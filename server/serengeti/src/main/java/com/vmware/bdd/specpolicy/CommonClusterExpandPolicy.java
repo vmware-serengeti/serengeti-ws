@@ -1,0 +1,177 @@
+/***************************************************************************
+ *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
+package com.vmware.bdd.specpolicy;
+
+import java.util.Set;
+
+import org.apache.commons.configuration.ConversionException;
+import org.apache.log4j.Logger;
+
+import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
+import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
+import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.manager.DistroManager;
+import com.vmware.bdd.spectypes.GroupType;
+import com.vmware.bdd.spectypes.HadoopDistroMap;
+import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.utils.Configuration;
+
+public class CommonClusterExpandPolicy {
+   private static final Logger logger = Logger.getLogger(CommonClusterExpandPolicy.class);
+   private static ClusterCreate template = TemplateClusterSpec.getTemplateClusterAttributes();
+   private static int[][] templateStorage;
+   static {
+      initTemplateValues();
+   }
+
+   private static void initTemplateValues() {
+      templateStorage = new int[GroupType.values().length][InstanceType.values().length];
+      
+      int value = setTemplateStorage("storage.mastergroup.extralarge",
+            GroupType.MASTER_GROUP.ordinal(), InstanceType.EXTRA_LARGE.ordinal(), 200);
+      templateStorage[GroupType.MASTER_JOBTRACKER_GROUP.ordinal()][InstanceType.EXTRA_LARGE.ordinal()] = value;
+      logger.debug("extra large storage of master group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.mastergroup.large",
+            GroupType.MASTER_GROUP.ordinal(), InstanceType.LARGE.ordinal(), 100);
+      templateStorage[GroupType.MASTER_JOBTRACKER_GROUP.ordinal()][InstanceType.LARGE.ordinal()] = value;
+      logger.debug("large storage of master group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.mastergroup.medium",
+            GroupType.MASTER_GROUP.ordinal(), InstanceType.MEDIUM.ordinal(), 50);
+      templateStorage[GroupType.MASTER_JOBTRACKER_GROUP.ordinal()][InstanceType.MEDIUM.ordinal()] = value;
+      logger.debug("medium storage of master group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.mastergroup.small",
+            GroupType.MASTER_GROUP.ordinal(), InstanceType.SMALL.ordinal(), 25);
+      templateStorage[GroupType.MASTER_JOBTRACKER_GROUP.ordinal()][InstanceType.SMALL.ordinal()] =  value;
+      logger.debug("small storage of master group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.workergroup.extralarge",
+            GroupType.WORKER_GROUP.ordinal(), InstanceType.EXTRA_LARGE.ordinal(), 400);
+      logger.debug("extra large storage of worker group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.workergroup.large",
+            GroupType.WORKER_GROUP.ordinal(), InstanceType.LARGE.ordinal(), 200);
+      logger.debug("large storage of worker group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.workergroup.medium",
+            GroupType.WORKER_GROUP.ordinal(), InstanceType.MEDIUM.ordinal(), 100);
+      logger.debug("medium storage of worker group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.workergroup.small",
+            GroupType.WORKER_GROUP.ordinal(), InstanceType.SMALL.ordinal(), 50);
+      logger.debug("small storage of worker group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.clientgroup.extralarge",
+            GroupType.CLIENT_GROUP.ordinal(), InstanceType.SMALL.ordinal(), 400);
+      logger.debug("extral large storage of client group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.clientgroup.large",
+            GroupType.CLIENT_GROUP.ordinal(), InstanceType.LARGE.ordinal(), 200);
+      logger.debug("large storage of client group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.clientgroup.medium",
+            GroupType.CLIENT_GROUP.ordinal(), InstanceType.MEDIUM.ordinal(), 100);
+      logger.debug("medium storage of client group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.clientgroup.small",
+            GroupType.CLIENT_GROUP.ordinal(), InstanceType.SMALL.ordinal(), 50);
+      logger.debug("small storage of client group  is " + value + "GB.");
+   }
+
+   private static int setTemplateStorage(String propertyName, int groupType, int instanceType, int defaultVal) {
+      int value = 0;
+      try {
+         value = Configuration.getInt(propertyName, defaultVal);
+      } catch (ConversionException e) {
+         value = defaultVal;
+      }
+      templateStorage[groupType][instanceType] = value;
+      return value;
+   }
+
+   public static void expandGroupInstanceType(NodeGroupEntity ngEntity, GroupType groupType,
+         Set<String> sharedPattern, Set<String> localPattern) {
+      logger.debug("Expand instance type config for group " + ngEntity.getName());
+      InstanceType instanceType = ngEntity.getNodeType();
+      if (instanceType == null) {
+         // replace with default instanceType
+         if (groupType == GroupType.MASTER_GROUP
+               || groupType == GroupType.MASTER_JOBTRACKER_GROUP) {
+            instanceType = InstanceType.MEDIUM;
+         } else {
+            instanceType = InstanceType.SMALL;
+         }
+      }
+      logger.debug("instance type is " + instanceType.toString());
+
+      int memory = ngEntity.getMemorySize();
+      if (memory <= 0) {
+         ngEntity.setMemorySize(instanceType.getMemoryMB());
+      }
+      int cpu = ngEntity.getCpuNum();
+      if (cpu <= 0) {
+         ngEntity.setCpuNum(instanceType.getCpuNum());
+      }
+
+      // storage
+      if (ngEntity.getStorageSize() <= 0) {
+         ngEntity.setStorageSize(getStorage(instanceType, groupType));
+         logger.debug("storage size is setting to default value: " + ngEntity.getStorageSize());
+      } else {
+         logger.debug("storage size is set to : " + ngEntity.getStorageSize());
+      }
+      if (ngEntity.getStorageType() == null) {
+         DatastoreType storeType = groupType.getStorageEnumType();
+         if ((sharedPattern == null || sharedPattern.isEmpty()) && storeType == DatastoreType.SHARED) {
+            storeType = DatastoreType.LOCAL;
+         }
+         if ((localPattern == null || localPattern.isEmpty()) && storeType == DatastoreType.LOCAL) {
+            storeType = DatastoreType.SHARED;
+         }
+         ngEntity.setStorageType(storeType);
+      }
+   }
+
+   public static String convertDistro(final ClusterCreate cluster,
+         ClusterEntity clusterEntity) {
+      
+      String distro = cluster.getDistro();
+      if (distro == null) {
+         distro = template.getDistro();
+      }
+
+      clusterEntity.setDistro(distro);
+      return distro;
+   }
+
+   public static void expandDistro(ClusterEntity clusterEntity, ClusterCreate clusterConfig, DistroManager distroMgr) {
+      String distro = clusterEntity.getDistro();
+      clusterConfig.setDistro(distro);
+
+      HadoopDistroMap map = new HadoopDistroMap();
+      map.setHadoopUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.HADOOP_NAMENODE_ROLE.toString()));
+      map.setHiveUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.HIVE_ROLE.toString()));
+      map.setPigUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.PIG_ROLE.toString()));
+      clusterConfig.setDistroMap(map);
+   }
+
+   private static int getStorage(InstanceType instance, GroupType groupType) {
+      return templateStorage[groupType.ordinal()][instance.ordinal()];
+   }
+}

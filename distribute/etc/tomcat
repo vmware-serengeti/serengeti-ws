@@ -1,0 +1,165 @@
+#!/bin/bash
+#
+# tomcat
+#
+# chkconfig: 345 80 15
+# description: Start tomcat service
+#
+### BEGIN INIT INFO
+# Provides:       tomcat
+# Required-Start: postgresql
+# Required-Stop:  postgresql
+# Default-Start:  3 5
+# Default-Stop:   0 1 2 6
+# Short-Description: tomcat server
+# Description:    Tomcat start/stop script
+### END INIT INFO
+#@$(false) Note: to be filtered through support/scripts/filter-text-by-build-type.pl
+
+# export JAVA_HOME=/usr/java/jre-vmware
+
+if [ "${SERENGETI_HOME}" == "" ]; then
+  SERENGETI_HOME='/opt/serengeti'
+fi
+
+CATALINA_HOME="${SERENGETI_HOME}/tomcat6"
+# Set PID file path, needed for force shutdown
+export CATALINA_PID=/var/tmp/catalina.pid
+export JAVA_OPTS="${JAVA_OPTS}${JAVA_OPTS:+ }-Dserengeti.home.dir=${SERENGETI_HOME} -Dlog4j.configuration=file:${SERENGETI_HOME}/conf/log4j.properties"
+
+#############################################################################
+# IMP NOTE: This script assumes that there's at most one tomcat java process
+# running in this system (i.e. java org.apache.catalina.startup.Bootstrap)
+#############################################################################
+
+tlog() {
+   echo `date` tomcat: "$@"
+}
+
+# Get running tomcat java pid (using ps command, not CATALINA_PID file).
+# - If one tomcat java process is found running, prints pid on stdout and
+#   returns 0)
+# - Else returns 1 if no tomcat java process found running (stdout has error
+#   message)
+# - Else returns 2 if more than one tomcat java processes running (stoudout has
+#   error message)
+ONE_TOMCAT=0
+NO_TOMCAT=1
+MULTI_TOMCAT=2
+GET_PID_RETRIES=5
+GET_PID_SLEEP=2s
+get_running_tomcat_java_pid() {
+   PID=`pgrep -f 'java[[:space:]].+org\.apache\.catalina\.startup\.Bootstrap' | xargs echo`
+   count=`echo $PID | wc -w`
+   echo $PID
+   case "$count" in
+      1 ) return $ONE_TOMCAT ;;
+      0 ) return $NO_TOMCAT ;;
+      * ) return $MULTI_TOMCAT ;;
+   esac
+}
+
+delete_pid_file() {
+   if [ -f $CATALINA_PID ]; then
+      if rm -f $CATALINA_PID ; then
+         tlog "forcefully removed stale $CATALINA_PID"
+         return 0
+      else
+         tlog "could not remove stale $CATALINA_PID"
+         return 1
+      fi
+   else
+      tlog "no need to remove stale $CATALINA_PID"
+      return 0
+   fi
+}
+
+# Removes stale PID file (i.e. PID file exists but no java tomcat process
+# running).
+check_stale_pid_file() {
+   get_running_tomcat_java_pid 1> /dev/null
+   if [ $? -eq $NO_TOMCAT ]; then
+      delete_pid_file
+      return $?
+   fi
+   return 0
+}
+
+start_tomcat() {
+   tlog "Starting Tomcat"
+   if ! check_stale_pid_file ; then
+      tlog "Start failed"
+      return 1
+   fi
+   $CATALINA_HOME/bin/startup.sh "$@"
+   
+   if [ "$_rc_status" == "0" ]; then
+      retry=0
+      ret=$NO_TOMCAT
+      while [ $ret -eq $NO_TOMCAT -a $retry -lt $GET_PID_RETRIES ]; do
+         pid=`get_running_tomcat_java_pid`
+         ret=$?
+         retry=`expr $retry + 1`
+         test $ret -eq $NO_TOMCAT && sleep $GET_PID_SLEEP
+      done
+      case "$ret" in
+         $ONE_TOMCAT )
+            if ! echo $pid > $CATALINA_PID ; then
+               tlog "Started but couldn't update $CATALINA_PID with $pid"
+            else
+               tlog "Start ok, updated $CATALINA_PID with $pid"
+            fi
+            ;;
+         $NO_TOMCAT )
+            tlog "Start failed, tomcat not running after start" 
+            ;;
+         $MULTI_TOMCAT )
+            tlog "Started but couldn't update $CATALINA_PID, found more than one tomcat running ($pid)"
+            ;;
+      esac
+   fi
+}
+
+stop_tomcat() {
+   tlog "Stopping Tomcat"
+   $CATALINA_HOME/bin/shutdown.sh "$@"
+   
+   pid=`get_running_tomcat_java_pid`
+   ret=$?
+   case "$ret" in
+      $NO_TOMCAT )
+         if delete_pid_file ; then
+            tlog "Stop ok"
+         else
+            tlog "Stop failed"
+          fi
+         ;;
+      * )
+         tlog "Stop failed, tomcat still found running ($pid)"
+         # TODO: SIG_KILL all pids?
+         ;;
+  esac
+}
+
+case "$1" in
+ start)
+        # carry forward any extra start args
+        shift # to consume "start" arg
+	start_tomcat "$@"
+	;;
+ stop)
+        # carry forward any extra stop args
+        shift # to consume "stop" arg
+	stop_tomcat "$@"
+ 	;;
+#@$(devel,#) debug)
+#@$(devel,#)        echo $"Starting Tomcat in remote-debuggable mode. Debug listening port is 8001..."
+#@$(devel,#)        export JAVA_OPTS="${JAVA_OPTS}${JAVA_OPTS:+ }-Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=n"
+#@$(devel,#)        $CATALINA_HOME/bin/startup.sh #&> /dev/null
+#@$(devel,#)        rc_status -v
+#@$(devel,#)        ;;
+ *)
+ 	echo $"Usage: $0 {start|stop}"
+ 	;;
+esac
+

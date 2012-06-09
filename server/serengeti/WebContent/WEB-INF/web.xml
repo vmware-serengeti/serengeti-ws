@@ -1,0 +1,37 @@
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+	<display-name>serengeti</display-name>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>WEB-INF/applicationContext.xml</param-value>
+	</context-param>
+
+   <filter>
+      <filter-name>requestLoggingFilter</filter-name>
+      <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+   </filter>
+
+   <filter-mapping>
+      <filter-name>requestLoggingFilter</filter-name>
+      <url-pattern>/*</url-pattern>
+   </filter-mapping>
+
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<!-- Servlet for REST APIs -->
+	<servlet>
+		<servlet-name>restapi</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>restapi</servlet-name>
+		<url-pattern>/api/*</url-pattern>
+	</servlet-mapping>
+	<!-- End REST API server -->
+</web-app>

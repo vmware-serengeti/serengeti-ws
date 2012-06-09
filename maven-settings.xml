@@ -1,0 +1,27 @@
+<settings>
+ 
+  <mirrors>  
+     <mirror>
+       <id>spring-roo-repository</id>
+	   <name>Spring Roo Maven Repository</name>
+	   <url>http://spring-roo-repository.springsource.org/release</url>
+	   <mirrorOf>spring-roo-repository</mirrorOf>
+     </mirror>
+     <mirror>
+     	<id>spring-maven-snapshot</id>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		<name>Springframework Maven SNAPSHOT Repository</name>
+		<url>http://maven.springframework.org/snapshot</url>
+		<mirrorOf>spring-maven-snapshot</mirrorOf>
+     </mirror>
+     <mirror>
+     	<id>spring-maven-milestone</id>
+		<name>Springframework Maven Milestone Repository</name>
+		<url>http://maven.springframework.org/milestone</url>
+		<mirrorOf>spring-maven-milstone</mirrorOf>
+     </mirror>
+  </mirrors>   
+
+</settings>

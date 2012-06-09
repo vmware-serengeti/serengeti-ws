@@ -1,0 +1,3 @@
+/rack1: esxhostname1.foo.com,esxhostname2.foo.com,esxhostname3.foo.com
+/rack2: esxhostname4.foo.com
+

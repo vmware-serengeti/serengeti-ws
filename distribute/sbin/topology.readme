@@ -1,0 +1,15 @@
+You can run topology-generator.rb and pass it cluster name and a rack/esx_host mapping description file (The format is same as the sample description file):
+topology-generator.rb clusterName host_rack_desc.sample
+
+Note: the serengeti cluster must be in RUNNING status when you use this command.
+
+The output will be two rack awareness topology mapping files. rack_vm.topology will provide vm<->rack topology, and host_as_rack.topology will treat each esx hostname as a rack name (you may use it when all hosts are on a single rack).
+
+After that, you can rename either topology file to topology.data, and scp it to /home/serengeti of namenode:
+scp topology.data serengeti@namnode:topology.data
+
+On hadoop namenode, add one parameter of "topology.script.file.name" into hdfs-site.xml under /usr/lib/hadoop/conf, with the value to point to the topology.sh. topology.sh should be scp to namenode as well.
+
+After adding rack awareness parameter, you can restart namenode service by running /sbin/service haddop-0.20-namenode restart.
+
+Done.
