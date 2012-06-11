@@ -1,17 +1,18 @@
 # serengeti-ws: Serengeti's Web service and CLI
-Serengeti helps you deploy Hadoop clusters on vSphere fast and easy. It's a management service, which makes user start with Hadoop very easy.
-This repo holds Serengeti Web Service and CLI.
+Serengeti is an open source project initiated by VMware to enable the rapid deployment of an Apache Hadoop cluster on a virtual platform.
+
+This repository contains the code for the Serengeti Web API and CLI.
 
 ## Getting Started
 To jump into using Serengeti, follow our Installation Instructions. 
 
-## Serengeti Web Service
-Serengeti Web Service provides RESTful API for VC resources managment and hadoop cluster spec management. It works as a proxy to invoke Serengeti provision engine and return fine-grained process execution status to caller.
+## Serengeti Web APIs
+Serengeti provides a RESTful API for resources managment and hadoop cluster management running on vSphere.  It works as a proxy to invoke the Serengeti provisioning engine and return fine-grained process execution status to the caller.
 
 ### Web service architecture
 ![Web service architecture (doc/ws-architecture.png)](https://github.com/vmware-serengeti/serengeti-ws/raw/master/doc/ws-architecture.png "web service architecture")
 
-### Web service APIs
+### Web APIs
 <table>
 <tr><td>Method</td><td>URL Template</td><td>Request</td><td>Response</td><td>Description</td></tr>
 <tr><td>GET</td><td>/hello</td><td>void</td><td>void</td><td></td></tr>
@@ -40,7 +41,7 @@ Serengeti Web Service provides RESTful API for VC resources managment and hadoop
 </table>
 
 ## Serengeti CLI
-CLI is built upon Spring Shell. It supports shell mode, command line mode, and execution of script file. After compiling, you can find the jar file under cli/target directory.
+The CLI is built using the [Spring Shell](https://github.com/SpringSource/spring-shell) project.  The CLI supports an interactive shell mode, a command line mode, and execution of script files.   After compiling, you can find the jar file under cli/target directory.
 
 - Shell mode: java -jar serengeti-cli-0.1.jar. It supports tab key based command hint and completion. It supports history by up/down arrows.
 
@@ -48,5 +49,17 @@ CLI is built upon Spring Shell. It supports shell mode, command line mode, and e
 
 - Execution of script file: in shell mode or command line mode, execute "script --file scriptFileName". The shell history file named cli.log will help to generate the script file. 
 
-More details can be found at cli/README.md. A sample cluster creation specification file can be found at cli/sample.spec.
+More details can be found at [cli/README.md](https://github.com/vmware-serengeti/serengeti-ws/tree/master/cli). A sample cluster creation specification file can be found at cli/sample.spec.
 
+
+
+## Contributing
+[Pull requests](http://help.github.com/send-pull-requests) are welcome; see the
+[contributor guidelines](https://github.com/vmware-serengeti/serengeti-ws/wiki/Contributor-guidelines).
+
+## Staying in touch
+Follow [@VMWserengeti](http://twitter.com/VMWserengeti) on Twitter. You can get help with technical issues, ask questions, and share your experiences with Serengeti on the mailing list [serengeti-user](https://groups.google.com/group/serengeti-user).  To discuss the development of Serengeti sign up on the [serengeti-dev](https://groups.google.com/group/serengeti-dev) mailing list.  
+
+## License
+The Spring Framework is released under version 2.0 of the
+[Apache License](http://www.apache.org/licenses/LICENSE-2.0).
