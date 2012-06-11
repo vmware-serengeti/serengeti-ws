@@ -1,4 +1,4 @@
-# serengeti-ws: Serengeti's Web service and CLI
+# serengeti-ws: Serengeti's Web API and CLI
 [Serengeti](http://projectserengeti.org) is an open source project initiated by VMware to enable the rapid deployment of an Apache Hadoop cluster on a virtual platform.
 
 This repository contains the code for the Serengeti Web API and CLI.
@@ -9,7 +9,7 @@ To jump into using Serengeti, follow our Installation Instructions.
 ## Serengeti Web APIs
 Serengeti provides a RESTful API for resources managment and hadoop cluster management running on vSphere.  It works as a proxy to invoke the Serengeti provisioning engine and return fine-grained process execution status to the caller.
 
-### Web service architecture
+### Web Application architecture
 ![Web service architecture (doc/ws-architecture.png)](https://github.com/vmware-serengeti/serengeti-ws/raw/master/doc/ws-architecture.png "web service architecture")
 
 ### Web APIs
