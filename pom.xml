@@ -148,7 +148,7 @@
 		<serengeti.version>0.1</serengeti.version>
 		<java.source.version>1.6</java.source.version>
 		<java.target.version>1.6</java.target.version>
-		<bdd.skipTests>false</bdd.skipTests>
+		<bdd.skipTests>true</bdd.skipTests>
 		<spring.version>3.1.1.RELEASE</spring.version>
 	</properties>
 	<build>
