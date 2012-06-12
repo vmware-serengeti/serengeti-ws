@@ -4,7 +4,7 @@
 This repository contains the code for the Serengeti Web API and CLI.
 
 ## Getting Started
-To jump into using Serengeti, follow our Installation Instructions. 
+To jump into using Serengeti, follow our ![Installation Guide] (https://github.com/vmware-serengeti/doc/blob/master/installation_guide_from_source_code.txt). 
 
 ## Serengeti Web APIs
 Serengeti provides a RESTful API for resources managment and hadoop cluster management running on vSphere.  It works as a proxy to invoke the Serengeti provisioning engine and return fine-grained process execution status to the caller.
