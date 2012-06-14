@@ -1,4 +1,4 @@
-# serengeti-ws: Serengeti's Web API and CLI
+# serengeti-ws: Serengeti's Web Service and CLI
 [Serengeti](http://projectserengeti.org) is an open source project initiated by VMware to enable the rapid deployment of an Apache Hadoop cluster on a virtual platform.
 
 This repository contains the code for the Serengeti Web API and CLI.
@@ -6,13 +6,13 @@ This repository contains the code for the Serengeti Web API and CLI.
 ## Getting Started
 To jump into using Serengeti, follow our ![Installation Guide] (https://github.com/vmware-serengeti/doc/blob/master/installation_guide_from_source_code.txt). 
 
-## Serengeti Web APIs
-Serengeti provides a RESTful API for resources managment and hadoop cluster management running on vSphere.  It works as a proxy to invoke the Serengeti provisioning engine and return fine-grained process execution status to the caller.
+## Serengeti Web Service
+Serengeti Web Service provides a RESTful API for resources managment and hadoop cluster management running on vSphere.  It works as a proxy to invoke the Serengeti provisioning engine and return fine-grained process execution status to the caller.
 
 ### Web Application architecture
 ![Web service architecture (doc/ws-architecture.png)](https://github.com/vmware-serengeti/serengeti-ws/raw/master/doc/ws-architecture.png "web service architecture")
 
-### Web APIs
+### REST APIs
 <table>
 <tr><td>Method</td><td>URL Template</td><td>Request</td><td>Response</td><td>Description</td></tr>
 <tr><td>GET</td><td>/hello</td><td>void</td><td>void</td><td></td></tr>
@@ -67,6 +67,3 @@ Serengei's JIRA issue tracker can be found [here](https://issuetracker.springsou
 ## Staying in touch
 Follow [@VMWserengeti](http://twitter.com/VMWserengeti) on Twitter. You can get help with technical issues, ask questions, and share your experiences with Serengeti on the mailing list [serengeti-user](https://groups.google.com/group/serengeti-user).  To discuss the development of Serengeti sign up on the [serengeti-dev](https://groups.google.com/group/serengeti-dev) mailing list.  
 
-## License
-The Spring Framework is released under version 2.0 of the
-[Apache License](http://www.apache.org/licenses/LICENSE-2.0).
