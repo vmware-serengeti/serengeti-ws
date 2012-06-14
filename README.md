@@ -1,7 +1,7 @@
 # serengeti-ws: Serengeti's Web Service and CLI
 [Serengeti](http://projectserengeti.org) is an open source project initiated by VMware to enable the rapid deployment of an Apache Hadoop cluster on a virtual platform.
 
-This repository contains the code for the Serengeti Web API and CLI.
+This repository contains the code for the Serengeti Web Service and CLI.
 
 ## Getting Started
 To jump into using Serengeti, follow our ![Installation Guide] (https://github.com/vmware-serengeti/doc/blob/master/installation_guide_from_source_code.txt). 
