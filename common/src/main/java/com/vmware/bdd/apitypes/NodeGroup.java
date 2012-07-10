@@ -52,4 +52,62 @@ public class NodeGroup {
          }
       }
    }
+
+   public static class PlacePolicy {
+      public static class GroupAssosiation {
+         public enum GroupAssosiationType {
+            LOOSE, STRICT
+         }
+
+         private String reference;
+         private GroupAssosiationType type;
+
+         public GroupAssosiation(String reference, GroupAssosiationType type) {
+            super();
+            this.reference = reference;
+            this.type = type;
+         }
+
+         public String getReference() {
+            return reference;
+         }
+
+         public void setReference(String reference) {
+            this.reference = reference;
+         }
+
+         public GroupAssosiationType getType() {
+            return type;
+         }
+
+         public void setType(GroupAssosiationType type) {
+            this.type = type;
+         }
+      }
+
+      private Integer instancePerHost;
+      private GroupAssosiation groupAssociation;
+
+      public PlacePolicy(Integer instancePerHost, GroupAssosiation groupAssociation) {
+         super();
+         this.instancePerHost = instancePerHost;
+         this.groupAssociation = groupAssociation;
+      }
+
+      public Integer getInstancePerHost() {
+         return instancePerHost;
+      }
+
+      public void setInstancePerHost(Integer instancePerHost) {
+         this.instancePerHost = instancePerHost;
+      }
+
+      public GroupAssosiation getGroupAssociation() {
+         return groupAssociation;
+      }
+
+      public void setGroupAssociation(GroupAssosiation groupAssociation) {
+         this.groupAssociation = groupAssociation;
+      }
+   }
 }

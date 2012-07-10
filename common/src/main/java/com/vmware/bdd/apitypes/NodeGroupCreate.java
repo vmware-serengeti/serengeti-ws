@@ -19,6 +19,7 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
+import com.vmware.bdd.apitypes.NodeGroup.PlacePolicy;
 import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.VcCluster;
 
@@ -37,6 +38,9 @@ public class NodeGroupCreate {
    private int instanceNum;
    @SerializedName("instance_type")
    private InstanceType instanceType;
+   @Expose
+   @SerializedName("place_policy")
+   private PlacePolicy placePolicy;
    @Expose
    private StorageRead storage;
    @Expose
@@ -63,6 +67,7 @@ public class NodeGroupCreate {
       this.haFlag = group.haFlag;
       this.instanceNum = group.instanceNum;
       this.instanceType = group.instanceType;
+      this.placePolicy = group.placePolicy;
       this.memCapacityMB = group.memCapacityMB;
       this.name = group.name;
       this.roles = group.roles;
@@ -101,6 +106,14 @@ public class NodeGroupCreate {
 
    public void setInstanceType(InstanceType instanceType) {
       this.instanceType = instanceType;
+   }
+
+   public PlacePolicy getPlacePolicy() {
+      return placePolicy;
+   }
+
+   public void setPlacePolicy(PlacePolicy placePolicy) {
+      this.placePolicy = placePolicy;
    }
 
    public int getCpuNum() {
