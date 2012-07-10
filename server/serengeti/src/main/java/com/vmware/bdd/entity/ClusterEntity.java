@@ -88,6 +88,9 @@ public class ClusterEntity extends EntityBase {
    @JoinColumn(name = "network_id")
    private NetworkEntity network;
 
+   @Column(name = "configuration")
+   private String hadoopConfig;
+
    ClusterEntity() {
 
    }
@@ -208,6 +211,14 @@ public class ClusterEntity extends EntityBase {
       }
 
       return datastores;
+   }
+
+   public String getHadoopConfig() {
+      return hadoopConfig;
+   }
+
+   public void setHadoopConfig(String hadoopConfig) {
+      this.hadoopConfig = hadoopConfig;
    }
 
    public ClusterRead toClusterRead() {

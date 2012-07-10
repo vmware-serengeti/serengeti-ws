@@ -16,6 +16,7 @@ package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.Assert;
 
@@ -518,4 +519,38 @@ public class TestClusterConfigManager {
       Assert.assertTrue("manifest is inconsistent",
             manifest.indexOf("{\"name\":\"my-cluster7\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":100},\"cpu\":3,\"memory\":15000,\"ha\":false},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
+
+   @Test
+   public void testClusterAppConfig() {
+      ClusterCreate spec = new ClusterCreate();
+      spec.setName("my-cluster8");
+      List<String> rps = new ArrayList<String>();
+      rps.add("myRp1");
+      spec.setRpNames(rps);
+      spec.setNetworkName("dhcpNet1");
+      String configJson = 
+         "{\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.xyz\":\"xyz\",\"hadoop.true\":true}}}}";
+      Map config = (new Gson()).fromJson(configJson, Map.class);
+      spec.setConfiguration((Map<String, Object>)(config.get("cluster_configuration")));
+      clusterMgr.createClusterConfig(spec);
+
+      ClusterEntity cluster = ClusterEntity.findClusterEntityById(1l);
+      List<ClusterEntity> cs = DAL.findAll(ClusterEntity.class);
+      for (ClusterEntity c : cs ) {
+         System.out.println(c.getId());
+      }
+      cluster =
+            ClusterEntity.findClusterEntityByName("my-cluster8");
+      Assert.assertTrue(cluster != null);
+
+      ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster8");
+      String manifest = gson.toJson(attrs);
+      System.out.println(manifest);
+      Assert.assertTrue("manifest should contains nodegroups",
+            manifest.indexOf("master") != -1);
+      Assert.assertTrue("manifest is inconsistent",
+            manifest.indexOf("{\"name\":\"my-cluster8\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":true},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1
+            && manifest.indexOf("\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.xyz\":\"xyz\",\"hadoop.true\":true}}}") != -1);
+   }
 }
+
