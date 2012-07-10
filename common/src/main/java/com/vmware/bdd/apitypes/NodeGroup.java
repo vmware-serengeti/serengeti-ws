@@ -54,19 +54,13 @@ public class NodeGroup {
    }
 
    public static class PlacePolicy {
-      public static class GroupAssosiation {
-         public enum GroupAssosiationType {
+      public static class GroupAssociation {
+         public enum GroupAssociationType {
             LOOSE, STRICT
          }
 
          private String reference;
-         private GroupAssosiationType type;
-
-         public GroupAssosiation(String reference, GroupAssosiationType type) {
-            super();
-            this.reference = reference;
-            this.type = type;
-         }
+         private GroupAssociationType type;
 
          public String getReference() {
             return reference;
@@ -76,23 +70,22 @@ public class NodeGroup {
             this.reference = reference;
          }
 
-         public GroupAssosiationType getType() {
+         public GroupAssociationType getType() {
             return type;
          }
 
-         public void setType(GroupAssosiationType type) {
+         public void setType(GroupAssociationType type) {
             this.type = type;
+         }
+
+         @Override
+         public String toString() {
+            return "GroupAssosiation [reference=" + reference + ", type=" + type + "]";
          }
       }
 
       private Integer instancePerHost;
-      private GroupAssosiation groupAssociation;
-
-      public PlacePolicy(Integer instancePerHost, GroupAssosiation groupAssociation) {
-         super();
-         this.instancePerHost = instancePerHost;
-         this.groupAssociation = groupAssociation;
-      }
+      private GroupAssociation groupAssociation;
 
       public Integer getInstancePerHost() {
          return instancePerHost;
@@ -102,12 +95,18 @@ public class NodeGroup {
          this.instancePerHost = instancePerHost;
       }
 
-      public GroupAssosiation getGroupAssociation() {
+      public GroupAssociation getGroupAssociation() {
          return groupAssociation;
       }
 
-      public void setGroupAssociation(GroupAssosiation groupAssociation) {
+      public void setGroupAssociation(GroupAssociation groupAssociation) {
          this.groupAssociation = groupAssociation;
+      }
+
+      @Override
+      public String toString() {
+         return "PlacePolicy [instancePerHost=" + instancePerHost
+               + ", groupAssociation=" + groupAssociation + "]";
       }
    }
 }
