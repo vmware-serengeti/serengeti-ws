@@ -15,6 +15,7 @@
 package com.vmware.bdd.apitypes;
 
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -52,6 +53,7 @@ public class NodeGroupCreate {
    @Expose
    @SerializedName("ha")
    private boolean haFlag;
+   private Map<String, Object> configuration;
 
    public NodeGroupCreate() {
       
@@ -69,6 +71,15 @@ public class NodeGroupCreate {
       this.rpNames = group.rpNames;
       this.storage = group.storage;
       this.vcClusters = group.vcClusters;
+      this.configuration = group.configuration;
+   }
+
+   public Map<String, Object> getConfiguration() {
+      return configuration;
+   }
+
+   public void setConfiguration(Map<String, Object> configuration) {
+      this.configuration = configuration;
    }
 
    public String getName() {
@@ -158,5 +169,4 @@ public class NodeGroupCreate {
    public void setVcClusters(List<VcCluster> vcClusters) {
       this.vcClusters = vcClusters;
    }
-
 }

@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -161,6 +162,11 @@ public class ClusterConfigManager {
                   throw ClusterConfigException.NETWORK_IS_NOT_FOUND(networkName, name);
                }
                clusterEntity.setNetwork(networkEntity);
+               if (cluster.getConfiguration() != null && cluster.getConfiguration().size() > 0) {
+                  // validate hadoop config
+                  CommonClusterExpandPolicy.validateAppConfig(cluster.getConfiguration(), cluster.isValidateConfig());
+                  clusterEntity.setHadoopConfig((new Gson()).toJson(cluster.getConfiguration()));
+               }
                expandNodeGroupCreates(cluster, gson, clusterEntity, distro);
                clusterEntity.insert();
                logger.debug("finished to add cluster config for " + name);
@@ -175,12 +181,12 @@ public class ClusterConfigManager {
 
    private Set<NodeGroupEntity> convertNodeGroupsToEntities(Gson gson,
          ClusterEntity clusterEntity, String distro,
-         NodeGroupCreate[] groups, EnumSet<HadoopRole> allRoles) {
+         NodeGroupCreate[] groups, EnumSet<HadoopRole> allRoles, boolean validateWhiteList) {
       Set<NodeGroupEntity> nodeGroups;
       nodeGroups = new HashSet<NodeGroupEntity>();
       for (NodeGroupCreate group : groups) {
          NodeGroupEntity groupEntity = convertGroup(gson,
-               clusterEntity, allRoles, group, distro);
+               clusterEntity, allRoles, group, distro, validateWhiteList);
          if (groupEntity != null) {
             nodeGroups.add(groupEntity);
          }
@@ -193,10 +199,11 @@ public class ClusterConfigManager {
       NodeGroupCreate[] groups = cluster.getNodeGroupCreates();
       Set<NodeGroupEntity> nodeGroups = null;
       EnumSet<HadoopRole> allRoles = EnumSet.noneOf(HadoopRole.class);
+      boolean validateWhiteList = cluster.isValidateConfig();
       if (groups != null && groups.length > 0) {
          logger.debug("User defined node groups.");
          nodeGroups = convertNodeGroupsToEntities(gson, clusterEntity,
-               distro, groups, allRoles);
+               distro, groups, allRoles, validateWhiteList);
          // add required node groups
          EnumSet<HadoopRole> missingRoles = getMissingRequiredRoles(allRoles,
                distro);
@@ -204,19 +211,20 @@ public class ClusterConfigManager {
             Set<NodeGroupCreate> missingGroups = fillPolicy.FillMissingGroups(nodeGroups, missingRoles,
                   clusterEntity);
             nodeGroups.addAll(convertNodeGroupsToEntities(gson, clusterEntity,
-                  distro, missingGroups.toArray(new NodeGroupCreate[]{}), allRoles));
+                  distro, missingGroups.toArray(new NodeGroupCreate[]{}), allRoles, validateWhiteList));
          }
       } else {
          // we need to add default group config into db
          Set<NodeGroupCreate> missingGroups = fillPolicy.fillDefaultGroups();
          nodeGroups = convertNodeGroupsToEntities(gson, clusterEntity,
-               distro, missingGroups.toArray(new NodeGroupCreate[]{}), allRoles);
+               distro, missingGroups.toArray(new NodeGroupCreate[]{}), allRoles, validateWhiteList);
       }
       clusterEntity.setNodeGroups(nodeGroups);
    }
 
    private NodeGroupEntity convertGroup(Gson gson, ClusterEntity clusterEntity, 
-         EnumSet<HadoopRole> allRoles, NodeGroupCreate group, String distro) {
+         EnumSet<HadoopRole> allRoles, NodeGroupCreate group, String distro,
+         boolean validateWhiteList) {
       NodeGroupEntity groupEntity = new NodeGroupEntity();
       if (group.getRoles() == null || group.getRoles().isEmpty()) {
          throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(group.getName());
@@ -267,6 +275,11 @@ public class ClusterConfigManager {
 
       CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity, groupType, sharedPattern, localPattern);
       groupEntity.setHaFlag(group.isHaFlag());
+      if (group.getConfiguration() != null && group.getConfiguration().size() > 0) {
+         // validate hadoop config
+         CommonClusterExpandPolicy.validateAppConfig(group.getConfiguration(), validateWhiteList);
+         groupEntity.setHadoopConfig(gson.toJson(group.getConfiguration()));
+      }
       logger.debug("finished to convert node group config for " + group.getName());
       return groupEntity;
    }
@@ -410,6 +423,10 @@ public class ClusterConfigManager {
       }
       networking.add(network);
       clusterConfig.setNetworking(networking);
+      if (clusterEntity.getHadoopConfig() != null) {
+         Map hadoopConfig = (new Gson()).fromJson(clusterEntity.getHadoopConfig(), Map.class);
+         clusterConfig.setConfiguration((Map<String, Object>)hadoopConfig);
+      }
    }
 
    private void sortGroups(List<NodeGroupCreate> nodeGroups) {

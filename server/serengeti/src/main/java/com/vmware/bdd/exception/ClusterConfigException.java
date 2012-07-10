@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.exception;
 
+import java.util.List;
+
 public class ClusterConfigException extends BddException {
    private static final long serialVersionUID = 1L;
    public ClusterConfigException() {
@@ -65,5 +67,8 @@ public class ClusterConfigException extends BddException {
    }
    public static ClusterConfigException MORE_THAN_ONE_JOBTRACKER_GROUP(String clusterName) {
       return new ClusterConfigException(null, "MORE_THAN_ONE_JOBTRACKER_GROUP", clusterName);
+   }
+   public static ClusterConfigException INVALID_APP_CONFIG_VALUE(List<String> configNames) {
+      return new ClusterConfigException(null, "INVALID_APP_CONFIG_VALUE", configNames);
    }
 }

@@ -15,6 +15,7 @@
 package com.vmware.bdd.apitypes;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.annotations.Expose;
@@ -57,9 +58,14 @@ public class ClusterCreate {
    @Expose
    @SerializedName("vc_local_datastore_pattern")
    private Set<String> localPattern;
+   @Expose
+   @SerializedName("cluster_configuration")
+   private Map<String, Object> configuration;
+
+   private boolean validateConfig = true;
 
    public ClusterCreate() {
-      
+
    }
 
    public ClusterCreate(ClusterCreate cluster) {
@@ -72,6 +78,16 @@ public class ClusterCreate {
       this.templateId = cluster.templateId;
       this.vcClusters = cluster.vcClusters;
       this.networking = cluster.networking;
+      this.configuration = cluster.configuration;
+      this.validateConfig = cluster.validateConfig;
+   }
+
+   public Map<String, Object> getConfiguration() {
+      return configuration;
+   }
+
+   public void setConfiguration(Map<String, Object> configuration) {
+      this.configuration = configuration;
    }
 
    public String getName() {
@@ -176,5 +192,13 @@ public class ClusterCreate {
 
    public void setLocalPattern(Set<String> localPattern) {
       this.localPattern = localPattern;
+   }
+
+   public boolean isValidateConfig() {
+      return validateConfig;
+   }
+
+   public void setValidateConfig(boolean validateConfig) {
+      this.validateConfig = validateConfig;
    }
 }

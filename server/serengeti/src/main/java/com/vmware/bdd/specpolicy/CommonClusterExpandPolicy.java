@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.specpolicy;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.configuration.ConversionException;
@@ -24,11 +25,15 @@ import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.manager.DistroManager;
 import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.HadoopDistroMap;
 import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.utils.AppConfigValidationUtils;
+import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
 import com.vmware.bdd.utils.Configuration;
+import com.vmware.bdd.utils.ValidateResult;
 
 public class CommonClusterExpandPolicy {
    private static final Logger logger = Logger.getLogger(CommonClusterExpandPolicy.class);
@@ -173,5 +178,32 @@ public class CommonClusterExpandPolicy {
 
    private static int getStorage(InstanceType instance, GroupType groupType) {
       return templateStorage[groupType.ordinal()][instance.ordinal()];
+   }
+
+   public static void validateAppConfig(Map<String, Object> appConfigs, boolean checkWhiteList) {
+      // validate hadoop config
+      if (checkWhiteList) {
+         logger.debug("Validate hadoop configuration in white list.");
+         ValidateResult valid = AppConfigValidationUtils.validateConfig(ValidationType.WHITE_LIST, appConfigs);
+         switch (valid.getType()) {
+         case WHITE_LIST_INVALID_VALUE:
+            throw ClusterConfigException.INVALID_APP_CONFIG_VALUE(valid.getNames());
+         case WHITE_LIST_INVALID_NAME:
+            logger.warn("Hadoop configurations " + valid.getNames() + " not in white list.");
+            break;
+         default:
+            logger.debug("Passed white list validation.");
+            break;
+         }
+      }
+      logger.debug("Validate hadoop configuration in black list.");
+      ValidateResult valid = AppConfigValidationUtils.validateConfig(ValidationType.BLACK_LIST, appConfigs);
+      switch (valid.getType()) {
+      case NAME_IN_BLACK_LIST:
+         logger.warn("Hadoop configurations " + valid.getNames() + " in black list. The configuration for these parameters do not take effect.");
+      default:
+         logger.debug("Passed black list validation.");
+         break;
+      }
    }
 }

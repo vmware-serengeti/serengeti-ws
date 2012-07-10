@@ -75,6 +75,7 @@ create table cluster (
    vc_rp_names  varchar(255),
    network_id   bigint,
    start_after_deploy boolean,
+   configuration text,
    primary key (id),
    foreign key(network_id) references network(id) ON DELETE CASCADE
 );
@@ -93,6 +94,7 @@ create table node_group (
    storage_size integer,
    vc_datastore_names varchar(255),
    vc_rp_names  varchar(255),
+   configuration text,
    cluster_id   bigint,
    primary key (id),
    foreign key(cluster_id) references cluster(id) ON DELETE CASCADE
