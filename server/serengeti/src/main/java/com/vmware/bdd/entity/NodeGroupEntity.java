@@ -15,9 +15,8 @@
 package com.vmware.bdd.entity;
 
 import java.util.ArrayList;
-
-import java.util.HashMap;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +39,9 @@ import org.hibernate.criterion.Restrictions;
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.StorageRead;
@@ -111,19 +113,37 @@ public class NodeGroupEntity extends EntityBase {
    @Column(name = "configuration")
    private String hadoopConfig;
 
+   // 0 or negative means no constraints
+   @Column(name = "instance_per_host")
+   private int instancePerHost;
+
+   @OneToMany(mappedBy = "nodeGroup", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+   private Set<NodeGroupAssociation> groupAssociations;
+
    public NodeGroupEntity() {
 
    }
 
+   public NodeGroupEntity(String name, int defineInstanceNum, int cpuNum,
+         int memorySize, DatastoreType storageType, int storageSize) {
+      super();
+      this.name = name;
+      this.defineInstanceNum = defineInstanceNum;
+      this.cpuNum = cpuNum;
+      this.memorySize = memorySize;
+      this.storageType = storageType;
+      this.storageSize = storageSize;
+   }
+
    public String getHadoopConfig() {
-	return hadoopConfig;
-}
+      return hadoopConfig;
+   }
 
-public void setHadoopConfig(String hadoopConfig) {
-	this.hadoopConfig = hadoopConfig;
-}
+   public void setHadoopConfig(String hadoopConfig) {
+      this.hadoopConfig = hadoopConfig;
+   }
 
-public boolean isHaFlag() {
+   public boolean isHaFlag() {
       return haFlag;
    }
 
@@ -141,17 +161,6 @@ public boolean isHaFlag() {
 
    public NodeGroupEntity(String name) {
       this.name = name;
-   }
-
-   public NodeGroupEntity(String name, int defineInstanceNum, int cpuNum,
-         int memorySize, DatastoreType storageType, int storageSize) {
-      super();
-      this.name = name;
-      this.defineInstanceNum = defineInstanceNum;
-      this.cpuNum = cpuNum;
-      this.memorySize = memorySize;
-      this.storageType = storageType;
-      this.storageSize = storageSize;
    }
 
    public String getName() {
@@ -254,6 +263,22 @@ public boolean isHaFlag() {
       this.roles = roles;
    }
 
+   public int getInstancePerHost() {
+      return instancePerHost;
+   }
+
+   public void setInstancePerHost(int instancePerHost) {
+      this.instancePerHost = instancePerHost;
+   }
+
+   public Set<NodeGroupAssociation> getGroupAssociations() {
+      return groupAssociations;
+   }
+
+   public void setGroupAssociations(Set<NodeGroupAssociation> groupAssociations) {
+      this.groupAssociations = groupAssociations;
+   }
+
    @SuppressWarnings("unchecked")
    public List<String> getRoleNameList() {
       return (new Gson()).fromJson(this.roles,
@@ -301,6 +326,20 @@ public boolean isHaFlag() {
          nodeList.add(node.toNodeRead());
       }
       nodeGroupRead.setInstances(nodeList);
+
+      List<GroupAssociation> associations = new ArrayList<GroupAssociation>();
+      for (NodeGroupAssociation relation : groupAssociations) {
+         GroupAssociation association = new GroupAssociation();
+         association.setReference(relation.getReferencedGroup());
+         association.setType(relation.getAssociationType());
+         associations.add(association);
+      }
+
+      PlacementPolicy policy = new PlacementPolicy();
+      policy.setInstancePerHost(instancePerHost);
+      policy.setGroupAssociations(associations);
+
+      nodeGroupRead.setPlacementPolicies(policy);
 
       return nodeGroupRead;
    }
