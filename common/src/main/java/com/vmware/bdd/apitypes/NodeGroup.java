@@ -16,6 +16,9 @@ package com.vmware.bdd.apitypes;
 
 import java.util.List;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Node Group Commons
  */
@@ -61,7 +64,11 @@ public class NodeGroup {
             WEAK, STRICT
          }
 
+         @Expose
+         @SerializedName("reference")
          private String reference;
+         @Expose
+         @SerializedName("type")
          private GroupAssociationType type;
 
          public String getReference() {
@@ -86,7 +93,11 @@ public class NodeGroup {
          }
       }
 
+      @Expose
+      @SerializedName("instance_per_host")
       private Integer instancePerHost;
+      @Expose
+      @SerializedName("group_associations")
       private List<GroupAssociation> groupAssociations;
 
       public Integer getInstancePerHost() {

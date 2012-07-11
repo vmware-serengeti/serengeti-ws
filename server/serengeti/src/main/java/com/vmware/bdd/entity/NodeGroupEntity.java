@@ -41,7 +41,6 @@ import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.StorageRead;
@@ -113,9 +112,8 @@ public class NodeGroupEntity extends EntityBase {
    @Column(name = "configuration")
    private String hadoopConfig;
 
-   // 0 or negative means no constraints
    @Column(name = "instance_per_host")
-   private int instancePerHost;
+   private Integer instancePerHost;
 
    @OneToMany(mappedBy = "nodeGroup", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
    private Set<NodeGroupAssociation> groupAssociations;
@@ -263,11 +261,11 @@ public class NodeGroupEntity extends EntityBase {
       this.roles = roles;
    }
 
-   public int getInstancePerHost() {
+   public Integer getInstancePerHost() {
       return instancePerHost;
    }
 
-   public void setInstancePerHost(int instancePerHost) {
+   public void setInstancePerHost(Integer instancePerHost) {
       this.instancePerHost = instancePerHost;
    }
 

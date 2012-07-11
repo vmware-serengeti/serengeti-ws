@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
@@ -31,12 +32,15 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.IpBlockEntity;
 import com.vmware.bdd.entity.NetworkEntity;
+import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.Saveable;
 import com.vmware.bdd.exception.BddException;
@@ -249,6 +253,25 @@ public class ClusterConfigManager {
       groupEntity.setMemorySize(group.getMemCapacityMB());
       groupEntity.setName(group.getName());
       groupEntity.setNodeType(group.getInstanceType());
+      
+      PlacementPolicy policies = group.getPlacementPolicies();
+      if (policies != null) {
+         List<GroupAssociation> associons = policies.getGroupAssociations();
+         if (associons != null) {
+            Set<NodeGroupAssociation> associonEntities = new TreeSet<NodeGroupAssociation>();
+            for (GroupAssociation a : associons) {
+               NodeGroupAssociation ae = new NodeGroupAssociation();
+               ae.setAssociationType(a.getType());
+               ae.setNodeGroup(groupEntity);
+               ae.setReferencedGroup(a.getReference());
+               associonEntities.add(ae);
+            }
+            groupEntity.setGroupAssociations(associonEntities);
+         }
+         if (policies.getInstancePerHost() != null) {
+            groupEntity.setInstancePerHost(policies.getInstancePerHost());
+         }
+      }
 
       if (group.getRpNames() != null
             && group.getRpNames().size() > 0) {
@@ -473,6 +496,29 @@ public class ClusterConfigManager {
       }
 
       group.setInstanceNum(ngEntity.getDefineInstanceNum());
+
+      Integer instancePerHost = ngEntity.getInstancePerHost();
+      Set<NodeGroupAssociation> associonEntities = ngEntity.getGroupAssociations();
+      if (instancePerHost == null &&
+          (associonEntities == null || associonEntities.isEmpty())) {
+         group.setPlacementPolicies(null);
+      } else {
+         PlacementPolicy policies = new PlacementPolicy();
+         policies.setInstancePerHost(instancePerHost);
+         if (associonEntities != null) {
+            List<GroupAssociation> associons =
+               new ArrayList<GroupAssociation>(associonEntities.size());
+            for (NodeGroupAssociation ae:associonEntities) {
+               GroupAssociation a = new GroupAssociation();
+               a.setReference(ae.getReferencedGroup());
+               a.setType(ae.getAssociationType());
+               associons.add(a);
+            }
+            policies.setGroupAssociations(associons);
+         }
+
+         group.setPlacementPolicies(policies);
+      }
 
       String rps = ngEntity.getVcRpNames();
       if (rps != null && rps.length() > 0) {
