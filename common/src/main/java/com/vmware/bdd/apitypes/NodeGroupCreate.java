@@ -53,6 +53,8 @@ public class NodeGroupCreate {
    @Expose
    @SerializedName("ha")
    private boolean haFlag;
+   @Expose
+   @SerializedName("cluster_configuration")
    private Map<String, Object> configuration;
 
    public NodeGroupCreate() {
