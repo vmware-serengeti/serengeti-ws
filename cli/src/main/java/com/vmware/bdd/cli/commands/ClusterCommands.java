@@ -585,7 +585,6 @@ public class ClusterCommands implements CommandMarker {
          }
       case WORKER:
          if (roles.size() == 1) {
-            System.out.println(roles.get(0));
             if (Constants.ROLE_HADOOP_DATANODE.equals(roles.get(0)) ||
                 Constants.ROLE_HADOOP_TASKTRACKER.equals(roles.get(0))) {
                return true;

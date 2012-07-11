@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
+import java.util.List;
+
 /**
  * Node Group Commons
  */
@@ -53,10 +55,10 @@ public class NodeGroup {
       }
    }
 
-   public static class PlacePolicy {
+   public static class PlacementPolicy {
       public static class GroupAssociation {
          public enum GroupAssociationType {
-            LOOSE, STRICT
+            WEAK, STRICT
          }
 
          private String reference;
@@ -85,7 +87,7 @@ public class NodeGroup {
       }
 
       private Integer instancePerHost;
-      private GroupAssociation groupAssociation;
+      private List<GroupAssociation> groupAssociations;
 
       public Integer getInstancePerHost() {
          return instancePerHost;
@@ -95,18 +97,18 @@ public class NodeGroup {
          this.instancePerHost = instancePerHost;
       }
 
-      public GroupAssociation getGroupAssociation() {
-         return groupAssociation;
+      public List<GroupAssociation> getGroupAssociations() {
+         return groupAssociations;
       }
 
-      public void setGroupAssociation(GroupAssociation groupAssociation) {
-         this.groupAssociation = groupAssociation;
+      public void setGroupAssociations(List<GroupAssociation> groupAssociations) {
+         this.groupAssociations = groupAssociations;
       }
 
       @Override
       public String toString() {
          return "PlacePolicy [instancePerHost=" + instancePerHost
-               + ", groupAssociation=" + groupAssociation + "]";
+               + ", groupAssociations=" + groupAssociations + "]";
       }
    }
 }

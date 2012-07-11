@@ -20,7 +20,7 @@ import java.util.Map;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
-import com.vmware.bdd.apitypes.NodeGroup.PlacePolicy;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.VcCluster;
 
@@ -40,8 +40,8 @@ public class NodeGroupCreate {
    @SerializedName("instance_type")
    private InstanceType instanceType;
    @Expose
-   @SerializedName("place_policy")
-   private PlacePolicy placePolicy;
+   @SerializedName("placement_policies")
+   private PlacementPolicy placementPolicies;
    @Expose
    private StorageRead storage;
    @Expose
@@ -69,7 +69,7 @@ public class NodeGroupCreate {
       this.haFlag = group.haFlag;
       this.instanceNum = group.instanceNum;
       this.instanceType = group.instanceType;
-      this.placePolicy = group.placePolicy;
+      this.placementPolicies = group.placementPolicies;
       this.memCapacityMB = group.memCapacityMB;
       this.name = group.name;
       this.roles = group.roles;
@@ -119,12 +119,12 @@ public class NodeGroupCreate {
       this.instanceType = instanceType;
    }
 
-   public PlacePolicy getPlacePolicy() {
-      return placePolicy;
+   public PlacementPolicy getPlacementPolicies() {
+      return placementPolicies;
    }
 
-   public void setPlacePolicy(PlacePolicy placePolicy) {
-      this.placePolicy = placePolicy;
+   public void setPlacementPolicies(PlacementPolicy placementPolicies) {
+      this.placementPolicies = placementPolicies;
    }
 
    public int getCpuNum() {

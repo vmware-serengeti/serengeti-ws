@@ -18,7 +18,7 @@ import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.apitypes.NodeGroup.PlacePolicy;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 
 /**
  * Nodegroup get output. Node group is a set of nodes with same properties, for
@@ -51,8 +51,8 @@ public class NodeGroupRead {
    private List<NodeRead> instances;
 
    @Expose
-   @SerializedName("place_policy")
-   private PlacePolicy placePolicy;
+   @SerializedName("placement_policies")
+   private PlacementPolicy placementPolicies;
 
    public String getName() {
       return name;
@@ -118,11 +118,11 @@ public class NodeGroupRead {
       this.storage = storage;
    }
 
-   public PlacePolicy getPlacePolicy() {
-      return placePolicy;
+   public PlacementPolicy getPlacementPolicies() {
+      return placementPolicies;
    }
 
-   public void setPlacePolicy(PlacePolicy placePolicy) {
-      this.placePolicy = placePolicy;
+   public void setPlacementPolicies(PlacementPolicy placementPolicies) {
+      this.placementPolicies = placementPolicies;
    }
 }
