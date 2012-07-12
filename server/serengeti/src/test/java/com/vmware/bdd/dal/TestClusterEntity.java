@@ -21,32 +21,18 @@ import java.util.Set;
 import junit.framework.Assert;
 
 import org.apache.log4j.Logger;
-
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
-import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertNull;
-import static org.testng.AssertJUnit.assertTrue;
-import static org.testng.AssertJUnit.assertEquals;
-
-import antlr.collections.List;
+import org.testng.annotations.Test;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.entity.ClusterEntity;
-import com.vmware.bdd.entity.IpBlockEntity;
-import com.vmware.bdd.entity.IpBlockEntity.BlockType;
-import com.vmware.bdd.entity.NetworkEntity;
-import com.vmware.bdd.entity.NetworkEntity.AllocType;
 import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.Saveable;
-import com.vmware.bdd.exception.NetworkException;
-import com.vmware.bdd.utils.IpAddressUtil;
 
 public class TestClusterEntity {
    private static final Logger logger = Logger
@@ -96,7 +82,7 @@ public class TestClusterEntity {
       nodeGroups.add(hdfsGroup);
 
       NodeGroupEntity computeGroup = new NodeGroupEntity(COMPUTE_GROUP);
-      
+
       computeGroup.setCluster(cluster);
       computeGroup.setCpuNum(1);
       computeGroup.setMemorySize(2048);
@@ -143,7 +129,7 @@ public class TestClusterEntity {
             Assert.assertNotNull(groupRead);
             Assert.assertTrue(groupRead.getCpuNum() == 1);
             Assert.assertTrue(groupRead.getGroupAssociations().size() == 1);
-            
+
             return null;
          }
       });
