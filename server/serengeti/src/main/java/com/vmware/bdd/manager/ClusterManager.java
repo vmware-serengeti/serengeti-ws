@@ -49,376 +49,351 @@ import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ConfigInfo;
 
 public class ClusterManager {
-   static final Logger logger = Logger.getLogger(ClusterManager.class);
-   private ClusterConfigManager clusterConfigMgr;
-   private CloudProviderManager cloudProviderMgr;
-   private NetworkManager networkManager;
-   private TaskManager taskManager;
+    static final Logger logger = Logger.getLogger(ClusterManager.class);
+    private ClusterConfigManager clusterConfigMgr;
+    private CloudProviderManager cloudProviderMgr;
+    private NetworkManager networkManager;
+    private TaskManager taskManager;
 
-   public ClusterConfigManager getClusterConfigMgr() {
-      return clusterConfigMgr;
-   }
+    public ClusterConfigManager getClusterConfigMgr() {
+        return clusterConfigMgr;
+    }
 
-   public void setClusterConfigMgr(ClusterConfigManager clusterConfigMgr) {
-      this.clusterConfigMgr = clusterConfigMgr;
-   }
+    public void setClusterConfigMgr(ClusterConfigManager clusterConfigMgr) {
+        this.clusterConfigMgr = clusterConfigMgr;
+    }
 
-   public CloudProviderManager getCloudProviderMgr() {
-      return cloudProviderMgr;
-   }
+    public CloudProviderManager getCloudProviderMgr() {
+        return cloudProviderMgr;
+    }
 
-   public void setCloudProviderMgr(CloudProviderManager cloudProviderMgr) {
-      this.cloudProviderMgr = cloudProviderMgr;
-   }
+    public void setCloudProviderMgr(CloudProviderManager cloudProviderMgr) {
+        this.cloudProviderMgr = cloudProviderMgr;
+    }
 
-   public NetworkManager getNetworkManager() {
-      return networkManager;
-   }
+    public NetworkManager getNetworkManager() {
+        return networkManager;
+    }
 
-   public void setNetworkManager(NetworkManager networkManager) {
-      this.networkManager = networkManager;
-   }
+    public void setNetworkManager(NetworkManager networkManager) {
+        this.networkManager = networkManager;
+    }
 
-   public TaskManager getTaskManager() {
-      return taskManager;
-   }
+    public TaskManager getTaskManager() {
+        return taskManager;
+    }
 
-   public void setTaskManager(TaskManager taskManager) {
-      this.taskManager = taskManager;
-   }
+    public void setTaskManager(TaskManager taskManager) {
+        this.taskManager = taskManager;
+    }
 
-   public Map<String, Object> getClusterConfigManifest(final String clusterName) {
-      ClusterCreate clusterConfig =
-            clusterConfigMgr.getClusterConfig(clusterName);
-      Map<String, Object> cloudProvider = cloudProviderMgr.getAttributes();
-      ClusterRead read = getClusterByName(clusterName);
-      Map<String, Object> attrs = new HashMap<String, Object>();
-      attrs.put("cloud_provider", cloudProvider);
-      attrs.put("cluster_definition", clusterConfig);
-      if (read != null) {
-         attrs.put("cluster_data", read);
-      }
-      return attrs;
-   }
+    public Map<String, Object> getClusterConfigManifest(final String clusterName) {
+        ClusterCreate clusterConfig = clusterConfigMgr.getClusterConfig(clusterName);
+        Map<String, Object> cloudProvider = cloudProviderMgr.getAttributes();
+        ClusterRead read = getClusterByName(clusterName);
+        Map<String, Object> attrs = new HashMap<String, Object>();
+        attrs.put("cloud_provider", cloudProvider);
+        attrs.put("cluster_definition", clusterConfig);
+        if (read != null) {
+            attrs.put("cluster_data", read);
+        }
+        return attrs;
+    }
 
-   private void writeJsonFile(Map<String, Object> clusterConfig, File workDir,
-         String fileName) {
-      Gson gson =
-            new GsonBuilder().excludeFieldsWithoutExposeAnnotation().
-            setPrettyPrinting().create();
-      String jsonStr = gson.toJson(clusterConfig);
+    private void writeJsonFile(Map<String, Object> clusterConfig, File workDir, String fileName) {
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create();
+        String jsonStr = gson.toJson(clusterConfig);
 
-      AuAssert.check(jsonStr != null);
-      logger.info("writing cluster manifest in json " + jsonStr + " to file "
-            + fileName);
+        AuAssert.check(jsonStr != null);
+        logger.info("writing cluster manifest in json " + jsonStr + " to file " + fileName);
 
-      FileWriter fileStream = null;
+        FileWriter fileStream = null;
 
-      try {
-         File file = new File(workDir, fileName);
-         fileStream = new FileWriter(file);
-         fileStream.write(jsonStr);
-      } catch (IOException ex) {
-         logger.error(ex.getMessage()
-               + "\n failed to write cluster manifest to file " + fileName);
-         throw BddException.INTERNAL(ex, "failed to write cluster manifest");
-      } finally {
-         if (fileStream != null) {
-            try {
-               fileStream.close();
-            } catch (IOException e) {
-               logger.error("falied to close output stream " + fileStream, e);
+        try {
+            File file = new File(workDir, fileName);
+            fileStream = new FileWriter(file);
+            fileStream.write(jsonStr);
+        } catch (IOException ex) {
+            logger.error(ex.getMessage() + "\n failed to write cluster manifest to file " + fileName);
+            throw BddException.INTERNAL(ex, "failed to write cluster manifest");
+        } finally {
+            if (fileStream != null) {
+                try {
+                    fileStream.close();
+                } catch (IOException e) {
+                    logger.error("falied to close output stream " + fileStream, e);
+                }
             }
-         }
-      }
-   }
+        }
+    }
 
-   private Long createClusterMgmtTaskWithErrorSetting(ClusterEntity cluster,
-         TaskListener listener, ClusterStatus initStatus) {
-      try {
-         return createClusterMgmtTask(cluster, listener, initStatus);
-      } catch (BddException e) {
-         logger.error("failed to create cluster management task.", e);
-         cluster.setStatus(ClusterStatus.ERROR);
-         DAL.inTransactionUpdate(cluster);
-         throw e;
-      }
-   }
+    private Long createClusterMgmtTaskWithErrorSetting(ClusterEntity cluster, TaskListener listener,
+            ClusterStatus initStatus) {
+        try {
+            return createClusterMgmtTask(cluster, listener, initStatus);
+        } catch (BddException e) {
+            logger.error("failed to create cluster management task.", e);
+            cluster.setStatus(ClusterStatus.ERROR);
+            DAL.inTransactionUpdate(cluster);
+            throw e;
+        }
+    }
 
-   private Long createClusterMgmtTask(ClusterEntity cluster,
-         TaskListener listener, ClusterStatus initStatus) {
-      Map<String, Object> clusterConfig;
-      String fileName = cluster.getName() + ".json";
+    private Long createClusterMgmtTask(ClusterEntity cluster, TaskListener listener, ClusterStatus initStatus) {
+        Map<String, Object> clusterConfig;
+        String fileName = cluster.getName() + ".json";
 
-      clusterConfig = getClusterConfigManifest(cluster.getName());
+        clusterConfig = getClusterConfigManifest(cluster.getName());
 
-      AuAssert.check(clusterConfig != null);
+        AuAssert.check(clusterConfig != null);
 
-      TaskEntity task = taskManager.createCmdlineTask(null, listener);
+        TaskEntity task = taskManager.createCmdlineTask(null, listener);
 
-      String[] cmdArray = listener.getTaskCommand(cluster.getName(), task
-                     .getWorkDir().getAbsolutePath() + "/" + fileName);
+        String[] cmdArray =
+                listener.getTaskCommand(cluster.getName(), task.getWorkDir().getAbsolutePath() + "/" + fileName);
 
-      AuAssert.check(cmdArray != null);
-      task.setCmdArray(cmdArray);
+        AuAssert.check(cmdArray != null);
+        task.setCmdArray(cmdArray);
 
-      DAL.inTransactionUpdate(task);
+        DAL.inTransactionUpdate(task);
 
-      HashMap<String, Object> properties = SystemProperties.getManifest();
-      SystemProperties.setChannelId(properties, task.getMessageRouteKey());
-      clusterConfig.put("system_properties", properties);
+        HashMap<String, Object> properties = SystemProperties.getManifest();
+        SystemProperties.setChannelId(properties, task.getMessageRouteKey());
+        clusterConfig.put("system_properties", properties);
 
-      writeJsonFile(clusterConfig, task.getWorkDir(), fileName);
+        writeJsonFile(clusterConfig, task.getWorkDir(), fileName);
 
-      cluster.setStatus(initStatus);
-      DAL.inTransactionUpdate(cluster);
+        cluster.setStatus(initStatus);
+        DAL.inTransactionUpdate(cluster);
 
-      taskManager.submit(task);
+        taskManager.submit(task);
 
-      StringBuilder cmdStr = new StringBuilder();
-      for (String str : cmdArray) {
-         cmdStr.append(str).append(" ");
-      }
+        StringBuilder cmdStr = new StringBuilder();
+        for (String str : cmdArray) {
+            cmdStr.append(str).append(" ");
+        }
 
-      logger.info("submitted a start cluster task with cmd array: " + cmdStr);
+        logger.info("submitted a start cluster task with cmd array: " + cmdStr);
 
-      return task.getId();
-   }
+        return task.getId();
+    }
 
-   public ClusterRead getClusterByName(final String clusterName) {
-      return DAL.inRoTransactionDo(new Saveable<ClusterRead>() {
-         @Override
-         public ClusterRead body() {
-            ClusterEntity entity = ClusterEntity.findClusterEntityByName(clusterName);
-            if (entity == null) {
-               throw BddException.NOT_FOUND("cluster", clusterName);
+    public ClusterRead getClusterByName(final String clusterName) {
+        return DAL.inRoTransactionDo(new Saveable<ClusterRead>() {
+            @Override
+            public ClusterRead body() {
+                ClusterEntity entity = ClusterEntity.findClusterEntityByName(clusterName);
+                if (entity == null) {
+                    throw BddException.NOT_FOUND("cluster", clusterName);
+                }
+
+                return entity.toClusterRead();
             }
+        });
+    }
 
-            return entity.toClusterRead();
-         }
-      });
-   }
-
-   public List<ClusterRead> getClusters() {
-      return DAL.inRoTransactionDo(new Saveable<List<ClusterRead>>() {
-         @Override
-         public List<ClusterRead> body() {
-            List<ClusterRead> clusters = new ArrayList<ClusterRead>();
-            List<ClusterEntity> clusterEntities = DAL.findAll(ClusterEntity.class);
-            for (ClusterEntity entity : clusterEntities) {
-               clusters.add(entity.toClusterRead());
+    public List<ClusterRead> getClusters() {
+        return DAL.inRoTransactionDo(new Saveable<List<ClusterRead>>() {
+            @Override
+            public List<ClusterRead> body() {
+                List<ClusterRead> clusters = new ArrayList<ClusterRead>();
+                List<ClusterEntity> clusterEntities = DAL.findAll(ClusterEntity.class);
+                for (ClusterEntity entity : clusterEntities) {
+                    clusters.add(entity.toClusterRead());
+                }
+                return clusters;
             }
-            return clusters;
-         }
-      });
-   }
+        });
+    }
 
-   public Long createCluster(ClusterCreate createSpec) throws Exception {
-      String name = createSpec.getName();
-      logger.info("ClusterManager, creating cluster " + name);
+    public Long createCluster(ClusterCreate createSpec) throws Exception {
+        String name = createSpec.getName();
+        logger.info("ClusterManager, creating cluster " + name);
 
-      final ClusterEntity cluster = clusterConfigMgr.createClusterConfig(createSpec);
+        final ClusterEntity cluster = clusterConfigMgr.createClusterConfig(createSpec);
 
-      CreateClusterListener listener = new CreateClusterListener(name);
-      try {
-         return createClusterMgmtTaskWithErrorSetting(cluster, listener,
-               ClusterStatus.PROVISIONING);
-      } catch (BddException e) {
-         logger.error("Create management task failed. Delete cluster entity, and release resources.", e);
-         DAL.inTransactionDo(new Saveable<Void>() {
-            public Void body() throws Exception {
-               NetworkEntity network = cluster.getNetwork();
-               DAL.refresh(network);
-               if (network.getAllocType() == AllocType.IP_POOL) {
-                  networkManager.free(network, cluster.getId());
-               }
-               cluster.delete();
-               return null;
-            }
-         });
-         throw e;
-      }
-   }
+        CreateClusterListener listener = new CreateClusterListener(name);
+        try {
+            return createClusterMgmtTaskWithErrorSetting(cluster, listener, ClusterStatus.PROVISIONING);
+        } catch (BddException e) {
+            logger.error("Create management task failed. Delete cluster entity, and release resources.", e);
+            DAL.inTransactionDo(new Saveable<Void>() {
+                public Void body() throws Exception {
+                    NetworkEntity network = cluster.getNetwork();
+                    DAL.refresh(network);
+                    if (network.getAllocType() == AllocType.IP_POOL) {
+                        networkManager.free(network, cluster.getId());
+                    }
+                    cluster.delete();
+                    return null;
+                }
+            });
+            throw e;
+        }
+    }
 
-   public Long resumeClusterCreation(String clusterName) throws Exception {
-      logger.info("ClusterManager, resume cluster creation " + clusterName);
+    public Long resumeClusterCreation(String clusterName) throws Exception {
+        logger.info("ClusterManager, resume cluster creation " + clusterName);
 
-      ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+        ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
 
-      if (cluster == null) {
-         logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
-      }
+        if (cluster == null) {
+            logger.error("cluster " + clusterName + " does not exist");
+            throw BddException.NOT_FOUND("cluster", clusterName);
+        }
 
-      if (cluster.getStatus() != ClusterStatus.PROVISION_ERROR) {
-         logger.error("can not resume creation of cluster: " + clusterName +
-               ", " + cluster.getStatus());
-         throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
-               "it should be in PROVISION_ERROR status");
-      }
+        if (cluster.getStatus() != ClusterStatus.PROVISION_ERROR) {
+            logger.error("can not resume creation of cluster: " + clusterName + ", " + cluster.getStatus());
+            throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
+                    "it should be in PROVISION_ERROR status");
+        }
 
-      CreateClusterListener listener = new CreateClusterListener(clusterName);
-      return createClusterMgmtTaskWithErrorSetting(cluster, listener,
-            ClusterStatus.PROVISIONING);
-   }
+        CreateClusterListener listener = new CreateClusterListener(clusterName);
+        return createClusterMgmtTaskWithErrorSetting(cluster, listener, ClusterStatus.PROVISIONING);
+    }
 
-   public Long deleteClusterByName(String clusterName) throws Exception {
-      logger.info("ClusterManager, deleting cluster " + clusterName);
+    public Long deleteClusterByName(String clusterName) throws Exception {
+        logger.info("ClusterManager, deleting cluster " + clusterName);
 
-      ClusterEntity cluster;
+        ClusterEntity cluster;
 
-      if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
-         logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
-      }
+        if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+            logger.error("cluster " + clusterName + " does not exist");
+            throw BddException.NOT_FOUND("cluster", clusterName);
+        }
 
-      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
-            && !ClusterStatus.STOPPED.equals(cluster.getStatus())
-            && !ClusterStatus.ERROR.equals(cluster.getStatus())
-            && !ClusterStatus.PROVISION_ERROR.equals(cluster.getStatus())) {
-         logger.error("cluster: " + clusterName
-               + " cannot be deleted, it is in " + cluster.getStatus()
-               + " status");
-         throw ClusterManagerException.DELETION_NOT_ALLOWED_ERROR(clusterName,
-               "it should be in RUNNING/STOPPED/ERROR/PROVISION_ERROR status");
-      }
+        if (!ClusterStatus.RUNNING.equals(cluster.getStatus()) && !ClusterStatus.STOPPED.equals(cluster.getStatus())
+                && !ClusterStatus.ERROR.equals(cluster.getStatus())
+                && !ClusterStatus.PROVISION_ERROR.equals(cluster.getStatus())) {
+            logger.error("cluster: " + clusterName + " cannot be deleted, it is in " + cluster.getStatus() + " status");
+            throw ClusterManagerException.DELETION_NOT_ALLOWED_ERROR(clusterName,
+                    "it should be in RUNNING/STOPPED/ERROR/PROVISION_ERROR status");
+        }
 
-      DeleteClusterListener listener =
-            new DeleteClusterListener(clusterName, networkManager);
-      return createClusterMgmtTaskWithErrorSetting(cluster, listener, ClusterStatus.DELETING);
-   }
+        DeleteClusterListener listener = new DeleteClusterListener(clusterName, networkManager);
+        return createClusterMgmtTaskWithErrorSetting(cluster, listener, ClusterStatus.DELETING);
+    }
 
-   public Long startCluster(String clusterName) throws Exception {
-      logger.info("ClusterManager, starting cluster " + clusterName);
+    public Long startCluster(String clusterName) throws Exception {
+        logger.info("ClusterManager, starting cluster " + clusterName);
 
-      ClusterEntity cluster;
+        ClusterEntity cluster;
 
-      if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
-         logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
-      }
+        if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+            logger.error("cluster " + clusterName + " does not exist");
+            throw BddException.NOT_FOUND("cluster", clusterName);
+        }
 
-      if (ClusterStatus.RUNNING.equals(cluster.getStatus())) {
-         logger.error("cluster " + clusterName + " is running already");
-         throw ClusterManagerException.ALREADY_STARTED_ERROR(clusterName);
-      }
+        if (ClusterStatus.RUNNING.equals(cluster.getStatus())) {
+            logger.error("cluster " + clusterName + " is running already");
+            throw ClusterManagerException.ALREADY_STARTED_ERROR(clusterName);
+        }
 
-      if (!ClusterStatus.STOPPED.equals(cluster.getStatus())) {
-         logger.error("cluster " + clusterName
-               + " cannot be started, it is in " + cluster.getStatus()
-               + " status");
-         throw ClusterManagerException.START_NOT_ALLOWED_ERROR(clusterName,
-               "it should be in STOPPED status");
-      }
+        if (!ClusterStatus.STOPPED.equals(cluster.getStatus())) {
+            logger.error("cluster " + clusterName + " cannot be started, it is in " + cluster.getStatus() + " status");
+            throw ClusterManagerException.START_NOT_ALLOWED_ERROR(clusterName, "it should be in STOPPED status");
+        }
 
-      StartClusterListener listener = new StartClusterListener(clusterName);
-      return createClusterMgmtTaskWithErrorSetting(cluster, listener, ClusterStatus.STARTING);
-   }
+        StartClusterListener listener = new StartClusterListener(clusterName);
+        return createClusterMgmtTaskWithErrorSetting(cluster, listener, ClusterStatus.STARTING);
+    }
 
-   public Long stopCluster(String clusterName) throws Exception {
-      logger.info("ClusterManager, stopping cluster " + clusterName);
+    public Long stopCluster(String clusterName) throws Exception {
+        logger.info("ClusterManager, stopping cluster " + clusterName);
 
-      ClusterEntity cluster;
+        ClusterEntity cluster;
 
-      if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
-         logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
-      }
+        if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+            logger.error("cluster " + clusterName + " does not exist");
+            throw BddException.NOT_FOUND("cluster", clusterName);
+        }
 
-      if (ClusterStatus.STOPPED.equals(cluster.getStatus())) {
-         logger.error("cluster " + clusterName + " is stopped already");
-         throw ClusterManagerException.ALREADY_STOPPED_ERROR(clusterName);
-      }
+        if (ClusterStatus.STOPPED.equals(cluster.getStatus())) {
+            logger.error("cluster " + clusterName + " is stopped already");
+            throw ClusterManagerException.ALREADY_STOPPED_ERROR(clusterName);
+        }
 
-      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
-         logger.error("cluster " + clusterName
-               + " cannot be stopped, it is in " + cluster.getStatus()
-               + " status");
-         throw ClusterManagerException.STOP_NOT_ALLOWED_ERROR(clusterName,
-               "it should be in RUNNING status");
-      }
+        if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
+            logger.error("cluster " + clusterName + " cannot be stopped, it is in " + cluster.getStatus() + " status");
+            throw ClusterManagerException.STOP_NOT_ALLOWED_ERROR(clusterName, "it should be in RUNNING status");
+        }
 
-      StopClusterListener listener = new StopClusterListener(clusterName);
-      return createClusterMgmtTaskWithErrorSetting(cluster, listener, ClusterStatus.STOPPING);
-   }
+        StopClusterListener listener = new StopClusterListener(clusterName);
+        return createClusterMgmtTaskWithErrorSetting(cluster, listener, ClusterStatus.STOPPING);
+    }
 
-   public Long resizeCluster(final String clusterName,
-         final String nodeGroupName, final int instanceNum) throws Exception {
-      logger.info("ClusterManager, updating node group " + nodeGroupName
-            + " in cluster " + clusterName + " reset instance number to "
-            + instanceNum);
+    public Long resizeCluster(final String clusterName, final String nodeGroupName, final int instanceNum)
+            throws Exception {
+        logger.info("ClusterManager, updating node group " + nodeGroupName + " in cluster " + clusterName
+                + " reset instance number to " + instanceNum);
 
-      ClusterEntity cluster;
-      if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
-         logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
-      }
+        ClusterEntity cluster;
+        if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+            logger.error("cluster " + clusterName + " does not exist");
+            throw BddException.NOT_FOUND("cluster", clusterName);
+        }
 
-      NodeGroupEntity group =
-            NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName);
-      if (group == null) {
-         logger.error("nodegroup " + nodeGroupName + " of cluster "
-               + clusterName + " does not exist");
-         throw ClusterManagerException.NOGEGROUP_NOT_FOUND_ERROR(nodeGroupName);
-      }
+        NodeGroupEntity group = NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName);
+        if (group == null) {
+            logger.error("nodegroup " + nodeGroupName + " of cluster " + clusterName + " does not exist");
+            throw ClusterManagerException.NOGEGROUP_NOT_FOUND_ERROR(nodeGroupName);
+        }
 
-      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
-         logger.error("cluster " + clusterName
-               + " can be updated only in RUNNING status, it is now in "
-               + cluster.getStatus() + " status");
-         throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
-               "it is should be in RUNNING status");
-      }
+        if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
+            logger.error("cluster " + clusterName + " can be updated only in RUNNING status, it is now in "
+                    + cluster.getStatus() + " status");
+            throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName, "it is should be in RUNNING status");
+        }
 
-      if (instanceNum <= group.getDefineInstanceNum()) {
-         logger.error("node group " + nodeGroupName
-               + " cannot be shrinked from " + group.getDefineInstanceNum()
-               + " to " + instanceNum + " nodes");
-         throw ClusterManagerException.SHRINK_OP_NOT_SUPPORTED(nodeGroupName,
-               instanceNum, group.getDefineInstanceNum());
-      }
+        if (instanceNum <= group.getDefineInstanceNum()) {
+            logger.error("node group " + nodeGroupName + " cannot be shrinked from " + group.getDefineInstanceNum()
+                    + " to " + instanceNum + " nodes");
+            throw ClusterManagerException.SHRINK_OP_NOT_SUPPORTED(nodeGroupName, instanceNum,
+                    group.getDefineInstanceNum());
+        }
 
-      UpdateClusterListener listener = new UpdateClusterListener(clusterName);
-      int oldInstanceNum = group.getDefineInstanceNum();
-      try {
-         // update defined instance number
-         group.setDefineInstanceNum(instanceNum);
-         DAL.inTransactionUpdate(group);
-         return createClusterMgmtTask(cluster, listener, ClusterStatus.UPDATING);
-      } catch (BddException e) {
-         logger.error("failed to resize cluster.", e);
-         // update defined instance number
-         group.setDefineInstanceNum(oldInstanceNum);
-         DAL.inTransactionUpdate(group);
-         throw e;
-      }
-   }
+        UpdateClusterListener listener = new UpdateClusterListener(clusterName);
+        int oldInstanceNum = group.getDefineInstanceNum();
+        try {
+            // update defined instance number
+            group.setDefineInstanceNum(instanceNum);
+            DAL.inTransactionUpdate(group);
+            return createClusterMgmtTask(cluster, listener, ClusterStatus.UPDATING);
+        } catch (BddException e) {
+            logger.error("failed to resize cluster.", e);
+            // update defined instance number
+            group.setDefineInstanceNum(oldInstanceNum);
+            DAL.inTransactionUpdate(group);
+            throw e;
+        }
+    }
 
-   static class SystemProperties {
-      private static final String RABBITMQ_CHANNEL = "rabbitmq_channel";
-      private static final String RABBITMQ_EXCHANGE = "rabbitmq_exchange";
-      private static final String RABBITMQ_PASSWORD = "rabbitmq_password";
-      private static final String RABBITMQ_USERNAME = "rabbitmq_username";
-      private static final String RABBITMQ_PORT = "rabbitmq_port";
-      private static final String RABBITMQ_HOST = "rabbitmq_host";
-      private static HashMap<String, Object> systemProperties;
-      static {
-         systemProperties = new HashMap<String, Object>();
-         systemProperties.put(RABBITMQ_HOST, ConfigInfo.getMqServerHost());
-         systemProperties.put(RABBITMQ_PORT, ConfigInfo.getMqServerPort());
-         systemProperties.put(RABBITMQ_USERNAME, ConfigInfo.getMqServerUsername());
-         systemProperties.put(RABBITMQ_PASSWORD, ConfigInfo.getMqServerPassword());
-         systemProperties.put(RABBITMQ_EXCHANGE, ConfigInfo.getMqExchangeName());
-      }
-      public static HashMap<String, Object> getManifest() {
-         HashMap<String, Object> result = new HashMap<String, Object>();
-         result.putAll(systemProperties);
-         return result;
-      }
-      
-      public static void setChannelId(HashMap<String, Object> properties, String channelId) {
-         properties.put(RABBITMQ_CHANNEL, channelId);
-      }
-   }
-   
+    static class SystemProperties {
+        private static final String RABBITMQ_CHANNEL = "rabbitmq_channel";
+        private static final String RABBITMQ_EXCHANGE = "rabbitmq_exchange";
+        private static final String RABBITMQ_PASSWORD = "rabbitmq_password";
+        private static final String RABBITMQ_USERNAME = "rabbitmq_username";
+        private static final String RABBITMQ_PORT = "rabbitmq_port";
+        private static final String RABBITMQ_HOST = "rabbitmq_host";
+        private static HashMap<String, Object> systemProperties;
+        static {
+            systemProperties = new HashMap<String, Object>();
+            systemProperties.put(RABBITMQ_HOST, ConfigInfo.getMqServerHost());
+            systemProperties.put(RABBITMQ_PORT, ConfigInfo.getMqServerPort());
+            systemProperties.put(RABBITMQ_USERNAME, ConfigInfo.getMqServerUsername());
+            systemProperties.put(RABBITMQ_PASSWORD, ConfigInfo.getMqServerPassword());
+            systemProperties.put(RABBITMQ_EXCHANGE, ConfigInfo.getMqExchangeName());
+        }
+
+        public static HashMap<String, Object> getManifest() {
+            HashMap<String, Object> result = new HashMap<String, Object>();
+            result.putAll(systemProperties);
+            return result;
+        }
+
+        public static void setChannelId(HashMap<String, Object> properties, String channelId) {
+            properties.put(RABBITMQ_CHANNEL, channelId);
+        }
+    }
+
 }
