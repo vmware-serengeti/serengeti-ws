@@ -17,12 +17,24 @@ package com.vmware.bdd.utils;
 import java.util.Map;
 
 public class AppConfigValidationUtils {
-   public static enum ValidationType {
-      WHITE_LIST,
-      BLACK_LIST
-   }
 
-   public static ValidateResult validateConfig(ValidationType type, Map<String, Object> config) {
-      return new ValidateResult(); //TODO
+   public static enum ValidationType {
+      BLACK_LIST,WHITE_LIST 
+   }
+   /**
+    * Validate the configration of spec file.
+    * @param type   validate type,blacklist or whitelist
+    * @param config configration of cluster or nodegroup
+    * @return
+    */
+   public static ValidateResult validateConfig(ValidationType type,
+         Map<String, Object> config) {
+      ValidateResult validateResult=null;
+      if (type == ValidationType.WHITE_LIST) {
+         validateResult=AppConfigValidationFactory.whiteListHandle(config);
+      } else if (type == ValidationType.BLACK_LIST) {
+         validateResult=AppConfigValidationFactory.blackListHandle(config);
+      }
+      return validateResult; //TODO
    }
 }

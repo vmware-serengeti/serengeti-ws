@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.spectypes.HadoopDistroMap;
@@ -32,7 +33,7 @@ public class ClusterCreate {
    private String name;
    @Expose
    @SerializedName("groups")
-   private NodeGroupCreate[] nodeGroupCreates;
+   private NodeGroupCreate[] nodeGroups;
    @Expose
    private String distro;
    private List<String> rpNames;
@@ -73,7 +74,7 @@ public class ClusterCreate {
       this.distro = cluster.distro;
       this.name = cluster.name;
       this.networkName = cluster.networkName;
-      this.nodeGroupCreates = cluster.nodeGroupCreates;
+      this.nodeGroups = cluster.nodeGroups;
       this.rpNames = cluster.rpNames;
       this.templateId = cluster.templateId;
       this.vcClusters = cluster.vcClusters;
@@ -122,12 +123,12 @@ public class ClusterCreate {
       this.networkName = networkName;
    }
 
-   public NodeGroupCreate[] getNodeGroupCreates() {
-      return nodeGroupCreates;
+   public NodeGroupCreate[] getNodeGroups() {
+      return nodeGroups;
    }
 
-   public void setNodeGroupCreates(NodeGroupCreate[] nodeGroupCreates) {
-      this.nodeGroupCreates = nodeGroupCreates;
+   public void setNodeGroups(NodeGroupCreate[] nodeGroups) {
+      this.nodeGroups = nodeGroups;
    }
 
    public List<String> getDsNames() {
@@ -201,4 +202,11 @@ public class ClusterCreate {
    public void setValidateConfig(boolean validateConfig) {
       this.validateConfig = validateConfig;
    }
+
+   @Override
+   public String toString() {
+      Gson gson = new Gson();
+      return gson.toJson(this);
+   }
+
 }

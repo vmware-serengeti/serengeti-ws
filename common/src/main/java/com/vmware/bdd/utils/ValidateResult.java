@@ -14,29 +14,54 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import java.util.LinkedList;
 import java.util.List;
+
+import com.google.gson.Gson;
 
 public class ValidateResult {
 
    public enum Type {
       WHITE_LIST_INVALID_NAME,
       WHITE_LIST_INVALID_VALUE,
+      WHITE_LIST_INVALID_NAME_VALUE,
       NAME_IN_BLACK_LIST,
       VALID
    }
 
    private Type type = Type.VALID;
-   private List<String> names; // configuration name list
+   private List<String> failureNames=new LinkedList<String>(); // configuration name list
+   private List<String> failureValues=new LinkedList<String>(); // configuration value list
    public Type getType() {
       return type;
    }
    public void setType(Type type) {
       this.type = type;
    }
-   public List<String> getNames() {
-      return names;
+   public List<String> getFailureNames() {
+      return failureNames;
    }
-   public void setNames(List<String> names) {
-      this.names = names;
+   public void setFailureNames(List<String> failureNames) {
+      this.failureNames = failureNames;
    }
+   
+   public List<String> getFailureValues() {
+      return failureValues;
+   }
+   public void setFailureValues(List<String> failureValues) {
+      this.failureValues = failureValues;
+   }
+   public void addFailureName(String failureName){
+      this.failureNames.add(failureName);
+   }
+   public void addFailureValue(String failureValue){
+      this.failureValues.add(failureValue);
+   }
+   @Override
+   public String toString() {
+      // TODO Auto-generated method stub
+      Gson g=new Gson();
+      return g.toJson(this);
+   }
+   
 }

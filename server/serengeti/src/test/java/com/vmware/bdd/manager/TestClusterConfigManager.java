@@ -168,7 +168,7 @@ public class TestClusterConfigManager {
       roles.add("hadoop_datanode");
       group.setRoles(roles);
 
-      spec.setNodeGroupCreates(nodegroups);
+      spec.setNodeGroups(nodegroups);
       clusterMgr.createClusterConfig(spec);
 
       ClusterEntity cluster =
@@ -210,7 +210,7 @@ public class TestClusterConfigManager {
       roles.add("hadoop_tasktracker");
       group.setRoles(roles);
 
-      spec.setNodeGroupCreates(nodegroups);
+      spec.setNodeGroups(nodegroups);
       clusterMgr.createClusterConfig(spec);
 
       ClusterEntity cluster =
@@ -251,7 +251,7 @@ public class TestClusterConfigManager {
       roles.add("hadoop_namenode");
       group.setRoles(roles);
 
-      spec.setNodeGroupCreates(nodegroups);
+      spec.setNodeGroups(nodegroups);
       clusterMgr.createClusterConfig(spec);
 
       ClusterEntity cluster =
@@ -291,7 +291,7 @@ public class TestClusterConfigManager {
       roles.add("hadoop_namenode");
       group.setRoles(roles);
 
-      spec.setNodeGroupCreates(nodegroups);
+      spec.setNodeGroups(nodegroups);
       try {
          clusterMgr.createClusterConfig(spec);
 
@@ -340,7 +340,7 @@ public class TestClusterConfigManager {
       roles.add("hadoop_namenode");
       group.setRoles(roles);
       
-      spec.setNodeGroupCreates(nodegroups);
+      spec.setNodeGroups(nodegroups);
       try {
          clusterMgr.createClusterConfig(spec);
 
@@ -416,7 +416,7 @@ public class TestClusterConfigManager {
       storage.setSizeGB(50);
       storage.setType(DatastoreType.LOCAL.toString());
       group.setStorage(storage);
-      spec.setNodeGroupCreates(nodegroups);
+      spec.setNodeGroups(nodegroups);
       clusterMgr.createClusterConfig(spec);
 
       ClusterEntity cluster =
@@ -462,7 +462,7 @@ public class TestClusterConfigManager {
       dsNames.add("testLocalStore");
       storage.setDsNames(dsNames);
        group.setStorage(storage);
-      spec.setNodeGroupCreates(nodegroups);
+      spec.setNodeGroups(nodegroups);
       clusterMgr.createClusterConfig(spec);
 
       ClusterEntity cluster =
@@ -503,7 +503,7 @@ public class TestClusterConfigManager {
       roles.add("hadoop_jobtracker");
       group.setRoles(roles);
 
-      spec.setNodeGroupCreates(nodegroups);
+      spec.setNodeGroups(nodegroups);
       clusterMgr.createClusterConfig(spec);
 
       ClusterEntity cluster =

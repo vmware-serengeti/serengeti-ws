@@ -54,16 +54,17 @@ public class ClusterCommandsTest extends MockRestServer {
       //normal case
       clusterCommands.resizeCluster("cluster1", "ng1", 5);
    }
-   
+
    @Test
    public void testClusterResizeFailure() throws Exception {
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
-      
+
       this.buildReqRespWithoutReqBody(
             "http://10.141.7.45:8080/serengeti/api/cluster/cluster1/nodegroup/ng1",
-            HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
+            HttpMethod.PUT, HttpStatus.NOT_FOUND,
+            mapper.writeValueAsString(errorMsg));
 
       clusterCommands.resizeCluster("cluster1", "ng1", 5);
    }
@@ -82,10 +83,11 @@ public class ClusterCommandsTest extends MockRestServer {
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
-      
+
       this.buildReqRespWithoutReqBody(
             "http://10.141.7.45:8080/serengeti/api/cluster/cluster1?state=start",
-            HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
+            HttpMethod.PUT, HttpStatus.NOT_FOUND,
+            mapper.writeValueAsString(errorMsg));
 
       clusterCommands.startCluster("cluster1");
    }
@@ -98,16 +100,17 @@ public class ClusterCommandsTest extends MockRestServer {
             HttpMethod.PUT, HttpStatus.NO_CONTENT, "");
       clusterCommands.stopCluster("cluster1");
    }
-   
+
    @Test
    public void testClusterStopFailure() throws Exception {
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
-      
+
       this.buildReqRespWithoutReqBody(
             "http://10.141.7.45:8080/serengeti/api/cluster/cluster1?state=stop",
-            HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
+            HttpMethod.PUT, HttpStatus.NOT_FOUND,
+            mapper.writeValueAsString(errorMsg));
       clusterCommands.stopCluster("cluster1");
    }
 
@@ -129,10 +132,10 @@ public class ClusterCommandsTest extends MockRestServer {
             "http://10.141.7.45:8080/serengeti/api/clusters", HttpMethod.POST,
             HttpStatus.NO_CONTENT, "");
 
-      clusterCommands.createCluster("cluster1", null, null, null, null,
-            null, false);
+      clusterCommands.createCluster("cluster1", null, null, null, null, null,
+            false, "Y");
    }
-   
+
    @Test
    public void testCreateClusterFailure() throws Exception {
       NetworkRead[] networks = new NetworkRead[1];
@@ -149,13 +152,13 @@ public class ClusterCommandsTest extends MockRestServer {
 
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("already exists");
-      
+
       buildReqRespWithoutReqBody(
             "http://10.141.7.45:8080/serengeti/api/clusters", HttpMethod.POST,
             HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
 
-      clusterCommands.createCluster("cluster1", null, null, null, null,
-            null, false);
+      clusterCommands.createCluster("cluster1", null, null, null, null, null,
+            false, "Y");
    }
 
    @Test
@@ -185,16 +188,18 @@ public class ClusterCommandsTest extends MockRestServer {
       roles.add("hive");
       roles.add("pig");
       distro.setRoles(roles);
-      
-      buildReqRespWithoutReqBody("http://10.141.7.45:8080/serengeti/api/distro/"+Constants.DEFAULT_DISTRO,
-            HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(distro));
-      
+
+      buildReqRespWithoutReqBody(
+            "http://10.141.7.45:8080/serengeti/api/distro/"
+                  + Constants.DEFAULT_DISTRO, HttpMethod.GET, HttpStatus.OK,
+            mapper.writeValueAsString(distro));
+
       buildReqRespWithoutReqBody(
             "http://10.141.7.45:8080/serengeti/api/clusters", HttpMethod.POST,
             HttpStatus.NO_CONTENT, "");
 
-      clusterCommands.createCluster("cluster1", null, "c:\\spec.txt",
-            null, null, null, false);
+      clusterCommands.createCluster("cluster1", null, "c:\\spec.txt", null,
+            null, null, false, "Y");
    }
 
    @Test
@@ -202,22 +207,23 @@ public class ClusterCommandsTest extends MockRestServer {
       buildReqRespWithoutReqBody(
             "http://10.141.7.45:8080/serengeti/api/cluster/cluster1?state=resume",
             HttpMethod.PUT, HttpStatus.NO_CONTENT, "");
-      clusterCommands.createCluster("cluster1", null, null, null, null,
-            null, true);
+      clusterCommands.createCluster("cluster1", null, null, null, null, null,
+            true, "Y");
    }
-   
+
    @Test
    public void testResumeCreateClusterFailure() throws Exception {
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
-      
+
       buildReqRespWithoutReqBody(
             "http://10.141.7.45:8080/serengeti/api/cluster/cluster1?state=resume",
-            HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
+            HttpMethod.PUT, HttpStatus.NOT_FOUND,
+            mapper.writeValueAsString(errorMsg));
 
-      clusterCommands.createCluster("cluster1", null, null, null, null,
-            null, true);
+      clusterCommands.createCluster("cluster1", null, null, null, null, null,
+            true, "Y");
    }
 
    @Test
@@ -278,8 +284,8 @@ public class ClusterCommandsTest extends MockRestServer {
             "http://10.141.7.45:8080/serengeti/api/cluster/cluster1",
             HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(cluster));
 
-      clusterCommands.createCluster("cluster1", null, null, null, null,
-            null, false);
+      clusterCommands.createCluster("cluster1", null, null, null, null, null,
+            false, "Y");
    }
 
    @Test

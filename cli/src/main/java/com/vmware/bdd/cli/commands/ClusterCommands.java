@@ -42,6 +42,9 @@ import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.ClusterRestClient;
 import com.vmware.bdd.cli.rest.DistroRestClient;
 import com.vmware.bdd.cli.rest.NetworkRestClient;
+import com.vmware.bdd.utils.AppConfigValidationUtils;
+import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
+import com.vmware.bdd.utils.ValidateResult;
 
 @Component
 public class ClusterCommands implements CommandMarker {
@@ -72,7 +75,8 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
          @CliOption(key = { "networkName" }, mandatory = false, help = "Network Name") final String networkName,
-         @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume) {
+         @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume,
+         @CliOption(key = { "validateConfig" }, mandatory = false, unspecifiedDefaultValue = "Y", help = "Whether to validate the configration of spec file.The default value is Y.") final String validateConfig) {
       //validate the name
       if (name.indexOf("-") != -1) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
@@ -82,7 +86,16 @@ public class ClusterCommands implements CommandMarker {
 
          return;
       }
+      //validate the validateConfig
+      if (!CommandsUtils.isBlank(validateConfig)
+            && !validateConfig.trim().equalsIgnoreCase("Y")
+            && !validateConfig.trim().equalsIgnoreCase("N")) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.PARAM_VALIDATE_CONFIG);
 
+         return;
+      }
       //process resume
       if (resume) {
          resumeCreateCluster(name);
@@ -131,9 +144,18 @@ public class ClusterCommands implements CommandMarker {
       }
       try {
          if (specFilePath != null) {
-            clusterCreate.setNodeGroupCreates(CommandsUtils
-                  .getObjectByJsonString(NodeGroupCreate[].class,
-                        CommandsUtils.dataFromFile(specFilePath)));
+            ClusterCreate clusterSpec =
+                  CommandsUtils.getObjectByJsonString(ClusterCreate.class,
+                        CommandsUtils.dataFromFile(specFilePath));
+            clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
+            clusterCreate.setConfiguration(clusterSpec.getConfiguration());
+            if (validateConfig.trim().equalsIgnoreCase("Y")) {
+               if (!validateConfigration(clusterCreate)) {
+                  return;
+               }
+            } else {
+               clusterCreate.setValidateConfig(false);
+            }
          }
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
@@ -193,6 +215,7 @@ public class ClusterCommands implements CommandMarker {
                e.getMessage());
       }
    }
+
 
    @CliCommand(value = "cluster list", help = "Get cluster information")
    public void getCluster(
@@ -339,7 +362,7 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private boolean validName(String inputName, List<String> validNames) {
-      for (String name: validNames) {
+      for (String name : validNames) {
          if (name.equals(inputName)) {
             return true;
          }
@@ -435,7 +458,7 @@ public class ClusterCommands implements CommandMarker {
       //role count
       int masterCount = 0, workerCount = 0, clientCount = 0;
       //Find NodeGroupCreate array from current ClusterCreate instance.
-      NodeGroupCreate[] nodeGroupCreates = clusterCreate.getNodeGroupCreates();
+      NodeGroupCreate[] nodeGroupCreates = clusterCreate.getNodeGroups();
       if (nodeGroupCreates == null || nodeGroupCreates.length == 0) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                clusterCreate.getName(), Constants.OUTPUT_OP_CREATE,
@@ -680,4 +703,33 @@ public class ClusterCommands implements CommandMarker {
             Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
             failedMsg.toString());
    }
+
+   private boolean validateConfigration(ClusterCreate cluster) {
+      boolean validated = true;
+      //      validate cluster level configration
+      //      validated=validateConfigration(cluster.getConfiguration());
+      //      validate nodegroup level configration
+      //      if(validated){         
+      //         for(NodeGroupCreate nodeGroup:cluster.getNodeGroups()){
+      //            validated=validateConfigration(nodeGroup.getConfiguration());
+      //         }
+      //      }
+      return validated;
+   }
+
+   @SuppressWarnings("unused")
+   private boolean validateConfigration(Map<String, Object> configration) {
+      ValidateResult validateResult = null;
+      for (ValidationType validationType : ValidationType.values()) {
+         validateResult =
+               AppConfigValidationUtils.validateConfig(validationType,
+                     configration);
+         if (validateResult.getType() != ValidateResult.Type.VALID) {
+            return false;
+         }
+      }
+
+      return true;
+   }
+
 }
