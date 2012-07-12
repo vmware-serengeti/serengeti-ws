@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -37,15 +37,14 @@ public class AppConfigValidationFactory {
    @SuppressWarnings("unchecked")
    public static ValidateResult blackListHandle(Map<String, Object> config) {
       ValidateResult validateResult = new ValidateResult();
-      String jsonStr = readJsonFile("BlackList.json");
+      String jsonStr = readJsonFile("blacklist.json");
       Gson gson = new Gson();
       List<Map<String, List<String>>> blackList =
             gson.fromJson(jsonStr, List.class);
       for (Entry<String, Object> configType : config.entrySet()) {
          if (((String) configType.getKey()).trim().equalsIgnoreCase("hadoop")) {
             if (!(configType.getValue() instanceof Map)) {
-               throw new RuntimeException(
-                     "The configuration of spec file is invalid!");
+               throw new RuntimeException(Constants.CLUSTER_CONFIG_ERROR);
             }
             Map<String, Object> propertyConfig =
                   (Map<String, Object>) (configType.getValue());
@@ -67,15 +66,14 @@ public class AppConfigValidationFactory {
    @SuppressWarnings("unchecked")
    public static ValidateResult whiteListHandle(Map<String, Object> config) {
       ValidateResult validateResult = new ValidateResult();
-      String jsonStr = readJsonFile("WhiteList.json");
+      String jsonStr = readJsonFile("whitelist.json");
       Gson gson = new Gson();
       List<Map<String, List<Map<String, String>>>> whiteList =
             gson.fromJson(jsonStr, List.class);
       for (Entry<String, Object> configType : config.entrySet()) {
          if (((String) configType.getKey()).trim().equalsIgnoreCase("hadoop")) {
             if (!(configType.getValue() instanceof Map)) {
-               throw new RuntimeException(
-                     "The configuration of spec file is invalid!");
+               throw new RuntimeException(Constants.CLUSTER_CONFIG_ERROR);
             }
             Map<String, Object> propertyConfig =
                   (Map<String, Object>) (configType.getValue());

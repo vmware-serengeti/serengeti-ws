@@ -1,6 +1,6 @@
 /*****************************************************************************
- *      Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *      Licensed under the Apache License, Version 2.0 (the "License");
+ *   Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
  *
@@ -81,17 +81,20 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_RESIZE = "resized";
    public static final String OUTPUT_OP_RESULT_RESUME = "resumed";
    public static final String OUTPUT_OP_RESULT_ADD = "added";
-   public static final String OUTPUT_UNKNOWN_HOST ="unknown host";
-   public static final String OUTPUT_HOST_REFUSE ="Connection refused. Please check the port number";
-   public static final String OUTPUT_HOST_TIMEOUT ="connection timeout";
-   public static final String OUTPUT_LOG_INFO ="you can get task failure details from serengeti server log at:";
+   public static final String OUTPUT_UNKNOWN_HOST = "unknown host";
+   public static final String OUTPUT_HOST_REFUSE =
+         "Connection refused. Please check the port number";
+   public static final String OUTPUT_HOST_TIMEOUT = "connection timeout";
+   public static final String OUTPUT_LOG_INFO =
+         "you can get task failure details from serengeti server log at:";
 
    public static final String HTTP_CONNECTION_PREFIX = "http://";
    public static final String HTTP_CONNECTION_SUFFIX = "/serengeti/api/";
 
    public static final String PROPERTY_FILE = "cli.properties";
    public static final String PROPERTY_HOST = "host";
-   public static final String PROPERTY_FILE_HOST_COMMENT = "update host information";
+   public static final String PROPERTY_FILE_HOST_COMMENT =
+         "update host information";
    public static final String PROPERTY_FILE_HOST_FAILURE =
          "cannot update the host information";
 
@@ -103,20 +106,23 @@ public class Constants {
    public static final String INPUT_INSTANCE_NUM_PARAM = "\"instanceNum\"";
    public static final String INTEGER_INPUTS_CHECK =
          " should be larger than existed, please check it.";
-   public static final String INVALID_VALUE =
-         "invalid value";
+   public static final String INVALID_VALUE = "invalid value";
 
-   public static final String PARAMS_EXCLUSION = " cannot be set at the same time.";
+   public static final String PARAMS_EXCLUSION =
+         " cannot be set at the same time.";
 
-   public static final String PARAMS_EXCLUSION_PAIR_NETWORK_ADD_IP_DHCP = "ip and dhcp";
+   public static final String PARAMS_EXCLUSION_PAIR_NETWORK_ADD_IP_DHCP =
+         "ip and dhcp";
    public static final String PARAMS_NETWORK_ADD_IP_DHCP_NOT_NULL =
          "You must enter one of ip,dhcp.";
    public static final String PARAMS_NETWORK_ADD_DNS = "dns";
    public static final String PARAMS_NETWORK_ADD_GATEWAY = "gateway";
    public static final String PARAMS_NETWORK_ADD_MASK = "mask";
    public static final String PARAMS_NETWORK_ADD_OR = " or ";
-   public static final String PARAMS_NETWORK_ADD_FORMAT_ERROR = " valid format is ips or ip ranges, eg. 255.0.0.1-100, 255.0.0.1 or 255.0.3.1-200,255.0.0.1-255";
-   public static final String PARAMS_NETWORK_ADD_IP_ERROR = " please provide valid ip or mask format.";
+   public static final String PARAMS_NETWORK_ADD_FORMAT_ERROR =
+         " valid format is ips or ip ranges, eg. 255.0.0.1-100, 255.0.0.1 or 255.0.3.1-200,255.0.0.1-255";
+   public static final String PARAMS_NETWORK_ADD_IP_ERROR =
+         " please provide valid ip or mask format.";
    public static final String PARAM_NOT_SUPPORTED =
          " input cannnot be accepted, we only support: ";
    public static final String ROLE_HADOOP_NAME_NODE = "hadoop_namenode";
@@ -128,7 +134,8 @@ public class Constants {
    public static final String ROLE_PIG = "pig";
    public static final String PARAM_CLUSTER_WARNING =
          "Warning: only support 1 master node group, 1 worker node group and 0 or 1 client node group now(master node group has hadoop_namenode,hadoop_jobtracker roles, only 1 instance. worker node group has hadoop_datanode,hadoop_tasktracker roles, 1 or more instance. client node group has hadoop_client,optional hive or pig roles,0 or more instance. Only master node group can config haFlag.)";
-   public static final String PARAM_CLUSTER_FAILED_INSTANCE_NUM_NEGATIVE ="instanceNum can not be negative";
+   public static final String PARAM_CLUSTER_FAILED_INSTANCE_NUM_NEGATIVE =
+         "instanceNum can not be negative";
    public static final String PARAM_CLUSTER = "cluster name";
    public static final String PARAM_DISTRO = "distro name";
    public static final String PARAM_NETWORK_NAME = "network name";
@@ -147,27 +154,30 @@ public class Constants {
    public static String FORMAT_TABLE_COLUMN_INSTANCE = "INSTANCE";
    public static String FORMAT_TABLE_COLUMN_CPU = "CPU";
    public static String FORMAT_TABLE_COLUMN_MEM = "MEM(MB)";
-   public static String FORMAT_TABLE_COLUMN_TYPE="TYPE";
-   public static String FORMAT_TABLE_COLUMN_SIZE="SIZE(GB)";
-   public static String FORMAT_TABLE_COLUMN_HOST="HOST";
-   public static String FORMAT_TABLE_COLUMN_SPACE="SPACE(GB)";
-   public static String FORMAT_TABLE_COLUMN_FREE_SPACE="FREE_SPACE(GB)";
-   public static String FORMAT_TABLE_COLUMN_PORT_GROUP="PORTGROUP";
-   public static String FORMAT_TABLE_COLUMN_FREE_IPS="FREE_IPS";
-   public static String FORMAT_TABLE_COLUMN_ASSIGNED_IPS="ASSIGNED_IPS";
-   public static String FORMAT_TABLE_COLUMN_DNS1="DNS1";
-   public static String FORMAT_TABLE_COLUMN_DNS2="DNS2";
-   public static String FORMAT_TABLE_COLUMN_GATEWAY="GATEWAY";
-   public static String FORMAT_TABLE_COLUMN_MASK="MASK";
-   public static String FORMAT_TABLE_COLUMN_NODE_NAME="NODE";
-   public static String FORMAT_TABLE_COLUMN_NODE_GROUP_NAME="NODEGROUP";
-   public static String FORMAT_TABLE_COLUMN_CLUSTER_NAME="CLUSTER";
-   public static String FORMAT_TABLE_COLUMN_PATH="PATH";
-   public static String FORMAT_TABLE_COLUMN_RAM_MB="RAM(MB)";
-   public static String FORMAT_TABLE_COLUMN_CPU_MHZ="CPU(MHZ)";
+   public static String FORMAT_TABLE_COLUMN_TYPE = "TYPE";
+   public static String FORMAT_TABLE_COLUMN_SIZE = "SIZE(GB)";
+   public static String FORMAT_TABLE_COLUMN_HOST = "HOST";
+   public static String FORMAT_TABLE_COLUMN_SPACE = "SPACE(GB)";
+   public static String FORMAT_TABLE_COLUMN_FREE_SPACE = "FREE_SPACE(GB)";
+   public static String FORMAT_TABLE_COLUMN_PORT_GROUP = "PORTGROUP";
+   public static String FORMAT_TABLE_COLUMN_FREE_IPS = "FREE_IPS";
+   public static String FORMAT_TABLE_COLUMN_ASSIGNED_IPS = "ASSIGNED_IPS";
+   public static String FORMAT_TABLE_COLUMN_DNS1 = "DNS1";
+   public static String FORMAT_TABLE_COLUMN_DNS2 = "DNS2";
+   public static String FORMAT_TABLE_COLUMN_GATEWAY = "GATEWAY";
+   public static String FORMAT_TABLE_COLUMN_MASK = "MASK";
+   public static String FORMAT_TABLE_COLUMN_NODE_NAME = "NODE";
+   public static String FORMAT_TABLE_COLUMN_NODE_GROUP_NAME = "NODEGROUP";
+   public static String FORMAT_TABLE_COLUMN_CLUSTER_NAME = "CLUSTER";
+   public static String FORMAT_TABLE_COLUMN_PATH = "PATH";
+   public static String FORMAT_TABLE_COLUMN_RAM_MB = "RAM(MB)";
+   public static String FORMAT_TABLE_COLUMN_CPU_MHZ = "CPU(MHZ)";
    public static final String FORMAT_TABLE_COLUMN_TASK = "TASK";
-   public static final String DEFAULT_DISTRO="apache";
-   public static final String PARAM_NO_DISTRO_AVAILABLE="no distro available,please upload one distro";
-   public static final String PARAM_PROMPT_CONTINUE_MESSAGE="Do you want to continue (Y/N)?";
-   public static final String PARAM_VALIDATE_CONFIG = "validateConfig value must be one of Y,N.";
+   public static final String DEFAULT_DISTRO = "apache";
+   public static final String PARAM_NO_DISTRO_AVAILABLE =
+         "no distro available,please upload one distro";
+   public static final String PARAM_PROMPT_CONTINUE_MESSAGE =
+         "Do you want to continue (Y/N)?";
+   public static final String PARAM_VALIDATE_CONFIG =
+         "--validateConfig must be Y or N.";
 }

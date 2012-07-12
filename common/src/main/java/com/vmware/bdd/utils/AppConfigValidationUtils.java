@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -19,22 +19,26 @@ import java.util.Map;
 public class AppConfigValidationUtils {
 
    public static enum ValidationType {
-      BLACK_LIST,WHITE_LIST 
+      BLACK_LIST, WHITE_LIST
    }
+
    /**
     * Validate the configration of spec file.
-    * @param type   validate type,blacklist or whitelist
-    * @param config configration of cluster or nodegroup
+    * 
+    * @param type
+    *           validate type,blacklist or whitelist
+    * @param config
+    *           configration of cluster or nodegroup
     * @return
     */
    public static ValidateResult validateConfig(ValidationType type,
          Map<String, Object> config) {
-      ValidateResult validateResult=null;
+      ValidateResult validateResult = null;
       if (type == ValidationType.WHITE_LIST) {
-         validateResult=AppConfigValidationFactory.whiteListHandle(config);
+         validateResult = AppConfigValidationFactory.whiteListHandle(config);
       } else if (type == ValidationType.BLACK_LIST) {
-         validateResult=AppConfigValidationFactory.blackListHandle(config);
+         validateResult = AppConfigValidationFactory.blackListHandle(config);
       }
-      return validateResult; //TODO
+      return validateResult;
    }
 }

@@ -76,7 +76,7 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
          @CliOption(key = { "networkName" }, mandatory = false, help = "Network Name") final String networkName,
          @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume,
-         @CliOption(key = { "validateConfig" }, mandatory = false, unspecifiedDefaultValue = "Y", help = "Whether to validate the configration of spec file.The default value is Y.") final String validateConfig) {
+         @CliOption(key = { "validateConfig" }, mandatory = false, unspecifiedDefaultValue = "Y", help = "Whether to validate the cluster configration in the cluster spec file. The default value is Y.") final String validateConfig) {
       //validate the name
       if (name.indexOf("-") != -1) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
@@ -706,14 +706,7 @@ public class ClusterCommands implements CommandMarker {
 
    private boolean validateConfigration(ClusterCreate cluster) {
       boolean validated = true;
-      //      validate cluster level configration
-      //      validated=validateConfigration(cluster.getConfiguration());
-      //      validate nodegroup level configration
-      //      if(validated){         
-      //         for(NodeGroupCreate nodeGroup:cluster.getNodeGroups()){
-      //            validated=validateConfigration(nodeGroup.getConfiguration());
-      //         }
-      //      }
+      //TODO
       return validated;
    }
 

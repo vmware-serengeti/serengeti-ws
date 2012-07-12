@@ -60,7 +60,6 @@ public class ClusterCommandsTest extends MockRestServer {
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
-
       this.buildReqRespWithoutReqBody(
             "http://10.141.7.45:8080/serengeti/api/cluster/cluster1/nodegroup/ng1",
             HttpMethod.PUT, HttpStatus.NOT_FOUND,
