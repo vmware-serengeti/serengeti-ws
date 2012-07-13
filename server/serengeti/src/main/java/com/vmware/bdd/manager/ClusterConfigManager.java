@@ -680,15 +680,17 @@ public class ClusterConfigManager {
             Map<String, Object> clusterLevelConfig = clusterCreate.getConfiguration();
             if (clusterLevelConfig != null && clusterLevelConfig.size() > 0) {
                logger.debug("Cluster level app config is updated.");
+               CommonClusterExpandPolicy.validateAppConfig(
+                     clusterCreate.getConfiguration(), clusterCreate.isValidateConfig());
                cluster.setHadoopConfig((new Gson()).toJson(clusterLevelConfig));
             }
-            updateNodegroupAppConfig(clusterCreate, cluster);
+            updateNodegroupAppConfig(clusterCreate, cluster, clusterCreate.isValidateConfig());
             return null;
          }
       });
    }
 
-   private void updateNodegroupAppConfig(ClusterCreate clusterCreate, ClusterEntity cluster) {
+   private void updateNodegroupAppConfig(ClusterCreate clusterCreate, ClusterEntity cluster, boolean validateWhiteList) {
       Gson gson = new Gson();
       Set<NodeGroupEntity> groupEntities = cluster.getNodeGroups();
       Map<String, NodeGroupEntity> groupMap = new HashMap<String, NodeGroupEntity>();
@@ -705,6 +707,9 @@ public class ClusterConfigManager {
          Map<String, Object> groupConfig = groupCreate.getConfiguration();
          if (groupConfig != null && groupConfig.size() > 0) {
             NodeGroupEntity groupEntity = groupMap.get(groupCreate.getName());
+            // validate hadoop config
+            CommonClusterExpandPolicy.validateAppConfig(groupConfig,
+                  validateWhiteList);
             groupEntity.setHadoopConfig(gson.toJson(groupConfig));
             updatedGroups.add(groupCreate.getName());
          }
