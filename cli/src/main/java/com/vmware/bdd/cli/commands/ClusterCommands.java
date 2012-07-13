@@ -142,6 +142,7 @@ public class ClusterCommands implements CommandMarker {
             clusterCreate.setDsNames(dsNamesList);
          }
       }
+
       try {
          if (specFilePath != null) {
             ClusterCreate clusterSpec =

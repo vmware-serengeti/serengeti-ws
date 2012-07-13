@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
@@ -31,12 +32,15 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.IpBlockEntity;
 import com.vmware.bdd.entity.NetworkEntity;
+import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.Saveable;
 import com.vmware.bdd.exception.BddException;
@@ -52,15 +56,16 @@ import com.vmware.bdd.utils.Configuration;
 
 public class ClusterConfigManager {
    private static final long serialVersionUID = 1L;
-   private static final Logger logger = Logger.getLogger(ClusterConfigManager.class);
+   private static final Logger logger = Logger
+         .getLogger(ClusterConfigManager.class);
    private static final String TEMPLATE_ID = "template_id";
    private VcResourcePoolManager rpMgr;
    private NetworkManager networkMgr;
    private DistroManager distroMgr;
    private VcDataStoreManager datastoreMgr;
    private FillRequiredHadoopGroups fillPolicy = new FillRequiredHadoopGroups();
-   private String templateId =
-      Configuration.getString(TEMPLATE_ID.toString(), "centos57-x64");
+   private String templateId = Configuration.getString(TEMPLATE_ID.toString(),
+         "centos57-x64");
 
    public VcDataStoreManager getDatastoreMgr() {
       return datastoreMgr;
@@ -102,7 +107,8 @@ public class ClusterConfigManager {
       try {
          return DAL.inTransactionDo(new Saveable<ClusterEntity>() {
             public ClusterEntity body() {
-               ClusterEntity entity = ClusterEntity.findClusterEntityByName(name);
+               ClusterEntity entity =
+                     ClusterEntity.findClusterEntityByName(name);
                if (entity != null) {
                   logger.info("can not create cluster " + name
                         + ", which is already existed.");
@@ -113,10 +119,12 @@ public class ClusterConfigManager {
                logger.debug("begin to add cluster config for " + name);
                Gson gson = new Gson();
                ClusterEntity clusterEntity = new ClusterEntity(name);
-               String distro = CommonClusterExpandPolicy.convertDistro(cluster,
-                     clusterEntity);
+               String distro =
+                     CommonClusterExpandPolicy.convertDistro(cluster,
+                           clusterEntity);
                clusterEntity.setStartAfterDeploy(true);
-               if (cluster.getRpNames() != null && cluster.getRpNames().size() > 0) {
+               if (cluster.getRpNames() != null
+                     && cluster.getRpNames().size() > 0) {
                   logger.debug("resource pool " + cluster.getRpNames()
                         + " specified for cluster " + name);
                   clusterEntity.setVcRpNameList(cluster.getRpNames());
@@ -130,7 +138,8 @@ public class ClusterConfigManager {
                   rpNames.addAll(globalNames);
                   clusterEntity.setVcRpNameList(rpNames);
                }
-               if (cluster.getDsNames() != null && !cluster.getDsNames().isEmpty()) {
+               if (cluster.getDsNames() != null
+                     && !cluster.getDsNames().isEmpty()) {
                   logger.debug("datastore " + cluster.getDsNames()
                         + " specified for cluster " + name);
                   clusterEntity.setVcDatastoreNameList(cluster.getDsNames());
@@ -149,23 +158,28 @@ public class ClusterConfigManager {
                if (networkName == null || networkName.isEmpty()) {
                   List<NetworkEntity> nets = networkMgr.getAllNetworkEntities();
                   if (nets.isEmpty() || nets.size() > 1) {
-                     throw ClusterConfigException.NETWORK_IS_NOT_SPECIFIED(nets.size(),
-                           name);
+                     throw ClusterConfigException.NETWORK_IS_NOT_SPECIFIED(
+                           nets.size(), name);
                   } else {
                      networkEntity = nets.get(0);
                   }
                } else {
-                  networkEntity = networkMgr.getNetworkEntityByName(networkName);
+                  networkEntity =
+                        networkMgr.getNetworkEntityByName(networkName);
                }
 
                if (networkEntity == null) {
-                  throw ClusterConfigException.NETWORK_IS_NOT_FOUND(networkName, name);
+                  throw ClusterConfigException.NETWORK_IS_NOT_FOUND(
+                        networkName, name);
                }
                clusterEntity.setNetwork(networkEntity);
-               if (cluster.getConfiguration() != null && cluster.getConfiguration().size() > 0) {
+               if (cluster.getConfiguration() != null
+                     && cluster.getConfiguration().size() > 0) {
                   // validate hadoop config
-                  CommonClusterExpandPolicy.validateAppConfig(cluster.getConfiguration(), cluster.isValidateConfig());
-                  clusterEntity.setHadoopConfig((new Gson()).toJson(cluster.getConfiguration()));
+                  CommonClusterExpandPolicy.validateAppConfig(
+                        cluster.getConfiguration(), cluster.isValidateConfig());
+                  clusterEntity.setHadoopConfig((new Gson()).toJson(cluster
+                        .getConfiguration()));
                }
                expandNodeGroupCreates(cluster, gson, clusterEntity, distro);
                clusterEntity.insert();
@@ -174,19 +188,21 @@ public class ClusterConfigManager {
             }
          });
       } catch (UniqueConstraintViolationException ex) {
-         logger.info("can not create cluster " + name + ", which is already existed.");
+         logger.info("can not create cluster " + name
+               + ", which is already existed.");
          throw BddException.ALREADY_EXISTS(ex, "cluster", name);
       }
    }
 
    private Set<NodeGroupEntity> convertNodeGroupsToEntities(Gson gson,
-         ClusterEntity clusterEntity, String distro,
-         NodeGroupCreate[] groups, EnumSet<HadoopRole> allRoles, boolean validateWhiteList) {
+         ClusterEntity clusterEntity, String distro, NodeGroupCreate[] groups,
+         EnumSet<HadoopRole> allRoles, boolean validateWhiteList) {
       Set<NodeGroupEntity> nodeGroups;
       nodeGroups = new HashSet<NodeGroupEntity>();
       for (NodeGroupCreate group : groups) {
-         NodeGroupEntity groupEntity = convertGroup(gson,
-               clusterEntity, allRoles, group, distro, validateWhiteList);
+         NodeGroupEntity groupEntity =
+               convertGroup(gson, clusterEntity, allRoles, group, distro,
+                     validateWhiteList);
          if (groupEntity != null) {
             nodeGroups.add(groupEntity);
          }
@@ -194,35 +210,40 @@ public class ClusterConfigManager {
       return nodeGroups;
    }
 
-   private void expandNodeGroupCreates(final ClusterCreate cluster,
-         Gson gson, ClusterEntity clusterEntity, String distro) {
+   private void expandNodeGroupCreates(final ClusterCreate cluster, Gson gson,
+         ClusterEntity clusterEntity, String distro) {
       NodeGroupCreate[] groups = cluster.getNodeGroups();
       Set<NodeGroupEntity> nodeGroups = null;
       EnumSet<HadoopRole> allRoles = EnumSet.noneOf(HadoopRole.class);
       boolean validateWhiteList = cluster.isValidateConfig();
       if (groups != null && groups.length > 0) {
          logger.debug("User defined node groups.");
-         nodeGroups = convertNodeGroupsToEntities(gson, clusterEntity,
-               distro, groups, allRoles, validateWhiteList);
+         nodeGroups =
+               convertNodeGroupsToEntities(gson, clusterEntity, distro, groups,
+                     allRoles, validateWhiteList);
          // add required node groups
-         EnumSet<HadoopRole> missingRoles = getMissingRequiredRoles(allRoles,
-               distro);
+         EnumSet<HadoopRole> missingRoles =
+               getMissingRequiredRoles(allRoles, distro);
          if (!missingRoles.isEmpty()) {
-            Set<NodeGroupCreate> missingGroups = fillPolicy.FillMissingGroups(nodeGroups, missingRoles,
-                  clusterEntity);
+            Set<NodeGroupCreate> missingGroups =
+                  fillPolicy.FillMissingGroups(nodeGroups, missingRoles,
+                        clusterEntity);
             nodeGroups.addAll(convertNodeGroupsToEntities(gson, clusterEntity,
-                  distro, missingGroups.toArray(new NodeGroupCreate[]{}), allRoles, validateWhiteList));
+                  distro, missingGroups.toArray(new NodeGroupCreate[] {}),
+                  allRoles, validateWhiteList));
          }
       } else {
          // we need to add default group config into db
          Set<NodeGroupCreate> missingGroups = fillPolicy.fillDefaultGroups();
-         nodeGroups = convertNodeGroupsToEntities(gson, clusterEntity,
-               distro, missingGroups.toArray(new NodeGroupCreate[]{}), allRoles, validateWhiteList);
+         nodeGroups =
+               convertNodeGroupsToEntities(gson, clusterEntity, distro,
+                     missingGroups.toArray(new NodeGroupCreate[] {}), allRoles,
+                     validateWhiteList);
       }
       clusterEntity.setNodeGroups(nodeGroups);
    }
 
-   private NodeGroupEntity convertGroup(Gson gson, ClusterEntity clusterEntity, 
+   private NodeGroupEntity convertGroup(Gson gson, ClusterEntity clusterEntity,
          EnumSet<HadoopRole> allRoles, NodeGroupCreate group, String distro,
          boolean validateWhiteList) {
       NodeGroupEntity groupEntity = new NodeGroupEntity();
@@ -238,7 +259,9 @@ public class ClusterConfigManager {
       groupEntity.setRoles(gson.toJson(roles));
       GroupType groupType = GroupType.fromHadoopRole(enumRoles);
 
-      boolean removeIt = validateGroupInstanceNum(clusterEntity.getName(), groupType, group, allRoles);
+      boolean removeIt =
+            validateGroupInstanceNum(clusterEntity.getName(), groupType, group,
+                  allRoles);
       if (removeIt) {
          return null;
       }
@@ -250,15 +273,33 @@ public class ClusterConfigManager {
       groupEntity.setName(group.getName());
       groupEntity.setNodeType(group.getInstanceType());
 
-      if (group.getRpNames() != null
-            && group.getRpNames().size() > 0) {
+      PlacementPolicy policies = group.getPlacementPolicies();
+      if (policies != null) {
+         List<GroupAssociation> associons = policies.getGroupAssociations();
+         if (associons != null) {
+            Set<NodeGroupAssociation> associonEntities =
+                  new TreeSet<NodeGroupAssociation>();
+            for (GroupAssociation a : associons) {
+               NodeGroupAssociation ae = new NodeGroupAssociation();
+               ae.setAssociationType(a.getType());
+               ae.setNodeGroup(groupEntity);
+               ae.setReferencedGroup(a.getReference());
+               associonEntities.add(ae);
+            }
+            groupEntity.setGroupAssociations(associonEntities);
+         }
+         if (policies.getInstancePerHost() != null) {
+            groupEntity.setInstancePerHost(policies.getInstancePerHost());
+         }
+      }
+
+      if (group.getRpNames() != null && group.getRpNames().size() > 0) {
          groupEntity.setVcRpNameList(group.getRpNames());
       }
       if (group.getStorage() != null) {
          groupEntity.setStorageSize(group.getStorage().getSizeGB());
          if (group.getStorage().getType() != null) {
-            if (group.getStorage().getType()
-                  .equals(DatastoreType.LOCAL.name())) {
+            if (group.getStorage().getType().equals(DatastoreType.LOCAL.name())) {
                groupEntity.setStorageType(DatastoreType.LOCAL);
             } else {
                groupEntity.setStorageType(DatastoreType.SHARED);
@@ -270,48 +311,62 @@ public class ClusterConfigManager {
       if (dsNames == null) {
          dsNames = clusterEntity.getVcDatastoreNameList();
       }
-      Set<String> sharedPattern = datastoreMgr.getSharedDatastoresByNames(dsNames);
-      Set<String> localPattern = datastoreMgr.getLocalDatastoresByNames(dsNames);
+      Set<String> sharedPattern =
+            datastoreMgr.getSharedDatastoresByNames(dsNames);
+      Set<String> localPattern =
+            datastoreMgr.getLocalDatastoresByNames(dsNames);
 
-      CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity, groupType, sharedPattern, localPattern);
+      CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity, groupType,
+            sharedPattern, localPattern);
       groupEntity.setHaFlag(group.isHaFlag());
-      if (group.getConfiguration() != null && group.getConfiguration().size() > 0) {
+      if (group.getConfiguration() != null
+            && group.getConfiguration().size() > 0) {
          // validate hadoop config
-         CommonClusterExpandPolicy.validateAppConfig(group.getConfiguration(), validateWhiteList);
+         CommonClusterExpandPolicy.validateAppConfig(group.getConfiguration(),
+               validateWhiteList);
          groupEntity.setHadoopConfig(gson.toJson(group.getConfiguration()));
       }
-      logger.debug("finished to convert node group config for " + group.getName());
+      logger.debug("finished to convert node group config for "
+            + group.getName());
       return groupEntity;
    }
 
-   private boolean validateGroupInstanceNum(String clusterName, GroupType groupType, NodeGroupCreate group, 
+   private boolean validateGroupInstanceNum(String clusterName,
+         GroupType groupType, NodeGroupCreate group,
          EnumSet<HadoopRole> allRoles) {
       boolean removeTheGroup = false;
       switch (groupType) {
       case MASTER_GROUP:
          if (group.getInstanceNum() != 1) {
-            throw ClusterConfigException.INVALID_INSTANCE_NUMBER(group.getInstanceNum(), clusterName, group.getName());
+            throw ClusterConfigException.INVALID_INSTANCE_NUMBER(
+                  group.getInstanceNum(), clusterName, group.getName());
          }
          if (allRoles.contains(HadoopRole.HADOOP_NAMENODE_ROLE)) {
-            throw ClusterConfigException.MORE_THAN_ONE_NAMENODE_GROUP(clusterName);
+            throw ClusterConfigException
+                  .MORE_THAN_ONE_NAMENODE_GROUP(clusterName);
          }
          break;
       case MASTER_JOBTRACKER_GROUP:
          if (group.getInstanceNum() != 1) {
-            throw ClusterConfigException.INVALID_INSTANCE_NUMBER(group.getInstanceNum(), clusterName, group.getName());
+            throw ClusterConfigException.INVALID_INSTANCE_NUMBER(
+                  group.getInstanceNum(), clusterName, group.getName());
          }
          if (allRoles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE)) {
-            throw ClusterConfigException.MORE_THAN_ONE_JOBTRACKER_GROUP(clusterName);
+            throw ClusterConfigException
+                  .MORE_THAN_ONE_JOBTRACKER_GROUP(clusterName);
          }
          break;
       case WORKER_GROUP:
          if (group.getInstanceNum() <= 0) {
-            throw ClusterConfigException.INVALID_INSTANCE_NUMBER(group.getInstanceNum(), clusterName, group.getName());
+            throw ClusterConfigException.INVALID_INSTANCE_NUMBER(
+                  group.getInstanceNum(), clusterName, group.getName());
          }
          break;
       case CLIENT_GROUP:
          if (group.getInstanceNum() <= 0) {
-            logger.warn("Zero or negative instance number for group " + group.getName() + ", remove the client group from cluster spec.");
+            logger.warn("Zero or negative instance number for group "
+                  + group.getName()
+                  + ", remove the client group from cluster spec.");
             removeTheGroup = true;
          }
          break;
@@ -351,7 +406,8 @@ public class ClusterConfigManager {
       logger.debug("begin to expand config for cluster "
             + clusterEntity.getName());
 
-      CommonClusterExpandPolicy.expandDistro(clusterEntity, clusterConfig, distroMgr);
+      CommonClusterExpandPolicy.expandDistro(clusterEntity, clusterConfig,
+            distroMgr);
 
       clusterConfig.setTemplateId(templateId);
       if (clusterEntity.getVcRpNames() != null) {
@@ -367,9 +423,13 @@ public class ClusterConfigManager {
 
       if (clusterEntity.getVcDatastoreNameList() != null) {
          logger.debug("datastore specified at cluster level.");
-         Set<String> sharedPattern = datastoreMgr.getSharedDatastoresByNames(clusterEntity.getVcDatastoreNameList());
+         Set<String> sharedPattern =
+               datastoreMgr.getSharedDatastoresByNames(clusterEntity
+                     .getVcDatastoreNameList());
          clusterConfig.setSharedPattern(sharedPattern);
-         Set<String> localPattern = datastoreMgr.getLocalDatastoresByNames(clusterEntity.getVcDatastoreNameList());
+         Set<String> localPattern =
+               datastoreMgr.getLocalDatastoresByNames(clusterEntity
+                     .getVcDatastoreNameList());
          clusterConfig.setLocalPattern(localPattern);
       } else {
          logger.debug("no datastore config at cluster level.");
@@ -378,19 +438,18 @@ public class ClusterConfigManager {
 
       Set<NodeGroupEntity> nodeGroupEntities = clusterEntity.getNodeGroups();
       long instanceNum = 0;
-      AuAssert.check(nodeGroupEntities != null && !nodeGroupEntities.isEmpty(), 
+      AuAssert.check(nodeGroupEntities != null && !nodeGroupEntities.isEmpty(),
             "The node group config should not be empty.");
 
       for (NodeGroupEntity ngEntity : nodeGroupEntities) {
          NodeGroupCreate group =
-            convertNodeGroups(clusterEntity.getDistro(), ngEntity,
-                  clusterEntity.getName());
+               convertNodeGroups(clusterEntity.getDistro(), ngEntity,
+                     clusterEntity.getName());
          nodeGroups.add(group);
          instanceNum += group.getInstanceNum();
       }
       sortGroups(nodeGroups);
       clusterConfig.setNodeGroups(nodeGroups.toArray(new NodeGroupCreate[]{}));
-
       NetworkEntity networkEntity = clusterEntity.getNetwork();
       List<NetworkAdd> networking = new ArrayList<NetworkAdd>();
       NetworkAdd network = new NetworkAdd();
@@ -399,13 +458,15 @@ public class ClusterConfigManager {
             .setDhcp(networkEntity.getAllocType() == NetworkEntity.AllocType.DHCP);
       if (!network.isDhcp()) {
          logger.debug("using static ip.");
-         List<IpBlockEntity> ipBlockEntities = 
-            networkMgr.getAllocatedIpBlocks(networkEntity, clusterEntity.getId());
+         List<IpBlockEntity> ipBlockEntities =
+               networkMgr.getAllocatedIpBlocks(networkEntity,
+                     clusterEntity.getId());
          long allocatedIpNum = IpBlockEntity.count(ipBlockEntities);
          if (allocatedIpNum < instanceNum) {
             long newNum = instanceNum - allocatedIpNum;
             List<IpBlockEntity> newIpBlockEntities =
-               networkMgr.alloc(networkEntity, clusterEntity.getId(), newNum);
+                  networkMgr
+                        .alloc(networkEntity, clusterEntity.getId(), newNum);
             ipBlockEntities.addAll(newIpBlockEntities);
          }
          network.setDns1(networkEntity.getDns1());
@@ -424,8 +485,10 @@ public class ClusterConfigManager {
       networking.add(network);
       clusterConfig.setNetworking(networking);
       if (clusterEntity.getHadoopConfig() != null) {
-         Map hadoopConfig = (new Gson()).fromJson(clusterEntity.getHadoopConfig(), Map.class);
-         clusterConfig.setConfiguration((Map<String, Object>)hadoopConfig);
+         Map hadoopConfig =
+               (new Gson())
+                     .fromJson(clusterEntity.getHadoopConfig(), Map.class);
+         clusterConfig.setConfiguration((Map<String, Object>) hadoopConfig);
       }
    }
 
@@ -445,7 +508,7 @@ public class ClusterConfigManager {
    private NodeGroupCreate convertNodeGroups(String distro,
          NodeGroupEntity ngEntity, String clusterName) {
       Gson gson = new Gson();
-      
+
       @SuppressWarnings("unchecked")
       List<String> groupRoles = gson.fromJson(ngEntity.getRoles(), List.class);
       EnumSet<HadoopRole> enumRoles = getEnumRoles(groupRoles, distro);
@@ -473,6 +536,30 @@ public class ClusterConfigManager {
       }
 
       group.setInstanceNum(ngEntity.getDefineInstanceNum());
+
+      Integer instancePerHost = ngEntity.getInstancePerHost();
+      Set<NodeGroupAssociation> associonEntities =
+            ngEntity.getGroupAssociations();
+      if (instancePerHost == null
+            && (associonEntities == null || associonEntities.isEmpty())) {
+         group.setPlacementPolicies(null);
+      } else {
+         PlacementPolicy policies = new PlacementPolicy();
+         policies.setInstancePerHost(instancePerHost);
+         if (associonEntities != null) {
+            List<GroupAssociation> associons =
+                  new ArrayList<GroupAssociation>(associonEntities.size());
+            for (NodeGroupAssociation ae : associonEntities) {
+               GroupAssociation a = new GroupAssociation();
+               a.setReference(ae.getReferencedGroup());
+               a.setType(ae.getAssociationType());
+               associons.add(a);
+            }
+            policies.setGroupAssociations(associons);
+         }
+
+         group.setPlacementPolicies(policies);
+      }
 
       String rps = ngEntity.getVcRpNames();
       if (rps != null && rps.length() > 0) {
@@ -516,7 +603,8 @@ public class ClusterConfigManager {
       storage.setNamePattern(getStoreNamePattern(storageType, storeNames));
    }
 
-   private List<String> getStoreNamePattern(DatastoreType storageType, List<String> storeNames) {
+   private List<String> getStoreNamePattern(DatastoreType storageType,
+         List<String> storeNames) {
       if (storageType == null && (storeNames == null || storeNames.isEmpty())) {
          return null;
       }
@@ -532,7 +620,8 @@ public class ClusterConfigManager {
       }
 
       if (storePattern == null || storePattern.isEmpty()) {
-         logger.warn("No any datastore found for datastore name: " + storeNames + ", type: " + storageType
+         logger.warn("No any datastore found for datastore name: " + storeNames
+               + ", type: " + storageType
                + ". Will use cluster storage definition.");
          return null;
       }
@@ -542,14 +631,11 @@ public class ClusterConfigManager {
       return result;
    }
 
-   private EnumSet<HadoopRole> getEnumRoles(List<String> roles,
-         String distro) {
+   private EnumSet<HadoopRole> getEnumRoles(List<String> roles, String distro) {
       logger.debug("convert string roles to enum roles");
-      EnumSet<HadoopRole> enumRoles =
-            EnumSet.noneOf(HadoopRole.class);
+      EnumSet<HadoopRole> enumRoles = EnumSet.noneOf(HadoopRole.class);
       for (String role : roles) {
-         HadoopRole configuredRole =
-               HadoopRole.fromString(role);
+         HadoopRole configuredRole = HadoopRole.fromString(role);
          if (configuredRole == null) {
             throw ClusterConfigException.UNSUPPORTED_HADOOP_ROLE(role, distro);
          }
@@ -561,8 +647,7 @@ public class ClusterConfigManager {
    private EnumSet<HadoopRole> getMissingRequiredRoles(
          EnumSet<HadoopRole> roles, String distro) {
       logger.debug("get missing required roles");
-      EnumSet<HadoopRole> allEnums =
-            EnumSet.allOf(HadoopRole.class);
+      EnumSet<HadoopRole> allEnums = EnumSet.allOf(HadoopRole.class);
       allEnums.removeAll(roles);
       if (!allEnums.isEmpty()) {
          logger.debug("Roles "

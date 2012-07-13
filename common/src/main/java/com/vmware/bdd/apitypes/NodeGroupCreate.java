@@ -20,6 +20,7 @@ import java.util.Map;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.VcCluster;
 
@@ -28,146 +29,158 @@ import com.vmware.bdd.spectypes.VcCluster;
  */
 public class NodeGroupCreate {
 
-    @Expose
-    private String name;
-    private GroupType groupType;
-    @Expose
-    private List<String> roles;
-    @Expose
-    @SerializedName("instance_num")
-    private int instanceNum;
-    @SerializedName("instance_type")
-    private InstanceType instanceType;
-    @Expose
-    private StorageRead storage;
-    @Expose
-    @SerializedName("cpu")
-    private int cpuNum;
-    @Expose
-    @SerializedName("memory")
-    private int memCapacityMB;
-    private List<String> rpNames;
-    @Expose
-    @SerializedName("vc_clusters")
-    private List<VcCluster> vcClusters;
-    @Expose
-    @SerializedName("ha")
-    private boolean haFlag;
-    @Expose
-    private Map<String, Object> configuration;
+   @Expose
+   private String name;
+   private GroupType groupType;
+   @Expose
+   private List<String> roles;
+   @Expose
+   @SerializedName("instance_num")
+   private int instanceNum;
+   @SerializedName("instance_type")
+   private InstanceType instanceType;
+   @Expose
+   @SerializedName("placement_policies")
+   private PlacementPolicy placementPolicies;
+   @Expose
+   private StorageRead storage;
+   @Expose
+   @SerializedName("cpu")
+   private int cpuNum;
+   @Expose
+   @SerializedName("memory")
+   private int memCapacityMB;
+   private List<String> rpNames;
+   @Expose
+   @SerializedName("vc_clusters")
+   private List<VcCluster> vcClusters;
+   @Expose
+   @SerializedName("ha")
+   private boolean haFlag;
+   @Expose
+   private Map<String, Object> configuration;
 
-    public NodeGroupCreate() {
+   public NodeGroupCreate() {
+      
+   }
 
-    }
+   public NodeGroupCreate(NodeGroupCreate group) {
+      this.cpuNum = group.cpuNum;
+      this.groupType = group.groupType;
+      this.haFlag = group.haFlag;
+      this.instanceNum = group.instanceNum;
+      this.instanceType = group.instanceType;
+      this.placementPolicies = group.placementPolicies;
+      this.memCapacityMB = group.memCapacityMB;
+      this.name = group.name;
+      this.roles = group.roles;
+      this.rpNames = group.rpNames;
+      this.storage = group.storage;
+      this.vcClusters = group.vcClusters;
+      this.configuration = group.configuration;
+   }
 
-    public NodeGroupCreate(NodeGroupCreate group) {
-        this.cpuNum = group.cpuNum;
-        this.groupType = group.groupType;
-        this.haFlag = group.haFlag;
-        this.instanceNum = group.instanceNum;
-        this.instanceType = group.instanceType;
-        this.memCapacityMB = group.memCapacityMB;
-        this.name = group.name;
-        this.roles = group.roles;
-        this.rpNames = group.rpNames;
-        this.storage = group.storage;
-        this.vcClusters = group.vcClusters;
-        this.configuration = group.configuration;
-    }
+   public Map<String, Object> getConfiguration() {
+      return configuration;
+   }
 
-    public Map<String, Object> getConfiguration() {
-        return configuration;
-    }
+   public void setConfiguration(Map<String, Object> configuration) {
+      this.configuration = configuration;
+   }
 
-    public void setConfiguration(Map<String, Object> configuration) {
-        this.configuration = configuration;
-    }
+   public String getName() {
+      return name;
+   }
 
-    public String getName() {
-        return name;
-    }
+   public void setName(String name) {
+      this.name = name;
+   }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+   public List<String> getRoles() {
+      return roles;
+   }
 
-    public List<String> getRoles() {
-        return roles;
-    }
+   public void setRoles(List<String> roles) {
+      this.roles = roles;
+   }
 
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
-    }
+   public int getInstanceNum() {
+      return instanceNum;
+   }
 
-    public int getInstanceNum() {
-        return instanceNum;
-    }
+   public void setInstanceNum(int instanceNum) {
+      this.instanceNum = instanceNum;
+   }
 
-    public void setInstanceNum(int instanceNum) {
-        this.instanceNum = instanceNum;
-    }
+   public InstanceType getInstanceType() {
+      return instanceType;
+   }
 
-    public InstanceType getInstanceType() {
-        return instanceType;
-    }
+   public void setInstanceType(InstanceType instanceType) {
+      this.instanceType = instanceType;
+   }
 
-    public void setInstanceType(InstanceType instanceType) {
-        this.instanceType = instanceType;
-    }
+   public PlacementPolicy getPlacementPolicies() {
+      return placementPolicies;
+   }
 
-    public int getCpuNum() {
-        return cpuNum;
-    }
+   public void setPlacementPolicies(PlacementPolicy placementPolicies) {
+      this.placementPolicies = placementPolicies;
+   }
 
-    public void setCpuNum(int cpuNum) {
-        this.cpuNum = cpuNum;
-    }
+   public int getCpuNum() {
+      return cpuNum;
+   }
 
-    public int getMemCapacityMB() {
-        return memCapacityMB;
-    }
+   public void setCpuNum(int cpuNum) {
+      this.cpuNum = cpuNum;
+   }
 
-    public void setMemCapacityMB(int memCapacityMB) {
-        this.memCapacityMB = memCapacityMB;
-    }
+   public int getMemCapacityMB() {
+      return memCapacityMB;
+   }
 
-    public StorageRead getStorage() {
-        return storage;
-    }
+   public void setMemCapacityMB(int memCapacityMB) {
+      this.memCapacityMB = memCapacityMB;
+   }
 
-    public void setStorage(StorageRead storage) {
-        this.storage = storage;
-    }
+   public StorageRead getStorage() {
+      return storage;
+   }
 
-    public List<String> getRpNames() {
-        return rpNames;
-    }
+   public void setStorage(StorageRead storage) {
+      this.storage = storage;
+   }
 
-    public void setRpNames(List<String> rpNames) {
-        this.rpNames = rpNames;
-    }
+   public List<String> getRpNames() {
+      return rpNames;
+   }
 
-    public boolean isHaFlag() {
-        return haFlag;
-    }
+   public void setRpNames(List<String> rpNames) {
+      this.rpNames = rpNames;
+   }
 
-    public void setHaFlag(boolean haFlag) {
-        this.haFlag = haFlag;
-    }
+   public boolean isHaFlag() {
+      return haFlag;
+   }
 
-    public GroupType getGroupType() {
-        return groupType;
-    }
+   public void setHaFlag(boolean haFlag) {
+      this.haFlag = haFlag;
+   }
 
-    public void setGroupType(GroupType groupType) {
-        this.groupType = groupType;
-    }
+   public GroupType getGroupType() {
+      return groupType;
+   }
 
-    public List<VcCluster> getVcClusters() {
-        return vcClusters;
-    }
+   public void setGroupType(GroupType groupType) {
+      this.groupType = groupType;
+   }
 
-    public void setVcClusters(List<VcCluster> vcClusters) {
-        this.vcClusters = vcClusters;
-    }
+   public List<VcCluster> getVcClusters() {
+      return vcClusters;
+   }
+
+   public void setVcClusters(List<VcCluster> vcClusters) {
+      this.vcClusters = vcClusters;
+   }
 }

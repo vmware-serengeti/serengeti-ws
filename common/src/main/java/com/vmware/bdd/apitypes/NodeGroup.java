@@ -14,6 +14,11 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
+import java.util.List;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Node Group Commons
  */
@@ -50,6 +55,71 @@ public class NodeGroup {
          default:
             return 0;
          }
+      }
+   }
+
+   public static class PlacementPolicy {
+      public static class GroupAssociation {
+         public enum GroupAssociationType {
+            WEAK, STRICT
+         }
+
+         @Expose
+         @SerializedName("reference")
+         private String reference;
+         @Expose
+         @SerializedName("type")
+         private GroupAssociationType type;
+
+         public String getReference() {
+            return reference;
+         }
+
+         public void setReference(String reference) {
+            this.reference = reference;
+         }
+
+         public GroupAssociationType getType() {
+            return type;
+         }
+
+         public void setType(GroupAssociationType type) {
+            this.type = type;
+         }
+
+         @Override
+         public String toString() {
+            return "GroupAssosiation [reference=" + reference + ", type=" + type + "]";
+         }
+      }
+
+      @Expose
+      @SerializedName("instance_per_host")
+      private Integer instancePerHost;
+      @Expose
+      @SerializedName("group_associations")
+      private List<GroupAssociation> groupAssociations;
+
+      public Integer getInstancePerHost() {
+         return instancePerHost;
+      }
+
+      public void setInstancePerHost(Integer instancePerHost) {
+         this.instancePerHost = instancePerHost;
+      }
+
+      public List<GroupAssociation> getGroupAssociations() {
+         return groupAssociations;
+      }
+
+      public void setGroupAssociations(List<GroupAssociation> groupAssociations) {
+         this.groupAssociations = groupAssociations;
+      }
+
+      @Override
+      public String toString() {
+         return "PlacePolicy [instancePerHost=" + instancePerHost
+               + ", groupAssociations=" + groupAssociations + "]";
       }
    }
 }

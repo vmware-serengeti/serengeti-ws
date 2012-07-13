@@ -57,6 +57,8 @@ class RolePackageMapping {
 }
 
 class Distro {
+   private static final Logger logger = Logger.getLogger(Distro.class);
+
    private String name;
    private String version; // ignored now
    private List<RolePackageMapping> packages;
@@ -83,6 +85,33 @@ class Distro {
 
    public void setPackages(List<RolePackageMapping> packages) {
       this.packages = packages;
+   }
+   
+   public DistroRead convert() {
+      DistroRead dr = new DistroRead();
+      Set<String> roles = new TreeSet<String>();
+      if (this.getPackages() == null) {
+         return null;
+      }
+      for (RolePackageMapping pkg : this.getPackages()) {
+         if (pkg.getRoles() == null) {
+            return null;
+         }
+         for (String r : pkg.getRoles()) {
+            if (r == null || r.isEmpty()) {
+               return null;
+            }
+            if (!roles.contains(r)) {
+               roles.add(r);
+            } else {
+               logger.error("duplicated roles: " + r);
+            }
+         }
+      }
+
+      dr.setName(this.getName());
+      dr.setRoles(new ArrayList<String>(roles));
+      return dr;
    }
 
    @Override
@@ -171,21 +200,12 @@ public class DistroManager {
       List<DistroRead> drs = new ArrayList<DistroRead>();
 
       for (Distro distro : distros.values()) {
-         DistroRead dr = new DistroRead();
-         Set<String> roles = new TreeSet<String>();
-         for (RolePackageMapping pkg : distro.getPackages()) {
-            for (String r : pkg.getRoles()) {
-               if (!roles.contains(r)) {
-                  roles.add(r);
-               } else {
-                  logger.error("duplicated roles: " + r);
-               }
-            }
+         DistroRead dr = distro.convert();
+         if (dr != null) {
+            drs.add(dr);
+         } else {
+            logger.error("discard invalid distro: " + distro);
          }
-
-         dr.setName(distro.getName());
-         dr.setRoles(new ArrayList<String>(roles));
-         drs.add(dr);
       }
 
       return drs;
@@ -197,20 +217,10 @@ public class DistroManager {
 
       Distro distro = distros.get(name);
       if (distro != null) {
-         dr = new DistroRead();
-         Set<String> roles = new TreeSet<String>();
-         for (RolePackageMapping pkg : distro.getPackages()) {
-            for (String r : pkg.getRoles()) {
-               if (!roles.contains(r)) {
-                  roles.add(r);
-               } else {
-                  logger.error("duplicated roles: " + r);
-               }
-            }
+         dr = distro.convert();
+         if (dr == null) {
+            logger.error("discard invalid distro: " + distro);
          }
-
-         dr.setName(name);
-         dr.setRoles(new ArrayList<String>(roles));
       }
 
       return dr;
