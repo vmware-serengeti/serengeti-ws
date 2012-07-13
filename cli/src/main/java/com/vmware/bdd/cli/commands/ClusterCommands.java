@@ -76,7 +76,7 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
          @CliOption(key = { "networkName" }, mandatory = false, help = "Network Name") final String networkName,
          @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume,
-         @CliOption(key = { "validateConfig" }, mandatory = false, unspecifiedDefaultValue = "Y", help = "Whether to validate the cluster configration in the cluster spec file. The default value is Y.") final String validateConfig) {
+         @CliOption(key = { "validateConfig" }, mandatory = false, unspecifiedDefaultValue = "Y", help = "Whether to validate the cluster configuration in the cluster spec file. The default value is Y.") final String validateConfig) {
       //validate the name
       if (name.indexOf("-") != -1) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
@@ -476,7 +476,7 @@ public class ClusterCommands implements CommandMarker {
                   Constants.PARAM_NO_DISTRO_AVAILABLE);
             return !validated;
          }
-         if (nodeGroupCreates.length < 2 || nodeGroupCreates.length > 3) {
+         if (nodeGroupCreates.length < 2 || nodeGroupCreates.length > 4) {
             warning = true;
          }
          for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
@@ -524,7 +524,8 @@ public class ClusterCommands implements CommandMarker {
             default:
             }
          }
-         if (masterCount != 1 || workerCount != 1 || clientCount > 1) {
+         if (masterCount != 1 || (workerCount < 1 || workerCount > 2) ||
+               clientCount > 1) {
             warning = true;
          }
          if (!validated) {
@@ -605,7 +606,11 @@ public class ClusterCommands implements CommandMarker {
             return matchRoles.size() == 0 ? true : false;
          }
       case WORKER:
-         if (roles.size() != 2) {
+         if (roles.size() == 1) {
+            if (Constants.ROLE_HADOOP_DATANODE.equals(roles.get(0)) ||
+                Constants.ROLE_HADOOP_TASKTRACKER.equals(roles.get(0))) {
+               return true;
+            }
             return false;
          } else {
             matchRoles.add(Constants.ROLE_HADOOP_DATANODE);

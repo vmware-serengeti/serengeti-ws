@@ -187,9 +187,9 @@ public class CommonClusterExpandPolicy {
          ValidateResult valid = AppConfigValidationUtils.validateConfig(ValidationType.WHITE_LIST, appConfigs);
          switch (valid.getType()) {
          case WHITE_LIST_INVALID_VALUE:
-            throw ClusterConfigException.INVALID_APP_CONFIG_VALUE(valid.getNames());
+            throw ClusterConfigException.INVALID_APP_CONFIG_VALUE(valid.getFailureNames());
          case WHITE_LIST_INVALID_NAME:
-            logger.warn("Hadoop configurations " + valid.getNames() + " not in white list.");
+            logger.warn("Hadoop configurations " + valid.getFailureNames() + " not in white list.");
             break;
          default:
             logger.debug("Passed white list validation.");
@@ -200,7 +200,7 @@ public class CommonClusterExpandPolicy {
       ValidateResult valid = AppConfigValidationUtils.validateConfig(ValidationType.BLACK_LIST, appConfigs);
       switch (valid.getType()) {
       case NAME_IN_BLACK_LIST:
-         logger.warn("Hadoop configurations " + valid.getNames() + " in black list. The configuration for these parameters do not take effect.");
+         logger.warn("Hadoop configurations " + valid.getFailureNames() + " in black list. The configuration for these parameters do not take effect.");
       default:
          logger.debug("Passed black list validation.");
          break;

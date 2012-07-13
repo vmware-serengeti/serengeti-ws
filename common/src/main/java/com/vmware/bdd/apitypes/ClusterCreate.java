@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.spectypes.HadoopDistroMap;
@@ -203,10 +202,5 @@ public class ClusterCreate {
       this.validateConfig = validateConfig;
    }
 
-   @Override
-   public String toString() {
-      Gson gson = new Gson();
-      return gson.toJson(this);
-   }
 
 }

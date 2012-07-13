@@ -59,7 +59,6 @@ public class ValidateResult {
    }
    @Override
    public String toString() {
-      // TODO Auto-generated method stub
       Gson g=new Gson();
       return g.toJson(this);
    }
