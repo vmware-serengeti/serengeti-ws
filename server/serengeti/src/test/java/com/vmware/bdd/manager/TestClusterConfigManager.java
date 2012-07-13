@@ -580,7 +580,7 @@ public class TestClusterConfigManager {
       Map config = (new Gson()).fromJson(configJson, Map.class);
       group.setConfiguration((Map<String, Object>)(config.get("cluster_configuration")));
 
-      spec.setNodeGroupCreates(nodegroups);
+      spec.setNodeGroups(nodegroups);
       clusterMgr.createClusterConfig(spec);
 
       ClusterEntity cluster =
