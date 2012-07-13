@@ -376,7 +376,7 @@ public class TestClusterManager {
       Map groupConfig = (new Gson()).fromJson(configJson, Map.class);
       group.setConfiguration(groupConfig);
 
-      Long id = clusterManager.configCluster(createSpec);
+      Long id = clusterManager.configCluster(CLUSTER_NAME, createSpec);
       TaskEntity task = TaskEntity.findById(id);
       ClusterEntity cluster =
             ClusterEntity.findClusterEntityByName(CLUSTER_NAME);
