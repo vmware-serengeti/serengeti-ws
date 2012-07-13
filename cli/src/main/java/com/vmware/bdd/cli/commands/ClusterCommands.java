@@ -21,6 +21,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import jline.ConsoleReader;
 
@@ -35,6 +37,8 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.NetworkRead;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
@@ -457,12 +461,19 @@ public class ClusterCommands implements CommandMarker {
          if (nodeGroupCreates.length < 2 || nodeGroupCreates.length > 4) {
             warning = true;
          }
+
+         // check placement policies
+         if (!clusterCreate.validateNodeGroupPlacementPolicies(failedMsgList)) {
+            validated = false;
+         }
+
          for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
-            //check node group's instanceNum
+            // check node group's instanceNum
             if (!checkInstanceNum(nodeGroupCreate, failedMsgList)) {
                validated = false;
             }
-            //check node group's roles 
+
+            // check node group's roles 
             if (!checkNodeGroupRoles(nodeGroupCreate, distroRoles,
                   failedMsgList)) {
                validated = false;
@@ -626,6 +637,8 @@ public class ClusterCommands implements CommandMarker {
       }
       return validated;
    }
+
+
 
    private void collectInstanceNumInvalidateMsg(NodeGroupCreate nodeGroup,
          List<String> failedMsgList) {

@@ -104,6 +104,10 @@ public class ClusterConfigManager {
       if (name == null || name.isEmpty()) {
          throw ClusterConfigException.CLUSTER_NAME_MISSING();
       }
+      List<String> failedMsgList = new ArrayList<String>();
+      if (!cluster.validateNodeGroupPlacementPolicies(failedMsgList)) {
+         throw ClusterConfigException.INVALID_APP_CONFIG_VALUE(failedMsgList);
+      }
       try {
          return DAL.inTransactionDo(new Saveable<ClusterEntity>() {
             public ClusterEntity body() {

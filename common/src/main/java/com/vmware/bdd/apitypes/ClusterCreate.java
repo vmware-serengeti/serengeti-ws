@@ -17,6 +17,7 @@ package com.vmware.bdd.apitypes;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -65,7 +66,6 @@ public class ClusterCreate {
    private boolean validateConfig = true;
 
    public ClusterCreate() {
-
    }
 
    public ClusterCreate(ClusterCreate cluster) {
@@ -200,5 +200,23 @@ public class ClusterCreate {
 
    public void setValidateConfig(boolean validateConfig) {
       this.validateConfig = validateConfig;
+   }
+
+   public boolean validateNodeGroupPlacementPolicies(List<String> failedMsgList) {
+      boolean valid = true;
+
+      Map<String, NodeGroupCreate> allGroups = new TreeMap<String, NodeGroupCreate>();
+
+      for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
+         allGroups.put(nodeGroupCreate.getName(), nodeGroupCreate);
+      }
+
+      for (NodeGroupCreate ngc : getNodeGroupCreates()) {
+         if (ngc.validatePlacementPolicies(allGroups, failedMsgList)) {
+            valid = false;
+         }
+      }
+
+      return valid;
    }
 }

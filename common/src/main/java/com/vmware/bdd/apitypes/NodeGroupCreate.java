@@ -21,6 +21,8 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.VcCluster;
 
@@ -181,5 +183,95 @@ public class NodeGroupCreate {
 
    public void setVcClusters(List<VcCluster> vcClusters) {
       this.vcClusters = vcClusters;
+   }
+
+   private Integer getHostNum() {
+      Integer hostNumber = null;
+      PlacementPolicy policies = getPlacementPolicies();
+      if (policies != null && policies.getInstancePerHost() != null) {
+         if (getInstanceNum() % policies.getInstancePerHost() == 0) {
+            hostNumber = getInstanceNum() / policies.getInstancePerHost();
+         }
+      }
+
+      return hostNumber;
+   }
+
+   public boolean validatePlacementPolicies(Map<String, NodeGroupCreate> groups,
+         List<String> failedMsgList) {
+      boolean valid = true;
+      PlacementPolicy policies = getPlacementPolicies();
+      if (policies != null) {
+         if (policies.getInstancePerHost() != null) {
+            if (policies.getInstancePerHost() <= 0 || getHostNum() == null) {
+               valid = false;
+               failedMsgList.add(new StringBuilder().append(getName())
+                     .append(".placementPolicies.instancePerHost=")
+                     .append(policies.getInstancePerHost()).toString());
+            }
+         }
+         if (valid && policies.getGroupAssociations() != null) {
+            // only support 1 group association now
+            if (policies.getGroupAssociations().size() != 1) {
+               valid = false;
+               failedMsgList.add(new StringBuilder().append(getName())
+                     .append(".placementPolicies.groupAssociations.size should be 1")
+                     .toString());
+            } else {
+               GroupAssociation a = policies.getGroupAssociations().get(0);
+
+               if (a.getType() == null) {
+                  a.setType(GroupAssociationType.WEAK); // set to default
+               }
+
+               if (a.getReference() == null) {
+                  valid = false;
+                  failedMsgList.add(new StringBuilder().append(getName())
+                        .append(".placementPolicies.groupAssociations[0]" +
+                        		".reference not set").toString());
+               } else if (a.getReference().equals(getName())) {
+                  valid = false;
+                  failedMsgList.add(new StringBuilder()
+                        .append(getName())
+                        .append(".placementPolicies.groupAssociations[0]"
+                                    + " refers to itself").toString());
+               } else if (!groups.containsKey(a.getReference())) {
+                  valid = false;
+                  failedMsgList.add(new StringBuilder()
+                        .append(getName())
+                        .append(".placementPolicies.groupAssociations[0]"
+                                    + " refers to invalid node group ")
+                        .append(a.getReference()).toString());
+               } else {
+                  // this is normal case, do more check
+                  if (a.getType() == GroupAssociationType.STRICT &&
+                     getHostNum() != groups.get(a.getReference()).getHostNum() ) {
+                     valid = false;
+                     failedMsgList.add(new StringBuilder()
+                           .append(getName())
+                           .append(".placementPolicies.groupAssociations[0] " +
+                           		"has different host number with " +
+                           		"the referenced node group ")
+                           .append(a.getReference()).toString());
+                  }
+                  // current implementation only support sum(in/out degree) <= 1
+                  PlacementPolicy refPolicies = groups.get(a.getReference())
+                        .getPlacementPolicies();
+                  if (refPolicies != null && refPolicies.getGroupAssociations() != null && 
+                        !refPolicies.getGroupAssociations().isEmpty()) {
+                     valid = false;
+                     failedMsgList.add(new StringBuilder()
+                           .append(getName())
+                           .append(".placementPolicies.groupAssociations[0] " +
+                           		"refers to node group ")
+                           .append(a.getReference())
+                           .append(" which also has reference(s)").toString());
+                  }
+               }
+            }
+         }
+      }
+
+      return valid;
    }
 }
