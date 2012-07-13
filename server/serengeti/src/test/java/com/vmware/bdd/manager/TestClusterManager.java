@@ -365,14 +365,14 @@ public class TestClusterManager {
       createSpec.setNetworkName(NETWORK_NAME);
       Map<String, Object> configuration = new HashMap<String, Object>();
       String configJson = 
-         "{\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.xxx\":\"xxx\",\"hadoop.true\":false}}}}";
+         "{\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.security.group.mapping\":\"xxx\",\"hadoop.security.authorization\":false}}}}";
       Map config = (new Gson()).fromJson(configJson, Map.class);
       createSpec.setConfiguration(config);
       NodeGroupCreate[] nodegroups = new NodeGroupCreate[1];
       NodeGroupCreate group = new NodeGroupCreate();
       nodegroups[0] = group;
       configJson = 
-         "{\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.yyy\":\"yyy\",\"hadoop.true\":false}}}}";
+         "{\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.security.group.mapping\":\"yyy\",\"hadoop.security.authorization\":false}}}}";
       Map groupConfig = (new Gson()).fromJson(configJson, Map.class);
       group.setConfiguration(groupConfig);
 
@@ -383,8 +383,8 @@ public class TestClusterManager {
 
       assertNotNull(task);
       assertNotNull(cluster);
-      assertEquals("cluster hadoop-bj should in RUNNING status",
-            ClusterStatus.RUNNING, cluster.getStatus());
+      assertEquals("cluster hadoop-bj should in CONFIGURING status",
+            ClusterStatus.CONFIGURING, cluster.getStatus());
 
       // mock. sent task listener an in-progress message
       task.getTaskListener().onMessage(getSampleMsg(CLUSTER_NAME, false));

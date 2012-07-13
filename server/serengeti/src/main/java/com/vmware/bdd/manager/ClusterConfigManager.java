@@ -698,6 +698,9 @@ public class ClusterConfigManager {
 
       Set<String> updatedGroups = new HashSet<String>();
       NodeGroupCreate[] groupCreates = clusterCreate.getNodeGroups();
+      if (groupCreates == null) {
+         return;
+      }
       for (NodeGroupCreate groupCreate : groupCreates) {
          Map<String, Object> groupConfig = groupCreate.getConfiguration();
          if (groupConfig != null && groupConfig.size() > 0) {

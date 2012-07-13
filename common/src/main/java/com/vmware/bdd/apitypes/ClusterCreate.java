@@ -207,6 +207,10 @@ public class ClusterCreate {
 
       Map<String, NodeGroupCreate> allGroups = new TreeMap<String, NodeGroupCreate>();
 
+      if (getNodeGroups() == null) {
+         return valid;
+      }
+
       for (NodeGroupCreate nodeGroupCreate : getNodeGroups()) {
          allGroups.put(nodeGroupCreate.getName(), nodeGroupCreate);
       }
