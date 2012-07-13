@@ -212,7 +212,7 @@ public class ClusterConfigManager {
 
    private void expandNodeGroupCreates(final ClusterCreate cluster, Gson gson,
          ClusterEntity clusterEntity, String distro) {
-      NodeGroupCreate[] groups = cluster.getNodeGroupCreates();
+      NodeGroupCreate[] groups = cluster.getNodeGroups();
       Set<NodeGroupEntity> nodeGroups = null;
       EnumSet<HadoopRole> allRoles = EnumSet.noneOf(HadoopRole.class);
       boolean validateWhiteList = cluster.isValidateConfig();
@@ -449,9 +449,7 @@ public class ClusterConfigManager {
          instanceNum += group.getInstanceNum();
       }
       sortGroups(nodeGroups);
-      clusterConfig.setNodeGroupCreates(nodeGroups
-            .toArray(new NodeGroupCreate[] {}));
-
+      clusterConfig.setNodeGroups(nodeGroups.toArray(new NodeGroupCreate[]{}));
       NetworkEntity networkEntity = clusterEntity.getNetwork();
       List<NetworkAdd> networking = new ArrayList<NetworkAdd>();
       NetworkAdd network = new NetworkAdd();

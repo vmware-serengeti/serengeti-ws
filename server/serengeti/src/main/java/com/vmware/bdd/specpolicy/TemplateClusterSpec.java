@@ -78,7 +78,7 @@ public class TemplateClusterSpec {
       createDefaultNodeGroup(GroupType.CLIENT_GROUP.toString(), roles,
             1, InstanceType.SMALL, GroupType.CLIENT_GROUP, false);
 
-      templateClusterConfig.setNodeGroupCreates(templateGroups.values().toArray(new NodeGroupCreate[]{}));
+      templateClusterConfig.setNodeGroups(templateGroups.values().toArray(new NodeGroupCreate[]{}));
    }
 
    private static NodeGroupCreate createDefaultNodeGroup(String name, List<String> roles, 
@@ -123,7 +123,7 @@ public class TemplateClusterSpec {
    private static void createTemplate(Reader fileReader) {
       Gson gson = new Gson();
       templateClusterConfig = gson.fromJson(fileReader, ClusterCreate.class);
-      NodeGroupCreate[] groups = templateClusterConfig.getNodeGroupCreates();
+      NodeGroupCreate[] groups = templateClusterConfig.getNodeGroups();
       if (groups == null || groups.length == 0) {
          throw TemplateClusterException.TEMPLATE_NODEGROUPS_UNDEFINED();
       }
