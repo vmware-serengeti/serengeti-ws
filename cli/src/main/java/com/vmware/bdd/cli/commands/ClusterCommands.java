@@ -76,23 +76,13 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
          @CliOption(key = { "networkName" }, mandatory = false, help = "Network Name") final String networkName,
          @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume,
-         @CliOption(key = { "validateConfig" }, mandatory = false, unspecifiedDefaultValue = "Y", help = "Whether to validate the cluster configuration in the cluster spec file. The default value is Y.") final String validateConfig) {
+         @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation) {
       //validate the name
       if (name.indexOf("-") != -1) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.PARAM_CLUSTER
                      + Constants.PARAM_NOT_CONTAIN_HORIZONTAL_LINE);
-
-         return;
-      }
-      //validate the validateConfig
-      if (!CommandsUtils.isBlank(validateConfig)
-            && !validateConfig.trim().equalsIgnoreCase("Y")
-            && !validateConfig.trim().equalsIgnoreCase("N")) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
-               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.PARAM_VALIDATE_CONFIG);
 
          return;
       }
@@ -150,7 +140,7 @@ public class ClusterCommands implements CommandMarker {
                         CommandsUtils.dataFromFile(specFilePath));
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
-            if (validateConfig.trim().equalsIgnoreCase("Y")) {
+            if (skipConfigValidation) {
                if (!validateConfigration(clusterCreate)) {
                   return;
                }

@@ -120,7 +120,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://10.141.7.45:8080/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.NO_CONTENT, "");
 
-        clusterCommands.createCluster("cluster1", null, null, null, null, null, false, "Y");
+        clusterCommands.createCluster("cluster1", null, null, null, null, null, false, false);
     }
 
     @Test
@@ -142,7 +142,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://10.141.7.45:8080/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
 
-        clusterCommands.createCluster("cluster1", null, null, null, null, null, false, "Y");
+        clusterCommands.createCluster("cluster1", null, null, null, null, null, false, false);
     }
 
     @Test
@@ -178,14 +178,14 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://10.141.7.45:8080/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.NO_CONTENT, "");
 
-        clusterCommands.createCluster("cluster1", null, "c:\\spec.txt", null, null, null, false, "Y");
+        clusterCommands.createCluster("cluster1", null, "c:\\spec.txt", null, null, null, false, false);
     }
 
     @Test
     public void testResumeCreateCluster() throws Exception {
         buildReqRespWithoutReqBody("http://10.141.7.45:8080/serengeti/api/cluster/cluster1?state=resume",
                 HttpMethod.PUT, HttpStatus.NO_CONTENT, "");
-        clusterCommands.createCluster("cluster1", null, null, null, null, null, true, "Y");
+        clusterCommands.createCluster("cluster1", null, null, null, null, null, true, false);
     }
 
     @Test
@@ -197,7 +197,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://10.141.7.45:8080/serengeti/api/cluster/cluster1?state=resume",
                 HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
-        clusterCommands.createCluster("cluster1", null, null, null, null, null, true, "Y");
+        clusterCommands.createCluster("cluster1", null, null, null, null, null, true, false);
     }
 
     @Test
@@ -251,7 +251,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://10.141.7.45:8080/serengeti/api/cluster/cluster1", HttpMethod.GET,
                 HttpStatus.OK, mapper.writeValueAsString(cluster));
 
-        clusterCommands.createCluster("cluster1", null, null, null, null, null, false, "Y");
+        clusterCommands.createCluster("cluster1", null, null, null, null, null, false, false);
     }
 
     @Test

@@ -160,5 +160,4 @@ public class Constants {
     public static final String DEFAULT_DISTRO = "apache";
     public static final String PARAM_NO_DISTRO_AVAILABLE = "no distro available,please upload one distro";
     public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Do you want to continue (Y/N)?";
-    public static final String PARAM_VALIDATE_CONFIG = "--validateConfig must be Y or N.";
 }
