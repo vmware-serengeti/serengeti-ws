@@ -134,7 +134,7 @@ public class NetworkCommandsTest extends MockRestServer {
    @Test
    public void testAddNetwork() throws Exception {
       buildReqRespWithoutReqBody(
-            "http://10.141.7.45:8080/serengeti/api/networks", HttpMethod.POST,
+            "http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.POST,
             HttpStatus.NO_CONTENT, "");
       networkCommands.addNetwork("name", "portGroup", false, "10.117.7.12",
             "10.117.7.13", "10.1.1.1,10.2.3.4-100", "10.117.7.1",
@@ -148,7 +148,7 @@ public class NetworkCommandsTest extends MockRestServer {
       ObjectMapper mapper = new ObjectMapper();
       
       buildReqRespWithoutReqBody(
-            "http://10.141.7.45:8080/serengeti/api/networks", HttpMethod.POST,
+            "http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.POST,
             HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
       
       networkCommands.addNetwork("name", "portGroup", false, "10.117.7.12",
@@ -159,7 +159,7 @@ public class NetworkCommandsTest extends MockRestServer {
    @Test
    public void testDeleteNetwork() throws Exception {
       buildReqRespWithoutReqBody(
-            "http://10.141.7.45:8080/serengeti/api/network/name",
+            "http://127.0.0.1:8080/serengeti/api/network/name",
             HttpMethod.DELETE, HttpStatus.NO_CONTENT, "");
       networkCommands.deleteNetwork("name");
    }
@@ -171,7 +171,7 @@ public class NetworkCommandsTest extends MockRestServer {
       ObjectMapper mapper = new ObjectMapper();
       
       buildReqRespWithoutReqBody(
-            "http://10.141.7.45:8080/serengeti/api/network/name",
+            "http://127.0.0.1:8080/serengeti/api/network/name",
             HttpMethod.DELETE, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
       networkCommands.deleteNetwork("name");
    }
@@ -255,13 +255,13 @@ public class NetworkCommandsTest extends MockRestServer {
       try {
          if (detail) {
             buildReqRespWithoutReqBody(
-                  "http://10.141.7.45:8080/serengeti/api/networks?details=true",
+                  "http://127.0.0.1:8080/serengeti/api/networks?details=true",
                   HttpMethod.GET, HttpStatus.OK,
                   mapper.writeValueAsString(networks));
             networkCommands.getNetwork(null, detail);
          } else {
             buildReqRespWithoutReqBody(
-                  "http://10.141.7.45:8080/serengeti/api/networks",
+                  "http://127.0.0.1:8080/serengeti/api/networks",
                   HttpMethod.GET, HttpStatus.OK,
                   mapper.writeValueAsString(networks));
             networkCommands.getNetwork(null, detail);
@@ -278,13 +278,13 @@ public class NetworkCommandsTest extends MockRestServer {
       try {
          if (detail) {
             buildReqRespWithoutReqBody(
-                  "http://10.141.7.45:8080/serengeti/api/network/name1?details=true",
+                  "http://127.0.0.1:8080/serengeti/api/network/name1?details=true",
                   HttpMethod.GET, HttpStatus.OK,
                   mapper.writeValueAsString(network));
             networkCommands.getNetwork("name1", detail);
          } else {
             buildReqRespWithoutReqBody(
-                  "http://10.141.7.45:8080/serengeti/api/network/name1",
+                  "http://127.0.0.1:8080/serengeti/api/network/name1",
                   HttpMethod.GET, HttpStatus.OK,
                   mapper.writeValueAsString(network));
             networkCommands.getNetwork("name1", detail);
@@ -302,7 +302,7 @@ public class NetworkCommandsTest extends MockRestServer {
       ObjectMapper mapper = new ObjectMapper();
 
       buildReqRespWithoutReqBody(
-            "http://10.141.7.45:8080/serengeti/api/network/name1", HttpMethod.GET,
+            "http://127.0.0.1:8080/serengeti/api/network/name1", HttpMethod.GET,
             HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
       networkCommands.getNetwork("name1", false);
    }

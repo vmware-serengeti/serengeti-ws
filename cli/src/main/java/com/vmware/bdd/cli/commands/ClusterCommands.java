@@ -140,7 +140,7 @@ public class ClusterCommands implements CommandMarker {
                         CommandsUtils.dataFromFile(specFilePath));
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
-            if (skipConfigValidation) {
+            if (!skipConfigValidation) {
                if (!validateConfigration(clusterCreate)) {
                   return;
                }
