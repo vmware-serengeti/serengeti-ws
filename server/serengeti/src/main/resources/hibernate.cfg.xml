@@ -19,6 +19,7 @@
 
       <mapping class="com.vmware.bdd.entity.ClusterEntity" />
       <mapping class="com.vmware.bdd.entity.NodeGroupEntity" />
+      <mapping class="com.vmware.bdd.entity.NodeGroupAssociation" />
       <mapping class="com.vmware.bdd.entity.HadoopNodeEntity" />
       <mapping class="com.vmware.bdd.entity.CloudProviderConfigEntity" />
       <mapping class="com.vmware.bdd.entity.VcResourcePoolEntity" />

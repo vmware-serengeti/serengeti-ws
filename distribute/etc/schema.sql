@@ -82,22 +82,33 @@ create table cluster (
 
 create sequence node_group_seq;
 create table node_group (
-   id           bigint       not null unique DEFAULT nextval('node_group_seq'::regclass),
-   name         varchar(255) not null,
-   roles        varchar(255),
-   node_type    integer,
-   cpu          integer,
-   memory       integer,
-   defined_instance_num integer not null,
-   ha_flag      boolean,
-   storage_type varchar(255),
-   storage_size integer,
-   vc_datastore_names varchar(255),
-   vc_rp_names  varchar(255),
-   configuration text,
-   cluster_id   bigint,
+   id                     bigint       not null unique DEFAULT nextval('node_group_seq'::regclass),
+   name                   varchar(255) not null,
+   roles                  varchar(255),
+   node_type              integer,
+   cpu                    integer,
+   memory                 integer,
+   defined_instance_num   integer not null,
+   ha_flag                boolean,
+   storage_type           varchar(255),
+   storage_size           integer,
+   vc_datastore_names     varchar(255),
+   vc_rp_names            varchar(255),
+   configuration          text,
+   instance_per_host      integer,
+   cluster_id             bigint,
    primary key (id),
    foreign key(cluster_id) references cluster(id) ON DELETE CASCADE
+);
+
+create sequence node_group_association_seq;
+create table node_group_association (
+   id                 bigint       not null unique DEFAULT nextval('node_group_association_seq'::regclass),
+   referenced_group   varchar(255) not null unique,
+   association_type   varchar(255),
+   node_group_id      bigint,
+   primary key (id),
+   foreign key(node_group_id) references node_group(id) ON DELETE CASCADE
 );
 
 create sequence hadoop_node_seq;
