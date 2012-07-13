@@ -48,14 +48,14 @@ public class NetworkRestClientTest extends MockRestServer {
       ObjectMapper mapper = new ObjectMapper();
 
       buildReqRespWithoutRespBody(
-            "http://10.141.7.45:8080/serengeti/api/networks", HttpMethod.POST,
+            "http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.POST,
             HttpStatus.NO_CONTENT, mapper.writeValueAsString(networkAdd));
       networkRestClient.add(networkAdd);
    }
    
    @Test
    public void delete() throws Exception {
-      buildReqRespWithoutReqBody("http://10.141.7.45:8080/serengeti/api/network/name1", HttpMethod.DELETE, HttpStatus.NO_CONTENT, "");
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/network/name1", HttpMethod.DELETE, HttpStatus.NO_CONTENT, "");
       networkRestClient.delete("name1");
    }
    

@@ -1,6 +1,6 @@
 /******************************************************************************
- *       Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *      Licensed under the Apache License, Version 2.0 (the "License");
+ *   Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
  *
@@ -14,12 +14,18 @@
  ******************************************************************************/
 package com.vmware.bdd.cli.command.tests;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.springframework.roo.support.util.Assert;
 import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
 
+import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.cli.commands.CommandsUtils;
@@ -52,7 +58,7 @@ public class CommandsUtilsTest {
       assertEquals(test03, testDef03);
    }
 
-   @Test(enabled=false)
+   @Test(enabled = false)
    public void testDataFromFile() throws Exception {
       String path01 = "C:/Users/weiw/aurora_bigdata/spec.txt";
       String path02 = "spec.txt";
@@ -148,5 +154,87 @@ public class CommandsUtilsTest {
       distroNames = distroNames.trim().replaceAll(" ", ",");
 
       assertEquals(distroNames, "Apache,GP");
+   }
+
+   @Test
+   @SuppressWarnings("unchecked")
+   public void testGetObjectByJsonString() throws JsonParseException,
+         JsonMappingException, IOException {
+      StringBuilder jsonBuff = new StringBuilder();
+      jsonBuff
+            .append("{  ")
+            .append(" \"nodeGroups\": [ ")
+            .append("      {            ")
+            .append("        \"name\": \"master\"  ,  ")
+            .append("        \"roles\": [             ")
+            .append("        \"hadoop_namenode\"   ,  ")
+            .append("        \"hadoop_jobtracker\"   ")
+            .append("         ],                      ")
+            .append("        \"instanceNum\": 1,             ")
+            .append("        \"cpuNum\": 2,                  ")
+            .append("        \"memCapacityMB\":2048,         ")
+            .append("        \"storage\": {                  ")
+            .append("        \"type\": \"SHARED\",           ")
+            .append("        \"sizeGB\": 10                  ")
+            .append("         },                               ")
+            .append("    \"configuration\": {            ")
+            .append("       \"hadoop\": {                ")
+            .append("           \"core-site.xml\" : {           ")
+            .append(
+                  "           \"fs.default.name\": \"hdfs://localhost:8020\" ")
+            .append("        },                            ")
+            .append("       \"hdfs-site.xml\" : {           ")
+            .append("          \"dfs.replication\": 4          ")
+            .append("       },                               ")
+            .append("       \"mapred-site.xml\" : {         ")
+            .append("          \"mapred.map.tasks\": 5          ")
+            .append("      },                             ")
+            .append("      \"hadoop-env.sh\" : {           ")
+            .append(
+                  "         \"JAVA_HOME\": \"/path/to/javahome\"              ")
+            .append("      },                              ")
+            .append("     \"log4j.properties\" : {        ")
+            .append("       \"hadoop.root.logger\": \"DEBUG,console\" ")
+            .append("      }                                          ")
+            .append("    }                                          ")
+            .append("  }                                          ")
+            .append("}, ").append("{").append("      \"name\": \"worker\",  ")
+            .append("      \"roles\": [           ")
+            .append("          \"hadoop_datanode\",   ")
+            .append("          \"hadoop_tasktracker\" ").append("       ], ")
+            .append("      \"instanceNum\": 3, ")
+            .append("      \"cpuNum\": 2, ")
+            .append("      \"memCapacityMB\":2048, ")
+            .append("      \"storage\": {          ")
+            .append("      \"type\": \"SHARED\",   ")
+            .append("      \"sizeGB\": 10          ")
+            .append("     }                        ")
+            .append("   }                          ").append("], ")
+            .append(" \"configuration\": {   ")
+            .append(" \"hadoop\": {          ")
+            .append(" \"core-site.xml\" : {  ")
+            .append(" \"fs.default.name\": \"hdfs://fqdn_or_ip:8020\",")
+            .append(" \"dfs.data.dir\":\"/data/\", ")
+            .append(" \"dfs.http.address\":\"localhost\" ").append("}, ")
+            .append(" \"hdfs-site.xml\" : {  ")
+            .append(" \"dfs.repliation\": 2   ").append("}, ")
+            .append(" \"mapred-site.xml\" : { ")
+            .append(" \"mapred.map.tasks\": 3 ").append(" }, ")
+            .append(" \"hadoop-env.sh\" : {   ")
+            .append(" \"JAVA_HOME\": \"/path/to/javahome\" ").append(" }, ")
+            .append("\"log4j.properties\" : {              ")
+            .append("\"hadoop.root.logger\": \"DEBUG,console\" ")
+            .append("  } ").append("}  ").append("} ").append("}");
+      ClusterCreate clusterCreate =
+            CommandsUtils.getObjectByJsonString(ClusterCreate.class,
+                  jsonBuff.toString());
+      Assert.notNull(clusterCreate);
+      Map<String, Object> hadoopConfig =
+            (Map<String, Object>) clusterCreate.getConfiguration()
+                  .get("hadoop");
+      Map<String, Object> coreSiteConfig =
+            (Map<String, Object>) hadoopConfig.get("core-site.xml");
+      assertEquals(coreSiteConfig.get("fs.default.name"),
+            "hdfs://fqdn_or_ip:8020");
    }
 }

@@ -33,7 +33,7 @@ public class ClusterCreate {
    private String name;
    @Expose
    @SerializedName("groups")
-   private NodeGroupCreate[] nodeGroupCreates;
+   private NodeGroupCreate[] nodeGroups;
    @Expose
    private String distro;
    private List<String> rpNames;
@@ -73,7 +73,7 @@ public class ClusterCreate {
       this.distro = cluster.distro;
       this.name = cluster.name;
       this.networkName = cluster.networkName;
-      this.nodeGroupCreates = cluster.nodeGroupCreates;
+      this.nodeGroups = cluster.nodeGroups;
       this.rpNames = cluster.rpNames;
       this.templateId = cluster.templateId;
       this.vcClusters = cluster.vcClusters;
@@ -122,12 +122,12 @@ public class ClusterCreate {
       this.networkName = networkName;
    }
 
-   public NodeGroupCreate[] getNodeGroupCreates() {
-      return nodeGroupCreates;
+   public NodeGroupCreate[] getNodeGroups() {
+      return nodeGroups;
    }
 
-   public void setNodeGroupCreates(NodeGroupCreate[] nodeGroupCreates) {
-      this.nodeGroupCreates = nodeGroupCreates;
+   public void setNodeGroups(NodeGroupCreate[] nodeGroups) {
+      this.nodeGroups = nodeGroups;
    }
 
    public List<String> getDsNames() {
@@ -207,11 +207,11 @@ public class ClusterCreate {
 
       Map<String, NodeGroupCreate> allGroups = new TreeMap<String, NodeGroupCreate>();
 
-      for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
+      for (NodeGroupCreate nodeGroupCreate : getNodeGroups()) {
          allGroups.put(nodeGroupCreate.getName(), nodeGroupCreate);
       }
 
-      for (NodeGroupCreate ngc : getNodeGroupCreates()) {
+      for (NodeGroupCreate ngc : getNodeGroups()) {
          if (ngc.validatePlacementPolicies(allGroups, failedMsgList)) {
             valid = false;
          }

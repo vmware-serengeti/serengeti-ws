@@ -65,7 +65,7 @@ public class DistroCommandsTest extends MockRestServer {
       
       ObjectMapper mapper = new ObjectMapper();
       
-      buildReqRespWithoutReqBody("http://10.141.7.45:8080/serengeti/api/distros",
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros",
             HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(distros));
 
       //get all distros
@@ -77,7 +77,7 @@ public class DistroCommandsTest extends MockRestServer {
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
-      buildReqRespWithoutReqBody("http://10.141.7.45:8080/serengeti/api/distros",
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros",
             HttpMethod.GET, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
       //get all distros
