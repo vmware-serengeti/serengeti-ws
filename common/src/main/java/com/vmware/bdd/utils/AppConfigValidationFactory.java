@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.testng.log4testng.Logger;
+import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
