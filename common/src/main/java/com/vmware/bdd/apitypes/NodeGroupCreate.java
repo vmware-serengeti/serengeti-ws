@@ -190,7 +190,8 @@ public class NodeGroupCreate {
    private Integer getHostNum() {
       Integer hostNumber = null;
       PlacementPolicy policies = getPlacementPolicies();
-      if (policies != null && policies.getInstancePerHost() != null) {
+      if (policies != null && policies.getInstancePerHost() != null &&
+          policies.getInstancePerHost() > 0) {
          if (getInstanceNum() % policies.getInstancePerHost() == 0) {
             hostNumber = getInstanceNum() / policies.getInstancePerHost();
          }
@@ -210,9 +211,10 @@ public class NodeGroupCreate {
                failedMsgList.add(new StringBuilder().append(getName())
                      .append(".placementPolicies.instancePerHost=")
                      .append(policies.getInstancePerHost()).toString());
+               return valid;
             }
          }
-         if (valid && policies.getGroupAssociations() != null) {
+         if (policies.getGroupAssociations() != null) {
             // only support 1 group association now
             if (policies.getGroupAssociations().size() != 1) {
                valid = false;
@@ -229,14 +231,14 @@ public class NodeGroupCreate {
                if (a.getReference() == null) {
                   valid = false;
                   failedMsgList.add(new StringBuilder().append(getName())
-                        .append(".placementPolicies.groupAssociations[0]" +
-                        		".reference not set").toString());
+                        .append(".placementPolicies.groupAssociations[0]"
+                              + ".reference not set").toString());
                } else if (a.getReference().equals(getName())) {
                   valid = false;
                   failedMsgList.add(new StringBuilder()
                         .append(getName())
                         .append(".placementPolicies.groupAssociations[0]"
-                                    + " refers to itself").toString());
+                              + " refers to itself").toString());
                } else if (!groups.containsKey(a.getReference())) {
                   valid = false;
                   failedMsgList.add(new StringBuilder()
@@ -264,8 +266,8 @@ public class NodeGroupCreate {
                      valid = false;
                      failedMsgList.add(new StringBuilder()
                            .append(getName())
-                           .append(".placementPolicies.groupAssociations[0] " +
-                           		"refers to node group ")
+                           .append(".placementPolicies.groupAssociations[0] "
+                                       + "refers to node group ")
                            .append(a.getReference())
                            .append(" which also has reference(s)").toString());
                   }
