@@ -212,7 +212,7 @@ public class ClusterCreate {
       }
 
       for (NodeGroupCreate ngc : getNodeGroups()) {
-         if (ngc.validatePlacementPolicies(allGroups, failedMsgList)) {
+         if (!ngc.validatePlacementPolicies(allGroups, failedMsgList)) {
             valid = false;
          }
       }
