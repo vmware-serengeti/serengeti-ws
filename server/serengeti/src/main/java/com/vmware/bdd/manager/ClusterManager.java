@@ -39,6 +39,7 @@ import com.vmware.bdd.entity.Saveable;
 import com.vmware.bdd.entity.TaskEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterManagerException;
+import com.vmware.bdd.manager.task.ConfigureClusterListener;
 import com.vmware.bdd.manager.task.CreateClusterListener;
 import com.vmware.bdd.manager.task.DeleteClusterListener;
 import com.vmware.bdd.manager.task.StartClusterListener;
@@ -230,6 +231,25 @@ public class ClusterManager {
             });
             throw e;
         }
+    }
+
+    public Long configCluster(String clusterName, ClusterCreate createSpec) throws Exception {
+       logger.info("ClusterManager, config cluster " + clusterName);
+       ClusterEntity cluster;
+
+       if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+           logger.error("cluster " + clusterName + " does not exist");
+           throw BddException.NOT_FOUND("cluster", clusterName);
+       }
+
+       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
+          logger.error("can not config cluster: " + clusterName + ", " + cluster.getStatus());
+          throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
+                  "it should be in RUNNING status");
+       }
+       clusterConfigMgr.updateAppConfig(clusterName, createSpec);
+       ConfigureClusterListener listener = new ConfigureClusterListener(clusterName);
+       return createClusterMgmtTaskWithErrorSetting(cluster, listener, ClusterStatus.CONFIGURING);
     }
 
     public Long resumeClusterCreation(String clusterName) throws Exception {
