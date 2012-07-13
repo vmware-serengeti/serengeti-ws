@@ -552,5 +552,49 @@ public class TestClusterConfigManager {
             manifest.indexOf("{\"name\":\"my-cluster8\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":true},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1
             && manifest.indexOf("\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.xyz\":\"xyz\",\"hadoop.true\":true}}}") != -1);
    }
+
+   @Test
+   public void testGroupMasterWithGroupAppConfig() {
+      ClusterCreate spec = new ClusterCreate();
+      spec.setNetworkName("dhcpNet1");
+      spec.setName("my-cluster9");
+      List<String> rps = new ArrayList<String>();
+      rps.add("myRp2");
+      rps.add("myRp3");
+      rps.add("myRp4");
+      rps.add("myRp5");
+      spec.setRpNames(rps);
+
+      NodeGroupCreate[] nodegroups = new NodeGroupCreate[1];
+      NodeGroupCreate group = new NodeGroupCreate();
+      nodegroups[0] = group;
+      group.setCpuNum(3);
+      group.setInstanceNum(1);
+      group.setInstanceType(InstanceType.LARGE);
+      group.setName("main_group");
+      List<String> roles = new ArrayList<String>();
+      roles.add("hadoop_namenode");
+      group.setRoles(roles);
+      String configJson = 
+         "{\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.xxx\":\"xxx\",\"hadoop.true\":false}}}}";
+      Map config = (new Gson()).fromJson(configJson, Map.class);
+      group.setConfiguration((Map<String, Object>)(config.get("cluster_configuration")));
+
+      spec.setNodeGroups(nodegroups);
+      clusterMgr.createClusterConfig(spec);
+
+      ClusterEntity cluster =
+            ClusterEntity.findClusterEntityByName("my-cluster9");
+      Assert.assertTrue(cluster != null);
+
+      ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster9");
+      String manifest = gson.toJson(attrs);
+      System.out.println(manifest);
+      Assert.assertTrue("manifest should contains nodegroups",
+            manifest.indexOf("main_group") != -1 && manifest.indexOf("expanded_master") != -1
+            && manifest.indexOf("expanded_worker") != -1);
+      Assert.assertTrue("manifest is inconsistent",
+            manifest.indexOf("{\"name\":\"my-cluster9\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":100},\"cpu\":3,\"memory\":15000,\"ha\":false,\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.xxx\":\"xxx\",\"hadoop.true\":false}}}},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":true},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
+   }
 }
 

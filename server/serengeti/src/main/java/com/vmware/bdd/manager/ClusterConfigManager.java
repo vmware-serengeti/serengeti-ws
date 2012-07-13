@@ -573,6 +573,10 @@ public class ClusterConfigManager {
 
       expandGroupStorage(ngEntity, group);
       group.setHaFlag(ngEntity.isHaFlag());
+      if (ngEntity.getHadoopConfig() != null) {
+         Map hadoopConfig = (new Gson()).fromJson(ngEntity.getHadoopConfig(), Map.class);
+         group.setConfiguration((Map<String, Object>)hadoopConfig);
+      }
       return group;
    }
 
