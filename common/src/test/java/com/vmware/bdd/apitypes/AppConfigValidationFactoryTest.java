@@ -75,4 +75,5 @@ public class AppConfigValidationFactoryTest {
       assertEquals(validateResult.getFailureNames().get(0), "dfs.http.address");
       assertEquals(validateResult.getFailureNames().get(1), "mapred.job.tracker");
    }
+   
 }
