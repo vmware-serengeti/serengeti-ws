@@ -1,4 +1,5 @@
-[
+{
+  "nodeGroups":[
     {
       "name": "master",
       "roles": [
@@ -27,7 +28,26 @@
       "rpNames": [
         "rp1",
         "rp2" 
-      ]
+      ],
+       "configuration": {
+	     "hadoop": {
+	        "core-site.xml" : {
+	            "hadoop.tmp.dir": "/temp"
+	        },
+	        "hdfs-site.xml" : {
+	           "dfs.namenode.logging.level": 2
+	        },
+	       "mapred-site.xml" : {
+	           "mapred.map.tasks": 3
+	       },
+	      "hadoop-env.sh" : {
+	           "JAVA_HOME": "/path/to/javahome"
+	       },
+	      "log4j.properties" : {
+	            "hadoop.root.logger": "DEBUG,console"
+	      }
+	    }
+	  }
     },
     {
       "name": "client",
@@ -45,4 +65,24 @@
         "rp3"
       ]
     }
-]  
+  ],
+  "configuration": {
+    "hadoop": {
+        "core-site.xml" : {
+            "hadoop.tmp.dir": "/temp"
+        },
+       "hdfs-site.xml" : {
+           "dfs.namenode.logging.level": 2
+      },
+      "mapred-site.xml" : {
+           "mapred.map.tasks": 3
+      },
+     "hadoop-env.sh" : {
+           "JAVA_HOME": "/path/to/javahome"
+      },
+      "log4j.properties" : {
+            "hadoop.root.logger": "DEBUG,console"
+     }
+   }
+ }
+}  
