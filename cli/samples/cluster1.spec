@@ -56,6 +56,7 @@
         "hive",
         "pig"
       ],
+      "instanceNum": 1,
       "cpuNum": 1,
       "storage": {
         "type": "LOCAL",

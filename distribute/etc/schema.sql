@@ -104,7 +104,7 @@ create table node_group (
 create sequence node_group_association_seq;
 create table node_group_association (
    id                 bigint       not null unique DEFAULT nextval('node_group_association_seq'::regclass),
-   referenced_group   varchar(255) not null unique,
+   referenced_group   varchar(255) not null,
    association_type   varchar(255),
    node_group_id      bigint,
    primary key (id),
