@@ -470,12 +470,19 @@ public class ClusterCommands implements CommandMarker {
          if (nodeGroupCreates.length < 2 || nodeGroupCreates.length > 4) {
             warning = true;
          }
+
+         // check placement policies
+         if (!clusterCreate.validateNodeGroupPlacementPolicies(failedMsgList)) {
+            validated = false;
+         }
+
          for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
-            //check node group's instanceNum
+            // check node group's instanceNum
             if (!checkInstanceNum(nodeGroupCreate, failedMsgList)) {
                validated = false;
             }
-            //check node group's roles 
+
+            // check node group's roles 
             if (!checkNodeGroupRoles(nodeGroupCreate, distroRoles,
                   failedMsgList)) {
                validated = false;
@@ -640,6 +647,8 @@ public class ClusterCommands implements CommandMarker {
       return validated;
    }
 
+
+
    private void collectInstanceNumInvalidateMsg(NodeGroupCreate nodeGroup,
          List<String> failedMsgList) {
       failedMsgList.add(new StringBuilder().append(nodeGroup.getName())
@@ -716,7 +725,7 @@ public class ClusterCommands implements CommandMarker {
       return validated;
    }
 
-   private boolean validateConfigration(String clusterName,Map<String, Object> configration) {
+   private boolean validateConfigration(String levelName,Map<String, Object> configration) {
       ValidateResult validateResult = null;
       for (ValidationType validationType : ValidationType.values()) {
          validateResult =
@@ -725,15 +734,15 @@ public class ClusterCommands implements CommandMarker {
          if (validateResult.getType() != ValidateResult.Type.VALID) {
             String warningMsg="";
             if (validateResult.getType() != ValidateResult.Type.NAME_IN_BLACK_LIST) {
-               warningMsg=getValidateWarningMsg(validateResult.getFailureNames(),
+               warningMsg=getValidateWarningMsg(levelName,validateResult.getFailureNames(),
                      Constants.PARAM_CLUSTER_IN_BLACK_LIST_WARNING);
                System.out.println(warningMsg);
             } else if (validateResult.getType() != ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
-               warningMsg=getValidateWarningMsg(
+               warningMsg=getValidateWarningMsg(levelName,
                      validateResult.getFailureNames(),
                      Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING
                            + Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING_CONTINUE);
-               if(! isContinue(clusterName,Constants.OUTPUT_OP_CREATE, warningMsg)){
+               if(! isContinue(levelName,Constants.OUTPUT_OP_CREATE, warningMsg)){
                   return false;
                }
             }
@@ -742,24 +751,31 @@ public class ClusterCommands implements CommandMarker {
       return true;
    }
    
-   private String getValidateWarningMsg(List<String> failureNames,String warningMsg) {
+   private String getValidateWarningMsg(String levelName,List<String> failureNames,String warningMsg) {
       StringBuilder waringMsgBuff = new StringBuilder();
-      waringMsgBuff.append("Waring:");
-      int j = 0;
-      for (String failureName : failureNames) {
-         waringMsgBuff.append(failureName);
-         if (j < failureNames.size() - 1) {
-            waringMsgBuff.append(",");
-         } else {
-            waringMsgBuff.append(" ");
+      if(failureNames != null && !failureNames.isEmpty()) {
+         waringMsgBuff.append("Waring:");
+         int j = 0;
+         for (String failureName : failureNames) {
+            waringMsgBuff.append(failureName);
+            if (j < failureNames.size() - 1) {
+               waringMsgBuff.append(",");
+            } else {
+               waringMsgBuff.append(" ");
+            }
+            j++;
          }
+         if (failureNames.size() > 1) {
+            waringMsgBuff.append("are");
+         } else {
+            waringMsgBuff.append("is");
+         }
+         waringMsgBuff.append(warningMsg);
+      }else{
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, levelName,
+               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.PARAM_CLUSTER_VALIDATE_ERROR);
       }
-      if (failureNames.size() > 1) {
-         waringMsgBuff.append("are");
-      } else {
-         waringMsgBuff.append("is");
-      }
-      waringMsgBuff.append(warningMsg);
       return waringMsgBuff.toString();
    }
 

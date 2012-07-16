@@ -25,6 +25,8 @@ public class ClusterCmdUtil {
          .getNonEmptyString("stop_cluster.cmd");
    private static final String START_CLUSTER_CMD = Configuration
          .getNonEmptyString("start_cluster.cmd");
+   private static final String CONFIGURE_CLUSTER_CMD = Configuration
+   .getNonEmptyString("configure_cluster.cmd");
 
    public static String[] getCreateClusterCmdArray(String clusterName,
          String fileName) {
@@ -57,4 +59,9 @@ public class ClusterCmdUtil {
             .replaceAll(":json_file", fileName).split(" ");
    }
 
+   public static String[] getConfigureClusterCmdArray(String clusterName,
+         String fileName) {
+      return CONFIGURE_CLUSTER_CMD.replaceAll(":cluster_name", clusterName)
+            .replaceAll(":json_file", fileName).split(" ");
+   }
 }

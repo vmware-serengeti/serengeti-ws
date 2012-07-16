@@ -162,6 +162,7 @@ public class Constants {
     public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Do you want to continue (Y/N)?";
     public static final String PARAM_CLUSTER_IN_BLACK_LIST_WARNING = " not allowed to customize in Serengeti. Your settings will not take effect.";
     public static final String PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING = "not regular properties in Apache Distro. ";
-    public static final String PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING_CONTINUE ="Are you sure to continue to enforce settings?(Y|N)"; 
+    public static final String PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING_CONTINUE ="Are you sure to continue to enforce settings?(Y|N)";
+    public static final String PARAM_CLUSTER_VALIDATE_ERROR = "A unexpected error:can not find failure names when validate blanklist or whitelist failed!"; 
    
 }
