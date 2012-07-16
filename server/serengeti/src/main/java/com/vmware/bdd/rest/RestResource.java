@@ -138,7 +138,7 @@ public class RestResource {
    }
 
    // cluster API
-   @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.PUT, consumes = "application/json")
+   @RequestMapping(value = "/cluster/{clusterName}/config", method = RequestMethod.PUT, consumes = "application/json")
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void configCluster(@PathVariable("clusterName") String clusterName, 
          @RequestBody ClusterCreate createSpec,
