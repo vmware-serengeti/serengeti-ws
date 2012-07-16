@@ -24,10 +24,10 @@
       "storage": {
         "type": "LOCAL",
         "sizeGB": 10
-      },        
+      },
       "rpNames": [
         "rp1",
-        "rp2" 
+        "rp2"
       ],
        "configuration": {
 	     "hadoop": {
@@ -61,7 +61,7 @@
       "storage": {
         "type": "LOCAL",
         "sizeGB": 10
-      },        
+      },
       "rpNames": [
         "rp3"
       ]
@@ -86,4 +86,4 @@
      }
    }
  }
-}  
+}

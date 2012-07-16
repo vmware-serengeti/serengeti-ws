@@ -23,10 +23,10 @@
       "storage": {
         "type": "LOCAL",
         "sizeGB": 10
-      },        
+      },
       "rpNames": [
         "rp1",
-        "rp2" 
+        "rp2"
       ],
       "placementPolicies": {
         "instancePerHost": 1
@@ -62,10 +62,10 @@
       "storage": {
         "type": "LOCAL",
         "sizeGB": 10
-      },        
+      },
       "rpNames": [
         "rp1",
-        "rp2" 
+        "rp2"
       ],
       "placementPolicies": {
         "instancePerHost": 2,
@@ -108,7 +108,7 @@
       "storage": {
         "type": "LOCAL",
         "sizeGB": 10
-      },        
+      },
       "rpNames": [
         "rp3"
       ]
@@ -133,4 +133,4 @@
      }
    }
  }
-}  
+}
