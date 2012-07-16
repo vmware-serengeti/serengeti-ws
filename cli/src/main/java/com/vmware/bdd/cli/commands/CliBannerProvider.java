@@ -18,10 +18,10 @@ package com.vmware.bdd.cli.commands;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.roo.shell.CliCommand;
-import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.support.util.StringUtils;
+import org.springframework.shell.core.CommandMarker;
+import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.plugin.support.DefaultBannerProvider;
+import org.springframework.shell.support.util.StringUtils;
 import org.springframework.stereotype.Component;
 
 /**

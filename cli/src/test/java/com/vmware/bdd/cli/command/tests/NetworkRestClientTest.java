@@ -24,7 +24,7 @@ import org.testng.annotations.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.roo.support.util.Assert;
+import org.springframework.shell.support.util.Assert;
 import org.springframework.test.context.ContextConfiguration;
 
 import com.vmware.bdd.apitypes.IpBlock;

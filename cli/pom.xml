@@ -9,37 +9,54 @@
 	<packaging>jar</packaging>
 	<name>vHadoop CLI</name>
 	<url>http://maven.apache.org</url>
-	
+
 	<parent>
 		<groupId>com.vmware.bdd</groupId>
 		<artifactId>serengeti-master</artifactId>
 		<version>${serengeti.version}</version>
 		<relativePath>../pom.xml</relativePath>
-   </parent>
-   
+	</parent>
+
 	<properties>
 		<spring.shell.version>1.0.0.BUILD-SNAPSHOT</spring.shell.version>
-	 	<jar.mainclass>org.springframework.shell.Bootstrap</jar.mainclass>
+		<jar.mainclass>org.springframework.shell.Bootstrap</jar.mainclass>
+		<impala.version>1.0.0.BUILD-SNAPSHOT</impala.version>
+		<hadoop.version>1.0.2</hadoop.version>
 	</properties>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>com.vmware.bdd</groupId>
 			<artifactId>common</artifactId>
-      	</dependency>
+		</dependency>
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
 		</dependency>
-        
- 		<!-- External modules -->
- 		<dependency>
+
+		<!-- External modules -->
+		<dependency>
 			<groupId>org.springframework.shell</groupId>
 			<artifactId>spring-shell</artifactId>
 			<version>${spring.shell.version}</version>
 		</dependency>
- 		<dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-core</artifactId>
+			<version>${hadoop.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data.hadoop.impala</groupId>
+			<artifactId>plugin-hdfs</artifactId>
+			<version>${impala.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data.hadoop.impala</groupId>
+			<artifactId>plugin-mapreduce</artifactId>
+			<version>${impala.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
 		</dependency>
@@ -51,12 +68,12 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 			<version>${spring.version}</version>
-		</dependency>  
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test-mvc</artifactId>
 			<version>1.0.0.BUILD-SNAPSHOT</version>
-		</dependency>    
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -69,7 +86,7 @@
 					<target>1.5</target>
 				</configuration>
 			</plugin>
-            <plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
@@ -105,24 +122,22 @@
 						</manifestEntries>
 					</archive>
 				</configuration>
-			</plugin>    
+			</plugin>
 		</plugins>
-	</build> 
+	</build>
 
-        <!-- jline 1.0.S2-B is here 
-	http://shrub.appspot.com/spring-roo-repository.springsource.org/release/net/sourceforge/jline/jline/1.0.S2-B/
-	-->
+	<!-- jline 1.0.S2-B is here http://shrub.appspot.com/spring-roo-repository.springsource.org/release/net/sourceforge/jline/jline/1.0.S2-B/ -->
 	<repositories>
 		<repository>
-		  <id>spring-roo-repository</id>
-		  <name>Spring Roo Maven Repository</name>
-		  <url>http://spring-roo-repository.springsource.org/release</url>
+			<id>spring-roo-repository</id>
+			<name>Spring Roo Maven Repository</name>
+			<url>http://spring-roo-repository.springsource.org/release</url>
 		</repository>
 		<repository>
 			<id>spring-maven-snapshot</id>
 			<snapshots>
 				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
+				<updatePolicy>always</updatePolicy>
 			</snapshots>
 			<name>Springframework Maven SNAPSHOT Repository</name>
 			<url>http://maven.springframework.org/snapshot</url>

@@ -26,10 +26,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.roo.shell.CliAvailabilityIndicator;
-import org.springframework.roo.shell.CliCommand;
-import org.springframework.roo.shell.CliOption;
-import org.springframework.roo.shell.CommandMarker;
+import org.springframework.shell.core.CommandMarker;
+import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
+import org.springframework.shell.core.annotation.CliCommand;
+import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
 import com.vmware.bdd.apitypes.IpAllocEntryRead;

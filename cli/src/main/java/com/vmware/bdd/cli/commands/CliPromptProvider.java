@@ -27,7 +27,8 @@ public class CliPromptProvider extends DefaultPromptProvider {
 	/* (non-Javadoc)
 	 * @see org.springframework.shell.plugin.PromptProvider#getPromptText()
 	 */
-	public String getPromptText() {		
+	@Override
+	public String getPrompt() {		
 		return "serengeti>";
 	}
 

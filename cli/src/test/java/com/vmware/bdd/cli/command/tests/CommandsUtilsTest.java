@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.springframework.roo.support.util.Assert;
+import org.springframework.shell.support.util.Assert;
 import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
 
