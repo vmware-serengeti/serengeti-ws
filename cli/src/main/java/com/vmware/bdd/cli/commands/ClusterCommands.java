@@ -21,8 +21,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import jline.ConsoleReader;
 
@@ -37,8 +35,6 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.NetworkRead;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
@@ -536,7 +532,7 @@ public class ClusterCommands implements CommandMarker {
             // If warning is true,show waring message.
             showWarningMsg();
             // When exist warning message,whether to proceed
-            if (!isContinue(clusterCreate)) {
+            if (!isContinue(clusterCreate.getName(),Constants.OUTPUT_OP_CREATE,Constants.PARAM_PROMPT_CONTINUE_MESSAGE)) {
                validated = false;
             }
          }
@@ -544,7 +540,7 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   private boolean isContinue(ClusterCreate clusterCreate) {
+   private boolean isContinue(String clusterName,String operateType,String promptMsg) {
       boolean continueCreate = true;
       boolean continueLoop = true;
       String readMsg = "";
@@ -557,7 +553,7 @@ public class ClusterCommands implements CommandMarker {
                break;
             }
             // Prompt continue infomation
-            System.out.println(Constants.PARAM_PROMPT_CONTINUE_MESSAGE);
+            System.out.println(promptMsg);
             // Get user's entering
             readMsg = reader.readLine();
             if (readMsg.trim().equalsIgnoreCase("yes")
@@ -573,7 +569,7 @@ public class ClusterCommands implements CommandMarker {
          }
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-               clusterCreate.getName(), Constants.OUTPUT_OP_CREATE,
+               clusterName, operateType,
                Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          continueCreate = false;
       }
@@ -715,23 +711,72 @@ public class ClusterCommands implements CommandMarker {
 
    private boolean validateConfigration(ClusterCreate cluster) {
       boolean validated = true;
-      //TODO
+      //validate cluster level configration
+      validated = validateConfigration(cluster.getName(),cluster.getConfiguration());
+      //validate nodegroup level configration
+      if (validated) {
+         for (NodeGroupCreate nodeGroup : cluster.getNodeGroups()) {
+            if(nodeGroup.getConfiguration()!= null && nodeGroup.getConfiguration().size()>0){
+               validated = validateConfigration(cluster.getName()+":"+nodeGroup.getName(),nodeGroup.getConfiguration());
+            }
+         }
+      }
+      
       return validated;
    }
 
-   @SuppressWarnings("unused")
-   private boolean validateConfigration(Map<String, Object> configration) {
+   private boolean validateConfigration(String levelName,Map<String, Object> configration) {
       ValidateResult validateResult = null;
       for (ValidationType validationType : ValidationType.values()) {
          validateResult =
                AppConfigValidationUtils.validateConfig(validationType,
                      configration);
          if (validateResult.getType() != ValidateResult.Type.VALID) {
-            return false;
+            String warningMsg="";
+            if (validateResult.getType() != ValidateResult.Type.NAME_IN_BLACK_LIST) {
+               warningMsg=getValidateWarningMsg(levelName,validateResult.getFailureNames(),
+                     Constants.PARAM_CLUSTER_IN_BLACK_LIST_WARNING);
+               System.out.println(warningMsg);
+            } else if (validateResult.getType() != ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
+               warningMsg=getValidateWarningMsg(levelName,
+                     validateResult.getFailureNames(),
+                     Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING
+                           + Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING_CONTINUE);
+               if(! isContinue(levelName,Constants.OUTPUT_OP_CREATE, warningMsg)){
+                  return false;
+               }
+            }
          }
       }
-
       return true;
+   }
+   
+   private String getValidateWarningMsg(String levelName,List<String> failureNames,String warningMsg) {
+      StringBuilder waringMsgBuff = new StringBuilder();
+      if(failureNames != null && !failureNames.isEmpty()) {
+         waringMsgBuff.append("Waring:");
+         int j = 0;
+         for (String failureName : failureNames) {
+            waringMsgBuff.append(failureName);
+            if (j < failureNames.size() - 1) {
+               waringMsgBuff.append(",");
+            } else {
+               waringMsgBuff.append(" ");
+            }
+            j++;
+         }
+         if (failureNames.size() > 1) {
+            waringMsgBuff.append("are");
+         } else {
+            waringMsgBuff.append("is");
+         }
+         waringMsgBuff.append(warningMsg);
+      }else{
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, levelName,
+               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.PARAM_CLUSTER_VALIDATE_ERROR);
+      }
+      return waringMsgBuff.toString();
    }
 
 }

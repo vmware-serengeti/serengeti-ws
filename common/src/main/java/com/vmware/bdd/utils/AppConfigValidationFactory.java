@@ -48,10 +48,8 @@ public class AppConfigValidationFactory {
                 String configFileName = "";
                 for (Entry<String, Object> configFileEntry : propertyConfig.entrySet()) {
                     configFileName = configFileEntry.getKey();
-                    if (validateBySameFileName(configFileName, configFileEntry.getValue(), blackList, validateResult,
-                            ValidationType.BLACK_LIST)) {
-
-                    }
+                    validateBySameFileName(configFileName, configFileEntry.getValue(), blackList, validateResult,
+                            ValidationType.BLACK_LIST);
                 }
             }
         }
@@ -73,10 +71,8 @@ public class AppConfigValidationFactory {
                 String configFileName = "";
                 for (Entry<String, Object> configFileEntry : propertyConfig.entrySet()) {
                     configFileName = configFileEntry.getKey();
-                    if (validateBySameFileName(configFileName, configFileEntry.getValue(), whiteList, validateResult,
-                            ValidationType.WHITE_LIST)) {
-
-                    }
+                    validateBySameFileName(configFileName, configFileEntry.getValue(), whiteList, validateResult,
+                            ValidationType.WHITE_LIST);
                 }
             }
         }
@@ -84,9 +80,8 @@ public class AppConfigValidationFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> boolean validateBySameFileName(String fileName, Object configProperties,
+    private static <T> void validateBySameFileName(String fileName, Object configProperties,
             List<Map<String, T>> warnPropertyList, ValidateResult validateResult, ValidationType validationType) {
-        boolean warning = false;
         for (Map<String, T> warnPropertyFileMap : warnPropertyList) {
             if (warnPropertyFileMap.containsKey(fileName) && configProperties instanceof Map) {
                 Map<String, Object> configPropertyMap = (Map<String, Object>) configProperties;
@@ -97,7 +92,6 @@ public class AppConfigValidationFactory {
                                 List<Object> propertyList = (List<Object>) warnPropertyFileEntry.getValue();
                                 if (!validateWhiteListPropertis(propertyList, configProperty.getKey(),
                                         String.valueOf(configProperty.getValue()), validateResult)) {
-                                    warning = true;
                                 }
                             }
                         }
@@ -107,7 +101,6 @@ public class AppConfigValidationFactory {
                                 List<String> propertyList = (List<String>) warnPropertyFileEntry.getValue();
                                 for (String propertyName : propertyList) {
                                     if (configProperty.getKey().equals(propertyName)) {
-                                        warning = true;
                                         validateResult.setType(ValidateResult.Type.NAME_IN_BLACK_LIST);
                                         validateResult.addFailureName(configProperty.getKey());
                                     }
@@ -118,10 +111,10 @@ public class AppConfigValidationFactory {
                 }
             }
         }
-        return warning;
     }
 
     private static boolean validatePropertyValueFormat(final String value, final String format) {
+        //TODO
         return true;
     }
 
