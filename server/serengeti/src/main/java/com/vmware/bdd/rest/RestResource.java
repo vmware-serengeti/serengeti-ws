@@ -137,6 +137,17 @@ public class RestResource {
       redirectRequest(taskId, request, response);
    }
 
+   // cluster API
+   @RequestMapping(value = "/cluster/{clusterName}/config", method = RequestMethod.PUT, consumes = "application/json")
+   @ResponseStatus(HttpStatus.ACCEPTED)
+   public void configCluster(@PathVariable("clusterName") String clusterName, 
+         @RequestBody ClusterCreate createSpec,
+         HttpServletRequest request, HttpServletResponse response)
+         throws Exception {
+      Long taskId = clusterMgr.configCluster(clusterName, createSpec);
+      redirectRequest(taskId, request, response);
+   }
+
    private void redirectRequest(long taskId, HttpServletRequest request,
          HttpServletResponse response) {
       StringBuffer url = request.getRequestURL();

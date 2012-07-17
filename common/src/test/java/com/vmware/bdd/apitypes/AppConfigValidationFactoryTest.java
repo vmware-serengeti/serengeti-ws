@@ -59,7 +59,7 @@ public class AppConfigValidationFactoryTest {
       nodeGroup.setConfiguration(hadoopMap);
       cluster.setNodeGroups(new NodeGroupCreate[]{nodeGroup});
    }
-   
+
    @Test
    public void testWhiteListHandle() {
       ValidateResult validateResult=AppConfigValidationFactory.whiteListHandle(cluster.getNodeGroups()[0].getConfiguration());
@@ -67,7 +67,7 @@ public class AppConfigValidationFactoryTest {
       assertEquals(validateResult.getFailureNames().get(0), "dfs.namenode.test.level");
       assertEquals(validateResult.getFailureNames().get(1), "dfs.namenode.logger.level");
    }
-   
+
    @Test
    public void testBlackListHandle() {
       ValidateResult validateResult=AppConfigValidationFactory.blackListHandle(cluster.getConfiguration());
@@ -75,5 +75,5 @@ public class AppConfigValidationFactoryTest {
       assertEquals(validateResult.getFailureNames().get(0), "dfs.http.address");
       assertEquals(validateResult.getFailureNames().get(1), "mapred.job.tracker");
    }
-   
+
 }

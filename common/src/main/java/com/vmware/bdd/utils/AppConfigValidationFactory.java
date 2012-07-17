@@ -127,7 +127,7 @@ public class AppConfigValidationFactory {
                 Map<String, String> property = (Map<String, String>) obj;
 
                 if (property.get("name").trim().equalsIgnoreCase(configPropertyName)) {
-                    if (property.get("valueFormat")!=null && !property.get("valueFormat").isEmpty()
+                    if (property.get("valueFormat") != null && !property.get("valueFormat").isEmpty()
                             && !validatePropertyValueFormat(configPropertyValue, property.get("valueFormat"))) {
                         validateType = ValidateResult.Type.WHITE_LIST_INVALID_VALUE;
                     }

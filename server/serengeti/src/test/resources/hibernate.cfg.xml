@@ -10,7 +10,7 @@
 		<property name="hibernate.connection.username">serengeti</property>
 		<property name="hibernate.connection.password">password</property>
 		<!-- Drop and re-create the database schema on startup -->
-		<!-- <property name="hbm2ddl.auto">create-drop</property> -->
+		<property name="hbm2ddl.auto">create-drop</property>
 		<property name="hibernate.current_session_context_class">org.hibernate.context.ThreadLocalSessionContext</property>
 		<property name="hibernate.c3p0.min_size">1</property>
 		<property name="hibernate.c3p0.max_size">90</property>

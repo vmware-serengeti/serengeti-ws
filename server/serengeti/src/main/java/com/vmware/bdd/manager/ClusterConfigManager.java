@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +104,10 @@ public class ClusterConfigManager {
       final String name = cluster.getName();
       if (name == null || name.isEmpty()) {
          throw ClusterConfigException.CLUSTER_NAME_MISSING();
+      }
+      List<String> failedMsgList = new ArrayList<String>();
+      if (!cluster.validateNodeGroupPlacementPolicies(failedMsgList)) {
+         throw ClusterConfigException.INVALID_PLACEMENT_POLICIES(failedMsgList);
       }
       try {
          return DAL.inTransactionDo(new Saveable<ClusterEntity>() {
@@ -659,5 +664,61 @@ public class ClusterConfigManager {
                + "is required, but not specified in the cluster spec. Will append default config.");
       }
       return allEnums;
+   }
+
+   public void updateAppConfig(final String clusterName, final ClusterCreate clusterCreate) {
+      logger.debug("Update configuration for cluster " + clusterName);
+
+      DAL.inTransactionDo(new Saveable<Void>() {
+         public Void body() {
+            ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterCreate.getName());
+
+            if (cluster == null) {
+               logger.error("cluster " + clusterName + " does not exist");
+               throw BddException.NOT_FOUND("cluster", clusterName);
+            }
+            Map<String, Object> clusterLevelConfig = clusterCreate.getConfiguration();
+            if (clusterLevelConfig != null && clusterLevelConfig.size() > 0) {
+               logger.debug("Cluster level app config is updated.");
+               CommonClusterExpandPolicy.validateAppConfig(
+                     clusterCreate.getConfiguration(), clusterCreate.isValidateConfig());
+               cluster.setHadoopConfig((new Gson()).toJson(clusterLevelConfig));
+            }
+            updateNodegroupAppConfig(clusterCreate, cluster, clusterCreate.isValidateConfig());
+            return null;
+         }
+      });
+   }
+
+   private void updateNodegroupAppConfig(ClusterCreate clusterCreate, ClusterEntity cluster, boolean validateWhiteList) {
+      Gson gson = new Gson();
+      Set<NodeGroupEntity> groupEntities = cluster.getNodeGroups();
+      Map<String, NodeGroupEntity> groupMap = new HashMap<String, NodeGroupEntity>();
+      for (NodeGroupEntity entity : groupEntities) {
+         groupMap.put(entity.getName(), entity);
+      }
+
+      Set<String> updatedGroups = new HashSet<String>();
+      NodeGroupCreate[] groupCreates = clusterCreate.getNodeGroups();
+      if (groupCreates == null) {
+         return;
+      }
+      for (NodeGroupCreate groupCreate : groupCreates) {
+         Map<String, Object> groupConfig = groupCreate.getConfiguration();
+         if (groupConfig != null && groupConfig.size() > 0) {
+            NodeGroupEntity groupEntity = groupMap.get(groupCreate.getName());
+            // validate hadoop config
+            CommonClusterExpandPolicy.validateAppConfig(groupConfig,
+                  validateWhiteList);
+            groupEntity.setHadoopConfig(gson.toJson(groupConfig));
+            updatedGroups.add(groupCreate.getName());
+         }
+      }
+      for (NodeGroupEntity entity : groupEntities) {
+         if (updatedGroups.contains(entity.getName())) {
+            continue;
+         }
+         entity.setHadoopConfig(null);
+      }
    }
 }
