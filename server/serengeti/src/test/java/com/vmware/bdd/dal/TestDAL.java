@@ -14,19 +14,18 @@
  ***************************************************************************/
 package com.vmware.bdd.dal;
 
+import static org.testng.AssertJUnit.assertTrue;
+
 import java.util.List;
 
 import org.hibernate.criterion.Restrictions;
-
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
-import static org.testng.AssertJUnit.assertTrue;
+import org.testng.annotations.Test;
 
 import com.vmware.bdd.entity.CloudProviderConfigEntity;
 import com.vmware.bdd.entity.Saveable;
-import com.vmware.bdd.entity.TaskEntity;
 
 public class TestDAL {
 
@@ -127,23 +126,28 @@ public class TestDAL {
    }
 
    private void prepareData() {
-      CloudProviderConfigEntity vcCloud = new CloudProviderConfigEntity();
-      vcCloud.setCloudType("VC");
-      vcCloud.setAttribute("vc_addr");
-      vcCloud.setValue("10.1.170.1");
-      DAL.inTransactionInsert(vcCloud);
+       DAL.inRwTransactionDo(new Saveable<Void>() {
+         public Void body() {
+            CloudProviderConfigEntity vcCloud = new CloudProviderConfigEntity();
+            vcCloud.setCloudType("VC");
+            vcCloud.setAttribute("vc_addr");
+            vcCloud.setValue("10.1.170.1");
+            DAL.insert(vcCloud);
 
-      vcCloud = new CloudProviderConfigEntity();
-      vcCloud.setCloudType("VC");
-      vcCloud.setAttribute("vc_user");
-      vcCloud.setValue("line");
-      DAL.inTransactionInsert(vcCloud);
+            vcCloud = new CloudProviderConfigEntity();
+            vcCloud.setCloudType("VC");
+            vcCloud.setAttribute("vc_user");
+            vcCloud.setValue("line");
+            DAL.insert(vcCloud);
 
-      vcCloud = new CloudProviderConfigEntity();
-      vcCloud.setCloudType("VC");
-      vcCloud.setAttribute("vc_template");
-      vcCloud.setValue("centos-5.3");
-      DAL.inTransactionInsert(vcCloud);
+            vcCloud = new CloudProviderConfigEntity();
+            vcCloud.setCloudType("VC");
+            vcCloud.setAttribute("vc_template");
+            vcCloud.setValue("centos-5.3");
+            DAL.insert(vcCloud);
+            return null;
+         }
+      });
    }
 
    @Test(groups = {"testDAL"}, dependsOnMethods = { "testInRwtransDo" })

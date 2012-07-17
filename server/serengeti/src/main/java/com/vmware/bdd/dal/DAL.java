@@ -438,17 +438,6 @@ public class DAL {
       getSession().refresh(obj);
    }
 
-   // Convenience routines for wrapping <code>findById, findAll,
-   // findByCriteria, save, update, delete</code> in a transaction.
-   public static void inTransactionInsert(final Object obj) {
-      inTransactionDo(new Saveable<Void>() {
-         public Void body() {
-            insert(obj);
-            return null;
-         }
-      });
-   }
-
    public static void inTransactionUpdate(final Object obj) {
       inTransactionDo(new Saveable<Void>() {
          public Void body() {
