@@ -91,11 +91,15 @@ public class TaskManager implements InitializingBean, DisposableBean {
       return new UUID((hash << 32) | (rand & 0xFFFFFFFFL), timestamp).toString();
    }
 
-   public TaskEntity createCmdlineTask(String[] cmdArray, TaskListener listener) {
-      TaskEntity task = new TaskEntity(cmdArray, listener, cookie);
-      logger.debug("creating task: " + task);
-      DAL.inTransactionInsert(task);
-      return task;
+   public TaskEntity createCmdlineTask(final String[] cmdArray, final TaskListener listener) {
+      return DAL.inRwTransactionDo(new Saveable<TaskEntity>() {
+         public TaskEntity body() {
+            TaskEntity task = new TaskEntity(cmdArray, listener, cookie);
+            logger.debug("creating task: " + task);
+            DAL.insert(task);
+            return task;
+         }
+      });
    }
 
    public void submit(TaskEntity taskEntity, Boolean enableMq) {

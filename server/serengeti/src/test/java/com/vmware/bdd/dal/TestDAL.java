@@ -26,6 +26,7 @@ import static org.testng.AssertJUnit.assertTrue;
 
 import com.vmware.bdd.entity.CloudProviderConfigEntity;
 import com.vmware.bdd.entity.Saveable;
+import com.vmware.bdd.entity.TaskEntity;
 
 public class TestDAL {
 
@@ -55,11 +56,16 @@ public class TestDAL {
 
    @Test(groups = {"testDAL"})
    public void testIntransInsert() {
-      CloudProviderConfigEntity vcCloud = new CloudProviderConfigEntity();
-      vcCloud.setCloudType("VC");
-      vcCloud.setAttribute("vc_addr");
-      vcCloud.setValue("10.1.170.1");
-      DAL.inTransactionInsert(vcCloud);
+      DAL.inRwTransactionDo(new Saveable<CloudProviderConfigEntity>() {
+         public CloudProviderConfigEntity body() {
+            CloudProviderConfigEntity vcCloud = new CloudProviderConfigEntity();
+            vcCloud.setCloudType("VC");
+            vcCloud.setAttribute("vc_addr");
+            vcCloud.setValue("10.1.170.1");
+            DAL.insert(vcCloud);
+            return vcCloud;
+         }
+      });
 
       List<CloudProviderConfigEntity> attrs =
             CloudProviderConfigEntity.findAllByType("VC");

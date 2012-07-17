@@ -161,7 +161,7 @@ public class DAL {
             sn.connection().setReadOnly(readOnly);
             retval = obj.body();
             if (doRndRollback) {
-               logger.debug("randomly rollback the transaction");
+               logger.warn("randomly rollback the transaction");
                throw new LockAcquisitionException("Random Rollback",
                         new SQLException("Random Rollback"));
             }

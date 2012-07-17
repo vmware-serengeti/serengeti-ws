@@ -60,60 +60,65 @@ public class TestClusterEntity {
 
    @Test(groups = { "testClusterEntity" })
    public void testInsert() {
-      ClusterEntity cluster = new ClusterEntity(CLUSTER_NAME);
-      cluster.setDistro("apache");
+      DAL.inRwTransactionDo(new Saveable<Void>() {
+         public Void body() {
+            ClusterEntity cluster = new ClusterEntity(CLUSTER_NAME);
+            cluster.setDistro("apache");
 
-      Set<NodeGroupEntity> nodeGroups = new HashSet<NodeGroupEntity>();
-      NodeGroupEntity hdfsGroup = new NodeGroupEntity(HDFS_GROUP);
+            Set<NodeGroupEntity> nodeGroups = new HashSet<NodeGroupEntity>();
+            NodeGroupEntity hdfsGroup = new NodeGroupEntity(HDFS_GROUP);
 
-      hdfsGroup.setCluster(cluster);
-      hdfsGroup.setCpuNum(1);
-      hdfsGroup.setMemorySize(2048);
-      hdfsGroup.setStorageSize(20);
-      hdfsGroup.setStorageType(DatastoreType.LOCAL);
-      hdfsGroup.setDefineInstanceNum(1);
-      hdfsGroup.setHaFlag(true);
+            hdfsGroup.setCluster(cluster);
+            hdfsGroup.setCpuNum(1);
+            hdfsGroup.setMemorySize(2048);
+            hdfsGroup.setStorageSize(20);
+            hdfsGroup.setStorageType(DatastoreType.LOCAL);
+            hdfsGroup.setDefineInstanceNum(1);
+            hdfsGroup.setHaFlag(true);
 
-      ArrayList<String> roleStr = new ArrayList<String>();
-      roleStr.add(HADOOP_ROLE);
-      roleStr.add(DATA_NODE_ROLE);
-      hdfsGroup.setRoles((new Gson()).toJson(roleStr));
+            ArrayList<String> roleStr = new ArrayList<String>();
+            roleStr.add(HADOOP_ROLE);
+            roleStr.add(DATA_NODE_ROLE);
+            hdfsGroup.setRoles((new Gson()).toJson(roleStr));
 
-      nodeGroups.add(hdfsGroup);
+            nodeGroups.add(hdfsGroup);
 
-      NodeGroupEntity computeGroup = new NodeGroupEntity(COMPUTE_GROUP);
+            NodeGroupEntity computeGroup = new NodeGroupEntity(COMPUTE_GROUP);
 
-      computeGroup.setCluster(cluster);
-      computeGroup.setCpuNum(1);
-      computeGroup.setMemorySize(2048);
-      computeGroup.setStorageSize(20);
-      computeGroup.setStorageType(DatastoreType.SHARED);
-      computeGroup.setDefineInstanceNum(1);
-      computeGroup.setHaFlag(true);
+            computeGroup.setCluster(cluster);
+            computeGroup.setCpuNum(1);
+            computeGroup.setMemorySize(2048);
+            computeGroup.setStorageSize(20);
+            computeGroup.setStorageType(DatastoreType.SHARED);
+            computeGroup.setDefineInstanceNum(1);
+            computeGroup.setHaFlag(true);
 
-      roleStr.clear();
-      roleStr.add(HADOOP_ROLE);
-      roleStr.add(COMPUTE_NODE_ROLE);
-      computeGroup.setRoles((new Gson()).toJson(roleStr));
+            roleStr.clear();
+            roleStr.add(HADOOP_ROLE);
+            roleStr.add(COMPUTE_NODE_ROLE);
+            computeGroup.setRoles((new Gson()).toJson(roleStr));
 
-      Set<NodeGroupAssociation> associations =
-            new HashSet<NodeGroupAssociation>();
-      NodeGroupAssociation association = new NodeGroupAssociation();
+            Set<NodeGroupAssociation> associations =
+                  new HashSet<NodeGroupAssociation>();
+            NodeGroupAssociation association = new NodeGroupAssociation();
 
-      association.setReferencedGroup(HDFS_GROUP);
-      association.setAssociationType(GroupAssociationType.STRICT);
-      association.setNodeGroup(computeGroup);
+            association.setReferencedGroup(HDFS_GROUP);
+            association.setAssociationType(GroupAssociationType.STRICT);
+            association.setNodeGroup(computeGroup);
 
-      associations.add(association);
+            associations.add(association);
 
-      computeGroup.setGroupAssociations(associations);
+            computeGroup.setGroupAssociations(associations);
 
-      nodeGroups.add(computeGroup);
+            nodeGroups.add(computeGroup);
 
-      cluster.setNodeGroups(nodeGroups);
+            cluster.setNodeGroups(nodeGroups);
 
-      DAL.inTransactionInsert(cluster);
-
+            DAL.insert(cluster);
+            return null;
+         }
+      });
+ 
       DAL.inRoTransactionDo(new Saveable<Void>() {
          public Void body() {
             ClusterEntity clusterRead =
