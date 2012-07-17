@@ -733,11 +733,11 @@ public class ClusterCommands implements CommandMarker {
                      configration);
          if (validateResult.getType() != ValidateResult.Type.VALID) {
             String warningMsg="";
-            if (validateResult.getType() != ValidateResult.Type.NAME_IN_BLACK_LIST) {
+            if (validateResult.getType() == ValidateResult.Type.NAME_IN_BLACK_LIST) {
                warningMsg=getValidateWarningMsg(levelName,validateResult.getFailureNames(),
                      Constants.PARAM_CLUSTER_IN_BLACK_LIST_WARNING);
                System.out.println(warningMsg);
-            } else if (validateResult.getType() != ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
+            } else if (validateResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
                warningMsg=getValidateWarningMsg(levelName,
                      validateResult.getFailureNames(),
                      Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING
