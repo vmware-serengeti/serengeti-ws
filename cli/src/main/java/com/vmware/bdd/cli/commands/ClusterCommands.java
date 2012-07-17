@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 
 import jline.ConsoleReader;
 
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -57,6 +58,9 @@ public class ClusterCommands implements CommandMarker {
 
    @Autowired
    private ClusterRestClient restClient;
+   
+   @Autowired
+   private Configuration hadoopConfiguration;
 
    //define role of the node group .
    private enum NodeGroupRole {
@@ -309,6 +313,75 @@ public class ClusterCommands implements CommandMarker {
                Constants.OUTPUT_OP_RESIZE, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.INVALID_VALUE + " instanceNum=" + instanceNum);
       }
+   }
+   
+	@CliCommand(value = "cluster target", help = "Set or query target cluster to run commands")
+	public void targetCluster(
+			@CliOption(key = { "name" }, mandatory = false, help = "The cluster name") final String name, 
+			@CliOption(key = { "info" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to show target information") final boolean info) {
+
+		ClusterRead cluster = null;
+		try {
+			if (info) {
+				System.out.println("HDFS url:" + hadoopConfiguration.get("fs.default.name"));
+				System.out.println("Job Tracker url:" + hadoopConfiguration.get("mapred.job.tracker"));
+			}
+			else {
+				if (name == null) {
+					ClusterRead[] clusters = restClient.getAll();
+					if (clusters != null && clusters.length > 0) {
+						cluster = clusters[0];
+					}
+				}
+				else {
+					cluster = restClient.get(name);
+				}
+
+				if (cluster == null) {
+					CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_TARGET,
+							Constants.OUTPUT_OP_RESULT_FAIL, "No valid target available");
+				}
+				else {
+					for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {
+						for(String role : nodeGroup.getRoles()){
+							if(role.equals("hadoop_namenode")){
+								List<NodeRead> nodes = nodeGroup.getInstances();
+								if(nodes != null && nodes.size() > 0){
+									String nameNodeIP = nodes.get(0).getIp();
+									setHDFSURL(nameNodeIP);
+								}
+								else{
+									throw new CliRestException("no name node available");
+								}
+							}
+							if(role.equals("hadoop_jobtracker")){
+								List<NodeRead> nodes = nodeGroup.getInstances();
+								if(nodes != null && nodes.size() > 0){
+									String jobTrackerIP = nodes.get(0).getIp();
+									setJobTrackerURL(jobTrackerIP);
+								}
+								else{
+									throw new CliRestException("no job tracker available");
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (CliRestException e) {
+			CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_TARGET,
+					Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+		}
+	}
+   
+   private void setHDFSURL(String nameNodeAddress){
+	   String hdfsUrl = "webhdfs://" + nameNodeAddress + ":50070";
+	   hadoopConfiguration.set("fs.default.name", hdfsUrl);
+   }
+   
+   private void setJobTrackerURL(String jobTrackerAddress){
+	   String jobTrackerUrl = jobTrackerAddress + ":9001";
+	   hadoopConfiguration.set("mapred.job.tracker", jobTrackerUrl);
    }
 
    @CliCommand(value = "cluster config", help = "Config an existing cluster")

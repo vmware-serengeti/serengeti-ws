@@ -69,6 +69,7 @@ public class Constants {
     public static final String OUTPUT_OP_CONFIG = "config";
     public static final String OUTPUT_OP_ADD = "add";
     public static final String OUTPUT_OP_LIST = "list";
+    public static final String OUTPUT_OP_TARGET = "target";
     public static final String OUTPUT_OP_DELETE = "delete";
     public static final String OUTPUT_OP_START = "start";
     public static final String OUTPUT_OP_STOP = "stop";
