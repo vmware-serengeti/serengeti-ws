@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import jline.ConsoleReader;
 
@@ -141,7 +142,7 @@ public class ClusterCommands implements CommandMarker {
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
             if (!skipConfigValidation) {
-               if (!validateConfigration(clusterCreate)) {
+               if (!validateConfiguration (clusterCreate)) {
                   return;
                }
             } else {
@@ -709,35 +710,34 @@ public class ClusterCommands implements CommandMarker {
             failedMsg.toString());
    }
 
-   private boolean validateConfigration(ClusterCreate cluster) {
+   private boolean validateConfiguration (ClusterCreate cluster) {
       boolean validated = true;
-      //validate cluster level configration
-      validated = validateConfigration(cluster.getName(),cluster.getConfiguration());
-      //validate nodegroup level configration
-      if (validated) {
-         for (NodeGroupCreate nodeGroup : cluster.getNodeGroups()) {
-            if(nodeGroup.getConfiguration()!= null && nodeGroup.getConfiguration().size()>0){
-               validated = validateConfigration(cluster.getName()+":"+nodeGroup.getName(),nodeGroup.getConfiguration());
-            }
+      Map<String, Object> configuration = new HashMap<String, Object>();
+      //add cluster level Configuration 
+      addConfiguration(configuration, cluster.getConfiguration());
+      //add nodegroup level Configuration 
+      for (NodeGroupCreate nodeGroup : cluster.getNodeGroups()) {
+         if (nodeGroup.getConfiguration() != null && nodeGroup.getConfiguration().size() > 0) {
+            addConfiguration(configuration, nodeGroup.getConfiguration());
          }
       }
-      
+      validated = validateConfiguration(cluster.getName(), configuration);
       return validated;
    }
 
-   private boolean validateConfigration(String levelName,Map<String, Object> configration) {
+   private boolean validateConfiguration(String levelName,Map<String, Object> configuration ) {
       ValidateResult validateResult = null;
       for (ValidationType validationType : ValidationType.values()) {
          validateResult =
                AppConfigValidationUtils.validateConfig(validationType,
-                     configration);
+                     configuration);
          if (validateResult.getType() != ValidateResult.Type.VALID) {
             String warningMsg="";
-            if (validateResult.getType() != ValidateResult.Type.NAME_IN_BLACK_LIST) {
+            if (validateResult.getType() == ValidateResult.Type.NAME_IN_BLACK_LIST) {
                warningMsg=getValidateWarningMsg(levelName,validateResult.getFailureNames(),
                      Constants.PARAM_CLUSTER_IN_BLACK_LIST_WARNING);
                System.out.println(warningMsg);
-            } else if (validateResult.getType() != ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
+            } else if (validateResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
                warningMsg=getValidateWarningMsg(levelName,
                      validateResult.getFailureNames(),
                      Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING
@@ -750,33 +750,61 @@ public class ClusterCommands implements CommandMarker {
       }
       return true;
    }
-   
-   private String getValidateWarningMsg(String levelName,List<String> failureNames,String warningMsg) {
-      StringBuilder waringMsgBuff = new StringBuilder();
-      if(failureNames != null && !failureNames.isEmpty()) {
-         waringMsgBuff.append("Waring:");
-         int j = 0;
+
+   private String getValidateWarningMsg(String levelName, List<String> failureNames, String warningMsg) {
+      StringBuilder warningMsgBuff = new StringBuilder();
+      if (failureNames != null && !failureNames.isEmpty()) {
+         warningMsgBuff.append("Warning: ");
          for (String failureName : failureNames) {
-            waringMsgBuff.append(failureName);
-            if (j < failureNames.size() - 1) {
-               waringMsgBuff.append(",");
-            } else {
-               waringMsgBuff.append(" ");
-            }
-            j++;
+            warningMsgBuff.append(failureName).append(", ");
          }
+         warningMsgBuff.delete(warningMsgBuff.length() - 2, warningMsgBuff.length());
          if (failureNames.size() > 1) {
-            waringMsgBuff.append("are");
+            warningMsgBuff.append(" are ");
          } else {
-            waringMsgBuff.append("is");
+            warningMsgBuff.append(" is ");
          }
-         waringMsgBuff.append(warningMsg);
-      }else{
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, levelName,
-               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.PARAM_CLUSTER_VALIDATE_ERROR);
+         warningMsgBuff.append(warningMsg);
       }
-      return waringMsgBuff.toString();
+      return warningMsgBuff.toString();
    }
 
+   @SuppressWarnings("unchecked")
+   private void addConfiguration(Map<String, Object> goalConfig, Map<String, Object> config) {
+      if (!goalConfig.isEmpty() && config != null) {
+         for (Entry<String, Object> goalTypeConfig : goalConfig.entrySet()) {
+            if (config.containsKey(goalTypeConfig.getKey())) {
+               if (goalTypeConfig.getValue() instanceof Map && config.get(goalTypeConfig.getKey()) instanceof Map) {
+                  Map<String, Object> goalFileConfigMap = (Map<String, Object>) goalTypeConfig.getValue();
+                  Map<String, Object> fileConfigMap = (Map<String, Object>) config.get(goalTypeConfig.getKey());
+                  for (Entry<String, Object> goalFileConfig : goalFileConfigMap.entrySet()) {
+                     if (fileConfigMap.containsKey(goalFileConfig.getKey())) {
+                        Object goalPropertyConfigObj = goalFileConfig.getValue();
+                        Object propertyConfigObj = fileConfigMap.get(goalFileConfig.getKey());
+                        if (goalPropertyConfigObj instanceof Map && propertyConfigObj instanceof Map) {
+                           Map<String, Object> goalPropertyConfigMap = (Map<String, Object>) goalPropertyConfigObj;
+                           Map<String, Object> propertyConfigMap = (Map<String, Object>) propertyConfigObj;
+                           for (Entry<String, Object> propertyConfig : propertyConfigMap.entrySet()) {
+                              boolean matched = false;
+                              String propertyName = propertyConfig.getKey();
+                              for (Entry<String, Object> goalPropertyConfig : goalPropertyConfigMap.entrySet()) {
+                                 if (goalPropertyConfig.getKey().trim().equals(propertyName)) {
+                                    matched = true;
+                                    break;
+                                 }
+                              }
+                              if (!matched) {
+                                 goalPropertyConfigMap.put(propertyName, propertyConfig.getValue());
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      } else if (goalConfig.isEmpty()) {
+         goalConfig.putAll(config);
+      }
+   }
 }

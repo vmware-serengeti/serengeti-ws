@@ -17,7 +17,7 @@ elif [ $1 = "stop" ]; then
 elif [ $1 = "destroy" ]; then
   cmd="knife cluster kill $2 -f $3 --yes $4"
 elif [ $1 = "configure" ]; then
-  cmd="knife cluster create $2 -f $3 --yes --bootstrap $4"
+  cmd="knife cluster bootstrap $2 -f $3 --yes $4"
 else
   echo "wrong command $1"
 fi

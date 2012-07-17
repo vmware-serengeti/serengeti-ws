@@ -231,20 +231,17 @@ public class NodeGroupCreate {
                if (a.getReference() == null) {
                   valid = false;
                   failedMsgList.add(new StringBuilder().append(getName())
-                        .append(".placementPolicies.groupAssociations[0]"
-                              + ".reference not set").toString());
+                        .append(".placementPolicies.groupAssociations[0].reference not set").toString());
                } else if (a.getReference().equals(getName())) {
                   valid = false;
                   failedMsgList.add(new StringBuilder()
                         .append(getName())
-                        .append(".placementPolicies.groupAssociations[0]"
-                              + " refers to itself").toString());
+                        .append(".placementPolicies.groupAssociations[0] refers to itself").toString());
                } else if (!groups.containsKey(a.getReference())) {
                   valid = false;
                   failedMsgList.add(new StringBuilder()
                         .append(getName())
-                        .append(".placementPolicies.groupAssociations[0]"
-                                    + " refers to invalid node group ")
+                        .append(".placementPolicies.groupAssociations[0] refers to invalid node group ")
                         .append(a.getReference()).toString());
                } else {
                   // this is normal case, do more check
@@ -253,9 +250,7 @@ public class NodeGroupCreate {
                      valid = false;
                      failedMsgList.add(new StringBuilder()
                            .append(getName())
-                           .append(".placementPolicies.groupAssociations[0] " +
-                           		"has different host number with " +
-                           		"the referenced node group ")
+                           .append(".placementPolicies.groupAssociations[0] has different host number with the referenced node group ")
                            .append(a.getReference()).toString());
                   }
                   // current implementation only support sum(in/out degree) <= 1
@@ -266,8 +261,7 @@ public class NodeGroupCreate {
                      valid = false;
                      failedMsgList.add(new StringBuilder()
                            .append(getName())
-                           .append(".placementPolicies.groupAssociations[0] "
-                                       + "refers to node group ")
+                           .append(".placementPolicies.groupAssociations[0] refers to node group ")
                            .append(a.getReference())
                            .append(" which also has reference(s)").toString());
                   }

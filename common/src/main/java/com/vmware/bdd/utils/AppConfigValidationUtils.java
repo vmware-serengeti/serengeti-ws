@@ -19,7 +19,8 @@ import java.util.Map;
 public class AppConfigValidationUtils {
 
    public static enum ValidationType {
-      BLACK_LIST, WHITE_LIST
+      WHITE_LIST,
+      BLACK_LIST
    }
 
    /**
