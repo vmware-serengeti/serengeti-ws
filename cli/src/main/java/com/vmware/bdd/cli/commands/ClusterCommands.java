@@ -142,7 +142,7 @@ public class ClusterCommands implements CommandMarker {
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
             if (!skipConfigValidation) {
-               if (!validateConfigurtion(clusterCreate)) {
+               if (!validateConfiguration (clusterCreate)) {
                   return;
                }
             } else {
@@ -710,27 +710,27 @@ public class ClusterCommands implements CommandMarker {
             failedMsg.toString());
    }
 
-   private boolean validateConfigurtion(ClusterCreate cluster) {
+   private boolean validateConfiguration (ClusterCreate cluster) {
       boolean validated = true;
       Map<String, Object> configuration = new HashMap<String, Object>();
-      //add cluster level configurtion
-      addConfigurtion(configuration, cluster.getConfiguration());
-      //add nodegroup level configurtion
+      //add cluster level Configuration 
+      addConfiguration(configuration, cluster.getConfiguration());
+      //add nodegroup level Configuration 
       for (NodeGroupCreate nodeGroup : cluster.getNodeGroups()) {
          if (nodeGroup.getConfiguration() != null && nodeGroup.getConfiguration().size() > 0) {
-            addConfigurtion(configuration, nodeGroup.getConfiguration());
+            addConfiguration(configuration, nodeGroup.getConfiguration());
          }
       }
-      validated = validateConfigurtion(cluster.getName(), configuration);
+      validated = validateConfiguration(cluster.getName(), configuration);
       return validated;
    }
 
-   private boolean validateConfigurtion(String levelName,Map<String, Object> configurtion) {
+   private boolean validateConfiguration(String levelName,Map<String, Object> configuration ) {
       ValidateResult validateResult = null;
       for (ValidationType validationType : ValidationType.values()) {
          validateResult =
                AppConfigValidationUtils.validateConfig(validationType,
-                     configurtion);
+                     configuration);
          if (validateResult.getType() != ValidateResult.Type.VALID) {
             String warningMsg="";
             if (validateResult.getType() == ValidateResult.Type.NAME_IN_BLACK_LIST) {
@@ -770,7 +770,7 @@ public class ClusterCommands implements CommandMarker {
    }
 
    @SuppressWarnings("unchecked")
-   private void addConfigurtion(Map<String, Object> goalConfig, Map<String, Object> config) {
+   private void addConfiguration(Map<String, Object> goalConfig, Map<String, Object> config) {
       if (!goalConfig.isEmpty() && config != null) {
          for (Entry<String, Object> goalTypeConfig : goalConfig.entrySet()) {
             if (config.containsKey(goalTypeConfig.getKey())) {
