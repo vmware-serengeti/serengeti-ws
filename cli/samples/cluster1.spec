@@ -24,10 +24,10 @@
       "storage": {
         "type": "LOCAL",
         "sizeGB": 10
-      },        
+      },
       "rpNames": [
         "rp1",
-        "rp2" 
+        "rp2"
       ],
        "configuration": {
 	     "hadoop": {
@@ -56,11 +56,12 @@
         "hive",
         "pig"
       ],
+      "instanceNum": 1,
       "cpuNum": 1,
       "storage": {
         "type": "LOCAL",
         "sizeGB": 10
-      },        
+      },
       "rpNames": [
         "rp3"
       ]
@@ -85,4 +86,4 @@
      }
    }
  }
-}  
+}
