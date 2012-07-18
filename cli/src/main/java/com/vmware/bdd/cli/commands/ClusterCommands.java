@@ -142,7 +142,7 @@ public class ClusterCommands implements CommandMarker {
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
             if (!skipConfigValidation) {
-               if (!validateConfiguration (clusterCreate)) {
+               if (!validateConfiguration(clusterCreate)) {
                   return;
                }
             } else {
@@ -308,6 +308,41 @@ public class ClusterCommands implements CommandMarker {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_RESIZE, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.INVALID_VALUE + " instanceNum=" + instanceNum);
+      }
+   }
+
+   @CliCommand(value = "cluster config", help = "Config an existing cluster")
+   public void configCluster(
+         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
+         @CliOption(key = { "specFile" }, mandatory = true, help = "The spec file name path") final String specFilePath,
+         @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation) {
+      //validate the name
+      if (name.indexOf("-") != -1) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CONFIG,
+               Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_CLUSTER + Constants.PARAM_NOT_CONTAIN_HORIZONTAL_LINE);
+         return;
+      }
+      try {
+         ClusterRead clusterRead = restClient.get(name);
+         // build ClusterCreate object
+         ClusterCreate clusterConfig = new ClusterCreate();
+         clusterConfig.setName(clusterRead.getName());
+         ClusterCreate clusterSpec =
+               CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile(specFilePath));
+         clusterConfig.setNodeGroups(clusterSpec.getNodeGroups());
+         clusterConfig.setConfiguration(clusterSpec.getConfiguration());
+         if (!skipConfigValidation) {
+            if (!validateConfiguration(clusterConfig)) {
+               return;
+            }
+         } else {
+            clusterConfig.setValidateConfig(false);
+         }
+         restClient.configCluster(clusterConfig);
+      } catch (Exception e) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CONFIG,
+               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+         return;
       }
    }
 
@@ -618,11 +653,12 @@ public class ClusterCommands implements CommandMarker {
             return matchRoles.size() == 0 ? true : false;
          }
       case CLIENT:
-         if (roles.size() < 1 || roles.size() > 3) {
+         if (roles.size() < 1 || roles.size() > 4) {
             return false;
          } else {
             matchRoles.add(Constants.ROLE_HADOOP_CLIENT);
             matchRoles.add(Constants.ROLE_HIVE);
+            matchRoles.add(Constants.ROLE_HIVE_SERVER);
             matchRoles.add(Constants.ROLE_PIG);
             int diffNum = matchRoles.size() - roles.size();
             matchRoles.removeAll(roles);
@@ -710,12 +746,12 @@ public class ClusterCommands implements CommandMarker {
             failedMsg.toString());
    }
 
-   private boolean validateConfiguration (ClusterCreate cluster) {
+   private boolean validateConfiguration(ClusterCreate cluster) {
       boolean validated = true;
       Map<String, Object> configuration = new HashMap<String, Object>();
-      //add cluster level Configuration 
+      // add cluster level Configuration
       addConfiguration(configuration, cluster.getConfiguration());
-      //add nodegroup level Configuration 
+      // add nodegroup level Configuration
       for (NodeGroupCreate nodeGroup : cluster.getNodeGroups()) {
          if (nodeGroup.getConfiguration() != null && nodeGroup.getConfiguration().size() > 0) {
             addConfiguration(configuration, nodeGroup.getConfiguration());
