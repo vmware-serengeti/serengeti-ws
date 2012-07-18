@@ -12,7 +12,7 @@
       "tarball" : "apache/1.0.1/pig-0.9.2.tar.gz"
     },
     {
-      "roles" : ["hive"],
+      "roles" : ["hive", "hive_server"],
       "tarball" : "apache/1.0.1/hive-0.8.1.tar.gz"
     }
    ]
