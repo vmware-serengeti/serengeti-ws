@@ -22,6 +22,7 @@
 		<jar.mainclass>org.springframework.shell.Bootstrap</jar.mainclass>
 		<impala.version>1.0.0.BUILD-SNAPSHOT</impala.version>
 		<hadoop.version>1.0.0</hadoop.version>
+		<antlr.version>3.4</antlr.version>
 	</properties>
 
 	<dependencies>
@@ -60,6 +61,31 @@
 			<groupId>org.springframework.data.hadoop.impala</groupId>
 			<artifactId>plugin-mapreduce</artifactId>
 			<version>${impala.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data.hadoop.impala</groupId>
+			<artifactId>plugin-pig</artifactId>
+			<version>${impala.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data.hadoop.impala</groupId>
+			<artifactId>plugin-hive</artifactId>
+			<version>${impala.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.antlr</groupId>
+      				<artifactId>antlr-runtime</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.antlr</groupId>
+      				<artifactId>antlr</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.antlr</groupId>
+      		<artifactId>antlr-runtime</artifactId> 
+			<version>${antlr.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
@@ -145,13 +171,8 @@
 				<updatePolicy>always</updatePolicy>
 			</snapshots>
 			<name>Springframework Maven SNAPSHOT Repository</name>
-			<url>http://maven.springframework.org/snapshot</url>
+			<url>http://repo.springsource.org/libs-snapshot</url>
 		</repository>
 
-		<repository>
-			<id>spring-maven-milestone</id>
-			<name>Springframework Maven Milestone Repository</name>
-			<url>http://maven.springframework.org/milestone</url>
-		</repository>
 	</repositories>
 </project>

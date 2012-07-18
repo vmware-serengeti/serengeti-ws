@@ -380,7 +380,7 @@ public class ClusterCommands implements CommandMarker {
    }
    
    private void setJobTrackerURL(String jobTrackerAddress){
-	   String jobTrackerUrl = jobTrackerAddress + ":9001";
+	   String jobTrackerUrl = jobTrackerAddress + ":8021";
 	   hadoopConfiguration.set("mapred.job.tracker", jobTrackerUrl);
    }
 
