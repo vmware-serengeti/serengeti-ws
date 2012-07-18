@@ -23,9 +23,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.BddErrorMessage;
+import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.NetworkRead;
@@ -35,6 +37,7 @@ import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.cli.commands.ClusterCommands;
+import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 
 @Test
@@ -340,5 +343,21 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.GET,
                 HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
         clusterCommands.getCluster(null, true);
+    }
+    
+    @Test
+    public void testParseClusterSpec() {
+      try {
+         String[] specFiles = { "samples/cluster1.spec", "samples/cluster2.spec" };
+         for (String specFile : specFiles) {
+            ClusterCreate clusterSpec = CommandsUtils.getObjectByJsonString(
+                  ClusterCreate.class, CommandsUtils.dataFromFile(specFile));
+            List<String> errors = new ArrayList<String>();
+            boolean valid = clusterSpec.validateNodeGroupPlacementPolicies(errors);
+            Assert.assertTrue(valid, errors.toString());
+         }
+      } catch (Exception e) {
+         Assert.fail("failed to parse cluster spec", e);
+      }
     }
 }
