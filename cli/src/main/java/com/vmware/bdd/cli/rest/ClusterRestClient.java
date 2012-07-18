@@ -48,6 +48,14 @@ public class ClusterRestClient {
       restClient.createObject(clusterCreate, path, httpverb, outputCallBack);
    }
 
+   public void configCluster(ClusterCreate clusterConfig) {
+      String clusterName = clusterConfig.getName();
+      final String path = Constants.REST_PATH_CLUSTER + "/" + clusterName + "/" + Constants.REST_PATH_CONFIG;
+      final HttpMethod httpverb = HttpMethod.PUT;
+      PrettyOutput outputCallBack = getClusterPrettyOutputCallBack(this, clusterName);
+      restClient.update(clusterConfig, path, httpverb, outputCallBack);
+   }
+
    public ClusterRead get(String id) {
       final String path = Constants.REST_PATH_CLUSTER;
       final HttpMethod httpverb = HttpMethod.GET;

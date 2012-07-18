@@ -169,6 +169,7 @@ public class ClusterCommandsTest extends MockRestServer {
         roles.add("hadoop_tasktracker");
         roles.add("hadoop_client");
         roles.add("hive");
+        roles.add("hive_server");
         roles.add("pig");
         distro.setRoles(roles);
 
@@ -178,7 +179,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.NO_CONTENT, "");
 
-        clusterCommands.createCluster("cluster1", null, "c:\\spec.txt", null, null, null, false, false);
+        clusterCommands.createCluster("cluster1", null, "samples/cluster1.spec", null, null, null, false, false);
     }
 
     @Test
@@ -341,4 +342,45 @@ public class ClusterCommandsTest extends MockRestServer {
                 HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
         clusterCommands.getCluster(null, true);
     }
+
+   @Test
+   public void testConfigCluster() throws Exception {
+      ObjectMapper mapper = new ObjectMapper();
+      StorageRead sr1 = new StorageRead();
+      sr1.setType("Type1");
+      sr1.setSizeGB(100);
+      NodeRead nr1 = new NodeRead();
+      nr1.setHostName("test1.domain.com");
+      nr1.setIp("192.1.1.99");
+      nr1.setName("node1");
+      nr1.setStatus("running");
+      List<NodeRead> instances1 = new LinkedList<NodeRead>();
+      instances1.add(nr1);
+      List<String> roles1 = new LinkedList<String>();
+      roles1.add(Constants.ROLE_HADOOP_NAME_NODE);
+      roles1.add(Constants.ROLE_HADOOP_JOB_TRACKER);
+      NodeGroupRead ngr1 = new NodeGroupRead();
+      ngr1.setName("NodeGroup1");
+      ngr1.setCpuNum(6);
+      ngr1.setMemCapacityMB(2048);
+      ngr1.setStorage(sr1);
+      ngr1.setInstanceNum(1);
+      ngr1.setInstances(instances1);
+      ngr1.setRoles(roles1);
+      ClusterRead cr1 = new ClusterRead();
+      cr1.setName("cluster1");
+      cr1.setDistro("distro1");
+      cr1.setInstanceNum(10);
+      cr1.setStatus(ClusterRead.ClusterStatus.RUNNING);
+      List<NodeGroupRead> nodeGroupRead1 = new LinkedList<NodeGroupRead>();
+      nodeGroupRead1.add(ngr1);
+      cr1.setNodeGroups(nodeGroupRead1);
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
+            mapper.writeValueAsString(cr1));
+
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/config", HttpMethod.PUT,
+            HttpStatus.NO_CONTENT, "");
+      clusterCommands.configCluster("cluster1", "samples/cluster1.spec", false);
+   }
+
 }

@@ -34,6 +34,7 @@ public class Constants {
     public static final String REST_PATH_NETWORKS = "networks";
     public static final String REST_PATH_DISTROS = "distros";
     public static final String REST_PATH_DISTRO = "distro";
+    public static final String REST_PATH_CONFIG = "config";
 
     public static final String QUERY_ACTION_KEY = "state";
     public static final String QUERY_ACTION_START = "start";
@@ -65,6 +66,7 @@ public class Constants {
     public static final String OUTPUT_OBJECT_NODE = "node";
     public static final String OUTPUT_OBJECT_RESOURCEPOOL = "resourcepool";
     public static final String OUTPUT_OP_CREATE = "create";
+    public static final String OUTPUT_OP_CONFIG = "config";
     public static final String OUTPUT_OP_ADD = "add";
     public static final String OUTPUT_OP_LIST = "list";
     public static final String OUTPUT_OP_DELETE = "delete";
@@ -119,6 +121,7 @@ public class Constants {
     public static final String ROLE_HADOOP_TASKTRACKER = "hadoop_tasktracker";
     public static final String ROLE_HADOOP_CLIENT = "hadoop_client";
     public static final String ROLE_HIVE = "hive";
+    public static final String ROLE_HIVE_SERVER = "hive_server";
     public static final String ROLE_PIG = "pig";
     public static final String PARAM_CLUSTER_WARNING =
             "Warning: only support 1 master node group, 1 worker node group and 0 or 1 client node group now(master node group has hadoop_namenode,hadoop_jobtracker roles, only 1 instance. worker node group has hadoop_datanode,hadoop_tasktracker roles, 1 or more instance. client node group has hadoop_client,optional hive or pig roles,0 or more instance. Only master node group can config haFlag.)";
