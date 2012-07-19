@@ -160,11 +160,6 @@
 	<!-- jline 1.0.S2-B is here http://shrub.appspot.com/spring-roo-repository.springsource.org/release/net/sourceforge/jline/jline/1.0.S2-B/ -->
 	<repositories>
 		<repository>
-			<id>spring-roo-repository</id>
-			<name>Spring Roo Maven Repository</name>
-			<url>http://spring-roo-repository.springsource.org/release</url>
-		</repository>
-		<repository>
 			<id>spring-maven-snapshot</id>
 			<snapshots>
 				<enabled>true</enabled>
@@ -173,6 +168,21 @@
 			<name>Springframework Maven SNAPSHOT Repository</name>
 			<url>http://repo.springsource.org/libs-snapshot</url>
 		</repository>
+		<repository>
+                        <id>spring-maven-milestone</id>
+                        <name>Springframework Maven Milestone Repository</name>
+                        <url>http://repo.springsource.org/libs-milestone</url>
+                </repository>
+		<repository>
+                        <id>spring-maven-ext</id>
+                        <name>Springframework Maven Ext Repository</name>
+                        <url>http://repo.springsource.org/ext-release-local</url>
+                </repository>
+		<repository>
+                        <id>spring-roo-repository</id>
+                        <name>Spring Roo Maven Repository</name>
+                        <url>http://spring-roo-repository.springsource.org/release</url>
+                </repository>
 
 	</repositories>
 </project>
