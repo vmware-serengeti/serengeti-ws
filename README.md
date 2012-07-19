@@ -54,18 +54,20 @@ More details can be found at [cli/README.md](https://github.com/vmware-serengeti
 ## Build serengeti webservice and cli
  You need to have maven installed. Please reference our ![Installation Guide] (https://github.com/vmware-serengeti/doc/blob/master/installation_guide_from_source_code.txt) to install maven if you don't have it.
  If your server is behind a proxy, add following config into maven-settings.xml and make sure the right proxy setting
-    <proxies>
-      <proxy>
-        <active>true</active>
-        <protocol>http</protocol>
-        <host>proxy.domain.com</host>
-        <port>3128</port>
-        <nonProxyHosts>*.domain.com</nonProxyHosts>
-      </proxy>
-    </proxies>
+ 
+      <proxies>
+        <proxy>
+          <active>true</active>
+          <protocol>http</protocol>
+          <host>proxy.domain.com</host>
+          <port>3128</port>
+          <nonProxyHosts>*.domain.com</nonProxyHosts>
+        </proxy>
+      </proxies>
 
  then cd $SERENGETI_HOME/src/serengeti-ws
-    mvn package -s maven-settings.xml
+  
+      mvn package -s maven-settings.xml
 
 ## Downloading 
 You can download a complete Serengeti distribution on [projectserengeti.org](http://projectserengeti.org)  There are no published maven artifacts at this time, stay tuned.
