@@ -53,7 +53,8 @@ More details can be found at [cli/README.md](https://github.com/vmware-serengeti
 
 ## Build serengeti webservice and cli
  You need to have maven installed. Please reference our ![Installation Guide] (https://github.com/vmware-serengeti/doc/blob/master/installation_guide_from_source_code.txt) to install maven if you don't have it.
- If your server is behind a proxy, add following config into maven-settings.xml and make sure the right proxy setting
+ 
+ If your server is behind a proxy, add following config into maven-settings.xml and make sure the right proxy setting.
  
       <proxies>
         <proxy>
