@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -85,14 +86,11 @@ public class CommandsUtils {
       return dataStringsb.toString();
    }
 
-   public static <T> T getObjectByJsonString(Class<T> entityType,
-         String jsonString) throws JsonParseException, JsonMappingException,
-         IOException {
-
-      ObjectMapper mapper = new ObjectMapper();
+   public static <T> T getObjectByJsonString(Class<T> entityType, String jsonString) throws JsonParseException,
+         JsonMappingException, IOException {
+      ObjectMapper mapper = getMapper();
       T NodeGroupsCreate = null;
       NodeGroupsCreate = mapper.readValue(jsonString, entityType);
-
       return NodeGroupsCreate;
    }
 
@@ -273,5 +271,11 @@ public class CommandsUtils {
       double d = bd.doubleValue();
       bd = null;
       return d;
+   }
+
+   private static ObjectMapper getMapper() {
+      ObjectMapper mapper = new ObjectMapper();
+      mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+      return mapper;
    }
 }
