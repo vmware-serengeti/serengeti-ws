@@ -139,8 +139,7 @@ then
 else
   case "$1" in
     --help)
-      echo "Usage:"
-      echo "serenegeti --help --histsize {size} --cmdfile {file}"
+      echo "Usage: serengeti [command] [--cmdfile file] [--histsize size] [--help]"
       ;;
     --*)
       java -jar \${clijarname} $*
