@@ -31,7 +31,7 @@ import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.cli.commands.ResourcePoolCommands;
 
-@ContextConfiguration(locations = { "classpath*:/META-INF/spring/spring-shell-plugin.xml" })
+@ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
 public class RpCommandsTest extends MockRestServer {
    @Autowired
    private ResourcePoolCommands rpCommands;

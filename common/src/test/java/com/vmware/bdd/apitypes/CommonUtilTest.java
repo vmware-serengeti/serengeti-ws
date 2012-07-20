@@ -28,9 +28,9 @@ public class CommonUtilTest {
    public void testCopyFile() {
       try {
          String origFile = "cli-default-cluster.json";
-         String destFile = "test.json";
+         String destFile = System.getProperty("user.home") + "/" + "test.json";
          CommonUtil.copyFile(origFile, destFile);
-         File file = new File(System.getProperty("user.home") + "/" + destFile);
+         File file = new File(destFile);
          assertEquals(file.exists(), true);
          CommonUtil.deleteFile(destFile);
          assertEquals(file.exists(), false);
