@@ -20,5 +20,5 @@
         </property>
     </bean>
     <bean id="hadoopConfiguration" class="org.apache.hadoop.conf.Configuration"/>
-
+	<bean id="hiveCommands" class="org.springframework.data.hadoop.impala.hive.HiveCommands"/>
 </beans>
