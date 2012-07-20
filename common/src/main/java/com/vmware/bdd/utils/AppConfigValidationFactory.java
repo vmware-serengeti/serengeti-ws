@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -79,6 +80,7 @@ public class AppConfigValidationFactory {
         for (Map<String, T> warnPropertyFileMap : warnPropertyList) {
             if (warnPropertyFileMap.containsKey(fileName) && configProperties instanceof Map) {
                 Map<String, Object> configPropertyMap = (Map<String, Object>) configProperties;
+                List<String> removeList=new ArrayList<String>();
                 for (Entry<String, Object> configProperty : configPropertyMap.entrySet()) {
                     if (validationType == ValidationType.WHITE_LIST) {
                         for (Entry<String, T> warnPropertyFileEntry : warnPropertyFileMap.entrySet()) {
@@ -97,11 +99,17 @@ public class AppConfigValidationFactory {
                                     if (configProperty.getKey().equals(propertyName)) {
                                         validateResult.setType(ValidateResult.Type.NAME_IN_BLACK_LIST);
                                         validateResult.addFailureName(configProperty.getKey());
+                                        validateResult.putProperty(fileName, propertyName);
+                                        removeList.add(propertyName);
                                     }
                                 }
                             }
                         }
                     }
+                }
+                //remove black property from configuration
+                for(String pName:removeList){
+                   configPropertyMap.remove(pName);
                 }
             }
         }

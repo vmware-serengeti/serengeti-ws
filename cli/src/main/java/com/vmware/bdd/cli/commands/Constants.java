@@ -77,6 +77,7 @@ public class Constants {
     public static final String OUTPUT_OP_RESUME = "resume";
     public static final String OUTPUT_OP_RESULT_FAIL = "failed";
     public static final String OUTPUT_OP_RESULT_CREAT = "created";
+    public static final String OUTPUT_OP_RESULT_CONFIG = "configured";
     public static final String OUTPUT_OP_RESULT_DELETE = "deleted";
     public static final String OUTPUT_OP_RESULT_START = "started";
     public static final String OUTPUT_OP_RESULT_STOP = "stopped";
@@ -167,5 +168,4 @@ public class Constants {
     public static final String PARAM_CLUSTER_IN_BLACK_LIST_WARNING = "not allowed to customize in Serengeti. Your settings will not take effect.";
     public static final String PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING = "not regular configuration properties in Apache Hadoop. ";
     public static final String PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING_CONTINUE ="Are you sure to continue (Y/N)?";
-
 }

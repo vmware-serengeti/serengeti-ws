@@ -16,17 +16,13 @@ package com.vmware.bdd.utils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.net.URL;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
-import java.util.Date;
 
 import org.apache.log4j.Logger;
 
@@ -58,4 +54,37 @@ public class CommonUtil {
       }
       return jsonBuff.toString();
   }
+
+   public static void copyFile(final String origFileName, final String destFileName) throws IOException {
+      InputStream in = null;
+      URL fileURL = CommonUtil.class.getClassLoader().getResource(origFileName);
+      if (fileURL != null) {
+         in = new BufferedInputStream(fileURL.openStream());
+         File destFile = new File(System.getProperty("user.home") + "/" + destFileName);
+         OutputStream out = new FileOutputStream(destFile.getAbsoluteFile());
+         if (!destFile.exists()) {
+            logger.error("Can not create destination file " + destFileName + ".");
+         }
+         int byteread = 0;
+         byte[] buffer = new byte[1024];
+         while ((byteread = in.read(buffer)) != -1) {
+            out.write(buffer, 0, byteread);
+         }
+         in.close();
+         out.close();
+      } else {
+         logger.error("Can not find origin file " + origFileName + " .");
+      }
+   }
+
+   public static void deleteFile(final String destFileName) {
+      File destFile = new File(System.getProperty("user.home") + "/" + destFileName);
+      if (destFile.exists()) {
+         try {
+            destFile.delete();
+         } catch (Exception e) {
+            logger.error("CommonUtil.deleteFile Exception:" + e.getMessage() + " .");
+         }
+      }
+   }
 }
