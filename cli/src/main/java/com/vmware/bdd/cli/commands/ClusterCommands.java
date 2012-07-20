@@ -26,6 +26,7 @@ import jline.ConsoleReader;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.hadoop.impala.hive.HiveCommands;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -60,6 +61,11 @@ public class ClusterCommands implements CommandMarker {
    
    @Autowired
    private Configuration hadoopConfiguration;
+   
+   @Autowired
+   private HiveCommands hiveCommands;
+   
+   private String hiveInfo;
 
    //define role of the node group .
    private enum NodeGroupRole {
@@ -328,8 +334,11 @@ public class ClusterCommands implements CommandMarker {
 		ClusterRead cluster = null;
 		try {
 			if (info) {
-				System.out.println("HDFS url:" + hadoopConfiguration.get("fs.default.name"));
-				System.out.println("Job Tracker url:" + hadoopConfiguration.get("mapred.job.tracker"));
+				System.out.println("HDFS url: " + hadoopConfiguration.get("fs.default.name"));
+				System.out.println("Job Tracker url: " + hadoopConfiguration.get("mapred.job.tracker"));
+				if(hiveInfo != null){
+					System.out.println("Hive server url: " + hiveInfo);
+				}
 			}
 			else {
 				if (name == null) {
@@ -369,6 +378,16 @@ public class ClusterCommands implements CommandMarker {
 									throw new CliRestException("no job tracker available");
 								}
 							}
+							if(role.equals("hive_server")){
+								List<NodeRead> nodes = nodeGroup.getInstances();
+								if(nodes != null && nodes.size() > 0){
+									String hiveServerIP = nodes.get(0).getIp();
+									setHiveServerURL(hiveServerIP);
+								}
+								else{
+									throw new CliRestException("no hive server available");
+								}
+							}
 						}
 					}
 				}
@@ -388,6 +407,14 @@ public class ClusterCommands implements CommandMarker {
 	   String jobTrackerUrl = jobTrackerAddress + ":8021";
 	   hadoopConfiguration.set("mapred.job.tracker", jobTrackerUrl);
    }
+   
+	private void setHiveServerURL(String hiveServerAddress) {
+		try {
+			hiveInfo = hiveCommands.config(hiveServerAddress, 10000, null);
+		} catch (Exception e) {
+			throw new CliRestException("faild to set hive server address");
+		}
+	}
 
    @CliCommand(value = "cluster config", help = "Config an existing cluster")
    public void configCluster(
