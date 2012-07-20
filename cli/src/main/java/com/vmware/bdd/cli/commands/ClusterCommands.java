@@ -21,7 +21,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import jline.ConsoleReader;
 
@@ -137,7 +136,7 @@ public class ClusterCommands implements CommandMarker {
             clusterCreate.setDsNames(dsNamesList);
          }
       }
-
+      ValidateResult blackListResult=null;
       try {
          if (specFilePath != null) {
             ClusterCreate clusterSpec =
@@ -145,8 +144,12 @@ public class ClusterCommands implements CommandMarker {
                         CommandsUtils.dataFromFile(specFilePath));
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
+            // validate blacklist
+            blackListResult=validateBlackList(clusterCreate);
             if (!skipConfigValidation) {
-               if (!validateConfiguration(clusterCreate)) {
+               // validate whitelist
+               ValidateResult whiteListResult=validateWhiteList(clusterCreate,blackListResult.getFailureNames());
+               if (!showWhiteListWarning(clusterCreate.getName(),whiteListResult)) {
                   return;
                }
             } else {
@@ -205,13 +208,15 @@ public class ClusterCommands implements CommandMarker {
          restClient.create(clusterCreate);
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_RESULT_CREAT);
+         if (blackListResult != null && !skipConfigValidation) {
+            showBlackListWarning(blackListResult);
+         }
       } catch (CliRestException e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
       }
    }
-
 
    @CliCommand(value = "cluster list", help = "Get cluster information")
    public void getCluster(
@@ -404,14 +409,22 @@ public class ClusterCommands implements CommandMarker {
                CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile(specFilePath));
          clusterConfig.setNodeGroups(clusterSpec.getNodeGroups());
          clusterConfig.setConfiguration(clusterSpec.getConfiguration());
+         // validate blacklist
+         ValidateResult blackListResult = validateBlackList(clusterConfig);
          if (!skipConfigValidation) {
-            if (!validateConfiguration(clusterConfig)) {
+            // validate whitelist
+            ValidateResult whiteListResult = validateWhiteList(clusterConfig, blackListResult.getFailureNames());
+            if (!showWhiteListWarning(clusterConfig.getName(), whiteListResult)) {
                return;
             }
          } else {
             clusterConfig.setValidateConfig(false);
          }
          restClient.configCluster(clusterConfig);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_RESULT_CONFIG);
+         if (blackListResult != null && !skipConfigValidation) {
+            showBlackListWarning(blackListResult);
+         }
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CONFIG,
                Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
@@ -819,48 +832,81 @@ public class ClusterCommands implements CommandMarker {
             failedMsg.toString());
    }
 
-   private boolean validateConfiguration(ClusterCreate cluster) {
-      boolean validated = true;
-      Map<String, Object> configuration = new HashMap<String, Object>();
-      // add cluster level Configuration
-      addConfiguration(configuration, cluster.getConfiguration());
-      // add nodegroup level Configuration
-      for (NodeGroupCreate nodeGroup : cluster.getNodeGroups()) {
-         if (nodeGroup.getConfiguration() != null && nodeGroup.getConfiguration().size() > 0) {
-            addConfiguration(configuration, nodeGroup.getConfiguration());
-         }
-      }
-      validated = validateConfiguration(cluster.getName(), configuration);
-      return validated;
+   private ValidateResult validateBlackList(ClusterCreate cluster) {
+      return validateConfiguration(cluster, ValidationType.BLACK_LIST);
    }
 
-   private boolean validateConfiguration(String levelName,Map<String, Object> configuration ) {
-      ValidateResult validateResult = null;
-      for (ValidationType validationType : ValidationType.values()) {
-         validateResult =
-               AppConfigValidationUtils.validateConfig(validationType,
-                     configuration);
-         if (validateResult.getType() != ValidateResult.Type.VALID) {
-            String warningMsg="";
-            if (validateResult.getType() == ValidateResult.Type.NAME_IN_BLACK_LIST) {
-               warningMsg=getValidateWarningMsg(levelName,validateResult.getFailureNames(),
-                     Constants.PARAM_CLUSTER_IN_BLACK_LIST_WARNING);
-               System.out.println(warningMsg);
-            } else if (validateResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
-               warningMsg=getValidateWarningMsg(levelName,
-                     validateResult.getFailureNames(),
+   private ValidateResult validateWhiteList(ClusterCreate cluster, List<String> blackList) {
+      ValidateResult validateResult = validateConfiguration(cluster, ValidationType.WHITE_LIST);
+      if(validateResult.getType() != ValidateResult.Type.VALID){
+         List<String> failureNames=new LinkedList<String>();
+         failureNames.addAll(validateResult.getFailureNames());
+         for(String name : validateResult.getFailureNames()){
+            if(blackList.contains(name)){
+               failureNames.remove(name);
+            }
+         }
+         validateResult.setFailureNames(failureNames);
+         if(validateResult.getFailureNames().isEmpty()){
+            validateResult.setType(ValidateResult.Type.VALID);
+         }
+      }
+      return validateResult;
+   }
+
+   private ValidateResult validateConfiguration(ClusterCreate cluster, ValidationType validationType) {
+      ValidateResult validateResult = new ValidateResult();
+      // validate cluster level Configuration
+      ValidateResult vr = null;
+      if (cluster.getConfiguration() != null && !cluster.getConfiguration().isEmpty()) {
+         vr = AppConfigValidationUtils.validateConfig(validationType, cluster.getConfiguration());
+         if (vr.getType() != ValidateResult.Type.VALID) {
+            validateResult.setType(vr.getType());
+            validateResult.setFailureNames(vr.getFailureNames());
+         }
+      }
+      // validate nodegroup level Configuration
+      for (NodeGroupCreate nodeGroup : cluster.getNodeGroups()) {
+         if (nodeGroup.getConfiguration() != null && !nodeGroup.getConfiguration().isEmpty()) {
+            vr = AppConfigValidationUtils.validateConfig(validationType, nodeGroup.getConfiguration());
+            if (vr.getType() != ValidateResult.Type.VALID) {
+               validateResult.setType(vr.getType());
+               List<String> failureNames = new LinkedList<String>();
+               failureNames.addAll(validateResult.getFailureNames());
+               for (String name : vr.getFailureNames()) {
+                  if (!failureNames.contains(name)) {
+                     failureNames.add(name);
+                  }
+               }
+               validateResult.setFailureNames(vr.getFailureNames());
+            }
+         }
+      }
+      return validateResult;
+   }
+
+   private boolean showWhiteListWarning(final String clusterName, ValidateResult whiteListResult) {
+      if (whiteListResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
+         String warningMsg =
+               getValidateWarningMsg(whiteListResult.getFailureNames(),
                      Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING
                            + Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING_CONTINUE);
-               if(! isContinue(levelName,Constants.OUTPUT_OP_CREATE, warningMsg)){
-                  return false;
-               }
-            }
+         if (!isContinue(clusterName, Constants.OUTPUT_OP_CREATE, warningMsg)) {
+            return false;
          }
       }
       return true;
    }
 
-   private String getValidateWarningMsg(String levelName, List<String> failureNames, String warningMsg) {
+   private void showBlackListWarning(ValidateResult blackListResult) {
+      if (blackListResult.getType() == ValidateResult.Type.NAME_IN_BLACK_LIST) {
+         String warningMsg =
+               getValidateWarningMsg(blackListResult.getFailureNames(), Constants.PARAM_CLUSTER_IN_BLACK_LIST_WARNING);
+         System.out.println(warningMsg);
+      }
+   }
+
+   private String getValidateWarningMsg(List<String> failureNames, String warningMsg) {
       StringBuilder warningMsgBuff = new StringBuilder();
       if (failureNames != null && !failureNames.isEmpty()) {
          warningMsgBuff.append("Warning: ");
@@ -878,42 +924,4 @@ public class ClusterCommands implements CommandMarker {
       return warningMsgBuff.toString();
    }
 
-   @SuppressWarnings("unchecked")
-   private void addConfiguration(Map<String, Object> goalConfig, Map<String, Object> config) {
-      if (!goalConfig.isEmpty() && config != null) {
-         for (Entry<String, Object> goalTypeConfig : goalConfig.entrySet()) {
-            if (config.containsKey(goalTypeConfig.getKey())) {
-               if (goalTypeConfig.getValue() instanceof Map && config.get(goalTypeConfig.getKey()) instanceof Map) {
-                  Map<String, Object> goalFileConfigMap = (Map<String, Object>) goalTypeConfig.getValue();
-                  Map<String, Object> fileConfigMap = (Map<String, Object>) config.get(goalTypeConfig.getKey());
-                  for (Entry<String, Object> goalFileConfig : goalFileConfigMap.entrySet()) {
-                     if (fileConfigMap.containsKey(goalFileConfig.getKey())) {
-                        Object goalPropertyConfigObj = goalFileConfig.getValue();
-                        Object propertyConfigObj = fileConfigMap.get(goalFileConfig.getKey());
-                        if (goalPropertyConfigObj instanceof Map && propertyConfigObj instanceof Map) {
-                           Map<String, Object> goalPropertyConfigMap = (Map<String, Object>) goalPropertyConfigObj;
-                           Map<String, Object> propertyConfigMap = (Map<String, Object>) propertyConfigObj;
-                           for (Entry<String, Object> propertyConfig : propertyConfigMap.entrySet()) {
-                              boolean matched = false;
-                              String propertyName = propertyConfig.getKey();
-                              for (Entry<String, Object> goalPropertyConfig : goalPropertyConfigMap.entrySet()) {
-                                 if (goalPropertyConfig.getKey().trim().equals(propertyName)) {
-                                    matched = true;
-                                    break;
-                                 }
-                              }
-                              if (!matched) {
-                                 goalPropertyConfigMap.put(propertyName, propertyConfig.getValue());
-                              }
-                           }
-                        }
-                     }
-                  }
-               }
-            }
-         }
-      } else if (goalConfig.isEmpty()) {
-         goalConfig.putAll(config);
-      }
-   }
 }

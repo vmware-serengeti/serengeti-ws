@@ -77,6 +77,7 @@ public class Constants {
     public static final String OUTPUT_OP_RESUME = "resume";
     public static final String OUTPUT_OP_RESULT_FAIL = "failed";
     public static final String OUTPUT_OP_RESULT_CREAT = "created";
+    public static final String OUTPUT_OP_RESULT_CONFIG = "configured";
     public static final String OUTPUT_OP_RESULT_DELETE = "deleted";
     public static final String OUTPUT_OP_RESULT_START = "started";
     public static final String OUTPUT_OP_RESULT_STOP = "stopped";

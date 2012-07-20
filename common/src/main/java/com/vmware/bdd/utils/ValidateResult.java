@@ -14,8 +14,10 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.Gson;
 
@@ -32,6 +34,8 @@ public class ValidateResult {
    private Type type = Type.VALID;
    private List<String> failureNames=new LinkedList<String>(); // configuration name list
    private List<String> failureValues=new LinkedList<String>(); // configuration value list
+   
+   private Map<String,List<String>> blackPropertisMap=new HashMap<String,List<String>>(); // It utilize to store propertis which it in the blacklist (key:filename,value:property name list).
    public Type getType() {
       return type;
    }
@@ -57,6 +61,36 @@ public class ValidateResult {
    public void addFailureValue(String failureValue){
       this.failureValues.add(failureValue);
    }
+   
+   public Map<String, List<String>> getBlackPropertisMap() {
+      return blackPropertisMap;
+   }
+   
+   public void setBlackPropertisMap(Map<String, List<String>> blackPropertisMap) {
+      this.blackPropertisMap = blackPropertisMap;
+   }
+   
+   public void putProperty(final String fileName, final String propertyName) {
+      if (blackPropertisMap != null) {
+         if (blackPropertisMap.containsKey(fileName)) {
+            List<String> propertyList = blackPropertisMap.get(fileName);
+            propertyList.add(propertyName);
+         } else {
+            List<String> propertyList = new LinkedList<String>();
+            propertyList.add(propertyName);
+            blackPropertisMap.put(fileName, propertyList);
+         }
+      }
+   }
+
+   public List<String> getProperty(final String fileName, final String propertyName) {
+      if (blackPropertisMap != null && blackPropertisMap.containsKey(fileName)) {
+         return blackPropertisMap.get(fileName);
+      } else {
+         return null;
+      }
+   }
+
    @Override
    public String toString() {
       Gson g=new Gson();

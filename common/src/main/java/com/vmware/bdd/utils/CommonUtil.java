@@ -17,9 +17,11 @@ package com.vmware.bdd.utils;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.net.URL;
@@ -58,4 +60,28 @@ public class CommonUtil {
       }
       return jsonBuff.toString();
   }
+
+   public static void copyFile(final String origFileName, final String destFileName) throws Exception {
+      File origFile = new File(CommonUtil.class.getClassLoader().getResource(origFileName).getPath());
+      if (!origFile.exists()) {
+         logger.error("Can not find origin file " + origFileName + ".");
+      } else {
+         InputStream in = new FileInputStream(origFile);
+         File destFile = new File(System.getProperty("user.home") +"/"+destFileName);
+         OutputStream out= new FileOutputStream(destFile.getAbsoluteFile());
+         if (!destFile.exists()) {
+            logger.error("Can not create destination file " + origFileName + ".");
+         }
+         int bytesum = 0;
+         int byteread = 0;
+         byte[] buffer = new byte[1024];
+         while ((byteread = in.read(buffer)) != -1) {
+            bytesum += byteread;
+            System.out.println(bytesum);
+            out.write(buffer, 0, byteread);
+         }
+         in.close();  
+         out.close();
+      }
+   }
 }
