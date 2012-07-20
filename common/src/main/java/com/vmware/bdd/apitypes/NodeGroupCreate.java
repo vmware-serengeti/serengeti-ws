@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,7 +65,7 @@ public class NodeGroupCreate {
    private Map<String, Object> configuration;
 
    public NodeGroupCreate() {
-      
+
    }
 
    public NodeGroupCreate(NodeGroupCreate group) {
@@ -88,6 +89,9 @@ public class NodeGroupCreate {
    }
 
    public void setConfiguration(Map<String, Object> configuration) {
+      if (configuration == null) {
+         configuration = new HashMap<String, Object>();
+      }
       this.configuration = configuration;
    }
 

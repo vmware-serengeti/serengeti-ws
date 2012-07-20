@@ -14,12 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,7 +31,7 @@ public class AppConfigValidationFactory {
     @SuppressWarnings("unchecked")
     public static ValidateResult blackListHandle(Map<String, Object> config) {
         ValidateResult validateResult = new ValidateResult();
-        String jsonStr = readJsonFile("blacklist.json");
+        String jsonStr = CommonUtil.readJsonFile("blacklist.json");
         Gson gson = new Gson();
         List<Map<String, List<String>>> blackList = gson.fromJson(jsonStr, List.class);
         for (Entry<String, Object> configType : config.entrySet()) {
@@ -59,7 +54,7 @@ public class AppConfigValidationFactory {
     @SuppressWarnings("unchecked")
     public static ValidateResult whiteListHandle(Map<String, Object> config) {
         ValidateResult validateResult = new ValidateResult();
-        String jsonStr = readJsonFile("whitelist.json");
+        String jsonStr = CommonUtil.readJsonFile("whitelist.json");
         Gson gson = new Gson();
         List<Map<String, List<Map<String, String>>>> whiteList = gson.fromJson(jsonStr, List.class);
         for (Entry<String, Object> configType : config.entrySet()) {
@@ -85,6 +80,7 @@ public class AppConfigValidationFactory {
         for (Map<String, T> warnPropertyFileMap : warnPropertyList) {
             if (warnPropertyFileMap.containsKey(fileName) && configProperties instanceof Map) {
                 Map<String, Object> configPropertyMap = (Map<String, Object>) configProperties;
+                List<String> removeList=new ArrayList<String>();
                 for (Entry<String, Object> configProperty : configPropertyMap.entrySet()) {
                     if (validationType == ValidationType.WHITE_LIST) {
                         for (Entry<String, T> warnPropertyFileEntry : warnPropertyFileMap.entrySet()) {
@@ -103,11 +99,17 @@ public class AppConfigValidationFactory {
                                     if (configProperty.getKey().equals(propertyName)) {
                                         validateResult.setType(ValidateResult.Type.NAME_IN_BLACK_LIST);
                                         validateResult.addFailureName(configProperty.getKey());
+                                        validateResult.putProperty(fileName, propertyName);
+                                        removeList.add(propertyName);
                                     }
                                 }
                             }
                         }
                     }
+                }
+                //remove black property from configuration
+                for(String pName:removeList){
+                   configPropertyMap.remove(pName);
                 }
             }
         }
@@ -155,30 +157,5 @@ public class AppConfigValidationFactory {
             return false;
         }
         return true;
-    }
-
-    private static String readJsonFile(final String fileName) {
-        StringBuilder jsonBuff = new StringBuilder();
-        URL fileURL = AppConfigValidationUtils.class.getClassLoader().getResource(fileName);
-        if (fileURL != null) {
-            InputStream in = null;
-            try {
-                in = new BufferedInputStream(fileURL.openStream());
-                Reader rd = new InputStreamReader(in, "UTF-8");
-                int c = 0;
-                while ((c = rd.read()) != -1) {
-                    jsonBuff.append((char) c);
-                }
-            } catch (IOException e) {
-                logger.error(e.getMessage() + "\n Can not find " + fileName + " or IO read error.");
-            } finally {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    logger.error(e.getMessage() + "\n Can not close " + fileName + ".");
-                }
-            }
-        }
-        return jsonBuff.toString();
     }
 }

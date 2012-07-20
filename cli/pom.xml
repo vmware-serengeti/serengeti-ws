@@ -21,7 +21,7 @@
 		<spring.shell.version>1.0.0.BUILD-SNAPSHOT</spring.shell.version>
 		<jar.mainclass>org.springframework.shell.Bootstrap</jar.mainclass>
 		<impala.version>1.0.0.BUILD-SNAPSHOT</impala.version>
-		<hadoop.version>1.0.0</hadoop.version>
+		<hadoop.version>1.0.1</hadoop.version>
 		<antlr.version>3.4</antlr.version>
 	</properties>
 

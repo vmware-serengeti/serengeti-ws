@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -87,6 +88,9 @@ public class ClusterCreate {
    }
 
    public void setConfiguration(Map<String, Object> configuration) {
+      if (configuration == null) {
+         configuration = new HashMap<String, Object>();
+      }
       this.configuration = configuration;
    }
 
