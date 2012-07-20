@@ -30,8 +30,7 @@ import org.springframework.test.web.client.RequestMatchers;
 import org.springframework.test.web.client.ResponseCreators;
 import org.springframework.web.client.RestTemplate;
 
-@ContextConfiguration(locations = { "classpath:/META-INF/spring/spring-shell-plugin.xml" })
-public abstract class MockRestServer extends AbstractTestNGSpringContextTests {
+@ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })public abstract class MockRestServer extends AbstractTestNGSpringContextTests {
    @Autowired
    private RestTemplate restTemplate;
    

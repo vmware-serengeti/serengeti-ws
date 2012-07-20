@@ -35,7 +35,7 @@ import com.vmware.bdd.cli.commands.DatastoreCommands;
 /**
  * This class is the test of Datastore command.
  */
-@ContextConfiguration(locations = { "classpath:/META-INF/spring/spring-shell-plugin.xml" })
+@ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
 public class DatastoreCommandsTest extends MockRestServer {
    @Autowired
    private DatastoreCommands datastoreCommands;

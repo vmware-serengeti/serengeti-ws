@@ -39,7 +39,7 @@ import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.NetworkCommands;
 
-@ContextConfiguration(locations = { "classpath:/META-INF/spring/spring-shell-plugin.xml" })
+@ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
 public class NetworkCommandsTest extends MockRestServer {
 
    @Autowired

@@ -30,7 +30,7 @@ import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.cli.commands.DistroCommands;
 
-@ContextConfiguration(locations = { "classpath:/META-INF/spring/spring-shell-plugin.xml" })
+@ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
 public class DistroCommandsTest extends MockRestServer {
    @Autowired
    private DistroCommands distroCommands;
