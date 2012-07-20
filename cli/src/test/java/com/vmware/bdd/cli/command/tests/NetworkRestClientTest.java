@@ -34,7 +34,7 @@ import com.vmware.bdd.cli.rest.NetworkRestClient;
 /**
  * This class is the test of Network rest client.
  */
-@ContextConfiguration(locations = { "classpath:/META-INF/spring/spring-shell-plugin.xml" })
+@ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
 public class NetworkRestClientTest extends MockRestServer {
    @Autowired
    private NetworkRestClient networkRestClient;

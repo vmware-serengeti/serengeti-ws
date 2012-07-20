@@ -41,7 +41,7 @@ import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 
 @Test
-@ContextConfiguration(locations = { "classpath:/META-INF/spring/spring-shell-plugin.xml" })
+@ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
 public class ClusterCommandsTest extends MockRestServer {
     @Autowired
     private ClusterCommands clusterCommands;

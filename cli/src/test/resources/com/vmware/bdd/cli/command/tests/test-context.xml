@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+ 	<context:component-scan base-package="com.vmware.bdd.cli.commands" />
+    <context:component-scan base-package="com.vmware.bdd.cli.rest"/>
+    <bean id="client" class="org.springframework.web.client.RestTemplate">
+        <property name="messageConverters">
+            <list>
+                <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter" />
+            </list>
+        </property>
+        <property name="errorHandler">
+        	<bean class="com.vmware.bdd.cli.rest.RestErrorHandler"></bean>
+        </property>
+    </bean>
+    <bean id="hadoopConfiguration" class="org.apache.hadoop.conf.Configuration"/>
+	<bean id="hiveCommands" class="org.springframework.data.hadoop.impala.hive.HiveCommands"/>
+</beans>

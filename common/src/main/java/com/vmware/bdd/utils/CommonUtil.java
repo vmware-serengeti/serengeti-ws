@@ -60,7 +60,7 @@ public class CommonUtil {
       URL fileURL = CommonUtil.class.getClassLoader().getResource(origFileName);
       if (fileURL != null) {
          in = new BufferedInputStream(fileURL.openStream());
-         File destFile = new File(System.getProperty("user.home") + "/" + destFileName);
+         File destFile = new File(destFileName);
          OutputStream out = new FileOutputStream(destFile.getAbsoluteFile());
          if (!destFile.exists()) {
             logger.error("Can not create destination file " + destFileName + ".");
@@ -78,7 +78,7 @@ public class CommonUtil {
    }
 
    public static void deleteFile(final String destFileName) {
-      File destFile = new File(System.getProperty("user.home") + "/" + destFileName);
+      File destFile = new File(destFileName);
       if (destFile.exists()) {
          try {
             destFile.delete();
