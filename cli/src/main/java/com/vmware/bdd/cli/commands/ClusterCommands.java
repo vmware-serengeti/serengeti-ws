@@ -144,30 +144,18 @@ public class ClusterCommands implements CommandMarker {
             clusterCreate.setDsNames(dsNamesList);
          }
       }
-      ValidateResult blackListResult=null;
+      List<String> warningMsgList = new ArrayList<String>();
       try {
          if (specFilePath != null) {
             ClusterCreate clusterSpec =
-                  CommandsUtils.getObjectByJsonString(ClusterCreate.class,
-                        CommandsUtils.dataFromFile(specFilePath));
+                  CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile(specFilePath));
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
-            // validate blacklist
-            blackListResult = validateBlackList(clusterCreate);
-            if (!skipConfigValidation) {
-               // validate whitelist
-               ValidateResult whiteListResult = validateWhiteList(clusterCreate);
-               if (!showWhiteListWarning(clusterCreate.getName(), whiteListResult)) {
-                  return;
-               }
-            } else {
-               clusterCreate.setValidateConfig(false);
-            }
+            validateConfiguration(clusterCreate, skipConfigValidation, warningMsgList);
          }
       } catch (Exception e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
-               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CREATE,
+               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          return;
       }
 
@@ -213,10 +201,10 @@ public class ClusterCommands implements CommandMarker {
 
       // rest invocation
       try {
-         restClient.create(clusterCreate);
-         if (blackListResult != null) {
-            showBlackListWarning(blackListResult);
+         if (!showWarningMsg(clusterCreate.getName(), warningMsgList)) {
+            return;
          }
+         restClient.create(clusterCreate);
          if (specFilePath == null) {
             createDefalutFile(clusterCreate);
          }
@@ -439,21 +427,14 @@ public class ClusterCommands implements CommandMarker {
                CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile(specFilePath));
          clusterConfig.setNodeGroups(clusterSpec.getNodeGroups());
          clusterConfig.setConfiguration(clusterSpec.getConfiguration());
-         // validate blacklist
-         ValidateResult blackListResult = validateBlackList(clusterConfig);
-         if (!skipConfigValidation) {
-            // validate whitelist
-            ValidateResult whiteListResult = validateWhiteList(clusterConfig);
-            if (!showWhiteListWarning(clusterConfig.getName(), whiteListResult)) {
-               return;
-            }
-         } else {
-            clusterConfig.setValidateConfig(false);
+         List<String> warningMsgList = new ArrayList<String>();
+         validateConfiguration(clusterConfig, skipConfigValidation, warningMsgList);
+         // add a confirm message for running job
+         warningMsgList.add("Warning: " + Constants.PARAM_CLUSTER_CONFIG_RUNNING_JOB_WARNING);
+         if (!showWarningMsg(clusterConfig.getName(), warningMsgList)) {
+            return;
          }
          restClient.configCluster(clusterConfig);
-         if (blackListResult != null) {
-            showBlackListWarning(blackListResult);
-         }
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_RESULT_CONFIG);
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CONFIG,
@@ -705,7 +686,7 @@ public class ClusterCommands implements CommandMarker {
                break;
             }
             // Prompt continue infomation
-            System.out.println(promptMsg);
+            System.out.print(promptMsg);
             // Get user's entering
             readMsg = reader.readLine();
             if (readMsg.trim().equalsIgnoreCase("yes")
@@ -862,6 +843,21 @@ public class ClusterCommands implements CommandMarker {
             failedMsg.toString());
    }
 
+   private void validateConfiguration(ClusterCreate cluster, boolean skipConfigValidation, List<String> warningMsgList) {
+      // validate blacklist
+      ValidateResult blackListResult = validateBlackList(cluster);
+      if (blackListResult != null) {
+         addBlackListWarning(blackListResult, warningMsgList);
+      }
+      if (!skipConfigValidation) {
+         // validate whitelist
+         ValidateResult whiteListResult = validateWhiteList(cluster);
+         addWhiteListWarning(cluster.getName(), whiteListResult, warningMsgList);
+      } else {
+         cluster.setValidateConfig(false);
+      }
+   }
+
    private ValidateResult validateBlackList(ClusterCreate cluster) {
       return validateConfiguration(cluster, ValidationType.BLACK_LIST);
    }
@@ -901,24 +897,24 @@ public class ClusterCommands implements CommandMarker {
       return validateResult;
    }
 
-   private boolean showWhiteListWarning(final String clusterName, ValidateResult whiteListResult) {
+   private void addWhiteListWarning(final String clusterName, ValidateResult whiteListResult,
+         List<String> warningMsgList) {
       if (whiteListResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
          String warningMsg =
                getValidateWarningMsg(whiteListResult.getFailureNames(),
-                     Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING
-                           + Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING_CONTINUE);
-         if (!isContinue(clusterName, Constants.OUTPUT_OP_CREATE, warningMsg)) {
-            return false;
+                     Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING);
+         if (warningMsgList != null) {
+            warningMsgList.add(warningMsg);
          }
       }
-      return true;
    }
 
-   private void showBlackListWarning(ValidateResult blackListResult) {
+   private void addBlackListWarning(ValidateResult blackListResult, List<String> warningList) {
       if (blackListResult.getType() == ValidateResult.Type.NAME_IN_BLACK_LIST) {
          String warningMsg =
                getValidateWarningMsg(blackListResult.getFailureNames(), Constants.PARAM_CLUSTER_IN_BLACK_LIST_WARNING);
-         System.out.println(warningMsg);
+         if (warningList != null)
+            warningList.add(warningMsg);
       }
    }
 
@@ -938,6 +934,18 @@ public class ClusterCommands implements CommandMarker {
          warningMsgBuff.append(warningMsg);
       }
       return warningMsgBuff.toString();
+   }
+
+   private boolean showWarningMsg(String clusterName, List<String> warningMsgList) {
+      if (warningMsgList != null && !warningMsgList.isEmpty()) {
+         for (String message : warningMsgList) {
+            System.out.println(message);
+         }
+         if (!isContinue(clusterName, Constants.OUTPUT_OP_CREATE, Constants.PARAM_PROMPT_CONTINUE_NEW_MESSAGE)) {
+            return false;
+         }
+      }
+      return true;
    }
 
    private void createDefalutFile(ClusterCreate cluster) {
