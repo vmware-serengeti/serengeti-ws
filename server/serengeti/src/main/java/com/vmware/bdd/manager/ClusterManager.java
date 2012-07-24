@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -30,10 +31,12 @@ import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NetworkEntity.AllocType;
+import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.Saveable;
 import com.vmware.bdd.entity.TaskEntity;
@@ -347,30 +350,72 @@ public class ClusterManager {
         logger.info("ClusterManager, updating node group " + nodeGroupName + " in cluster " + clusterName
                 + " reset instance number to " + instanceNum);
 
-        ClusterEntity cluster;
-        if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+        final ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+        if (cluster == null) {
             logger.error("cluster " + clusterName + " does not exist");
             throw BddException.NOT_FOUND("cluster", clusterName);
         }
 
-        NodeGroupEntity group = NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName);
-        if (group == null) {
-            logger.error("nodegroup " + nodeGroupName + " of cluster " + clusterName + " does not exist");
-            throw ClusterManagerException.NOGEGROUP_NOT_FOUND_ERROR(nodeGroupName);
-        }
+      NodeGroupEntity group = DAL.inRoTransactionDo(new Saveable<NodeGroupEntity>() {
+         @Override
+         public NodeGroupEntity body() throws Exception {
+            NodeGroupEntity group = NodeGroupEntity.findNodeGroupEntityByName(cluster,
+                  nodeGroupName);
+            if (group == null) {
+               logger.error("nodegroup " + nodeGroupName + " of cluster " + clusterName
+                     + " does not exist");
+               throw ClusterManagerException.NOGEGROUP_NOT_FOUND_ERROR(nodeGroupName);
+            }
 
-        if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
-            logger.error("cluster " + clusterName + " can be updated only in RUNNING status, it is now in "
-                    + cluster.getStatus() + " status");
-            throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName, "it is should be in RUNNING status");
-        }
+            if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
+               logger.error("cluster " + clusterName
+                     + " can be updated only in RUNNING status, it is now in "
+                     + cluster.getStatus() + " status");
+               throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
+                     "it is should be in RUNNING status");
+            }
 
-        if (instanceNum <= group.getDefineInstanceNum()) {
-            logger.error("node group " + nodeGroupName + " cannot be shrinked from " + group.getDefineInstanceNum()
-                    + " to " + instanceNum + " nodes");
-            throw ClusterManagerException.SHRINK_OP_NOT_SUPPORTED(nodeGroupName, instanceNum,
-                    group.getDefineInstanceNum());
-        }
+            if (instanceNum <= group.getDefineInstanceNum()) {
+               logger.error("node group " + nodeGroupName + " cannot be shrinked from "
+                     + group.getDefineInstanceNum() + " to " + instanceNum + " nodes");
+               throw ClusterManagerException.SHRINK_OP_NOT_SUPPORTED(nodeGroupName,
+                     instanceNum, group.getDefineInstanceNum());
+            }
+
+            Integer instancePerHost = group.getInstancePerHost();
+            if (instancePerHost != null && instanceNum % instancePerHost != 0) {
+               throw BddException.INVALID_PARAMETER("instance number", new StringBuilder(100)
+                     .append(instanceNum).append(": not divisiable by instancePerHost")
+                     .toString());
+            }
+
+            Set<NodeGroupAssociation> associations = group.getGroupAssociations();
+            if (associations != null && !associations.isEmpty()) {
+               AuAssert.check(associations.size() == 1,
+                     "only support 1 group association now");
+               NodeGroupAssociation association = associations.iterator().next();
+               if (association.getAssociationType() == GroupAssociationType.STRICT) {
+                  NodeGroupEntity refGroup = NodeGroupEntity.findNodeGroupEntityByName(
+                        cluster, association.getReferencedGroup());
+                  AuAssert.check(refGroup != null, "shold not happens");
+                  Integer hostNum = group.getInstancePerHost() == null ? null : group
+                        .getDefineInstanceNum() / group.getInstancePerHost();
+                  Integer refHostNum = refGroup.getInstancePerHost() == null ? null
+                        : refGroup.getDefineInstanceNum()
+                              / refGroup.getInstancePerHost();
+                  if (hostNum != null && refHostNum != null && hostNum > refHostNum) {
+                     throw BddException.INVALID_PARAMETER(
+                           "instance number",
+                           new StringBuilder(100)
+                           .append(instanceNum)
+                           .append(": required host number is larger " +
+                                 "than the referenced node group").toString());
+                  }
+               }
+            }
+
+            return group;
+         }});
 
         UpdateClusterListener listener = new UpdateClusterListener(clusterName);
         int oldInstanceNum = group.getDefineInstanceNum();
@@ -415,5 +460,4 @@ public class ClusterManager {
             properties.put(RABBITMQ_CHANNEL, channelId);
         }
     }
-
 }

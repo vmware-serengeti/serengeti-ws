@@ -248,13 +248,18 @@ public class NodeGroupCreate {
                         .append(".placementPolicies.groupAssociations[0] refers to invalid node group ")
                         .append(a.getReference()).toString());
                } else {
-                  // this is normal case, do more check
+                  /*
+                   *  This is normal case, do more checks.
+                   *  
+                   *  If STRICT is specified, the host number of the current node
+                   *  group should not be larger than the referenced one.
+                   */
                   if (a.getType() == GroupAssociationType.STRICT &&
-                     getHostNum() != groups.get(a.getReference()).getHostNum() ) {
+                     getHostNum() > groups.get(a.getReference()).getHostNum() ) {
                      valid = false;
                      failedMsgList.add(new StringBuilder()
                            .append(getName())
-                           .append(".placementPolicies.groupAssociations[0] has different host number with the referenced node group ")
+                           .append(".placementPolicies.groupAssociations[0] requires more hosts than the referenced node group ")
                            .append(a.getReference()).toString());
                   }
                   // current implementation only support sum(in/out degree) <= 1
