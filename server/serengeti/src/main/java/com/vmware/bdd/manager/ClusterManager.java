@@ -398,12 +398,16 @@ public class ClusterManager {
                   NodeGroupEntity refGroup = NodeGroupEntity.findNodeGroupEntityByName(
                         cluster, association.getReferencedGroup());
                   AuAssert.check(refGroup != null, "shold not happens");
-                  Integer hostNum = group.getInstancePerHost() == null ? null : group
-                        .getDefineInstanceNum() / group.getInstancePerHost();
-                  Integer refHostNum = refGroup.getInstancePerHost() == null ? null
-                        : refGroup.getDefineInstanceNum()
-                              / refGroup.getInstancePerHost();
-                  if (hostNum != null && refHostNum != null && hostNum > refHostNum) {
+                  AuAssert.check(group.getInstancePerHost() != null,
+                        "shold never happens, see create cluster");
+                  AuAssert.check(refGroup.getInstancePerHost() != null,
+                        "shold never happens, see create cluster");
+                  
+                  Integer hostNum = group.getDefineInstanceNum()
+                        / group.getInstancePerHost();
+                  Integer refHostNum = refGroup.getDefineInstanceNum()
+                        / refGroup.getInstancePerHost();
+                  if (hostNum > refHostNum) {
                      throw BddException.INVALID_PARAMETER(
                            "instance number",
                            new StringBuilder(100)

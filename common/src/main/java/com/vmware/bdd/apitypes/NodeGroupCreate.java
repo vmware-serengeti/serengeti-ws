@@ -254,14 +254,24 @@ public class NodeGroupCreate {
                    *  If STRICT is specified, the host number of the current node
                    *  group should not be larger than the referenced one.
                    */
-                  if (a.getType() == GroupAssociationType.STRICT &&
-                     getHostNum() > groups.get(a.getReference()).getHostNum() ) {
-                     valid = false;
-                     failedMsgList.add(new StringBuilder()
-                           .append(getName())
-                           .append(".placementPolicies.groupAssociations[0] requires more hosts than the referenced node group ")
-                           .append(a.getReference()).toString());
+                  if (a.getType() == GroupAssociationType.STRICT) {
+                     if (groups.get(a.getReference()).getHostNum() == null) {
+                        valid = false;
+                        failedMsgList.add(new StringBuilder()
+                              .append(getName())
+                              .append(".placementPolicies.groupAssociations[0] refers to node group ")
+                              .append(a.getReference())
+                              .append(" with no instancePerHost specified")
+                              .toString());
+                     } else if (getHostNum() > groups.get(a.getReference()).getHostNum()) {
+                        valid = false;
+                        failedMsgList.add(new StringBuilder()
+                              .append(getName())
+                              .append(".placementPolicies.groupAssociations[0] requires more hosts than the referenced node group ")
+                              .append(a.getReference()).toString());
+                     }
                   }
+   
                   // current implementation only support sum(in/out degree) <= 1
                   PlacementPolicy refPolicies = groups.get(a.getReference())
                         .getPlacementPolicies();
