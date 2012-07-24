@@ -346,7 +346,7 @@ public class ClusterCommandsTest extends MockRestServer {
         clusterCommands.getCluster(null, true);
     }
 
-   @Test
+   @Test(enabled=false)
    public void testConfigCluster() throws Exception {
       ObjectMapper mapper = new ObjectMapper();
       StorageRead sr1 = new StorageRead();
