@@ -16,7 +16,8 @@ package com.vmware.bdd.spectypes;
 
 public enum HadoopRole {
    PIG_ROLE("pig"), 
-   HIVE_ROLE("hive"), 
+   HIVE_ROLE("hive"),
+   HIVE_SERVER_ROLE("hive_server"), 
    HADOOP_CLIENT_ROLE("hadoop_client"),
    HADOOP_DATANODE("hadoop_datanode"), 
    HADOOP_TASKTRACKER("hadoop_tasktracker"), 
