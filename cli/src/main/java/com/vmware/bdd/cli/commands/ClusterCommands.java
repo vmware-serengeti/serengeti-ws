@@ -655,7 +655,7 @@ public class ClusterCommands implements CommandMarker {
             default:
             }
          }
-         if (masterCount != 1 || (workerCount < 1 || workerCount > 2) ||
+         if ((masterCount < 1 || masterCount > 2) || (workerCount < 1 || workerCount > 2) ||
                clientCount > 1) {
             warning = true;
          }
@@ -685,7 +685,7 @@ public class ClusterCommands implements CommandMarker {
                continueCreate = false;
                break;
             }
-            // Prompt continue infomation
+            // Prompt continue information
             System.out.print(promptMsg);
             // Get user's entering
             readMsg = reader.readLine();
@@ -728,14 +728,17 @@ public class ClusterCommands implements CommandMarker {
       List<String> matchRoles = new LinkedList<String>();
       switch (role) {
       case MASTER:
-         if (roles.size() != 2) {
-            return false;
-         } else {
+         if (roles.size() == 1) {
+            String r = roles.get(0);
+            return Constants.ROLE_HADOOP_NAME_NODE.equals(r) ||
+                   Constants.ROLE_HADOOP_JOB_TRACKER.equals(r);
+         } else if (roles.size() == 2) {
             matchRoles.add(Constants.ROLE_HADOOP_NAME_NODE);
             matchRoles.add(Constants.ROLE_HADOOP_JOB_TRACKER);
             matchRoles.removeAll(roles);
             return matchRoles.size() == 0 ? true : false;
          }
+         return false;
       case WORKER:
          if (roles.size() == 1) {
             if (Constants.ROLE_HADOOP_DATANODE.equals(roles.get(0)) ||
@@ -955,7 +958,7 @@ public class ClusterCommands implements CommandMarker {
       try {
          CommonUtil.copyFile(origFile, destFile);
          createDefalutFileMsgBuffer.append("The spec file for cluster ").append(cluster.getName())
-               .append(" has been created. ").append("Please specify '—specFile ")
+               .append(" has been created. ").append("Please specify 'ï¿½specFile ")
                .append(System.getProperty("user.home")).append("/").append(destFile)
                .append("' in command line to re-configure this cluster.");
          System.out.println(createDefalutFileMsgBuffer.toString());
