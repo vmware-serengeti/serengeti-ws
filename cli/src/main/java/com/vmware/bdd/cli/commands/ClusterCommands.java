@@ -954,14 +954,11 @@ public class ClusterCommands implements CommandMarker {
       StringBuilder createDefalutFileMsgBuffer = new StringBuilder();
       try {
          CommonUtil.copyFile(origFile, destFile);
-         createDefalutFileMsgBuffer.append("The spec file for cluster ").append(cluster.getName())
-               .append(" has been created. ").append("Please specify '—specFile ")
-               .append(System.getProperty("user.home")).append("/").append(destFile)
-               .append("' in command line to re-configure this cluster.");
+         createDefalutFileMsgBuffer.append("Please use the spec file '").append(destFile)
+               .append("' created for cluster ").append(cluster.getName()).append(" for further operations.");
          System.out.println(createDefalutFileMsgBuffer.toString());
       } catch (IOException e) {
          CommonUtil.deleteFile(destFile);
       }
    }
-
 }
