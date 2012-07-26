@@ -89,7 +89,7 @@ create table node_group (
    cpu                    integer,
    memory                 integer,
    defined_instance_num   integer not null,
-   ha_flag                boolean,
+   ha_flag                varchar(10),
    storage_type           varchar(255),
    storage_size           integer,
    vc_datastore_names     varchar(255),
