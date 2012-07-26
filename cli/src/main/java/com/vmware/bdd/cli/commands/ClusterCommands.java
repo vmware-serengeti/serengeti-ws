@@ -638,14 +638,14 @@ public class ClusterCommands implements CommandMarker {
                   validated = false;
                   collectInstanceNumInvalidateMsg(nodeGroupCreate,
                         failedMsgList);
-               } else if (nodeGroupCreate.isHaFlag()) {
+               } else if (isHAFlag(nodeGroupCreate)) {
                   warning = true;
                }
                break;
             case CLIENT:
                clientCount++;
                if (nodeGroupCreate.getInstanceNum() == 0
-                     || nodeGroupCreate.isHaFlag()) {
+                     || isHAFlag(nodeGroupCreate)) {
                   warning = true;
                }
                break;
@@ -963,5 +963,10 @@ public class ClusterCommands implements CommandMarker {
       } catch (IOException e) {
          CommonUtil.deleteFile(destFile);
       }
+   }
+
+   private boolean isHAFlag(NodeGroupCreate nodeGroupCreate) {
+      return !CommandsUtils.isBlank(nodeGroupCreate.getHaFlag())
+            && !nodeGroupCreate.getHaFlag().equalsIgnoreCase("off");
    }
 }

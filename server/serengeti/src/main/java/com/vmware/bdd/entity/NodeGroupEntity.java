@@ -109,7 +109,7 @@ public class NodeGroupEntity extends EntityBase {
    private InstanceType nodeType;
 
    @Column(name = "ha_flag")
-   private boolean haFlag;
+   private String haFlag;
 
    @Column(name = "configuration")
    private String hadoopConfig;
@@ -143,11 +143,11 @@ public class NodeGroupEntity extends EntityBase {
       this.hadoopConfig = hadoopConfig;
    }
 
-   public boolean isHaFlag() {
+   public String getHaFlag() {
       return haFlag;
    }
 
-   public void setHaFlag(boolean haFlag) {
+   public void setHaFlag(String haFlag) {
       this.haFlag = haFlag;
    }
 

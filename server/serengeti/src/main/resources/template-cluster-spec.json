@@ -9,7 +9,7 @@
       ],
       "instance_type":MEDIUM,
       "instance_num":1,
-      "ha":true
+      "ha":"on"
     },
     {
       "name":"worker",
@@ -19,7 +19,7 @@
       ],
       "instance_type":SMALL,
       "instance_num":3,
-      "ha":false
+      "ha":"off"
     },
     {
       "name":"client",
@@ -31,7 +31,7 @@
       ],
       "instance_type":SMALL,
       "instance_num":1,
-      "ha":false
+      "ha":"off"
     }
   ]
 }

@@ -327,7 +327,7 @@ public class ClusterConfigManager {
 
       CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity, groupType,
             sharedPattern, localPattern);
-      groupEntity.setHaFlag(group.isHaFlag());
+      groupEntity.setHaFlag(group.getHaFlag());
       if (group.getConfiguration() != null
             && group.getConfiguration().size() > 0) {
          // validate hadoop config
@@ -581,7 +581,7 @@ public class ClusterConfigManager {
       }
 
       expandGroupStorage(ngEntity, group);
-      group.setHaFlag(ngEntity.isHaFlag());
+      group.setHaFlag(ngEntity.getHaFlag());
       if (ngEntity.getHadoopConfig() != null) {
          Map hadoopConfig = (new Gson()).fromJson(ngEntity.getHadoopConfig(), Map.class);
          group.setConfiguration((Map<String, Object>)hadoopConfig);

@@ -59,7 +59,7 @@ public class NodeGroupCreate {
    private List<VcCluster> vcClusters;
    @Expose
    @SerializedName("ha")
-   private boolean haFlag;
+   private String haFlag="off";
    @Expose
    @SerializedName("cluster_configuration")
    private Map<String, Object> configuration;
@@ -167,11 +167,11 @@ public class NodeGroupCreate {
       this.rpNames = rpNames;
    }
 
-   public boolean isHaFlag() {
+   public String getHaFlag() {
       return haFlag;
    }
 
-   public void setHaFlag(boolean haFlag) {
+   public void setHaFlag(String haFlag) {
       this.haFlag = haFlag;
    }
 

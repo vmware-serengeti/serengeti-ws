@@ -102,8 +102,8 @@ public class TestClusterConfigManager {
 
    @Test
    public void testString() {
-      String s1 = "{\"name\":\"my-cluster\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"cpu\":2,\"memory\":7500,\"storage\":{\"type\":\"shared\",\"size\":50},\"ha\":true},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"cpu\":1,\"memory\":3748,\"storage\":{\"type\":\"local\",\"size\":50},\"ha\":false},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"pig\"],\"instance_num\":1,\"cpu\":1,\"memory\":3748,\"storage\":{\"type\":\"shared\",\"size\":50},\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}],\"distro_map\":{\"hadoop\":\"http://localhost/distros/apache/1.0.1/hadoop-1.0.1.tar.gz\",\"pig\":\"http://localhost/distros/apache/1.0.1/pig-0.9.2.tar.gz\",\"hive\":\"http://localhost/distros/apache/1.0.1/hive-0.8.1.tar.gz\"},\"vc_shared_datastore_pattern\":[\"share1\",\"share2\"],\"vc_local_datastore_pattern\":[\"vmfs*\",\"local1\"]}";
-      String s2 = "{\"name\":\"my-cluster\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":true},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}],\"distro_map\":{\"hadoop\":\"http://localhost/distros/apache/1.0.1/hadoop-1.0.1.tar.gz\",\"pig\":\"http://localhost/distros/apache/1.0.1/pig-0.9.2.tar.gz\",\"hive\":\"http://localhost/distros/apache/1.0.1/hive-0.8.1.tar.gz\"},\"vc_shared_datastore_pattern\":[\"share1\",\"share2\"],\"vc_local_datastore_pattern\":[\"vmfs*\",\"local1\"]}";
+      String s1 = "{\"name\":\"my-cluster\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"cpu\":2,\"memory\":7500,\"storage\":{\"type\":\"shared\",\"size\":50},\"ha\":\"on\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"cpu\":1,\"memory\":3748,\"storage\":{\"type\":\"local\",\"size\":50},\"ha\":\"off\"},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"pig\"],\"instance_num\":1,\"cpu\":1,\"memory\":3748,\"storage\":{\"type\":\"shared\",\"size\":50},\"ha\":\"off\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}],\"distro_map\":{\"hadoop\":\"http://localhost/distros/apache/1.0.1/hadoop-1.0.1.tar.gz\",\"pig\":\"http://localhost/distros/apache/1.0.1/pig-0.9.2.tar.gz\",\"hive\":\"http://localhost/distros/apache/1.0.1/hive-0.8.1.tar.gz\"},\"vc_shared_datastore_pattern\":[\"share1\",\"share2\"],\"vc_local_datastore_pattern\":[\"vmfs*\",\"local1\"]}";
+      String s2 = "{\"name\":\"my-cluster\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\"},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}],\"distro_map\":{\"hadoop\":\"http://localhost/distros/apache/1.0.1/hadoop-1.0.1.tar.gz\",\"pig\":\"http://localhost/distros/apache/1.0.1/pig-0.9.2.tar.gz\",\"hive\":\"http://localhost/distros/apache/1.0.1/hive-0.8.1.tar.gz\"},\"vc_shared_datastore_pattern\":[\"share1\",\"share2\"],\"vc_local_datastore_pattern\":[\"vmfs*\",\"local1\"]}";
       System.out.println("string length: " + s1.length());
       int i = 0;
       for (; i < s1.length(); i++) {
@@ -142,7 +142,7 @@ public class TestClusterConfigManager {
       Assert.assertTrue("manifest should contains nodegroups",
             manifest.indexOf("master") != -1);
       Assert.assertTrue("manifest is inconsistent",
-            manifest.indexOf("{\"name\":\"my-cluster\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":true},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"hive_server\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
+            manifest.indexOf("{\"name\":\"my-cluster\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\"},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"hive_server\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
    @Test
@@ -163,18 +163,19 @@ public class TestClusterConfigManager {
       group.setCpuNum(3);
       group.setInstanceNum(10);
       group.setInstanceType(InstanceType.SMALL);
+      group.setHaFlag("off");
       group.setName("slave");
       List<String> roles = new ArrayList<String>();
       roles.add("hadoop_datanode");
       group.setRoles(roles);
-
+      
       spec.setNodeGroups(nodegroups);
       clusterMgr.createClusterConfig(spec);
 
       ClusterEntity cluster =
             ClusterEntity.findClusterEntityByName("my-cluster1");
       Assert.assertTrue(cluster != null);
-
+      
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster1");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
@@ -183,7 +184,7 @@ public class TestClusterConfigManager {
 
       Assert.assertTrue("manifest is inconsistent.",
             manifest.indexOf(
-                  "{\"name\":\"my-cluster1\",\"groups\":[{\"name\":\"expanded_master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":true},{\"name\":\"slave\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":10,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":3,\"memory\":3748,\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork1\",\"type\":\"static\",\"gateway\":\"192.168.1.254\",\"netmask\":\"255.255.0.0\",\"dns\":[\"2.2.2.2\"],\"ip\":[\"192.168.1.1-192.168.1.3\",\"192.168.1.102\",\"192.168.1.104-192.168.1.110\"]}]") != -1);
+                  "{\"name\":\"my-cluster1\",\"groups\":[{\"name\":\"expanded_master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\"},{\"name\":\"slave\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":10,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":3,\"memory\":3748,\"ha\":\"off\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork1\",\"type\":\"static\",\"gateway\":\"192.168.1.254\",\"netmask\":\"255.255.0.0\",\"dns\":[\"2.2.2.2\"],\"ip\":[\"192.168.1.1-192.168.1.3\",\"192.168.1.102\",\"192.168.1.104-192.168.1.110\"]}]") != -1);
    }
 
 
@@ -205,6 +206,7 @@ public class TestClusterConfigManager {
       group.setCpuNum(3);
       group.setInstanceNum(10);
       group.setInstanceType(InstanceType.SMALL);
+      group.setHaFlag("off");
       group.setName("slave");
       List<String> roles = new ArrayList<String>();
       roles.add("hadoop_tasktracker");
@@ -225,7 +227,7 @@ public class TestClusterConfigManager {
 
       Assert.assertTrue("manifest is inconsistent.",
             manifest.indexOf(
-                  "{\"name\":\"my-cluster-slave2\",\"groups\":[{\"name\":\"expanded_master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":true},{\"name\":\"slave\",\"roles\":[\"hadoop_tasktracker\",\"hadoop_datanode\"],\"instance_num\":10,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":3,\"memory\":3748,\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
+                  "{\"name\":\"my-cluster-slave2\",\"groups\":[{\"name\":\"expanded_master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\"},{\"name\":\"slave\",\"roles\":[\"hadoop_tasktracker\",\"hadoop_datanode\"],\"instance_num\":10,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":3,\"memory\":3748,\"ha\":\"off\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
    @Test
@@ -246,6 +248,7 @@ public class TestClusterConfigManager {
       group.setCpuNum(3);
       group.setInstanceNum(1);
       group.setInstanceType(InstanceType.LARGE);
+      group.setHaFlag("off");
       group.setName("main_group");
       List<String> roles = new ArrayList<String>();
       roles.add("hadoop_namenode");
@@ -265,7 +268,7 @@ public class TestClusterConfigManager {
             manifest.indexOf("main_group") != -1 && manifest.indexOf("expanded_master") != -1
             && manifest.indexOf("expanded_worker") != -1);
       Assert.assertTrue("manifest is inconsistent",
-            manifest.indexOf("{\"name\":\"my-cluster2\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":100},\"cpu\":3,\"memory\":15000,\"ha\":false},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":true},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
+            manifest.indexOf("{\"name\":\"my-cluster2\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":100},\"cpu\":3,\"memory\":15000,\"ha\":\"off\"},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
    @Test
@@ -387,7 +390,7 @@ public class TestClusterConfigManager {
       Assert.assertTrue("manifest should contains nodegroups",
             manifest.indexOf("master") != -1);
       Assert.assertTrue("manifest is inconsistent",
-            manifest.indexOf("{\"name\":\"my-cluster4\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":true},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"hive_server\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
+            manifest.indexOf("{\"name\":\"my-cluster4\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\"},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"hive_server\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
    @Test
@@ -408,6 +411,7 @@ public class TestClusterConfigManager {
       group.setCpuNum(3);
       group.setInstanceNum(1);
       group.setInstanceType(InstanceType.LARGE);
+      group.setHaFlag("off");
       group.setName("main_group");
       List<String> roles = new ArrayList<String>();
       roles.add("hadoop_namenode");
@@ -430,7 +434,7 @@ public class TestClusterConfigManager {
             manifest.indexOf("main_group") != -1 && manifest.indexOf("expanded_master") != -1
             && manifest.indexOf("expanded_worker") != -1);
       Assert.assertTrue("manifest is inconsistent",
-            manifest.indexOf("{\"name\":\"my-cluster5\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":3,\"memory\":15000,\"ha\":false},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":true},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
+            manifest.indexOf("{\"name\":\"my-cluster5\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":3,\"memory\":15000,\"ha\":\"off\"},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
    @Test
@@ -451,6 +455,7 @@ public class TestClusterConfigManager {
       group.setCpuNum(3);
       group.setInstanceNum(1);
       group.setInstanceType(InstanceType.LARGE);
+      group.setHaFlag("off");
       group.setName("main_group");
       List<String> roles = new ArrayList<String>();
       roles.add("hadoop_namenode");
@@ -476,7 +481,7 @@ public class TestClusterConfigManager {
             manifest.indexOf("main_group") != -1 && manifest.indexOf("expanded_master") != -1
             && manifest.indexOf("expanded_worker") != -1);
       Assert.assertTrue("manifest is inconsistent",
-            manifest.indexOf("{\"name\":\"my-cluster6\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"local\",\"size\":100,\"name_pattern\":[\"vmfs*\",\"local1\"]},\"cpu\":3,\"memory\":15000,\"ha\":false},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":true},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
+            manifest.indexOf("{\"name\":\"my-cluster6\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"local\",\"size\":100,\"name_pattern\":[\"vmfs*\",\"local1\"]},\"cpu\":3,\"memory\":15000,\"ha\":\"off\"},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
    @Test
@@ -497,6 +502,7 @@ public class TestClusterConfigManager {
       group.setCpuNum(3);
       group.setInstanceNum(1);
       group.setInstanceType(InstanceType.LARGE);
+      group.setHaFlag("off");
       group.setName("main_group");
       List<String> roles = new ArrayList<String>();
       roles.add("hadoop_namenode");
@@ -517,7 +523,7 @@ public class TestClusterConfigManager {
             manifest.indexOf("main_group") != -1
             && manifest.indexOf("expanded_worker") != -1);
       Assert.assertTrue("manifest is inconsistent",
-            manifest.indexOf("{\"name\":\"my-cluster7\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":100},\"cpu\":3,\"memory\":15000,\"ha\":false},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
+            manifest.indexOf("{\"name\":\"my-cluster7\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":100},\"cpu\":3,\"memory\":15000,\"ha\":\"off\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
    @Test
@@ -549,7 +555,7 @@ public class TestClusterConfigManager {
       Assert.assertTrue("manifest should contains nodegroups",
             manifest.indexOf("master") != -1);
       Assert.assertTrue("manifest is inconsistent",
-            manifest.indexOf("{\"name\":\"my-cluster8\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":true},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"hive_server\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1
+            manifest.indexOf("{\"name\":\"my-cluster8\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\"},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"hive_server\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1
             && manifest.indexOf("\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.security.group.mapping\":\"xyz\",\"hadoop.security.authorization\":true}}}") != -1);
    }
 
@@ -571,6 +577,7 @@ public class TestClusterConfigManager {
       group.setCpuNum(3);
       group.setInstanceNum(1);
       group.setInstanceType(InstanceType.LARGE);
+      group.setHaFlag("off");
       group.setName("main_group");
       List<String> roles = new ArrayList<String>();
       roles.add("hadoop_namenode");
@@ -594,7 +601,7 @@ public class TestClusterConfigManager {
             manifest.indexOf("main_group") != -1 && manifest.indexOf("expanded_master") != -1
             && manifest.indexOf("expanded_worker") != -1);
       Assert.assertTrue("manifest is inconsistent",
-            manifest.indexOf("{\"name\":\"my-cluster9\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":100},\"cpu\":3,\"memory\":15000,\"ha\":false,\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.security.group.mapping\":\"xxx\",\"hadoop.security.authorization\":false}}}},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":true},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":false}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
+            manifest.indexOf("{\"name\":\"my-cluster9\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":100},\"cpu\":3,\"memory\":15000,\"ha\":\"off\",\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.security.group.mapping\":\"xxx\",\"hadoop.security.authorization\":false}}}},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 }
 
