@@ -74,7 +74,7 @@ public class TestClusterEntity {
             hdfsGroup.setStorageSize(20);
             hdfsGroup.setStorageType(DatastoreType.LOCAL);
             hdfsGroup.setDefineInstanceNum(1);
-            hdfsGroup.setHaFlag(true);
+            hdfsGroup.setHaFlag("on");
 
             ArrayList<String> roleStr = new ArrayList<String>();
             roleStr.add(HADOOP_ROLE);
@@ -91,7 +91,7 @@ public class TestClusterEntity {
             computeGroup.setStorageSize(20);
             computeGroup.setStorageType(DatastoreType.SHARED);
             computeGroup.setDefineInstanceNum(1);
-            computeGroup.setHaFlag(true);
+            computeGroup.setHaFlag("on");
 
             roleStr.clear();
             roleStr.add(HADOOP_ROLE);

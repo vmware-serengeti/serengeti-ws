@@ -58,7 +58,7 @@ public class TemplateClusterSpec {
       roles.add(HadoopRole.HADOOP_NAMENODE_ROLE.toString());
       roles.add(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString());
       NodeGroupCreate master = createDefaultNodeGroup(GroupType.MASTER_GROUP.toString(), roles,
-            1, InstanceType.MEDIUM, GroupType.MASTER_GROUP, true);
+            1, InstanceType.MEDIUM, GroupType.MASTER_GROUP, "on");
 
       // job tracker group template
       templateGroups.put(GroupType.MASTER_JOBTRACKER_GROUP, master);
@@ -68,7 +68,7 @@ public class TemplateClusterSpec {
       roles.add(HadoopRole.HADOOP_DATANODE.toString());
       roles.add(HadoopRole.HADOOP_TASKTRACKER.toString());
       createDefaultNodeGroup(GroupType.WORKER_GROUP.toString(), roles,
-            3, InstanceType.SMALL, GroupType.WORKER_GROUP, false);
+            3, InstanceType.SMALL, GroupType.WORKER_GROUP, "off");
 
       // client group
       roles = new ArrayList<String>();
@@ -76,13 +76,13 @@ public class TemplateClusterSpec {
       roles.add(HadoopRole.HADOOP_CLIENT_ROLE.toString());
       roles.add(HadoopRole.PIG_ROLE.toString());
       createDefaultNodeGroup(GroupType.CLIENT_GROUP.toString(), roles,
-            1, InstanceType.SMALL, GroupType.CLIENT_GROUP, false);
+            1, InstanceType.SMALL, GroupType.CLIENT_GROUP, "off");
 
       templateClusterConfig.setNodeGroups(templateGroups.values().toArray(new NodeGroupCreate[]{}));
    }
 
    private static NodeGroupCreate createDefaultNodeGroup(String name, List<String> roles, 
-         int instanceNum, InstanceType instanceType, GroupType groupType, boolean ha) {
+         int instanceNum, InstanceType instanceType, GroupType groupType, String ha) {
       NodeGroupCreate group = new NodeGroupCreate();
       group.setName(name);
       group.setRoles(roles);

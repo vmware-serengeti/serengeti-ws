@@ -13,7 +13,7 @@
         "type": "SHARED",
         "sizeGB": 50
       },
-      "haFlag": true,
+      "haFlag": "on",
       "configuration": {
         "hadoop": {
         }
@@ -32,7 +32,7 @@
         "type": "LOCAL",
         "sizeGB": 50
       },
-      "haFlag": false,
+      "haFlag": "off",
       "configuration": {
         "hadoop": {
         }
@@ -53,7 +53,7 @@
         "type": "LOCAL",
         "sizeGB": 50
       },
-      "haFlag": false,
+      "haFlag": "off",
       "configuration": {
         "hadoop": {
         }

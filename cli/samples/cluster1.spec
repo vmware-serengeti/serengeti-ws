@@ -10,7 +10,7 @@
       "instanceType": "LARGE",
       "cpuNum": 6,
       "memCapacityMB": 2048,
-      "haFlag": false
+      "haFlag": "off"
     },
     {
       "name": "worker",
