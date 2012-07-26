@@ -941,7 +941,7 @@ public class ClusterCommands implements CommandMarker {
          for (String message : warningMsgList) {
             System.out.println(message);
          }
-         if (!isContinue(clusterName, Constants.OUTPUT_OP_CREATE, Constants.PARAM_PROMPT_CONTINUE_NEW_MESSAGE)) {
+         if (!isContinue(clusterName, Constants.OUTPUT_OP_CREATE, Constants.PARAM_PROMPT_CONTINUE_MESSAGE)) {
             return false;
          }
       }
