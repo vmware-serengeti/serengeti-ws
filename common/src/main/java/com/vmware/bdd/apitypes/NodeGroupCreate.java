@@ -222,7 +222,7 @@ public class NodeGroupCreate {
                failedMsgList.add(new StringBuilder().append(getName())
                      .append(".placementPolicies.instancePerHost=")
                      .append(policies.getInstancePerHost())
-                     .append(" is invalid divisor").toString());
+                     .append(" is not an exact divisor").toString());
             }
          }
          if (policies.getGroupAssociations() != null) {
@@ -257,7 +257,7 @@ public class NodeGroupCreate {
                } else {
                   /*
                    *  This is normal case, do more checks.
-                   *  
+                   *
                    *  If STRICT is specified, the host number of the current node
                    *  group should not be larger than the referenced one.
                    */
@@ -281,15 +281,15 @@ public class NodeGroupCreate {
                         failedMsgList.add(new StringBuilder()
                               .append(getName())
                               .append(".placementPolicies.groupAssociations[0] requires " +
-                              		"more hosts than the referenced node group ")
+                                      "more hosts than the referenced node group ")
                               .append(a.getReference()).toString());
                      }
                   }
-   
+
                   // current implementation only support sum(in/out degree) <= 1
                   PlacementPolicy refPolicies = groups.get(a.getReference())
                         .getPlacementPolicies();
-                  if (refPolicies != null && refPolicies.getGroupAssociations() != null && 
+                  if (refPolicies != null && refPolicies.getGroupAssociations() != null &&
                         !refPolicies.getGroupAssociations().isEmpty()) {
                      valid = false;
                      failedMsgList.add(new StringBuilder()
