@@ -17,7 +17,7 @@ A Hadoop distribution version</span></p>
 CLI supports shell mode, command line mode, and execution of script file. After compile, you can find the jar file under cli/target directory.
 - Shell mode: java -jar serengeti-cli-0.1.jar. It supports tab key based command hint and completion. It supports history by up/down arrows.
 - Command line mode: java -jar serengeti-cli-0.1.jar "command1;command2..."
-- Execution of script file: in shell mode or command line mode, execute "script --file scriptFileName". The shell history file named cli.log will help to generate the script file. 
+- Execution of script file: in shell mode or command line mode, execute "script --file scriptFileName". The shell history file named cli.history will help to generate the script file. 
 
 ## 3. Command Syntax
 <p class=MsoNormal><span style='font-family:"Times New Roman","serif"'>CLI

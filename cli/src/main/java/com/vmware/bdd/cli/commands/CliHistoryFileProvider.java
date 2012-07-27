@@ -28,7 +28,7 @@ public class CliHistoryFileProvider extends DefaultHistoryFileNameProvider {
 
 	@Override
 	public String getHistoryFileName() {
-		return "cli.log";
+		return "cli.history";
 	}
 
 }
