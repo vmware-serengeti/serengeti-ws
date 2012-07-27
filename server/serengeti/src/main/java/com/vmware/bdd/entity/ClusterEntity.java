@@ -277,6 +277,9 @@ public class ClusterEntity extends EntityBase {
 
    @SuppressWarnings("unchecked")
    public static boolean hasHDFSUrlConfigured(Map<String, Object> conf) {
+      if (conf == null) {
+         return false;
+      }
       Map<String, Object> hadoopConf =
          (Map<String, Object>) conf.get("hadoop");
       if (hadoopConf == null) {
