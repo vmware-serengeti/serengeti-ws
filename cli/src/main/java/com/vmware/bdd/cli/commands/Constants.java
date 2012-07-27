@@ -171,4 +171,5 @@ public class Constants {
          "not regular configuration properties in Apache Hadoop. ";
    public static final String PARAM_CLUSTER_CONFIG_RUNNING_JOB_WARNING =
          "Applying new Hadoop configuration will restart Hadoop processes and may lead to termination of running jobs.";
+   public static final String PARAM_CLUSTER_SPEC_HA_ERROR = "The ha property must be one of 'off', 'on' and 'ft' in spec file ";
 }
