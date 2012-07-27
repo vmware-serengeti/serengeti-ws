@@ -163,6 +163,13 @@ public class ClusterCommands implements CommandMarker {
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
             validateConfiguration(clusterCreate, skipConfigValidation, warningMsgList);
+            if (!validateHAInfo(clusterCreate.getNodeGroups())){
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                     name, Constants.OUTPUT_OP_CREATE,
+                     Constants.OUTPUT_OP_RESULT_FAIL,
+                     Constants.PARAM_CLUSTER_SPEC_HA_ERROR + specFilePath);
+               return;
+            }
          }
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CREATE,
@@ -994,4 +1001,17 @@ public class ClusterCommands implements CommandMarker {
       return !CommandsUtils.isBlank(nodeGroupCreate.getHaFlag())
             && !nodeGroupCreate.getHaFlag().equalsIgnoreCase("off");
    }
+
+   private boolean validateHAInfo(NodeGroupCreate[] nodeGroups) {
+      List<String> haFlagList = Arrays.asList("off","on","ft");
+      if (nodeGroups != null){
+         for(NodeGroupCreate group : nodeGroups){
+            if (!haFlagList.contains(group.getHaFlag().toLowerCase())){
+               return false;
+            }
+         }
+      }
+      return true;
+   }
+
 }
