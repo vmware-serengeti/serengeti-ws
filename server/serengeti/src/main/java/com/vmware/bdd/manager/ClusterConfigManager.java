@@ -268,14 +268,14 @@ public class ClusterConfigManager {
          if (!missingRoles.isEmpty()) {
             Set<NodeGroupCreate> missingGroups =
                   fillPolicy.FillMissingGroups(nodeGroups, missingRoles,
-                        clusterEntity);
+                        clusterEntity,cluster.getType());
             nodeGroups.addAll(convertNodeGroupsToEntities(gson, clusterEntity,
                   distro, missingGroups.toArray(new NodeGroupCreate[] {}),
                   allRoles, validateWhiteList));
          }
       } else {
          // we need to add default group config into db
-         Set<NodeGroupCreate> missingGroups = fillPolicy.fillDefaultGroups();
+         Set<NodeGroupCreate> missingGroups = fillPolicy.fillDefaultGroups(cluster.getType());
          nodeGroups =
                convertNodeGroupsToEntities(gson, clusterEntity, distro,
                      missingGroups.toArray(new NodeGroupCreate[] {}), allRoles,

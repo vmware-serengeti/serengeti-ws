@@ -24,6 +24,7 @@ import java.util.TreeMap;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.vmware.bdd.apitypes.Cluster.ClusterType;
 import com.vmware.bdd.spectypes.HadoopDistroMap;
 import com.vmware.bdd.spectypes.VcCluster;
 
@@ -66,8 +67,8 @@ public class ClusterCreate {
    @Expose
    @SerializedName("cluster_configuration")
    private Map<String, Object> configuration;
-
    private boolean validateConfig = true;
+   private ClusterType type = ClusterType.HADOOP;
 
    public ClusterCreate() {
    }
@@ -216,6 +217,14 @@ public class ClusterCreate {
 
    public void setValidateConfig(boolean validateConfig) {
       this.validateConfig = validateConfig;
+   }
+
+   public ClusterType getType() {
+      return type;
+   }
+
+   public void setType(ClusterType type) {
+      this.type = type;
    }
 
    public boolean validateNodeGroupPlacementPolicies(List<String> failedMsgList) {

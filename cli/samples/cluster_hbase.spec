@@ -4,7 +4,8 @@
       "name": "master",
       "roles": [
         "hadoop_namenode",
-        "hadoop_jobtracker"
+        "hadoop_jobtracker",
+	"hbase_master"
       ],
       "instanceNum": 1,
       "instanceType": "LARGE",
@@ -15,7 +16,8 @@
     {
       "name": "data",
       "roles": [
-        "hadoop_datanode"
+        "hadoop_datanode",
+	"hbase_regionserver"
       ],
       "instanceNum": 4,
       "cpuNum": 2,
@@ -101,7 +103,23 @@
       "roles": [
         "hadoop_client",
         "hive",
-        "pig"
+        "pig",
+        "hbase_client"
+      ],
+      "instanceNum": 1,
+      "cpuNum": 1,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 10
+      },
+      "rpNames": [
+        "rp3"
+      ]
+    },
+    {
+      "name": "zookeeper",
+      "roles": [
+        "zookeeper"
       ],
       "instanceNum": 1,
       "cpuNum": 1,
