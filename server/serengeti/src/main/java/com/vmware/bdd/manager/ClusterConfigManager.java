@@ -687,6 +687,9 @@ public class ClusterConfigManager {
                CommonClusterExpandPolicy.validateAppConfig(
                      clusterCreate.getConfiguration(), clusterCreate.isValidateConfig());
                cluster.setHadoopConfig((new Gson()).toJson(clusterLevelConfig));
+            } else {
+               logger.debug("cluster configuration is not set in cluster spec, so treat it as an empty configuration.");
+               cluster.setHadoopConfig(null);
             }
             updateNodegroupAppConfig(clusterCreate, cluster, clusterCreate.isValidateConfig());
             return null;

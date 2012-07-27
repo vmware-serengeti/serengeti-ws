@@ -58,10 +58,9 @@ public class ConfigureClusterListener implements TaskListener {
       ClusterEntity cluster =
             ClusterEntity.findClusterEntityByName(clusterName);
       AuAssert.check(cluster != null);
-      cluster.setStatus(ClusterStatus.ERROR);
+      cluster.setStatus(ClusterStatus.CONFIGURE_ERROR);
       DAL.inTransactionUpdate(cluster);
-      logger.error("failed to configure cluster " + clusterName 
-            + " set its status as ERROR");
+      logger.error("failed to configure cluster " + clusterName + " set its status as ERROR");
    }
 
    @Override
