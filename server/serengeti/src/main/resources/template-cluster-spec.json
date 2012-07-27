@@ -5,7 +5,8 @@
       "name":"master",
       "roles":[
         "hadoop_namenode",
-        "hadoop_jobtracker"
+        "hadoop_jobtracker",
+        "hbase_master"
       ],
       "instance_type":MEDIUM,
       "instance_num":1,
@@ -15,7 +16,8 @@
       "name":"worker",
       "roles":[
         "hadoop_datanode",
-        "hadoop_tasktracker"
+        "hadoop_tasktracker",
+        "hbase_regionserver"
       ],
       "instance_type":SMALL,
       "instance_num":3,
@@ -24,10 +26,20 @@
     {
       "name":"client",
       "roles":[
-        "pig",
+        "hadoop_client",
         "hive",
         "hive_server",
-        "hadoop_client"
+        "pig",
+        "hbase_client"
+      ],
+      "instance_type":SMALL,
+      "instance_num":1,
+      "ha":"off"
+    },
+    {
+      "name":"zookeeper",
+      "roles":[
+        "zookeeper"
       ],
       "instance_type":SMALL,
       "instance_num":1,

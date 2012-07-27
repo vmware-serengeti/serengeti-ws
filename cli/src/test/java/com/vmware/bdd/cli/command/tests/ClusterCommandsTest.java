@@ -123,7 +123,26 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.NO_CONTENT, "");
 
-        clusterCommands.createCluster("cluster1", null, null, null, null, null, false, false);
+        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, false, false);
+    }
+
+    @Test
+    public void testCreateHbaseCluster() throws Exception {
+        NetworkRead[] networks = new NetworkRead[1];
+        NetworkRead network = new NetworkRead();
+        network.setName("dhcp");
+        network.setDhcp(true);
+        network.setPortGroup("pg1");
+        networks[0] = network;
+
+        ObjectMapper mapper = new ObjectMapper();
+        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
+                mapper.writeValueAsString(networks));
+
+        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
+                HttpStatus.NO_CONTENT, "");
+
+        clusterCommands.createCluster("cluster1", null, "HBASE", null, null, null, null, false, false);
     }
 
     @Test
@@ -145,7 +164,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
 
-        clusterCommands.createCluster("cluster1", null, null, null, null, null, false, false);
+        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, false, false);
     }
 
     @Test
@@ -182,14 +201,55 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.NO_CONTENT, "");
 
-        clusterCommands.createCluster("cluster1", null, "samples/cluster1.spec", null, null, null, false, false);
+        clusterCommands.createCluster("cluster1", null, "HADOOP", "samples/cluster_hadoop.spec", null, null, null, false, false);
+    }
+
+    @Test
+    public void testCreateHbaseClusterBySpecFile() throws Exception {
+        NetworkRead[] networks = new NetworkRead[1];
+        NetworkRead network = new NetworkRead();
+        network.setName("dhcp");
+        network.setDhcp(true);
+        network.setPortGroup("pg1");
+        networks[0] = network;
+
+        ObjectMapper mapper = new ObjectMapper();
+        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
+                mapper.writeValueAsString(networks));
+
+        DistroRead distro = new DistroRead();
+        distro.setName(Constants.DEFAULT_DISTRO);
+        List<String> roles = new ArrayList<String>();
+        roles.add("hadoop");
+        roles.add("hadoop_namenode");
+        roles.add("hadoop_jobtracker");
+        roles.add("hbase_master");
+        roles.add("hadoop_worker");
+        roles.add("hadoop_datanode");
+        roles.add("hadoop_tasktracker");
+        roles.add("hbase_regionserver");
+        roles.add("hadoop_client");
+        roles.add("hive");
+        roles.add("hive_server");
+        roles.add("pig");
+        roles.add("hbase_client");
+        roles.add("zookeeper");
+        distro.setRoles(roles);
+
+        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + Constants.DEFAULT_DISTRO,
+                HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(distro));
+
+        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
+                HttpStatus.NO_CONTENT, "");
+
+        clusterCommands.createCluster("cluster1", null, "HADOOP", "samples/cluster_hadoop.spec", null, null, null, false, false);
     }
 
     @Test
     public void testResumeCreateCluster() throws Exception {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1?state=resume",
                 HttpMethod.PUT, HttpStatus.NO_CONTENT, "");
-        clusterCommands.createCluster("cluster1", null, null, null, null, null, true, false);
+        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, true, false);
     }
 
     @Test
@@ -201,7 +261,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1?state=resume",
                 HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
-        clusterCommands.createCluster("cluster1", null, null, null, null, null, true, false);
+        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, true, false);
     }
 
     @Test
@@ -255,7 +315,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET,
                 HttpStatus.OK, mapper.writeValueAsString(cluster));
 
-        clusterCommands.createCluster("cluster1", null, null, null, null, null, false, false);
+        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, false, false);
     }
 
     @Test
@@ -383,13 +443,13 @@ public class ClusterCommandsTest extends MockRestServer {
 
       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/config", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
-      clusterCommands.configCluster("cluster1", "samples/cluster1.spec", false);
+      clusterCommands.configCluster("cluster1", "samples/cluster_hadoop.spec", false);
    }
 
    @Test
    public void testParseClusterSpec() {
      try {
-        String[] specFiles = { "samples/cluster1.spec", "samples/cluster2.spec" };
+        String[] specFiles = { "samples/cluster_hadoop.spec", "samples/cluster_hbase.spec" };
         for (String specFile : specFiles) {
            ClusterCreate clusterSpec = CommandsUtils.getObjectByJsonString(
                  ClusterCreate.class, CommandsUtils.dataFromFile(specFile));
