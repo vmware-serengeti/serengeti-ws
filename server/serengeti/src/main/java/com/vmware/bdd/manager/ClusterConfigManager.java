@@ -229,7 +229,7 @@ public class ClusterConfigManager {
          // add required node groups
          EnumSet<HadoopRole> missingRoles =
                getMissingRequiredRoles(allRoles, distro);
-         if (cluster.hasHDFSUrlConfigured()) {
+         if (ClusterEntity.hasHDFSUrlConfigured(cluster.getConfiguration())) {
             missingRoles.remove(HadoopRole.HADOOP_NAMENODE_ROLE);
             missingRoles.remove(HadoopRole.HADOOP_DATANODE);
          }

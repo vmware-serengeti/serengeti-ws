@@ -389,34 +389,7 @@ public class ClusterManager {
                      .toString());
             }
 
-            Set<NodeGroupAssociation> associations = group.getGroupAssociations();
-            if (associations != null && !associations.isEmpty()) {
-               AuAssert.check(associations.size() == 1,
-                     "only support 1 group association now");
-               NodeGroupAssociation association = associations.iterator().next();
-               if (association.getAssociationType() == GroupAssociationType.STRICT) {
-                  NodeGroupEntity refGroup = NodeGroupEntity.findNodeGroupEntityByName(
-                        cluster, association.getReferencedGroup());
-                  AuAssert.check(refGroup != null, "shold not happens");
-                  AuAssert.check(group.getInstancePerHost() != null,
-                        "shold never happens, see create cluster");
-                  AuAssert.check(refGroup.getInstancePerHost() != null,
-                        "shold never happens, see create cluster");
-                  
-                  Integer hostNum = group.getDefineInstanceNum()
-                        / group.getInstancePerHost();
-                  Integer refHostNum = refGroup.getDefineInstanceNum()
-                        / refGroup.getInstancePerHost();
-                  if (hostNum > refHostNum) {
-                     throw BddException.INVALID_PARAMETER(
-                           "instance number",
-                           new StringBuilder(100)
-                           .append(instanceNum)
-                           .append(": required host number is larger " +
-                                 "than the referenced node group").toString());
-                  }
-               }
-            }
+            group.validateHostNumber(instanceNum);
 
             return group;
          }});

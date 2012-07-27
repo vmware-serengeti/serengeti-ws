@@ -198,6 +198,8 @@ public class NodeGroupCreate {
           policies.getInstancePerHost() > 0) {
          if (getInstanceNum() % policies.getInstancePerHost() == 0) {
             hostNumber = getInstanceNum() / policies.getInstancePerHost();
+         } else {
+            hostNumber = -1;
          }
       }
 
@@ -210,12 +212,17 @@ public class NodeGroupCreate {
       PlacementPolicy policies = getPlacementPolicies();
       if (policies != null) {
          if (policies.getInstancePerHost() != null) {
-            if (policies.getInstancePerHost() <= 0 || getHostNum() == null) {
+            if (policies.getInstancePerHost() <= 0) {
                valid = false;
                failedMsgList.add(new StringBuilder().append(getName())
                      .append(".placementPolicies.instancePerHost=")
                      .append(policies.getInstancePerHost()).toString());
-               return valid;
+            } else if (getHostNum() < 0) {
+               valid = false;
+               failedMsgList.add(new StringBuilder().append(getName())
+                     .append(".placementPolicies.instancePerHost=")
+                     .append(policies.getInstancePerHost())
+                     .append(" is invalid divisor").toString());
             }
          }
          if (policies.getGroupAssociations() != null) {
@@ -255,19 +262,26 @@ public class NodeGroupCreate {
                    *  group should not be larger than the referenced one.
                    */
                   if (a.getType() == GroupAssociationType.STRICT) {
-                     if (groups.get(a.getReference()).getHostNum() == null) {
+                     /*
+                      * For the referenced node group, we assume the max node number equals to
+                      * instance number when instance per host is unspecified. For the reference
+                      * node group, we assume the min node number is 1 when instance per host is
+                      * unspecified. This rule follows the underlying placement algorithm.
+                      */
+                     int hostNum = 1;
+                     int refHostNum = groups.get(a.getReference()).getInstanceNum();
+                     if (getHostNum() != null) {
+                        hostNum = getHostNum();
+                     }
+                     if (groups.get(a.getReference()).getHostNum() != null) {
+                        refHostNum = groups.get(a.getReference()).getHostNum();
+                     }
+                     if (hostNum > refHostNum) {
                         valid = false;
                         failedMsgList.add(new StringBuilder()
                               .append(getName())
-                              .append(".placementPolicies.groupAssociations[0] refers to node group ")
-                              .append(a.getReference())
-                              .append(" with no instancePerHost specified")
-                              .toString());
-                     } else if (getHostNum() > groups.get(a.getReference()).getHostNum()) {
-                        valid = false;
-                        failedMsgList.add(new StringBuilder()
-                              .append(getName())
-                              .append(".placementPolicies.groupAssociations[0] requires more hosts than the referenced node group ")
+                              .append(".placementPolicies.groupAssociations[0] requires " +
+                              		"more hosts than the referenced node group ")
                               .append(a.getReference()).toString());
                      }
                   }

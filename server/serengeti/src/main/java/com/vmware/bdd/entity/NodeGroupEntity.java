@@ -41,10 +41,12 @@ import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.dal.DAL;
+import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.AuAssert;
 
 /**
@@ -383,6 +385,38 @@ public class NodeGroupEntity extends EntityBase {
                Restrictions.in("cluster", clusters));
       } else {
          return new ArrayList<NodeGroupEntity>(0);
+      }
+   }
+
+   public void validateHostNumber(int instanceNum) {
+      Set<NodeGroupAssociation> associations = getGroupAssociations();
+      if (associations != null && !associations.isEmpty()) {
+         AuAssert.check(associations.size() == 1,
+               "only support 1 group association now");
+         NodeGroupAssociation association = associations.iterator().next();
+         if (association.getAssociationType() == GroupAssociationType.STRICT) {
+            NodeGroupEntity refGroup = NodeGroupEntity.findNodeGroupEntityByName(
+                  getCluster(), association.getReferencedGroup());
+            AuAssert.check(refGroup != null, "shold not happens");
+
+            int hostNum = 1;
+            int refHostNum = refGroup.getDefineInstanceNum();
+            if (getInstancePerHost() != null) {
+               hostNum = instanceNum / getInstancePerHost();
+            }
+            if (refGroup.getInstancePerHost() != null) {
+               refHostNum = refGroup.getDefineInstanceNum() / refGroup.getInstancePerHost();
+            }
+
+            if (hostNum > refHostNum) {
+               throw BddException.INVALID_PARAMETER(
+                     "instance number",
+                     new StringBuilder(100)
+                     .append(instanceNum)
+                     .append(": required host number is larger " +
+                           "than the referenced node group").toString());
+            }
+         }
       }
    }
 }

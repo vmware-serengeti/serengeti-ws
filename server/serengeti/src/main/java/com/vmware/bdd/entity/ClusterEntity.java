@@ -15,10 +15,12 @@
 package com.vmware.bdd.entity;
 
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -41,6 +43,7 @@ import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.dal.DAL;
+import com.vmware.bdd.exception.BddException;
 
 /**
  * Cluster Entity
@@ -270,5 +273,33 @@ public class ClusterEntity extends EntityBase {
          }
       }
       return clusters;
+   }
+
+   @SuppressWarnings("unchecked")
+   public static boolean hasHDFSUrlConfigured(Map<String, Object> conf) {
+      Map<String, Object> hadoopConf =
+         (Map<String, Object>) conf.get("hadoop");
+      if (hadoopConf == null) {
+         return false;
+      }
+      Map<String, Object> coreSiteConf =
+         (Map<String, Object>) hadoopConf.get("core-site.xml");
+      if (coreSiteConf == null) {
+         return false;
+      }
+      String url = (String)coreSiteConf.get("fs.default.name");
+      if (url != null && !url.isEmpty()) {
+         try {
+            URI uri = new URI(url);
+            if (!"hdfs".equalsIgnoreCase(uri.getScheme()) ||
+                  uri.getHost() == null) {
+               throw BddException.INVALID_PARAMETER("fs.default.name", url);
+            }
+         } catch (Exception ex) {
+            throw BddException.INVALID_PARAMETER(ex, "fs.default.name", url);
+         }
+         return true;
+      }
+      return false;
    }
 }

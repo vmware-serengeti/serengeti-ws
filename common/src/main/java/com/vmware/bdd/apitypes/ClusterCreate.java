@@ -227,22 +227,4 @@ public class ClusterCreate {
 
       return valid;
    }
-
-   @SuppressWarnings("unchecked")
-   public boolean hasHDFSUrlConfigured() {
-      // if hdfs url exists
-      
-      Map<String, Object> hadoopConf =
-         (Map<String, Object>)getConfiguration().get("hadoop");
-      if (hadoopConf == null) {
-         return false;
-      }
-      Map<String, Object> coreSiteConf =
-         (Map<String, Object>) hadoopConf.get("core-site.xml");
-      if (coreSiteConf == null) {
-         return false;
-      }
-      String url = (String)coreSiteConf.get("fs.default.name");
-      return url != null && !url.isEmpty();
-   }
 }
