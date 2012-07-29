@@ -16,15 +16,17 @@ package com.vmware.bdd.cli.commands;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import org.codehaus.jackson.JsonParseException;
@@ -277,5 +279,35 @@ public class CommandsUtils {
       ObjectMapper mapper = new ObjectMapper();
       mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
       return mapper;
+   }
+
+   public static Properties readPropertise(String propertiesFilePath) {
+      Properties propertise = new Properties();
+      FileInputStream fis;
+      try {
+         File file = new File(propertiesFilePath);
+         if (!file.exists()){
+            return propertise;
+         }
+         fis = new FileInputStream(propertiesFilePath);
+         propertise.load(fis);
+      } catch (FileNotFoundException e) {
+         e.printStackTrace();
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+      return propertise;
+   }
+   
+   public static void writePropertise(Properties propertise, String propertiesFilePath) {
+      FileOutputStream fos=null;
+      try {
+         fos = new FileOutputStream(propertiesFilePath);
+         propertise.store(fos, "");
+      } catch (FileNotFoundException e) {
+         e.printStackTrace();
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
    }
 }

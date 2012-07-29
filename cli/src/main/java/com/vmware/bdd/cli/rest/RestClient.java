@@ -35,8 +35,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.vmware.bdd.apitypes.Connect;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
+import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 
 /**
@@ -73,7 +75,7 @@ public class RestClient {
                   Constants.HTTP_CONNECTION_PREFIX
                         + (String) hostProperties
                               .get(Constants.PROPERTY_HOST)
-                        + Constants.HTTP_CONNECTION_SUFFIX;
+                        + Constants.HTTP_CONNECTION_LOGIN_SUFFIX;
          }
       } catch (Exception e) {//not set yet; or read io error
       } finally {
@@ -95,35 +97,64 @@ public class RestClient {
     * @param host
     *           host url with optional port
     */
-   public void connect(final String host) {
+   public Connect.ConnectType connect(final String host, final String userName, final String password) {
       String oldHostUri = hostUri;
 
       hostUri =
             Constants.HTTP_CONNECTION_PREFIX + host
-                  + Constants.HTTP_CONNECTION_SUFFIX;
+                  + Constants.HTTP_CONNECTION_LOGIN_SUFFIX;
 
       try {
          ResponseEntity<String> response =
-               restGet(Constants.REST_PATH_TEST, String.class, false);
+            login(Constants.REST_PATH_TEST, String.class, userName,password);
 
-         if (response.getStatusCode() == HttpStatus.NO_CONTENT) {//normal response        
+         if (response.getStatusCode() == HttpStatus.OK) {//normal response        
             updateHostproperty(host);
-
+            String cookieValue=response.getHeaders().getFirst("Set-Cookie");
+            if(cookieValue.contains(";")){
+               cookieValue=cookieValue.split(";")[0];
+            }
+            writeCookieInfo(cookieValue);
             System.out.println(Constants.CONNECT_SUCCESS);
+         } else if (response.getStatusCode() == HttpStatus.NOT_FOUND){
+            System.out.println(Constants.CONNECT_UNAUTHORIZATION);
+            //recover old hostUri
+            hostUri = oldHostUri;
+            return Connect.ConnectType.UNAUTHORIZATION;
          } else { //error
             System.out.println(Constants.CONNECT_FAILURE);
 
             //recover old hostUri
             hostUri = oldHostUri;
+            return Connect.ConnectType.ERROR;
          }
       }catch (Exception e) {
          System.out.println(Constants.CONNECT_FAILURE + ":" + e.getCause().getMessage().toLowerCase());
+      }
+      return Connect.ConnectType.SUCCESS;
+   }
+
+   private void writeCookieInfo(String cookie) {
+      String propertiseFile = "cookie.propertise";
+      Properties propertise = new Properties();
+      propertise.put("Cookie", cookie);
+      CommandsUtils.writePropertise(propertise, propertiseFile);
+   }
+
+   private String readCookieInfo() {
+      String propertiseFile = "cookie.propertise";
+      Properties propertise = null;
+      propertise = CommandsUtils.readPropertise(propertiseFile);
+      if (propertise != null) {
+         return propertise.getProperty("Cookie");
+      } else {
+         return null;
       }
    }
 
    private <T> ResponseEntity<T> restGetById(final String path, final String id,
          final Class<T> respEntityType, final boolean hasDetailQueryString) {
-      String targetUri = hostUri + path + "/" + id;
+      String targetUri = hostUri + Constants.HTTP_CONNECTION_API + path + "/" + id;
       if (hasDetailQueryString) {
          targetUri += Constants.QUERY_DETAIL;
       }
@@ -131,11 +162,20 @@ public class RestClient {
    }
 
    private <T> ResponseEntity<T> restGet(final String path, final Class<T> respEntityType, final boolean hasDetailQueryString) {
-      String targetUri = hostUri + path;
+      String targetUri = hostUri + Constants.HTTP_CONNECTION_API + path;
       if (hasDetailQueryString) {
          targetUri += Constants.QUERY_DETAIL;
       }
       return restGetByUri(targetUri, respEntityType);
+   }
+
+   private <T> ResponseEntity<T> login(final String path, final Class<T> respEntityType, final String userName, final String password) {
+      StringBuilder uriBuff=new StringBuilder();
+      uriBuff.append(hostUri).append(path);
+      if (!CommandsUtils.isBlank(userName) && !CommandsUtils.isBlank(password)) {
+         uriBuff.append("?").append("j_username=").append(userName).append("&j_password=").append(password);
+      }
+      return restPostByUri(uriBuff.toString(), respEntityType);
    }
 
    private <T> ResponseEntity<T> restGetByUri(String uri,
@@ -146,12 +186,24 @@ public class RestClient {
       return client.exchange(uri, HttpMethod.GET, entity, respEntityType);
    }
 
+   private <T> ResponseEntity<T> restPostByUri(String uri,
+         Class<T> respEntityType) {
+      HttpHeaders headers = buildHeaders();
+      HttpEntity<String> entity = new HttpEntity<String>(headers);
+
+      return client.exchange(uri, HttpMethod.POST, entity, respEntityType);
+   }
+
    private HttpHeaders buildHeaders() {
       HttpHeaders headers = new HttpHeaders();
       headers.setContentType(MediaType.APPLICATION_JSON);
       List<MediaType> acceptedTypes = new ArrayList<MediaType>();
       acceptedTypes.add(MediaType.APPLICATION_JSON);
+      acceptedTypes.add(MediaType.TEXT_HTML);
       headers.setAccept(acceptedTypes);
+
+      String cookieInfo = readCookieInfo();
+      headers.add("Cookie", cookieInfo == null ? "" : cookieInfo);
 
       return headers;
    }
@@ -194,7 +246,9 @@ public class RestClient {
       try {
          if (verb == HttpMethod.POST) {
             ResponseEntity<String> response = restPost(path, entity);
-
+            if (!validateAuthorization(response)) {
+               return;
+            }
             processResponse(response, HttpMethod.POST, prettyOutput);
          } else {
             throw new Exception(Constants.HTTP_VERB_ERROR);
@@ -206,10 +260,11 @@ public class RestClient {
    }
 
    private ResponseEntity<String> restPost(String path, Object entity) {
-      String targetUri = hostUri + path;
+      String targetUri = hostUri + Constants.HTTP_CONNECTION_API + path;
 
       HttpHeaders headers = buildHeaders();
       HttpEntity<Object> postEntity = new HttpEntity<Object>(entity, headers);
+
       return client.exchange(targetUri, HttpMethod.POST, postEntity,
             String.class);
    }
@@ -313,7 +368,9 @@ public class RestClient {
       try {
          if (verb == HttpMethod.GET) {
             ResponseEntity<T> response = restGetById(path, id, entityType, detail);
-
+            if (!validateAuthorization(response)) {
+               return null;
+            }
             T objectRead = response.getBody();
 
             return objectRead;
@@ -340,7 +397,9 @@ public class RestClient {
       try {
          if (verb == HttpMethod.GET) {
             ResponseEntity<T> response = restGet(path, entityType, detail);
-
+            if (!validateAuthorization(response)) {
+               return null;
+            }
             T objectsRead = response.getBody();
 
             return objectsRead;
@@ -366,7 +425,9 @@ public class RestClient {
       try {
          if (verb == HttpMethod.DELETE) {
             ResponseEntity<String> response = restDelete(path, id);
-
+            if (!validateAuthorization(response)) {
+               return;
+            }
             processResponse(response, HttpMethod.DELETE, prettyOutput);
          } else {
             throw new Exception(Constants.HTTP_VERB_ERROR);
@@ -378,10 +439,11 @@ public class RestClient {
    }
 
    private ResponseEntity<String> restDelete(String path, String id) {
-      String targetUri = hostUri + path + "/" + id;
+      String targetUri = hostUri + Constants.HTTP_CONNECTION_API + path + "/" + id;
 
       HttpHeaders headers = buildHeaders();
       HttpEntity<String> entity = new HttpEntity<String>(headers);
+
       return client
             .exchange(targetUri, HttpMethod.DELETE, entity, String.class);
    }
@@ -408,7 +470,9 @@ public class RestClient {
       try {
          if (verb == HttpMethod.PUT) {
             ResponseEntity<String> response = restActionOps(path, id, queryStrings);
-
+            if (!validateAuthorization(response)) {
+               return;
+            }
             processResponse(response, HttpMethod.PUT, prettyOutput);
          } else {
             throw new Exception(Constants.HTTP_VERB_ERROR);
@@ -421,7 +485,7 @@ public class RestClient {
 
    private ResponseEntity<String> restActionOps(String path, String id,
          Map<String, ?> queryStrings) {
-      String targetUri = hostUri + path + "/" + id;
+      String targetUri = hostUri + Constants.HTTP_CONNECTION_API + path + "/" + id;
       if (queryStrings != null) {
          targetUri = targetUri + buildQueryStrings(queryStrings);
       }
@@ -455,7 +519,9 @@ public class RestClient {
       try {
          if (verb == HttpMethod.PUT) {
             ResponseEntity<String> response = restUpdate(path, entity);
-
+            if (!validateAuthorization(response)) {
+               return;
+            }
             processResponse(response, HttpMethod.PUT, prettyOutput);
          } else {
             throw new Exception(Constants.HTTP_VERB_ERROR);
@@ -467,11 +533,21 @@ public class RestClient {
    }
 
    private ResponseEntity<String> restUpdate(String path, Object entityName) {
-      String targetUri = hostUri + path;
+      String targetUri = hostUri + Constants.HTTP_CONNECTION_API + path;
 
       HttpHeaders headers = buildHeaders();
       HttpEntity<Object> entity = new HttpEntity<Object>(entityName, headers);
 
       return client.exchange(targetUri, HttpMethod.PUT, entity, String.class);
    }
+
+   @SuppressWarnings("rawtypes")
+   private boolean validateAuthorization(ResponseEntity response) {
+      if (response.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+         System.out.println(Constants.CONNECT_UNAUTHORIZATION);
+         return false;
+      }
+      return true;
+   }
+
 }
