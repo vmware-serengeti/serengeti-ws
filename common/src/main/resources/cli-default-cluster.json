@@ -64,6 +64,8 @@
     "hadoop": {
       "core-site.xml": {
         // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/core-default.html
+        // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample: 
+        // "io.file.buffer.size": "4096"
       },
       "hdfs-site.xml": {
         // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/hdfs-default.html
@@ -87,5 +89,4 @@
       }
     }
   }
- }
 }
