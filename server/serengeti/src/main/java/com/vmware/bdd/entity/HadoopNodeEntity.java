@@ -31,6 +31,7 @@ import org.hibernate.criterion.Restrictions;
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.dal.DAL;
+import com.vmware.bdd.utils.AuAssert;
 
 /**
  * Hadoop Node Entity class: describes hadoop node info
@@ -202,5 +203,13 @@ public class HadoopNodeEntity extends EntityBase {
       } else {
          return new ArrayList<HadoopNodeEntity>(0);
       }
+   }
+
+   public static HadoopNodeEntity findByName(NodeGroupEntity group, String name) {
+      AuAssert.check(group != null);
+      return DAL.findUniqueByCriteria(
+            HadoopNodeEntity.class,
+            Restrictions.and(Restrictions.eq("nodeGroup", group),
+                  Restrictions.eq("vmName", name)));
    }
 }

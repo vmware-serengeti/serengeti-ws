@@ -35,6 +35,7 @@ public class Constants {
    public static final String REST_PATH_DISTROS = "distros";
    public static final String REST_PATH_DISTRO = "distro";
    public static final String REST_PATH_CONFIG = "config";
+   public static final String REST_PATH_SPEC = "spec";
 
    public static final String QUERY_ACTION_KEY = "state";
    public static final String QUERY_ACTION_START = "start";
@@ -60,6 +61,7 @@ public class Constants {
    public static final String OUTPUT_INDENT = "  ";
    public static final String OUTPUT_SPLITTER = ", ";
    public static final String OUTPUT_OBJECT_CLUSTER = "cluster";
+   public static final String OUTPUT_OBJECT_NODES_IN_CLUSTER = "nodes in cluster";
    public static final String OUTPUT_OBJECT_DATASTORE = "datastore";
    public static final String OUTPUT_OBJECT_DISTRO = "distro";
    public static final String OUTPUT_OBJECT_NETWORK = "network";
@@ -67,6 +69,7 @@ public class Constants {
    public static final String OUTPUT_OBJECT_RESOURCEPOOL = "resourcepool";
    public static final String OUTPUT_OP_CREATE = "create";
    public static final String OUTPUT_OP_CONFIG = "config";
+   public static final String OUTPUT_OP_EXPORT = "export";
    public static final String OUTPUT_OP_ADD = "add";
    public static final String OUTPUT_OP_LIST = "list";
    public static final String OUTPUT_OP_TARGET = "target";
@@ -84,6 +87,7 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_RESIZE = "resized";
    public static final String OUTPUT_OP_RESULT_RESUME = "resumed";
    public static final String OUTPUT_OP_RESULT_ADD = "added";
+   public static final String OUTPUT_OP_NODEGROUP_MISSING = "must specify nodegroup name when node name is specified";
    public static final String OUTPUT_UNKNOWN_HOST = "unknown host";
    public static final String OUTPUT_HOST_REFUSE = "Connection refused. Please check the port number";
    public static final String OUTPUT_HOST_TIMEOUT = "connection timeout";

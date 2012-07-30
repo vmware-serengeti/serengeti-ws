@@ -17,20 +17,25 @@ package com.vmware.bdd.cli.commands;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import org.codehaus.jackson.util.DefaultPrettyPrinter;
 
 
 public class CommandsUtils {
@@ -92,6 +97,23 @@ public class CommandsUtils {
       T NodeGroupsCreate = null;
       NodeGroupsCreate = mapper.readValue(jsonString, entityType);
       return NodeGroupsCreate;
+   }
+
+   public static void prettyJsonOutput(Object object, String fileName) 
+   throws JsonParseException, JsonMappingException, IOException {
+      OutputStream out = null;
+      if (fileName != null) {
+         out = new FileOutputStream(fileName);
+      } else {
+         out = System.out;
+      }
+      JsonFactory factory = new JsonFactory();
+      JsonGenerator generator = factory.createJsonGenerator(out);
+      ObjectMapper mapper = getMapper();
+      mapper.setSerializationInclusion(Inclusion.NON_NULL);
+      generator.setCodec(mapper);
+      generator.setPrettyPrinter(new DefaultPrettyPrinter());
+      generator.writeObject(object);
    }
 
    /**

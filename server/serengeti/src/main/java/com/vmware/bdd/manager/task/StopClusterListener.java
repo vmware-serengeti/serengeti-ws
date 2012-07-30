@@ -32,10 +32,23 @@ public class StopClusterListener implements TaskListener {
    private static final Logger logger = Logger.getLogger(StopClusterListener.class);
 
    private String clusterName;
+   private String nodeGroupName;
+   private String nodeName;
+
+   public StopClusterListener(String clusterName, String nodeGroupName, String nodeName) {
+      super();
+      AuAssert.check(clusterName != null && !clusterName.isEmpty());
+      AuAssert.check(nodeGroupName == null || !nodeGroupName.isEmpty());
+      AuAssert.check(nodeGroupName == null || !nodeGroupName.isEmpty());
+      AuAssert.check(!(nodeName != null && nodeGroupName == null));
+
+      this.clusterName = clusterName;
+      this.nodeGroupName = nodeGroupName;
+      this.nodeName = nodeName;
+   }
 
    public StopClusterListener(String clusterName) {
-      super();
-      this.clusterName = clusterName;
+      this(clusterName, null, null);
    }
 
    @Override
@@ -43,30 +56,37 @@ public class StopClusterListener implements TaskListener {
       logger.debug("stop cluster " + clusterName
             + " task listener called onSuccess");
 
-      ClusterEntity cluster =
-            ClusterEntity.findClusterEntityByName(clusterName);
-      AuAssert.check(cluster != null);
+      // only update status when the command is issued on the whole cluster
+      if (nodeGroupName == null) {
+         ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+         AuAssert.check(cluster != null);
 
-      cluster.setStatus(ClusterStatus.STOPPED);
-      DAL.inTransactionUpdate(cluster);
+         cluster.setStatus(ClusterStatus.STOPPED);
+         DAL.inTransactionUpdate(cluster);
+      }
    }
 
    @Override
    public void onFailure() {
       logger.debug("stop cluster listener called onFailure");
 
-      ClusterEntity cluster =
-            ClusterEntity.findClusterEntityByName(clusterName);
-      AuAssert.check(cluster != null);
-      cluster.setStatus(ClusterStatus.ERROR);
-      DAL.inTransactionUpdate(cluster);
-      logger.error("failed to stop cluster " + clusterName 
+      // only update status when the command is issued on the whole cluster
+      if (nodeGroupName == null) {
+         ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+         AuAssert.check(cluster != null);
+         cluster.setStatus(ClusterStatus.ERROR);
+         DAL.inTransactionUpdate(cluster);
+      }
+
+      logger.error("failed to stop cluster nodes "
+            + ClusterCmdUtil.getFullNodeName(clusterName, nodeGroupName, nodeName)
             + " set its status as ERROR");
    }
 
    @Override
    public void onMessage(Map<String, Object> mMap) {
-      logger.debug("stop cluster " + clusterName
+      logger.debug("stop cluster nodes "
+            + ClusterCmdUtil.getFullNodeName(clusterName, nodeGroupName, nodeName)
             + " task listner received message " + mMap);
 
       BddMessageUtil.validate(mMap, clusterName);
@@ -81,7 +101,9 @@ public class StopClusterListener implements TaskListener {
       BddMessageUtil.processClusterData(clusterName, description);
    }
 
-   public String[] getTaskCommand(String clusterName, String fileName) {
-      return ClusterCmdUtil.getStopClusterCmdArray(clusterName, fileName);
+   public String[] getTaskCommand(String clusterNodesName, String fileName) {
+      String nodeFullName = 
+         ClusterCmdUtil.getFullNodeName(clusterName, nodeGroupName, nodeName);
+      return ClusterCmdUtil.getStopClusterNodesCmdArray(nodeFullName, fileName);
    }
 }

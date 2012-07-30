@@ -44,11 +44,13 @@ import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetworkRead;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.ResourcePoolAdd;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
+import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.DistroManager;
 import com.vmware.bdd.manager.NetworkManager;
@@ -171,9 +173,13 @@ public class RestResource {
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void startStopResumeCluster(
          @PathVariable("clusterName") String clusterName,
-         @RequestParam(value="state", required = false) String state,
+         @RequestParam(value="state", required = true) String state,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
+      if (clusterName == null || clusterName.isEmpty()) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+
       Long taskId;
       if (state.equals("stop")) {
          taskId = clusterMgr.stopCluster(clusterName);
@@ -189,7 +195,70 @@ public class RestResource {
       }
    }
 
-   @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}", method = RequestMethod.PUT)
+   @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}",
+         method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.ACCEPTED)
+   public void startStopNodeGroup(
+         @PathVariable("clusterName") String clusterName,
+         @PathVariable("groupName") String groupName,
+         @RequestParam(value="state", required = true) String state,
+         HttpServletRequest request, HttpServletResponse response)
+         throws Exception {
+      if (clusterName == null || clusterName.isEmpty()) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+
+      if (groupName == null || groupName.isEmpty()) {
+         throw BddException.INVALID_PARAMETER("node group name", groupName);
+      }
+
+      Long taskId;
+      if (state.equals("stop")) {
+         taskId = clusterMgr.stopNodeGroup(clusterName, groupName);
+         redirectRequest(taskId, request, response);
+      } else if (state.equals("start")) {
+         taskId = clusterMgr.startNodeGroup(clusterName, groupName);
+         redirectRequest(taskId, request, response);
+      } else {
+         throw BddException.INVALID_PARAMETER("node group state", state);
+      }
+   }
+
+   @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}/node/{nodeName}",
+         method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.ACCEPTED)
+   public void startStopNode(
+         @PathVariable("clusterName") String clusterName,
+         @PathVariable("groupName") String groupName,
+         @PathVariable("nodeName") String nodeName,
+         @RequestParam(value="state", required = true) String state,
+         HttpServletRequest request, HttpServletResponse response)
+         throws Exception {
+      if (clusterName == null || clusterName.isEmpty()) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+
+      if (groupName == null || groupName.isEmpty()) {
+         throw BddException.INVALID_PARAMETER("node group name", groupName);
+      }
+
+      if (nodeName == null || nodeName.isEmpty()) {
+         throw BddException.INVALID_PARAMETER("node name", nodeName);
+      }
+
+      Long taskId;
+      if (state.equals("stop")) {
+         taskId = clusterMgr.stopNode(clusterName, groupName, nodeName);
+         redirectRequest(taskId, request, response);
+      } else if (state.equals("start")) {
+         taskId = clusterMgr.startNode(clusterName, groupName, nodeName);
+         redirectRequest(taskId, request, response);
+      } else {
+         throw BddException.INVALID_PARAMETER("node state", state);
+      }
+   }
+
+   @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}/instancenum", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void resizeCluster(@PathVariable("clusterName") String clusterName,
          @PathVariable("groupName") String groupName,
@@ -209,6 +278,13 @@ public class RestResource {
    public ClusterRead getCluster(
          @PathVariable("clusterName") final String clusterName) {
       return clusterMgr.getClusterByName(clusterName);
+   }
+
+   @RequestMapping(value = "/cluster/{clusterName}/spec", method = RequestMethod.GET, produces = "application/json")
+   @ResponseBody
+   public ClusterCreate getClusterSpec(
+         @PathVariable("clusterName") final String clusterName) {
+      return clusterMgr.getClusterSpec(clusterName);
    }
 
    @RequestMapping(value = "/clusters", method = RequestMethod.GET, produces = "application/json")

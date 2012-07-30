@@ -326,6 +326,33 @@ public class RestClient {
    }
 
    /**
+    * Method to get by path
+    * @param entityType
+    * @param path
+    * @param verb
+    * @param detail
+    * @return
+    */
+   public <T> T getObjectByPath(Class<T> entityType,
+         final String path, final HttpMethod verb, final boolean detail) {
+      checkConnection();
+
+      try {
+         if (verb == HttpMethod.GET) {
+            ResponseEntity<T> response = restGet(path, entityType, detail);
+
+            T objectRead = response.getBody();
+
+            return objectRead;
+         } else {
+            throw new Exception(Constants.HTTP_VERB_ERROR);
+         }
+      } catch (Exception e) {
+         throw new CliRestException(e.getMessage());
+      }
+   }
+
+   /**
     * Generic method to get all objects of a type
     * @param entityType object type
     * @param path the rest url

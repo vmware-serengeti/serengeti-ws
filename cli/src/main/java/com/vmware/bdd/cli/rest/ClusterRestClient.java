@@ -63,6 +63,13 @@ public class ClusterRestClient {
       return restClient.getObject(id, ClusterRead.class, path, httpverb, false);
    }
 
+   public ClusterCreate getSpec(String id) {
+      final String path = Constants.REST_PATH_CLUSTER + "/" + id + "/" + Constants.REST_PATH_SPEC;
+      final HttpMethod httpverb = HttpMethod.GET;
+
+      return restClient.getObjectByPath(ClusterCreate.class, path, httpverb, false);
+   }
+
    public ClusterRead[] getAll() {
       final String path = Constants.REST_PATH_CLUSTERS;
       final HttpMethod httpverb = HttpMethod.GET;
@@ -82,7 +89,7 @@ public class ClusterRestClient {
    public void resize(String clusterName, String nodeGroup, int instanceNum) {
       final String path =
             Constants.REST_PATH_CLUSTER + "/" + clusterName + "/"
-                  + Constants.REST_PATH_NODEGROUP + "/" + nodeGroup;
+                  + Constants.REST_PATH_NODEGROUP + "/" + nodeGroup + "/instancenum";
       final HttpMethod httpverb = HttpMethod.PUT;
 
       PrettyOutput outputCallBack = getClusterPrettyOutputCallBack(this, clusterName);
