@@ -139,6 +139,7 @@ echo ${clijarname}
 #touch serengeti cli bash
 chown serengeti:serengeti "#{SERENGETI_CLI_HOME}" -R #
 touch "#{SERENGETI_SCRIPTS_HOME}/serengeti"
+chown serengeti:serengeti "#{SERENGETI_SCRIPTS_HOME}/serengeti"
 chmod +x "#{SERENGETI_SCRIPTS_HOME}/serengeti"
 echo "#!/bin/bash" > "#{SERENGETI_SCRIPTS_HOME}/serengeti"
 echo "clijarname=${clijarfullname##*\/}" >> "#{SERENGETI_SCRIPTS_HOME}/serengeti"
@@ -164,6 +165,7 @@ SHELLEOF
 
 #write system configuration
 echo "PATH=\\$PATH:\"#{SERENGETI_SCRIPTS_HOME}\"" >> /etc/profile
+echo "CLOUD_MANAGER_CONFIG_DIR=\"#{SERENGETI_HOME}\"/conf" >> /etc/profile
 
 EOF
 
@@ -206,15 +208,14 @@ system <<EOF
 
 #update serengeti.properties for web service
 sed -i "s/distro_root =.*/#{distroip}/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/vc_addr = .*/vc_addr = \"#{h["evs_IP"]}\"/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/vc_user = .*/vc_user = \"#{vcuser}\"/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/vc_pwd = .*/vc_pwd = \"#{updateVCPassword}\"/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/vc_datacenter = .*/#{vcdatacenterline}/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/template_id = .*/#{templateid}/" "#{SERENGETI_WEBAPP_CONF}"
 
 echo "vc_addr: #{h["evs_IP"]}" > "#{SERENGETI_CLOUD_MANAGER_CONF}"
 echo "vc_user: #{vcuser}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
 echo "vc_pwd:  #{updateVCPassword}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+chmod 400 "#{SERENGETI_CLOUD_MANAGER_CONF}"
+chown serengeti:serengeti "#{SERENGETI_CLOUD_MANAGER_CONF}"
 
 #kill tomcat using shell direclty to avoid failing to stop tomcat
 pidlist=`ps -ef|grep tomcat | grep -v "grep"|awk '{print $2}'`

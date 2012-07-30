@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -76,7 +76,6 @@ public class BddMessageUtil {
       DAL.inRwTransactionDo(new Saveable<Void>() {
          @Override
          public Void body() {
-            int processedGroups = 0;
             HashMap<String, Object> clusterData =
                   (new Gson()).fromJson(msg,
                         (new HashMap<String, Object>()).getClass());
@@ -99,6 +98,9 @@ public class BddMessageUtil {
                               groupMap.get(GROUP_NAME_FIELD))) {
                      Set<HadoopNodeEntity> nodes =
                            new HashSet<HadoopNodeEntity>();
+
+                     if (groupMap.get(INSTANCE_FIELD) == null)
+                        continue;
 
                      for (HashMap<String, Object> instance : (ArrayList<HashMap<String, Object>>) groupMap
                            .get(INSTANCE_FIELD)) {
@@ -136,7 +138,7 @@ public class BddMessageUtil {
                            node.setVcRp(VcResourcePoolEntity
                                  .findByClusterAndRp(vcCluster, vcRp));
                         }
-                        // TODO: parse datastore usage as well
+
                         if (instance.get(DATASTORE_FIELD) != null) {
                            List<String> dsNames = new ArrayList<String>();
                            for (HashMap<String, Object> ds : (ArrayList<HashMap<String, Object>>) instance
@@ -151,32 +153,28 @@ public class BddMessageUtil {
                         nodes.add(node);
                      }
 
-                     int oldNodeNum = group.getHadoopNodes().size();
                      // copy the new status if the instance exist
                      for (HadoopNodeEntity newNode : nodes) {
                         Iterator<HadoopNodeEntity> iter =
                               group.getHadoopNodes().iterator();
+                        boolean found = false;
                         while (iter.hasNext()) {
                            HadoopNodeEntity oldNode = iter.next();
                            if (oldNode.getVmName().equals(newNode.getVmName())) {
                               oldNode.copy(newNode);
                               logger.debug("update old node "
                                     + oldNode.getVmName() + " with new info");
-                              oldNodeNum--;
+                              found = true;
                               break;
                            }
                         }
                         // insert new instance
-                        if (!iter.hasNext()) {
+                        if (!found) {
                            group.getHadoopNodes().add(newNode);
                            logger.debug("insert new node "
                                  + newNode.getVmName());
                         }
                      }
-                     // checks whether all old nodes have been updated
-                     AuAssert.check(oldNodeNum == 0);
-
-                     processedGroups += 1;
                   }
                }
             }

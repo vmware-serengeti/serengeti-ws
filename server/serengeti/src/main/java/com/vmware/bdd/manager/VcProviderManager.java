@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -28,8 +28,7 @@ import com.vmware.bdd.utils.Configuration;
 public class VcProviderManager implements CloudProviderManager {
 
    enum VcProviderAttribute {
-      PROVIDER_TYPE("type"), VC_ADDR_ATTR("vc_addr"), VC_USER_ATTR("vc_user"), VC_PASSWORD_ATTR(
-            "vc_pwd"), VC_DATACENTER_ATTR("vc_datacenter"), VC_CLUSTER_ATTR(
+      PROVIDER_TYPE("type"), VC_DATACENTER_ATTR("vc_datacenter"), VC_CLUSTER_ATTR(
             "vc_clusters"), VC_RESOURCE_POOL_ATTR("vc_rps"), VC_SHARED_STORAGE_ATTR(
             "vc_shared_datastore_pattern"), VC_LOCAL_STORAGE_ATTR(
             "vc_local_datastore_pattern"), PROVIDER_NAME("name");
@@ -117,9 +116,6 @@ public class VcProviderManager implements CloudProviderManager {
                   + attributeName);
          }
          switch (enumAttr) {
-         case VC_ADDR_ATTR:
-         case VC_USER_ATTR:
-         case VC_PASSWORD_ATTR:
          case VC_DATACENTER_ATTR:
             attributes.put(entity.getAttribute(), entity.getValue());
             break;
@@ -140,25 +136,6 @@ public class VcProviderManager implements CloudProviderManager {
             attributes.put(VcProviderAttribute.PROVIDER_TYPE.toString(),
                   VC_PROVIDER_TYPE);
             break;
-         case VC_ADDR_ATTR:
-            String vcAddr =
-                  Configuration.getString(VcProviderAttribute.VC_ADDR_ATTR
-                        .toString());
-            attributes.put(VcProviderAttribute.VC_ADDR_ATTR.toString(), vcAddr);
-            break;
-         case VC_USER_ATTR:
-            String vcUser =
-                  Configuration.getString(VcProviderAttribute.VC_USER_ATTR
-                        .toString());
-            attributes.put(VcProviderAttribute.VC_USER_ATTR.toString(), vcUser);
-            break;
-         case VC_PASSWORD_ATTR:
-            String vcPassword =
-                  Configuration.getString(VcProviderAttribute.VC_PASSWORD_ATTR
-                        .toString());
-            attributes.put(VcProviderAttribute.VC_PASSWORD_ATTR.toString(),
-                  vcPassword);
-            break;
          case VC_DATACENTER_ATTR:
             String vcDatacenter =
                   Configuration
@@ -175,21 +152,6 @@ public class VcProviderManager implements CloudProviderManager {
             break;
          }
       }
-   }
-
-   public String getVcAddress() {
-      return (String) attributes.get(VcProviderAttribute.VC_ADDR_ATTR
-            .toString());
-   }
-
-   public String getAdminUser() {
-      return (String) attributes.get(VcProviderAttribute.VC_USER_ATTR
-            .toString());
-   }
-
-   public String getAdminPassword() {
-      return (String) attributes.get(VcProviderAttribute.VC_PASSWORD_ATTR
-            .toString());
    }
 
    public String getDataCenter() {

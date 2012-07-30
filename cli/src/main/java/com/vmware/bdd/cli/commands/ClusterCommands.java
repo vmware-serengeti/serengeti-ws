@@ -1,6 +1,6 @@
 /*****************************************************************************
- *      Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *      Licensed under the Apache License, Version 2.0 (the "License");
+ *   Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
  *
@@ -303,7 +303,7 @@ public class ClusterCommands implements CommandMarker {
          String fullNodeName = autoCompleteNodeName(clusterName, nodeGroupName, nodeName);
          String resource = getClusterResourceName(clusterName, nodeGroupName, fullNodeName);
          if (resource != null) {
-            restClient.actionOps(resource, queryStrings);
+            restClient.actionOps(resource, clusterName, queryStrings);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
                   Constants.OUTPUT_OP_RESULT_START);
          }
@@ -327,7 +327,7 @@ public class ClusterCommands implements CommandMarker {
          String fullNodeName = autoCompleteNodeName(clusterName, nodeGroupName, nodeName);
          String resource = getClusterResourceName(clusterName, nodeGroupName, fullNodeName);
          if (resource != null) {
-            restClient.actionOps(resource, queryStrings);
+            restClient.actionOps(resource, clusterName, queryStrings);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
                   Constants.OUTPUT_OP_RESULT_STOP);
          }
@@ -360,117 +360,111 @@ public class ClusterCommands implements CommandMarker {
                Constants.INVALID_VALUE + " instanceNum=" + instanceNum);
       }
    }
-   
-	@CliCommand(value = "cluster target", help = "Set or query target cluster to run commands")
-	public void targetCluster(
-			@CliOption(key = { "name" }, mandatory = false, help = "The cluster name") final String name, 
-			@CliOption(key = { "info" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to show target information") final boolean info) {
 
-		ClusterRead cluster = null;
-		try {
-			if (info) {
-				if(name != null){
-					System.out.println("Warning: can't specify option --name and --info at the same time");
-					return;
-				}
-				String fsUrl = hadoopConfiguration.get("fs.default.name");
-				String jtUrl = hadoopConfiguration.get("mapred.job.tracker");
-				if((fsUrl == null || fsUrl.length() == 0 ) && (jtUrl == null || jtUrl.length() == 0)){
-					System.out.println("There is no cluster be targeted now, target cluster first");
-					return;
-				}
-				if(fsUrl != null && fsUrl.length() > 0) {
-					System.out.println("HDFS url: " + fsUrl);
-				}
-				if(jtUrl != null && jtUrl.length() > 0){
-					System.out.println("Job Tracker url: " + jtUrl);
-				}
-				if(hiveInfo != null && hiveInfo.length() > 0){
-					System.out.println("Hive server url: " + hiveInfo);
-				}
-			}
-			else {
-				if (name == null) {
-					ClusterRead[] clusters = restClient.getAll();
-					if (clusters != null && clusters.length > 0) {
-						cluster = clusters[0];
-					}
-				}
-				else {
-					cluster = restClient.get(name);
-				}
+   @CliCommand(value = "cluster target", help = "Set or query target cluster to run commands")
+   public void targetCluster(
+         @CliOption(key = { "name" }, mandatory = false, help = "The cluster name") final String name,
+         @CliOption(key = { "info" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to show target information") final boolean info) {
 
-				if (cluster == null) {
-					CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_TARGET,
-							Constants.OUTPUT_OP_RESULT_FAIL, "No valid target available");
-				}
-				else {
-					for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {
-						for(String role : nodeGroup.getRoles()){
-							if(role.equals("hadoop_namenode")){
-								List<NodeRead> nodes = nodeGroup.getInstances();
-								if(nodes != null && nodes.size() > 0){
-									String nameNodeIP = nodes.get(0).getIp();
-									setNameNode(nameNodeIP);
-								}
-								else{
-									throw new CliRestException("no name node available");
-								}
-							}
-							if(role.equals("hadoop_jobtracker")){
-								List<NodeRead> nodes = nodeGroup.getInstances();
-								if(nodes != null && nodes.size() > 0){
-									String jobTrackerIP = nodes.get(0).getIp();
-									setJobTracker(jobTrackerIP);
-								}
-								else{
-									throw new CliRestException("no job tracker available");
-								}
-							}
-							if(role.equals("hive_server")){
-								List<NodeRead> nodes = nodeGroup.getInstances();
-								if(nodes != null && nodes.size() > 0){
-									String hiveServerIP = nodes.get(0).getIp();
-									setHiveServer(hiveServerIP);
-								}
-								else{
-									throw new CliRestException("no hive server available");
-								}
-							}
-						}
-					}
-					if(cluster.getExternalHDFS() != null && !cluster.getExternalHDFS().isEmpty()) {
-						setFsURL(cluster.getExternalHDFS());
-					}
-				}
-			}
-		} catch (CliRestException e) {
-			CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_TARGET,
-					Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
-		}
-	}
-   
-	private void setNameNode(String nameNodeAddress) {
-		String hdfsUrl = "webhdfs://" + nameNodeAddress + ":50070";
-		setFsURL(hdfsUrl);
-	}
+      ClusterRead cluster = null;
+      try {
+         if (info) {
+            if (name != null) {
+               System.out.println("Warning: can't specify option --name and --info at the same time");
+               return;
+            }
+            String fsUrl = hadoopConfiguration.get("fs.default.name");
+            String jtUrl = hadoopConfiguration.get("mapred.job.tracker");
+            if ((fsUrl == null || fsUrl.length() == 0) && (jtUrl == null || jtUrl.length() == 0)) {
+               System.out.println("There is no cluster be targeted now, target cluster first");
+               return;
+            }
+            if (fsUrl != null && fsUrl.length() > 0) {
+               System.out.println("HDFS url: " + fsUrl);
+            }
+            if (jtUrl != null && jtUrl.length() > 0) {
+               System.out.println("Job Tracker url: " + jtUrl);
+            }
+            if (hiveInfo != null && hiveInfo.length() > 0) {
+               System.out.println("Hive server url: " + hiveInfo);
+            }
+         } else {
+            if (name == null) {
+               ClusterRead[] clusters = restClient.getAll();
+               if (clusters != null && clusters.length > 0) {
+                  cluster = clusters[0];
+               }
+            } else {
+               cluster = restClient.get(name);
+            }
 
-	private void setFsURL(String fsURL) {
-		hadoopConfiguration.set("fs.default.name", fsURL);
-	}
+            if (cluster == null) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_TARGET,
+                     Constants.OUTPUT_OP_RESULT_FAIL, "No valid target available");
+            } else {
+               for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {
+                  for (String role : nodeGroup.getRoles()) {
+                     if (role.equals("hadoop_namenode")) {
+                        List<NodeRead> nodes = nodeGroup.getInstances();
+                        if (nodes != null && nodes.size() > 0) {
+                           String nameNodeIP = nodes.get(0).getIp();
+                           setNameNode(nameNodeIP);
+                        } else {
+                           throw new CliRestException("no name node available");
+                        }
+                     }
+                     if (role.equals("hadoop_jobtracker")) {
+                        List<NodeRead> nodes = nodeGroup.getInstances();
+                        if (nodes != null && nodes.size() > 0) {
+                           String jobTrackerIP = nodes.get(0).getIp();
+                           setJobTracker(jobTrackerIP);
+                        } else {
+                           throw new CliRestException("no job tracker available");
+                        }
+                     }
+                     if (role.equals("hive_server")) {
+                        List<NodeRead> nodes = nodeGroup.getInstances();
+                        if (nodes != null && nodes.size() > 0) {
+                           String hiveServerIP = nodes.get(0).getIp();
+                           setHiveServer(hiveServerIP);
+                        } else {
+                           throw new CliRestException("no hive server available");
+                        }
+                     }
+                  }
+               }
+               if (cluster.getExternalHDFS() != null && !cluster.getExternalHDFS().isEmpty()) {
+                  setFsURL(cluster.getExternalHDFS());
+               }
+            }
+         }
+      } catch (CliRestException e) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_TARGET,
+               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+      }
+   }
 
-	private void setJobTracker(String jobTrackerAddress) {
-		String jobTrackerUrl = jobTrackerAddress + ":8021";
-		hadoopConfiguration.set("mapred.job.tracker", jobTrackerUrl);
-	}
+   private void setNameNode(String nameNodeAddress) {
+      String hdfsUrl = "webhdfs://" + nameNodeAddress + ":50070";
+      setFsURL(hdfsUrl);
+   }
 
-	private void setHiveServer(String hiveServerAddress) {
-		try {
-			hiveInfo = hiveCommands.config(hiveServerAddress, 10000, null);
-		} catch (Exception e) {
-			throw new CliRestException("faild to set hive server address");
-		}
-	}
+   private void setFsURL(String fsURL) {
+      hadoopConfiguration.set("fs.default.name", fsURL);
+   }
+
+   private void setJobTracker(String jobTrackerAddress) {
+      String jobTrackerUrl = jobTrackerAddress + ":8021";
+      hadoopConfiguration.set("mapred.job.tracker", jobTrackerUrl);
+   }
+
+   private void setHiveServer(String hiveServerAddress) {
+      try {
+         hiveInfo = hiveCommands.config(hiveServerAddress, 10000, null);
+      } catch (Exception e) {
+         throw new CliRestException("faild to set hive server address");
+      }
+   }
 
    @CliCommand(value = "cluster config", help = "Config an existing cluster")
    public void configCluster(
@@ -1071,7 +1065,7 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private void createDefalutFile(ClusterCreate cluster) {
-      String origFile = "cli-default-cluster.json";
+      String origFile = "default_hadoop_cluster.json";
       String destFile = System.getProperty("user.home") + "/" + cluster.getName() + ".json";
       StringBuilder createDefalutFileMsgBuffer = new StringBuilder();
       try {
