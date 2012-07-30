@@ -14,14 +14,10 @@
  ******************************************************************************/
 package com.vmware.bdd.cli.command.tests;
 
-import static org.testng.AssertJUnit.assertNotNull;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.springframework.shell.support.util.Assert;

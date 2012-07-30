@@ -237,8 +237,9 @@ public class RestClient {
     */
    public void createObject(Object entity, final String path,
          final HttpMethod verb, PrettyOutput... prettyOutput) {
-      checkConnection();
-
+      if(!checkConnection()){
+         return ;
+      }
       try {
          if (verb == HttpMethod.POST) {
             ResponseEntity<String> response = restPost(path, entity);
@@ -359,8 +360,9 @@ public class RestClient {
     */
    public <T> T getObject(final String id, Class<T> entityType,
          final String path, final HttpMethod verb, final boolean detail) {
-      checkConnection();
-
+      if(!checkConnection()){
+         return null;
+      }
       try {
          if (verb == HttpMethod.GET) {
             ResponseEntity<T> response = restGetById(path, id, entityType, detail);
@@ -388,8 +390,9 @@ public class RestClient {
     */
    public <T> T getAllObjects(final Class<T> entityType, final String path,
          final HttpMethod verb, final boolean detail) {
-      checkConnection();
-
+      if(!checkConnection()){
+         return null;
+      }
       try {
          if (verb == HttpMethod.GET) {
             ResponseEntity<T> response = restGet(path, entityType, detail);
@@ -416,8 +419,9 @@ public class RestClient {
     */
    public void deleteObject(final String id, final String path,
          final HttpMethod verb, PrettyOutput... prettyOutput) {
-      checkConnection();
-
+      if(!checkConnection()){
+         return ;
+      }
       try {
          if (verb == HttpMethod.DELETE) {
             ResponseEntity<String> response = restDelete(path, id);
@@ -444,10 +448,15 @@ public class RestClient {
             .exchange(targetUri, HttpMethod.DELETE, entity, String.class);
    }
 
-   private void checkConnection() {
+   private boolean checkConnection() {
       if (hostUri == null) {
-         throw new CliRestException(Constants.NEED_CONNECTION);
+         System.out.println(Constants.NEED_CONNECTION);
+         return false;
+      } else if (CommandsUtils.isBlank(CookieCache.get("Cookie"))) {
+         System.out.println(Constants.CONNECT_CHECK_LOGIN);
+         return false;
       }
+      return true;
    }
 
    /**
@@ -461,8 +470,9 @@ public class RestClient {
    public void actionOps(final String id, final String path,
          final HttpMethod verb, final Map<String, ?> queryStrings,
          PrettyOutput... prettyOutput) {
-      checkConnection();
-
+      if(!checkConnection()){
+         return ;
+      }
       try {
          if (verb == HttpMethod.PUT) {
             ResponseEntity<String> response = restActionOps(path, id, queryStrings);
@@ -510,8 +520,9 @@ public class RestClient {
     */
    public void update(Object entity, final String path, final HttpMethod verb,
          PrettyOutput... prettyOutput) {
-      checkConnection();
-
+      if(!checkConnection()){
+         return ;
+      }
       try {
          if (verb == HttpMethod.PUT) {
             ResponseEntity<String> response = restUpdate(path, entity);

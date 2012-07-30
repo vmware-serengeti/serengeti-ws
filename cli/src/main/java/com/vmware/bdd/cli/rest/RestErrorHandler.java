@@ -28,6 +28,7 @@ import org.springframework.web.client.HttpMessageConverterExtractor;
 import org.springframework.web.client.ResponseErrorHandler;
 
 import com.vmware.bdd.apitypes.BddErrorMessage;
+import com.vmware.bdd.cli.commands.Constants;
 
 public class RestErrorHandler implements ResponseErrorHandler {
    private List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
@@ -53,7 +54,13 @@ public class RestErrorHandler implements ResponseErrorHandler {
          throw new CliRestException(delegate.extractData(response).getMessage());
       } else {
          HttpStatus statusCode = response.getStatusCode();
-         throw new CliRestException(statusCode, statusCode.getReasonPhrase());
+         String errorMsg="";
+         if (statusCode == HttpStatus.UNAUTHORIZED) {
+            errorMsg = Constants.CONNECT_SESSION_TIME_OUT;
+         } else {
+            errorMsg = statusCode.getReasonPhrase();
+         }
+         throw new CliRestException(statusCode, errorMsg);
       }
    }
 }
