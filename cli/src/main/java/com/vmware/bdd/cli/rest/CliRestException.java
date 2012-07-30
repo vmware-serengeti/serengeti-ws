@@ -14,10 +14,22 @@
  ******************************************************************************/
 package com.vmware.bdd.cli.rest;
 
+import org.springframework.http.HttpStatus;
+
 public class CliRestException extends RuntimeException {
    private static final long serialVersionUID = -7416263807231480157L;
+   private HttpStatus status;
+
+   public HttpStatus getStatus() {
+      return status;
+   }
 
    public CliRestException(String errorMsg) {
       super(errorMsg);
+   }
+
+   public CliRestException(HttpStatus status, String errorMsg) {
+      super(errorMsg);
+      this.status = status;
    }
 }
