@@ -29,7 +29,7 @@ import com.vmware.bdd.cli.commands.DisconnectionCommands;
 public class DisconnectionCommandsTest extends MockRestServer {
    @Autowired
    private DisconnectionCommands disconnectionCommands;
-   
+
    @Test
    public void testDisconnect() throws Exception {
       buildReqRespWithoutReqBody(

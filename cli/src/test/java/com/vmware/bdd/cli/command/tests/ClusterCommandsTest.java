@@ -186,47 +186,6 @@ public class ClusterCommandsTest extends MockRestServer {
     }
 
     @Test
-    public void testCreateHbaseClusterBySpecFile() throws Exception {
-        NetworkRead[] networks = new NetworkRead[1];
-        NetworkRead network = new NetworkRead();
-        network.setName("dhcp");
-        network.setDhcp(true);
-        network.setPortGroup("pg1");
-        networks[0] = network;
-
-        ObjectMapper mapper = new ObjectMapper();
-        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
-                mapper.writeValueAsString(networks));
-
-        DistroRead distro = new DistroRead();
-        distro.setName(Constants.DEFAULT_DISTRO);
-        List<String> roles = new ArrayList<String>();
-        roles.add("hadoop");
-        roles.add("hadoop_namenode");
-        roles.add("hadoop_jobtracker");
-        roles.add("hbase_master");
-        roles.add("hadoop_worker");
-        roles.add("hadoop_datanode");
-        roles.add("hadoop_tasktracker");
-        roles.add("hbase_regionserver");
-        roles.add("hadoop_client");
-        roles.add("hive");
-        roles.add("hive_server");
-        roles.add("pig");
-        roles.add("hbase_client");
-        roles.add("zookeeper");
-        distro.setRoles(roles);
-
-        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + Constants.DEFAULT_DISTRO,
-                HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(distro));
-
-        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
-                HttpStatus.NO_CONTENT, "");
-
-        clusterCommands.createCluster("cluster1", null, "hadoop_cluster.json", null, null, null, false, false, false);
-    }
-
-    @Test
     public void testResumeCreateCluster() throws Exception {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1?state=resume",
                 HttpMethod.PUT, HttpStatus.NO_CONTENT, "");

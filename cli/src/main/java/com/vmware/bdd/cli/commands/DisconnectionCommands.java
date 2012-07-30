@@ -16,7 +16,6 @@ package com.vmware.bdd.cli.commands;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.stereotype.Component;
 
@@ -26,11 +25,6 @@ import com.vmware.bdd.cli.rest.RestClient;
 public class DisconnectionCommands implements CommandMarker {
    @Autowired
    RestClient conn;
-
-   @CliAvailabilityIndicator({"connect help"})
-   public boolean isCommandAvailable() {
-      return true;
-   }
 
    @CliCommand(value = "disconnect", help = "Disconnect a serengeti server")
    public void disconnect() {

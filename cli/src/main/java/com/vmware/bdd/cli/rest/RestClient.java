@@ -127,32 +127,35 @@ public class RestClient {
             hostUri = oldHostUri;
             return Connect.ConnectType.ERROR;
          }
-      }catch (Exception e) {
-         if (e instanceof CliRestException) {
-            CliRestException cliRestException = (CliRestException) e;
-            if (cliRestException.getStatus() == HttpStatus.UNAUTHORIZED) {
-               System.out.println(Constants.CONNECT_UNAUTHORIZATION);
-               //recover old hostUri
-               hostUri = oldHostUri;
-               return Connect.ConnectType.UNAUTHORIZATION;
-            }
-         } else{
-            System.out.println(Constants.CONNECT_FAILURE + ":" + e.getCause().getMessage().toLowerCase());
-            return Connect.ConnectType.ERROR;
+      } catch (CliRestException cliRestException) {
+         if (cliRestException.getStatus() == HttpStatus.UNAUTHORIZED) {
+            System.out.println(Constants.CONNECT_UNAUTHORIZATION);
+            //recover old hostUri
+            hostUri = oldHostUri;
+            return Connect.ConnectType.UNAUTHORIZATION;
          }
+      } catch (Exception e) {
+         System.out.println(Constants.CONNECT_FAILURE + ":" + e.getCause().getMessage().toLowerCase());
+         return Connect.ConnectType.ERROR;
       }
       return Connect.ConnectType.SUCCESS;
    }
 
-   
+   /**
+    * Disconnect the session
+    */
    public void disconnect () {
       try {
          if(!checkConnection()){
             return ;
          }
          logout(Constants.REST_PATH_LOGOUT, String.class);
+      } catch (CliRestException cliRestException) {
+         if (cliRestException.getStatus() == HttpStatus.UNAUTHORIZED) {
+            //ignore
+         }
       } catch (Exception e) {
-         System.out.println(Constants.DISCONNECT_FAILURE + ":" + e.getCause().getMessage().toLowerCase());
+         System.out.println(Constants.DISCONNECT_FAILURE + ":" + e);
       }
    }
 
@@ -175,7 +178,7 @@ public class RestClient {
             return propertise.getProperty("Cookie");
          } else {
             return null;
-         }         
+         }
       }
       return cookieValue;
    }
@@ -209,7 +212,7 @@ public class RestClient {
    private <T> ResponseEntity<T> logout(final String path, final Class<T> respEntityType) {
       StringBuilder uriBuff = new StringBuilder();
       uriBuff.append(hostUri).append(path);
-      return restPostByUri(uriBuff.toString(), respEntityType);
+      return restGetByUri(uriBuff.toString(), respEntityType);
    }
 
    private <T> ResponseEntity<T> restGetByUri(String uri,
