@@ -29,7 +29,8 @@ public class Constants {
    public static final String REST_PATH_NODEGROUP = "nodegroup";
    public static final String REST_PATH_NODE = "node";
    public static final String REST_PATH_TASK = "task";
-   public static final String REST_PATH_TEST = "j_spring_security_check";
+   public static final String REST_PATH_LOGIN = "j_spring_security_check";
+   public static final String REST_PATH_LOGOUT = "j_spring_security_logout";
    public static final String REST_PATH_NETWORK = "network";
    public static final String REST_PATH_NETWORKS = "networks";
    public static final String REST_PATH_DISTROS = "distros";
@@ -56,6 +57,7 @@ public class Constants {
    public static final String ACTION_OPS_FAILURE = "Unable to";
    public static final String CONNECT_SUCCESS = "Connected";
    public static final String CONNECT_FAILURE = "Cannot connect to the host";
+   public static final String DISCONNECT_FAILURE = "Diconnect failed!";
    public static final String NEED_CONNECTION = "no connection to serengeti server, please connect first.";
 
    public static final String OUTPUT_INDENT = "  ";

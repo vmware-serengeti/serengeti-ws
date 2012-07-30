@@ -97,6 +97,10 @@ public class RestClient {
     * 
     * @param host
     *           host url with optional port
+    * @param userName 
+    *           serengeti login name
+    * @param password
+    *           serengeti password                     
     */
    public Connect.ConnectType connect(final String host, final String userName, final String password) {
       String oldHostUri = hostUri;
@@ -107,7 +111,7 @@ public class RestClient {
 
       try {
          ResponseEntity<String> response =
-            login(Constants.REST_PATH_TEST, String.class, userName,password);
+            login(Constants.REST_PATH_LOGIN, String.class, userName,password);
 
          if (response.getStatusCode() == HttpStatus.OK) {//normal response        
             updateHostproperty(host);
@@ -140,12 +144,40 @@ public class RestClient {
       return Connect.ConnectType.SUCCESS;
    }
 
+   
+   public void disconnect () {
+      try {
+         if(!checkConnection()){
+            return ;
+         }
+         logout(Constants.REST_PATH_LOGOUT, String.class);
+      } catch (Exception e) {
+         System.out.println(Constants.DISCONNECT_FAILURE + ":" + e.getCause().getMessage().toLowerCase());
+      }
+   }
+
    private void writeCookieInfo(String cookie) {
       CookieCache.put("Cookie",cookie);
+      String propertiseFile = "cookie.propertise";
+      Properties propertise = new Properties();
+      propertise.put("Cookie", cookie);
+      CommandsUtils.writePropertise(propertise, propertiseFile);
    }
 
    private String readCookieInfo() { 
-      return CookieCache.get("Cookie");
+      String cookieValue = "";
+      cookieValue = CookieCache.get("Cookie");
+      if (CommandsUtils.isBlank(cookieValue)){
+         String propertiseFile = "cookie.propertise";
+         Properties propertise = null;
+         propertise = CommandsUtils.readPropertise(propertiseFile);
+         if (propertise != null) {
+            return propertise.getProperty("Cookie");
+         } else {
+            return null;
+         }         
+      }
+      return cookieValue;
    }
 
    private <T> ResponseEntity<T> restGetById(final String path, final String id,
@@ -166,11 +198,17 @@ public class RestClient {
    }
 
    private <T> ResponseEntity<T> login(final String path, final Class<T> respEntityType, final String userName, final String password) {
-      StringBuilder uriBuff=new StringBuilder();
+      StringBuilder uriBuff = new StringBuilder();
       uriBuff.append(hostUri).append(path);
       if (!CommandsUtils.isBlank(userName) && !CommandsUtils.isBlank(password)) {
          uriBuff.append("?").append("j_username=").append(userName).append("&j_password=").append(password);
       }
+      return restPostByUri(uriBuff.toString(), respEntityType);
+   }
+
+   private <T> ResponseEntity<T> logout(final String path, final Class<T> respEntityType) {
+      StringBuilder uriBuff = new StringBuilder();
+      uriBuff.append(hostUri).append(path);
       return restPostByUri(uriBuff.toString(), respEntityType);
    }
 
@@ -479,7 +517,7 @@ public class RestClient {
       if (hostUri == null) {
          System.out.println(Constants.NEED_CONNECTION);
          return false;
-      } else if (CommandsUtils.isBlank(CookieCache.get("Cookie"))) {
+      } else if (CommandsUtils.isBlank(readCookieInfo())) {
          System.out.println(Constants.CONNECT_CHECK_LOGIN);
          return false;
       }

@@ -303,4 +303,34 @@ public class CommandsUtils {
       return mapper;
    }
 
+   public static Properties readPropertise(String propertiesFilePath) {
+      Properties propertise = new Properties();
+      FileInputStream fis;
+      try {
+         File file = new File(propertiesFilePath);
+         if (!file.exists()){
+            return propertise;
+         }
+         fis = new FileInputStream(propertiesFilePath);
+         propertise.load(fis);
+      } catch (FileNotFoundException e) {
+         e.printStackTrace();
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+      return propertise;
+   }
+
+   public static void writePropertise(Properties propertise, String propertiesFilePath) {
+      FileOutputStream fos=null;
+      try {
+         fos = new FileOutputStream(propertiesFilePath);
+         propertise.store(fos, "");
+      } catch (FileNotFoundException e) {
+         e.printStackTrace();
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+   }
+
 }

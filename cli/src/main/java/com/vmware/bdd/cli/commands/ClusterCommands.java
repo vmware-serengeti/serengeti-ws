@@ -86,7 +86,6 @@ public class ClusterCommands implements CommandMarker {
    public void createCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
          @CliOption(key = { "distro" }, mandatory = false, help = "Hadoop Distro") final String distro,
-         @CliOption(key = { "type" },mandatory = false, unspecifiedDefaultValue = "hadoop", help = "Please specify the type for cluster: hadoop or hbase") final String type,
          @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath,
          @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
@@ -102,14 +101,6 @@ public class ClusterCommands implements CommandMarker {
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.PARAM_CLUSTER
                      + Constants.PARAM_NOT_CONTAIN_HORIZONTAL_LINE);
-
-         return;
-      }
-      //validate the cluster type
-      if(!type.trim().equalsIgnoreCase("hadoop") && !type.trim().equalsIgnoreCase("hbase")){
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
-               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.INVALID_VALUE + " " + "type=" + type);
 
          return;
       }
@@ -134,7 +125,7 @@ public class ClusterCommands implements CommandMarker {
             return;
          }
       }
-      clusterCreate.setType(Enum.valueOf(ClusterType.class, type.toUpperCase()));
+      clusterCreate.setType(Enum.valueOf(ClusterType.class, "HADOOP"));
       if (rpNames != null) {
          List<String> rpNamesList = CommandsUtils.inputsConvert(rpNames);
          if (rpNamesList.isEmpty()) {
