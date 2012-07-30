@@ -40,6 +40,7 @@ import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
+import com.vmware.bdd.cli.commands.CookieCache;
 
 /**
  * RestClient provides common rest apis required by resource operations.
@@ -116,40 +117,35 @@ public class RestClient {
             }
             writeCookieInfo(cookieValue);
             System.out.println(Constants.CONNECT_SUCCESS);
-         } else if (response.getStatusCode() == HttpStatus.NOT_FOUND){
-            System.out.println(Constants.CONNECT_UNAUTHORIZATION);
-            //recover old hostUri
-            hostUri = oldHostUri;
-            return Connect.ConnectType.UNAUTHORIZATION;
          } else { //error
             System.out.println(Constants.CONNECT_FAILURE);
-
             //recover old hostUri
             hostUri = oldHostUri;
             return Connect.ConnectType.ERROR;
          }
       }catch (Exception e) {
-         System.out.println(Constants.CONNECT_FAILURE + ":" + e.getCause().getMessage().toLowerCase());
+         if (e instanceof CliRestException) {
+            CliRestException cliRestException = (CliRestException) e;
+            if (cliRestException.getStatus() == HttpStatus.UNAUTHORIZED) {
+               System.out.println(Constants.CONNECT_UNAUTHORIZATION);
+               //recover old hostUri
+               hostUri = oldHostUri;
+               return Connect.ConnectType.UNAUTHORIZATION;
+            }
+         } else{
+            System.out.println(Constants.CONNECT_FAILURE + ":" + e.getCause().getMessage().toLowerCase());
+            return Connect.ConnectType.ERROR;
+         }
       }
       return Connect.ConnectType.SUCCESS;
    }
 
    private void writeCookieInfo(String cookie) {
-      String propertiseFile = "cookie.propertise";
-      Properties propertise = new Properties();
-      propertise.put("Cookie", cookie);
-      CommandsUtils.writePropertise(propertise, propertiseFile);
+      CookieCache.put("Cookie",cookie);
    }
 
-   private String readCookieInfo() {
-      String propertiseFile = "cookie.propertise";
-      Properties propertise = null;
-      propertise = CommandsUtils.readPropertise(propertiseFile);
-      if (propertise != null) {
-         return propertise.getProperty("Cookie");
-      } else {
-         return null;
-      }
+   private String readCookieInfo() { 
+      return CookieCache.get("Cookie");
    }
 
    private <T> ResponseEntity<T> restGetById(final String path, final String id,

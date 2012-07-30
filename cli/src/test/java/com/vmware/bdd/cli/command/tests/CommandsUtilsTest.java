@@ -241,47 +241,4 @@ public class CommandsUtilsTest {
             "hdfs://fqdn_or_ip:8020");
    }
 
-   @Test
-   public void testWritePropertise() {
-      String propertiseFile =
-            CommandsUtils.class.getClassLoader().getResource("").getPath()
-                  + "cookie.propertise";
-      Properties propertise = new Properties();
-      propertise.put("Cookie", "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
-      CommandsUtils.writePropertise(propertise, propertiseFile);
-      File file = new File(propertiseFile);
-      assertEquals(file.exists(), true);
-      propertise = CommandsUtils.readPropertise(propertiseFile);
-      assertNotNull(propertise);
-      if (propertise != null) {
-         assertEquals(propertise.getProperty("Cookie"),
-               "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
-      }
-      if (file.exists()) {
-         file.delete();
-      }
-   }
-
-   @Test
-   public void testReadPropertise() {
-      String propertiseFile =
-            CommandsUtils.class.getClassLoader().getResource("").getPath()
-                  + "cookie.propertise";
-      Properties propertise = new Properties();
-      propertise.put("Cookie", "123abc123");
-      CommandsUtils.writePropertise(propertise, propertiseFile);
-      propertise.put("Cookie", "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
-      CommandsUtils.writePropertise(propertise, propertiseFile);
-      File file = new File(propertiseFile);
-      assertEquals(file.exists(), true);
-      propertise = CommandsUtils.readPropertise(propertiseFile);
-      assertNotNull(propertise);
-      if (propertise != null) {
-         assertEquals(propertise.getProperty("Cookie"),
-               "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
-      }
-      if (file.exists()) {
-         file.delete();
-      }
-   }
 }

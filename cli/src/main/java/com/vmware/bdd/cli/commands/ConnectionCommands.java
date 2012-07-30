@@ -121,7 +121,6 @@ public class ConnectionCommands implements CommandMarker {
             enter=reader.readLine(new Character('*'));
          }
       } catch (IOException e) {
-         // TODO Auto-generated catch block
          e.printStackTrace();
       }      
       return enter;
