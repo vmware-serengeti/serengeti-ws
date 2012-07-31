@@ -251,4 +251,9 @@ if [ "#{h["initResources"]}" == "True" ]; then
    rm -rf "#{SERENGETI_HOME}/logs/not-init"
 fi
 
+# generate random password for root/serengeti user when lockdown
+if [ -e /opt/serengeti/etc/lock_down ]; then
+  /opt/serengeti/sbin/set-password -a
+fi
+
 EOF
