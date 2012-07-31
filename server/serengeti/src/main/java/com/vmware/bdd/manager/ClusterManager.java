@@ -395,20 +395,9 @@ public class ClusterManager {
             return group;
          }});
 
-        UpdateClusterListener listener = new UpdateClusterListener(clusterName);
-        int oldInstanceNum = group.getDefineInstanceNum();
-        try {
-            // update defined instance number
-            group.setDefineInstanceNum(instanceNum);
-            DAL.inTransactionUpdate(group);
-            return createClusterMgmtTask(cluster, listener, ClusterStatus.UPDATING);
-        } catch (BddException e) {
-            logger.error("failed to resize cluster.", e);
-            // update defined instance number
-            group.setDefineInstanceNum(oldInstanceNum);
-            DAL.inTransactionUpdate(group);
-            throw e;
-        }
+        UpdateClusterListener listener =
+           new UpdateClusterListener(clusterName, nodeGroupName, instanceNum);
+        return createClusterMgmtTask(cluster, listener, ClusterStatus.UPDATING);
     }
 
     static class SystemProperties {
