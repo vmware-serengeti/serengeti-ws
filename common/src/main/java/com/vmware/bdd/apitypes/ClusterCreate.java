@@ -242,19 +242,24 @@ public class ClusterCreate {
 
    public boolean validateNodeGroupRoles(List<String> failedMsgList) {
       boolean valid = true;
-      Set<String> roles = new HashSet<String>();
-      for (NodeGroupCreate ngc : getNodeGroups()) {
-         roles.addAll(ngc.getRoles());
-      }
       if (validateHDFSUrl()) {
-         if (roles.contains("hadoop_namenode") || roles.contains("hadoop_datanode")) {
-            valid = false;
-            failedMsgList.add("redundant namenode/datanode role");
-         }
-         if (!roles.contains("hadoop_jobtracker") ||
-               !roles.contains("hadoop_tasktracker")) {
+         if (getNodeGroups() == null) {
             valid = false;
             failedMsgList.add("missing jobtracker/tasktracker role");
+         } else {
+            Set<String> roles = new HashSet<String>();
+            for (NodeGroupCreate ngc : getNodeGroups()) {
+               roles.addAll(ngc.getRoles());
+            }
+            if (roles.contains("hadoop_namenode") || roles.contains("hadoop_datanode")) {
+               valid = false;
+               failedMsgList.add("redundant namenode/datanode role");
+            }
+            if (!roles.contains("hadoop_jobtracker")
+                  || !roles.contains("hadoop_tasktracker")) {
+               valid = false;
+               failedMsgList.add("missing jobtracker/tasktracker role");
+            }
          }
       }
       return valid;
