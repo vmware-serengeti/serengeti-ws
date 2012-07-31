@@ -216,7 +216,7 @@ sed -i "s/template_id = .*/#{templateid}/" "#{SERENGETI_WEBAPP_CONF}"
 echo "vc_addr: #{h["evs_IP"]}" > "#{SERENGETI_CLOUD_MANAGER_CONF}"
 echo "vc_user: #{vcuser}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
 echo "vc_pwd:  #{updateVCPassword}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
-chmod 600 "#{SERENGETI_CLOUD_MANAGER_CONF}"
+chmod 400 "#{SERENGETI_CLOUD_MANAGER_CONF}"
 chown serengeti:serengeti "#{SERENGETI_CLOUD_MANAGER_CONF}"
 
 #kill tomcat using shell direclty to avoid failing to stop tomcat
