@@ -110,6 +110,9 @@ public class ClusterConfigManager {
       if (!cluster.validateNodeGroupPlacementPolicies(failedMsgList)) {
          throw ClusterConfigException.INVALID_PLACEMENT_POLICIES(failedMsgList);
       }
+      if (!cluster.validateNodeGroupRoles(failedMsgList)) {
+         throw ClusterConfigException.INVALID_ROLES(failedMsgList);
+      }
 
       if (cluster.hasHDFSUrlConfigured()) {
          if (cluster.validateHDFSUrl()) {
