@@ -105,10 +105,39 @@ public class ClusterConfigManager {
       if (name == null || name.isEmpty()) {
          throw ClusterConfigException.CLUSTER_NAME_MISSING();
       }
+
       List<String> failedMsgList = new ArrayList<String>();
       if (!cluster.validateNodeGroupPlacementPolicies(failedMsgList)) {
          throw ClusterConfigException.INVALID_PLACEMENT_POLICIES(failedMsgList);
       }
+
+      if (cluster.hasHDFSUrlConfigured()) {
+         if (cluster.validateHDFSUrl()) {
+            Map<String,Object> conf = cluster.getConfiguration();
+            if (conf == null) {
+               conf = new HashMap<String,Object>();
+               cluster.setConfiguration(conf);
+            }
+            @SuppressWarnings("unchecked")
+            Map<String, Object> hadoopConf = (Map<String, Object>) conf.get("hadoop");
+            if (hadoopConf == null) {
+               hadoopConf = new HashMap<String,Object>();
+               conf.put("hadoop", hadoopConf);
+            }
+            @SuppressWarnings("unchecked")
+            Map<String, Object> coreSiteConf =
+               (Map<String, Object>) hadoopConf.get("core-site.xml");
+            if (coreSiteConf == null) {
+               coreSiteConf = new HashMap<String,Object>();
+               hadoopConf.put("core-site.xml", coreSiteConf);
+            }
+            coreSiteConf.put("fs.default.name", cluster.getExternalHDFS());
+         } else {
+            throw BddException.INVALID_PARAMETER("externalHDFS",
+                  cluster.getExternalHDFS());
+         }
+      }
+
       try {
          return DAL.inTransactionDo(new Saveable<ClusterEntity>() {
             public ClusterEntity body() {
@@ -229,7 +258,7 @@ public class ClusterConfigManager {
          // add required node groups
          EnumSet<HadoopRole> missingRoles =
                getMissingRequiredRoles(allRoles, distro);
-         if (ClusterEntity.hasHDFSUrlConfigured(cluster.getConfiguration())) {
+         if (cluster.hasHDFSUrlConfigured()) {
             missingRoles.remove(HadoopRole.HADOOP_NAMENODE_ROLE);
             missingRoles.remove(HadoopRole.HADOOP_DATANODE);
          }

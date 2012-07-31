@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ public class ClusterCreate {
 
    @Expose
    private String name;
+   private String externalHDFS;
    @Expose
    @SerializedName("groups")
    private NodeGroupCreate[] nodeGroups;
@@ -73,6 +75,7 @@ public class ClusterCreate {
       this.deployPolicy = cluster.deployPolicy;
       this.distro = cluster.distro;
       this.name = cluster.name;
+      this.externalHDFS = cluster.externalHDFS;
       this.networkName = cluster.networkName;
       this.nodeGroups = cluster.nodeGroups;
       this.rpNames = cluster.rpNames;
@@ -100,6 +103,14 @@ public class ClusterCreate {
 
    public void setName(String name) {
       this.name = name;
+   }
+
+   public void setExternalHDFS(String externalHDFS) {
+      this.externalHDFS = externalHDFS;
+   }
+
+   public String getExternalHDFS() {
+      return externalHDFS;
    }
 
    public String getDistro() {
@@ -226,5 +237,25 @@ public class ClusterCreate {
       }
 
       return valid;
+   }
+
+   public boolean hasHDFSUrlConfigured() {
+      return getExternalHDFS() != null && !getExternalHDFS().isEmpty(); 
+   }
+
+   public boolean validateHDFSUrl() {
+      if (hasHDFSUrlConfigured()) {
+         try {
+            URI uri = new URI(getExternalHDFS());
+            if (!"hdfs".equalsIgnoreCase(uri.getScheme()) || uri.getHost() == null) {
+               return false;
+            }
+            return true;
+         } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+         }
+      }
+      return false;
    }
 }
