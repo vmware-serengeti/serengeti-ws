@@ -149,6 +149,7 @@ public class ClusterCommands implements CommandMarker {
          if (specFilePath != null) {
             ClusterCreate clusterSpec =
                   CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile(specFilePath));
+            clusterCreate.setExternalHDFS(clusterSpec.getExternalHDFS());
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
             validateConfiguration(clusterCreate, skipConfigValidation, warningMsgList);
@@ -602,6 +603,13 @@ public class ClusterCommands implements CommandMarker {
          }
          if (nodeGroupCreates.length < 2 || nodeGroupCreates.length > 4) {
             warning = true;
+         }
+         // check external HDFS
+         if (clusterCreate.hasHDFSUrlConfigured() && !clusterCreate.validateHDFSUrl()) {
+            failedMsgList.add(new StringBuilder()
+                         .append("externalHDFS=")
+                         .append(clusterCreate.getExternalHDFS()).toString());
+            validated = false;
          }
 
          // check placement policies
