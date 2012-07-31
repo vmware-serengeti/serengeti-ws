@@ -71,7 +71,10 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException INVALID_APP_CONFIG_VALUE(List<String> configNames) {
       return new ClusterConfigException(null, "INVALID_APP_CONFIG_VALUE", configNames);
    }
-   public static ClusterConfigException INVALID_PLACEMENT_POLICIES(List<String> configNames) {
-      return new ClusterConfigException(null, "INVALID_PLACEMENT_POLICIES", configNames);
+   public static ClusterConfigException INVALID_PLACEMENT_POLICIES(List<String> errors) {
+      return new ClusterConfigException(null, "INVALID_PLACEMENT_POLICIES", errors);
+   }
+   public static ClusterConfigException INVALID_ROLES(List<String> errors) {
+      return new ClusterConfigException(null, "INVALID_ROLES", errors);
    }
 }

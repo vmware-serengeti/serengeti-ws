@@ -16,6 +16,7 @@ package com.vmware.bdd.apitypes;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -236,6 +237,26 @@ public class ClusterCreate {
          }
       }
 
+      return valid;
+   }
+
+   public boolean validateNodeGroupRoles(List<String> failedMsgList) {
+      boolean valid = true;
+      Set<String> roles = new HashSet<String>();
+      for (NodeGroupCreate ngc : getNodeGroups()) {
+         roles.addAll(ngc.getRoles());
+      }
+      if (validateHDFSUrl()) {
+         if (roles.contains("hadoop_namenode") || roles.contains("hadoop_datanode")) {
+            valid = false;
+            failedMsgList.add("redundant namenode/datanode role");
+         }
+         if (!roles.contains("hadoop_jobtracker") ||
+               !roles.contains("hadoop_tasktracker")) {
+            valid = false;
+            failedMsgList.add("missing jobtracker/tasktracker role");
+         }
+      }
       return valid;
    }
 
