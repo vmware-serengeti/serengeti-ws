@@ -1,0 +1,6 @@
+[server]
+name=serengeti-base
+baseurl=http://yum_server_ip/yum/repos/base/
+enabled=1
+gpgcheck=0
+
