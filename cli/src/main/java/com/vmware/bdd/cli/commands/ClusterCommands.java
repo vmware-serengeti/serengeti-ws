@@ -618,7 +618,7 @@ public class ClusterCommands implements CommandMarker {
          }
 
          if (!clusterCreate.validateNodeGroupRoles(failedMsgList)) {
-            //validated = false;
+            validated = false;
          }
 
          for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
