@@ -22,6 +22,8 @@ import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.entity.Saveable;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.BddMessageUtil;
 import com.vmware.bdd.utils.ClusterCmdUtil;
@@ -32,10 +34,14 @@ public class UpdateClusterListener implements TaskListener {
    private static final Logger logger = Logger.getLogger(UpdateClusterListener.class);
 
    private String clusterName;
+   private String nodeGroupName;
+   private int instanceNum;
 
-   public UpdateClusterListener(String clusterName) {
+   public UpdateClusterListener(String clusterName, String nodeGroupName, int instanceNum) {
       super();
       this.clusterName = clusterName;
+      this.nodeGroupName = nodeGroupName;
+      this.instanceNum = instanceNum;
    }
 
    @Override
@@ -43,12 +49,23 @@ public class UpdateClusterListener implements TaskListener {
       logger.debug("update cluster " + clusterName
             + " task listener called onSuccess");
 
-      ClusterEntity cluster =
-            ClusterEntity.findClusterEntityByName(clusterName);
-      AuAssert.check(cluster != null);
+      DAL.inRwTransactionDo(new Saveable<Void>() {
+         @Override
+         public Void body() throws Exception {
+            ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+            AuAssert.check(cluster != null);
 
-      cluster.setStatus(ClusterStatus.RUNNING);
-      DAL.inTransactionUpdate(cluster);
+            NodeGroupEntity group = NodeGroupEntity.findNodeGroupEntityByName(cluster,
+                  nodeGroupName);
+            AuAssert.check(group != null);
+
+            cluster.setStatus(ClusterStatus.RUNNING);
+            group.setDefineInstanceNum(instanceNum);
+
+            return null;
+         }
+      });
+
    }
 
    @Override
@@ -58,7 +75,8 @@ public class UpdateClusterListener implements TaskListener {
       ClusterEntity cluster =
             ClusterEntity.findClusterEntityByName(clusterName);
       AuAssert.check(cluster != null);
-      cluster.setStatus(ClusterStatus.ERROR);
+      // TODO reclaim resources
+      cluster.setStatus(ClusterStatus.RUNNING);
       DAL.inTransactionUpdate(cluster);
       logger.error("failed to update cluster " + clusterName 
             + " set its status as ERROR");
