@@ -164,6 +164,7 @@ SHELLEOF
 
 #write system configuration
 echo "PATH=\\$PATH:\"#{SERENGETI_SCRIPTS_HOME}\"" >> /etc/profile
+echo "CLOUD_MANAGER_CONFIG_DIR=\"#{SERENGETI_HOME}\"" >> /etc/profile
 
 EOF
 
