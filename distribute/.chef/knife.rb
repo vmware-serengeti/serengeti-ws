@@ -30,3 +30,7 @@ knife[:bootstrap_runs_chef_client] = true
 bootstrap_chef_version   "~> 0.10.0"
 knife[:ssh_user] = "serengeti"
 knife[:ssh_password] = "password"
+
+# yum server
+knife[:yum_repos] = [ yum_repos_url ] # the urls to yum server's .repo or .rpm file
+knife[:disable_external_yum_repo] = true # if the provisioned VM doesn't have network access to WWW, set this to true

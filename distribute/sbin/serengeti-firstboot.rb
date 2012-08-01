@@ -124,7 +124,8 @@ chown -h serengeti:serengeti /home/serengeti/.chef
 chmod 755 /home/serengeti/.chef
 
 # update yum server url
-sed -i "s/yum_server_ip/#{ethip}/" /opt/serengeti/www/yum/repos/base/serengeti-base.repo 
+sed -i "s|yum_server_ip|#{ethip}|" "#{SERENGETI_HOME}/www/yum/repos/base/serengeti-base.repo"
+sed -i "s|yum_repos_url|'http://#{ethip}/yum/repos/base/serengeti-base.repo'|" "#{SERENGETI_HOME}/.chef/knife.rb"
 
 chmod +x "#{SERENGETI_SCRIPTS_HOME}/serengeti-chef-init.sh"
 su - "#{SERENGETI_USER}" -s /bin/bash "#{SERENGETI_SCRIPTS_HOME}/serengeti-chef-init.sh"
