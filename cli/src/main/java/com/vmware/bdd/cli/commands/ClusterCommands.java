@@ -500,6 +500,9 @@ public class ClusterCommands implements CommandMarker {
       System.out.printf("name: %s, distro: %s, status: %s", cluster.getName(),
             cluster.getDistro(), cluster.getStatus());
       System.out.println();
+      if(cluster.getExternalHDFS() != null && !cluster.getExternalHDFS().isEmpty()) {
+         System.out.printf("external HDFS: %s\n", cluster.getExternalHDFS());
+      }
       LinkedHashMap<String, List<String>> ngColumnNamesWithGetMethodNames =
             new LinkedHashMap<String, List<String>>();
       List<NodeGroupRead> nodegroups = cluster.getNodeGroups();
