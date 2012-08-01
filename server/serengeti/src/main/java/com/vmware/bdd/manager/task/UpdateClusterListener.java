@@ -35,13 +35,13 @@ public class UpdateClusterListener implements TaskListener {
 
    private String clusterName;
    private String nodeGroupName;
-   private int instanceNum;
+   private int oldInstanceNum;
 
-   public UpdateClusterListener(String clusterName, String nodeGroupName, int instanceNum) {
+   public UpdateClusterListener(String clusterName, String nodeGroupName, int oldInstanceNum) {
       super();
       this.clusterName = clusterName;
       this.nodeGroupName = nodeGroupName;
-      this.instanceNum = instanceNum;
+      this.oldInstanceNum = oldInstanceNum;
    }
 
    @Override
@@ -55,31 +55,34 @@ public class UpdateClusterListener implements TaskListener {
             ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
             AuAssert.check(cluster != null);
 
-            NodeGroupEntity group = NodeGroupEntity.findNodeGroupEntityByName(cluster,
-                  nodeGroupName);
-            AuAssert.check(group != null);
-
             cluster.setStatus(ClusterStatus.RUNNING);
-            group.setDefineInstanceNum(instanceNum);
 
             return null;
          }
       });
-
    }
 
    @Override
    public void onFailure() {
       logger.debug("update cluster listener called onFailure");
+      DAL.inRwTransactionDo(new Saveable<Void>() {
+         @Override
+         public Void body() throws Exception {
+            ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+            AuAssert.check(cluster != null);
 
-      ClusterEntity cluster =
-            ClusterEntity.findClusterEntityByName(clusterName);
-      AuAssert.check(cluster != null);
-      // TODO reclaim resources
-      cluster.setStatus(ClusterStatus.RUNNING);
-      DAL.inTransactionUpdate(cluster);
-      logger.error("failed to update cluster " + clusterName 
-            + " set its status as ERROR");
+            NodeGroupEntity group = NodeGroupEntity.findNodeGroupEntityByName(cluster,
+                  nodeGroupName);
+            AuAssert.check(group != null);
+
+            // TODO reclaim resources
+            cluster.setStatus(ClusterStatus.RUNNING);
+            group.setDefineInstanceNum(oldInstanceNum);
+            logger.error("failed to update cluster " + clusterName 
+                  + " set its status as ERROR");
+            return null;
+         }
+      });
    }
 
    @Override

@@ -395,9 +395,18 @@ public class ClusterManager {
             return group;
          }});
 
+        int oldInstanceNum = group.getDefineInstanceNum();
+        group.setDefineInstanceNum(instanceNum);
+        DAL.inTransactionUpdate(group);
         UpdateClusterListener listener =
-           new UpdateClusterListener(clusterName, nodeGroupName, instanceNum);
-        return createClusterMgmtTask(cluster, listener, ClusterStatus.UPDATING);
+           new UpdateClusterListener(clusterName, nodeGroupName, oldInstanceNum);
+        try {
+           return createClusterMgmtTask(cluster, listener, ClusterStatus.UPDATING);
+        } catch (Exception ex) {
+           group.setDefineInstanceNum(oldInstanceNum);
+           DAL.inTransactionUpdate(group);
+           throw ex;
+        }
     }
 
     static class SystemProperties {
