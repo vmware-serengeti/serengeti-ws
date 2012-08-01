@@ -6,7 +6,7 @@ exec </dev/$tty >/dev/$tty 2>&1
 
 stty -echo
 clear
-verrel=`rpm -q --qf '%{VERSION} Build %{RELEASE}\n' serengeti`
+verrel=`rpm -q --qf '%{VERSION} Build %{RELEASE}\n' VMware-Serengeti`
 
 echo "VMware Serengeti" $verrel
 MSG_FILE=/opt/serengeti/etc/login_msg

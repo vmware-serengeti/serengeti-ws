@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -44,11 +44,13 @@ import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetworkRead;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.ResourcePoolAdd;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
+import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.DistroManager;
 import com.vmware.bdd.manager.NetworkManager;
@@ -102,7 +104,7 @@ public class RestResource {
    }
 
    @RequestMapping(value = "/hello", method = RequestMethod.GET)
-   @ResponseStatus(HttpStatus.NO_CONTENT)
+   @ResponseStatus(HttpStatus.OK)
    public void getHello() {
    }
 
@@ -276,6 +278,13 @@ public class RestResource {
    public ClusterRead getCluster(
          @PathVariable("clusterName") final String clusterName) {
       return clusterMgr.getClusterByName(clusterName);
+   }
+
+   @RequestMapping(value = "/cluster/{clusterName}/spec", method = RequestMethod.GET, produces = "application/json")
+   @ResponseBody
+   public ClusterCreate getClusterSpec(
+         @PathVariable("clusterName") final String clusterName) {
+      return clusterMgr.getClusterSpec(clusterName);
    }
 
    @RequestMapping(value = "/clusters", method = RequestMethod.GET, produces = "application/json")

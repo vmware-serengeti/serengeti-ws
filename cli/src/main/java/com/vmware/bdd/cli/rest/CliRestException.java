@@ -1,6 +1,6 @@
 /******************************************************************************
- *       Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *      Licensed under the Apache License, Version 2.0 (the "License");
+ *   Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
  *
@@ -14,10 +14,22 @@
  ******************************************************************************/
 package com.vmware.bdd.cli.rest;
 
+import org.springframework.http.HttpStatus;
+
 public class CliRestException extends RuntimeException {
    private static final long serialVersionUID = -7416263807231480157L;
+   private HttpStatus status;
+
+   public HttpStatus getStatus() {
+      return status;
+   }
 
    public CliRestException(String errorMsg) {
       super(errorMsg);
+   }
+
+   public CliRestException(HttpStatus status, String errorMsg) {
+      super(errorMsg);
+      this.status = status;
    }
 }

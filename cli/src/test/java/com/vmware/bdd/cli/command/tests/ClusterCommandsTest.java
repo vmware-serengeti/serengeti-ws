@@ -1,6 +1,6 @@
 /******************************************************************************
- *       Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *      Licensed under the Apache License, Version 2.0 (the "License");
+ *   Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
  *
@@ -393,6 +393,16 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.GET, HttpStatus.OK,
                 mapper.writeValueAsString(new ClusterRead[] { cr1, cr2 }));
         clusterCommands.getCluster(null, true);
+    }
+
+    @Test
+    public void testExportClusterSpec() throws Exception {
+       ObjectMapper mapper = new ObjectMapper();
+       ClusterCreate clusterSpec =
+          CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile("samples/cluster_hadoop.spec"));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/hadoop/spec", HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(clusterSpec));
+     clusterCommands.exportClusterSpec("hadoop", null);
     }
 
     @Test

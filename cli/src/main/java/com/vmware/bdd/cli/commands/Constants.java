@@ -29,12 +29,13 @@ public class Constants {
    public static final String REST_PATH_NODEGROUP = "nodegroup";
    public static final String REST_PATH_NODE = "node";
    public static final String REST_PATH_TASK = "task";
-   public static final String REST_PATH_TEST = "hello";
+   public static final String REST_PATH_TEST = "j_spring_security_check";
    public static final String REST_PATH_NETWORK = "network";
    public static final String REST_PATH_NETWORKS = "networks";
    public static final String REST_PATH_DISTROS = "distros";
    public static final String REST_PATH_DISTRO = "distro";
    public static final String REST_PATH_CONFIG = "config";
+   public static final String REST_PATH_SPEC = "spec";
 
    public static final String QUERY_ACTION_KEY = "state";
    public static final String QUERY_ACTION_START = "start";
@@ -68,6 +69,7 @@ public class Constants {
    public static final String OUTPUT_OBJECT_RESOURCEPOOL = "resourcepool";
    public static final String OUTPUT_OP_CREATE = "create";
    public static final String OUTPUT_OP_CONFIG = "config";
+   public static final String OUTPUT_OP_EXPORT = "export";
    public static final String OUTPUT_OP_ADD = "add";
    public static final String OUTPUT_OP_LIST = "list";
    public static final String OUTPUT_OP_TARGET = "target";
@@ -93,7 +95,8 @@ public class Constants {
 
    public static final String HTTP_CONNECTION_PREFIX = "http://";
    public static final String HTTP_CONNECTION_SUFFIX = "/serengeti/api/";
-
+   public static final String HTTP_CONNECTION_API = "api/";
+   public static final String HTTP_CONNECTION_LOGIN_SUFFIX = "/serengeti/";
    public static final String PROPERTY_FILE = "cli.properties";
    public static final String PROPERTY_HOST = "host";
    public static final String PROPERTY_FILE_HOST_COMMENT = "update host information";
@@ -174,4 +177,12 @@ public class Constants {
    public static final String PARAM_CLUSTER_CONFIG_RUNNING_JOB_WARNING =
          "Applying new Hadoop configuration will restart Hadoop processes and may lead to termination of running jobs.";
    public static final String PARAM_CLUSTER_SPEC_HA_ERROR = "The ha property must be one of 'off', 'on' and 'ft' in spec file ";
+   public static final String CONNECT_UNAUTHORIZATION = "The connection is refused, may be invalid password or overtime session, please try to reconnect!";
+   public static final String CONNECT_USER_NAME = "The user name";
+   public static final String CONNECT_PASSWORD = "The password";
+   public static final String CONNECT_CAN_NOT_BE_NULL = " can not be null!";
+   public static final String CONNECT_ENTER_USER_NAME = "Please enter the user name!";
+   public static final String CONNECT_ENTER_PASSWORD = "Please enter the password!";
+   public static final String CONNECT_CHECK_LOGIN = "You are not login, please run connect first!";
+   public static final String CONNECT_SESSION_TIME_OUT = "Session timeout, please run connect again!";
 }

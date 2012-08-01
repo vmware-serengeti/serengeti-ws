@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.springframework.shell.support.util.Assert;
@@ -237,4 +236,5 @@ public class CommandsUtilsTest {
       assertEquals(coreSiteConfig.get("fs.default.name"),
             "hdfs://fqdn_or_ip:8020");
    }
+
 }

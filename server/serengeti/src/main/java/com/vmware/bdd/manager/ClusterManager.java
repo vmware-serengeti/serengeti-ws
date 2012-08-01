@@ -29,6 +29,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
@@ -219,6 +220,26 @@ public class ClusterManager {
                 return entity.toClusterRead();
             }
         });
+    }
+
+    public ClusterCreate getClusterSpec(String clusterName) {
+       ClusterCreate spec = clusterConfigMgr.getClusterConfig(clusterName);
+       spec.setVcClusters(null);
+       spec.setTemplateId(null);
+       spec.setType(null);
+       spec.setDistroMap(null);
+       spec.setSharedPattern(null);
+       spec.setLocalPattern(null);
+       spec.setNetworking(null);
+       NodeGroupCreate[] groups = spec.getNodeGroups();
+       if (groups != null) {
+          for (NodeGroupCreate group : groups) {
+             group.setVcClusters(null);
+             group.setGroupType(null);
+             group.getStorage().setNamePattern(null);
+          }
+       }
+       return spec;
     }
 
     public List<ClusterRead> getClusters() {
