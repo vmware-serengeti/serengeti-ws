@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -233,6 +234,20 @@ public class ClusterEntity extends EntityBase {
          groupList.add(group.toNodeGroupRead());
       }
       clusterRead.setNodeGroups(groupList);
+      if (this.getHadoopConfig() != null) {
+         Map conf =
+            (new Gson()).fromJson(this.getHadoopConfig(), Map.class);
+         Map hadoopConf = (Map) conf.get("hadoop");
+         if (hadoopConf != null) {
+            Map coreSiteConf = (Map) hadoopConf.get("core-site.xml");
+            if (coreSiteConf != null) {
+               String hdfs = (String) coreSiteConf.get("fs.default.name");
+               if (hdfs != null && !hdfs.isEmpty()) {
+                  clusterRead.setExternalHDFS(hdfs);
+               }
+            }
+         }
+      }
 
       return clusterRead;
    }

@@ -32,6 +32,7 @@ public class ClusterRead {
 
    @Expose
    private String name;
+   private String externalHDFS;
    @Expose
    private String distro;
 
@@ -67,6 +68,14 @@ public class ClusterRead {
 
    public void setName(String name) {
       this.name = name;
+   }
+
+   public String getExternalHDFS() {
+      return externalHDFS;
+   }
+
+   public void setExternalHDFS(String externalHDFS) {
+      this.externalHDFS = externalHDFS;
    }
 
    public String getDistro() {
