@@ -75,6 +75,7 @@ public class ClusterEntity extends EntityBase {
     * JSON encoded VCResourcePoolEntity name array 
     */
    @Column(name = "vc_rp_names")
+   @Type(type = "text")
    private String vcRpNames;
 
    /*
@@ -83,6 +84,7 @@ public class ClusterEntity extends EntityBase {
     * JSON encoded VCDataStoreEntity name array 
     */
    @Column(name = "vc_datastore_names")
+   @Type(type = "text")
    private String vcDatastoreNames;
 
    // OneToMany mapping with Network table
