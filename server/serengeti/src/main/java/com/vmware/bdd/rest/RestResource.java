@@ -171,7 +171,7 @@ public class RestResource {
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void startStopResumeCluster(
          @PathVariable("clusterName") String clusterName,
-         @RequestParam(value="state", required = false) String state,
+         @RequestParam(value="state", required = true) String state,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
       Long taskId;
@@ -187,6 +187,29 @@ public class RestResource {
       } else {
          throw BddException.INVALID_PARAMETER("cluster state", state);
       }
+   }
+
+   @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}",
+         method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.ACCEPTED)
+   public void startStopNodeGroup(
+         @PathVariable("clusterName") String clusterName,
+         @PathVariable("groupName") String groupName,
+         @RequestParam(value="state", required = true) String state,
+         HttpServletRequest request, HttpServletResponse response)
+         throws Exception {
+   }
+
+   @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}/node/{nodeName}",
+         method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.ACCEPTED)
+   public void startStopNode(
+         @PathVariable("clusterName") String clusterName,
+         @PathVariable("groupName") String groupName,
+         @PathVariable("nodeName") String nodeName,
+         @RequestParam(value="state", required = true) String state,
+         HttpServletRequest request, HttpServletResponse response)
+         throws Exception {
    }
 
    @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}", method = RequestMethod.PUT)

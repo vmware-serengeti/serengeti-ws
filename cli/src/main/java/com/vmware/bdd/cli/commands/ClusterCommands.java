@@ -276,7 +276,9 @@ public class ClusterCommands implements CommandMarker {
 
    @CliCommand(value = "cluster start", help = "Start a cluster")
    public void startCluster(
-         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name) {
+         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
+         @CliOption(key = { "nodeGroupName" }, mandatory = false, help = "The node group name") final String nodeGroupName,
+         @CliOption(key = { "nodeName" }, mandatory = false, help = "The node name") final String nodeName) {
 
       Map<String, String> queryStrings = new HashMap<String, String>();
       queryStrings
@@ -284,11 +286,14 @@ public class ClusterCommands implements CommandMarker {
 
       //rest invocation
       try {
-         restClient.actionOps(name, queryStrings);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
-               Constants.OUTPUT_OP_RESULT_START);
+         String resource = getClusterResourceName(clusterName, nodeGroupName, nodeName);
+         if (resource != null) {
+            restClient.actionOps(resource, queryStrings);
+            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+                  Constants.OUTPUT_OP_RESULT_START);
+         }
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
                Constants.OUTPUT_OP_START, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
       }
@@ -296,17 +301,22 @@ public class ClusterCommands implements CommandMarker {
 
    @CliCommand(value = "cluster stop", help = "Stop a cluster")
    public void stopCluster(
-         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name) {
+         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
+         @CliOption(key = { "nodeGroupName" }, mandatory = false, help = "The node group name") final String nodeGroupName,
+         @CliOption(key = { "nodeName" }, mandatory = false, help = "The node name") final String nodeName) {
       Map<String, String> queryStrings = new HashMap<String, String>();
       queryStrings.put(Constants.QUERY_ACTION_KEY, Constants.QUERY_ACTION_STOP);
 
       //rest invocation
       try {
-         restClient.actionOps(name, queryStrings);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
-               Constants.OUTPUT_OP_RESULT_STOP);
+         String resource = getClusterResourceName(clusterName, nodeGroupName, nodeName);
+         if (resource != null) {
+            restClient.actionOps(resource, queryStrings);
+            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+                  Constants.OUTPUT_OP_RESULT_STOP);
+         }
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
                Constants.OUTPUT_OP_STOP, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
       }
@@ -466,6 +476,29 @@ public class ClusterCommands implements CommandMarker {
                Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          return;
       }
+   }
+
+   
+   private String getClusterResourceName(String cluster, String nodeGroup, String node) {
+      assert cluster != null; // Spring shell guarantees this
+
+      if (node != null && nodeGroup == null) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, cluster,
+               Constants.OUTPUT_OP_START, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.OUTPUT_OP_NODEGROUP_MISSING);
+         return null;
+      }
+
+      StringBuilder res = new StringBuilder();
+      res.append(cluster);
+      if (nodeGroup != null) {
+         res.append("/nodegroup/").append(nodeGroup);
+         if (node != null) {
+            res.append("/node/").append(node);
+         }
+      }
+
+      return res.toString();
    }
 
    private void resumeCreateCluster(final String name) {
