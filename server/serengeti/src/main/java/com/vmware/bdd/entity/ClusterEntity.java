@@ -34,6 +34,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 
@@ -90,6 +91,7 @@ public class ClusterEntity extends EntityBase {
    private NetworkEntity network;
 
    @Column(name = "configuration")
+   @Type(type = "text")
    private String hadoopConfig;
 
    ClusterEntity() {

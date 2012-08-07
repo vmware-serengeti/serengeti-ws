@@ -115,6 +115,7 @@ public class NodeGroupEntity extends EntityBase {
    private String haFlag;
 
    @Column(name = "configuration")
+   @Type(type = "text")
    private String hadoopConfig;
 
    @Column(name = "instance_per_host")
