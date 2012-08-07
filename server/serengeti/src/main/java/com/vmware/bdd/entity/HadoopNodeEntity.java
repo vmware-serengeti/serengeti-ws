@@ -25,6 +25,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.gson.Gson;
@@ -66,6 +67,7 @@ public class HadoopNodeEntity extends EntityBase {
 
    // JSON encoded datastore name array
    @Column(name = "vc_datastores")
+   @Type(type = "text")
    private String datastores;
 
    public HadoopNodeEntity() {
