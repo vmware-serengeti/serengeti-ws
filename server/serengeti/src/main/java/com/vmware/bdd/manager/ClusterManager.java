@@ -407,7 +407,7 @@ public class ClusterManager {
            throw BddException.NOT_FOUND("node group", nodeGroupName);
        }
 
-       if (HadoopNodeEntity.findByName(group, nodeGroupName) == null) {
+       if (HadoopNodeEntity.findByName(group, nodeName) == null) {
           logger.error("node " + nodeName + " does not exist");
           throw BddException.NOT_FOUND("node", nodeName);
       }
@@ -433,7 +433,7 @@ public class ClusterManager {
            throw BddException.NOT_FOUND("node group", nodeGroupName);
        }
 
-       if (HadoopNodeEntity.findByName(group, nodeGroupName) == null) {
+       if (HadoopNodeEntity.findByName(group, nodeName) == null) {
            logger.error("node " + nodeName + " does not exist");
            throw BddException.NOT_FOUND("node", nodeName);
        }

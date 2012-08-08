@@ -72,11 +72,11 @@ public class ClusterCmdUtil {
       AuAssert.check(!(node != null && group == null));
 
       StringBuilder fullName = new StringBuilder();
-      fullName.append(cluster).append("-");
+      fullName.append(cluster);
       if (group != null) {
-         fullName.append(group).append("-");
+         fullName.append("-").append(group);
          if (node != null) {
-            fullName.append(node);
+            fullName.append("-").append(node);
          }
       }
 
