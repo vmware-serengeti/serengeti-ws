@@ -371,7 +371,7 @@ public class ClusterCommands implements CommandMarker {
 								List<NodeRead> nodes = nodeGroup.getInstances();
 								if(nodes != null && nodes.size() > 0){
 									String nameNodeIP = nodes.get(0).getIp();
-									setHDFSURL(nameNodeIP);
+									setNameNode(nameNodeIP);
 								}
 								else{
 									throw new CliRestException("no name node available");
@@ -381,7 +381,7 @@ public class ClusterCommands implements CommandMarker {
 								List<NodeRead> nodes = nodeGroup.getInstances();
 								if(nodes != null && nodes.size() > 0){
 									String jobTrackerIP = nodes.get(0).getIp();
-									setJobTrackerURL(jobTrackerIP);
+									setJobTracker(jobTrackerIP);
 								}
 								else{
 									throw new CliRestException("no job tracker available");
@@ -391,13 +391,16 @@ public class ClusterCommands implements CommandMarker {
 								List<NodeRead> nodes = nodeGroup.getInstances();
 								if(nodes != null && nodes.size() > 0){
 									String hiveServerIP = nodes.get(0).getIp();
-									setHiveServerURL(hiveServerIP);
+									setHiveServer(hiveServerIP);
 								}
 								else{
 									throw new CliRestException("no hive server available");
 								}
 							}
 						}
+					}
+					if(cluster.getExternalHDFS() != null && !cluster.getExternalHDFS().isEmpty()) {
+						setFsURL(cluster.getExternalHDFS());
 					}
 				}
 			}
@@ -407,17 +410,21 @@ public class ClusterCommands implements CommandMarker {
 		}
 	}
    
-   private void setHDFSURL(String nameNodeAddress){
-	   String hdfsUrl = "webhdfs://" + nameNodeAddress + ":50070";
-	   hadoopConfiguration.set("fs.default.name", hdfsUrl);
-   }
-   
-   private void setJobTrackerURL(String jobTrackerAddress){
-	   String jobTrackerUrl = jobTrackerAddress + ":8021";
-	   hadoopConfiguration.set("mapred.job.tracker", jobTrackerUrl);
-   }
-   
-	private void setHiveServerURL(String hiveServerAddress) {
+	private void setNameNode(String nameNodeAddress) {
+		String hdfsUrl = "webhdfs://" + nameNodeAddress + ":50070";
+		setFsURL(hdfsUrl);
+	}
+
+	private void setFsURL(String fsURL) {
+		hadoopConfiguration.set("fs.default.name", fsURL);
+	}
+
+	private void setJobTracker(String jobTrackerAddress) {
+		String jobTrackerUrl = jobTrackerAddress + ":8021";
+		hadoopConfiguration.set("mapred.job.tracker", jobTrackerUrl);
+	}
+
+	private void setHiveServer(String hiveServerAddress) {
 		try {
 			hiveInfo = hiveCommands.config(hiveServerAddress, 10000, null);
 		} catch (Exception e) {
