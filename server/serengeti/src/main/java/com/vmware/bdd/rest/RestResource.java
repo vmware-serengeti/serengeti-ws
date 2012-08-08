@@ -102,7 +102,7 @@ public class RestResource {
    }
 
    @RequestMapping(value = "/hello", method = RequestMethod.GET)
-   @ResponseStatus(HttpStatus.NO_CONTENT)
+   @ResponseStatus(HttpStatus.OK)
    public void getHello() {
    }
 

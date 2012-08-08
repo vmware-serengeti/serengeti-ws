@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans
+   xmlns="http://www.springframework.org/schema/security"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:beans="http://www.springframework.org/schema/beans"
+   xmlns:sec="http://www.springframework.org/schema/security"
+   xsi:schemaLocation="
+		http://www.springframework.org/schema/security
+		http://www.springframework.org/schema/security/spring-security-3.1.xsd
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+   
+   <http entry-point-ref="restAuthenticationEntryPoint" auto-config="true">
+      <intercept-url pattern="/login.jsp" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+      <intercept-url pattern="/**" access="IS_AUTHENTICATED_FULLY"/>
+
+      <form-login login-page="/login.jsp" 
+         authentication-failure-url="/login.jsp?login_error=1"
+         authentication-success-handler-ref="noRedirectHandler"/>
+      <logout invalidate-session="true"/>
+   </http>
+
+   <beans:bean id="noRedirectHandler" class="com.vmware.bdd.rest.NoRedirectHandler"/>
+   <beans:bean id="restAuthenticationEntryPoint" class="com.vmware.bdd.rest.RestAuthenticationEntryPoint"/>
+
+   <authentication-manager alias="authenticationManager">
+      <authentication-provider>
+         <user-service>
+            <user name="serengeti" password="password" authorities="ROLE_ADMIN"/>
+         </user-service>
+      </authentication-provider>
+   </authentication-manager>
+
+</beans:beans>
