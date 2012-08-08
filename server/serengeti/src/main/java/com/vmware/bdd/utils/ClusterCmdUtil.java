@@ -21,10 +21,10 @@ public class ClusterCmdUtil {
          .getNonEmptyString("delete_cluster.cmd");
    private static final String UPDATE_CLUSTER_CMD = Configuration
          .getNonEmptyString("update_cluster.cmd");
-   private static final String STOP_CLUSTER_CMD = Configuration
-         .getNonEmptyString("stop_cluster.cmd");
-   private static final String START_CLUSTER_CMD = Configuration
-         .getNonEmptyString("start_cluster.cmd");
+   private static final String STOP_NODES_CMD = Configuration
+         .getNonEmptyString("stop_cluster_node.cmd");
+   private static final String START_NODES_CMD = Configuration
+         .getNonEmptyString("start_cluster_node.cmd");
    private static final String CONFIGURE_CLUSTER_CMD = Configuration
    .getNonEmptyString("configure_cluster.cmd");
 
@@ -41,15 +41,15 @@ public class ClusterCmdUtil {
             .replaceAll(":json_file", fileName).split(" ");
    }
 
-   public static String[] getStartClusterCmdArray(String clusterName,
+   public static String[] getStartClusterNodesCmdArray(String nodesName,
          String fileName) {
-      return START_CLUSTER_CMD.replaceAll(":cluster_name", clusterName)
+      return START_NODES_CMD.replaceAll(":nodes_name", nodesName)
             .replaceAll(":json_file", fileName).split(" ");
    }
 
-   public static String[] getStopClusterCmdArray(String clusterName,
+   public static String[] getStopClusterNodesCmdArray(String nodesName,
          String fileName) {
-      return STOP_CLUSTER_CMD.replaceAll(":cluster_name", clusterName)
+      return STOP_NODES_CMD.replaceAll(":nodes_name", nodesName)
             .replaceAll(":json_file", fileName).split(" ");
    }
 
@@ -63,5 +63,23 @@ public class ClusterCmdUtil {
          String fileName) {
       return CONFIGURE_CLUSTER_CMD.replaceAll(":cluster_name", clusterName)
             .replaceAll(":json_file", fileName).split(" ");
+   }
+
+   public static String getFullNodeName(String cluster, String group, String node) {
+      AuAssert.check(cluster != null && !cluster.isEmpty());
+      AuAssert.check(group == null || !group.isEmpty());
+      AuAssert.check(node == null || !node.isEmpty());
+      AuAssert.check(!(node != null && group == null));
+
+      StringBuilder fullName = new StringBuilder();
+      fullName.append(cluster).append("-");
+      if (group != null) {
+         fullName.append(group).append("-");
+         if (node != null) {
+            fullName.append(node);
+         }
+      }
+
+      return fullName.toString();
    }
 }
