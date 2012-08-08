@@ -34,6 +34,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.gson.Gson;
@@ -92,6 +93,7 @@ public class NodeGroupEntity extends EntityBase {
     * JSON encoded VCResourcePoolEntity name array 
     */
    @Column(name = "vc_rp_names")
+   @Type(type = "text")
    private String vcRpNames;
 
    /*
@@ -100,6 +102,7 @@ public class NodeGroupEntity extends EntityBase {
     * JSON encoded VCDataStoreEntity name array 
     */
    @Column(name = "vc_datastore_names")
+   @Type(type = "text")
    private String vcDatastoreNames;
 
    @Column(name = "roles")
@@ -112,6 +115,7 @@ public class NodeGroupEntity extends EntityBase {
    private String haFlag;
 
    @Column(name = "configuration")
+   @Type(type = "text")
    private String hadoopConfig;
 
    @Column(name = "instance_per_host")

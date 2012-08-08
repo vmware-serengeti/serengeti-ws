@@ -34,6 +34,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 
@@ -74,6 +75,7 @@ public class ClusterEntity extends EntityBase {
     * JSON encoded VCResourcePoolEntity name array 
     */
    @Column(name = "vc_rp_names")
+   @Type(type = "text")
    private String vcRpNames;
 
    /*
@@ -82,6 +84,7 @@ public class ClusterEntity extends EntityBase {
     * JSON encoded VCDataStoreEntity name array 
     */
    @Column(name = "vc_datastore_names")
+   @Type(type = "text")
    private String vcDatastoreNames;
 
    // OneToMany mapping with Network table
@@ -90,6 +93,7 @@ public class ClusterEntity extends EntityBase {
    private NetworkEntity network;
 
    @Column(name = "configuration")
+   @Type(type = "text")
    private String hadoopConfig;
 
    ClusterEntity() {
