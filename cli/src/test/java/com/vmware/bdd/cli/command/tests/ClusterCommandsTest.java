@@ -123,7 +123,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.NO_CONTENT, "");
 
-        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, false, false);
+        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, false, false, false);
     }
 
     @Test
@@ -142,7 +142,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.NO_CONTENT, "");
 
-        clusterCommands.createCluster("cluster1", null, "HBASE", null, null, null, null, false, false);
+        clusterCommands.createCluster("cluster1", null, "HBASE", null, null, null, null, false, false, false);
     }
 
     @Test
@@ -164,7 +164,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
 
-        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, false, false);
+        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, false, false, false);
     }
 
     @Test
@@ -201,7 +201,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.NO_CONTENT, "");
 
-        clusterCommands.createCluster("cluster1", null, "HADOOP", "samples/cluster_hadoop.spec", null, null, null, false, false);
+        clusterCommands.createCluster("cluster1", null, "HADOOP", "samples/cluster_hadoop.spec", null, null, null, false, false, false);
     }
 
     @Test
@@ -242,14 +242,14 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.NO_CONTENT, "");
 
-        clusterCommands.createCluster("cluster1", null, "HADOOP", "samples/cluster_hadoop.spec", null, null, null, false, false);
+        clusterCommands.createCluster("cluster1", null, "HADOOP", "samples/cluster_hadoop.spec", null, null, null, false, false, false);
     }
 
     @Test
     public void testResumeCreateCluster() throws Exception {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1?state=resume",
                 HttpMethod.PUT, HttpStatus.NO_CONTENT, "");
-        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, true, false);
+        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, true, false, false);
     }
 
     @Test
@@ -261,7 +261,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1?state=resume",
                 HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
-        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, true, false);
+        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, true, false, false);
     }
 
     @Test
@@ -315,7 +315,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET,
                 HttpStatus.OK, mapper.writeValueAsString(cluster));
 
-        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, false, false);
+        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, false, false, false);
     }
 
     @Test
@@ -443,7 +443,7 @@ public class ClusterCommandsTest extends MockRestServer {
 
       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/config", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
-      clusterCommands.configCluster("cluster1", "samples/cluster_hadoop.spec", false);
+      clusterCommands.configCluster("cluster1", "samples/cluster_hadoop.spec", false, false);
    }
 
    @Test
