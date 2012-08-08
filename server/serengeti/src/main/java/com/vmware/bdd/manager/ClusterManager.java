@@ -34,6 +34,7 @@ import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.HadoopNodeEntity;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NetworkEntity.AllocType;
 import com.vmware.bdd.entity.NodeGroupAssociation;
@@ -50,6 +51,7 @@ import com.vmware.bdd.manager.task.StopClusterListener;
 import com.vmware.bdd.manager.task.TaskListener;
 import com.vmware.bdd.manager.task.UpdateClusterListener;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.ClusterCmdUtil;
 import com.vmware.bdd.utils.ConfigInfo;
 
 public class ClusterManager {
@@ -167,8 +169,10 @@ public class ClusterManager {
 
         writeJsonFile(clusterConfig, task.getWorkDir(), fileName);
 
-        cluster.setStatus(initStatus);
-        DAL.inTransactionUpdate(cluster);
+        if (initStatus != null) {
+            cluster.setStatus(initStatus);
+            DAL.inTransactionUpdate(cluster);
+        }
 
         taskManager.submit(task);
 
@@ -344,6 +348,98 @@ public class ClusterManager {
 
         StopClusterListener listener = new StopClusterListener(clusterName);
         return createClusterMgmtTaskWithErrorSetting(cluster, listener, ClusterStatus.STOPPING);
+    }
+
+    public Long startNodeGroup(String clusterName, String nodeGroupName) throws Exception {
+       logger.info("ClusterManager, starting node group "
+             + ClusterCmdUtil.getFullNodeName(clusterName, nodeGroupName, null));
+
+       ClusterEntity cluster;
+
+       if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+           logger.error("cluster " + clusterName + " does not exist");
+           throw BddException.NOT_FOUND("cluster", clusterName);
+       }
+
+       if (NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName) == null) {
+           logger.error("node group " + nodeGroupName + " does not exist");
+           throw BddException.NOT_FOUND("node group", nodeGroupName);
+       }
+
+       StartClusterListener listener = new StartClusterListener(clusterName, nodeGroupName, null);
+       return createClusterMgmtTaskWithErrorSetting(cluster, listener, null);
+    }
+
+    public Long stopNodeGroup(String clusterName, String nodeGroupName) throws Exception {
+       logger.info("ClusterManager, stopping node group "
+             + ClusterCmdUtil.getFullNodeName(clusterName, nodeGroupName, null));
+
+       ClusterEntity cluster;
+
+       if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+           logger.error("cluster " + clusterName + " does not exist");
+           throw BddException.NOT_FOUND("cluster", clusterName);
+       }
+
+       if (NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName) == null) {
+           logger.error("node group " + nodeGroupName + " does not exist");
+           throw BddException.NOT_FOUND("node group", nodeGroupName);
+       }
+
+       StopClusterListener listener = new StopClusterListener(clusterName, nodeGroupName, null);
+       return createClusterMgmtTaskWithErrorSetting(cluster, listener, null);
+    }
+
+    public Long startNode(String clusterName, String nodeGroupName, String nodeName) throws Exception {
+       logger.info("ClusterManager, starting node "
+             + ClusterCmdUtil.getFullNodeName(clusterName, nodeGroupName, nodeName));
+
+       ClusterEntity cluster;
+       NodeGroupEntity group;
+
+       if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+           logger.error("cluster " + clusterName + " does not exist");
+           throw BddException.NOT_FOUND("cluster", clusterName);
+       }
+
+       if ((group = NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName)) == null) {
+           logger.error("node group " + nodeGroupName + " does not exist");
+           throw BddException.NOT_FOUND("node group", nodeGroupName);
+       }
+
+       if (HadoopNodeEntity.findByName(group, nodeGroupName) == null) {
+          logger.error("node " + nodeName + " does not exist");
+          throw BddException.NOT_FOUND("node", nodeName);
+      }
+
+       StartClusterListener listener = new StartClusterListener(clusterName, nodeGroupName, nodeName);
+       return createClusterMgmtTaskWithErrorSetting(cluster, listener, null);
+    }
+
+    public Long stopNode(String clusterName, String nodeGroupName, String nodeName) throws Exception {
+       logger.info("ClusterManager, stopping node "
+             + ClusterCmdUtil.getFullNodeName(clusterName, nodeGroupName, nodeName));
+
+       ClusterEntity cluster;
+       NodeGroupEntity group;
+
+       if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+           logger.error("cluster " + clusterName + " does not exist");
+           throw BddException.NOT_FOUND("cluster", clusterName);
+       }
+
+       if ((group = NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName)) == null) {
+           logger.error("node group " + nodeGroupName + " does not exist");
+           throw BddException.NOT_FOUND("node group", nodeGroupName);
+       }
+
+       if (HadoopNodeEntity.findByName(group, nodeGroupName) == null) {
+           logger.error("node " + nodeName + " does not exist");
+           throw BddException.NOT_FOUND("node", nodeName);
+       }
+
+       StopClusterListener listener = new StopClusterListener(clusterName, nodeGroupName, nodeName);
+       return createClusterMgmtTaskWithErrorSetting(cluster, listener, null);
     }
 
     public Long resizeCluster(final String clusterName, final String nodeGroupName, final int instanceNum)
