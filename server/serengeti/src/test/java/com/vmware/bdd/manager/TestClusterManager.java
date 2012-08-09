@@ -217,11 +217,14 @@ public class TestClusterManager {
    }
 
    public void testGetManifest() {
+      String clusterName = "hadoopSprintA";
+      List<String> targets = new ArrayList<String>();
+      targets.add(clusterName);
       Map<String, Object> attrs =
-            clusterManager.getClusterConfigManifest("hadoop-sprintA");
+            clusterManager.getClusterConfigManifest(clusterName, targets);
       Gson gson = new Gson();
       assertTrue("manifest should contains cluster name",
-            gson.toJson(attrs).indexOf("hadoop-sprintA") != -1);
+            gson.toJson(attrs).indexOf(clusterName) != -1);
       System.out.println(gson.toJson(attrs));
    }
 
