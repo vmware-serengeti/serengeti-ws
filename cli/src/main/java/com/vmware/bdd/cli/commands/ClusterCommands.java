@@ -61,14 +61,16 @@ public class ClusterCommands implements CommandMarker {
 
    @Autowired
    private ClusterRestClient restClient;
-   
+
    @Autowired
    private Configuration hadoopConfiguration;
-   
+
    @Autowired
    private HiveCommands hiveCommands;
-   
+
    private String hiveInfo;
+
+   private boolean alwaysAnswerYes;
 
    //define role of the node group .
    private enum NodeGroupRole {
@@ -90,7 +92,10 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
          @CliOption(key = { "networkName" }, mandatory = false, help = "Network Name") final String networkName,
          @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume,
-         @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation) {
+         @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation,
+         @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes) {
+
+      this.alwaysAnswerYes = alwaysAnswerYes;
       //validate the name
       if (name.indexOf("-") != -1) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
@@ -446,7 +451,10 @@ public class ClusterCommands implements CommandMarker {
    public void configCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
          @CliOption(key = { "specFile" }, mandatory = true, help = "The spec file name path") final String specFilePath,
-         @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation) {
+         @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation,
+         @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes) {
+
+      this.alwaysAnswerYes = alwaysAnswerYes;
       //validate the name
       if (name.indexOf("-") != -1) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CONFIG,
@@ -745,7 +753,11 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   private boolean isContinue(String clusterName,String operateType,String promptMsg) {
+   private boolean isContinue(String clusterName, String operateType, String promptMsg) {
+      if (this.alwaysAnswerYes) {
+         return true;
+      }
+
       boolean continueCreate = true;
       boolean continueLoop = true;
       String readMsg = "";
