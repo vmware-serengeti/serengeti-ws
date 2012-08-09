@@ -35,6 +35,7 @@ public class Constants {
    public static final String REST_PATH_DISTROS = "distros";
    public static final String REST_PATH_DISTRO = "distro";
    public static final String REST_PATH_CONFIG = "config";
+   public static final String REST_PATH_SPEC = "spec";
 
    public static final String QUERY_ACTION_KEY = "state";
    public static final String QUERY_ACTION_START = "start";
@@ -67,6 +68,7 @@ public class Constants {
    public static final String OUTPUT_OBJECT_RESOURCEPOOL = "resourcepool";
    public static final String OUTPUT_OP_CREATE = "create";
    public static final String OUTPUT_OP_CONFIG = "config";
+   public static final String OUTPUT_OP_EXPORT = "export";
    public static final String OUTPUT_OP_ADD = "add";
    public static final String OUTPUT_OP_LIST = "list";
    public static final String OUTPUT_OP_TARGET = "target";

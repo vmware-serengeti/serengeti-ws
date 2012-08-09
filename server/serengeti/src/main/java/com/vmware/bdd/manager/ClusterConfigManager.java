@@ -15,6 +15,7 @@
 package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -458,6 +459,7 @@ public class ClusterConfigManager {
          List<VcCluster> vcClusters =
                rpMgr.getVcResourcePoolByNameList(rpNames);
          clusterConfig.setVcClusters(vcClusters);
+         clusterConfig.setRpNames(clusterEntity.getVcRpNameList());
       } else {
          logger.debug("no resource pool config at cluster level.");
       }
@@ -472,6 +474,7 @@ public class ClusterConfigManager {
                datastoreMgr.getLocalDatastoresByNames(clusterEntity
                      .getVcDatastoreNameList());
          clusterConfig.setLocalPattern(localPattern);
+         clusterConfig.setDsNames(clusterEntity.getVcDatastoreNameList());
       } else {
          logger.debug("no datastore config at cluster level.");
       }
@@ -525,6 +528,7 @@ public class ClusterConfigManager {
       }
       networking.add(network);
       clusterConfig.setNetworking(networking);
+      clusterConfig.setNetworkName(networkEntity.getName());
       if (clusterEntity.getHadoopConfig() != null) {
          Map hadoopConfig =
                (new Gson())
@@ -610,6 +614,7 @@ public class ClusterConfigManager {
          List<VcCluster> vcClusters =
                rpMgr.getVcResourcePoolByNameList(rpNames);
          group.setVcClusters(vcClusters);
+         group.setRpNames(Arrays.asList(rpNames));
       }
 
       expandGroupStorage(ngEntity, group);
@@ -626,7 +631,6 @@ public class ClusterConfigManager {
       int storageSize = ngEntity.getStorageSize();
       DatastoreType storageType = ngEntity.getStorageType();
       List<String> storeNames = ngEntity.getVcDatastoreNameList();
-
       if (storageSize <= 0 && storageType == null
             && (storeNames == null || storeNames.isEmpty())) {
          logger.debug("no storage specified for node group "
@@ -646,6 +650,7 @@ public class ClusterConfigManager {
          storage.setType(storageType.toString().toLowerCase());
       }
       storage.setNamePattern(getStoreNamePattern(storageType, storeNames));
+      storage.setDsNames(storeNames);
    }
 
    private List<String> getStoreNamePattern(DatastoreType storageType,

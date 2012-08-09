@@ -258,6 +258,24 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
+   @CliCommand(value = "cluster export spec", help = "Export cluster specification")
+   public void exportClusterSpec(
+         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
+         @CliOption(key = { "output" }, mandatory = false, help = "The output file name") final String fileName) {
+
+      // rest invocation
+      try {
+         ClusterCreate cluster = restClient.getSpec(name);
+         if (cluster != null) {
+            CommandsUtils.prettyJsonOutput(cluster, fileName);
+         }
+      } catch (Exception e) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_EXPORT, Constants.OUTPUT_OP_RESULT_FAIL,
+               e.getMessage());
+      }
+   }
+
    @CliCommand(value = "cluster delete", help = "Delete a cluster")
    public void deleteCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name) {

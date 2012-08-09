@@ -396,6 +396,16 @@ public class ClusterCommandsTest extends MockRestServer {
     }
 
     @Test
+    public void testExportClusterSpec() throws Exception {
+       ObjectMapper mapper = new ObjectMapper();
+       ClusterCreate clusterSpec =
+          CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile("samples/cluster_hadoop.spec"));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/hadoop/spec", HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(clusterSpec));
+     clusterCommands.exportClusterSpec("hadoop", null);
+    }
+
+    @Test
     public void testGetClusterFailure() throws Exception {
         BddErrorMessage errorMsg = new BddErrorMessage();
         errorMsg.setMessage("not found");
