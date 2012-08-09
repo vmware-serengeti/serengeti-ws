@@ -358,9 +358,23 @@ public class ClusterCommands implements CommandMarker {
 		ClusterRead cluster = null;
 		try {
 			if (info) {
-				System.out.println("HDFS url: " + hadoopConfiguration.get("fs.default.name"));
-				System.out.println("Job Tracker url: " + hadoopConfiguration.get("mapred.job.tracker"));
-				if(hiveInfo != null){
+				if(name != null){
+					System.out.println("Warning: can't specify option --name and --info at the same time");
+					return;
+				}
+				String fsUrl = hadoopConfiguration.get("fs.default.name");
+				String jtUrl = hadoopConfiguration.get("mapred.job.tracker");
+				if((fsUrl == null || fsUrl.length() == 0 ) && (jtUrl == null || jtUrl.length() == 0)){
+					System.out.println("There is no cluster be targeted now, target cluster first");
+					return;
+				}
+				if(fsUrl != null && fsUrl.length() > 0) {
+					System.out.println("HDFS url: " + fsUrl);
+				}
+				if(jtUrl != null && jtUrl.length() > 0){
+					System.out.println("Job Tracker url: " + jtUrl);
+				}
+				if(hiveInfo != null && hiveInfo.length() > 0){
 					System.out.println("Hive server url: " + hiveInfo);
 				}
 			}
