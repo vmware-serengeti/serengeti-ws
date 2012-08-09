@@ -14,6 +14,7 @@ SERENGETI_HOME="/opt/serengeti"
 SERENGETI_WEBAPP_HOME="#{SERENGETI_HOME}/conf"
 #serengeti webservice properties
 SERENGETI_WEBAPP_CONF="#{SERENGETI_WEBAPP_HOME}/serengeti.properties"
+SERENGETI_CLOUD_MANAGER_CONF="#{SERENGETI_WEBAPP_HOME}/cloud-manager.vsphere.yaml"
 #cookbook related .chef/knife.rb
 CHEF_CONF="#{SERENGETI_HOME}/.chef/knife.rb"
 #serengeti tmp folder
@@ -210,6 +211,10 @@ sed -i "s/vc_user = .*/vc_user = \"#{vcuser}\"/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/vc_pwd = .*/vc_pwd = \"#{updateVCPassword}\"/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/vc_datacenter = .*/#{vcdatacenterline}/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/template_id = .*/#{templateid}/" "#{SERENGETI_WEBAPP_CONF}"
+
+echo "vc_addr: #{h["evs_IP"]}" > "#{SERENGETI_CLOUD_MANAGER_CONF}"
+echo "vc_user: #{vcuser}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+echo "vc_pwd:  #{updateVCPassword}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
 
 #kill tomcat using shell direclty to avoid failing to stop tomcat
 pidlist=`ps -ef|grep tomcat | grep -v "grep"|awk '{print $2}'`
