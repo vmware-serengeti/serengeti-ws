@@ -71,15 +71,16 @@ public class ClusterCmdUtil {
       AuAssert.check(node == null || !node.isEmpty());
       AuAssert.check(!(node != null && group == null));
 
-      StringBuilder fullName = new StringBuilder();
-      fullName.append(cluster);
-      if (group != null) {
-         fullName.append("-").append(group);
-         if (node != null) {
-            fullName.append("-").append(node);
-         }
+      if (node != null) {
+         return node; // node is already the full name
       }
 
-      return fullName.toString();
+      if (group == null) {
+         return cluster;
+      } else {
+         StringBuilder sb = new StringBuilder();
+         sb.append(cluster).append("-").append(group);
+         return sb.toString();
+      }
    }
 }
