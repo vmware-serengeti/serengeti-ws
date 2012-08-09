@@ -1,0 +1,19 @@
+#!/bin/bash
+
+tty=`eval echo \\\$\${#}` # Last argument
+
+exec </dev/$tty >/dev/$tty 2>&1
+
+stty -echo
+clear
+verrel=`rpm -q --qf '%{VERSION} Build %{RELEASE}\n' serengeti`
+
+echo "VMware Serengeti" $verrel
+MSG_FILE=/opt/serengeti/etc/login_msg
+if [ -f $MSG_FILE ]; then
+   cat $MSG_FILE
+fi
+
+while read c; do
+   exec /sbin/mingetty --noclear  "$@"
+done

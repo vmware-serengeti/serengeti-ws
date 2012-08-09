@@ -173,9 +173,13 @@ public class RestResource {
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void startStopResumeCluster(
          @PathVariable("clusterName") String clusterName,
-         @RequestParam(value="state", required = false) String state,
+         @RequestParam(value="state", required = true) String state,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
+      if (clusterName == null || clusterName.isEmpty()) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+
       Long taskId;
       if (state.equals("stop")) {
          taskId = clusterMgr.stopCluster(clusterName);
@@ -191,7 +195,70 @@ public class RestResource {
       }
    }
 
-   @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}", method = RequestMethod.PUT)
+   @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}",
+         method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.ACCEPTED)
+   public void startStopNodeGroup(
+         @PathVariable("clusterName") String clusterName,
+         @PathVariable("groupName") String groupName,
+         @RequestParam(value="state", required = true) String state,
+         HttpServletRequest request, HttpServletResponse response)
+         throws Exception {
+      if (clusterName == null || clusterName.isEmpty()) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+
+      if (groupName == null || groupName.isEmpty()) {
+         throw BddException.INVALID_PARAMETER("node group name", groupName);
+      }
+
+      Long taskId;
+      if (state.equals("stop")) {
+         taskId = clusterMgr.stopNodeGroup(clusterName, groupName);
+         redirectRequest(taskId, request, response);
+      } else if (state.equals("start")) {
+         taskId = clusterMgr.startNodeGroup(clusterName, groupName);
+         redirectRequest(taskId, request, response);
+      } else {
+         throw BddException.INVALID_PARAMETER("node group state", state);
+      }
+   }
+
+   @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}/node/{nodeName}",
+         method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.ACCEPTED)
+   public void startStopNode(
+         @PathVariable("clusterName") String clusterName,
+         @PathVariable("groupName") String groupName,
+         @PathVariable("nodeName") String nodeName,
+         @RequestParam(value="state", required = true) String state,
+         HttpServletRequest request, HttpServletResponse response)
+         throws Exception {
+      if (clusterName == null || clusterName.isEmpty()) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+
+      if (groupName == null || groupName.isEmpty()) {
+         throw BddException.INVALID_PARAMETER("node group name", groupName);
+      }
+
+      if (nodeName == null || nodeName.isEmpty()) {
+         throw BddException.INVALID_PARAMETER("node name", nodeName);
+      }
+
+      Long taskId;
+      if (state.equals("stop")) {
+         taskId = clusterMgr.stopNode(clusterName, groupName, nodeName);
+         redirectRequest(taskId, request, response);
+      } else if (state.equals("start")) {
+         taskId = clusterMgr.startNode(clusterName, groupName, nodeName);
+         redirectRequest(taskId, request, response);
+      } else {
+         throw BddException.INVALID_PARAMETER("node state", state);
+      }
+   }
+
+   @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}/instancenum", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void resizeCluster(@PathVariable("clusterName") String clusterName,
          @PathVariable("groupName") String groupName,

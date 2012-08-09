@@ -89,7 +89,7 @@ public class ClusterRestClient {
    public void resize(String clusterName, String nodeGroup, int instanceNum) {
       final String path =
             Constants.REST_PATH_CLUSTER + "/" + clusterName + "/"
-                  + Constants.REST_PATH_NODEGROUP + "/" + nodeGroup;
+                  + Constants.REST_PATH_NODEGROUP + "/" + nodeGroup + "/instancenum";
       final HttpMethod httpverb = HttpMethod.PUT;
 
       PrettyOutput outputCallBack = getClusterPrettyOutputCallBack(this, clusterName);
