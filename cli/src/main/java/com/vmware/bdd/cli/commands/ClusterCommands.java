@@ -312,7 +312,7 @@ public class ClusterCommands implements CommandMarker {
          String fullNodeName = autoCompleteNodeName(clusterName, nodeGroupName, nodeName);
          String resource = getClusterResourceName(clusterName, nodeGroupName, fullNodeName);
          if (resource != null) {
-            restClient.actionOps(resource, queryStrings);
+            restClient.actionOps(resource, clusterName, queryStrings);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
                   Constants.OUTPUT_OP_RESULT_START);
          }
@@ -336,7 +336,7 @@ public class ClusterCommands implements CommandMarker {
          String fullNodeName = autoCompleteNodeName(clusterName, nodeGroupName, nodeName);
          String resource = getClusterResourceName(clusterName, nodeGroupName, fullNodeName);
          if (resource != null) {
-            restClient.actionOps(resource, queryStrings);
+            restClient.actionOps(resource, clusterName, queryStrings);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
                   Constants.OUTPUT_OP_RESULT_STOP);
          }

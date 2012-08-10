@@ -78,12 +78,16 @@ public class ClusterRestClient {
             false);
    }
 
-   public void actionOps(String id, Map<String, ?> queryStrings) {
+   public void actionOps(String id, String callbackId, Map<String, ?> queryStrings) {
       final String path = Constants.REST_PATH_CLUSTER;
       final HttpMethod httpverb = HttpMethod.PUT;
 
-      PrettyOutput outputCallBack = getClusterPrettyOutputCallBack(this, id);
+      PrettyOutput outputCallBack = getClusterPrettyOutputCallBack(this, callbackId);
       restClient.actionOps(id, path, httpverb, queryStrings, outputCallBack);
+   }
+
+   public void actionOps(String id, Map<String, ?> queryStrings) {
+      actionOps(id, id, queryStrings);
    }
 
    public void resize(String clusterName, String nodeGroup, int instanceNum) {
