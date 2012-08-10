@@ -87,7 +87,7 @@ public class ConnectionCommands implements CommandMarker {
       int k = 0;
       String enter = "";
       while (k < 3) {
-         System.out.println(msg);
+         System.out.print(msg);
          enter = readEnter(msg, promptType);
          if (!CommandsUtils.isBlank(enter)) {
             if (promptType == PromptType.USER_NAME) {

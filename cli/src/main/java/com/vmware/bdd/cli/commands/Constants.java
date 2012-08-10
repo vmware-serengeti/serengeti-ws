@@ -181,8 +181,8 @@ public class Constants {
    public static final String CONNECT_USER_NAME = "The user name";
    public static final String CONNECT_PASSWORD = "The password";
    public static final String CONNECT_CAN_NOT_BE_NULL = " can not be null!";
-   public static final String CONNECT_ENTER_USER_NAME = "Please enter the user name!";
-   public static final String CONNECT_ENTER_PASSWORD = "Please enter the password!";
+   public static final String CONNECT_ENTER_USER_NAME = "Please enter the user name: ";
+   public static final String CONNECT_ENTER_PASSWORD = "Please enter the password: ";
    public static final String CONNECT_CHECK_LOGIN = "You are not login, please run connect first!";
    public static final String CONNECT_SESSION_TIME_OUT = "Session timeout, please run connect again!";
 }
