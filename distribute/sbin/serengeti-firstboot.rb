@@ -139,6 +139,7 @@ echo ${clijarname}
 #touch serengeti cli bash
 chown serengeti:serengeti "#{SERENGETI_CLI_HOME}" -R #
 touch "#{SERENGETI_SCRIPTS_HOME}/serengeti"
+chown serengeti:serengeti "#{SERENGETI_SCRIPTS_HOME}/serengeti"
 chmod +x "#{SERENGETI_SCRIPTS_HOME}/serengeti"
 echo "#!/bin/bash" > "#{SERENGETI_SCRIPTS_HOME}/serengeti"
 echo "clijarname=${clijarfullname##*\/}" >> "#{SERENGETI_SCRIPTS_HOME}/serengeti"
