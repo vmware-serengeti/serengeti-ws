@@ -1074,7 +1074,7 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private void createDefalutFile(ClusterCreate cluster) {
-      String origFile = "cli-default-cluster.json";
+      String origFile = "default_hadoop_cluster.json";
       String destFile = System.getProperty("user.home") + "/" + cluster.getName() + ".json";
       StringBuilder createDefalutFileMsgBuffer = new StringBuilder();
       try {

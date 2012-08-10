@@ -201,7 +201,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.NO_CONTENT, "");
 
-        clusterCommands.createCluster("cluster1", null, "HADOOP", "samples/cluster_hadoop.spec", null, null, null, false, false, false);
+        clusterCommands.createCluster("cluster1", null, "HADOOP", "hadoop_cluster.json", null, null, null, false, false, false);
     }
 
     @Test
@@ -242,7 +242,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.NO_CONTENT, "");
 
-        clusterCommands.createCluster("cluster1", null, "HADOOP", "samples/cluster_hadoop.spec", null, null, null, false, false, false);
+        clusterCommands.createCluster("cluster1", null, "HADOOP", "hadoop_cluster.json", null, null, null, false, false, false);
     }
 
     @Test
@@ -399,7 +399,7 @@ public class ClusterCommandsTest extends MockRestServer {
     public void testExportClusterSpec() throws Exception {
        ObjectMapper mapper = new ObjectMapper();
        ClusterCreate clusterSpec =
-          CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile("samples/cluster_hadoop.spec"));
+          CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile(this.getClass().getResource("/hadoop_cluster.json").getPath()));
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/hadoop/spec", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(clusterSpec));
      clusterCommands.exportClusterSpec("hadoop", null);
@@ -453,16 +453,16 @@ public class ClusterCommandsTest extends MockRestServer {
 
       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/config", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
-      clusterCommands.configCluster("cluster1", "samples/cluster_hadoop.spec", false, false);
+      clusterCommands.configCluster("cluster1", "hadoop_cluster.json", false, false);
    }
 
    @Test
    public void testParseClusterSpec() {
      try {
-        String[] specFiles = { "samples/cluster_hadoop.spec", "samples/cluster_hbase.spec" };
+        String[] specFiles = { "hadoop_cluster.json", "hbase_cluster.json" };
         for (String specFile : specFiles) {
            ClusterCreate clusterSpec = CommandsUtils.getObjectByJsonString(
-                 ClusterCreate.class, CommandsUtils.dataFromFile(specFile));
+                 ClusterCreate.class, CommandsUtils.dataFromFile(this.getClass().getResource("/" + specFile).getPath()));
            List<String> errors = new ArrayList<String>();
            boolean valid = clusterSpec.validateNodeGroupPlacementPolicies(errors);
            Assert.assertTrue(valid, errors.toString());
