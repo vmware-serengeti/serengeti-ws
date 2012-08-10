@@ -15,12 +15,13 @@
       <intercept-url pattern="/**" access="IS_AUTHENTICATED_FULLY"/>
 
       <form-login login-page="/login.jsp" 
-         authentication-failure-url="/login.jsp?login_error=1"
-         authentication-success-handler-ref="noRedirectHandler"/>
+         authentication-failure-handler-ref="noRedirectFailureHandler"
+         authentication-success-handler-ref="noRedirectSuccessHandler"/>
       <logout invalidate-session="true"/>
    </http>
 
-   <beans:bean id="noRedirectHandler" class="com.vmware.bdd.rest.NoRedirectHandler"/>
+   <beans:bean id="noRedirectSuccessHandler" class="com.vmware.bdd.rest.NoRedirectSuccessHandler"/>
+   <beans:bean id="noRedirectFailureHandler" class="com.vmware.bdd.rest.NoRedirectFailureHandler"/>
    <beans:bean id="restAuthenticationEntryPoint" class="com.vmware.bdd.rest.RestAuthenticationEntryPoint"/>
 
    <authentication-manager alias="authenticationManager">

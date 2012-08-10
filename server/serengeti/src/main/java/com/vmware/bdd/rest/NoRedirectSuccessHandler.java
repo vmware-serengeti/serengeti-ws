@@ -24,8 +24,8 @@ import org.apache.log4j.Logger;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
-public class NoRedirectHandler implements AuthenticationSuccessHandler {
-   private static final Logger logger = Logger.getLogger(NoRedirectHandler.class);
+public class NoRedirectSuccessHandler implements AuthenticationSuccessHandler {
+   private static final Logger logger = Logger.getLogger(NoRedirectSuccessHandler.class);
    @Override
    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
            Authentication authentication) throws ServletException, IOException {

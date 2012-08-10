@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatus.Series;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
@@ -47,7 +48,12 @@ public class RestErrorHandler implements ResponseErrorHandler {
    }
 
    public void handleError(ClientHttpResponse response) throws IOException {
-      throw new CliRestException(delegate.extractData(response).getMessage());
+      MediaType contentType = response.getHeaders().getContentType();
+      if (contentType == MediaType.APPLICATION_JSON) {
+         throw new CliRestException(delegate.extractData(response).getMessage());
+      } else {
+         HttpStatus statusCode = response.getStatusCode();
+         throw new CliRestException(statusCode, statusCode.getReasonPhrase());
+      }
    }
-   
 }
