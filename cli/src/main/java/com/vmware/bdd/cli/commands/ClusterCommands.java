@@ -309,7 +309,8 @@ public class ClusterCommands implements CommandMarker {
 
       //rest invocation
       try {
-         String resource = getClusterResourceName(clusterName, nodeGroupName, nodeName);
+         String fullNodeName = autoCompleteNodeName(clusterName, nodeGroupName, nodeName);
+         String resource = getClusterResourceName(clusterName, nodeGroupName, fullNodeName);
          if (resource != null) {
             restClient.actionOps(resource, queryStrings);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
@@ -332,7 +333,8 @@ public class ClusterCommands implements CommandMarker {
 
       //rest invocation
       try {
-         String resource = getClusterResourceName(clusterName, nodeGroupName, nodeName);
+         String fullNodeName = autoCompleteNodeName(clusterName, nodeGroupName, nodeName);
+         String resource = getClusterResourceName(clusterName, nodeGroupName, fullNodeName);
          if (resource != null) {
             restClient.actionOps(resource, queryStrings);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
@@ -539,6 +541,16 @@ public class ClusterCommands implements CommandMarker {
       }
 
       return res.toString();
+   }
+
+   private String autoCompleteNodeName(String cluster, String group, String node) {
+      assert cluster != null;
+      if (group != null && node != null && node.indexOf("-") == -1) {
+         StringBuilder sb = new StringBuilder();
+         sb.append(cluster).append("-").append(group).append("-").append(node);
+         return sb.toString();
+      }
+      return node;
    }
 
    private void resumeCreateCluster(final String name) {
