@@ -78,9 +78,9 @@ public class TestVcProviderManager {
 
    @Test(groups = {"testVCProvider"}, dependsOnMethods = { "com.vmware.bdd.manager.TestClusterManager.testDeleteClusterNegative" })
    public void testDefaultValue() {
-      System.out.println("password: " + mgr.getAdminPassword());
-      Assert.assertTrue("password should not be empty.",
-            mgr.getAdminPassword() != null);
+      System.out.println("datacenter: " + mgr.getDataCenter());
+      Assert.assertTrue("datacenter should not be empty.",
+            mgr.getDataCenter() != null);
    }
 
    @Test(groups = {"testVCProvider"}, dependsOnMethods = { "testDefaultValue" })

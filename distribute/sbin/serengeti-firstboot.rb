@@ -208,9 +208,6 @@ system <<EOF
 
 #update serengeti.properties for web service
 sed -i "s/distro_root =.*/#{distroip}/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/vc_addr = .*/vc_addr = \"#{h["evs_IP"]}\"/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/vc_user = .*/vc_user = \"#{vcuser}\"/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/vc_pwd = .*/vc_pwd = \"#{updateVCPassword}\"/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/vc_datacenter = .*/#{vcdatacenterline}/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/template_id = .*/#{templateid}/" "#{SERENGETI_WEBAPP_CONF}"
 
