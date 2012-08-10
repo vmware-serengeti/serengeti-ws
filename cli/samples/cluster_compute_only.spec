@@ -1,5 +1,5 @@
 {
-  "externalHDFS" : "hdfs://hostofnamenode:8020",
+  "externalHDFS" : "hdfs://host-of-namenode:8020",
   "nodeGroups":[
     {
       "name": "master",
@@ -19,7 +19,7 @@
       ],
       "instanceNum": 4,
       "cpuNum": 2,
-      "memCapacityMB": 1024,	
+      "memCapacityMB": 1024,
       "storage": {
         "type": "LOCAL",
         "sizeGB": 10

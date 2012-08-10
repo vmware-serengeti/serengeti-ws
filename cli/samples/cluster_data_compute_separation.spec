@@ -19,7 +19,7 @@
       ],
       "instanceNum": 4,
       "cpuNum": 2,
-      "memCapacityMB": 1024,	
+      "memCapacityMB": 1024,
       "storage": {
         "type": "LOCAL",
         "sizeGB": 10
@@ -39,7 +39,7 @@
       ],
       "instanceNum": 8,
       "cpuNum": 2,
-      "memCapacityMB": 1024,	
+      "memCapacityMB": 1024,
       "storage": {
         "type": "LOCAL",
         "sizeGB": 10
