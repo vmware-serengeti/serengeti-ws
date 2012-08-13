@@ -236,7 +236,7 @@ fi
 /etc/init.d/tomcat start
 
 #serengeti cli connect first
-connecthost="connect --host localhost:8080"
+connecthost="connect --host localhost:8080 --userName serengeti --password password"
 su - "#{SERENGETI_USER}" -c "#{SERENGETI_SCRIPTS_HOME}/serengeti \\"${connecthost}\\""
 
 #add default resourcepool, datastore, and dhcp network
