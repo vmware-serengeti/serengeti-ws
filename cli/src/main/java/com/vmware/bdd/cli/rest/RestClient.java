@@ -152,10 +152,10 @@ public class RestClient {
          logout(Constants.REST_PATH_LOGOUT, String.class);
       } catch (CliRestException cliRestException) {
          if (cliRestException.getStatus() == HttpStatus.UNAUTHORIZED) {
-            //ignore
+            writeCookieInfo("");
          }
       } catch (Exception e) {
-         System.out.println(Constants.DISCONNECT_FAILURE + ":" + e);
+         System.out.println(Constants.DISCONNECT_FAILURE + ":" + e.getMessage());
       }
    }
 
@@ -167,7 +167,7 @@ public class RestClient {
       CommandsUtils.writePropertise(propertise, propertiseFile);
    }
 
-   private String readCookieInfo() { 
+   private String readCookieInfo() {
       String cookieValue = "";
       cookieValue = CookieCache.get("Cookie");
       if (CommandsUtils.isBlank(cookieValue)){
