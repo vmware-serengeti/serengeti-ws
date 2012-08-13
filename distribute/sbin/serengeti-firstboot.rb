@@ -120,7 +120,7 @@ system <<EOF
 sed -i "s/chef_server_url.*/#{fqdn_url}/" "#{CHEF_CONF}" #update CHEF_URL
 
 # link ~/.chef to /opt/serengeti/.chef so knife can be run in any directory
-ln -sf $SERENGETI_HOME/.chef /home/serengeti/.chef
+ln -sf "#{SERENGETI_HOME}/.chef" /home/serengeti/.chef
 chown -h serengeti:serengeti /home/serengeti/.chef
 chmod 755 /home/serengeti/.chef
 
@@ -236,7 +236,7 @@ fi
 /etc/init.d/tomcat start
 
 #serengeti cli connect first
-connecthost="connect --host localhost:8080"
+connecthost="connect --host localhost:8080 --userName serengeti --password password"
 su - "#{SERENGETI_USER}" -c "#{SERENGETI_SCRIPTS_HOME}/serengeti \\"${connecthost}\\""
 
 #add default resourcepool, datastore, and dhcp network
