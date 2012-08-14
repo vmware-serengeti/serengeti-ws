@@ -49,6 +49,8 @@ public class ClusterRead {
 
    private boolean nodeGroupSorted;
 
+   private boolean isDefault;
+
    public ClusterRead() {
 
    }
@@ -100,6 +102,14 @@ public class ClusterRead {
 
    public void setStatus(ClusterStatus status) {
       this.status = status;
+   }
+
+   public boolean isDefault() {
+      return isDefault;
+   }
+
+   public void setDefault(boolean isDefault) {
+      this.isDefault = isDefault;
    }
 
    public List<NodeGroupRead> getNodeGroups() {

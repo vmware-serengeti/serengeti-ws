@@ -219,6 +219,7 @@ public class ClusterConfigManager {
                   clusterEntity.setHadoopConfig((new Gson()).toJson(cluster
                         .getConfiguration()));
                }
+               clusterEntity.setDefault(cluster.isDefault());
                expandNodeGroupCreates(cluster, gson, clusterEntity, distro);
                clusterEntity.insert();
                logger.debug("finished to add cluster config for " + name);

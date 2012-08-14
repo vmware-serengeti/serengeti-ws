@@ -166,6 +166,7 @@ public class ClusterCommands implements CommandMarker {
                      Constants.PARAM_CLUSTER_SPEC_HA_ERROR + specFilePath);
                return;
             }
+            clusterCreate.setDefault(false);
          }
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CREATE,
@@ -220,7 +221,7 @@ public class ClusterCommands implements CommandMarker {
          }
          restClient.create(clusterCreate);
          if (specFilePath == null) {
-            createDefalutFile(clusterCreate);
+            createDefalutFile(clusterCreate.getName());
          }
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_RESULT_CREAT);
       } catch (CliRestException e) {
@@ -544,9 +545,13 @@ public class ClusterCommands implements CommandMarker {
             Constants.QUERY_ACTION_RESUME);
 
       try {
+         ClusterRead cluster=restClient.get(name);
          restClient.actionOps(name, queryStrings);
+         if (cluster != null && cluster.isDefault()) {
+            createDefalutFile(name);
+         }
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
-               Constants.OUTPUT_OP_RESULT_RESUME);
+               Constants.OUTPUT_OP_RESULT_RESUME); 
       } catch (CliRestException e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_RESUME, Constants.OUTPUT_OP_RESULT_FAIL,
@@ -1064,14 +1069,14 @@ public class ClusterCommands implements CommandMarker {
       return true;
    }
 
-   private void createDefalutFile(ClusterCreate cluster) {
+   private void createDefalutFile(String clusterName) {
       String origFile = "default_hadoop_cluster.json";
-      String destFile = System.getProperty("user.home") + "/" + cluster.getName() + ".json";
+      String destFile = System.getProperty("user.home") + "/" + clusterName + ".json";
       StringBuilder createDefalutFileMsgBuffer = new StringBuilder();
       try {
          CommonUtil.copyFile(origFile, destFile);
          createDefalutFileMsgBuffer.append("Please use the spec file '").append(destFile)
-               .append("' created for cluster ").append(cluster.getName()).append(" for further operations.");
+               .append("' created for cluster ").append(clusterName).append(" for further operations.");
          System.out.println(createDefalutFileMsgBuffer.toString());
       } catch (IOException e) {
          CommonUtil.deleteFile(destFile);

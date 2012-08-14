@@ -96,6 +96,9 @@ public class ClusterEntity extends EntityBase {
    @Type(type = "text")
    private String hadoopConfig;
 
+   @Column(name = "is_default")
+   private boolean isDefault;
+
    ClusterEntity() {
 
    }
@@ -226,6 +229,14 @@ public class ClusterEntity extends EntityBase {
       this.hadoopConfig = hadoopConfig;
    }
 
+   public boolean isDefault() {
+      return isDefault;
+   }
+
+   public void setDefault(boolean isDefault) {
+      this.isDefault = isDefault;
+   }
+
    public ClusterRead toClusterRead() {
       ClusterRead clusterRead = new ClusterRead();
       clusterRead.setInstanceNum(this.getRealInstanceNum());
@@ -252,6 +263,7 @@ public class ClusterEntity extends EntityBase {
             }
          }
       }
+      clusterRead.setDefault(this.isDefault);
 
       return clusterRead;
    }
