@@ -329,7 +329,6 @@ public class ClusterCommands implements CommandMarker {
          }
 
          String resource = getClusterResourceName(clusterName, groupName, fullNodeName);
-         System.out.println("resource: " + resource);
          if (resource != null) {
             restClient.actionOps(resource, clusterName, queryStrings);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
@@ -381,7 +380,6 @@ public class ClusterCommands implements CommandMarker {
          }
 
          String resource = getClusterResourceName(clusterName, nodeGroupName, fullNodeName);
-         System.out.println("resource: " + resource);
          if (resource != null) {
             restClient.actionOps(resource, clusterName, queryStrings);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
