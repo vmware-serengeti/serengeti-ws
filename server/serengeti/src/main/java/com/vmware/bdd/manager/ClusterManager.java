@@ -231,11 +231,19 @@ public class ClusterManager {
        spec.setSharedPattern(null);
        spec.setLocalPattern(null);
        spec.setNetworking(null);
+       spec.setRpNames(null);
+       spec.setDsNames(null);
+       spec.setNetworkName(null);
+       spec.setName(null);
+       spec.setDistro(null);
+       spec.setValidateConfig(null);
        NodeGroupCreate[] groups = spec.getNodeGroups();
        if (groups != null) {
           for (NodeGroupCreate group : groups) {
              group.setVcClusters(null);
              group.setGroupType(null);
+             group.setRpNames(null);
+             group.getStorage().setDsNames(null);
              group.getStorage().setNamePattern(null);
           }
        }
