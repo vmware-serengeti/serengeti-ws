@@ -76,7 +76,6 @@ create table cluster (
    network_id   bigint,
    start_after_deploy boolean,
    configuration text,
-   is_default         boolean,
    primary key (id),
    foreign key(network_id) references network(id) ON DELETE CASCADE
 );

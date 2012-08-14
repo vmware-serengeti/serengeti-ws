@@ -187,24 +187,16 @@ public class ClusterCommandsTest extends MockRestServer {
 
     @Test
    public void testResumeCreateCluster() throws Exception {
-      ObjectMapper mapper = new ObjectMapper();
-      ClusterRead cluster = buildClusterRead();
-      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1",
-            HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(cluster));
       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1?state=resume",
             HttpMethod.PUT, HttpStatus.NO_CONTENT, "");
-      clusterCommands.createCluster("cluster1", null, null, null, null, null,
-            true, false, false);
+      clusterCommands.createCluster("cluster1", null, null, null, null, null, true, false, false);
    }
 
     @Test
     public void testResumeCreateClusterFailure() throws Exception {
-        ClusterRead cluster = buildClusterRead();
         BddErrorMessage errorMsg = new BddErrorMessage();
         errorMsg.setMessage("not found");
         ObjectMapper mapper = new ObjectMapper();
-        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1",
-              HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(cluster));
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1?state=resume",
                 HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
@@ -419,49 +411,4 @@ public class ClusterCommandsTest extends MockRestServer {
      }
    }
 
-   private ClusterRead buildClusterRead(){
-      StorageRead sr1 = new StorageRead();
-      sr1.setType("Type1");
-      sr1.setSizeGB(100);
-      StorageRead sr2 = new StorageRead();
-      sr2.setType("Type2");
-      sr2.setSizeGB(200);
-      NodeRead nr1 = new NodeRead();
-      nr1.setHostName("test1.vmware.com");
-      nr1.setIp("10.1.1.99");
-      nr1.setName("node1");
-      nr1.setStatus("running");
-      NodeRead nr2 = new NodeRead();
-      nr2.setHostName("test2.vmware.com");
-      nr2.setIp("10.1.1.100");
-      nr2.setName("node2");
-      nr2.setStatus("running");
-      List<NodeRead> instances1 = new LinkedList<NodeRead>();
-      instances1.add(nr1);
-      instances1.add(nr2);
-      List<String> roles1 = new LinkedList<String>();
-      roles1.add(Constants.ROLE_HADOOP_NAME_NODE);
-      roles1.add(Constants.ROLE_HADOOP_JOB_TRACKER);
-      List<String> roles2 = new LinkedList<String>();
-      roles2.add(Constants.ROLE_HADOOP_DATANODE);
-      roles2.add(Constants.ROLE_HADOOP_TASKTRACKER);
-      NodeGroupRead ngr1 = new NodeGroupRead();
-      ngr1.setName("NodeGroup1");
-      ngr1.setCpuNum(6);
-      ngr1.setMemCapacityMB(2048);
-      ngr1.setStorage(sr1);
-      ngr1.setInstanceNum(1);
-      ngr1.setInstances(instances1);
-      ngr1.setRoles(roles1);
-      ClusterRead cluster = new ClusterRead();
-      cluster.setName("cluster1");
-      cluster.setDistro("distro1");
-      cluster.setInstanceNum(10);
-      cluster.setStatus(ClusterRead.ClusterStatus.RUNNING);
-      cluster.setDefault(true);
-      List<NodeGroupRead> nodeGroupRead1 = new LinkedList<NodeGroupRead>();
-      nodeGroupRead1.add(ngr1);
-      cluster.setNodeGroups(nodeGroupRead1);
-      return cluster;
-   }
 }

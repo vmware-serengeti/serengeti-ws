@@ -69,7 +69,6 @@ public class ClusterCreate {
    private Map<String, Object> configuration;
    private boolean validateConfig = true;
    private ClusterType type = ClusterType.HADOOP;
-   private boolean isDefault = true;
    public ClusterCreate() {
    }
 
@@ -292,14 +291,6 @@ public class ClusterCreate {
          }
       }
       return false;
-   }
-
-   public boolean isDefault() {
-      return isDefault;
-   }
-
-   public void setDefault(boolean isDefault) {
-      this.isDefault = isDefault;
    }
 
 }
