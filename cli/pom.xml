@@ -87,11 +87,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.data.hadoop.impala</groupId>
-			<artifactId>plugin-r</artifactId>
-			<version>${impala.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr-runtime</artifactId>
 			<version>${antlr.version}</version>
