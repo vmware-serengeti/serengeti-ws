@@ -49,7 +49,7 @@ The CLI is built using the [Spring Shell](https://github.com/SpringSource/spring
 
 - Execution of script file: in shell mode or command line mode, execute "script --file scriptFileName". The shell history file named cli.log will help to generate the script file. 
 
-More details can be found at [cli/README.md](https://github.com/vmware-serengeti/serengeti-ws/tree/master/cli). A sample cluster creation specification file can be found at cli/sample.spec.
+More details can be found at [cli/README.md](https://github.com/vmware-serengeti/serengeti-ws/tree/master/cli). Some sample cluster creation specification files can be found at [cli/samples](https://github.com/vmware-serengeti/serengeti-ws/tree/master/cli/samples).
 
 ## Build serengeti webservice and cli
  You need to have maven installed. Please reference our ![Installation Guide] (https://github.com/vmware-serengeti/doc/blob/master/installation_guide_from_source_code.txt) to install maven if you don't have it.

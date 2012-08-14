@@ -69,6 +69,7 @@ public class ClusterCommands implements CommandMarker {
    private HiveCommands hiveCommands;
 
    private String hiveInfo;
+   private String targetClusterName;
 
    private boolean alwaysAnswerYes;
 
@@ -380,8 +381,11 @@ public class ClusterCommands implements CommandMarker {
                System.out.println("There is no cluster be targeted now, target cluster first");
                return;
             }
+            if(targetClusterName != null && targetClusterName.length() > 0){
+               System.out.println("Cluster:         " + targetClusterName);            	
+            }
             if (fsUrl != null && fsUrl.length() > 0) {
-               System.out.println("HDFS url: " + fsUrl);
+               System.out.println("HDFS url:        " + fsUrl);
             }
             if (jtUrl != null && jtUrl.length() > 0) {
                System.out.println("Job Tracker url: " + jtUrl);
@@ -403,6 +407,7 @@ public class ClusterCommands implements CommandMarker {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_TARGET,
                      Constants.OUTPUT_OP_RESULT_FAIL, "No valid target available");
             } else {
+               targetClusterName = cluster.getName();
                for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {
                   for (String role : nodeGroup.getRoles()) {
                      if (role.equals("hadoop_namenode")) {

@@ -94,34 +94,33 @@ public class RestClient {
 
    /**
     * connect to a Serengeti server
-    * 
+    *
     * @param host
     *           host url with optional port
-    * @param userName 
-    *           serengeti login name
+    * @param username
+    *           serengeti login user name
     * @param password
-    *           serengeti password                     
+    *           serengeti password
     */
-   public Connect.ConnectType connect(final String host, final String userName, final String password) {
+   public Connect.ConnectType connect(final String host, final String username, final String password) {
       String oldHostUri = hostUri;
 
-      hostUri =
-            Constants.HTTP_CONNECTION_PREFIX + host
-                  + Constants.HTTP_CONNECTION_LOGIN_SUFFIX;
+      hostUri = Constants.HTTP_CONNECTION_PREFIX + host + Constants.HTTP_CONNECTION_LOGIN_SUFFIX;
 
       try {
-         ResponseEntity<String> response =
-            login(Constants.REST_PATH_LOGIN, String.class, userName,password);
+         ResponseEntity<String> response = login(Constants.REST_PATH_LOGIN, String.class, username, password);
 
-         if (response.getStatusCode() == HttpStatus.OK) {//normal response        
+         if (response.getStatusCode() == HttpStatus.OK) {
+            //normal response
             updateHostproperty(host);
-            String cookieValue=response.getHeaders().getFirst("Set-Cookie");
+            String cookieValue = response.getHeaders().getFirst("Set-Cookie");
             if(cookieValue.contains(";")){
-               cookieValue=cookieValue.split(";")[0];
+               cookieValue = cookieValue.split(";")[0];
             }
             writeCookieInfo(cookieValue);
             System.out.println(Constants.CONNECT_SUCCESS);
-         } else { //error
+         } else {
+            //error
             System.out.println(Constants.CONNECT_FAILURE);
             //recover old hostUri
             hostUri = oldHostUri;
@@ -135,7 +134,7 @@ public class RestClient {
             return Connect.ConnectType.UNAUTHORIZATION;
          }
       } catch (Exception e) {
-         System.out.println(Constants.CONNECT_FAILURE + ":" + e.getCause().getMessage().toLowerCase());
+         System.out.println(Constants.CONNECT_FAILURE + ": " + e.getCause().getMessage().toLowerCase());
          return Connect.ConnectType.ERROR;
       }
       return Connect.ConnectType.SUCCESS;
@@ -200,11 +199,11 @@ public class RestClient {
       return restGetByUri(targetUri, respEntityType);
    }
 
-   private <T> ResponseEntity<T> login(final String path, final Class<T> respEntityType, final String userName, final String password) {
+   private <T> ResponseEntity<T> login(final String path, final Class<T> respEntityType, final String username, final String password) {
       StringBuilder uriBuff = new StringBuilder();
       uriBuff.append(hostUri).append(path);
-      if (!CommandsUtils.isBlank(userName) && !CommandsUtils.isBlank(password)) {
-         uriBuff.append("?").append("j_username=").append(userName).append("&j_password=").append(password);
+      if (!CommandsUtils.isBlank(username) && !CommandsUtils.isBlank(password)) {
+         uriBuff.append("?").append("j_username=").append(username).append("&j_password=").append(password);
       }
       return restPostByUri(uriBuff.toString(), respEntityType);
    }

@@ -47,12 +47,12 @@ public class ConnectionCommands implements CommandMarker {
    @CliCommand(value = "connect", help = "Connect a serengeti server")
    public void conn(
          @CliOption(key = { "host" }, mandatory = true, help = "The serengeti host with optional port number, e.g. hostname:port") final String hostName,
-         @CliOption(key = { "userName" }, mandatory = false, help = "The serengeti user name") final String userName,
+         @CliOption(key = { "username" }, mandatory = false, help = "The serengeti user name") final String username,
          @CliOption(key = { "password" }, mandatory = false, help = "The serengeti password") final String password) {
       Map<String,String> loginInfo = new HashMap<String,String>();
-      loginInfo.put("userName", userName);
+      loginInfo.put("username", username);
       loginInfo.put("password", password);
-      if (CommandsUtils.isBlank(userName)) {
+      if (CommandsUtils.isBlank(username)) {
          if(!prompt(Constants.CONNECT_ENTER_USER_NAME, PromptType.USER_NAME, loginInfo)){
             return ;
          }
@@ -69,7 +69,7 @@ public class ConnectionCommands implements CommandMarker {
       if (count <= 0) {
          return false;
       } else {
-         ConnectType connectType = conn.connect(hostName, loginInfo.get("userName"), loginInfo.get("password"));
+         ConnectType connectType = conn.connect(hostName, loginInfo.get("username"), loginInfo.get("password"));
          if (connectType == ConnectType.UNAUTHORIZATION) {
             if (!prompt(Constants.CONNECT_ENTER_PASSWORD, PromptType.PASSWORD,
                   loginInfo)) {
@@ -91,7 +91,7 @@ public class ConnectionCommands implements CommandMarker {
          enter = readEnter(msg, promptType);
          if (!CommandsUtils.isBlank(enter)) {
             if (promptType == PromptType.USER_NAME) {
-               loginInfo.put("userName", enter);
+               loginInfo.put("username", enter);
             } else {
                loginInfo.put("password", enter);
             }

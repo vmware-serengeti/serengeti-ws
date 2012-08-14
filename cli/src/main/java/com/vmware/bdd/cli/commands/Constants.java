@@ -91,9 +91,9 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_ADD = "added";
    public static final String OUTPUT_OP_NODEGROUP_MISSING = "must specify nodegroup name when node name is specified";
    public static final String OUTPUT_UNKNOWN_HOST = "unknown host";
-   public static final String OUTPUT_HOST_REFUSE = "Connection refused. Please check the port number";
+   public static final String OUTPUT_HOST_REFUSE = "Connection refused. Please check the port number.";
    public static final String OUTPUT_HOST_TIMEOUT = "connection timeout";
-   public static final String OUTPUT_LOG_INFO = "you can get task failure details from serengeti server log at:";
+   public static final String OUTPUT_LOG_INFO = "you can get task failure details from serengeti server log at: ";
 
    public static final String HTTP_CONNECTION_PREFIX = "http://";
    public static final String HTTP_CONNECTION_SUFFIX = "/serengeti/api/";
@@ -171,7 +171,7 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_TASK = "TASK";
    public static final String DEFAULT_DISTRO = "apache";
    public static final String PARAM_NO_DISTRO_AVAILABLE = "no distro available,please upload one distro";
-   public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure to continue (Y/N)? ";
+   public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure you want to continue (Y/N)? ";
    public static final String PARAM_CLUSTER_IN_BLACK_LIST_WARNING =
          "not allowed to customize in Serengeti. Your settings will not take effect.";
    public static final String PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING =
