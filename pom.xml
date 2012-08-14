@@ -12,6 +12,7 @@
 		<module>server/serengeti</module>
 		<module>common</module>
 		<module>cli</module>
+		<module>frontend</module>
 	</modules>
 
 	<dependencyManagement>
