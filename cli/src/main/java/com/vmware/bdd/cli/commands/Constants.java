@@ -171,7 +171,7 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_TASK = "TASK";
    public static final String DEFAULT_DISTRO = "apache";
    public static final String PARAM_NO_DISTRO_AVAILABLE = "no distro available,please upload one distro";
-   public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure to continue (Y/N)? ";
+   public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure you want to continue (Y/N)? ";
    public static final String PARAM_CLUSTER_IN_BLACK_LIST_WARNING =
          "not allowed to customize in Serengeti. Your settings will not take effect.";
    public static final String PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING =
