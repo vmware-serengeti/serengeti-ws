@@ -187,4 +187,8 @@ public class Constants {
    public static final String CONNECT_ENTER_PASSWORD = "Please enter the password: ";
    public static final String CONNECT_CHECK_LOGIN = "You are not login, please run connect first!";
    public static final String CONNECT_SESSION_TIME_OUT = "Session timeout, please run connect again!";
+   public static final String READ_TIME_OUT = "Get input timeout.";
+   public static final String OUTPUT_OBJECT_CONNECT = "connect";
+   public static final int READER_SLEEP_TIME_MILLISECONDS = 200;
+   public static final int MAX_WAITING_LOOP = 1500;
 }
