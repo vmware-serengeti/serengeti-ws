@@ -48,6 +48,7 @@ import com.vmware.bdd.manager.task.StartClusterListener;
 import com.vmware.bdd.manager.task.StopClusterListener;
 import com.vmware.bdd.manager.task.TaskListener;
 import com.vmware.bdd.manager.task.UpdateClusterListener;
+import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ClusterCmdUtil;
 import com.vmware.bdd.utils.ConfigInfo;
@@ -347,9 +348,8 @@ public class ClusterManager {
     public Long startCluster(String clusterName) throws Exception {
         logger.info("ClusterManager, starting cluster " + clusterName);
 
-        ClusterEntity cluster;
-
-        if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+        ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+        if (cluster == null) {
             logger.error("cluster " + clusterName + " does not exist");
             throw BddException.NOT_FOUND("cluster", clusterName);
         }
@@ -371,9 +371,8 @@ public class ClusterManager {
     public Long stopCluster(String clusterName) throws Exception {
         logger.info("ClusterManager, stopping cluster " + clusterName);
 
-        ClusterEntity cluster;
-
-        if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+        ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+        if (cluster == null) {
             logger.error("cluster " + clusterName + " does not exist");
             throw BddException.NOT_FOUND("cluster", clusterName);
         }
@@ -396,16 +395,23 @@ public class ClusterManager {
        logger.info("ClusterManager, starting node group "
              + ClusterCmdUtil.getFullNodeName(clusterName, nodeGroupName, null));
 
-       ClusterEntity cluster;
-
-       if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+       ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+       if (cluster == null) {
            logger.error("cluster " + clusterName + " does not exist");
            throw BddException.NOT_FOUND("cluster", clusterName);
        }
 
-       if (NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName) == null) {
+       NodeGroupEntity group = NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName);
+       if (group == null) {
            logger.error("node group " + nodeGroupName + " does not exist");
            throw BddException.NOT_FOUND("node group", nodeGroupName);
+       }
+       List<String> roles = group.getRoleNameList();
+       AuAssert.check(!roles.isEmpty(), "roles should not be empty");
+       roles.remove(HadoopRole.HADOOP_TASKTRACKER.toString());
+       if (!roles.isEmpty()) {
+          logger.info("can not start node group with role: " + roles);
+          throw ClusterManagerException.ROLES_NOT_SUPPORTED(roles);
        }
 
        StartClusterListener listener = new StartClusterListener(clusterName, nodeGroupName, null);
@@ -417,16 +423,23 @@ public class ClusterManager {
        logger.info("ClusterManager, stopping node group "
              + ClusterCmdUtil.getFullNodeName(clusterName, nodeGroupName, null));
 
-       ClusterEntity cluster;
-
-       if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+       ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+       if (cluster == null) {
            logger.error("cluster " + clusterName + " does not exist");
            throw BddException.NOT_FOUND("cluster", clusterName);
        }
 
-       if (NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName) == null) {
+       NodeGroupEntity group = NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName);
+       if (group == null) {
            logger.error("node group " + nodeGroupName + " does not exist");
            throw BddException.NOT_FOUND("node group", nodeGroupName);
+       }
+       List<String> roles = group.getRoleNameList();
+       AuAssert.check(!roles.isEmpty(), "roles should not be empty");
+       roles.remove(HadoopRole.HADOOP_TASKTRACKER.toString());
+       if (!roles.isEmpty()) {
+          logger.info("can not stop node group with role: " + roles);
+          throw ClusterManagerException.ROLES_NOT_SUPPORTED(roles);
        }
 
        StopClusterListener listener = new StopClusterListener(clusterName, nodeGroupName, null);
@@ -438,17 +451,23 @@ public class ClusterManager {
        logger.info("ClusterManager, starting node "
              + ClusterCmdUtil.getFullNodeName(clusterName, nodeGroupName, nodeName));
 
-       ClusterEntity cluster;
-       NodeGroupEntity group;
-
-       if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+       ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+       if (cluster == null) {
            logger.error("cluster " + clusterName + " does not exist");
            throw BddException.NOT_FOUND("cluster", clusterName);
        }
 
-       if ((group = NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName)) == null) {
+       NodeGroupEntity group = NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName);
+       if (group == null) {
            logger.error("node group " + nodeGroupName + " does not exist");
            throw BddException.NOT_FOUND("node group", nodeGroupName);
+       }
+       List<String> roles = group.getRoleNameList();
+       AuAssert.check(!roles.isEmpty(), "roles should not be empty");
+       roles.remove(HadoopRole.HADOOP_TASKTRACKER.toString());
+       if (!roles.isEmpty()) {
+          logger.info("can not start node with role: " + roles);
+          throw ClusterManagerException.ROLES_NOT_SUPPORTED(roles);
        }
 
        if (HadoopNodeEntity.findByName(group, nodeName) == null) {
@@ -465,17 +484,23 @@ public class ClusterManager {
        logger.info("ClusterManager, stopping node "
              + ClusterCmdUtil.getFullNodeName(clusterName, nodeGroupName, nodeName));
 
-       ClusterEntity cluster;
-       NodeGroupEntity group;
-
-       if ((cluster = ClusterEntity.findClusterEntityByName(clusterName)) == null) {
+       ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+       if (cluster == null) {
            logger.error("cluster " + clusterName + " does not exist");
            throw BddException.NOT_FOUND("cluster", clusterName);
        }
 
-       if ((group = NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName)) == null) {
+       NodeGroupEntity group = NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName);
+       if (group == null) {
            logger.error("node group " + nodeGroupName + " does not exist");
            throw BddException.NOT_FOUND("node group", nodeGroupName);
+       }
+       List<String> roles = group.getRoleNameList();
+       AuAssert.check(!roles.isEmpty(), "roles should not be empty");
+       roles.remove(HadoopRole.HADOOP_TASKTRACKER.toString());
+       if (!roles.isEmpty()) {
+          logger.info("can not stop node with role: " + roles);
+          throw ClusterManagerException.ROLES_NOT_SUPPORTED(roles);
        }
 
        if (HadoopNodeEntity.findByName(group, nodeName) == null) {
@@ -508,6 +533,21 @@ public class ClusterManager {
                logger.error("nodegroup " + nodeGroupName + " of cluster " + clusterName
                      + " does not exist");
                throw ClusterManagerException.NOGEGROUP_NOT_FOUND_ERROR(nodeGroupName);
+            }
+
+            // resize of job tracker and name node is not supported
+            List<String> roles = group.getRoleNameList();
+            List<String> unsupportedRoles = new ArrayList<String>();
+            AuAssert.check(!roles.isEmpty(), "roles should not be empty");
+            if (roles.contains(HadoopRole.HADOOP_NAMENODE_ROLE.toString())) {
+               unsupportedRoles.add(HadoopRole.HADOOP_NAMENODE_ROLE.toString());
+            }
+            if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
+               unsupportedRoles.add(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString());
+            }
+            if (!unsupportedRoles.isEmpty()) {
+               logger.info("can not resize node group with role: " + unsupportedRoles);
+               throw ClusterManagerException.ROLES_NOT_SUPPORTED(unsupportedRoles);
             }
 
            if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {

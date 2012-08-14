@@ -300,8 +300,36 @@ public class ClusterCommands implements CommandMarker {
 
       //rest invocation
       try {
-         String fullNodeName = autoCompleteNodeName(clusterName, nodeGroupName, nodeName);
-         String resource = getClusterResourceName(clusterName, nodeGroupName, fullNodeName);
+         if (!validateNodeGroupName(nodeGroupName)) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+                  Constants.OUTPUT_OP_START, Constants.OUTPUT_OP_RESULT_FAIL,
+                  "invalid node group name");
+            return;
+         }
+         if (!validateNodeName(clusterName, nodeGroupName, nodeName)) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+                  Constants.OUTPUT_OP_START, Constants.OUTPUT_OP_RESULT_FAIL,
+                  "invalid node name");
+            return;
+         }
+         String groupName = nodeGroupName;
+         String fullNodeName = nodeName;
+         if (nodeName != null) {
+            if (nodeGroupName == null) {
+               groupName = extractNodeGroupName(nodeName);
+               if (groupName == null) {
+                  CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+                        Constants.OUTPUT_OP_START, Constants.OUTPUT_OP_RESULT_FAIL,
+                        "missing node group name");
+                  return;
+               }
+            } else {
+               fullNodeName = autoCompleteNodeName(clusterName, nodeGroupName, nodeName);
+            }
+         }
+
+         String resource = getClusterResourceName(clusterName, groupName, fullNodeName);
+         System.out.println("resource: " + resource);
          if (resource != null) {
             restClient.actionOps(resource, clusterName, queryStrings);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
@@ -324,8 +352,36 @@ public class ClusterCommands implements CommandMarker {
 
       //rest invocation
       try {
-         String fullNodeName = autoCompleteNodeName(clusterName, nodeGroupName, nodeName);
+         if (!validateNodeGroupName(nodeGroupName)) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+                  Constants.OUTPUT_OP_STOP, Constants.OUTPUT_OP_RESULT_FAIL,
+                  "invalid node group name");
+            return;
+         }
+         if (!validateNodeName(clusterName, nodeGroupName, nodeName)) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+                  Constants.OUTPUT_OP_STOP, Constants.OUTPUT_OP_RESULT_FAIL,
+                  "invalid node name");
+            return;
+         }
+         String groupName = nodeGroupName;
+         String fullNodeName = nodeName;
+         if (nodeName != null) {
+            if (nodeGroupName == null) {
+               groupName = extractNodeGroupName(nodeName);
+               if (groupName == null) {
+                  CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+                        Constants.OUTPUT_OP_STOP, Constants.OUTPUT_OP_RESULT_FAIL,
+                        "missing node group name");
+                  return;
+               }
+            } else {
+               fullNodeName = autoCompleteNodeName(clusterName, nodeGroupName, nodeName);
+            }
+         }
+
          String resource = getClusterResourceName(clusterName, nodeGroupName, fullNodeName);
+         System.out.println("resource: " + resource);
          if (resource != null) {
             restClient.actionOps(resource, clusterName, queryStrings);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
@@ -528,14 +584,56 @@ public class ClusterCommands implements CommandMarker {
       return res.toString();
    }
 
+   private boolean validateNodeName(String cluster, String group, String node) {
+      if (node != null) {
+         String[] parts = node.split("-");
+         if (parts.length == 1) {
+            return true;
+         }
+         if (parts.length == 3) {
+            if (!parts[0].equals(cluster)) {
+               return false;
+            }
+            if (group != null && !parts[1].equals(group)) {
+               return false;
+            }
+            return true;
+         }
+         return false;
+      }
+
+      return true;
+   }
+
+   private boolean validateNodeGroupName(String group) {
+      if (group != null) {
+         return group.indexOf("-") == -1;
+      }
+
+      return true;
+   }
+
    private String autoCompleteNodeName(String cluster, String group, String node) {
       assert cluster != null;
-      if (group != null && node != null && node.indexOf("-") == -1) {
+      assert group != null;
+      assert node != null;
+
+      if (node.indexOf("-") == -1) {
          StringBuilder sb = new StringBuilder();
          sb.append(cluster).append("-").append(group).append("-").append(node);
          return sb.toString();
       }
+
       return node;
+   }
+
+   private String extractNodeGroupName(String node) {
+      String[] parts = node.split("-");
+
+      if (parts.length == 3) {
+         return parts[1];
+      }
+      return null;
    }
 
    private void resumeCreateCluster(final String name) {
