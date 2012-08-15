@@ -46,7 +46,7 @@ public class CliBannerProvider extends DefaultBannerProvider implements CommandM
 		buf.append("*                             |___/             *" + StringUtils.LINE_SEPARATOR);
 		buf.append("*                                               *" + StringUtils.LINE_SEPARATOR);
 		buf.append("=================================================" + StringUtils.LINE_SEPARATOR);
-		buf.append("Verson:" + this.getVersion());
+		buf.append("Version: " + this.getVersion());
 		return buf.toString();
 
 	}
