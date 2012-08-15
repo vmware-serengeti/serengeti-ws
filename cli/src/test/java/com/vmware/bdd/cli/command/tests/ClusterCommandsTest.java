@@ -186,18 +186,17 @@ public class ClusterCommandsTest extends MockRestServer {
     }
 
     @Test
-    public void testResumeCreateCluster() throws Exception {
-        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1?state=resume",
-                HttpMethod.PUT, HttpStatus.NO_CONTENT, "");
-        clusterCommands.createCluster("cluster1", null, null, null, null, null, true, false, false);
-    }
+   public void testResumeCreateCluster() throws Exception {
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1?state=resume",
+            HttpMethod.PUT, HttpStatus.NO_CONTENT, "");
+      clusterCommands.createCluster("cluster1", null, null, null, null, null, true, false, false);
+   }
 
     @Test
     public void testResumeCreateClusterFailure() throws Exception {
         BddErrorMessage errorMsg = new BddErrorMessage();
         errorMsg.setMessage("not found");
         ObjectMapper mapper = new ObjectMapper();
-
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1?state=resume",
                 HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
@@ -411,4 +410,5 @@ public class ClusterCommandsTest extends MockRestServer {
         Assert.fail("failed to parse cluster spec", e);
      }
    }
+
 }

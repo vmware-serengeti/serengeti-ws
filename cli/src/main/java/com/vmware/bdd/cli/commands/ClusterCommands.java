@@ -14,7 +14,6 @@
  ****************************************************************************/
 package com.vmware.bdd.cli.commands;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -48,7 +47,6 @@ import com.vmware.bdd.cli.rest.DistroRestClient;
 import com.vmware.bdd.cli.rest.NetworkRestClient;
 import com.vmware.bdd.utils.AppConfigValidationUtils;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
-import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ValidateResult;
 
 @Component
@@ -69,6 +67,7 @@ public class ClusterCommands implements CommandMarker {
    private HiveCommands hiveCommands;
 
    private String hiveInfo;
+   private String targetClusterName;
 
    private boolean alwaysAnswerYes;
 
@@ -219,9 +218,6 @@ public class ClusterCommands implements CommandMarker {
             return;
          }
          restClient.create(clusterCreate);
-         if (specFilePath == null) {
-            createDefalutFile(clusterCreate);
-         }
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_RESULT_CREAT);
       } catch (CliRestException e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CREATE,
@@ -254,7 +250,7 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   @CliCommand(value = "cluster export spec", help = "Export cluster specification")
+   @CliCommand(value = "cluster export --spec", help = "Export cluster specification")
    public void exportClusterSpec(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
          @CliOption(key = { "output" }, mandatory = false, help = "The output file name") final String fileName) {
@@ -433,8 +429,11 @@ public class ClusterCommands implements CommandMarker {
                System.out.println("There is no cluster be targeted now, target cluster first");
                return;
             }
+            if(targetClusterName != null && targetClusterName.length() > 0){
+               System.out.println("Cluster:         " + targetClusterName);            	
+            }
             if (fsUrl != null && fsUrl.length() > 0) {
-               System.out.println("HDFS url: " + fsUrl);
+               System.out.println("HDFS url:        " + fsUrl);
             }
             if (jtUrl != null && jtUrl.length() > 0) {
                System.out.println("Job Tracker url: " + jtUrl);
@@ -456,6 +455,7 @@ public class ClusterCommands implements CommandMarker {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_TARGET,
                      Constants.OUTPUT_OP_RESULT_FAIL, "No valid target available");
             } else {
+               targetClusterName = cluster.getName();
                for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {
                   for (String role : nodeGroup.getRoles()) {
                      if (role.equals("hadoop_namenode")) {
@@ -1158,20 +1158,6 @@ public class ClusterCommands implements CommandMarker {
          }
       }
       return true;
-   }
-
-   private void createDefalutFile(ClusterCreate cluster) {
-      String origFile = "default_hadoop_cluster.json";
-      String destFile = System.getProperty("user.home") + "/" + cluster.getName() + ".json";
-      StringBuilder createDefalutFileMsgBuffer = new StringBuilder();
-      try {
-         CommonUtil.copyFile(origFile, destFile);
-         createDefalutFileMsgBuffer.append("Please use the spec file '").append(destFile)
-               .append("' created for cluster ").append(cluster.getName()).append(" for further operations.");
-         System.out.println(createDefalutFileMsgBuffer.toString());
-      } catch (IOException e) {
-         CommonUtil.deleteFile(destFile);
-      }
    }
 
    private boolean isHAFlag(NodeGroupCreate nodeGroupCreate) {

@@ -67,9 +67,8 @@ public class ClusterCreate {
    @Expose
    @SerializedName("cluster_configuration")
    private Map<String, Object> configuration;
-   private boolean validateConfig = true;
+   private Boolean validateConfig = true;
    private ClusterType type = ClusterType.HADOOP;
-
    public ClusterCreate() {
    }
 
@@ -211,11 +210,11 @@ public class ClusterCreate {
       this.localPattern = localPattern;
    }
 
-   public boolean isValidateConfig() {
+   public Boolean isValidateConfig() {
       return validateConfig;
    }
 
-   public void setValidateConfig(boolean validateConfig) {
+   public void setValidateConfig(Boolean validateConfig) {
       this.validateConfig = validateConfig;
    }
 
@@ -293,4 +292,5 @@ public class ClusterCreate {
       }
       return false;
    }
+
 }

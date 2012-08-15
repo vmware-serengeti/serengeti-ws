@@ -14,7 +14,9 @@
  ****************************************************************************/
 package com.vmware.bdd.cli.commands;
 
-import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +30,7 @@ import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
 import com.vmware.bdd.apitypes.Connect.ConnectType;
+import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.RestClient;
 
 @Component
@@ -52,17 +55,29 @@ public class ConnectionCommands implements CommandMarker {
       Map<String,String> loginInfo = new HashMap<String,String>();
       loginInfo.put("username", username);
       loginInfo.put("password", password);
-      if (CommandsUtils.isBlank(username)) {
-         if(!prompt(Constants.CONNECT_ENTER_USER_NAME, PromptType.USER_NAME, loginInfo)){
-            return ;
+      try {
+         if (CommandsUtils.isBlank(username)) {
+            if(!prompt(Constants.CONNECT_ENTER_USER_NAME, PromptType.USER_NAME, loginInfo)){
+               return ;
+            }
          }
-      }
-      if (CommandsUtils.isBlank(password)) {
-         if(!prompt(Constants.CONNECT_ENTER_PASSWORD, PromptType.PASSWORD, loginInfo)){
-            return ;
+         if (CommandsUtils.isBlank(password)) {
+            if(!prompt(Constants.CONNECT_ENTER_PASSWORD, PromptType.PASSWORD, loginInfo)){
+               return ;
+            }
          }
+         connect(hostName, loginInfo, 3);
+      } catch (CliRestException e) {
+         System.out.println();
+         printConnectionFailure(e.getMessage());
+      } catch (Exception e) {
+         printConnectionFailure(e.getMessage());
       }
-      connect(hostName, loginInfo, 3);
+   }
+
+   private static void printConnectionFailure(String message) {
+      System.out.println(Constants.OUTPUT_OBJECT_CONNECT + " " 
+            + Constants.OUTPUT_OP_RESULT_FAIL + " " + message);
    }
 
    private boolean connect(final String hostName, final Map<String,String> loginInfo, int count) {
@@ -113,18 +128,29 @@ public class ConnectionCommands implements CommandMarker {
 
    private String readEnter(String msg,PromptType promptType){
       String enter="";
+      BufferedReader br = null;
       try {
-         ConsoleReader reader = new ConsoleReader();;
-         if (promptType == PromptType.USER_NAME){
+         br = new BufferedReader(new InputStreamReader(System.in));
+         ConsoleReader reader = new ConsoleReader(System.in, new PrintWriter(System.out));
+         int times = 0;
+         while (!br.ready() && times < Constants.MAX_WAITING_LOOP) {
+            Thread.currentThread().sleep(Constants.READER_SLEEP_TIME_MILLISECONDS);
+            times ++;
+         }
+         if (!br.ready()) {
+            // timeout
+            throw new CliRestException(Constants.READ_TIME_OUT);
+         }
+         if (promptType == PromptType.USER_NAME) {
             enter=reader.readLine();
-         }else if (promptType == PromptType.PASSWORD){
+         } else if (promptType == PromptType.PASSWORD) {
             enter=reader.readLine(new Character('*'));
          }
-      } catch (IOException e) {
-         e.printStackTrace();
-      }      
+      } catch (CliRestException e) {
+         throw e;
+      } catch (Exception e) {
+         throw new CliRestException(e.getMessage());
+      }
       return enter;
    }
-
-   
 }
