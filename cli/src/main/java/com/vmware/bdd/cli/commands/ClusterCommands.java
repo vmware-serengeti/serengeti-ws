@@ -14,7 +14,6 @@
  ****************************************************************************/
 package com.vmware.bdd.cli.commands;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -48,7 +47,6 @@ import com.vmware.bdd.cli.rest.DistroRestClient;
 import com.vmware.bdd.cli.rest.NetworkRestClient;
 import com.vmware.bdd.utils.AppConfigValidationUtils;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
-import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ValidateResult;
 
 @Component
