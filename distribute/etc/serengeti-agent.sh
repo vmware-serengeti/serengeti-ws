@@ -17,6 +17,7 @@ if [ ! -e "${SERENGETI_ETC_HOME}/serengeti-firstboot" ]
 then
     touch "${SERENGETI_LOG_INSTALLER}"
     chown "${SERENGETI_USER}.${SERENGETI_GROUP}" "${SERENGETI_LOG_INSTALLER}"
+    chmod 600 "${SERENGETI_LOG_INSTALLER}"
     echo `date` >> ${SERENGETI_LOG_INSTALLER}
     echo `date` >> ${SERENGETI_ERR_INSTALLER}
     chmod +x "${SERENGETI_SCRIPTS_HOME}/serengeti-firstboot.rb"
@@ -28,6 +29,7 @@ then
 else
     touch "${SERENGETI_LOG_UPDATE}"
     chown "${SERENGETI_USER}.${SERENGETI_GROUP}" "${SERENGETI_LOG_UPDATE}"
+    chmod 600 "${SERENGETI_LOG_UPDATE}"
     echo `date` >> ${SERENGETI_LOG_UPDATE}
     echo `date` >> ${SERENGETI_ERR_UPDATE}
     chmod +x "${SERENGETI_SCRIPTS_HOME}/serengeti-subsequentboot.rb"
