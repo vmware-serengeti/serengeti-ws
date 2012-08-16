@@ -133,7 +133,7 @@ public class Constants {
    public static final String ROLE_HIVE_SERVER = "hive_server";
    public static final String ROLE_PIG = "pig";
    public static final String PARAM_CLUSTER_WARNING =
-         "Warning: only support 1 master node group, 1 worker node group and 0 or 1 client node group now(master node group has hadoop_namenode,hadoop_jobtracker roles, only 1 instance. worker node group has hadoop_datanode,hadoop_tasktracker roles, 1 or more instance. client node group has hadoop_client,optional hive or pig roles,0 or more instance. Only master node group can config haFlag.)";
+         "Warning: Serengeti supports multi-instance of tasktracker and datanode, only one instance of namenode and jobtracker, multi-instance of client. Only namenode and jobtracker instance support to configure haFlag.";
    public static final String PARAM_CLUSTER_FAILED_INSTANCE_NUM_NEGATIVE = "instanceNum can not be negative";
    public static final String PARAM_CLUSTER = "cluster name";
    public static final String PARAM_DISTRO = "distro name";
