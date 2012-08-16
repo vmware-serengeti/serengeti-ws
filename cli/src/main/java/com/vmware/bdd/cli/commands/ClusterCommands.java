@@ -430,16 +430,16 @@ public class ClusterCommands implements CommandMarker {
                return;
             }
             if(targetClusterName != null && targetClusterName.length() > 0){
-               System.out.println("Cluster:         " + targetClusterName);            	
+               System.out.println("Cluster         : " + targetClusterName);            	
             }
             if (fsUrl != null && fsUrl.length() > 0) {
-               System.out.println("HDFS url:        " + fsUrl);
+               System.out.println("HDFS url        : " + fsUrl);
             }
             if (jtUrl != null && jtUrl.length() > 0) {
-               System.out.println("Job Tracker url: " + jtUrl);
+               System.out.println("Job Tracker url : " + jtUrl);
             }
             if (hiveInfo != null && hiveInfo.length() > 0) {
-               System.out.println("Hive server url: " + hiveInfo);
+               System.out.println("Hive server info: " + hiveInfo);
             }
          } else {
             if (name == null) {
