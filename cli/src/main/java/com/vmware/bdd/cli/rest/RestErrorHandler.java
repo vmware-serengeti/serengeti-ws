@@ -33,12 +33,12 @@ import com.vmware.bdd.cli.commands.Constants;
 public class RestErrorHandler implements ResponseErrorHandler {
    private List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
    private final HttpMessageConverterExtractor<BddErrorMessage> delegate;
-   
+
    RestErrorHandler() {
       messageConverters.add(new MappingJacksonHttpMessageConverter());
       delegate = new HttpMessageConverterExtractor<BddErrorMessage>(BddErrorMessage.class, messageConverters);
    }
-   
+
    public boolean hasError(ClientHttpResponse response) throws IOException {
       HttpStatus statusCode = response.getStatusCode();
       if (statusCode.series() == Series.CLIENT_ERROR || statusCode.series() == Series.SERVER_ERROR) {

@@ -257,4 +257,6 @@ if [ -e /opt/serengeti/etc/lock_down ]; then
   /opt/serengeti/sbin/set-password -a
 fi
 
+# remove ovf env file
+rm -f "#{SERENGETI_VC_PROPERTIES}"
 EOF

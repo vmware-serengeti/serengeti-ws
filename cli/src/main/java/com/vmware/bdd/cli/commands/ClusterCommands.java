@@ -794,7 +794,7 @@ public class ClusterCommands implements CommandMarker {
                   Constants.PARAM_NO_DISTRO_AVAILABLE);
             return !validated;
          }
-         if (nodeGroupCreates.length < 2 || nodeGroupCreates.length > 4) {
+         if (nodeGroupCreates.length < 2 || nodeGroupCreates.length > 5) {
             warning = true;
          }
          // check external HDFS
@@ -849,8 +849,7 @@ public class ClusterCommands implements CommandMarker {
                break;
             case CLIENT:
                clientCount++;
-               if (nodeGroupCreate.getInstanceNum() == 0
-                     || isHAFlag(nodeGroupCreate)) {
+               if (isHAFlag(nodeGroupCreate)) {
                   warning = true;
                }
                break;
