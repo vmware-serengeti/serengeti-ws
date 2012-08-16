@@ -67,10 +67,8 @@ public class ConnectionCommands implements CommandMarker {
             }
          }
          connect(hostName, loginInfo, 3);
-      } catch (CliRestException e) {
-         System.out.println();
-         printConnectionFailure(e.getMessage());
       } catch (Exception e) {
+         System.out.println();
          printConnectionFailure(e.getMessage());
       }
    }
@@ -80,7 +78,7 @@ public class ConnectionCommands implements CommandMarker {
             + Constants.OUTPUT_OP_RESULT_FAIL + " " + message);
    }
 
-   private boolean connect(final String hostName, final Map<String,String> loginInfo, int count) {
+   private boolean connect(final String hostName, final Map<String,String> loginInfo, int count) throws Exception {
       if (count <= 0) {
          return false;
       } else {
@@ -98,7 +96,7 @@ public class ConnectionCommands implements CommandMarker {
       return true;
    }
 
-   private boolean prompt(String msg, PromptType promptType, Map<String,String> loginInfo) {
+   private boolean prompt(String msg, PromptType promptType, Map<String,String> loginInfo) throws Exception {
       int k = 0;
       String enter = "";
       while (k < 3) {
@@ -126,31 +124,28 @@ public class ConnectionCommands implements CommandMarker {
       return k < 3;
    }
 
-   private String readEnter(String msg,PromptType promptType){
-      String enter="";
+   @SuppressWarnings("static-access")
+   private String readEnter(String msg,PromptType promptType) throws Exception {
+      String enter = "";
       BufferedReader br = null;
-      try {
-         br = new BufferedReader(new InputStreamReader(System.in));
-         ConsoleReader reader = new ConsoleReader(System.in, new PrintWriter(System.out));
-         int times = 0;
-         while (!br.ready() && times < Constants.MAX_WAITING_LOOP) {
-            Thread.currentThread().sleep(Constants.READER_SLEEP_TIME_MILLISECONDS);
-            times ++;
-         }
-         if (!br.ready()) {
-            // timeout
-            throw new CliRestException(Constants.READ_TIME_OUT);
-         }
-         if (promptType == PromptType.USER_NAME) {
-            enter=reader.readLine();
-         } else if (promptType == PromptType.PASSWORD) {
-            enter=reader.readLine(new Character('*'));
-         }
-      } catch (CliRestException e) {
-         throw e;
-      } catch (Exception e) {
-         throw new CliRestException(e.getMessage());
+      br = new BufferedReader(new InputStreamReader(System.in));
+      ConsoleReader reader =
+            new ConsoleReader(System.in, new PrintWriter(System.out));
+      int times = 0;
+      while (!br.ready() && times < Constants.MAX_WAITING_LOOP) {
+         Thread.currentThread().sleep(Constants.READER_SLEEP_TIME_MILLISECONDS);
+         times++;
       }
+      if (!br.ready()) {
+         // timeout
+         throw new Exception(Constants.READ_TIME_OUT);
+      }
+      if (promptType == PromptType.USER_NAME) {
+         enter = reader.readLine();
+      } else if (promptType == PromptType.PASSWORD) {
+         enter = reader.readLine(new Character('*'));
+      }
+
       return enter;
    }
 }

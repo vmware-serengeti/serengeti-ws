@@ -132,6 +132,9 @@ public class RestClient {
             //recover old hostUri
             hostUri = oldHostUri;
             return Connect.ConnectType.UNAUTHORIZATION;
+         } else {
+            System.out.println(Constants.CONNECT_FAILURE + ": " + cliRestException.getStatus() + " " + cliRestException.getMessage().toLowerCase());
+            return Connect.ConnectType.ERROR;
          }
       } catch (Exception e) {
          System.out.println(Constants.CONNECT_FAILURE + ": " + e.getCause().getMessage().toLowerCase());
