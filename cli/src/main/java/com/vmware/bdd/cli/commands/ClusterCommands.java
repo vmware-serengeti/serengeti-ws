@@ -501,7 +501,7 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private void setNameNode(String nameNodeAddress) {
-      String hdfsUrl = "webhdfs://" + nameNodeAddress + ":50070";
+      String hdfsUrl = "hdfs://" + nameNodeAddress + ":8020";
       setFsURL(hdfsUrl);
    }
 
