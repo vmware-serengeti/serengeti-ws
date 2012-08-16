@@ -375,7 +375,7 @@ public class ClusterCommands implements CommandMarker {
             }
          }
 
-         String resource = getClusterResourceName(clusterName, nodeGroupName, fullNodeName);
+         String resource = getClusterResourceName(clusterName, groupName, fullNodeName);
          if (resource != null) {
             restClient.actionOps(resource, clusterName, queryStrings);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
