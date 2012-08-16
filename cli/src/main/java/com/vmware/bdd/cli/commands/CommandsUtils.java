@@ -34,10 +34,12 @@ import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.impl.Indenter;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
+import org.codehaus.jackson.util.DefaultPrettyPrinter.Lf2SpacesIndenter;
 
 
 public class CommandsUtils {
@@ -114,7 +116,10 @@ public class CommandsUtils {
       ObjectMapper mapper = getMapper();
       mapper.setSerializationInclusion(Inclusion.NON_NULL);
       generator.setCodec(mapper);
-      generator.setPrettyPrinter(new DefaultPrettyPrinter());
+      DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+      Indenter indenter = new Lf2SpacesIndenter();
+      prettyPrinter.indentArraysWith(indenter);
+      generator.setPrettyPrinter(prettyPrinter);
       generator.writeObject(object);
    }
 
