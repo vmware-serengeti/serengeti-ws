@@ -160,7 +160,7 @@
 		</dependencies>
 	</dependencyManagement>
 	<properties>
-		<serengeti.version>0.1</serengeti.version>
+		<serengeti.version>0.6.0</serengeti.version>
 		<java.source.version>1.6</java.source.version>
 		<java.target.version>1.6</java.target.version>
 		<bdd.skipTests>true</bdd.skipTests>
