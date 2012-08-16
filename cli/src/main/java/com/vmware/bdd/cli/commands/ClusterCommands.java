@@ -426,7 +426,7 @@ public class ClusterCommands implements CommandMarker {
             String fsUrl = hadoopConfiguration.get("fs.default.name");
             String jtUrl = hadoopConfiguration.get("mapred.job.tracker");
             if ((fsUrl == null || fsUrl.length() == 0) && (jtUrl == null || jtUrl.length() == 0)) {
-               System.out.println("There is no cluster be targeted now, target cluster first");
+               System.out.println("There is no targeted cluster. Please use \"cluster target --name\" to target first");
                return;
             }
             if(targetClusterName != null && targetClusterName.length() > 0){
@@ -452,8 +452,10 @@ public class ClusterCommands implements CommandMarker {
             }
 
             if (cluster == null) {
-               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_TARGET,
-                     Constants.OUTPUT_OP_RESULT_FAIL, "No valid target available");
+               System.out.println("Failed to target cluster: The cluster " + name + "is not found");
+               setFsURL("");
+               setJobTrackerURL("");
+               this.setHiveServer("");
             } else {
                targetClusterName = cluster.getName();
                for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {
@@ -509,7 +511,11 @@ public class ClusterCommands implements CommandMarker {
 
    private void setJobTracker(String jobTrackerAddress) {
       String jobTrackerUrl = jobTrackerAddress + ":8021";
-      hadoopConfiguration.set("mapred.job.tracker", jobTrackerUrl);
+      setJobTrackerURL(jobTrackerUrl);      
+   }
+
+   private void setJobTrackerURL(String jobTrackerUrl){
+	   hadoopConfiguration.set("mapred.job.tracker", jobTrackerUrl);
    }
 
    private void setHiveServer(String hiveServerAddress) {
