@@ -186,4 +186,6 @@ if [[ -f "#{SERENGETI_HOME}/logs/not-init" ]];then
    rm -rf "#{SERENGETI_HOME}/logs/not-init"
 fi
 
+# remove ovf env file
+rm -f "#{SERENGETI_VC_PROPERTIES}"
 EOF

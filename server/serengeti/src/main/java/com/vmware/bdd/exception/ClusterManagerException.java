@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.exception;
 
+import java.util.List;
+
 public class ClusterManagerException extends BddException {
    private static final long serialVersionUID = 1l;
 
@@ -65,5 +67,9 @@ public class ClusterManagerException extends BddException {
          String nodeGroupName, int newInstanceNum, int definedInstanceNum) {
       return new ClusterManagerException(null, "SHRINK_OP_NOT_SUPPORTED",
             nodeGroupName, definedInstanceNum, newInstanceNum);
+   }
+
+   public static ClusterManagerException ROLES_NOT_SUPPORTED(List<String> roles) {
+      return new ClusterManagerException(null, "ROLES_NOT_SUPPORTED", roles);
    }
 }
