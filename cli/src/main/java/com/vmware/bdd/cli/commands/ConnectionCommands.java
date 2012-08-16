@@ -127,25 +127,12 @@ public class ConnectionCommands implements CommandMarker {
    @SuppressWarnings("static-access")
    private String readEnter(String msg,PromptType promptType) throws Exception {
       String enter = "";
-      BufferedReader br = null;
-      br = new BufferedReader(new InputStreamReader(System.in));
-      ConsoleReader reader =
-            new ConsoleReader(System.in, new PrintWriter(System.out));
-      int times = 0;
-      while (!br.ready() && times < Constants.MAX_WAITING_LOOP) {
-         Thread.currentThread().sleep(Constants.READER_SLEEP_TIME_MILLISECONDS);
-         times++;
-      }
-      if (!br.ready()) {
-         // timeout
-         throw new Exception(Constants.READ_TIME_OUT);
-      }
+      ConsoleReader reader = new ConsoleReader();
       if (promptType == PromptType.USER_NAME) {
          enter = reader.readLine();
       } else if (promptType == PromptType.PASSWORD) {
          enter = reader.readLine(new Character('*'));
       }
-
       return enter;
    }
 }

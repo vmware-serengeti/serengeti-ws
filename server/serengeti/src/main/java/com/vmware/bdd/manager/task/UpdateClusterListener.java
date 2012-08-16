@@ -14,7 +14,9 @@
  ***************************************************************************/
 package com.vmware.bdd.manager.task;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -22,6 +24,7 @@ import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.HadoopNodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.Saveable;
 import com.vmware.bdd.utils.AuAssert;
@@ -31,13 +34,15 @@ import com.vmware.bdd.utils.ClusterCmdUtil;
 public class UpdateClusterListener implements TaskListener {
    private static final long serialVersionUID = -4144721086697547540L;
 
-   private static final Logger logger = Logger.getLogger(UpdateClusterListener.class);
+   private static final Logger logger = Logger
+         .getLogger(UpdateClusterListener.class);
 
    private String clusterName;
    private String nodeGroupName;
    private int oldInstanceNum;
 
-   public UpdateClusterListener(String clusterName, String nodeGroupName, int oldInstanceNum) {
+   public UpdateClusterListener(String clusterName, String nodeGroupName,
+         int oldInstanceNum) {
       super();
       this.clusterName = clusterName;
       this.nodeGroupName = nodeGroupName;
@@ -52,7 +57,8 @@ public class UpdateClusterListener implements TaskListener {
       DAL.inRwTransactionDo(new Saveable<Void>() {
          @Override
          public Void body() throws Exception {
-            ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+            ClusterEntity cluster =
+                  ClusterEntity.findClusterEntityByName(clusterName);
             AuAssert.check(cluster != null);
 
             cluster.setStatus(ClusterStatus.RUNNING);
@@ -68,18 +74,33 @@ public class UpdateClusterListener implements TaskListener {
       DAL.inRwTransactionDo(new Saveable<Void>() {
          @Override
          public Void body() throws Exception {
-            ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+            ClusterEntity cluster =
+                  ClusterEntity.findClusterEntityByName(clusterName);
             AuAssert.check(cluster != null);
 
-            NodeGroupEntity group = NodeGroupEntity.findNodeGroupEntityByName(cluster,
-                  nodeGroupName);
+            NodeGroupEntity group =
+                  NodeGroupEntity.findNodeGroupEntityByName(cluster,
+                        nodeGroupName);
             AuAssert.check(group != null);
 
             // TODO reclaim resources
             cluster.setStatus(ClusterStatus.RUNNING);
             group.setDefineInstanceNum(oldInstanceNum);
-            logger.error("failed to update cluster " + clusterName 
-                  + " set its status as ERROR");
+            logger.error("failed to update cluster " + clusterName
+                  + " revert to previous status");
+
+            Set<HadoopNodeEntity> toRemove = new HashSet<HadoopNodeEntity>();
+            if (group.getHadoopNodes() != null) {
+               for (HadoopNodeEntity node : group.getHadoopNodes()) {
+                  // delete extra nodes in db
+                  if (ClusterCmdUtil.getIndexFromNodeName(node.getVmName()) >= oldInstanceNum) {
+                     logger.info("delete obsolete nodes " + node.getVmName());
+                     toRemove.add(node);
+                     DAL.delete(node);
+                  }
+               }
+               group.getHadoopNodes().removeAll(toRemove);
+            }
             return null;
          }
       });

@@ -26,7 +26,7 @@ public class ClusterCmdUtil {
    private static final String START_NODES_CMD = Configuration
          .getNonEmptyString("start_cluster_node.cmd");
    private static final String CONFIGURE_CLUSTER_CMD = Configuration
-   .getNonEmptyString("configure_cluster.cmd");
+         .getNonEmptyString("configure_cluster.cmd");
 
    public static String[] getCreateClusterCmdArray(String clusterName,
          String fileName) {
@@ -65,7 +65,8 @@ public class ClusterCmdUtil {
             .replaceAll(":json_file", fileName).split(" ");
    }
 
-   public static String getFullNodeName(String cluster, String group, String node) {
+   public static String getFullNodeName(String cluster, String group,
+         String node) {
       AuAssert.check(cluster != null && !cluster.isEmpty());
       AuAssert.check(group == null || !group.isEmpty());
       AuAssert.check(node == null || !node.isEmpty());
@@ -82,5 +83,14 @@ public class ClusterCmdUtil {
          sb.append(cluster).append("-").append(group);
          return sb.toString();
       }
+   }
+
+   public static int getIndexFromNodeName(String node) {
+      AuAssert.check(node != null && !node.isEmpty());
+
+      String[] ary = node.split("-");
+      AuAssert.check(ary.length == 3);
+
+      return Integer.parseInt(ary[2]);
    }
 }
