@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
+import com.vmware.bdd.cli.commands.CookieCache;
 import com.vmware.bdd.cli.commands.DisconnectionCommands;
 
 /**
@@ -32,9 +33,11 @@ public class DisconnectionCommandsTest extends MockRestServer {
 
    @Test
    public void testDisconnect() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody(
             "http://127.0.0.1:8080/serengeti/j_spring_security_logout",
             HttpMethod.GET, HttpStatus.UNAUTHORIZED, "");
       disconnectionCommands.disconnect();
+      CookieCache.put("Cookie","");
    }
 }

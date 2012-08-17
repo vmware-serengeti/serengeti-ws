@@ -39,6 +39,7 @@ import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.cli.commands.ClusterCommands;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
+import com.vmware.bdd.cli.commands.CookieCache;
 
 @Test
 @ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
@@ -48,6 +49,7 @@ public class ClusterCommandsTest extends MockRestServer {
 
     @Test
     public void testClusterResize() {
+        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         this.buildReqRespWithoutRespBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/nodegroup/ng1/instancenum",
                 HttpMethod.PUT, HttpStatus.NO_CONTENT, "5");
         //invalid instance num
@@ -55,10 +57,12 @@ public class ClusterCommandsTest extends MockRestServer {
 
         //normal case
         clusterCommands.resizeCluster("cluster1", "ng1", 5);
+        CookieCache.put("Cookie","");
     }
 
     @Test
     public void testClusterResizeFailure() throws Exception {
+        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         BddErrorMessage errorMsg = new BddErrorMessage();
         errorMsg.setMessage("not found");
         ObjectMapper mapper = new ObjectMapper();
@@ -66,18 +70,21 @@ public class ClusterCommandsTest extends MockRestServer {
                 HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
         clusterCommands.resizeCluster("cluster1", "ng1", 5);
+        CookieCache.put("Cookie","");
     }
 
     @Test
     public void testClusterStart() {
-
+        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         this.buildReqRespWithoutRespBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1?state=start",
                 HttpMethod.PUT, HttpStatus.NO_CONTENT, "");
         clusterCommands.startCluster("cluster1", null, null);
+        CookieCache.put("Cookie","");
     }
 
     @Test
     public void testClusterStartFailure() throws Exception {
+        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         BddErrorMessage errorMsg = new BddErrorMessage();
         errorMsg.setMessage("not found");
         ObjectMapper mapper = new ObjectMapper();
@@ -86,18 +93,21 @@ public class ClusterCommandsTest extends MockRestServer {
                 HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
         clusterCommands.startCluster("cluster1", null, null);
+        CookieCache.put("Cookie","");
     }
 
     @Test
     public void testClusterStop() {
-
+        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         this.buildReqRespWithoutRespBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1?state=stop",
                 HttpMethod.PUT, HttpStatus.NO_CONTENT, "");
         clusterCommands.stopCluster("cluster1", null, null);
+        CookieCache.put("Cookie","");
     }
 
     @Test
     public void testClusterStopFailure() throws Exception {
+        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         BddErrorMessage errorMsg = new BddErrorMessage();
         errorMsg.setMessage("not found");
         ObjectMapper mapper = new ObjectMapper();
@@ -105,10 +115,12 @@ public class ClusterCommandsTest extends MockRestServer {
         this.buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1?state=stop",
                 HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
         clusterCommands.stopCluster("cluster1", null, null);
+        CookieCache.put("Cookie","");
     }
 
     @Test
     public void testCreateCluster() throws Exception {
+        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         NetworkRead[] networks = new NetworkRead[1];
         NetworkRead network = new NetworkRead();
         network.setName("dhcp");
@@ -124,10 +136,12 @@ public class ClusterCommandsTest extends MockRestServer {
                 HttpStatus.NO_CONTENT, "");
 
         clusterCommands.createCluster("cluster1", null, null, null, null, null, false, false, false);
+        CookieCache.put("Cookie","");
     }
 
     @Test
     public void testCreateClusterFailure() throws Exception {
+        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         NetworkRead[] networks = new NetworkRead[1];
         NetworkRead network = new NetworkRead();
         network.setName("dhcp");
@@ -146,10 +160,12 @@ public class ClusterCommandsTest extends MockRestServer {
                 HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
 
         clusterCommands.createCluster("cluster1", null, null, null, null, null, false, false, false);
+        CookieCache.put("Cookie","");
     }
 
     @Test
     public void testCreateClusterBySpecFile() throws Exception {
+        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         NetworkRead[] networks = new NetworkRead[1];
         NetworkRead network = new NetworkRead();
         network.setName("dhcp");
@@ -183,17 +199,21 @@ public class ClusterCommandsTest extends MockRestServer {
                 HttpStatus.NO_CONTENT, "");
 
         clusterCommands.createCluster("cluster1", null, "hadoop_cluster.json", null, null, null, false, false, false);
+        CookieCache.put("Cookie","");
     }
 
     @Test
    public void testResumeCreateCluster() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1?state=resume",
             HttpMethod.PUT, HttpStatus.NO_CONTENT, "");
       clusterCommands.createCluster("cluster1", null, null, null, null, null, true, false, false);
+      CookieCache.put("Cookie","");
    }
 
     @Test
     public void testResumeCreateClusterFailure() throws Exception {
+        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         BddErrorMessage errorMsg = new BddErrorMessage();
         errorMsg.setMessage("not found");
         ObjectMapper mapper = new ObjectMapper();
@@ -201,10 +221,12 @@ public class ClusterCommandsTest extends MockRestServer {
                 HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
         clusterCommands.createCluster("cluster1", "HADOOP", null, null, null, null, true, false, false);
+        CookieCache.put("Cookie","");
     }
 
     @Test
     public void testClusterCreateOutput() throws Exception {
+        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         NetworkRead[] networks = new NetworkRead[1];
         NetworkRead network = new NetworkRead();
         network.setName("dhcp");
@@ -255,10 +277,12 @@ public class ClusterCommandsTest extends MockRestServer {
                 HttpStatus.OK, mapper.writeValueAsString(cluster));
 
         clusterCommands.createCluster("cluster1", null, null, null, null, null, false, false, false);
+        CookieCache.put("Cookie","");
     }
 
     @Test
     public void testGetCluster() throws Exception {
+        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         ObjectMapper mapper = new ObjectMapper();
         StorageRead sr1 = new StorageRead();
         sr1.setType("Type1");
@@ -332,20 +356,24 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.GET, HttpStatus.OK,
                 mapper.writeValueAsString(new ClusterRead[] { cr1, cr2 }));
         clusterCommands.getCluster(null, true);
+        CookieCache.put("Cookie","");
     }
 
     @Test
     public void testExportClusterSpec() throws Exception {
+       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
        ObjectMapper mapper = new ObjectMapper();
        ClusterCreate clusterSpec =
           CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile(this.getClass().getResource("/hadoop_cluster.json").getPath()));
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/hadoop/spec", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(clusterSpec));
      clusterCommands.exportClusterSpec("hadoop", null);
+     CookieCache.put("Cookie","");
     }
 
     @Test
     public void testGetClusterFailure() throws Exception {
+        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         BddErrorMessage errorMsg = new BddErrorMessage();
         errorMsg.setMessage("not found");
         ObjectMapper mapper = new ObjectMapper();
@@ -353,10 +381,12 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.GET,
                 HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
         clusterCommands.getCluster(null, true);
+        CookieCache.put("Cookie","");
     }
 
    @Test(enabled=false)
    public void testConfigCluster() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       ObjectMapper mapper = new ObjectMapper();
       StorageRead sr1 = new StorageRead();
       sr1.setType("Type1");
@@ -393,6 +423,7 @@ public class ClusterCommandsTest extends MockRestServer {
       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/config", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
       clusterCommands.configCluster("cluster1", "hadoop_cluster.json", false, false);
+      CookieCache.put("Cookie","");
    }
 
    @Test

@@ -30,6 +30,7 @@ import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.DatastoreRead;
 import com.vmware.bdd.apitypes.DatastoreReadDetail;
+import com.vmware.bdd.cli.commands.CookieCache;
 import com.vmware.bdd.cli.commands.DatastoreCommands;
 
 /**
@@ -42,6 +43,7 @@ public class DatastoreCommandsTest extends MockRestServer {
 
    @Test
    public void testCreateDatastore() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody(
             "http://127.0.0.1:8080/serengeti/api/datastores", HttpMethod.POST,
             HttpStatus.NO_CONTENT, "");
@@ -51,10 +53,12 @@ public class DatastoreCommandsTest extends MockRestServer {
 
       //normal case
       datastoreCommands.addDatastore("ds01", "ds*", "SHARED");
+      CookieCache.put("Cookie","");
    }
    
    @Test
    public void testCreateDatastoreFailure() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("already exists");
       ObjectMapper mapper = new ObjectMapper();
@@ -64,19 +68,23 @@ public class DatastoreCommandsTest extends MockRestServer {
             HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
 
       datastoreCommands.addDatastore("ds01", "ds*", "SHARED");
+      CookieCache.put("Cookie","");
    }
 
    @Test
    public void testDeleteDatastore() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody(
             "http://127.0.0.1:8080/serengeti/api/datastore/ds01", HttpMethod.DELETE,
             HttpStatus.NO_CONTENT, "");
 
       datastoreCommands.deleteDatastore("ds01");
+      CookieCache.put("Cookie","");
    }
    
    @Test
    public void testDeleteDatastoreFailure() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
@@ -86,10 +94,12 @@ public class DatastoreCommandsTest extends MockRestServer {
             HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
       datastoreCommands.deleteDatastore("ds01");
+      CookieCache.put("Cookie","");
    }
 
    @Test
    public void testListDatastore() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       DatastoreRead rd1 = new DatastoreRead();
       rd1.setName("rd1Name");
       rd1.setType(DatastoreType.LOCAL);
@@ -128,6 +138,7 @@ public class DatastoreCommandsTest extends MockRestServer {
       
       ObjectMapper mapper = new ObjectMapper();
       testListDatastore(mapper, new DatastoreRead[] { rd1, rd2 });
+      CookieCache.put("Cookie","");
    }
 
    private void testListDatastore(ObjectMapper mapper, DatastoreRead[] drs)
@@ -149,6 +160,7 @@ public class DatastoreCommandsTest extends MockRestServer {
 
    @Test
    public void testListDatastoreFailure() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
@@ -156,5 +168,6 @@ public class DatastoreCommandsTest extends MockRestServer {
             "http://127.0.0.1:8080/serengeti/api/datastore/rd1Name",
             HttpMethod.GET, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
       datastoreCommands.listDatastore("rd1Name", true);
+      CookieCache.put("Cookie","");
    }
 }

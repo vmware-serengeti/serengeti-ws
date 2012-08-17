@@ -37,6 +37,7 @@ import com.vmware.bdd.apitypes.IpAllocEntryRead;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.cli.commands.CommandsUtils;
+import com.vmware.bdd.cli.commands.CookieCache;
 import com.vmware.bdd.cli.commands.NetworkCommands;
 
 @ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
@@ -133,16 +134,19 @@ public class NetworkCommandsTest extends MockRestServer {
 
    @Test
    public void testAddNetwork() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody(
             "http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.POST,
             HttpStatus.NO_CONTENT, "");
       networkCommands.addNetwork("name", "portGroup", false, "10.117.7.12",
             "10.117.7.13", "10.1.1.1,10.2.3.4-100", "10.117.7.1",
             "255.255.255.0");
+      CookieCache.put("Cookie","");
    }
    
    @Test
    public void testAddNetworkFailure() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("already exists");
       ObjectMapper mapper = new ObjectMapper();
@@ -154,18 +158,22 @@ public class NetworkCommandsTest extends MockRestServer {
       networkCommands.addNetwork("name", "portGroup", false, "10.117.7.12",
             "10.117.7.13", "10.1.1.1,10.2.3.4-100", "10.117.7.1",
             "255.255.255.0");
+      CookieCache.put("Cookie","");
    }
 
    @Test
    public void testDeleteNetwork() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody(
             "http://127.0.0.1:8080/serengeti/api/network/name",
             HttpMethod.DELETE, HttpStatus.NO_CONTENT, "");
       networkCommands.deleteNetwork("name");
+      CookieCache.put("Cookie","");
    }
    
    @Test
    public void testDeleteNetworkFailure() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
@@ -174,10 +182,12 @@ public class NetworkCommandsTest extends MockRestServer {
             "http://127.0.0.1:8080/serengeti/api/network/name",
             HttpMethod.DELETE, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
       networkCommands.deleteNetwork("name");
+      CookieCache.put("Cookie","");
    }
 
    @Test
    public void testGetNetwork() {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       ObjectMapper mapper = new ObjectMapper();
       NetworkRead networkRead1 = new NetworkRead();
       networkRead1.setName("name1");
@@ -244,6 +254,7 @@ public class NetworkCommandsTest extends MockRestServer {
       networkRead2.setIpAllocEntries(ipAllocEntries2);
       getListNetwork(mapper, new NetworkRead[] { networkRead1, networkRead2 },
             true);
+      CookieCache.put("Cookie","");
    }
 
    private List<String> testIpGroupFormat(String str) {
@@ -297,6 +308,7 @@ public class NetworkCommandsTest extends MockRestServer {
    
    @Test
    public void testGetClusterFailure() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
@@ -305,6 +317,7 @@ public class NetworkCommandsTest extends MockRestServer {
             "http://127.0.0.1:8080/serengeti/api/network/name1", HttpMethod.GET,
             HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
       networkCommands.getNetwork("name1", false);
+      CookieCache.put("Cookie","");
    }
 
 }

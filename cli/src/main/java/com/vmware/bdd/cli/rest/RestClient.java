@@ -148,9 +148,7 @@ public class RestClient {
     */
    public void disconnect () {
       try {
-         if(!checkConnection()){
-            return ;
-         }
+         checkConnection();
          logout(Constants.REST_PATH_LOGOUT, String.class);
       } catch (CliRestException cliRestException) {
          if (cliRestException.getStatus() == HttpStatus.UNAUTHORIZED) {
@@ -280,9 +278,7 @@ public class RestClient {
     */
    public void createObject(Object entity, final String path,
          final HttpMethod verb, PrettyOutput... prettyOutput) {
-      if(!checkConnection()){
-         return ;
-      }
+      checkConnection();
       try {
          if (verb == HttpMethod.POST) {
             ResponseEntity<String> response = restPost(path, entity);
@@ -403,9 +399,7 @@ public class RestClient {
     */
    public <T> T getObject(final String id, Class<T> entityType,
          final String path, final HttpMethod verb, final boolean detail) {
-      if(!checkConnection()){
-         return null;
-      }
+      checkConnection();
       try {
          if (verb == HttpMethod.GET) {
             ResponseEntity<T> response = restGetById(path, id, entityType, detail);
@@ -460,9 +454,7 @@ public class RestClient {
     */
    public <T> T getAllObjects(final Class<T> entityType, final String path,
          final HttpMethod verb, final boolean detail) {
-      if(!checkConnection()){
-         return null;
-      }
+      checkConnection();
       try {
          if (verb == HttpMethod.GET) {
             ResponseEntity<T> response = restGet(path, entityType, detail);
@@ -489,9 +481,7 @@ public class RestClient {
     */
    public void deleteObject(final String id, final String path,
          final HttpMethod verb, PrettyOutput... prettyOutput) {
-      if(!checkConnection()){
-         return ;
-      }
+      checkConnection();
       try {
          if (verb == HttpMethod.DELETE) {
             ResponseEntity<String> response = restDelete(path, id);
@@ -518,15 +508,12 @@ public class RestClient {
             .exchange(targetUri, HttpMethod.DELETE, entity, String.class);
    }
 
-   private boolean checkConnection() {
+   private void checkConnection() {
       if (hostUri == null) {
-         System.out.println(Constants.NEED_CONNECTION);
-         return false;
+         throw new CliRestException(Constants.NEED_CONNECTION);
       } else if (CommandsUtils.isBlank(readCookieInfo())) {
-         System.out.println(Constants.CONNECT_CHECK_LOGIN);
-         return false;
+         throw new CliRestException(Constants.CONNECT_CHECK_LOGIN);
       }
-      return true;
    }
 
    /**
@@ -540,9 +527,7 @@ public class RestClient {
    public void actionOps(final String id, final String path,
          final HttpMethod verb, final Map<String, ?> queryStrings,
          PrettyOutput... prettyOutput) {
-      if(!checkConnection()){
-         return ;
-      }
+      checkConnection();
       try {
          if (verb == HttpMethod.PUT) {
             ResponseEntity<String> response = restActionOps(path, id, queryStrings);
@@ -590,9 +575,7 @@ public class RestClient {
     */
    public void update(Object entity, final String path, final HttpMethod verb,
          PrettyOutput... prettyOutput) {
-      if(!checkConnection()){
-         return ;
-      }
+      checkConnection();
       try {
          if (verb == HttpMethod.PUT) {
             ResponseEntity<String> response = restUpdate(path, entity);
