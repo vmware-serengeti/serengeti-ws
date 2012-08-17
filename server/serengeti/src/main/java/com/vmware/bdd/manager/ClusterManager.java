@@ -171,49 +171,51 @@ public class ClusterManager {
    }
 
    private Long createClusterMgmtTask(List<String> targets,
-         final ClusterEntity clusterEntity, final TaskListener listener, final ClusterStatus initStatus) {
-      final String fileName = clusterEntity.getName() + ".json";
+         final ClusterEntity cluster, final TaskListener listener, final ClusterStatus initStatus) {
+      final String fileName = cluster.getName() + ".json";
 
-      final Map<String, Object> clusterConfig = getClusterConfigManifest(clusterEntity.getName(), targets);
+      final Map<String, Object> clusterConfig =
+            getClusterConfigManifest(cluster.getName(), targets);
 
       AuAssert.check(clusterConfig != null);
 
-      final TaskEntity taskEntity = taskManager.createCmdlineTask(null, listener);
+      TaskEntity task = taskManager.createCmdlineTask(null, listener);
 
-      return DAL.inTransactionDo(new Saveable<Long>() {
-         public Long body() {
-            TaskEntity task = TaskEntity.findById(taskEntity.getId());
-            ClusterEntity cluster = ClusterEntity.findClusterEntityById(clusterEntity.getId());
+      String[] cmdArray =
+            listener.getTaskCommand(cluster.getName(), task.getWorkDir()
+                  .getAbsolutePath() + "/" + fileName);
 
-            String[] cmdArray =
-               listener.getTaskCommand(cluster.getName(), task.getWorkDir()
-                     .getAbsolutePath() + "/" + fileName);
+      AuAssert.check(cmdArray != null);
+      task.setCmdArray(cmdArray);
+      
+      DAL.inTransactionUpdate(task);
 
-            AuAssert.check(cmdArray != null);
-            task.setCmdArray(cmdArray);
+      HashMap<String, Object> properties = SystemProperties.getManifest();
+      SystemProperties.setChannelId(properties, task.getMessageRouteKey());
+      clusterConfig.put("system_properties", properties);
 
-            HashMap<String, Object> properties = SystemProperties.getManifest();
-            SystemProperties.setChannelId(properties, task.getMessageRouteKey());
-            clusterConfig.put("system_properties", properties);
+      writeJsonFile(clusterConfig, task.getWorkDir(), fileName);
 
-            writeJsonFile(clusterConfig, task.getWorkDir(), fileName);
-
+      DAL.inTransactionDo(new Saveable<Void>() {
+         public Void body() {
+            DAL.refresh(cluster);
             if (initStatus != null) {
                cluster.setStatus(initStatus);
             }
-
-            taskManager.submit(task);
-
-            StringBuilder cmdStr = new StringBuilder();
-            for (String str : cmdArray) {
-               cmdStr.append(str).append(" ");
-            }
-
-            logger.info("submitted a start cluster task with cmd array: " + cmdStr);
-
-            return task.getId();
+            return null;
          }
       });
+
+      taskManager.submit(task);
+
+      StringBuilder cmdStr = new StringBuilder();
+      for (String str : cmdArray) {
+         cmdStr.append(str).append(" ");
+      }
+
+      logger.info("submitted a start cluster task with cmd array: " + cmdStr);
+
+      return task.getId();
    }
 
    private Long createClusterMgmtTask(ClusterEntity cluster,
