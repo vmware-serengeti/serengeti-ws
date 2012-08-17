@@ -497,6 +497,9 @@ public class ClusterCommands implements CommandMarker {
       } catch (CliRestException e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_TARGET,
                Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+         setFsURL("");
+         setJobTrackerURL("");
+         this.setHiveServer("");
       }
    }
 
