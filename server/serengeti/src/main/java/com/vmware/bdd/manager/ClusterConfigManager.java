@@ -115,32 +115,7 @@ public class ClusterConfigManager {
          throw ClusterConfigException.INVALID_ROLES(failedMsgList);
       }
 
-      if (cluster.hasHDFSUrlConfigured()) {
-         if (cluster.validateHDFSUrl()) {
-            Map<String,Object> conf = cluster.getConfiguration();
-            if (conf == null) {
-               conf = new HashMap<String,Object>();
-               cluster.setConfiguration(conf);
-            }
-            @SuppressWarnings("unchecked")
-            Map<String, Object> hadoopConf = (Map<String, Object>) conf.get("hadoop");
-            if (hadoopConf == null) {
-               hadoopConf = new HashMap<String,Object>();
-               conf.put("hadoop", hadoopConf);
-            }
-            @SuppressWarnings("unchecked")
-            Map<String, Object> coreSiteConf =
-               (Map<String, Object>) hadoopConf.get("core-site.xml");
-            if (coreSiteConf == null) {
-               coreSiteConf = new HashMap<String,Object>();
-               hadoopConf.put("core-site.xml", coreSiteConf);
-            }
-            coreSiteConf.put("fs.default.name", cluster.getExternalHDFS());
-         } else {
-            throw BddException.INVALID_PARAMETER("externalHDFS",
-                  cluster.getExternalHDFS());
-         }
-      }
+      transformHDFSUrl(cluster);
 
       try {
          return DAL.inTransactionDo(new Saveable<ClusterEntity>() {
@@ -229,6 +204,35 @@ public class ClusterConfigManager {
          logger.info("can not create cluster " + name
                + ", which is already existed.");
          throw BddException.ALREADY_EXISTS(ex, "cluster", name);
+      }
+   }
+
+   private void transformHDFSUrl(ClusterCreate cluster) {
+      if (cluster.hasHDFSUrlConfigured()) {
+         if (cluster.validateHDFSUrl()) {
+            Map<String,Object> conf = cluster.getConfiguration();
+            if (conf == null) {
+               conf = new HashMap<String,Object>();
+               cluster.setConfiguration(conf);
+            }
+            @SuppressWarnings("unchecked")
+            Map<String, Object> hadoopConf = (Map<String, Object>) conf.get("hadoop");
+            if (hadoopConf == null) {
+               hadoopConf = new HashMap<String,Object>();
+               conf.put("hadoop", hadoopConf);
+            }
+            @SuppressWarnings("unchecked")
+            Map<String, Object> coreSiteConf =
+               (Map<String, Object>) hadoopConf.get("core-site.xml");
+            if (coreSiteConf == null) {
+               coreSiteConf = new HashMap<String,Object>();
+               hadoopConf.put("core-site.xml", coreSiteConf);
+            }
+            coreSiteConf.put("fs.default.name", cluster.getExternalHDFS());
+         } else {
+            throw BddException.INVALID_PARAMETER("externalHDFS",
+                  cluster.getExternalHDFS());
+         }
       }
    }
 
@@ -735,6 +739,7 @@ public class ClusterConfigManager {
    }
 
    private void updateNodegroupAppConfig(ClusterCreate clusterCreate, ClusterEntity cluster, boolean validateWhiteList) {
+      transformHDFSUrl(clusterCreate);
       Gson gson = new Gson();
       Set<NodeGroupEntity> groupEntities = cluster.getNodeGroups();
       Map<String, NodeGroupEntity> groupMap = new HashMap<String, NodeGroupEntity>();
