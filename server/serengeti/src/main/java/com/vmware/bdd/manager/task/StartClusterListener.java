@@ -58,11 +58,7 @@ public class StartClusterListener implements TaskListener {
 
       // only update status when the command is issued on the whole cluster
       if (nodeGroupName == null) {
-         ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
-         AuAssert.check(cluster != null);
-
-         cluster.setStatus(ClusterStatus.RUNNING);
-         DAL.inTransactionUpdate(cluster);
+         ClusterEntity.updateStatus(clusterName, ClusterStatus.RUNNING);
       }
    }
 
@@ -72,10 +68,7 @@ public class StartClusterListener implements TaskListener {
 
       // only update status when the command is issued on the whole cluster
       if (nodeGroupName == null) {
-         ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
-         AuAssert.check(cluster != null);
-         cluster.setStatus(ClusterStatus.ERROR);
-         DAL.inTransactionUpdate(cluster);
+         ClusterEntity.updateStatus(clusterName, ClusterStatus.ERROR);
       }
       logger.error("failed to start cluster nodes "
             + ClusterCmdUtil.getFullNodeName(clusterName, nodeGroupName, nodeName)

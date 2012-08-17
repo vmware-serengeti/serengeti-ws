@@ -58,11 +58,7 @@ public class StopClusterListener implements TaskListener {
 
       // only update status when the command is issued on the whole cluster
       if (nodeGroupName == null) {
-         ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
-         AuAssert.check(cluster != null);
-
-         cluster.setStatus(ClusterStatus.STOPPED);
-         DAL.inTransactionUpdate(cluster);
+         ClusterEntity.updateStatus(clusterName, ClusterStatus.STOPPED);
       }
    }
 
@@ -72,10 +68,7 @@ public class StopClusterListener implements TaskListener {
 
       // only update status when the command is issued on the whole cluster
       if (nodeGroupName == null) {
-         ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
-         AuAssert.check(cluster != null);
-         cluster.setStatus(ClusterStatus.ERROR);
-         DAL.inTransactionUpdate(cluster);
+         ClusterEntity.updateStatus(clusterName, ClusterStatus.ERROR);
       }
 
       logger.error("failed to stop cluster nodes "

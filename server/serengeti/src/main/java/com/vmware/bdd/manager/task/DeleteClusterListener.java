@@ -68,11 +68,7 @@ public class DeleteClusterListener implements TaskListener {
    public void onFailure() {
       logger.debug("delete cluster listener called onFailure");
 
-      ClusterEntity cluster =
-            ClusterEntity.findClusterEntityByName(clusterName);
-      AuAssert.check(cluster != null);
-      cluster.setStatus(ClusterStatus.ERROR);
-      DAL.inTransactionUpdate(cluster);
+      ClusterEntity.updateStatus(clusterName, ClusterStatus.ERROR);
       logger.error("failed to delete cluster " + clusterName 
             + " set its status as ERROR");
    }

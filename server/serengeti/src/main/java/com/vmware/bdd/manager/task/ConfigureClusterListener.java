@@ -43,23 +43,14 @@ public class ConfigureClusterListener implements TaskListener {
       logger.debug("configure cluster " + clusterName
             + " task listener called onSuccess");
 
-      ClusterEntity cluster =
-            ClusterEntity.findClusterEntityByName(clusterName);
-      AuAssert.check(cluster != null);
-
-      cluster.setStatus(ClusterStatus.RUNNING);
-      DAL.inTransactionUpdate(cluster);
+      ClusterEntity.updateStatus(clusterName, ClusterStatus.RUNNING);
    }
 
    @Override
    public void onFailure() {
       logger.debug("configure cluster listener called onFailure");
 
-      ClusterEntity cluster =
-            ClusterEntity.findClusterEntityByName(clusterName);
-      AuAssert.check(cluster != null);
-      cluster.setStatus(ClusterStatus.CONFIGURE_ERROR);
-      DAL.inTransactionUpdate(cluster);
+      ClusterEntity.updateStatus(clusterName, ClusterStatus.CONFIGURE_ERROR);
       logger.error("failed to configure cluster " + clusterName + " set its status as ERROR");
    }
 
