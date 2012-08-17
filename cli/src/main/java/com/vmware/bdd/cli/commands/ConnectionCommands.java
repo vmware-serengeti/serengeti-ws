@@ -96,7 +96,6 @@ public class ConnectionCommands implements CommandMarker {
       int k = 0;
       String enter = "";
       while (k < 3) {
-         System.out.print(msg);
          enter = readEnter(msg, promptType);
          if (!CommandsUtils.isBlank(enter)) {
             if (promptType == PromptType.USER_NAME) {
@@ -123,6 +122,7 @@ public class ConnectionCommands implements CommandMarker {
    private String readEnter(String msg,PromptType promptType) throws Exception {
       String enter = "";
       ConsoleReader reader = new ConsoleReader();
+      reader.setDefaultPrompt(msg);
       if (promptType == PromptType.USER_NAME) {
          enter = reader.readLine();
       } else if (promptType == PromptType.PASSWORD) {

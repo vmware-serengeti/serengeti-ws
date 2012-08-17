@@ -898,15 +898,15 @@ public class ClusterCommands implements CommandMarker {
       String readMsg = "";
       try {
          ConsoleReader reader = new ConsoleReader();
+         // Set prompt message
+         reader.setDefaultPrompt(promptMsg);
          int k = 0;
          while (continueLoop) {
             if (k >= 3) {
                continueCreate = false;
                break;
             }
-            // Prompt continue information
-            System.out.print(promptMsg);
-            // Get user's entering
+            // Read user input
             readMsg = reader.readLine();
             if (readMsg.trim().equalsIgnoreCase("yes")
                   || readMsg.trim().equalsIgnoreCase("y")) {
