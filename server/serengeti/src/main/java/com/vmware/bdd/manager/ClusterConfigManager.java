@@ -722,7 +722,9 @@ public class ClusterConfigManager {
                logger.error("cluster " + clusterName + " does not exist");
                throw BddException.NOT_FOUND("cluster", clusterName);
             }
+            transformHDFSUrl(clusterCreate);
             Map<String, Object> clusterLevelConfig = clusterCreate.getConfiguration();
+
             if (clusterLevelConfig != null && clusterLevelConfig.size() > 0) {
                logger.debug("Cluster level app config is updated.");
                CommonClusterExpandPolicy.validateAppConfig(
@@ -732,6 +734,7 @@ public class ClusterConfigManager {
                logger.debug("cluster configuration is not set in cluster spec, so treat it as an empty configuration.");
                cluster.setHadoopConfig(null);
             }
+
             updateNodegroupAppConfig(clusterCreate, cluster, clusterCreate.isValidateConfig());
             return null;
          }
@@ -739,7 +742,6 @@ public class ClusterConfigManager {
    }
 
    private void updateNodegroupAppConfig(ClusterCreate clusterCreate, ClusterEntity cluster, boolean validateWhiteList) {
-      transformHDFSUrl(clusterCreate);
       Gson gson = new Gson();
       Set<NodeGroupEntity> groupEntities = cluster.getNodeGroups();
       Map<String, NodeGroupEntity> groupMap = new HashMap<String, NodeGroupEntity>();
