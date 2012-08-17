@@ -14,9 +14,6 @@
  ****************************************************************************/
 package com.vmware.bdd.cli.commands;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +27,6 @@ import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
 import com.vmware.bdd.apitypes.Connect.ConnectType;
-import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.RestClient;
 
 @Component
@@ -124,7 +120,6 @@ public class ConnectionCommands implements CommandMarker {
       return k < 3;
    }
 
-   @SuppressWarnings("static-access")
    private String readEnter(String msg,PromptType promptType) throws Exception {
       String enter = "";
       ConsoleReader reader = new ConsoleReader();
