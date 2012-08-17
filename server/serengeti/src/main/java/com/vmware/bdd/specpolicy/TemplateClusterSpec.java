@@ -57,7 +57,6 @@ public class TemplateClusterSpec {
       List<String> roles = new ArrayList<String>();
       roles.add(HadoopRole.HADOOP_NAMENODE_ROLE.toString());
       roles.add(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString());
-      roles.add(HadoopRole.HBASE_MASTER_ROLE.toString());
       NodeGroupCreate master = createDefaultNodeGroup(GroupType.MASTER_GROUP.toString(), roles,
             1, InstanceType.MEDIUM, GroupType.MASTER_GROUP, "on");
 
@@ -68,7 +67,6 @@ public class TemplateClusterSpec {
       roles = new ArrayList<String>();
       roles.add(HadoopRole.HADOOP_DATANODE.toString());
       roles.add(HadoopRole.HADOOP_TASKTRACKER.toString());
-      roles.add(HadoopRole.HBASE_REGIONSERVER_ROLE.toString());
       createDefaultNodeGroup(GroupType.WORKER_GROUP.toString(), roles,
             3, InstanceType.SMALL, GroupType.WORKER_GROUP, "off");
 
@@ -78,15 +76,8 @@ public class TemplateClusterSpec {
       roles.add(HadoopRole.HIVE_ROLE.toString());
       roles.add(HadoopRole.HIVE_SERVER_ROLE.toString());
       roles.add(HadoopRole.PIG_ROLE.toString());
-      roles.add(HadoopRole.HBASE_CLIENT_ROLE.toString());
       createDefaultNodeGroup(GroupType.CLIENT_GROUP.toString(), roles,
             1, InstanceType.SMALL, GroupType.CLIENT_GROUP, "off");
-
-      // zookeeper group
-      roles = new ArrayList<String>();
-      roles.add(HadoopRole.ZOOKEEPER_ROLE.toString());
-      createDefaultNodeGroup(GroupType.ZOOKEEPER_GROUP.toString(), roles,
-            1, InstanceType.SMALL, GroupType.ZOOKEEPER_GROUP, "off");
 
       templateClusterConfig.setNodeGroups(templateGroups.values().toArray(new NodeGroupCreate[]{}));
    }
