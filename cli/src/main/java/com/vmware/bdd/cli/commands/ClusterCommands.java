@@ -150,6 +150,7 @@ public class ClusterCommands implements CommandMarker {
          }
       }
       List<String> warningMsgList = new ArrayList<String>();
+      List<String> networkNames = null;
       try {
          if (specFilePath != null) {
             ClusterCreate clusterSpec =
@@ -166,13 +167,13 @@ public class ClusterCommands implements CommandMarker {
                return;
             }
          }
+         networkNames = getNetworkNames();
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CREATE,
                Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          return;
       }
 
-      List<String> networkNames = getNetworkNames();
 
       if (networkNames.isEmpty()) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
