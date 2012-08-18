@@ -549,6 +549,7 @@ public class ClusterCommands implements CommandMarker {
                CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile(specFilePath));
          clusterConfig.setNodeGroups(clusterSpec.getNodeGroups());
          clusterConfig.setConfiguration(clusterSpec.getConfiguration());
+         clusterConfig.setExternalHDFS(clusterSpec.getExternalHDFS());
          List<String> warningMsgList = new ArrayList<String>();
          validateConfiguration(clusterConfig, skipConfigValidation, warningMsgList);
          // add a confirm message for running job
