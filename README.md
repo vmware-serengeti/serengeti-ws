@@ -41,6 +41,47 @@ Serengeti Web Service provides a RESTful API for resources managment and hadoop 
 <tr><td>GET</td><td>/distro/{distroName}</td><td>distroName</td><td>DistroRead</td><td>Get a distro by name</td></tr>
 </table>
 
+### Authentication
+Spring security In-Memory Authentication is used for Serengeti Authentication and user management. 
+
+We don't provide html or JSPs for login, instead, the spring default standard URL is used. User need to set j_username and j_password and then POST login information to URL /serengeti/j_spring_security_check for authentication.
+
+Navigate to URL /serengeti/j_spring_security_logout means logout, and the session will be removed from server side.
+#### Session timeout
+If the user session is idle more than 30 mintues, server will invalidate the session. The timeout can be set in /opt/serengeti/tomcat6/webapps/serengeti/WEB-INF/web.xml in following format:
+
+    <session-config>
+      <session-timeout>30</session-timeout>    <!-- 30 minutes -->
+    </session-config>
+
+#### Add/Delete a User in Serengeti
+Add or delete user at /opt/serengeti/tomcat6/webapps/serengeti/WEB-INF/spring-security-context.xml file, user-service element.
+Following is a sample to add one user into user-service.
+
+    <authentication-manager alias="authenticationManager">
+      <authentication-provider>
+         <user-service>
+            <user name="serengeti" password="password" authorities="ROLE_ADMIN"/>
+            <user name="joe" password="password" authorities="ROLE_ADMIN"/>
+         </user-service>
+      </authentication-provider>
+    </authentication-manager>
+    
+The authorities value should define user role in Serengeti, but in M2, it’s not used.
+#### Modify User Password
+Change password is in the same element at /opt/serengeti/tomcat6/webapps/serengeti/WEB-INF/spring-security-context.xml file.
+
+    <authentication-manager alias="authenticationManager">
+      <authentication-provider>
+         <user-service>
+            <user name="serengeti" password="password" authorities="ROLE_ADMIN"/>
+            <user name="joe" password="welcome1" authorities="ROLE_ADMIN"/>
+         </user-service>
+      </authentication-provider>
+    </authentication-manager>
+
+#### Login URL
+
 ## Serengeti CLI
 The CLI is built using the [Spring Shell](https://github.com/SpringSource/spring-shell) project.  The CLI supports an interactive shell mode, a command line mode, and execution of script files.   After compiling, you can find the jar file under cli/target directory.
 
