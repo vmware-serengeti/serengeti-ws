@@ -80,8 +80,6 @@ Change password is in the same element at /opt/serengeti/tomcat6/webapps/serenge
       </authentication-provider>
     </authentication-manager>
 
-#### Login URL
-
 ## Serengeti CLI
 The CLI is built using the [Spring Shell](https://github.com/SpringSource/spring-shell) project.  The CLI supports an interactive shell mode, a command line mode, and execution of script files.   After compiling, you can find the jar file under cli/target directory.
 
