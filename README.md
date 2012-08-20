@@ -21,6 +21,7 @@ Serengeti Web Service provides a RESTful API for resources managment and hadoop 
 <tr><td>POST</td><td>/clusters</td><td>ClusterCreate</td><td>Redirect to /task/{taskId}</td><td>Create cluster</td></tr>
 <tr><td>GET</td><td>/clusters</td><td>void</td><td>List of ClusterRead</td><td>List all clusters</td></tr>
 <tr><td>GET</td><td>/cluster/{clusterName}</td><td>clusterName</td><td>ClusterRead</td><td>Get cluster by name</td></tr>
+<tr><td>GET</td><td>/cluster/{clusterName}/spec</td><td>clusterName</td><td>ClusterCreate</td><td>Get cluster specification by name</td></tr>
 <tr><td>PUT</td><td>/cluster/{clusterName}</td><td>clusterName; state=start/stop/resume</td><td>Redirect to /task/{taskId}</td><td>Operate a cluster: start; stop or resume a failed creation</td></tr>
 <tr><td>PUT</td><td>/cluster/{clusterName}/nodegroup/{groupName}</td><td>clusterName; groupName; instanceNum</td><td>Redirect to /task/{taskId}</td><td>Resize cluster with a new instance number</td></tr>
 <tr><td>DELETE</td><td>/cluster/{clusterName}</td><td>clusterName</td><td>Redirect to /task/{taskId}</td><td>Delete a cluster by name</td></tr>
