@@ -6,7 +6,7 @@
 	<artifactId>serengeti-master</artifactId>
 	<version>${serengeti.version}</version>
 	<packaging>pom</packaging>
-	<name>Master project POM</name>
+	<name>Serengeti Master project POM</name>
 
 	<modules>
 		<module>server/serengeti</module>
