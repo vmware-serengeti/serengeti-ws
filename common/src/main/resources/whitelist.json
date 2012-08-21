@@ -705,9 +705,6 @@
     "name":"HADOOP_HEAPSIZE"
     },
     {
-    "name":"HADOOP_LOG_DIR"
-    },
-    {
     "name":"HADOOP_NAMENODE_OPTS"
     },
     {

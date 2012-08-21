@@ -5,7 +5,7 @@
 	<artifactId>serengeti</artifactId>
 	<packaging>war</packaging>
 	<version>${serengeti.version}</version>
-	<name>serengeti Webapp</name>
+	<name>Serengeti Web Service</name>
 	<url>http://maven.apache.org</url>
 
 	<parent>
