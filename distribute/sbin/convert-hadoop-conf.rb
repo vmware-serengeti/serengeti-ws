@@ -14,7 +14,7 @@ $blacklist = [
   'fs.default.name',
   'dfs.http.address', 'dfs.name.dir', 'dfs.data.dir',
   'mapred.job.tracker', 'mapred.local.dir',
-  'HADOOP_HOME', 'HADOOP_COMMON_HOME', 'HADOOP_MAPRED_HOME', 'HADOOP_HDFS_HOME', 'HADOOP_CONF_DIR', 'HADOOP_PID_DIR'
+  'HADOOP_HOME', 'HADOOP_COMMON_HOME', 'HADOOP_MAPRED_HOME', 'HADOOP_HDFS_HOME', 'HADOOP_CONF_DIR', 'HADOOP_PID_DIR', 'HADOOP_LOG_DIR'
 ]
 xml_files = [ 'core-site.xml', 'hdfs-site.xml', 'mapred-site.xml' ]
 prop_files = [ 'hadoop-env.sh' ]
