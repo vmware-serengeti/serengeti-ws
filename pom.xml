@@ -9,8 +9,8 @@
 	<name>Serengeti Master project POM</name>
 
 	<modules>
-		<module>server/serengeti</module>
 		<module>common</module>
+		<module>server/serengeti</module>
 		<module>cli</module>
 	</modules>
 
