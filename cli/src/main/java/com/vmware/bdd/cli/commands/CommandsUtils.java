@@ -1,6 +1,6 @@
 /*****************************************************************************
- *      Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *      Licensed under the Apache License, Version 2.0 (the "License");
+ *   Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
  *
@@ -16,21 +16,30 @@ package com.vmware.bdd.cli.commands;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.impl.Indenter;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import org.codehaus.jackson.util.DefaultPrettyPrinter;
+import org.codehaus.jackson.util.DefaultPrettyPrinter.Lf2SpacesIndenter;
 
 
 public class CommandsUtils {
@@ -92,6 +101,26 @@ public class CommandsUtils {
       T NodeGroupsCreate = null;
       NodeGroupsCreate = mapper.readValue(jsonString, entityType);
       return NodeGroupsCreate;
+   }
+
+   public static void prettyJsonOutput(Object object, String fileName) 
+   throws JsonParseException, JsonMappingException, IOException {
+      OutputStream out = null;
+      if (fileName != null) {
+         out = new FileOutputStream(fileName);
+      } else {
+         out = System.out;
+      }
+      JsonFactory factory = new JsonFactory();
+      JsonGenerator generator = factory.createJsonGenerator(out);
+      ObjectMapper mapper = getMapper();
+      mapper.setSerializationInclusion(Inclusion.NON_NULL);
+      generator.setCodec(mapper);
+      DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+      Indenter indenter = new Lf2SpacesIndenter();
+      prettyPrinter.indentArraysWith(indenter);
+      generator.setPrettyPrinter(prettyPrinter);
+      generator.writeObject(object);
    }
 
    /**
@@ -278,4 +307,35 @@ public class CommandsUtils {
       mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
       return mapper;
    }
+
+   public static Properties readPropertise(String propertiesFilePath) {
+      Properties propertise = new Properties();
+      FileInputStream fis;
+      try {
+         File file = new File(propertiesFilePath);
+         if (!file.exists()){
+            return propertise;
+         }
+         fis = new FileInputStream(propertiesFilePath);
+         propertise.load(fis);
+      } catch (FileNotFoundException e) {
+         e.printStackTrace();
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+      return propertise;
+   }
+
+   public static void writePropertise(Properties propertise, String propertiesFilePath) {
+      FileOutputStream fos=null;
+      try {
+         fos = new FileOutputStream(propertiesFilePath);
+         propertise.store(fos, "");
+      } catch (FileNotFoundException e) {
+         e.printStackTrace();
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+   }
+
 }

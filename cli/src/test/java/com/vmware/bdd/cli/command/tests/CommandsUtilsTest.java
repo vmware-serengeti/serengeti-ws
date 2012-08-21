@@ -14,10 +14,13 @@
  ******************************************************************************/
 package com.vmware.bdd.cli.command.tests;
 
+import static org.testng.AssertJUnit.assertNotNull;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -237,4 +240,49 @@ public class CommandsUtilsTest {
       assertEquals(coreSiteConfig.get("fs.default.name"),
             "hdfs://fqdn_or_ip:8020");
    }
+
+   @Test
+   public void testWritePropertise() {
+      String propertiseFile =
+            CommandsUtils.class.getClassLoader().getResource("").getPath()
+                  + "cookie.propertise";
+      Properties propertise = new Properties();
+      propertise.put("Cookie", "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+      CommandsUtils.writePropertise(propertise, propertiseFile);
+      File file = new File(propertiseFile);
+      assertEquals(file.exists(), true);
+      propertise = CommandsUtils.readPropertise(propertiseFile);
+      assertNotNull(propertise);
+      if (propertise != null) {
+         assertEquals(propertise.getProperty("Cookie"),
+               "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+      }
+      if (file.exists()) {
+         file.delete();
+      }
+   }
+
+   @Test
+   public void testReadPropertise() {
+      String propertiseFile =
+            CommandsUtils.class.getClassLoader().getResource("").getPath()
+                  + "cookie.propertise";
+      Properties propertise = new Properties();
+      propertise.put("Cookie", "123abc123");
+      CommandsUtils.writePropertise(propertise, propertiseFile);
+      propertise.put("Cookie", "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+      CommandsUtils.writePropertise(propertise, propertiseFile);
+      File file = new File(propertiseFile);
+      assertEquals(file.exists(), true);
+      propertise = CommandsUtils.readPropertise(propertiseFile);
+      assertNotNull(propertise);
+      if (propertise != null) {
+         assertEquals(propertise.getProperty("Cookie"),
+               "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+      }
+      if (file.exists()) {
+         file.delete();
+      }
+   }
+
 }

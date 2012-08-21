@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -43,6 +43,7 @@ import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.dal.DAL;
+import com.vmware.bdd.utils.AuAssert;
 
 /**
  * Cluster Entity
@@ -290,4 +291,19 @@ public class ClusterEntity extends EntityBase {
       }
       return clusters;
    }
+
+   public static void updateStatus(final String clusterName, final ClusterStatus status) {
+      if (clusterName == null || status == null) 
+         return;
+
+      DAL.inTransactionDo(new Saveable<Void>() {
+         public Void body() {
+            ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+            AuAssert.check(cluster != null);
+            cluster.setStatus(status);
+            return null;
+         }
+      });
+   }
+
 }

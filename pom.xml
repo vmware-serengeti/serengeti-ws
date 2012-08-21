@@ -128,6 +128,21 @@
 				<artifactId>spring-webmvc</artifactId>
 				<version>${spring.version}</version>
 			</dependency>
+                        <dependency>
+                                <groupId>org.springframework.security</groupId>
+                                <artifactId>spring-security-core</artifactId>
+                                <version>${spring.version}</version>
+                        </dependency>
+                        <dependency>
+                                <groupId>org.springframework.security</groupId>
+                                <artifactId>spring-security-web</artifactId>
+                                <version>${spring.version}</version>
+                        </dependency>
+                        <dependency>
+                                <groupId>org.springframework.security</groupId>
+                                <artifactId>spring-security-config</artifactId>
+                                <version>${spring.version}</version>
+                        </dependency>
 			<dependency>
 				<groupId>org.codehaus.jackson</groupId>
 				<artifactId>jackson-mapper-asl</artifactId>
@@ -146,7 +161,7 @@
 		</dependencies>
 	</dependencyManagement>
 	<properties>
-		<serengeti.version>0.1</serengeti.version>
+		<serengeti.version>0.6.0</serengeti.version>
 		<java.source.version>1.6</java.source.version>
 		<java.target.version>1.6</java.target.version>
 		<bdd.skipTests>true</bdd.skipTests>

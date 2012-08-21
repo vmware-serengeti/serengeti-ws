@@ -14,14 +14,6 @@
     {
       "roles" : ["hive", "hive_server"],
       "tarball" : "apache/1.0.1/hive-0.8.1.tar.gz"
-    },
-    {
-      "roles" : ["hbase_master","hbase_regionserver","hbase_client"],
-      "tarball" : "apache/1.0.1/hbase-0.94.0.tar.gz"
-    },
-    {
-      "roles" : ["zookeeper"],
-      "tarball" : "apache/1.0.1/zookeeper-3.4.3.tar.gz"
     }
    ]
  }

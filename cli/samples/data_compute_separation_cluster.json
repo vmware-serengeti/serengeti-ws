@@ -1,0 +1,108 @@
+{
+  "nodeGroups":[
+    {
+      "name": "master",
+      "roles": [
+        "hadoop_namenode",
+        "hadoop_jobtracker"
+      ],
+      "instanceNum": 1,
+      "instanceType": "LARGE",
+      "cpuNum": 6,
+      "memCapacityMB": 2048,
+      "haFlag": "off"
+    },
+    {
+      "name": "data",
+      "roles": [
+        "hadoop_datanode"
+      ],
+      "instanceNum": 4,
+      "cpuNum": 2,
+      "memCapacityMB": 1024,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 10
+      },
+      "rpNames": [
+        "rp1",
+        "rp2"
+      ],
+      "placementPolicies": {
+        "instancePerHost": 1
+      }
+    },
+    {
+      "name": "compute",
+      "roles": [
+        "hadoop_tasktracker"
+      ],
+      "instanceNum": 8,
+      "cpuNum": 2,
+      "memCapacityMB": 1024,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 10
+      },
+      "rpNames": [
+        "rp1",
+        "rp2"
+      ],
+      "placementPolicies": {
+        "instancePerHost": 2,
+	"groupAssociations": [
+	  {
+	    "reference": "data",
+	    "type": "STRICT"
+	  }
+	]
+      }
+    },
+    {
+      "name": "client",
+      "roles": [
+        "hadoop_client",
+        "hive",
+        "pig"
+      ],
+      "instanceNum": 1,
+      "cpuNum": 1,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 10
+      },
+      "rpNames": [
+        "rp3"
+      ]
+    }
+  ],
+  "configuration": {
+    "hadoop": {
+      "core-site.xml": {
+        // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/core-default.html
+        // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample:
+        // "io.file.buffer.size": "4096"
+      },
+      "hdfs-site.xml": {
+        // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/hdfs-default.html
+      },
+      "mapred-site.xml": {
+        // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/mapred-default.html
+      },
+      "hadoop-env.sh": {
+        // "HADOOP_HEAPSIZE": "",
+        // "HADOOP_NAMENODE_OPTS": "",
+        // "HADOOP_DATANODE_OPTS": "",
+        // "HADOOP_SECONDARYNAMENODE_OPTS": "",
+        // "HADOOP_JOBTRACKER_OPTS": "",
+        // "HADOOP_TASKTRACKER_OPTS": "",
+        // "JAVA_HOME": "",
+        // "PATH": "",
+      },
+      "log4j.properties": {
+        // "hadoop.root.logger": "DEBUG,console",
+        // "hadoop.security.logger": "DEBUG,console",
+      }
+    }
+  }
+}

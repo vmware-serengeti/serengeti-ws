@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -67,9 +67,8 @@ public class ClusterCreate {
    @Expose
    @SerializedName("cluster_configuration")
    private Map<String, Object> configuration;
-   private boolean validateConfig = true;
+   private Boolean validateConfig = true;
    private ClusterType type = ClusterType.HADOOP;
-
    public ClusterCreate() {
    }
 
@@ -211,11 +210,11 @@ public class ClusterCreate {
       this.localPattern = localPattern;
    }
 
-   public boolean isValidateConfig() {
+   public Boolean isValidateConfig() {
       return validateConfig;
    }
 
-   public void setValidateConfig(boolean validateConfig) {
+   public void setValidateConfig(Boolean validateConfig) {
       this.validateConfig = validateConfig;
    }
 
@@ -293,4 +292,5 @@ public class ClusterCreate {
       }
       return false;
    }
+
 }

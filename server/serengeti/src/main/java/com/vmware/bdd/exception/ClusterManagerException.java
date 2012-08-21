@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -13,6 +13,8 @@
  * limitations under the License.
  ***************************************************************************/
 package com.vmware.bdd.exception;
+
+import java.util.List;
 
 public class ClusterManagerException extends BddException {
    private static final long serialVersionUID = 1l;
@@ -65,5 +67,9 @@ public class ClusterManagerException extends BddException {
          String nodeGroupName, int newInstanceNum, int definedInstanceNum) {
       return new ClusterManagerException(null, "SHRINK_OP_NOT_SUPPORTED",
             nodeGroupName, definedInstanceNum, newInstanceNum);
+   }
+
+   public static ClusterManagerException ROLES_NOT_SUPPORTED(List<String> roles) {
+      return new ClusterManagerException(null, "ROLES_NOT_SUPPORTED", roles);
    }
 }

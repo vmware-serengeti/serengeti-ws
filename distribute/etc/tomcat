@@ -23,6 +23,10 @@ if [ "${SERENGETI_HOME}" == "" ]; then
 fi
 
 CATALINA_HOME="${SERENGETI_HOME}/tomcat6"
+
+# Set start tomcat service user
+user="serengeti"
+
 # Set PID file path, needed for force shutdown
 export CATALINA_PID=/var/tmp/catalina.pid
 export JAVA_OPTS="${JAVA_OPTS}${JAVA_OPTS:+ }-Dserengeti.home.dir=${SERENGETI_HOME} -Dlog4j.configuration=file:${SERENGETI_HOME}/conf/log4j.properties"
@@ -91,8 +95,8 @@ start_tomcat() {
       tlog "Start failed"
       return 1
    fi
-   $CATALINA_HOME/bin/startup.sh "$@"
-   
+   sudo -E -u "$user" $CATALINA_HOME/bin/startup.sh "$@"
+
    if [ "$_rc_status" == "0" ]; then
       retry=0
       ret=$NO_TOMCAT
@@ -122,8 +126,8 @@ start_tomcat() {
 
 stop_tomcat() {
    tlog "Stopping Tomcat"
-   $CATALINA_HOME/bin/shutdown.sh "$@"
-   
+   sudo -E -u "$user" $CATALINA_HOME/bin/shutdown.sh "$@"
+
    pid=`get_running_tomcat_java_pid`
    ret=$?
    case "$ret" in

@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -217,11 +217,14 @@ public class TestClusterManager {
    }
 
    public void testGetManifest() {
+      String clusterName = "hadoopSprintA";
+      List<String> targets = new ArrayList<String>();
+      targets.add(clusterName);
       Map<String, Object> attrs =
-            clusterManager.getClusterConfigManifest("hadoop-sprintA");
+            clusterManager.getClusterConfigManifest(clusterName, targets);
       Gson gson = new Gson();
       assertTrue("manifest should contains cluster name",
-            gson.toJson(attrs).indexOf("hadoop-sprintA") != -1);
+            gson.toJson(attrs).indexOf(clusterName) != -1);
       System.out.println(gson.toJson(attrs));
    }
 

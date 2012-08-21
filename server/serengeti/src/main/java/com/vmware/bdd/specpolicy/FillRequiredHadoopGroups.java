@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -45,12 +45,6 @@ public class FillRequiredHadoopGroups {
             continue;
          }
          group = groupMap.get(type);
-         if (clusterType == Cluster.ClusterType.HADOOP) {
-            if (type == GroupType.ZOOKEEPER_GROUP) {
-               continue;
-            }
-            removeHbaseRole(group,type);
-         }
          nodeGroups.add(group);
       }
       return nodeGroups;
@@ -81,9 +75,6 @@ public class FillRequiredHadoopGroups {
          logger.debug("master roles are all missing. add default master node group.");
          groupType = GroupType.MASTER_GROUP;
          templateGroup = templateGroupMaps.get(groupType);
-         if (clusterType == Cluster.ClusterType.HADOOP){
-            removeHbaseRole(templateGroup, groupType);
-         }
          group = new NodeGroupCreate(templateGroup);
       } else {
          List<String> roles = new ArrayList<String>();
@@ -95,9 +86,6 @@ public class FillRequiredHadoopGroups {
             logger.debug("hadoop_jobtracker role is missing. add node group contains this role only.");
             groupType = GroupType.MASTER_GROUP;
             roles.add(HadoopRole.HADOOP_NAMENODE_ROLE.toString());
-         }
-         if (clusterType == Cluster.ClusterType.HBASE){
-            roles.add(HadoopRole.HBASE_MASTER_ROLE.toString());
          }
          groupType = GroupType.MASTER_GROUP;
          templateGroup = templateGroupMaps.get(groupType);
@@ -118,9 +106,6 @@ public class FillRequiredHadoopGroups {
          logger.debug("datanode and tasktracker roles are missing. add default worker node group.");
          GroupType groupType = GroupType.WORKER_GROUP;
          NodeGroupCreate nodeGroupCreate = templateGroupMaps.get(groupType);
-         if (clusterType == Cluster.ClusterType.HADOOP) {
-            removeHbaseRole(nodeGroupCreate, groupType);
-         }
          NodeGroupCreate group = new NodeGroupCreate(nodeGroupCreate);
          group.setName("expanded_worker");
          missingGroups.add(group);
@@ -135,22 +120,9 @@ public class FillRequiredHadoopGroups {
             } else if (strRoles.contains(HadoopRole.HADOOP_DATANODE.toString())) {
                strRoles.add(HadoopRole.HADOOP_TASKTRACKER.toString());
             }
-            if (clusterType == Cluster.ClusterType.HBASE){
-               strRoles.add(HadoopRole.HBASE_REGIONSERVER_ROLE.toString());
-            }
             entity.setRoles(new Gson().toJson(strRoles));
          }
       }
    }
-
-   private void removeHbaseRole(NodeGroupCreate group,GroupType type){
-      if (type == GroupType.MASTER_GROUP){
-         group.getRoles().remove(HadoopRole.HBASE_MASTER_ROLE.toString());
-      } else if (type == GroupType.WORKER_GROUP){
-         group.getRoles().remove(HadoopRole.HBASE_REGIONSERVER_ROLE.toString());
-      } else if (type == GroupType.CLIENT_GROUP){
-         group.getRoles().remove(HadoopRole.HBASE_CLIENT_ROLE.toString());
-      }
-  }
 
 }

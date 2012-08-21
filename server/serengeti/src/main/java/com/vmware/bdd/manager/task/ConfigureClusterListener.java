@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -43,23 +43,14 @@ public class ConfigureClusterListener implements TaskListener {
       logger.debug("configure cluster " + clusterName
             + " task listener called onSuccess");
 
-      ClusterEntity cluster =
-            ClusterEntity.findClusterEntityByName(clusterName);
-      AuAssert.check(cluster != null);
-
-      cluster.setStatus(ClusterStatus.RUNNING);
-      DAL.inTransactionUpdate(cluster);
+      ClusterEntity.updateStatus(clusterName, ClusterStatus.RUNNING);
    }
 
    @Override
    public void onFailure() {
       logger.debug("configure cluster listener called onFailure");
 
-      ClusterEntity cluster =
-            ClusterEntity.findClusterEntityByName(clusterName);
-      AuAssert.check(cluster != null);
-      cluster.setStatus(ClusterStatus.CONFIGURE_ERROR);
-      DAL.inTransactionUpdate(cluster);
+      ClusterEntity.updateStatus(clusterName, ClusterStatus.CONFIGURE_ERROR);
       logger.error("failed to configure cluster " + clusterName + " set its status as ERROR");
    }
 

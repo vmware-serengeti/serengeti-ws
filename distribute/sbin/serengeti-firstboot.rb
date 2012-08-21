@@ -14,6 +14,7 @@ SERENGETI_HOME="/opt/serengeti"
 SERENGETI_WEBAPP_HOME="#{SERENGETI_HOME}/conf"
 #serengeti webservice properties
 SERENGETI_WEBAPP_CONF="#{SERENGETI_WEBAPP_HOME}/serengeti.properties"
+SERENGETI_CLOUD_MANAGER_CONF="#{SERENGETI_WEBAPP_HOME}/cloud-manager.vsphere.yaml"
 #cookbook related .chef/knife.rb
 CHEF_CONF="#{SERENGETI_HOME}/.chef/knife.rb"
 #serengeti tmp folder
@@ -119,7 +120,7 @@ system <<EOF
 sed -i "s/chef_server_url.*/#{fqdn_url}/" "#{CHEF_CONF}" #update CHEF_URL
 
 # link ~/.chef to /opt/serengeti/.chef so knife can be run in any directory
-ln -sf $SERENGETI_HOME/.chef /home/serengeti/.chef
+ln -sf "#{SERENGETI_HOME}/.chef" /home/serengeti/.chef
 chown -h serengeti:serengeti /home/serengeti/.chef
 chmod 755 /home/serengeti/.chef
 
@@ -138,6 +139,7 @@ echo ${clijarname}
 #touch serengeti cli bash
 chown serengeti:serengeti "#{SERENGETI_CLI_HOME}" -R #
 touch "#{SERENGETI_SCRIPTS_HOME}/serengeti"
+chown serengeti:serengeti "#{SERENGETI_SCRIPTS_HOME}/serengeti"
 chmod +x "#{SERENGETI_SCRIPTS_HOME}/serengeti"
 echo "#!/bin/bash" > "#{SERENGETI_SCRIPTS_HOME}/serengeti"
 echo "clijarname=${clijarfullname##*\/}" >> "#{SERENGETI_SCRIPTS_HOME}/serengeti"
@@ -163,6 +165,7 @@ SHELLEOF
 
 #write system configuration
 echo "PATH=\\$PATH:\"#{SERENGETI_SCRIPTS_HOME}\"" >> /etc/profile
+echo "CLOUD_MANAGER_CONFIG_DIR=\"#{SERENGETI_HOME}\"/conf" >> /etc/profile
 
 EOF
 
@@ -205,11 +208,14 @@ system <<EOF
 
 #update serengeti.properties for web service
 sed -i "s/distro_root =.*/#{distroip}/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/vc_addr = .*/vc_addr = \"#{h["evs_IP"]}\"/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/vc_user = .*/vc_user = \"#{vcuser}\"/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/vc_pwd = .*/vc_pwd = \"#{updateVCPassword}\"/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/vc_datacenter = .*/#{vcdatacenterline}/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/template_id = .*/#{templateid}/" "#{SERENGETI_WEBAPP_CONF}"
+
+echo "vc_addr: #{h["evs_IP"]}" > "#{SERENGETI_CLOUD_MANAGER_CONF}"
+echo "vc_user: #{vcuser}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+echo "vc_pwd:  #{updateVCPassword}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+chmod 400 "#{SERENGETI_CLOUD_MANAGER_CONF}"
+chown serengeti:serengeti "#{SERENGETI_CLOUD_MANAGER_CONF}"
 
 #kill tomcat using shell direclty to avoid failing to stop tomcat
 pidlist=`ps -ef|grep tomcat | grep -v "grep"|awk '{print $2}'`
@@ -230,7 +236,7 @@ fi
 /etc/init.d/tomcat start
 
 #serengeti cli connect first
-connecthost="connect --host localhost:8080"
+connecthost="connect --host localhost:8080 --username serengeti --password password"
 su - "#{SERENGETI_USER}" -c "#{SERENGETI_SCRIPTS_HOME}/serengeti \\"${connecthost}\\""
 
 #add default resourcepool, datastore, and dhcp network
@@ -246,4 +252,11 @@ if [ "#{h["initResources"]}" == "True" ]; then
    rm -rf "#{SERENGETI_HOME}/logs/not-init"
 fi
 
+# generate random password for root/serengeti user when lockdown
+if [ -e /opt/serengeti/etc/lock_down ]; then
+  /opt/serengeti/sbin/set-password -a
+fi
+
+# remove ovf env file
+rm -f "#{SERENGETI_VC_PROPERTIES}"
 EOF

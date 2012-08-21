@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SERENGETI_USER="serengeti"
+SERENGETI_GROUP="serengeti"
 SERENGETI_HOME="/opt/serengeti"
 SERENGETI_SCRIPTS_HOME="${SERENGETI_HOME}/sbin"
 SERENGETI_ETC_HOME="${SERENGETI_HOME}/etc"
@@ -14,15 +16,24 @@ mkdir -p "${SERENGETI_LOG}"
 if [ ! -e "${SERENGETI_ETC_HOME}/serengeti-firstboot" ]
 then
     touch "${SERENGETI_LOG_INSTALLER}"
+    chown "${SERENGETI_USER}.${SERENGETI_GROUP}" "${SERENGETI_LOG_INSTALLER}"
+    chmod 600 "${SERENGETI_LOG_INSTALLER}"
     echo `date` >> ${SERENGETI_LOG_INSTALLER}
     echo `date` >> ${SERENGETI_ERR_INSTALLER}
     chmod +x "${SERENGETI_SCRIPTS_HOME}/serengeti-firstboot.rb"
     /usr/bin/ruby "${SERENGETI_SCRIPTS_HOME}/serengeti-firstboot.rb" 1>>${SERENGETI_LOG_INSTALLER} 2>>${SERENGETI_ERR_INSTALLER}
+    chown "${SERENGETI_USER}.${SERENGETI_GROUP}" "${SERENGETI_ERR_INSTALLER}"
     touch "${SERENGETI_ETC_HOME}/serengeti-firstboot"
+    chown "${SERENGETI_USER}.${SERENGETI_GROUP}" "${SERENGETI_ETC_HOME}/serengeti-firstboot"
+    chmod 400 "${SERENGETI_ETC_HOME}/serengeti-firstboot"
 else
     touch "${SERENGETI_LOG_UPDATE}"
+    chown "${SERENGETI_USER}.${SERENGETI_GROUP}" "${SERENGETI_LOG_UPDATE}"
+    chmod 600 "${SERENGETI_LOG_UPDATE}"
     echo `date` >> ${SERENGETI_LOG_UPDATE}
     echo `date` >> ${SERENGETI_ERR_UPDATE}
     chmod +x "${SERENGETI_SCRIPTS_HOME}/serengeti-subsequentboot.rb"
     /usr/bin/ruby "${SERENGETI_SCRIPTS_HOME}/serengeti-subsequentboot.rb" 1>>${SERENGETI_LOG_UPDATE} 2>>${SERENGETI_ERR_UPDATE}
+    chown "${SERENGETI_USER}.${SERENGETI_GROUP}" "${SERENGETI_LOG_UPDATE}"
+    chown "${SERENGETI_USER}.${SERENGETI_GROUP}" "${SERENGETI_ERR_UPDATE}"
 fi

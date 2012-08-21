@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -31,6 +31,7 @@ import org.hibernate.criterion.Restrictions;
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.dal.DAL;
+import com.vmware.bdd.utils.AuAssert;
 
 /**
  * Hadoop Node Entity class: describes hadoop node info
@@ -202,5 +203,13 @@ public class HadoopNodeEntity extends EntityBase {
       } else {
          return new ArrayList<HadoopNodeEntity>(0);
       }
+   }
+
+   public static HadoopNodeEntity findByName(NodeGroupEntity group, String name) {
+      AuAssert.check(group != null);
+      return DAL.findUniqueByCriteria(
+            HadoopNodeEntity.class,
+            Restrictions.and(Restrictions.eq("nodeGroup", group),
+                  Restrictions.eq("vmName", name)));
    }
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -78,9 +78,9 @@ public class TestVcProviderManager {
 
    @Test(groups = {"testVCProvider"}, dependsOnMethods = { "com.vmware.bdd.manager.TestClusterManager.testDeleteClusterNegative" })
    public void testDefaultValue() {
-      System.out.println("password: " + mgr.getAdminPassword());
-      Assert.assertTrue("password should not be empty.",
-            mgr.getAdminPassword() != null);
+      System.out.println("datacenter: " + mgr.getDataCenter());
+      Assert.assertTrue("datacenter should not be empty.",
+            mgr.getDataCenter() != null);
    }
 
    @Test(groups = {"testVCProvider"}, dependsOnMethods = { "testDefaultValue" })

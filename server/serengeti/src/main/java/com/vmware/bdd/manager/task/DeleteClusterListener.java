@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -68,11 +68,7 @@ public class DeleteClusterListener implements TaskListener {
    public void onFailure() {
       logger.debug("delete cluster listener called onFailure");
 
-      ClusterEntity cluster =
-            ClusterEntity.findClusterEntityByName(clusterName);
-      AuAssert.check(cluster != null);
-      cluster.setStatus(ClusterStatus.ERROR);
-      DAL.inTransactionUpdate(cluster);
+      ClusterEntity.updateStatus(clusterName, ClusterStatus.ERROR);
       logger.error("failed to delete cluster " + clusterName 
             + " set its status as ERROR");
    }

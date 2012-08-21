@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -15,6 +15,7 @@
 package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -114,32 +115,7 @@ public class ClusterConfigManager {
          throw ClusterConfigException.INVALID_ROLES(failedMsgList);
       }
 
-      if (cluster.hasHDFSUrlConfigured()) {
-         if (cluster.validateHDFSUrl()) {
-            Map<String,Object> conf = cluster.getConfiguration();
-            if (conf == null) {
-               conf = new HashMap<String,Object>();
-               cluster.setConfiguration(conf);
-            }
-            @SuppressWarnings("unchecked")
-            Map<String, Object> hadoopConf = (Map<String, Object>) conf.get("hadoop");
-            if (hadoopConf == null) {
-               hadoopConf = new HashMap<String,Object>();
-               conf.put("hadoop", hadoopConf);
-            }
-            @SuppressWarnings("unchecked")
-            Map<String, Object> coreSiteConf =
-               (Map<String, Object>) hadoopConf.get("core-site.xml");
-            if (coreSiteConf == null) {
-               coreSiteConf = new HashMap<String,Object>();
-               hadoopConf.put("core-site.xml", coreSiteConf);
-            }
-            coreSiteConf.put("fs.default.name", cluster.getExternalHDFS());
-         } else {
-            throw BddException.INVALID_PARAMETER("externalHDFS",
-                  cluster.getExternalHDFS());
-         }
-      }
+      transformHDFSUrl(cluster);
 
       try {
          return DAL.inTransactionDo(new Saveable<ClusterEntity>() {
@@ -228,6 +204,35 @@ public class ClusterConfigManager {
          logger.info("can not create cluster " + name
                + ", which is already existed.");
          throw BddException.ALREADY_EXISTS(ex, "cluster", name);
+      }
+   }
+
+   private void transformHDFSUrl(ClusterCreate cluster) {
+      if (cluster.hasHDFSUrlConfigured()) {
+         if (cluster.validateHDFSUrl()) {
+            Map<String,Object> conf = cluster.getConfiguration();
+            if (conf == null) {
+               conf = new HashMap<String,Object>();
+               cluster.setConfiguration(conf);
+            }
+            @SuppressWarnings("unchecked")
+            Map<String, Object> hadoopConf = (Map<String, Object>) conf.get("hadoop");
+            if (hadoopConf == null) {
+               hadoopConf = new HashMap<String,Object>();
+               conf.put("hadoop", hadoopConf);
+            }
+            @SuppressWarnings("unchecked")
+            Map<String, Object> coreSiteConf =
+               (Map<String, Object>) hadoopConf.get("core-site.xml");
+            if (coreSiteConf == null) {
+               coreSiteConf = new HashMap<String,Object>();
+               hadoopConf.put("core-site.xml", coreSiteConf);
+            }
+            coreSiteConf.put("fs.default.name", cluster.getExternalHDFS());
+         } else {
+            throw BddException.INVALID_PARAMETER("externalHDFS",
+                  cluster.getExternalHDFS());
+         }
       }
    }
 
@@ -458,6 +463,7 @@ public class ClusterConfigManager {
          List<VcCluster> vcClusters =
                rpMgr.getVcResourcePoolByNameList(rpNames);
          clusterConfig.setVcClusters(vcClusters);
+         clusterConfig.setRpNames(clusterEntity.getVcRpNameList());
       } else {
          logger.debug("no resource pool config at cluster level.");
       }
@@ -472,6 +478,7 @@ public class ClusterConfigManager {
                datastoreMgr.getLocalDatastoresByNames(clusterEntity
                      .getVcDatastoreNameList());
          clusterConfig.setLocalPattern(localPattern);
+         clusterConfig.setDsNames(clusterEntity.getVcDatastoreNameList());
       } else {
          logger.debug("no datastore config at cluster level.");
       }
@@ -525,6 +532,7 @@ public class ClusterConfigManager {
       }
       networking.add(network);
       clusterConfig.setNetworking(networking);
+      clusterConfig.setNetworkName(networkEntity.getName());
       if (clusterEntity.getHadoopConfig() != null) {
          Map hadoopConfig =
                (new Gson())
@@ -610,6 +618,7 @@ public class ClusterConfigManager {
          List<VcCluster> vcClusters =
                rpMgr.getVcResourcePoolByNameList(rpNames);
          group.setVcClusters(vcClusters);
+         group.setRpNames(Arrays.asList(rpNames));
       }
 
       expandGroupStorage(ngEntity, group);
@@ -626,7 +635,6 @@ public class ClusterConfigManager {
       int storageSize = ngEntity.getStorageSize();
       DatastoreType storageType = ngEntity.getStorageType();
       List<String> storeNames = ngEntity.getVcDatastoreNameList();
-
       if (storageSize <= 0 && storageType == null
             && (storeNames == null || storeNames.isEmpty())) {
          logger.debug("no storage specified for node group "
@@ -646,6 +654,7 @@ public class ClusterConfigManager {
          storage.setType(storageType.toString().toLowerCase());
       }
       storage.setNamePattern(getStoreNamePattern(storageType, storeNames));
+      storage.setDsNames(storeNames);
    }
 
    private List<String> getStoreNamePattern(DatastoreType storageType,
@@ -713,7 +722,9 @@ public class ClusterConfigManager {
                logger.error("cluster " + clusterName + " does not exist");
                throw BddException.NOT_FOUND("cluster", clusterName);
             }
+            transformHDFSUrl(clusterCreate);
             Map<String, Object> clusterLevelConfig = clusterCreate.getConfiguration();
+
             if (clusterLevelConfig != null && clusterLevelConfig.size() > 0) {
                logger.debug("Cluster level app config is updated.");
                CommonClusterExpandPolicy.validateAppConfig(
@@ -723,6 +734,7 @@ public class ClusterConfigManager {
                logger.debug("cluster configuration is not set in cluster spec, so treat it as an empty configuration.");
                cluster.setHadoopConfig(null);
             }
+
             updateNodegroupAppConfig(clusterCreate, cluster, clusterCreate.isValidateConfig());
             return null;
          }

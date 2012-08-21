@@ -27,7 +27,7 @@ public class CommonUtilTest {
    @Test
    public void testCopyFile() {
       try {
-         String origFile = "cli-default-cluster.json";
+         String origFile = "default_hadoop_cluster.json";
          String destFile = System.getProperty("user.home") + "/" + "test.json";
          CommonUtil.copyFile(origFile, destFile);
          File file = new File(destFile);

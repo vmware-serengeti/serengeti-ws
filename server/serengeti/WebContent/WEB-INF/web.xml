@@ -3,19 +3,26 @@
  "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
 <web-app>
+    <!--
+      - Location of the XML file that defines the root application context
+      - Applied by ContextLoaderListener.
+      -->
 	<display-name>serengeti</display-name>
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>WEB-INF/applicationContext.xml</param-value>
+		<param-value>
+		   WEB-INF/applicationContext.xml
+           WEB-INF/spring-security-context.xml
+		</param-value>
 	</context-param>
 
    <filter>
-      <filter-name>requestLoggingFilter</filter-name>
+      <filter-name>springSecurityFilterChain</filter-name>
       <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
    </filter>
 
    <filter-mapping>
-      <filter-name>requestLoggingFilter</filter-name>
+      <filter-name>springSecurityFilterChain</filter-name>
       <url-pattern>/*</url-pattern>
    </filter-mapping>
 

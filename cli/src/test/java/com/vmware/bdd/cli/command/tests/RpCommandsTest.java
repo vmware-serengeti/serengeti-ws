@@ -1,6 +1,6 @@
 /******************************************************************************
- *       Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *      Licensed under the Apache License, Version 2.0 (the "License");
+ *   Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
  *
@@ -29,6 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
+import com.vmware.bdd.cli.commands.CookieCache;
 import com.vmware.bdd.cli.commands.ResourcePoolCommands;
 
 @ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
@@ -38,15 +39,18 @@ public class RpCommandsTest extends MockRestServer {
 
    @Test
    public void testCreateRp() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody(
             "http://127.0.0.1:8080/serengeti/api/resourcepools", HttpMethod.POST,
             HttpStatus.NO_CONTENT, "");
 
       rpCommands.addResourcePool("rp01", "vc_rp1", "vc_cluster1");
+      CookieCache.put("Cookie","");
    }
    
    @Test
    public void testCreateRpFailure() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("already exists");
       ObjectMapper mapper = new ObjectMapper();
@@ -56,19 +60,23 @@ public class RpCommandsTest extends MockRestServer {
             HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
 
       rpCommands.addResourcePool("rp01", "vc_rp1", "vc_cluster1");
+      CookieCache.put("Cookie","");
    }
 
    @Test
    public void testDeleteRp() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody(
             "http://127.0.0.1:8080/serengeti/api/resourcepool/rp01", HttpMethod.DELETE,
             HttpStatus.NO_CONTENT, "");
 
       rpCommands.deleteResourcePool("rp01");
+      CookieCache.put("Cookie","");
    }
    
    @Test
    public void testDeleteRpFailure() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
@@ -78,10 +86,12 @@ public class RpCommandsTest extends MockRestServer {
             HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
       rpCommands.deleteResourcePool("rp01");
+      CookieCache.put("Cookie","");
    }
    
    @Test
    public void testRpList() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       ResourcePoolRead rp = new ResourcePoolRead();
       rp.setRpName("test01");
       rp.setVcCluster("home");
@@ -115,11 +125,12 @@ public class RpCommandsTest extends MockRestServer {
             HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(rp));
     
       rpCommands.getResourcePool("test01", true);
+      CookieCache.put("Cookie","");
    }
    
    @Test
    public void testPrettyOutputResourcePoolsInfo() throws Exception {
-
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       NodeRead node01 = new NodeRead();
       node01.setName("node01");
       node01.setIp("192.168.1.2");
@@ -160,10 +171,12 @@ public class RpCommandsTest extends MockRestServer {
             HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(rps));
     
       rpCommands.getResourcePool(null, true);
+      CookieCache.put("Cookie","");
    }
    
    @Test
    public void testRpListFailure() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
@@ -172,5 +185,6 @@ public class RpCommandsTest extends MockRestServer {
             HttpMethod.GET, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
       rpCommands.getResourcePool("rp1", true);
+      CookieCache.put("Cookie","");
    }
 }

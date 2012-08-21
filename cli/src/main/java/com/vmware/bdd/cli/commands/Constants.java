@@ -29,12 +29,14 @@ public class Constants {
    public static final String REST_PATH_NODEGROUP = "nodegroup";
    public static final String REST_PATH_NODE = "node";
    public static final String REST_PATH_TASK = "task";
-   public static final String REST_PATH_TEST = "hello";
+   public static final String REST_PATH_LOGIN = "j_spring_security_check";
+   public static final String REST_PATH_LOGOUT = "j_spring_security_logout";
    public static final String REST_PATH_NETWORK = "network";
    public static final String REST_PATH_NETWORKS = "networks";
    public static final String REST_PATH_DISTROS = "distros";
    public static final String REST_PATH_DISTRO = "distro";
    public static final String REST_PATH_CONFIG = "config";
+   public static final String REST_PATH_SPEC = "spec";
 
    public static final String QUERY_ACTION_KEY = "state";
    public static final String QUERY_ACTION_START = "start";
@@ -55,11 +57,13 @@ public class Constants {
    public static final String ACTION_OPS_FAILURE = "Unable to";
    public static final String CONNECT_SUCCESS = "Connected";
    public static final String CONNECT_FAILURE = "Cannot connect to the host";
+   public static final String DISCONNECT_FAILURE = "Diconnect failed!";
    public static final String NEED_CONNECTION = "no connection to serengeti server, please connect first.";
 
    public static final String OUTPUT_INDENT = "  ";
    public static final String OUTPUT_SPLITTER = ", ";
    public static final String OUTPUT_OBJECT_CLUSTER = "cluster";
+   public static final String OUTPUT_OBJECT_NODES_IN_CLUSTER = "nodes in cluster";
    public static final String OUTPUT_OBJECT_DATASTORE = "datastore";
    public static final String OUTPUT_OBJECT_DISTRO = "distro";
    public static final String OUTPUT_OBJECT_NETWORK = "network";
@@ -67,6 +71,7 @@ public class Constants {
    public static final String OUTPUT_OBJECT_RESOURCEPOOL = "resourcepool";
    public static final String OUTPUT_OP_CREATE = "create";
    public static final String OUTPUT_OP_CONFIG = "config";
+   public static final String OUTPUT_OP_EXPORT = "export";
    public static final String OUTPUT_OP_ADD = "add";
    public static final String OUTPUT_OP_LIST = "list";
    public static final String OUTPUT_OP_TARGET = "target";
@@ -84,14 +89,16 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_RESIZE = "resized";
    public static final String OUTPUT_OP_RESULT_RESUME = "resumed";
    public static final String OUTPUT_OP_RESULT_ADD = "added";
+   public static final String OUTPUT_OP_NODEGROUP_MISSING = "must specify nodegroup name when node name is specified";
    public static final String OUTPUT_UNKNOWN_HOST = "unknown host";
-   public static final String OUTPUT_HOST_REFUSE = "Connection refused. Please check the port number";
+   public static final String OUTPUT_HOST_REFUSE = "Connection refused. Please check the port number.";
    public static final String OUTPUT_HOST_TIMEOUT = "connection timeout";
-   public static final String OUTPUT_LOG_INFO = "you can get task failure details from serengeti server log at:";
+   public static final String OUTPUT_LOG_INFO = "you can get task failure details from serengeti server log at: ";
 
    public static final String HTTP_CONNECTION_PREFIX = "http://";
    public static final String HTTP_CONNECTION_SUFFIX = "/serengeti/api/";
-
+   public static final String HTTP_CONNECTION_API = "api/";
+   public static final String HTTP_CONNECTION_LOGIN_SUFFIX = "/serengeti/";
    public static final String PROPERTY_FILE = "cli.properties";
    public static final String PROPERTY_HOST = "host";
    public static final String PROPERTY_FILE_HOST_COMMENT = "update host information";
@@ -126,7 +133,7 @@ public class Constants {
    public static final String ROLE_HIVE_SERVER = "hive_server";
    public static final String ROLE_PIG = "pig";
    public static final String PARAM_CLUSTER_WARNING =
-         "Warning: only support 1 master node group, 1 worker node group and 0 or 1 client node group now(master node group has hadoop_namenode,hadoop_jobtracker roles, only 1 instance. worker node group has hadoop_datanode,hadoop_tasktracker roles, 1 or more instance. client node group has hadoop_client,optional hive or pig roles,0 or more instance. Only master node group can config haFlag.)";
+         "Warning: Serengeti supports multi-instance of tasktracker and datanode, only one instance of namenode and jobtracker, multi-instance of client. Only namenode and jobtracker instance support to configure haFlag.";
    public static final String PARAM_CLUSTER_FAILED_INSTANCE_NUM_NEGATIVE = "instanceNum can not be negative";
    public static final String PARAM_CLUSTER = "cluster name";
    public static final String PARAM_DISTRO = "distro name";
@@ -164,7 +171,7 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_TASK = "TASK";
    public static final String DEFAULT_DISTRO = "apache";
    public static final String PARAM_NO_DISTRO_AVAILABLE = "no distro available,please upload one distro";
-   public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure to continue (Y/N)? ";
+   public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure you want to continue (Y/N)? ";
    public static final String PARAM_CLUSTER_IN_BLACK_LIST_WARNING =
          "not allowed to customize in Serengeti. Your settings will not take effect.";
    public static final String PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING =
@@ -172,4 +179,13 @@ public class Constants {
    public static final String PARAM_CLUSTER_CONFIG_RUNNING_JOB_WARNING =
          "Applying new Hadoop configuration will restart Hadoop processes and may lead to termination of running jobs.";
    public static final String PARAM_CLUSTER_SPEC_HA_ERROR = "The ha property must be one of 'off', 'on' and 'ft' in spec file ";
+   public static final String CONNECT_UNAUTHORIZATION = "The connection is refused, may be invalid password or overtime session, please try to reconnect!";
+   public static final String CONNECT_USER_NAME = "The user name";
+   public static final String CONNECT_PASSWORD = "The password";
+   public static final String CONNECT_CAN_NOT_BE_NULL = " can not be null!";
+   public static final String CONNECT_ENTER_USER_NAME = "Please enter the username: ";
+   public static final String CONNECT_ENTER_PASSWORD = "Please enter the password: ";
+   public static final String CONNECT_CHECK_LOGIN = "You are not login, please run connect first!";
+   public static final String CONNECT_SESSION_TIME_OUT = "Session timeout, please run connect again!";
+   public static final String OUTPUT_OBJECT_CONNECT = "connect";
 }

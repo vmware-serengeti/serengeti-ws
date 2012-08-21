@@ -1,6 +1,6 @@
 /******************************************************************************
- *       Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *      Licensed under the Apache License, Version 2.0 (the "License");
+ *   Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
  *
@@ -29,6 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
+import com.vmware.bdd.cli.commands.CookieCache;
 import com.vmware.bdd.cli.rest.NetworkRestClient;
 
 /**
@@ -41,6 +42,7 @@ public class NetworkRestClientTest extends MockRestServer {
    
    @Test
    public void add() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       Assert.notNull(networkRestClient);
       NetworkAdd networkAdd =new NetworkAdd();
       addByIP(networkAdd);
@@ -51,12 +53,15 @@ public class NetworkRestClientTest extends MockRestServer {
             "http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.POST,
             HttpStatus.NO_CONTENT, mapper.writeValueAsString(networkAdd));
       networkRestClient.add(networkAdd);
+      CookieCache.put("Cookie","");
    }
    
    @Test
    public void delete() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/network/name1", HttpMethod.DELETE, HttpStatus.NO_CONTENT, "");
       networkRestClient.delete("name1");
+      CookieCache.put("Cookie","");
    }
    
    private void addByIP(NetworkAdd networkAdd){

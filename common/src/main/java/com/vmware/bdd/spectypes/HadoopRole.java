@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -22,11 +22,7 @@ public enum HadoopRole {
    HADOOP_DATANODE("hadoop_datanode"), 
    HADOOP_TASKTRACKER("hadoop_tasktracker"), 
    HADOOP_JOBTRACKER_ROLE("hadoop_jobtracker"), 
-   HADOOP_NAMENODE_ROLE("hadoop_namenode"),
-   HBASE_MASTER_ROLE("hbase_master"),
-   HBASE_REGIONSERVER_ROLE("hbase_regionserver"),
-   HBASE_CLIENT_ROLE("hbase_client"),
-   ZOOKEEPER_ROLE("zookeeper");
+   HADOOP_NAMENODE_ROLE("hadoop_namenode");
 
    private String description;
 

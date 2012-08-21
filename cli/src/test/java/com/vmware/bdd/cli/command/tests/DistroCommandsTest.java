@@ -1,6 +1,6 @@
 /******************************************************************************
- *       Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *      Licensed under the Apache License, Version 2.0 (the "License");
+ *   Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
  *
@@ -28,6 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.DistroRead;
+import com.vmware.bdd.cli.commands.CookieCache;
 import com.vmware.bdd.cli.commands.DistroCommands;
 
 @ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
@@ -37,8 +38,8 @@ public class DistroCommandsTest extends MockRestServer {
 
    @Test
    public void testDistroList() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       DistroRead[] distros = new DistroRead[2];
-
       DistroRead distro1 = new DistroRead();
       distro1.setName("Apache");
       List<String> roles1 = new ArrayList<String>();
@@ -70,10 +71,12 @@ public class DistroCommandsTest extends MockRestServer {
 
       //get all distros
       distroCommands.getDistro(null, false);
+      CookieCache.put("Cookie","");
    }
    
    @Test
    public void testDistroListFailure() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
@@ -82,5 +85,6 @@ public class DistroCommandsTest extends MockRestServer {
 
       //get all distros
       distroCommands.getDistro(null, false);
+      CookieCache.put("Cookie","");
    }
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
- *    Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- *    Licensed under the Apache License, Version 2.0 (the "License");
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -23,8 +23,7 @@ public enum GroupType {
    MASTER_GROUP("master"), 
    MASTER_JOBTRACKER_GROUP("job_tracker"),
    WORKER_GROUP("worker"), 
-   CLIENT_GROUP("client"),
-   ZOOKEEPER_GROUP("zookeeper");
+   CLIENT_GROUP("client");
 
    private String description;
 
@@ -64,8 +63,6 @@ public enum GroupType {
       } else if (roles.contains(HadoopRole.HADOOP_DATANODE) ||
             roles.contains(HadoopRole.HADOOP_TASKTRACKER)) {
          return WORKER_GROUP;
-      } else if (roles.contains(HadoopRole.ZOOKEEPER_ROLE)) {
-         return ZOOKEEPER_GROUP;
       } else {
          return CLIENT_GROUP;
       }
