@@ -5,6 +5,7 @@
 # usage: topology-generator.rb cluster_name rack_description_file
 require 'json'
 require 'net/http'
+require 'highline/import'
 
 def check_rack_host_desc_format( file_name )
   f = File.open(file_name, "r")
@@ -34,15 +35,40 @@ end
 cluster_name = ARGV[0]
 rack_descriptiion_file = ARGV[1]
 
+#login serengeti first
+puts "login serengeti now."
+username = ask("username: ") { |q| q.echo = true }
+password = ask("password: ") { |q| q.echo = "*" }
+path = "/serengeti/j_spring_security_check?j_username=#{username}&j_password=#{password}"
+http = Net::HTTP.new('localhost', 8080)
+headers = {
+  'Content-Type' => 'text/html'
+}
+conn_resp = http.post(path, nil, headers)
+unless conn_resp.code == '200'
+  puts "Cannot authenticate, please check if username/password is valid."
+  exit
+end
+
 #get cluster information
-url = "http://localhost:8080/serengeti/api/cluster/#{cluster_name}"
-resp = Net::HTTP.get_response(URI.parse(url))
-unless resp.code == '200'
+cookie = conn_resp["set-cookie"]
+path = "/serengeti/api/cluster/#{cluster_name}"
+headers = {
+  'Cookie' => "#{cookie}",
+  'Content-Type' => 'application/json'
+}
+get_cluster_resp = http.get(path, headers)
+
+#logout serengeti as a good practice
+path = "/serengeti/j_spring_security_logout"
+http.get(path, headers)
+
+unless get_cluster_resp.code == '200'
   puts "Cannot get cluster information, please check if the cluster name is correct."
   exit
 end
 
-cluster = JSON.parse(resp.body)
+cluster = JSON.parse(get_cluster_resp.body)
 
 unless cluster['status'] == 'RUNNING'
   puts "Please make sure the cluster is running before you can run this script."
