@@ -202,18 +202,20 @@
 
 =======================================================================   
 
-Serengeti 0.5: 
+Serengeti 0.6: 
 
-Serengeti 0.5 includes a number of subcomponents with
+Serengeti 0.6 includes a number of subcomponents with
 separate copyright notices and license terms.  The product that 
 includes this file does not necessarily use all the open source 
 subcomponents referred to below. Your use of the source
 code for the these subcomponents is subject to the terms and
-conditions of the following licenses. 
+conditions of the following licenses.
+
 
 SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
 
-  >>> rubygem-fog-1.3.1
+   >>> rubygem-fog-1.3.1
+
 
 
 SECTION 2: Apache License, V2.0
@@ -221,7 +223,13 @@ SECTION 2: Apache License, V2.0
    >>> ironfan-homebase-none
    >>> rubygem-ironfan-3.1.4
 
+
+
+
+--------------- SECTION 1:  BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES ----------
+
 BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES are applicable to the following component(s).
+
 
 
 >>> rubygem-fog-1.3.1
@@ -231,26 +239,6 @@ BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES are applicable to the following 
 (The MIT License)
 
 Copyright (c) 2010 {geemus (Wesley Beary)}[http://github.com/geemus]
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-MIT License
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -303,7 +291,7 @@ limitations under the License.
 
 
 
-===========================================================================
+================================================================================
 
 To the extent any open source components are licensed under the
 GPL and/or LGPL, or other similar licenses that require the
@@ -322,4 +310,5 @@ offer to obtain a copy of the Source Files is valid for three
 years from the date you acquired this Software product. Alternatively,
 the Source Files may accompany the VMware product.
 
-[VHELPER10KV060112]
+
+[SERENGETI06BKR081312]

@@ -15,8 +15,8 @@ A Hadoop distribution version</span></p>
 
 ## 2. Usage
 CLI supports shell mode, command line mode, and execution of script file. After compile, you can find the jar file under cli/target directory.
-- Shell mode: java -jar serengeti-cli-0.1.jar. It supports tab key based command hint and completion. It supports history by up/down arrows.
-- Command line mode: java -jar serengeti-cli-0.1.jar "command1;command2..."
+- Shell mode: java -jar serengeti-cli-*.jar. It supports tab key based command hint and completion. It supports history by up/down arrows.
+- Command line mode: java -jar serengeti-cli-*.jar "command1;command2..."
 - Execution of script file: in shell mode or command line mode, execute "script --file scriptFileName". The shell history file named cli.history will help to generate the script file. 
 
 ## 3. Command Syntax
@@ -109,7 +109,11 @@ Optional-command-key-values are parameters that are optional for the operation.<
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Options</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>None</span></p>
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--username
+  &lt;serengeti user name&gt;</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--password
+  &lt;serengeti password&gt;</span></p>
   </td>
   <td width=275 valign=top style='width:206.1pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -124,6 +128,9 @@ Optional-command-key-values are parameters that are optional for the operation.<
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>The
   Serengeti host with optional port number, e.g. hostname:port .</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Connect command requires
+  username and password interactively. If connect failed, the other Serengeti command is not allowed to execute.</span></p>
   </td>
  </tr>
  <tr>
@@ -156,7 +163,7 @@ Optional-command-key-values are parameters that are optional for the operation.<
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Options</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>None</span></p>
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--username</span></p>
   </td>
   <td width=275 valign=top style='width:206.1pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -512,7 +519,7 @@ Optional-command-key-values are parameters that are optional for the operation.<
   </td>
  </tr>
  <tr>
-  <td width=67 rowspan=6 valign=top style='width:.7in;border:solid windowtext 1.0pt;
+  <td width=67 rowspan=9 valign=top style='width:.7in;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>cluster</span></p>
@@ -557,6 +564,17 @@ Optional-command-key-values are parameters that are optional for the operation.<
   &lt;</span><span style='font-size:10.0pt;font-family:"Times New Roman","serif"'>
   </span><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>flag
   to resume cluster creation &gt;</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--skipConfigValidation
+  &lt;</span><span style='font-size:10.0pt;font-family:"Times New Roman","serif"'>
+  </span><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>flag to skip cluster configuration validation 
+&gt;</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--yes
+  &lt;</span><span style='font-size:10.0pt;font-family:"Times New Roman","serif"'>
+  </span><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>flag
+  to answer 'yes' to all Y/N questions &gt;</span></p>
+
   </td>
   <td width=275 valign=top style='width:206.1pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -570,12 +588,58 @@ Optional-command-key-values are parameters that are optional for the operation.<
   normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Remark</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>The
-  specFile is defined in jason format.</span></p>
+  specFile is defined in json format.</span></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Example</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>cluster
   create --name testCluster</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=66 valign=top style='width:49.5pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>config</span></p>
+  </td>
+  <td width=216 valign=top style='width:2.25in;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Mandatory</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--name
+  &lt;cluster name&gt;</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--specFile
+  &lt;spec file pathname&gt;</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Options</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--skipConfigValidation
+  &lt;</span><span style='font-size:10.0pt;font-family:"Times New Roman","serif"'>
+  </span><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>flag to skip cluster configuration validation 
+&gt;</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--yes
+  &lt;</span><span style='font-size:10.0pt;font-family:"Times New Roman","serif"'>
+  </span><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>flag
+  to answer 'yes' to all Y/N questions &gt;</span></p>
+  </td>
+  <td width=275 valign=top style='width:206.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Function</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Config
+  an existing cluster.</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Remark</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>The
+  specFile is defined in json format.</span></p>
   </td>
  </tr>
  <tr>
@@ -683,7 +747,11 @@ Optional-command-key-values are parameters that are optional for the operation.<
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Options</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>None</span></p>
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--nodeGroupName
+  &lt;node group name&gt;</a></span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--nodeName
+  &lt;node name&gt;</span></p>
   </td>
   <td width=275 valign=top style='width:206.1pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -715,7 +783,11 @@ Optional-command-key-values are parameters that are optional for the operation.<
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Options</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>None</span></p>
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--nodeGroupName
+  &lt;node group name&gt;</a></span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--nodeName
+  &lt;node name&gt;</span></p>
   </td>
   <td width=275 valign=top style='width:206.1pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -762,6 +834,73 @@ Optional-command-key-values are parameters that are optional for the operation.<
   cluster information.</span></p>
   </td>
  </tr>
+ <tr>
+  <td width=66 valign=top style='width:49.5pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>export</span></p>
+  </td>
+  <td width=216 valign=top style='width:2.25in;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Mandatory</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--spec
+  &lt;falg to export cluster specification&gt;</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--name
+  &lt;cluster name&gt;</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Options</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--output
+  &lt;output file name&gt;</a></span></p>
+  </td>
+  <td width=275 valign=top style='width:206.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Function</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Export
+  cluster specification.</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=66 valign=top style='width:49.5pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>target</span></p>
+  </td>
+  <td width=216 valign=top style='width:2.25in;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Mandatory</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>None</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Options</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--name
+  &lt;cluster name&gt;</a></span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--info
+  &lt;flag to show target information&gt;</span></p>
+  </td>
+  <td width=275 valign=top style='width:206.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Function</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Set
+  or query target cluster to run hadoop commands.</span></p>
+  </td>
+ </tr>
  <tr style='height:31.0pt'>
   <td width=67 valign=top style='width:.7in;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt;height:31.0pt'>
@@ -802,4 +941,35 @@ Optional-command-key-values are parameters that are optional for the operation.<
   distro information.</span></p>
   </td>
  </tr>
+ <tr>
+  <td width=67 valign=top style='width:.7in;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>disconnect</span></p>
+  </td>
+  <td width=66 valign=top style='width:49.5pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+  </td>
+  <td width=66 valign=top style='width:49.5pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+  </td>
+  <td width=275 valign=top style='width:206.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Function</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Disconnect
+  the Serengeti server.</span></p>
+  </td>
+ </tr>
 </table>
+## 6. Hadoop Commands
+From CLI 0.6.0, we integrated impala(https://github.com/SpringSource/impala) hadoop hdfs, map/reduce, pig, and hive commands into CLI. You need to use "cluster target" command to set hdfs or jobtracker url before launching hdfs or map/reduce commands. More details can be found from CLI help.
+

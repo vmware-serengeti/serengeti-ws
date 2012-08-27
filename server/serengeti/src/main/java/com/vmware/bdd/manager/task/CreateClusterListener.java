@@ -43,25 +43,15 @@ public class CreateClusterListener implements TaskListener {
       logger.debug("create cluster " + clusterName
             + " task listener called onSuccess");
 
-      ClusterEntity cluster =
-            ClusterEntity.findClusterEntityByName(clusterName);
-      AuAssert.check(cluster != null);
-
-      cluster.setStatus(ClusterStatus.RUNNING);
-      DAL.inTransactionUpdate(cluster);
+      ClusterEntity.updateStatus(clusterName, ClusterStatus.RUNNING);
    }
 
    @Override
    public void onFailure() {
       logger.debug("create cluster listener called onFailure");
 
-      ClusterEntity cluster =
-            ClusterEntity.findClusterEntityByName(clusterName);
-      AuAssert.check(cluster != null);
-
       // will not delete the cluster info, assuming the error can be recovered
-      cluster.setStatus(ClusterStatus.PROVISION_ERROR);
-      DAL.inTransactionUpdate(cluster);
+      ClusterEntity.updateStatus(clusterName, ClusterStatus.PROVISION_ERROR);
       logger.error("failed to create cluster " + clusterName 
             + " set its status as ERROR");
    }

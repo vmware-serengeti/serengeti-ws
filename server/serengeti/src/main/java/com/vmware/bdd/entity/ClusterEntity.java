@@ -43,6 +43,7 @@ import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.dal.DAL;
+import com.vmware.bdd.utils.AuAssert;
 
 /**
  * Cluster Entity
@@ -290,4 +291,19 @@ public class ClusterEntity extends EntityBase {
       }
       return clusters;
    }
+
+   public static void updateStatus(final String clusterName, final ClusterStatus status) {
+      if (clusterName == null || status == null) 
+         return;
+
+      DAL.inTransactionDo(new Saveable<Void>() {
+         public Void body() {
+            ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+            AuAssert.check(cluster != null);
+            cluster.setStatus(status);
+            return null;
+         }
+      });
+   }
+
 }

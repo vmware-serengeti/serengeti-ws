@@ -54,18 +54,7 @@ public class UpdateClusterListener implements TaskListener {
       logger.debug("update cluster " + clusterName
             + " task listener called onSuccess");
 
-      DAL.inRwTransactionDo(new Saveable<Void>() {
-         @Override
-         public Void body() throws Exception {
-            ClusterEntity cluster =
-                  ClusterEntity.findClusterEntityByName(clusterName);
-            AuAssert.check(cluster != null);
-
-            cluster.setStatus(ClusterStatus.RUNNING);
-
-            return null;
-         }
-      });
+      ClusterEntity.updateStatus(clusterName, ClusterStatus.RUNNING);
    }
 
    @Override

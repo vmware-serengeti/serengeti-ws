@@ -196,15 +196,9 @@ public class ClusterManager {
 
       writeJsonFile(clusterConfig, task.getWorkDir(), fileName);
 
-      DAL.inTransactionDo(new Saveable<Void>() {
-         public Void body() {
-            DAL.refresh(cluster);
-            if (initStatus != null) {
-               cluster.setStatus(initStatus);
-            }
-            return null;
-         }
-      });
+      if (initStatus != null) {
+         ClusterEntity.updateStatus(cluster.getName(), initStatus);
+      }
 
       taskManager.submit(task);
 
