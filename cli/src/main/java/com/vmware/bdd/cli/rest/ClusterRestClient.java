@@ -78,7 +78,7 @@ public class ClusterRestClient {
             false);
    }
 
-   public void actionOps(String id, String callbackId, Map<String, ?> queryStrings) {
+   public void actionOps(String id, String callbackId, Map<String, String> queryStrings) {
       final String path = Constants.REST_PATH_CLUSTER;
       final HttpMethod httpverb = HttpMethod.PUT;
 
@@ -86,7 +86,7 @@ public class ClusterRestClient {
       restClient.actionOps(id, path, httpverb, queryStrings, outputCallBack);
    }
 
-   public void actionOps(String id, Map<String, ?> queryStrings) {
+   public void actionOps(String id, Map<String, String> queryStrings) {
       actionOps(id, id, queryStrings);
    }
 

@@ -261,7 +261,7 @@ public class NetworkCommands implements CommandMarker {
       if (ipList == null) {
          throw new RuntimeException(
                "[NetworkCommands:transferIpInfo]ipList is null .");
-      } else if (ipList != null && ipList.size() == 0) {
+      } else if (ipList.size() == 0) {
          return ipBlockList;
       } else {
          IpBlock ipBlock = null;
@@ -318,14 +318,8 @@ public class NetworkCommands implements CommandMarker {
       Pattern ipSegPattern = Pattern.compile(PatternType.IPSEG);
 
       List<String> ipPrarams = CommandsUtils.inputsConvert(ip);
-      if (ipPrarams == null) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
-               networkName, Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.INVALID_VALUE + " " + "ip=" + ipPrarams);
-         return false;
-      }
 
-      if (ipPrarams != null && ipPrarams.size() == 0) {
+      if (ipPrarams.size() == 0) {
          StringBuilder errorMessage = new StringBuilder().append(Constants.PARAMS_NETWORK_ADD_FORMAT_ERROR);
 
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,

@@ -126,7 +126,7 @@ public class ConnectionCommands implements CommandMarker {
       if (promptType == PromptType.USER_NAME) {
          enter = reader.readLine();
       } else if (promptType == PromptType.PASSWORD) {
-         enter = reader.readLine(new Character('*'));
+         enter = reader.readLine(Character.valueOf('*'));
       }
       return enter;
    }

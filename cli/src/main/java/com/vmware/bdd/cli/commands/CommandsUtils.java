@@ -298,7 +298,6 @@ public class CommandsUtils {
       BigDecimal bd = new BigDecimal(value);
       bd = bd.setScale(scale, roundingMode);
       double d = bd.doubleValue();
-      bd = null;
       return d;
    }
 
@@ -308,33 +307,46 @@ public class CommandsUtils {
       return mapper;
    }
 
-   public static Properties readPropertise(String propertiesFilePath) {
-      Properties propertise = new Properties();
-      FileInputStream fis;
+   public static Properties readProperties(String propertiesFilePath) {
+      Properties properties = new Properties();
+      FileInputStream fis = null;
       try {
          File file = new File(propertiesFilePath);
          if (!file.exists()){
-            return propertise;
+            return null;
          }
          fis = new FileInputStream(propertiesFilePath);
-         propertise.load(fis);
-      } catch (FileNotFoundException e) {
-         e.printStackTrace();
+         properties.load(fis);
+         fis.close();
+         return properties;
       } catch (IOException e) {
-         e.printStackTrace();
-      }
-      return propertise;
+         System.out.println(e.getMessage());
+         if (fis != null) {
+        	 try {
+        		 fis.close();
+        	 } catch (IOException e1) {
+        		 System.out.println(e1.getMessage());
+        	 }
+         }
+         return null;
+      } 
    }
 
-   public static void writePropertise(Properties propertise, String propertiesFilePath) {
-      FileOutputStream fos=null;
+   public static void writeProperties(Properties properties, String propertiesFilePath) {
+      FileOutputStream fos = null;
       try {
          fos = new FileOutputStream(propertiesFilePath);
-         propertise.store(fos, "");
-      } catch (FileNotFoundException e) {
-         e.printStackTrace();
+         properties.store(fos, "");
+         fos.close();
       } catch (IOException e) {
-         e.printStackTrace();
+         System.out.println(e.getMessage());
+         if (fos != null) {
+        	 try {
+				fos.close();
+			} catch (IOException e1) {
+				System.out.println(e1.getMessage());
+			}
+         }
       }
    }
 

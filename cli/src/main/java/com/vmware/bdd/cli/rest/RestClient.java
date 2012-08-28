@@ -21,6 +21,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -161,21 +162,21 @@ public class RestClient {
 
    private void writeCookieInfo(String cookie) {
       CookieCache.put("Cookie",cookie);
-      String propertiseFile = "cookie.propertise";
-      Properties propertise = new Properties();
-      propertise.put("Cookie", cookie);
-      CommandsUtils.writePropertise(propertise, propertiseFile);
+      String propertiesFile = "cookie.properties";
+      Properties properties = new Properties();
+      properties.put("Cookie", cookie);
+      CommandsUtils.writeProperties(properties, propertiesFile);
    }
 
    private String readCookieInfo() {
       String cookieValue = "";
       cookieValue = CookieCache.get("Cookie");
       if (CommandsUtils.isBlank(cookieValue)){
-         String propertiseFile = "cookie.propertise";
-         Properties propertise = null;
-         propertise = CommandsUtils.readPropertise(propertiseFile);
-         if (propertise != null) {
-            return propertise.getProperty("Cookie");
+         String propertiesFile = "cookie.properties";
+         Properties properties = null;
+         properties = CommandsUtils.readProperties(propertiesFile);
+         if (properties != null) {
+            return properties.getProperty("Cookie");
          } else {
             return null;
          }
@@ -380,11 +381,6 @@ public class RestClient {
             }
          }
 
-      } else if (responseStatus == HttpStatus.OK
-            || responseStatus == HttpStatus.NO_CONTENT) {
-         //TODO
-      } else if (responseStatus == HttpStatus.CREATED) {
-         //TODO
       }
    }
 
@@ -525,7 +521,7 @@ public class RestClient {
     * @param prettyOutput output callback
     */
    public void actionOps(final String id, final String path,
-         final HttpMethod verb, final Map<String, ?> queryStrings,
+         final HttpMethod verb, final Map<String, String> queryStrings,
          PrettyOutput... prettyOutput) {
       checkConnection();
       try {
@@ -545,7 +541,7 @@ public class RestClient {
    }
 
    private ResponseEntity<String> restActionOps(String path, String id,
-         Map<String, ?> queryStrings) {
+         Map<String, String> queryStrings) {
       String targetUri = hostUri + Constants.HTTP_CONNECTION_API + path + "/" + id;
       if (queryStrings != null) {
          targetUri = targetUri + buildQueryStrings(queryStrings);
@@ -556,13 +552,14 @@ public class RestClient {
       return client.exchange(targetUri, HttpMethod.PUT, entity, String.class);
    }
 
-   private String buildQueryStrings(Map<String, ?> queryStrings) {
+   private String buildQueryStrings(Map<String, String> queryStrings) {
       StringBuilder stringBuilder = new StringBuilder("?");
 
-      Set<String> keys = queryStrings.keySet();
-      for (String key : keys) {
-         stringBuilder.append(key + "=" + queryStrings.get(key));
+      Set<Entry<String, String>> entryset = queryStrings.entrySet();
+      for (Entry<String, String> entry: entryset) {
+    	  stringBuilder.append(entry.getKey() + "=" + entry.getValue());
       }
+      
       return stringBuilder.toString();
    }
 

@@ -248,10 +248,10 @@ public class CommandsUtilsTest {
                   + "cookie.propertise";
       Properties propertise = new Properties();
       propertise.put("Cookie", "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
-      CommandsUtils.writePropertise(propertise, propertiseFile);
+      CommandsUtils.writeProperties(propertise, propertiseFile);
       File file = new File(propertiseFile);
       assertEquals(file.exists(), true);
-      propertise = CommandsUtils.readPropertise(propertiseFile);
+      propertise = CommandsUtils.readProperties(propertiseFile);
       assertNotNull(propertise);
       if (propertise != null) {
          assertEquals(propertise.getProperty("Cookie"),
@@ -269,12 +269,12 @@ public class CommandsUtilsTest {
                   + "cookie.propertise";
       Properties propertise = new Properties();
       propertise.put("Cookie", "123abc123");
-      CommandsUtils.writePropertise(propertise, propertiseFile);
+      CommandsUtils.writeProperties(propertise, propertiseFile);
       propertise.put("Cookie", "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
-      CommandsUtils.writePropertise(propertise, propertiseFile);
+      CommandsUtils.writeProperties(propertise, propertiseFile);
       File file = new File(propertiseFile);
       assertEquals(file.exists(), true);
-      propertise = CommandsUtils.readPropertise(propertiseFile);
+      propertise = CommandsUtils.readProperties(propertiseFile);
       assertNotNull(propertise);
       if (propertise != null) {
          assertEquals(propertise.getProperty("Cookie"),
