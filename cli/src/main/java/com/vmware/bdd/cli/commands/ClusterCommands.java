@@ -81,7 +81,7 @@ public class ClusterCommands implements CommandMarker {
       return true;
    }
 
-   @CliCommand(value = "cluster create", help = "Create a default vhadoop cluster")
+   @CliCommand(value = "cluster create", help = "Create a hadoop cluster")
    public void createCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
          @CliOption(key = { "distro" }, mandatory = false, help = "Hadoop Distro") final String distro,
