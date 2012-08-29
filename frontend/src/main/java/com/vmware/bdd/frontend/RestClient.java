@@ -2,9 +2,18 @@ package com.vmware.bdd.frontend;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 
 import org.springframework.web.client.RestTemplate;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
+import com.vmware.bdd.apitypes.Connect;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.DatastoreRead;
@@ -13,64 +22,166 @@ import com.vmware.bdd.apitypes.ResourcePoolRead;
 
 public class RestClient {
 
-    protected RestTemplate restTemplate;
-    private String serengetiUrl;
-    
-    public RestClient(String serverIp) {
-        serengetiUrl = "http://" + serverIp + ":8080/serengeti/api";
-        
-        restTemplate = new RestTemplate();
-    }
+	protected RestTemplate client;
+	private String hostUri;
+	private String cookieInfo;
 
-    public void deleteCluster(String name) {
-        restTemplate.delete(serengetiUrl + "/cluster/{name}", name);
-    }
-   
-    public String createCluster(ClusterCreate cluster) {
-/*        HttpEntity<String> request;
-        HttpHeaders headers = new HttpHeaders();
-        
-        String json = "{\"name\": \"" + cluster.getName() + "\"}";
+	public RestClient() {
+		client = new RestTemplate();
+	}
 
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        request = new HttpEntity<String>(json, headers);
-  */      
-        return restTemplate.postForObject(serengetiUrl + "/clusters", cluster, String.class);
-    }
-    
-    public List<ClusterRead> getClusters() {
-        ClusterRead[] clusterArray = restTemplate.getForObject(serengetiUrl + "/clusters", 
-                ClusterRead[].class);
-        
-        return Arrays.asList(clusterArray);
-    }
-    
-    public List<ResourcePoolRead> getResourcePools() {
-        ResourcePoolRead[] rpArray = restTemplate.getForObject(serengetiUrl + "/resourcepools", 
-                ResourcePoolRead[].class);
-        
-        return Arrays.asList(rpArray);
-    }
-    
-    public List<DatastoreRead> getDatastores() {
-        DatastoreRead[] dsArray = restTemplate.getForObject(serengetiUrl + "/datastores", 
-                DatastoreRead[].class);
-        
-        return Arrays.asList(dsArray);
-    }
-    
-    public List<NetworkRead> getNetworks() {
-        NetworkRead[] networkArray = restTemplate.getForObject(serengetiUrl + "/networks", 
-                NetworkRead[].class);
-        
-        return Arrays.asList(networkArray);
-    }    
-    
-    public ClusterRead getClusterByName(String name) {
-        ClusterRead cluster = restTemplate.getForObject(serengetiUrl + "/clusters/{name}", 
-                ClusterRead.class);
-        
-        return cluster;
-    }
-    
+	public Connect.ConnectType connect(final String host, final String username, final String password) {
+		hostUri = Constants.HTTP_CONNECTION_PREFIX + host + Constants.HTTP_CONNECTION_LOGIN_SUFFIX;
+
+		try {
+			ResponseEntity<String> response = login(Constants.REST_PATH_LOGIN,
+					String.class, username, password);
+
+			if (response.getStatusCode() == HttpStatus.OK) {
+				String cookieValue = response.getHeaders().getFirst(
+						"Set-Cookie");
+				if (cookieValue.contains(";")) {
+					cookieValue = cookieValue.split(";")[0];
+				}
+				cookieInfo = cookieValue;
+				System.out.println(Constants.CONNECT_SUCCESS);
+			} else {
+				System.out.println(Constants.CONNECT_FAILURE);
+				return Connect.ConnectType.ERROR;
+			}
+		} catch (CliRestException cliRestException) {
+			if (cliRestException.getStatus() == HttpStatus.UNAUTHORIZED) {
+				System.out.println(Constants.CONNECT_UNAUTHORIZATION);
+				return Connect.ConnectType.UNAUTHORIZATION;
+			} else {
+				System.out.println(Constants.CONNECT_FAILURE + ": "
+						+ cliRestException.getStatus() + " "
+						+ cliRestException.getMessage().toLowerCase());
+				return Connect.ConnectType.ERROR;
+			}
+		} catch (Exception e) {
+			System.out.println(Constants.CONNECT_FAILURE + ": "
+					+ e.getCause().getMessage().toLowerCase());
+			return Connect.ConnectType.ERROR;
+		}
+		return Connect.ConnectType.SUCCESS;
+	}
+
+	public void disconnect() {
+		try {
+			logout(Constants.REST_PATH_LOGOUT, String.class);
+		} catch (CliRestException cliRestException) {
+			if (cliRestException.getStatus() == HttpStatus.UNAUTHORIZED) {
+				cookieInfo = "";
+			}
+		} catch (Exception e) {
+			System.out.println(Constants.DISCONNECT_FAILURE + ":"
+					+ e.getMessage());
+		}
+	}
+
+	private <T> ResponseEntity<T> login(final String path,
+			final Class<T> respEntityType, final String username,
+			final String password) {
+		StringBuilder uriBuff = new StringBuilder();
+		uriBuff.append(hostUri).append(path);
+		if (!"".equals(username) && !"".equals(password)) {
+			uriBuff.append("?").append("j_username=").append(username)
+					.append("&j_password=").append(password);
+		}
+		return restPostByUri(uriBuff.toString(), respEntityType);
+	}
+
+	private <T> ResponseEntity<T> logout(final String path,
+			final Class<T> respEntityType) {
+		StringBuilder uriBuff = new StringBuilder();
+		uriBuff.append(hostUri).append(path);
+		return restGetByUri(uriBuff.toString(), respEntityType);
+	}
+
+	private <T> ResponseEntity<T> restGetByUri(String uri,
+			Class<T> respEntityType) {
+		HttpHeaders headers = buildHeaders();
+		HttpEntity<String> entity = new HttpEntity<String>(headers);
+
+		return client.exchange(uri, HttpMethod.GET, entity, respEntityType);
+	}
+
+	private <T> ResponseEntity<T> restPostByUri(String uri,
+			Class<T> respEntityType) {
+		HttpHeaders headers = buildHeaders();
+		HttpEntity<String> entity = new HttpEntity<String>(headers);
+
+		return client.exchange(uri, HttpMethod.POST, entity, respEntityType);
+	}
+
+	private ResponseEntity<String> restPost(String path, Object entity) {
+		String targetUri = hostUri + Constants.HTTP_CONNECTION_API + path;
+
+		HttpHeaders headers = buildHeaders();
+		HttpEntity<Object> postEntity = new HttpEntity<Object>(entity, headers);
+
+		return client.exchange(targetUri, HttpMethod.POST, postEntity,
+				String.class);
+	}
+
+	private HttpHeaders buildHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		List<MediaType> acceptedTypes = new ArrayList<MediaType>();
+		acceptedTypes.add(MediaType.APPLICATION_JSON);
+		acceptedTypes.add(MediaType.TEXT_HTML);
+		headers.setAccept(acceptedTypes);
+
+		headers.add("Cookie", cookieInfo == null ? "" : cookieInfo);
+
+		return headers;
+	}
+
+	//
+	// Cluster Actions
+	//
+	
+	public void deleteCluster(String name) {
+		HttpEntity<Object> entity = new HttpEntity<Object>(name, buildHeaders());
+		String targetUri = hostUri + Constants.HTTP_CONNECTION_API
+				+ Constants.REST_PATH_CLUSTER + "/" + name;
+		
+		client.exchange(targetUri, HttpMethod.DELETE, entity, String.class);
+	}
+
+	public String createCluster(ClusterCreate cluster) {
+		ResponseEntity<String> response = restPost(Constants.REST_PATH_CLUSTERS, cluster);
+
+		return response.getBody();
+	}
+
+	public List<ClusterRead> getClusters() {
+		ResponseEntity<ClusterRead[]> response = restGetByUri(hostUri
+				+ Constants.HTTP_CONNECTION_API 
+				+ Constants.REST_PATH_CLUSTERS,	ClusterRead[].class);
+		return Arrays.asList(response.getBody());
+	}
+
+	public List<ResourcePoolRead> getResourcePools() {
+		ResponseEntity<ResourcePoolRead[]> response = restGetByUri(hostUri
+				+ Constants.HTTP_CONNECTION_API
+				+ Constants.REST_PATH_RESOURCEPOOLS, ResourcePoolRead[].class);
+		return Arrays.asList(response.getBody());
+	}
+
+	public List<DatastoreRead> getDatastores() {
+		ResponseEntity<DatastoreRead[]> response = restGetByUri(hostUri
+				+ Constants.HTTP_CONNECTION_API
+				+ Constants.REST_PATH_DATASTORES, DatastoreRead[].class);
+		return Arrays.asList(response.getBody());
+	}
+
+	public List<NetworkRead> getNetworks() {
+		ResponseEntity<NetworkRead[]> response = restGetByUri(hostUri
+				+ Constants.HTTP_CONNECTION_API
+				+ Constants.REST_PATH_NETWORKS, NetworkRead[].class);
+		return Arrays.asList(response.getBody());
+	}
+
 }

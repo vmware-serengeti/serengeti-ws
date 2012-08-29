@@ -1,5 +1,7 @@
 package com.vmware.bdd.frontend;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -13,16 +15,16 @@ import com.vmware.bdd.frontend.entities.ConnectForm;
 public class FrontendController {
 	
     private String serengetiServer;
-	private RestClient client;
+	private RestClient client = new RestClient();
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String home(Model model) {
 
-	    if (serengetiServer == null || "".equals(serengetiServer)) {
+		if (serengetiServer == null || "".equals(serengetiServer)) {
             return "connect";
 	    }
             
-        client = new RestClient(serengetiServer); 
 	    model.addAttribute("serengetiServer", serengetiServer);
 
 	    return "home";
@@ -36,16 +38,22 @@ public class FrontendController {
     public ConnectForm connectForm() {
         return new ConnectForm();
     }
-    	
+	
     @RequestMapping(value = "/action/connect", method = RequestMethod.POST)
     public String connect(@ModelAttribute ConnectForm form) {
         serengetiServer = form.getSerengetiServer();
+
+        client.connect(serengetiServer, form.getUsername(), form.getPassword());
+        
         return "redirect:/";
     }
 
     @RequestMapping(value = "/action/disconnect", method = RequestMethod.GET)
     public String disconnect() {
         serengetiServer = "";
+        
+        client.disconnect();
+        
         return "redirect:/";
     }
     
@@ -74,8 +82,9 @@ public class FrontendController {
     //
     
 	@RequestMapping(value = "/action/cluster/create", method = RequestMethod.POST)
-	public String createCluster(@ModelAttribute ClusterCreate name) {
-	    client.createCluster(name);
+	public String createCluster(@ModelAttribute ClusterCreate cluster) {
+		logger.info("Create Cluster");
+	    client.createCluster(cluster);
 	    return "redirect:/";
 	}
 
