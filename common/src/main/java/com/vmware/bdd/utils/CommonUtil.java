@@ -46,7 +46,9 @@ public class CommonUtil {
               logger.error(e.getMessage() + "\n Can not find " + fileName + " or IO read error.");
           } finally {
               try {
-                  in.close();
+            	  if (in != null) {
+            		  in.close();
+            	  }
               } catch (IOException e) {
                   logger.error(e.getMessage() + "\n Can not close " + fileName + ".");
               }
@@ -54,37 +56,4 @@ public class CommonUtil {
       }
       return jsonBuff.toString();
   }
-
-   public static void copyFile(final String origFileName, final String destFileName) throws IOException {
-      InputStream in = null;
-      URL fileURL = CommonUtil.class.getClassLoader().getResource(origFileName);
-      if (fileURL != null) {
-         in = new BufferedInputStream(fileURL.openStream());
-         File destFile = new File(destFileName);
-         OutputStream out = new FileOutputStream(destFile.getAbsoluteFile());
-         if (!destFile.exists()) {
-            logger.error("Can not create destination file " + destFileName + ".");
-         }
-         int byteread = 0;
-         byte[] buffer = new byte[1024];
-         while ((byteread = in.read(buffer)) != -1) {
-            out.write(buffer, 0, byteread);
-         }
-         in.close();
-         out.close();
-      } else {
-         logger.error("Can not find origin file " + origFileName + " .");
-      }
-   }
-
-   public static void deleteFile(final String destFileName) {
-      File destFile = new File(destFileName);
-      if (destFile.exists()) {
-         try {
-            destFile.delete();
-         } catch (Exception e) {
-            logger.error("CommonUtil.deleteFile Exception:" + e.getMessage() + " .");
-         }
-      }
-   }
 }
