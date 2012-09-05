@@ -21,8 +21,26 @@
       <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
    </filter>
 
+   <filter>
+      <filter-name>requestLoggingFilter</filter-name>
+      <filter-class>org.springframework.web.filter.CommonsRequestLoggingFilter</filter-class>
+         <init-param>
+            <param-name>includeQueryString</param-name>
+            <param-value>true</param-value>
+         </init-param>
+	     <init-param>
+            <param-name>includeClientInfo</param-name>
+            <param-value>true</param-value>
+         </init-param>
+   </filter>
+
    <filter-mapping>
       <filter-name>springSecurityFilterChain</filter-name>
+      <url-pattern>/*</url-pattern>
+   </filter-mapping>
+
+   <filter-mapping>
+      <filter-name>requestLoggingFilter</filter-name>
       <url-pattern>/*</url-pattern>
    </filter-mapping>
 

@@ -45,10 +45,4 @@
          <ref bean="taskManager" />
       </property>
    </bean>
-
-   <bean id="requestLoggingFilter"
-      class="org.springframework.web.filter.CommonsRequestLoggingFilter">
-      <property name="includeQueryString" value="true" />
-      <property name="includeClientInfo" value="true" />
-   </bean>
 </beans>
