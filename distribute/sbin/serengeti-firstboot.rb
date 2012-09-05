@@ -259,4 +259,9 @@ fi
 
 # remove ovf env file
 rm -f "#{SERENGETI_VC_PROPERTIES}"
+
+# generate ssh key pair
+rm -rf "/home/#{SERENGETI_USER}/.ssh"
+su - "#{SERENGETI_USER}" -c "ssh-keygen -t rsa -N '' -f /home/#{SERENGETI_USER}/.ssh/id_rsa"
+
 EOF
