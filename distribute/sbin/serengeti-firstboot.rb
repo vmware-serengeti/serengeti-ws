@@ -206,6 +206,9 @@ system <<EOF
 #stop tomcat for update serengeti.properties
 /etc/init.d/tomcat stop
 
+# update serengeti uuid
+sed -i "s/serengeti.uuid =.*/serengeti.uuid = `uuidgen -r`/" "#{SERENGETI_WEBAPP_CONF}"
+
 #update serengeti.properties for web service
 sed -i "s/distro_root =.*/#{distroip}/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/vc_datacenter = .*/#{vcdatacenterline}/" "#{SERENGETI_WEBAPP_CONF}"
