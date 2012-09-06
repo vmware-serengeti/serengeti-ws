@@ -257,6 +257,7 @@ public class ClusterManager {
             group.setRpNames(null);
             group.getStorage().setDsNames(null);
             group.getStorage().setNamePattern(null);
+            group.setVmFolderPath(null);
          }
       }
       return spec;

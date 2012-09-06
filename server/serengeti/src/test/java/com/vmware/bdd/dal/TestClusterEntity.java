@@ -36,7 +36,7 @@ import com.vmware.bdd.entity.Saveable;
 
 public class TestClusterEntity {
    private static final Logger logger = Logger
-         .getLogger(TestNetworkEntity.class);
+         .getLogger(TestClusterEntity.class);
    private static final String CLUSTER_NAME = "bdd-cluster";
    private static final String HDFS_GROUP = "hdfs";
    private static final String COMPUTE_GROUP = "compute";
