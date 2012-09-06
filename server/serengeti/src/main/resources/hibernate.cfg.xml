@@ -27,5 +27,7 @@
       <mapping class="com.vmware.bdd.entity.TaskEntity" />
       <mapping class="com.vmware.bdd.entity.NetworkEntity" />
       <mapping class="com.vmware.bdd.entity.IpBlockEntity" />
+      <mapping class="com.vmware.bdd.entity.RackEntity" />
+      <mapping class="com.vmware.bdd.entity.PhysicalHostEntity" />
    </session-factory>
 </hibernate-configuration>

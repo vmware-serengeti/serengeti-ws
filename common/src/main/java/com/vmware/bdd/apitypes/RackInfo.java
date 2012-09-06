@@ -1,5 +1,6 @@
 package com.vmware.bdd.apitypes;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -7,13 +8,13 @@ import java.util.Map;
  *
  */
 public class RackInfo {
-	private Map<String, String[]> racks;
+	private Map<String, List<String>> racks;
 
-	public Map<String, String[]> getRacks() {
+	public Map<String, List<String>> getRacks() {
 		return racks;
 	}
 
-	public void setRacks(Map<String, String[]> racks) {
+	public void setRacks(Map<String, List<String>> racks) {
 		this.racks = racks;
 	}
 }

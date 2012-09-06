@@ -1,0 +1,60 @@
+/***************************************************************************
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
+package com.vmware.bdd.manager;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import static org.testng.AssertJUnit.assertEquals;
+import org.apache.log4j.Logger;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+public class TestRackInfoManager {
+   private static final Logger logger = Logger.getLogger(TestRackInfoManager.class);
+
+   @BeforeMethod
+   public void setup() {
+
+   }
+
+   @AfterMethod
+   public void tearDown() {
+
+   }
+
+   @Test
+   public void testInsert() {
+      RackInfoManager rim = new RackInfoManager();
+
+      Map<String, List<String>> rackInfo = new TreeMap<String, List<String>>();
+      List<String> hosts1 = new ArrayList<String>();
+      hosts1.add("host1-1");
+      hosts1.add("task1-2");
+      List<String> hosts2 = new ArrayList<String>();
+      hosts2.add("host2-1");
+      hosts2.add("task2-2");
+      rackInfo.put("rack1", hosts1);
+      rackInfo.put("rack2", hosts2);
+
+      rim.importRackInfo(rackInfo);
+      assertEquals(rackInfo, rim.exportRackInfo());
+      rim.importRackInfo(rackInfo);
+      assertEquals(rackInfo, rim.exportRackInfo());
+   }
+}

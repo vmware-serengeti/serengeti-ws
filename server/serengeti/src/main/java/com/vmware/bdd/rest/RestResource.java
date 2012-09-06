@@ -44,16 +44,16 @@ import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetworkRead;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.apitypes.ResourcePoolAdd;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
-import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.DistroManager;
 import com.vmware.bdd.manager.NetworkManager;
+import com.vmware.bdd.manager.RackInfoManager;
 import com.vmware.bdd.manager.TaskManager;
 import com.vmware.bdd.manager.VcDataStoreManager;
 import com.vmware.bdd.manager.VcResourcePoolManager;
@@ -72,6 +72,8 @@ public class RestResource {
    private VcResourcePoolManager vcRpMgr;
    @Autowired
    private NetworkManager networkManager;
+   @Autowired
+   private RackInfoManager rackInfoManager;
    @Autowired
    private DistroManager distroManager;
    @Autowired
@@ -473,6 +475,23 @@ public class RestResource {
                na.getNetmask(), na.getGateway(), na.getDns1(), na.getDns2(),
                na.getIp());
       }
+   }
+
+   @RequestMapping(value = "/racks", method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.OK)
+   public void importRacks(@RequestBody final RackInfo rackInfo) throws Exception {
+      if (rackInfo == null || rackInfo.getRacks() == null) {
+         throw BddException.INVALID_PARAMETER("rack list", "empty");
+      }
+      rackInfoManager.importRackInfo(rackInfo.getRacks());
+   }
+
+   @RequestMapping(value = "/racks", method = RequestMethod.GET, produces = "application/json")
+   @ResponseBody
+   public RackInfo exportRacks() throws Exception {
+      RackInfo rackInfo = new RackInfo();
+      rackInfo.setRacks(rackInfoManager.exportRackInfo());
+      return rackInfo;
    }
 
    @RequestMapping(value = "/distros", method = RequestMethod.GET, produces = "application/json")
