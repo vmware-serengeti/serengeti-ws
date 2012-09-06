@@ -17,6 +17,7 @@ package com.vmware.bdd.manager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import com.vmware.bdd.dal.DAL;
@@ -36,8 +37,8 @@ public class RackInfoManager {
                rack.delete();
             }
 
-            for (String rackName : rackInfo.keySet()) {
-               RackEntity.addRack(rackName, rackInfo.get(rackName));
+            for (Entry<String, List<String>> entry : rackInfo.entrySet()) {
+               RackEntity.addRack(entry.getKey(), entry.getValue());
             }
 
             return null;
@@ -53,7 +54,7 @@ public class RackInfoManager {
 
             List<RackEntity> racks = RackEntity.findAllRacks();
             for (RackEntity rack : racks) {
-               List<PhysicalHostEntity> hostEntities = rack.getHost();
+               List<PhysicalHostEntity> hostEntities = rack.getHosts();
                if (hostEntities != null && !hostEntities.isEmpty()) {
                   List<String> hosts = new ArrayList<String>(hostEntities.size());
                   for (PhysicalHostEntity he : hostEntities) {

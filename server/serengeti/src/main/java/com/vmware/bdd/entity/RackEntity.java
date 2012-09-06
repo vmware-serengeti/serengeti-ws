@@ -41,15 +41,15 @@ public class RackEntity extends EntityBase {
 
    @OneToMany(mappedBy = "rack", fetch = FetchType.LAZY)
    @Cascade({ CascadeType.SAVE_UPDATE, CascadeType.REMOVE })
-   private List<PhysicalHostEntity> host;
+   private List<PhysicalHostEntity> hosts;
 
    public RackEntity() {
-      this.host = new ArrayList<PhysicalHostEntity>();
+      this.hosts = new ArrayList<PhysicalHostEntity>();
    }
 
    public RackEntity(String name) {
       this.name = name;
-      this.host = new ArrayList<PhysicalHostEntity>();
+      this.hosts = new ArrayList<PhysicalHostEntity>();
    }
 
    public String getName() {
@@ -60,12 +60,12 @@ public class RackEntity extends EntityBase {
       this.name = name;
    }
 
-   public List<PhysicalHostEntity> getHost() {
-      return host;
+   public List<PhysicalHostEntity> getHosts() {
+      return hosts;
    }
 
-   public void setHost(List<PhysicalHostEntity> host) {
-      this.host = host;
+   public void setHosts(List<PhysicalHostEntity> hosts) {
+      this.hosts = hosts;
    }
 
    public static List<RackEntity> findAllRacks() {
@@ -77,7 +77,7 @@ public class RackEntity extends EntityBase {
       for (String host : hosts) {
          PhysicalHostEntity hostEntity = new PhysicalHostEntity(host);
          hostEntity.setRack(rackEntity);
-         rackEntity.getHost().add(hostEntity);
+         rackEntity.getHosts().add(hostEntity);
       }
       rackEntity.insert();
       return rackEntity;
