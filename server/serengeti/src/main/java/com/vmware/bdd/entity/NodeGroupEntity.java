@@ -49,7 +49,6 @@ import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.Configuration;
 
 /**
  * Node Group Entity: node group info
@@ -125,9 +124,6 @@ public class NodeGroupEntity extends EntityBase {
    @OneToMany(mappedBy = "nodeGroup", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
    private Set<NodeGroupAssociation> groupAssociations;
 
-   @Column(name = "vm_folder_path")
-   private String vmFolderPath;
-   
    public NodeGroupEntity() {
 
    }
@@ -287,18 +283,6 @@ public class NodeGroupEntity extends EntityBase {
       this.groupAssociations = groupAssociations;
    }
 
-   public String getVmFolderPath() {
-      return vmFolderPath;
-   }
-
-   public void setVmFolderPath(String vmFolderPath) {
-      this.vmFolderPath = vmFolderPath;
-   }
-   
-   public void setVmFolderPath(ClusterEntity cluster) {
-      this.vmFolderPath = cluster.getClusterVmFolder() + "/" + this.name;
-   }
-
    @SuppressWarnings("unchecked")
    public List<String> getRoleNameList() {
       return (new Gson()).fromJson(this.roles,
@@ -363,7 +347,7 @@ public class NodeGroupEntity extends EntityBase {
 
       return nodeGroupRead;
    }
-   
+
    @Override
    public int hashCode() {
       AuAssert.check(this.name != null,

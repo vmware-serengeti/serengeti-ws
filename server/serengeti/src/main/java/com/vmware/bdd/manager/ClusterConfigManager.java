@@ -245,8 +245,6 @@ public class ClusterConfigManager {
          NodeGroupEntity groupEntity =
                convertGroup(gson, clusterEntity, allRoles, group, distro,
                      validateWhiteList);
-         // set vm folder path
-         groupEntity.setVmFolderPath(clusterEntity);
          if (groupEntity != null) {
             nodeGroups.add(groupEntity);
          }
@@ -629,8 +627,6 @@ public class ClusterConfigManager {
          Map hadoopConfig = (new Gson()).fromJson(ngEntity.getHadoopConfig(), Map.class);
          group.setConfiguration((Map<String, Object>)hadoopConfig);
       }
-      
-      group.setVmFolderPath(ngEntity.getVmFolderPath());
       return group;
    }
 

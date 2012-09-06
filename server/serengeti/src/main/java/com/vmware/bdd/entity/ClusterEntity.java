@@ -44,8 +44,6 @@ import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.ConfigInfo;
-import com.vmware.bdd.utils.Configuration;
 
 /**
  * Cluster Entity
@@ -259,10 +257,6 @@ public class ClusterEntity extends EntityBase {
       return clusterRead;
    }
 
-   public String getClusterVmFolder() {
-      return ConfigInfo.getSerengetiRootVmFolder() + "/" + this.name; 
-   }
-
    public static ClusterEntity findClusterEntityById(Long clusterId) {
       return DAL.findById(ClusterEntity.class, clusterId);
    }
@@ -311,4 +305,5 @@ public class ClusterEntity extends EntityBase {
          }
       });
    }
+
 }

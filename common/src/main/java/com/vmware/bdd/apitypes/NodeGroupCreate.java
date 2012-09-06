@@ -64,10 +64,6 @@ public class NodeGroupCreate {
    @SerializedName("cluster_configuration")
    private Map<String, Object> configuration;
 
-   @Expose
-   @SerializedName("vm_folder_path")
-   private String vmFolderPath;
-
    public NodeGroupCreate() {
 
    }
@@ -86,7 +82,6 @@ public class NodeGroupCreate {
       this.storage = group.storage;
       this.vcClusters = group.vcClusters;
       this.configuration = group.configuration;
-      this.vmFolderPath = group.vmFolderPath;
    }
 
    public Map<String, Object> getConfiguration() {
@@ -194,14 +189,6 @@ public class NodeGroupCreate {
 
    public void setVcClusters(List<VcCluster> vcClusters) {
       this.vcClusters = vcClusters;
-   }
-
-   public String getVmFolderPath() {
-      return vmFolderPath;
-   }
-
-   public void setVmFolderPath(String vmFolderPath) {
-      this.vmFolderPath = vmFolderPath;
    }
 
    private Integer getHostNum() {

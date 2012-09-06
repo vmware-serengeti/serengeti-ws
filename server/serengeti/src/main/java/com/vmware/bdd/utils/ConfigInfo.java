@@ -26,9 +26,6 @@ public class ConfigInfo {
    private static String mqServerUsername;
    private static String mqServerPassword;
 
-   private static String serengetiRootVmFolderPrefix;
-   private static String serengetiUUID;
-   
    static {
       mqEnabled = Configuration.getBoolean("task.enable_mq", mqEnabled);
       mqExchangeName = Configuration.getString("task.rabbitmq.exchange", mqExchangeName);
@@ -37,8 +34,6 @@ public class ConfigInfo {
       mqServerPort = Configuration.getInt("task.rabbitmq.port", mqServerPort);
       mqServerUsername = Configuration.getString("task.rabbitmq.username");
       mqServerPassword = Configuration.getString("task.rabbitmq.password");
-      serengetiRootVmFolderPrefix = Configuration.getString("serengeti.root_vm_folder_prefix");
-      serengetiUUID = Configuration.getString("serengeti.uuid");
    }
 
    public static boolean isDebugEnabled() {
@@ -71,13 +66,5 @@ public class ConfigInfo {
 
    public static String getMqServerPassword() {
       return mqServerPassword;
-   }
-   
-   public static String getSerengetiUUID() {
-      return serengetiUUID;
-   }
-   
-   public static String getSerengetiRootVmFolder() {
-      return serengetiRootVmFolderPrefix + "-" + serengetiUUID;
    }
 }
