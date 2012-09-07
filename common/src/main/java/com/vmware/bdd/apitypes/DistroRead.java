@@ -18,17 +18,29 @@ import java.util.List;
 
 public class DistroRead {
    private String name;
+   private boolean hveSupported;
    private List<String> roles;
 
    public String getName() {
       return name;
    }
+
    public void setName(String name) {
       this.name = name;
    }
+
+   public boolean isHveSupported() {
+      return hveSupported;
+   }
+
+   public void setHveSupported(boolean hveSupported) {
+      this.hveSupported = hveSupported;
+   }
+
    public List<String> getRoles() {
       return roles;
    }
+
    public void setRoles(List<String> roles) {
       this.roles = roles;
    }

@@ -42,6 +42,7 @@ import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.NodeGroupRead;
+import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ConfigInfo;
@@ -65,6 +66,10 @@ public class ClusterEntity extends EntityBase {
 
    @Column(name = "distro")
    private String distro;
+
+   @Enumerated(EnumType.STRING)
+   @Column(name = "topology", nullable = false)
+   private TopologyType topologyPolicy;
 
    @Column(name = "start_after_deploy")
    private boolean startAfterDeploy;
@@ -123,6 +128,14 @@ public class ClusterEntity extends EntityBase {
 
    public void setName(String name) {
       this.name = name;
+   }
+
+   public TopologyType getTopologyPolicy() {
+      return topologyPolicy;
+   }
+
+   public void setTopologyPolicy(TopologyType topologyPolicy) {
+      this.topologyPolicy = topologyPolicy;
    }
 
    public ClusterStatus getStatus() {
@@ -235,6 +248,7 @@ public class ClusterEntity extends EntityBase {
       clusterRead.setName(this.name);
       clusterRead.setStatus(this.status);
       clusterRead.setDistro(this.distro);
+      clusterRead.setTopologyPolicy(this.topologyPolicy);
 
       List<NodeGroupRead> groupList = new ArrayList<NodeGroupRead>();
       for(NodeGroupEntity group : this.getNodeGroups()) {

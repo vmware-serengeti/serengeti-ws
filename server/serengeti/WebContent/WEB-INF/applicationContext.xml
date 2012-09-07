@@ -25,6 +25,9 @@
       <property name="datastoreMgr">
          <ref bean="datastoreManager" />
       </property>
+      <property name="rackInfoMgr">
+         <ref bean="rackInfoManager" />
+      </property>
    </bean>
    <bean id="taskManager" class="com.vmware.bdd.manager.TaskManager" />
    <bean id="networkManager" class="com.vmware.bdd.manager.NetworkManager" />

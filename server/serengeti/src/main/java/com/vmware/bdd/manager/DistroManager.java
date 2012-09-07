@@ -60,6 +60,7 @@ class Distro {
    private static final Logger logger = Logger.getLogger(Distro.class);
 
    private String name;
+   private Boolean hveSupported;
    private String version; // ignored now
    private List<RolePackageMapping> packages;
 
@@ -69,6 +70,14 @@ class Distro {
 
    public void setName(String name) {
       this.name = name;
+   }
+
+   public Boolean getHveSupported() {
+      return hveSupported;
+   }
+
+   public void setHveSupported(Boolean hveSupported) {
+      this.hveSupported = hveSupported;
    }
 
    public String getVersion() {
@@ -110,14 +119,15 @@ class Distro {
       }
 
       dr.setName(this.getName());
+      dr.setHveSupported(this.getHveSupported() == null ? false : this.getHveSupported());
       dr.setRoles(new ArrayList<String>(roles));
       return dr;
    }
 
    @Override
    public String toString() {
-      return "Distro [name=" + name + ", version=" + version + ", packages=" + packages
-            + "]";
+      return "Distro [name=" + name + ", hveSupported=" + hveSupported + ", version="
+            + version + ", packages=" + packages + "]";
    }
 }
 
