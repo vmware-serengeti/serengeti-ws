@@ -1,20 +1,28 @@
 package com.vmware.bdd.apitypes;
 
 import java.util.List;
-import java.util.Map;
 
 /**
- * Keep <rack_name, hosts> pairs
+ * Keep <rack_name, hosts> pair
  *
  */
 public class RackInfo {
-	private Map<String, List<String>> racks;
+   private String name;
+   private List<String> hosts;
 
-	public Map<String, List<String>> getRacks() {
-		return racks;
-	}
+   public String getName() {
+      return name;
+   }
 
-	public void setRacks(Map<String, List<String>> racks) {
-		this.racks = racks;
-	}
+   public void setName(String name) {
+      this.name = name;
+   }
+
+   public List<String> getHosts() {
+      return hosts;
+   }
+
+   public void setHosts(List<String> hosts) {
+      this.hosts = hosts;
+   }
 }

@@ -16,10 +16,8 @@ package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 
+import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.PhysicalHostEntity;
 import com.vmware.bdd.entity.RackEntity;
@@ -27,7 +25,7 @@ import com.vmware.bdd.entity.Saveable;
 
 public class RackInfoManager {
 
-   public void importRackInfo(final Map<String, List<String>> rackInfo) {
+   public void importRackInfo(final List<RackInfo> racksInfo) {
       DAL.inRwTransactionDo(new Saveable<Void>() {
          @Override
          public Void body() throws Exception {
@@ -37,8 +35,8 @@ public class RackInfoManager {
                rack.delete();
             }
 
-            for (Entry<String, List<String>> entry : rackInfo.entrySet()) {
-               RackEntity.addRack(entry.getKey(), entry.getValue());
+            for (RackInfo rack : racksInfo) {
+               RackEntity.addRack(rack.getName(), rack.getHosts());
             }
 
             return null;
@@ -46,11 +44,11 @@ public class RackInfoManager {
       });
    }
 
-   public Map<String, List<String>> exportRackInfo() {
-      return DAL.inRoTransactionDo(new Saveable<Map<String, List<String>>>() {
+   public List<RackInfo> exportRackInfo() {
+      return DAL.inRoTransactionDo(new Saveable<List<RackInfo>>() {
          @Override
-         public Map<String, List<String>> body() throws Exception {
-            Map<String, List<String>> rackInfo = new TreeMap<String, List<String>>();
+         public List<RackInfo> body() throws Exception {
+            List<RackInfo> racksInfo = new ArrayList<RackInfo>();
 
             List<RackEntity> racks = RackEntity.findAllRacks();
             for (RackEntity rack : racks) {
@@ -60,11 +58,14 @@ public class RackInfoManager {
                   for (PhysicalHostEntity he : hostEntities) {
                      hosts.add(he.getName());
                   }
-                  rackInfo.put(rack.getName(), hosts);
+                  RackInfo rackInfo = new RackInfo();
+                  rackInfo.setName(rack.getName());
+                  rackInfo.setHosts(hosts);
+                  racksInfo.add(rackInfo);
                }
             }
 
-            return rackInfo;
+            return racksInfo;
          }
       });
    }

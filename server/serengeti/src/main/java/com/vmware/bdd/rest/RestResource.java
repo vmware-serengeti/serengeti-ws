@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.rest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -479,19 +480,17 @@ public class RestResource {
 
    @RequestMapping(value = "/racks", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.OK)
-   public void importRacks(@RequestBody final RackInfo rackInfo) throws Exception {
-      if (rackInfo == null || rackInfo.getRacks() == null) {
+   public void importRacks(@RequestBody final List<RackInfo> racksInfo) throws Exception {
+      if (racksInfo == null || racksInfo.size() == 0) {
          throw BddException.INVALID_PARAMETER("rack list", "empty");
       }
-      rackInfoManager.importRackInfo(rackInfo.getRacks());
+      rackInfoManager.importRackInfo(racksInfo);
    }
 
    @RequestMapping(value = "/racks", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   public RackInfo exportRacks() throws Exception {
-      RackInfo rackInfo = new RackInfo();
-      rackInfo.setRacks(rackInfoManager.exportRackInfo());
-      return rackInfo;
+   public List<RackInfo> exportRacks() throws Exception {
+      return rackInfoManager.exportRackInfo();
    }
 
    @RequestMapping(value = "/distros", method = RequestMethod.GET, produces = "application/json")

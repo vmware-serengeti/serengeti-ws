@@ -14,16 +14,18 @@
  ***************************************************************************/
 package com.vmware.bdd.manager;
 
+import static org.testng.AssertJUnit.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
-import static org.testng.AssertJUnit.assertEquals;
 import org.apache.log4j.Logger;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.vmware.bdd.apitypes.RackInfo;
 
 public class TestRackInfoManager {
    private static final Logger logger = Logger.getLogger(TestRackInfoManager.class);
@@ -42,19 +44,23 @@ public class TestRackInfoManager {
    public void testInsert() {
       RackInfoManager rim = new RackInfoManager();
 
-      Map<String, List<String>> rackInfo = new TreeMap<String, List<String>>();
+      List<RackInfo> racksInfo = new ArrayList<RackInfo>();
       List<String> hosts1 = new ArrayList<String>();
       hosts1.add("host1-1");
       hosts1.add("task1-2");
       List<String> hosts2 = new ArrayList<String>();
       hosts2.add("host2-1");
       hosts2.add("task2-2");
-      rackInfo.put("rack1", hosts1);
-      rackInfo.put("rack2", hosts2);
+      RackInfo rackInfo1 = new RackInfo();
+      RackInfo rackInfo2 = new RackInfo();
+      rackInfo1.setName("rack1");
+      rackInfo1.setHosts(hosts1);
+      rackInfo2.setName("rack2");
+      rackInfo2.setHosts(hosts2);
+      racksInfo.add(rackInfo1);
+      racksInfo.add(rackInfo2);
 
-      rim.importRackInfo(rackInfo);
-      assertEquals(rackInfo, rim.exportRackInfo());
-      rim.importRackInfo(rackInfo);
-      assertEquals(rackInfo, rim.exportRackInfo());
+      rim.importRackInfo(racksInfo);
+      assertEquals(racksInfo, rim.exportRackInfo());
    }
 }

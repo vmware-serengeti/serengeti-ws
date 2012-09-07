@@ -265,7 +265,11 @@ public class CommandsUtils {
 
    public static void printCmdSuccess(String objectType, String name,
          String result) {
-      System.out.println(objectType + " " + name + " " + result);
+      if (name != null) {
+         System.out.println(objectType + " " + name + " " + result);
+      } else {
+         System.out.println(objectType + " " + result);
+      }
    }
 
    public static void printCmdFailure(String objectType, String name,

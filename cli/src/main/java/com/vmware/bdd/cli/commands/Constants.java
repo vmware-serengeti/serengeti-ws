@@ -37,6 +37,7 @@ public class Constants {
    public static final String REST_PATH_DISTRO = "distro";
    public static final String REST_PATH_CONFIG = "config";
    public static final String REST_PATH_SPEC = "spec";
+   public static final String REST_PATH_TOPOLOGY = "racks";
 
    public static final String QUERY_ACTION_KEY = "state";
    public static final String QUERY_ACTION_START = "start";
@@ -69,7 +70,9 @@ public class Constants {
    public static final String OUTPUT_OBJECT_NETWORK = "network";
    public static final String OUTPUT_OBJECT_NODE = "node";
    public static final String OUTPUT_OBJECT_RESOURCEPOOL = "resourcepool";
+   public static final String OUTPUT_OBJECT_TOPOLOGY = "topology";
    public static final String OUTPUT_OP_CREATE = "create";
+   public static final String OUTPUT_OP_UPLOAD = "upload";
    public static final String OUTPUT_OP_CONFIG = "config";
    public static final String OUTPUT_OP_EXPORT = "export";
    public static final String OUTPUT_OP_ADD = "add";
@@ -89,6 +92,7 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_RESIZE = "resized";
    public static final String OUTPUT_OP_RESULT_RESUME = "resumed";
    public static final String OUTPUT_OP_RESULT_ADD = "added";
+   public static final String OUTPUT_OP_RESULT_UPLOAD = "uploaded";
    public static final String OUTPUT_OP_NODEGROUP_MISSING = "must specify nodegroup name when node name is specified";
    public static final String OUTPUT_UNKNOWN_HOST = "unknown host";
    public static final String OUTPUT_HOST_REFUSE = "Connection refused. Please check the port number.";
@@ -169,6 +173,7 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_RAM_MB = "RAM(MB)";
    public static final String FORMAT_TABLE_COLUMN_CPU_MHZ = "CPU(MHZ)";
    public static final String FORMAT_TABLE_COLUMN_TASK = "TASK";
+   public static final String FORMAT_TABLE_COLUMN_HOSTS = "HOSTS";
    public static final String DEFAULT_DISTRO = "apache";
    public static final String PARAM_NO_DISTRO_AVAILABLE = "no distro available,please upload one distro";
    public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure you want to continue (Y/N)? ";
