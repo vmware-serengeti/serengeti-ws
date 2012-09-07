@@ -27,6 +27,10 @@ public class NodeRead {
    private String name;
 
    @Expose
+   @SerializedName("rack")
+   private String rack;
+
+   @Expose
    @SerializedName("hostname")
    private String hostName;
 
@@ -52,6 +56,14 @@ public class NodeRead {
 
    public void setName(String name) {
       this.name = name;
+   }
+
+   public String getRack() {
+      return rack;
+   }
+
+   public void setRack(String rack) {
+      this.rack = rack;
    }
 
    public String getHostName() {

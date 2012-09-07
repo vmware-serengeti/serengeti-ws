@@ -44,6 +44,10 @@ public class ClusterRead {
    private ClusterStatus status;
 
    @Expose
+   @SerializedName("rack_topology_policy")
+   private TopologyType topologyPolicy;
+
+   @Expose
    @SerializedName("groups")
    private List<NodeGroupRead> nodeGroups;
 
@@ -84,6 +88,14 @@ public class ClusterRead {
 
    public void setDistro(String distro) {
       this.distro = distro;
+   }
+
+   public TopologyType getTopologyPolicy() {
+      return topologyPolicy;
+   }
+
+   public void setTopologyPolicy(TopologyType topologyPolicy) {
+      this.topologyPolicy = topologyPolicy;
    }
 
    public int getInstanceNum() {

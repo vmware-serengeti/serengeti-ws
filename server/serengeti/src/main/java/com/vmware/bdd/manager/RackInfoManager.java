@@ -16,6 +16,8 @@ package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.dal.DAL;
@@ -35,6 +37,7 @@ public class RackInfoManager {
                rack.delete();
             }
 
+            // TODO make sure one host maps to one rack
             for (RackInfo rack : racksInfo) {
                RackEntity.addRack(rack.getName(), rack.getHosts());
             }
@@ -45,7 +48,7 @@ public class RackInfoManager {
    }
 
    public List<RackInfo> exportRackInfo() {
-      return DAL.inRoTransactionDo(new Saveable<List<RackInfo>>() {
+      return DAL.autoTransactionDo(new Saveable<List<RackInfo>>() {
          @Override
          public List<RackInfo> body() throws Exception {
             List<RackInfo> racksInfo = new ArrayList<RackInfo>();
@@ -68,5 +71,18 @@ public class RackInfoManager {
             return racksInfo;
          }
       });
+   }
+
+   public Map<String, String> exportHostRackMap() {
+      Map<String, String> hostRackMap = new TreeMap<String, String>();
+      List<RackInfo> rackInfo = exportRackInfo();
+
+      for (RackInfo ri : rackInfo) {
+         for (String host : ri.getHosts()) {
+            hostRackMap.put(host, ri.getName());
+         }
+      }
+
+      return hostRackMap;
    }
 }

@@ -59,6 +59,12 @@ public class ClusterCreate {
    @SerializedName("distro_map")
    private HadoopDistroMap distroMap;
    @Expose
+   @SerializedName("rack_topology_policy")
+   private TopologyType topologyPolicy;
+   @Expose
+   @SerializedName("rack_topology")
+   private Map<String, String> hostToRackMap;
+   @Expose
    @SerializedName("vc_shared_datastore_pattern")
    private Set<String> sharedPattern;
    @Expose
@@ -85,6 +91,8 @@ public class ClusterCreate {
       this.networking = cluster.networking;
       this.configuration = cluster.configuration;
       this.validateConfig = cluster.validateConfig;
+      this.topologyPolicy = cluster.topologyPolicy;
+      this.hostToRackMap = cluster.hostToRackMap;
    }
 
    public Map<String, Object> getConfiguration() {
@@ -192,6 +200,22 @@ public class ClusterCreate {
 
    public void setDistroMap(HadoopDistroMap distroMap) {
       this.distroMap = distroMap;
+   }
+
+   public TopologyType getTopologyPolicy() {
+      return topologyPolicy;
+   }
+
+   public void setTopologyPolicy(TopologyType topologyPolicy) {
+      this.topologyPolicy = topologyPolicy;
+   }
+
+   public Map<String, String> getHostToRackMap() {
+      return hostToRackMap;
+   }
+
+   public void setHostToRackMap(Map<String, String> hostToRackMap) {
+      this.hostToRackMap = hostToRackMap;
    }
 
    public Set<String> getSharedPattern() {

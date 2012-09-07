@@ -49,6 +49,7 @@ import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.apitypes.ResourcePoolAdd;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.apitypes.TaskRead;
+import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
 import com.vmware.bdd.manager.ClusterManager;
@@ -138,6 +139,7 @@ public class RestResource {
          throws Exception {
 
       // TODO: make sure cluster name is valid
+
       Long taskId = clusterMgr.createCluster(createSpec);
       redirectRequest(taskId, request, response);
    }
@@ -484,6 +486,7 @@ public class RestResource {
       if (racksInfo == null || racksInfo.size() == 0) {
          throw BddException.INVALID_PARAMETER("rack list", "empty");
       }
+
       rackInfoManager.importRackInfo(racksInfo);
    }
 

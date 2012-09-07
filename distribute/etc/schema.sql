@@ -70,6 +70,7 @@ create table cluster (
    id           bigint       not null unique DEFAULT nextval('cluster_seq'::regclass),
    name         varchar(255) not null unique,
    distro       varchar(255),
+   topology     varchar(255) not null,
    status       varchar(255) not null,
    vc_datastore_names text,
    vc_rp_names  text,
@@ -115,6 +116,7 @@ create sequence hadoop_node_seq;
 create table hadoop_node (
    id           bigint       not null unique DEFAULT nextval('hadoop_node_seq'::regclass),
    vm_name      varchar(255) not null unique,
+   rack         varchar(255),
    host_name    varchar(255),
    status       varchar(255),
    action       varchar(255),

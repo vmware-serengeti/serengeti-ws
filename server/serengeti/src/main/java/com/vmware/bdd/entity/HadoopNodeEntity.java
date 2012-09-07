@@ -45,6 +45,9 @@ public class HadoopNodeEntity extends EntityBase {
    @Column(name = "vm_name", unique = true, nullable = false)
    private String vmName;
 
+   @Column(name = "rack")
+   private String rack;
+
    @Column(name = "host_name")
    private String hostName;
 
@@ -75,10 +78,11 @@ public class HadoopNodeEntity extends EntityBase {
 
    }
 
-   public HadoopNodeEntity(String vmName, String hostName, String status,
-         String ipAddress) {
+   public HadoopNodeEntity(String vmName, String rack, String hostName,
+         String status, String ipAddress) {
       super();
       this.vmName = vmName;
+      this.rack = rack;
       this.hostName = hostName;
       this.status = status;
       this.ipAddress = ipAddress;
@@ -90,6 +94,14 @@ public class HadoopNodeEntity extends EntityBase {
 
    public void setVmName(String vmName) {
       this.vmName = vmName;
+   }
+
+   public String getRack() {
+      return rack;
+   }
+
+   public void setRack(String rack) {
+      this.rack = rack;
    }
 
    public String getHostName() {
@@ -151,6 +163,7 @@ public class HadoopNodeEntity extends EntityBase {
    }
 
    public void copy(HadoopNodeEntity newNode) {
+      this.rack = newNode.getRack();
       this.hostName = newNode.getHostName();
       this.ipAddress = newNode.getIpAddress();
       this.status = newNode.getStatus();
@@ -165,6 +178,7 @@ public class HadoopNodeEntity extends EntityBase {
 
    public NodeRead toNodeRead() {
       NodeRead node = new NodeRead();
+      node.setRack(this.rack);
       node.setHostName(this.hostName);
       node.setIp(this.ipAddress);
       node.setName(this.vmName);

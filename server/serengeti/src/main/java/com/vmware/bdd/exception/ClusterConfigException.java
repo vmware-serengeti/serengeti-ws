@@ -16,6 +16,8 @@ package com.vmware.bdd.exception;
 
 import java.util.List;
 
+import com.vmware.bdd.apitypes.TopologyType;
+
 public class ClusterConfigException extends BddException {
    private static final long serialVersionUID = 1L;
    public ClusterConfigException() {
@@ -76,5 +78,8 @@ public class ClusterConfigException extends BddException {
    }
    public static ClusterConfigException INVALID_ROLES(List<String> errors) {
       return new ClusterConfigException(null, "INVALID_ROLES", errors);
+   }
+   public static ClusterConfigException INVALID_TOPOLOGY_POLICY(TopologyType topology, String reason) {
+      return new ClusterConfigException(null, "INVALID_TOPOLOGY_POLICY", topology, reason);
    }
 }
