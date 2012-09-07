@@ -14,7 +14,12 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import com.vmware.bdd.dal.DAL;
+import com.vmware.bdd.entity.TaskEntity;
+
 public class ClusterCmdUtil {
+   private static final String QUERY_CLUSTER_CMD = Configuration
+   .getNonEmptyString("query_cluster.cmd");
    private static final String CREATE_CLUSTER_CMD = Configuration
          .getNonEmptyString("create_cluster.cmd");
    private static final String DELETE_CLUSTER_CMD = Configuration
@@ -27,6 +32,12 @@ public class ClusterCmdUtil {
          .getNonEmptyString("start_cluster_node.cmd");
    private static final String CONFIGURE_CLUSTER_CMD = Configuration
          .getNonEmptyString("configure_cluster.cmd");
+
+   public static String[] getQueryClusterCmdArray(String clusterName,
+         String fileName) {
+      return QUERY_CLUSTER_CMD.replaceAll(":cluster_name", clusterName)
+            .replaceAll(":json_file", fileName).split(" ");
+   }
 
    public static String[] getCreateClusterCmdArray(String clusterName,
          String fileName) {
@@ -92,5 +103,32 @@ public class ClusterCmdUtil {
       AuAssert.check(ary.length == 3);
 
       return Integer.parseInt(ary[2]);
+   }
+
+   /**
+    * wait for task to complete
+    * @param taskId
+    *   task ID
+    * @return
+    *   true for a successfully executed task, false otherwise
+    */
+   public static boolean waitForTask(Long taskId) {
+      TaskEntity task = TaskEntity.findById(taskId);
+      AuAssert.check(task != null);
+
+      while (true) {
+         try {
+            Thread.sleep(100);
+         } catch (InterruptedException e) {
+            // ignore
+         }
+         DAL.inTransactionRefresh(task);
+         if (com.vmware.bdd.apitypes.TaskRead.Status.SUCCESS.equals(task
+               .getStatus()))
+            return true;
+         if (com.vmware.bdd.apitypes.TaskRead.Status.FAILED.equals(task
+               .getStatus()))
+            return false;
+      }
    }
 }

@@ -46,8 +46,10 @@ import com.vmware.bdd.exception.ClusterManagerException;
 import com.vmware.bdd.manager.task.ConfigureClusterListener;
 import com.vmware.bdd.manager.task.CreateClusterListener;
 import com.vmware.bdd.manager.task.DeleteClusterListener;
+import com.vmware.bdd.manager.task.QueryClusterListener;
 import com.vmware.bdd.manager.task.StartClusterListener;
 import com.vmware.bdd.manager.task.StopClusterListener;
+import com.vmware.bdd.manager.task.Task;
 import com.vmware.bdd.manager.task.TaskListener;
 import com.vmware.bdd.manager.task.UpdateClusterListener;
 import com.vmware.bdd.spectypes.HadoopRole;
@@ -99,7 +101,7 @@ public class ClusterManager {
       ClusterCreate clusterConfig =
             clusterConfigMgr.getClusterConfig(clusterName);
       Map<String, Object> cloudProvider = cloudProviderMgr.getAttributes();
-      ClusterRead read = getClusterByName(clusterName);
+      ClusterRead read = getClusterByName(clusterName, false);
       Map<String, Object> attrs = new HashMap<String, Object>();
       attrs.put("cloud_provider", cloudProvider);
       attrs.put("cluster_definition", clusterConfig);
@@ -219,17 +221,28 @@ public class ClusterManager {
       return createClusterMgmtTask(targets, cluster, listener, initStatus);
    }
 
-   public ClusterRead getClusterByName(final String clusterName) {
-      return DAL.inRoTransactionDo(new Saveable<ClusterRead>() {
+   public ClusterRead getClusterByName(final String clusterName, final boolean realTime) {
+      return DAL.autoTransactionDo(new Saveable<ClusterRead>() {
          @Override
          public ClusterRead body() {
-            ClusterEntity entity =
+            ClusterEntity cluster =
                   ClusterEntity.findClusterEntityByName(clusterName);
-            if (entity == null) {
+            if (cluster == null) {
                throw BddException.NOT_FOUND("cluster", clusterName);
             }
 
-            return entity.toClusterRead();
+            if (realTime && cluster.inStableStatus()) {
+               // query real time cluster data
+               QueryClusterListener listener = new QueryClusterListener(clusterName);
+
+               // no need to update status, set initStatus to null
+               Long taskId = createClusterMgmtTaskWithErrorSetting(cluster, listener,
+                        null);
+               ClusterCmdUtil.waitForTask(taskId);
+               DAL.refresh(cluster);
+            }
+
+            return cluster.toClusterRead();
          }
       });
    }
@@ -264,14 +277,14 @@ public class ClusterManager {
    }
 
    public List<ClusterRead> getClusters() {
-      return DAL.inRoTransactionDo(new Saveable<List<ClusterRead>>() {
+      return DAL.inTransactionDo(new Saveable<List<ClusterRead>>() {
          @Override
          public List<ClusterRead> body() {
             List<ClusterRead> clusters = new ArrayList<ClusterRead>();
             List<ClusterEntity> clusterEntities =
                   DAL.findAll(ClusterEntity.class);
             for (ClusterEntity entity : clusterEntities) {
-               clusters.add(entity.toClusterRead());
+               clusters.add(getClusterByName(entity.getName(), true));
             }
             return clusters;
          }
