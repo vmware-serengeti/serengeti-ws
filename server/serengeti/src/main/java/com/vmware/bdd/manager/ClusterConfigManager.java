@@ -458,7 +458,7 @@ public class ClusterConfigManager {
    }
 
    public ClusterCreate getClusterConfig(final String clusterName) {
-      return DAL.inTransactionDo(new Saveable<ClusterCreate>() {
+      return DAL.autoTransactionDo(new Saveable<ClusterCreate>() {
          public ClusterCreate body() {
 
             ClusterEntity clusterEntity =

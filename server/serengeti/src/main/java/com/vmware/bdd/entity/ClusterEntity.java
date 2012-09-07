@@ -16,6 +16,7 @@ package com.vmware.bdd.entity;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -251,13 +252,12 @@ public class ClusterEntity extends EntityBase {
       clusterRead.setTopologyPolicy(this.topologyPolicy);
 
       List<NodeGroupRead> groupList = new ArrayList<NodeGroupRead>();
-      for(NodeGroupEntity group : this.getNodeGroups()) {
+      for (NodeGroupEntity group : this.getNodeGroups()) {
          groupList.add(group.toNodeGroupRead());
       }
       clusterRead.setNodeGroups(groupList);
       if (this.getHadoopConfig() != null) {
-         Map conf =
-            (new Gson()).fromJson(this.getHadoopConfig(), Map.class);
+         Map conf = (new Gson()).fromJson(this.getHadoopConfig(), Map.class);
          Map hadoopConf = (Map) conf.get("hadoop");
          if (hadoopConf != null) {
             Map coreSiteConf = (Map) hadoopConf.get("core-site.xml");
@@ -277,6 +277,15 @@ public class ClusterEntity extends EntityBase {
       return ConfigInfo.getSerengetiRootFolder() + "/" + this.name;
    }
 
+   public boolean inStableStatus() {
+      ClusterStatus[] stableStatus =
+            new ClusterStatus[] { ClusterStatus.RUNNING, ClusterStatus.STOPPED };
+      // should ERROR status be stable status?
+      // ClusterStatus.CONFIGURE_ERROR, ClusterStatus.ERROR, ClusterStatus.PROVISION_ERROR,
+
+      return Arrays.asList(stableStatus).contains(this.status);
+   }
+
    public static ClusterEntity findClusterEntityById(Long clusterId) {
       return DAL.findById(ClusterEntity.class, clusterId);
    }
@@ -287,8 +296,9 @@ public class ClusterEntity extends EntityBase {
    }
 
    public static List<ClusterEntity> findClusterEntityByDatastore(String dsName) {
-      List<ClusterEntity> clusters = DAL.findByCriteria(ClusterEntity.class,
-            Restrictions.like("vcDatastoreNames", dsName, MatchMode.ANYWHERE));
+      List<ClusterEntity> clusters =
+            DAL.findByCriteria(ClusterEntity.class, Restrictions.like(
+                  "vcDatastoreNames", dsName, MatchMode.ANYWHERE));
       Iterator<ClusterEntity> i = clusters.iterator();
       while (i.hasNext()) {
          ClusterEntity cluster = i.next();
@@ -300,8 +310,9 @@ public class ClusterEntity extends EntityBase {
    }
 
    public static List<ClusterEntity> findClusterEntityByRP(String rpName) {
-      List<ClusterEntity> clusters = DAL.findByCriteria(ClusterEntity.class,
-            Restrictions.like("vcRpNames", rpName, MatchMode.ANYWHERE));
+      List<ClusterEntity> clusters =
+            DAL.findByCriteria(ClusterEntity.class,
+                  Restrictions.like("vcRpNames", rpName, MatchMode.ANYWHERE));
       Iterator<ClusterEntity> i = clusters.iterator();
       while (i.hasNext()) {
          ClusterEntity cluster = i.next();
@@ -312,13 +323,15 @@ public class ClusterEntity extends EntityBase {
       return clusters;
    }
 
-   public static void updateStatus(final String clusterName, final ClusterStatus status) {
-      if (clusterName == null || status == null) 
+   public static void updateStatus(final String clusterName,
+         final ClusterStatus status) {
+      if (clusterName == null || status == null)
          return;
 
       DAL.inTransactionDo(new Saveable<Void>() {
          public Void body() {
-            ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+            ClusterEntity cluster =
+                  ClusterEntity.findClusterEntityByName(clusterName);
             AuAssert.check(cluster != null);
             cluster.setStatus(status);
             return null;
