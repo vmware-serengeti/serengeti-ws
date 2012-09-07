@@ -5,7 +5,7 @@
  *   You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *   Unless required by applicable law or agreed to in writing, software
  *   distributed under the License is distributed on an "AS IS" BASIS,
  *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -62,7 +62,7 @@ public class TopologyTests extends MockRestServer {
       topologyCommands.upload("src/test/resources/topology.sample");
       CookieCache.put("Cookie","");
    }
-   
+
    @Test
    public void testTopologyList() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
@@ -83,9 +83,9 @@ public class TopologyTests extends MockRestServer {
 
       racksInfo[0] = rack1;
       racksInfo[1] = rack2;
-      
+
       ObjectMapper mapper = new ObjectMapper();
-      
+
       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/racks",
             HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(racksInfo));
 

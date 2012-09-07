@@ -119,10 +119,10 @@ public class TopologyCommands implements CommandMarker {
                Constants.FORMAT_TABLE_COLUMN_NAME, Arrays.asList("getName"));
          rackInfoColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_HOSTS, Arrays.asList("getHosts"));
-         
-            CommandsUtils.printInTableFormat(
-                  rackInfoColumnNamesWithGetMethodNames, racks,
-                  Constants.OUTPUT_INDENT);
+
+         CommandsUtils.printInTableFormat(
+               rackInfoColumnNamesWithGetMethodNames, racks,
+               Constants.OUTPUT_INDENT);
       }
    }
 }
