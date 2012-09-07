@@ -61,8 +61,8 @@ public class TestRackInfoManager {
       racksInfo.add(rackInfo2);
 
       rim.importRackInfo(racksInfo);
-      assertEquals(racksInfo, rim.exportRackInfo());
+      assertEquals(racksInfo.get(0).getName(), rim.exportRackInfo().get(0).getName());
       rim.importRackInfo(racksInfo);
-      assertEquals(racksInfo, rim.exportRackInfo());
+      assertEquals(racksInfo.get(0).getName(), rim.exportRackInfo().get(0).getName());
    }
 }

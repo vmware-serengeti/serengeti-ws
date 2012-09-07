@@ -14,7 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.rest;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -46,6 +45,7 @@ import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.RackInfo;
+import com.vmware.bdd.apitypes.RackInfoList;
 import com.vmware.bdd.apitypes.ResourcePoolAdd;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.apitypes.TaskRead;
@@ -480,7 +480,7 @@ public class RestResource {
 
    @RequestMapping(value = "/racks", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.OK)
-   public void importRacks(@RequestBody final List<RackInfo> racksInfo) throws Exception {
+   public void importRacks(@RequestBody final RackInfoList racksInfo) throws Exception {
       if (racksInfo == null || racksInfo.size() == 0) {
          throw BddException.INVALID_PARAMETER("rack list", "empty");
       }
