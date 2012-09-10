@@ -139,7 +139,6 @@ public class RestResource {
          throws Exception {
 
       // TODO: make sure cluster name is valid
-      createSpec.setTopologyPolicy(TopologyType.NONE); // XXX to be deleted, just make smoke test happy
       Long taskId = clusterMgr.createCluster(createSpec);
       redirectRequest(taskId, request, response);
    }

@@ -75,7 +75,7 @@ public class TopologyCommands implements CommandMarker {
             } else {
                String[] rackHosts = line.split(":");
                if (rackHosts.length != 2) {
-                  throw new CliException("wrong topology format at line: " + lineNum);
+                  throw new CliException("wrong topology format at line: " + lineNum + "." + Constants.TOPLOGY_FORMAT);
                } else {
                   String[] hosts = rackHosts[1].split(",");
                   for (int i = 0; i < hosts.length; i++) {
