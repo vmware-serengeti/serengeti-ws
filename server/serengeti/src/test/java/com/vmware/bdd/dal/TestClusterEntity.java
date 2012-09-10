@@ -29,6 +29,7 @@ import org.testng.annotations.Test;
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
+import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
@@ -64,6 +65,7 @@ public class TestClusterEntity {
          public Void body() {
             ClusterEntity cluster = new ClusterEntity(CLUSTER_NAME);
             cluster.setDistro("apache");
+            cluster.setTopologyPolicy(TopologyType.NONE);
 
             Set<NodeGroupEntity> nodeGroups = new HashSet<NodeGroupEntity>();
             NodeGroupEntity hdfsGroup = new NodeGroupEntity(HDFS_GROUP);

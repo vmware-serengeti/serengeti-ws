@@ -87,6 +87,7 @@ public class TestClusterManager {
       ccMgr.setDistroMgr(new DistroManager());
       ccMgr.setRpMgr(new VcResourcePoolManager());
       ccMgr.setDatastoreMgr(new VcDataStoreManager());
+      ccMgr.setRackInfoMgr(new RackInfoManager());
 
       clusterManager.setClusterConfigMgr(ccMgr);
       clusterManager.setTaskManager(new TaskManager());

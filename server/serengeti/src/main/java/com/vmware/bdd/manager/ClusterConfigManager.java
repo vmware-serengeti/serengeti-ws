@@ -206,9 +206,13 @@ public class ClusterConfigManager {
                         .getConfiguration()));
                }
                expandNodeGroupCreates(cluster, gson, clusterEntity, distro);
-               
-               AuAssert.check(cluster.getTopologyPolicy() != null);
-               clusterEntity.setTopologyPolicy(cluster.getTopologyPolicy());
+
+               if (cluster.getTopologyPolicy() == null) {
+                  clusterEntity.setTopologyPolicy(TopologyType.NONE);
+               } else {
+                  clusterEntity.setTopologyPolicy(cluster.getTopologyPolicy());
+               }
+
                if (clusterEntity.getTopologyPolicy() == TopologyType.HVE) {
                   boolean hveSupported = false;
                   if (clusterEntity.getDistro() != null) {
@@ -487,16 +491,15 @@ public class ClusterConfigManager {
             distroMgr);
 
       clusterConfig.setTopologyPolicy(clusterEntity.getTopologyPolicy());
-      if (clusterConfig.getTopologyPolicy() == TopologyType.RACK_HOST
-            || clusterConfig.getTopologyPolicy() == TopologyType.HVE) {
-         Map<String, String> hostToRackMap = rackInfoMgr.exportHostRackMap();
-         if (hostToRackMap.isEmpty()) {
-            logger.error("trying to use host-rack topology which is absent");
-            throw ClusterConfigException.INVALID_TOPOLOGY_POLICY(
-                  clusterConfig.getTopologyPolicy(), "no rack information");
-         }
-         clusterConfig.setHostToRackMap(hostToRackMap);
+      Map<String, String> hostToRackMap = rackInfoMgr.exportHostRackMap();
+      if ((clusterConfig.getTopologyPolicy() == TopologyType.RACK_HOST ||
+           clusterConfig.getTopologyPolicy() == TopologyType.HVE) &&
+           hostToRackMap.isEmpty()) {
+         logger.error("trying to use host-rack topology which is absent");
+         throw ClusterConfigException.INVALID_TOPOLOGY_POLICY(
+               clusterConfig.getTopologyPolicy(), "no rack information");
       }
+      clusterConfig.setHostToRackMap(hostToRackMap);
 
       clusterConfig.setTemplateId(templateId);
       if (clusterEntity.getVcRpNames() != null) {

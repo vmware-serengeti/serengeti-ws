@@ -53,6 +53,8 @@ public class TestClusterConfigManager {
       VcDataStoreManager datastoreMgr = new VcDataStoreManager();
       vcProvider.setDatastoreMgr(datastoreMgr);
       clusterMgr.setDatastoreMgr(datastoreMgr);
+      RackInfoManager rackInfoMgr = new RackInfoManager();
+      clusterMgr.setRackInfoMgr(rackInfoMgr);
    }
 
    @BeforeClass
