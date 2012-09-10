@@ -166,7 +166,7 @@
 			<id>spring-maven-snapshot</id>
 			<snapshots>
 				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
+				<updatePolicy>never</updatePolicy>
 			</snapshots>
 			<name>Springframework Maven SNAPSHOT Repository</name>
 			<url>http://repo.springsource.org/libs-snapshot</url>
