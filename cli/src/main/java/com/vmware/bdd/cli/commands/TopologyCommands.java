@@ -116,7 +116,7 @@ public class TopologyCommands implements CommandMarker {
          LinkedHashMap<String, List<String>> rackInfoColumnNamesWithGetMethodNames =
                new LinkedHashMap<String, List<String>>();
          rackInfoColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_NAME, Arrays.asList("getName"));
+               Constants.FORMAT_TABLE_COLUMN_RACK, Arrays.asList("getName"));
          rackInfoColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_HOSTS, Arrays.asList("getHosts"));
 

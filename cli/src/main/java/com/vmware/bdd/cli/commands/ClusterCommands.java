@@ -713,9 +713,14 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private void prettyOutputClusterInfo(ClusterRead cluster, boolean detail) {
-      //cluster Name
-      System.out.printf("name: %s, distro: %s, status: %s", cluster.getName(),
-            cluster.getDistro(), cluster.getStatus());
+      TopologyType topology = cluster.getTopologyPolicy();
+      if (topology == null || topology == TopologyType.NONE) {
+         System.out.printf("name: %s, distro: %s, status: %s",
+               cluster.getName(), cluster.getDistro(), cluster.getStatus());
+      } else {
+         System.out.printf("name: %s, distro: %s, topology: %s, status: %s",
+               cluster.getName(), cluster.getDistro(), topology, cluster.getStatus());
+      }
       System.out.println();
       if(cluster.getExternalHDFS() != null && !cluster.getExternalHDFS().isEmpty()) {
          System.out.printf("external HDFS: %s\n", cluster.getExternalHDFS());
@@ -749,11 +754,13 @@ public class ClusterCommands implements CommandMarker {
                nColumnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_NAME,
                      Arrays.asList("getName"));
+               if (topology == TopologyType.RACK_AS_RACK || topology == TopologyType.HVE) {
+                  nColumnNamesWithGetMethodNames.put(
+                        Constants.FORMAT_TABLE_COLUMN_RACK,
+                        Arrays.asList("getRack"));
+               }
                nColumnNamesWithGetMethodNames.put(
-                     Constants.FORMAT_TABLE_COLUMN_RACK,
-                     Arrays.asList("getRack"));
-               nColumnNamesWithGetMethodNames.put(
-                     Constants.FORMAT_TABLE_COLUMN_PHYSICAL_HOST,
+                     Constants.FORMAT_TABLE_COLUMN_HOST,
                      Arrays.asList("getHostName"));
                nColumnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_IP, Arrays.asList("getIp"));

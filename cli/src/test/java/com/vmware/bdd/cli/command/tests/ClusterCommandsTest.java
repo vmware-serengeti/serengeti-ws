@@ -36,6 +36,7 @@ import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
+import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.cli.commands.ClusterCommands;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
@@ -295,21 +296,25 @@ public class ClusterCommandsTest extends MockRestServer {
         nr1.setIp("10.1.1.99");
         nr1.setName("node1");
         nr1.setStatus("running");
+        nr1.setRack("rack1");
         NodeRead nr2 = new NodeRead();
         nr2.setHostName("test2.vmware.com");
         nr2.setIp("10.1.1.100");
         nr2.setName("node2");
         nr2.setStatus("running");
+        nr2.setRack("rack1");
         NodeRead nr3 = new NodeRead();
         nr3.setHostName("test3.vmware.com");
         nr3.setIp("10.1.1.101");
         nr3.setName("node3");
         nr3.setStatus("running");
+        nr3.setRack("rack1");
         NodeRead nr4 = new NodeRead();
         nr4.setHostName("test4.vmware.com");
         nr4.setIp("10.1.1.102");
         nr4.setName("node4");
         nr4.setStatus("create");
+        nr4.setRack("rack1");
         List<NodeRead> instances1 = new LinkedList<NodeRead>();
         instances1.add(nr1);
         instances1.add(nr2);
@@ -356,6 +361,15 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.GET, HttpStatus.OK,
                 mapper.writeValueAsString(new ClusterRead[] { cr1, cr2 }));
         clusterCommands.getCluster(null, true);
+
+        //test topology turn-on
+        cr1.setTopologyPolicy(TopologyType.HVE);
+        cr2.setTopologyPolicy(TopologyType.RACK_AS_RACK);
+        setup();
+        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.GET, HttpStatus.OK,
+              mapper.writeValueAsString(new ClusterRead[] { cr1, cr2 }));
+        clusterCommands.getCluster(null, true);
+
         CookieCache.put("Cookie","");
     }
 
