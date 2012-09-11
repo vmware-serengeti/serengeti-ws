@@ -281,7 +281,7 @@ public class RestResource {
    @ResponseBody
    public ClusterRead getCluster(
          @PathVariable("clusterName") final String clusterName) {
-      return clusterMgr.getClusterByName(clusterName);
+      return clusterMgr.getClusterByName(clusterName, true);
    }
 
    @RequestMapping(value = "/cluster/{clusterName}/spec", method = RequestMethod.GET, produces = "application/json")
