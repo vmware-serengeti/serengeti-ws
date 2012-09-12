@@ -86,7 +86,6 @@ public class ClusterCommands implements CommandMarker {
    public void createCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
          @CliOption(key = { "distro" }, mandatory = false, help = "Hadoop Distro") final String distro,
-         @CliOption(key = { "topology" }, mandatory = false, help = "The topology type") final String topology,
          @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath,
          @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,

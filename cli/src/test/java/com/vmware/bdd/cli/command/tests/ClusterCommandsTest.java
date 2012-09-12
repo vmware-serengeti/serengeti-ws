@@ -199,11 +199,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.NO_CONTENT, "");
 
-<<<<<<< HEAD
-        clusterCommands.createCluster("cluster1", null, null, "hadoop_cluster.json", null, null, null, false, false, false);
-=======
         clusterCommands.createCluster("cluster1", null, "hadoop_cluster.json", null, null, null, null, false, false, false);
->>>>>>> b2d6b7f413a72c5d1a67979a9472899a31775376
         CookieCache.put("Cookie","");
     }
 
