@@ -59,6 +59,40 @@ public class NodeGroup {
    }
 
    public static class PlacementPolicy {
+
+      public static class GroupRacks {
+         public enum GroupRacksType {
+            ROUND_ROBIN, SAME_RACK
+         }
+         @Expose
+         @SerializedName("type")
+         private GroupRacksType type;
+         @Expose
+         @SerializedName("racks")
+         private String[] racks;
+
+         public GroupRacksType getType() {
+            return type;
+         }
+
+         public void setType(GroupRacksType type) {
+            this.type = type;
+         }
+
+         public String[] getRacks() {
+            return racks;
+         }
+
+         public void setRacks(String[] racks) {
+            this.racks = racks;
+         }
+
+         @Override
+         public String toString() {
+            return "GroupRacks [racks=" + racks.toString() + "; type=" + type + "]";
+         }
+      }
+
       public static class GroupAssociation {
          public enum GroupAssociationType {
             WEAK, STRICT
@@ -94,11 +128,22 @@ public class NodeGroup {
       }
 
       @Expose
+      @SerializedName("group_racks")
+      private GroupRacks groupRacks;
+      @Expose
       @SerializedName("instance_per_host")
       private Integer instancePerHost;
       @Expose
       @SerializedName("group_associations")
       private List<GroupAssociation> groupAssociations;
+
+      public GroupRacks getGroupRacks() {
+         return groupRacks;
+      }
+
+      public void setGroupRacks(GroupRacks groupRacks) {
+         this.groupRacks = groupRacks;
+      }
 
       public Integer getInstancePerHost() {
          return instancePerHost;

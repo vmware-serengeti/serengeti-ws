@@ -76,6 +76,9 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException INVALID_PLACEMENT_POLICIES(List<String> errors) {
       return new ClusterConfigException(null, "INVALID_PLACEMENT_POLICIES", errors);
    }
+   public static ClusterConfigException LACK_PHYSICAL_HOSTS() {
+      return new ClusterConfigException(null, "LACK_PHYSICAL_HOSTS");
+   }
    public static ClusterConfigException INVALID_ROLES(List<String> errors) {
       return new ClusterConfigException(null, "INVALID_ROLES", errors);
    }

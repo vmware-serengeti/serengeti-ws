@@ -95,6 +95,7 @@ create table node_group (
    storage_size           integer,
    vc_datastore_names     text,
    vc_rp_names            text,
+   group_racks            text,
    configuration          text,
    instance_per_host      integer,
    cluster_id             bigint,

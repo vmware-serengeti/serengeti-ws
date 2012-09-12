@@ -20,12 +20,16 @@ import java.util.Map;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksType;
 import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.VcCluster;
+import com.vmware.bdd.utils.Constants;
 
 /**
  * Cluster creation parameters
@@ -204,7 +208,7 @@ public class NodeGroupCreate {
       this.vmFolderPath = vmFolderPath;
    }
 
-   private Integer getHostNum() {
+   public Integer calculateHostNum() {
       Integer hostNumber = null;
       PlacementPolicy policies = getPlacementPolicies();
       if (policies != null && policies.getInstancePerHost() != null &&
@@ -219,8 +223,8 @@ public class NodeGroupCreate {
       return hostNumber;
    }
 
-   public boolean validatePlacementPolicies(Map<String, NodeGroupCreate> groups,
-         List<String> failedMsgList) {
+   public boolean validatePlacementPolicies(ClusterCreate cluster, Map<String, NodeGroupCreate> groups,
+         List<String> failedMsgList, List<String> warningMsgList) {
       boolean valid = true;
       PlacementPolicy policies = getPlacementPolicies();
       if (policies != null) {
@@ -230,7 +234,7 @@ public class NodeGroupCreate {
                failedMsgList.add(new StringBuilder().append(getName())
                      .append(".placementPolicies.instancePerHost=")
                      .append(policies.getInstancePerHost()).toString());
-            } else if (getHostNum() < 0) {
+            } else if (calculateHostNum() < 0) {
                valid = false;
                failedMsgList.add(new StringBuilder().append(getName())
                      .append(".placementPolicies.instancePerHost=")
@@ -238,6 +242,29 @@ public class NodeGroupCreate {
                      .append(" is not an exact divisor").toString());
             }
          }
+
+         if (policies.getGroupRacks() != null) {
+            if (cluster.getTopologyPolicy() == null) {
+               warningMsgList.add("Warning: "
+                     + Constants.PRACK_NO_TOPOLOGY_TYPE_SPECIFIED);
+               cluster.setTopologyPolicy(TopologyType.NONE);
+            }
+            GroupRacks r = policies.getGroupRacks();
+            if (r.getType() == null) {
+               r.setType(GroupRacksType.ROUND_ROBIN);
+            } else if (r.getType() == GroupRacksType.SAME_RACK
+                  && r.getRacks().length != 1) {
+               valid = false;
+               failedMsgList.add(Constants.PRACK_SAME_RACK_WITH_WRONG_VALUES);
+            }
+
+            // warning if storage.type = SHARED
+            if (getStorage() == null || getStorage().getType() == null
+                  || getStorage().getType().equals(DatastoreType.SHARED.toString())) {
+               warningMsgList.add("Warning: " + Constants.PRACK_WITH_SHARED_STORAGE);
+            }
+         }
+
          if (policies.getGroupAssociations() != null) {
             // only support 1 group association now
             if (policies.getGroupAssociations().size() != 1) {
@@ -281,13 +308,17 @@ public class NodeGroupCreate {
                       * node group, we assume the min node number is 1 when instance per host is
                       * unspecified. This rule follows the underlying placement algorithm.
                       */
+                     if (policies.getGroupRacks() != null) {
+                        warningMsgList.add("Warning: "
+                              + Constants.PRACK_WITH_STRICT_ASSOCIATION);
+                     }
                      int hostNum = 1;
                      int refHostNum = groups.get(a.getReference()).getInstanceNum();
-                     if (getHostNum() != null) {
-                        hostNum = getHostNum();
+                     if (calculateHostNum() != null) {
+                        hostNum = calculateHostNum();
                      }
-                     if (groups.get(a.getReference()).getHostNum() != null) {
-                        refHostNum = groups.get(a.getReference()).getHostNum();
+                     if (groups.get(a.getReference()).calculateHostNum() != null) {
+                        refHostNum = groups.get(a.getReference()).calculateHostNum();
                      }
                      if (hostNum > refHostNum) {
                         valid = false;

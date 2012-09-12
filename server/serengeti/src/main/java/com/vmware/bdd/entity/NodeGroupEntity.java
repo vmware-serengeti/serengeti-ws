@@ -38,11 +38,13 @@ import org.hibernate.annotations.Type;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.StorageRead;
@@ -124,6 +126,10 @@ public class NodeGroupEntity extends EntityBase {
 
    @OneToMany(mappedBy = "nodeGroup", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
    private Set<NodeGroupAssociation> groupAssociations;
+   
+   @Column(name = "group_racks")
+   @Type(type = "text")
+   private String groupRacks;
 
    @Column(name = "vm_folder_path")
    private String vmFolderPath;
@@ -285,6 +291,14 @@ public class NodeGroupEntity extends EntityBase {
 
    public void setGroupAssociations(Set<NodeGroupAssociation> groupAssociations) {
       this.groupAssociations = groupAssociations;
+   }
+
+   public String getGroupRacks() {
+      return groupRacks;
+   }
+
+   public void setGroupRacks(String groupRacks) {
+      this.groupRacks = groupRacks;
    }
 
    public String getVmFolderPath() {

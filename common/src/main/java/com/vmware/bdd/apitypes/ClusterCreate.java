@@ -249,8 +249,8 @@ public class ClusterCreate {
    public void setType(ClusterType type) {
       this.type = type;
    }
-
-   public boolean validateNodeGroupPlacementPolicies(List<String> failedMsgList) {
+   
+   public boolean validateNodeGroupPlacementPolicies(List<String> failedMsgList, List<String> warningMsgList) {
       boolean valid = true;
 
       Map<String, NodeGroupCreate> allGroups = new TreeMap<String, NodeGroupCreate>();
@@ -264,7 +264,7 @@ public class ClusterCreate {
       }
 
       for (NodeGroupCreate ngc : getNodeGroups()) {
-         if (!ngc.validatePlacementPolicies(allGroups, failedMsgList)) {
+	  if (!ngc.validatePlacementPolicies(this, allGroups, failedMsgList, warningMsgList)) {
             valid = false;
          }
       }

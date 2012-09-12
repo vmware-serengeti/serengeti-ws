@@ -24,10 +24,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
-
 import org.apache.log4j.Logger;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.ClusterCreate;
@@ -39,6 +38,7 @@ import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.StorageRead;
+import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
@@ -57,6 +57,7 @@ import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Configuration;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
 
 public class ClusterConfigManager {
    private static final long serialVersionUID = 1L;
@@ -119,9 +120,16 @@ public class ClusterConfigManager {
       }
 
       List<String> failedMsgList = new ArrayList<String>();
-      if (!cluster.validateNodeGroupPlacementPolicies(failedMsgList)) {
+      List<String> warningMsgList = new ArrayList<String>();
+
+      if (!cluster.validateNodeGroupPlacementPolicies(failedMsgList, warningMsgList)) {
          throw ClusterConfigException.INVALID_PLACEMENT_POLICIES(failedMsgList);
       }
+
+      if (!validateRacksInfo(cluster, failedMsgList)) {
+         throw ClusterConfigException.INVALID_PLACEMENT_POLICIES(failedMsgList);
+      }
+
       if (!cluster.validateNodeGroupRoles(failedMsgList)) {
          throw ClusterConfigException.INVALID_ROLES(failedMsgList);
       }
@@ -188,8 +196,7 @@ public class ClusterConfigManager {
                      networkEntity = nets.get(0);
                   }
                } else {
-                  networkEntity =
-                        networkMgr.getNetworkEntityByName(networkName);
+                  networkEntity = networkMgr.getNetworkEntityByName(networkName);
                }
 
                if (networkEntity == null) {
@@ -205,6 +212,7 @@ public class ClusterConfigManager {
                   clusterEntity.setHadoopConfig((new Gson()).toJson(cluster
                         .getConfiguration()));
                }
+
                expandNodeGroupCreates(cluster, gson, clusterEntity, distro);
 
                if (cluster.getTopologyPolicy() == null) {
@@ -240,6 +248,46 @@ public class ClusterConfigManager {
       }
    }
 
+   private boolean validateRacksInfo(ClusterCreate cluster, List<String> failedMsgList) {
+      boolean valid = true;
+      Map<String, NodeGroupCreate> allGroups = new TreeMap<String, NodeGroupCreate>();
+      if (cluster.getNodeGroups() == null) {
+         return valid;
+      }
+
+      for (NodeGroupCreate nodeGroupCreate : cluster.getNodeGroups()) {
+         allGroups.put(nodeGroupCreate.getName(), nodeGroupCreate);
+      }
+
+      for (NodeGroupCreate ngc : cluster.getNodeGroups()) {
+         PlacementPolicy policies = ngc.getPlacementPolicies();
+         if (policies != null && policies.getGroupRacks() != null
+               && ngc.calculateHostNum() != null) {
+
+            Integer requiredHostNum = ngc.calculateHostNum();
+            if (requiredHostNum > 0) {
+               GroupRacks r = policies.getGroupRacks();
+               Integer totalHostNum = 0;
+               List<RackInfo> racksInfo = rackInfoMgr.exportRackInfo();
+
+               Set<String> totalRacks = new HashSet<String>(Arrays.asList(r.getRacks()));
+               for (RackInfo rackInfo : racksInfo) {
+                  if (totalRacks.isEmpty()) {
+                     totalHostNum += rackInfo.getHosts().size();
+                  } else if (totalRacks.contains(rackInfo)) {
+                     totalHostNum += rackInfo.getHosts().size();
+                  }
+               }
+               if (totalHostNum < requiredHostNum) {
+                  valid = false;
+                  throw ClusterConfigException.LACK_PHYSICAL_HOSTS();
+               }
+            }
+         }
+      }
+      return valid;
+   }
+  
    private void transformHDFSUrl(ClusterCreate cluster) {
       if (cluster.hasHDFSUrlConfigured()) {
          if (cluster.validateHDFSUrl()) {
@@ -358,8 +406,7 @@ public class ClusterConfigManager {
       if (policies != null) {
          List<GroupAssociation> associons = policies.getGroupAssociations();
          if (associons != null) {
-            Set<NodeGroupAssociation> associonEntities =
-                  new TreeSet<NodeGroupAssociation>();
+            Set<NodeGroupAssociation> associonEntities = new TreeSet<NodeGroupAssociation>();
             for (GroupAssociation a : associons) {
                NodeGroupAssociation ae = new NodeGroupAssociation();
                ae.setAssociationType(a.getType());
@@ -371,6 +418,10 @@ public class ClusterConfigManager {
          }
          if (policies.getInstancePerHost() != null) {
             groupEntity.setInstancePerHost(policies.getInstancePerHost());
+         }
+
+         if (policies.getGroupRacks() != null) {
+            groupEntity.setGroupRacks((new Gson()).toJson(policies.getGroupRacks()));
          }
       }
 
@@ -600,6 +651,7 @@ public class ClusterConfigManager {
       });
    }
 
+   @SuppressWarnings("unchecked")
    private NodeGroupCreate convertNodeGroups(String distro,
          NodeGroupEntity ngEntity, String clusterName) {
       Gson gson = new Gson();
@@ -635,12 +687,16 @@ public class ClusterConfigManager {
       Integer instancePerHost = ngEntity.getInstancePerHost();
       Set<NodeGroupAssociation> associonEntities =
             ngEntity.getGroupAssociations();
+      String ngRacks = ngEntity.getGroupRacks();
       if (instancePerHost == null
-            && (associonEntities == null || associonEntities.isEmpty())) {
+            && (associonEntities == null || associonEntities.isEmpty()) && ngRacks == null) {
          group.setPlacementPolicies(null);
       } else {
          PlacementPolicy policies = new PlacementPolicy();
          policies.setInstancePerHost(instancePerHost);
+         if (ngRacks != null) {
+            policies.setGroupRacks((GroupRacks) new Gson().fromJson(ngRacks, GroupRacks.class));
+         }
          if (associonEntities != null) {
             List<GroupAssociation> associons =
                   new ArrayList<GroupAssociation>(associonEntities.size());

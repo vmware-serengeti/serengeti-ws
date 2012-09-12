@@ -41,6 +41,7 @@ import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
+import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.ClusterRestClient;
 import com.vmware.bdd.cli.rest.DistroRestClient;
@@ -85,6 +86,7 @@ public class ClusterCommands implements CommandMarker {
    public void createCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
          @CliOption(key = { "distro" }, mandatory = false, help = "Hadoop Distro") final String distro,
+         @CliOption(key = { "topology" }, mandatory = false, help = "The topology type") final String topology,
          @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath,
          @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
@@ -112,6 +114,20 @@ public class ClusterCommands implements CommandMarker {
       // build ClusterCreate object
       ClusterCreate clusterCreate = new ClusterCreate();
       clusterCreate.setName(name);
+
+      if (topology != null) {
+         try {
+            clusterCreate.setTopologyPolicy(TopologyType.valueOf(topology));
+         } catch (IllegalArgumentException ex) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+                  Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+                  Constants.INVALID_VALUE + " " + "topologyType=" + topology);
+            return;
+         }
+      } else {
+         clusterCreate.setTopologyPolicy(null);
+      }
+
       if (distro != null) {
          List<String> distroNames = getDistroNames();
          if (validName(distro, distroNames)) {
@@ -173,7 +189,6 @@ public class ClusterCommands implements CommandMarker {
                Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          return;
       }
-
 
       if (networkNames.isEmpty()) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
@@ -796,6 +811,7 @@ public class ClusterCommands implements CommandMarker {
       } else {
          //used for collecting failed message.
          List<String> failedMsgList = new LinkedList<String>();
+         List<String> warningMsgList = new LinkedList<String>();
          //find distro roles.
          List<String> distroRoles = findDistroRoles(clusterCreate);
          if (distroRoles == null) {
@@ -806,6 +822,7 @@ public class ClusterCommands implements CommandMarker {
             return !validated;
          }
          if (nodeGroupCreates.length < 2 || nodeGroupCreates.length > 5) {
+            warningMsgList.add(Constants.PARAM_CLUSTER_WARNING);
             warning = true;
          }
          // check external HDFS
@@ -817,7 +834,7 @@ public class ClusterCommands implements CommandMarker {
          }
 
          // check placement policies
-         if (!clusterCreate.validateNodeGroupPlacementPolicies(failedMsgList)) {
+         if (!clusterCreate.validateNodeGroupPlacementPolicies(failedMsgList, warningMsgList)) {
             validated = false;
          }
 
@@ -876,11 +893,10 @@ public class ClusterCommands implements CommandMarker {
          }
          if (!validated) {
             showFailedMsg(clusterCreate.getName(), failedMsgList);
-         } else if (warning) {
+         } else if (warning || warningMsgList != null) {
             // If warning is true,show waring message.
-            showWarningMsg();
-            // When exist warning message,whether to proceed
-            if (!isContinue(clusterCreate.getName(),Constants.OUTPUT_OP_CREATE,Constants.PARAM_PROMPT_CONTINUE_MESSAGE)) {
+            if (!showWarningMsg(clusterCreate.getName(), warningMsgList)) {
+               // When exist warning message,whether to proceed
                validated = false;
             }
          }
