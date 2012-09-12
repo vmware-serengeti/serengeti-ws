@@ -81,11 +81,22 @@
         // "HADOOP_JOBTRACKER_OPTS": "",
         // "HADOOP_TASKTRACKER_OPTS": "",
         // "JAVA_HOME": "",
-        // "PATH": "",
+        // "PATH": ""
       },
       "log4j.properties": {
         // "hadoop.root.logger": "DEBUG,console",
-        // "hadoop.security.logger": "DEBUG,console",
+        // "hadoop.security.logger": "DEBUG,console"
+      },
+      "fair-scheduler.xml": {
+        // check for all settings at http://hadoop.apache.org/docs/r1.0.0/fair_scheduler.html
+      },
+      "capacity-scheduler.xml": {
+        // check for all settings at http://hadoop.apache.org/docs/r1.0.0/capacity_scheduler.html
+      },
+      "mapred-queue-acls.xml": {
+        // check for all settings at http://hadoop.apache.org/docs/r1.0.0/cluster_setup.html#Configuring+the+Hadoop+Daemons
+        // "mapred.queue.queue-name.acl-submit-job": "",
+        // "mapred.queue.queue-name.acl-administer-jobs", ""
       }
     }
   }

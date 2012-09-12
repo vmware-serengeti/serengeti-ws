@@ -16,9 +16,10 @@ $blacklist = [
   'mapred.job.tracker', 'mapred.local.dir',
   'HADOOP_HOME', 'HADOOP_COMMON_HOME', 'HADOOP_MAPRED_HOME', 'HADOOP_HDFS_HOME', 'HADOOP_CONF_DIR', 'HADOOP_PID_DIR', 'HADOOP_LOG_DIR'
 ]
-xml_files = [ 'core-site.xml', 'hdfs-site.xml', 'mapred-site.xml' ]
+xml_files = [ 'core-site.xml', 'hdfs-site.xml', 'mapred-site.xml', 'capacity-scheduler.xml', 'mapred-queue-acls.xml' ]
 prop_files = [ 'hadoop-env.sh' ]
-files = [ xml_files, prop_files ].flatten
+txt_files = [ 'fair-scheduler.xml' ]
+files = [ xml_files, prop_files, txt_files ].flatten
 
 conf_dir = ARGV[0]
 indent = ARGV[1] || 2
@@ -49,7 +50,7 @@ files.each do |f|
         final = final ? final.text == 'true' : false
         add_to_conf(conf, name, value, final)
       end
-    else
+    elsif prop_files.include?(f)
       body.each_line do |line|
         line.strip!
         next if line.start_with?('#') || !line.index('=')
@@ -58,6 +59,8 @@ files.each do |f|
         name, value = line.split('=')
         add_to_conf(conf, name, value, false)
       end
+    elsif txt_files.include?(f)
+      add_to_conf(conf, 'text', body.to_s, false)
     end
   end
   hadoop_conf[f] = conf
