@@ -21,10 +21,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.CommandMarker;
@@ -57,31 +57,25 @@ public class TopologyCommands implements CommandMarker {
    }
 
    private boolean duplicatedNameCheck(List<RackInfo> racks) {
-      Set<String> checkRack = new HashSet<String>();
+      Set<String> checkRack = new TreeSet<String>();
+      Set<String> checkHosts = new TreeSet<String>();
       for (RackInfo rack: racks) {
+         if (checkRack.contains(rack.getName())) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, null, Constants.OUTPUT_OP_UPLOAD,
+                  Constants.OUTPUT_OP_RESULT_FAIL, "please remove duplicated racks.");
+            return true;
+         }
          checkRack.add(rack.getName());
-      }
-      if (checkRack.size() != racks.size()) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, null, Constants.OUTPUT_OP_UPLOAD,
-               Constants.OUTPUT_OP_RESULT_FAIL, "please remove duplicated racks.");
-         return true;
-      }
-      
-      Set<String>checkHosts = new HashSet<String>();
-      int numOfExpectedTotalHosts = 0;
-      for (RackInfo rack: racks) {
-         List<String> hosts = rack.getHosts();
-         numOfExpectedTotalHosts += hosts.size();
-         for (String hostName: hosts) {
+
+         for (String hostName: rack.getHosts()) {
+            if (checkHosts.contains(hostName)) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, null, Constants.OUTPUT_OP_UPLOAD,
+                     Constants.OUTPUT_OP_RESULT_FAIL, "please remove duplicated hosts.");
+               return true;
+            }
             checkHosts.add(hostName);
          }
       }
-      if (checkHosts.size() != numOfExpectedTotalHosts) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, null, Constants.OUTPUT_OP_UPLOAD,
-               Constants.OUTPUT_OP_RESULT_FAIL, "please remove duplicated hosts.");
-         return true;
-      }
-
       return false;
    }
 
