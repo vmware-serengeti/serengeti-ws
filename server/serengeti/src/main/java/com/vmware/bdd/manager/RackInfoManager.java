@@ -17,17 +17,40 @@ package com.vmware.bdd.manager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.PhysicalHostEntity;
 import com.vmware.bdd.entity.RackEntity;
 import com.vmware.bdd.entity.Saveable;
+import com.vmware.bdd.exception.BddException;
 
 public class RackInfoManager {
 
+   private void validateRaskInfoList(final List<RackInfo> racksInfo) {
+      Set<String> racks = new TreeSet<String>();
+      Set<String> hosts = new TreeSet<String>();
+
+      for (RackInfo rack : racksInfo) {
+         if (racks.contains(rack.getName())) {
+            throw BddException.INVALID_PARAMETER("duplicated rack", rack.getName());
+         }
+         racks.add(rack.getName());
+         for (String host : rack.getHosts()) {
+            if (hosts.contains(host)) {
+               throw BddException.INVALID_PARAMETER("duplicated host", host);
+            }
+            hosts.add(host);
+         }
+      }
+   }
+
    public void importRackInfo(final List<RackInfo> racksInfo) {
+      validateRaskInfoList(racksInfo);
+
       DAL.inRwTransactionDo(new Saveable<Void>() {
          @Override
          public Void body() throws Exception {
@@ -37,7 +60,6 @@ public class RackInfoManager {
                rack.delete();
             }
 
-            // TODO make sure one host maps to one rack
             for (RackInfo rack : racksInfo) {
                RackEntity.addRack(rack.getName(), rack.getHosts());
             }

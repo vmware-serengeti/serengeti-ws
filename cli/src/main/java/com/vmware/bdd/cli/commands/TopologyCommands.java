@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.CommandMarker;
@@ -42,14 +44,39 @@ public class TopologyCommands implements CommandMarker {
    public void upload(@CliOption(key = { "fileName" }, mandatory = true, help = "The topology file name") final String fileName) {
       try {
          List<RackInfo> racks = readRackInfoFromFile(fileName);
-         topologyRestClient.upload(racks);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_TOPOLOGY, null,
+         if (!duplicatedNameCheck(racks)) {
+            topologyRestClient.upload(racks);
+            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_TOPOLOGY, null,
                Constants.OUTPUT_OP_RESULT_UPLOAD);
+         }
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, null, Constants.OUTPUT_OP_UPLOAD,
                Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          return;
       }
+   }
+
+   private boolean duplicatedNameCheck(List<RackInfo> racks) {
+      Set<String> checkRack = new TreeSet<String>();
+      Set<String> checkHosts = new TreeSet<String>();
+      for (RackInfo rack: racks) {
+         if (checkRack.contains(rack.getName())) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, null, Constants.OUTPUT_OP_UPLOAD,
+                  Constants.OUTPUT_OP_RESULT_FAIL, "please remove duplicated racks.");
+            return true;
+         }
+         checkRack.add(rack.getName());
+
+         for (String hostName: rack.getHosts()) {
+            if (checkHosts.contains(hostName)) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, null, Constants.OUTPUT_OP_UPLOAD,
+                     Constants.OUTPUT_OP_RESULT_FAIL, "please remove duplicated hosts.");
+               return true;
+            }
+            checkHosts.add(hostName);
+         }
+      }
+      return false;
    }
 
    /*
@@ -74,16 +101,23 @@ public class TopologyCommands implements CommandMarker {
                continue;
             } else {
                String[] rackHosts = line.split(":");
-               if (rackHosts.length != 2) {
-                  throw new CliException("wrong topology format at line: " + lineNum);
+               if (rackHosts.length != 2 || rackHosts[0].trim().isEmpty() || rackHosts[1].trim().isEmpty()) {
+                  throw new CliException("wrong topology format at line: " + lineNum + ". " + Constants.TOPLOGY_FORMAT);
                } else {
                   String[] hosts = rackHosts[1].split(",");
+                  int numOfNonEmptyHosts = 0;
                   for (int i = 0; i < hosts.length; i++) {
                      hosts[i] = hosts[i].trim();
+                     if (!hosts[i].isEmpty()) {
+                        hosts[numOfNonEmptyHosts++] = hosts[i]; 
+                     }
+                  }
+                  if (numOfNonEmptyHosts == 0) {
+                     throw new CliException("wrong topology format at line: " + lineNum + ". " + Constants.TOPLOGY_FORMAT);
                   }
                   RackInfo rackInfo = new RackInfo();
                   rackInfo.setName(rackHosts[0].trim());
-                  rackInfo.setHosts(Arrays.asList(hosts));
+                  rackInfo.setHosts(Arrays.asList(hosts).subList(0, numOfNonEmptyHosts));
                   racksInfo.add(rackInfo);
                }
             }
@@ -116,7 +150,7 @@ public class TopologyCommands implements CommandMarker {
          LinkedHashMap<String, List<String>> rackInfoColumnNamesWithGetMethodNames =
                new LinkedHashMap<String, List<String>>();
          rackInfoColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_NAME, Arrays.asList("getName"));
+               Constants.FORMAT_TABLE_COLUMN_RACK, Arrays.asList("getName"));
          rackInfoColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_HOSTS, Arrays.asList("getHosts"));
 

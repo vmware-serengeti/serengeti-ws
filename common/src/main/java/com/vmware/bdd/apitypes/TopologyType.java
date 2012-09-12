@@ -5,7 +5,7 @@ package com.vmware.bdd.apitypes;
  *
  */
 public enum TopologyType {
-	RACK_HOST, //original hadoop rack awareness topology 
+	RACK_AS_RACK, //original hadoop rack awareness topology 
 	HOST_AS_RACK, //treat each host as rack in the case of rack info missing
 	HVE, //hadoop virtualization enhancement, refer to HADOOP-8468
 	NONE

@@ -509,7 +509,7 @@ public class ClusterConfigManager {
    }
 
    public ClusterCreate getClusterConfig(final String clusterName) {
-      return DAL.inTransactionDo(new Saveable<ClusterCreate>() {
+      return DAL.autoTransactionDo(new Saveable<ClusterCreate>() {
          public ClusterCreate body() {
 
             ClusterEntity clusterEntity =
@@ -542,8 +542,9 @@ public class ClusterConfigManager {
             distroMgr);
 
       clusterConfig.setTopologyPolicy(clusterEntity.getTopologyPolicy());
+
       Map<String, String> hostToRackMap = rackInfoMgr.exportHostRackMap();
-      if ((clusterConfig.getTopologyPolicy() == TopologyType.RACK_HOST ||
+      if ((clusterConfig.getTopologyPolicy() == TopologyType.RACK_AS_RACK ||
            clusterConfig.getTopologyPolicy() == TopologyType.HVE) &&
            hostToRackMap.isEmpty()) {
          logger.error("trying to use host-rack topology which is absent");

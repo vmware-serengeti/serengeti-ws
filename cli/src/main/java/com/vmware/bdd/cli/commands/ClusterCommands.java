@@ -91,6 +91,7 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
          @CliOption(key = { "networkName" }, mandatory = false, help = "Network Name") final String networkName,
+         @CliOption(key = { "topology" }, mandatory = false, help = "Please specify the topology type: HVE or RACK_HOST or HOST_AS_RACK") final String topology,
          @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume,
          @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation,
          @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes) {
@@ -225,6 +226,20 @@ public class ClusterCommands implements CommandMarker {
       if (specFilePath != null) {
          if (!validateClusterCreate(clusterCreate)) {
             return;
+         }
+      }
+
+      // process topology option
+      if (topology == null) {
+         clusterCreate.setTopologyPolicy(TopologyType.NONE);
+      } else {
+         try {
+            clusterCreate.setTopologyPolicy(TopologyType.valueOf(topology));
+         } catch (IllegalArgumentException e) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  name, Constants.OUTPUT_OP_CREATE,
+                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.INPUT_TOPOLOGY_INVALID_VALUE);
+            System.out.println("Please specify the topology type: HVE or RACK_HOST or HOST_AS_RACK");
          }
       }
 
@@ -712,9 +727,14 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private void prettyOutputClusterInfo(ClusterRead cluster, boolean detail) {
-      //cluster Name
-      System.out.printf("name: %s, distro: %s, status: %s", cluster.getName(),
-            cluster.getDistro(), cluster.getStatus());
+      TopologyType topology = cluster.getTopologyPolicy();
+      if (topology == null || topology == TopologyType.NONE) {
+         System.out.printf("name: %s, distro: %s, status: %s",
+               cluster.getName(), cluster.getDistro(), cluster.getStatus());
+      } else {
+         System.out.printf("name: %s, distro: %s, topology: %s, status: %s",
+               cluster.getName(), cluster.getDistro(), topology, cluster.getStatus());
+      }
       System.out.println();
       if(cluster.getExternalHDFS() != null && !cluster.getExternalHDFS().isEmpty()) {
          System.out.printf("external HDFS: %s\n", cluster.getExternalHDFS());
@@ -748,6 +768,11 @@ public class ClusterCommands implements CommandMarker {
                nColumnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_NAME,
                      Arrays.asList("getName"));
+               if (topology == TopologyType.RACK_AS_RACK || topology == TopologyType.HVE) {
+                  nColumnNamesWithGetMethodNames.put(
+                        Constants.FORMAT_TABLE_COLUMN_RACK,
+                        Arrays.asList("getRack"));
+               }
                nColumnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_HOST,
                      Arrays.asList("getHostName"));

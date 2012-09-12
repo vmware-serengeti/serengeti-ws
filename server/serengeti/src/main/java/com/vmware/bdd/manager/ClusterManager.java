@@ -222,26 +222,25 @@ public class ClusterManager {
    }
 
    public ClusterRead getClusterByName(final String clusterName, final boolean realTime) {
+      ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+      if (cluster == null) {
+         throw BddException.NOT_FOUND("cluster", clusterName);
+      }
+
+      if (realTime && cluster.inStableStatus()) {
+         // query real time cluster data
+         QueryClusterListener listener = new QueryClusterListener(clusterName);
+
+         // no need to update status, set initStatus to null
+         Long taskId = createClusterMgmtTaskWithErrorSetting(cluster, listener, null);
+         ClusterCmdUtil.waitForTask(taskId);
+      }
+
+      // return the latest data from db, even when the query task failed
       return DAL.autoTransactionDo(new Saveable<ClusterRead>() {
          @Override
          public ClusterRead body() {
-            ClusterEntity cluster =
-                  ClusterEntity.findClusterEntityByName(clusterName);
-            if (cluster == null) {
-               throw BddException.NOT_FOUND("cluster", clusterName);
-            }
-
-            if (realTime && cluster.inStableStatus()) {
-               // query real time cluster data
-               QueryClusterListener listener = new QueryClusterListener(clusterName);
-
-               // no need to update status, set initStatus to null
-               Long taskId = createClusterMgmtTaskWithErrorSetting(cluster, listener,
-                        null);
-               ClusterCmdUtil.waitForTask(taskId);
-               DAL.refresh(cluster);
-            }
-
+            ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
             return cluster.toClusterRead();
          }
       });
@@ -277,18 +276,12 @@ public class ClusterManager {
    }
 
    public List<ClusterRead> getClusters() {
-      return DAL.inTransactionDo(new Saveable<List<ClusterRead>>() {
-         @Override
-         public List<ClusterRead> body() {
-            List<ClusterRead> clusters = new ArrayList<ClusterRead>();
-            List<ClusterEntity> clusterEntities =
-                  DAL.findAll(ClusterEntity.class);
-            for (ClusterEntity entity : clusterEntities) {
-               clusters.add(getClusterByName(entity.getName(), true));
-            }
-            return clusters;
-         }
-      });
+      List<ClusterRead> clusters = new ArrayList<ClusterRead>();
+      List<ClusterEntity> clusterEntities = DAL.findAll(ClusterEntity.class);
+      for (ClusterEntity entity : clusterEntities) {
+         clusters.add(getClusterByName(entity.getName(), true));
+      }
+      return clusters;
    }
 
    public Long createCluster(ClusterCreate createSpec) throws Exception {
