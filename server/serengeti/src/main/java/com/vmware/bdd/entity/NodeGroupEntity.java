@@ -15,6 +15,7 @@
 package com.vmware.bdd.entity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,8 +51,12 @@ import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Configuration;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
+import com.vmware.bdd.apitypes.RackInfo;
+import com.vmware.bdd.manager.RackInfoManager;
 
 /**
  * Node Group Entity: node group info
@@ -421,6 +426,34 @@ public class NodeGroupEntity extends EntityBase {
          return new ArrayList<NodeGroupEntity>(0);
       }
    }
+
+
+   public void validateIfHostCanSatisfied (int instanceNum) {
+      if (getInstancePerHost() != null) {
+         // assume this value is already validated
+         int requiredHostNum = instanceNum / getInstancePerHost();
+
+         if (requiredHostNum > 0 && getGroupRacks() != null) {
+            GroupRacks groupRacks = (GroupRacks) new Gson().fromJson(getGroupRacks(),
+                  GroupRacks.class);
+            Integer totalHostNum = 0;
+            List<RackInfo> racksInfo = new RackInfoManager().exportRackInfo();
+
+            Set<String> totalRacks = new HashSet<String>(Arrays.asList(groupRacks.getRacks()));
+            for (RackInfo rackInfo : racksInfo) {
+               if (totalRacks.isEmpty()) {
+                  totalHostNum += rackInfo.getHosts().size();
+               } else if (totalRacks.contains(rackInfo.getName())) {
+                  totalHostNum += rackInfo.getHosts().size();
+               }
+            }
+            if (totalHostNum < requiredHostNum) {
+               throw ClusterConfigException.LACK_PHYSICAL_HOSTS();
+            }
+         }
+      }
+   }
+ 
 
    public void validateHostNumber(int instanceNum) {
       Set<NodeGroupAssociation> associations = getGroupAssociations();

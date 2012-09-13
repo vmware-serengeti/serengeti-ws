@@ -648,6 +648,7 @@ public class ClusterManager {
                   }
 
                   group.validateHostNumber(instanceNum);
+                  group.validateIfHostCanSatisfied(instanceNum);
 
                   return group;
                }

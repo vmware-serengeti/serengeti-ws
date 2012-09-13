@@ -274,7 +274,7 @@ public class ClusterConfigManager {
                for (RackInfo rackInfo : racksInfo) {
                   if (totalRacks.isEmpty()) {
                      totalHostNum += rackInfo.getHosts().size();
-                  } else if (totalRacks.contains(rackInfo)) {
+                  } else if (totalRacks.contains(rackInfo.getName())) {
                      totalHostNum += rackInfo.getHosts().size();
                   }
                }
