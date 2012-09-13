@@ -62,7 +62,7 @@ public class NodeGroup {
 
       public static class GroupRacks {
          public enum GroupRacksType {
-            ROUND_ROBIN, SAME_RACK
+            ROUNDROBIN, SAMERACK
          }
          @Expose
          @SerializedName("type")

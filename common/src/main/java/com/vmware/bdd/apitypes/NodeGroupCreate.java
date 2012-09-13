@@ -251,8 +251,8 @@ public class NodeGroupCreate {
             }
             GroupRacks r = policies.getGroupRacks();
             if (r.getType() == null) {
-               r.setType(GroupRacksType.ROUND_ROBIN);
-            } else if (r.getType() == GroupRacksType.SAME_RACK
+               r.setType(GroupRacksType.ROUNDROBIN);
+            } else if (r.getType() == GroupRacksType.SAMERACK
                   && r.getRacks().length != 1) {
                valid = false;
                failedMsgList.add(Constants.PRACK_SAME_RACK_WITH_WRONG_VALUES);
