@@ -102,7 +102,7 @@ public class TopologyCommands implements CommandMarker {
             } else {
                String[] rackHosts = line.split(":");
                if (rackHosts.length != 2 || rackHosts[0].trim().isEmpty() || rackHosts[1].trim().isEmpty()) {
-                  throw new CliException("wrong topology format at line: " + lineNum + ". " + Constants.TOPLOGY_FORMAT);
+                  throw new CliException("wrong topology format at line " + lineNum + ".\n" + Constants.TOPLOGY_FORMAT);
                } else {
                   String[] hosts = rackHosts[1].split(",");
                   int numOfNonEmptyHosts = 0;
@@ -113,8 +113,9 @@ public class TopologyCommands implements CommandMarker {
                      }
                   }
                   if (numOfNonEmptyHosts == 0) {
-                     throw new CliException("wrong topology format at line: " + lineNum + ". " + Constants.TOPLOGY_FORMAT);
+                     throw new CliException("wrong topology format at line " + lineNum + ".\n" + Constants.TOPLOGY_FORMAT);
                   }
+                  lineNum++;
                   RackInfo rackInfo = new RackInfo();
                   rackInfo.setName(rackHosts[0].trim());
                   rackInfo.setHosts(Arrays.asList(hosts).subList(0, numOfNonEmptyHosts));
