@@ -377,6 +377,7 @@ public class NodeGroupEntity extends EntityBase {
       PlacementPolicy policy = new PlacementPolicy();
       policy.setInstancePerHost(instancePerHost);
       policy.setGroupAssociations(associations);
+      policy.setGroupRacks((GroupRacks) new Gson().fromJson(groupRacks, GroupRacks.class));
 
       nodeGroupRead.setPlacementPolicies(policy);
 
