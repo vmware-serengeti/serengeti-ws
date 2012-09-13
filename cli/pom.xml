@@ -18,7 +18,7 @@
 	</parent>
 
 	<properties>
-		<spring.shell.version>1.0.0.M1</spring.shell.version>
+		<spring.shell.version>1.0.0.M2</spring.shell.version>
 		<jar.mainclass>org.springframework.shell.Bootstrap</jar.mainclass>
 		<impala.version>1.0.0.M1</impala.version>
 		<hadoop.version>1.0.1</hadoop.version>
