@@ -18,28 +18,27 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.BddMessageUtil;
-import com.vmware.bdd.utils.ClusterCmdUtil;
 
-public class CreateClusterListener implements TaskListener {
-   private static final long serialVersionUID = 7435702462311134502L;
+public class VHMReceiveListener implements TaskListener {
 
-   private static final Logger logger = Logger.getLogger(CreateClusterListener.class);
+   private static final long serialVersionUID = -7523538749427650436L;
+
+   private static final Logger logger = Logger.getLogger(VHMReceiveListener.class);
 
    private String clusterName;
 
-   public CreateClusterListener(String clusterName) {
+   public VHMReceiveListener(String clusterName) {
       super();
       this.clusterName = clusterName;
    }
 
    @Override
    public void onSuccess() {
-      logger.debug("create cluster " + clusterName
+      logger.debug("cluster setQuota " + clusterName
             + " task listener called onSuccess");
 
       ClusterEntity.updateStatus(clusterName, ClusterStatus.RUNNING);
@@ -47,32 +46,28 @@ public class CreateClusterListener implements TaskListener {
 
    @Override
    public void onFailure() {
-      logger.debug("create cluster listener called onFailure");
+      logger.debug("cluster setQuota listener called onFailure");
 
       // will not delete the cluster info, assuming the error can be recovered
-      ClusterEntity.updateStatus(clusterName, ClusterStatus.PROVISION_ERROR);
-      logger.error("failed to create cluster " + clusterName 
-            + " set its status as ERROR");
+      ClusterEntity.updateStatus(clusterName, ClusterStatus.RUNNING);
+      logger.error("failed to cluster setQuota " + clusterName 
+            + " set its status as RUNNING");
    }
 
    @Override
    public void onMessage(Map<String, Object> mMap) {
-      logger.debug("create cluster " + clusterName
+      logger.debug("cluster setQuota " + clusterName
             + " task listener received message " + mMap);
 
-      AuAssert.check(BddMessageUtil.validate(mMap, clusterName));
-
-      ClusterEntity cluster =
-            ClusterEntity.findClusterEntityByName(clusterName);
-      AuAssert.check(cluster != null);
-
-      // parse cluster data from message and store them in db
-      String description =
-            (new Gson()).toJson(mMap.get(BddMessageUtil.CLUSTER_DATA_FIELD));
-      BddMessageUtil.processClusterData(clusterName, description);
+      AuAssert.check(mMap.get(BddMessageUtil.FINISH_FIELD) instanceof Boolean
+            && mMap.get(BddMessageUtil.SUCCEED_FIELD) instanceof Boolean
+            && mMap.get(BddMessageUtil.PROGRESS_FIELD) instanceof Double
+            && (Double) mMap.get(BddMessageUtil.PROGRESS_FIELD) <= 100);
    }
 
+   @Override
    public String[] getTaskCommand(String clusterName, String fileName) {
-      return ClusterCmdUtil.getCreateClusterCmdArray(clusterName, fileName);
+      return null;
    }
+
 }

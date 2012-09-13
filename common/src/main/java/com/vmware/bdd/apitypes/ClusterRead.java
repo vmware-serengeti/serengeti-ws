@@ -27,7 +27,8 @@ import com.google.gson.annotations.SerializedName;
 public class ClusterRead {
    public enum ClusterStatus {
       RUNNING, PROVISIONING, PROVISION_ERROR, UPGRADING, UPDATING, DELETING, 
-      STOPPED, ERROR, STOPPING, STARTING, CONFIGURING, CONFIGURE_ERROR, NA
+      STOPPED, ERROR, STOPPING, STARTING, CONFIGURING, CONFIGURE_ERROR, NA, 
+      VHM_RUNNING
    }
 
    @Expose

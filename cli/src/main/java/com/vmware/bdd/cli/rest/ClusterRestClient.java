@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.ObjectMapper;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -106,6 +105,18 @@ public class ClusterRestClient {
 
       PrettyOutput outputCallBack = getClusterPrettyOutputCallBack(this, id);
       restClient.deleteObject(id, path, httpverb, outputCallBack);
+   }
+
+   public void limitCluster(String clusterName, String nodeGroupName, int activeComputeNodeNum) {
+      final String path = Constants.REST_PATH_CLUSTER + "/" + clusterName + "/" + "limit";
+      final HttpMethod httpverb = HttpMethod.PUT;
+
+      PrettyOutput outputCallBack =
+            getClusterPrettyOutputCallBack(this, clusterName);
+      NodeGroupRead nodeGroup = new NodeGroupRead();
+      nodeGroup.setInstanceNum(activeComputeNodeNum);
+      nodeGroup.setName(nodeGroupName);
+      restClient.update(nodeGroup, path, httpverb,outputCallBack);
    }
 
    private PrettyOutput getClusterPrettyOutputCallBack(

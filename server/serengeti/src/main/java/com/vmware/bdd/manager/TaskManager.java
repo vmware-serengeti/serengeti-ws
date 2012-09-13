@@ -37,6 +37,7 @@ import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.task.LegacyTaskCleanner;
 import com.vmware.bdd.manager.task.Task;
 import com.vmware.bdd.manager.task.TaskListener;
+import com.vmware.bdd.manager.task.TaskWorker;
 import com.vmware.bdd.utils.Configuration;
 
 public class TaskManager implements InitializingBean, DisposableBean {
@@ -102,7 +103,19 @@ public class TaskManager implements InitializingBean, DisposableBean {
       });
    }
 
-   public void submit(TaskEntity taskEntity, Boolean enableMq) {
+   public TaskEntity createMessageTask(final boolean retry, final TaskListener listener) {
+      return DAL.inRwTransactionDo(new Saveable<TaskEntity>() {
+         public TaskEntity body() {
+            TaskEntity task = new TaskEntity(null, listener, cookie);
+            task.setRetry(retry);
+            logger.debug("creating task: " + task);
+            DAL.insert(task);
+            return task;
+         }
+      });
+   }
+
+   public void submit(TaskEntity taskEntity, Boolean enableMq, TaskWorker taskWorker) {
       logger.debug("submitting task: " + taskEntity);
       TaskEntity.updateStatus(taskEntity.getId(), Status.SUBMITTED, null);
 
@@ -110,9 +123,9 @@ public class TaskManager implements InitializingBean, DisposableBean {
          Task task;
          if (enableMq != null) {
             // enable/disable message queue at runtime, mainly for tests
-            task = new Task(taskEntity.getId(), enableMq);
+            task = new Task(taskEntity.getId(), enableMq, taskWorker);
          } else {
-            task = new Task(taskEntity.getId());
+            task = new Task(taskEntity.getId(), taskWorker);
          }
          executorService.submit(task);
       } catch (RejectedExecutionException e) {
@@ -124,8 +137,8 @@ public class TaskManager implements InitializingBean, DisposableBean {
       return;
    }
 
-   public void submit(TaskEntity task) {
-      submit(task, null);
+   public void submit(TaskEntity task, TaskWorker taskWorker ) {
+      submit(task, null, taskWorker);
    }
 
    public List<TaskRead> getTasks() {

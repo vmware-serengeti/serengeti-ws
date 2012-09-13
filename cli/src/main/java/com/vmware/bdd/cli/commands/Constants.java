@@ -82,6 +82,10 @@ public class Constants {
    public static final String OUTPUT_OP_START = "start";
    public static final String OUTPUT_OP_STOP = "stop";
    public static final String OUTPUT_OP_RESIZE = "resize";
+   public static final String OUTPUT_OP_QUOTA_SET = "quota";
+   public static final String OUTPUT_OP_ADJUSTMENT = "Adjustment";
+   public static final String OUTPUT_OP_ADJUSTMENT_SUCCEEDED = "succeeded";
+   public static final String OUTPUT_OP_ADJUSTMENT_FAILED = "failed";
    public static final String OUTPUT_OP_RESUME = "resume";
    public static final String OUTPUT_OP_RESULT_FAIL = "failed";
    public static final String OUTPUT_OP_RESULT_CREAT = "created";
@@ -160,6 +164,7 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_SIZE = "SIZE(GB)";
    public static final String FORMAT_TABLE_COLUMN_RACK = "RACK";
    public static final String FORMAT_TABLE_COLUMN_HOST = "HOST";
+   public static final String FORMAT_TABLE_COLUMN_PHYSICAL_HOST = "PHYSICAL HOST";
    public static final String FORMAT_TABLE_COLUMN_SPACE = "SPACE(GB)";
    public static final String FORMAT_TABLE_COLUMN_FREE_SPACE = "FREE_SPACE(GB)";
    public static final String FORMAT_TABLE_COLUMN_PORT_GROUP = "PORTGROUP";

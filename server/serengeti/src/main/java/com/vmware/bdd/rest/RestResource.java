@@ -44,12 +44,12 @@ import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetworkRead;
+import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.apitypes.RackInfoList;
 import com.vmware.bdd.apitypes.ResourcePoolAdd;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.apitypes.TaskRead;
-import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
 import com.vmware.bdd.manager.ClusterManager;
@@ -275,6 +275,21 @@ public class RestResource {
       Long taskId =
             clusterMgr.resizeCluster(clusterName, groupName, instanceNum);
       redirectRequest(taskId, request, response);
+   }
+
+   @RequestMapping(value = "/cluster/{clusterName}/limit", method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.OK)
+   public void limitCluster(
+         @PathVariable("clusterName") String clusterName,
+         @RequestBody NodeGroupRead nodeGroup, HttpServletRequest request,
+         HttpServletResponse response) throws Exception {
+      int activeComputeNodeNum = nodeGroup.getInstanceNum();
+      String groupName = nodeGroup.getName();
+      if (activeComputeNodeNum < 0) {
+         logger.error("Invalid instance number: " + activeComputeNodeNum + " !");
+         throw BddException.INVALID_PARAMETER("instance number", String.valueOf(activeComputeNodeNum));
+      }
+      clusterMgr.limitCluster(clusterName, groupName, activeComputeNodeNum);
    }
 
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.GET, produces = "application/json")

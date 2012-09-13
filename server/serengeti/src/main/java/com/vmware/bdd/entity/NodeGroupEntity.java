@@ -139,6 +139,7 @@ public class NodeGroupEntity extends EntityBase {
    @Column(name = "vm_folder_path")
    private String vmFolderPath;
 
+
    public NodeGroupEntity() {
 
    }

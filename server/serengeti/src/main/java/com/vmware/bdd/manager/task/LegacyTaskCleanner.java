@@ -65,8 +65,10 @@ public class LegacyTaskCleanner extends TracedRunnable {
        * retry.
        */
       for (TaskEntity task : tasks) {
-         logger.info("re-submit lagacy task: " + task);
-         taskManager.submit(task);
+         if (task.isRetry()) {
+            logger.info("re-submit lagacy task: " + task);
+            taskManager.submit(task, new CommandTaskWorker());            
+         }
       }
    }
 

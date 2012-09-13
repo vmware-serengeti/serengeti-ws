@@ -22,7 +22,9 @@ import static org.testng.AssertJUnit.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.testng.annotations.AfterMethod;
@@ -32,8 +34,11 @@ import org.testng.annotations.Test;
 import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.TaskEntity;
+import com.vmware.bdd.manager.task.CommandTaskWorker;
+import com.vmware.bdd.manager.task.MessageTaskWorker;
 
 public class TestTaskManager {
+
    private static final Logger logger = Logger.getLogger(TestTaskManager.class);
 
    @BeforeMethod
@@ -56,7 +61,7 @@ public class TestTaskManager {
       TaskManager taskManager = new TaskManager();
       TaskEntity task = taskManager.createCmdlineTask(cmdArray, new TestListener());
       // task.
-      taskManager.submit(task, enableMq);
+      taskManager.submit(task, enableMq, new CommandTaskWorker());
       while (timeout-- > 0) {
          try {
             DAL.inTransactionRefresh(task);
@@ -70,6 +75,32 @@ public class TestTaskManager {
       }
 
       return task;
+   }
+
+   private TaskEntity sendAndWaitMessageTask(int timeout, boolean enableMq){
+      TaskManager taskManager = new TaskManager();
+      TaskEntity task = taskManager.createMessageTask(false, new TestListener());
+      Map<String,Object> sendParam = new HashMap <String,Object> ();
+      taskManager.submit(task, enableMq, new MessageTaskWorker(sendParam));
+      while (timeout-- > 0) {
+         try {
+            DAL.inTransactionRefresh(task);
+            logger.info("task status: " + task);
+            if (Status.SUCCESS == task.getStatus() || Status.FAILED == task.getStatus()) {
+               break;
+            }
+            Thread.sleep(1000);
+         } catch (InterruptedException e) {
+         }
+      }
+      return task;
+   }
+
+   @Test
+   public void testMessageTaskWithMq() {
+      TaskEntity task = sendAndWaitMessageTask(60, true);
+      // failed due to missing message
+      assertEquals(Status.FAILED, task.getStatus());
    }
 
    @Test

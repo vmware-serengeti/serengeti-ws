@@ -23,6 +23,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -56,4 +58,14 @@ public class CommonUtil {
       }
       return jsonBuff.toString();
   }
+
+   public static List<String> inputsConvert(String inputs) {
+      List<String> names = new ArrayList<String>();
+      for (String s : inputs.split(",")) {
+         if (!s.trim().isEmpty()) {
+            names.add(s.trim());
+         }
+      }
+      return names;
+   }
 }

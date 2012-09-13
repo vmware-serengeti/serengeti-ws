@@ -157,5 +157,6 @@ create table task (
    cookie       varchar(255),
    error        text,
    listener     bytea,
+   retry        boolean,
    primary key (id)
 );

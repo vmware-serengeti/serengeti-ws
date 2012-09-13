@@ -511,4 +511,19 @@ public class TestClusterManager {
       } catch (Exception e) {
       }
    }
+
+   @Test(groups = {"testClusterManager"}, dependsOnMethods = { "testGetClusterRead" }) 
+   public void testSetQuota() {
+      try {
+         Long id = clusterManager.limitCluster(CLUSTER_NAME, NODEGROUP_NAME, 1);
+         TaskEntity task = TaskEntity.findById(id);
+         task.getTaskListener().onMessage(getSampleMsg(CLUSTER_NAME, true));
+         assertTrue("task should succeed", waitForTask(task));
+         ClusterEntity cluster =
+               ClusterEntity.findClusterEntityByName(CLUSTER_NAME);
+         assertTrue("cluster " + CLUSTER_NAME + " should be running, but get status: " + cluster.getStatus(),
+               cluster.getStatus().equals(ClusterStatus.RUNNING));
+      } catch (Exception e) {
+      }
+   }
 }
