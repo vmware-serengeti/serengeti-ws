@@ -1256,17 +1256,19 @@ public class ClusterCommands implements CommandMarker {
     */
    private boolean validateLimit(String clusterName, String nodeGroupName,
          int activeComputeNodeNum) {
-      ClusterRead cluster = restClient.get(clusterName);
 
+      if (activeComputeNodeNum < 0) {
+         System.out.println("Invalid instance number:" + activeComputeNodeNum);
+         return false;
+      }
+
+      ClusterRead cluster = restClient.get(clusterName);
       if (cluster == null) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null, null,
                Constants.OUTPUT_OP_ADJUSTMENT_FAILED, "cluster " + clusterName + " is not exsit !");
          return false;
       }
-      if (activeComputeNodeNum < 0) {
-         System.out.println("Invalid instance number:" + activeComputeNodeNum);
-         return false;
-      }
+
       if (!CommandsUtils.isBlank(nodeGroupName)) {
          List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
          if(nodeGroups != null && !nodeGroups.isEmpty()){
@@ -1299,6 +1301,7 @@ public class ClusterCommands implements CommandMarker {
             return false;
          }
       }
+
       return true;
    }
 

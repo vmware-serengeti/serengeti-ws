@@ -533,6 +533,31 @@ public class ClusterConfigManager {
       });
    }
 
+   public ClusterCreate getClusterDTO(final String clusterName) {
+      return DAL.inTransactionDo(new Saveable<ClusterCreate>() {
+         public ClusterCreate body() {
+
+            ClusterEntity clusterEntity =
+                  ClusterEntity.findClusterEntityByName(clusterName);
+            if (clusterEntity == null) {
+               throw ClusterConfigException
+                     .CLUSTER_CONFIG_NOT_FOUND(clusterName);
+            }
+            ClusterCreate clusterConfig = new ClusterCreate();
+            clusterConfig.setName(clusterEntity.getName());
+
+            convertClusterConfig(clusterEntity, clusterConfig);
+
+            Gson gson =
+                  new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
+                        .create();
+            String manifest = gson.toJson(clusterConfig);
+            logger.debug("final cluster manifest " + manifest);
+            return clusterConfig;
+         }
+      });
+   }
+
    private void convertClusterConfig(ClusterEntity clusterEntity,
          ClusterCreate clusterConfig) {
       logger.debug("begin to expand config for cluster "

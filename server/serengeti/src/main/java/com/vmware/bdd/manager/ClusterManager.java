@@ -739,15 +739,15 @@ public class ClusterManager {
 
       logger.info("Limit active compute node number to" + activeComputeNodeNum);
 
-      final ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
+      ClusterCreate cluster = clusterConfigMgr.getClusterConfig(clusterName);
       // cluster must be exist.
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");
          throw BddException.NOT_FOUND("cluster", clusterName);
       }
       // cluster must be contain node group
-      Set<NodeGroupEntity> nodeGroups = cluster.getNodeGroups();
-      if(nodeGroups == null || nodeGroups.size()==0) {
+      NodeGroupCreate[] nodeGroups = cluster.getNodeGroups();
+      if(nodeGroups == null || nodeGroups.length == 0) {
          String msg = "There is no node group in cluster " + clusterName + " . ";
          logger.error(msg);
          throw BddException.INTERNAL(null, msg);
