@@ -225,6 +225,31 @@ public class ClusterManager {
       return createClusterMgmtTask(targets, cluster, listener, initStatus);
    }
 
+   private boolean checkClusterInstance(final String clusterName) {
+
+      return DAL.inRwTransactionDo(new Saveable<Boolean>() {
+         private boolean validated;
+
+         @Override
+         public Boolean body() throws Exception {
+            ClusterEntity cluster =
+                  ClusterEntity.findClusterEntityByName(clusterName);
+            AuAssert.check(cluster != null);
+            if (cluster.getRealInstanceNum() == 0) {
+               logger.warn("cluster real instance number is zero !");
+               if (cluster.getNetwork().getAllocType() == NetworkEntity.AllocType.IP_POOL) {
+                  networkManager.free(cluster.getNetwork(), cluster.getId());
+               }
+               cluster.delete();
+               validated = false;
+            } else {
+               validated = true;
+            }
+            return validated;
+         }
+      });
+   }
+
    public ClusterRead getClusterByName(final String clusterName, final boolean realTime) {
       ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
       if (cluster == null) {
@@ -386,7 +411,9 @@ public class ClusterManager {
          throw ClusterManagerException.DELETION_NOT_ALLOWED_ERROR(clusterName,
                "it should be in RUNNING/STOPPED/ERROR/PROVISION_ERROR status");
       }
-
+      if(!checkClusterInstance(clusterName)) {
+         return null;
+      }
       DeleteClusterListener listener =
             new DeleteClusterListener(clusterName, networkManager);
       return createClusterMgmtTaskWithErrorSetting(cluster, listener,
