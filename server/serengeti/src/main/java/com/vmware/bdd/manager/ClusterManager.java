@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +34,7 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.HadoopNodeEntity;
@@ -49,8 +49,8 @@ import com.vmware.bdd.manager.task.CommandTaskWorker;
 import com.vmware.bdd.manager.task.ConfigureClusterListener;
 import com.vmware.bdd.manager.task.CreateClusterListener;
 import com.vmware.bdd.manager.task.DeleteClusterListener;
-import com.vmware.bdd.manager.task.QueryClusterListener;
 import com.vmware.bdd.manager.task.MessageTaskWorker;
+import com.vmware.bdd.manager.task.QueryClusterListener;
 import com.vmware.bdd.manager.task.StartClusterListener;
 import com.vmware.bdd.manager.task.StopClusterListener;
 import com.vmware.bdd.manager.task.TaskListener;
@@ -59,9 +59,12 @@ import com.vmware.bdd.manager.task.VHMReceiveListener;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ClusterCmdUtil;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
+import com.vmware.bdd.utils.Constants;
 
 public class ClusterManager {
+
    static final Logger logger = Logger.getLogger(ClusterManager.class);
    private ClusterConfigManager clusterConfigMgr;
    private CloudProviderManager cloudProviderMgr;
@@ -225,7 +228,7 @@ public class ClusterManager {
       return createClusterMgmtTask(targets, cluster, listener, initStatus);
    }
 
-   private boolean checkClusterInstance(final String clusterName) {
+   private boolean removeEmptyCluster(final String clusterName) {
 
       return DAL.inRwTransactionDo(new Saveable<Boolean>() {
          private boolean validated;
@@ -241,9 +244,9 @@ public class ClusterManager {
                   networkManager.free(cluster.getNetwork(), cluster.getId());
                }
                cluster.delete();
-               validated = false;
-            } else {
                validated = true;
+            } else {
+               validated = false;
             }
             return validated;
          }
@@ -411,7 +414,7 @@ public class ClusterManager {
          throw ClusterManagerException.DELETION_NOT_ALLOWED_ERROR(clusterName,
                "it should be in RUNNING/STOPPED/ERROR/PROVISION_ERROR status");
       }
-      if(!checkClusterInstance(clusterName)) {
+      if(removeEmptyCluster(clusterName)) {
          return null;
       }
       DeleteClusterListener listener =
@@ -734,20 +737,14 @@ public class ClusterManager {
     * Validate the limit.
     * Submit a vhm MQ process task.   
     */
-   public long limitCluster(final String clusterName,
+   @SuppressWarnings("unchecked")
+   public Long limitCluster(final String clusterName,
          final String nodeGroupName, final int activeComputeNodeNum) throws Exception {
-
       logger.info("Limit active compute node number to" + activeComputeNodeNum);
-
-      ClusterCreate cluster = clusterConfigMgr.getClusterConfig(clusterName);
-      // cluster must be exist.
-      if (cluster == null) {
-         logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
-      }
+      ClusterRead cluster = clusterConfigMgr.getClusterRead(clusterName);
       // cluster must be contain node group
-      NodeGroupCreate[] nodeGroups = cluster.getNodeGroups();
-      if(nodeGroups == null || nodeGroups.length == 0) {
+      List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
+      if(nodeGroups == null || nodeGroups.isEmpty()) {
          String msg = "There is no node group in cluster " + clusterName + " . ";
          logger.error(msg);
          throw BddException.INTERNAL(null, msg);
@@ -759,35 +756,19 @@ public class ClusterManager {
          throw ClusterManagerException.LIMIT_CLUSTER_NOT_ALLOWED_ERROR(clusterName, msg);
       }
       // node group must be compute only node
-      List<String> nodeGroupNameList = new ArrayList<String> ();
-      String hadoopJobTrackerIP="";
-      if(nodeGroupName != null && nodeGroupName.length() > 0){
-         List<String> invalidNodeGroupName = new ArrayList<String>();
-         nodeGroupNameList.add(nodeGroupName);
-         NodeGroupEntity nodeGroup = matchNodeGroupByName(nodeGroups,nodeGroupName);
-         if (nodeGroup == null) {
-            invalidNodeGroupName.add(nodeGroupName);
-         } else if (nodeGroup.getRoles() == null || nodeGroup.getRoleNameList().size() != 1 || 
-            !nodeGroup.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())){
-            invalidNodeGroupName.add(nodeGroupName);
-         }
-         if (!invalidNodeGroupName.isEmpty()) {
-            logger.error("The specified node group is not a compute only node group.");
-            throw BddException.INVALID_PARAMETER("node group", nodeGroupName);
-         }
-      } else {
-         for(NodeGroupEntity nodeGroup : nodeGroups) {   
-            if (nodeGroup.getRoles() != null && nodeGroup.getRoleNameList().size() == 1 && nodeGroup.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {
-               nodeGroupNameList.add(nodeGroup.getName());
-            }
-         }
+      List<String> nodeGroupNames = new ArrayList<String> ();
+      if (!cluster.validateLimit(nodeGroupName, activeComputeNodeNum, nodeGroupNames)) {
+         return null;
       }
       // find hadoop job tracker ip
-      for(NodeGroupEntity nodeGroup : nodeGroups){
-         if (nodeGroup.getRoles() != null && nodeGroup.getRoleNameList().size() == 1 && nodeGroup.getRoles().contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
-            if(nodeGroup.getHadoopNodes().iterator().hasNext()){
-               hadoopJobTrackerIP = nodeGroup.getHadoopNodes().iterator().next().getIpAddress();                        
+      String hadoopJobTrackerIP="";
+      for(NodeGroupRead nodeGroup : nodeGroups){
+         if (nodeGroup.getRoles() != null && nodeGroup.getRoles().contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
+            AuAssert.check(nodeGroup.getInstanceNum() == 1, "The Jobtracker only support one instance .");
+            if(!nodeGroup.getInstances().isEmpty()) {
+               hadoopJobTrackerIP = nodeGroup.getInstances().get(0).getIp();                                   
             }
+            AuAssert.check(!CommonUtil.isBlank(hadoopJobTrackerIP),"Hadoop jobtracker cannot be null");
             break;
          }
       }
@@ -797,29 +778,15 @@ public class ClusterManager {
       ClusterEntity.updateStatus(cluster.getName(), ClusterStatus.VHM_RUNNING);
       DAL.inTransactionUpdate(task);
       Map<String,Object> sendParam = new HashMap <String,Object> ();
-      sendParam.put("version", 1);
-      sendParam.put("cluster_name", clusterName);
-      sendParam.put("jobtracker", hadoopJobTrackerIP);
-      sendParam.put("instance_num", activeComputeNodeNum);
-      sendParam.put("node_groups", nodeGroupNameList);
-      sendParam.put("serengeti_instance", ConfigInfo.getSerengetiRootFolder());      
+      sendParam.put(Constants.CLUSTER_LIMIT_INFO_VERSION, 1);
+      sendParam.put(Constants.CLUSTER_LIMIT_INFO_CLUSTER_NAME, clusterName);
+      sendParam.put(Constants.CLUSTER_LIMIT_INFO_JOBTRACKER, hadoopJobTrackerIP);
+      sendParam.put(Constants.CLUSTER_LIMIT_INFO_INSTANCE_NUM, activeComputeNodeNum);
+      sendParam.put(Constants.CLUSTER_LIMIT_INFO_NODE_GROUPS, nodeGroupNames);
+      sendParam.put(Constants.CLUSTER_LIMIT_INFO_SERENGETI_INSTANCE, ConfigInfo.getSerengetiRootFolder());      
       taskManager.submit(task, new MessageTaskWorker(sendParam));
 
       return task.getId();      
-   }
-
-   private NodeGroupEntity matchNodeGroupByName(
-         Set<NodeGroupEntity> nodeGroups, String nodeGroupName) {
-      NodeGroupEntity nodeGroupEntity = null;
-      Iterator<NodeGroupEntity> nodeGroupIterator = nodeGroups.iterator();
-      while (nodeGroupIterator.hasNext()) {
-         NodeGroupEntity nodeGroup = nodeGroupIterator.next();
-         if (nodeGroupName.trim().equals(nodeGroup.getName())) {
-            nodeGroupEntity = nodeGroup;
-            break;
-         }
-      }
-      return nodeGroupEntity;
    }
 
    static class SystemProperties {

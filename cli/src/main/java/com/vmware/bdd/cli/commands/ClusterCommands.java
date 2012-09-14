@@ -449,7 +449,18 @@ public class ClusterCommands implements CommandMarker {
             @CliOption(key = { "activeComputeNodeNum" }, mandatory = true, help = "The number of instances powered on") final int activeComputeNodeNum) {
 
          try {
-            if(!validateLimit(clusterName, nodeGroupName, activeComputeNodeNum)){
+            // The active compute node number must be a integer and cannot be less than zero.
+            if (activeComputeNodeNum < 0) {
+               System.out.println("Invalid instance number:" + activeComputeNodeNum);
+               return;
+            }
+            ClusterRead cluster = restClient.get(clusterName);
+            if (cluster == null) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null, null,
+                     Constants.OUTPUT_OP_ADJUSTMENT_FAILED, "cluster " + clusterName + " is not exsit !");
+               return;
+            }
+            if(!cluster.validateLimit(nodeGroupName, activeComputeNodeNum)) {
                return;
             }
             restClient.limitCluster(clusterName, nodeGroupName, activeComputeNodeNum);
@@ -1247,74 +1258,6 @@ public class ClusterCommands implements CommandMarker {
          }
       }
       return true;
-   }
-
-   /*
-    * Validate the limit,make sure the specified node group is a compute only node group.
-    * The active compute node number must be a integer and cannot be less than zero.
-    * If user have not specified the node group name,the cluster must contain compute only node.   
-    */
-   private boolean validateLimit(String clusterName, String nodeGroupName,
-         int activeComputeNodeNum) {
-
-      if (activeComputeNodeNum < 0) {
-         System.out.println("Invalid instance number:" + activeComputeNodeNum);
-         return false;
-      }
-
-      ClusterRead cluster = restClient.get(clusterName);
-      if (cluster == null) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null, null,
-               Constants.OUTPUT_OP_ADJUSTMENT_FAILED, "cluster " + clusterName + " is not exsit !");
-         return false;
-      }
-
-      if (!CommandsUtils.isBlank(nodeGroupName)) {
-         List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
-         if(nodeGroups != null && !nodeGroups.isEmpty()){
-            List<String> invalidNodeGroup = new ArrayList<String>();
-            NodeGroupRead nodeGroup = matchNodeGroupByName(nodeGroups,nodeGroupName);
-            if (nodeGroup == null) {
-                invalidNodeGroup.add(nodeGroupName);
-            } else if (nodeGroup.getRoles() == null || nodeGroup.getRoles().size() != 1
-                || !nodeGroup.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {
-                   invalidNodeGroup.add(nodeGroupName);
-            }
-            if (!invalidNodeGroup.isEmpty()) {
-               System.out.println("The specified node group is not a compute only node group.");
-               return false;
-            }
-         } else {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null, null,
-                  Constants.OUTPUT_OP_ADJUSTMENT_FAILED, "There is not node group under the cluster " + clusterName + " !");
-            return false;
-         }
-      }else{
-         int count = 0;
-         for(NodeGroupRead nodeGroup : cluster.getNodeGroups()) {   
-            if (nodeGroup.getRoles() != null && nodeGroup.getRoles().size() == 1 && nodeGroup.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {
-              count ++;
-            }
-         }
-         if(count == 0){
-            System.out.println("There's no compute only nodes in the cluster.");
-            return false;
-         }
-      }
-
-      return true;
-   }
-
-   private NodeGroupRead matchNodeGroupByName(List<NodeGroupRead> nodeGroups,
-         String nodeGroupName) {
-      NodeGroupRead nodeGoupRead = null;
-      for (NodeGroupRead nodeGroup : nodeGroups) {
-         if (nodeGroupName.trim().equals(nodeGroup.getName())) {
-            nodeGoupRead = nodeGroup;
-            break;
-         }
-      }
-      return nodeGoupRead;
    }
 
 }

@@ -30,6 +30,7 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
+import com.vmware.bdd.apitypes.VHMRequestBody;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 
@@ -113,10 +114,10 @@ public class ClusterRestClient {
 
       PrettyOutput outputCallBack =
             getClusterPrettyOutputCallBack(this, clusterName);
-      NodeGroupRead nodeGroup = new NodeGroupRead();
-      nodeGroup.setInstanceNum(activeComputeNodeNum);
-      nodeGroup.setName(nodeGroupName);
-      restClient.update(nodeGroup, path, httpverb,outputCallBack);
+      VHMRequestBody requestBody = new VHMRequestBody();
+      requestBody.setActiveComputeNodeNum(activeComputeNodeNum);
+      requestBody.setNodeGroupName(nodeGroupName);
+      restClient.update(requestBody, path, httpverb,outputCallBack);
    }
 
    private PrettyOutput getClusterPrettyOutputCallBack(

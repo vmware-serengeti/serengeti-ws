@@ -249,7 +249,7 @@ public class ClusterCreate {
    public void setType(ClusterType type) {
       this.type = type;
    }
-   
+
    public boolean validateNodeGroupPlacementPolicies(List<String> failedMsgList, List<String> warningMsgList) {
       boolean valid = true;
 

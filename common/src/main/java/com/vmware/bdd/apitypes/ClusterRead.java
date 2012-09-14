@@ -14,12 +14,15 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.utils.CommonUtil;
 
 /**
  * Cluster get output
@@ -127,6 +130,63 @@ public class ClusterRead {
 
    public void setNodeGroups(List<NodeGroupRead> nodeGroups) {
       this.nodeGroups = nodeGroups;
+   }
+
+   /*
+    * Validate the limit,make sure the specified node group is a compute only node group.
+    * If user have not specified the node group name,the cluster must contain compute only node.   
+    */
+   public boolean validateLimit(String nodeGroupName, int activeComputeNodeNum,List<String>... nodeGroupNames) {
+      if (!CommonUtil.isBlank(nodeGroupName)) {
+         List<NodeGroupRead> nodeGroups = getNodeGroups();
+         if(nodeGroups != null && !nodeGroups.isEmpty()){
+            List<String> invalidNodeGroup = new ArrayList<String>();
+            if(nodeGroupNames != null && nodeGroupNames.length > 0){
+               nodeGroupNames[0].add(nodeGroupName);
+            }
+            NodeGroupRead nodeGroup = matchNodeGroupByName(nodeGroups,nodeGroupName);
+            if (nodeGroup == null) {
+                invalidNodeGroup.add(nodeGroupName);
+            } else if (nodeGroup.getRoles() == null || nodeGroup.getRoles().size() != 1
+                || !nodeGroup.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {
+                   invalidNodeGroup.add(nodeGroupName);
+            }
+            if (!invalidNodeGroup.isEmpty()) {
+               System.out.println("The specified node group is not a compute only node group.");
+               return false;
+            }
+         } else {
+            System.out.println("There is not node group under the cluster " + getName() + " !");
+            return false;
+         }
+      } else {
+         int count = 0;
+         for(NodeGroupRead nodeGroup : getNodeGroups()) {
+            if (nodeGroup.getRoles() != null && nodeGroup.getRoles().size() == 1 && nodeGroup.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {
+               if(nodeGroupNames != null && nodeGroupNames.length > 0){
+                  nodeGroupNames[0].add(nodeGroup.getName());
+               }
+               count ++;
+            }
+         }
+         if(count == 0){
+            System.out.println("There's no compute only nodes in the cluster.");
+            return false;
+         }
+      }
+      return true;
+   }
+
+   private NodeGroupRead matchNodeGroupByName(List<NodeGroupRead> nodeGroups,
+         String nodeGroupName) {
+      NodeGroupRead nodeGoupRead = null;
+      for (NodeGroupRead nodeGroup : nodeGroups) {
+         if (nodeGroupName.trim().equals(nodeGroup.getName())) {
+            nodeGoupRead = nodeGroup;
+            break;
+         }
+      }
+      return nodeGoupRead;
    }
 
    /**

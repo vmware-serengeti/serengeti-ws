@@ -138,7 +138,7 @@ public class CommandsUtils {
     * @return the opposite of
     */
    public static boolean isBlank(final String str) {
-      return str == null || str.trim().isEmpty();
+      return CommonUtil.isBlank(str);
    }
 
    /**
@@ -335,7 +335,8 @@ public class CommandsUtils {
       } 
    }
 
-   public static void writeProperties(Properties properties, String propertiesFilePath) {
+   public static void writeProperties(Properties properties,
+         String propertiesFilePath) {
       FileOutputStream fos = null;
       try {
          fos = new FileOutputStream(propertiesFilePath);
@@ -344,11 +345,11 @@ public class CommandsUtils {
       } catch (IOException e) {
          System.out.println(e.getMessage());
          if (fos != null) {
-        	 try {
-				fos.close();
-			} catch (IOException e1) {
-				System.out.println(e1.getMessage());
-			}
+            try {
+               fos.close();
+            } catch (IOException e1) {
+               System.out.println(e1.getMessage());
+            }
          }
       }
    }

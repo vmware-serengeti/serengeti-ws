@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpBlock;
@@ -533,27 +534,16 @@ public class ClusterConfigManager {
       });
    }
 
-   public ClusterCreate getClusterDTO(final String clusterName) {
-      return DAL.inTransactionDo(new Saveable<ClusterCreate>() {
-         public ClusterCreate body() {
-
+   public ClusterRead getClusterRead(final String clusterName) {
+      return DAL.inTransactionDo(new Saveable<ClusterRead>() {
+         public ClusterRead body() {
             ClusterEntity clusterEntity =
                   ClusterEntity.findClusterEntityByName(clusterName);
             if (clusterEntity == null) {
-               throw ClusterConfigException
-                     .CLUSTER_CONFIG_NOT_FOUND(clusterName);
+               logger.error("cluster " + clusterName + " does not exist");
+               throw ClusterConfigException.CLUSTER_CONFIG_NOT_FOUND(clusterName);
             }
-            ClusterCreate clusterConfig = new ClusterCreate();
-            clusterConfig.setName(clusterEntity.getName());
-
-            convertClusterConfig(clusterEntity, clusterConfig);
-
-            Gson gson =
-                  new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
-                        .create();
-            String manifest = gson.toJson(clusterConfig);
-            logger.debug("final cluster manifest " + manifest);
-            return clusterConfig;
+            return clusterEntity.toClusterRead();
          }
       });
    }
