@@ -128,7 +128,8 @@ public class AppConfigValidationFactory {
             if (obj instanceof Map) {
                 Map<String, String> property = (Map<String, String>) obj;
 
-                if (property.get("name").trim().equalsIgnoreCase(configPropertyName)) {
+                if ((property.get("nameIsPattern") != null && property.get("nameIsPattern").trim().equalsIgnoreCase("true") && configPropertyName.matches(property.get("name")))
+                      || property.get("name").trim().equalsIgnoreCase(configPropertyName)) {
                     if (property.get("valueFormat") != null && !property.get("valueFormat").isEmpty()
                             && !validatePropertyValueFormat(configPropertyValue, property.get("valueFormat"))) {
                         validateType = ValidateResult.Type.WHITE_LIST_INVALID_VALUE;

@@ -1,6 +1,8 @@
 [
   {
-    "core-site.xml":[]
+    "core-site.xml":[
+	"net.topology.impl"
+    ]
   },
   {
     "hdfs-site.xml":[
@@ -12,7 +14,10 @@
   {
     "mapred-site.xml":[
     "mapred.job.tracker",
-    "mapred.local.dir"
+    "mapred.local.dir",
+    "mapred.task.cache.levels",
+    "mapred.jobtracker.jobSchedulable",
+    "mapred.jobtracker.nodegroup.awareness"
     ]
   },
   {

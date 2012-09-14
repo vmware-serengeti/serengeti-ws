@@ -2,6 +2,9 @@
   {
     "core-site.xml":[
 	  {
+	    "name":"net.topology.nodegroup.aware"
+	  },
+	  {
 	    "name":"hadoop.tmp.dir"
 	  },
 	  {
@@ -173,6 +176,9 @@
 		"name":"topology.script.number.args"
 	  },
 	  {
+		"name":"dfs.block.replicator.classname"
+	  },
+	  {
 		"name":"hadoop.security.uid.cache.secs"
 	  }
     ]
@@ -328,11 +334,56 @@
 	  },
 	  {
 	    "name":"dfs.datanode.failed.volumes.tolerated"
+	  },
+	  {
+	    "name":"topology.script.file.name"
 	  }
     ]
   },  
   {
     "mapred-site.xml":[
+    {
+    "name":"mapred.task.cache.levels"
+    },
+    {
+    "name":"mapred.jobtracker.taskScheduler"
+    },
+    {
+    "name":"mapred.fairscheduler.poolnameproperty"
+    },
+    {
+    "name":"mapred.fairscheduler.preemption"
+    },
+    {
+    "name":"mapred.fairscheduler.pool"
+    },
+    {
+    "name":"mapred.fairscheduler.poolnameproperty"
+    },
+    {
+    "name":"mapred.fairscheduler.allocation.file"
+    },
+    {
+    "name":"mapred.fairscheduler.sizebasedweight"
+    },
+    {
+    "name":"mapred.fairscheduler.preemption.only.log"
+    },
+    {
+    "name":"mapred.fairscheduler.update.interval"
+    },
+    {
+    "name":"mapred.fairscheduler.preemption.interval"
+    },
+    {
+    "name":"mapred.fairscheduler.weightadjuster"
+    },
+    {
+    "name":"mapred.fairscheduler.loadmanager"
+    },
+    {
+    "name":"mapred.fairscheduler.taskselector"
+    },
     {
     "name":"hadoop.job.history.location"
     },
@@ -600,7 +651,6 @@
      {
     "name":"mapred.task.profile"
     },
-    
      {
     "name":"mapred.task.profile.maps"
     },
@@ -659,6 +709,13 @@
     "name":"mapreduce.job.acl-view-job"
     },
     {
+    "name":"mapreduce.cluster.administrators"
+    },
+    {
+    "name":"mapred\\.queue\\.[0-9a-zA-Z-_]+\\.acl-administer-jobs",
+    "nameIsPattern":"true"
+    },
+    {
     "name":"mapred.tasktracker.indexcache.mb"
     },
     {
@@ -693,6 +750,83 @@
     }
     ]
   },
+  { 
+    "fair-scheduler.xml":[
+    {
+     "name":"text"
+    } 
+    ]
+  },
+  { 
+    "capacity-scheduler.xml":[
+    {
+     "name":"mapred\\.capacity-scheduler\\.queue\\.[a-zA-Z0-9-_]+\\.capacity",
+     "nameIsPattern":"true"
+    },
+    {
+     "name":"mapred\\.capacity-scheduler\\.queue\\.[a-zA-Z0-9-_]+\\.maximum-capacity",
+     "nameIsPattern":"true"
+    },
+    {
+     "name":"mapred\\.capacity-scheduler\\.queue\\.[a-zA-Z0-9-_]+\\.minimum-user-limit-percent",
+     "nameIsPattern":"true"
+    },
+    {
+     "name":"mapred\\.capacity-scheduler\\.queue\\.[a-zA-Z0-9-_]+\\.user-limit-factor",
+     "nameIsPattern":"true"
+    },
+    {
+     "name":"mapred\\.capacity-scheduler\\.queue\\.[a-zA-Z0-9-_]+\\.supports-priority",
+     "nameIsPattern":"true"
+    },
+    {
+     "name":"mapred.capacity-scheduler.maximum-system-jobs"
+    },
+    {
+     "name":"mapred\\.capacity-scheduler\\.queue\\.[a-zA-Z0-9-_]+\\.maximum-initialized-active-tasks",
+     "nameIsPattern":"true"
+    },
+    {
+     "name":"mapred\\.capacity-scheduler\\.queue\\.[a-zA-Z0-9-_]+\\.maximum-initialized-active-tasks-per-user",
+     "nameIsPattern":"true"
+    },
+    {
+     "name":"mapred\\.capacity-scheduler\\.queue\\.[a-zA-Z0-9-_]+\\.init-accept-jobs-factor",
+     "nameIsPattern":"true"
+    },
+    {
+     "name":"mapred.cluster.map.memory.mb"
+    },
+    {
+     "name":"mapred.cluster.reduce.memory.mb"
+    },
+    {
+     "name":"mapred.cluster.max.map.memory.mb"
+    },
+    {
+     "name":"mapred.cluster.max.reduce.memory.mb"
+    },
+    {
+     "name":"mapred.job.map.memory.mb"
+    },
+    {
+     "name":"mapred.job.reduce.memory.mb"
+    },
+    ]
+  },
+  { 
+    "mapred-queue-acls.xml":[
+    {
+     "name":"mapred\\.queue\\.[a-zA-Z0-9-_]+\\.acl-submit-job",
+     "nameIsPattern":"true"
+    },
+    {
+     "name":"mapred\\.queue\\.[a-zA-Z0-9-_]+\\.acl-administer-jobs",
+     "nameIsPattern":"true"
+    }   
+    ]
+  },
+
   {
     "hadoop-env.sh":[
     {
