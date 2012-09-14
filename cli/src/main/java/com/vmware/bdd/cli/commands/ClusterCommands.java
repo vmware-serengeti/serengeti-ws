@@ -239,6 +239,7 @@ public class ClusterCommands implements CommandMarker {
                   name, Constants.OUTPUT_OP_CREATE,
                   Constants.OUTPUT_OP_RESULT_FAIL, Constants.INPUT_TOPOLOGY_INVALID_VALUE);
             System.out.println("Please specify the topology type: HVE or RACK_HOST or HOST_AS_RACK");
+            return;
          }
       }
 
