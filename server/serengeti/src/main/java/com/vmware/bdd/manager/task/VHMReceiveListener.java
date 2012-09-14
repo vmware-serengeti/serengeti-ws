@@ -38,7 +38,7 @@ public class VHMReceiveListener implements TaskListener {
 
    @Override
    public void onSuccess() {
-      logger.debug("cluster setQuota " + clusterName
+      logger.debug("cluster limit " + clusterName
             + " task listener called onSuccess");
 
       ClusterEntity.updateStatus(clusterName, ClusterStatus.RUNNING);
@@ -46,17 +46,17 @@ public class VHMReceiveListener implements TaskListener {
 
    @Override
    public void onFailure() {
-      logger.debug("cluster setQuota listener called onFailure");
+      logger.debug("cluster limit listener called onFailure");
 
       // will not delete the cluster info, assuming the error can be recovered
       ClusterEntity.updateStatus(clusterName, ClusterStatus.RUNNING);
-      logger.error("failed to cluster setQuota " + clusterName 
+      logger.error("failed to cluster limit " + clusterName 
             + " set its status as RUNNING");
    }
 
    @Override
    public void onMessage(Map<String, Object> mMap) {
-      logger.debug("cluster setQuota " + clusterName
+      logger.debug("cluster limit " + clusterName
             + " task listener received message " + mMap);
 
       AuAssert.check(mMap.get(BddMessageUtil.FINISH_FIELD) instanceof Boolean

@@ -40,7 +40,7 @@ public class MessageTaskWorker implements TaskWorker {
          runtimeConnectionManager = new RuntimeConnectionManager();
          runtimeConnectionManager.init();
       }
-      runtimeConnectionManager.sendMessage(ConfigInfo.getRuntimeMqSendRouteKey(),jsonStr);
+      runtimeConnectionManager.sendMessage(ConfigInfo.getRuntimeMqSendRouteKey(), jsonStr);
 
       /*
        * Message processing thread.
