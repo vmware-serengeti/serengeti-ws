@@ -25,8 +25,8 @@
         "sizeGB": 10
       },
       "rpNames": [
-        "rp1",
-        "rp2"
+        "sample_resource_pool1", // change this to the resource pool added via Serengeti CLI
+        "sample_resource_pool2"  // change this to the resource pool added via Serengeti CLI
       ],
       "placementPolicies": {
         "instancePerHost": 1
@@ -45,17 +45,17 @@
         "sizeGB": 10
       },
       "rpNames": [
-        "rp1",
-        "rp2"
+        "sample_resource_pool1", // change this to the resource pool added via Serengeti CLI
+        "sample_resource_pool2"  // change this to the resource pool added via Serengeti CLI
       ],
       "placementPolicies": {
         "instancePerHost": 2,
-	"groupAssociations": [
-	  {
-	    "reference": "data",
-	    "type": "STRICT"
-	  }
-	]
+        "groupAssociations": [
+          {
+            "reference": "data",
+            "type": "STRICT"
+          }
+        ]
       }
     },
     {
@@ -72,7 +72,7 @@
         "sizeGB": 10
       },
       "rpNames": [
-        "rp3"
+        "sample_resource_pool3" // change this to the resource pool added via Serengeti CLI
       ]
     }
   ],
@@ -97,11 +97,11 @@
         // "HADOOP_JOBTRACKER_OPTS": "",
         // "HADOOP_TASKTRACKER_OPTS": "",
         // "JAVA_HOME": "",
-        // "PATH": "",
+        // "PATH": ""
       },
       "log4j.properties": {
         // "hadoop.root.logger": "DEBUG,console",
-        // "hadoop.security.logger": "DEBUG,console",
+        // "hadoop.security.logger": "DEBUG,console"
       }
     }
   }

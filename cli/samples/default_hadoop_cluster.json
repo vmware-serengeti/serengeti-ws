@@ -60,6 +60,7 @@
       }
     }
   ],
+  // we suggest running convert-hadoop-conf.rb to generate "configuration" section and paste the output here
   "configuration": {
     "hadoop": {
       "core-site.xml": {
@@ -89,6 +90,7 @@
       },
       "fair-scheduler.xml": {
         // check for all settings at http://hadoop.apache.org/docs/r1.0.0/fair_scheduler.html
+        // "text": "the full content of fair-scheduler.xml in one line"
       },
       "capacity-scheduler.xml": {
         // check for all settings at http://hadoop.apache.org/docs/r1.0.0/capacity_scheduler.html
