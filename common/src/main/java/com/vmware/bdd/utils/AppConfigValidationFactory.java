@@ -14,15 +14,28 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+import org.xml.sax.SAXException;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
+import com.vmware.bdd.utils.ValidateResult.Type;
 
 public class AppConfigValidationFactory {
 
@@ -68,13 +81,127 @@ public class AppConfigValidationFactory {
                     configFileName = configFileEntry.getKey();
                     validateBySameFileName(configFileName, configFileEntry.getValue(), whiteList, validateResult,
                             ValidationType.WHITE_LIST);
+                    if (validateResult.getType() == Type.VALID) {
+                       valdiateSpecialFileFormat(configFileName, configFileEntry.getValue(), validateResult);
+                    }
                 }
             }
         }
         return validateResult;
     }
 
+//    process non key-value xml files such as fair-scheduler.xml below
+//    <?xml version="1.0"?>
+//    <allocations>
+//      <pool name="sample_pool">
+//        <minMaps>5</minMaps>
+//        <minReduces>5</minReduces>
+//        <weight>2.0</weight>
+//      </pool>
+//      <user name="sample_user">
+//        <maxRunningJobs>6</maxRunningJobs>
+//      </user>
+//      <userMaxJobsDefault>3</userMaxJobsDefault>
+//    </allocations>
     @SuppressWarnings("unchecked")
+   private static void valdiateSpecialFileFormat(String configFileName,
+         Object configProperties, ValidateResult validateResult) {
+       if (configFileName.equals(Constants.FAIR_SCHEDULER_FILE_NAME)) {
+          Map<String, Object> configPropertyMap = (Map<String, Object>) configProperties;
+          String xmlContents = (String)configPropertyMap.get(Constants.FAIR_SCHEDULER_FILE_ATTRIBUTE);
+          checkFairSchedulerXmlFormat(xmlContents, validateResult);
+       }
+   }
+
+   private static void checkFairSchedulerXmlFormat(String xmlContents, ValidateResult validateResult) {
+      //slightly modified hadoop codes to check fair-scheduler.xml format
+      //https://github.com/apache/hadoop/blob/trunk/src/contrib/fairscheduler/src/java/org/apache/hadoop/mapred/PoolManager.java
+      DocumentBuilderFactory docBuilderFactory =
+            DocumentBuilderFactory.newInstance();
+      docBuilderFactory.setIgnoringComments(true);
+      DocumentBuilder builder = null;
+      Document doc = null;
+      try {
+      builder = docBuilderFactory.newDocumentBuilder();
+      doc = builder.parse(xmlContents);
+      } catch (Exception e) {
+         validateResult.addFailureName(Constants.FAIR_SCHEDULER_FILE_ATTRIBUTE);
+         return;
+      }
+      Element root = doc.getDocumentElement();
+      if (!"allocations".equals(root.getTagName())) {
+         validateResult.addFailureName(root.getTagName());
+         return;
+      }
+      NodeList elements = root.getChildNodes();
+      for (int i = 0; i < elements.getLength(); i++) {
+         Node node = elements.item(i);
+         if (!(node instanceof Element))
+            continue;
+         Element element = (Element)node;
+         if ("pool".equals(element.getTagName())) {
+            NodeList fields = element.getChildNodes();
+            for (int j = 0; j < fields.getLength(); j++) {
+               Node fieldNode = fields.item(j);
+               if (!(fieldNode instanceof Element))
+                  continue;
+               Element field = (Element) fieldNode;
+               String text = null;
+               try {
+                  if ("minMaps".equals(field.getTagName())) {
+                     text = ((Text)field.getFirstChild()).getData().trim();
+                     int val = Integer.parseInt(text);
+                  } else if ("minReduces".equals(field.getTagName())) {
+                     text = ((Text)field.getFirstChild()).getData().trim();
+                     int val = Integer.parseInt(text);
+                  } else if ("maxRunningJobs".equals(field.getTagName())) {
+                     text = ((Text)field.getFirstChild()).getData().trim();
+                     int val = Integer.parseInt(text);
+                  } else if ("weight".equals(field.getTagName())) {
+                     text = ((Text)field.getFirstChild()).getData().trim();
+                     double val = Double.parseDouble(text);
+                  }
+               }catch (NumberFormatException e) {
+                  validateResult.addFailureValue(text);
+               }
+            }
+         } else if ("user".equals(element.getTagName())) {
+            NodeList fields = element.getChildNodes();
+            for (int j = 0; j < fields.getLength(); j++) {
+               Node fieldNode = fields.item(j);
+               if (!(fieldNode instanceof Element))
+                  continue;
+               Element field = (Element) fieldNode;
+               if ("maxRunningJobs".equals(field.getTagName())) {
+                  String text = ((Text)field.getFirstChild()).getData().trim();
+                  try {
+                  int val = Integer.parseInt(text);
+                  } catch (NumberFormatException e) {
+                     validateResult.addFailureValue(text);
+                  }       
+               }
+            }
+         } else if ("userMaxJobsDefault".equals(element.getTagName())) {
+            String text = ((Text)element.getFirstChild()).getData().trim();
+            try {
+               int val = Integer.parseInt(text);
+            } catch (NumberFormatException e) {
+               validateResult.addFailureValue(text);
+            }  
+         } else if ("poolMaxJobsDefault".equals(element.getTagName())) {
+            String text = ((Text)element.getFirstChild()).getData().trim();
+            try {
+               int val = Integer.parseInt(text);
+            } catch (NumberFormatException e) {
+               validateResult.addFailureValue(text);
+            }
+         } else {
+            validateResult.addFailureName(element.getTagName());
+         }
+      } 
+}
+
+   @SuppressWarnings("unchecked")
     private static <T> void validateBySameFileName(String fileName, Object configProperties,
             List<Map<String, T>> warnPropertyList, ValidateResult validateResult, ValidationType validationType) {
         for (Map<String, T> warnPropertyFileMap : warnPropertyList) {

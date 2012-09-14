@@ -20,4 +20,7 @@ public class Constants {
    public static final String PRACK_WITH_SHARED_STORAGE = "Cluster PRack Policy will not take effect when node group uses SHARED storage.";
    public static final String PRACK_WITH_STRICT_ASSOCIATION = "Cluster PRack Policy will not take effect when compute node group uses STRICT group association.";
    public static final String PRACK_SAME_RACK_WITH_WRONG_VALUES = "There is no proper rack to place your nodes. Please \n(1) Add more hosts in vSphere cluster into PRack-PHost mapping file; \n(2)Adjust cluster PRack policy.";
+
+   public static final String FAIR_SCHEDULER_FILE_NAME = "fair-scheduler.xml";
+   public static final String FAIR_SCHEDULER_FILE_ATTRIBUTE = "text";
 }
