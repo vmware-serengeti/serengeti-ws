@@ -9,3 +9,5 @@ for name in couchdb postgresql rabbitmq-server httpd tomcat chef-solr chef-expan
     echo "Cannot start service $name, please start it mannually."
   fi
 done
+
+sh /opt/serengeti/sbin/vhm-start.sh

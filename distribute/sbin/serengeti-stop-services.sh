@@ -22,3 +22,5 @@ for name in chef-server-webui chef-server chef-expander chef-solr tomcat httpd r
     echo "Cannot stop service $name, please restart it mannually."
   fi
 done
+
+sh /opt/serengeti/sbin/vhm-stop.sh

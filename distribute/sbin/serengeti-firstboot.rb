@@ -32,6 +32,9 @@ DNS_CONFIG_FILE="/etc/resolv.conf"
 DNS_CONFIG_FILE_DHCP="/etc/resolv.conf.bak"
 DNS_CONFIG_FILE_TMP="/etc/resolv.conf.tmp"
 
+VHM_CONF="/opt/serengeti/conf/vHadoopProperties"
+VHM_START="/opt/serengeti/sbin/vhm-start.sh"
+
 system <<EOF
 /usr/sbin/rabbitmqctl add_vhost /chef
 /usr/sbin/rabbitmqctl add_user chef testing
@@ -266,5 +269,23 @@ rm -f "#{SERENGETI_VC_PROPERTIES}"
 # generate ssh key pair
 rm -rf "/home/#{SERENGETI_USER}/.ssh"
 su - "#{SERENGETI_USER}" -c "ssh-keygen -t rsa -N '' -f /home/#{SERENGETI_USER}/.ssh/id_rsa"
+
+# init vhm property file
+if [ -e "#{VHM_CONF}" ]; then
+  sed -i "s|vCenterId=.*$|vCenterId=#{h["evs_IP"]}|g" "#{VHM_CONF}"
+  sed -i "s|vCenterUser=.*$|vCenterUser=#{vcuser}|g"  "#{VHM_CONF}"
+  sed -i "s|vCenterPwd=.*$|vCenterPwd=#{updateVCPassword}|g" "#{VHM_CONF}"
+  sed -i "s|vHadoopUser=.*$|vHadoopUser=root|g" "#{VHM_CONF}"
+  sed -i "s|vHadoopPwd=.*$|vHadoopPwd=password|g" "#{VHM_CONF}"
+  sed -i "s|vHadoopHome=.*$|vHadoopHome=/usr/lib/hadoop|g" "#{VHM_CONF}"
+  sed -i "s|vHadoopExcludeTTFile=.*$|vHadoopExcludeTTFile=/usr/lib/hadoop/conf/mapred.hosts.exclude|g" "#{VHM_CONF}"
+  chmod 400 "#{VHM_CONF}"
+  chown serengeti:serengeti "#{VHM_CONF}"
+fi
+
+# start vhm service on everyboot
+if [ -e "#{VHM_START}" ]; then
+  echo "sh #{VHM_START}" >> /etc/rc.local
+fi
 
 EOF
