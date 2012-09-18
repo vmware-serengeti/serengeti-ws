@@ -278,7 +278,7 @@ public class RestResource {
    }
 
    @RequestMapping(value = "/cluster/{clusterName}/limit", method = RequestMethod.PUT)
-   @ResponseStatus(HttpStatus.OK)
+   @ResponseStatus(HttpStatus.ACCEPTED)
    public void limitCluster(
          @PathVariable("clusterName") String clusterName,
          @RequestBody VHMRequestBody requestBody, HttpServletRequest request,
@@ -289,7 +289,8 @@ public class RestResource {
          logger.error("Invalid instance number: " + activeComputeNodeNum + " !");
          throw BddException.INVALID_PARAMETER("instance number", String.valueOf(activeComputeNodeNum));
       }
-      clusterMgr.limitCluster(clusterName, groupName, activeComputeNodeNum);
+      Long taskId = clusterMgr.limitCluster(clusterName, groupName, activeComputeNodeNum);
+      redirectRequest(taskId, request, response);
    }
 
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.GET, produces = "application/json")

@@ -12,6 +12,7 @@ import com.google.gson.GsonBuilder;
 import com.vmware.bdd.entity.TaskEntity;
 import com.vmware.bdd.manager.RuntimeConnectionManager;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
 
 public class MessageTaskWorker implements TaskWorker {
@@ -40,8 +41,7 @@ public class MessageTaskWorker implements TaskWorker {
          runtimeConnectionManager = new RuntimeConnectionManager();
          runtimeConnectionManager.init();
       }
-      runtimeConnectionManager.sendMessage(ConfigInfo.getRuntimeMqSendRouteKey(), jsonStr);
-
+      
       /*
        * Message processing thread.
        */
@@ -54,12 +54,18 @@ public class MessageTaskWorker implements TaskWorker {
                      ConfigInfo.getMqServerPort(),
                      ConfigInfo.getMqServerUsername(),
                      ConfigInfo.getMqServerPassword(),
-                     ConfigInfo.getMqExchangeName(), "",
+                     ConfigInfo.getRuntimeMqExchangeName(), "",
                      ConfigInfo.getRuntimeMqReceiveRouteKey(), true);
          messageProcessorThread = new Thread(messageProcessor);
          messageProcessorThread.setDaemon(true);
          messageProcessorThread.start();
 
+         try {
+            Thread.sleep(2000);
+         } catch (InterruptedException e) {
+            logger.error(e.getMessage());
+         }
+         runtimeConnectionManager.sendMessage(ConfigInfo.getRuntimeMqSendRouteKey(), jsonStr);
          messageProcessor.forceStop();
          try {
             messageProcessorThread.join();
@@ -78,9 +84,14 @@ public class MessageTaskWorker implements TaskWorker {
          successed = messageProcessor.isSuccess();
          if (!successed) {
             errorMessage = messageProcessor.getErrorMessage();
+            if(CommonUtil.isBlank(errorMessage)){
+               errorMessage = "Cannot find message from VHM.";
+               logger.error(errorMessage);
+            }
          }
       }
-
+      logger.info("Task status [successed => " + successed + ",errorMessage =>"
+            + errorMessage);
       result.put("successed", successed);
       result.put("errorMessage", errorMessage);
       return result;
