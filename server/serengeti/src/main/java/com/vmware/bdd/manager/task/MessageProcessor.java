@@ -39,12 +39,12 @@ class MessageProcessor extends TracedRunnable {
 
    public MessageProcessor(Long taskId, String serverHost, int serverPort,
          String serverUsername, String serverPassword, String exchangeName,
-         String queueName, String routeKey) throws IOException {
+         String queueName, String routeKey, boolean getQueue) throws IOException {
       super();
       this.taskId = taskId;
 
       mqConsumer = new RabbitMQConsumer(serverHost, serverPort, serverUsername,
-            serverPassword, exchangeName, queueName, routeKey);
+            serverPassword, exchangeName, queueName, routeKey, getQueue);
    }
 
    public void forceStopNow() throws IOException {

@@ -35,6 +35,7 @@ import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
+import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.HadoopNodeEntity;
@@ -253,6 +254,20 @@ public class ClusterManager {
       });
    }
 
+   private Long deleteEmptyClusterSuccess(ClusterEntity cluster, DeleteClusterListener listener) {
+      TaskEntity task = taskManager.createCmdlineTask(null, listener);
+      final String fileName = cluster.getName() + ".json";
+      String[] cmdArray =
+         listener.getTaskCommand(cluster.getName(), task.getWorkDir()
+               .getAbsolutePath() + "/" + fileName);
+      AuAssert.check(cmdArray != null);
+      task.setCmdArray(cmdArray);
+      task.setStatus(Status.SUCCESS);
+      task.setProgress(1.0);
+      DAL.inTransactionUpdate(task);
+      return task.getId();
+   }
+
    public ClusterRead getClusterByName(final String clusterName, final boolean realTime) {
       ClusterEntity cluster = ClusterEntity.findClusterEntityByName(clusterName);
       if (cluster == null) {
@@ -414,11 +429,11 @@ public class ClusterManager {
          throw ClusterManagerException.DELETION_NOT_ALLOWED_ERROR(clusterName,
                "it should be in RUNNING/STOPPED/ERROR/PROVISION_ERROR status");
       }
-      if(removeEmptyCluster(clusterName)) {
-         return null;
-      }
       DeleteClusterListener listener =
             new DeleteClusterListener(clusterName, networkManager);
+      if(removeEmptyCluster(clusterName)) {
+         return deleteEmptyClusterSuccess(cluster, listener);
+      }
       return createClusterMgmtTaskWithErrorSetting(cluster, listener,
             ClusterStatus.DELETING);
    }

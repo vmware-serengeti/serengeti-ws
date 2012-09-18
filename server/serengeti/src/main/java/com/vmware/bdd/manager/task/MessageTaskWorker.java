@@ -54,7 +54,8 @@ public class MessageTaskWorker implements TaskWorker {
                      ConfigInfo.getMqServerPort(),
                      ConfigInfo.getMqServerUsername(),
                      ConfigInfo.getMqServerPassword(),
-                     ConfigInfo.getMqExchangeName(), ConfigInfo.getRuntimeMqQueue(), ConfigInfo.getRuntimeMqReceiveRouteKey());
+                     ConfigInfo.getMqExchangeName(), "",
+                     ConfigInfo.getRuntimeMqReceiveRouteKey(), true);
          messageProcessorThread = new Thread(messageProcessor);
          messageProcessorThread.setDaemon(true);
          messageProcessorThread.start();

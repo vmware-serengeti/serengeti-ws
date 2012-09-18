@@ -27,7 +27,6 @@ public class ConfigInfo {
    private static String mqServerPassword;
    private static String runtimeMqSendRouteKey = "bdd.runtime.send.routekey";
    private static String runtimeMqReceiveRouteKey = "bdd.runtime.receive.routekey";
-   private static String runtimeMqQueue = "bdd.runtime.queue";
 
    private static String serengetiRootFolderPrefix;
    private static String serengetiUUID;
@@ -38,7 +37,6 @@ public class ConfigInfo {
       runtimeMqExchangeName = Configuration.getString("runtime.rabbitmq.exchange", runtimeMqExchangeName);
       runtimeMqSendRouteKey = Configuration.getString("runtime.rabbitmq.send.routekey", runtimeMqSendRouteKey);
       runtimeMqReceiveRouteKey = Configuration.getString("runtime.rabbitmq.receive.routekey", runtimeMqReceiveRouteKey);
-      runtimeMqQueue = Configuration.getString("runtime.rabbitmq.queue", runtimeMqQueue);
       
       mqServerHost = Configuration.getString("task.rabbitmq.host", mqServerHost);
       mqServerPort = Configuration.getInt("task.rabbitmq.port", mqServerPort);
@@ -74,10 +72,6 @@ public class ConfigInfo {
 
    public static String getRuntimeMqReceiveRouteKey() {
       return runtimeMqReceiveRouteKey;
-   }
-
-   public static String getRuntimeMqQueue() {
-      return runtimeMqQueue;
    }
 
    public static String getMqServerHost() {

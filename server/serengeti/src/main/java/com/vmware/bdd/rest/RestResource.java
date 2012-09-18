@@ -170,9 +170,6 @@ public class RestResource {
          throws Exception {
       // TODO: make sure cluster name is valid
       Long taskId = clusterMgr.deleteClusterByName(clusterName);
-      if(taskId == null){
-         return;
-      }
       redirectRequest(taskId, request, response);
    }
 

@@ -69,7 +69,7 @@ public class CommandTaskWorker implements TaskWorker {
          messageProcessor = new MessageProcessor(taskEntity.getId(),
                ConfigInfo.getMqServerHost(), ConfigInfo.getMqServerPort(),
                ConfigInfo.getMqServerUsername(), ConfigInfo.getMqServerPassword(),
-               ConfigInfo.getMqExchangeName(), routeKey, routeKey);
+               ConfigInfo.getMqExchangeName(), routeKey, routeKey,false);
          messageProcessorThread = new Thread(messageProcessor);
          messageProcessorThread.setDaemon(true);
          messageProcessorThread.start();
