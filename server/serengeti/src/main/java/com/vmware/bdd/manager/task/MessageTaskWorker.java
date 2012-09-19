@@ -39,6 +39,8 @@ public class MessageTaskWorker implements TaskWorker {
       //Send message
       if(runtimeConnectionManager == null) {
          runtimeConnectionManager = new RuntimeConnectionManager();
+      }
+      if(runtimeConnectionManager.getRuntimeChannel() == null || !runtimeConnectionManager.getRuntimeChannel().isOpen()){
          runtimeConnectionManager.init();
       }
       /*

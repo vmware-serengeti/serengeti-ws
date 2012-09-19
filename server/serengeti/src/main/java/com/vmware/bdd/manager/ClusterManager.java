@@ -780,9 +780,7 @@ public class ClusterManager {
       for(NodeGroupRead nodeGroup : nodeGroups){
          if (nodeGroup.getRoles() != null && nodeGroup.getRoles().contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
             AuAssert.check(nodeGroup.getInstanceNum() == 1, "The Jobtracker only support one instance .");
-            if(!nodeGroup.getInstances().isEmpty()) {
-               hadoopJobTrackerIP = nodeGroup.getInstances().get(0).getIp();
-            }
+            hadoopJobTrackerIP = nodeGroup.getInstances().get(0).getIp();
             AuAssert.check(!CommonUtil.isBlank(hadoopJobTrackerIP),"Hadoop jobtracker cannot be null");
             break;
          }

@@ -31,8 +31,9 @@ public class RuntimeConnectionManager {
 
    /**
     * Setup rabbitMQ exchange and channel to notify VHMs
+    * @throws IOException 
     */
-   public void init() {
+   public void init() throws IOException {
       String serverHost = ConfigInfo.getMqServerHost();
       int serverPort = ConfigInfo.getMqServerPort();
       String serverUsername = ConfigInfo.getMqServerUsername();
@@ -48,9 +49,9 @@ public class RuntimeConnectionManager {
       factory.setVirtualHost("/");
       factory.setHost(serverHost);
       factory.setPort(serverPort);
-
+      Connection conn = null;
       try {
-         Connection conn = factory.newConnection();
+         conn = factory.newConnection();
          runtimeChannel = conn.createChannel();
 
          logger.info("creating exchange: " + exchangeName);
@@ -59,11 +60,17 @@ public class RuntimeConnectionManager {
                false, // auto-delete
                null); // arguments map
       } catch (IOException e) {
-         e.printStackTrace();
+         logger.error(e.getMessage());
+         if(runtimeChannel != null) {
+            runtimeChannel.close();
+         }
+         if(conn != null){
+            conn.close();
+         }
+         throw e;
       }
    }
 
-   
    /**
     * Send a message to VHMs (on runtime rabbit exchange)
     * 
@@ -73,4 +80,9 @@ public class RuntimeConnectionManager {
       logger.info("sending message \"" + message + "\" on exchange " + exchangeName + ".");
       runtimeChannel.basicPublish(exchangeName, routeKey, null, message.getBytes());
    }
+
+   public Channel getRuntimeChannel() {
+      return runtimeChannel;
+   }
+
 }
