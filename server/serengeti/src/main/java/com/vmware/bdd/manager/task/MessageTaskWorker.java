@@ -41,7 +41,6 @@ public class MessageTaskWorker implements TaskWorker {
          runtimeConnectionManager = new RuntimeConnectionManager();
          runtimeConnectionManager.init();
       }
-      
       /*
        * Message processing thread.
        */
