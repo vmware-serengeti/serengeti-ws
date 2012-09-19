@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
 import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.PhysicalHostEntity;

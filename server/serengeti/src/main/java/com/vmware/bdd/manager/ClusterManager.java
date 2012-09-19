@@ -1,4 +1,5 @@
 /***************************************************************************
+
  * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +32,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.NodeGroupRead;
+import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.HadoopNodeEntity;
@@ -43,21 +46,26 @@ import com.vmware.bdd.entity.Saveable;
 import com.vmware.bdd.entity.TaskEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterManagerException;
+import com.vmware.bdd.manager.task.CommandTaskWorker;
 import com.vmware.bdd.manager.task.ConfigureClusterListener;
 import com.vmware.bdd.manager.task.CreateClusterListener;
 import com.vmware.bdd.manager.task.DeleteClusterListener;
+import com.vmware.bdd.manager.task.MessageTaskWorker;
 import com.vmware.bdd.manager.task.QueryClusterListener;
 import com.vmware.bdd.manager.task.StartClusterListener;
 import com.vmware.bdd.manager.task.StopClusterListener;
-import com.vmware.bdd.manager.task.Task;
 import com.vmware.bdd.manager.task.TaskListener;
 import com.vmware.bdd.manager.task.UpdateClusterListener;
+import com.vmware.bdd.manager.task.VHMReceiveListener;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ClusterCmdUtil;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
+import com.vmware.bdd.utils.Constants;
 
 public class ClusterManager {
+
    static final Logger logger = Logger.getLogger(ClusterManager.class);
    private ClusterConfigManager clusterConfigMgr;
    private CloudProviderManager cloudProviderMgr;
@@ -202,7 +210,7 @@ public class ClusterManager {
          ClusterEntity.updateStatus(cluster.getName(), initStatus);
       }
 
-      taskManager.submit(task);
+      taskManager.submit(task, new CommandTaskWorker());
 
       StringBuilder cmdStr = new StringBuilder();
       for (String str : cmdArray) {
@@ -219,6 +227,45 @@ public class ClusterManager {
       List<String> targets = new ArrayList<String>(1);
       targets.add(cluster.getName());
       return createClusterMgmtTask(targets, cluster, listener, initStatus);
+   }
+
+   private boolean removeEmptyCluster(final String clusterName) {
+
+      return DAL.inRwTransactionDo(new Saveable<Boolean>() {
+         private boolean validated;
+
+         @Override
+         public Boolean body() throws Exception {
+            ClusterEntity cluster =
+                  ClusterEntity.findClusterEntityByName(clusterName);
+            AuAssert.check(cluster != null);
+            if (cluster.getRealInstanceNum() == 0) {
+               logger.warn("cluster real instance number is zero !");
+               if (cluster.getNetwork().getAllocType() == NetworkEntity.AllocType.IP_POOL) {
+                  networkManager.free(cluster.getNetwork(), cluster.getId());
+               }
+               cluster.delete();
+               validated = true;
+            } else {
+               validated = false;
+            }
+            return validated;
+         }
+      });
+   }
+
+   private Long deleteEmptyClusterSuccess(ClusterEntity cluster, DeleteClusterListener listener) {
+      TaskEntity task = taskManager.createCmdlineTask(null, listener);
+      final String fileName = cluster.getName() + ".json";
+      String[] cmdArray =
+         listener.getTaskCommand(cluster.getName(), task.getWorkDir()
+               .getAbsolutePath() + "/" + fileName);
+      AuAssert.check(cmdArray != null);
+      task.setCmdArray(cmdArray);
+      task.setStatus(Status.SUCCESS);
+      task.setProgress(1.0);
+      DAL.inTransactionUpdate(task);
+      return task.getId();
    }
 
    public ClusterRead getClusterByName(final String clusterName, final boolean realTime) {
@@ -382,9 +429,11 @@ public class ClusterManager {
          throw ClusterManagerException.DELETION_NOT_ALLOWED_ERROR(clusterName,
                "it should be in RUNNING/STOPPED/ERROR/PROVISION_ERROR status");
       }
-
       DeleteClusterListener listener =
             new DeleteClusterListener(clusterName, networkManager);
+      if(removeEmptyCluster(clusterName)) {
+         return deleteEmptyClusterSuccess(cluster, listener);
+      }
       return createClusterMgmtTaskWithErrorSetting(cluster, listener,
             ClusterStatus.DELETING);
    }
@@ -697,6 +746,62 @@ public class ClusterManager {
          logger.info("can not start node group with role: " + roles);
          throw ClusterManagerException.ROLES_NOT_SUPPORTED(roles);
       }
+   }
+
+   /*
+    * Validate the limit.
+    * Submit a vhm MQ process task.   
+    */
+   @SuppressWarnings("unchecked")
+   public Long limitCluster(final String clusterName,
+         final String nodeGroupName, final int activeComputeNodeNum) throws Exception {
+      logger.info("Limit active compute node number to" + activeComputeNodeNum);
+      ClusterRead cluster = getClusterByName(clusterName, false);
+      // cluster must be contain node group
+      List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
+      if(nodeGroups == null || nodeGroups.isEmpty()) {
+         String msg = "There is no node group in cluster " + clusterName + " . ";
+         logger.error(msg);
+         throw BddException.INTERNAL(null, msg);
+      }
+      // cluster must be runing status
+      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
+         String msg = "Cluster is not running.";
+         logger.error(msg);
+         throw ClusterManagerException.LIMIT_CLUSTER_NOT_ALLOWED_ERROR(clusterName, msg);
+      }
+      // node group must be compute only node
+      List<String> nodeGroupNames = new ArrayList<String> ();
+      if (!cluster.validateLimit(nodeGroupName, activeComputeNodeNum, nodeGroupNames)) {
+         return null;
+      }
+      // find hadoop job tracker ip
+      String hadoopJobTrackerIP="";
+      for(NodeGroupRead nodeGroup : nodeGroups){
+         if (nodeGroup.getRoles() != null && nodeGroup.getRoles().contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
+            AuAssert.check(nodeGroup.getInstanceNum() == 1, "The Jobtracker only support one instance .");
+            if(!nodeGroup.getInstances().isEmpty()) {
+               hadoopJobTrackerIP = nodeGroup.getInstances().get(0).getIp();
+            }
+            AuAssert.check(!CommonUtil.isBlank(hadoopJobTrackerIP),"Hadoop jobtracker cannot be null");
+            break;
+         }
+      }
+      // submit a MQ task
+      TaskListener listener = new VHMReceiveListener(clusterName);
+      TaskEntity task = taskManager.createMessageTask(false, listener);
+      ClusterEntity.updateStatus(cluster.getName(), ClusterStatus.VHM_RUNNING);
+      DAL.inTransactionUpdate(task);
+      Map<String,Object> sendParam = new HashMap <String,Object> ();
+      sendParam.put(Constants.CLUSTER_LIMIT_INFO_VERSION, 1);
+      sendParam.put(Constants.CLUSTER_LIMIT_INFO_CLUSTER_NAME, clusterName);
+      sendParam.put(Constants.CLUSTER_LIMIT_INFO_JOBTRACKER, hadoopJobTrackerIP);
+      sendParam.put(Constants.CLUSTER_LIMIT_INFO_INSTANCE_NUM, activeComputeNodeNum);
+      sendParam.put(Constants.CLUSTER_LIMIT_INFO_NODE_GROUPS, nodeGroupNames);
+      sendParam.put(Constants.CLUSTER_LIMIT_INFO_SERENGETI_INSTANCE, ConfigInfo.getSerengetiRootFolder());
+      taskManager.submit(task, new MessageTaskWorker(sendParam));
+
+      return task.getId();
    }
 
    static class SystemProperties {

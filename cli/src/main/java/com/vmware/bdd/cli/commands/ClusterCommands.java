@@ -442,6 +442,35 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
+   @CliCommand(value = "cluster limit", help = "Set number of instances powered on in a node group")
+   public void limitCluster(
+            @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
+            @CliOption(key = { "nodeGroup" }, mandatory = false, help = "The node group name") final String nodeGroupName,
+            @CliOption(key = { "activeComputeNodeNum" }, mandatory = true, help = "The number of instances powered on") final int activeComputeNodeNum) {
+
+         try {
+            // The active compute node number must be a integer and cannot be less than zero.
+            if (activeComputeNodeNum < 0) {
+               System.out.println("Invalid instance number:" + activeComputeNodeNum);
+               return;
+            }
+            ClusterRead cluster = restClient.get(clusterName);
+            if (cluster == null) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null, null,
+                     Constants.OUTPUT_OP_ADJUSTMENT_FAILED, "cluster " + clusterName + " is not exsit !");
+               return;
+            }
+            if(!cluster.validateLimit(nodeGroupName, activeComputeNodeNum)) {
+               return;
+            }
+            restClient.limitCluster(clusterName, nodeGroupName, activeComputeNodeNum);
+            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OP_ADJUSTMENT,null, Constants.OUTPUT_OP_ADJUSTMENT_SUCCEEDED);
+         } catch (CliRestException e) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT,null,null, Constants.OUTPUT_OP_ADJUSTMENT_FAILED
+                  ,e.getMessage());
+         }
+      }
+
    @CliCommand(value = "cluster target", help = "Set or query target cluster to run commands")
    public void targetCluster(
          @CliOption(key = { "name" }, mandatory = false, help = "The cluster name") final String name,

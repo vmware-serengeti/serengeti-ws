@@ -23,7 +23,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,17 +40,14 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
 import org.codehaus.jackson.util.DefaultPrettyPrinter.Lf2SpacesIndenter;
 
+import com.vmware.bdd.utils.CommonUtil;
+
 
 public class CommandsUtils {
 
    public static List<String> inputsConvert(String inputs) {
-      List<String> names = new ArrayList<String>();
-      for (String s : inputs.split(",")) {
-         if (!s.trim().isEmpty()) {
-            names.add(s.trim());
-         }
-      }
-      return names;
+      
+      return CommonUtil.inputsConvert(inputs);
    }
 
    public static String prettyRoleOutput(List<String> roles,
@@ -142,7 +138,7 @@ public class CommandsUtils {
     * @return the opposite of
     */
    public static boolean isBlank(final String str) {
-      return str == null || str.trim().isEmpty();
+      return CommonUtil.isBlank(str);
    }
 
    /**
@@ -265,7 +261,7 @@ public class CommandsUtils {
 
    public static void printCmdSuccess(String objectType, String name,
          String result) {
-      if (name != null) {
+      if (!isBlank(name)) {
          System.out.println(objectType + " " + name + " " + result);
       } else {
          System.out.println(objectType + " " + result);
@@ -274,11 +270,14 @@ public class CommandsUtils {
 
    public static void printCmdFailure(String objectType, String name,
          String opName, String result, String message) {
-      if (name != null) {
+      if (!isBlank(name)) {
          System.out.println(objectType + " " + name + " " + opName + " "
                + result + ": " + message);
-      } else {
+      } else if(!isBlank(opName)) {
          System.out.println(objectType + " " + opName + " " + result + ": "
+               + message);
+      }else{
+         System.out.println(objectType + " " + result + ": "
                + message);
       }
    }
@@ -336,7 +335,8 @@ public class CommandsUtils {
       } 
    }
 
-   public static void writeProperties(Properties properties, String propertiesFilePath) {
+   public static void writeProperties(Properties properties,
+         String propertiesFilePath) {
       FileOutputStream fos = null;
       try {
          fos = new FileOutputStream(propertiesFilePath);
@@ -345,11 +345,11 @@ public class CommandsUtils {
       } catch (IOException e) {
          System.out.println(e.getMessage());
          if (fos != null) {
-        	 try {
-				fos.close();
-			} catch (IOException e1) {
-				System.out.println(e1.getMessage());
-			}
+            try {
+               fos.close();
+            } catch (IOException e1) {
+               System.out.println(e1.getMessage());
+            }
          }
       }
    }

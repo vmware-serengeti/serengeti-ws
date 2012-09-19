@@ -63,13 +63,14 @@ public class RabbitMQConsumer {
    private String exchangeName;
    private String queueName;
    private String routingKey;
-
+   private boolean getQueue;
+   
    // volatile is a must to insert memory barrier because read has no lock
    private volatile boolean stopping = false;
    private Date mqExpireTime;
 
    public RabbitMQConsumer(String host, int port, String username, String password,
-         String exchangeName, String queueName, String routingKey) throws IOException {
+         String exchangeName, String queueName, String routingKey, boolean getQueue) throws IOException {
       this.host = host;
       this.port = port;
       this.username = username;
@@ -77,6 +78,7 @@ public class RabbitMQConsumer {
       this.exchangeName = exchangeName;
       this.queueName = queueName;
       this.routingKey = routingKey;
+      this.getQueue = getQueue;
    }
 
    public String getHost() {
@@ -134,7 +136,15 @@ public class RabbitMQConsumer {
    public void setRoutingKey(String routingKey) {
       this.routingKey = routingKey;
    }
-   
+
+   public boolean isGetQueue() {
+      return getQueue;
+   }
+
+   public void setGetQueue(boolean getQueue) {
+      this.getQueue = getQueue;
+   }
+
    public void forceStopNow() throws IOException {
       synchronized (this) {
          mqExpireTime = new Date();
@@ -185,7 +195,11 @@ public class RabbitMQConsumer {
        * make exchange and queue non-durable
        */
       channel.exchangeDeclare(exchangeName, "direct", true);
-      channel.queueDeclare(queueName, false, true, true, null);
+      if(!getQueue) {
+         channel.queueDeclare(queueName, false, true, true, null);         
+      } else {
+         queueName = channel.queueDeclare().getQueue();
+      }
       channel.queueBind(queueName, exchangeName, routingKey);
 
       boolean noAck = false;

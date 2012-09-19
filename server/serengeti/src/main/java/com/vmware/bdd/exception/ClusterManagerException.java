@@ -72,4 +72,9 @@ public class ClusterManagerException extends BddException {
    public static ClusterManagerException ROLES_NOT_SUPPORTED(List<String> roles) {
       return new ClusterManagerException(null, "ROLES_NOT_SUPPORTED", roles);
    }
+   
+   public static ClusterManagerException LIMIT_CLUSTER_NOT_ALLOWED_ERROR(String clusterName,
+         String reason) {
+      return new ClusterManagerException(null, "CANNOT_LIMIT_CLUSTER", clusterName, reason);
+   }
 }

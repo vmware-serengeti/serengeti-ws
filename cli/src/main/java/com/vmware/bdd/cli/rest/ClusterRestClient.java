@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.ObjectMapper;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -31,6 +30,7 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
+import com.vmware.bdd.apitypes.VHMRequestBody;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 
@@ -106,6 +106,18 @@ public class ClusterRestClient {
 
       PrettyOutput outputCallBack = getClusterPrettyOutputCallBack(this, id);
       restClient.deleteObject(id, path, httpverb, outputCallBack);
+   }
+
+   public void limitCluster(String clusterName, String nodeGroupName, int activeComputeNodeNum) {
+      final String path = Constants.REST_PATH_CLUSTER + "/" + clusterName + "/" + "limit";
+      final HttpMethod httpverb = HttpMethod.PUT;
+
+      PrettyOutput outputCallBack =
+            getClusterPrettyOutputCallBack(this, clusterName);
+      VHMRequestBody requestBody = new VHMRequestBody();
+      requestBody.setActiveComputeNodeNum(activeComputeNodeNum);
+      requestBody.setNodeGroupName(nodeGroupName);
+      restClient.update(requestBody, path, httpverb,outputCallBack);
    }
 
    private PrettyOutput getClusterPrettyOutputCallBack(

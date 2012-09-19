@@ -62,7 +62,6 @@ public class TestClusterManager {
          "src/test/resources/sampleMsg.json";
    private static final String CLUSTER_NAME = "hadoop-bj";
    private static final String CLUSTER2_NAME = "hadoop-bj2";
-
    private static final String RP_NAME = "tliRp1";
    private static final String NETWORK_NAME = "tliDhcpNet";
    private static final String PORT_GROUP_NAME = "CFNetwork";
@@ -508,6 +507,38 @@ public class TestClusterManager {
          clusterManager.deleteClusterByName(CLUSTER2_NAME);
          fail("delete " + CLUSTER2_NAME
                + " cluster should fail, since it is not exist");
+      } catch (Exception e) {
+      }
+   }
+
+   @Test(groups = {"testClusterManager"}, dependsOnMethods = { "testCreateCluster" })
+   public void testDeleteClusterNoNodes() {
+      try {
+         ClusterEntity cluster = ClusterEntity.findClusterEntityByName(CLUSTER_NAME);
+         assertNotNull(cluster);
+         cluster.setNodeGroups(null);
+         cluster.update();
+         Long taskId = clusterManager.deleteClusterByName(CLUSTER_NAME);
+         assertEquals(taskId, null);
+         cluster = ClusterEntity.findClusterEntityByName(CLUSTER_NAME);
+         assertTrue("hadoop-bj cluster should be delete and removed in db",
+               cluster == null);
+      } catch (Exception e) {
+         
+      }
+   }
+
+   @Test(groups = {"testClusterManager"}, dependsOnMethods = { "testGetClusterRead" }) 
+   public void testLimitCluster() {
+      try {
+         Long id = clusterManager.limitCluster(CLUSTER_NAME, NODEGROUP_NAME, 1);
+         TaskEntity task = TaskEntity.findById(id);
+         task.getTaskListener().onMessage(getSampleMsg(CLUSTER_NAME, true));
+         assertTrue("task should succeed", waitForTask(task));
+         ClusterEntity cluster =
+               ClusterEntity.findClusterEntityByName(CLUSTER_NAME);
+         assertTrue("cluster " + CLUSTER_NAME + " should be running, but get status: " + cluster.getStatus(),
+               cluster.getStatus().equals(ClusterStatus.RUNNING));
       } catch (Exception e) {
       }
    }

@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpBlock;

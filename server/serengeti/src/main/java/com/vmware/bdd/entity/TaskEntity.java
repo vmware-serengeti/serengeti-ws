@@ -115,6 +115,9 @@ public class TaskEntity extends EntityBase {
    @Column(name = "cookie")
    private String cookie;
 
+   @Column(name = "retry")
+   private boolean retry = true;
+   
    public TaskListener getTaskListener() {
       if (listener == null) {
          depersistListener();
@@ -237,6 +240,14 @@ public class TaskEntity extends EntityBase {
 
    public void setErrorMessage(String errorMessage) {
       this.errorMessage = errorMessage;
+   } 
+
+   public boolean isRetry() {
+      return retry;
+   }
+
+   public void setRetry(boolean retry) {
+      this.retry = retry;
    }
 
    @Override

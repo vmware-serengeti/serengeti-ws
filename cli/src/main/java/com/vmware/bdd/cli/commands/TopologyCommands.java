@@ -78,7 +78,6 @@ public class TopologyCommands implements CommandMarker {
       }
       return false;
    }
-
    /*
     * The rack format is: rack_name: hostname1, hostname2,...
     */

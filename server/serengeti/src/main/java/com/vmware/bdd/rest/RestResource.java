@@ -49,7 +49,7 @@ import com.vmware.bdd.apitypes.RackInfoList;
 import com.vmware.bdd.apitypes.ResourcePoolAdd;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.apitypes.TaskRead;
-import com.vmware.bdd.apitypes.TopologyType;
+import com.vmware.bdd.apitypes.VHMRequestBody;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
 import com.vmware.bdd.manager.ClusterManager;
@@ -274,6 +274,22 @@ public class RestResource {
       }
       Long taskId =
             clusterMgr.resizeCluster(clusterName, groupName, instanceNum);
+      redirectRequest(taskId, request, response);
+   }
+
+   @RequestMapping(value = "/cluster/{clusterName}/limit", method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.ACCEPTED)
+   public void limitCluster(
+         @PathVariable("clusterName") String clusterName,
+         @RequestBody VHMRequestBody requestBody, HttpServletRequest request,
+         HttpServletResponse response) throws Exception {
+      int activeComputeNodeNum = requestBody.getActiveComputeNodeNum();
+      String groupName = requestBody.getNodeGroupName();
+      if (activeComputeNodeNum < 0) {
+         logger.error("Invalid instance number: " + activeComputeNodeNum + " !");
+         throw BddException.INVALID_PARAMETER("instance number", String.valueOf(activeComputeNodeNum));
+      }
+      Long taskId = clusterMgr.limitCluster(clusterName, groupName, activeComputeNodeNum);
       redirectRequest(taskId, request, response);
    }
 
