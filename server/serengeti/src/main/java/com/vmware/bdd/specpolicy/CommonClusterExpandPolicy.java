@@ -37,7 +37,6 @@ import com.vmware.bdd.utils.ValidateResult;
 
 public class CommonClusterExpandPolicy {
    private static final Logger logger = Logger.getLogger(CommonClusterExpandPolicy.class);
-//   private static ClusterCreate template = TemplateClusterSpec.getTemplateClusterAttributes();
    private static int[][] templateStorage;
    static {
       initTemplateValues();
@@ -152,18 +151,6 @@ public class CommonClusterExpandPolicy {
          ngEntity.setStorageType(storeType);
       }
    }
-
-//   public static String convertDistro(final ClusterCreate cluster,
-//         ClusterEntity clusterEntity) {
-//      
-//      String distro = cluster.getDistro();
-//      if (distro == null) {
-//         distro = template.getDistro();
-//      }
-//
-//      clusterEntity.setDistro(distro);
-//      return distro;
-//   }
 
    public static void expandDistro(ClusterEntity clusterEntity, ClusterCreate clusterConfig, DistroManager distroMgr) {
       String distro = clusterEntity.getDistro();
