@@ -115,7 +115,7 @@ public class Constants {
    public static final String INPUT_INSTANCE_NUM_PARAM = "\"instanceNum\"";
    public static final String INTEGER_INPUTS_CHECK = " should be larger than existed, please check it.";
    public static final String INVALID_VALUE = "invalid value";
-   public static final String INPUT_TOPOLOGY_INVALID_VALUE = "invalid topology value. The valid value is HVE or HOST_RACK or RACK_AS HOST";
+   public static final String INPUT_TOPOLOGY_INVALID_VALUE = "invalid topology value. The valid value is HVE or RACK_AS_RACK or HOST_AS RACK";
    public static final String TOPLOGY_FORMAT = "Accepted topology file format: for each line, rackname1: hostname1, hostname2,...";
 
    public static final String PARAMS_EXCLUSION = " cannot be set at the same time.";

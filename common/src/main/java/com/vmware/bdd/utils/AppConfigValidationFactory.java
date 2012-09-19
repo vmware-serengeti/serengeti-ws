@@ -122,8 +122,8 @@ public class AppConfigValidationFactory {
       DocumentBuilder builder = null;
       Document doc = null;
       try {
-      builder = docBuilderFactory.newDocumentBuilder();
-      doc = builder.parse(xmlContents);
+         builder = docBuilderFactory.newDocumentBuilder();
+         doc = builder.parse(xmlContents);
       } catch (Exception e) {
          validateResult.addFailureName(Constants.FAIR_SCHEDULER_FILE_ATTRIBUTE);
          return;
@@ -160,6 +160,17 @@ public class AppConfigValidationFactory {
                   } else if ("weight".equals(field.getTagName())) {
                      text = ((Text)field.getFirstChild()).getData().trim();
                      double val = Double.parseDouble(text);
+                  } else if ("maxMaps".equals(field.getTagName())) {
+                     text = ((Text)field.getFirstChild()).getData().trim();
+                     int val = Integer.parseInt(text);
+                  } else if ("maxReduces".equals(field.getTagName())) {
+                     text = ((Text)field.getFirstChild()).getData().trim();
+                     int val = Integer.parseInt(text);
+                  } else if ("minSharePreemptionTimeout".equals(field.getTagName())) {
+                     text = ((Text)field.getFirstChild()).getData().trim();
+                     long val = Long.parseLong(text) * 1000L;
+                  } else if ("schedulingMode".equals(field.getTagName())) {
+                     text = ((Text)field.getFirstChild()).getData().trim();
                   }
                }catch (NumberFormatException e) {
                   validateResult.addFailureValue(text);
@@ -175,7 +186,7 @@ public class AppConfigValidationFactory {
                if ("maxRunningJobs".equals(field.getTagName())) {
                   String text = ((Text)field.getFirstChild()).getData().trim();
                   try {
-                  int val = Integer.parseInt(text);
+                     int val = Integer.parseInt(text);
                   } catch (NumberFormatException e) {
                      validateResult.addFailureValue(text);
                   }       
@@ -195,6 +206,29 @@ public class AppConfigValidationFactory {
             } catch (NumberFormatException e) {
                validateResult.addFailureValue(text);
             }
+         } else if ("poolMaxJobsDefault".equals(element.getTagName())) {
+            String text = ((Text)element.getFirstChild()).getData().trim();
+            try {
+               int val = Integer.parseInt(text);
+            } catch (NumberFormatException e) {
+               validateResult.addFailureValue(text);
+            }
+         } else if ("fairSharePreemptionTimeout".equals(element.getTagName())) {
+            String text = ((Text)element.getFirstChild()).getData().trim();
+            try {
+               long val = Integer.parseInt(text) * 1000L;
+            } catch (NumberFormatException e) {
+               validateResult.addFailureValue(text);
+            }
+         } else if ("defaultMinSharePreemptionTimeout".equals(element.getTagName())) {
+            String text = ((Text)element.getFirstChild()).getData().trim();
+            try {
+               long val = Integer.parseInt(text) * 1000L;
+            } catch (NumberFormatException e) {
+               validateResult.addFailureValue(text);
+            }
+         } else if ("defaultPoolSchedulingMode".equals(element.getTagName())) {
+            String text = ((Text)element.getFirstChild()).getData().trim();
          } else {
             validateResult.addFailureName(element.getTagName());
          }
