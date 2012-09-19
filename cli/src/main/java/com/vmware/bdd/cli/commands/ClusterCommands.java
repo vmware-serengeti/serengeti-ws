@@ -33,7 +33,7 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
-import com.vmware.bdd.apitypes.Cluster.ClusterType;
+import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.DistroRead;
@@ -140,7 +140,7 @@ public class ClusterCommands implements CommandMarker {
             return;
          }
       }
-      clusterCreate.setType(Enum.valueOf(ClusterType.class, "HADOOP"));
+
       if (rpNames != null) {
          List<String> rpNamesList = CommandsUtils.inputsConvert(rpNames);
          if (rpNamesList.isEmpty()) {

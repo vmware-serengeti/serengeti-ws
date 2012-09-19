@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
+import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.DatastoreAdd;
 import com.vmware.bdd.apitypes.DatastoreRead;
 import com.vmware.bdd.apitypes.DistroRead;
@@ -134,12 +135,13 @@ public class RestResource {
    // cluster API
    @RequestMapping(value = "/clusters", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.ACCEPTED)
-   public void createCluster(@RequestBody ClusterCreate createSpec,
+   public void createCluster(@RequestParam(value = "type", required = false) ClusterType clusterType,
+         @RequestBody ClusterCreate createSpec,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
-
-      // TODO: make sure cluster name is valid
-      Long taskId = clusterMgr.createCluster(createSpec);
+      // XXX to be removed
+      clusterType = ClusterType.HDFS_MAPRED;
+      Long taskId = clusterMgr.createCluster(clusterType, createSpec);
       redirectRequest(taskId, request, response);
    }
 
