@@ -32,7 +32,6 @@ import com.vmware.bdd.utils.AuAssert;
 public class ClusterSpecFactory {
    private static final Logger logger = Logger.getLogger(ClusterSpecFactory.class);
 
-   // TODO FIXME update filename in Makefile
    private static final String HDFS_TEMPLATE_SPEC = "hdfs-template-spec.json";
    private static final String HDFS_MAPRED_TEMPLATE_SPEC = "hdfs-mapred-template-spec.json";
    private static final String HDFS_HBASE_TEMPLATE_SPEC = "hdfs-hbase-template-spec.json";
