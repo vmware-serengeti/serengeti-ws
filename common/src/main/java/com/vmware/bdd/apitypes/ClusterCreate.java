@@ -33,6 +33,7 @@ import com.vmware.bdd.spectypes.VcCluster;
 public class ClusterCreate {
    @Expose
    private String name;
+   private ClusterType type;
    private String externalHDFS;
    @Expose
    @SerializedName("groups")
@@ -80,6 +81,7 @@ public class ClusterCreate {
       this.deployPolicy = cluster.deployPolicy;
       this.distro = cluster.distro;
       this.name = cluster.name;
+      this.type = cluster.type;
       this.externalHDFS = cluster.externalHDFS;
       this.networkName = cluster.networkName;
       this.nodeGroups = cluster.nodeGroups;
@@ -110,6 +112,14 @@ public class ClusterCreate {
 
    public void setName(String name) {
       this.name = name;
+   }
+
+   public ClusterType getType() {
+      return type;
+   }
+
+   public void setType(ClusterType type) {
+      this.type = type;
    }
 
    public void setExternalHDFS(String externalHDFS) {

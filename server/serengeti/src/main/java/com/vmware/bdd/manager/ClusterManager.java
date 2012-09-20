@@ -332,12 +332,9 @@ public class ClusterManager {
       return clusters;
    }
 
-   public Long createCluster(ClusterType clusterType, ClusterCreate createSpec)
-         throws Exception {
-      return createCluster(ClusterSpecFactory.getCustomizedSpec(clusterType, createSpec));
-   }
-
    public Long createCluster(ClusterCreate createSpec) throws Exception {
+      createSpec = ClusterSpecFactory.getCustomizedSpec(createSpec);
+
       String name = createSpec.getName();
       logger.info("ClusterManager, creating cluster " + name);
 

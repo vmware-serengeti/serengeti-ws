@@ -85,6 +85,7 @@ public class ClusterCommands implements CommandMarker {
    @CliCommand(value = "cluster create", help = "Create a hadoop cluster")
    public void createCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
+         @CliOption(key = { "type" }, mandatory = false, help = "The cluster type") final String type,
          @CliOption(key = { "distro" }, mandatory = false, help = "Hadoop Distro") final String distro,
          @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath,
          @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,
@@ -114,6 +115,17 @@ public class ClusterCommands implements CommandMarker {
       // build ClusterCreate object
       ClusterCreate clusterCreate = new ClusterCreate();
       clusterCreate.setName(name);
+
+      if (type != null) {
+         ClusterType clusterType = ClusterType.getByDescription(type);
+         if (clusterType == null) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+                  Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+                  Constants.INVALID_VALUE + " " + "topologyType=" + topology);
+            return;
+         }
+         clusterCreate.setType(clusterType);
+      }
 
       if (topology != null) {
          try {

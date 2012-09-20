@@ -234,8 +234,9 @@ public class TestClusterManager {
    public void testCreateCluster() throws Exception {
       ClusterCreate createSpec = new ClusterCreate();
       createSpec.setName(CLUSTER_NAME);
+      createSpec.setType(ClusterType.HDFS_MAPRED);
       createSpec.setNetworkName(NETWORK_NAME);
-      Long id = clusterManager.createCluster(ClusterType.HDFS_MAPRED, createSpec);
+      Long id = clusterManager.createCluster(createSpec);
       TaskEntity task = TaskEntity.findById(id);
       ClusterEntity cluster =
             ClusterEntity.findClusterEntityByName(CLUSTER_NAME);

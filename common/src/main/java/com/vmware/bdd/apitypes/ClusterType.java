@@ -19,11 +19,35 @@ package com.vmware.bdd.apitypes;
  */
 public enum ClusterType {
    // hdfs cluster
-   HDFS,
+   HDFS("HDFS"),
 
    // hdfs + mapreduce cluster
-   HDFS_MAPRED,
+   HDFS_MAPRED("HADOOP"),
 
    // hdfs + hbase cluster
-   HDFS_HBASE
+   HDFS_HBASE("HBase");
+   
+   private String description;
+   ClusterType(String description) {
+      assert description != null && !description.isEmpty();
+      this.description = description;
+   }
+   
+   public String getDescription() {
+      return description;
+   }
+
+   public void setDescription(String description) {
+      this.description = description;
+   }
+
+   public static ClusterType getByDescription(String description) {
+      for (ClusterType type : ClusterType.values()) {
+         if (type.getDescription().compareToIgnoreCase(description) == 0) {
+            return type;
+         }
+      }
+
+      return null;
+   }
 }

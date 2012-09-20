@@ -108,20 +108,18 @@ public class ClusterSpecFactory {
     * optionally overwriting the parameters 2) specify a customized spec with
     * cluster type not specified
     * 
-    * @param type
-    *           cluster type
     * @param spec
-    *           customized field
+    *           spec with customized field
     * @return customized cluster spec
     * @throws FileNotFoundException
     */
-   public static ClusterCreate getCustomizedSpec(ClusterType type, ClusterCreate spec)
+   public static ClusterCreate getCustomizedSpec(ClusterCreate spec)
          throws FileNotFoundException {
-      if (type == null) {
+      if (spec.getType() == null) {
          return spec;
       }
 
-      ClusterCreate newSpec = createDefaultSpec(type);
+      ClusterCreate newSpec = createDefaultSpec(spec.getType());
 
       // --name
       if (spec.getName() != null) {

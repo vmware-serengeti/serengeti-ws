@@ -135,13 +135,10 @@ public class RestResource {
    // cluster API
    @RequestMapping(value = "/clusters", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.ACCEPTED)
-   public void createCluster(@RequestParam(value = "type", required = false) ClusterType clusterType,
-         @RequestBody ClusterCreate createSpec,
+   public void createCluster(@RequestBody ClusterCreate createSpec,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
-      // XXX to be removed
-      clusterType = ClusterType.HDFS_MAPRED;
-      Long taskId = clusterMgr.createCluster(clusterType, createSpec);
+      Long taskId = clusterMgr.createCluster(createSpec);
       redirectRequest(taskId, request, response);
    }
 
