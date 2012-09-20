@@ -33,7 +33,8 @@
     {
       "name":"client",
       "roles":[
-        "hadoop_client"
+        "hadoop_client",
+        "hbase_client"
       ],
       "instance_type":SMALL,
       "instance_num":1,
