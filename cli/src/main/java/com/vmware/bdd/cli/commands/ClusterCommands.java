@@ -121,7 +121,7 @@ public class ClusterCommands implements CommandMarker {
          if (clusterType == null) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
                   Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
-                  Constants.INVALID_VALUE + " " + "topologyType=" + topology);
+                  Constants.INVALID_VALUE + " " + "type=" + type);
             return;
          }
          clusterCreate.setType(clusterType);
