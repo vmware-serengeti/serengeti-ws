@@ -27,6 +27,7 @@ import com.vmware.bdd.utils.ConfigInfo;
 public class RuntimeConnectionManager {
    private static final Logger logger = Logger.getLogger(RuntimeConnectionManager.class);
    private Channel runtimeChannel;
+   private Connection conn = null;
    private String exchangeName =  ConfigInfo.getRuntimeMqExchangeName();
 
    /**
@@ -49,7 +50,6 @@ public class RuntimeConnectionManager {
       factory.setVirtualHost("/");
       factory.setHost(serverHost);
       factory.setPort(serverPort);
-      Connection conn = null;
       try {
          conn = factory.newConnection();
          runtimeChannel = conn.createChannel();
@@ -83,6 +83,15 @@ public class RuntimeConnectionManager {
 
    public Channel getRuntimeChannel() {
       return runtimeChannel;
+   }
+
+   public void destrory() throws IOException {
+      if (runtimeChannel != null) {
+         runtimeChannel.close();
+      }
+      if (conn != null) {
+         conn.close();
+      }
    }
 
 }

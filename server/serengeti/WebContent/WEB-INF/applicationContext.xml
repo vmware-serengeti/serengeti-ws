@@ -56,6 +56,6 @@
       <property name="includeClientInfo" value="true" />
    </bean>
 
-   <bean id="runtimeConnectionManager" class="com.vmware.bdd.manager.RuntimeConnectionManager" init-method="init"/>
+   <bean id="runtimeConnectionManager" class="com.vmware.bdd.manager.RuntimeConnectionManager" init-method="init" destroy-method="destrory"/>
 
 </beans>

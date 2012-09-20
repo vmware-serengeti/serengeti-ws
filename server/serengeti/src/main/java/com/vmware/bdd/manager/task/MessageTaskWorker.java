@@ -91,6 +91,7 @@ public class MessageTaskWorker implements TaskWorker {
             }
          }
       }
+      runtimeConnectionManager.destrory();
       logger.info("Task status [successed => " + successed + ",errorMessage =>"
             + errorMessage);
       result.put("successed", successed);
