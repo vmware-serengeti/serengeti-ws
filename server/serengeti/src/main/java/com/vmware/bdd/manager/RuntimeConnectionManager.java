@@ -61,12 +61,7 @@ public class RuntimeConnectionManager {
                null); // arguments map
       } catch (IOException e) {
          logger.error(e.getMessage());
-         if(runtimeChannel != null) {
-            runtimeChannel.close();
-         }
-         if(conn != null){
-            conn.close();
-         }
+         destroy();
          throw e;
       }
    }
@@ -85,7 +80,7 @@ public class RuntimeConnectionManager {
       return runtimeChannel;
    }
 
-   public void destrory() throws IOException {
+   public void destroy() throws IOException {
       if (runtimeChannel != null) {
          runtimeChannel.close();
       }
