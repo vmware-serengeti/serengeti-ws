@@ -456,7 +456,8 @@ public class ClusterManager {
          throw ClusterManagerException.ALREADY_STARTED_ERROR(clusterName);
       }
 
-      if (!ClusterStatus.STOPPED.equals(cluster.getStatus())) {
+      if (!ClusterStatus.STOPPED.equals(cluster.getStatus())
+            && !ClusterStatus.ERROR.equals(cluster.getStatus())) {
          logger.error("cluster " + clusterName
                + " cannot be started, it is in " + cluster.getStatus()
                + " status");
@@ -484,7 +485,8 @@ public class ClusterManager {
          throw ClusterManagerException.ALREADY_STOPPED_ERROR(clusterName);
       }
 
-      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
+      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
+            && !ClusterStatus.ERROR.equals(cluster.getStatus())) {
          logger.error("cluster " + clusterName
                + " cannot be stopped, it is in " + cluster.getStatus()
                + " status");
@@ -710,8 +712,7 @@ public class ClusterManager {
       group.setDefineInstanceNum(instanceNum);
       DAL.inTransactionUpdate(group);
       UpdateClusterListener listener =
-            new UpdateClusterListener(clusterName, nodeGroupName,
-                  oldInstanceNum);
+            new UpdateClusterListener(clusterName);
       try {
          return createClusterMgmtTask(cluster, listener, ClusterStatus.UPDATING);
       } catch (Exception ex) {

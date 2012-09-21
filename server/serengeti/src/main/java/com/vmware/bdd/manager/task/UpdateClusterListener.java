@@ -14,9 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.manager.task;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -24,8 +22,6 @@ import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
-import com.vmware.bdd.entity.HadoopNodeEntity;
-import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.Saveable;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.BddMessageUtil;
@@ -38,15 +34,10 @@ public class UpdateClusterListener implements TaskListener {
          .getLogger(UpdateClusterListener.class);
 
    private String clusterName;
-   private String nodeGroupName;
-   private int oldInstanceNum;
 
-   public UpdateClusterListener(String clusterName, String nodeGroupName,
-         int oldInstanceNum) {
+   public UpdateClusterListener(String clusterName) {
       super();
       this.clusterName = clusterName;
-      this.nodeGroupName = nodeGroupName;
-      this.oldInstanceNum = oldInstanceNum;
    }
 
    @Override
@@ -66,30 +57,9 @@ public class UpdateClusterListener implements TaskListener {
             ClusterEntity cluster =
                   ClusterEntity.findClusterEntityByName(clusterName);
             AuAssert.check(cluster != null);
-
-            NodeGroupEntity group =
-                  NodeGroupEntity.findNodeGroupEntityByName(cluster,
-                        nodeGroupName);
-            AuAssert.check(group != null);
-
-            // TODO reclaim resources
             cluster.setStatus(ClusterStatus.RUNNING);
-            group.setDefineInstanceNum(oldInstanceNum);
             logger.error("failed to update cluster " + clusterName
                   + " revert to previous status");
-
-            Set<HadoopNodeEntity> toRemove = new HashSet<HadoopNodeEntity>();
-            if (group.getHadoopNodes() != null) {
-               for (HadoopNodeEntity node : group.getHadoopNodes()) {
-                  // delete extra nodes in db
-                  if (ClusterCmdUtil.getIndexFromNodeName(node.getVmName()) >= oldInstanceNum) {
-                     logger.info("delete obsolete nodes " + node.getVmName());
-                     toRemove.add(node);
-                     DAL.delete(node);
-                  }
-               }
-               group.getHadoopNodes().removeAll(toRemove);
-            }
             return null;
          }
       });
