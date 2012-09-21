@@ -527,12 +527,14 @@ public class ClusterCommands implements CommandMarker {
             }
 
             if (cluster == null) {
-               System.out.println("Failed to target cluster: The cluster " + name + "is not found");
+               System.out.println("There is no available cluster for targeting.");
                setFsURL("");
                setJobTrackerURL("");
                this.setHiveServer("");
             } else {
                targetClusterName = cluster.getName();
+               boolean hasHDFS = false;
+               boolean hasHiveServer = false;
                for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {
                   for (String role : nodeGroup.getRoles()) {
                      if (role.equals("hadoop_namenode")) {
@@ -540,6 +542,7 @@ public class ClusterCommands implements CommandMarker {
                         if (nodes != null && nodes.size() > 0) {
                            String nameNodeIP = nodes.get(0).getIp();
                            setNameNode(nameNodeIP);
+                           hasHDFS = true;
                         } else {
                            throw new CliRestException("no name node available");
                         }
@@ -558,6 +561,7 @@ public class ClusterCommands implements CommandMarker {
                         if (nodes != null && nodes.size() > 0) {
                            String hiveServerIP = nodes.get(0).getIp();
                            setHiveServer(hiveServerIP);
+                           hasHiveServer = true;
                         } else {
                            throw new CliRestException("no hive server available");
                         }
@@ -566,6 +570,13 @@ public class ClusterCommands implements CommandMarker {
                }
                if (cluster.getExternalHDFS() != null && !cluster.getExternalHDFS().isEmpty()) {
                   setFsURL(cluster.getExternalHDFS());
+                  hasHDFS = true;
+               }
+               if(!hasHDFS){
+            	   setFsURL("");
+               }
+               if(!hasHiveServer){
+            	   this.setHiveServer("");
                }
             }
          }
