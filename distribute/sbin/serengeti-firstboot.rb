@@ -182,8 +182,10 @@ connection = Fog::Compute.new(info)
 mob = connection.get_vm_mob_ref_by_moid(h["evs_SelfMoRef"])
 vmdatastores = mob.datastore.map {|ds| "#{ds.info.name}"}     #serengeti server Datastore name
 puts("serengeti server datastore: " + "#{vmdatastores[0]}")
-vmrp = "#{mob.resourcePool.parent.name}"					#serengeti server resource pool name
+vmrp = "#{mob.resourcePool.parent.name}"		      #serengeti server resource pool name
 puts("serengeti server resource pool: " + "#{vmrp}")
+vApp_name = "#{mob.parentVApp.name}"                               #serengeti vApp name
+puts("serengeti vApp name: " + "#{vApp_name}")
 vmcluster = "#{mob.resourcePool.owner.name}" #serengeti server vc cluster name
 puts("serengeti server vc cluster: " + "#{vmcluster}")
 datacenter = mob.resourcePool.owner
@@ -210,7 +212,7 @@ system <<EOF
 /etc/init.d/tomcat stop
 
 # update serengeti uuid
-sed -i "s/serengeti.uuid =.*/serengeti.uuid = `uuidgen -r`/" "#{SERENGETI_WEBAPP_CONF}"
+sed -i "s/serengeti.uuid =.*/serengeti.uuid = #{vApp_name}/" "#{SERENGETI_WEBAPP_CONF}"
 
 #update serengeti.properties for web service
 sed -i "s/distro_root =.*/#{distroip}/" "#{SERENGETI_WEBAPP_CONF}"
