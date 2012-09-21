@@ -492,6 +492,7 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "info" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to show target information") final boolean info) {
 
       ClusterRead cluster = null;
+      boolean noCluster = false;
       try {
          if (info) {
             if (name != null) {
@@ -522,12 +523,20 @@ public class ClusterCommands implements CommandMarker {
                if (clusters != null && clusters.length > 0) {
                   cluster = clusters[0];
                }
+               else{
+            	   noCluster = true;
+               }
             } else {
                cluster = restClient.get(name);
             }
 
             if (cluster == null) {
-               System.out.println("There is no available cluster for targeting.");
+               if(noCluster){
+                  System.out.println("There is no available cluster for targeting.");
+               }
+               else{
+            	  System.out.println("Failed to target cluster: The cluster " + name + " not found"); 
+               }
                setFsURL("");
                setJobTrackerURL("");
                this.setHiveServer("");
