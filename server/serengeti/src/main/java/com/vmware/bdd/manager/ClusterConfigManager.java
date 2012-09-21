@@ -135,6 +135,11 @@ public class ClusterConfigManager {
          throw ClusterConfigException.INVALID_ROLES(failedMsgList);
       }
 
+      if (cluster.getDistro() == null ||
+          distroMgr.getDistroByName(cluster.getDistro()) == null) {
+         throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
+      }
+
       transformHDFSUrl(cluster);
 
       try {
@@ -152,7 +157,6 @@ public class ClusterConfigManager {
                logger.debug("begin to add cluster config for " + name);
                Gson gson = new Gson();
                ClusterEntity clusterEntity = new ClusterEntity(name);
-               AuAssert.check(cluster.getDistro() != null);
                clusterEntity.setDistro(cluster.getDistro());
 
                clusterEntity.setStartAfterDeploy(true);
