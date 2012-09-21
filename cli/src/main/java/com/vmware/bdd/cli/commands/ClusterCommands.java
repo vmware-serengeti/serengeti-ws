@@ -125,7 +125,11 @@ public class ClusterCommands implements CommandMarker {
             return;
          }
          clusterCreate.setType(clusterType);
+      } else if (specFilePath == null) {
+         // create Hadoop (HDFS + MapReduce) cluster as default
+         clusterCreate.setType(ClusterType.HDFS_MAPRED);
       }
+      
 
       if (topology != null) {
          try {
