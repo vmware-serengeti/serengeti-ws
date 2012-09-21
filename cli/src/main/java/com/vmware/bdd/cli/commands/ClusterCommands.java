@@ -129,7 +129,6 @@ public class ClusterCommands implements CommandMarker {
          // create Hadoop (HDFS + MapReduce) cluster as default
          clusterCreate.setType(ClusterType.HDFS_MAPRED);
       }
-      
 
       if (topology != null) {
          try {
