@@ -79,16 +79,18 @@ DHCLIENT_RELEASE_BEFORE_QUIT=yes
 
          
 
-def SetHostName(ip, hostname):
-   hostNameCfgTemplate = """
-%s %s
-"""
+def SetHostName():
+   ips = os.popen( "/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk \'{print $2}\'|tr -d \"addr:\" ").read()
+   ip = ips[:-1]
+   hostname = ip
+   try:
+      hostInfo = socket.gethostbyaddr(ip)
+      hostname = hostInfo[0]
+   except:
+      print "failed to reverse query hostname from ip address"
+      print "setup ip address as hostname"
+   os.system('hostname %s' % hostname)
 
-   hostNameCfgTemplate = hostNameCfgTemplate.lstrip()
-   interfaces = hostNameCfgTemplate % (ip, hostname)
-   # update eth configuration file
-   WriteFile('/etc/hosts', interfaces)
-   
 
 def SetEthAsDhcp(vmName, nic, hostname):
    dhcpCfgTemplate = """
@@ -181,12 +183,10 @@ GATEWAY=%(gateway)s
       WriteFile('/etc/sysconfig/network-scripts/ifcfg-%s' % nic, interfaces)
       # bring up the nic
       os.system('/etc/init.d/network start %s -o manual' % nic)
-   
-   ips = os.popen( "/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk \'{print $2}\'|tr -d \"addr:\" ").read()
-   ip = ips[:-1]
-#   SetHostName(ip, ip)
-   os.system('hostname %s' % ip)
-   #os.system('/etc/init.d/network restart')
+
+   # setup hostname
+   SetHostName()
+
       
 ###################
 ##  Main program ##
