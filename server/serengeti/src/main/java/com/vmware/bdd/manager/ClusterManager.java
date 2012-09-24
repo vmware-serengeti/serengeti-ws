@@ -776,7 +776,7 @@ public class ClusterManager {
       }
       // node group must be compute only node
       List<String> nodeGroupNames = new ArrayList<String> ();
-      if (!cluster.validateLimit(nodeGroupName, activeComputeNodeNum, nodeGroupNames)) {
+      if (!cluster.validateLimit(nodeGroupName, nodeGroupNames)) {
          return null;
       }
       // find hadoop job tracker ip

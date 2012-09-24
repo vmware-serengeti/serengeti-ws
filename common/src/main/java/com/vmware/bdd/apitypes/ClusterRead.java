@@ -136,7 +136,7 @@ public class ClusterRead {
     * Validate the limit,make sure the specified node group is a compute only node group.
     * If user have not specified the node group name,the cluster must contain compute only node.   
     */
-   public boolean validateLimit(String nodeGroupName, int activeComputeNodeNum,List<String>... nodeGroupNames) {
+   public boolean validateLimit(String nodeGroupName, List<String>... nodeGroupNames) {
       if (!CommonUtil.isBlank(nodeGroupName)) {
          List<NodeGroupRead> nodeGroups = getNodeGroups();
          if(nodeGroups != null && !nodeGroups.isEmpty()){

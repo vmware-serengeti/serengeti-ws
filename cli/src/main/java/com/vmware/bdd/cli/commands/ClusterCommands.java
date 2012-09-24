@@ -464,18 +464,13 @@ public class ClusterCommands implements CommandMarker {
             @CliOption(key = { "activeComputeNodeNum" }, mandatory = true, help = "The number of instances powered on") final int activeComputeNodeNum) {
 
          try {
-            // The active compute node number must be a integer and cannot be less than zero.
-            if (activeComputeNodeNum < 0) {
-               System.out.println("Invalid instance number:" + activeComputeNodeNum);
-               return;
-            }
             ClusterRead cluster = restClient.get(clusterName);
             if (cluster == null) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null, null,
                      Constants.OUTPUT_OP_ADJUSTMENT_FAILED, "cluster " + clusterName + " is not exsit !");
                return;
             }
-            if(!cluster.validateLimit(nodeGroupName, activeComputeNodeNum)) {
+            if(!cluster.validateLimit(nodeGroupName)) {
                return;
             }
             restClient.limitCluster(clusterName, nodeGroupName, activeComputeNodeNum);
