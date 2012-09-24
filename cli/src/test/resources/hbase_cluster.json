@@ -121,7 +121,7 @@
       "roles": [
         "zookeeper"
       ],
-      "instanceNum": 1,
+      "instanceNum": 3,
       "cpuNum": 1,
       "storage": {
         "type": "LOCAL",

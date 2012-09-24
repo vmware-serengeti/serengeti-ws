@@ -121,23 +121,24 @@ public class ClusterCommandsTest extends MockRestServer {
 
     @Test
     public void testCreateCluster() throws Exception {
-        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
-        NetworkRead[] networks = new NetworkRead[1];
-        NetworkRead network = new NetworkRead();
-        network.setName("dhcp");
-        network.setDhcp(true);
-        network.setPortGroup("pg1");
-        networks[0] = network;
+       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+       NetworkRead[] networks = new NetworkRead[1];
+       NetworkRead network = new NetworkRead();
+       network.setName("dhcp");
+       network.setDhcp(true);
+       network.setPortGroup("pg1");
+       networks[0] = network;
 
-        ObjectMapper mapper = new ObjectMapper();
-        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
-                mapper.writeValueAsString(networks));
+       ObjectMapper mapper = new ObjectMapper();
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(networks));
 
-        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
-                HttpStatus.NO_CONTENT, "");
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
+             HttpStatus.NO_CONTENT, "");
 
-        clusterCommands.createCluster("cluster1", "HADOOP", null, null, null, null, null, null, false, false, false);
-        CookieCache.put("Cookie","");
+       clusterCommands.createCluster("cluster1", "HADOOP", null, null, null, null, null, null, false, false, false);
+
+       CookieCache.put("Cookie","");
     }
 
     @Test
@@ -166,41 +167,55 @@ public class ClusterCommandsTest extends MockRestServer {
 
     @Test
     public void testCreateClusterBySpecFile() throws Exception {
-        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
-        NetworkRead[] networks = new NetworkRead[1];
-        NetworkRead network = new NetworkRead();
-        network.setName("dhcp");
-        network.setDhcp(true);
-        network.setPortGroup("pg1");
-        networks[0] = network;
+       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+       NetworkRead[] networks = new NetworkRead[1];
+       NetworkRead network = new NetworkRead();
+       network.setName("dhcp");
+       network.setDhcp(true);
+       network.setPortGroup("pg1");
+       networks[0] = network;
 
-        ObjectMapper mapper = new ObjectMapper();
-        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
-                mapper.writeValueAsString(networks));
+       ObjectMapper mapper = new ObjectMapper();
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(networks));
 
-        DistroRead distro = new DistroRead();
-        distro.setName(Constants.DEFAULT_DISTRO);
-        List<String> roles = new ArrayList<String>();
-        roles.add("hadoop");
-        roles.add("hadoop_namenode");
-        roles.add("hadoop_jobtracker");
-        roles.add("hadoop_worker");
-        roles.add("hadoop_datanode");
-        roles.add("hadoop_tasktracker");
-        roles.add("hadoop_client");
-        roles.add("hive");
-        roles.add("hive_server");
-        roles.add("pig");
-        distro.setRoles(roles);
+       DistroRead distro = new DistroRead();
+       distro.setName(Constants.DEFAULT_DISTRO);
+       List<String> roles = new ArrayList<String>();
+       roles.add("hadoop");
+       roles.add("hadoop_namenode");
+       roles.add("hadoop_jobtracker");
+       roles.add("hadoop_worker");
+       roles.add("hadoop_datanode");
+       roles.add("hadoop_tasktracker");
+       roles.add("hadoop_client");
+       roles.add("hive");
+       roles.add("hive_server");
+       roles.add("pig");
+       roles.add("hbase_master");
+       roles.add("hbase_regionserver");
+       roles.add("hbase_client");
+       roles.add("zookeeper");
+       distro.setRoles(roles);
 
-        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + Constants.DEFAULT_DISTRO,
-                HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(distro));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + Constants.DEFAULT_DISTRO,
+             HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(distro));
 
-        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
-                HttpStatus.NO_CONTENT, "");
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
+             HttpStatus.NO_CONTENT, "");
 
-        clusterCommands.createCluster("cluster1", null, null, "hadoop_cluster.json", null, null, null, null, false, false, false);
-        CookieCache.put("Cookie","");
+       clusterCommands.createCluster("cluster1WithHadoopSpec", null, null, "src/test/resources/hadoop_cluster.json", null, null, null, null, false, false, true);
+
+       setup();
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(networks));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + Constants.DEFAULT_DISTRO,
+             HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(distro));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
+             HttpStatus.NO_CONTENT, "");
+       clusterCommands.createCluster("cluster1WithHBaseSpec", null, null, "src/test/resources/hbase_cluster.json", null, null, null, null, false, false, true);
+
+       CookieCache.put("Cookie","");
     }
 
     @Test

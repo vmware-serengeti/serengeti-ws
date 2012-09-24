@@ -121,7 +121,12 @@ public class Constants {
    public static final String INVALID_VALUE = "invalid value";
    public static final String INPUT_TOPOLOGY_INVALID_VALUE = "invalid topology value. The valid value is HVE or RACK_AS_RACK or HOST_AS RACK";
    public static final String TOPLOGY_FORMAT = "Accepted topology file format: for each line, rackname1: hostname1, hostname2,...";
-
+   public static final String TYPE_SPECFILE_CONFLICT = "--type will not take effect when you specify --specFile.";
+   public static final String WRONG_NUM_OF_NODES = "the number of namenode and jobtracker are larger than 1, or no worker exists";
+   public static final String WRONG_NUM_OF_ZOOKEEPER = "the number of zookeepers is less than 3";
+   public static final String ODD_NUM_OF_ZOOKEEPER = "the number of zookeepers is better to be odd numbers";
+   public static final String REGISONSERVER_DATANODE_SEPERATION = "RegionServer and Datanode are separated, which will impact performance.";
+   
    public static final String PARAMS_EXCLUSION = " cannot be set at the same time.";
 
    public static final String PARAMS_EXCLUSION_PAIR_NETWORK_ADD_IP_DHCP = "ip and dhcp";
@@ -142,8 +147,6 @@ public class Constants {
    public static final String ROLE_HIVE = "hive";
    public static final String ROLE_HIVE_SERVER = "hive_server";
    public static final String ROLE_PIG = "pig";
-   public static final String PARAM_CLUSTER_WARNING =
-         "Warning: Serengeti supports multi-instance of tasktracker and datanode, only one instance of namenode and jobtracker, multi-instance of client. Only namenode and jobtracker instance support to configure haFlag.";
    public static final String PARAM_CLUSTER_FAILED_INSTANCE_NUM_NEGATIVE = "instanceNum can not be negative";
    public static final String PARAM_CLUSTER = "cluster name";
    public static final String PARAM_DISTRO = "distro name";

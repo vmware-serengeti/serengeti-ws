@@ -15,6 +15,7 @@
 package com.vmware.bdd.apitypes;
 
 import java.net.URI;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +26,8 @@ import java.util.TreeMap;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.spectypes.HadoopDistroMap;
+import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.spectypes.ServiceType;
 import com.vmware.bdd.spectypes.VcCluster;
 
 /**
@@ -274,17 +277,31 @@ public class ClusterCreate {
       return valid;
    }
 
+   /*
+    * Validate 2 cases. Case 1: compute node group with external hdfs node group.
+    * Case 2: The dependency check of HDFS, MapReduce, HBase, Zookeeper, Hadoop 
+    * Client(Pig, Hive, Hadoop Client), and HBase Client Combinations. The rules are below:
+    * - HDFS includes roles of "haddop_namenode" and "hadoop_datanode";
+    * - MapReduce includes roles of "haddop_jobtracker" and "hadoop_takstracker";
+    * - HBase includes roles of "hbase_master" and "hbase_regionserver;
+    * - Zookeeper includes a single role of "zookeeper";
+    * - Hadoop Client includes roles of "hadoop_client";
+    * - HBase client includes roles of "hbase_client";
+    * - MapReduce depends on HDFS, HBase depends on HDFS and Zookeeper;
+    * - Hadoop Client depends on MapReduce, HBase Client depends on HBase.   
+    */
    public boolean validateNodeGroupRoles(List<String> failedMsgList) {
       boolean valid = true;
+      Set<String> roles = new HashSet<String>();
+      for (NodeGroupCreate ngc : getNodeGroups()) {
+         roles.addAll(ngc.getRoles());
+      }
+
       if (validateHDFSUrl()) {
          if (getNodeGroups() == null) {
             valid = false;
             failedMsgList.add("missing jobtracker/tasktracker role");
          } else {
-            Set<String> roles = new HashSet<String>();
-            for (NodeGroupCreate ngc : getNodeGroups()) {
-               roles.addAll(ngc.getRoles());
-            }
             if (roles.contains("hadoop_namenode") || roles.contains("hadoop_datanode")) {
                valid = false;
                failedMsgList.add("redundant namenode/datanode role");
@@ -295,7 +312,37 @@ public class ClusterCreate {
                failedMsgList.add("missing jobtracker/tasktracker role");
             }
          }
+      } else { //case 2
+         // get involved service types of the spec file
+         EnumSet<ServiceType> serviceTypes = EnumSet.noneOf(ServiceType.class);
+         for (ServiceType service : ServiceType.values()) {
+            //identify partially match
+            int matched = 0;
+            for (HadoopRole role: service.getRoles()) {
+               if (roles.contains(role.toString())) {
+                  matched++;
+               }
+            }
+            if (matched == service.getRoles().size()) {
+               serviceTypes.add(service);
+            } else if (matched != 0) {
+               failedMsgList.add("some roles in " + service + " " + service.getRoles() + " cannot be found in the spec file");
+               valid = false;
+            }
+         }
+
+         //validate the relationships of services
+         if (valid == true && !serviceTypes.isEmpty()) {
+            for (ServiceType service: serviceTypes) {
+               EnumSet<ServiceType> dependency = service.depend();
+               if (dependency != null && !serviceTypes.containsAll(dependency)) {
+                  failedMsgList.add("some dependent services " + dependency + " " + service + " relies on cannot be found in the spec file");
+                  valid = false;
+               }
+            }
+         }
       }
+      
       return valid;
    }
 

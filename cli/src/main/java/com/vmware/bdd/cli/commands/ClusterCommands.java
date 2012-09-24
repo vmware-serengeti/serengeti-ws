@@ -46,6 +46,7 @@ import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.ClusterRestClient;
 import com.vmware.bdd.cli.rest.DistroRestClient;
 import com.vmware.bdd.cli.rest.NetworkRestClient;
+import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AppConfigValidationUtils;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
 import com.vmware.bdd.utils.ValidateResult;
@@ -74,7 +75,7 @@ public class ClusterCommands implements CommandMarker {
 
    //define role of the node group .
    private enum NodeGroupRole {
-      MASTER, WORKER, CLIENT, NONE
+      MASTER, JOB_TRACKER, WORKER, CLIENT, HBASE_MASTER, ZOOKEEPER, NONE
    }
 
    @CliAvailabilityIndicator({ "cluster help" })
@@ -243,6 +244,11 @@ public class ClusterCommands implements CommandMarker {
          }
       }
 
+      // give a warning message if both type and specFilePath are specified
+      if (type != null && specFilePath != null) {
+         warningMsgList.add(Constants.TYPE_SPECFILE_CONFLICT);
+      }
+
       // process topology option
       if (topology == null) {
          clusterCreate.setTopologyPolicy(TopologyType.NONE);
@@ -253,7 +259,6 @@ public class ClusterCommands implements CommandMarker {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   name, Constants.OUTPUT_OP_CREATE,
                   Constants.OUTPUT_OP_RESULT_FAIL, Constants.INPUT_TOPOLOGY_INVALID_VALUE);
-            System.out.println("Please specify the topology type: HVE or RACK_HOST or HOST_AS_RACK");
             return;
          }
       }
@@ -884,7 +889,7 @@ public class ClusterCommands implements CommandMarker {
       // show warning message
       boolean warning = false;
       //role count
-      int masterCount = 0, workerCount = 0, clientCount = 0;
+      int masterCount = 0, jobtrackerCount = 0, hbasemasterCount = 0, zookeeperCount = 0, workerCount = 0;
       //Find NodeGroupCreate array from current ClusterCreate instance.
       NodeGroupCreate[] nodeGroupCreates = clusterCreate.getNodeGroups();
       if (nodeGroupCreates == null || nodeGroupCreates.length == 0) {
@@ -905,10 +910,10 @@ public class ClusterCommands implements CommandMarker {
                   Constants.PARAM_NO_DISTRO_AVAILABLE);
             return !validated;
          }
-         if (nodeGroupCreates.length < 2 || nodeGroupCreates.length > 5) {
-            warningMsgList.add(Constants.PARAM_CLUSTER_WARNING);
-            warning = true;
-         }
+
+         // remove the number of node groups check, because after supporting hbase,
+         // zookeeper can be one valid independent node group.
+
          // check external HDFS
          if (clusterCreate.hasHDFSUrlConfigured() && !clusterCreate.validateHDFSUrl()) {
             failedMsgList.add(new StringBuilder()
@@ -937,7 +942,7 @@ public class ClusterCommands implements CommandMarker {
                   failedMsgList)) {
                validated = false;
             }
-            // get node group role .
+            // get node group role.
             NodeGroupRole role = getNodeGroupRole(nodeGroupCreate);
             switch (role) {
             case MASTER:
@@ -949,6 +954,34 @@ public class ClusterCommands implements CommandMarker {
                         failedMsgList);
                }
                break;
+            case JOB_TRACKER:
+               jobtrackerCount++;
+               if (nodeGroupCreate.getInstanceNum() >= 0
+                     && nodeGroupCreate.getInstanceNum() != 1) {
+                  validated = false;
+                  collectInstanceNumInvalidateMsg(nodeGroupCreate,
+                        failedMsgList);
+               }
+               break;
+            case HBASE_MASTER:
+               hbasemasterCount++;
+               if (nodeGroupCreate.getInstanceNum() == 0) {
+                  validated = false;
+                  collectInstanceNumInvalidateMsg(nodeGroupCreate,
+                        failedMsgList);
+               }
+               break;   
+            case ZOOKEEPER:
+               zookeeperCount++;
+               if (nodeGroupCreate.getInstanceNum() > 0
+                     && nodeGroupCreate.getInstanceNum() < 3) {
+                  validated = false;
+                  failedMsgList.add(Constants.WRONG_NUM_OF_ZOOKEEPER);
+               } else if (nodeGroupCreate.getInstanceNum() > 0 && nodeGroupCreate.getInstanceNum() % 2 == 0) {
+                  warningMsgList.add(Constants.ODD_NUM_OF_ZOOKEEPER);
+                  warning = true;
+               }
+               break;
             case WORKER:
                workerCount++;
                if (nodeGroupCreate.getInstanceNum() == 0) {
@@ -958,9 +991,15 @@ public class ClusterCommands implements CommandMarker {
                } else if (isHAFlag(nodeGroupCreate)) {
                   warning = true;
                }
+
+               //check if datanode and region server are seperate
+               List<String> roles = nodeGroupCreate.getRoles();
+               if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE) && !roles.contains(HadoopRole.HADOOP_DATANODE)) {
+                  warningMsgList.add(Constants.REGISONSERVER_DATANODE_SEPERATION);
+                  warning = true;
+               }
                break;
             case CLIENT:
-               clientCount++;
                if (isHAFlag(nodeGroupCreate)) {
                   warning = true;
                }
@@ -971,14 +1010,14 @@ public class ClusterCommands implements CommandMarker {
             default:
             }
          }
-         if ((masterCount < 1 || masterCount > 2) || (workerCount < 1 || workerCount > 2) ||
-               clientCount > 1) {
+         if ((masterCount > 1) || (jobtrackerCount > 1) || (zookeeperCount > 1) || (hbasemasterCount > 1) || (workerCount == 0)) {
+            warningMsgList.add(Constants.WRONG_NUM_OF_NODES);
             warning = true;
          }
          if (!validated) {
             showFailedMsg(clusterCreate.getName(), failedMsgList);
          } else if (warning || warningMsgList != null) {
-            // If warning is true,show waring message.
+            // If warning is true,show warning message.
             if (!showWarningMsg(clusterCreate.getName(), warningMsgList)) {
                // When exist warning message,whether to proceed
                validated = false;
@@ -1047,43 +1086,46 @@ public class ClusterCommands implements CommandMarker {
       List<String> matchRoles = new LinkedList<String>();
       switch (role) {
       case MASTER:
-         if (roles.size() == 1) {
-            String r = roles.get(0);
-            return Constants.ROLE_HADOOP_NAME_NODE.equals(r) ||
-                   Constants.ROLE_HADOOP_JOB_TRACKER.equals(r);
-         } else if (roles.size() == 2) {
-            matchRoles.add(Constants.ROLE_HADOOP_NAME_NODE);
-            matchRoles.add(Constants.ROLE_HADOOP_JOB_TRACKER);
-            matchRoles.removeAll(roles);
-            return matchRoles.size() == 0 ? true : false;
-         }
-         return false;
-      case WORKER:
-         if (roles.size() == 1) {
-            if (Constants.ROLE_HADOOP_DATANODE.equals(roles.get(0)) ||
-                Constants.ROLE_HADOOP_TASKTRACKER.equals(roles.get(0))) {
-               return true;
-            }
-            return false;
+         if (roles.contains(HadoopRole.HADOOP_NAMENODE_ROLE.toString())) {
+            return true;
          } else {
-            matchRoles.add(Constants.ROLE_HADOOP_DATANODE);
-            matchRoles.add(Constants.ROLE_HADOOP_TASKTRACKER);
-            matchRoles.removeAll(roles);
-            return matchRoles.size() == 0 ? true : false;
+            return false;
+         }
+      case JOB_TRACKER:
+         if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
+            return true;
+         } else {
+            return false;
+         }
+      case HBASE_MASTER:
+         if (roles.contains(HadoopRole.HBASE_MASTER_ROLE.toString())) {
+            return true;
+         } else {
+            return false;
+         }
+      case ZOOKEEPER:
+         if (roles.contains(HadoopRole.ZOOKEEPER_ROLE.toString())) {
+            return true;
+         } else {
+            return false;
+         }
+      case WORKER:
+         if (roles.contains(HadoopRole.HADOOP_DATANODE.toString())
+               || roles.contains(HadoopRole.HADOOP_TASKTRACKER.toString())
+               || roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString())) {
+            return true;
+         } else {
+            return false;
          }
       case CLIENT:
-         if (roles.size() < 1 || roles.size() > 4) {
-            return false;
+         if (roles.contains(HadoopRole.HADOOP_CLIENT_ROLE.toString())
+               || roles.contains(HadoopRole.HIVE_ROLE.toString())
+               || roles.contains(HadoopRole.HIVE_SERVER_ROLE.toString())
+               || roles.contains(HadoopRole.PIG_ROLE.toString())
+               || roles.contains(HadoopRole.HBASE_CLIENT_ROLE.toString())) {
+            return true;
          } else {
-            matchRoles.add(Constants.ROLE_HADOOP_CLIENT);
-            matchRoles.add(Constants.ROLE_HIVE);
-            matchRoles.add(Constants.ROLE_HIVE_SERVER);
-            matchRoles.add(Constants.ROLE_PIG);
-            int diffNum = matchRoles.size() - roles.size();
-            matchRoles.removeAll(roles);
-            return roles.contains(Constants.ROLE_HADOOP_CLIENT)
-                  && (diffNum >= 0) && (diffNum == matchRoles.size()) ? true
-                  : false;
+            return false;
          }
       }
       return false;
