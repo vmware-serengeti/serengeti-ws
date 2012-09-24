@@ -144,8 +144,8 @@ public class ClusterCommands implements CommandMarker {
          clusterCreate.setTopologyPolicy(null);
       }
 
+      List<String> distroNames = getDistroNames();
       if (distro != null) {
-         List<String> distroNames = getDistroNames();
          if (validName(distro, distroNames)) {
             clusterCreate.setDistro(distro);
          } else {
@@ -154,6 +154,16 @@ public class ClusterCommands implements CommandMarker {
                   Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_DISTRO
                         + Constants.PARAM_NOT_SUPPORTED + distroNames);
             return;
+         }
+      } else {
+         int index = distroNames.indexOf(Constants.DEFAULT_DISTRO);
+         if (index == -1) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  name, Constants.OUTPUT_OP_CREATE,
+                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM__NO_DEFAULT_DISTRO);
+            return;
+         } else {
+            clusterCreate.setDistro(distroNames.get(index));
          }
       }
 
