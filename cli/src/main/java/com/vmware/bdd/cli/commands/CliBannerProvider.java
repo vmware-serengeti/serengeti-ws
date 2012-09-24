@@ -55,7 +55,7 @@ public class CliBannerProvider extends DefaultBannerProvider implements CommandM
 	 * @see org.springframework.shell.plugin.BannerProvider#getVersion()
 	 */
 	public String getVersion() {
-		return "0.6.0";
+		return "0.7.0";
 	}
 
 	/* (non-Javadoc)
