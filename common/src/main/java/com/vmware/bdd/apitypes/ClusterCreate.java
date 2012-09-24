@@ -287,8 +287,12 @@ public class ClusterCreate {
     * - Zookeeper includes a single role of "zookeeper";
     * - Hadoop Client includes roles of "hadoop_client";
     * - HBase client includes roles of "hbase_client";
+    * - Pig includes roles of "pig";
+    * - Hive includes roles of "hive";
+    * - Hive Server includes roles of "hive_server";
     * - MapReduce depends on HDFS, HBase depends on HDFS and Zookeeper;
-    * - Hadoop Client depends on MapReduce, HBase Client depends on HBase.   
+    * - Pig, Hive, Hive Server depends on MapReduce, HBase Client depends on HBase;
+    * - Hadoop Client depends on HDFS.   
     */
    public boolean validateNodeGroupRoles(List<String> failedMsgList) {
       boolean valid = true;
