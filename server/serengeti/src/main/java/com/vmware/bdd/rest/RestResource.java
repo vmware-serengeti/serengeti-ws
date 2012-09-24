@@ -291,8 +291,9 @@ public class RestResource {
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public ClusterRead getCluster(
-         @PathVariable("clusterName") final String clusterName) {
-      return clusterMgr.getClusterByName(clusterName, true);
+         @PathVariable("clusterName") final String clusterName,
+         @RequestParam(value="details", required = false) Boolean details) {
+      return clusterMgr.getClusterByName(clusterName, (details == null) ? false : details);
    }
 
    @RequestMapping(value = "/cluster/{clusterName}/spec", method = RequestMethod.GET, produces = "application/json")
@@ -304,8 +305,9 @@ public class RestResource {
 
    @RequestMapping(value = "/clusters", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   public List<ClusterRead> getClusters() {
-      return clusterMgr.getClusters();
+   public List<ClusterRead> getClusters( 
+         @RequestParam(value = "details", required = false) Boolean details) {
+      return clusterMgr.getClusters((details == null) ? false : details);
    }
 
    // cloud provider API

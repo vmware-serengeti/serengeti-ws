@@ -284,12 +284,12 @@ public class ClusterCommands implements CommandMarker {
       // rest invocation
       try {
          if (name == null) {
-            ClusterRead[] clusters = restClient.getAll();
+            ClusterRead[] clusters = restClient.getAll(detail);
             if (clusters != null) {
                prettyOutputClustersInfo(clusters, detail);
             }
          } else {
-            ClusterRead cluster = restClient.get(name);
+            ClusterRead cluster = restClient.get(name, detail);
             if (cluster != null) {
                prettyOutputClusterInfo(cluster, detail);
             }
@@ -469,7 +469,7 @@ public class ClusterCommands implements CommandMarker {
             @CliOption(key = { "activeComputeNodeNum" }, mandatory = true, help = "The number of instances powered on") final int activeComputeNodeNum) {
 
          try {
-            ClusterRead cluster = restClient.get(clusterName);
+            ClusterRead cluster = restClient.get(clusterName, false);
             if (cluster == null) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null, null,
                      Constants.OUTPUT_OP_ADJUSTMENT_FAILED, "cluster " + clusterName + " is not exsit !");
@@ -519,22 +519,22 @@ public class ClusterCommands implements CommandMarker {
             }
          } else {
             if (name == null) {
-               ClusterRead[] clusters = restClient.getAll();
+               ClusterRead[] clusters = restClient.getAll(false);
                if (clusters != null && clusters.length > 0) {
                   cluster = clusters[0];
                }
-               else{
-            	   noCluster = true;
+               else {
+                  noCluster = true;
                }
             } else {
-               cluster = restClient.get(name);
+               cluster = restClient.get(name, false);
             }
 
             if (cluster == null) {
-               if(noCluster){
+               if(noCluster) {
                   System.out.println("There is no available cluster for targeting.");
                }
-               else{
+               else {
             	  System.out.println("Failed to target cluster: The cluster " + name + " not found"); 
                }
                setFsURL("");
@@ -639,7 +639,7 @@ public class ClusterCommands implements CommandMarker {
          return;
       }
       try {
-         ClusterRead clusterRead = restClient.get(name);
+         ClusterRead clusterRead = restClient.get(name, false);
          // build ClusterCreate object
          ClusterCreate clusterConfig = new ClusterCreate();
          clusterConfig.setName(clusterRead.getName());

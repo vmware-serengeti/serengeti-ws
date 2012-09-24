@@ -56,11 +56,11 @@ public class ClusterRestClient {
       restClient.update(clusterConfig, path, httpverb, outputCallBack);
    }
 
-   public ClusterRead get(String id) {
+   public ClusterRead get(String id, Boolean detail) {
       final String path = Constants.REST_PATH_CLUSTER;
       final HttpMethod httpverb = HttpMethod.GET;
 
-      return restClient.getObject(id, ClusterRead.class, path, httpverb, false);
+      return restClient.getObject(id, ClusterRead.class, path, httpverb, detail);
    }
 
    public ClusterCreate getSpec(String id) {
@@ -70,12 +70,12 @@ public class ClusterRestClient {
       return restClient.getObjectByPath(ClusterCreate.class, path, httpverb, false);
    }
 
-   public ClusterRead[] getAll() {
+   public ClusterRead[] getAll(Boolean detail) {
       final String path = Constants.REST_PATH_CLUSTERS;
       final HttpMethod httpverb = HttpMethod.GET;
 
       return restClient.getAllObjects(ClusterRead[].class, path, httpverb,
-            false);
+            detail);
    }
 
    public void actionOps(String id, String callbackId, Map<String, String> queryStrings) {
@@ -150,7 +150,7 @@ public class ClusterRestClient {
          
          public boolean isRefresh() throws Exception {
             try {
-               cluster = clusterRestClient.get(id);
+               cluster = clusterRestClient.get(id, false);
                if (cluster != null) {
                   List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
                   if (nodeGroups != null) {

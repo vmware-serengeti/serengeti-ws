@@ -323,11 +323,11 @@ public class ClusterManager {
       return spec;
    }
 
-   public List<ClusterRead> getClusters() {
+   public List<ClusterRead> getClusters(Boolean realTime) {
       List<ClusterRead> clusters = new ArrayList<ClusterRead>();
       List<ClusterEntity> clusterEntities = DAL.findAll(ClusterEntity.class);
       for (ClusterEntity entity : clusterEntities) {
-         clusters.add(getClusterByName(entity.getName(), true));
+         clusters.add(getClusterByName(entity.getName(), realTime));
       }
       return clusters;
    }
@@ -711,8 +711,8 @@ public class ClusterManager {
       final int oldInstanceNum = group.getDefineInstanceNum();
       group.setDefineInstanceNum(instanceNum);
       DAL.inTransactionUpdate(group);
-      UpdateClusterListener listener =
-            new UpdateClusterListener(clusterName);
+      UpdateClusterListener listener = new UpdateClusterListener(clusterName);
+
       try {
          return createClusterMgmtTask(cluster, listener, ClusterStatus.UPDATING);
       } catch (Exception ex) {
