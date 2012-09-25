@@ -100,6 +100,33 @@
         // "mapred.queue.queue-name.acl-submit-job": "",
         // "mapred.queue.queue-name.acl-administer-jobs", ""
       }
+    },
+    "hbase": {
+      "hbase-site.xml": {
+        //check for all settings at http://hbase.apache.org/book/config.files.html 
+      },
+      "hbase-env.sh": {
+        //  "JAVA_HOME": "",
+        //  "PATH": "",
+        //  "HBASE_CLASSPATH": "",
+        //  "HBASE_HEAPSIZE": "",
+        //  "HBASE_OPTS": "",
+        //  "HBASE_USE_GC_LOGFILE": "",
+        //  "HBASE_JMX_BASE": "",
+        //  "HBASE_MASTER_OPTS": "",
+        //  "HBASE_REGIONSERVER_OPTS": "",
+        //  "HBASE_THRIFT_OPTS": "",
+        //  "HBASE_ZOOKEEPER_OPTS": "",
+        //  "HBASE_REGIONSERVERS": "",
+        //  "HBASE_SSH_OPTS": "",
+        //  "HBASE_NICENESS": "",
+        //  "HBASE_SLAVE_SLEEP: ""
+      }
+    },
+    "zookeeper": {
+      "java.env": {
+        //  "jvm_option": ""
+      }
     }
   }
 }
