@@ -153,17 +153,22 @@ public class DistroManager {
 
    private String readDistroManifest() throws IOException {
       URL manifestUrl = new URL(distrosManifestUrl);
-      BufferedReader in = new BufferedReader(
-            new InputStreamReader(manifestUrl.openStream()));
+      BufferedReader in = null;
+      try {
+         in = new BufferedReader(
+               new InputStreamReader(manifestUrl.openStream()));
 
-      StringBuffer sb = new StringBuffer();
-      String line;
-      while ((line = in.readLine()) != null) {
-         sb.append(line);
+         StringBuffer sb = new StringBuffer();
+         String line;
+         while ((line = in.readLine()) != null) {
+            sb.append(line);
+         }
+         return sb.toString();
+      } finally {
+         if (in != null) {
+            in.close();
+         }
       }
-
-      in.close();
-      return sb.toString();
    }
 
    private void loadManifest(boolean reload) {
