@@ -72,6 +72,6 @@ public class ConfigureClusterListener implements TaskListener {
    }
 
    public String[] getTaskCommand(String clusterName, String fileName) {
-      return ClusterCmdUtil.getUpdatetClusterCmdArray(clusterName, fileName);
+      return ClusterCmdUtil.getConfigureClusterCmdArray(clusterName, fileName);
    }
 }
