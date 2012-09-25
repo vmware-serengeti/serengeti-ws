@@ -56,10 +56,12 @@ public class TopologyTests extends MockRestServer {
       racksInfo.add(rack2);
 
       ObjectMapper mapper = new ObjectMapper();
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/racks",
+            HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(racksInfo));
       buildReqRespWithoutRespBody("http://127.0.0.1:8080/serengeti/api/racks",
             HttpMethod.PUT, HttpStatus.NO_CONTENT, mapper.writeValueAsString(racksInfo));
 
-      topologyCommands.upload("src/test/resources/topology.sample");
+      topologyCommands.upload("src/test/resources/topology.sample", true);
       CookieCache.put("Cookie","");
    }
 

@@ -51,6 +51,7 @@ public class DistroCommandsTest extends MockRestServer {
 
       DistroRead distro2 = new DistroRead();
       distro2.setName("GP");
+      distro2.setHveSupported(true);
       List<String> roles2 = new ArrayList<String>();
       roles2.add("NameNode");
       roles2.add("JobTracker");

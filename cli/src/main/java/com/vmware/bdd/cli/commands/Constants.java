@@ -121,6 +121,7 @@ public class Constants {
    public static final String INVALID_VALUE = "invalid value";
    public static final String INPUT_TOPOLOGY_INVALID_VALUE = "invalid topology value. The valid value is HVE or RACK_AS_RACK or HOST_AS RACK";
    public static final String TOPLOGY_FORMAT = "Accepted topology file format: for each line, rackname1: hostname1, hostname2,...";
+   public static final String OVERWRITE_TOPOLOGY = "WARNING: you will overwrite the existing topology. Existing Hadoop clusters may be impacted and cannot work well if you remove some hosts these clusters are using.";
    public static final String TYPE_SPECFILE_CONFLICT = "--type will not take effect when you specify --specFile.";
    public static final String WRONG_NUM_OF_NODES = "the number of namenode and jobtracker are larger than 1, or no worker exists";
    public static final String WRONG_NUM_OF_ZOOKEEPER = "the number of zookeepers is less than 3";
@@ -160,6 +161,7 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_NAME = "NAME";
    public static final String FORMAT_TABLE_COLUMN_STATUS = "STATUS";
    public static final String FORMAT_TABLE_COLUMN_IP = "IP";
+   public static final String FORMAT_TABLE_COLUMN_HVE = "HVE";
    public static final String FORMAT_TABLE_COLUMN_ROLES = "ROLES";
    public static final String FORMAT_TABLE_COLUMN_INSTANCE = "INSTANCE";
    public static final String FORMAT_TABLE_COLUMN_CPU = "CPU";
