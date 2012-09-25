@@ -45,6 +45,9 @@ public class HadoopNodeEntity extends EntityBase {
    @Column(name = "vm_name", unique = true, nullable = false)
    private String vmName;
 
+   @Column(name = "moid", unique = true)
+   private String moId;
+
    @Column(name = "rack")
    private String rack;
 
@@ -94,6 +97,14 @@ public class HadoopNodeEntity extends EntityBase {
 
    public void setVmName(String vmName) {
       this.vmName = vmName;
+   }
+
+   public String getMoId() {
+      return moId;
+   }
+
+   public void setMoId(String moId) {
+      this.moId = moId;
    }
 
    public String getRack() {
@@ -168,6 +179,9 @@ public class HadoopNodeEntity extends EntityBase {
       this.ipAddress = newNode.getIpAddress();
       this.status = newNode.getStatus();
       this.action = newNode.getAction();
+      if (newNode.getMoId() != null) {
+         this.moId = newNode.getMoId();
+      }
       if(newNode.getVcRp() != null) {
          this.vcRp = newNode.getVcRp();
       }
@@ -182,6 +196,7 @@ public class HadoopNodeEntity extends EntityBase {
       node.setHostName(this.hostName);
       node.setIp(this.ipAddress);
       node.setName(this.vmName);
+      node.setMoId(this.moId);
       node.setStatus(this.status);
       node.setAction(this.action);
       List<String> roleNames = nodeGroup.getRoleNameList();

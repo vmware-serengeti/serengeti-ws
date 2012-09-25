@@ -27,6 +27,9 @@ public class NodeRead {
    private String name;
 
    @Expose
+   private String moId;
+
+   @Expose
    @SerializedName("rack")
    private String rack;
 
@@ -40,13 +43,16 @@ public class NodeRead {
 
    @Expose
    private String status;
+
    @Expose
    private String action;
 
    @Expose
    private List<String> roles;
+
    @Expose
    private int totalRAMInMB;
+
    @Expose
    private int totalCPUInMHz;
 
@@ -56,6 +62,14 @@ public class NodeRead {
 
    public void setName(String name) {
       this.name = name;
+   }
+
+   public String getMoId() {
+      return moId;
+   }
+
+   public void setMoId(String moId) {
+      this.moId = moId;
    }
 
    public String getRack() {

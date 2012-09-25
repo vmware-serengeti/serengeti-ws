@@ -38,6 +38,7 @@
         "instances": [
           {
             "name" => "vm-098asdjfliu34",
+            "moid" : "vm-01",
             "status" => "poweredOn",
             "ip_address" => "10.112.113.118",
             "hostname" => "tli-centos",
@@ -66,6 +67,7 @@
           },
           {
             "name" => "vm-j89aw4hth",
+            "moid" : "vm-02",
             "status" => "poweredOn",
             "ip_address" => "10.112.113.119",
             "hostname" => "tli-centosasdf",

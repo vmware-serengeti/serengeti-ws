@@ -117,6 +117,7 @@ create sequence hadoop_node_seq;
 create table hadoop_node (
    id           bigint       not null unique DEFAULT nextval('hadoop_node_seq'::regclass),
    vm_name      varchar(255) not null unique,
+   moid         varchar(255) unique,
    rack         varchar(255),
    host_name    varchar(255),
    status       varchar(255),

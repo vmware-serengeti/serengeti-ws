@@ -47,6 +47,7 @@ public class BddMessageUtil {
    public static final String GROUP_NAME_FIELD = "name";
    public static final String INSTANCE_FIELD = "instances";
    public static final String INSTANCE_NAME_FIELD = "name";
+   public static final String INSTANCE_MOID_FIELD = "moid";
    public static final String INSTANCE_RACK_FIELD = "rack";
    public static final String INSTANCE_HOSTNAME_FIELD = "hostname";
    public static final String INSTANCE_IP_FIELD = "ip_address";
@@ -117,6 +118,8 @@ public class BddMessageUtil {
 
                         node.setVmName((String) instance
                               .get(INSTANCE_NAME_FIELD));
+                        node.setMoId((String) instance
+                              .get(INSTANCE_MOID_FIELD));
                         node.setRack((String) instance
                               .get(INSTANCE_RACK_FIELD));
                         node.setHostName((String) instance
