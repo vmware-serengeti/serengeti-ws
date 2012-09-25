@@ -48,6 +48,7 @@ public class TaskManager implements InitializingBean, DisposableBean {
    private static int poolSize = 10;
    private static int queueSize = 50;
    private static String cookie;
+   private static Random random = new Random();
 
    private static ExecutorService executorService;
 
@@ -77,7 +78,7 @@ public class TaskManager implements InitializingBean, DisposableBean {
     */
    private static String generateCookie(Object... params) {
       long timestamp = System.currentTimeMillis();
-      long rand = new Random().nextInt();
+      long rand = random.nextInt();
       long hash = 0;
       for (Object p : params) {
          if (p != null) {

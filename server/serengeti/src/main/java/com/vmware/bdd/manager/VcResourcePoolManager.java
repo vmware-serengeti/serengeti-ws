@@ -15,6 +15,7 @@
 package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -88,7 +89,7 @@ public class VcResourcePoolManager {
    }
 
    public List<VcCluster> getVcResourcePoolByNameList(String[] names) {
-      logger.debug("get resource pools by name list " + names);
+      logger.debug("get resource pools by name list " + Arrays.toString(names));
       if (names == null || names.length == 0) {
          return null;
       }

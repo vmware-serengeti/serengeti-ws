@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
@@ -89,7 +90,7 @@ public class NodeGroup {
 
          @Override
          public String toString() {
-            return "GroupRacks [racks=" + racks.toString() + "; type=" + type + "]";
+            return "GroupRacks [racks=" + Arrays.toString(racks) + "; type=" + type + "]";
          }
       }
 

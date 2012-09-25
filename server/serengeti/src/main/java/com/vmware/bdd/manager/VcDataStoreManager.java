@@ -79,9 +79,6 @@ public class VcDataStoreManager {
       // load vc resource pools
       List<VcDataStoreEntity> datastores =
          VcDataStoreEntity.findByNameAndType(type, name);
-      if (datastores == null) {
-         logger.warn("No datastore found for name " + name + ", type" + type);
-      }
       Set<String> result = getDatastorePattern(datastores);
       logger.debug("got datastores for type : " + type + ", name: " + name + result);
       return result;
@@ -89,10 +86,6 @@ public class VcDataStoreManager {
 
    public Set<String> getDatastoresByName(String name) {
       List<VcDataStoreEntity> datastores = VcDataStoreEntity.findByName(name);
-      if (datastores == null) {
-         logger.warn("No datastore found for name " + name);
-      }
-
       return getDatastorePattern(datastores);
    }
 

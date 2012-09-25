@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -126,7 +127,7 @@ public class CommandTaskWorker implements TaskWorker {
             stderrReaperThread.join();
          } else {
             logger.error("the underlying command might be still running: "
-                  + taskEntity.getCmdArray());
+                  + Arrays.toString(taskEntity.getCmdArray()));
          }
 
          logger.info("helper threads joined for task: " + taskEntity.getId());
@@ -153,6 +154,8 @@ public class CommandTaskWorker implements TaskWorker {
     * @param pid
     */
    private boolean kill(Process proc, Logger logger) {
+      BufferedReader bufInStream = null;
+      BufferedReader bufErrStream = null;
       try {
          // proc.destroy() does not work
 
@@ -167,20 +170,18 @@ public class CommandTaskWorker implements TaskWorker {
             Process procKill = Runtime.getRuntime().exec(cmdArrayKill);
             if (ConfigInfo.isDebugEnabled()) {
                logger.debug("stdout of " + killCmd + " " + pid);
-               BufferedReader bufInStream = new BufferedReader(new InputStreamReader(
+               bufInStream = new BufferedReader(new InputStreamReader(
                      procKill.getInputStream()));
                String line;
                while ((line = bufInStream.readLine()) != null) {
                   logger.debug(line);
                }
-               bufInStream.close();
                logger.debug("stderr of " + killCmd + " " + pid);
-               bufInStream = new BufferedReader(new InputStreamReader(
+               bufErrStream = new BufferedReader(new InputStreamReader(
                      procKill.getErrorStream()));
-               while ((line = bufInStream.readLine()) != null) {
+               while ((line = bufErrStream.readLine()) != null) {
                   logger.debug(line);
                }
-               bufInStream.close();
             }
             int exit = procKill.waitFor();
             logger.info("exit value = " + exit);
@@ -192,8 +193,22 @@ public class CommandTaskWorker implements TaskWorker {
          }
       } catch (Throwable t) {
          logger.error("failed to kill process: " + proc, t);
+      } finally {
+         if (bufInStream != null) {
+            try {
+               bufInStream.close();
+            } catch (Exception e) {
+               // ignore exception here
+            }
+         }
+         if (bufErrStream != null) {
+            try {
+               bufErrStream.close();
+            } catch (Exception e) {
+               // ignore exception here
+            }
+         }
       }
-
       return false;
    }
 

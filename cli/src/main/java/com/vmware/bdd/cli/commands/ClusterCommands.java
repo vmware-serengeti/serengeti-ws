@@ -22,8 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import jline.ConsoleReader;
-
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.hadoop.impala.hive.HiveCommands;
@@ -71,8 +69,6 @@ public class ClusterCommands implements CommandMarker {
    private String hiveInfo;
    private String targetClusterName;
 
-   private boolean alwaysAnswerYes;
-
    //define role of the node group .
    private enum NodeGroupRole {
       MASTER, JOB_TRACKER, WORKER, CLIENT, HBASE_MASTER, ZOOKEEPER, NONE
@@ -96,8 +92,6 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume,
          @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation,
          @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes) {
-
-      this.alwaysAnswerYes = alwaysAnswerYes;
       //validate the name
       if (name.indexOf("-") != -1) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
@@ -249,7 +243,7 @@ public class ClusterCommands implements CommandMarker {
 
       // Validate that the specified file is correct json format and proper value.
       if (specFilePath != null) {
-         if (!validateClusterCreate(clusterCreate)) {
+         if (!validateClusterCreate(clusterCreate, alwaysAnswerYes)) {
             return;
          }
       }
@@ -275,7 +269,9 @@ public class ClusterCommands implements CommandMarker {
 
       // rest invocation
       try {
-         if (!showWarningMsg(clusterCreate.getName(), warningMsgList)) {
+         if (!CommandsUtils.showWarningMsg(clusterCreate.getName(),
+               Constants.OUTPUT_OBJECT_CLUSTER, Constants.OUTPUT_OP_CREATE,
+               warningMsgList, alwaysAnswerYes)) {
             return;
          }
          restClient.create(clusterCreate);
@@ -457,6 +453,38 @@ public class ClusterCommands implements CommandMarker {
 
       if (instanceNum > 1) {
          try {
+            ClusterRead cluster = restClient.get(name, false);
+            if (cluster == null) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                     name, Constants.OUTPUT_OP_RESIZE,
+                     Constants.OUTPUT_OP_RESULT_FAIL, "cluster " + name
+                           + " does not exsit.");
+               return;
+            }
+            //disallow scale out zookeeper node group.
+            List<NodeGroupRead> ngs = cluster.getNodeGroups();
+            boolean found = false;
+            for (NodeGroupRead ng : ngs) {
+               if (ng.getName().equals(nodeGroup)) {
+                  found = true;
+                  if (ng.getRoles() != null && ng.getRoles().contains(HadoopRole.ZOOKEEPER_ROLE.toString())) {
+                     CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                           name, Constants.OUTPUT_OP_RESIZE,
+                           Constants.OUTPUT_OP_RESULT_FAIL, Constants.ZOOKEEPER_NOT_RESIZE);
+                     return;
+                  }
+                  break;
+               }
+            }
+
+            if (!found) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                     name, Constants.OUTPUT_OP_RESIZE,
+                     Constants.OUTPUT_OP_RESULT_FAIL, "node group " + nodeGroup
+                     + " does not exist.");
+               return;
+            }
+
             restClient.resize(name, nodeGroup, instanceNum);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                   name, Constants.OUTPUT_OP_RESULT_RESIZE);
@@ -640,8 +668,6 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "specFile" }, mandatory = true, help = "The spec file name path") final String specFilePath,
          @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation,
          @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes) {
-
-      this.alwaysAnswerYes = alwaysAnswerYes;
       //validate the name
       if (name.indexOf("-") != -1) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CONFIG,
@@ -662,7 +688,9 @@ public class ClusterCommands implements CommandMarker {
          validateConfiguration(clusterConfig, skipConfigValidation, warningMsgList);
          // add a confirm message for running job
          warningMsgList.add("Warning: " + Constants.PARAM_CLUSTER_CONFIG_RUNNING_JOB_WARNING);
-         if (!showWarningMsg(clusterConfig.getName(), warningMsgList)) {
+         if (!CommandsUtils.showWarningMsg(clusterConfig.getName(),
+               Constants.OUTPUT_OBJECT_CLUSTER, Constants.OUTPUT_OP_CONFIG,
+               warningMsgList, alwaysAnswerYes)) {
             return;
          }
          restClient.configCluster(clusterConfig);
@@ -893,7 +921,7 @@ public class ClusterCommands implements CommandMarker {
    /**
     * Validate nodeGroupCreates member formats and values in the ClusterCreate.
     */
-   private boolean validateClusterCreate(ClusterCreate clusterCreate) {
+   private boolean validateClusterCreate(ClusterCreate clusterCreate, final boolean alwaysAnswerYes) {
       // validation status 
       boolean validated = true;
       // show warning message
@@ -1028,7 +1056,9 @@ public class ClusterCommands implements CommandMarker {
             showFailedMsg(clusterCreate.getName(), failedMsgList);
          } else if (warning || warningMsgList != null) {
             // If warning is true,show warning message.
-            if (!showWarningMsg(clusterCreate.getName(), warningMsgList)) {
+            if (!CommandsUtils.showWarningMsg(clusterCreate.getName(),
+                  Constants.OUTPUT_OBJECT_CLUSTER, Constants.OUTPUT_OP_CREATE,
+                  warningMsgList, alwaysAnswerYes)) {
                // When exist warning message,whether to proceed
                validated = false;
             }
@@ -1037,45 +1067,7 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   private boolean isContinue(String clusterName, String operateType, String promptMsg) {
-      if (this.alwaysAnswerYes) {
-         return true;
-      }
-
-      boolean continueCreate = true;
-      boolean continueLoop = true;
-      String readMsg = "";
-      try {
-         ConsoleReader reader = new ConsoleReader();
-         // Set prompt message
-         reader.setDefaultPrompt(promptMsg);
-         int k = 0;
-         while (continueLoop) {
-            if (k >= 3) {
-               continueCreate = false;
-               break;
-            }
-            // Read user input
-            readMsg = reader.readLine();
-            if (readMsg.trim().equalsIgnoreCase("yes")
-                  || readMsg.trim().equalsIgnoreCase("y")) {
-               continueLoop = false;
-            } else if (readMsg.trim().equalsIgnoreCase("no")
-                  || readMsg.trim().equalsIgnoreCase("n")) {
-               continueLoop = false;
-               continueCreate = false;
-            } else {
-               k++;
-            }
-         }
-      } catch (Exception e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-               clusterName, operateType,
-               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
-         continueCreate = false;
-      }
-      return continueCreate;
-   }
+   
 
    private NodeGroupRole getNodeGroupRole(NodeGroupCreate nodeGroupCreate) {
       //Find roles list from current  NodeGroupCreate instance.
@@ -1093,7 +1085,6 @@ public class ClusterCommands implements CommandMarker {
     * role.
     */
    private boolean matchRole(NodeGroupRole role, List<String> roles) {
-      List<String> matchRoles = new LinkedList<String>();
       switch (role) {
       case MASTER:
          if (roles.contains(HadoopRole.HADOOP_NAMENODE_ROLE.toString())) {
@@ -1150,8 +1141,6 @@ public class ClusterCommands implements CommandMarker {
       }
       return validated;
    }
-
-
 
    private void collectInstanceNumInvalidateMsg(NodeGroupCreate nodeGroup,
          List<String> failedMsgList) {
@@ -1304,18 +1293,6 @@ public class ClusterCommands implements CommandMarker {
          warningMsgBuff.append(warningMsg);
       }
       return warningMsgBuff.toString();
-   }
-
-   private boolean showWarningMsg(String clusterName, List<String> warningMsgList) {
-      if (warningMsgList != null && !warningMsgList.isEmpty()) {
-         for (String message : warningMsgList) {
-            System.out.println(message);
-         }
-         if (!isContinue(clusterName, Constants.OUTPUT_OP_CREATE, Constants.PARAM_PROMPT_CONTINUE_MESSAGE)) {
-            return false;
-         }
-      }
-      return true;
    }
 
    private boolean isHAFlag(NodeGroupCreate nodeGroupCreate) {

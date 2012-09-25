@@ -665,6 +665,11 @@ public class ClusterManager {
                      unsupportedRoles.add(HadoopRole.HADOOP_JOBTRACKER_ROLE
                            .toString());
                   }
+                  if (roles.contains(HadoopRole.ZOOKEEPER_ROLE
+                        .toString())) {
+                     unsupportedRoles.add(HadoopRole.ZOOKEEPER_ROLE
+                           .toString());
+                  }
                   if (!unsupportedRoles.isEmpty()) {
                      logger.info("can not resize node group with role: "
                            + unsupportedRoles);
