@@ -327,8 +327,6 @@ public class ClusterConfigManager {
          NodeGroupEntity groupEntity =
                convertGroup(gson, clusterEntity, allRoles, group, distro,
                      validateWhiteList);
-         // set vm folder path
-         groupEntity.setVmFolderPath(clusterEntity);
          if (groupEntity != null) {
             nodeGroups.add(groupEntity);
          }
@@ -359,7 +357,7 @@ public class ClusterConfigManager {
                   fillPolicy.FillMissingGroups(nodeGroups, missingRoles,
                         clusterEntity,cluster.getType());
             nodeGroups.addAll(convertNodeGroupsToEntities(gson, clusterEntity,
-                  distro, missingGroups.toArray(new NodeGroupCreate[] {}),
+                  distro, missingGroups.toArray(new NodeGroupCreate[missingGroups.size()]),
                   allRoles, validateWhiteList));
          }
       } else {
@@ -367,7 +365,7 @@ public class ClusterConfigManager {
          Set<NodeGroupCreate> missingGroups = fillPolicy.fillDefaultGroups(cluster.getType());
          nodeGroups =
                convertNodeGroupsToEntities(gson, clusterEntity, distro,
-                     missingGroups.toArray(new NodeGroupCreate[] {}), allRoles,
+                     missingGroups.toArray(new NodeGroupCreate[missingGroups.size()]), allRoles,
                      validateWhiteList);
       }
       clusterEntity.setNodeGroups(nodeGroups);
@@ -459,6 +457,8 @@ public class ClusterConfigManager {
                validateWhiteList);
          groupEntity.setHadoopConfig(gson.toJson(group.getConfiguration()));
       }
+      // set vm folder path
+      groupEntity.setVmFolderPath(clusterEntity);
       logger.debug("finished to convert node group config for "
             + group.getName());
       return groupEntity;
@@ -572,7 +572,7 @@ public class ClusterConfigManager {
       if (clusterEntity.getVcRpNames() != null) {
          logger.debug("resource pool specified at cluster level.");
          String[] rpNames =
-               clusterEntity.getVcRpNameList().toArray(new String[] {});
+               clusterEntity.getVcRpNameList().toArray(new String[clusterEntity.getVcRpNameList().size()]);
          List<VcCluster> vcClusters =
                rpMgr.getVcResourcePoolByNameList(rpNames);
          clusterConfig.setVcClusters(vcClusters);
@@ -610,7 +610,7 @@ public class ClusterConfigManager {
          instanceNum += group.getInstanceNum();
       }
       sortGroups(nodeGroups);
-      clusterConfig.setNodeGroups(nodeGroups.toArray(new NodeGroupCreate[]{}));
+      clusterConfig.setNodeGroups(nodeGroups.toArray(new NodeGroupCreate[nodeGroups.size()]));
       NetworkEntity networkEntity = clusterEntity.getNetwork();
       List<NetworkAdd> networking = new ArrayList<NetworkAdd>();
       NetworkAdd network = new NetworkAdd();

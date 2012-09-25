@@ -161,7 +161,7 @@ public class VcResourcePoolEntity extends EntityBase {
             return arg0.getName().compareTo(arg1.getName());
          }
       });
-      read.setNodes(nodeReads.toArray(new NodeRead[]{}));
+      read.setNodes(nodeReads.toArray(new NodeRead[nodeReads.size()]));
       return read;
    }
 }
