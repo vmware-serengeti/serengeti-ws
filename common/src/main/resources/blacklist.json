@@ -1,14 +1,17 @@
 [
   {
     "core-site.xml":[
-	"net.topology.impl"
+	"net.topology.impl",
+	"net.topology.nodegroup.aware",
+	"dfs.block.replicator.classname"
     ]
   },
   {
     "hdfs-site.xml":[
     "dfs.http.address",
     "dfs.name.dir",
-    "dfs.data.dir"
+    "dfs.data.dir",
+    "topology.script.file.name"
     ]
   },  
   {
@@ -33,5 +36,25 @@
   },
   { 
     "log4j.properties":[]
+  },
+  { 
+    "java.env":[]
+  },
+  {
+     "hbase-site.xml":[
+     "hbase.rootdir",
+     "hbase.cluster.distributed",
+     "hbase.zookeeper.quorum"
+     ]
+  },
+  {
+     "hbase-env.sh":[
+     "HBASE_CONF_DIR",
+     "HBASE_LOG_DIR",
+     "HBASE_PID_DIR",
+     "HBASE_MANAGES_ZK",
+     "HBASE_IDENT_STRING"
+     ]
   }
+
 ]

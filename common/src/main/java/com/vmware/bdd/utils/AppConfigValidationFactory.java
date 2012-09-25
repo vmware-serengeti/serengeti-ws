@@ -48,7 +48,10 @@ public class AppConfigValidationFactory {
         Gson gson = new Gson();
         List<Map<String, List<String>>> blackList = gson.fromJson(jsonStr, List.class);
         for (Entry<String, Object> configType : config.entrySet()) {
-            if (((String) configType.getKey()).trim().equalsIgnoreCase("hadoop")) {
+            if (((String) configType.getKey()).trim().equalsIgnoreCase("hadoop")
+            		|| ((String) configType.getKey()).trim().equalsIgnoreCase("hbase") 
+            		|| ((String) configType.getKey()).trim().equalsIgnoreCase("zookeeper")
+                ) {
                 if (!(configType.getValue() instanceof Map)) {
                     throw new RuntimeException(Constants.CLUSTER_CONFIG_ERROR);
                 }
@@ -71,7 +74,10 @@ public class AppConfigValidationFactory {
         Gson gson = new Gson();
         List<Map<String, List<Map<String, String>>>> whiteList = gson.fromJson(jsonStr, List.class);
         for (Entry<String, Object> configType : config.entrySet()) {
-            if (((String) configType.getKey()).trim().equalsIgnoreCase("hadoop")) {
+            if (((String) configType.getKey()).trim().equalsIgnoreCase("hadoop")
+            		|| ((String) configType.getKey()).trim().equalsIgnoreCase("hbase")
+            		|| ((String) configType.getKey()).trim().equalsIgnoreCase("zookeeper")
+                ) {
                 if (!(configType.getValue() instanceof Map)) {
                     throw new RuntimeException(Constants.CLUSTER_CONFIG_ERROR);
                 }
