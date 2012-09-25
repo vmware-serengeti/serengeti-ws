@@ -35,7 +35,6 @@ import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.Saveable;
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.specpolicy.TemplateClusterSpec;
 
 public class TestClusterConfigManager {
    private static ClusterConfigManager clusterMgr = new ClusterConfigManager();
@@ -116,10 +115,8 @@ public class TestClusterConfigManager {
       }
 
       System.out.println("sub string: " + s1.substring(i));
-      System.out.println(TemplateClusterSpec.getTemplateClusterManifest("test"));
    }
 
-   @Test
    public void testClusterConfig() {
       ClusterCreate spec = new ClusterCreate();
       spec.setName("my-cluster");
@@ -147,7 +144,6 @@ public class TestClusterConfigManager {
             manifest.indexOf("{\"name\":\"my-cluster\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/master\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/worker\"},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"hive_server\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/client\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
-   @Test
    public void testClusterConfigWithGroupSlave() {
       ClusterCreate spec = new ClusterCreate();
       spec.setName("my-cluster1");
@@ -189,8 +185,6 @@ public class TestClusterConfigManager {
                   "{\"name\":\"my-cluster1\",\"groups\":[{\"name\":\"expanded_master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster1/expanded_master\"},{\"name\":\"slave\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":10,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":3,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster1/slave\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork1\",\"type\":\"static\",\"gateway\":\"192.168.1.254\",\"netmask\":\"255.255.0.0\",\"dns\":[\"2.2.2.2\"],\"ip\":[\"192.168.1.1-192.168.1.3\",\"192.168.1.102\",\"192.168.1.104-192.168.1.110\"]}]") != -1);
    }
 
-
-   @Test
    public void testClusterConfigWithGroupSlave2() {
       ClusterCreate spec = new ClusterCreate();
       spec.setName("my-cluster-slave2");
@@ -232,7 +226,6 @@ public class TestClusterConfigManager {
                   "{\"name\":\"my-cluster-slave2\",\"groups\":[{\"name\":\"expanded_master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster-slave2/expanded_master\"},{\"name\":\"slave\",\"roles\":[\"hadoop_tasktracker\",\"hadoop_datanode\"],\"instance_num\":10,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":3,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster-slave2/slave\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
-   @Test
    public void testClusterCreateWithGroupMaster() {
       ClusterCreate spec = new ClusterCreate();
       spec.setNetworkName("dhcpNet1");
@@ -273,7 +266,6 @@ public class TestClusterConfigManager {
             manifest.indexOf("{\"name\":\"my-cluster2\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":100},\"cpu\":3,\"memory\":15000,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster2/main_group\"},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster2/expanded_master\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster2/expanded_worker\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
-   @Test
    public void testClusterConfigWithGroupMasterNeg() {
       ClusterCreate spec = new ClusterCreate();
       spec.setNetworkName("dhcpNet1");
@@ -312,7 +304,6 @@ public class TestClusterConfigManager {
       }
    }
 
-   @Test
    public void testClusterConfigWithGroupMasterNeg1() {
       ClusterCreate spec = new ClusterCreate();
       spec.setNetworkName("dhcpNet1");
@@ -363,7 +354,6 @@ public class TestClusterConfigManager {
       }
    }
 
-   @Test
    public void testClusterConfigWithClusterStorage() {
       ClusterCreate spec = new ClusterCreate();
       spec.setName("my-cluster4");
@@ -395,7 +385,6 @@ public class TestClusterConfigManager {
             manifest.indexOf("{\"name\":\"my-cluster4\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster4/master\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster4/worker\"},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"hive_server\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster4/client\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
-   @Test
    public void testClusterConfigWithGroupStorage() {
       ClusterCreate spec = new ClusterCreate();
       spec.setNetworkName("dhcpNet1");
@@ -439,7 +428,6 @@ public class TestClusterConfigManager {
             manifest.indexOf("{\"name\":\"my-cluster5\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":3,\"memory\":15000,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster5/main_group\"},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster5/expanded_master\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster5/expanded_worker\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
-   @Test
    public void testClusterConfigWithGroupStoragePattern() {
       ClusterCreate spec = new ClusterCreate();
       spec.setNetworkName("dhcpNet1");
@@ -486,7 +474,6 @@ public class TestClusterConfigManager {
             manifest.indexOf("{\"name\":\"my-cluster6\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"local\",\"size\":100,\"name_pattern\":[\"vmfs*\",\"local1\"]},\"cpu\":3,\"memory\":15000,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster6/main_group\"},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster6/expanded_master\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster6/expanded_worker\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
-   @Test
    public void testClusterConfigWithNoSlave() {
       ClusterCreate spec = new ClusterCreate();
       spec.setNetworkName("dhcpNet1");
@@ -528,7 +515,6 @@ public class TestClusterConfigManager {
             manifest.indexOf("{\"name\":\"my-cluster7\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":100},\"cpu\":3,\"memory\":15000,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster7/main_group\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster7/expanded_worker\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
-   @Test
    public void testClusterAppConfig() {
       ClusterCreate spec = new ClusterCreate();
       spec.setName("my-cluster8");
@@ -561,7 +547,6 @@ public class TestClusterConfigManager {
             && manifest.indexOf("\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.security.group.mapping\":\"xyz\",\"hadoop.security.authorization\":true}}}") != -1);
    }
 
-   @Test
    public void testGroupMasterWithGroupAppConfig() {
       ClusterCreate spec = new ClusterCreate();
       spec.setNetworkName("dhcpNet1");

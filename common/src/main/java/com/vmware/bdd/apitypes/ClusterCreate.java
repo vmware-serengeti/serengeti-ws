@@ -24,15 +24,13 @@ import java.util.TreeMap;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.apitypes.Cluster.ClusterType;
 import com.vmware.bdd.spectypes.HadoopDistroMap;
 import com.vmware.bdd.spectypes.VcCluster;
 
 /**
- * Cluster creation parameters
+ * Cluster creation spec
  */
 public class ClusterCreate {
-
    @Expose
    private String name;
    private String externalHDFS;
@@ -74,7 +72,7 @@ public class ClusterCreate {
    @SerializedName("cluster_configuration")
    private Map<String, Object> configuration;
    private Boolean validateConfig = true;
-   private ClusterType type = ClusterType.HADOOP;
+
    public ClusterCreate() {
    }
 
@@ -242,15 +240,8 @@ public class ClusterCreate {
       this.validateConfig = validateConfig;
    }
 
-   public ClusterType getType() {
-      return type;
-   }
-
-   public void setType(ClusterType type) {
-      this.type = type;
-   }
-
-   public boolean validateNodeGroupPlacementPolicies(List<String> failedMsgList, List<String> warningMsgList) {
+   public boolean validateNodeGroupPlacementPolicies(List<String> failedMsgList,
+         List<String> warningMsgList) {
       boolean valid = true;
 
       Map<String, NodeGroupCreate> allGroups = new TreeMap<String, NodeGroupCreate>();
@@ -264,7 +255,8 @@ public class ClusterCreate {
       }
 
       for (NodeGroupCreate ngc : getNodeGroups()) {
-	  if (!ngc.validatePlacementPolicies(this, allGroups, failedMsgList, warningMsgList)) {
+         if (!ngc.validatePlacementPolicies(this, allGroups, failedMsgList,
+               warningMsgList)) {
             valid = false;
          }
       }
@@ -298,7 +290,7 @@ public class ClusterCreate {
    }
 
    public boolean hasHDFSUrlConfigured() {
-      return getExternalHDFS() != null && !getExternalHDFS().isEmpty(); 
+      return getExternalHDFS() != null && !getExternalHDFS().isEmpty();
    }
 
    public boolean validateHDFSUrl() {
@@ -316,5 +308,4 @@ public class ClusterCreate {
       }
       return false;
    }
-
 }

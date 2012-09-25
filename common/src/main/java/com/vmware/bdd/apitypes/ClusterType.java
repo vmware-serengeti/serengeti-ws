@@ -17,10 +17,13 @@ package com.vmware.bdd.apitypes;
 /**
  * This class is the common enum of cluster command.
  */
-public class Cluster {
+public enum ClusterType {
+   // hdfs cluster
+   HDFS,
 
-   public enum ClusterType {
-      HADOOP, HBASE
-   }
+   // hdfs + mapreduce cluster
+   HDFS_MAPRED,
 
+   // hdfs + hbase cluster
+   HDFS_HBASE
 }

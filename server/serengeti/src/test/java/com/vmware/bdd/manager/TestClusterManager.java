@@ -37,9 +37,10 @@ import org.testng.annotations.Test;
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.CloudProviderConfigEntity;
@@ -234,7 +235,7 @@ public class TestClusterManager {
       ClusterCreate createSpec = new ClusterCreate();
       createSpec.setName(CLUSTER_NAME);
       createSpec.setNetworkName(NETWORK_NAME);
-      Long id = clusterManager.createCluster(createSpec);
+      Long id = clusterManager.createCluster(ClusterType.HDFS_MAPRED, createSpec);
       TaskEntity task = TaskEntity.findById(id);
       ClusterEntity cluster =
             ClusterEntity.findClusterEntityByName(CLUSTER_NAME);

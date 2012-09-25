@@ -47,7 +47,6 @@ import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ConfigInfo;
-import com.vmware.bdd.utils.Configuration;
 
 /**
  * Cluster Entity

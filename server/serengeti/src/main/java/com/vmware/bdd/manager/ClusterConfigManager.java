@@ -26,7 +26,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
 import org.apache.log4j.Logger;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.ClusterCreate;
@@ -37,9 +39,10 @@ import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.apitypes.RackInfo;
+import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
@@ -52,13 +55,11 @@ import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.exception.UniqueConstraintViolationException;
 import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
-import com.vmware.bdd.specpolicy.FillRequiredHadoopGroups;
 import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Configuration;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
 
 public class ClusterConfigManager {
    private static final long serialVersionUID = 1L;
@@ -70,7 +71,6 @@ public class ClusterConfigManager {
    private DistroManager distroMgr;
    private RackInfoManager rackInfoMgr;
    private VcDataStoreManager datastoreMgr;
-   private FillRequiredHadoopGroups fillPolicy = new FillRequiredHadoopGroups();
    private String templateId = Configuration.getString(TEMPLATE_ID.toString(),
          "centos57-x64");
 
@@ -152,9 +152,9 @@ public class ClusterConfigManager {
                logger.debug("begin to add cluster config for " + name);
                Gson gson = new Gson();
                ClusterEntity clusterEntity = new ClusterEntity(name);
-               String distro =
-                     CommonClusterExpandPolicy.convertDistro(cluster,
-                           clusterEntity);
+               AuAssert.check(cluster.getDistro() != null);
+               clusterEntity.setDistro(cluster.getDistro());
+
                clusterEntity.setStartAfterDeploy(true);
                if (cluster.getRpNames() != null
                      && cluster.getRpNames().size() > 0) {
@@ -214,7 +214,12 @@ public class ClusterConfigManager {
                         .getConfiguration()));
                }
 
-               expandNodeGroupCreates(cluster, gson, clusterEntity, distro);
+               NodeGroupCreate[] groups = cluster.getNodeGroups();
+               if (groups != null && groups.length > 0) {
+                  clusterEntity.setNodeGroups(convertNodeGroupsToEntities(gson,
+                        clusterEntity, cluster.getDistro(), groups,
+                        EnumSet.noneOf(HadoopRole.class), cluster.isValidateConfig()));
+               }
 
                if (cluster.getTopologyPolicy() == null) {
                   clusterEntity.setTopologyPolicy(TopologyType.NONE);
@@ -334,43 +339,6 @@ public class ClusterConfigManager {
          }
       }
       return nodeGroups;
-   }
-
-   private void expandNodeGroupCreates(final ClusterCreate cluster, Gson gson,
-         ClusterEntity clusterEntity, String distro) {
-      NodeGroupCreate[] groups = cluster.getNodeGroups();
-      Set<NodeGroupEntity> nodeGroups = null;
-      EnumSet<HadoopRole> allRoles = EnumSet.noneOf(HadoopRole.class);
-      boolean validateWhiteList = cluster.isValidateConfig();
-      if (groups != null && groups.length > 0) {
-         logger.debug("User defined node groups.");
-         nodeGroups =
-               convertNodeGroupsToEntities(gson, clusterEntity, distro, groups,
-                     allRoles, validateWhiteList);
-         // add required node groups
-         EnumSet<HadoopRole> missingRoles =
-               getMissingRequiredRoles(allRoles, distro);
-         if (cluster.hasHDFSUrlConfigured()) {
-            missingRoles.remove(HadoopRole.HADOOP_NAMENODE_ROLE);
-            missingRoles.remove(HadoopRole.HADOOP_DATANODE);
-         }
-         if (!missingRoles.isEmpty()) {
-            Set<NodeGroupCreate> missingGroups =
-                  fillPolicy.FillMissingGroups(nodeGroups, missingRoles,
-                        clusterEntity,cluster.getType());
-            nodeGroups.addAll(convertNodeGroupsToEntities(gson, clusterEntity,
-                  distro, missingGroups.toArray(new NodeGroupCreate[] {}),
-                  allRoles, validateWhiteList));
-         }
-      } else {
-         // we need to add default group config into db
-         Set<NodeGroupCreate> missingGroups = fillPolicy.fillDefaultGroups(cluster.getType());
-         nodeGroups =
-               convertNodeGroupsToEntities(gson, clusterEntity, distro,
-                     missingGroups.toArray(new NodeGroupCreate[] {}), allRoles,
-                     validateWhiteList);
-      }
-      clusterEntity.setNodeGroups(nodeGroups);
    }
 
    private NodeGroupEntity convertGroup(Gson gson, ClusterEntity clusterEntity,
@@ -583,10 +551,10 @@ public class ClusterConfigManager {
       }
       List<NodeGroupCreate> nodeGroups = new ArrayList<NodeGroupCreate>();
 
+      // TODO need more role checks
+
       Set<NodeGroupEntity> nodeGroupEntities = clusterEntity.getNodeGroups();
       long instanceNum = 0;
-      AuAssert.check(nodeGroupEntities != null && !nodeGroupEntities.isEmpty(),
-            "The node group config should not be empty.");
 
       for (NodeGroupEntity ngEntity : nodeGroupEntities) {
          NodeGroupCreate group =
@@ -802,19 +770,6 @@ public class ClusterConfigManager {
          enumRoles.add(configuredRole);
       }
       return enumRoles;
-   }
-
-   private EnumSet<HadoopRole> getMissingRequiredRoles(
-         EnumSet<HadoopRole> roles, String distro) {
-      logger.debug("get missing required roles");
-      EnumSet<HadoopRole> allEnums = EnumSet.allOf(HadoopRole.class);
-      allEnums.removeAll(roles);
-      if (!allEnums.isEmpty()) {
-         logger.debug("Roles "
-               + allEnums
-               + "is required, but not specified in the cluster spec. Will append default config.");
-      }
-      return allEnums;
    }
 
    public void updateAppConfig(final String clusterName, final ClusterCreate clusterCreate) {

@@ -33,6 +33,7 @@ import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
@@ -57,6 +58,7 @@ import com.vmware.bdd.manager.task.StopClusterListener;
 import com.vmware.bdd.manager.task.TaskListener;
 import com.vmware.bdd.manager.task.UpdateClusterListener;
 import com.vmware.bdd.manager.task.VHMReceiveListener;
+import com.vmware.bdd.specpolicy.ClusterSpecFactory;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ClusterCmdUtil;
@@ -297,7 +299,6 @@ public class ClusterManager {
       ClusterCreate spec = clusterConfigMgr.getClusterConfig(clusterName);
       spec.setVcClusters(null);
       spec.setTemplateId(null);
-      spec.setType(null);
       spec.setDistroMap(null);
       spec.setSharedPattern(null);
       spec.setLocalPattern(null);
@@ -329,6 +330,11 @@ public class ClusterManager {
          clusters.add(getClusterByName(entity.getName(), true));
       }
       return clusters;
+   }
+
+   public Long createCluster(ClusterType clusterType, ClusterCreate createSpec)
+         throws Exception {
+      return createCluster(ClusterSpecFactory.getCustomizedSpec(clusterType, createSpec));
    }
 
    public Long createCluster(ClusterCreate createSpec) throws Exception {
