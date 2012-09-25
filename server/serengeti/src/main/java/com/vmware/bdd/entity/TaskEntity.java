@@ -38,9 +38,11 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.TaskRead.Status;
+import com.vmware.bdd.apitypes.TaskRead.Type;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.manager.task.TaskListener;
+import com.vmware.bdd.manager.task.VHMReceiveListener;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Configuration;
 
@@ -53,7 +55,7 @@ public class TaskEntity extends EntityBase {
    private static final String TASK_ID_STR = "${task_id}";
    private static String routeKeyFormat = "task." + TASK_ID_STR;
    private static File taskRootDir;
-
+   private static String serengetiLog = "serengeti.log";
 
    static {
       String taskRootDirStr = System.getProperty("serengeti.home.dir");
@@ -151,19 +153,27 @@ public class TaskEntity extends EntityBase {
       }
    }
 
+   @SuppressWarnings("static-access")
    public File getWorkDir() {
-      if (getId() == null) {
-         return null;
-      }
+      File path = null;
+      Type type = getType();
+      if (type.equals(type.INNER)) {
+         if (getId() == null) {
+            return null;
+         }
 
-      File path = new File(taskRootDir, getId().toString());
-      if (!path.exists()) {
-         path.mkdirs();
+         path = new File(taskRootDir, getId().toString());
+         if (!path.exists()) {
+            path.mkdirs();
+         }
+      } else if (type.equals(type.VHM)) {
+         path = new File(taskRootDir,serengetiLog);
+         AuAssert.check(path.exists(),"The " + serengetiLog + " must exist !");
       }
 
       return path;
    }
-   
+
    public String getMessageRouteKey() {
       if (getId() == null) {
          return null;
@@ -323,6 +333,15 @@ public class TaskEntity extends EntityBase {
          return updateState(taskId, status, 1.0, null);
       } else {
          return updateState(taskId, status, null, errorMessage);
+      }
+   }
+
+   public Type getType() {
+      TaskListener taskListener = getTaskListener();
+      if (taskListener instanceof VHMReceiveListener) {
+         return Type.VHM;
+      } else {
+         return Type.INNER;
       }
    }
 }

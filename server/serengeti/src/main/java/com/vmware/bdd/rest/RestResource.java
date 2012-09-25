@@ -284,6 +284,11 @@ public class RestResource {
          HttpServletResponse response) throws Exception {
       int activeComputeNodeNum = requestBody.getActiveComputeNodeNum();
       String groupName = requestBody.getNodeGroupName();
+      // The active compute node number must be a positive number or -1.
+      if (activeComputeNodeNum < -1) {
+         logger.error("Invalid instance number: " + activeComputeNodeNum + " !");
+         throw BddException.INVALID_PARAMETER("instance number", String.valueOf(activeComputeNodeNum));
+      }
       Long taskId = clusterMgr.limitCluster(clusterName, groupName, activeComputeNodeNum);
       redirectRequest(taskId, request, response);
    }

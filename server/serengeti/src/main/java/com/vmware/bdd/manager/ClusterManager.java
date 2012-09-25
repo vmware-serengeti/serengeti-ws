@@ -33,7 +33,6 @@ import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
-import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
@@ -768,7 +767,7 @@ public class ClusterManager {
       ClusterRead cluster = getClusterByName(clusterName, false);
       // cluster must be contain node group
       List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
-      if(nodeGroups == null || nodeGroups.isEmpty()) {
+      if (nodeGroups == null || nodeGroups.isEmpty()) {
          String msg = "There is no node group in cluster " + clusterName + " . ";
          logger.error(msg);
          throw BddException.INTERNAL(null, msg);
@@ -786,7 +785,7 @@ public class ClusterManager {
       }
       // find hadoop job tracker ip
       String hadoopJobTrackerIP="";
-      for(NodeGroupRead nodeGroup : nodeGroups){
+      for (NodeGroupRead nodeGroup : nodeGroups) {
          if (nodeGroup.getRoles() != null && nodeGroup.getRoles().contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
             AuAssert.check(nodeGroup.getInstanceNum() == 1, "The Jobtracker only support one instance .");
             hadoopJobTrackerIP = nodeGroup.getInstances().get(0).getIp();

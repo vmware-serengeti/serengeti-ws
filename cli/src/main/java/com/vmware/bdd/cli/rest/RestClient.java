@@ -39,6 +39,7 @@ import org.springframework.web.client.RestTemplate;
 import com.vmware.bdd.apitypes.Connect;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
+import com.vmware.bdd.apitypes.TaskRead.Type;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 import com.vmware.bdd.cli.commands.CookieCache;
@@ -365,10 +366,10 @@ public class RestClient {
          } while (taskRead.getStatus() != TaskRead.Status.SUCCESS
                && taskRead.getStatus() != TaskRead.Status.FAILED);
 
+         String logdir = taskRead.getWorkDir();
+         String errorMsg = taskRead.getErrorMessage();
          if (taskRead.getStatus().equals(TaskRead.Status.FAILED)) {
-            String logdir = taskRead.getWorkDir();
-            String errorMsg = taskRead.getErrorMessage();
-            if (logdir != null && !logdir.isEmpty()) {
+            if (!CommandsUtils.isBlank(logdir)) {
                String outputErrorInfo = Constants.OUTPUT_LOG_INFO + logdir;
                if (errorMsg != null) {
                   outputErrorInfo = errorMsg + " " + outputErrorInfo;
@@ -379,8 +380,13 @@ public class RestClient {
             } else {
                throw new CliRestException("task failed");
             }
+         } else if (taskRead.getStatus().equals(TaskRead.Status.SUCCESS)) {
+            if (taskRead.getType().equals(Type.VHM)) {
+               if(!CommandsUtils.isBlank(logdir)){
+                  System.out.println(Constants.OUTPUT_WARNING_LOG_INFO + logdir);                  
+               }
+            }
          }
-
       }
    }
 

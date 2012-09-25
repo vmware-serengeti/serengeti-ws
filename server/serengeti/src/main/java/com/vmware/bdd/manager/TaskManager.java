@@ -143,8 +143,8 @@ public class TaskManager implements InitializingBean, DisposableBean {
    }
 
    public List<TaskRead> getTasks() {
-      List<TaskEntity> taskEntities = DAL
-            .inRoTransactionDo(new Saveable<List<TaskEntity>>() {
+      List<TaskEntity> taskEntities =
+            DAL.inRoTransactionDo(new Saveable<List<TaskEntity>>() {
                @Override
                public List<TaskEntity> body() throws Exception {
                   // we may want to limit the max number and make it ordered
@@ -154,9 +154,9 @@ public class TaskManager implements InitializingBean, DisposableBean {
 
       List<TaskRead> tasks = new ArrayList<TaskRead>();
       for (TaskEntity entity : taskEntities) {
-         tasks.add(new TaskRead(entity.getId(), entity.getStatus(),
-               entity.getProgress(), entity.getErrorMessage(), entity.getWorkDir()
-                     .getAbsolutePath()));
+         tasks.add(new TaskRead(entity.getId(), entity.getStatus(), entity
+               .getType(), entity.getProgress(), entity.getErrorMessage(),
+               entity.getWorkDir().getAbsolutePath()));
       }
 
       return tasks;
@@ -171,7 +171,8 @@ public class TaskManager implements InitializingBean, DisposableBean {
       });
 
       if (entity != null) {
-         return new TaskRead(entity.getId(), entity.getStatus(), entity.getProgress(),
+         return new TaskRead(entity.getId(), entity.getStatus(),
+               entity.getType(), entity.getProgress(),
                entity.getErrorMessage(), entity.getWorkDir().getAbsolutePath());
       }
 

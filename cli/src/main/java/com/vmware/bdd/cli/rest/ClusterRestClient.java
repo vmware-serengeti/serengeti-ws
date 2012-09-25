@@ -147,7 +147,7 @@ public class ClusterRestClient {
                throw e;
             }
          }
-         
+
          public boolean isRefresh() throws Exception {
             try {
                cluster = clusterRestClient.get(id, false);

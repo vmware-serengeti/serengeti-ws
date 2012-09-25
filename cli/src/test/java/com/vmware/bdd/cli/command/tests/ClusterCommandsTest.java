@@ -36,6 +36,7 @@ import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
+import com.vmware.bdd.apitypes.TaskRead.Type;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.cli.commands.ClusterCommands;
 import com.vmware.bdd.cli.commands.CommandsUtils;
@@ -419,6 +420,7 @@ public class ClusterCommandsTest extends MockRestServer {
 
         TaskRead task = new TaskRead();
         task.setId(12l);
+        task.setType(Type.INNER);
         task.setProgress(0.8);
         task.setStatus(Status.RUNNING);
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/task/12", HttpMethod.GET, HttpStatus.OK,

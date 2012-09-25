@@ -22,9 +22,12 @@ public class TaskRead {
    public enum Status {
       CREATED, SUBMITTED, RUNNING, SUCCESS, FAILED
    }
-
+   public enum Type {
+      INNER, VHM 
+   }
    Long id;
    Status status;
+   Type type;
    Double progress;
    String errorMessage;
    String workDir;
@@ -33,10 +36,11 @@ public class TaskRead {
 
    }
 
-   public TaskRead(Long id, Status status, Double progress, String errorMessage,
+   public TaskRead(Long id, Status status, Type type, Double progress, String errorMessage,
          String workDir) {
       this.id = id;
       this.status = status;
+      this.type = type;
       this.progress = progress;
       this.errorMessage = errorMessage;
       this.workDir = workDir;
@@ -56,6 +60,14 @@ public class TaskRead {
 
    public void setStatus(Status status) {
       this.status = status;
+   }
+
+   public Type getType() {
+      return type;
+   }
+
+   public void setType(Type type) {
+      this.type = type;
    }
 
    public Double getProgress() {
