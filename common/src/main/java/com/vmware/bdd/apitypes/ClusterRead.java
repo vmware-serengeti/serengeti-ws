@@ -152,11 +152,11 @@ public class ClusterRead {
                    invalidNodeGroup.add(nodeGroupName);
             }
             if (!invalidNodeGroup.isEmpty()) {
-               System.out.println("The specified node group is not a compute only node group.");
+               System.out.println("Adjustment failed: The specified node group is not a compute only node group.");
                return false;
             }
          } else {
-            System.out.println("There is not node group under the cluster " + getName() + " !");
+            System.out.println("Adjustment failed: There is not node group under the cluster " + getName() + " !");
             return false;
          }
       } else {
@@ -170,7 +170,7 @@ public class ClusterRead {
             }
          }
          if(count == 0){
-            System.out.println("There's no compute only nodes in the cluster.");
+            System.out.println("Adjustment failed: There's no compute only nodes in the cluster.");
             return false;
          }
       }

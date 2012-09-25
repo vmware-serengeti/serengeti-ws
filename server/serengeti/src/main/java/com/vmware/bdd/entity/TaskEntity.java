@@ -44,6 +44,7 @@ import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.manager.task.TaskListener;
 import com.vmware.bdd.manager.task.VHMReceiveListener;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Configuration;
 
 @Entity
@@ -56,9 +57,9 @@ public class TaskEntity extends EntityBase {
    private static String routeKeyFormat = "task." + TASK_ID_STR;
    private static File taskRootDir;
    private static String serengetiLog = "serengeti.log";
-
+   private static String taskRootDirStr = "";
    static {
-      String taskRootDirStr = System.getProperty("serengeti.home.dir");
+      taskRootDirStr = System.getProperty("serengeti.home.dir");
       if (taskRootDirStr != null) {
          taskRootDir = new File(taskRootDirStr, "logs/task");
       } else {
@@ -167,7 +168,14 @@ public class TaskEntity extends EntityBase {
             path.mkdirs();
          }
       } else if (type.equals(type.VHM)) {
-         path = new File(taskRootDir,serengetiLog);
+         String serengetiLogPath = "";
+         if (!CommonUtil.isBlank(taskRootDirStr)) {
+            serengetiLogPath = taskRootDirStr + "/logs/" + serengetiLog;
+         } else {
+            serengetiLogPath = System.getProperty("catalina.home") + "/logs/" + serengetiLog;
+         }
+         logger.info("serengeti.log path is  " + serengetiLogPath);
+         path = new File(serengetiLogPath);
          AuAssert.check(path.exists(),"The " + serengetiLog + " must exist !");
       }
 

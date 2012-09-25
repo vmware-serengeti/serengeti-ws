@@ -24,7 +24,7 @@ public interface PrettyOutput {
     * Check if the screen needs refresh or same as before
     * 
     */
-   boolean isRefresh() throws Exception;
+   boolean isRefresh(boolean realTime) throws Exception;
 
    void prettyOutput() throws Exception;
 }

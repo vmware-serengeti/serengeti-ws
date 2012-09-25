@@ -148,9 +148,9 @@ public class ClusterRestClient {
             }
          }
 
-         public boolean isRefresh() throws Exception {
+         public boolean isRefresh(boolean realTime) throws Exception {
             try {
-               cluster = clusterRestClient.get(id, false);
+               cluster = clusterRestClient.get(id, realTime);
                if (cluster != null) {
                   List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
                   if (nodeGroups != null) {

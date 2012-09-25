@@ -507,15 +507,13 @@ public class ClusterCommands implements CommandMarker {
             @CliOption(key = { "activeComputeNodeNum" }, mandatory = true, help = "The number of instances powered on") final int activeComputeNodeNum) {
 
          try {
-<<<<<<< HEAD
-            ClusterRead cluster = restClient.get(clusterName, false);
-=======
             // The active compute node number must be a integer and cannot be less than zero.
             if (activeComputeNodeNum < 0) {
-               System.out.println("Invalid instance number:" + activeComputeNodeNum);
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT,null,null, Constants.OUTPUT_OP_ADJUSTMENT_FAILED
+                     ,"Invalid instance number:" + activeComputeNodeNum + " .");
                return;
             }
-            ClusterRead cluster = restClient.get(clusterName);
+            ClusterRead cluster = restClient.get(clusterName, false);
             if (cluster == null) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null, null,
                      Constants.OUTPUT_OP_ADJUSTMENT_FAILED, "cluster " + clusterName + " is not exsit !");
@@ -539,8 +537,7 @@ public class ClusterCommands implements CommandMarker {
 
          try {
             int activeComputeNodeNum = -1;
-            ClusterRead cluster = restClient.get(clusterName);
->>>>>>> Add cluster unlimit command.
+            ClusterRead cluster = restClient.get(clusterName, false);
             if (cluster == null) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null, null,
                      Constants.OUTPUT_OP_ADJUSTMENT_FAILED, "cluster " + clusterName + " is not exsit !");

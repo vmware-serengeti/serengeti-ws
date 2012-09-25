@@ -324,6 +324,8 @@ public class RestClient {
          TaskRead taskRead;
          int oldProgress = 0;
          Status oldTaskStatus = null;
+         Status taskStatus = null;
+         int progress = 0;
          do {
             ResponseEntity<TaskRead> taskResponse =
                   restGetById(Constants.REST_PATH_TASK, taskId, TaskRead.class, false);
@@ -332,24 +334,18 @@ public class RestClient {
 
             taskRead = taskResponse.getBody();
 
-            int progress = (int) (taskRead.getProgress() * 100);
-            Status taskStatus = taskRead.getStatus();
+            progress = (int) (taskRead.getProgress() * 100);
+            taskStatus = taskRead.getStatus();
 
             if ((prettyOutput != null && prettyOutput.length > 0 && prettyOutput[0]
-                  .isRefresh())
+                  .isRefresh(false))
                   || oldTaskStatus != taskStatus
                   || oldProgress != progress) { //need refresh
                oldTaskStatus = taskStatus;
                oldProgress = progress;
 
                //clear screen and show progress every few seconds 
-               AnsiConsole.systemInstall();
-               String separator = "[";
-               char ESC = 27;
-               String clearScreen = "2J";
-               System.out.print(ESC + separator + clearScreen);
-               AnsiConsole.systemUninstall();
-
+               clearScreen();
                System.out.println(taskStatus + " " + progress + "%\n");
 
                // print call back customize the detailed output case by case
@@ -382,12 +378,31 @@ public class RestClient {
             }
          } else if (taskRead.getStatus().equals(TaskRead.Status.SUCCESS)) {
             if (taskRead.getType().equals(Type.VHM)) {
-               if(!CommandsUtils.isBlank(logdir)){
+               if (prettyOutput != null && prettyOutput.length > 0 && prettyOutput[0].isRefresh(true)) {
+                  //clear screen and show progress every few seconds 
+                  clearScreen();
+                  System.out.println(taskStatus + " " + progress + "%\n");
+
+                  // print call back customize the detailed output case by case
+                  if (prettyOutput != null && prettyOutput.length > 0) {
+                     prettyOutput[0].prettyOutput();
+                  }
+               }
+               if (!CommandsUtils.isBlank(logdir)) {
                   System.out.println(Constants.OUTPUT_WARNING_LOG_INFO + logdir);                  
                }
             }
          }
       }
+   }
+
+   private void clearScreen() {
+      AnsiConsole.systemInstall();
+      String separator = "[";
+      char ESC = 27;
+      String clearScreen = "2J";
+      System.out.print(ESC + separator + clearScreen);
+      AnsiConsole.systemUninstall();
    }
 
    /**
