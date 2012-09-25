@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import jline.ConsoleReader;
+
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonParseException;
@@ -354,4 +356,59 @@ public class CommandsUtils {
       }
    }
 
+   public static boolean showWarningMsg(final String name,
+         final String targetObject, final String operateType,
+         final List<String> warningMsgList, final boolean alwaysAnswerYes) {
+      if (warningMsgList != null && !warningMsgList.isEmpty()) {
+         for (String message : warningMsgList) {
+            System.out.println(message);
+         }
+         if (!isContinue(name, targetObject, operateType, Constants.PARAM_PROMPT_CONTINUE_MESSAGE, alwaysAnswerYes)) {
+            return false;
+         }
+      }
+      return true;
+   }
+
+   private static boolean isContinue(final String name,
+         final String targetObject, final String operateType,
+         final String promptMsg, final boolean alwaysAnswerYes) {
+      if (alwaysAnswerYes) {
+         return true;
+      }
+
+      boolean continueCreate = true;
+      boolean continueLoop = true;
+      String readMsg = "";
+      try {
+         ConsoleReader reader = new ConsoleReader();
+         // Set prompt message
+         reader.setDefaultPrompt(promptMsg);
+         int k = 0;
+         while (continueLoop) {
+            if (k >= 3) {
+               continueCreate = false;
+               break;
+            }
+            // Read user input
+            readMsg = reader.readLine();
+            if (readMsg.trim().equalsIgnoreCase("yes")
+                  || readMsg.trim().equalsIgnoreCase("y")) {
+               continueLoop = false;
+            } else if (readMsg.trim().equalsIgnoreCase("no")
+                  || readMsg.trim().equalsIgnoreCase("n")) {
+               continueLoop = false;
+               continueCreate = false;
+            } else {
+               k++;
+            }
+         }
+      } catch (Exception e) {
+         CommandsUtils.printCmdFailure(targetObject,
+               name, operateType,
+               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+         continueCreate = false;
+      }
+      return continueCreate;
+   }
 }

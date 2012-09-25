@@ -41,13 +41,24 @@ public class TopologyCommands implements CommandMarker {
    private TopologyRestClient topologyRestClient;
 
    @CliCommand(value = "topology upload", help = "Upload a rack-->hosts mapping topology file")
-   public void upload(@CliOption(key = { "fileName" }, mandatory = true, help = "The topology file name") final String fileName) {
+   public void upload(
+         @CliOption(key = { "fileName" }, mandatory = true, help = "The topology file name") final String fileName,
+         @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes) {
+      List<String> warningMsgList = new ArrayList<String>();
       try {
          List<RackInfo> racks = readRackInfoFromFile(fileName);
          if (!duplicatedNameCheck(racks)) {
-            topologyRestClient.upload(racks);
-            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_TOPOLOGY, null,
-               Constants.OUTPUT_OP_RESULT_UPLOAD);
+            RackInfo[] existingRackInfo = topologyRestClient.list();
+            if ((existingRackInfo != null) && (existingRackInfo.length > 0)) {
+               warningMsgList.add(Constants.OVERWRITE_TOPOLOGY);
+            }
+            if (CommandsUtils.showWarningMsg(null,
+                  Constants.OUTPUT_OBJECT_TOPOLOGY, Constants.OUTPUT_OP_UPLOAD,
+                  warningMsgList, alwaysAnswerYes)) {
+               topologyRestClient.upload(racks);
+               CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_TOPOLOGY, null,
+                  Constants.OUTPUT_OP_RESULT_UPLOAD);
+            }
          }
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, null, Constants.OUTPUT_OP_UPLOAD,
