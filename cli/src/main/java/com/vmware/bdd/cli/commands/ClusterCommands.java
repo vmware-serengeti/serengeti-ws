@@ -473,6 +473,7 @@ public class ClusterCommands implements CommandMarker {
                            Constants.OUTPUT_OP_RESULT_FAIL, Constants.ZOOKEEPER_NOT_RESIZE);
                      return;
                   }
+                  break;
                }
             }
 
