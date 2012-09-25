@@ -122,6 +122,10 @@ public class ClusterCommandsTest extends MockRestServer {
     @Test
     public void testCreateCluster() throws Exception {
        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+       DistroRead[] distros = new DistroRead[1];
+       DistroRead distro = new DistroRead();
+       distro.setName(Constants.DEFAULT_DISTRO);
+       distros[0] = distro;
        NetworkRead[] networks = new NetworkRead[1];
        NetworkRead network = new NetworkRead();
        network.setName("dhcp");
@@ -130,6 +134,8 @@ public class ClusterCommandsTest extends MockRestServer {
        networks[0] = network;
 
        ObjectMapper mapper = new ObjectMapper();
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(distros));
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
 
@@ -144,6 +150,10 @@ public class ClusterCommandsTest extends MockRestServer {
     @Test
     public void testCreateClusterFailure() throws Exception {
         CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+        DistroRead[] distros = new DistroRead[1];
+        DistroRead distro = new DistroRead();
+        distro.setName(Constants.DEFAULT_DISTRO);
+        distros[0] = distro;
         NetworkRead[] networks = new NetworkRead[1];
         NetworkRead network = new NetworkRead();
         network.setName("dhcp");
@@ -152,6 +162,8 @@ public class ClusterCommandsTest extends MockRestServer {
         networks[0] = network;
 
         ObjectMapper mapper = new ObjectMapper();
+        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
+              mapper.writeValueAsString(distros));
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
                 mapper.writeValueAsString(networks));
 
@@ -168,17 +180,7 @@ public class ClusterCommandsTest extends MockRestServer {
     @Test
     public void testCreateClusterBySpecFile() throws Exception {
        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
-       NetworkRead[] networks = new NetworkRead[1];
-       NetworkRead network = new NetworkRead();
-       network.setName("dhcp");
-       network.setDhcp(true);
-       network.setPortGroup("pg1");
-       networks[0] = network;
-
-       ObjectMapper mapper = new ObjectMapper();
-       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
-             mapper.writeValueAsString(networks));
-
+       DistroRead[] distros = new DistroRead[1];
        DistroRead distro = new DistroRead();
        distro.setName(Constants.DEFAULT_DISTRO);
        List<String> roles = new ArrayList<String>();
@@ -197,20 +199,33 @@ public class ClusterCommandsTest extends MockRestServer {
        roles.add("hbase_client");
        roles.add("zookeeper");
        distro.setRoles(roles);
+       distros[0] = distro;
+       NetworkRead[] networks = new NetworkRead[1];
+       NetworkRead network = new NetworkRead();
+       network.setName("dhcp");
+       network.setDhcp(true);
+       network.setPortGroup("pg1");
+       networks[0] = network;
 
-       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + Constants.DEFAULT_DISTRO,
-             HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(distro));
-
+       ObjectMapper mapper = new ObjectMapper();
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(distros));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(networks));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + Constants.DEFAULT_DISTRO, HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(distro));
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
              HttpStatus.NO_CONTENT, "");
 
        clusterCommands.createCluster("cluster1WithHadoopSpec", null, null, "src/test/resources/hadoop_cluster.json", null, null, null, null, false, false, true);
 
        setup();
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(distros));
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
-       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + Constants.DEFAULT_DISTRO,
-             HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(distro));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + Constants.DEFAULT_DISTRO, HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(distro));
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
              HttpStatus.NO_CONTENT, "");
        clusterCommands.createCluster("cluster1WithHBaseSpec", null, null, "src/test/resources/hbase_cluster.json", null, null, null, null, false, false, true);
@@ -243,6 +258,11 @@ public class ClusterCommandsTest extends MockRestServer {
     @Test
     public void testClusterCreateOutput() throws Exception {
         CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+        DistroRead[] distros = new DistroRead[1];
+        DistroRead distro = new DistroRead();
+        distro.setName(Constants.DEFAULT_DISTRO);
+        distros[0] = distro;
+        
         NetworkRead[] networks = new NetworkRead[1];
         NetworkRead network = new NetworkRead();
         network.setName("dhcp");
@@ -251,6 +271,8 @@ public class ClusterCommandsTest extends MockRestServer {
         networks[0] = network;
 
         ObjectMapper mapper = new ObjectMapper();
+        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
+              mapper.writeValueAsString(distros));
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
                 mapper.writeValueAsString(networks));
 
