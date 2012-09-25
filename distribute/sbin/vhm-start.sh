@@ -8,4 +8,4 @@ VHM_JAR=`ls ${VHM_HOME}/elastic-runtime-*-jar-with-dependencies.jar`
 JAVA_OPTS="-Dserengeti.home.dir=${SERENGETI_HOME}"
 
 echo "starting VHM service"
-java ${JAVA_OPTS} -jar ${VHM_JAR} > /opt/serengeti/logs/vhm.log 2>&1 &
+java ${JAVA_OPTS} -jar ${VHM_JAR} >> /opt/serengeti/logs/vhm.log 2>&1 &

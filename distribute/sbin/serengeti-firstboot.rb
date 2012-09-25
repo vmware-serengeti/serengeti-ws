@@ -285,7 +285,7 @@ fi
 
 # start vhm service on everyboot
 if [ -e "#{VHM_START}" ]; then
-  echo "sh #{VHM_START}" >> /etc/rc.local
+  echo "su serengeti -c \\"bash #{VHM_START}\\"" >> /etc/rc.local
 fi
 
 EOF
