@@ -453,6 +453,37 @@ public class ClusterCommands implements CommandMarker {
 
       if (instanceNum > 1) {
          try {
+            ClusterRead cluster = restClient.get(name, false);
+            if (cluster == null) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                     name, Constants.OUTPUT_OP_RESIZE,
+                     Constants.OUTPUT_OP_RESULT_FAIL, "cluster " + name
+                           + " does not exsit.");
+               return;
+            }
+            //disallow scale out zookeeper node group.
+            List<NodeGroupRead> ngs = cluster.getNodeGroups();
+            boolean found = false;
+            for (NodeGroupRead ng : ngs) {
+               if (ng.getName().equals(nodeGroup)) {
+                  found = true;
+                  if (ng.getRoles() != null && ng.getRoles().contains(HadoopRole.ZOOKEEPER_ROLE.toString())) {
+                     CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                           name, Constants.OUTPUT_OP_RESIZE,
+                           Constants.OUTPUT_OP_RESULT_FAIL, Constants.ZOOKEEPER_NOT_RESIZE);
+                     return;
+                  }
+               }
+            }
+
+            if (!found) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                     name, Constants.OUTPUT_OP_RESIZE,
+                     Constants.OUTPUT_OP_RESULT_FAIL, "node group " + nodeGroup
+                     + " does not exist.");
+               return;
+            }
+
             restClient.resize(name, nodeGroup, instanceNum);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                   name, Constants.OUTPUT_OP_RESULT_RESIZE);

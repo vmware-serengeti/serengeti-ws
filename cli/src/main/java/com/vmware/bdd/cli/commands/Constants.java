@@ -126,6 +126,7 @@ public class Constants {
    public static final String WRONG_NUM_OF_NODES = "the number of namenode and jobtracker are larger than 1, or no worker exists";
    public static final String WRONG_NUM_OF_ZOOKEEPER = "the number of zookeepers is less than 3";
    public static final String ODD_NUM_OF_ZOOKEEPER = "the number of zookeepers is better to be odd numbers";
+   public static final String ZOOKEEPER_NOT_RESIZE = "zookeeper node groups are not allowed to resize.";
    public static final String REGISONSERVER_DATANODE_SEPERATION = "RegionServer and Datanode are separated, which will impact performance.";
    
    public static final String PARAMS_EXCLUSION = " cannot be set at the same time.";
