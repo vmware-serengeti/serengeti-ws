@@ -27,6 +27,7 @@ public class NodeRead {
    private String name;
 
    @Expose
+   @SerializedName("moid")
    private String moId;
 
    @Expose
