@@ -1,6 +1,15 @@
 {
   "distro":"apache",
   "groups":[
+  	{
+      "name":"zookeeper",
+      "roles":[
+        "zookeeper"
+      ],
+      "instance_type":SMALL,
+      "instance_num":3,
+      "ha":"off"
+    },
     {
       "name":"master",
       "roles":[
@@ -18,15 +27,6 @@
         "hbase_regionserver"
       ],
       "instance_type":SMALL,
-      "instance_num":3,
-      "ha":"off"
-    },
-    {
-      "name":"zookeeper",
-      "roles":[
-        "zookeeper"
-      ],
-      "instance_type":MEDIUM,
       "instance_num":3,
       "ha":"off"
     },

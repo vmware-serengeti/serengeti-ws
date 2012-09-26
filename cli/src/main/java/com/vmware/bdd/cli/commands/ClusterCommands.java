@@ -870,14 +870,14 @@ public class ClusterCommands implements CommandMarker {
                nColumnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_NAME,
                      Arrays.asList("getName"));
+               nColumnNamesWithGetMethodNames.put(
+                     Constants.FORMAT_TABLE_COLUMN_HOST,
+                     Arrays.asList("getHostName"));
                if (topology == TopologyType.RACK_AS_RACK || topology == TopologyType.HVE) {
                   nColumnNamesWithGetMethodNames.put(
                         Constants.FORMAT_TABLE_COLUMN_RACK,
                         Arrays.asList("getRack"));
                }
-               nColumnNamesWithGetMethodNames.put(
-                     Constants.FORMAT_TABLE_COLUMN_HOST,
-                     Arrays.asList("getHostName"));
                nColumnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_IP, Arrays.asList("getIp"));
                nColumnNamesWithGetMethodNames.put(
