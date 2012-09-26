@@ -195,7 +195,9 @@ public class ClusterRead {
     *
     */
    private class NodeGroupReadComparactor implements Comparator<NodeGroupRead> {
-      private final String[] roleOrders = {"namenode", "jobtracker", "tasktracker", "datanode", "client", "pig", "hive"};
+      private final String[] roleOrders = { "namenode", "jobtracker",
+            "hbase_master", "zookeeper", "datanode", "tasktracker",
+            "regionserver", "hadoop_client", "hbase_client", "pig", "hive" };
 
       @Override
       public int compare(NodeGroupRead ng1, NodeGroupRead ng2) {
