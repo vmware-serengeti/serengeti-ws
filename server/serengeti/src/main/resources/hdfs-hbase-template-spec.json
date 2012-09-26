@@ -40,5 +40,12 @@
       "instance_num":1,
       "ha":"off"
     }
-  ]
+  ],
+  "configuration": {
+    "zookeeper": {
+      "java.env": {
+        "jvm_option": "-Xmx2g"
+      }
+    }
+  }
 }
