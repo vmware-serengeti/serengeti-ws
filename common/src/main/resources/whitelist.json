@@ -204,6 +204,12 @@
 	    "name":"dfs.datanode.handler.count"
 	  },
 	  {
+	    "name":"dfs.datanode.max.xceivers"
+	  },
+	  {
+	    "name":"dfs.datanode.socket.write.timeout"
+	  },
+	  {
 	    "name":"dfs.https.enable"
 	  },
 	  {
