@@ -106,15 +106,15 @@ public class CommonClusterExpandPolicy {
       logger.debug("extra large storage of zookeeper group  is " + value + "GB.");
 
       value = setTemplateStorage("storage.zookeepergroup.large",
-            GroupType.ZOOKEEPER_GROUP.ordinal(), InstanceType.LARGE.ordinal(), 200);
+            GroupType.ZOOKEEPER_GROUP.ordinal(), InstanceType.LARGE.ordinal(), 100);
       logger.debug("large storage of zookeeper group  is " + value + "GB.");
 
       value = setTemplateStorage("storage.zookeepergroup.medium",
-            GroupType.ZOOKEEPER_GROUP.ordinal(), InstanceType.MEDIUM.ordinal(), 200);
+            GroupType.ZOOKEEPER_GROUP.ordinal(), InstanceType.MEDIUM.ordinal(), 50);
       logger.debug("medium storage of zookeeper group  is " + value + "GB.");
 
       value = setTemplateStorage("storage.zookeepergroup.small",
-            GroupType.ZOOKEEPER_GROUP.ordinal(), InstanceType.SMALL.ordinal(), 200);
+            GroupType.ZOOKEEPER_GROUP.ordinal(), InstanceType.SMALL.ordinal(), 25);
       logger.debug("small storage of zookeeper group  is " + value + "GB.");
    }
 
