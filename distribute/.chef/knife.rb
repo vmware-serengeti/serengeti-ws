@@ -30,7 +30,7 @@ knife[:bootstrap_runs_chef_client] = true
 bootstrap_chef_version   "~> 0.10.0"
 knife[:ssh_user] = "serengeti"
 knife[:ssh_password] = "password"
-knife[:bootstrap_by_facet] = true # if true, bootstrap the nodes facet by facet; if false, bootstrap all nodes in paralell.
+knife[:bootstrap_by_facet] = false # if true, bootstrap the nodes facet by facet; if false, bootstrap all nodes in paralell.
 
 # yum server
 knife[:yum_repos] = [ yum_repos_url ] # the urls to yum server's .repo or .rpm file
