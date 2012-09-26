@@ -37,6 +37,13 @@ public enum HadoopRole {
    public String toString() {
       return this.description;
    }
+   
+   public boolean shouldRunAfterHDFS() {
+      if (this.equals(HadoopRole.HBASE_CLIENT_ROLE) || this.equals(HadoopRole.HBASE_MASTER_ROLE) || this.equals(HadoopRole.HBASE_REGIONSERVER_ROLE)) {
+         return true;
+      }
+      return false;
+   }
 
    public static HadoopRole fromString(String desc) {
       if (desc != null) {

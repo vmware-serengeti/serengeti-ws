@@ -506,6 +506,7 @@ public class ClusterConfigManager {
       });
    }
 
+   @SuppressWarnings("unchecked")
    private void convertClusterConfig(ClusterEntity clusterEntity,
          ClusterCreate clusterConfig) {
       logger.debug("begin to expand config for cluster "
@@ -629,9 +630,18 @@ public class ClusterConfigManager {
    private NodeGroupCreate convertNodeGroups(String distro,
          NodeGroupEntity ngEntity, String clusterName) {
       Gson gson = new Gson();
-
-      @SuppressWarnings("unchecked")
       List<String> groupRoles = gson.fromJson(ngEntity.getRoles(), List.class);
+      Collections.sort(groupRoles, new Comparator<String>(){
+         public int compare(String str1, String str2) {
+            if (HadoopRole.fromString(str1).shouldRunAfterHDFS()) {
+               return 1;
+            } else if (HadoopRole.fromString(str2).shouldRunAfterHDFS()) {
+               return -1;
+            } else {
+               return 0;
+            }  
+         }
+      });   
       EnumSet<HadoopRole> enumRoles = getEnumRoles(groupRoles, distro);
       if (enumRoles.isEmpty()) {
          throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(ngEntity

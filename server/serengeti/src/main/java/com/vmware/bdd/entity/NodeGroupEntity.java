@@ -17,6 +17,8 @@ package com.vmware.bdd.entity;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -52,6 +54,7 @@ import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterConfigException;
+import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Configuration;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
@@ -353,7 +356,23 @@ public class NodeGroupEntity extends EntityBase {
       nodeGroupRead.setCpuNum(this.cpuNum);
       nodeGroupRead.setMemCapacityMB(this.memorySize);
       nodeGroupRead.setInstanceNum(this.getRealInstanceNum());
-      nodeGroupRead.setRoles(this.getRoleNameList());
+      
+      Gson gson = new Gson();
+      @SuppressWarnings("unchecked")
+      List<String> groupRoles = gson.fromJson(roles, List.class);
+      Collections.sort(groupRoles, new Comparator<String>(){
+         public int compare(String str1, String str2) {
+            if (HadoopRole.fromString(str1).shouldRunAfterHDFS()) {
+               return 1;
+            } else if (HadoopRole.fromString(str2).shouldRunAfterHDFS()) {
+               return -1;
+            } else {
+               return 0;
+            }  
+         }
+      });   
+      nodeGroupRead.setRoles(groupRoles);
+      //nodeGroupRead.setRoles(this.getRoleNameList());
 
       StorageRead storage = new StorageRead();
       storage.setType(this.storageType.toString());
