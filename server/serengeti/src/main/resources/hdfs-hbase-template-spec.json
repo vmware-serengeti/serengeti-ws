@@ -26,7 +26,7 @@
       "roles":[
         "zookeeper"
       ],
-      "instance_type":SMALL,
+      "instance_type":MEDIUM,
       "instance_num":3,
       "ha":"off"
     },

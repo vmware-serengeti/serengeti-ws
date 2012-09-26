@@ -48,21 +48,25 @@ public class CommonClusterExpandPolicy {
       int value = setTemplateStorage("storage.mastergroup.extralarge",
             GroupType.MASTER_GROUP.ordinal(), InstanceType.EXTRA_LARGE.ordinal(), 200);
       templateStorage[GroupType.MASTER_JOBTRACKER_GROUP.ordinal()][InstanceType.EXTRA_LARGE.ordinal()] = value;
+      templateStorage[GroupType.HBASE_MASTER_GROUP.ordinal()][InstanceType.EXTRA_LARGE.ordinal()] = value;
       logger.debug("extra large storage of master group  is " + value + "GB.");
 
       value = setTemplateStorage("storage.mastergroup.large",
             GroupType.MASTER_GROUP.ordinal(), InstanceType.LARGE.ordinal(), 100);
       templateStorage[GroupType.MASTER_JOBTRACKER_GROUP.ordinal()][InstanceType.LARGE.ordinal()] = value;
+      templateStorage[GroupType.HBASE_MASTER_GROUP.ordinal()][InstanceType.LARGE.ordinal()] = value;
       logger.debug("large storage of master group  is " + value + "GB.");
 
       value = setTemplateStorage("storage.mastergroup.medium",
             GroupType.MASTER_GROUP.ordinal(), InstanceType.MEDIUM.ordinal(), 50);
       templateStorage[GroupType.MASTER_JOBTRACKER_GROUP.ordinal()][InstanceType.MEDIUM.ordinal()] = value;
+      templateStorage[GroupType.HBASE_MASTER_GROUP.ordinal()][InstanceType.MEDIUM.ordinal()] = value;
       logger.debug("medium storage of master group  is " + value + "GB.");
 
       value = setTemplateStorage("storage.mastergroup.small",
             GroupType.MASTER_GROUP.ordinal(), InstanceType.SMALL.ordinal(), 25);
       templateStorage[GroupType.MASTER_JOBTRACKER_GROUP.ordinal()][InstanceType.SMALL.ordinal()] =  value;
+      templateStorage[GroupType.HBASE_MASTER_GROUP.ordinal()][InstanceType.SMALL.ordinal()] = value;
       logger.debug("small storage of master group  is " + value + "GB.");
 
       value = setTemplateStorage("storage.workergroup.extralarge",
@@ -96,6 +100,22 @@ public class CommonClusterExpandPolicy {
       value = setTemplateStorage("storage.clientgroup.small",
             GroupType.CLIENT_GROUP.ordinal(), InstanceType.SMALL.ordinal(), 50);
       logger.debug("small storage of client group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.zookeepergroup.extralarge",
+            GroupType.ZOOKEEPER_GROUP.ordinal(), InstanceType.EXTRA_LARGE.ordinal(), 200);
+      logger.debug("extra large storage of zookeeper group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.zookeepergroup.large",
+            GroupType.ZOOKEEPER_GROUP.ordinal(), InstanceType.LARGE.ordinal(), 200);
+      logger.debug("large storage of zookeeper group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.zookeepergroup.medium",
+            GroupType.ZOOKEEPER_GROUP.ordinal(), InstanceType.MEDIUM.ordinal(), 200);
+      logger.debug("medium storage of zookeeper group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.zookeepergroup.small",
+            GroupType.ZOOKEEPER_GROUP.ordinal(), InstanceType.SMALL.ordinal(), 200);
+      logger.debug("small storage of zookeeper group  is " + value + "GB.");
    }
 
    private static int setTemplateStorage(String propertyName, int groupType, int instanceType, int defaultVal) {
@@ -116,7 +136,9 @@ public class CommonClusterExpandPolicy {
       if (instanceType == null) {
          // replace with default instanceType
          if (groupType == GroupType.MASTER_GROUP
-               || groupType == GroupType.MASTER_JOBTRACKER_GROUP) {
+               || groupType == GroupType.MASTER_JOBTRACKER_GROUP
+               || groupType == GroupType.HBASE_MASTER_GROUP
+               || groupType == GroupType.ZOOKEEPER_GROUP) {
             instanceType = InstanceType.MEDIUM;
          } else {
             instanceType = InstanceType.SMALL;

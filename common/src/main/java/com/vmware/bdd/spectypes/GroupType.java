@@ -22,8 +22,10 @@ import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 public enum GroupType {
    MASTER_GROUP("master"), 
    MASTER_JOBTRACKER_GROUP("job_tracker"),
+   HBASE_MASTER_GROUP("hbase_master"),
    WORKER_GROUP("worker"), 
-   CLIENT_GROUP("client");
+   CLIENT_GROUP("client"),
+   ZOOKEEPER_GROUP("zookeeper");
 
    private String description;
 
@@ -61,8 +63,13 @@ public enum GroupType {
       } else if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE)) {
          return MASTER_JOBTRACKER_GROUP;
       } else if (roles.contains(HadoopRole.HADOOP_DATANODE) ||
-            roles.contains(HadoopRole.HADOOP_TASKTRACKER)) {
+            roles.contains(HadoopRole.HADOOP_TASKTRACKER) ||
+            roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE)) {
          return WORKER_GROUP;
+      } else if(roles.contains(HadoopRole.HBASE_MASTER_ROLE)){
+         return HBASE_MASTER_GROUP;
+      } else if(roles.contains(HadoopRole.ZOOKEEPER_ROLE)){
+         return ZOOKEEPER_GROUP;
       } else {
          return CLIENT_GROUP;
       }

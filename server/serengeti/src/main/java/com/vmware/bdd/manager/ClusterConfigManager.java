@@ -461,6 +461,26 @@ public class ClusterConfigManager {
                   .MORE_THAN_ONE_JOBTRACKER_GROUP(clusterName);
          }
          break;
+      case HBASE_MASTER_GROUP:
+         if (group.getInstanceNum() <= 0) {
+            throw ClusterConfigException.INVALID_INSTANCE_NUMBER(
+                  group.getInstanceNum(), clusterName, group.getName());
+         }
+         if (allRoles.contains(HadoopRole.HBASE_MASTER_ROLE)) {
+            throw ClusterConfigException
+                  .MORE_THAN_ONE_HBASEMASTER_GROUP(clusterName);
+         }
+         break;
+      case ZOOKEEPER_GROUP:
+         if (group.getInstanceNum() <= 2) {
+            throw ClusterConfigException.INVALID_INSTANCE_NUMBER(
+                  group.getInstanceNum(), clusterName, group.getName());
+         }
+         if (allRoles.contains(HadoopRole.ZOOKEEPER_ROLE)) {
+            throw ClusterConfigException
+                  .MORE_THAN_ONE_ZOOKEEPER_GROUP(clusterName);
+         }
+         break;
       case WORKER_GROUP:
          if (group.getInstanceNum() <= 0) {
             throw ClusterConfigException.INVALID_INSTANCE_NUMBER(
