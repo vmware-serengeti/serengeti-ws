@@ -88,7 +88,7 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
          @CliOption(key = { "networkName" }, mandatory = false, help = "Network Name") final String networkName,
-         @CliOption(key = { "topology" }, mandatory = false, help = "Please specify the topology type: HVE or RACK_HOST or HOST_AS_RACK") final String topology,
+         @CliOption(key = { "topology" }, mandatory = false, help = "Please specify the topology type: HVE or RACK_AS_RACK or HOST_AS_RACK") final String topology,
          @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume,
          @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation,
          @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes) {
