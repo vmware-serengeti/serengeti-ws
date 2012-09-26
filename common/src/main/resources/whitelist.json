@@ -875,6 +875,12 @@
      "name":"hadoop.root.logger"
     },
     {
+     "name":"hbase.root.logger"
+    },
+    {
+     "name":"zookeeper.root.logger"
+    },
+    {
      "name":"hadoop.security.logger"
     }   
     ]

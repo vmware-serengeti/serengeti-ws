@@ -102,6 +102,9 @@
       }
     },
     "hbase": {
+      "log4j.properties": {
+        // "hbase.root.logger": "DEBUG,console",
+      },
       "hbase-site.xml": {
         //check for all settings at http://hbase.apache.org/book/config.files.html 
       },
@@ -126,7 +129,11 @@
     "zookeeper": {
       "java.env": {
         //  "jvm_option": "-Xmx4g"
+      },
+      "log4j.properties": {
+        // "zookeeper.root.logger": "DEBUG,console",
       }
+
     }
   }
 }
