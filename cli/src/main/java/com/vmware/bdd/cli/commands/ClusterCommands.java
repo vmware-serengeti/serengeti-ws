@@ -82,7 +82,7 @@ public class ClusterCommands implements CommandMarker {
    @CliCommand(value = "cluster create", help = "Create a hadoop cluster")
    public void createCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
-         @CliOption(key = { "type" }, mandatory = false, help = "The cluster type") final String type,
+         @CliOption(key = { "type" }, mandatory = false, help = "The cluster type is Hadoop or HBase") final String type,
          @CliOption(key = { "distro" }, mandatory = false, help = "Hadoop Distro") final String distro,
          @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath,
          @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,

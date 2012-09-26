@@ -22,7 +22,7 @@ public enum ClusterType {
    HDFS("HDFS"),
 
    // hdfs + mapreduce cluster
-   HDFS_MAPRED("HADOOP"),
+   HDFS_MAPRED("Hadoop"),
 
    // hdfs + hbase cluster
    HDFS_HBASE("HBase");
