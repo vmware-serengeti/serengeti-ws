@@ -86,7 +86,7 @@ public class MessageTaskWorker implements TaskWorker {
          if (!successed) {
             errorMessage = messageProcessor.getErrorMessage();
             if(CommonUtil.isBlank(errorMessage)){
-               errorMessage = "Cannot find message from VHM.";
+               errorMessage = "No error message from VHM.";
                logger.error(errorMessage);
             }
          }

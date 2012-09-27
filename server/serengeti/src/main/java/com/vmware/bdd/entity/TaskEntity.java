@@ -56,7 +56,7 @@ public class TaskEntity extends EntityBase {
    private static final String TASK_ID_STR = "${task_id}";
    private static String routeKeyFormat = "task." + TASK_ID_STR;
    private static File taskRootDir;
-   private static String serengetiLog = "serengeti.log";
+   private static String vhmLog = "vhm.log";
    private static String taskRootDirStr = "";
    static {
       taskRootDirStr = System.getProperty("serengeti.home.dir");
@@ -170,13 +170,13 @@ public class TaskEntity extends EntityBase {
       } else if (type.equals(type.VHM)) {
          String serengetiLogPath = "";
          if (!CommonUtil.isBlank(taskRootDirStr)) {
-            serengetiLogPath = taskRootDirStr + "/logs/" + serengetiLog;
+            serengetiLogPath = taskRootDirStr + "/logs/" + vhmLog;
          } else {
-            serengetiLogPath = System.getProperty("catalina.home") + "/logs/" + serengetiLog;
+            serengetiLogPath = System.getProperty("catalina.home") + "/logs/" + vhmLog;
          }
          logger.info("serengeti.log path is  " + serengetiLogPath);
          path = new File(serengetiLogPath);
-         AuAssert.check(path.exists(),"The " + serengetiLog + " must exist !");
+         AuAssert.check(path.exists(),"The " + vhmLog + " must exist !");
       }
 
       return path;
