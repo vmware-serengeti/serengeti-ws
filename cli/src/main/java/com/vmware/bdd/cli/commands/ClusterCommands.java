@@ -1062,7 +1062,7 @@ public class ClusterCommands implements CommandMarker {
 
                //check if datanode and region server are seperate
                List<String> roles = nodeGroupCreate.getRoles();
-               if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE) && !roles.contains(HadoopRole.HADOOP_DATANODE)) {
+               if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString()) && !roles.contains(HadoopRole.HADOOP_DATANODE.toString())) {
                   warningMsgList.add(Constants.REGISONSERVER_DATANODE_SEPERATION);
                   warning = true;
                }
