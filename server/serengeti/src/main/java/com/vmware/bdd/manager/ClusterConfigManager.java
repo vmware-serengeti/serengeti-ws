@@ -32,7 +32,6 @@ import org.apache.log4j.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpBlock;
@@ -57,6 +56,7 @@ import com.vmware.bdd.exception.UniqueConstraintViolationException;
 import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
 import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Configuration;
@@ -352,11 +352,14 @@ public class ClusterConfigManager {
       }
       Set<String> roles = new HashSet<String>();
       roles.addAll(group.getRoles());
+      List<String> sortedRolesByDependency = new ArrayList<String>();
+      sortedRolesByDependency.addAll(roles);
+      Collections.sort(sortedRolesByDependency, new RoleComparactor());
       EnumSet<HadoopRole> enumRoles = getEnumRoles(group.getRoles(), distro);
       if (enumRoles.isEmpty()) {
          throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(group.getName());
       }
-      groupEntity.setRoles(gson.toJson(roles));
+      groupEntity.setRoles(gson.toJson(sortedRolesByDependency));
       GroupType groupType = GroupType.fromHadoopRole(enumRoles);
 
       boolean removeIt =

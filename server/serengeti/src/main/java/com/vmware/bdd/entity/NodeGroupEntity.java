@@ -41,7 +41,6 @@ import org.hibernate.annotations.Type;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
@@ -56,8 +55,6 @@ import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.Configuration;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.manager.RackInfoManager;
 
