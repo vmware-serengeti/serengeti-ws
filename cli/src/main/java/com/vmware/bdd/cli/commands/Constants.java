@@ -102,7 +102,6 @@ public class Constants {
    public static final String OUTPUT_HOST_REFUSE = "Connection refused. Please check the port number.";
    public static final String OUTPUT_HOST_TIMEOUT = "connection timeout";
    public static final String OUTPUT_LOG_INFO = "you can get task failure details from serengeti server log at: ";
-   public static final String OUTPUT_WARNING_LOG_INFO = "you can get warning details from serengeti server log at: ";
    public static final String HTTP_CONNECTION_PREFIX = "http://";
    public static final String HTTP_CONNECTION_SUFFIX = "/serengeti/api/";
    public static final String HTTP_CONNECTION_API = "api/";

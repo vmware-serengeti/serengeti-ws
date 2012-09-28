@@ -388,9 +388,6 @@ public class RestClient {
                      prettyOutput[0].prettyOutput();
                   }
                }
-               if (!CommandsUtils.isBlank(logdir)) {
-                  System.out.println(Constants.OUTPUT_WARNING_LOG_INFO + logdir);                  
-               }
             }
          }
       }
