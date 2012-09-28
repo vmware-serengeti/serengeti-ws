@@ -172,7 +172,7 @@ public class TaskEntity extends EntityBase {
          if (!CommonUtil.isBlank(taskRootDirStr)) {
             serengetiLogPath = taskRootDirStr + "/logs/" + vhmLog;
          } else {
-            serengetiLogPath = System.getProperty("catalina.home") + "/logs/" + vhmLog;
+            serengetiLogPath = "/opt/serengeti/logs" + vhmLog;
          }
          logger.info("serengeti.log path is  " + serengetiLogPath);
          path = new File(serengetiLogPath);
