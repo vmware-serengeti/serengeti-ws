@@ -17,18 +17,24 @@ package com.vmware.bdd.spectypes;
 import java.util.Comparator;
 
 public enum HadoopRole {
+   //NOTE: when you add a new role, please put it into an appropriate position
+   //based on their dependencies. The more dependent, the latter position
+   //0 dependency
+   HADOOP_NAMENODE_ROLE("hadoop_namenode"),
+   ZOOKEEPER_ROLE("zookeeper"),
+   //1 dependency
+   HBASE_MASTER_ROLE("hbase_master"),
+   HADOOP_DATANODE("hadoop_datanode"),
+   HADOOP_JOBTRACKER_ROLE("hadoop_jobtracker"),
+   //2 dependencies
+   HADOOP_TASKTRACKER("hadoop_tasktracker"),
+   HBASE_REGIONSERVER_ROLE("hbase_regionserver"),
+   //3 dependencies
+   HADOOP_CLIENT_ROLE("hadoop_client"),
+   HBASE_CLIENT_ROLE("hbase_client"),
    PIG_ROLE("pig"), 
    HIVE_ROLE("hive"),
-   HIVE_SERVER_ROLE("hive_server"), 
-   HADOOP_CLIENT_ROLE("hadoop_client"),
-   HADOOP_DATANODE("hadoop_datanode"), 
-   HADOOP_TASKTRACKER("hadoop_tasktracker"), 
-   HADOOP_JOBTRACKER_ROLE("hadoop_jobtracker"), 
-   HADOOP_NAMENODE_ROLE("hadoop_namenode"),
-   HBASE_MASTER_ROLE("hbase_master"),
-   HBASE_REGIONSERVER_ROLE("hbase_regionserver"),
-   HBASE_CLIENT_ROLE("hbase_client"),
-   ZOOKEEPER_ROLE("zookeeper");
+   HIVE_SERVER_ROLE("hive_server");
 
    private String description;
 
@@ -57,42 +63,9 @@ public enum HadoopRole {
       }
       return null;
    }
-   
-   /*
-    * Get the relative dependencies of roles. The more dependent, the bigger value
-    * TODO The dependency algorithm will be improved to be more generic in the future. 
-    */
-   public static int getDependency(String desc) {
-      final int MAX_DEPENDENCY = 20; 
-      HadoopRole role = fromString(desc);
-      if (role != null) {
-         switch (role) {
-         case HADOOP_NAMENODE_ROLE:
-         case ZOOKEEPER_ROLE:
-            return 0;
-         case HBASE_MASTER_ROLE:
-         case HADOOP_DATANODE:
-         case HADOOP_JOBTRACKER_ROLE:
-            return 1;
-         case HADOOP_TASKTRACKER:
-         case HBASE_REGIONSERVER_ROLE:
-            return 2;
-         case HBASE_CLIENT_ROLE:
-         case HADOOP_CLIENT_ROLE:
-         case PIG_ROLE:
-         case HIVE_ROLE:
-         case HIVE_SERVER_ROLE:
-            return 3;
-         default:
-            return MAX_DEPENDENCY;
-         }
-      } else {
-         return MAX_DEPENDENCY;
-      }
-   }
 
    /**
-    * Compare the order of roles according to their dependencies
+    * Compare the order of roles according to their dependencies(the enum ordial is very important here)
     *
     *
     */
@@ -103,12 +76,23 @@ public enum HadoopRole {
             return 0;
          }
 
-         int role1Dependency = HadoopRole.getDependency(role1);
-         int role2Dependency = HadoopRole.getDependency(role2);
+         HadoopRole role1Dependency = HadoopRole.fromString(role1);
+         HadoopRole role2Dependency = HadoopRole.fromString(role2);
          if (role1Dependency == role2Dependency) {
             return 0;
+         }
+
+         //null elements will be sorted behind the list
+         if (role1Dependency == null) {
+            return 1;
+         } else if (role2Dependency == null) {
+            return -1;
+         }
+
+         if (role1Dependency.ordinal() == role2Dependency.ordinal()) {
+            return 0;
          } else {
-            return (role1Dependency > role2Dependency) ? 1 : -1;
+            return (role1Dependency.ordinal() > role2Dependency.ordinal()) ? 1 : -1;
          }
       }
    }
