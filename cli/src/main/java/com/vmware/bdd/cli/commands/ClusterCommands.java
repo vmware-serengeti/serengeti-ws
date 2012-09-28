@@ -343,9 +343,7 @@ public class ClusterCommands implements CommandMarker {
 
    @CliCommand(value = "cluster start", help = "Start a cluster")
    public void startCluster(
-         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
-         @CliOption(key = { "nodeGroupName" }, mandatory = false, help = "The node group name") final String nodeGroupName,
-         @CliOption(key = { "nodeName" }, mandatory = false, help = "The node name") final String nodeName) {
+         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName) {
 
       Map<String, String> queryStrings = new HashMap<String, String>();
       queryStrings
@@ -353,40 +351,10 @@ public class ClusterCommands implements CommandMarker {
 
       //rest invocation
       try {
-         if (!validateNodeGroupName(nodeGroupName)) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
-                  Constants.OUTPUT_OP_START, Constants.OUTPUT_OP_RESULT_FAIL,
-                  "invalid node group name");
-            return;
-         }
-         if (!validateNodeName(clusterName, nodeGroupName, nodeName)) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
-                  Constants.OUTPUT_OP_START, Constants.OUTPUT_OP_RESULT_FAIL,
-                  "invalid node name");
-            return;
-         }
-         String groupName = nodeGroupName;
-         String fullNodeName = nodeName;
-         if (nodeName != null) {
-            if (nodeGroupName == null) {
-               groupName = extractNodeGroupName(nodeName);
-               if (groupName == null) {
-                  CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
-                        Constants.OUTPUT_OP_START, Constants.OUTPUT_OP_RESULT_FAIL,
-                        "missing node group name");
-                  return;
-               }
-            } else {
-               fullNodeName = autoCompleteNodeName(clusterName, nodeGroupName, nodeName);
-            }
-         }
+         restClient.actionOps(clusterName, queryStrings);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+               Constants.OUTPUT_OP_RESULT_START);
 
-         String resource = getClusterResourceName(clusterName, groupName, fullNodeName);
-         if (resource != null) {
-            restClient.actionOps(resource, clusterName, queryStrings);
-            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
-                  Constants.OUTPUT_OP_RESULT_START);
-         }
       } catch (CliRestException e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
                Constants.OUTPUT_OP_START, Constants.OUTPUT_OP_RESULT_FAIL,
@@ -396,48 +364,15 @@ public class ClusterCommands implements CommandMarker {
 
    @CliCommand(value = "cluster stop", help = "Stop a cluster")
    public void stopCluster(
-         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
-         @CliOption(key = { "nodeGroupName" }, mandatory = false, help = "The node group name") final String nodeGroupName,
-         @CliOption(key = { "nodeName" }, mandatory = false, help = "The node name") final String nodeName) {
+         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName) {
       Map<String, String> queryStrings = new HashMap<String, String>();
       queryStrings.put(Constants.QUERY_ACTION_KEY, Constants.QUERY_ACTION_STOP);
 
       //rest invocation
       try {
-         if (!validateNodeGroupName(nodeGroupName)) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
-                  Constants.OUTPUT_OP_STOP, Constants.OUTPUT_OP_RESULT_FAIL,
-                  "invalid node group name");
-            return;
-         }
-         if (!validateNodeName(clusterName, nodeGroupName, nodeName)) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
-                  Constants.OUTPUT_OP_STOP, Constants.OUTPUT_OP_RESULT_FAIL,
-                  "invalid node name");
-            return;
-         }
-         String groupName = nodeGroupName;
-         String fullNodeName = nodeName;
-         if (nodeName != null) {
-            if (nodeGroupName == null) {
-               groupName = extractNodeGroupName(nodeName);
-               if (groupName == null) {
-                  CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
-                        Constants.OUTPUT_OP_STOP, Constants.OUTPUT_OP_RESULT_FAIL,
-                        "missing node group name");
-                  return;
-               }
-            } else {
-               fullNodeName = autoCompleteNodeName(clusterName, nodeGroupName, nodeName);
-            }
-         }
-
-         String resource = getClusterResourceName(clusterName, groupName, fullNodeName);
-         if (resource != null) {
-            restClient.actionOps(resource, clusterName, queryStrings);
-            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
-                  Constants.OUTPUT_OP_RESULT_STOP);
-         }
+         restClient.actionOps(clusterName, queryStrings);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+               Constants.OUTPUT_OP_RESULT_STOP);
       } catch (CliRestException e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
                Constants.OUTPUT_OP_STOP, Constants.OUTPUT_OP_RESULT_FAIL,
