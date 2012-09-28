@@ -28,7 +28,13 @@ public class HadoopDistroMap {
    @Expose
    @SerializedName("hive")
    private String hiveUrl;
-
+   @Expose
+   @SerializedName("hbase")
+   private String hbaseUrl;
+   @Expose
+   @SerializedName("zookeeper")
+   private String zookeeperUrl;
+   
    public String getName() {
       return name;
    }
@@ -52,5 +58,17 @@ public class HadoopDistroMap {
    }
    public void setHiveUrl(String hiveUrl) {
       this.hiveUrl = hiveUrl;
+   }
+   public String getHbaseUrl() {
+	  return hbaseUrl;
+   }
+   public void setHbaseUrl(String hbaseUrl) {
+	  this.hbaseUrl = hbaseUrl;
+   }
+   public String getZookeeperUrl() {
+      return zookeeperUrl;
+   }
+   public void setZookeeperUrl(String zookeeperUrl) {
+      this.zookeeperUrl = zookeeperUrl;
    }
 }
