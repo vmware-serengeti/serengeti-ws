@@ -182,6 +182,8 @@ public class CommonClusterExpandPolicy {
       map.setHadoopUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.HADOOP_NAMENODE_ROLE.toString()));
       map.setHiveUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.HIVE_ROLE.toString()));
       map.setPigUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.PIG_ROLE.toString()));
+      map.setHbaseUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.HBASE_MASTER_ROLE.toString()));
+      map.setZookeeperUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.ZOOKEEPER_ROLE.toString()));
       clusterConfig.setDistroMap(map);
    }
 

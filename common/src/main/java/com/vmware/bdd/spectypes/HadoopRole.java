@@ -14,19 +14,27 @@
  ***************************************************************************/
 package com.vmware.bdd.spectypes;
 
+import java.util.Comparator;
+
 public enum HadoopRole {
+   //NOTE: when you add a new role, please put it into an appropriate position
+   //based on their dependencies. The more dependent, the latter position
+   //0 dependency
+   HADOOP_NAMENODE_ROLE("hadoop_namenode"),
+   ZOOKEEPER_ROLE("zookeeper"),
+   //1 dependency
+   HBASE_MASTER_ROLE("hbase_master"),
+   HADOOP_DATANODE("hadoop_datanode"),
+   HADOOP_JOBTRACKER_ROLE("hadoop_jobtracker"),
+   //2 dependencies
+   HADOOP_TASKTRACKER("hadoop_tasktracker"),
+   HBASE_REGIONSERVER_ROLE("hbase_regionserver"),
+   //3 dependencies
+   HADOOP_CLIENT_ROLE("hadoop_client"),
+   HBASE_CLIENT_ROLE("hbase_client"),
    PIG_ROLE("pig"), 
    HIVE_ROLE("hive"),
-   HIVE_SERVER_ROLE("hive_server"), 
-   HADOOP_CLIENT_ROLE("hadoop_client"),
-   HADOOP_DATANODE("hadoop_datanode"), 
-   HADOOP_TASKTRACKER("hadoop_tasktracker"), 
-   HADOOP_JOBTRACKER_ROLE("hadoop_jobtracker"), 
-   HADOOP_NAMENODE_ROLE("hadoop_namenode"),
-   HBASE_MASTER_ROLE("hbase_master"),
-   HBASE_REGIONSERVER_ROLE("hbase_regionserver"),
-   HBASE_CLIENT_ROLE("hbase_client"),
-   ZOOKEEPER_ROLE("zookeeper");
+   HIVE_SERVER_ROLE("hive_server");
 
    private String description;
 
@@ -54,5 +62,38 @@ public enum HadoopRole {
          }
       }
       return null;
+   }
+
+   /**
+    * Compare the order of roles according to their dependencies(the enum ordial is very important here)
+    *
+    *
+    */
+   public static class RoleComparactor implements Comparator<String> {
+      @Override
+      public int compare(String role1, String role2) {
+         if (role1 == role2) {
+            return 0;
+         }
+
+         HadoopRole role1Dependency = HadoopRole.fromString(role1);
+         HadoopRole role2Dependency = HadoopRole.fromString(role2);
+         if (role1Dependency == role2Dependency) {
+            return 0;
+         }
+
+         //null elements will be sorted behind the list
+         if (role1Dependency == null) {
+            return 1;
+         } else if (role2Dependency == null) {
+            return -1;
+         }
+
+         if (role1Dependency.ordinal() == role2Dependency.ordinal()) {
+            return 0;
+         } else {
+            return (role1Dependency.ordinal() > role2Dependency.ordinal()) ? 1 : -1;
+         }
+      }
    }
 }
