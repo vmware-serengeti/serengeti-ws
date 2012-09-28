@@ -32,7 +32,7 @@ DNS_CONFIG_FILE="/etc/resolv.conf"
 DNS_CONFIG_FILE_DHCP="/etc/resolv.conf.bak"
 DNS_CONFIG_FILE_TMP="/etc/resolv.conf.tmp"
 
-VHM_CONF="/opt/serengeti/conf/vHadoopProperties"
+VHM_CONF="/opt/serengeti/conf/vhm.properties"
 VHM_START="/opt/serengeti/sbin/vhm-start.sh"
 
 system <<EOF
