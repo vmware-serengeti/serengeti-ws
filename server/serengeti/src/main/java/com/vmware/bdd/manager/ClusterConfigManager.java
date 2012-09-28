@@ -38,6 +38,7 @@ import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.RackInfo;
@@ -271,9 +272,18 @@ public class ClusterConfigManager {
 
       for (NodeGroupCreate ngc : cluster.getNodeGroups()) {
          PlacementPolicy policies = ngc.getPlacementPolicies();
+         if (policies != null && policies.getGroupAssociations() != null 
+        	   && policies.getGroupAssociations().get(0).getType() == GroupAssociationType.STRICT) {
+        	 continue;
+         }
+         
+         if (ngc.getStorage() != null && ngc.getStorage().getType() != null 
+        	   && ngc.getStorage().getType().equals(DatastoreType.SHARED.toString())) {
+        	 continue;
+         }
+      
          if (policies != null && policies.getGroupRacks() != null
                && ngc.calculateHostNum() != null) {
-
             Integer requiredHostNum = ngc.calculateHostNum();
             if (requiredHostNum > 0) {
                GroupRacks r = policies.getGroupRacks();
@@ -290,7 +300,7 @@ public class ClusterConfigManager {
                }
                if (totalHostNum < requiredHostNum) {
                   valid = false;
-                  throw ClusterConfigException.LACK_PHYSICAL_HOSTS();
+                  throw ClusterConfigException.LACK_PHYSICAL_HOSTS(ngc.getName(), requiredHostNum, totalHostNum);
                }
             }
          }

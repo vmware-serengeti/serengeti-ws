@@ -223,9 +223,25 @@ public class NodeGroupCreate {
       return hostNumber;
    }
 
+   @SuppressWarnings("unused")
    public boolean validatePlacementPolicies(ClusterCreate cluster, Map<String, NodeGroupCreate> groups,
          List<String> failedMsgList, List<String> warningMsgList) {
       boolean valid = true;
+      if (cluster.getTopologyPolicy() == TopologyType.HVE 
+          || cluster.getTopologyPolicy() == TopologyType.HOST_AS_RACK
+          || cluster.getTopologyPolicy() == TopologyType.RACK_AS_RACK) {
+    	 if (getPlacementPolicies() == null) {
+    		setPlacementPolicies(new PlacementPolicy());
+    	 }
+    	 if (getPlacementPolicies().getGroupRacks() == null)
+    	 {
+    		 GroupRacks groupRacks = new GroupRacks();
+    		 groupRacks.setType(GroupRacksType.ROUNDROBIN);
+    		 groupRacks.setRacks(new String[0]);
+    		 getPlacementPolicies().setGroupRacks(groupRacks);
+    	 }
+      }
+
       PlacementPolicy policies = getPlacementPolicies();
       if (policies != null) {
          if (policies.getInstancePerHost() != null) {
@@ -256,6 +272,10 @@ public class NodeGroupCreate {
                   && r.getRacks().length != 1) {
                valid = false;
                failedMsgList.add(Constants.PRACK_SAME_RACK_WITH_WRONG_VALUES);
+            }
+
+            if (r.getRacks() == null) {
+               r.setRacks(new String[0]);
             }
 
             // warning if storage.type = SHARED

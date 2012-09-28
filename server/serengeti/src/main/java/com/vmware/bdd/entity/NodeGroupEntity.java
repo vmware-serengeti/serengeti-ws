@@ -445,7 +445,6 @@ public class NodeGroupEntity extends EntityBase {
       }
    }
 
-
    public void validateIfHostCanSatisfied (int instanceNum) {
       if (getInstancePerHost() != null) {
          // assume this value is already validated
@@ -466,7 +465,7 @@ public class NodeGroupEntity extends EntityBase {
                }
             }
             if (totalHostNum < requiredHostNum) {
-               throw ClusterConfigException.LACK_PHYSICAL_HOSTS();
+               throw ClusterConfigException.LACK_PHYSICAL_HOSTS(this.name, requiredHostNum, totalHostNum);
             }
          }
       }
