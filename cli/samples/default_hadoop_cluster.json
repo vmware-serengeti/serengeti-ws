@@ -85,8 +85,8 @@
         // "PATH": ""
       },
       "log4j.properties": {
-        // "hadoop.root.logger": "DEBUG,console",
-        // "hadoop.security.logger": "DEBUG,console"
+        // "hadoop.root.logger": "DEBUG,DRFA",
+        // "hadoop.security.logger": "DEBUG,DRFA"
       },
       "fair-scheduler.xml": {
         // check for all settings at http://hadoop.apache.org/docs/r1.0.0/fair_scheduler.html
@@ -100,40 +100,6 @@
         // "mapred.queue.queue-name.acl-submit-job": "",
         // "mapred.queue.queue-name.acl-administer-jobs", ""
       }
-    },
-    "hbase": {
-      "log4j.properties": {
-        // "hbase.root.logger": "DEBUG,console",
-      },
-      "hbase-site.xml": {
-        //check for all settings at http://hbase.apache.org/book/config.files.html 
-      },
-      "hbase-env.sh": {
-        //  "JAVA_HOME": "",
-        //  "PATH": "",
-        //  "HBASE_CLASSPATH": "",
-        //  "HBASE_HEAPSIZE": "",
-        //  "HBASE_OPTS": "",
-        //  "HBASE_USE_GC_LOGFILE": "",
-        //  "HBASE_JMX_BASE": "",
-        //  "HBASE_MASTER_OPTS": "",
-        //  "HBASE_REGIONSERVER_OPTS": "",
-        //  "HBASE_THRIFT_OPTS": "",
-        //  "HBASE_ZOOKEEPER_OPTS": "",
-        //  "HBASE_REGIONSERVERS": "",
-        //  "HBASE_SSH_OPTS": "",
-        //  "HBASE_NICENESS": "",
-        //  "HBASE_SLAVE_SLEEP: ""
-      }
-    },
-    "zookeeper": {
-      "java.env": {
-        //  "jvm_option": "-Xmx4g"
-      },
-      "log4j.properties": {
-        // "zookeeper.root.logger": "DEBUG,console",
-      }
-
     }
   }
 }

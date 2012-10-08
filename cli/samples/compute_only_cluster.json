@@ -34,6 +34,7 @@
       "roles": [
         "hadoop_client",
         "hive",
+        "hive_server",
         "pig"
       ],
       "instanceNum": 1,
@@ -71,8 +72,8 @@
         // "PATH": ""
       },
       "log4j.properties": {
-        // "hadoop.root.logger": "DEBUG,console",
-        // "hadoop.security.logger": "DEBUG,console"
+        // "hadoop.root.logger": "DEBUG,DRFA",
+        // "hadoop.security.logger": "DEBUG,DRFA"
       }
     }
   }
