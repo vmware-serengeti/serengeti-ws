@@ -7,106 +7,56 @@
         "hadoop_jobtracker"
       ],
       "instanceNum": 1,
-      "instanceType": "LARGE",
-      "cpuNum": 6,
-      "memCapacityMB": 2048,
-      "haFlag": "off"
+      "instanceType": "SMALL",
+      "haFlag": "on"
     },
     {
-      "name": "data",
+      "name": "d1",
       "roles": [
         "hadoop_datanode"
       ],
-      "instanceNum": 4,
-      "cpuNum": 2,
-      "memCapacityMB": 1024,
+      "instanceNum": 3,
+	  "instanceType": "SMALL",
       "storage": {
         "type": "LOCAL",
-        "sizeGB": 10
+        "sizeGB": 20
       },
-      "rpNames": [
-        "sample_resource_pool1", // change this to the resource pool added via Serengeti CLI
-        "sample_resource_pool2"  // change this to the resource pool added via Serengeti CLI
-      ],
-      "placementPolicies": {
-        "instancePerHost": 1,
-	"groupRacks": {
-	 "type": "ROUNDROBIN"
-	}
-      }
+	  "placementPolicies": {
+	    "instancePerHost": 1,
+		"groupRacks": {
+		  "type":"ROUNDROBIN"
+		}
+	  }
     },
     {
-      "name": "compute",
+      "name": "c1",
       "roles": [
         "hadoop_tasktracker"
       ],
-      "instanceNum": 8,
-      "cpuNum": 2,
-      "memCapacityMB": 1024,
+      "instanceNum": 3,
+	  "instanceType": "SMALL",
       "storage": {
         "type": "LOCAL",
         "sizeGB": 10
       },
-      "rpNames": [
-        "sample_resource_pool1", // change this to the resource pool added via Serengeti CLI
-        "sample_resource_pool2"  // change this to the resource pool added via Serengeti CLI
-      ],
-      "placementPolicies": {
-        "instancePerHost": 2,
-        "groupAssociations": [
-          {
-            "reference": "data",
-            "type": "STRICT"
-          }
-        ]
-      }
+	  "placementPolicies": {
+		"groupAssociations":[{
+		  "reference": "d1",
+		  "type": "STRICT"
+		}]
+	  }
     },
     {
       "name": "client",
       "roles": [
         "hadoop_client",
         "hive",
-        "hive_server",
+	"hive_server",
         "pig"
       ],
       "instanceNum": 1,
-      "cpuNum": 1,
-      "storage": {
-        "type": "LOCAL",
-        "sizeGB": 10
-      },
-      "rpNames": [
-        "sample_resource_pool3" // change this to the resource pool added via Serengeti CLI
-      ]
-    }
-  ],
-  "configuration": {
-    "hadoop": {
-      "core-site.xml": {
-        // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/core-default.html
-        // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample:
-        // "io.file.buffer.size": "4096"
-      },
-      "hdfs-site.xml": {
-        // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/hdfs-default.html
-      },
-      "mapred-site.xml": {
-        // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/mapred-default.html
-      },
-      "hadoop-env.sh": {
-        // "HADOOP_HEAPSIZE": "",
-        // "HADOOP_NAMENODE_OPTS": "",
-        // "HADOOP_DATANODE_OPTS": "",
-        // "HADOOP_SECONDARYNAMENODE_OPTS": "",
-        // "HADOOP_JOBTRACKER_OPTS": "",
-        // "HADOOP_TASKTRACKER_OPTS": "",
-        // "JAVA_HOME": "",
-        // "PATH": ""
-      },
-      "log4j.properties": {
-        // "hadoop.root.logger": "DEBUG,DRFA",
-        // "hadoop.security.logger": "DEBUG,DRFA"
-      }
-    }
-  }
+      "instanceType": "SMALL"
+	}
+  ]
 }
+
