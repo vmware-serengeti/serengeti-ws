@@ -18,7 +18,6 @@ package com.vmware.bdd.entity;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +35,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
-import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.gson.Gson;
@@ -294,34 +292,6 @@ public class ClusterEntity extends EntityBase {
             Restrictions.eq("name", name));
    }
 
-   public static List<ClusterEntity> findClusterEntityByDatastore(String dsName) {
-      List<ClusterEntity> clusters =
-            DAL.findByCriteria(ClusterEntity.class, Restrictions.like(
-                  "vcDatastoreNames", dsName, MatchMode.ANYWHERE));
-      Iterator<ClusterEntity> i = clusters.iterator();
-      while (i.hasNext()) {
-         ClusterEntity cluster = i.next();
-         if (!cluster.getVcDatastoreNameList().contains(dsName)) {
-            i.remove();
-         }
-      }
-      return clusters;
-   }
-
-   public static List<ClusterEntity> findClusterEntityByRP(String rpName) {
-      List<ClusterEntity> clusters =
-            DAL.findByCriteria(ClusterEntity.class,
-                  Restrictions.like("vcRpNames", rpName, MatchMode.ANYWHERE));
-      Iterator<ClusterEntity> i = clusters.iterator();
-      while (i.hasNext()) {
-         ClusterEntity cluster = i.next();
-         if (!cluster.getVcRpNameList().contains(rpName)) {
-            i.remove();
-         }
-      }
-      return clusters;
-   }
-
    public static void updateStatus(final String clusterName,
          final ClusterStatus status) {
       if (clusterName == null || status == null)
@@ -336,5 +306,58 @@ public class ClusterEntity extends EntityBase {
             return null;
          }
       });
+   }
+
+   public static List<String> findClusterNamesByUsedResourcePool(final String rpName) {
+      return DAL.inRoTransactionDo(new Saveable<List<String>>() {
+         @Override
+         public List<String> body() {
+            List<String> clusterNames = new ArrayList<String>();
+            // query cluster entity to check if resource pool is used by cluster.
+            List<ClusterEntity> clusters = DAL.findAll(ClusterEntity.class);
+            for (ClusterEntity cluster : clusters) {
+               Set<VcResourcePoolEntity> usedRps = cluster.getUsedRps();
+               for (VcResourcePoolEntity vcRp : usedRps) {
+                  if (rpName.equals(vcRp.getName())) {
+                     clusterNames.add(cluster.getName());
+                  }
+               }
+            }
+            return clusterNames;
+         }
+      });
+   }
+
+   public static List<String> findClusterNamesByUsedDatastores(
+         final Set<String> patterns) {
+      List<String> clusterNames = DAL.inRoTransactionDo(new Saveable<List<String>>() {
+         @Override
+         public List<String> body() {
+            List<String> clusterNames = new ArrayList<String>();
+            // query cluster entity to check if data store is used by cluster.
+            List<ClusterEntity> clusters = DAL.findAll(ClusterEntity.class);
+            for (ClusterEntity cluster : clusters) {
+               Set<String> usedDS = cluster.getUsedVcDatastores();
+               if (matchDatastorePattern(patterns, usedDS)) {
+                  clusterNames.add(cluster.getName());
+               }
+            }
+            return clusterNames;
+         }
+      });
+      return clusterNames;
+   }
+
+   private static boolean matchDatastorePattern(Set<String> patterns, Set<String> datastores) {
+      for (String pattern : patterns) {
+         // the datastore pattern is defined as wildcard
+         pattern = pattern.replace("?", ".").replace("*", ".*");
+         for (String datastore : datastores) {
+            if (datastore.matches(pattern)) {
+               return true;
+            }
+         }
+      }
+      return false;
    }
 }

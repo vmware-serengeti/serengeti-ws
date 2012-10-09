@@ -205,14 +205,13 @@ public class VcDataStoreManager {
          throw VcProviderException.DATASTORE_NOT_FOUND(name);
       }
 
-      // query cluster configuration to check if data store is used by cluster spec.
-      List<ClusterEntity> clusters = ClusterEntity.findClusterEntityByDatastore(name);
-      if (!clusters.isEmpty()) {
-         List<String> clusterNames = new ArrayList<String>();
-         for (ClusterEntity cluster : clusters) {
-            clusterNames.add(cluster.getName());
-         }
-         logger.error("cannot remove datastore, since following cluster spec referenced this datastore: " + clusterNames);
+      final Set<String> patterns = new HashSet<String>();
+      for (VcDataStoreEntity entity : entities) {
+         patterns.add(entity.getVcDatastore());
+      }
+      List<String> clusterNames = ClusterEntity.findClusterNamesByUsedDatastores(patterns);
+      if (!clusterNames.isEmpty()) {
+         logger.error("cannot remove datastore, since following clusters referenced this datastore: " + clusterNames);
          throw VcProviderException.DATASTORE_IS_REFERENCED_BY_CLUSTER(clusterNames);
       }
 

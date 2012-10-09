@@ -212,18 +212,16 @@ public class VcResourcePoolManager {
          throw VcProviderException.RESOURCE_POOL_NOT_FOUND(rpName);
       }
 
-      // query cluster configuration to check if resource pool is used by cluster spec.
-      List<ClusterEntity> clusters = ClusterEntity.findClusterEntityByRP(rpName);
-      if (!clusters.isEmpty()) {
-         List<String> clusterNames = new ArrayList<String>();
-         for (ClusterEntity cluster : clusters) {
-            clusterNames.add(cluster.getName());
-         }
-         logger.error("cannot remove resource pool, since following cluster spec referenced it: " + clusterNames);
+      List<String> clusterNames = ClusterEntity.findClusterNamesByUsedResourcePool(rpName);
+
+      if (!clusterNames.isEmpty()) {
+         logger.error("cannot remove resource pool, since following clusters referenced it: " + clusterNames);
          throw VcProviderException.RESOURCE_POOL_IS_REFERENCED_BY_CLUSTER(clusterNames);
       }
 
       DAL.inTransactionDelete(entity);
       logger.debug("successfully deleted resource pool " + rpName);
    }
+
+
 }

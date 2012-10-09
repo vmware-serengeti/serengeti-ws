@@ -168,13 +168,6 @@ public class ClusterConfigManager {
                   clusterEntity.setVcRpNameList(cluster.getRpNames());
                } else {
                   logger.debug("no resource pool name specified, use global configuration.");
-                  Set<String> globalNames = rpMgr.getAllRPNames();
-                  if (globalNames.isEmpty()) {
-                     throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
-                  }
-                  List<String> rpNames = new ArrayList<String>();
-                  rpNames.addAll(globalNames);
-                  clusterEntity.setVcRpNameList(rpNames);
                }
                if (cluster.getDsNames() != null
                      && !cluster.getDsNames().isEmpty()) {
@@ -183,13 +176,6 @@ public class ClusterConfigManager {
                   clusterEntity.setVcDatastoreNameList(cluster.getDsNames());
                } else {
                   logger.debug("no datastore name specified, use global configuration.");
-                  Set<String> globalNames = datastoreMgr.getAllDataStoreName();
-                  if (globalNames.isEmpty()) {
-                     throw ClusterConfigException.NO_DATASTORE_ADDED();
-                  }
-                  List<String> dsNames = new ArrayList<String>();
-                  dsNames.addAll(globalNames);
-                  clusterEntity.setVcDatastoreNameList(dsNames);
                }
                String networkName = cluster.getNetworkName();
                NetworkEntity networkEntity = null;
