@@ -2,7 +2,12 @@
 
 service="sudo /sbin/service"
 
-for name in chef-server-webui chef-server chef-expander chef-solr tomcat httpd rabbitmq-server postgresql couchdb; do
+for name in chef-server-webui chef-server chef-expander chef-solr tomcat vhm httpd rabbitmq-server postgresql couchdb; do
+  if [ "${name}" == "vhm" ]; then
+    sh /opt/serengeti/sbin/vhm-stop.sh
+    continue
+  fi
+
   $service $name stop
 
   #kill tomcat if it cannot be stopped by service
@@ -22,5 +27,3 @@ for name in chef-server-webui chef-server chef-expander chef-solr tomcat httpd r
     echo "Cannot stop service $name, please restart it mannually."
   fi
 done
-
-sh /opt/serengeti/sbin/vhm-stop.sh

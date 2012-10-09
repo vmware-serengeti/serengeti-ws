@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Source function library
+. /etc/init.d/functions
+
 SERENGETI_HOME=/opt/serengeti
 
 VHM_HOME=${SERENGETI_HOME}/vhm
@@ -12,7 +15,9 @@ java ${JAVA_OPTS} -jar ${VHM_JAR} >> /opt/serengeti/logs/vhm.log 2>&1 &
 
 VHM_SERVICE_PID=`ps aux | grep java | grep elastic-runtime | awk '{print $2}'`
 if [ "${VHM_SERVICE_PID}" != "" ]; then
-  echo ": [ OK ]"
+  success
+  echo
 else
-  echo ": [ Failed ]"
+  failure
+  echo
 fi
