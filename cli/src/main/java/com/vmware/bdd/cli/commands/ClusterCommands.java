@@ -66,7 +66,7 @@ public class ClusterCommands implements CommandMarker {
    @Autowired
    private HiveCommands hiveCommands;
 
-   private String hiveInfo;
+   private String hiveServerUrl;
    private String targetClusterName;
 
    //define role of the node group .
@@ -517,8 +517,8 @@ public class ClusterCommands implements CommandMarker {
             if (jtUrl != null && jtUrl.length() > 0) {
                System.out.println("Job Tracker url : " + jtUrl);
             }
-            if (hiveInfo != null && hiveInfo.length() > 0) {
-               System.out.println("Hive server info: " + hiveInfo);
+            if (hiveServerUrl != null && hiveServerUrl.length() > 0) {
+               System.out.println("Hive server info: " + hiveServerUrl);
             }
          } else {
             if (name == null) {
@@ -542,7 +542,7 @@ public class ClusterCommands implements CommandMarker {
                }
                setFsURL("");
                setJobTrackerURL("");
-               this.setHiveServer("");
+               this.setHiveServerUrl("");
             } else {
                targetClusterName = cluster.getName();
                boolean hasHDFS = false;
@@ -572,7 +572,7 @@ public class ClusterCommands implements CommandMarker {
                         List<NodeRead> nodes = nodeGroup.getInstances();
                         if (nodes != null && nodes.size() > 0) {
                            String hiveServerIP = nodes.get(0).getIp();
-                           setHiveServer(hiveServerIP);
+                           setHiveServerAddress(hiveServerIP);
                            hasHiveServer = true;
                         } else {
                            throw new CliRestException("no hive server available");
@@ -588,7 +588,7 @@ public class ClusterCommands implements CommandMarker {
             	   setFsURL("");
                }
                if(!hasHiveServer){
-            	   this.setHiveServer("");
+            	   this.setHiveServerUrl("");
                }
             }
          }
@@ -597,7 +597,7 @@ public class ClusterCommands implements CommandMarker {
                Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          setFsURL("");
          setJobTrackerURL("");
-         this.setHiveServer("");
+         this.setHiveServerUrl("");
       }
    }
 
@@ -619,12 +619,16 @@ public class ClusterCommands implements CommandMarker {
 	   hadoopConfiguration.set("mapred.job.tracker", jobTrackerUrl);
    }
 
-   private void setHiveServer(String hiveServerAddress) {
+   private void setHiveServerAddress(String hiveServerAddress) {
       try {
-         hiveInfo = hiveCommands.config(hiveServerAddress, 10000, null);
+         hiveServerUrl = hiveCommands.config(hiveServerAddress, 10000, null);
       } catch (Exception e) {
          throw new CliRestException("faild to set hive server address");
       }
+   }
+   
+   private void setHiveServerUrl(String hiveServerUrl) {
+	   this.hiveServerUrl = hiveServerUrl;
    }
 
    @CliCommand(value = "cluster config", help = "Config an existing cluster")
