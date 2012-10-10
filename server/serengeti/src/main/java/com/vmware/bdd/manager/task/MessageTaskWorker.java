@@ -67,7 +67,7 @@ public class MessageTaskWorker implements TaskWorker {
             logger.error(e.getMessage());
          }
          runtimeConnectionManager.sendMessage(ConfigInfo.getRuntimeMqSendRouteKey(), jsonStr);
-         messageProcessor.forceStop();
+         messageProcessor.graceStop();
          try {
             messageProcessorThread.join();
             logger.info("helper threads joined for task: " + taskEntity.getId());

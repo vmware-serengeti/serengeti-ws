@@ -59,6 +59,12 @@ class MessageProcessor extends TracedRunnable {
       }
    }
 
+   public void graceStop() throws IOException {
+      if (!done) {
+         mqConsumer.graceStop();
+      }
+   }
+
    public boolean isDone() {
       return done;
    }
@@ -93,8 +99,9 @@ class MessageProcessor extends TracedRunnable {
 
             if (!success) {
                double progress = (Double) msgMap.get(BddMessageUtil.PROGRESS_FIELD) / 100;
+               String progressMsg = (String)msgMap.get(BddMessageUtil.PROGRESS_MESSAGE_FIELD);
                // TODO need write throttling?
-               TaskEntity.updateProgress(taskId, progress);
+               TaskEntity.updateProgress(taskId, progress, progressMsg);
             }
 
             taskListener.onMessage(msgMap);
