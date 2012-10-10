@@ -59,7 +59,7 @@ public class NetworkCommandsTest extends MockRestServer {
       Pattern ipSegPattern = Pattern.compile(IPSEG);
       //Test a single IP format.
       assertEquals(ipPattern.matcher("192.168.0.1").matches(), true);
-      assertEquals(ipPattern.matcher("10.117.6.12").matches(), true);
+      assertEquals(ipPattern.matcher("88.207.6.12").matches(), true);
       assertEquals(ipPattern.matcher("abcd").matches(), false);
       assertEquals(ipPattern.matcher("256.0.0").matches(), false);
       assertEquals(ipPattern.matcher("256.0.0.1").matches(), false);
@@ -71,33 +71,33 @@ public class NetworkCommandsTest extends MockRestServer {
       assertEquals(ipSegPattern.matcher("192.168.0-255.1-256").matches(), false);
 
       List<String> list = null;
-      list = testIpGroupFormat("10.117.6.12,10.117.6.12,10.117.6.12-200");
+      list = testIpGroupFormat("192.168.0.12,192.168.0.12,192.168.0.12-200");
       for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
          String string = (String) iterator.next();
          assertEquals(ipPattern.matcher(string).matches()
                || ipSegPattern.matcher(string).matches(), true);
       }
-      list = testIpGroupFormat("10.117.6.12,10.117.6.12,10.117.6.12");
+      list = testIpGroupFormat("192.168.0.12,192.168.0.12,192.168.0.12");
       for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
          String string = (String) iterator.next();
          assertEquals(ipPattern.matcher(string).matches()
                || ipSegPattern.matcher(string).matches(), true);
       }
-      list = testIpGroupFormat("10.117.6.12-30,10.117.6.12-80,10.117.6.12-90");
-      for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
-         String string = (String) iterator.next();
-         assertEquals(ipPattern.matcher(string).matches()
-               || ipSegPattern.matcher(string).matches(), true);
-      }
-
-      list = testIpGroupFormat("10.117.6.12, ");
+      list = testIpGroupFormat("192.168.0.12-30,192.168.0.12-80,192.168.0.12-90");
       for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
          String string = (String) iterator.next();
          assertEquals(ipPattern.matcher(string).matches()
                || ipSegPattern.matcher(string).matches(), true);
       }
 
-      list = testIpGroupFormat("10.117.6.12,256.117.6.12-300");
+      list = testIpGroupFormat("192.168.0.12, ");
+      for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
+         String string = (String) iterator.next();
+         assertEquals(ipPattern.matcher(string).matches()
+               || ipSegPattern.matcher(string).matches(), true);
+      }
+
+      list = testIpGroupFormat("192.168.0.12,256.117.6.12-300");
       for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
          String string = (String) iterator.next();
          if (ipPattern.matcher(string).matches()
@@ -138,10 +138,10 @@ public class NetworkCommandsTest extends MockRestServer {
       buildReqRespWithoutReqBody(
             "http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.POST,
             HttpStatus.NO_CONTENT, "");
-      networkCommands.addNetwork("name", "portGroup", false, "10.117.7.12",
-            "10.117.7.13", "10.1.1.1,10.2.3.4-100", "10.117.7.1",
+      networkCommands.addNetwork("name", "portGroup", false, "192.168.0.12",
+            "192.168.0.13", "192.168.0.1,192.167.0.4-100", "192.168.1.1",
             "255.255.255.0");
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
    
    @Test
@@ -155,10 +155,10 @@ public class NetworkCommandsTest extends MockRestServer {
             "http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.POST,
             HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
       
-      networkCommands.addNetwork("name", "portGroup", false, "10.117.7.12",
-            "10.117.7.13", "10.1.1.1,10.2.3.4-100", "10.117.7.1",
+      networkCommands.addNetwork("name", "portGroup", false, "192.168.0.12",
+            "192.168.0.13", "192.168.0.1,192.168.3.4-100", "192.168.7.1",
             "255.255.255.0");
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
 
    @Test
@@ -168,7 +168,7 @@ public class NetworkCommandsTest extends MockRestServer {
             "http://127.0.0.1:8080/serengeti/api/network/name",
             HttpMethod.DELETE, HttpStatus.NO_CONTENT, "");
       networkCommands.deleteNetwork("name");
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
    
    @Test
@@ -182,7 +182,7 @@ public class NetworkCommandsTest extends MockRestServer {
             "http://127.0.0.1:8080/serengeti/api/network/name",
             HttpMethod.DELETE, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
       networkCommands.deleteNetwork("name");
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
 
    @Test
@@ -193,18 +193,18 @@ public class NetworkCommandsTest extends MockRestServer {
       networkRead1.setName("name1");
       networkRead1.setPortGroup("portGroup1");
       networkRead1.setDhcp(false);
-      networkRead1.setDns1("10.1.1.1");
-      networkRead1.setDns2("10.1.2.1");
+      networkRead1.setDns1("192.1.1.1");
+      networkRead1.setDns2("192.1.2.1");
       List<IpBlock> allIpBlocks = new ArrayList<IpBlock>();
       IpBlock ip1 = new IpBlock();
-      ip1.setBeginIp("10.1.1.2");
-      ip1.setEndIp("10.1.1.5");
+      ip1.setBeginIp("192.1.1.2");
+      ip1.setEndIp("192.1.1.5");
       IpBlock ip2 = new IpBlock();
-      ip2.setBeginIp("10.1.1.8");
-      ip2.setEndIp("10.1.1.8");
+      ip2.setBeginIp("192.1.1.8");
+      ip2.setEndIp("192.1.1.8");
       IpBlock ip3 = new IpBlock();
-      ip3.setBeginIp("10.1.1.10");
-      ip3.setEndIp("10.1.1.100");
+      ip3.setBeginIp("192.1.1.10");
+      ip3.setEndIp("192.1.1.100");
       allIpBlocks.add(ip1);
       allIpBlocks.add(ip2);
       allIpBlocks.add(ip3);
@@ -215,17 +215,17 @@ public class NetworkCommandsTest extends MockRestServer {
       networkRead1.setAllIpBlocks(allIpBlocks);
       networkRead1.setFreeIpBlocks(freeIpBlocks);
       networkRead1.setAssignedIpBlocks(assignedIpBlocks);
-      networkRead1.setGateway("10.1.1.0");
+      networkRead1.setGateway("192.1.1.0");
       networkRead1.setNetmask("255.255.0.0");
       List<IpAllocEntryRead> ipAllocEntries1 =
             new ArrayList<IpAllocEntryRead>();
       IpAllocEntryRead ipAllocEntry1 = new IpAllocEntryRead();
-      ipAllocEntry1.setIpAddress("10.1.1.3");
+      ipAllocEntry1.setIpAddress("192.1.1.3");
       ipAllocEntry1.setNodeName("nodeName1");
       ipAllocEntry1.setNodeGroupName("nodeGroupName1");
       ipAllocEntry1.setClusterName("clusterName1");
       IpAllocEntryRead ipAllocEntry2 = new IpAllocEntryRead();
-      ipAllocEntry2.setIpAddress("10.1.1.7");
+      ipAllocEntry2.setIpAddress("192.1.1.7");
       ipAllocEntry2.setNodeName("nodeName2");
       ipAllocEntry2.setNodeGroupName("nodeGroupName1");
       ipAllocEntry2.setClusterName("clusterName1");
@@ -240,12 +240,12 @@ public class NetworkCommandsTest extends MockRestServer {
       List<IpAllocEntryRead> ipAllocEntries2 =
             new ArrayList<IpAllocEntryRead>();
       IpAllocEntryRead ipAllocEntry3 = new IpAllocEntryRead();
-      ipAllocEntry3.setIpAddress("10.1.10.3");
+      ipAllocEntry3.setIpAddress("192.1.10.3");
       ipAllocEntry3.setNodeName("nodeName3");
       ipAllocEntry3.setNodeGroupName("nodeGroupName2");
       ipAllocEntry3.setClusterName("clusterName2");
       IpAllocEntryRead ipAllocEntry4 = new IpAllocEntryRead();
-      ipAllocEntry4.setIpAddress("10.1.10.7");
+      ipAllocEntry4.setIpAddress("192.1.10.7");
       ipAllocEntry4.setNodeName("nodeName4");
       ipAllocEntry4.setNodeGroupName("nodeGroupName2");
       ipAllocEntry4.setClusterName("clusterName2");
@@ -254,7 +254,7 @@ public class NetworkCommandsTest extends MockRestServer {
       networkRead2.setIpAllocEntries(ipAllocEntries2);
       getListNetwork(mapper, new NetworkRead[] { networkRead1, networkRead2 },
             true);
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
 
    private List<String> testIpGroupFormat(String str) {
@@ -317,7 +317,7 @@ public class NetworkCommandsTest extends MockRestServer {
             "http://127.0.0.1:8080/serengeti/api/network/name1", HttpMethod.GET,
             HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
       networkCommands.getNetwork("name1", false);
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
 
 }

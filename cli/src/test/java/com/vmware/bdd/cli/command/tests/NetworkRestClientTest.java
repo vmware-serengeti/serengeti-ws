@@ -53,7 +53,7 @@ public class NetworkRestClientTest extends MockRestServer {
             "http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.POST,
             HttpStatus.NO_CONTENT, mapper.writeValueAsString(networkAdd));
       networkRestClient.add(networkAdd);
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
    
    @Test
@@ -61,7 +61,7 @@ public class NetworkRestClientTest extends MockRestServer {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/network/name1", HttpMethod.DELETE, HttpStatus.NO_CONTENT, "");
       networkRestClient.delete("name1");
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
    
    private void addByIP(NetworkAdd networkAdd){

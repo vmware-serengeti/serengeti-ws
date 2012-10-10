@@ -45,7 +45,7 @@ public class RpCommandsTest extends MockRestServer {
             HttpStatus.NO_CONTENT, "");
 
       rpCommands.addResourcePool("rp01", "vc_rp1", "vc_cluster1");
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
    
    @Test
@@ -60,7 +60,7 @@ public class RpCommandsTest extends MockRestServer {
             HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
 
       rpCommands.addResourcePool("rp01", "vc_rp1", "vc_cluster1");
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
 
    @Test
@@ -71,7 +71,7 @@ public class RpCommandsTest extends MockRestServer {
             HttpStatus.NO_CONTENT, "");
 
       rpCommands.deleteResourcePool("rp01");
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
    
    @Test
@@ -86,7 +86,7 @@ public class RpCommandsTest extends MockRestServer {
             HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
       rpCommands.deleteResourcePool("rp01");
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
    
    @Test
@@ -125,7 +125,7 @@ public class RpCommandsTest extends MockRestServer {
             HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(rp));
     
       rpCommands.getResourcePool("test01", true);
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
    
    @Test
@@ -171,7 +171,7 @@ public class RpCommandsTest extends MockRestServer {
             HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(rps));
     
       rpCommands.getResourcePool(null, true);
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
    
    @Test
@@ -185,6 +185,6 @@ public class RpCommandsTest extends MockRestServer {
             HttpMethod.GET, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
       rpCommands.getResourcePool("rp1", true);
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
 }
