@@ -413,10 +413,15 @@ public class ClusterConfigManager {
       if (dsNames == null) {
          dsNames = clusterEntity.getVcDatastoreNameList();
       }
-      Set<String> sharedPattern =
-            datastoreMgr.getSharedDatastoresByNames(dsNames);
-      Set<String> localPattern =
-            datastoreMgr.getLocalDatastoresByNames(dsNames);
+      Set<String> sharedPattern;
+      Set<String> localPattern;
+      if (dsNames != null) {
+         sharedPattern = datastoreMgr.getSharedDatastoresByNames(dsNames);
+         localPattern = datastoreMgr.getLocalDatastoresByNames(dsNames);
+      } else {
+         sharedPattern = datastoreMgr.getAllSharedDatastores();
+         localPattern = datastoreMgr.getAllLocalDatastores();
+      }
 
       CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity, groupType,
             sharedPattern, localPattern);
