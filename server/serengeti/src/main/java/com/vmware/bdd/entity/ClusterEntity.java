@@ -34,6 +34,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.apache.log4j.Logger;
 import org.hibernate.annotations.Type;
 import org.hibernate.criterion.Restrictions;
 
@@ -43,6 +44,7 @@ import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.dal.DAL;
+import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ConfigInfo;
 
@@ -54,6 +56,8 @@ import com.vmware.bdd.utils.ConfigInfo;
 @SequenceGenerator(name = "IdSequence", sequenceName = "cluster_seq", allocationSize = 1)
 @Table(name = "cluster")
 public class ClusterEntity extends EntityBase {
+
+   private static final Logger logger = Logger.getLogger(ClusterEntity.class);
 
    @Column(name = "name", unique = true, nullable = false)
    private String name;
@@ -353,8 +357,13 @@ public class ClusterEntity extends EntityBase {
          // the datastore pattern is defined as wildcard
          pattern = pattern.replace("?", ".").replace("*", ".*");
          for (String datastore : datastores) {
-            if (datastore.matches(pattern)) {
-               return true;
+            try {
+               if (datastore.matches(pattern)) {
+                  return true;
+               }
+            } catch (Exception e) {
+               logger.error(e.getMessage());
+               continue;
             }
          }
       }

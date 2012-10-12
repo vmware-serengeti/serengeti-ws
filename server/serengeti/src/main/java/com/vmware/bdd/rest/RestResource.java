@@ -60,6 +60,7 @@ import com.vmware.bdd.manager.TaskManager;
 import com.vmware.bdd.manager.VcDataStoreManager;
 import com.vmware.bdd.manager.VcResourcePoolManager;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.IpAddressUtil;
 
 @Controller
@@ -148,6 +149,9 @@ public class RestResource {
          @RequestBody ClusterCreate createSpec,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
+      if (!CommonUtil.validateName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
       Long taskId = clusterMgr.configCluster(clusterName, createSpec);
       redirectRequest(taskId, request, response);
    }
@@ -166,7 +170,10 @@ public class RestResource {
    public void deleteCluster(@PathVariable("clusterName") String clusterName,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
-      // TODO: make sure cluster name is valid
+      // make sure cluster name is valid
+      if (!CommonUtil.validateName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
       Long taskId = clusterMgr.deleteClusterByName(clusterName);
       redirectRequest(taskId, request, response);
    }
@@ -178,7 +185,7 @@ public class RestResource {
          @RequestParam(value="state", required = true) String state,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
-      if (clusterName == null || clusterName.isEmpty()) {
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
 
@@ -206,11 +213,11 @@ public class RestResource {
          @RequestParam(value="state", required = true) String state,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
-      if (clusterName == null || clusterName.isEmpty()) {
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
 
-      if (groupName == null || groupName.isEmpty()) {
+      if (CommonUtil.isBlank(groupName) || !CommonUtil.validateName(groupName)) {
          throw BddException.INVALID_PARAMETER("node group name", groupName);
       }
 
@@ -236,15 +243,15 @@ public class RestResource {
          @RequestParam(value="state", required = true) String state,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
-      if (clusterName == null || clusterName.isEmpty()) {
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
 
-      if (groupName == null || groupName.isEmpty()) {
+      if (CommonUtil.isBlank(groupName) || !CommonUtil.validateName(groupName)) {
          throw BddException.INVALID_PARAMETER("node group name", groupName);
       }
 
-      if (nodeName == null || nodeName.isEmpty()) {
+      if (CommonUtil.isBlank(nodeName) || !CommonUtil.validateName(nodeName)) {
          throw BddException.INVALID_PARAMETER("node name", nodeName);
       }
 
@@ -266,6 +273,14 @@ public class RestResource {
          @PathVariable("groupName") String groupName,
          @RequestBody int instanceNum, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+
+      if (CommonUtil.isBlank(groupName) || !CommonUtil.validateName(groupName)) {
+         throw BddException.INVALID_PARAMETER("node group name", groupName);
+      }
+
       if (instanceNum <= 0) {
          throw BddException.INVALID_PARAMETER(
                "node group instance number", String.valueOf(instanceNum));
@@ -281,8 +296,14 @@ public class RestResource {
          @PathVariable("clusterName") String clusterName,
          @RequestBody VHMRequestBody requestBody, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
       int activeComputeNodeNum = requestBody.getActiveComputeNodeNum();
       String groupName = requestBody.getNodeGroupName();
+      if(!CommonUtil.isBlank(groupName) && !CommonUtil.validateName(groupName)) {
+         throw BddException.INVALID_PARAMETER("node group name", groupName);
+      }
       // The active compute node number must be a positive number or -1.
       if (activeComputeNodeNum < -1) {
          logger.error("Invalid instance number: " + activeComputeNodeNum + " !");
@@ -297,6 +318,9 @@ public class RestResource {
    public ClusterRead getCluster(
          @PathVariable("clusterName") final String clusterName,
          @RequestParam(value="details", required = false) Boolean details) {
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
       return clusterMgr.getClusterByName(clusterName, (details == null) ? false : details);
    }
 
@@ -304,6 +328,9 @@ public class RestResource {
    @ResponseBody
    public ClusterCreate getClusterSpec(
          @PathVariable("clusterName") final String clusterName) {
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
       return clusterMgr.getClusterSpec(clusterName);
    }
 
@@ -321,19 +348,14 @@ public class RestResource {
       if (rpSpec == null) {
          throw BddException.INVALID_PARAMETER("rpSpec", null);
       }
-      if (rpSpec.getName() == null || rpSpec.getName().isEmpty()) {
-         throw BddException.INVALID_PARAMETER("resource pool name",
-               rpSpec.getName());
+      if (CommonUtil.isBlank(rpSpec.getName()) || !CommonUtil.validateName(rpSpec.getName())) {
+         throw BddException.INVALID_PARAMETER("resource pool name", rpSpec.getName());
       }
-      if (rpSpec.getVcClusterName() == null
-            || rpSpec.getVcClusterName().isEmpty()) {
-         throw BddException.INVALID_PARAMETER("vc cluster name",
-               rpSpec.getVcClusterName());
+      if (CommonUtil.isBlank(rpSpec.getVcClusterName()) || !CommonUtil.validateName(rpSpec.getVcClusterName())) {
+         throw BddException.INVALID_PARAMETER("vc cluster name", rpSpec.getVcClusterName());
       }
-      if (rpSpec.getResourcePoolName() == null
-            || rpSpec.getResourcePoolName().isEmpty()) {
-         throw BddException.INVALID_PARAMETER("vc resource pool name",
-               rpSpec.getResourcePoolName());
+      if (CommonUtil.isBlank(rpSpec.getResourcePoolName()) || !CommonUtil.validateName(rpSpec.getResourcePoolName())) {
+         throw BddException.INVALID_PARAMETER("vc resource pool name", rpSpec.getResourcePoolName());
       }
 
       vcRpMgr.addResourcePool(rpSpec.getName(), rpSpec.getVcClusterName(),
@@ -350,9 +372,8 @@ public class RestResource {
    @ResponseBody
    public ResourcePoolRead getResourcePool(
          @PathVariable("rpName") final String rpName) {
-      if (rpName == null || rpName.isEmpty()) {
-         throw BddException.INVALID_PARAMETER("resource pool name",
-               rpName);
+      if (CommonUtil.isBlank(rpName) || !CommonUtil.validateName(rpName)) {
+         throw BddException.INVALID_PARAMETER("resource pool name", rpName);
       }
       ResourcePoolRead read = vcRpMgr.getResourcePoolForRest(rpName);
       if (read == null) {
@@ -364,9 +385,8 @@ public class RestResource {
    @RequestMapping(value = "/resourcepool/{rpName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
    public void deleteResourcePool(@PathVariable("rpName") final String rpName) {
-      if (rpName == null || rpName.isEmpty()) {
-         throw BddException.INVALID_PARAMETER("resource pool name",
-               rpName);
+      if (CommonUtil.isBlank(rpName) || !CommonUtil.validateName(rpName)) {
+         throw BddException.INVALID_PARAMETER("resource pool name", rpName);
       }
       vcRpMgr.deleteResourcePool(rpName);
    }
@@ -377,13 +397,11 @@ public class RestResource {
       if (dsSpec == null) {
          throw BddException.INVALID_PARAMETER("dsSpec", null);
       }
-      if (dsSpec.getName() == null || dsSpec.getName().isEmpty()) {
-         throw BddException.INVALID_PARAMETER("date store name",
-               dsSpec.getName());
+      if (CommonUtil.isBlank(dsSpec.getName()) || !CommonUtil.validateName(dsSpec.getName())) {
+         throw BddException.INVALID_PARAMETER("date store name", dsSpec.getName());
       }
-      if (dsSpec.getSpec() == null || dsSpec.getSpec().isEmpty()) {
-         throw BddException.INVALID_PARAMETER("vc data store name",
-               dsSpec.getSpec().toString());
+      if (!CommonUtil.validateVcDataStoreNames(dsSpec.getSpec())) {
+         throw BddException.INVALID_PARAMETER("vc data store name", dsSpec.getSpec().toString());
       }
       datastoreMgr.addDataStores(dsSpec);
    }
@@ -391,7 +409,7 @@ public class RestResource {
    @RequestMapping(value = "/datastore/{dsName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public DatastoreRead getDatastore(@PathVariable("dsName") final String dsName) {
-      if (dsName == null || dsName.isEmpty()) {
+      if (CommonUtil.isBlank(dsName) || !CommonUtil.validateName(dsName)) {
          throw BddException.INVALID_PARAMETER("date store name", dsName);
       }
       DatastoreRead read = datastoreMgr.getDatastoreRead(dsName);
@@ -410,7 +428,7 @@ public class RestResource {
    @RequestMapping(value = "/datastore/{dsName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
    public void deleteDatastore(@PathVariable("dsName") String dsName) {
-      if (dsName == null || dsName.isEmpty()) {
+      if (CommonUtil.isBlank(dsName) || !CommonUtil.validateName(dsName)) {
          throw BddException.INVALID_PARAMETER("date store name", dsName);
       }
       datastoreMgr.deleteDatastore(dsName);
@@ -420,6 +438,9 @@ public class RestResource {
    @ResponseStatus(HttpStatus.OK)
    public void deleteNetworkByName(
          @PathVariable("networkName") final String networkName) {
+      if (CommonUtil.isBlank(networkName) || !CommonUtil.validateName(networkName)) {
+         throw BddException.INVALID_PARAMETER("network name", networkName);
+      }
       networkManager.removeNetwork(networkName);
    }
 
@@ -428,13 +449,14 @@ public class RestResource {
    public NetworkRead getNetworkByName(
          @PathVariable("networkName") final String networkName,
          @RequestParam(value = "details", required = false, defaultValue = "false") final Boolean details) {
+      if (CommonUtil.isBlank(networkName) || !CommonUtil.validateName(networkName)) {
+         throw BddException.INVALID_PARAMETER("network name", networkName);
+      }
       NetworkRead network = networkManager.getNetworkByName(networkName,
             details != null ? details : false);
-
       if (network == null) {
          throw NetworkException.NOT_FOUND("network", networkName);
       }
-
       return network;
    }
 
@@ -449,11 +471,10 @@ public class RestResource {
    @RequestMapping(value = "/networks", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
    public void addNetworks(@RequestBody final NetworkAdd na) {
-      if (na.getName() == null || na.getName().isEmpty()) {
+      if (CommonUtil.isBlank(na.getName()) || !CommonUtil.validateName(na.getName())) {
          throw BddException.INVALID_PARAMETER("name", na.getName());
       }
-
-      if (na.getPortGroup() == null || na.getPortGroup().isEmpty()) {
+      if (CommonUtil.isBlank(na.getPortGroup()) || !CommonUtil.validateName(na.getPortGroup())) {
          throw BddException.INVALID_PARAMETER("port group", na.getPortGroup());
       }
 
@@ -522,8 +543,10 @@ public class RestResource {
    @ResponseBody
    public DistroRead getDistroByName(
          @PathVariable("distroName") String distroName) {
+      if (CommonUtil.isBlank(distroName) || !CommonUtil.validateName(distroName)) {
+         throw BddException.INVALID_PARAMETER("distro name", distroName);
+      }
       DistroRead distro = distroManager.getDistroByName(distroName);
-
       if (distro == null) {
          throw BddException.NOT_FOUND("distro", distroName);
       }
