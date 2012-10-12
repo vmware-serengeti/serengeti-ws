@@ -519,7 +519,7 @@ Optional-command-key-values are parameters that are optional for the operation.<
   </td>
  </tr>
  <tr>
-  <td width=67 rowspan=9 valign=top style='width:.7in;border:solid windowtext 1.0pt;
+  <td width=67 rowspan=11 valign=top style='width:.7in;border:solid windowtext 1.0pt;
   border-top:none;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>cluster</span></p>
@@ -806,6 +806,75 @@ Optional-command-key-values are parameters that are optional for the operation.<
   border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>limit</span></p>
+  </td>
+  <td width=216 valign=top style='width:2.25in;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Mandatory</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--name
+  &lt;cluster name&gt;</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--activeComputeNodeNum
+  &lt;Number of active compute nodes for the specified Hadoop cluster or node group within that cluster.&gt;</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Options</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--nodeGroupName
+  &lt;Name of a node group in the specified Hadoop cluster in Serengeti (only supports node groups with task tracker role)&gt;</a></span></p>
+  </td>
+  <td width=275 valign=top style='width:206.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Function</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Enable or disable provisioned compute nodes 
+in the specified Hadoop cluster or node group in Serengeti to reach the limit specified by activeComputeNodeNum.  
+Compute nodes are re-commissioned and powered-on or decommissioned and powered-off to reach the specified number of active compute nodes.</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=66 valign=top style='width:49.5pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>unlimit</span></p>
+  </td>
+  <td width=216 valign=top style='width:2.25in;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Mandatory</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--name
+  &lt;cluster name&gt;</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Options</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--nodeGroupName
+  &lt;Name of a node group in the specified Hadoop cluster in Serengeti (only supports node groups with task tracker role)&gt;</a></span></p>
+  </td>
+  <td width=275 valign=top style='width:206.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Function</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Remove cluster limit restriction for provisioned compute nodes in the specified Hadoop cluster or node group in Serengeti. All compute nodes in specified cluster or node group are all re-commissioned and powered-on.</span></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+  </td>
+ </tr>
+<tr>
+  <td width=66 valign=top style='width:49.5pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>list</span></p>
   </td>
   <td width=216 valign=top style='width:2.25in;border-top:none;border-left:
@@ -831,7 +900,7 @@ Optional-command-key-values are parameters that are optional for the operation.<
   normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Function</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Show
-  cluster information.</span></p>
+  cluster information.     Note: with this option specified, Serengeti will query from vCenter server to get latest node status. That operation may take some time, for example, longer than 7 seconds for each cluster. Please be patient.</span></p>
   </td>
  </tr>
  <tr>
