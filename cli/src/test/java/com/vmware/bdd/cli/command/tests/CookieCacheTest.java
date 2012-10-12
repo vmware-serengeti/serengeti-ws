@@ -28,6 +28,7 @@ public class CookieCacheTest {
       CookieCache.put(cookieName, cookieValue);
       assertNotNull(CookieCache.get(cookieName));
       assertEquals(CookieCache.get(cookieName),cookieValue);
+      CookieCache.clear();
    }
 
    @Test
@@ -37,5 +38,6 @@ public class CookieCacheTest {
       CookieCache.put(cookieName, cookieValue);
       assertNotNull(CookieCache.get(cookieName));
       assertEquals(CookieCache.get(cookieName),cookieValue);
+      CookieCache.clear();
    }
 }

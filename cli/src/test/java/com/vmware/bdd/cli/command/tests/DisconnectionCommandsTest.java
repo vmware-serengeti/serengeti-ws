@@ -38,6 +38,6 @@ public class DisconnectionCommandsTest extends MockRestServer {
             "http://127.0.0.1:8080/serengeti/j_spring_security_logout",
             HttpMethod.GET, HttpStatus.UNAUTHORIZED, "");
       disconnectionCommands.disconnect();
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
 }

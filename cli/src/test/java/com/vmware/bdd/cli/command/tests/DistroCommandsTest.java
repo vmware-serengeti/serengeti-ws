@@ -72,7 +72,7 @@ public class DistroCommandsTest extends MockRestServer {
 
       //get all distros
       distroCommands.getDistro(null, false);
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
    
    @Test
@@ -86,6 +86,6 @@ public class DistroCommandsTest extends MockRestServer {
 
       //get all distros
       distroCommands.getDistro(null, false);
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
 }

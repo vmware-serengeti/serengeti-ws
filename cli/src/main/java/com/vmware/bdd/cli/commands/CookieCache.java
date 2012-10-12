@@ -30,5 +30,9 @@ public class CookieCache {
    public static String get(final String cookieName) {
       return cookieInfo.get(cookieName);
    }
- 
+
+   public static void clear() {
+      cookieInfo.clear();
+   }
+
 }

@@ -13,6 +13,7 @@
 		<module>server/serengeti</module>
 		<module>cli</module>
 		<module>frontend</module>
+		<module>vcext</module>
 	</modules>
 
 	<dependencyManagement>

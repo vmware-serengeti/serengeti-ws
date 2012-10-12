@@ -62,7 +62,7 @@ public class TopologyTests extends MockRestServer {
             HttpMethod.PUT, HttpStatus.NO_CONTENT, mapper.writeValueAsString(racksInfo));
 
       topologyCommands.upload("src/test/resources/topology.sample", true);
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
 
    @Test
@@ -93,6 +93,6 @@ public class TopologyTests extends MockRestServer {
 
       //get topology
       topologyCommands.list();
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
 }
