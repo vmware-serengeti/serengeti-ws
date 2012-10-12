@@ -105,7 +105,7 @@ Optional-command-key-values are parameters that are optional for the operation.<
   normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Mandatory</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--host
-  &lt;Serengeti server host&gt;</span></p>
+  &lt;Serengeti server host&gt;:8080</span></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Options</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
