@@ -815,15 +815,15 @@ Optional-command-key-values are parameters that are optional for the operation.<
   normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Mandatory</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--name
-  &lt;cluster name&gt;</span></p>
+  &lt;cluster name&gt;: Name of the Hadoop cluster in Serengeti</span></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--activeComputeNodeNum
-  &lt;Number of active compute nodes for the specified Hadoop cluster or node group within that cluster.&gt;</span></p>
+  &lt;active node number&gt;: Number of active compute nodes for the specified Hadoop cluster or node group within that cluster.</span></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Options</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--nodeGroupName
-  &lt;Name of a node group in the specified Hadoop cluster in Serengeti (only supports node groups with task tracker role)&gt;</a></span></p>
+  &lt;node group name&gt;: Name of a node group in the specified Hadoop cluster in Serengeti (only supports node groups with task tracker role)</a></span></p>
   </td>
   <td width=275 valign=top style='width:206.1pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -852,12 +852,12 @@ Compute nodes are re-commissioned and powered-on or decommissioned and powered-o
   normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Mandatory</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--name
-  &lt;cluster name&gt;</span></p>
+  &lt;cluster name&gt;: Name of the Hadoop cluster in Serengeti</span></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><b><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>Options</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
   normal'><span style='font-size:9.0pt;font-family:"Times New Roman","serif"'>--nodeGroupName
-  &lt;Name of a node group in the specified Hadoop cluster in Serengeti (only supports node groups with task tracker role)&gt;</a></span></p>
+  &lt;node group name&gt;: Name of a node group in the specified Hadoop cluster in Serengeti (only supports node groups with task tracker role)</a></span></p>
   </td>
   <td width=275 valign=top style='width:206.1pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
