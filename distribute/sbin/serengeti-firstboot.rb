@@ -35,6 +35,17 @@ DNS_CONFIG_FILE_TMP="/etc/resolv.conf.tmp"
 VHM_CONF="/opt/serengeti/conf/vhm.properties"
 VHM_START="/opt/serengeti/sbin/vhm-start.sh"
 
+SERENGETI_CERT_FILE="/opt/serengeti/.certs/serengeti.pem"
+SERENGETI_PRIVATE_KEY="/opt/serengeti/.certs/private.pem"
+
+ENTERPRISE_EDITION_FLAG="/opt/serengeti/etc/enterprise"
+
+VCEXT_TOOL_DIR="/opt/serengeti/vcext"
+VCEXT_TOOL_JAR=VCEXT_TOOL_DIR + "/" + %x[ls #{VCEXT_TOOL_DIR}/vcext-*.jar].strip
+SERENGETI_VCEXT_ID=%x[uuidgen].strip
+
+GENERATE_CERT_SCRIPT="/opt/serengeti/sbin/generate-certs.sh"
+
 system <<EOF
 /usr/sbin/rabbitmqctl add_vhost /chef
 /usr/sbin/rabbitmqctl add_user chef testing
@@ -71,6 +82,18 @@ puts("VM Ref ID: " + "#{h["evs_SelfMoRef"]}")
 h["templatename"] =
   properties_doc.elements["*/Entity"].attributes["oe:id"]
 puts("Node Template Name: " + "#{h["templatename"]}")
+
+h["evs_url"] =
+  properties_doc.elements["*/ve:vServiceEnvironmentSection/evs:GuestApi/evs:URL"].text
+puts("evs URL: " + "#{h["evs_url"]}")
+
+h["evs_token"] =
+  properties_doc.elements["*/ve:vServiceEnvironmentSection/evs:GuestApi/evs:Token"].text
+puts("evs Token: " + "*** HIDDEN ***")
+
+h["evs_thumbprint"] =
+  properties_doc.elements["*/ve:vServiceEnvironmentSection/evs:GuestApi/evs:X509Thumbprint"].text
+puts("evs X509Thumbprint: " + "#{h["evs_thumbprint"]}")
 
 #save dhcp init configuration
 FileUtils.cp("#{ETH_CONFIG_FILE}", "#{ETH_CONFIG_FILE_DHCP}")
@@ -170,15 +193,50 @@ SHELLEOF
 echo "PATH=\\$PATH:\"#{SERENGETI_SCRIPTS_HOME}\"" >> /etc/profile
 echo "CLOUD_MANAGER_CONFIG_DIR=\"#{SERENGETI_HOME}\"/conf" >> /etc/profile
 
+# register serengeti server as vc extension service
+if [ -e #{ENTERPRISE_EDITION_FLAG} -a "#{VCEXT_TOOL_JAR}" != "" ]; then
+  # generate certificate and private key
+  bash #{GENERATE_CERT_SCRIPT}
+  echo "registering serengeti server as vc ext service"
+  java -jar #{VCEXT_TOOL_JAR} \
+    -evsURL #{h["evs_url"]} \
+    -evsToken #{h["evs_token"]} \
+    -evsThumbprint #{h["evs_thumbprint"]} \
+    -extKey #{SERENGETI_VCEXT_ID} \
+    -cert #{SERENGETI_CERT_FILE}
+  ret=$?
+  if [ $ret != 0 ]; then
+    echo "failed to register serengeti server as vc ext service"
+    exit 1
+  fi
+fi
+
 EOF
 
-cloud_server = 'vsphere'
-info = {:provider => cloud_server,
-  :vsphere_server => h["evs_IP"],
-  :vsphere_username => h["vcusername"],
-  :vsphere_password => h["vcpassword"],
-}
-connection = Fog::Compute.new(info)
+def is_enterprise_edition?
+  File.exist? ENTERPRISE_EDITION_FLAG
+end
+
+def get_connection_info(vc_info) 
+  cloud_server = 'vsphere'
+  info = {:provider => cloud_server,
+    :vsphere_server => vc_info["evs_IP"]
+  }
+
+  if is_enterprise_edition? 
+    info[:cert] = SERENGETI_CERT_FILE
+    info[:key] = SERENGETI_PRIVATE_KEY
+    info[:extension_key] = SERENGETI_VCEXT_ID
+  else
+    info[:vsphere_username] = vc_info["vcusername"]
+    info[:vsphere_password] = vc_info["vcpassword"]
+  end
+  info
+end
+
+conn_info = get_connection_info(h)
+connection = Fog::Compute.new(conn_info)
+
 mob = connection.get_vm_mob_ref_by_moid(h["evs_SelfMoRef"])
 vmdatastores = mob.datastore.map {|ds| "#{ds.info.name}"}     #serengeti server Datastore name
 puts("serengeti server datastore: " + "#{vmdatastores[0]}")
@@ -220,8 +278,16 @@ sed -i "s/vc_datacenter = .*/#{vcdatacenterline}/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/template_id = .*/#{templateid}/" "#{SERENGETI_WEBAPP_CONF}"
 
 echo "vc_addr: #{h["evs_IP"]}" > "#{SERENGETI_CLOUD_MANAGER_CONF}"
-echo "vc_user: #{vcuser}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
-echo "vc_pwd:  #{updateVCPassword}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+
+if [ -e #{ENTERPRISE_EDITION_FLAG} ]; then
+  echo "key: #{SERENGETI_PRIVATE_KEY}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+  echo "cert: #{SERENGETI_CERT_FILE}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+  echo "extension_key: #{SERENGETI_VCEXT_ID}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+else
+  echo "vc_user: #{vcuser}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+  echo "vc_pwd: #{updateVCPassword}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+fi
+
 chmod 400 "#{SERENGETI_CLOUD_MANAGER_CONF}"
 chown serengeti:serengeti "#{SERENGETI_CLOUD_MANAGER_CONF}"
 
@@ -277,6 +343,9 @@ if [ -e "#{VHM_CONF}" ]; then
   sed -i "s|vCenterId=.*$|vCenterId=#{h["evs_IP"]}|g" "#{VHM_CONF}"
   sed -i "s|vCenterUser=.*$|vCenterUser=#{vcuser}|g"  "#{VHM_CONF}"
   sed -i "s|vCenterPwd=.*$|vCenterPwd=#{updateVCPassword}|g" "#{VHM_CONF}"
+  sed -i "s|vCExtCert=.*$|vCenterCert=#{SERENGETI_CERT_FILE}|g" "#{VHM_CONF}"
+  sed -i "s|vCExtPrivateKey=.*$|vCExtPrivateKey=#{SERENGETI_PRIVATE_KEY}|g" "#{VHM_CONF}"
+  sed -i "s|vCExtId=.*$|vCExtId=#{SERENGETI_VCEXT_ID}|g" "#{VHM_CONF}"
   sed -i "s|vHadoopUser=.*$|vHadoopUser=root|g" "#{VHM_CONF}"
   sed -i "s|vHadoopPwd=.*$|vHadoopPwd=password|g" "#{VHM_CONF}"
   sed -i "s|vHadoopHome=.*$|vHadoopHome=/usr/lib/hadoop|g" "#{VHM_CONF}"
