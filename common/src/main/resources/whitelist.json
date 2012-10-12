@@ -850,6 +850,9 @@
     "name":"PATH"
     },
     {
+    "name":"HADOOP_CLASSPATH"
+    },
+    {
     "name":"HADOOP_HEAPSIZE"
     },
     {
