@@ -20,7 +20,7 @@
 	<properties>
 		<spring.shell.version>1.0.0.M2</spring.shell.version>
 		<jar.mainclass>org.springframework.shell.Bootstrap</jar.mainclass>
-		<impala.version>1.0.0.BUILD-SANPSHOT</impala.version>
+		<impala.version>1.0.0.M1</impala.version>
 		<hadoop.version>1.0.1</hadoop.version>
 		<antlr.version>3.4</antlr.version>
 	</properties>
