@@ -41,7 +41,7 @@ HTTPD_CONF="/etc/httpd/conf/httpd.conf"
 SERENGETI_CERT_FILE="/opt/serengeti/.certs/serengeti.pem"
 SERENGETI_PRIVATE_KEY="/opt/serengeti/.certs/private.pem"
 SERENGETI_KEYSTORE_PATH="/opt/serengeti/.certs/serengeti.jks"
-SERENGETI_KEYSTORE_PWD=%x[uuidgen].strip[0..7]
+SERENGETI_KEYSTORE_PWD=%x[openssl rand -base64 6].strip
 
 ENTERPRISE_EDITION_FLAG="/opt/serengeti/etc/enterprise"
 
