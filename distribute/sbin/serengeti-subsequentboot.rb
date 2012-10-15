@@ -50,6 +50,8 @@ def get_extension_id
   "com.vmware.serengeti." + %x[uuidgen].strip[0..7]
 end
 
+HTTPD_CONF="/etc/httpd/conf/httpd.conf"
+
 system <<EOF
 #rabbitmq reconfigure
 /usr/sbin/rabbitmqctl add_vhost /chef
@@ -239,6 +241,12 @@ if [[ -f "#{SERENGETI_HOME}/logs/not-init" ]];then
    echo ${ntadd} >> "#{SERENGETI_CLI_HOME}/initResources"
    su - "#{SERENGETI_USER}" -c "#{SERENGETI_SCRIPTS_HOME}/serengeti --cmdfile #{SERENGETI_CLI_HOME}/initResources"
    rm -rf "#{SERENGETI_HOME}/logs/not-init"
+fi
+
+# update serengeti server ip address in httpd conf
+if [ -e "#{HTTPD_CONF}" ]; then
+  sed -i "s|Redirect permanent.*$|Redirect permanent /datadirector http://#{ethip}:8080/serengeti|g" "#{HTTPD_CONF}"
+  service httpd restart
 fi
 
 # remove ovf env file

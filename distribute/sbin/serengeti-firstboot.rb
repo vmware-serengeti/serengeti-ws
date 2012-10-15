@@ -36,6 +36,8 @@ DNS_CONFIG_FILE_TMP="/etc/resolv.conf.tmp"
 VHM_CONF="/opt/serengeti/conf/vhm.properties"
 VHM_START="/opt/serengeti/sbin/vhm-start.sh"
 
+HTTPD_CONF="/etc/httpd/conf/httpd.conf"
+
 SERENGETI_CERT_FILE="/opt/serengeti/.certs/serengeti.pem"
 SERENGETI_PRIVATE_KEY="/opt/serengeti/.certs/private.pem"
 SERENGETI_KEYSTORE_PATH="/opt/serengeti/.certs/serengeti.jks"
@@ -369,6 +371,12 @@ fi
 # start vhm service on everyboot
 if [ -e "#{VHM_START}" ]; then
   echo "su serengeti -c \\"bash #{VHM_START}\\"" >> /etc/rc.local
+fi
+
+# remove the path in Serengeti UI URL
+if [ -e "#{HTTPD_CONF}" ]; then
+  sed -i "s|# Redirect permanent.*$|Redirect permanent /datadirector http://#{ethip}:8080/serengeti|g" "#{HTTPD_CONF}"
+  service httpd restart
 fi
 
 EOF
