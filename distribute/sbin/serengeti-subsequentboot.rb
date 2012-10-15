@@ -108,7 +108,11 @@ fqdn_url="chef_server_url         " + "'http:\\/\\/#{ethip}:4000'"
 puts("fqdn_url: #{fqdn_url}")
 
 system <<EOF
-sed -i "s/chef_server_url.*/#{fqdn_url}/" "#{CHEF_CONF}" #update CHEF_URL
+# update Chef Server url
+sed -i "s/chef_server_url.*/#{fqdn_url}/" "#{CHEF_CONF}"
+# update yum server url
+sed -i "s|http://.*/yum|http://#{ethip}/yum|" "#{SERENGETI_HOME}/www/yum/repos/base/serengeti-base.repo"
+sed -i "s|http://.*/yum|http://#{ethip}/yum|" "#{SERENGETI_HOME}/.chef/knife.rb"
 EOF
 
 #get serenegeti server vsphere related information
