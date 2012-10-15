@@ -35,6 +35,21 @@ DNS_CONFIG_FILE_TMP="/etc/resolv.conf.tmp"
 VHM_CONF="/opt/serengeti/conf/vhm.properties"
 ENTERPRISE_EDITION_FLAG="/opt/serengeti/etc/enterprise"
 
+SERENGETI_CERT_FILE="/opt/serengeti/.certs/serengeti.pem"
+SERENGETI_PRIVATE_KEY="/opt/serengeti/.certs/private.pem"
+
+def is_enterprise_edition?
+  File.exist? ENTERPRISE_EDITION_FLAG
+end
+
+def get_extension_id
+  if File.exist? SERENGETI_CLOUD_MANAGER_CONF
+    vc_info = YAML.load(File.open(SERENGETI_CLOUD_MANAGER_CONF))
+    return vc_info["extension_key"] unless vc_info["extension_key"].nil?
+  end
+  "com.vmware.serengeti." + %x[uuidgen].strip[0..7]
+end
+
 system <<EOF
 #rabbitmq reconfigure
 /usr/sbin/rabbitmqctl add_vhost /chef
@@ -114,9 +129,6 @@ sed -i "s|http://.*/yum|http://#{ethip}/yum|" "#{SERENGETI_HOME}/www/yum/repos/b
 sed -i "s|http://.*/yum|http://#{ethip}/yum|" "#{SERENGETI_HOME}/.chef/knife.rb"
 EOF
 
-def is_enterprise_edition?
-  File.exist? ENTERPRISE_EDITION_FLAG
-end
 
 def get_connection_info(vc_info)
   cloud_server = 'vsphere'
@@ -127,7 +139,7 @@ def get_connection_info(vc_info)
   if is_enterprise_edition?
     info[:cert] = SERENGETI_CERT_FILE
     info[:key] = SERENGETI_PRIVATE_KEY
-    info[:extension_key] = SERENGETI_VCEXT_ID
+    info[:extension_key] = get_extension_id
   else
     info[:vsphere_username] = vc_info["vcusername"]
     info[:vsphere_password] = vc_info["vcpassword"]

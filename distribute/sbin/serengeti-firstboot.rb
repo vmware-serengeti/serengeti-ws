@@ -4,6 +4,7 @@ include REXML
 require "socket"
 require "fileutils"
 require "fog"
+require "yaml"
 
 #serengeti server user
 SERENGETI_USER="serengeti"
@@ -37,14 +38,29 @@ VHM_START="/opt/serengeti/sbin/vhm-start.sh"
 
 SERENGETI_CERT_FILE="/opt/serengeti/.certs/serengeti.pem"
 SERENGETI_PRIVATE_KEY="/opt/serengeti/.certs/private.pem"
+SERENGETI_KEYSTORE_PATH="/opt/serengeti/.certs/serengeti.jks"
+SERENGETI_KEYSTORE_PWD=%x[uuidgen].strip[0..7]
 
 ENTERPRISE_EDITION_FLAG="/opt/serengeti/etc/enterprise"
 
 VCEXT_TOOL_DIR="/opt/serengeti/vcext"
-VCEXT_TOOL_JAR=VCEXT_TOOL_DIR + "/" + %x[ls #{VCEXT_TOOL_DIR}/vcext-*.jar].strip
-SERENGETI_VCEXT_ID=%x[uuidgen].strip
+VCEXT_TOOL_JAR=%x[ls #{VCEXT_TOOL_DIR}/vcext-*.jar].strip
 
 GENERATE_CERT_SCRIPT="/opt/serengeti/sbin/generate-certs.sh"
+
+def is_enterprise_edition?
+  File.exist? ENTERPRISE_EDITION_FLAG
+end
+
+def get_extension_id
+  if File.exist? SERENGETI_CLOUD_MANAGER_CONF
+    vc_info = YAML.load(File.open(SERENGETI_CLOUD_MANAGER_CONF))
+    return vc_info["extension_key"] unless vc_info["extension_key"].nil?
+  end
+  "com.vmware.serengeti." + %x[uuidgen].strip[0..7]
+end
+
+SERENGETI_VCEXT_ID=get_extension_id
 
 system <<EOF
 /usr/sbin/rabbitmqctl add_vhost /chef
@@ -196,7 +212,7 @@ echo "CLOUD_MANAGER_CONFIG_DIR=\"#{SERENGETI_HOME}\"/conf" >> /etc/profile
 # register serengeti server as vc extension service
 if [ -e #{ENTERPRISE_EDITION_FLAG} -a "#{VCEXT_TOOL_JAR}" != "" ]; then
   # generate certificate and private key
-  bash #{GENERATE_CERT_SCRIPT}
+  bash #{GENERATE_CERT_SCRIPT} #{SERENGETI_KEYSTORE_PWD}
   echo "registering serengeti server as vc ext service"
   java -jar #{VCEXT_TOOL_JAR} \
     -evsURL #{h["evs_url"]} \
@@ -212,10 +228,6 @@ if [ -e #{ENTERPRISE_EDITION_FLAG} -a "#{VCEXT_TOOL_JAR}" != "" ]; then
 fi
 
 EOF
-
-def is_enterprise_edition?
-  File.exist? ENTERPRISE_EDITION_FLAG
-end
 
 def get_connection_info(vc_info) 
   cloud_server = 'vsphere'
@@ -343,9 +355,9 @@ if [ -e "#{VHM_CONF}" ]; then
   sed -i "s|vCenterId=.*$|vCenterId=#{h["evs_IP"]}|g" "#{VHM_CONF}"
   sed -i "s|vCenterUser=.*$|vCenterUser=#{vcuser}|g"  "#{VHM_CONF}"
   sed -i "s|vCenterPwd=.*$|vCenterPwd=#{updateVCPassword}|g" "#{VHM_CONF}"
-  sed -i "s|vCExtCert=.*$|vCenterCert=#{SERENGETI_CERT_FILE}|g" "#{VHM_CONF}"
-  sed -i "s|vCExtPrivateKey=.*$|vCExtPrivateKey=#{SERENGETI_PRIVATE_KEY}|g" "#{VHM_CONF}"
-  sed -i "s|vCExtId=.*$|vCExtId=#{SERENGETI_VCEXT_ID}|g" "#{VHM_CONF}"
+  sed -i "s|keyStorePath=.*$|keyStorePath=#{SERENGETI_KEYSTORE_PATH}|g" "#{VHM_CONF}"
+  sed -i "s|keyStorePwd=.*$|keyStorePwd=#{SERENGETI_KEYSTORE_PWD}|g" "#{VHM_CONF}"
+  sed -i "s|extensionKey=.*$|extensionKey=#{SERENGETI_VCEXT_ID}|g" "#{VHM_CONF}"
   sed -i "s|vHadoopUser=.*$|vHadoopUser=root|g" "#{VHM_CONF}"
   sed -i "s|vHadoopPwd=.*$|vHadoopPwd=password|g" "#{VHM_CONF}"
   sed -i "s|vHadoopHome=.*$|vHadoopHome=/usr/lib/hadoop|g" "#{VHM_CONF}"
