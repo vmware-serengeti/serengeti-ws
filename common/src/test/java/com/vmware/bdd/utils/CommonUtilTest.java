@@ -46,6 +46,17 @@ public class CommonUtilTest {
    }
 
    @Test
+   public void testValidateNodeGroupName() {
+      assertEquals(CommonUtil.validateClusterName("nodeGroupName1"), true);
+      assertEquals(CommonUtil.validateClusterName("nodeGroupName2"), true);
+      assertEquals(CommonUtil.validateClusterName("nodeGroupName3_"), true);
+      assertEquals(CommonUtil.validateClusterName("nodeGroupName4 "), true);
+      assertEquals(CommonUtil.validateClusterName("nodeGroupName-5"), false);
+      assertEquals(CommonUtil.validateClusterName("nodeGroupName6-"), false);
+      assertEquals(CommonUtil.validateClusterName("-nodeGroupName7"), false);
+   }
+
+   @Test
    public void testValidateVcDataStoreNames() {
       List<String> vcDataStoreNames = new ArrayList<String>();
       vcDataStoreNames.add("vcDataStore_Name1");

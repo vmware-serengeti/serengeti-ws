@@ -217,7 +217,7 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
 
-      if (CommonUtil.isBlank(groupName) || !CommonUtil.validateName(groupName)) {
+      if (CommonUtil.isBlank(groupName) || !CommonUtil.validateNodeGroupName(groupName)) {
          throw BddException.INVALID_PARAMETER("node group name", groupName);
       }
 
@@ -247,7 +247,7 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
 
-      if (CommonUtil.isBlank(groupName) || !CommonUtil.validateName(groupName)) {
+      if (CommonUtil.isBlank(groupName) || !CommonUtil.validateNodeGroupName(groupName)) {
          throw BddException.INVALID_PARAMETER("node group name", groupName);
       }
 
@@ -277,7 +277,7 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
 
-      if (CommonUtil.isBlank(groupName) || !CommonUtil.validateName(groupName)) {
+      if (CommonUtil.isBlank(groupName) || !CommonUtil.validateNodeGroupName(groupName)) {
          throw BddException.INVALID_PARAMETER("node group name", groupName);
       }
 
@@ -301,7 +301,7 @@ public class RestResource {
       }
       int activeComputeNodeNum = requestBody.getActiveComputeNodeNum();
       String groupName = requestBody.getNodeGroupName();
-      if(!CommonUtil.isBlank(groupName) && !CommonUtil.validateName(groupName)) {
+      if(!CommonUtil.isBlank(groupName) && !CommonUtil.validateNodeGroupName(groupName)) {
          throw BddException.INVALID_PARAMETER("node group name", groupName);
       }
       // The active compute node number must be a positive number or -1.

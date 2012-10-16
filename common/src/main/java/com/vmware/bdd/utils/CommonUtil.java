@@ -79,6 +79,10 @@ public class CommonUtil {
       return match(input, Constants.CLUSTER_NAME_PATTERN);
    }
 
+   public static boolean validateNodeGroupName(final String input) {
+      return match(input, Constants.NODE_GROUP_NAME_PATTERN);
+   }
+
    public static boolean validateVcDataStoreNames(List<String> names) {
       if (names == null || names.isEmpty()) {
          return false;
