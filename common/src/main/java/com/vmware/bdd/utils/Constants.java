@@ -31,5 +31,5 @@ public class Constants {
    public static final String CLUSTER_LIMIT_INFO_SERENGETI_INSTANCE = "serengeti_instance";
    public static final String CLUSTER_NAME_PATTERN = "[a-zA-Z0-9_\\s]+";
    public static final String NAME_PATTERN = "[a-zA-Z0-9_\\-\\s]+";
-   public static final String VC_DATASTORE_NAME_PATTERN = "[a-zA-Z0-9_\\s\\?\\*]+";
+   public static final String VC_DATASTORE_NAME_PATTERN = "[a-zA-Z0-9_\\-\\s\\?\\*]+";
 }

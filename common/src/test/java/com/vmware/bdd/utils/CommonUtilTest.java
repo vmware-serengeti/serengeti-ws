@@ -52,13 +52,14 @@ public class CommonUtilTest {
       vcDataStoreNames.add("vcDataStore_Nam*");
       vcDataStoreNames.add("vcDataStore_Nam?");
       vcDataStoreNames.add("vcData Store_Name2");
+      vcDataStoreNames.add("vcDataStoreName3-");
       assertEquals(CommonUtil.validateVcDataStoreNames(vcDataStoreNames), true);
 
       List<String> errorVcDataStoreNames1 = new ArrayList<String>();
       errorVcDataStoreNames1.add("vcDataStoreName!");
       assertEquals(CommonUtil.validateVcDataStoreNames(errorVcDataStoreNames1), false);
       List<String> errorVcDataStoreNames2 = new ArrayList<String>();
-      errorVcDataStoreNames2.add("vcDataStoreName-");
+      errorVcDataStoreNames2.add("vcDataStoreName#");
       assertEquals(CommonUtil.validateVcDataStoreNames(errorVcDataStoreNames2), false);
    }
 
