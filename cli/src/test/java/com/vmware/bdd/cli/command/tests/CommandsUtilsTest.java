@@ -16,6 +16,8 @@ package com.vmware.bdd.cli.command.tests;
 
 import static org.testng.AssertJUnit.assertNotNull;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,7 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.cli.commands.CommandsUtils;
+import com.vmware.bdd.cli.commands.Constants;
 
 public class CommandsUtilsTest {
 
@@ -243,45 +246,80 @@ public class CommandsUtilsTest {
 
    @Test
    public void testWritePropertise() {
-      String propertiseFile =
-            CommandsUtils.class.getClassLoader().getResource("").getPath()
-                  + "cookie.propertise";
       Properties propertise = new Properties();
       propertise.put("Cookie", "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
-      CommandsUtils.writeProperties(propertise, propertiseFile);
-      File file = new File(propertiseFile);
+      CommandsUtils.writeProperties(propertise, Constants.PROPERTY_FILE);
+      File file = new File(Constants.PROPERTY_FILE);
       assertEquals(file.exists(), true);
-      propertise = CommandsUtils.readProperties(propertiseFile);
+      propertise = CommandsUtils.readProperties(Constants.PROPERTY_FILE);
       assertNotNull(propertise);
       if (propertise != null) {
          assertEquals(propertise.getProperty("Cookie"),
                "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
-      }
-      if (file.exists()) {
-         file.delete();
+         removeProperties(Constants.PROPERTY_FILE, "Cookie");
       }
    }
 
    @Test
    public void testReadPropertise() {
-      String propertiseFile =
-            CommandsUtils.class.getClassLoader().getResource("").getPath()
-                  + "cookie.propertise";
       Properties propertise = new Properties();
       propertise.put("Cookie", "123abc123");
-      CommandsUtils.writeProperties(propertise, propertiseFile);
+      CommandsUtils.writeProperties(propertise, Constants.PROPERTY_FILE);
       propertise.put("Cookie", "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
-      CommandsUtils.writeProperties(propertise, propertiseFile);
-      File file = new File(propertiseFile);
+      CommandsUtils.writeProperties(propertise, Constants.PROPERTY_FILE);
+      File file = new File(Constants.PROPERTY_FILE);
       assertEquals(file.exists(), true);
-      propertise = CommandsUtils.readProperties(propertiseFile);
+      propertise = CommandsUtils.readProperties(Constants.PROPERTY_FILE);
       assertNotNull(propertise);
       if (propertise != null) {
          assertEquals(propertise.getProperty("Cookie"),
                "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+         removeProperties(Constants.PROPERTY_FILE, "Cookie");
       }
-      if (file.exists()) {
-         file.delete();
+   }
+
+   @Test
+   public void testRemoveProperties() {
+      Properties propertise = new Properties();
+      propertise.put("Cookie", "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+      CommandsUtils.writeProperties(propertise, Constants.PROPERTY_FILE);
+      removeProperties(Constants.PROPERTY_FILE, "Cookie");
+      propertise = CommandsUtils.readProperties(Constants.PROPERTY_FILE);
+      assertNotNull(propertise);
+      if (propertise != null) {
+         assertEquals(propertise.getProperty("Cookie"), null);
+      }
+   }
+
+   private void removeProperties(String propertiesFilePath,
+         String... propertiesName) {
+      if (propertiesName.length > 0) {
+         Properties properties =
+               CommandsUtils.readProperties(propertiesFilePath);
+         if (properties != null && !properties.isEmpty()) {
+            for (String propertieName : propertiesName) {
+               if (properties.keySet().contains(propertieName)) {
+                  properties.remove(propertieName);
+               }
+            }
+            FileOutputStream fos = null;
+            try {
+               fos = new FileOutputStream(propertiesFilePath);
+               properties.store(fos, "");
+            } catch (FileNotFoundException e) {
+               //nothing to do
+            } catch (IOException e) {
+               //nothing to do
+            } finally {
+               if (fos != null) {
+                  try {
+                     fos.close();
+                  } catch (IOException e) {
+                     //nothing to do
+                  }
+               }
+            }
+         }
       }
    }
 

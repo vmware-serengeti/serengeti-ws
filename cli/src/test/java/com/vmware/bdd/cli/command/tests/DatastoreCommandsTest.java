@@ -53,7 +53,7 @@ public class DatastoreCommandsTest extends MockRestServer {
 
       //normal case
       datastoreCommands.addDatastore("ds01", "ds*", "SHARED");
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
    
    @Test
@@ -68,7 +68,7 @@ public class DatastoreCommandsTest extends MockRestServer {
             HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
 
       datastoreCommands.addDatastore("ds01", "ds*", "SHARED");
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
 
    @Test
@@ -79,7 +79,7 @@ public class DatastoreCommandsTest extends MockRestServer {
             HttpStatus.NO_CONTENT, "");
 
       datastoreCommands.deleteDatastore("ds01");
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
    
    @Test
@@ -94,7 +94,7 @@ public class DatastoreCommandsTest extends MockRestServer {
             HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
       datastoreCommands.deleteDatastore("ds01");
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
 
    @Test
@@ -138,7 +138,7 @@ public class DatastoreCommandsTest extends MockRestServer {
       
       ObjectMapper mapper = new ObjectMapper();
       testListDatastore(mapper, new DatastoreRead[] { rd1, rd2 });
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
 
    private void testListDatastore(ObjectMapper mapper, DatastoreRead[] drs)
@@ -168,6 +168,6 @@ public class DatastoreCommandsTest extends MockRestServer {
             "http://127.0.0.1:8080/serengeti/api/datastore/rd1Name",
             HttpMethod.GET, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
       datastoreCommands.listDatastore("rd1Name", true);
-      CookieCache.put("Cookie","");
+      CookieCache.clear();
    }
 }

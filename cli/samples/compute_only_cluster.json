@@ -68,6 +68,7 @@
         // "HADOOP_SECONDARYNAMENODE_OPTS": "",
         // "HADOOP_JOBTRACKER_OPTS": "",
         // "HADOOP_TASKTRACKER_OPTS": "",
+        // "HADOOP_CLASSPATH": "",
         // "JAVA_HOME": "",
         // "PATH": ""
       },

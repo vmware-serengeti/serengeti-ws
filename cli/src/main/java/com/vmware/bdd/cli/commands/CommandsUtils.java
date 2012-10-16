@@ -317,35 +317,44 @@ public class CommandsUtils {
       FileInputStream fis = null;
       try {
          File file = new File(propertiesFilePath);
-         if (!file.exists()){
+         if (!file.exists()) {
             return null;
          }
          fis = new FileInputStream(propertiesFilePath);
          properties.load(fis);
-         fis.close();
          return properties;
       } catch (IOException e) {
          System.out.println(e.getMessage());
-         if (fis != null) {
-        	 try {
-        		 fis.close();
-        	 } catch (IOException e1) {
-        		 System.out.println(e1.getMessage());
-        	 }
-         }
          return null;
-      } 
+      } finally {
+         if (fis != null) {
+            try {
+               fis.close();
+            } catch (IOException e) {
+               System.out.println(e.getMessage());
+            }
+         }
+      }
    }
 
    public static void writeProperties(Properties properties,
          String propertiesFilePath) {
       FileOutputStream fos = null;
       try {
+         Properties prop = null;
+         File file = new File(propertiesFilePath);
+         if (file.exists()) {
+            prop = new Properties();
+            prop.load(new FileInputStream(propertiesFilePath));
+            prop.putAll(properties);
+         } else {
+            prop = properties;
+         }
          fos = new FileOutputStream(propertiesFilePath);
-         properties.store(fos, "");
-         fos.close();
+         prop.store(fos, "");
       } catch (IOException e) {
          System.out.println(e.getMessage());
+      } finally {
          if (fos != null) {
             try {
                fos.close();
@@ -411,4 +420,5 @@ public class CommandsUtils {
       }
       return continueCreate;
    }
+
 }

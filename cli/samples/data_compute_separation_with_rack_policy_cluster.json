@@ -16,17 +16,17 @@
         "hadoop_datanode"
       ],
       "instanceNum": 3,
-	  "instanceType": "SMALL",
+      "instanceType": "SMALL",
       "storage": {
         "type": "LOCAL",
         "sizeGB": 20
       },
-	  "placementPolicies": {
-	    "instancePerHost": 1,
-		"groupRacks": {
-		  "type":"ROUNDROBIN"
-		}
-	  }
+      "placementPolicies": {
+        "instancePerHost": 1,
+        "groupRacks": {
+          "type":"ROUNDROBIN"
+        }
+      }
     },
     {
       "name": "c1",
@@ -34,29 +34,31 @@
         "hadoop_tasktracker"
       ],
       "instanceNum": 3,
-	  "instanceType": "SMALL",
+      "instanceType": "SMALL",
       "storage": {
         "type": "LOCAL",
         "sizeGB": 10
       },
-	  "placementPolicies": {
-		"groupAssociations":[{
-		  "reference": "d1",
-		  "type": "STRICT"
-		}]
-	  }
+  	  "placementPolicies": {
+        "groupAssociations":[
+          {
+  		      "reference": "d1",
+  		      "type": "STRICT"
+		      }
+        ]
+	    }
     },
     {
       "name": "client",
       "roles": [
         "hadoop_client",
         "hive",
-	"hive_server",
+        "hive_server",
         "pig"
       ],
       "instanceNum": 1,
       "instanceType": "SMALL"
-	}
+	  }
   ]
 }
 

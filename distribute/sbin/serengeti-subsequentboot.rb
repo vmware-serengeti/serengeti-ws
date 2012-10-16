@@ -14,6 +14,7 @@ SERENGETI_HOME="/opt/serengeti"
 SERENGETI_WEBAPP_HOME="#{SERENGETI_HOME}/conf"
 #serengeti webservice properties
 SERENGETI_WEBAPP_CONF="#{SERENGETI_WEBAPP_HOME}/serengeti.properties"
+SERENGETI_CLOUD_MANAGER_CONF="#{SERENGETI_WEBAPP_HOME}/cloud-manager.vsphere.yaml"
 #cookbook related .chef/knife.rb
 CHEF_CONF="#{SERENGETI_HOME}/.chef/knife.rb"
 #serengeti tmp folder
@@ -30,6 +31,8 @@ ETH_CONFIG_FILE_TMP="/etc/sysconfig/network-scripts/ifcfg-eth0.tmp"
 DNS_CONFIG_FILE="/etc/resolv.conf"
 DNS_CONFIG_FILE_DHCP="/etc/resolv.conf.bak"
 DNS_CONFIG_FILE_TMP="/etc/resolv.conf.tmp"
+
+VHM_CONF="/opt/serengeti/conf/vhm.properties"
 
 system <<EOF
 #rabbitmq reconfigure
@@ -103,7 +106,11 @@ fqdn_url="chef_server_url         " + "'http:\\/\\/#{ethip}:4000'"
 puts("fqdn_url: #{fqdn_url}")
 
 system <<EOF
-sed -i "s/chef_server_url.*/#{fqdn_url}/" "#{CHEF_CONF}" #update CHEF_URL
+# update Chef Server url
+sed -i "s/chef_server_url.*/#{fqdn_url}/" "#{CHEF_CONF}"
+# update yum server url
+sed -i "s|http://.*/yum|http://#{ethip}/yum|" "#{SERENGETI_HOME}/www/yum/repos/base/serengeti-base.repo"
+sed -i "s|http://.*/yum|http://#{ethip}/yum|" "#{SERENGETI_HOME}/.chef/knife.rb"
 EOF
 
 #get serenegeti server vsphere related information
@@ -146,11 +153,28 @@ system <<EOF
 
 #update serengeti.properties for web service
 sed -i "s/distro_root =.*/#{distroip}/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/vc_addr = .*/vc_addr = \"#{h["evs_IP"]}\"/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/vc_user = .*/vc_user = \"#{vcuser}\"/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/vc_pwd = .*/vc_pwd = \"#{updateVCPassword}\"/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/vc_datacenter = .*/#{vcdatacenterline}/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/template_id = .*/#{templateid}/" "#{SERENGETI_WEBAPP_CONF}"
+
+echo "vc_addr: #{h["evs_IP"]}" > "#{SERENGETI_CLOUD_MANAGER_CONF}"
+echo "vc_user: #{vcuser}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+echo "vc_pwd:  #{updateVCPassword}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+chmod 400 "#{SERENGETI_CLOUD_MANAGER_CONF}"
+chown serengeti:serengeti "#{SERENGETI_CLOUD_MANAGER_CONF}"
+
+# re-init vhm property file
+if [ -e "#{VHM_CONF}" ]; then
+  sed -i "s|vCenterId=.*$|vCenterId=#{h["evs_IP"]}|g" "#{VHM_CONF}"
+  sed -i "s|vCenterUser=.*$|vCenterUser=#{vcuser}|g"  "#{VHM_CONF}"
+  sed -i "s|vCenterPwd=.*$|vCenterPwd=#{updateVCPassword}|g" "#{VHM_CONF}"
+  sed -i "s|vHadoopUser=.*$|vHadoopUser=root|g" "#{VHM_CONF}"
+  sed -i "s|vHadoopPwd=.*$|vHadoopPwd=password|g" "#{VHM_CONF}"
+  sed -i "s|vHadoopHome=.*$|vHadoopHome=/usr/lib/hadoop|g" "#{VHM_CONF}"
+  sed -i "s|vHadoopExcludeTTFile=.*$|vHadoopExcludeTTFile=/usr/lib/hadoop/conf/mapred.hosts.exclude|g" "#{VHM_CONF}"
+  chmod 400 "#{VHM_CONF}"
+  chown serengeti:serengeti "#{VHM_CONF}"
+fi
+
 
 #kill tomcat using shell direclty to avoid failing to stop tomcat
 pidlist=`ps -ef|grep tomcat | grep -v "grep"|awk '{print $2}'`
@@ -171,7 +195,7 @@ fi
 /etc/init.d/tomcat start
 
 #serengeti cli connect first
-connecthost="connect --host localhost:8080"
+connecthost="connect --host localhost:8080 --username serengeti --password password"
 su - "#{SERENGETI_USER}" -c "#{SERENGETI_SCRIPTS_HOME}/serengeti \\"${connecthost}\\""
 
 if [[ -f "#{SERENGETI_HOME}/logs/not-init" ]];then

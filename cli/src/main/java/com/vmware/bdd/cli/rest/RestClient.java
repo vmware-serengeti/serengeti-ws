@@ -163,19 +163,17 @@ public class RestClient {
 
    private void writeCookieInfo(String cookie) {
       CookieCache.put("Cookie",cookie);
-      String propertiesFile = "cookie.properties";
       Properties properties = new Properties();
       properties.put("Cookie", cookie);
-      CommandsUtils.writeProperties(properties, propertiesFile);
+      CommandsUtils.writeProperties(properties, Constants.PROPERTY_FILE);
    }
 
    private String readCookieInfo() {
       String cookieValue = "";
       cookieValue = CookieCache.get("Cookie");
       if (CommandsUtils.isBlank(cookieValue)){
-         String propertiesFile = "cookie.properties";
          Properties properties = null;
-         properties = CommandsUtils.readProperties(propertiesFile);
+         properties = CommandsUtils.readProperties(Constants.PROPERTY_FILE);
          if (properties != null) {
             return properties.getProperty("Cookie");
          } else {
@@ -208,7 +206,7 @@ public class RestClient {
       if (!CommandsUtils.isBlank(username) && !CommandsUtils.isBlank(password)) {
          uriBuff.append("?").append("j_username=").append(username).append("&j_password=").append(password);
       }
-      return restPostByUri(uriBuff.toString(), respEntityType);
+      return restPostByUri(uriBuff.toString(), respEntityType, false);
    }
 
    private <T> ResponseEntity<T> logout(final String path, final Class<T> respEntityType) {
@@ -226,14 +224,14 @@ public class RestClient {
    }
 
    private <T> ResponseEntity<T> restPostByUri(String uri,
-         Class<T> respEntityType) {
-      HttpHeaders headers = buildHeaders();
+         Class<T> respEntityType, boolean withCookie) {
+      HttpHeaders headers = buildHeaders(withCookie);
       HttpEntity<String> entity = new HttpEntity<String>(headers);
 
       return client.exchange(uri, HttpMethod.POST, entity, respEntityType);
    }
 
-   private HttpHeaders buildHeaders() {
+   private HttpHeaders buildHeaders(boolean withCookie) {
       HttpHeaders headers = new HttpHeaders();
       headers.setContentType(MediaType.APPLICATION_JSON);
       List<MediaType> acceptedTypes = new ArrayList<MediaType>();
@@ -241,9 +239,15 @@ public class RestClient {
       acceptedTypes.add(MediaType.TEXT_HTML);
       headers.setAccept(acceptedTypes);
 
-      String cookieInfo = readCookieInfo();
-      headers.add("Cookie", cookieInfo == null ? "" : cookieInfo);
+      if (withCookie) {
+         String cookieInfo = readCookieInfo();
+         headers.add("Cookie", cookieInfo == null ? "" : cookieInfo);
+      }
       return headers;
+   }
+
+   private HttpHeaders buildHeaders() {
+      return buildHeaders(true);
    }
 
    /*
