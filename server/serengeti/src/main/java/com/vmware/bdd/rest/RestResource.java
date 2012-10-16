@@ -149,7 +149,7 @@ public class RestResource {
          @RequestBody ClusterCreate createSpec,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
-      if (!CommonUtil.validateName(clusterName)) {
+      if (!CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
       Long taskId = clusterMgr.configCluster(clusterName, createSpec);
@@ -171,7 +171,7 @@ public class RestResource {
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
       // make sure cluster name is valid
-      if (!CommonUtil.validateName(clusterName)) {
+      if (!CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
       Long taskId = clusterMgr.deleteClusterByName(clusterName);
@@ -185,7 +185,7 @@ public class RestResource {
          @RequestParam(value="state", required = true) String state,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
-      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateName(clusterName)) {
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
 
@@ -213,7 +213,7 @@ public class RestResource {
          @RequestParam(value="state", required = true) String state,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
-      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateName(clusterName)) {
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
 
@@ -243,7 +243,7 @@ public class RestResource {
          @RequestParam(value="state", required = true) String state,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
-      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateName(clusterName)) {
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
 
@@ -273,7 +273,7 @@ public class RestResource {
          @PathVariable("groupName") String groupName,
          @RequestBody int instanceNum, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
-      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateName(clusterName)) {
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
 
@@ -296,7 +296,7 @@ public class RestResource {
          @PathVariable("clusterName") String clusterName,
          @RequestBody VHMRequestBody requestBody, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
-      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateName(clusterName)) {
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
       int activeComputeNodeNum = requestBody.getActiveComputeNodeNum();
@@ -318,7 +318,7 @@ public class RestResource {
    public ClusterRead getCluster(
          @PathVariable("clusterName") final String clusterName,
          @RequestParam(value="details", required = false) Boolean details) {
-      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateName(clusterName)) {
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
       return clusterMgr.getClusterByName(clusterName, (details == null) ? false : details);
@@ -328,7 +328,7 @@ public class RestResource {
    @ResponseBody
    public ClusterCreate getClusterSpec(
          @PathVariable("clusterName") final String clusterName) {
-      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateName(clusterName)) {
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
       return clusterMgr.getClusterSpec(clusterName);
