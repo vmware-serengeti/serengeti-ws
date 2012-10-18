@@ -219,11 +219,11 @@ if [ -e #{ENTERPRISE_EDITION_FLAG} -a "#{VCEXT_TOOL_JAR}" != "" ]; then
   bash #{GENERATE_CERT_SCRIPT} #{SERENGETI_KEYSTORE_PWD}
   echo "registering serengeti server as vc ext service"
   java -jar #{VCEXT_TOOL_JAR} \
-    -evsURL #{h["evs_url"]} \
-    -evsToken #{h["evs_token"]} \
-    -evsThumbprint #{h["evs_thumbprint"]} \
-    -extKey #{SERENGETI_VCEXT_ID} \
-    -cert #{SERENGETI_CERT_FILE}
+    -evsURL "#{h["evs_url"]}" \
+    -evsToken "#{h["evs_token"]}" \
+    -evsThumbprint "#{h["evs_thumbprint"]}" \
+    -extKey "#{SERENGETI_VCEXT_ID}" \
+    -cert "#{SERENGETI_CERT_FILE}"
   ret=$?
   if [ $ret != 0 ]; then
     echo "failed to register serengeti server as vc ext service"
