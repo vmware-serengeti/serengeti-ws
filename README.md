@@ -14,7 +14,7 @@ Serengeti Web Service provides a RESTful API for resources managment and hadoop 
 
 ### REST APIs
 <table>
-<tr><td>Method</td><td>URL Template</td><td>Request</td><td>Response</td><td>Description</td></tr>
+<tr><th>Method</th><th>URL Template</th><th>Request</th><th>Response</th><th>Description</th></tr>
 <tr><td>GET</td><td>/hello</td><td>void</td><td>void</td><td></td></tr>
 <tr><td>GET</td><td>/tasks</td><td>void</td><td>List of TaskRead</td><td>List all tasks</td></tr>
 <tr><td>GET</td><td>/task/{taskId}</td><td>taskId</td><td>TaskRead</td><td>Get task by task id</td></tr>
@@ -40,11 +40,14 @@ Serengeti Web Service provides a RESTful API for resources managment and hadoop 
 <tr><td>GET</td><td>/distros</td><td>void</td><td>List of DistroRead</td><td>List all distros</td></tr>
 <tr><td>GET</td><td>/distro/{distroName}</td><td>distroName</td><td>DistroRead</td><td>Get a distro by name</td></tr>
 </table>
+Note: The url of all REST APIs is prefixed with http://hostname:8080/serengeti .
 
 ### Authentication
-Spring security In-Memory Authentication is used for Serengeti Authentication and user management. 
+Spring security In-Memory Authentication is used for Serengeti Authentication and user management.
 
-We don't provide html or JSPs for login, instead, the spring default standard URL is used. User need to set j_username and j_password and then POST login information to URL /serengeti/j_spring_security_check for authentication.
+We don't provide html or JSPs for login, instead, the Spring default standard URL is used.
+User needs to set j_username and j_password and then POST login information to URL /serengeti/j_spring_security_check for authentication,
+e.g. send POST to http://localhost:8080/serengeti/j_spring_security_check?j_username=serengeti&j_password=password .
 
 Navigate to URL /serengeti/j_spring_security_logout means logout, and the session will be removed from server side.
 #### Session timeout
