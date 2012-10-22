@@ -64,6 +64,8 @@ end
 
 SERENGETI_VCEXT_ID=get_extension_id
 
+CLEAR_OVF_ENV_SCRIPT="/opt/serengeti/sbin/clear-ovf-env.sh"
+
 system <<EOF
 /usr/sbin/rabbitmqctl add_vhost /chef
 /usr/sbin/rabbitmqctl add_user chef testing
@@ -217,11 +219,11 @@ if [ -e #{ENTERPRISE_EDITION_FLAG} -a "#{VCEXT_TOOL_JAR}" != "" ]; then
   bash #{GENERATE_CERT_SCRIPT} #{SERENGETI_KEYSTORE_PWD}
   echo "registering serengeti server as vc ext service"
   java -jar #{VCEXT_TOOL_JAR} \
-    -evsURL #{h["evs_url"]} \
-    -evsToken #{h["evs_token"]} \
-    -evsThumbprint #{h["evs_thumbprint"]} \
-    -extKey #{SERENGETI_VCEXT_ID} \
-    -cert #{SERENGETI_CERT_FILE}
+    -evsURL "#{h["evs_url"]}" \
+    -evsToken "#{h["evs_token"]}" \
+    -evsThumbprint "#{h["evs_thumbprint"]}" \
+    -extKey "#{SERENGETI_VCEXT_ID}" \
+    -cert "#{SERENGETI_CERT_FILE}"
   ret=$?
   if [ $ret != 0 ]; then
     echo "failed to register serengeti server as vc ext service"
@@ -379,4 +381,6 @@ if [ -e "#{HTTPD_CONF}" ]; then
   service httpd restart
 fi
 
+# remove vc token in ovf env
+bash #{CLEAR_OVF_ENV_SCRIPT}
 EOF
