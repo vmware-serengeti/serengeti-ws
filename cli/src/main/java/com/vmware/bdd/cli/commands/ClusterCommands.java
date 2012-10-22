@@ -725,10 +725,10 @@ public class ClusterCommands implements CommandMarker {
    private void prettyOutputClusterInfo(ClusterRead cluster, boolean detail) {
       TopologyType topology = cluster.getTopologyPolicy();
       if (topology == null || topology == TopologyType.NONE) {
-         System.out.printf("name: %s, distro: %s, status: %s",
+         System.out.printf("cluster name: %s, distro: %s, status: %s",
                cluster.getName(), cluster.getDistro(), cluster.getStatus());
       } else {
-         System.out.printf("name: %s, distro: %s, topology: %s, status: %s",
+         System.out.printf("cluster name: %s, distro: %s, topology: %s, status: %s",
                cluster.getName(), cluster.getDistro(), topology, cluster.getStatus());
       }
       System.out.println();
@@ -740,7 +740,7 @@ public class ClusterCommands implements CommandMarker {
       List<NodeGroupRead> nodegroups = cluster.getNodeGroups();
       if (nodegroups != null) {
          ngColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_NAME, Arrays.asList("getName"));
+               Constants.FORMAT_TABLE_COLUMN_GROUP_NAME, Arrays.asList("getName"));
          ngColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_ROLES, Arrays.asList("getRoles"));
          ngColumnNamesWithGetMethodNames.put(
@@ -762,7 +762,7 @@ public class ClusterCommands implements CommandMarker {
                LinkedHashMap<String, List<String>> nColumnNamesWithGetMethodNames =
                      new LinkedHashMap<String, List<String>>();
                nColumnNamesWithGetMethodNames.put(
-                     Constants.FORMAT_TABLE_COLUMN_NAME,
+                     Constants.FORMAT_TABLE_COLUMN_NODE_NAME,
                      Arrays.asList("getName"));
                nColumnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_HOST,

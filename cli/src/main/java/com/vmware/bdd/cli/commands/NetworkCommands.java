@@ -482,7 +482,7 @@ public class NetworkCommands implements CommandMarker {
       networkDetailColumnNamesWithGetMethodNames.put(
             Constants.FORMAT_TABLE_COLUMN_IP, Arrays.asList("getIpAddress"));
       networkDetailColumnNamesWithGetMethodNames.put(
-            Constants.FORMAT_TABLE_COLUMN_NODE_NAME,
+            Constants.FORMAT_TABLE_COLUMN_NODE,
             Arrays.asList("getNodeName"));
       networkDetailColumnNamesWithGetMethodNames.put(
             Constants.FORMAT_TABLE_COLUMN_NODE_GROUP_NAME,
