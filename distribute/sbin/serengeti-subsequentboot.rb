@@ -247,7 +247,7 @@ fi
 
 # update serengeti server ip address in httpd conf
 if [ -e "#{HTTPD_CONF}" ]; then
-  sed -i "s|Redirect permanent.*$|Redirect permanent /datadirector http://#{ethip}:8080/serengeti|g" "#{HTTPD_CONF}"
+  sed -i "s|Redirect permanent.*$|Redirect permanent /datadirector http://#{ethip}:8080/datadirector|g" "#{HTTPD_CONF}"
   service httpd restart
 fi
 
