@@ -33,6 +33,24 @@ DNS_CONFIG_FILE_DHCP="/etc/resolv.conf.bak"
 DNS_CONFIG_FILE_TMP="/etc/resolv.conf.tmp"
 
 VHM_CONF="/opt/serengeti/conf/vhm.properties"
+ENTERPRISE_EDITION_FLAG="/opt/serengeti/etc/enterprise"
+
+SERENGETI_CERT_FILE="/opt/serengeti/.certs/serengeti.pem"
+SERENGETI_PRIVATE_KEY="/opt/serengeti/.certs/private.pem"
+
+def is_enterprise_edition?
+  File.exist? ENTERPRISE_EDITION_FLAG
+end
+
+def get_extension_id
+  if File.exist? SERENGETI_CLOUD_MANAGER_CONF
+    vc_info = YAML.load(File.open(SERENGETI_CLOUD_MANAGER_CONF))
+    return vc_info["extension_key"] unless vc_info["extension_key"].nil?
+  end
+  "com.vmware.serengeti." + %x[uuidgen].strip[0..7]
+end
+
+HTTPD_CONF="/etc/httpd/conf/httpd.conf"
 
 system <<EOF
 #rabbitmq reconfigure
@@ -113,14 +131,27 @@ sed -i "s|http://.*/yum|http://#{ethip}/yum|" "#{SERENGETI_HOME}/www/yum/repos/b
 sed -i "s|http://.*/yum|http://#{ethip}/yum|" "#{SERENGETI_HOME}/.chef/knife.rb"
 EOF
 
-#get serenegeti server vsphere related information
-cloud_server = 'vsphere'
-info = {:provider => cloud_server,
-  :vsphere_server => h["evs_IP"],
-  :vsphere_username => h["vcusername"],
-  :vsphere_password => h["vcpassword"],
-}
-connection = Fog::Compute.new(info)
+
+def get_connection_info(vc_info)
+  cloud_server = 'vsphere'
+  info = {:provider => cloud_server,
+    :vsphere_server => vc_info["evs_IP"]
+  }
+
+  if is_enterprise_edition?
+    info[:cert] = SERENGETI_CERT_FILE
+    info[:key] = SERENGETI_PRIVATE_KEY
+    info[:extension_key] = get_extension_id
+  else
+    info[:vsphere_username] = vc_info["vcusername"]
+    info[:vsphere_password] = vc_info["vcpassword"]
+  end
+  info
+end
+
+conn_info = get_connection_info(h)
+connection = Fog::Compute.new(conn_info)
+
 mob = connection.get_vm_mob_ref_by_moid(h["evs_SelfMoRef"])
 vmdatastores = mob.datastore.map {|ds| "#{ds.info.name}"}  	#serengeti server Datastore name
 puts("serengeti server datastore: " + "#{vmdatastores[0]}")
@@ -156,25 +187,27 @@ sed -i "s/distro_root =.*/#{distroip}/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/vc_datacenter = .*/#{vcdatacenterline}/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/template_id = .*/#{templateid}/" "#{SERENGETI_WEBAPP_CONF}"
 
-echo "vc_addr: #{h["evs_IP"]}" > "#{SERENGETI_CLOUD_MANAGER_CONF}"
-echo "vc_user: #{vcuser}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
-echo "vc_pwd:  #{updateVCPassword}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
-chmod 400 "#{SERENGETI_CLOUD_MANAGER_CONF}"
-chown serengeti:serengeti "#{SERENGETI_CLOUD_MANAGER_CONF}"
+# no need to rewrite vc info file in vc ext case 
+if [ ! -e #{ENTERPRISE_EDITION_FLAG} ]; then
+  echo "vc_addr: #{h["evs_IP"]}" > "#{SERENGETI_CLOUD_MANAGER_CONF}"
+  echo "vc_user: #{vcuser}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+  echo "vc_pwd:  #{updateVCPassword}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+  chmod 400 "#{SERENGETI_CLOUD_MANAGER_CONF}"
+  chown serengeti:serengeti "#{SERENGETI_CLOUD_MANAGER_CONF}"
 
-# re-init vhm property file
-if [ -e "#{VHM_CONF}" ]; then
-  sed -i "s|vCenterId=.*$|vCenterId=#{h["evs_IP"]}|g" "#{VHM_CONF}"
-  sed -i "s|vCenterUser=.*$|vCenterUser=#{vcuser}|g"  "#{VHM_CONF}"
-  sed -i "s|vCenterPwd=.*$|vCenterPwd=#{updateVCPassword}|g" "#{VHM_CONF}"
-  sed -i "s|vHadoopUser=.*$|vHadoopUser=root|g" "#{VHM_CONF}"
-  sed -i "s|vHadoopPwd=.*$|vHadoopPwd=password|g" "#{VHM_CONF}"
-  sed -i "s|vHadoopHome=.*$|vHadoopHome=/usr/lib/hadoop|g" "#{VHM_CONF}"
-  sed -i "s|vHadoopExcludeTTFile=.*$|vHadoopExcludeTTFile=/usr/lib/hadoop/conf/mapred.hosts.exclude|g" "#{VHM_CONF}"
-  chmod 400 "#{VHM_CONF}"
-  chown serengeti:serengeti "#{VHM_CONF}"
+  # re-init vhm property file
+  if [ -e "#{VHM_CONF}" ]; then
+    sed -i "s|vCenterId=.*$|vCenterId=#{h["evs_IP"]}|g" "#{VHM_CONF}"
+    sed -i "s|vCenterUser=.*$|vCenterUser=#{vcuser}|g"  "#{VHM_CONF}"
+    sed -i "s|vCenterPwd=.*$|vCenterPwd=#{updateVCPassword}|g" "#{VHM_CONF}"
+    sed -i "s|vHadoopUser=.*$|vHadoopUser=root|g" "#{VHM_CONF}"
+    sed -i "s|vHadoopPwd=.*$|vHadoopPwd=password|g" "#{VHM_CONF}"
+    sed -i "s|vHadoopHome=.*$|vHadoopHome=/usr/lib/hadoop|g" "#{VHM_CONF}"
+    sed -i "s|vHadoopExcludeTTFile=.*$|vHadoopExcludeTTFile=/usr/lib/hadoop/conf/mapred.hosts.exclude|g" "#{VHM_CONF}"
+    chmod 400 "#{VHM_CONF}"
+    chown serengeti:serengeti "#{VHM_CONF}"
+  fi
 fi
-
 
 #kill tomcat using shell direclty to avoid failing to stop tomcat
 pidlist=`ps -ef|grep tomcat | grep -v "grep"|awk '{print $2}'`
@@ -208,6 +241,12 @@ if [[ -f "#{SERENGETI_HOME}/logs/not-init" ]];then
    echo ${ntadd} >> "#{SERENGETI_CLI_HOME}/initResources"
    su - "#{SERENGETI_USER}" -c "#{SERENGETI_SCRIPTS_HOME}/serengeti --cmdfile #{SERENGETI_CLI_HOME}/initResources"
    rm -rf "#{SERENGETI_HOME}/logs/not-init"
+fi
+
+# update serengeti server ip address in httpd conf
+if [ -e "#{HTTPD_CONF}" ]; then
+  sed -i "s|Redirect permanent.*$|Redirect permanent /datadirector http://#{ethip}:8080/serengeti|g" "#{HTTPD_CONF}"
+  service httpd restart
 fi
 
 # remove ovf env file
