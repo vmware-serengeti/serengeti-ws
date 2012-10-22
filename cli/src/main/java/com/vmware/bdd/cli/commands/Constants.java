@@ -159,6 +159,8 @@ public class Constants {
 
    public static final int FORMAT_COLUMN_DISTANCE = 2;
    public static final String FORMAT_TABLE_COLUMN_NAME = "NAME";
+   public static final String FORMAT_TABLE_COLUMN_GROUP_NAME = "GROUP NAME";
+   public static final String FORMAT_TABLE_COLUMN_NODE_NAME = "NODE NAME";
    public static final String FORMAT_TABLE_COLUMN_STATUS = "STATUS";
    public static final String FORMAT_TABLE_COLUMN_IP = "IP";
    public static final String FORMAT_TABLE_COLUMN_HVE = "HVE";
@@ -180,7 +182,7 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_DNS2 = "DNS2";
    public static final String FORMAT_TABLE_COLUMN_GATEWAY = "GATEWAY";
    public static final String FORMAT_TABLE_COLUMN_MASK = "MASK";
-   public static final String FORMAT_TABLE_COLUMN_NODE_NAME = "NODE";
+   public static final String FORMAT_TABLE_COLUMN_NODE = "NODE";
    public static final String FORMAT_TABLE_COLUMN_NODE_GROUP_NAME = "NODEGROUP";
    public static final String FORMAT_TABLE_COLUMN_CLUSTER_NAME = "CLUSTER";
    public static final String FORMAT_TABLE_COLUMN_PATH = "PATH";

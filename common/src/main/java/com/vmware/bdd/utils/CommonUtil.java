@@ -22,13 +22,14 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
 public class CommonUtil {
 
    static final Logger logger = Logger.getLogger(CommonUtil.class);
-   
+
    public static String readJsonFile(final String fileName) {
       StringBuilder jsonBuff = new StringBuilder();
       URL fileURL = CommonUtil.class.getClassLoader().getResource(fileName);
@@ -56,7 +57,7 @@ public class CommonUtil {
       return jsonBuff.toString();
   }
 
-  public static List<String> inputsConvert(String inputs) {
+   public static List<String> inputsConvert(String inputs) {
       List<String> names = new ArrayList<String>();
       for (String s : inputs.split(",")) {
          if (!s.trim().isEmpty()) {
@@ -66,8 +67,41 @@ public class CommonUtil {
       return names;
    }
 
-  public static boolean isBlank(final String str) {
-     return str == null || str.trim().isEmpty();
-  }
+   public static boolean isBlank(final String str) {
+      return str == null || str.trim().isEmpty();
+   }
+
+   public static boolean validateName(final String input) {
+      return match(input, Constants.NAME_PATTERN);
+   }
+
+   public static boolean validateClusterName(final String input) {
+      return match(input, Constants.CLUSTER_NAME_PATTERN);
+   }
+
+   public static boolean validateNodeGroupName(final String input) {
+      return match(input, Constants.NODE_GROUP_NAME_PATTERN);
+   }
+
+   public static boolean validateVcDataStoreNames(List<String> names) {
+      if (names == null || names.isEmpty()) {
+         return false;
+      }
+      for (String name : names) {
+         if (!validateVcDataStoreName(name)) {
+            return false;
+         }
+      }
+      return true;
+   }
+
+   private static boolean validateVcDataStoreName(final String input) {
+      return match(input, Constants.VC_DATASTORE_NAME_PATTERN);
+   }
+
+   private static boolean match(final String input, final String regex) {
+      Pattern pattern = Pattern.compile(regex);
+      return pattern.matcher(input).matches();
+   }
 
 }
