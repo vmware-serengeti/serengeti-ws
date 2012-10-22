@@ -52,6 +52,8 @@ end
 
 HTTPD_CONF="/etc/httpd/conf/httpd.conf"
 
+CLEAR_OVF_ENV_SCRIPT="/opt/serengeti/sbin/clear-ovf-env.sh"
+
 system <<EOF
 #rabbitmq reconfigure
 /usr/sbin/rabbitmqctl add_vhost /chef
@@ -251,4 +253,7 @@ fi
 
 # remove ovf env file
 rm -f "#{SERENGETI_VC_PROPERTIES}"
+
+# remove vc token in ovf env
+bash #{CLEAR_OVF_ENV_SCRIPT}
 EOF
