@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupA
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksType;
 import com.vmware.bdd.spectypes.GroupType;
+import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.Constants;
 
@@ -222,24 +224,33 @@ public class NodeGroupCreate {
 
       return hostNumber;
    }
+   
+   private boolean isWorkerGroup() {
+	   List<String> roles = getRoles();
+	   if (roles.contains(HadoopRole.HADOOP_DATANODE.toString()) 
+			   || roles.contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {
+		   return true;
+	   }
+	   return false;
+   }
 
    @SuppressWarnings("unused")
    public boolean validatePlacementPolicies(ClusterCreate cluster, Map<String, NodeGroupCreate> groups,
          List<String> failedMsgList, List<String> warningMsgList) {
-      boolean valid = true;
-      if (cluster.getTopologyPolicy() == TopologyType.HVE 
-          || cluster.getTopologyPolicy() == TopologyType.HOST_AS_RACK
-          || cluster.getTopologyPolicy() == TopologyType.RACK_AS_RACK) {
-    	 if (getPlacementPolicies() == null) {
-    		setPlacementPolicies(new PlacementPolicy());
-    	 }
-    	 if (getPlacementPolicies().getGroupRacks() == null)
-    	 {
-    		 GroupRacks groupRacks = new GroupRacks();
-    		 groupRacks.setType(GroupRacksType.ROUNDROBIN);
-    		 groupRacks.setRacks(new String[0]);
-    		 getPlacementPolicies().setGroupRacks(groupRacks);
-    	 }
+      boolean valid = true;    
+
+      if ((cluster.getTopologyPolicy() == TopologyType.HVE || cluster
+            .getTopologyPolicy() == TopologyType.RACK_AS_RACK) && isWorkerGroup()) {
+         if (getPlacementPolicies() == null) {
+            setPlacementPolicies(new PlacementPolicy());
+         }
+         if (getPlacementPolicies().getGroupRacks() == null
+               && getPlacementPolicies().getGroupAssociations() == null) {
+            GroupRacks groupRacks = new GroupRacks();
+            groupRacks.setType(GroupRacksType.ROUNDROBIN);
+            groupRacks.setRacks(new String[0]);
+            getPlacementPolicies().setGroupRacks(groupRacks);
+         }
       }
 
       PlacementPolicy policies = getPlacementPolicies();
@@ -260,33 +271,30 @@ public class NodeGroupCreate {
          }
 
          if (policies.getGroupRacks() != null) {
-            if (cluster.getTopologyPolicy() == null) {
-               warningMsgList.add("Warning: "
-                     + Constants.PRACK_NO_TOPOLOGY_TYPE_SPECIFIED);
-               cluster.setTopologyPolicy(TopologyType.NONE);
-            }
             GroupRacks r = policies.getGroupRacks();
             if (r.getType() == null) {
                r.setType(GroupRacksType.ROUNDROBIN);
-            } else if (r.getType() == GroupRacksType.SAMERACK
-                  && r.getRacks().length != 1) {
-               valid = false;
-               failedMsgList.add(Constants.PRACK_SAME_RACK_WITH_WRONG_VALUES);
             }
 
             if (r.getRacks() == null) {
                r.setRacks(new String[0]);
             }
 
-            // warning if storage.type = SHARED
             if (getStorage() == null || getStorage().getType() == null
                   || getStorage().getType().equals(DatastoreType.SHARED.toString())) {
-               warningMsgList.add("Warning: " + Constants.PRACK_WITH_SHARED_STORAGE);
+               warningMsgList.add(new StringBuilder()
+                           .append("Warning: Cluster PRack Policy will not take effect when node group ")
+                           .append(getName()).append(" uses SHARED storage.").toString());
             }
          }
 
          if (policies.getGroupAssociations() != null) {
             // only support 1 group association now
+            if (policies.getGroupRacks() != null) {
+                warningMsgList.add(new StringBuilder().append("Warning: Cluster PRack Policy will not take effect when node group ") 
+                       .append(getName())
+                       .append(" specifies groupAssociations meanwhile").toString());
+            }
             if (policies.getGroupAssociations().size() != 1) {
                valid = false;
                failedMsgList.add(new StringBuilder().append(getName())
@@ -328,10 +336,6 @@ public class NodeGroupCreate {
                       * node group, we assume the min node number is 1 when instance per host is
                       * unspecified. This rule follows the underlying placement algorithm.
                       */
-                     if (policies.getGroupRacks() != null) {
-                        warningMsgList.add("Warning: "
-                              + Constants.PRACK_WITH_STRICT_ASSOCIATION);
-                     }
                      int hostNum = 1;
                      int refHostNum = groups.get(a.getReference()).getInstanceNum();
                      if (calculateHostNum() != null) {

@@ -40,6 +40,7 @@ import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.apitypes.StorageRead;
@@ -252,43 +253,73 @@ public class ClusterConfigManager {
          return valid;
       }
 
+      List<RackInfo> racksInfo = rackInfoMgr.exportRackInfo();
+
+      if ((cluster.getTopologyPolicy() == TopologyType.HVE || cluster
+            .getTopologyPolicy() == TopologyType.RACK_AS_RACK) && racksInfo.isEmpty()) {
+         valid = false;
+         throw ClusterConfigException.TOPOLOGY_WITH_NO_MAPPING_INFO_EXIST(cluster
+               .getTopologyPolicy().toString());
+      }
+
       for (NodeGroupCreate nodeGroupCreate : cluster.getNodeGroups()) {
          allGroups.put(nodeGroupCreate.getName(), nodeGroupCreate);
       }
 
       for (NodeGroupCreate ngc : cluster.getNodeGroups()) {
          PlacementPolicy policies = ngc.getPlacementPolicies();
-         if (policies != null && policies.getGroupAssociations() != null 
-        	   && policies.getGroupAssociations().get(0).getType() == GroupAssociationType.STRICT) {
-        	 continue;
+         if (policies != null && policies.getGroupAssociations() != null) {
+            continue;
          }
-         
-         if (ngc.getStorage() != null && ngc.getStorage().getType() != null 
-        	   && ngc.getStorage().getType().equals(DatastoreType.SHARED.toString())) {
-        	 continue;
-         }
-      
-         if (policies != null && policies.getGroupRacks() != null
-               && ngc.calculateHostNum() != null) {
-            Integer requiredHostNum = ngc.calculateHostNum();
-            if (requiredHostNum > 0) {
-               GroupRacks r = policies.getGroupRacks();
-               Integer totalHostNum = 0;
-               List<RackInfo> racksInfo = rackInfoMgr.exportRackInfo();
 
-               Set<String> totalRacks = new HashSet<String>(Arrays.asList(r.getRacks()));
-               for (RackInfo rackInfo : racksInfo) {
-                  if (totalRacks.isEmpty()) {
-                     totalHostNum += rackInfo.getHosts().size();
-                  } else if (totalRacks.contains(rackInfo.getName())) {
-                     totalHostNum += rackInfo.getHosts().size();
+         if (ngc.getStorage() != null && ngc.getStorage().getType() != null
+               && ngc.getStorage().getType().equals(DatastoreType.SHARED.toString())) {
+            continue;
+         }
+
+         if (policies != null && policies.getGroupRacks() != null) {
+            if (racksInfo.isEmpty()) {
+               valid = false;
+               throw ClusterConfigException.RACKPOLICY_WITH_NO_MAPPING_INFO_EXIST(ngc
+                     .getName());
+            }
+
+            GroupRacks r = policies.getGroupRacks();
+            GroupRacksType rackType = r.getType();
+            Set<String> specifiedRacks = new HashSet<String>(Arrays.asList(r.getRacks()));
+            List<String> IntersecRacks = new ArrayList<String>();
+            Integer IntersecHostNum = 0;
+            Integer maxIntersecHostNum = 0;
+
+            for (RackInfo rackInfo : racksInfo) {
+               if (specifiedRacks.isEmpty() || specifiedRacks.size() == 0 || specifiedRacks.contains(rackInfo.getName())) {
+                  IntersecHostNum += rackInfo.getHosts().size();
+                  IntersecRacks.add(rackInfo.getName());
+                  if (rackInfo.getHosts().size() > maxIntersecHostNum) {
+                     maxIntersecHostNum = rackInfo.getHosts().size();
                   }
                }
-               if (totalHostNum < requiredHostNum) {
+            }
+
+            if (IntersecRacks.size() == 0) {
+               valid = false;
+               throw ClusterConfigException.NO_VALID_RACK(ngc.getName());
+            }
+
+            if (ngc.calculateHostNum() != null) {
+               if (rackType == GroupRacksType.ROUNDROBIN
+                     && ngc.calculateHostNum() > IntersecHostNum) {
                   valid = false;
-                  throw ClusterConfigException.LACK_PHYSICAL_HOSTS(ngc.getName(), requiredHostNum, totalHostNum);
+                  throw ClusterConfigException.LACK_PHYSICAL_HOSTS(ngc.getName(),
+                        ngc.calculateHostNum(), IntersecHostNum);
+               } else if (ngc.calculateHostNum() > maxIntersecHostNum) {
+                  valid = false;
+                  throw ClusterConfigException.LACK_PHYSICAL_HOSTS(ngc.getName(),
+                        ngc.calculateHostNum(), maxIntersecHostNum);
                }
             }
+
+            r.setRacks(IntersecRacks.toArray(new String[IntersecRacks.size()]));
          }
       }
       return valid;

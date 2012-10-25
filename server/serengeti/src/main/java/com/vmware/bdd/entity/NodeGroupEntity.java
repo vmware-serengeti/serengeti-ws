@@ -46,6 +46,7 @@ import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
@@ -445,33 +446,45 @@ public class NodeGroupEntity extends EntityBase {
       }
    }
 
-   public void validateIfHostCanSatisfied (int instanceNum) {
+   public void validateIfHostCanSatisfied(int instanceNum) {
       if (getInstancePerHost() != null) {
          // assume this value is already validated
          int requiredHostNum = instanceNum / getInstancePerHost();
 
-         if (requiredHostNum > 0 && getGroupRacks() != null) {
+         if (getGroupRacks() != null) {
             GroupRacks groupRacks = (GroupRacks) new Gson().fromJson(getGroupRacks(),
                   GroupRacks.class);
-            Integer totalHostNum = 0;
+            GroupRacksType rackType = groupRacks.getType();
             List<RackInfo> racksInfo = new RackInfoManager().exportRackInfo();
-
-            Set<String> totalRacks = new HashSet<String>(Arrays.asList(groupRacks.getRacks()));
+            Set<String> specifiedRacks = new HashSet<String>(Arrays.asList(groupRacks
+                  .getRacks()));
+            List<String> IntersecRacks = new ArrayList<String>();
+            Integer IntersecHostNum = 0;
+            Integer maxIntersecHostNum = 0;
             for (RackInfo rackInfo : racksInfo) {
-               if (totalRacks.isEmpty()) {
-                  totalHostNum += rackInfo.getHosts().size();
-               } else if (totalRacks.contains(rackInfo.getName())) {
-                  totalHostNum += rackInfo.getHosts().size();
+               if (specifiedRacks.isEmpty() || specifiedRacks.size() == 0 || specifiedRacks.contains(rackInfo.getName())) {
+                  IntersecHostNum += rackInfo.getHosts().size();
+                  IntersecRacks.add(rackInfo.getName());
+                  if (rackInfo.getHosts().size() > maxIntersecHostNum) {
+                     maxIntersecHostNum = rackInfo.getHosts().size();
+                  }
                }
             }
-            if (totalHostNum < requiredHostNum) {
-               throw ClusterConfigException.LACK_PHYSICAL_HOSTS(this.name, requiredHostNum, totalHostNum);
+
+            if (rackType.equals(GroupRacksType.ROUNDROBIN) && IntersecHostNum < requiredHostNum) {
+               throw ClusterConfigException.LACK_PHYSICAL_HOSTS(this.name,
+                     requiredHostNum, IntersecHostNum);
+            } else if (requiredHostNum > maxIntersecHostNum) {
+               throw ClusterConfigException.LACK_PHYSICAL_HOSTS(this.name,
+                     requiredHostNum, maxIntersecHostNum);
             }
+            
+            groupRacks.setRacks(IntersecRacks.toArray(new String[IntersecRacks.size()]));
+            setGroupRacks((new Gson()).toJson(groupRacks));      
          }
       }
    }
  
-
    public void validateHostNumber(int instanceNum) {
       Set<NodeGroupAssociation> associations = getGroupAssociations();
       if (associations != null && !associations.isEmpty()) {

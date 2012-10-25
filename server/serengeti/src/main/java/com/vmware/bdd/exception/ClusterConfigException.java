@@ -82,6 +82,15 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException INVALID_PLACEMENT_POLICIES(List<String> errors) {
       return new ClusterConfigException(null, "INVALID_PLACEMENT_POLICIES", errors);
    }
+   public static ClusterConfigException TOPOLOGY_WITH_NO_MAPPING_INFO_EXIST(String topology) {
+      return new ClusterConfigException(null, "TOPOLOGY_WITH_NO_MAPPING_INFO_EXIST", topology);
+   }
+   public static ClusterConfigException RACKPOLICY_WITH_NO_MAPPING_INFO_EXIST(String groupName) {
+      return new ClusterConfigException(null, "RACKPOLICY_WITH_NO_MAPPING_FILE_EXIST", groupName);
+   }
+   public static ClusterConfigException NO_VALID_RACK(String groupName) {
+      return new ClusterConfigException(null, "NO_VALID_RACK", groupName);
+   }
    public static ClusterConfigException LACK_PHYSICAL_HOSTS(String groupName, int requiredHostNum, int provideHostNum) {
       return new ClusterConfigException(null, "LACK_PHYSICAL_HOSTS", groupName, requiredHostNum, provideHostNum);
    }

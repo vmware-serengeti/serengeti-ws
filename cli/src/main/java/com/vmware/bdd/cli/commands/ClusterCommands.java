@@ -135,7 +135,7 @@ public class ClusterCommands implements CommandMarker {
             return;
          }
       } else {
-         clusterCreate.setTopologyPolicy(null);
+         clusterCreate.setTopologyPolicy(TopologyType.NONE);
       }
 
       List<String> distroNames = getDistroNames();
@@ -251,20 +251,6 @@ public class ClusterCommands implements CommandMarker {
       // give a warning message if both type and specFilePath are specified
       if (type != null && specFilePath != null) {
          warningMsgList.add(Constants.TYPE_SPECFILE_CONFLICT);
-      }
-
-      // process topology option
-      if (topology == null) {
-         clusterCreate.setTopologyPolicy(TopologyType.NONE);
-      } else {
-         try {
-            clusterCreate.setTopologyPolicy(TopologyType.valueOf(topology));
-         } catch (IllegalArgumentException e) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  name, Constants.OUTPUT_OP_CREATE,
-                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.INPUT_TOPOLOGY_INVALID_VALUE);
-            return;
-         }
       }
 
       // rest invocation
