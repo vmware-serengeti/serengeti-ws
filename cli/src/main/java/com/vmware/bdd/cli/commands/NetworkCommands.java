@@ -414,12 +414,18 @@ public class NetworkCommands implements CommandMarker {
          networkIpColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_TYPE,
                Arrays.asList("findDhcpOrIp"));
-         networkIpColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_FREE_IPS,
-               Arrays.asList("getFreeIpBlocks"));
-         networkIpColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_ASSIGNED_IPS,
-               Arrays.asList("getAssignedIpBlocks"));
+         if (detail) {
+            networkIpColumnNamesWithGetMethodNames.put(
+                  Constants.FORMAT_TABLE_COLUMN_FREE_IPS,
+                  Arrays.asList("getFreeIpBlocks"));
+            networkIpColumnNamesWithGetMethodNames.put(
+                  Constants.FORMAT_TABLE_COLUMN_ASSIGNED_IPS,
+                  Arrays.asList("getAssignedIpBlocks"));
+         } else {
+            networkIpColumnNamesWithGetMethodNames.put(
+                  Constants.FORMAT_TABLE_COLUMN_IP_RANGES,
+                  Arrays.asList("getAllIpBlocks"));
+         }
          networkIpColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_DNS1, Arrays.asList("getDns1"));
          networkIpColumnNamesWithGetMethodNames.put(
