@@ -176,6 +176,7 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_SPACE = "SPACE(GB)";
    public static final String FORMAT_TABLE_COLUMN_FREE_SPACE = "FREE_SPACE(GB)";
    public static final String FORMAT_TABLE_COLUMN_PORT_GROUP = "PORTGROUP";
+   public static final String FORMAT_TABLE_COLUMN_IP_RANGES = "IP_RANGES";
    public static final String FORMAT_TABLE_COLUMN_FREE_IPS = "FREE_IPS";
    public static final String FORMAT_TABLE_COLUMN_ASSIGNED_IPS = "ASSIGNED_IPS";
    public static final String FORMAT_TABLE_COLUMN_DNS1 = "DNS1";
