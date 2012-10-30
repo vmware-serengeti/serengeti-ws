@@ -24,20 +24,19 @@ import com.vmware.bdd.apitypes.IpAllocEntryRead;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.dal.DAL;
-import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.HadoopNodeEntity;
 import com.vmware.bdd.entity.IpBlockEntity;
+import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.IpBlockEntity.BlockType;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NetworkEntity.AllocType;
-import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.Saveable;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
 import com.vmware.bdd.exception.UniqueConstraintViolationException;
 import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.IpAddressUtil;
+import com.vmware.bdd.utils.ConfigInfo;
 
 public class NetworkManager implements Serializable {
    private static final long serialVersionUID = 1271195142772906091L;
@@ -141,11 +140,7 @@ public class NetworkManager implements Serializable {
    private void assertNetworkNotUsed(NetworkEntity network) throws NetworkException {
       if (!network.getClusters().isEmpty()) {
          logger.error("can not change network, network re");
-         List<String> clusterNames = new ArrayList<String>();
-         for (ClusterEntity entity : network.getClusters()) {
-            clusterNames.add(entity.getName());
-         }
-         throw NetworkException.NETWORK_IN_USE(clusterNames);
+         throw NetworkException.NETWORK_IN_USE();
       }
 
       if (ConfigInfo.isDebugEnabled()) {
