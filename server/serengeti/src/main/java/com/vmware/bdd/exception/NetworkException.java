@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.exception;
 
+import java.util.List;
+
 import com.vmware.bdd.entity.IpBlockEntity;
 
 public class NetworkException extends BddException {
@@ -26,8 +28,8 @@ public class NetworkException extends BddException {
       super(cause, "NETWORK", errorId, detail);
    }
 
-   public static NetworkException NETWORK_IN_USE() {
-      return new NetworkException(null, "NETWORK_IN_USE");
+   public static NetworkException NETWORK_IN_USE(List<String> clusterNames) {
+      return new NetworkException(null, "NETWORK_IN_USE", clusterNames);
    }
 
    public static NetworkException IP_ADDR_IN_USE() {
