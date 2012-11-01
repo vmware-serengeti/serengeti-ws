@@ -167,6 +167,11 @@ public class PigCommands implements CommandMarker {
 
 	@CliCommand(value = { PREFIX + "script" }, help = "Executes a Pig script")
 	public String script(@CliOption(key = { "", "location" }, mandatory = true, help = "Script location") String location) {
+		String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win")) {
+                org.apache.hadoop.mapreduce.JobSubmissionFiles.JOB_DIR_PERMISSION.fromShort((short) 0700);
+                org.apache.hadoop.mapreduce.JobSubmissionFiles.JOB_FILE_PERMISSION.fromShort((short) 0644);
+        }
 		String jobTracker = hadoopConfiguration.get("mapred.job.tracker");
 		if (jobTracker == null || jobTracker.length() == 0) {
 			return "You must set Job Tracker URL before run Pig script";

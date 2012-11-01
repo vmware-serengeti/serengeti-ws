@@ -50,8 +50,8 @@ public class ConfigurationCommands implements ApplicationEventPublisherAware, Co
 		// do the assignment only on Windows systems
 		if (System.getProperty("os.name").startsWith("Windows")) {
 			// 0655 = -rwxr-xr-x
-			JobSubmissionFiles.JOB_DIR_PERMISSION.fromShort((short) 0655);
-			JobSubmissionFiles.JOB_FILE_PERMISSION.fromShort((short) 0655);
+			org.apache.hadoop.mapreduce.JobSubmissionFiles.JOB_DIR_PERMISSION.fromShort((short) 0700);
+			org.apache.hadoop.mapreduce.JobSubmissionFiles.JOB_FILE_PERMISSION.fromShort((short) 0644);
 		}
 	}
 
