@@ -24,19 +24,19 @@ import junit.framework.Assert;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FsShell;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 /**
  * @author Jarred Li
  *
  */
 @Test
 @ContextConfiguration(locations = { "classpath:org/springframework/data/hadoop/impala/mapreduce/MapReduceCommandsTest-context.xml" })
-public class MapReduceCommandsTest {
+public class MapReduceCommandsTest extends AbstractTestNGSpringContextTests{
 
 	@Autowired
 	MapReduceCommands mrCmds;
@@ -46,7 +46,7 @@ public class MapReduceCommandsTest {
 	/**
 	 * @throws java.lang.Exception
 	 */
-	@BeforeMethod
+	@BeforeClass
 	public void setUp() throws Exception {
 		mrCmds.init();
 	}
@@ -54,7 +54,7 @@ public class MapReduceCommandsTest {
 	/**
 	 * @throws java.lang.Exception
 	 */
-	@AfterMethod
+	@AfterClass
 	public void tearDown() throws Exception {
 		mrCmds = null;
 	}
@@ -62,7 +62,7 @@ public class MapReduceCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.mapreduce.MapReduceCommands#init()}.
 	 */
-	@Test(enabled=false)
+	@Test
 	public void testInit() {
 		mrCmds.init();
 	}
@@ -71,7 +71,7 @@ public class MapReduceCommandsTest {
 	 * Test method for {@link org.springframework.data.hadoop.impala.mapreduce.MapReduceCommands#submit(java.lang.String)}.
 	 * @throws Exception 
 	 */
-	@Test(enabled=false)
+	@Test
 	public void testSubmit() throws Exception {
 		Configuration jobConfig = new Configuration(false);
 
@@ -117,7 +117,7 @@ public class MapReduceCommandsTest {
 		mrCmds.submit(tmpFile);
 	}
 
-	@Test(enabled=false)
+	@Test
 	public void testJar() throws Exception{
 		Configuration hadoopConfig = mrCmds.getHadoopConfiguration();
 		FsShell shell = new FsShell(hadoopConfig);

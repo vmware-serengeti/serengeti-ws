@@ -19,8 +19,9 @@ import java.io.File;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -29,7 +30,7 @@ import org.testng.annotations.Test;
  */
 @Test
 @ContextConfiguration(locations = { "classpath:org/springframework/data/hadoop/impala/hdfs/FsShellCommandsTest-context.xml" })
-public class FsShellCommandsTest {
+public class FsShellCommandsTest extends AbstractTestNGSpringContextTests {
 
 	@Autowired
 	private FsShellCommands fsCmd;
@@ -45,7 +46,7 @@ public class FsShellCommandsTest {
 	/**
 	 * @throws java.lang.Exception
 	 */
-	@BeforeMethod
+	@BeforeClass
 	public void setUp() throws Exception {
 		fsCmd.init();
 		File f = new File(srcFile);
@@ -56,7 +57,7 @@ public class FsShellCommandsTest {
 	/**
 	 * @throws java.lang.Exception
 	 */
-	@AfterMethod
+	@AfterClass
 	public void tearDown() throws Exception {
 		fsCmd.rm(tmpFile, false, false);
 		fsCmd = null;
@@ -66,12 +67,12 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#ls(java.lang.String, boolean)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testLs() {
 		fsCmd.ls("/tmp", false);
 	}
 	
-	@Test(enabled = false)
+	@Test
 	public void testLs_withRecursion() {
 		fsCmd.ls("/tmp", true);
 	}
@@ -79,7 +80,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#cat(java.lang.String)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testCat() {
 		fsCmd.cat(tmpFile);
 	}
@@ -87,7 +88,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#chgrp(boolean, java.lang.String, java.lang.String)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testChgrp() {
 		fsCmd.chgrp(false, "hadoop", tmpFile);
 		fsCmd.ls(tmpFile, false);
@@ -96,7 +97,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#chown(boolean, java.lang.String, java.lang.String)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testChown() {
 		fsCmd.chown(false, "hadoop", tmpFile);
 		fsCmd.ls(tmpFile, false);
@@ -105,7 +106,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#chmod(boolean, java.lang.String, java.lang.String)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testChmod() {
 		fsCmd.chmod(false, "777", tmpFile);
 		fsCmd.ls(tmpFile, false);
@@ -114,7 +115,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#copyFromLocal(java.lang.String, java.lang.String)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testCopyFromLocal() {
 		fsCmd.rm(tmpFile, false, false);
 		File f = new File(srcFile);
@@ -126,7 +127,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#put(java.lang.String, java.lang.String)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testPut() {
 		fsCmd.rm(tmpFile, false, false);
 		File f = new File(srcFile);
@@ -138,7 +139,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#moveFromLocal(java.lang.String, java.lang.String)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testMoveFromLocal() {
 		File file = new File(localTmpFile);
 		if(!file.exists()){
@@ -151,7 +152,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#copyToLocal(java.lang.String, java.lang.String, boolean, boolean)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testCopyToLocal() {
 		File file = new File(localTmpFile);
 		if(file.exists()){
@@ -160,7 +161,7 @@ public class FsShellCommandsTest {
 		fsCmd.copyToLocal(tmpFile, localTmpFile, true, false);
 	}
 	
-	@Test(enabled = false)
+	@Test
 	public void testCopyMergeToLocal() {
 		File file = new File(localTmpFile);
 		if(file.exists()){
@@ -172,7 +173,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#get(java.lang.String, java.lang.String, boolean, boolean)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testGet() {
 		File file = new File(localTmpFile);
 		if(file.exists()){
@@ -184,7 +185,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#count(boolean, java.lang.String)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testCount() {
 		fsCmd.count(false, tmpFile);
 	}
@@ -192,7 +193,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#cp(java.lang.String, java.lang.String)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testCp() {
 		fsCmd.cp(tmpFile, newTmpFile);
 		fsCmd.ls(tmpFile, false);
@@ -202,7 +203,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#mv(java.lang.String, java.lang.String)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testMv() {
 		fsCmd.mv(tmpFile, newTmpFile);
 		fsCmd.ls(newTmpFile, false);
@@ -212,7 +213,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#du(java.lang.String, boolean)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testDu() {
 		fsCmd.du("/tmp", false);
 	}
@@ -220,7 +221,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#expunge()}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testExpunge() {
 		fsCmd.expunge();
 	}
@@ -228,7 +229,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#mkdir(java.lang.String)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testMkdir() {
 		fsCmd.mkdir("/tmp/tmp");
 	}
@@ -236,7 +237,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#rm(java.lang.String, boolean, boolean)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testRm() {
 		fsCmd.rm("/tmp/tmp", false, true);
 	}
@@ -247,7 +248,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#text(java.lang.String)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testText() {
 		fsCmd.text(tmpFile);
 	}
@@ -255,7 +256,7 @@ public class FsShellCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.hdfs.FsShellCommands#touchz(java.lang.String)}.
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testTouchz() {
 		fsCmd.touchz("/tmp/touch");
 	}

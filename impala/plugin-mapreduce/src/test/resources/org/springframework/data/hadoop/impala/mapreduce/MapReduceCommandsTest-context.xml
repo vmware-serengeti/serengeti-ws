@@ -14,4 +14,5 @@
 	</hdp:configuration>
 	<context:component-scan base-package="org.springframework.data.hadoop.impala.mapreduce"/>
 	<bean class="org.springframework.data.hadoop.impala.common.util.SecurityUtil" />
+	<bean class="org.apache.hadoop.conf.Configuration" />
 </beans>
