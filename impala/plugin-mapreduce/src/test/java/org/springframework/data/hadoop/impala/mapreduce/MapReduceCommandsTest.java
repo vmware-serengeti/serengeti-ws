@@ -34,7 +34,7 @@ import org.springframework.test.context.ContextConfiguration;
  * @author Jarred Li
  *
  */
-@Test(enabled=false)
+@Test
 @ContextConfiguration(locations = { "classpath:org/springframework/data/hadoop/impala/mapreduce/MapReduceCommandsTest-context.xml" })
 public class MapReduceCommandsTest {
 
@@ -62,7 +62,7 @@ public class MapReduceCommandsTest {
 	/**
 	 * Test method for {@link org.springframework.data.hadoop.impala.mapreduce.MapReduceCommands#init()}.
 	 */
-	@Test
+	@Test(enabled=false)
 	public void testInit() {
 		mrCmds.init();
 	}
@@ -71,7 +71,7 @@ public class MapReduceCommandsTest {
 	 * Test method for {@link org.springframework.data.hadoop.impala.mapreduce.MapReduceCommands#submit(java.lang.String)}.
 	 * @throws Exception 
 	 */
-	@Test
+	@Test(enabled=false)
 	public void testSubmit() throws Exception {
 		Configuration jobConfig = new Configuration(false);
 
@@ -117,7 +117,7 @@ public class MapReduceCommandsTest {
 		mrCmds.submit(tmpFile);
 	}
 
-	@Test
+	@Test(enabled=false)
 	public void testJar() throws Exception{
 		Configuration hadoopConfig = mrCmds.getHadoopConfiguration();
 		FsShell shell = new FsShell(hadoopConfig);
@@ -141,6 +141,4 @@ public class MapReduceCommandsTest {
 		File jarFile = new File(hadoopExampleJarFile);		
 		mrCmds.jar(jarFile.getAbsolutePath(), "org.apache.hadoop.examples.WordCount","/tmp/wc-input2 /tmp/wc-output2");
 	}
-	
-
 }
