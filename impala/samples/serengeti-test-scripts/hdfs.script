@@ -1,0 +1,6 @@
+cluster target
+fs ls /tmp
+fs put --from /tmp/impala/u.data --to /tmp/u.data
+fs ls /tmp
+quit
+
