@@ -1,0 +1,36 @@
+<configuration>
+	<property>
+		<name>fs.default.name</name>
+		<value>hdfs://localhost:9000</value>
+	</property>
+	<property>
+		<name>mapred.job.tracker</name>
+		<value>localhost:9001</value>
+	</property>
+	<property>
+		<name>mapred.jar</name>
+		<value>/home/hadoop/hadoop-1.0.0/hadoop-examples-1.0.0.jar</value>
+	</property>
+	<property>
+		<name>mapred.input.dir</name>
+		<value>/tmp/input</value>
+	</property>
+	<property>
+		<name>mapred.output.dir</name>
+		<value>/tmp/output</value>
+	</property>
+	<property>
+		<name>mapred.job.name</name>
+		<value>wordcount</value>
+	</property>
+	<property>
+		<name>mapreduce.map.class</name>
+		<value>org.apache.hadoop.examples.WordCount.TokenizerMapper</value>
+	</property>
+	<property>
+		<name>mapreduce.reduce.class</name>
+		<value>org.apache.hadoop.examples.WordCount.IntSumReducer</value>
+	</property>
+
+</configuration>
+

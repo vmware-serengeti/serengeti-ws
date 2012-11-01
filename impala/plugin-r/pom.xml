@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.vmware.bdd.impala.plugin.r</groupId>
+	<artifactId>serengeti-impala-plugin-r</artifactId>
+	<version>${serengeti.version}</version>
+	<packaging>jar</packaging>
+	<name>Serengeti Impala plugin-r project POM</name>
+	<parent>
+		<groupId>com.vmware.bdd.impala</groupId>
+		<artifactId>serengeti-impala</artifactId>
+		<version>${serengeti.version}</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>	
+	
+	<dependencies> 
+		<dependency>
+			<groupId>org.springframework.shell</groupId>
+			<artifactId>spring-shell</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+		</dependency>
+	</dependencies>
+</project>
