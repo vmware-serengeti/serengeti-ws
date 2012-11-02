@@ -49,11 +49,11 @@ public class Constants {
 
    public static final String CREATE_SUCCESS = "Succeeded";
    public static final String CREATE_FAILURE = "Failed";
-   public static final String GET_FAILURE = "Cannnot get";
+   public static final String GET_FAILURE = "Cannot get";
    public static final String DELETE_SUCCESS = "is deleted";
-   public static final String DELETE_FAILURE = "Cannnot delete";
+   public static final String DELETE_FAILURE = "Cannot delete";
    public static final String UPDATE_SUCCESS = "is updated";
-   public static final String UPDATE_FAILURE = "Cannnot update";
+   public static final String UPDATE_FAILURE = "Cannot update";
    public static final String ACTION_OPS_SUCCESS = "Succeeded to";
    public static final String ACTION_OPS_FAILURE = "Unable to";
    public static final String CONNECT_SUCCESS = "Connected";
@@ -139,7 +139,7 @@ public class Constants {
    public static final String PARAMS_NETWORK_ADD_FORMAT_ERROR =
          " valid format is ips or ip ranges, eg. 255.0.0.1-100, 255.0.0.1 or 255.0.3.1-200,255.0.0.1-255";
    public static final String PARAMS_NETWORK_ADD_IP_ERROR = " please provide valid ip or mask format.";
-   public static final String PARAM_NOT_SUPPORTED = " input cannnot be accepted, we only support: ";
+   public static final String PARAM_NOT_SUPPORTED = " input cannot be accepted, we only support: ";
    public static final String ROLE_HADOOP_NAME_NODE = "hadoop_namenode";
    public static final String ROLE_HADOOP_JOB_TRACKER = "hadoop_jobtracker";
    public static final String ROLE_HADOOP_DATANODE = "hadoop_datanode";
