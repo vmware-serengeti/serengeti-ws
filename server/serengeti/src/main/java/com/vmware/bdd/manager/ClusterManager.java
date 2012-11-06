@@ -723,7 +723,13 @@ public class ClusterManager {
          DAL.inTransactionDo(new Saveable<Void>() {
             @Override
             public Void body() {
-               DAL.refresh(group);
+               NodeGroupEntity group = NodeGroupEntity.findNodeGroupEntityByName(
+                     cluster, nodeGroupName);
+               if (group == null) {
+                  logger.error("nodegroup " + nodeGroupName + " of cluster "
+                        + clusterName + " does not exist");
+                  throw ClusterManagerException.NOGEGROUP_NOT_FOUND_ERROR(nodeGroupName);
+               }
                group.setDefineInstanceNum(oldInstanceNum);
                Set<HadoopNodeEntity> toRemove = new HashSet<HadoopNodeEntity>();
                if (group.getHadoopNodes() != null) {
