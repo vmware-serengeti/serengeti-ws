@@ -122,7 +122,8 @@ public class Constants {
    public static final String TOPLOGY_FORMAT = "Accepted topology file format: for each line, rackname1: hostname1, hostname2,...";
    public static final String OVERWRITE_TOPOLOGY = "WARNING: you will overwrite the existing topology. Existing Hadoop clusters may be impacted and cannot work well if you remove some hosts these clusters are using.";
    public static final String TYPE_SPECFILE_CONFLICT = "--type will not take effect when you specify --specFile.";
-   public static final String WRONG_NUM_OF_NODES = "the number of namenode and jobtracker are larger than 1, or no worker exists";
+   public static final String WRONG_NUM_OF_MASTERNODES = "the number of namenode or jobtracker is larger than 1.";
+   public static final String WRONG_NUM_OF_WORKERNODES = "no worker exists";
    public static final String WRONG_NUM_OF_ZOOKEEPER = "the number of zookeepers is less than 3";
    public static final String ODD_NUM_OF_ZOOKEEPER = "the number of zookeepers is better to be odd numbers";
    public static final String ZOOKEEPER_NOT_RESIZE = "zookeeper node groups are not allowed to resize.";
