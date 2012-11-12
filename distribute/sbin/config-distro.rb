@@ -78,10 +78,10 @@ class ConfigDistro
   end
 
   def output_usage
-      puts "Usage: configDistro [OPTIONS]"
+      puts "Usage: config-distro.rb [OPTIONS]"
       puts "commands:"
-      puts "    configDistro --name distro_name --hadoop hadoop_package_url --pig pig_package_url --hive hive_package_url"
-      puts "    configDistro --help"
+      puts "    config-distro.rb --name distro_name --hadoop hadoop_package_url --pig pig_package_url --hive hive_package_url"
+      puts "    config-distro.rb --help"
   end
 
   # TO DO - do whatever this app does

@@ -25,25 +25,35 @@ public class TaskRead {
    public enum Type {
       INNER, VHM 
    }
-   Long id;
-   Status status;
-   Type type;
-   Double progress;
-   String errorMessage;
-   String workDir;
+   private Long id;
+   private Status status;
+   private Type type;
+   private Double progress;
+   private String errorMessage;
+   private String workDir;
+   private String progressMessage;
 
    public TaskRead() {
 
    }
 
    public TaskRead(Long id, Status status, Type type, Double progress, String errorMessage,
-         String workDir) {
+         String workDir, String progressMessage) {
       this.id = id;
       this.status = status;
       this.type = type;
       this.progress = progress;
       this.errorMessage = errorMessage;
       this.workDir = workDir;
+      this.progressMessage = progressMessage;
+   }
+
+   public String getProgressMessage() {
+      return progressMessage;
+   }
+
+   public void setProgressMessage(String progressMessage) {
+      this.progressMessage = progressMessage;
    }
 
    public Long getId() {

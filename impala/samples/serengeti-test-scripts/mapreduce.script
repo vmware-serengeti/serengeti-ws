@@ -1,0 +1,6 @@
+cluster target
+fs ls /tmp
+fs put --from /tmp/impala/u.data --to /tmp/u.data
+fs ls /tmp
+mr jar --jarfile /opt/serengeti/cli/lib/hadoop-examples-1.0.1.jar --mainclass org.apache.hadoop.examples.PiEstimator --args "10 10"
+

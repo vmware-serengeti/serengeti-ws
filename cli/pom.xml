@@ -20,8 +20,6 @@
 	<properties>
 		<spring.shell.version>1.0.0.M2</spring.shell.version>
 		<jar.mainclass>org.springframework.shell.Bootstrap</jar.mainclass>
-		<impala.version>1.0.0.M2</impala.version>
-		<hadoop.version>1.0.1</hadoop.version>
 		<antlr.version>3.4</antlr.version>
 	</properties>
 
@@ -29,6 +27,26 @@
 		<dependency>
 			<groupId>com.vmware.bdd</groupId>
 			<artifactId>common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.vmware.bdd.impala.plugin.hdfs</groupId>
+			<artifactId>serengeti-impala-plugin-hdfs</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.vmware.bdd.impala.plugin.mapreduce</groupId>
+			<artifactId>serengeti-impala-plugin-mapreduce</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.vmware.bdd.impala.plugin.pig</groupId>
+			<artifactId>serengeti-impala-plugin-pig</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.vmware.bdd.impala.plugin.hive</groupId>
+			<artifactId>serengeti-impala-plugin-hive</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.vmware.bdd.impala.plugin.hive</groupId>
+			<artifactId>serengeti-impala-plugin-hive</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.testng</groupId>
@@ -44,47 +62,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-core</artifactId>
-			<version>${hadoop.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-examples</artifactId>
-			<version>${hadoop.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.data.hadoop.impala</groupId>
-			<artifactId>plugin-hdfs</artifactId>
-			<version>${impala.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.data.hadoop.impala</groupId>
-			<artifactId>plugin-mapreduce</artifactId>
-			<version>${impala.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.data.hadoop.impala</groupId>
-			<artifactId>plugin-pig</artifactId>
-			<version>${impala.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.data.hadoop.impala</groupId>
-			<artifactId>plugin-hive</artifactId>
-			<version>${impala.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.antlr</groupId>
-					<artifactId>antlr-runtime</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.antlr</groupId>
-					<artifactId>antlr</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>jline</groupId>
-					<artifactId>jline</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
@@ -170,21 +148,16 @@
 		<repository>
 			<id>spring-maven-snapshot</id>
 			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
+					<enabled>true</enabled>
+					<updatePolicy>never</updatePolicy>
 			</snapshots>
 			<name>Springframework Maven SNAPSHOT Repository</name>
 			<url>http://repo.springsource.org/libs-snapshot</url>
 		</repository>
 		<repository>
-			<id>spring-maven-milestone</id>
-			<name>Springframework Maven Milestone Repository</name>
-			<url>http://repo.springsource.org/libs-milestone</url>
-		</repository>
-		<repository>
-			<id>spring-maven-ext</id>
-			<name>Springframework Maven Ext Repository</name>
-			<url>http://repo.springsource.org/ext-release-local</url>
+ 			<id>spring-maven-milestone</id>
+ 			<name>Springframework Maven Milestone Repository</name>
+ 			<url>http://repo.springframework.org/libs-milestone</url>
 		</repository>
 		<repository>
 			<id>spring-roo-repository</id>

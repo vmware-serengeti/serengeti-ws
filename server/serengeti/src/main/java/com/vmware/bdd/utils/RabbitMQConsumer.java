@@ -15,6 +15,7 @@
 package com.vmware.bdd.utils;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
@@ -67,6 +68,7 @@ public class RabbitMQConsumer {
    
    // volatile is a must to insert memory barrier because read has no lock
    private volatile boolean stopping = false;
+   private volatile boolean graceStopping = false;
    private Date mqExpireTime;
 
    public RabbitMQConsumer(String host, int port, String username, String password,
@@ -145,7 +147,7 @@ public class RabbitMQConsumer {
       this.getQueue = getQueue;
    }
 
-   public void forceStopNow() throws IOException {
+   public void forceStopNow() {
       synchronized (this) {
          mqExpireTime = new Date();
          stopping = true;
@@ -153,16 +155,28 @@ public class RabbitMQConsumer {
       }
    }
 
-   public void forceStop() throws IOException {
+   public void forceStop() {
       synchronized (this) {
-         Date now = new Date();
-          Date deadline = new Date(now.getTime() + mqKeepAliveTimeMs);
-          if (mqExpireTime == null || mqExpireTime.after(deadline)) {
-             mqExpireTime = deadline;
-             stopping = true;
-             logger.info("force to stop receiving messages after " + mqKeepAliveTimeMs
-                   + " ms");
-          }
+         extendExpirationTime();
+         stopping = true;
+         logger.info("force to stop receiving messages after " + mqKeepAliveTimeMs + " ms");
+      }
+   }
+
+   synchronized private void extendExpirationTime() {
+      Date now = new Date();
+      Date deadline = new Date(now.getTime() + mqKeepAliveTimeMs);
+      if (mqExpireTime == null || mqExpireTime.after(deadline)) {
+         mqExpireTime = deadline;
+      }
+   }
+   
+   public void graceStop() {
+      synchronized (this) {
+         extendExpirationTime();
+         stopping = true;
+         graceStopping = true;
+         logger.info("gracefully stop receiving messages if no message received after " + mqKeepAliveTimeMs + " ms");
       }
    }
 
@@ -225,6 +239,10 @@ public class RabbitMQConsumer {
          }
 
          String message = new String(delivery.getBody());
+         if (graceStopping) {
+            extendExpirationTime();
+         }
+
          logger.debug("message received: " + message);
          try {
             if (!listener.onMessage(message)) {

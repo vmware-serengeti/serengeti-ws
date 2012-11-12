@@ -114,6 +114,9 @@ public class TaskEntity extends EntityBase {
    @Column(name = "error")
    private String errorMessage;
 
+   @Column(name = "progress_msg")
+   private String progressMessage;
+
    // identifier of task scheduler (which will always change after restart)
    @Column(name = "cookie")
    private String cookie;
@@ -260,6 +263,14 @@ public class TaskEntity extends EntityBase {
       this.errorMessage = errorMessage;
    } 
 
+   public String getProgressMessage() {
+      return progressMessage;
+   }
+
+   public void setProgressMessage(String progressMessage) {
+      this.progressMessage = progressMessage;
+   }
+
    public boolean isRetry() {
       return retry;
    }
@@ -310,7 +321,7 @@ public class TaskEntity extends EntityBase {
    }
 
    private static TaskEntity updateState(final Long taskId, final Status status,
-         final Double progress, final String errorMessage) {
+         final Double progress, final String errorMessage, final String progressMessage) {
       return DAL.autoTransactionDo(new Saveable<TaskEntity>() {
          @Override
          public TaskEntity body() throws Exception {
@@ -327,20 +338,27 @@ public class TaskEntity extends EntityBase {
             if (errorMessage != null) {
                task.setErrorMessage(errorMessage);
             }
+            if (progressMessage != null) {
+               task.setProgressMessage(progressMessage);
+            }
             return task;
          }
       });
    }
 
    public static TaskEntity updateProgress(long taskId, double progress) {
-      return updateState(taskId, null, progress, null);
+      return updateState(taskId, null, progress, null, null);
+   }
+
+   public static TaskEntity updateProgress(long taskId, double progress, String progressMessage) {
+      return updateState(taskId, null, progress, null, progressMessage);
    }
 
    public static TaskEntity updateStatus(long taskId, Status status, String errorMessage) {
       if (status == Status.SUCCESS) {
-         return updateState(taskId, status, 1.0, null);
+         return updateState(taskId, status, 1.0, null, null);
       } else {
-         return updateState(taskId, status, null, errorMessage);
+         return updateState(taskId, status, null, errorMessage, null);
       }
    }
 

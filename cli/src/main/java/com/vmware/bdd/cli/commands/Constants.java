@@ -49,11 +49,11 @@ public class Constants {
 
    public static final String CREATE_SUCCESS = "Succeeded";
    public static final String CREATE_FAILURE = "Failed";
-   public static final String GET_FAILURE = "Cannnot get";
+   public static final String GET_FAILURE = "Cannot get";
    public static final String DELETE_SUCCESS = "is deleted";
-   public static final String DELETE_FAILURE = "Cannnot delete";
+   public static final String DELETE_FAILURE = "Cannot delete";
    public static final String UPDATE_SUCCESS = "is updated";
-   public static final String UPDATE_FAILURE = "Cannnot update";
+   public static final String UPDATE_FAILURE = "Cannot update";
    public static final String ACTION_OPS_SUCCESS = "Succeeded to";
    public static final String ACTION_OPS_FAILURE = "Unable to";
    public static final String CONNECT_SUCCESS = "Connected";
@@ -122,7 +122,8 @@ public class Constants {
    public static final String TOPLOGY_FORMAT = "Accepted topology file format: for each line, rackname1: hostname1, hostname2,...";
    public static final String OVERWRITE_TOPOLOGY = "WARNING: you will overwrite the existing topology. Existing Hadoop clusters may be impacted and cannot work well if you remove some hosts these clusters are using.";
    public static final String TYPE_SPECFILE_CONFLICT = "--type will not take effect when you specify --specFile.";
-   public static final String WRONG_NUM_OF_NODES = "the number of namenode and jobtracker are larger than 1, or no worker exists";
+   public static final String WRONG_NUM_OF_MASTERNODES = "the number of namenode or jobtracker is larger than 1.";
+   public static final String WRONG_NUM_OF_WORKERNODES = "no worker exists";
    public static final String WRONG_NUM_OF_ZOOKEEPER = "the number of zookeepers is less than 3";
    public static final String ODD_NUM_OF_ZOOKEEPER = "the number of zookeepers is better to be odd numbers";
    public static final String ZOOKEEPER_NOT_RESIZE = "zookeeper node groups are not allowed to resize.";
@@ -139,7 +140,7 @@ public class Constants {
    public static final String PARAMS_NETWORK_ADD_FORMAT_ERROR =
          " valid format is ips or ip ranges, eg. 255.0.0.1-100, 255.0.0.1 or 255.0.3.1-200,255.0.0.1-255";
    public static final String PARAMS_NETWORK_ADD_IP_ERROR = " please provide valid ip or mask format.";
-   public static final String PARAM_NOT_SUPPORTED = " input cannnot be accepted, we only support: ";
+   public static final String PARAM_NOT_SUPPORTED = " input cannot be accepted, we only support: ";
    public static final String ROLE_HADOOP_NAME_NODE = "hadoop_namenode";
    public static final String ROLE_HADOOP_JOB_TRACKER = "hadoop_jobtracker";
    public static final String ROLE_HADOOP_DATANODE = "hadoop_datanode";
@@ -176,6 +177,7 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_SPACE = "SPACE(GB)";
    public static final String FORMAT_TABLE_COLUMN_FREE_SPACE = "FREE_SPACE(GB)";
    public static final String FORMAT_TABLE_COLUMN_PORT_GROUP = "PORTGROUP";
+   public static final String FORMAT_TABLE_COLUMN_IP_RANGES = "IP_RANGES";
    public static final String FORMAT_TABLE_COLUMN_FREE_IPS = "FREE_IPS";
    public static final String FORMAT_TABLE_COLUMN_ASSIGNED_IPS = "ASSIGNED_IPS";
    public static final String FORMAT_TABLE_COLUMN_DNS1 = "DNS1";

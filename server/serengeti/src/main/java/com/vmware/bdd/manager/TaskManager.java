@@ -156,7 +156,7 @@ public class TaskManager implements InitializingBean, DisposableBean {
       for (TaskEntity entity : taskEntities) {
          tasks.add(new TaskRead(entity.getId(), entity.getStatus(), entity
                .getType(), entity.getProgress(), entity.getErrorMessage(),
-               entity.getWorkDir().getAbsolutePath()));
+               entity.getWorkDir().getAbsolutePath(), entity.getProgressMessage()));
       }
 
       return tasks;
@@ -173,7 +173,8 @@ public class TaskManager implements InitializingBean, DisposableBean {
       if (entity != null) {
          return new TaskRead(entity.getId(), entity.getStatus(),
                entity.getType(), entity.getProgress(),
-               entity.getErrorMessage(), entity.getWorkDir().getAbsolutePath());
+               entity.getErrorMessage(), entity.getWorkDir().getAbsolutePath(),
+               entity.getProgressMessage());
       }
 
       return null;

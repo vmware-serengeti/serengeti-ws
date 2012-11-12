@@ -9,6 +9,7 @@
 	<name>Serengeti Master project POM</name>
 
 	<modules>
+		<module>impala</module>
 		<module>common</module>
 		<module>server/serengeti</module>
 		<module>cli</module>
@@ -22,6 +23,50 @@
 				<groupId>com.vmware.bdd</groupId>
 				<artifactId>common</artifactId>
 				<version>${serengeti.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.hadoop</groupId>
+				<artifactId>hadoop-core</artifactId>
+				<version>${hadoop.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.hadoop</groupId>
+				<artifactId>hadoop-examples</artifactId>
+				<version>${hadoop.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.vmware.bdd.impala.plugin.hdfs</groupId>
+				<artifactId>serengeti-impala-plugin-hdfs</artifactId>
+				<version>${serengeti.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.vmware.bdd.impala.plugin.mapreduce</groupId>
+				<artifactId>serengeti-impala-plugin-mapreduce</artifactId>
+				<version>${serengeti.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.vmware.bdd.impala.plugin.pig</groupId>
+				<artifactId>serengeti-impala-plugin-pig</artifactId>
+				<version>${serengeti.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.vmware.bdd.impala.plugin.hive</groupId>
+				<artifactId>serengeti-impala-plugin-hive</artifactId>
+				<version>${serengeti.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.antlr</groupId>
+						<artifactId>antlr-runtime</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.antlr</groupId>
+						<artifactId>antlr</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>jline</groupId>
+						<artifactId>jline</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
   				<groupId>org.testng</groupId>
@@ -167,6 +212,7 @@
 		<java.target.version>1.6</java.target.version>
 		<bdd.skipTests>true</bdd.skipTests>
 		<spring.version>3.1.1.RELEASE</spring.version>
+		<hadoop.version>1.0.1</hadoop.version>
 	</properties>
 	<build>
 		<pluginManagement>

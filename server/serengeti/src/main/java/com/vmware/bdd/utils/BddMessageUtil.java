@@ -41,6 +41,7 @@ public class BddMessageUtil {
    public static final String FINISH_FIELD = "finished";
    public static final String SUCCEED_FIELD = "succeed";
    public static final String PROGRESS_FIELD = "progress";
+   public static final String PROGRESS_MESSAGE_FIELD = "progress_msg";
    public static final String CLUSTER_DATA_FIELD = "cluster_data";
    public static final String CLUSTER_NAME_FIELD = "name";
    public static final String GROUP_FIELD = "groups";

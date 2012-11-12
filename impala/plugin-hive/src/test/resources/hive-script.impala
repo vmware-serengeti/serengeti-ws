@@ -1,0 +1,7 @@
+// Impala CLI Banner Provider null log opened at 2012-07-13 15:57:53
+hive cfg --port 12345
+hive cfg
+hive script src/test/resources/script.q
+hive cfg
+exit
+// Impala CLI Banner Provider null log closed at 2012-07-13 16:00:50

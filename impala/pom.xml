@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.vmware.bdd.impala</groupId>
+	<artifactId>serengeti-impala</artifactId>
+	<version>${serengeti.version}</version>
+	<packaging>pom</packaging>
+	<name>Serengeti Impala project POM</name>
+
+	<parent>
+		<groupId>com.vmware.bdd</groupId>
+		<artifactId>serengeti-master</artifactId>
+		<version>${serengeti.version}</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>	
+
+	<modules>
+		<module>plugin-common</module>
+		<module>plugin-hdfs</module>
+		<module>plugin-mapreduce</module>
+		<module>plugin-pig</module>
+		<module>plugin-hive</module>
+		<module>plugin-r</module>
+	</modules>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.vmware.bdd.impala.plugin.common</groupId>
+				<artifactId>serengeti-impala-plugin-common</artifactId>
+				<version>${serengeti.version}</version>
+			</dependency>
+			<dependency>
+ 				<groupId>org.springframework.data</groupId>
+ 				<artifactId>spring-data-hadoop</artifactId>
+ 				<version>${spring.data.hadoop.version}</version>	
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.shell</groupId>
+				<artifactId>spring-shell</artifactId>
+				<version>${spring.shell.version}</version>
+				<type>jar</type>
+				<scope>compile</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<properties>
+		<spring.data.hadoop.version>1.0.0.RC1</spring.data.hadoop.version>
+		<spring.shell.version>1.0.0.M2</spring.shell.version>
+		<jar.mainclass>org.springframework.shell.Bootstrap</jar.mainclass>
+	</properties>
+	<build>
+	</build>
+	<repositories>
+		<repository>
+			<id>spring-maven-snapshot</id>
+			<snapshots>
+					<enabled>true</enabled>
+					<updatePolicy>never</updatePolicy>
+			</snapshots>
+			<name>Springframework Maven SNAPSHOT Repository</name>
+			<url>http://repo.springsource.org/libs-snapshot</url>
+		</repository>
+		<repository>
+ 			<id>spring-maven-milestone</id>
+ 			<name>Springframework Maven Milestone Repository</name>
+ 			<url>http://repo.springframework.org/libs-milestone</url>
+		</repository>
+		<repository>
+			<id>spring-roo-repository</id>
+			<name>Spring Roo Maven Repository</name>
+			<url>http://spring-roo-repository.springsource.org/release</url>
+		</repository>
+	</repositories>
+</project>

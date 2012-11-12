@@ -157,6 +157,7 @@ create table task (
    ftime        timestamp with time zone,
    cookie       varchar(255),
    error        text,
+   progress_msg   text,
    listener     bytea,
    retry        boolean,
    primary key (id)

@@ -243,7 +243,6 @@ public class RestClient {
          String cookieInfo = readCookieInfo();
          headers.add("Cookie", cookieInfo == null ? "" : cookieInfo);
       }
-
       return headers;
    }
 
@@ -335,29 +334,30 @@ public class RestClient {
                   restGetById(Constants.REST_PATH_TASK, taskId, TaskRead.class, false);
 
             //task will not return exception as it has status
-
             taskRead = taskResponse.getBody();
 
             progress = (int) (taskRead.getProgress() * 100);
             taskStatus = taskRead.getStatus();
 
-            if ((prettyOutput != null && prettyOutput.length > 0 && prettyOutput[0]
-                  .isRefresh(false))
-                  || oldTaskStatus != taskStatus
-                  || oldProgress != progress) { //need refresh
+            if (oldTaskStatus != taskStatus || oldProgress != progress) {
                oldTaskStatus = taskStatus;
                oldProgress = progress;
+               if (prettyOutput != null && prettyOutput.length > 0 && prettyOutput[0]
+                  .isRefresh(false)) {
+                  //clear screen and show progress every few seconds 
+                  clearScreen();
+                  System.out.println(taskStatus + " " + progress + "%\n");
 
-               //clear screen and show progress every few seconds 
-               clearScreen();
-               System.out.println(taskStatus + " " + progress + "%\n");
-
-               // print call back customize the detailed output case by case
-               if (prettyOutput != null && prettyOutput.length > 0) {
+                  // print call back customize the detailed output case by case
                   prettyOutput[0].prettyOutput();
+               } else {
+                  String output = taskStatus + " " + progress + "% ";
+                  if (taskRead.getProgressMessage() != null) {
+                     output += taskRead.getProgressMessage();
+                  }
+                  System.out.println(output);
                }
             }
-
             try {
                Thread.sleep(3 * 1000);
             } catch (InterruptedException ex) {

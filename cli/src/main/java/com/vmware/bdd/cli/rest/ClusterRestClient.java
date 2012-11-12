@@ -112,12 +112,10 @@ public class ClusterRestClient {
       final String path = Constants.REST_PATH_CLUSTER + "/" + clusterName + "/" + "limit";
       final HttpMethod httpverb = HttpMethod.PUT;
 
-      PrettyOutput outputCallBack =
-            getClusterPrettyOutputCallBack(this, clusterName);
       VHMRequestBody requestBody = new VHMRequestBody();
       requestBody.setActiveComputeNodeNum(activeComputeNodeNum);
       requestBody.setNodeGroupName(nodeGroupName);
-      restClient.update(requestBody, path, httpverb,outputCallBack);
+      restClient.update(requestBody, path, httpverb);
    }
 
    private PrettyOutput getClusterPrettyOutputCallBack(

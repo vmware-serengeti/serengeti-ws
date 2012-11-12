@@ -928,8 +928,12 @@ public class ClusterCommands implements CommandMarker {
             default:
             }
          }
-         if ((masterCount > 1) || (jobtrackerCount > 1) || (zookeeperCount > 1) || (hbasemasterCount > 1) || (workerCount == 0)) {
-            warningMsgList.add(Constants.WRONG_NUM_OF_NODES);
+         if ((masterCount > 1) || (jobtrackerCount > 1) || (zookeeperCount > 1) || (hbasemasterCount > 1)) {
+            failedMsgList.add(Constants.WRONG_NUM_OF_MASTERNODES);
+            validated = false;
+         }
+         if (workerCount == 0) {
+            warningMsgList.add(Constants.WRONG_NUM_OF_WORKERNODES);
             warning = true;
          }
          if (!validated) {
