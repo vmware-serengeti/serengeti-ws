@@ -308,6 +308,8 @@ public class ClusterManager {
       spec.setName(null);
       spec.setDistro(null);
       spec.setValidateConfig(null);
+      spec.setTopologyPolicy(null);
+      spec.setHostToRackMap(null);
       NodeGroupCreate[] groups = spec.getNodeGroups();
       if (groups != null) {
          for (NodeGroupCreate group : groups) {
