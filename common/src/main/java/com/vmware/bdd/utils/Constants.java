@@ -16,7 +16,9 @@ package com.vmware.bdd.utils;
 
 
 public class Constants {
-   public static final String CLUSTER_CONFIG_ERROR="The configuration of spec file is invalid!";
+   public static final String CLUSTER_CONFIG_FORMAT_ERROR = "The format of configuration is invalid !";
+   public static final String CLUSTER_CONFIG_TYPE_ERROR = "The configuration is invalid ! At present, we only support ";
+   public static final String LIST_CONFIG_ERROR = "The blacklist or whitelist config error!";
    public static final String PRACK_NO_TOPOLOGY_TYPE_SPECIFIED = "Rack Policy in spec file will not benefit Hadoop running when not specify topology through CLI. By default, Hadoop cluster will use NONE topology.";
    public static final String FAIR_SCHEDULER_FILE_NAME = "fair-scheduler.xml";
    public static final String FAIR_SCHEDULER_FILE_ATTRIBUTE = "text";

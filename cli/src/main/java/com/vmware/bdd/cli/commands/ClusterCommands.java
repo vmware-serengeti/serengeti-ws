@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1109,6 +1110,11 @@ public class ClusterCommands implements CommandMarker {
       return validateConfiguration(cluster, ValidationType.WHITE_LIST);
    }
 
+   /*
+    * Validate a configuration of the cluster at first. Validate configurations of all of node groups then.
+    * And merge the failed info which have been producted by validation between cluster level and node group
+    * level.
+    */
    private ValidateResult validateConfiguration(ClusterCreate cluster, ValidationType validationType) {
       ValidateResult validateResult = new ValidateResult();
       // validate cluster level Configuration
@@ -1118,36 +1124,63 @@ public class ClusterCommands implements CommandMarker {
          if (vr.getType() != ValidateResult.Type.VALID) {
             validateResult.setType(vr.getType());
             validateResult.setFailureNames(vr.getFailureNames());
+            validateResult.setNoExistFileNames(vr.getNoExistFileNames());
          }
       }
+      List<String> failureNames = new LinkedList<String>();
+      Map<String,List<String>> noExistingFileNamesMap = new HashMap<String,List<String>>();
+      failureNames.addAll(validateResult.getFailureNames());
+      noExistingFileNamesMap.putAll(validateResult.getNoExistFileNames());
       // validate nodegroup level Configuration
       for (NodeGroupCreate nodeGroup : cluster.getNodeGroups()) {
          if (nodeGroup.getConfiguration() != null && !nodeGroup.getConfiguration().isEmpty()) {
             vr = AppConfigValidationUtils.validateConfig(validationType, nodeGroup.getConfiguration());
             if (vr.getType() != ValidateResult.Type.VALID) {
                validateResult.setType(vr.getType());
-               List<String> failureNames = new LinkedList<String>();
-               failureNames.addAll(validateResult.getFailureNames());
-               for (String name : vr.getFailureNames()) {
-                  if (!failureNames.contains(name)) {
-                     failureNames.add(name);
+               // merge failed names between cluster level and node group level.
+               for (String failureName : vr.getFailureNames()) {
+                  if (!failureNames.contains(failureName)) {
+                     failureNames.add(failureName);
                   }
                }
-               validateResult.setFailureNames(vr.getFailureNames());
+               // merge no existing file names between cluster level and node group level 
+               for (Entry<String, List<String>> noExistingFileNames : vr.getNoExistFileNames().entrySet()) {
+                  String configType = noExistingFileNames.getKey();
+                  if (noExistingFileNamesMap.containsKey(configType)) {
+                     List<String> noExistingFilesTemp = noExistingFileNames.getValue();
+                     List<String> noExistingFiles = noExistingFileNamesMap.get(configType);
+                     for (String fileName : noExistingFilesTemp) {
+                        if (!noExistingFiles.contains(fileName)) {
+                           noExistingFiles.add(fileName);
+                        }
+                     }
+                     noExistingFileNamesMap.put(configType, noExistingFiles);
+                  } else {
+                     noExistingFileNamesMap.put(configType, noExistingFileNames.getValue());
+                  }
+               }
             }
          }
       }
+      validateResult.setFailureNames(failureNames);
+      validateResult.setNoExistFileNames(noExistingFileNamesMap);
       return validateResult;
    }
 
    private void addWhiteListWarning(final String clusterName, ValidateResult whiteListResult,
          List<String> warningMsgList) {
-      if (whiteListResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
-         String warningMsg =
-               getValidateWarningMsg(whiteListResult.getFailureNames(),
-                     Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING);
+      if(whiteListResult.getType() == ValidateResult.Type.WHITE_LIST_NO_EXIST_FILE_NAME) {
+         String noExistingWarningMsg = getValidateWarningMsg(whiteListResult.getNoExistFileNames());
          if (warningMsgList != null) {
-            warningMsgList.add(warningMsg);
+            warningMsgList.add(noExistingWarningMsg);
+         }
+      }else if (whiteListResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
+         String noExistingWarningMsg = getValidateWarningMsg(whiteListResult.getNoExistFileNames());
+         String failureNameWarningMsg = getValidateWarningMsg(whiteListResult.getFailureNames(),
+               Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING);
+         if (warningMsgList != null) {
+            warningMsgList.add(noExistingWarningMsg);
+            warningMsgList.add(failureNameWarningMsg);
          }
       }
    }
@@ -1175,6 +1208,29 @@ public class ClusterCommands implements CommandMarker {
             warningMsgBuff.append(" is ");
          }
          warningMsgBuff.append(warningMsg);
+      }
+      return warningMsgBuff.toString();
+   }
+
+   private String getValidateWarningMsg(Map<String,List<String>> noExistingFilesMap) {
+      StringBuilder warningMsgBuff = new StringBuilder();
+      if (noExistingFilesMap != null && !noExistingFilesMap.isEmpty()) {
+         warningMsgBuff.append("Warning: ");
+         for (Entry<String, List<String>> noExistingFilesEntry : noExistingFilesMap.entrySet()) {
+            List<String> noExistingFileNames = noExistingFilesEntry.getValue();
+            for (String noExistingFileName : noExistingFileNames) {
+               warningMsgBuff.append(noExistingFileName).append(", ");
+            }
+            warningMsgBuff.delete(warningMsgBuff.length() - 2, warningMsgBuff.length());
+            if (noExistingFileNames.size() > 1) {
+               warningMsgBuff.append(" are ");
+            } else {
+               warningMsgBuff.append(" is ");
+            }
+            warningMsgBuff.append("not existing in ");
+            warningMsgBuff.append(noExistingFilesEntry.getKey()+ " scope , ");
+         }
+         warningMsgBuff.replace(warningMsgBuff.length() - 2, warningMsgBuff.length(),". ");
       }
       return warningMsgBuff.toString();
    }

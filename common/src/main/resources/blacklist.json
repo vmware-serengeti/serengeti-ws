@@ -1,63 +1,57 @@
 [
   {
-    "core-site.xml": [
-      "net.topology.impl",
-      "net.topology.nodegroup.aware",
-      "dfs.block.replicator.classname"
-    ]
+    "hadoop": {
+      "core-site.xml": [
+        "net.topology.impl",
+        "net.topology.nodegroup.aware",
+        "dfs.block.replicator.classname"
+      ],
+      "hdfs-site.xml": [
+        "dfs.http.address",
+        "dfs.name.dir",
+        "dfs.data.dir",
+        "topology.script.file.name"
+      ],
+      "mapred-site.xml": [
+        "mapred.job.tracker",
+        "mapred.local.dir",
+        "mapred.task.cache.levels",
+        "mapred.jobtracker.jobSchedulable",
+        "mapred.jobtracker.nodegroup.awareness"
+      ],
+      "hadoop-env.sh": [
+        "HADOOP_HOME",
+        "HADOOP_COMMON_HOME",
+        "HADOOP_MAPRED_HOME",
+        "HADOOP_HDFS_HOME",
+        "HADOOP_CONF_DIR",
+        "HADOOP_PID_DIR",
+        "HADOOP_LOG_DIR"
+      ],
+      "log4j.properties": []
+    }
   },
   {
-    "hdfs-site.xml": [
-      "dfs.http.address",
-      "dfs.name.dir",
-      "dfs.data.dir",
-      "topology.script.file.name"
-    ]
+    "zookeeper": {
+      "java.env": [],
+      "log4j.properties": []
+    }
   },
   {
-    "mapred-site.xml": [
-      "mapred.job.tracker",
-      "mapred.local.dir",
-      "mapred.task.cache.levels",
-      "mapred.jobtracker.jobSchedulable",
-      "mapred.jobtracker.nodegroup.awareness"
-    ]
-  },
-  {
-    "hadoop-env.sh": [
-      "HADOOP_HOME",
-      "HADOOP_COMMON_HOME",
-      "HADOOP_MAPRED_HOME",
-      "HADOOP_HDFS_HOME",
-      "HADOOP_CONF_DIR",
-      "HADOOP_PID_DIR",
-      "HADOOP_LOG_DIR"
-    ]
-  },
-  {
-    "log4j.properties": [
-
-    ]
-  },
-  {
-    "java.env": [
-
-    ]
-  },
-  {
-    "hbase-site.xml": [
-      "hbase.rootdir",
-      "hbase.cluster.distributed",
-      "hbase.zookeeper.quorum"
-    ]
-  },
-  {
-    "hbase-env.sh": [
-      "HBASE_CONF_DIR",
-      "HBASE_LOG_DIR",
-      "HBASE_PID_DIR",
-      "HBASE_MANAGES_ZK",
-      "HBASE_IDENT_STRING"
-    ]
+    "hbase": {
+      "hbase-site.xml": [
+        "hbase.rootdir",
+        "hbase.cluster.distributed",
+        "hbase.zookeeper.quorum"
+      ],
+      "hbase-env.sh": [
+        "HBASE_CONF_DIR",
+        "HBASE_LOG_DIR",
+        "HBASE_PID_DIR",
+        "HBASE_MANAGES_ZK",
+        "HBASE_IDENT_STRING"
+      ],
+      "log4j.properties": []
+    }
   }
 ]

@@ -30,21 +30,36 @@ public class AppConfigValidationFactoryTest {
    public void setup(){
       cluster=new ClusterCreate();
       Map<String,Object> hadoopMap=new HashMap<String,Object>();
-      Map<String,Object> fileMap=new HashMap<String,Object>();
+      Map<String,Object> hadoopFileMap=new HashMap<String,Object>();
       Map<String,Object> corePopertysMap=new HashMap<String,Object>();
       Map<String,Object> hdfsPopertysMap=new HashMap<String,Object>();
       Map<String,Object> mapredPopertysMap=new HashMap<String,Object>();
+      Map<String,Object> hbaseFileMap=new HashMap<String,Object>();
+      Map<String,Object> hbaseSiteMap=new HashMap<String,Object>();
+      Map<String,Object> zookeeperFileMap=new HashMap<String,Object>();
+      Map<String,Object> zookeeperEnvMap=new HashMap<String,Object>();
       corePopertysMap.put("hadoop.tmp.dir", "/tmp");
       hdfsPopertysMap.put("dfs.http.address", "localhost");
       mapredPopertysMap.put("mapred.job.tracker","127.0.1.2");
-      fileMap.put("core-site.xml", corePopertysMap);
-      fileMap.put("hdfs-site.xml", hdfsPopertysMap);
-      fileMap.put("mapred-site.xml", mapredPopertysMap);
-      hadoopMap.put("hadoop", fileMap);
+      hbaseSiteMap.put("hbase.rootdir", "/root");
+      zookeeperEnvMap.put("jvm_option", "-Xmx1g");
+      zookeeperEnvMap.put("other", "error");
+      hadoopFileMap.put("core-site.xml", corePopertysMap);
+      hadoopFileMap.put("hdfs-site.xml", hdfsPopertysMap);
+      hadoopFileMap.put("mapred-site.xml", mapredPopertysMap);
+      hbaseFileMap.put("hbase-site.xml", hbaseSiteMap);
+      zookeeperFileMap.put("java.env", zookeeperEnvMap);
+      hadoopMap.put("hadoop", hadoopFileMap);
+      hadoopMap.put("hbase", hbaseFileMap);
+      hadoopMap.put("zookeeper", zookeeperFileMap);
       cluster.setConfiguration(hadoopMap);
-      NodeGroupCreate nodeGroup=new NodeGroupCreate();
+      NodeGroupCreate nodeGroup1=new NodeGroupCreate();
+      NodeGroupCreate nodeGroup2=new NodeGroupCreate();
+      NodeGroupCreate nodeGroup3=new NodeGroupCreate();
       hadoopMap=new HashMap<String,Object>();
-      fileMap=new HashMap<String,Object>();
+      Map<String, Object> zookeeperMap = new HashMap<String,Object>();
+      Map<String, Object> noExistingFileZookeeperMap = new HashMap<String,Object>();
+      hadoopFileMap=new HashMap<String,Object>();
       corePopertysMap=new HashMap<String,Object>();
       hdfsPopertysMap=new HashMap<String,Object>();
       mapredPopertysMap=new HashMap<String,Object>();
@@ -52,20 +67,31 @@ public class AppConfigValidationFactoryTest {
       hdfsPopertysMap.put("dfs.namenode.test.level", 4);
       hdfsPopertysMap.put("dfs.namenode.logger.level", 5);
       mapredPopertysMap.put("mapred.cluster.map.memory.mb",200);
-      fileMap.put("core-site.xml", corePopertysMap);
-      fileMap.put("hdfs-site.xml", hdfsPopertysMap);
-      fileMap.put("mapred-site.xml", mapredPopertysMap);
-      hadoopMap.put("hadoop", fileMap);
-      nodeGroup.setConfiguration(hadoopMap);
-      cluster.setNodeGroups(new NodeGroupCreate[]{nodeGroup});
+      hadoopFileMap.put("core-site.xml", corePopertysMap);
+      hadoopFileMap.put("hdfs-site.xml", hdfsPopertysMap);
+      hadoopFileMap.put("mapred-site.xml", mapredPopertysMap);
+      hadoopMap.put("hadoop", hadoopFileMap);
+      zookeeperMap.put("zookeeper", zookeeperFileMap);
+      noExistingFileZookeeperMap.put("zookeeper", hadoopFileMap);
+      nodeGroup1.setConfiguration(hadoopMap);
+      nodeGroup2.setConfiguration(zookeeperMap);
+      nodeGroup3.setConfiguration(noExistingFileZookeeperMap);
+      cluster.setNodeGroups(new NodeGroupCreate[]{nodeGroup1, nodeGroup2, nodeGroup3});
+      
    }
 
    @Test
    public void testWhiteListHandle() {
-      ValidateResult validateResult=AppConfigValidationFactory.whiteListHandle(cluster.getNodeGroups()[0].getConfiguration());
-      assertEquals(validateResult.getType(),ValidateResult.Type.WHITE_LIST_INVALID_NAME);
-      assertEquals(validateResult.getFailureNames().get(0), "dfs.namenode.test.level");
-      assertEquals(validateResult.getFailureNames().get(1), "dfs.namenode.logger.level");
+      ValidateResult hadoopValidateResult=AppConfigValidationFactory.whiteListHandle(cluster.getNodeGroups()[0].getConfiguration());
+      assertEquals(hadoopValidateResult.getType(),ValidateResult.Type.WHITE_LIST_INVALID_NAME);
+      assertEquals(hadoopValidateResult.getFailureNames().get(0), "dfs.namenode.test.level");
+      assertEquals(hadoopValidateResult.getFailureNames().get(1), "dfs.namenode.logger.level");
+      ValidateResult zookeeperValidateResult=AppConfigValidationFactory.whiteListHandle(cluster.getNodeGroups()[1].getConfiguration());
+      assertEquals(zookeeperValidateResult.getType(),ValidateResult.Type.WHITE_LIST_INVALID_NAME);
+      assertEquals(zookeeperValidateResult.getFailureNames().get(0), "other");
+      ValidateResult noExistingValidateResult=AppConfigValidationFactory.whiteListHandle(cluster.getNodeGroups()[2].getConfiguration());
+      assertEquals(noExistingValidateResult.getType(),ValidateResult.Type.WHITE_LIST_NO_EXIST_FILE_NAME);
+      assertEquals(noExistingValidateResult.getNoExistFileNames().get("zookeeper").size(),3);
    }
 
    @Test
@@ -74,6 +100,7 @@ public class AppConfigValidationFactoryTest {
       assertEquals(validateResult.getType(),ValidateResult.Type.NAME_IN_BLACK_LIST);
       assertEquals(validateResult.getFailureNames().get(0), "dfs.http.address");
       assertEquals(validateResult.getFailureNames().get(1), "mapred.job.tracker");
+      assertEquals(validateResult.getFailureNames().get(2), "hbase.rootdir"); 
    }
 
 }

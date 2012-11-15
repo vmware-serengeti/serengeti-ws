@@ -368,18 +368,17 @@ public class TestClusterManager {
       ClusterCreate createSpec = new ClusterCreate();
       createSpec.setName(CLUSTER_NAME);
       createSpec.setNetworkName(NETWORK_NAME);
-      Map<String, Object> configuration = new HashMap<String, Object>();
       String configJson = 
          "{\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.security.group.mapping\":\"xxx\",\"hadoop.security.authorization\":false}}}}";
       Map config = (new Gson()).fromJson(configJson, Map.class);
-      createSpec.setConfiguration(config);
+      createSpec.setConfiguration((Map<String, Object>)config.get("cluster_configuration"));
       NodeGroupCreate[] nodegroups = new NodeGroupCreate[1];
       NodeGroupCreate group = new NodeGroupCreate();
       nodegroups[0] = group;
       configJson = 
          "{\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.security.group.mapping\":\"yyy\",\"hadoop.security.authorization\":false}}}}";
       Map groupConfig = (new Gson()).fromJson(configJson, Map.class);
-      group.setConfiguration(groupConfig);
+      group.setConfiguration((Map<String, Object>)groupConfig.get("cluster_configuration"));
 
       Long id = clusterManager.configCluster(CLUSTER_NAME, createSpec);
       TaskEntity task = TaskEntity.findById(id);
