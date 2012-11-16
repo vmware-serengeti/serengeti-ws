@@ -287,31 +287,31 @@ public class ClusterConfigManager {
             GroupRacks r = policies.getGroupRacks();
             GroupRacksType rackType = r.getType();
             Set<String> specifiedRacks = new HashSet<String>(Arrays.asList(r.getRacks()));
-            List<String> IntersecRacks = new ArrayList<String>();
-            Integer IntersecHostNum = 0;
-            Integer maxIntersecHostNum = 0;
+            List<String> intersecRacks = new ArrayList<String>();
+            int intersecHostNum = 0;
+            int maxIntersecHostNum = 0;
 
             for (RackInfo rackInfo : racksInfo) {
                if (specifiedRacks.isEmpty() || specifiedRacks.size() == 0 || specifiedRacks.contains(rackInfo.getName())) {
-                  IntersecHostNum += rackInfo.getHosts().size();
-                  IntersecRacks.add(rackInfo.getName());
+                  intersecHostNum += rackInfo.getHosts().size();
+                  intersecRacks.add(rackInfo.getName());
                   if (rackInfo.getHosts().size() > maxIntersecHostNum) {
                      maxIntersecHostNum = rackInfo.getHosts().size();
                   }
                }
             }
 
-            if (IntersecRacks.size() == 0) {
+            if (intersecRacks.size() == 0) {
                valid = false;
                throw ClusterConfigException.NO_VALID_RACK(ngc.getName());
             }
 
             if (ngc.calculateHostNum() != null) {
-               if (rackType == GroupRacksType.ROUNDROBIN
-                     && ngc.calculateHostNum() > IntersecHostNum) {
+               if (rackType.equals(GroupRacksType.ROUNDROBIN)
+                     && ngc.calculateHostNum() > intersecHostNum) {
                   valid = false;
                   throw ClusterConfigException.LACK_PHYSICAL_HOSTS(ngc.getName(),
-                        ngc.calculateHostNum(), IntersecHostNum);
+                        ngc.calculateHostNum(), intersecHostNum);
                } else if (ngc.calculateHostNum() > maxIntersecHostNum) {
                   valid = false;
                   throw ClusterConfigException.LACK_PHYSICAL_HOSTS(ngc.getName(),
@@ -319,7 +319,7 @@ public class ClusterConfigManager {
                }
             }
 
-            r.setRacks(IntersecRacks.toArray(new String[IntersecRacks.size()]));
+            r.setRacks(intersecRacks.toArray(new String[intersecRacks.size()]));
          }
       }
       return valid;

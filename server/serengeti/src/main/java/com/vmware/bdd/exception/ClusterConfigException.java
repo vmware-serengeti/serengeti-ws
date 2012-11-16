@@ -86,7 +86,7 @@ public class ClusterConfigException extends BddException {
       return new ClusterConfigException(null, "TOPOLOGY_WITH_NO_MAPPING_INFO_EXIST", topology);
    }
    public static ClusterConfigException RACKPOLICY_WITH_NO_MAPPING_INFO_EXIST(String groupName) {
-      return new ClusterConfigException(null, "RACKPOLICY_WITH_NO_MAPPING_FILE_EXIST", groupName);
+      return new ClusterConfigException(null, "RACKPOLICY_WITH_NO_MAPPING_INFO_EXIST", groupName);
    }
    public static ClusterConfigException NO_VALID_RACK(String groupName) {
       return new ClusterConfigException(null, "NO_VALID_RACK", groupName);

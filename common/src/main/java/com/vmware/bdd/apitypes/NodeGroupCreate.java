@@ -239,8 +239,8 @@ public class NodeGroupCreate {
          List<String> failedMsgList, List<String> warningMsgList) {
       boolean valid = true;    
 
-      if ((cluster.getTopologyPolicy() == TopologyType.HVE || cluster
-            .getTopologyPolicy() == TopologyType.RACK_AS_RACK) && isWorkerGroup()) {
+      if ((cluster.getTopologyPolicy().equals(TopologyType.HVE) || cluster
+            .getTopologyPolicy().equals(TopologyType.RACK_AS_RACK)) && isWorkerGroup()) {
          if (getPlacementPolicies() == null) {
             setPlacementPolicies(new PlacementPolicy());
          }
