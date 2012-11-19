@@ -312,7 +312,7 @@ public class ClusterConfigManager {
                   valid = false;
                   throw ClusterConfigException.LACK_PHYSICAL_HOSTS(ngc.getName(),
                         ngc.calculateHostNum(), intersecHostNum);
-               } else if (ngc.calculateHostNum() > maxIntersecHostNum) {
+               } else if (rackType.equals(GroupRacksType.SAMERACK) && ngc.calculateHostNum() > maxIntersecHostNum) {
                   valid = false;
                   throw ClusterConfigException.LACK_PHYSICAL_HOSTS(ngc.getName(),
                         ngc.calculateHostNum(), maxIntersecHostNum);
