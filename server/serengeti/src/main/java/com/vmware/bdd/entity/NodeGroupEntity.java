@@ -474,7 +474,7 @@ public class NodeGroupEntity extends EntityBase {
             if (rackType.equals(GroupRacksType.ROUNDROBIN) && IntersecHostNum < requiredHostNum) {
                throw ClusterConfigException.LACK_PHYSICAL_HOSTS(this.name,
                      requiredHostNum, IntersecHostNum);
-            } else if (requiredHostNum > maxIntersecHostNum) {
+            } else if (rackType.equals(GroupRacksType.SAMERACK) && requiredHostNum > maxIntersecHostNum) {
                throw ClusterConfigException.LACK_PHYSICAL_HOSTS(this.name,
                      requiredHostNum, maxIntersecHostNum);
             }
