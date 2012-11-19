@@ -479,7 +479,11 @@ public class NodeGroupEntity extends EntityBase {
                      requiredHostNum, maxIntersecHostNum);
             }
             
-            groupRacks.setRacks(IntersecRacks.toArray(new String[IntersecRacks.size()]));
+            if (specifiedRacks.isEmpty()) {
+               groupRacks.setRacks(new String[0]);
+            } else {
+               groupRacks.setRacks(IntersecRacks.toArray(new String[IntersecRacks.size()]));
+            }
             setGroupRacks((new Gson()).toJson(groupRacks));      
          }
       }

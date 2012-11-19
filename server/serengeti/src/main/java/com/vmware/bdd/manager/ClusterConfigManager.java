@@ -319,7 +319,11 @@ public class ClusterConfigManager {
                }
             }
 
-            r.setRacks(intersecRacks.toArray(new String[intersecRacks.size()]));
+            if (specifiedRacks.isEmpty()) {
+               r.setRacks(new String[0]);
+            } else {
+               r.setRacks(intersecRacks.toArray(new String[intersecRacks.size()]));
+            }
          }
       }
       return valid;
