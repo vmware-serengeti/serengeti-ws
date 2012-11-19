@@ -422,6 +422,7 @@ public class ClusterCommandsTest extends MockRestServer {
         task.setId(12l);
         task.setType(Type.INNER);
         task.setProgress(0.8);
+        task.setProgressMessage("some more details here:");
         task.setStatus(Status.RUNNING);
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/task/12", HttpMethod.GET, HttpStatus.OK,
                 mapper.writeValueAsString(task));
