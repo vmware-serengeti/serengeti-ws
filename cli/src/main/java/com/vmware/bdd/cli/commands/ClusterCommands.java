@@ -1187,10 +1187,11 @@ public class ClusterCommands implements CommandMarker {
 
    private void addBlackListWarning(ValidateResult blackListResult, List<String> warningList) {
       if (blackListResult.getType() == ValidateResult.Type.NAME_IN_BLACK_LIST) {
-         String warningMsg =
-               getValidateWarningMsg(blackListResult.getFailureNames(), Constants.PARAM_CLUSTER_IN_BLACK_LIST_WARNING);
-         if (warningList != null)
+         String warningMsg = getValidateWarningMsg(blackListResult.getFailureNames(), 
+               Constants.PARAM_CLUSTER_IN_BLACK_LIST_WARNING + Constants.PARAM_CLUSTER_NOT_TAKE_EFFECT);
+         if (warningList != null) {
             warningList.add(warningMsg);
+         }
       }
    }
 
@@ -1231,6 +1232,7 @@ public class ClusterCommands implements CommandMarker {
             warningMsgBuff.append(noExistingFilesEntry.getKey()+ " scope , ");
          }
          warningMsgBuff.replace(warningMsgBuff.length() - 2, warningMsgBuff.length(),". ");
+         warningMsgBuff.append(Constants.PARAM_CLUSTER_NOT_TAKE_EFFECT);
       }
       return warningMsgBuff.toString();
    }
