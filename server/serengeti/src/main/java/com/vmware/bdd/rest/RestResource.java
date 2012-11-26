@@ -421,7 +421,7 @@ public class RestResource {
 
    @RequestMapping(value = "/datastores", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   public List<DatastoreRead> getDatastore() {
+   public List<DatastoreRead> getDatastores() {
       return datastoreMgr.getAllDatastoreReads();
    }
 
