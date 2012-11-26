@@ -889,7 +889,7 @@
     "zookeeper": {
       "java.env": [
         {
-          "name": "jvm_option"
+          "name": "JVMFLAGS"
         }
       ],
       "log4j.properties": [
