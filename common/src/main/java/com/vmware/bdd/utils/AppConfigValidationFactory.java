@@ -289,7 +289,7 @@ public class AppConfigValidationFactory {
          List<String> removeList = new ArrayList<String>();
          for (Entry<String, Object> configProperty : configPropertyMap.entrySet()) {
             for (Entry<String, List<T>> listFileEntry : listFileMap.entrySet()) {
-               if (listFileEntry.getValue() instanceof List) {
+               if (listFileEntry.getKey().equals(fileName) && listFileEntry.getValue() instanceof List) {
                   List<T> propertiesPerListFile = (List<T>) listFileEntry.getValue();
                   if (validationType == ValidationType.BLACK_LIST) {
                      validateBlackListPropertis(fileName, propertiesPerListFile, configProperty.getKey(),

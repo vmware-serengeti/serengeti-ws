@@ -88,6 +88,7 @@ public class AppConfigValidationFactoryTest {
       assertEquals(hadoopValidateResult.getFailureNames().get(1), "dfs.namenode.logger.level");
       ValidateResult zookeeperValidateResult=AppConfigValidationFactory.whiteListHandle(cluster.getNodeGroups()[1].getConfiguration());
       assertEquals(zookeeperValidateResult.getType(),ValidateResult.Type.WHITE_LIST_INVALID_NAME);
+      assertEquals(zookeeperValidateResult.getFailureNames().size(), 1);
       assertEquals(zookeeperValidateResult.getFailureNames().get(0), "other");
       ValidateResult noExistingValidateResult=AppConfigValidationFactory.whiteListHandle(cluster.getNodeGroups()[2].getConfiguration());
       assertEquals(noExistingValidateResult.getType(),ValidateResult.Type.WHITE_LIST_NO_EXIST_FILE_NAME);
