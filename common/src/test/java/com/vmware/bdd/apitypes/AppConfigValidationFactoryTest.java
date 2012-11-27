@@ -42,7 +42,7 @@ public class AppConfigValidationFactoryTest {
       hdfsPopertysMap.put("dfs.http.address", "localhost");
       mapredPopertysMap.put("mapred.job.tracker","127.0.1.2");
       hbaseSiteMap.put("hbase.rootdir", "/root");
-      zookeeperEnvMap.put("jvm_option", "-Xmx1g");
+      zookeeperEnvMap.put("JVMFLAGS", "-Xmx1g");
       zookeeperEnvMap.put("other", "error");
       hadoopFileMap.put("core-site.xml", corePopertysMap);
       hadoopFileMap.put("hdfs-site.xml", hdfsPopertysMap);
