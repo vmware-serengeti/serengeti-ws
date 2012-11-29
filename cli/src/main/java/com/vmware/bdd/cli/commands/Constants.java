@@ -122,10 +122,15 @@ public class Constants {
    public static final String TOPLOGY_FORMAT = "Accepted topology file format: for each line, rackname1: hostname1, hostname2,...";
    public static final String OVERWRITE_TOPOLOGY = "WARNING: you will overwrite the existing topology. Existing Hadoop clusters may be impacted and cannot work well if you remove some hosts these clusters are using.";
    public static final String TYPE_SPECFILE_CONFLICT = "--type will not take effect when you specify --specFile.";
-   public static final String WRONG_NUM_OF_MASTERNODES = "the number of namenode or jobtracker is larger than 1.";
+   public static final String WRONG_NUM_OF_NODEGROUPS = "the node groups including jobtracker, zookeeper or hmaster is larger than 1.";
    public static final String WRONG_NUM_OF_WORKERNODES = "no worker exists";
    public static final String WRONG_NUM_OF_ZOOKEEPER = "the number of zookeepers is less than 3";
-   public static final String ODD_NUM_OF_ZOOKEEPER = "the number of zookeepers is better to be odd numbers";
+   public static final String WRONG_NUM_OF_JOBTRACKER = "the number of jobtrackers is more than 1";
+   public static final String ODD_NUM_OF_ZOOKEEPER = "the number of zookeeper nodes is better to be odd numbers";
+   public static final String WRONG_NUM_OF_JOURNALNODE = "the number of journal nodes is less than 3 for namenode HA. It should be at least 3";
+   public static final String ODD_NUM_OF_JOURNALNODE = "the number of journal nodes is better to be odd numbers";
+   public static final String NO_NAMENODE_HA = "no namenode HA, but journal nodes appear";
+   public static final String NAMENODE_AUTO_FAILOVER_ZOOKEEPER = "please configure a zookeeper group in order to support name node HA";
    public static final String ZOOKEEPER_NOT_RESIZE = "zookeeper node groups are not allowed to resize.";
    public static final String REGISONSERVER_DATANODE_SEPERATION = "RegionServer and Datanode are separated, which will impact performance.";
    

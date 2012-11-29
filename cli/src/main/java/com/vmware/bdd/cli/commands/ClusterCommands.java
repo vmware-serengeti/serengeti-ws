@@ -72,7 +72,7 @@ public class ClusterCommands implements CommandMarker {
 
    //define role of the node group .
    private enum NodeGroupRole {
-      MASTER, JOB_TRACKER, WORKER, CLIENT, HBASE_MASTER, ZOOKEEPER, NONE
+      MASTER, JOB_TRACKER, WORKER, CLIENT, HBASE_MASTER, ZOOKEEPER, JOURNAL_NODE, NONE
    }
 
    @CliAvailabilityIndicator({ "cluster help" })
@@ -807,8 +807,10 @@ public class ClusterCommands implements CommandMarker {
       boolean validated = true;
       // show warning message
       boolean warning = false;
+      // if hadoop2 namenode ha is enabled
+      boolean namenodeHACheck = false;
       //role count
-      int masterCount = 0, jobtrackerCount = 0, hbasemasterCount = 0, zookeeperCount = 0, workerCount = 0;
+      int masterCount = 0, jobtrackerCount = 0, hbasemasterCount = 0, zookeeperCount = 0, workerCount = 0, numOfJournalNode = 0;
       //Find NodeGroupCreate array from current ClusterCreate instance.
       NodeGroupCreate[] nodeGroupCreates = clusterCreate.getNodeGroups();
       if (nodeGroupCreates == null || nodeGroupCreates.length == 0) {
@@ -862,75 +864,101 @@ public class ClusterCommands implements CommandMarker {
                validated = false;
             }
             // get node group role.
-            NodeGroupRole role = getNodeGroupRole(nodeGroupCreate);
-            switch (role) {
-            case MASTER:
-               masterCount++;
-               if (nodeGroupCreate.getInstanceNum() >= 0
-                     && nodeGroupCreate.getInstanceNum() != 1) {
-                  validated = false;
-                  collectInstanceNumInvalidateMsg(nodeGroupCreate,
-                        failedMsgList);
-               }
-               break;
-            case JOB_TRACKER:
-               jobtrackerCount++;
-               if (nodeGroupCreate.getInstanceNum() >= 0
-                     && nodeGroupCreate.getInstanceNum() != 1) {
-                  validated = false;
-                  collectInstanceNumInvalidateMsg(nodeGroupCreate,
-                        failedMsgList);
-               }
-               break;
-            case HBASE_MASTER:
-               hbasemasterCount++;
-               if (nodeGroupCreate.getInstanceNum() == 0) {
-                  validated = false;
-                  collectInstanceNumInvalidateMsg(nodeGroupCreate,
-                        failedMsgList);
-               }
-               break;   
-            case ZOOKEEPER:
-               zookeeperCount++;
-               if (nodeGroupCreate.getInstanceNum() > 0
-                     && nodeGroupCreate.getInstanceNum() < 3) {
-                  validated = false;
-                  failedMsgList.add(Constants.WRONG_NUM_OF_ZOOKEEPER);
-               } else if (nodeGroupCreate.getInstanceNum() > 0 && nodeGroupCreate.getInstanceNum() % 2 == 0) {
-                  warningMsgList.add(Constants.ODD_NUM_OF_ZOOKEEPER);
-                  warning = true;
-               }
-               break;
-            case WORKER:
-               workerCount++;
-               if (nodeGroupCreate.getInstanceNum() == 0) {
-                  validated = false;
-                  collectInstanceNumInvalidateMsg(nodeGroupCreate,
-                        failedMsgList);
-               } else if (isHAFlag(nodeGroupCreate)) {
-                  warning = true;
-               }
+            List<NodeGroupRole> groupRoles = getNodeGroupRoles(nodeGroupCreate);
+            for (NodeGroupRole role : groupRoles) {
+               switch (role) {
+               case MASTER:
+                  masterCount++;
+                  int numOfInstance = nodeGroupCreate.getInstanceNum();
+                  if (numOfInstance >= 0 && numOfInstance != 1) {
+                     if (numOfInstance != 2) { //namenode ha only support 2 nodes currently 
+                        validated = false;
+                        collectInstanceNumInvalidateMsg(nodeGroupCreate,
+                              failedMsgList);
+                     } else {
+                        namenodeHACheck = true;
+                     }
+                  }
+                  break;
+               case JOB_TRACKER:
+                  jobtrackerCount++;
+                  if (nodeGroupCreate.getInstanceNum() >= 0
+                        && nodeGroupCreate.getInstanceNum() != 1) {
+                     validated = false;
+                     failedMsgList.add(Constants.WRONG_NUM_OF_JOBTRACKER);
+                  }
+                  break;
+               case HBASE_MASTER:
+                  hbasemasterCount++;
+                  if (nodeGroupCreate.getInstanceNum() == 0) {
+                     validated = false;
+                     collectInstanceNumInvalidateMsg(nodeGroupCreate,
+                           failedMsgList);
+                  }
+                  break;   
+               case ZOOKEEPER:
+                  zookeeperCount++;
+                  if (nodeGroupCreate.getInstanceNum() > 0
+                        && nodeGroupCreate.getInstanceNum() < 3) {
+                     validated = false;
+                     failedMsgList.add(Constants.WRONG_NUM_OF_ZOOKEEPER);
+                  } else if (nodeGroupCreate.getInstanceNum() > 0 && nodeGroupCreate.getInstanceNum() % 2 == 0) {
+                     warningMsgList.add(Constants.ODD_NUM_OF_ZOOKEEPER);
+                     warning = true;
+                  }
+                  break;
+               case JOURNAL_NODE:
+                  numOfJournalNode += nodeGroupCreate.getInstanceNum();
+                  break;
+               case WORKER:
+                  workerCount++;
+                  if (nodeGroupCreate.getInstanceNum() == 0) {
+                     validated = false;
+                     collectInstanceNumInvalidateMsg(nodeGroupCreate,
+                           failedMsgList);
+                  } else if (isHAFlag(nodeGroupCreate)) {
+                     warning = true;
+                  }
 
-               //check if datanode and region server are seperate
-               List<String> roles = nodeGroupCreate.getRoles();
-               if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString()) && !roles.contains(HadoopRole.HADOOP_DATANODE.toString())) {
-                  warningMsgList.add(Constants.REGISONSERVER_DATANODE_SEPERATION);
+                  //check if datanode and region server are seperate
+                  List<String> roles = nodeGroupCreate.getRoles();
+                  if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString()) && !roles.contains(HadoopRole.HADOOP_DATANODE.toString())) {
+                     warningMsgList.add(Constants.REGISONSERVER_DATANODE_SEPERATION);
+                     warning = true;
+                  }
+                  break;
+               case CLIENT:
+                  if (isHAFlag(nodeGroupCreate)) {
+                     warning = true;
+                  }
+                  break;
+               case NONE:
                   warning = true;
+                  break;
+               default:
                }
-               break;
-            case CLIENT:
-               if (isHAFlag(nodeGroupCreate)) {
-                  warning = true;
-               }
-               break;
-            case NONE:
-               warning = true;
-               break;
-            default:
             }
          }
-         if ((masterCount > 1) || (jobtrackerCount > 1) || (zookeeperCount > 1) || (hbasemasterCount > 1)) {
-            failedMsgList.add(Constants.WRONG_NUM_OF_MASTERNODES);
+         if (namenodeHACheck) {
+            if (numOfJournalNode >= 0 && numOfJournalNode < 3) {
+               validated = false;
+               failedMsgList.add(Constants.WRONG_NUM_OF_JOURNALNODE);
+            } else if (numOfJournalNode > 0 && numOfJournalNode % 2 == 0) {
+               warningMsgList.add(Constants.ODD_NUM_OF_JOURNALNODE);
+               warning = true;
+            }
+            //check if zookeeper exists for automatic namenode ha failover
+            if (zookeeperCount == 0) {
+               validated = false;
+               failedMsgList.add(Constants.NAMENODE_AUTO_FAILOVER_ZOOKEEPER);
+            }
+         }
+         if ((jobtrackerCount > 1) || (zookeeperCount > 1) || (hbasemasterCount > 1)) {
+            failedMsgList.add(Constants.WRONG_NUM_OF_NODEGROUPS);
+            validated = false;
+         }
+         if (numOfJournalNode > 0 && !namenodeHACheck) {
+            failedMsgList.add(Constants.NO_NAMENODE_HA);
             validated = false;
          }
          if (workerCount == 0) {
@@ -954,15 +982,19 @@ public class ClusterCommands implements CommandMarker {
 
    
 
-   private NodeGroupRole getNodeGroupRole(NodeGroupCreate nodeGroupCreate) {
+   private List<NodeGroupRole> getNodeGroupRoles(NodeGroupCreate nodeGroupCreate) {
+      List<NodeGroupRole> groupRoles = new ArrayList<NodeGroupRole>();
       //Find roles list from current  NodeGroupCreate instance.
       List<String> roles = nodeGroupCreate.getRoles();
       for (NodeGroupRole role : NodeGroupRole.values()) {
          if (matchRole(role, roles)) {
-            return role;
+            groupRoles.add(role);
          }
       }
-      return NodeGroupRole.NONE;
+      if (groupRoles.size() == 0) {
+         groupRoles.add(NodeGroupRole.NONE);
+      }
+      return groupRoles;
    }
 
    /**
@@ -991,6 +1023,12 @@ public class ClusterCommands implements CommandMarker {
          }
       case ZOOKEEPER:
          if (roles.contains(HadoopRole.ZOOKEEPER_ROLE.toString())) {
+            return true;
+         } else {
+            return false;
+         }
+      case JOURNAL_NODE:
+         if (roles.contains(HadoopRole.HADOOP_JOURNALNODE_ROLE.toString())) {
             return true;
          } else {
             return false;
