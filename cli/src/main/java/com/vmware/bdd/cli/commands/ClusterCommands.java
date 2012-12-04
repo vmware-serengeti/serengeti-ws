@@ -48,6 +48,7 @@ import com.vmware.bdd.cli.rest.NetworkRestClient;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AppConfigValidationUtils;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ValidateResult;
 
 @Component
@@ -186,6 +187,7 @@ public class ClusterCommands implements CommandMarker {
             clusterCreate.setDsNames(dsNamesList);
          }
       }
+      List<String> failedMsgList = new ArrayList<String>();
       List<String> warningMsgList = new ArrayList<String>();
       List<String> networkNames = null;
       try {
@@ -244,14 +246,18 @@ public class ClusterCommands implements CommandMarker {
 
       // Validate that the specified file is correct json format and proper value.
       if (specFilePath != null) {
-         if (!validateClusterCreate(clusterCreate, alwaysAnswerYes)) {
-            return;
-         }
+         List<String> distroRoles = findDistroRoles(clusterCreate);
+         clusterCreate.validateClusterCreate(failedMsgList, warningMsgList, distroRoles);
       }
 
       // give a warning message if both type and specFilePath are specified
       if (type != null && specFilePath != null) {
          warningMsgList.add(Constants.TYPE_SPECFILE_CONFLICT);
+      }
+      
+      if (!failedMsgList.isEmpty()) {
+         showFailedMsg(clusterCreate.getName(), failedMsgList);
+         return;
       }
 
       // rest invocation
@@ -269,6 +275,19 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
+   private List<String> findDistroRoles(ClusterCreate clusterCreate) {
+      DistroRead distroRead = null;
+      distroRead =
+            distroRestClient
+                  .get(clusterCreate.getDistro() != null ? clusterCreate
+                        .getDistro() : Constants.DEFAULT_DISTRO);
+      if (distroRead != null) {
+         return distroRead.getRoles();
+      } else {
+         return null;
+      }
+   }
+   
    @CliCommand(value = "cluster list", help = "Get cluster information")
    public void getCluster(
          @CliOption(key = { "name" }, mandatory = false, help = "The cluster name") final String name,
@@ -799,313 +818,6 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   /**
-    * Validate nodeGroupCreates member formats and values in the ClusterCreate.
-    */
-   private boolean validateClusterCreate(ClusterCreate clusterCreate, final boolean alwaysAnswerYes) {
-      // validation status 
-      boolean validated = true;
-      // show warning message
-      boolean warning = false;
-      // if hadoop2 namenode ha is enabled
-      boolean namenodeHACheck = false;
-      //role count
-      int masterCount = 0, jobtrackerCount = 0, hbasemasterCount = 0, zookeeperCount = 0, workerCount = 0, numOfJournalNode = 0;
-      //Find NodeGroupCreate array from current ClusterCreate instance.
-      NodeGroupCreate[] nodeGroupCreates = clusterCreate.getNodeGroups();
-      if (nodeGroupCreates == null || nodeGroupCreates.length == 0) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-               clusterCreate.getName(), Constants.OUTPUT_OP_CREATE,
-               Constants.OUTPUT_OP_RESULT_FAIL, Constants.MULTI_INPUTS_CHECK);
-         return !validated;
-      } else {
-         //used for collecting failed message.
-         List<String> failedMsgList = new LinkedList<String>();
-         List<String> warningMsgList = new LinkedList<String>();
-         //find distro roles.
-         List<String> distroRoles = findDistroRoles(clusterCreate);
-         if (distroRoles == null) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterCreate.getName(), Constants.OUTPUT_OP_CREATE,
-                  Constants.OUTPUT_OP_RESULT_FAIL,
-                  Constants.PARAM_NO_DISTRO_AVAILABLE);
-            return !validated;
-         }
-
-         // remove the number of node groups check, because after supporting hbase,
-         // zookeeper can be one valid independent node group.
-
-         // check external HDFS
-         if (clusterCreate.hasHDFSUrlConfigured() && !clusterCreate.validateHDFSUrl()) {
-            failedMsgList.add(new StringBuilder()
-                         .append("externalHDFS=")
-                         .append(clusterCreate.getExternalHDFS()).toString());
-            validated = false;
-         }
-
-         // check placement policies
-         if (!clusterCreate.validateNodeGroupPlacementPolicies(failedMsgList, warningMsgList)) {
-            validated = false;
-         }
-
-         if (!clusterCreate.validateNodeGroupRoles(failedMsgList)) {
-            validated = false;
-         }
-
-         for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
-            // check node group's instanceNum
-            if (!checkInstanceNum(nodeGroupCreate, failedMsgList)) {
-               validated = false;
-            }
-
-            // check node group's roles 
-            if (!checkNodeGroupRoles(nodeGroupCreate, distroRoles,
-                  failedMsgList)) {
-               validated = false;
-            }
-            // get node group role.
-            List<NodeGroupRole> groupRoles = getNodeGroupRoles(nodeGroupCreate);
-            for (NodeGroupRole role : groupRoles) {
-               switch (role) {
-               case MASTER:
-                  masterCount++;
-                  int numOfInstance = nodeGroupCreate.getInstanceNum();
-                  if (numOfInstance >= 0 && numOfInstance != 1) {
-                     if (numOfInstance != 2) { //namenode ha only support 2 nodes currently 
-                        validated = false;
-                        collectInstanceNumInvalidateMsg(nodeGroupCreate,
-                              failedMsgList);
-                     } else {
-                        namenodeHACheck = true;
-                     }
-                  }
-                  break;
-               case JOB_TRACKER:
-                  jobtrackerCount++;
-                  if (nodeGroupCreate.getInstanceNum() >= 0
-                        && nodeGroupCreate.getInstanceNum() != 1) {
-                     validated = false;
-                     failedMsgList.add(Constants.WRONG_NUM_OF_JOBTRACKER);
-                  }
-                  break;
-               case HBASE_MASTER:
-                  hbasemasterCount++;
-                  if (nodeGroupCreate.getInstanceNum() == 0) {
-                     validated = false;
-                     collectInstanceNumInvalidateMsg(nodeGroupCreate,
-                           failedMsgList);
-                  }
-                  break;   
-               case ZOOKEEPER:
-                  zookeeperCount++;
-                  if (nodeGroupCreate.getInstanceNum() > 0
-                        && nodeGroupCreate.getInstanceNum() < 3) {
-                     validated = false;
-                     failedMsgList.add(Constants.WRONG_NUM_OF_ZOOKEEPER);
-                  } else if (nodeGroupCreate.getInstanceNum() > 0 && nodeGroupCreate.getInstanceNum() % 2 == 0) {
-                     warningMsgList.add(Constants.ODD_NUM_OF_ZOOKEEPER);
-                     warning = true;
-                  }
-                  break;
-               case JOURNAL_NODE:
-                  numOfJournalNode += nodeGroupCreate.getInstanceNum();
-                  break;
-               case WORKER:
-                  workerCount++;
-                  if (nodeGroupCreate.getInstanceNum() == 0) {
-                     validated = false;
-                     collectInstanceNumInvalidateMsg(nodeGroupCreate,
-                           failedMsgList);
-                  } else if (isHAFlag(nodeGroupCreate)) {
-                     warning = true;
-                  }
-
-                  //check if datanode and region server are seperate
-                  List<String> roles = nodeGroupCreate.getRoles();
-                  if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString()) && !roles.contains(HadoopRole.HADOOP_DATANODE.toString())) {
-                     warningMsgList.add(Constants.REGISONSERVER_DATANODE_SEPERATION);
-                     warning = true;
-                  }
-                  break;
-               case CLIENT:
-                  if (isHAFlag(nodeGroupCreate)) {
-                     warning = true;
-                  }
-                  break;
-               case NONE:
-                  warning = true;
-                  break;
-               default:
-               }
-            }
-         }
-         if (namenodeHACheck) {
-            if (numOfJournalNode >= 0 && numOfJournalNode < 3) {
-               validated = false;
-               failedMsgList.add(Constants.WRONG_NUM_OF_JOURNALNODE);
-            } else if (numOfJournalNode > 0 && numOfJournalNode % 2 == 0) {
-               warningMsgList.add(Constants.ODD_NUM_OF_JOURNALNODE);
-               warning = true;
-            }
-            //check if zookeeper exists for automatic namenode ha failover
-            if (zookeeperCount == 0) {
-               validated = false;
-               failedMsgList.add(Constants.NAMENODE_AUTO_FAILOVER_ZOOKEEPER);
-            }
-         }
-         if ((jobtrackerCount > 1) || (zookeeperCount > 1) || (hbasemasterCount > 1)) {
-            failedMsgList.add(Constants.WRONG_NUM_OF_NODEGROUPS);
-            validated = false;
-         }
-         if (numOfJournalNode > 0 && !namenodeHACheck) {
-            failedMsgList.add(Constants.NO_NAMENODE_HA);
-            validated = false;
-         }
-         if (workerCount == 0) {
-            warningMsgList.add(Constants.WRONG_NUM_OF_WORKERNODES);
-            warning = true;
-         }
-         if (!validated) {
-            showFailedMsg(clusterCreate.getName(), failedMsgList);
-         } else if (warning || warningMsgList != null) {
-            // If warning is true,show warning message.
-            if (!CommandsUtils.showWarningMsg(clusterCreate.getName(),
-                  Constants.OUTPUT_OBJECT_CLUSTER, Constants.OUTPUT_OP_CREATE,
-                  warningMsgList, alwaysAnswerYes)) {
-               // When exist warning message,whether to proceed
-               validated = false;
-            }
-         }
-         return validated;
-      }
-   }
-
-   
-
-   private List<NodeGroupRole> getNodeGroupRoles(NodeGroupCreate nodeGroupCreate) {
-      List<NodeGroupRole> groupRoles = new ArrayList<NodeGroupRole>();
-      //Find roles list from current  NodeGroupCreate instance.
-      List<String> roles = nodeGroupCreate.getRoles();
-      for (NodeGroupRole role : NodeGroupRole.values()) {
-         if (matchRole(role, roles)) {
-            groupRoles.add(role);
-         }
-      }
-      if (groupRoles.size() == 0) {
-         groupRoles.add(NodeGroupRole.NONE);
-      }
-      return groupRoles;
-   }
-
-   /**
-    * Check the roles was introduced, whether matching with system's specialize
-    * role.
-    */
-   private boolean matchRole(NodeGroupRole role, List<String> roles) {
-      switch (role) {
-      case MASTER:
-         if (roles.contains(HadoopRole.HADOOP_NAMENODE_ROLE.toString())) {
-            return true;
-         } else {
-            return false;
-         }
-      case JOB_TRACKER:
-         if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
-            return true;
-         } else {
-            return false;
-         }
-      case HBASE_MASTER:
-         if (roles.contains(HadoopRole.HBASE_MASTER_ROLE.toString())) {
-            return true;
-         } else {
-            return false;
-         }
-      case ZOOKEEPER:
-         if (roles.contains(HadoopRole.ZOOKEEPER_ROLE.toString())) {
-            return true;
-         } else {
-            return false;
-         }
-      case JOURNAL_NODE:
-         if (roles.contains(HadoopRole.HADOOP_JOURNALNODE_ROLE.toString())) {
-            return true;
-         } else {
-            return false;
-         }
-      case WORKER:
-         if (roles.contains(HadoopRole.HADOOP_DATANODE.toString())
-               || roles.contains(HadoopRole.HADOOP_TASKTRACKER.toString())
-               || roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString())) {
-            return true;
-         } else {
-            return false;
-         }
-      case CLIENT:
-         if (roles.contains(HadoopRole.HADOOP_CLIENT_ROLE.toString())
-               || roles.contains(HadoopRole.HIVE_ROLE.toString())
-               || roles.contains(HadoopRole.HIVE_SERVER_ROLE.toString())
-               || roles.contains(HadoopRole.PIG_ROLE.toString())
-               || roles.contains(HadoopRole.HBASE_CLIENT_ROLE.toString())) {
-            return true;
-         } else {
-            return false;
-         }
-      }
-      return false;
-   }
-
-   private boolean checkInstanceNum(NodeGroupCreate nodeGroup,
-         List<String> failedMsgList) {
-      boolean validated = true;
-      if (nodeGroup.getInstanceNum() < 0) {
-         validated = false;
-         collectInstanceNumInvalidateMsg(nodeGroup, failedMsgList);
-      }
-      return validated;
-   }
-
-   private void collectInstanceNumInvalidateMsg(NodeGroupCreate nodeGroup,
-         List<String> failedMsgList) {
-      failedMsgList.add(new StringBuilder().append(nodeGroup.getName())
-            .append(".").append("instanceNum=")
-            .append(nodeGroup.getInstanceNum()).toString());
-   }
-
-
-   private boolean checkNodeGroupRoles(NodeGroupCreate nodeGroup,
-         List<String> distroRoles, List<String> failedMsgList) {
-      List<String> roles = nodeGroup.getRoles();
-      boolean validated = true;
-      StringBuilder rolesMsg = new StringBuilder();
-      for (String role : roles) {
-         if (!distroRoles.contains(role)) {
-            validated = false;
-            rolesMsg.append(",").append(role);
-         }
-      }
-      if (!validated) {
-         rolesMsg.replace(0, 1, "");
-         failedMsgList.add(new StringBuilder().append(nodeGroup.getName())
-               .append(".").append("roles=").append("\"")
-               .append(rolesMsg.toString()).append("\"").toString());
-      }
-      return validated;
-   }
-
-   private List<String> findDistroRoles(ClusterCreate clusterCreate) {
-      DistroRead distroRead = null;
-      distroRead =
-            distroRestClient
-                  .get(clusterCreate.getDistro() != null ? clusterCreate
-                        .getDistro() : Constants.DEFAULT_DISTRO);
-      if (distroRead != null) {
-         return distroRead.getRoles();
-      } else {
-         return null;
-      }
-   }
-
    private void showFailedMsg(String name, List<String> failedMsgList) {
       //cluster creation failed message.
       StringBuilder failedMsg = new StringBuilder();
@@ -1276,7 +988,7 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private boolean isHAFlag(NodeGroupCreate nodeGroupCreate) {
-      return !CommandsUtils.isBlank(nodeGroupCreate.getHaFlag())
+      return !CommonUtil.isBlank(nodeGroupCreate.getHaFlag())
             && !nodeGroupCreate.getHaFlag().equalsIgnoreCase("off");
    }
 

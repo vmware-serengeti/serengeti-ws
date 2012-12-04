@@ -38,7 +38,6 @@ import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
@@ -125,21 +124,19 @@ public class ClusterConfigManager {
       List<String> failedMsgList = new ArrayList<String>();
       List<String> warningMsgList = new ArrayList<String>();
 
-      if (!cluster.validateNodeGroupPlacementPolicies(failedMsgList, warningMsgList)) {
+      if (cluster.getDistro() == null ||
+            distroMgr.getDistroByName(cluster.getDistro()) == null) {
+           throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
+      }
+      
+      cluster.validateClusterCreate(failedMsgList, warningMsgList, distroMgr
+            .getDistroByName(cluster.getDistro()).getRoles());
+      if (!failedMsgList.isEmpty()) {
          throw ClusterConfigException.INVALID_PLACEMENT_POLICIES(failedMsgList);
       }
 
       if (!validateRacksInfo(cluster, failedMsgList)) {
          throw ClusterConfigException.INVALID_PLACEMENT_POLICIES(failedMsgList);
-      }
-
-      if (!cluster.validateNodeGroupRoles(failedMsgList)) {
-         throw ClusterConfigException.INVALID_ROLES(failedMsgList);
-      }
-
-      if (cluster.getDistro() == null ||
-          distroMgr.getDistroByName(cluster.getDistro()) == null) {
-         throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
       }
 
       transformHDFSUrl(cluster);

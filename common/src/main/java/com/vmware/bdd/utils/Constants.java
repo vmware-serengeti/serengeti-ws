@@ -32,4 +32,18 @@ public class Constants {
    public static final String NODE_GROUP_NAME_PATTERN = "[a-zA-Z0-9_\\s]+";
    public static final String NAME_PATTERN = "[a-zA-Z0-9_\\-\\s]+";
    public static final String VC_DATASTORE_NAME_PATTERN = "[a-zA-Z0-9_\\-\\s\\?\\*]+";
+   public static final String MULTI_INPUTS_CHECK = " cannot be empty, please check it.";
+   public static final String WRONG_NUM_OF_JOBTRACKER = "the number of jobtrackers is more than 1";
+   public static final String WRONG_NUM_OF_ZOOKEEPER = "the number of zookeepers is less than 3";
+   public static final String ODD_NUM_OF_ZOOKEEPER = "the number of zookeeper nodes is better to be odd numbers";
+   public static final String WORKER_CLIENT_HA_FLAG = "the worker or client node group has HA enabled";
+   public static final String REGISONSERVER_DATANODE_SEPERATION = "RegionServer and Datanode are separated, which will impact performance.";
+   public static final String NOT_DEFINED_ROLE = "Some roles are not identified";
+   public static final String WRONG_NUM_OF_JOURNALNODE = "the number of journal nodes is less than 3 for namenode HA. It should be at least 3";
+   public static final String ODD_NUM_OF_JOURNALNODE = "the number of journal nodes is better to be odd numbers";
+   public static final String NAMENODE_AUTO_FAILOVER_ZOOKEEPER = "please configure a zookeeper group in order to support name node HA";
+   public static final String NO_NAMENODE_HA = "no namenode HA, but journal nodes appear";
+   public static final String WRONG_NUM_OF_NODEGROUPS = "the node groups including jobtracker, zookeeper or hmaster is larger than 1.";
+   public static final String WRONG_NUM_OF_WORKERNODES = "no worker exists";
+   public static final String DATANODE_JOURNALNODE_COEXIST = "journal nodes are not allowed to be on data nodes";
 }
