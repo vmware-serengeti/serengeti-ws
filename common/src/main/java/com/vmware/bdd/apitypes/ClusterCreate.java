@@ -372,7 +372,7 @@ public class ClusterCreate {
       }
       return false;
    }
-   
+
    /**
     * Validate nodeGroupCreates member formats and values in the ClusterCreate.
     */
@@ -404,7 +404,7 @@ public class ClusterCreate {
             // check node group's instanceNum
             checkInstanceNum(nodeGroupCreate, failedMsgList);
 
-            // check node group's roles 
+            // check node group's roles
             checkNodeGroupRoles(nodeGroupCreate, distroRoles, failedMsgList);
             // get node group role.
             List<NodeGroupRole> groupRoles = getNodeGroupRoles(nodeGroupCreate);
@@ -413,7 +413,7 @@ public class ClusterCreate {
                case MASTER:
                   int numOfInstance = nodeGroupCreate.getInstanceNum();
                   if (numOfInstance >= 0 && numOfInstance != 1) {
-                     if (numOfInstance != 2) { //namenode ha only support 2 nodes currently 
+                     if (numOfInstance != 2) { //namenode ha only support 2 nodes currently
                         collectInstanceNumInvalidateMsg(nodeGroupCreate,
                               failedMsgList);
                      } else {
@@ -434,7 +434,7 @@ public class ClusterCreate {
                      collectInstanceNumInvalidateMsg(nodeGroupCreate,
                            failedMsgList);
                   }
-                  break;   
+                  break;
                case ZOOKEEPER:
                   zookeeperCount++;
                   if (nodeGroupCreate.getInstanceNum() > 0
@@ -500,7 +500,7 @@ public class ClusterCreate {
          }
       }
    }
-   
+
    private boolean checkInstanceNum(NodeGroupCreate nodeGroup,
          List<String> failedMsgList) {
       boolean validated = true;
@@ -510,7 +510,7 @@ public class ClusterCreate {
       }
       return validated;
    }
-   
+
    private void collectInstanceNumInvalidateMsg(NodeGroupCreate nodeGroup,
          List<String> failedMsgList) {
       failedMsgList.add(new StringBuilder().append(nodeGroup.getName())

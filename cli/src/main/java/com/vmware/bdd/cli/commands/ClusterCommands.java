@@ -254,7 +254,7 @@ public class ClusterCommands implements CommandMarker {
       if (type != null && specFilePath != null) {
          warningMsgList.add(Constants.TYPE_SPECFILE_CONFLICT);
       }
-      
+
       if (!failedMsgList.isEmpty()) {
          showFailedMsg(clusterCreate.getName(), failedMsgList);
          return;
@@ -287,7 +287,7 @@ public class ClusterCommands implements CommandMarker {
          return null;
       }
    }
-   
+
    @CliCommand(value = "cluster list", help = "Get cluster information")
    public void getCluster(
          @CliOption(key = { "name" }, mandatory = false, help = "The cluster name") final String name,
