@@ -198,7 +198,7 @@ public class ClusterManager {
 
       AuAssert.check(cmdArray != null);
       task.setCmdArray(cmdArray);
-      
+
       DAL.inTransactionUpdate(task);
 
       HashMap<String, Object> properties = SystemProperties.getManifest();

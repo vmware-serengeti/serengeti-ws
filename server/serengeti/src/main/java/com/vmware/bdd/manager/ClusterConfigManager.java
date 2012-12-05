@@ -75,7 +75,7 @@ public class ClusterConfigManager {
    private VcDataStoreManager datastoreMgr;
    private String templateId = Configuration.getString(TEMPLATE_ID.toString(),
          "centos57-x64");
-   private String httpProxy = Configuration.getString(HTTP_PROXY.toString());
+   private String httpProxy = Configuration.getString(HTTP_PROXY.toString(), "");
 
    public VcDataStoreManager getDatastoreMgr() {
       return datastoreMgr;
@@ -130,7 +130,7 @@ public class ClusterConfigManager {
             distroMgr.getDistroByName(cluster.getDistro()) == null) {
            throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
       }
-      
+
       cluster.validateClusterCreate(failedMsgList, warningMsgList, distroMgr
             .getDistroByName(cluster.getDistro()).getRoles());
       if (!failedMsgList.isEmpty()) {
