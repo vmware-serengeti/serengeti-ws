@@ -30,15 +30,21 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Configuration;
 
 class RolePackageMapping {
    private List<String> roles;
    private String tarball;
-
+   //yum or ubuntu apt repos
+   @Expose
+   @SerializedName("package_repos")
+   private List<String> packageRepos;
    public List<String> getRoles() {
       return roles;
    }
@@ -54,6 +60,15 @@ class RolePackageMapping {
    public void setTarball(String tarball) {
       this.tarball = tarball;
    }
+
+   public List<String> getPackageRepos() {
+      return packageRepos;
+   }
+
+   public void setPackageRepos(List<String> packageRepos) {
+      this.packageRepos = packageRepos;
+   }
+
 }
 
 class Distro {
@@ -141,6 +156,10 @@ public class DistroManager {
       distrosManifestUrl = distroRootUrl + "/manifest";
    }
 
+   public enum PackagesExistStatus {
+      NONE, TARBALL, REPO, BOTH
+   }
+
    private Map<String, Distro> distros = null;
 
    public DistroManager() {
@@ -210,6 +229,31 @@ public class DistroManager {
       return null;
    }
 
+   public PackagesExistStatus checkPackagesExistStatus(final String distroName) {
+      loadManifest(false);
+      Distro distro = distros.get(distroName);
+      boolean hasPackageRepo = false, hasTarball = false;
+      for (RolePackageMapping pkg : distro.getPackages()) {
+         List<String> packageRepos = pkg.getPackageRepos();
+         if (packageRepos != null && !packageRepos.isEmpty()) {
+            hasPackageRepo = true;
+         }
+         if (!CommonUtil.isBlank(pkg.getTarball())) {
+            hasTarball = true;
+            if (hasPackageRepo) {
+               return PackagesExistStatus.BOTH;
+            }
+         }
+      }
+      if (!hasPackageRepo && !hasTarball) {
+         return PackagesExistStatus.NONE;
+      } else if (hasPackageRepo) {
+         return PackagesExistStatus.REPO;
+      } else {
+         return PackagesExistStatus.TARBALL;
+      }
+   }
+
    public List<DistroRead> getDistros() {
       loadManifest(false);
       List<DistroRead> drs = new ArrayList<DistroRead>();
@@ -239,5 +283,18 @@ public class DistroManager {
       }
 
       return dr;
+   }
+
+   public List<String> getPackageRepos(String distroName) {
+      loadManifest(true);
+      Distro distro = distros.get(distroName);
+      List<String> packageRepos = new ArrayList<String> ();
+      for (RolePackageMapping pkg : distro.getPackages()) {
+         List<String> subPackageRepos = pkg.getPackageRepos();
+         if (subPackageRepos != null && !subPackageRepos.isEmpty()) {
+            packageRepos.addAll(subPackageRepos);
+         }
+      }
+      return packageRepos.isEmpty() ? null : packageRepos;
    }
 }

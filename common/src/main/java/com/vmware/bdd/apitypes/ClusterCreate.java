@@ -46,6 +46,9 @@ public class ClusterCreate {
    private NodeGroupCreate[] nodeGroups;
    @Expose
    private String distro;
+   @Expose
+   @SerializedName("http_proxy")
+   private String httpProxy;
    private List<String> rpNames;
    @Expose
    @SerializedName("vc_clusters")
@@ -60,6 +63,10 @@ public class ClusterCreate {
    private String networkName;
    @Expose
    private List<NetworkAdd> networking;
+   //yum or ubuntu apt repos
+   @Expose
+   @SerializedName("distro_package_repos")
+   private List<String> packageRepos;
    @Expose
    @SerializedName("distro_map")
    private HadoopDistroMap distroMap;
@@ -144,6 +151,14 @@ public class ClusterCreate {
       this.distro = distro;
    }
 
+   public String getHttpProxy() {
+      return httpProxy;
+   }
+
+   public void setHttpProxy(String httpProxy) {
+      this.httpProxy = httpProxy;
+   }
+
    public List<String> getRpNames() {
       return rpNames;
    }
@@ -206,6 +221,14 @@ public class ClusterCreate {
 
    public void setNetworking(List<NetworkAdd> networking) {
       this.networking = networking;
+   }
+
+   public List<String> getPackageRepos() {
+      return packageRepos;
+   }
+
+   public void setPackageRepos(List<String> packageRepos) {
+      this.packageRepos = packageRepos;
    }
 
    public HadoopDistroMap getDistroMap() {

@@ -27,6 +27,7 @@ import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.manager.DistroManager;
+import com.vmware.bdd.manager.DistroManager.PackagesExistStatus;
 import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.HadoopDistroMap;
 import com.vmware.bdd.spectypes.HadoopRole;
@@ -177,14 +178,25 @@ public class CommonClusterExpandPolicy {
    public static void expandDistro(ClusterEntity clusterEntity, ClusterCreate clusterConfig, DistroManager distroMgr) {
       String distro = clusterEntity.getDistro();
       clusterConfig.setDistro(distro);
-
-      HadoopDistroMap map = new HadoopDistroMap();
-      map.setHadoopUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.HADOOP_NAMENODE_ROLE.toString()));
-      map.setHiveUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.HIVE_ROLE.toString()));
-      map.setPigUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.PIG_ROLE.toString()));
-      map.setHbaseUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.HBASE_MASTER_ROLE.toString()));
-      map.setZookeeperUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.ZOOKEEPER_ROLE.toString()));
-      clusterConfig.setDistroMap(map);
+      PackagesExistStatus status = distroMgr.checkPackagesExistStatus(distro);
+      switch (status) {
+      case TARBALL:
+         HadoopDistroMap map = new HadoopDistroMap();
+         map.setHadoopUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.HADOOP_NAMENODE_ROLE.toString()));
+         map.setHiveUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.HIVE_ROLE.toString()));
+         map.setPigUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.PIG_ROLE.toString()));
+         map.setHbaseUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.HBASE_MASTER_ROLE.toString()));
+         map.setZookeeperUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.ZOOKEEPER_ROLE.toString()));
+         clusterConfig.setDistroMap(map);
+         break;
+      case REPO:
+         clusterConfig.setPackageRepos(distroMgr.getPackageRepos(distro));
+         break;
+      case NONE:
+         throw ClusterConfigException.MANIFEST_CONFIG_TARBALL_REPO_NONE();
+      case BOTH:
+         throw ClusterConfigException.MANIFEST_CONFIG_TARBALL_REPO_COEXIST();
+      }
    }
 
    private static int getStorage(InstanceType instance, GroupType groupType) {

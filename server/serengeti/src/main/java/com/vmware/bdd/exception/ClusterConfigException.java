@@ -100,4 +100,10 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException INVALID_TOPOLOGY_POLICY(TopologyType topology, String reason) {
       return new ClusterConfigException(null, "INVALID_TOPOLOGY_POLICY", topology, reason);
    }
+   public static ClusterConfigException MANIFEST_CONFIG_TARBALL_REPO_COEXIST() {
+      return new ClusterConfigException(null, "MANIFEST_CONFIG_TARBALL_REPO_COEXIST");
+   }
+   public static ClusterConfigException MANIFEST_CONFIG_TARBALL_REPO_NONE() {
+      return new ClusterConfigException(null, "MANIFEST_CONFIG_TARBALL_REPO_NONE");
+   }
 }
