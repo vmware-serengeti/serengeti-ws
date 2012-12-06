@@ -173,6 +173,11 @@ public class CommonClusterExpandPolicy {
          }
          ngEntity.setStorageType(storeType);
       }
+      if (groupType == GroupType.ZOOKEEPER_GROUP) {
+         ngEntity.setDiskBisect(true);         
+      } else {
+         ngEntity.setDiskBisect(false);
+      }
    }
 
    public static void expandDistro(ClusterEntity clusterEntity, ClusterCreate clusterConfig, DistroManager distroMgr) {

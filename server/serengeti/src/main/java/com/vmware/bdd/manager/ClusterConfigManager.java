@@ -434,6 +434,13 @@ public class ClusterConfigManager {
       }
       if (group.getStorage() != null) {
          groupEntity.setStorageSize(group.getStorage().getSizeGB());
+         List<String> groupRoles = group.getRoles();
+         //currently, ignore input from CLI and hard code here
+         if (groupRoles.contains(HadoopRole.ZOOKEEPER_ROLE.toString()) && groupRoles.size() == 1) {
+            groupEntity.setDiskBisect(true);
+         } else {
+            groupEntity.setDiskBisect(false);
+         }
          if (group.getStorage().getType() != null) {
             if (group.getStorage().getType().equals(DatastoreType.LOCAL.name())) {
                groupEntity.setStorageType(DatastoreType.LOCAL);
@@ -780,6 +787,7 @@ public class ClusterConfigManager {
          NodeGroupCreate group) {
       int storageSize = ngEntity.getStorageSize();
       DatastoreType storageType = ngEntity.getStorageType();
+      boolean storageBisect = ngEntity.getDiskBisect();
       List<String> storeNames = ngEntity.getVcDatastoreNameList();
       if (storageSize <= 0 && storageType == null
             && (storeNames == null || storeNames.isEmpty())) {
@@ -789,6 +797,8 @@ public class ClusterConfigManager {
 
       logger.debug("storage size is " + storageSize + " for node group "
             + ngEntity.getName());
+      logger.debug("storage diskBisect is " + storageBisect + "for node group "
+            + ngEntity.getName());
       logger.debug("storage type is " + storageType + " for node group "
             + ngEntity.getName());
       logger.debug("storage name pattern is " + storeNames + " for node group "
@@ -796,6 +806,7 @@ public class ClusterConfigManager {
       StorageRead storage = new StorageRead();
       group.setStorage(storage);
       storage.setSizeGB(storageSize);
+      storage.setDiskBisect(storageBisect);
       if (storageType != null) {
          storage.setType(storageType.toString().toLowerCase());
       }

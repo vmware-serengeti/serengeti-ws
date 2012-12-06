@@ -88,6 +88,9 @@ public class NodeGroupEntity extends EntityBase {
    // GB
    @Column(name = "storage_size")
    private int storageSize;
+   
+   @Column(name = "disk_bisect")
+   private boolean diskBisect;
 
    @ManyToOne
    @JoinColumn(name = "cluster_id")
@@ -146,7 +149,7 @@ public class NodeGroupEntity extends EntityBase {
    }
 
    public NodeGroupEntity(String name, int defineInstanceNum, int cpuNum,
-         int memorySize, DatastoreType storageType, int storageSize) {
+         int memorySize, DatastoreType storageType, int storageSize, boolean diskBisect) {
       super();
       this.name = name;
       this.defineInstanceNum = defineInstanceNum;
@@ -154,6 +157,7 @@ public class NodeGroupEntity extends EntityBase {
       this.memorySize = memorySize;
       this.storageType = storageType;
       this.storageSize = storageSize;
+      this.diskBisect = diskBisect;
    }
 
    public String getHadoopConfig() {
@@ -230,6 +234,14 @@ public class NodeGroupEntity extends EntityBase {
 
    public void setStorageSize(int storageSize) {
       this.storageSize = storageSize;
+   }
+   
+   public boolean getDiskBisect() {
+      return diskBisect;
+   }
+   
+   public void setDiskBisect(boolean diskBisect) {
+      this.diskBisect = diskBisect;
    }
 
    public Set<HadoopNodeEntity> getHadoopNodes() {
@@ -375,6 +387,7 @@ public class NodeGroupEntity extends EntityBase {
       StorageRead storage = new StorageRead();
       storage.setType(this.storageType.toString());
       storage.setSizeGB(this.storageSize);
+      storage.setDiskBisect(this.diskBisect);
       storage.setDsNames(getVcDatastoreNameList());
       nodeGroupRead.setStorage(storage);
 
