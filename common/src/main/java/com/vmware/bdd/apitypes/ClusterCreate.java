@@ -352,7 +352,13 @@ public class ClusterCreate {
       boolean valid = true;
       Set<String> roles = new HashSet<String>();
       for (NodeGroupCreate ngc : getNodeGroups()) {
-         roles.addAll(ngc.getRoles());
+         List<String> nodeGroupRoles = ngc.getRoles();
+         if(nodeGroupRoles == null || nodeGroupRoles.isEmpty()) {
+            valid = false;
+            failedMsgList.add("missing role attribute for node group '" + ngc.getName() + "' ");
+         } else {
+            roles.addAll(ngc.getRoles());
+         }
       }
 
       if (validateHDFSUrl()) {
@@ -400,7 +406,7 @@ public class ClusterCreate {
             }
          }
       }
-      
+
       return valid;
    }
 
@@ -463,73 +469,75 @@ public class ClusterCreate {
             checkNodeGroupRoles(nodeGroupCreate, distroRoles, failedMsgList);
             // get node group role.
             List<NodeGroupRole> groupRoles = getNodeGroupRoles(nodeGroupCreate);
-            for (NodeGroupRole role : groupRoles) {
-               switch (role) {
-               case MASTER:
-                  int numOfInstance = nodeGroupCreate.getInstanceNum();
-                  if (numOfInstance >= 0 && numOfInstance != 1) {
-                     if (numOfInstance != 2) { //namenode ha only support 2 nodes currently
+            if (groupRoles != null) {
+               for (NodeGroupRole role : groupRoles) {
+                  switch (role) {
+                  case MASTER:
+                     int numOfInstance = nodeGroupCreate.getInstanceNum();
+                     if (numOfInstance >= 0 && numOfInstance != 1) {
+                        if (numOfInstance != 2) { //namenode ha only support 2 nodes currently
+                           collectInstanceNumInvalidateMsg(nodeGroupCreate,
+                                 failedMsgList);
+                        } else {
+                           namenodeHACheck = true;
+                        }
+                     }
+                     break;
+                  case JOB_TRACKER:
+                     jobtrackerCount++;
+                     if (nodeGroupCreate.getInstanceNum() >= 0
+                           && nodeGroupCreate.getInstanceNum() != 1) {
+                        failedMsgList.add(Constants.WRONG_NUM_OF_JOBTRACKER);
+                     }
+                     break;
+                  case HBASE_MASTER:
+                     hbasemasterCount++;
+                     if (nodeGroupCreate.getInstanceNum() == 0) {
                         collectInstanceNumInvalidateMsg(nodeGroupCreate,
                               failedMsgList);
-                     } else {
-                        namenodeHACheck = true;
                      }
+                     break;
+                  case ZOOKEEPER:
+                     zookeeperCount++;
+                     if (nodeGroupCreate.getInstanceNum() > 0
+                           && nodeGroupCreate.getInstanceNum() < 3) {
+                        failedMsgList.add(Constants.WRONG_NUM_OF_ZOOKEEPER);
+                     } else if (nodeGroupCreate.getInstanceNum() > 0 && nodeGroupCreate.getInstanceNum() % 2 == 0) {
+                        warningMsgList.add(Constants.ODD_NUM_OF_ZOOKEEPER);
+                     }
+                     break;
+                  case JOURNAL_NODE:
+                     numOfJournalNode += nodeGroupCreate.getInstanceNum();
+                     if (nodeGroupCreate.getRoles().contains(HadoopRole.HADOOP_DATANODE.toString()) ||
+                           nodeGroupCreate.getRoles().contains(HadoopRole.HADOOP_CLIENT_ROLE.toString())) {
+                        failedMsgList.add(Constants.DATANODE_JOURNALNODE_COEXIST);
+                     }
+                     break;
+                  case WORKER:
+                     workerCount++;
+                     if (nodeGroupCreate.getInstanceNum() == 0) {
+                        collectInstanceNumInvalidateMsg(nodeGroupCreate,
+                              failedMsgList);
+                     } else if (isHAFlag(nodeGroupCreate)) {
+                        warningMsgList.add(Constants.WORKER_CLIENT_HA_FLAG);
+                     }
+                     
+                     //check if datanode and region server are seperate
+                     List<String> roles = nodeGroupCreate.getRoles();
+                     if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString()) && !roles.contains(HadoopRole.HADOOP_DATANODE.toString())) {
+                        warningMsgList.add(Constants.REGISONSERVER_DATANODE_SEPERATION);
+                     }
+                     break;
+                  case CLIENT:
+                     if (isHAFlag(nodeGroupCreate)) {
+                        warningMsgList.add(Constants.WORKER_CLIENT_HA_FLAG);
+                     }
+                     break;
+                  case NONE:
+                     warningMsgList.add(Constants.NOT_DEFINED_ROLE);
+                     break;
+                  default:
                   }
-                  break;
-               case JOB_TRACKER:
-                  jobtrackerCount++;
-                  if (nodeGroupCreate.getInstanceNum() >= 0
-                        && nodeGroupCreate.getInstanceNum() != 1) {
-                     failedMsgList.add(Constants.WRONG_NUM_OF_JOBTRACKER);
-                  }
-                  break;
-               case HBASE_MASTER:
-                  hbasemasterCount++;
-                  if (nodeGroupCreate.getInstanceNum() == 0) {
-                     collectInstanceNumInvalidateMsg(nodeGroupCreate,
-                           failedMsgList);
-                  }
-                  break;
-               case ZOOKEEPER:
-                  zookeeperCount++;
-                  if (nodeGroupCreate.getInstanceNum() > 0
-                        && nodeGroupCreate.getInstanceNum() < 3) {
-                     failedMsgList.add(Constants.WRONG_NUM_OF_ZOOKEEPER);
-                  } else if (nodeGroupCreate.getInstanceNum() > 0 && nodeGroupCreate.getInstanceNum() % 2 == 0) {
-                     warningMsgList.add(Constants.ODD_NUM_OF_ZOOKEEPER);
-                  }
-                  break;
-               case JOURNAL_NODE:
-                  numOfJournalNode += nodeGroupCreate.getInstanceNum();
-                  if (nodeGroupCreate.getRoles().contains(HadoopRole.HADOOP_DATANODE.toString()) ||
-                        nodeGroupCreate.getRoles().contains(HadoopRole.HADOOP_CLIENT_ROLE.toString())) {
-                     failedMsgList.add(Constants.DATANODE_JOURNALNODE_COEXIST);
-                  }
-                  break;
-               case WORKER:
-                  workerCount++;
-                  if (nodeGroupCreate.getInstanceNum() == 0) {
-                     collectInstanceNumInvalidateMsg(nodeGroupCreate,
-                           failedMsgList);
-                  } else if (isHAFlag(nodeGroupCreate)) {
-                     warningMsgList.add(Constants.WORKER_CLIENT_HA_FLAG);
-                  }
-
-                  //check if datanode and region server are seperate
-                  List<String> roles = nodeGroupCreate.getRoles();
-                  if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString()) && !roles.contains(HadoopRole.HADOOP_DATANODE.toString())) {
-                     warningMsgList.add(Constants.REGISONSERVER_DATANODE_SEPERATION);
-                  }
-                  break;
-               case CLIENT:
-                  if (isHAFlag(nodeGroupCreate)) {
-                     warningMsgList.add(Constants.WORKER_CLIENT_HA_FLAG);
-                  }
-                  break;
-               case NONE:
-                  warningMsgList.add(Constants.NOT_DEFINED_ROLE);
-                  break;
-               default:
                }
             }
          }
@@ -578,10 +586,12 @@ public class ClusterCreate {
       List<String> roles = nodeGroup.getRoles();
       boolean validated = true;
       StringBuilder rolesMsg = new StringBuilder();
-      for (String role : roles) {
-         if (!distroRoles.contains(role)) {
-            validated = false;
-            rolesMsg.append(",").append(role);
+      if (roles != null) {
+         for (String role : roles) {
+            if (!distroRoles.contains(role)) {
+               validated = false;
+               rolesMsg.append(",").append(role);
+            }
          }
       }
       if (!validated) {
@@ -603,7 +613,7 @@ public class ClusterCreate {
       //Find roles list from current  NodeGroupCreate instance.
       List<String> roles = nodeGroupCreate.getRoles();
       for (NodeGroupRole role : NodeGroupRole.values()) {
-         if (matchRole(role, roles)) {
+         if (roles !=null && matchRole(role, roles)) {
             groupRoles.add(role);
          }
       }
