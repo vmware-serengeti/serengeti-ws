@@ -150,6 +150,7 @@ public class Constants {
    public static final String PARAM_NOT_EXISTED = " cannot be found. Please add it first.";
    public static final String PARAM__NO_DEFAULT_DISTRO = "no default distro, please install and/or set a distro by --distro";
    public static final String PARAM_NOT_CONTAIN_HORIZONTAL_LINE = " cannot contain '-'.";
+   public static final String PARAM_NOT_CONTAIN_BLANK_SPACE = " cannot contain blank space.";
 
    public static final int FORMAT_COLUMN_DISTANCE = 2;
    public static final String FORMAT_TABLE_COLUMN_NAME = "NAME";

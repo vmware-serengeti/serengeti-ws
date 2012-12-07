@@ -28,7 +28,7 @@ public class Constants {
    public static final String CLUSTER_LIMIT_INFO_INSTANCE_NUM = "instance_num";
    public static final String CLUSTER_LIMIT_INFO_NODE_GROUPS = "node_groups";
    public static final String CLUSTER_LIMIT_INFO_SERENGETI_INSTANCE = "serengeti_instance";
-   public static final String CLUSTER_NAME_PATTERN = "[a-zA-Z0-9_\\s]+";
+   public static final String CLUSTER_NAME_PATTERN = "[a-zA-Z0-9_]+";
    public static final String NODE_GROUP_NAME_PATTERN = "[a-zA-Z0-9_\\s]+";
    public static final String NAME_PATTERN = "[a-zA-Z0-9_\\-\\s]+";
    public static final String VC_DATASTORE_NAME_PATTERN = "[a-zA-Z0-9_\\-\\s\\?\\*]+";

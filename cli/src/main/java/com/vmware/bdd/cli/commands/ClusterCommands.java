@@ -100,7 +100,12 @@ public class ClusterCommands implements CommandMarker {
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.PARAM_CLUSTER
                      + Constants.PARAM_NOT_CONTAIN_HORIZONTAL_LINE);
-
+         return;
+      } else if (name.indexOf(" ") != -1) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.PARAM_CLUSTER
+                     + Constants.PARAM_NOT_CONTAIN_BLANK_SPACE);
          return;
       }
       //process resume

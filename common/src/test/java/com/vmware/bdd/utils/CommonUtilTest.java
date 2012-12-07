@@ -39,21 +39,24 @@ public class CommonUtilTest {
       assertEquals(CommonUtil.validateClusterName("clusterName1"), true);
       assertEquals(CommonUtil.validateClusterName("clusterName2"), true);
       assertEquals(CommonUtil.validateClusterName("clusterName3_"), true);
-      assertEquals(CommonUtil.validateClusterName("clusterName4 "), true);
+      assertEquals(CommonUtil.validateClusterName("clusterName4 "), false);
       assertEquals(CommonUtil.validateClusterName("clusterName-5"), false);
       assertEquals(CommonUtil.validateClusterName("clusterName6-"), false);
       assertEquals(CommonUtil.validateClusterName("-clusterName7"), false);
+      assertEquals(CommonUtil.validateClusterName("cluster-Name8"), false);
+      assertEquals(CommonUtil.validateClusterName("cluster Name9"), false);
    }
 
    @Test
    public void testValidateNodeGroupName() {
-      assertEquals(CommonUtil.validateClusterName("nodeGroupName1"), true);
-      assertEquals(CommonUtil.validateClusterName("nodeGroupName2"), true);
-      assertEquals(CommonUtil.validateClusterName("nodeGroupName3_"), true);
-      assertEquals(CommonUtil.validateClusterName("nodeGroupName4 "), true);
-      assertEquals(CommonUtil.validateClusterName("nodeGroupName-5"), false);
-      assertEquals(CommonUtil.validateClusterName("nodeGroupName6-"), false);
-      assertEquals(CommonUtil.validateClusterName("-nodeGroupName7"), false);
+      assertEquals(CommonUtil.validateNodeGroupName("nodeGroupName1"), true);
+      assertEquals(CommonUtil.validateNodeGroupName("nodeGroupName2"), true);
+      assertEquals(CommonUtil.validateNodeGroupName("nodeGroupName3_"), true);
+      assertEquals(CommonUtil.validateNodeGroupName("nodeGroupName4 "), true);
+      assertEquals(CommonUtil.validateNodeGroupName("nodeGroupName-5"), false);
+      assertEquals(CommonUtil.validateNodeGroupName("nodeGroupName6-"), false);
+      assertEquals(CommonUtil.validateNodeGroupName("-nodeGroupName7"), false);
+      assertEquals(CommonUtil.validateNodeGroupName("nodeGroup Name8"), true);
    }
 
    @Test
