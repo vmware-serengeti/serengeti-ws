@@ -444,10 +444,10 @@ public class ClusterConfigManager {
          }
          String storageType = group.getStorage().getType();
          if (storageType != null) {
-            if (storageType.equals(DatastoreType.TEMPFS.name())) {
+            if (storageType.equalsIgnoreCase(DatastoreType.TEMPFS.name())) {
                groupEntity.setStorageType(DatastoreType.TEMPFS);
                roles.add(HadoopRole.TEMPFS_CLIENT_ROLE.toString());
-            } else if (storageType.equals(DatastoreType.LOCAL.name())) {
+            } else if (storageType.equalsIgnoreCase(DatastoreType.LOCAL.name())) {
                groupEntity.setStorageType(DatastoreType.LOCAL);
             } else {
                groupEntity.setStorageType(DatastoreType.SHARED);

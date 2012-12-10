@@ -61,7 +61,7 @@ public class DatastoreCommands implements CommandMarker {
                         + Constants.MULTI_INPUTS_CHECK);
          } else {
             datastoreAdd.setSpec(CommandsUtils.inputsConvert(spec));
-            datastoreAdd.setType(DatastoreType.valueOf(type));
+            datastoreAdd.setType(DatastoreType.valueOf(type.toUpperCase()));
 
             restClient.add(datastoreAdd);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_DATASTORE,

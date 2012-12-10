@@ -520,8 +520,7 @@ public class ClusterCreate {
                               failedMsgList);
                      } else if (isHAFlag(nodeGroupCreate)) {
                         warningMsgList.add(Constants.WORKER_CLIENT_HA_FLAG);
-                     }
-                     
+                     }  
                      //check if datanode and region server are seperate
                      List<String> roles = nodeGroupCreate.getRoles();
                      if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString()) && !roles.contains(HadoopRole.HADOOP_DATANODE.toString())) {
