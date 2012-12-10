@@ -369,6 +369,17 @@ public class ClusterCommandsTest extends MockRestServer {
              HttpStatus.NO_CONTENT, "");
        clusterCommands.createCluster("cluster1WithHBaseSpec", null, null, "src/test/resources/hbase_cluster.json", null, null, null, null, false, false, true);
 
+       setup();
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(distros));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(networks));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + Constants.DEFAULT_DISTRO, HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(distro));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
+             HttpStatus.NO_CONTENT, "");
+       clusterCommands.createCluster("cluster1WithDCSeperationSpec", null, null, "src/test/resources/data_compute_separation_cluster.json", null, null, null, null, false, false, true);
+
        CookieCache.clear();
     }
 

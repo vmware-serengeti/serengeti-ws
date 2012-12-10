@@ -46,4 +46,5 @@ public class Constants {
    public static final String WRONG_NUM_OF_NODEGROUPS = "the node groups including jobtracker, zookeeper or hmaster is larger than 1.";
    public static final String WRONG_NUM_OF_WORKERNODES = "no worker exists";
    public static final String DATANODE_JOURNALNODE_COEXIST = "journal nodes are not allowed to be on data nodes";
+   public static final String TEMPFS_NOT_ALLOWED = "the disk type of TEMPFS can only be set on compute nodes with strict association to data nodes";
 }

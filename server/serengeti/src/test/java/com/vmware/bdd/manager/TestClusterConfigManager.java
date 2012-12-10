@@ -26,15 +26,20 @@ import org.testng.annotations.Test;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.Saveable;
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.specpolicy.ClusterSpecFactory;
 
 public class TestClusterConfigManager {
    private static ClusterConfigManager clusterMgr = new ClusterConfigManager();
@@ -117,13 +122,17 @@ public class TestClusterConfigManager {
       System.out.println("sub string: " + s1.substring(i));
    }
 
-   public void testClusterConfig() {
+   @Test
+   public void testClusterConfig() throws Exception {
       ClusterCreate spec = new ClusterCreate();
       spec.setName("my-cluster");
       List<String> rps = new ArrayList<String>();
       rps.add("myRp1");
       spec.setRpNames(rps);
       spec.setNetworkName("dhcpNet1");
+      spec.setDistro("apache");
+      spec.setType(ClusterType.HDFS_MAPRED);
+      spec = ClusterSpecFactory.getCustomizedSpec(spec);
       clusterMgr.createClusterConfig(spec);
 
       ClusterEntity cluster = ClusterEntity.findClusterEntityById(1l);
@@ -140,8 +149,87 @@ public class TestClusterConfigManager {
       System.out.println(manifest);
       Assert.assertTrue("manifest should contains nodegroups",
             manifest.indexOf("master") != -1);
-      Assert.assertTrue("manifest is inconsistent",
-            manifest.indexOf("{\"name\":\"my-cluster\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/master\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/worker\"},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"hive_server\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/client\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
+      //Assert.assertTrue("manifest is inconsistent",
+        //    manifest.indexOf("{\"name\":\"my-cluster\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/master\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/worker\"},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"hive_server\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/client\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
+   }
+
+   @Test
+   public void testClusterConfigWithTempfs() throws Exception {
+      ClusterCreate spec = new ClusterCreate();
+      spec.setName("my-cluster-dc-tempfs");
+      List<String> rps = new ArrayList<String>();
+      rps.add("myRp1");
+      spec.setRpNames(rps);
+      spec.setNetworkName("dhcpNet1");
+      spec.setDistro("apache");
+
+      //build a master group, a datanode group, a compute node group with strict association and tempfs.
+      NodeGroupCreate[] ngs = new NodeGroupCreate[3];
+      NodeGroupCreate ng0 = new NodeGroupCreate();
+      ngs[0] = ng0;
+      List<String> masterRoles = new ArrayList<String>();
+      masterRoles.add("hadoop_namenode");
+      masterRoles.add("hadoop_jobtracker");
+      ngs[0].setRoles(masterRoles);
+      ngs[0].setName("master");
+      ngs[0].setInstanceNum(1);
+      ngs[0].setInstanceType(InstanceType.LARGE);
+
+      NodeGroupCreate ng1 = new NodeGroupCreate();
+      ngs[1] = ng1;
+      List<String> dataNodeRoles = new ArrayList<String>();
+      dataNodeRoles.add("hadoop_datanode");
+      ngs[1].setRoles(dataNodeRoles);
+      ngs[1].setName("data");
+      ngs[1].setInstanceNum(4);
+      ngs[1].setInstanceType(InstanceType.MEDIUM);
+      StorageRead storage = new StorageRead();
+      storage.setType("LOCAL");
+      storage.setSizeGB(50);
+      ngs[1].setStorage(storage);
+
+      NodeGroupCreate ng2 = new NodeGroupCreate();
+      ngs[2] = ng2;
+      List<String> computeNodeRoles = new ArrayList<String>();
+      computeNodeRoles.add("hadoop_tasktracker");
+      ngs[2].setRoles(computeNodeRoles);
+      ngs[2].setName("compute");
+      ngs[2].setInstanceNum(8);
+      ngs[2].setInstanceType(InstanceType.MEDIUM);
+      StorageRead storageCompute = new StorageRead();
+      storageCompute.setType("TEMPFS");
+      storageCompute.setSizeGB(50);
+      ngs[2].setStorage(storageCompute);
+      PlacementPolicy policy = new PlacementPolicy();
+      policy.setInstancePerHost(2);
+      List<GroupAssociation> associates = new ArrayList<GroupAssociation>();
+      GroupAssociation associate = new GroupAssociation();
+      associate.setReference("data");
+      associate.setType(GroupAssociationType.STRICT);
+      associates.add(associate);
+      policy.setGroupAssociations(associates);
+      ngs[2].setPlacementPolicies(policy);
+
+      spec.setNodeGroups(ngs);
+      spec = ClusterSpecFactory.getCustomizedSpec(spec);
+      clusterMgr.createClusterConfig(spec);
+
+      ClusterEntity cluster = ClusterEntity.findClusterEntityById(1l);
+      List<ClusterEntity> cs = DAL.findAll(ClusterEntity.class);
+      for (ClusterEntity c : cs ) {
+         System.out.println(c.getId());
+      }
+      cluster =
+            ClusterEntity.findClusterEntityByName("my-cluster-dc-tempfs");
+      Assert.assertTrue(cluster != null);
+
+      ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster-dc-tempfs");
+      String manifest = gson.toJson(attrs);
+      System.out.println(manifest);
+      Assert.assertTrue("manifest should contains nodegroups",
+            manifest.indexOf("master") != -1);
+      //Assert.assertTrue("manifest is inconsistent",
+        //    manifest.indexOf("{\"name\":\"my-cluster\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/master\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/worker\"},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"hive_server\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/client\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
    public void testClusterConfigWithGroupSlave() {

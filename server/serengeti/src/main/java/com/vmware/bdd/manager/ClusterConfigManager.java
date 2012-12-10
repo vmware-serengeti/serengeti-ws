@@ -362,14 +362,33 @@ public class ClusterConfigManager {
          EnumSet<HadoopRole> allRoles, boolean validateWhiteList) {
       Set<NodeGroupEntity> nodeGroups;
       nodeGroups = new HashSet<NodeGroupEntity>();
+      Set<String> referencedNodeGroups = new HashSet<String>();
       for (NodeGroupCreate group : groups) {
          NodeGroupEntity groupEntity =
                convertGroup(gson, clusterEntity, allRoles, group, distro,
                      validateWhiteList);
          if (groupEntity != null) {
             nodeGroups.add(groupEntity);
+            if (groupEntity.getStorageType() == DatastoreType.TEMPFS) {
+               for (NodeGroupAssociation associate : groupEntity.getGroupAssociations()) {
+                  referencedNodeGroups.add(associate.getReferencedGroup());
+               }
+               
+            }
          }
       }
+
+      //insert tempfs_server role into the referenced data node groups
+      for (String nodeGroupName : referencedNodeGroups) {
+         for (NodeGroupEntity groupEntity : nodeGroups) {
+            if (groupEntity.getName().equals(nodeGroupName)) {
+               List<String> sortedRoles = gson.fromJson(groupEntity.getRoles(), List.class);
+               sortedRoles.add(0, HadoopRole.TEMPFS_SERVER_ROLE.toString());
+               groupEntity.setRoles(gson.toJson(sortedRoles));
+            }
+         }
+      }
+
       return nodeGroups;
    }
 
@@ -381,24 +400,7 @@ public class ClusterConfigManager {
          throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(group.getName());
       }
       Set<String> roles = new HashSet<String>();
-      roles.addAll(group.getRoles());
-      List<String> sortedRolesByDependency = new ArrayList<String>();
-      sortedRolesByDependency.addAll(roles);
-      Collections.sort(sortedRolesByDependency, new RoleComparactor());
-      EnumSet<HadoopRole> enumRoles = getEnumRoles(group.getRoles(), distro);
-      if (enumRoles.isEmpty()) {
-         throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(group.getName());
-      }
-      groupEntity.setRoles(gson.toJson(sortedRolesByDependency));
-      GroupType groupType = GroupType.fromHadoopRole(enumRoles);
 
-      boolean removeIt =
-            validateGroupInstanceNum(clusterEntity.getName(), groupType, group,
-                  allRoles);
-      if (removeIt) {
-         return null;
-      }
-      allRoles.addAll(enumRoles);
       groupEntity.setCluster(clusterEntity);
       groupEntity.setCpuNum(group.getCpuNum());
       groupEntity.setDefineInstanceNum(group.getInstanceNum());
@@ -441,8 +443,12 @@ public class ClusterConfigManager {
          } else {
             groupEntity.setDiskBisect(false);
          }
-         if (group.getStorage().getType() != null) {
-            if (group.getStorage().getType().equals(DatastoreType.LOCAL.name())) {
+         String storageType = group.getStorage().getType();
+         if (storageType != null) {
+            if (storageType.equals(DatastoreType.TEMPFS.name())) {
+               groupEntity.setStorageType(DatastoreType.TEMPFS);
+               roles.add(HadoopRole.TEMPFS_CLIENT_ROLE.toString());
+            } else if (storageType.equals(DatastoreType.LOCAL.name())) {
                groupEntity.setStorageType(DatastoreType.LOCAL);
             } else {
                groupEntity.setStorageType(DatastoreType.SHARED);
@@ -450,6 +456,26 @@ public class ClusterConfigManager {
          }
          groupEntity.setVcDatastoreNameList(group.getStorage().getDsNames());
       }
+
+      roles.addAll(group.getRoles());
+      List<String> sortedRolesByDependency = new ArrayList<String>();
+      sortedRolesByDependency.addAll(roles);
+      Collections.sort(sortedRolesByDependency, new RoleComparactor());
+      EnumSet<HadoopRole> enumRoles = getEnumRoles(group.getRoles(), distro);
+      if (enumRoles.isEmpty()) {
+         throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(group.getName());
+      }
+      groupEntity.setRoles(gson.toJson(sortedRolesByDependency));
+      GroupType groupType = GroupType.fromHadoopRole(enumRoles);
+
+      boolean removeIt =
+            validateGroupInstanceNum(clusterEntity.getName(), groupType, group,
+                  allRoles);
+      if (removeIt) {
+         return null;
+      }
+      allRoles.addAll(enumRoles);
+
       List<String> dsNames = groupEntity.getVcDatastoreNameList();
       if (dsNames == null) {
          dsNames = clusterEntity.getVcDatastoreNameList();

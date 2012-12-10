@@ -26,9 +26,11 @@ public enum HadoopRole {
    ZOOKEEPER_ROLE("zookeeper"),
    //2 dependency
    HBASE_MASTER_ROLE("hbase_master"),
+   TEMPFS_SERVER_ROLE("tempfs_server"),
    HADOOP_DATANODE("hadoop_datanode"),
    HADOOP_JOBTRACKER_ROLE("hadoop_jobtracker"),
    //3 dependencies
+   TEMPFS_CLIENT_ROLE("tempf_client"),
    HADOOP_TASKTRACKER("hadoop_tasktracker"),
    HBASE_REGIONSERVER_ROLE("hbase_regionserver"),
    //4 dependencies

@@ -26,6 +26,10 @@ import java.util.TreeMap;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.spectypes.HadoopDistroMap;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.ServiceType;
@@ -303,6 +307,30 @@ public class ClusterCreate {
       return valid;
    }
 
+   public void validateTempfs(List<String> failedMsgList) {
+      for (NodeGroupCreate nodeGroupCreate : getNodeGroups()) {
+         StorageRead storageDef = nodeGroupCreate.getStorage();
+         if (storageDef != null) {
+            String storageType = storageDef.getType();
+            if (storageType != null && storageType.equals(DatastoreType.TEMPFS.toString())) {//tempfs disk type
+               if (nodeGroupCreate.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {//compute node
+                  PlacementPolicy placementPolicy = nodeGroupCreate.getPlacementPolicies();
+                  if (placementPolicy != null) {
+                     List<GroupAssociation> groupAssociations = placementPolicy.getGroupAssociations();
+                     if (groupAssociations != null) {
+                        GroupAssociationType associationType = groupAssociations.get(0).getType();
+                        if (associationType != null && associationType == GroupAssociationType.STRICT) {
+                           continue;
+                        }
+                     }
+                  }
+               }
+               failedMsgList.add(Constants.TEMPFS_NOT_ALLOWED);
+            }
+         }
+      }
+   }
+
    /*
     * Validate 2 cases. Case 1: compute node group with external hdfs node group.
     * Case 2: The dependency check of HDFS, MapReduce, HBase, Zookeeper, Hadoop 
@@ -422,6 +450,10 @@ public class ClusterCreate {
          validateNodeGroupPlacementPolicies(failedMsgList, warningMsgList);
 
          validateNodeGroupRoles(failedMsgList);
+         
+         // check tempfs relationship: if a compute node has strict association with a data node, its disk type
+         // can be set to "TEMPFS". Otherwise, it is not allowed to use tempfs as the disk type.
+         validateTempfs(failedMsgList);
 
          for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
             // check node group's instanceNum
