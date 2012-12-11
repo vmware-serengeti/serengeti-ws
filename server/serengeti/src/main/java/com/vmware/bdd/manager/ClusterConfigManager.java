@@ -373,7 +373,6 @@ public class ClusterConfigManager {
                for (NodeGroupAssociation associate : groupEntity.getGroupAssociations()) {
                   referencedNodeGroups.add(associate.getReferencedGroup());
                }
-               
             }
          }
       }
