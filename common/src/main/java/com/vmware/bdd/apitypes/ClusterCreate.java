@@ -521,7 +521,7 @@ public class ClusterCreate {
                      numOfJournalNode += nodeGroupCreate.getInstanceNum();
                      if (nodeGroupCreate.getRoles().contains(HadoopRole.HADOOP_DATANODE.toString()) ||
                            nodeGroupCreate.getRoles().contains(HadoopRole.HADOOP_CLIENT_ROLE.toString())) {
-                        failedMsgList.add(Constants.DATANODE_JOURNALNODE_COEXIST);
+                        failedMsgList.add(Constants.DATA_CLIENT_NODE_JOURNALNODE_COEXIST);
                      }
                      break;
                   case WORKER:
@@ -531,7 +531,8 @@ public class ClusterCreate {
                               failedMsgList);
                      } else if (isHAFlag(nodeGroupCreate)) {
                         warningMsgList.add(Constants.WORKER_CLIENT_HA_FLAG);
-                     }  
+                     }
+
                      //check if datanode and region server are seperate
                      List<String> roles = nodeGroupCreate.getRoles();
                      if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString()) && !roles.contains(HadoopRole.HADOOP_DATANODE.toString())) {

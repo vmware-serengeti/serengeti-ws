@@ -136,7 +136,7 @@ public class ClusterConfigManager {
       cluster.validateClusterCreate(failedMsgList, warningMsgList, distroMgr
             .getDistroByName(cluster.getDistro()).getRoles());
       if (!failedMsgList.isEmpty()) {
-         throw ClusterConfigException.INVALID_PLACEMENT_POLICIES(failedMsgList);
+         throw ClusterConfigException.INVALID_SPEC(failedMsgList);
       }
 
       if (!validateRacksInfo(cluster, failedMsgList)) {
@@ -502,12 +502,13 @@ public class ClusterConfigManager {
       groupEntity.setRoles(gson.toJson(sortedRolesByDependency));
       GroupType groupType = GroupType.fromHadoopRole(enumRoles);
 
-      boolean removeIt =
-            validateGroupInstanceNum(clusterEntity.getName(), groupType, group,
-                  allRoles);
-      if (removeIt) {
+      if (groupType == GroupType.CLIENT_GROUP && group.getInstanceNum() <= 0) {
+         logger.warn("Zero or negative instance number for group "
+               + group.getName()
+               + ", remove the client group from cluster spec.");
          return null;
       }
+
       allRoles.addAll(enumRoles);
 
       List<String> dsNames = groupEntity.getVcDatastoreNameList();
@@ -539,71 +540,6 @@ public class ClusterConfigManager {
       logger.debug("finished to convert node group config for "
             + group.getName());
       return groupEntity;
-   }
-
-   private boolean validateGroupInstanceNum(String clusterName,
-         GroupType groupType, NodeGroupCreate group,
-         EnumSet<HadoopRole> allRoles) {
-      boolean removeTheGroup = false;
-      switch (groupType) {
-      case MASTER_GROUP:
-         if (group.getInstanceNum() != 1) {
-            throw ClusterConfigException.INVALID_INSTANCE_NUMBER(
-                  group.getInstanceNum(), clusterName, group.getName());
-         }
-         if (allRoles.contains(HadoopRole.HADOOP_NAMENODE_ROLE)) {
-            throw ClusterConfigException
-                  .MORE_THAN_ONE_NAMENODE_GROUP(clusterName);
-         }
-         break;
-      case MASTER_JOBTRACKER_GROUP:
-         if (group.getInstanceNum() != 1) {
-            throw ClusterConfigException.INVALID_INSTANCE_NUMBER(
-                  group.getInstanceNum(), clusterName, group.getName());
-         }
-         if (allRoles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE)) {
-            throw ClusterConfigException
-                  .MORE_THAN_ONE_JOBTRACKER_GROUP(clusterName);
-         }
-         break;
-      case HBASE_MASTER_GROUP:
-         if (group.getInstanceNum() <= 0) {
-            throw ClusterConfigException.INVALID_INSTANCE_NUMBER(
-                  group.getInstanceNum(), clusterName, group.getName());
-         }
-         if (allRoles.contains(HadoopRole.HBASE_MASTER_ROLE)) {
-            throw ClusterConfigException
-                  .MORE_THAN_ONE_HBASEMASTER_GROUP(clusterName);
-         }
-         break;
-      case ZOOKEEPER_GROUP:
-         if (group.getInstanceNum() <= 2) {
-            throw ClusterConfigException.INVALID_INSTANCE_NUMBER(
-                  group.getInstanceNum(), clusterName, group.getName());
-         }
-         if (allRoles.contains(HadoopRole.ZOOKEEPER_ROLE)) {
-            throw ClusterConfigException
-                  .MORE_THAN_ONE_ZOOKEEPER_GROUP(clusterName);
-         }
-         break;
-      case WORKER_GROUP:
-         if (group.getInstanceNum() <= 0) {
-            throw ClusterConfigException.INVALID_INSTANCE_NUMBER(
-                  group.getInstanceNum(), clusterName, group.getName());
-         }
-         break;
-      case CLIENT_GROUP:
-         if (group.getInstanceNum() <= 0) {
-            logger.warn("Zero or negative instance number for group "
-                  + group.getName()
-                  + ", remove the client group from cluster spec.");
-            removeTheGroup = true;
-         }
-         break;
-      default:
-         break;
-      }
-      return removeTheGroup;
    }
 
    public ClusterCreate getClusterConfig(final String clusterName) {

@@ -337,6 +337,7 @@ public class ClusterCommandsTest extends MockRestServer {
        roles.add("hbase_regionserver");
        roles.add("hbase_client");
        roles.add("zookeeper");
+       roles.add("hadoop_journalnode");
        distro.setRoles(roles);
        distros[0] = distro;
        NetworkRead[] networks = new NetworkRead[1];
@@ -380,6 +381,16 @@ public class ClusterCommandsTest extends MockRestServer {
              HttpStatus.NO_CONTENT, "");
        clusterCommands.createCluster("cluster1WithDCSeperationSpec", null, null, "src/test/resources/data_compute_separation_cluster.json", null, null, null, null, false, false, true);
 
+       setup();
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(distros));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(networks));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + Constants.DEFAULT_DISTRO, HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(distro));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/clusters", HttpMethod.POST,
+             HttpStatus.NO_CONTENT, "");
+       clusterCommands.createCluster("cluster1WithNameNodeHASpec", null, null, "src/test/resources/namenode_ha_cluster.json", null, null, null, null, false, false, true);
        CookieCache.clear();
     }
 

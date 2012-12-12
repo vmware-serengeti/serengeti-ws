@@ -25,7 +25,8 @@ public enum GroupType {
    HBASE_MASTER_GROUP("hbase_master"),
    WORKER_GROUP("worker"), 
    CLIENT_GROUP("client"),
-   ZOOKEEPER_GROUP("zookeeper");
+   ZOOKEEPER_GROUP("zookeeper"),
+   JOURNALNODE_GROUP("journalnode");
 
    private String description;
 
@@ -70,6 +71,8 @@ public enum GroupType {
          return HBASE_MASTER_GROUP;
       } else if(roles.contains(HadoopRole.ZOOKEEPER_ROLE)){
          return ZOOKEEPER_GROUP;
+      } else if (roles.contains(HadoopRole.HADOOP_JOURNALNODE_ROLE)) {
+         return JOURNALNODE_GROUP;   
       } else {
          return CLIENT_GROUP;
       }
