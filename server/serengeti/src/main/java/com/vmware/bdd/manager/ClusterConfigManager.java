@@ -68,6 +68,7 @@ public class ClusterConfigManager {
          .getLogger(ClusterConfigManager.class);
    private static final String TEMPLATE_ID = "template_id";
    private static final String HTTP_PROXY = "serengeti.http_proxy";
+   private static final String NO_PROXY = "serengeti.no_proxy";
    private VcResourcePoolManager rpMgr;
    private NetworkManager networkMgr;
    private DistroManager distroMgr;
@@ -76,6 +77,7 @@ public class ClusterConfigManager {
    private String templateId = Configuration.getString(TEMPLATE_ID.toString(),
          "centos57-x64");
    private String httpProxy = Configuration.getString(HTTP_PROXY.toString(), "");
+   private String noProxy = Configuration.getString(NO_PROXY.toString(), "");
 
    public VcDataStoreManager getDatastoreMgr() {
       return datastoreMgr;
@@ -638,6 +640,7 @@ public class ClusterConfigManager {
       CommonClusterExpandPolicy.expandDistro(clusterEntity, clusterConfig,
             distroMgr);
       clusterConfig.setHttpProxy(httpProxy);
+      clusterConfig.setNoProxy(noProxy);
       clusterConfig.setTopologyPolicy(clusterEntity.getTopologyPolicy());
 
       Map<String, String> hostToRackMap = rackInfoMgr.exportHostRackMap();

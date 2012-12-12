@@ -53,6 +53,9 @@ public class ClusterCreate {
    @Expose
    @SerializedName("http_proxy")
    private String httpProxy;
+   @Expose
+   @SerializedName("no_proxy")
+   private String noProxy;
    private List<String> rpNames;
    @Expose
    @SerializedName("vc_clusters")
@@ -161,6 +164,14 @@ public class ClusterCreate {
 
    public void setHttpProxy(String httpProxy) {
       this.httpProxy = httpProxy;
+   }
+
+   public String getNoProxy() {
+      return noProxy;
+   }
+
+   public void setNoProxy(String noProxy) {
+      this.noProxy = noProxy;
    }
 
    public List<String> getRpNames() {
