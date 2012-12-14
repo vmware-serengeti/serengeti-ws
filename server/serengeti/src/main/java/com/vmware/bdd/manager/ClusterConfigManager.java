@@ -77,7 +77,7 @@ public class ClusterConfigManager {
    private String templateId = Configuration.getString(TEMPLATE_ID.toString(),
          "centos57-x64");
    private String httpProxy = Configuration.getString(HTTP_PROXY.toString(), "");
-   private String noProxy = Configuration.getString(NO_PROXY.toString(), "");
+   private String noProxy = Configuration.getStrings(NO_PROXY.toString(), "");
 
    public VcDataStoreManager getDatastoreMgr() {
       return datastoreMgr;

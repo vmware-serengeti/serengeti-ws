@@ -147,6 +147,28 @@ public class Configuration {
    }
 
    /**
+    * Get all of values in a property as a string type.
+    * @param key
+    *           The key of property.
+    * @param defautValue
+    *           The default value.
+    * @return The property value.
+    */
+   public static String getStrings(String key, String defautValue) {
+      String[] values = _config.getStringArray(key);
+      if (values != null && values.length > 0) {
+         StringBuffer buffer = new StringBuffer();
+         for (String value : values) {
+            buffer.append(value.trim()).append(",");
+         }
+         buffer.delete(buffer.length() - 1, buffer.length());
+         return buffer.toString();
+      } else {
+         return defautValue;
+      }
+   }
+
+   /**
     * Gets a whitespace trimmed non-empty string property.
     * 
     * @param key
