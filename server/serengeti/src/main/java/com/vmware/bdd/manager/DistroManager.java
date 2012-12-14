@@ -198,8 +198,10 @@ public class DistroManager {
             Type type = new TypeToken<ArrayList<Distro>>() {
             }.getType();
             List<Distro> distrosList = gson.fromJson(readDistroManifest(), type);
-            for (Distro d : distrosList) {
-               distrosLoading.put(d.getName(), d);
+            if (distrosList != null) {
+               for (Distro d : distrosList) {
+                  distrosLoading.put(d.getName(), d);
+               }
             }
          } catch (JsonSyntaxException e) {
             logger.error("failed to parse manifest: " + distrosManifestUrl, e);
