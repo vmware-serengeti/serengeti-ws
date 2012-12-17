@@ -20,13 +20,13 @@ import java.util.EnumSet;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 
 public enum GroupType {
-   MASTER_GROUP("master"), 
-   MASTER_JOBTRACKER_GROUP("job_tracker"),
-   HBASE_MASTER_GROUP("hbase_master"),
-   WORKER_GROUP("worker"), 
-   CLIENT_GROUP("client"),
    ZOOKEEPER_GROUP("zookeeper"),
-   JOURNALNODE_GROUP("journalnode");
+   JOURNALNODE_GROUP("journalnode"),
+   MASTER_GROUP("master"), 
+   HBASE_MASTER_GROUP("hbase_master"),
+   MASTER_JOBTRACKER_GROUP("job_tracker"),
+   WORKER_GROUP("worker"), 
+   CLIENT_GROUP("client");
 
    private String description;
 

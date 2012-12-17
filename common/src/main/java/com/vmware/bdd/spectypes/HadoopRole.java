@@ -20,10 +20,10 @@ public enum HadoopRole {
    //NOTE: when you add a new role, please put it into an appropriate position
    //based on their dependencies. The more dependent, the latter position
    //0 dependency
+   ZOOKEEPER_ROLE("zookeeper"),
    HADOOP_JOURNALNODE_ROLE("hadoop_journalnode"), //for cdh4 namenode ha
    //1 dependency
    HADOOP_NAMENODE_ROLE("hadoop_namenode"),
-   ZOOKEEPER_ROLE("zookeeper"),
    //2 dependency
    HBASE_MASTER_ROLE("hbase_master"),
    TEMPFS_SERVER_ROLE("tempfs_server"),
