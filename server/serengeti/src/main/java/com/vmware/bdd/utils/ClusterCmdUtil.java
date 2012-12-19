@@ -14,10 +14,15 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.TaskEntity;
 
 public class ClusterCmdUtil {
+   private static final Level logLevel = Logger
+         .getRootLogger().getLevel();
    private static final String QUERY_CLUSTER_CMD = Configuration
    .getNonEmptyString("query_cluster.cmd");
    private static final String CREATE_CLUSTER_CMD = Configuration
@@ -33,46 +38,57 @@ public class ClusterCmdUtil {
    private static final String CONFIGURE_CLUSTER_CMD = Configuration
          .getNonEmptyString("configure_cluster.cmd");
 
+   private static String getCommandWithLogLevel(String command) {
+      if (logLevel.isGreaterOrEqual(Level.ERROR)) {
+         return command;
+      } else if (logLevel.isGreaterOrEqual(Level.INFO)) {
+         return command + " -V";
+      } else { 
+         return command + " -VV";
+      }
+   }
+   
    public static String[] getQueryClusterCmdArray(String clusterName,
          String fileName) {
-      return QUERY_CLUSTER_CMD.replaceAll(":cluster_name", clusterName)
+      return getCommandWithLogLevel(QUERY_CLUSTER_CMD).replaceAll(":cluster_name", clusterName)
             .replaceAll(":json_file", fileName).split(" ");
+      
    }
 
    public static String[] getCreateClusterCmdArray(String clusterName,
          String fileName) {
       // TODO: handling spaces between quote 
-      return CREATE_CLUSTER_CMD.replaceAll(":cluster_name", clusterName)
+      return getCommandWithLogLevel(CREATE_CLUSTER_CMD).replaceAll(":cluster_name", clusterName)
             .replaceAll(":json_file", fileName).split(" ");
    }
 
    public static String[] getDeleteClusterCmdArray(String clusterName,
          String fileName) {
-      return DELETE_CLUSTER_CMD.replaceAll(":cluster_name", clusterName)
+      return getCommandWithLogLevel(DELETE_CLUSTER_CMD).replaceAll(":cluster_name", clusterName)
             .replaceAll(":json_file", fileName).split(" ");
    }
 
    public static String[] getStartClusterNodesCmdArray(String nodesName,
          String fileName) {
-      return START_NODES_CMD.replaceAll(":nodes_name", nodesName)
+      return getCommandWithLogLevel(START_NODES_CMD).replaceAll(":nodes_name", nodesName)
             .replaceAll(":json_file", fileName).split(" ");
    }
 
    public static String[] getStopClusterNodesCmdArray(String nodesName,
          String fileName) {
-      return STOP_NODES_CMD.replaceAll(":nodes_name", nodesName)
+      return getCommandWithLogLevel(STOP_NODES_CMD).replaceAll(":nodes_name", nodesName)
             .replaceAll(":json_file", fileName).split(" ");
    }
 
    public static String[] getUpdatetClusterCmdArray(String clusterName,
          String fileName) {
-      return UPDATE_CLUSTER_CMD.replaceAll(":cluster_name", clusterName)
+      return getCommandWithLogLevel(UPDATE_CLUSTER_CMD).replaceAll(":cluster_name", clusterName)
             .replaceAll(":json_file", fileName).split(" ");
    }
 
    public static String[] getConfigureClusterCmdArray(String clusterName,
          String fileName) {
-      return CONFIGURE_CLUSTER_CMD.replaceAll(":cluster_name", clusterName)
+      return getCommandWithLogLevel(CONFIGURE_CLUSTER_CMD).replaceAll(":cluster_name", clusterName)
             .replaceAll(":json_file", fileName).split(" ");
    }
 
