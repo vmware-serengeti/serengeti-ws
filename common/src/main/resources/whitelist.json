@@ -880,6 +880,15 @@
           "name": "hadoop.root.logger"
         },
         {
+          "name": "log4j.appender.DRFA.MaxBackupIndex"
+        },
+        {
+          "name": "log4j.appender.RFA.MaxBackupIndex"
+        },
+        {
+          "name": "log4j.appender.RFA.MaxFileSize"
+        },
+        {
           "name": "hadoop.security.logger"
         }
       ]
