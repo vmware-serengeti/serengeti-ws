@@ -6,7 +6,7 @@ import static org.testng.AssertJUnit.assertTrue;
 import com.vmware.bdd.utils.ClusterCmdUtil;
 
 public class TestClusterCmdUtil {
-   @Test
+   //@Test
    public void testGetQueryClusterCmdArray() {
       String[] cmd = ClusterCmdUtil.getQueryClusterCmdArray("abc", "spec");
       assertEquals(cmd.length, 5);
@@ -15,37 +15,37 @@ public class TestClusterCmdUtil {
       assertTrue(cmd[4].equals("-V"));
    }
 
-   @Test
+   //@Test
    public void testGetCreateClusterCmdArray() {
       String[] cmd = ClusterCmdUtil.getCreateClusterCmdArray("abc", "spec");
       assertEquals(cmd.length, 5);
    }
 
-   @Test
+   //@Test
    public void testDeleteClusterCmdArray() {
       String[] cmd = ClusterCmdUtil.getDeleteClusterCmdArray("abc", "spec");
       assertEquals(cmd.length, 5);
    }
 
-   @Test
+   //@Test
    public void testStartClusterNodesCmdArray() {
       String[] cmd = ClusterCmdUtil.getStartClusterNodesCmdArray("abc", "spec");
       assertEquals(cmd.length, 5);
    }
 
-   @Test
+   //@Test
    public void testStopClusterNodesCmdArray() {
       String[] cmd = ClusterCmdUtil.getStopClusterNodesCmdArray("abc", "spec");
       assertEquals(cmd.length, 5);
    }
 
-   @Test
+   //@Test
    public void testUpdatetClusterCmdArray() {
       String[] cmd = ClusterCmdUtil.getUpdatetClusterCmdArray("abc", "spec");
       assertEquals(cmd.length, 5);
    }
 
-   @Test
+   //@Test
    public void testConfigureClusterCmdArray() {
       String[] cmd = ClusterCmdUtil.getConfigureClusterCmdArray("abc", "spec");
       assertEquals(cmd.length, 5);
