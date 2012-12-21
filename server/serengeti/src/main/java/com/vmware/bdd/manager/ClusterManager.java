@@ -310,6 +310,8 @@ public class ClusterManager {
       spec.setValidateConfig(null);
       spec.setTopologyPolicy(null);
       spec.setHostToRackMap(null);
+      spec.setHttpProxy(null);
+      spec.setNoProxy(null);
       NodeGroupCreate[] groups = spec.getNodeGroups();
       if (groups != null) {
          for (NodeGroupCreate group : groups) {
