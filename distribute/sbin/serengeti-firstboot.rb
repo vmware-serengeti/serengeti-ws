@@ -43,10 +43,16 @@ SERENGETI_PRIVATE_KEY="/opt/serengeti/.certs/private.pem"
 SERENGETI_KEYSTORE_PATH="/opt/serengeti/.certs/serengeti.jks"
 SERENGETI_KEYSTORE_PWD=%x[openssl rand -base64 6].strip
 
+ENTERPRISE_EDITION_FLAG="/opt/serengeti/etc/enterprise"
+
 VCEXT_TOOL_DIR="/opt/serengeti/vcext"
 VCEXT_TOOL_JAR=%x[ls #{VCEXT_TOOL_DIR}/vcext-*.jar].strip
 
 GENERATE_CERT_SCRIPT="/opt/serengeti/sbin/generate-certs.sh"
+
+def is_enterprise_edition?
+  File.exist? ENTERPRISE_EDITION_FLAG
+end
 
 def get_extension_id
   if File.exist? SERENGETI_CLOUD_MANAGER_CONF
@@ -207,21 +213,22 @@ SHELLEOF
 echo "PATH=\\$PATH:\"#{SERENGETI_SCRIPTS_HOME}\"" >> /etc/profile
 echo "CLOUD_MANAGER_CONFIG_DIR=\"#{SERENGETI_HOME}\"/conf" >> /etc/profile
 
-# generate certificate and private key
-bash #{GENERATE_CERT_SCRIPT} #{SERENGETI_KEYSTORE_PWD}
-
 # register serengeti server as vc extension service
-echo "registering serengeti server as vc ext service"
-java -jar #{VCEXT_TOOL_JAR} \
-  -evsURL "#{h["evs_url"]}" \
-  -evsToken "#{h["evs_token"]}" \
-  -evsThumbprint "#{h["evs_thumbprint"]}" \
-  -extKey "#{SERENGETI_VCEXT_ID}" \
-  -cert "#{SERENGETI_CERT_FILE}"
-ret=$?
-if [ $ret != 0 ]; then
-  echo "failed to register serengeti server as vc ext service"
-  exit 1
+if [ -e #{ENTERPRISE_EDITION_FLAG} -a "#{VCEXT_TOOL_JAR}" != "" ]; then
+  # generate certificate and private key
+  bash #{GENERATE_CERT_SCRIPT} #{SERENGETI_KEYSTORE_PWD}
+  echo "registering serengeti server as vc ext service"
+  java -jar #{VCEXT_TOOL_JAR} \
+    -evsURL "#{h["evs_url"]}" \
+    -evsToken "#{h["evs_token"]}" \
+    -evsThumbprint "#{h["evs_thumbprint"]}" \
+    -extKey "#{SERENGETI_VCEXT_ID}" \
+    -cert "#{SERENGETI_CERT_FILE}"
+  ret=$?
+  if [ $ret != 0 ]; then
+    echo "failed to register serengeti server as vc ext service"
+    exit 1
+  fi
 fi
 
 EOF
@@ -232,10 +239,14 @@ def get_connection_info(vc_info)
     :vsphere_server => vc_info["evs_IP"]
   }
 
-  info[:cert] = SERENGETI_CERT_FILE
-  info[:key] = SERENGETI_PRIVATE_KEY
-  info[:extension_key] = SERENGETI_VCEXT_ID
-
+  if is_enterprise_edition? 
+    info[:cert] = SERENGETI_CERT_FILE
+    info[:key] = SERENGETI_PRIVATE_KEY
+    info[:extension_key] = SERENGETI_VCEXT_ID
+  else
+    info[:vsphere_username] = vc_info["vcusername"]
+    info[:vsphere_password] = vc_info["vcpassword"]
+  end
   info
 end
 
@@ -284,9 +295,14 @@ sed -i "s/template_id = .*/#{templateid}/" "#{SERENGETI_WEBAPP_CONF}"
 
 echo "vc_addr: #{h["evs_IP"]}" > "#{SERENGETI_CLOUD_MANAGER_CONF}"
 
-echo "key: #{SERENGETI_PRIVATE_KEY}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
-echo "cert: #{SERENGETI_CERT_FILE}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
-echo "extension_key: #{SERENGETI_VCEXT_ID}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+if [ -e #{ENTERPRISE_EDITION_FLAG} ]; then
+  echo "key: #{SERENGETI_PRIVATE_KEY}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+  echo "cert: #{SERENGETI_CERT_FILE}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+  echo "extension_key: #{SERENGETI_VCEXT_ID}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+else
+  echo "vc_user: #{vcuser}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+  echo "vc_pwd: #{updateVCPassword}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
+fi
 
 chmod 400 "#{SERENGETI_CLOUD_MANAGER_CONF}"
 chown serengeti:serengeti "#{SERENGETI_CLOUD_MANAGER_CONF}"
