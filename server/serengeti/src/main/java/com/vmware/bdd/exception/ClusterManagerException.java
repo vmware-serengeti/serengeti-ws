@@ -77,4 +77,9 @@ public class ClusterManagerException extends BddException {
          String reason) {
       return new ClusterManagerException(null, "CANNOT_LIMIT_CLUSTER", clusterName, reason);
    }
+
+   public static ClusterManagerException PRIORITIZE_CLUSTER_NOT_ALLOWED_ERROR(String clusterName,
+         String reason) {
+      return new ClusterManagerException(null, "CANNOT_PRIORITIZE_CLUSTER", clusterName, reason);
+   }
 }

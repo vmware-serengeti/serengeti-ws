@@ -54,6 +54,9 @@ public class NodeGroupRead {
    @SerializedName("placement_policies")
    private PlacementPolicy placementPolicies;
 
+   //this is for cli output only
+   private int runningNodesNum;
+
    public String getName() {
       return name;
    }
@@ -124,5 +127,13 @@ public class NodeGroupRead {
 
    public void setPlacementPolicies(PlacementPolicy placementPolicies) {
       this.placementPolicies = placementPolicies;
+   }
+
+   public int getRunningNodesNum() {
+      return runningNodesNum;
+   }
+
+   public void setRunningNodesNum(int runningNodesNum) {
+      this.runningNodesNum = runningNodesNum;
    }
 }

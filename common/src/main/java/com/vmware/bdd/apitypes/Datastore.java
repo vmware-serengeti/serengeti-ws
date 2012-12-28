@@ -20,9 +20,9 @@ package com.vmware.bdd.apitypes;
  * </p>
  */
 public class Datastore {
-   
+
    public enum DatastoreType {
       SHARED, LOCAL, TEMPFS
    }
-   
+
 }

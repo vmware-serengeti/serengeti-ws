@@ -36,6 +36,7 @@ import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
+import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
@@ -52,6 +53,7 @@ import com.vmware.bdd.manager.task.ConfigureClusterListener;
 import com.vmware.bdd.manager.task.CreateClusterListener;
 import com.vmware.bdd.manager.task.DeleteClusterListener;
 import com.vmware.bdd.manager.task.MessageTaskWorker;
+import com.vmware.bdd.manager.task.PrioritizeClusterListener;
 import com.vmware.bdd.manager.task.QueryClusterListener;
 import com.vmware.bdd.manager.task.StartClusterListener;
 import com.vmware.bdd.manager.task.StopClusterListener;
@@ -844,6 +846,30 @@ public class ClusterManager {
       taskManager.submit(task, new MessageTaskWorker(sendParam));
 
       return task.getId();
+   }
+
+   /*
+    * Change the disk I/O priority of the cluster or a node group   
+    */
+   public Long prioritizeCluster(final String clusterName,
+         final String nodeGroupName, final Priority diskIOPriority) throws Exception {
+      if (nodeGroupName == null) {
+         logger.info("Change the node group "+ nodeGroupName + " disk I/O priority to " + diskIOPriority);
+      } else {
+         logger.info("Change the cluster " + clusterName + " disk I/O priority to " + diskIOPriority);
+      }
+      ClusterEntity cluster =
+            ClusterEntity.findClusterEntityByName(clusterName);
+      // cluster must be running or stopped status
+      if (!ClusterStatus.RUNNING.equals(cluster.getStatus()) || !ClusterStatus.STOPPED.equals(cluster.getStatus())) {
+         String msg = "Cluster is not in running or stopped status.";
+         logger.error(msg);
+         throw ClusterManagerException.LIMIT_CLUSTER_NOT_ALLOWED_ERROR(clusterName, msg);
+      }
+      PrioritizeClusterListener listener =
+            new PrioritizeClusterListener(clusterName);
+      return createClusterMgmtTaskWithErrorSetting(cluster, listener,
+            ClusterStatus.PRIORITIZING);
    }
 
    static class SystemProperties {

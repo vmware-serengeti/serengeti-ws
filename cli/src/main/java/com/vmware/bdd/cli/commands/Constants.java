@@ -83,8 +83,8 @@ public class Constants {
    public static final String OUTPUT_OP_STOP = "stop";
    public static final String OUTPUT_OP_RESIZE = "resize";
    public static final String OUTPUT_OP_QUOTA_SET = "quota";
-   public static final String OUTPUT_OP_ADJUSTMENT = "Adjustment";
-   public static final String OUTPUT_OP_ADJUSTMENT_SUCCEEDED = "succeeded";
+   public static final String OUTPUT_OP_LIMIT = "limit";
+   public static final String OUTPUT_OP_UNLIMIT = "unlimit";
    public static final String OUTPUT_OP_ADJUSTMENT_FAILED = "failed";
    public static final String OUTPUT_OP_RESUME = "resume";
    public static final String OUTPUT_OP_RESULT_FAIL = "failed";
@@ -97,6 +97,12 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_RESUME = "resumed";
    public static final String OUTPUT_OP_RESULT_ADD = "added";
    public static final String OUTPUT_OP_RESULT_UPLOAD = "uploaded";
+   public static final String OUTPUT_OP_RESULT_LIMIT = "limited";
+   public static final String OUTPUT_OP_RESULT_STOP_COMPUTE_NODE = "compute nodes stopped";
+   public static final String OUTPUT_OP_RESULT_START_COMPUTE_NODE = "compute nodes started";
+   public static final String OUTPUT_OP_RESULT_UNLIMIT = "unlimited";
+   public static final String OUTPUT_OP_RESULT_PRIORITY = "prioritized";
+   public static final String OUTPUT_OP_RESULT_PRIORITY_RESET = "priority reset";
    public static final String OUTPUT_OP_NODEGROUP_MISSING = "must specify nodegroup name when node name is specified";
    public static final String OUTPUT_UNKNOWN_HOST = "unknown host";
    public static final String OUTPUT_HOST_REFUSE = "Connection refused. Please check the port number.";
@@ -167,6 +173,8 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_MEM = "MEM(MB)";
    public static final String FORMAT_TABLE_COLUMN_TYPE = "TYPE";
    public static final String FORMAT_TABLE_COLUMN_SIZE = "SIZE(GB)";
+   public static final String FORMAT_TABLE_COLUMN_RUNNING_NODES = "RUNNING NODE NUMBER";
+   public static final String FORMAT_TABLE_COLUMN_IOSHARES = "I/O PRIORITY";
    public static final String FORMAT_TABLE_COLUMN_RACK = "RACK";
    public static final String FORMAT_TABLE_COLUMN_HOST = "HOST";
    public static final String FORMAT_TABLE_COLUMN_PHYSICAL_HOST = "PHYSICAL HOST";
@@ -208,4 +216,6 @@ public class Constants {
    public static final String CONNECT_CHECK_LOGIN = "You are not login, please run connect first!";
    public static final String CONNECT_SESSION_TIME_OUT = "Session timeout, please run connect again!";
    public static final String OUTPUT_OBJECT_CONNECT = "connect";
+   public static final String NODE_RUNNING_STATUS = "Service Ready";
+   public static final String AT_LEAST_ONE_OPTION = "Please use at least one option.";
 }
