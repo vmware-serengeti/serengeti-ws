@@ -93,6 +93,7 @@ public class TestClusterManager {
       clusterManager.setClusterConfigMgr(ccMgr);
       clusterManager.setTaskManager(new TaskManager());
       clusterManager.setNetworkManager(new NetworkManager());
+      clusterManager.setDistroManager(new DistroManager());
 
       Set<String> rpNames = vcmgr.getRpMgr().getAllRPNames();
       for (String name : rpNames) {

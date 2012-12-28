@@ -38,7 +38,21 @@ public enum HadoopRole {
    HBASE_CLIENT_ROLE("hbase_client"),
    PIG_ROLE("pig"), 
    HIVE_ROLE("hive"),
-   HIVE_SERVER_ROLE("hive_server");
+   HIVE_SERVER_ROLE("hive_server"),
+   // mapr
+   MAPR_CLDB_ROLE("mapr_cldb"),
+   MAPR_JOBTRACKER_ROLE("mapr_jobtracker"),
+   MAPR_NFS_ROLE("mapr_nfs"),
+   MAPR_WEBSERVER_ROLE("mapr_webserver"),
+   MAPR_FILESERVER_ROLE("mapr_fileserver"),
+   MAPR_TASKTRACKER_ROLE("mapr_tasktracker"),
+   MAPR_METRICS_ROLE("mapr_metrics"),
+   MAPR_MYSQL_CLIENT_ROLE("mapr_mysql_client"),
+   MAPR_NODE_ROLE("mapr_node"),
+   MAPR_PIG_ROLE("mapr_pig"),
+   MAPR_HIVE_ROLE("mapr_hive"),
+   MAPR_ZOOKEEPER_ROLE("mapr_zookeeper"),
+   MAPR_MYSQL_SERVER_ROLE("mapr_mysql_server");
 
    private String description;
 

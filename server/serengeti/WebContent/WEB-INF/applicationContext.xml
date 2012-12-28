@@ -48,6 +48,9 @@
       <property name="taskManager">
          <ref bean="taskManager" />
       </property>
+      <property name="distroManager">
+         <ref bean="distroManager" />
+      </property>
    </bean>
 
    <bean id="requestLoggingFilter"

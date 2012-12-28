@@ -48,7 +48,6 @@ import com.vmware.bdd.cli.rest.NetworkRestClient;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AppConfigValidationUtils;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
-import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ValidateResult;
 
 @Component
@@ -71,11 +70,6 @@ public class ClusterCommands implements CommandMarker {
    private String hiveServerUrl;
    private String targetClusterName;
 
-   //define role of the node group .
-   private enum NodeGroupRole {
-      MASTER, JOB_TRACKER, WORKER, CLIENT, HBASE_MASTER, ZOOKEEPER, JOURNAL_NODE, NONE
-   }
-
    @CliAvailabilityIndicator({ "cluster help" })
    public boolean isCommandAvailable() {
       return true;
@@ -85,7 +79,7 @@ public class ClusterCommands implements CommandMarker {
    public void createCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
          @CliOption(key = { "type" }, mandatory = false, help = "The cluster type is Hadoop or HBase") final String type,
-         @CliOption(key = { "distro" }, mandatory = false, help = "Hadoop Distro") final String distro,
+         @CliOption(key = { "distro" }, mandatory = false, help = "A hadoop distro name") final String distro,
          @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath,
          @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
@@ -145,27 +139,33 @@ public class ClusterCommands implements CommandMarker {
          clusterCreate.setTopologyPolicy(TopologyType.NONE);
       }
 
-      List<String> distroNames = getDistroNames();
-      if (distro != null) {
-         if (validName(distro, distroNames)) {
-            clusterCreate.setDistro(distro);
+      try {
+         if (distro != null) {
+            List<String> distroNames = getDistroNames();
+            if (validName(distro, distroNames)) {
+               clusterCreate.setDistro(distro);
+            } else {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                     name, Constants.OUTPUT_OP_CREATE,
+                     Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_DISTRO
+                           + Constants.PARAM_NOT_SUPPORTED + distroNames);
+               return;
+            }
          } else {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  name, Constants.OUTPUT_OP_CREATE,
-                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_DISTRO
-                        + Constants.PARAM_NOT_SUPPORTED + distroNames);
-            return;
+            String defaultDistroName = clusterCreate.getDefaultDistroName(distroRestClient.getAll());
+            if (CommandsUtils.isBlank(defaultDistroName)) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                     name, Constants.OUTPUT_OP_CREATE,
+                     Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM__NO_DEFAULT_DISTRO);
+               return;
+            } else {
+               clusterCreate.setDistro(defaultDistroName);
+            }
          }
-      } else {
-         int index = distroNames.indexOf(Constants.DEFAULT_DISTRO);
-         if (index == -1) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  name, Constants.OUTPUT_OP_CREATE,
-                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM__NO_DEFAULT_DISTRO);
-            return;
-         } else {
-            clusterCreate.setDistro(distroNames.get(index));
-         }
+      } catch (CliRestException e) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CREATE,
+               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+         return;
       }
 
       if (rpNames != null) {
@@ -990,11 +990,6 @@ public class ClusterCommands implements CommandMarker {
          warningMsgBuff.append(Constants.PARAM_CLUSTER_NOT_TAKE_EFFECT);
       }
       return warningMsgBuff.toString();
-   }
-
-   private boolean isHAFlag(NodeGroupCreate nodeGroupCreate) {
-      return !CommonUtil.isBlank(nodeGroupCreate.getHaFlag())
-            && !nodeGroupCreate.getHaFlag().equalsIgnoreCase("off");
    }
 
    private boolean validateHAInfo(NodeGroupCreate[] nodeGroups) {

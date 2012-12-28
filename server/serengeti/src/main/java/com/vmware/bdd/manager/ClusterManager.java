@@ -33,6 +33,7 @@ import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
@@ -72,6 +73,7 @@ public class ClusterManager {
    private CloudProviderManager cloudProviderMgr;
    private NetworkManager networkManager;
    private TaskManager taskManager;
+   private DistroManager distroManager;
 
    public ClusterConfigManager getClusterConfigMgr() {
       return clusterConfigMgr;
@@ -103,6 +105,14 @@ public class ClusterManager {
 
    public void setTaskManager(TaskManager taskManager) {
       this.taskManager = taskManager;
+   }
+
+   public DistroManager getDistroManager() {
+      return distroManager;
+   }
+
+   public void setDistroManager(DistroManager distroManager) {
+      this.distroManager = distroManager;
    }
 
    public Map<String, Object> getClusterConfigManifest(
@@ -337,6 +347,11 @@ public class ClusterManager {
    }
 
    public Long createCluster(ClusterCreate createSpec) throws Exception {
+
+      if (CommonUtil.isBlank(createSpec.getDistro())) {
+         setDefaultDistro(createSpec);
+      }
+      setVendorInfo(createSpec);
       createSpec = ClusterSpecFactory.getCustomizedSpec(createSpec);
 
       String name = createSpec.getName();
@@ -366,6 +381,17 @@ public class ClusterManager {
          });
          throw e;
       }
+   }
+
+   private void setDefaultDistro(ClusterCreate createSpec) {
+         List<DistroRead> distroList = distroManager.getDistros();
+         DistroRead[] distros = new DistroRead[distroList.size()];
+         createSpec.setDistro(createSpec.getDefaultDistroName(distroList.toArray(distros)));
+   }
+
+   private void setVendorInfo(ClusterCreate createSpec) {
+      DistroRead distroRead=this.getDistroManager().getDistroByName(createSpec.getDistro());
+      createSpec.setVendor(distroRead.getVendor());
    }
 
    public Long configCluster(String clusterName, ClusterCreate createSpec)

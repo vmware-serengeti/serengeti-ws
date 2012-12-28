@@ -83,7 +83,8 @@ public class ClusterConfigException extends BddException {
       return new ClusterConfigException(null, "INVALID_PLACEMENT_POLICIES", errors);
    }
    public static ClusterConfigException INVALID_SPEC(List<String> errors) {
-      return new ClusterConfigException(null, "INVALID_SPECIFICATION", errors);
+      String errorStr = errors.toString().substring(1,errors.toString().length()-1);
+      return new ClusterConfigException(null, "INVALID_SPECIFICATION", errorStr);
    }
    public static ClusterConfigException TOPOLOGY_WITH_NO_MAPPING_INFO_EXIST(String topology) {
       return new ClusterConfigException(null, "TOPOLOGY_WITH_NO_MAPPING_INFO_EXIST", topology);

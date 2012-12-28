@@ -44,6 +44,7 @@ public class ClusterCreate {
    @Expose
    private String name;
    private ClusterType type;
+   private String vendor;
    private String externalHDFS;
    @Expose
    @SerializedName("groups")
@@ -102,6 +103,7 @@ public class ClusterCreate {
       this.distro = cluster.distro;
       this.name = cluster.name;
       this.type = cluster.type;
+      this.vendor = cluster.vendor;
       this.externalHDFS = cluster.externalHDFS;
       this.networkName = cluster.networkName;
       this.nodeGroups = cluster.nodeGroups;
@@ -140,6 +142,14 @@ public class ClusterCreate {
 
    public void setType(ClusterType type) {
       this.type = type;
+   }
+
+   public String getVendor() {
+      return vendor;
+   }
+
+   public void setVendor(String vendor) {
+      this.vendor = vendor;
    }
 
    public void setExternalHDFS(String externalHDFS) {
@@ -696,4 +706,16 @@ public class ClusterCreate {
       }
       return false;
    }
+
+   public String getDefaultDistroName(DistroRead[] distros) {
+      if (distros != null) {
+         for (DistroRead distro : distros) {
+            if (distro.getVendor().equalsIgnoreCase(Constants.DEFAULT_VENDOR)) {
+               return distro.getName();
+            }
+         }
+      }
+      return null;
+   }
+
 }

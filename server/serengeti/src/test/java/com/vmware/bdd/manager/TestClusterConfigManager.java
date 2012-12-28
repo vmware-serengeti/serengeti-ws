@@ -132,6 +132,7 @@ public class TestClusterConfigManager {
       spec.setRpNames(rps);
       spec.setNetworkName("dhcpNet1");
       spec.setDistro("apache");
+      spec.setVendor("Apache");
       spec.setType(ClusterType.HDFS_MAPRED);
       spec = ClusterSpecFactory.getCustomizedSpec(spec);
       clusterMgr.createClusterConfig(spec);
@@ -166,6 +167,7 @@ public class TestClusterConfigManager {
       spec.setRpNames(rps);
       spec.setNetworkName("dhcpNet1");
       spec.setDistro("apache");
+      spec.setVendor("Apache");
       spec.setExternalHDFS(hdfsArray[0]);
       String clusterConfigJson = 
          "{\"configuration\":{\"hadoop\":{\"core-site.xml\":{\"fs.default.name\":\"" + hdfsArray[1] + "\"}}}}";
@@ -246,6 +248,7 @@ public class TestClusterConfigManager {
       spec.setRpNames(rps);
       spec.setNetworkName("dhcpNet1");
       spec.setDistro("apache");
+      spec.setVendor("Apache");
       String clusterConfigJson = 
          "{\"configuration\":{\"hadoop\":{\"core-site.xml\":{\"fs.default.name\":\"" + hdfsArray[1] + "\"}}}}";
       Map clusterConfig = (new Gson()).fromJson(clusterConfigJson, Map.class);
@@ -324,6 +327,7 @@ public class TestClusterConfigManager {
       spec.setRpNames(rps);
       spec.setNetworkName("dhcpNet1");
       spec.setDistro("apache");
+      spec.setVendor("Apache");
 
       //build a master group, a datanode group, a compute node group with strict association and tempfs.
       NodeGroupCreate[] ngs = new NodeGroupCreate[3];

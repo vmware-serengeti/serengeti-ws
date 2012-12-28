@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,7 @@ class Distro {
 
    private String name;
    private Boolean hveSupported;
+   private String vendor = "Apache";
    private String version; // ignored now
    private List<RolePackageMapping> packages;
 
@@ -93,6 +95,14 @@ class Distro {
 
    public void setHveSupported(Boolean hveSupported) {
       this.hveSupported = hveSupported;
+   }
+
+   public String getVendor() {
+      return vendor;
+   }
+
+   public void setVendor(String vendor) {
+      this.vendor = vendor;
    }
 
    public String getVersion() {
@@ -134,6 +144,7 @@ class Distro {
       }
 
       dr.setName(this.getName());
+      dr.setVendor(this.getVendor());
       dr.setHveSupported(this.getHveSupported() == null ? false : this.getHveSupported());
       dr.setRoles(new ArrayList<String>(roles));
       return dr;
@@ -148,6 +159,7 @@ class Distro {
 
 public class DistroManager {
    private static String distroRootUrl = "http://localhost/distros/";
+   private static String VENDOR = "serengeti.distro_vendor";
    private static String distrosManifestUrl;
    private static final Logger logger = Logger.getLogger(DistroManager.class);
 
@@ -259,23 +271,37 @@ public class DistroManager {
    public List<DistroRead> getDistros() {
       loadManifest(false);
       List<DistroRead> drs = new ArrayList<DistroRead>();
-
+      String vendorStr = Configuration.getStrings(VENDOR, "");
+      List<String> vendors =
+            Arrays.asList(vendorStr.indexOf(",") != -1 ? vendorStr.split(",")
+                  : new String[] { vendorStr });
+      List<String>  errorVendors = new ArrayList<String> ();
       for (Distro distro : distros.values()) {
          DistroRead dr = distro.convert();
+         //check vendor name is whether configured in serengeti.properties
+         if (! vendors.contains(dr.getVendor())) {
+            errorVendors.add(dr.getVendor());
+         }
          if (dr != null) {
             drs.add(dr);
          } else {
             logger.error("discard invalid distro: " + distro);
          }
       }
-
+      StringBuffer errorMsg = new StringBuffer();
+      if (!errorVendors.isEmpty()) {
+         String errorVendorsStr=errorVendors.toString().substring(1, errorVendors.toString().length()-1);
+         errorMsg.append(errorVendorsStr).append(" can not be found in serengeti.properties. ");
+      }
+      if(errorMsg.length() > 0) {
+         throw BddException.INTERNAL(null, errorMsg.toString());
+      }
       return drs;
    }
 
    public DistroRead getDistroByName(String name) {
       loadManifest(false);
       DistroRead dr = null;
-
       Distro distro = distros.get(name);
       if (distro != null) {
          dr = distro.convert();

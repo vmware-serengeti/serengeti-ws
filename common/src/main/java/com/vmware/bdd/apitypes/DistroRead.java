@@ -18,6 +18,7 @@ import java.util.List;
 
 public class DistroRead {
    private String name;
+   private String vendor = "Apache";
    private boolean hveSupported;
    private List<String> roles;
 
@@ -27,6 +28,14 @@ public class DistroRead {
 
    public void setName(String name) {
       this.name = name;
+   }
+
+   public String getVendor() {
+      return vendor;
+   }
+
+   public void setVendor(String vendor) {
+      this.vendor = vendor;
    }
 
    public boolean isHveSupported() {

@@ -132,9 +132,10 @@ public class ClusterConfigManager {
             distroMgr.getDistroByName(cluster.getDistro()) == null) {
            throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
       }
-
-      cluster.validateClusterCreate(failedMsgList, warningMsgList, distroMgr
-            .getDistroByName(cluster.getDistro()).getRoles());
+      if (!cluster.getVendor().equalsIgnoreCase("Mapr")) {
+         cluster.validateClusterCreate(failedMsgList, warningMsgList, distroMgr
+               .getDistroByName(cluster.getDistro()).getRoles());
+      }
       if (!failedMsgList.isEmpty()) {
          throw ClusterConfigException.INVALID_SPEC(failedMsgList);
       }

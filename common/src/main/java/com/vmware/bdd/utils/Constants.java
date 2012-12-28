@@ -47,4 +47,5 @@ public class Constants {
    public static final String WRONG_NUM_OF_WORKERNODES = "no worker exists";
    public static final String DATA_CLIENT_NODE_JOURNALNODE_COEXIST = "journal nodes are not allowed to be on data nodes or client nodes";
    public static final String TEMPFS_NOT_ALLOWED = "the disk type of TEMPFS can only be set on compute nodes with strict association to data nodes";
+   public static final String DEFAULT_VENDOR = "Apache";
 }
