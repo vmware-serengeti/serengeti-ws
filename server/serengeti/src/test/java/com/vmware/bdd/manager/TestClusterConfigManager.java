@@ -397,7 +397,7 @@ public class TestClusterConfigManager {
       Assert.assertTrue("manifest is inconsistent",
             manifest.indexOf("[\"tempfs_server\",\"hadoop_datanode\"]") != -1);
       Assert.assertTrue("manifest is inconsistent",
-            manifest.indexOf("[\"tempf_client\",\"hadoop_tasktracker\"]") != -1);
+            manifest.indexOf("[\"tempfs_client\",\"hadoop_tasktracker\"]") != -1);
    }
 
    public void testClusterConfigWithGroupSlave() {

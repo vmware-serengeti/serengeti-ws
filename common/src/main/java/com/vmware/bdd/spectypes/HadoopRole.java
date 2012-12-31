@@ -30,7 +30,7 @@ public enum HadoopRole {
    HADOOP_DATANODE("hadoop_datanode"),
    HADOOP_JOBTRACKER_ROLE("hadoop_jobtracker"),
    //3 dependencies
-   TEMPFS_CLIENT_ROLE("tempf_client"),
+   TEMPFS_CLIENT_ROLE("tempfs_client"),
    HADOOP_TASKTRACKER("hadoop_tasktracker"),
    HBASE_REGIONSERVER_ROLE("hbase_regionserver"),
    //4 dependencies
