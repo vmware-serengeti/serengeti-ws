@@ -1,4 +1,4 @@
-[0-serengeti-base]
+[a-serengeti-base]
 name=Serengeti internal yum server
 baseurl=http://yum_server_ip/yum/repos/base/
 enabled=1
