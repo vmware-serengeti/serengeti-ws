@@ -351,7 +351,9 @@ public class ClusterManager {
       if (CommonUtil.isBlank(createSpec.getDistro())) {
          setDefaultDistro(createSpec);
       }
-      setVendorInfo(createSpec);
+      DistroRead distroRead=this.getDistroManager().getDistroByName(createSpec.getDistro());
+      createSpec.setVendor(distroRead.getVendor());
+      createSpec.setVersion(distroRead.getVersion());
       createSpec = ClusterSpecFactory.getCustomizedSpec(createSpec);
 
       String name = createSpec.getName();
@@ -387,11 +389,6 @@ public class ClusterManager {
          List<DistroRead> distroList = distroManager.getDistros();
          DistroRead[] distros = new DistroRead[distroList.size()];
          createSpec.setDistro(createSpec.getDefaultDistroName(distroList.toArray(distros)));
-   }
-
-   private void setVendorInfo(ClusterCreate createSpec) {
-      DistroRead distroRead=this.getDistroManager().getDistroByName(createSpec.getDistro());
-      createSpec.setVendor(distroRead.getVendor());
    }
 
    public Long configCluster(String clusterName, ClusterCreate createSpec)

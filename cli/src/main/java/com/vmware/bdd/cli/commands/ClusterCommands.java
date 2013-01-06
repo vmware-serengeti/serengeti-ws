@@ -167,7 +167,9 @@ public class ClusterCommands implements CommandMarker {
                Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          return;
       }
-
+      DistroRead distroRead = distroRestClient.get(clusterCreate.getDistro());
+      clusterCreate.setVendor(distroRead.getVendor());
+      clusterCreate.setVersion(distroRead.getVersion());
       if (rpNames != null) {
          List<String> rpNamesList = CommandsUtils.inputsConvert(rpNames);
          if (rpNamesList.isEmpty()) {
@@ -837,6 +839,7 @@ public class ClusterCommands implements CommandMarker {
       }
       tmpMsg.replace(0, 1, "");
       failedMsg.append(tmpMsg);
+      failedMsg.append(".");
       CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
             Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
             failedMsg.toString());

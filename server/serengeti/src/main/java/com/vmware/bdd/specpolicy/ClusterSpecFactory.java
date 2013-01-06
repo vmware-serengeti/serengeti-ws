@@ -146,6 +146,11 @@ public class ClusterSpecFactory {
          newSpec.setVendor(spec.getVendor());
       }
 
+      //version
+      if(spec.getVersion() != null) {
+         newSpec.setVersion(spec.getVersion());
+      }
+
       // --dsNames
       if (spec.getDsNames() != null) {
          newSpec.setDsNames(spec.getDsNames());

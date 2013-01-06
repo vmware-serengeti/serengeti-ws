@@ -275,6 +275,8 @@ public class ClusterCommandsTest extends MockRestServer {
        ObjectMapper mapper = new ObjectMapper();
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(distros));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + distro.getName(), HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(distro));
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
 
@@ -303,6 +305,8 @@ public class ClusterCommandsTest extends MockRestServer {
         ObjectMapper mapper = new ObjectMapper();
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
               mapper.writeValueAsString(distros));
+        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + distro.getName(), HttpMethod.GET, HttpStatus.OK,
+              mapper.writeValueAsString(distro));
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
                 mapper.writeValueAsString(networks));
 
@@ -350,6 +354,8 @@ public class ClusterCommandsTest extends MockRestServer {
        ObjectMapper mapper = new ObjectMapper();
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(distros));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + distro.getName(), HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(distro));
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + Constants.DEFAULT_DISTRO, HttpMethod.GET, HttpStatus.OK,
@@ -362,6 +368,8 @@ public class ClusterCommandsTest extends MockRestServer {
        setup();
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(distros));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + distro.getName(), HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(distro));
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + Constants.DEFAULT_DISTRO, HttpMethod.GET, HttpStatus.OK,
@@ -373,6 +381,8 @@ public class ClusterCommandsTest extends MockRestServer {
        setup();
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(distros));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + distro.getName(), HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(distro));
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + Constants.DEFAULT_DISTRO, HttpMethod.GET, HttpStatus.OK,
@@ -384,6 +394,8 @@ public class ClusterCommandsTest extends MockRestServer {
        setup();
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(distros));
+       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + distro.getName(), HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(distro));
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + Constants.DEFAULT_DISTRO, HttpMethod.GET, HttpStatus.OK,
@@ -434,6 +446,8 @@ public class ClusterCommandsTest extends MockRestServer {
         ObjectMapper mapper = new ObjectMapper();
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
               mapper.writeValueAsString(distros));
+        buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/distro/" + distro.getName(), HttpMethod.GET, HttpStatus.OK,
+              mapper.writeValueAsString(distro));
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
                 mapper.writeValueAsString(networks));
 

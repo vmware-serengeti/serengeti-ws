@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.apitypes;
+package com.vmware.bdd.utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +21,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
 
+import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.utils.AppConfigValidationFactory;
 import com.vmware.bdd.utils.ValidateResult;
 

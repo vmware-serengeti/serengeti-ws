@@ -78,7 +78,7 @@ class Distro {
    private String name;
    private Boolean hveSupported;
    private String vendor = "Apache";
-   private String version; // ignored now
+   private String version;
    private List<RolePackageMapping> packages;
 
    public String getName() {
@@ -145,6 +145,7 @@ class Distro {
 
       dr.setName(this.getName());
       dr.setVendor(this.getVendor());
+      dr.setVersion(this.getVersion());
       dr.setHveSupported(this.getHveSupported() == null ? false : this.getHveSupported());
       dr.setRoles(new ArrayList<String>(roles));
       return dr;

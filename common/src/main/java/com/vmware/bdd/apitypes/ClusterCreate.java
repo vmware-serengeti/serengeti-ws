@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -51,6 +52,7 @@ public class ClusterCreate {
    private NodeGroupCreate[] nodeGroups;
    @Expose
    private String distro;
+   private String version;
    @Expose
    @SerializedName("http_proxy")
    private String httpProxy;
@@ -166,6 +168,14 @@ public class ClusterCreate {
 
    public void setDistro(String distro) {
       this.distro = distro;
+   }
+
+   public String getVersion() {
+      return version;
+   }
+
+   public void setVersion(String version) {
+      this.version = version;
    }
 
    public String getHttpProxy() {
@@ -459,7 +469,7 @@ public class ClusterCreate {
       // if hadoop2 namenode ha is enabled
       boolean namenodeHACheck = false;
       //role count
-      int jobtrackerCount = 0, hbasemasterCount = 0, zookeeperCount = 0, workerCount = 0, numOfJournalNode = 0;
+      int masterCount = 0, jobtrackerCount = 0, hbasemasterCount = 0, zookeeperCount = 0, workerCount = 0, numOfJournalNode = 0;
       //Find NodeGroupCreate array from current ClusterCreate instance.
       NodeGroupCreate[] nodeGroupCreates = getNodeGroups();
       if (nodeGroupCreates == null || nodeGroupCreates.length == 0) {
@@ -477,7 +487,7 @@ public class ClusterCreate {
          validateNodeGroupPlacementPolicies(failedMsgList, warningMsgList);
 
          validateNodeGroupRoles(failedMsgList);
-         
+
          // check tempfs relationship: if a compute node has strict association with a data node, its disk type
          // can be set to "TEMPFS". Otherwise, it is not allowed to use tempfs as the disk type.
          validateTempfs(failedMsgList);
@@ -494,6 +504,7 @@ public class ClusterCreate {
                for (NodeGroupRole role : groupRoles) {
                   switch (role) {
                   case MASTER:
+                     masterCount++;
                      int numOfInstance = nodeGroupCreate.getInstanceNum();
                      if (numOfInstance >= 0 && numOfInstance != 1) {
                         if (numOfInstance != 2) { //namenode ha only support 2 nodes currently
@@ -562,7 +573,11 @@ public class ClusterCreate {
                }
             }
          }
-         if (namenodeHACheck) {
+         if (!supportedWithHdfs2()) {
+            if (namenodeHACheck || masterCount > 1) {
+               failedMsgList.add(Constants.CURRENT_DISTRO_CAN_NOT_SUPPORT_HDFS2);
+            }
+         } else if (namenodeHACheck) {
             if (numOfJournalNode >= 0 && numOfJournalNode < 3) {
                failedMsgList.add(Constants.WRONG_NUM_OF_JOURNALNODE);
             } else if (numOfJournalNode > 0 && numOfJournalNode % 2 == 0) {
@@ -576,11 +591,11 @@ public class ClusterCreate {
          if ((jobtrackerCount > 1) || (zookeeperCount > 1) || (hbasemasterCount > 1)) {
             failedMsgList.add(Constants.WRONG_NUM_OF_NODEGROUPS);
          }
-         if (numOfJournalNode > 0 && !namenodeHACheck) {
-            failedMsgList.add(Constants.NO_NAMENODE_HA);
-         }
          if (workerCount == 0) {
             warningMsgList.add(Constants.WRONG_NUM_OF_WORKERNODES);
+         }
+         if (numOfJournalNode > 0 && !namenodeHACheck) {
+            failedMsgList.add(Constants.NO_NAMENODE_HA);
          }
       }
    }
@@ -702,6 +717,17 @@ public class ClusterCreate {
             return true;
          } else {
             return false;
+         }
+      }
+      return false;
+   }
+
+   // For HDFS2, at present, serengeti only support cdh4 of Cloudera.
+   public boolean supportedWithHdfs2() {
+      if (this.getVendor().equalsIgnoreCase(Constants.CLOUDERA_VENDOR)) {
+         Pattern pattern = Pattern.compile(Constants.CDH4_1_PATTERN);
+         if (pattern.matcher(this.getVersion()).matches()) {
+            return true;
          }
       }
       return false;
