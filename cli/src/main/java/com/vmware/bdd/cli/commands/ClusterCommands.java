@@ -320,7 +320,7 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   @CliCommand(value = "cluster export --spec", help = "Export cluster specification")
+   @CliCommand(value = "cluster export", help = "Export cluster specification")
    public void exportClusterSpec(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
          @CliOption(key = { "output" }, mandatory = false, help = "The output file name") final String fileName) {
