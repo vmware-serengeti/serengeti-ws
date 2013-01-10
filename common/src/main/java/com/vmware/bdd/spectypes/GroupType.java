@@ -20,12 +20,13 @@ import java.util.EnumSet;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 
 public enum GroupType {
+   ZOOKEEPER_GROUP("zookeeper"),
+   JOURNALNODE_GROUP("journalnode"),
    MASTER_GROUP("master"), 
-   MASTER_JOBTRACKER_GROUP("job_tracker"),
    HBASE_MASTER_GROUP("hbase_master"),
+   MASTER_JOBTRACKER_GROUP("job_tracker"),
    WORKER_GROUP("worker"), 
-   CLIENT_GROUP("client"),
-   ZOOKEEPER_GROUP("zookeeper");
+   CLIENT_GROUP("client");
 
    private String description;
 
@@ -70,6 +71,8 @@ public enum GroupType {
          return HBASE_MASTER_GROUP;
       } else if(roles.contains(HadoopRole.ZOOKEEPER_ROLE)){
          return ZOOKEEPER_GROUP;
+      } else if (roles.contains(HadoopRole.HADOOP_JOURNALNODE_ROLE)) {
+         return JOURNALNODE_GROUP;   
       } else {
          return CLIENT_GROUP;
       }

@@ -74,19 +74,20 @@ public class ConnectionCommands implements CommandMarker {
             + Constants.OUTPUT_OP_RESULT_FAIL + " " + message);
    }
 
-   private boolean connect(final String hostName, final Map<String,String> loginInfo, int count) throws Exception {
-      if (count <= 0) {
+   private boolean connect(final String hostName, final Map<String, String> loginInfo, int count) throws Exception {
+      if (count < 0) {
          return false;
-      } else {
-         ConnectType connectType = conn.connect(hostName, loginInfo.get("username"), loginInfo.get("password"));
-         if (connectType == ConnectType.UNAUTHORIZATION) {
-            if (!prompt(Constants.CONNECT_ENTER_PASSWORD, PromptType.PASSWORD,
-                  loginInfo)) {
-               return false;
-            } else {
-               count--;
-               connect(hostName, loginInfo, count);
-            }
+      }
+      ConnectType connectType = conn.connect(hostName, loginInfo.get("username"), loginInfo.get("password"));
+      if (connectType == ConnectType.UNAUTHORIZATION) {
+         if (count == 0) {
+            return false;
+         }
+         if (!prompt(Constants.CONNECT_ENTER_PASSWORD, PromptType.PASSWORD, loginInfo)) {
+            return false;
+         } else {
+            count--;
+            connect(hostName, loginInfo, count);
          }
       }
       return true;

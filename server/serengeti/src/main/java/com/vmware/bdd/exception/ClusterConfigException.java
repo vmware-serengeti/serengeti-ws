@@ -82,6 +82,10 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException INVALID_PLACEMENT_POLICIES(List<String> errors) {
       return new ClusterConfigException(null, "INVALID_PLACEMENT_POLICIES", errors);
    }
+   public static ClusterConfigException INVALID_SPEC(List<String> errors) {
+      String errorStr = errors.toString().substring(1,errors.toString().length()-1);
+      return new ClusterConfigException(null, "INVALID_SPECIFICATION", errorStr);
+   }
    public static ClusterConfigException TOPOLOGY_WITH_NO_MAPPING_INFO_EXIST(String topology) {
       return new ClusterConfigException(null, "TOPOLOGY_WITH_NO_MAPPING_INFO_EXIST", topology);
    }
@@ -99,5 +103,11 @@ public class ClusterConfigException extends BddException {
    }
    public static ClusterConfigException INVALID_TOPOLOGY_POLICY(TopologyType topology, String reason) {
       return new ClusterConfigException(null, "INVALID_TOPOLOGY_POLICY", topology, reason);
+   }
+   public static ClusterConfigException MANIFEST_CONFIG_TARBALL_REPO_COEXIST() {
+      return new ClusterConfigException(null, "MANIFEST_CONFIG_TARBALL_REPO_COEXIST");
+   }
+   public static ClusterConfigException MANIFEST_CONFIG_TARBALL_REPO_NONE() {
+      return new ClusterConfigException(null, "MANIFEST_CONFIG_TARBALL_REPO_NONE");
    }
 }

@@ -1,0 +1,160 @@
+{
+  "nodeGroups":[
+    {
+      "name": "zookeeper",
+      "roles": [
+        "zookeeper",
+        "hadoop_journalnode"
+      ],
+      "instanceNum": 3,
+      "cpuNum": 2,
+      "memCapacityMB": 7500,
+      "storage": {
+        "type": "SHARED",
+        "sizeGB": 20
+      },
+      "haFlag": "on",
+      "configuration": {
+        "hadoop": {
+        }
+      }
+    },
+    {
+      "name": "nameservice0",
+      "roles": [
+        "hadoop_namenode"
+      ],
+      "instanceNum": 2,
+      "cpuNum": 2,
+      "memCapacityMB": 7500,
+      "storage": {
+        "type": "SHARED",
+        "sizeGB": 20
+      },
+      "haFlag": "on",
+      "configuration": {
+        "hadoop": {
+        }
+      }
+    },
+    {
+      "name": "nameservice1",
+      "roles": [
+        "hadoop_namenode"
+      ],
+      "instanceNum": 1,
+      "cpuNum": 2,
+      "memCapacityMB": 7500,
+      "storage": {
+        "type": "SHARED",
+        "sizeGB": 20
+      },
+      "haFlag": "on",
+      "configuration": {
+        "hadoop": {
+        }
+      }
+    },
+    {
+      "name": "computeMaster",
+      "roles": [
+        "hadoop_jobtracker"
+      ],
+      "instanceNum": 1,
+      "cpuNum": 2,
+      "memCapacityMB": 7500,
+      "storage": {
+        "type": "SHARED",
+        "sizeGB": 20
+      },
+      "haFlag": "on",
+      "configuration": {
+        "hadoop": {
+        }
+      }
+    },
+    {
+      "name": "worker",
+      "roles": [
+        "hadoop_tasktracker",
+        "hadoop_datanode"
+      ],
+      "instanceNum": 3,
+      "cpuNum": 1,
+      "memCapacityMB": 3748,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 20
+      },
+      "haFlag": "off",
+      "configuration": {
+        "hadoop": {
+        }
+      }
+    },
+    {
+      "name": "client",
+      "roles": [
+        "hadoop_client",
+        "hive",
+        "hive_server",
+        "pig"
+      ],
+      "instanceNum": 1,
+      "cpuNum": 1,
+      "memCapacityMB": 3748,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 20
+      },
+      "haFlag": "off",
+      "configuration": {
+        "hadoop": {
+        }
+      }
+    }
+  ],
+  // we suggest running convert-hadoop-conf.rb to generate "configuration" section and paste the output here
+  "configuration": {
+    "hadoop": {
+      "core-site.xml": {
+        // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/core-default.html
+        // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample:
+        // "io.file.buffer.size": "4096"
+      },
+      "hdfs-site.xml": {
+        // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/hdfs-default.html
+      },
+      "mapred-site.xml": {
+        // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/mapred-default.html
+      },
+      "hadoop-env.sh": {
+        // "HADOOP_HEAPSIZE": "",
+        // "HADOOP_NAMENODE_OPTS": "",
+        // "HADOOP_DATANODE_OPTS": "",
+        // "HADOOP_SECONDARYNAMENODE_OPTS": "",
+        // "HADOOP_JOBTRACKER_OPTS": "",
+        // "HADOOP_TASKTRACKER_OPTS": "",
+        // "HADOOP_CLASSPATH": "",
+        // "JAVA_HOME": "",
+        // "PATH": ""
+      },
+      "log4j.properties": {
+        // "hadoop.root.logger": "DEBUG,DRFA",
+        // "hadoop.security.logger": "DEBUG,DRFA"
+      },
+      "fair-scheduler.xml": {
+        // check for all settings at http://hadoop.apache.org/docs/r1.0.0/fair_scheduler.html
+        // "text": "the full content of fair-scheduler.xml in one line"
+      },
+      "capacity-scheduler.xml": {
+        // check for all settings at http://hadoop.apache.org/docs/r1.0.0/capacity_scheduler.html
+      },
+      "mapred-queue-acls.xml": {
+        // check for all settings at http://hadoop.apache.org/docs/r1.0.0/cluster_setup.html#Configuring+the+Hadoop+Daemons
+        // "mapred.queue.queue-name.acl-submit-job": "",
+        // "mapred.queue.queue-name.acl-administer-jobs", ""
+      }
+    }
+  }
+}

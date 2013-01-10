@@ -17,6 +17,7 @@ package com.vmware.bdd.manager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import junit.framework.Assert;
 
@@ -26,15 +27,20 @@ import org.testng.annotations.Test;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.Saveable;
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.specpolicy.ClusterSpecFactory;
 
 public class TestClusterConfigManager {
    private static ClusterConfigManager clusterMgr = new ClusterConfigManager();
@@ -117,13 +123,18 @@ public class TestClusterConfigManager {
       System.out.println("sub string: " + s1.substring(i));
    }
 
-   public void testClusterConfig() {
+   @Test
+   public void testClusterConfig() throws Exception {
       ClusterCreate spec = new ClusterCreate();
       spec.setName("my-cluster");
       List<String> rps = new ArrayList<String>();
       rps.add("myRp1");
       spec.setRpNames(rps);
       spec.setNetworkName("dhcpNet1");
+      spec.setDistro("apache");
+      spec.setVendor("Apache");
+      spec.setType(ClusterType.HDFS_MAPRED);
+      spec = ClusterSpecFactory.getCustomizedSpec(spec);
       clusterMgr.createClusterConfig(spec);
 
       ClusterEntity cluster = ClusterEntity.findClusterEntityById(1l);
@@ -140,8 +151,253 @@ public class TestClusterConfigManager {
       System.out.println(manifest);
       Assert.assertTrue("manifest should contains nodegroups",
             manifest.indexOf("master") != -1);
+      //Assert.assertTrue("manifest is inconsistent",
+        //    manifest.indexOf("{\"name\":\"my-cluster\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"bisect\":false,\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/master\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"bisect\":false,\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/worker\"},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"pig\",\"hive\",\"hive_server\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"bisect\":false,\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/client\"}],\"distro\":\"apache\",\"http_proxy\":\"\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
+   }
+
+   @Test
+   public void testClusterConfigWithExternalHDFS() throws Exception {
+      String[] hdfsArray = new String[] {
+            "hdfs://168.192.0.70:8020", "hdfs://168.192.0.71:8020",
+            "hdfs://168.192.0.72:8020", "hdfs://168.192.0.73:8020" };
+      ClusterCreate spec = new ClusterCreate();
+      spec.setName("my-cluster-external-hdfs");
+      List<String> rps = new ArrayList<String>();
+      rps.add("myRp1");
+      spec.setRpNames(rps);
+      spec.setNetworkName("dhcpNet1");
+      spec.setDistro("apache");
+      spec.setVendor("Apache");
+      spec.setExternalHDFS(hdfsArray[0]);
+      String clusterConfigJson = 
+         "{\"configuration\":{\"hadoop\":{\"core-site.xml\":{\"fs.default.name\":\"" + hdfsArray[1] + "\"}}}}";
+      Map clusterConfig = (new Gson()).fromJson(clusterConfigJson, Map.class);
+      spec.setConfiguration((Map<String, Object>)(clusterConfig.get("configuration")));
+      //build a jobtracker group, two compute node groups.
+      NodeGroupCreate ng0 = new NodeGroupCreate();
+      List<String> jobtrackerRole = new ArrayList<String>();
+      jobtrackerRole.add("hadoop_jobtracker");
+      ng0.setRoles(jobtrackerRole);
+      ng0.setName("jobtracker");
+      ng0.setInstanceNum(1);
+      ng0.setInstanceType(InstanceType.LARGE);
+      String ng0ConfigJson = 
+         "{\"configuration\":{\"hadoop\":{\"core-site.xml\":{\"fs.default.name\":\"" + hdfsArray[2] + "\"}}}}";
+      Map ng0Config = (new Gson()).fromJson(ng0ConfigJson, Map.class);
+      ng0.setConfiguration((Map<String, Object>)(ng0Config.get("configuration")));
+
+      NodeGroupCreate ng1 = new NodeGroupCreate();
+      List<String> computeRoles = new ArrayList<String>();
+      computeRoles.add("hadoop_tasktracker");
+      ng1.setRoles(computeRoles);
+      ng1.setName("compute1");
+      ng1.setInstanceNum(4);
+      ng1.setInstanceType(InstanceType.MEDIUM);
+      StorageRead storage = new StorageRead();
+      storage.setType("LOCAL");
+      storage.setSizeGB(10);
+      ng1.setStorage(storage);
+      String ng1ConfigJson = 
+         "{\"configuration\":{\"hadoop\":{\"core-site.xml\":{\"fs.default.name\":\"" + hdfsArray[3] + "\"}}}}";
+      Map ng1Config = (new Gson()).fromJson(ng1ConfigJson, Map.class);
+      ng1.setConfiguration((Map<String, Object>)(ng1Config.get("configuration")));
+      NodeGroupCreate ng2 = new NodeGroupCreate();
+      ng2.setRoles(computeRoles);
+      ng2.setName("compute2");
+      ng2.setInstanceNum(2);
+      ng2.setInstanceType(InstanceType.MEDIUM);
+      StorageRead storageCompute = new StorageRead();
+      storageCompute.setType("LOCAL");
+      storageCompute.setSizeGB(10);
+      ng2.setStorage(storageCompute);
+
+      NodeGroupCreate[] ngs =  new NodeGroupCreate[]{ng0, ng1, ng2};
+      spec.setNodeGroups(ngs);
+      spec = ClusterSpecFactory.getCustomizedSpec(spec);
+      clusterMgr.createClusterConfig(spec);
+
+      ClusterEntity cluster = ClusterEntity.findClusterEntityById(1l);
+      List<ClusterEntity> cs = DAL.findAll(ClusterEntity.class);
+      for (ClusterEntity c : cs ) {
+         System.out.println(c.getId());
+      }
+      cluster =
+            ClusterEntity.findClusterEntityByName("my-cluster-external-hdfs");
+      Assert.assertTrue(cluster != null);
+      
+      ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster-external-hdfs");
+      String manifest = gson.toJson(attrs);
+      System.out.println(manifest);
+      Assert.assertTrue("\"fs.default.name\" must be coved with external HDFS uri in both of cluster and group configuration.",
+            Pattern.compile("([\\s\\S]*" + hdfsArray[0] + "[\\s\\S]*){3}").matcher(manifest).matches());
+      Assert.assertTrue("\"fs.default.name\" must be coved under the cluster level", manifest.indexOf(hdfsArray[1]) == -1);
+      Assert.assertTrue("\"fs.default.name\" must be coved under the node group 1 level", manifest.indexOf(hdfsArray[2]) == -1);
+      Assert.assertTrue("\"fs.default.name\" must be coved under the node group 2 level", manifest.indexOf(hdfsArray[3]) == -1);
+      
+   }
+
+   @Test
+   public void testClusterConfigWithExternalHDFSFailure() throws Exception {
+      String[] hdfsArray = new String[] {
+            "hdfs://168.192.0.70:8020", "hdfs://168.192.0.71:8020",
+            "hdfs://168.192.0.72:8020", "hdfs://168.192.0.73:8020" };
+      ClusterCreate spec = new ClusterCreate();
+      spec.setName("my-cluster-external-hdfs-failure");
+      List<String> rps = new ArrayList<String>();
+      rps.add("myRp1");
+      spec.setRpNames(rps);
+      spec.setNetworkName("dhcpNet1");
+      spec.setDistro("apache");
+      spec.setVendor("Apache");
+      String clusterConfigJson = 
+         "{\"configuration\":{\"hadoop\":{\"core-site.xml\":{\"fs.default.name\":\"" + hdfsArray[1] + "\"}}}}";
+      Map clusterConfig = (new Gson()).fromJson(clusterConfigJson, Map.class);
+      spec.setConfiguration((Map<String, Object>)(clusterConfig.get("configuration")));
+      //build a master group, a compute node group and a datanode.
+      NodeGroupCreate ng0 = new NodeGroupCreate();
+      List<String> masterRole = new ArrayList<String>();
+      masterRole.add("hadoop_namenode");
+      masterRole.add("hadoop_jobtracker");
+      ng0.setRoles(masterRole);
+      ng0.setName("jobtracker");
+      ng0.setInstanceNum(1);
+      ng0.setInstanceType(InstanceType.LARGE);
+      String ng0ConfigJson = 
+         "{\"configuration\":{\"hadoop\":{\"core-site.xml\":{\"fs.default.name\":\"" + hdfsArray[2] + "\"}}}}";
+      Map ng0Config = (new Gson()).fromJson(ng0ConfigJson, Map.class);
+      ng0.setConfiguration((Map<String, Object>)(ng0Config.get("configuration")));
+
+      NodeGroupCreate ng1 = new NodeGroupCreate();
+      List<String> computeRoles = new ArrayList<String>();
+      computeRoles.add("hadoop_tasktracker");
+      ng1.setRoles(computeRoles);
+      ng1.setName("compute1");
+      ng1.setInstanceNum(4);
+      ng1.setInstanceType(InstanceType.MEDIUM);
+      StorageRead storage = new StorageRead();
+      storage.setType("LOCAL");
+      storage.setSizeGB(10);
+      ng1.setStorage(storage);
+      String ng1ConfigJson = 
+         "{\"configuration\":{\"hadoop\":{\"core-site.xml\":{\"fs.default.name\":\"" + hdfsArray[3] + "\"}}}}";
+      Map ng1Config = (new Gson()).fromJson(ng1ConfigJson, Map.class);
+      ng1.setConfiguration((Map<String, Object>)(ng1Config.get("configuration")));
+      NodeGroupCreate ng2 = new NodeGroupCreate();
+      List<String> dataRoles = new ArrayList<String>();
+      dataRoles.add("hadoop_datanode");
+      ng2.setRoles(dataRoles);
+      ng2.setName("data1");
+      ng2.setInstanceNum(2);
+      ng2.setInstanceType(InstanceType.MEDIUM);
+      StorageRead storageCompute = new StorageRead();
+      storageCompute.setType("LOCAL");
+      storageCompute.setSizeGB(10);
+      ng2.setStorage(storageCompute);
+
+      NodeGroupCreate[] ngs =  new NodeGroupCreate[]{ng0, ng1, ng2};
+      spec.setNodeGroups(ngs);
+      spec = ClusterSpecFactory.getCustomizedSpec(spec);
+      clusterMgr.createClusterConfig(spec);
+
+      ClusterEntity cluster = ClusterEntity.findClusterEntityById(1l);
+      List<ClusterEntity> cs = DAL.findAll(ClusterEntity.class);
+      for (ClusterEntity c : cs ) {
+         System.out.println(c.getId());
+      }
+      cluster =
+            ClusterEntity.findClusterEntityByName("my-cluster-external-hdfs-failure");
+      Assert.assertTrue(cluster != null);
+
+      ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster-external-hdfs-failure");
+      String manifest = gson.toJson(attrs);
+      System.out.println(manifest);
+      Assert.assertTrue("\"fs.default.name\" must be coved with external HDFS uri in both of cluster and group configuration.",
+            Pattern.compile("([\\s\\S]*" + hdfsArray[0] + "[\\s\\S]*){3}").matcher(manifest).matches()==false);
+      Assert.assertTrue("\"fs.default.name\" must be coved under the cluster level", manifest.indexOf(hdfsArray[1]) != -1);
+      Assert.assertTrue("\"fs.default.name\" must be coved under the node group 1 level", manifest.indexOf(hdfsArray[2]) != -1);
+      Assert.assertTrue("\"fs.default.name\" must be coved under the node group 2 level", manifest.indexOf(hdfsArray[3]) != -1);
+      
+   }
+   @Test
+   public void testClusterConfigWithTempfs() throws Exception {
+      ClusterCreate spec = new ClusterCreate();
+      spec.setName("my-cluster-dc-tempfs");
+      List<String> rps = new ArrayList<String>();
+      rps.add("myRp1");
+      spec.setRpNames(rps);
+      spec.setNetworkName("dhcpNet1");
+      spec.setDistro("apache");
+      spec.setVendor("Apache");
+
+      //build a master group, a datanode group, a compute node group with strict association and tempfs.
+      NodeGroupCreate[] ngs = new NodeGroupCreate[3];
+      NodeGroupCreate ng0 = new NodeGroupCreate();
+      ngs[0] = ng0;
+      List<String> masterRoles = new ArrayList<String>();
+      masterRoles.add("hadoop_namenode");
+      masterRoles.add("hadoop_jobtracker");
+      ngs[0].setRoles(masterRoles);
+      ngs[0].setName("master");
+      ngs[0].setInstanceNum(1);
+      ngs[0].setInstanceType(InstanceType.LARGE);
+
+      NodeGroupCreate ng1 = new NodeGroupCreate();
+      ngs[1] = ng1;
+      List<String> dataNodeRoles = new ArrayList<String>();
+      dataNodeRoles.add("hadoop_datanode");
+      ngs[1].setRoles(dataNodeRoles);
+      ngs[1].setName("data");
+      ngs[1].setInstanceNum(4);
+      ngs[1].setInstanceType(InstanceType.MEDIUM);
+      StorageRead storage = new StorageRead();
+      storage.setType("LOCAL");
+      storage.setSizeGB(50);
+      ngs[1].setStorage(storage);
+
+      NodeGroupCreate ng2 = new NodeGroupCreate();
+      ngs[2] = ng2;
+      List<String> computeNodeRoles = new ArrayList<String>();
+      computeNodeRoles.add("hadoop_tasktracker");
+      ngs[2].setRoles(computeNodeRoles);
+      ngs[2].setName("compute");
+      ngs[2].setInstanceNum(8);
+      ngs[2].setInstanceType(InstanceType.MEDIUM);
+      StorageRead storageCompute = new StorageRead();
+      storageCompute.setType("TEMPFS");
+      storageCompute.setSizeGB(50);
+      ngs[2].setStorage(storageCompute);
+      PlacementPolicy policy = new PlacementPolicy();
+      policy.setInstancePerHost(2);
+      List<GroupAssociation> associates = new ArrayList<GroupAssociation>();
+      GroupAssociation associate = new GroupAssociation();
+      associate.setReference("data");
+      associate.setType(GroupAssociationType.STRICT);
+      associates.add(associate);
+      policy.setGroupAssociations(associates);
+      ngs[2].setPlacementPolicies(policy);
+
+      spec.setNodeGroups(ngs);
+      spec = ClusterSpecFactory.getCustomizedSpec(spec);
+      clusterMgr.createClusterConfig(spec);
+
+      ClusterEntity cluster = ClusterEntity.findClusterEntityById(1l);
+      List<ClusterEntity> cs = DAL.findAll(ClusterEntity.class);
+      for (ClusterEntity c : cs ) {
+         System.out.println(c.getId());
+      }
+      cluster =
+            ClusterEntity.findClusterEntityByName("my-cluster-dc-tempfs");
+      Assert.assertTrue(cluster != null);
+
+      ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster-dc-tempfs");
+      String manifest = gson.toJson(attrs);
+      System.out.println(manifest);
+      Assert.assertTrue("manifest should contains nodegroups",
+            manifest.indexOf("master") != -1);
       Assert.assertTrue("manifest is inconsistent",
-            manifest.indexOf("{\"name\":\"my-cluster\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/master\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/worker\"},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"hive_server\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/client\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
+            manifest.indexOf("[\"tempfs_server\",\"hadoop_datanode\"]") != -1);
+      Assert.assertTrue("manifest is inconsistent",
+            manifest.indexOf("[\"tempfs_client\",\"hadoop_tasktracker\"]") != -1);
    }
 
    public void testClusterConfigWithGroupSlave() {

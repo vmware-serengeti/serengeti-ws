@@ -43,6 +43,7 @@ import com.vmware.bdd.apitypes.TaskRead.Type;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 import com.vmware.bdd.cli.commands.CookieCache;
+import com.vmware.bdd.utils.CommonUtil;
 
 /**
  * RestClient provides common rest apis required by resource operations.
@@ -139,7 +140,7 @@ public class RestClient {
             return Connect.ConnectType.ERROR;
          }
       } catch (Exception e) {
-         System.out.println(Constants.CONNECT_FAILURE + ": " + e.getCause().getMessage().toLowerCase());
+         System.out.println(Constants.CONNECT_FAILURE + ": " + (e.getCause() != null ? e.getCause().getMessage().toLowerCase() : e.getMessage()));
          return Connect.ConnectType.ERROR;
       }
       return Connect.ConnectType.SUCCESS;
@@ -262,7 +263,12 @@ public class RestClient {
          hostProperty.store(hostFile,
                Constants.PROPERTY_FILE_HOST_COMMENT);
       } catch (IOException e) {
-         throw new IOException(Constants.PROPERTY_FILE_HOST_FAILURE);
+         StringBuilder exceptionMsg = new StringBuilder();
+         exceptionMsg.append(Constants.PROPERTY_FILE_HOST_FAILURE);
+         if (!CommonUtil.isBlank(e.getMessage())) {
+            exceptionMsg.append(",").append(e.getMessage());
+         }
+         throw new IOException(exceptionMsg.toString());
       } finally {
          if (hostFile != null) {
             try {
@@ -339,23 +345,25 @@ public class RestClient {
             progress = (int) (taskRead.getProgress() * 100);
             taskStatus = taskRead.getStatus();
 
-            if (oldTaskStatus != taskStatus || oldProgress != progress) {
-               oldTaskStatus = taskStatus;
-               oldProgress = progress;
-               if (prettyOutput != null && prettyOutput.length > 0 && prettyOutput[0]
-                  .isRefresh(false)) {
-                  //clear screen and show progress every few seconds 
-                  clearScreen();
-                  System.out.println(taskStatus + " " + progress + "%\n");
+            if ((prettyOutput != null && prettyOutput.length > 0 && prettyOutput[0]
+                  .isRefresh(false))
+                  || oldTaskStatus != taskStatus
+                  || oldProgress != progress) {
+               //clear screen and show progress every few seconds 
+               clearScreen();
+               System.out.println(taskStatus + " " + progress + "%\n");
 
+               if (prettyOutput != null && prettyOutput.length > 0) {
                   // print call back customize the detailed output case by case
                   prettyOutput[0].prettyOutput();
-               } else {
-                  String output = taskStatus + " " + progress + "% ";
+               } 
+
+               if (oldTaskStatus != taskStatus || oldProgress != progress) {
+                  oldTaskStatus = taskStatus;
+                  oldProgress = progress;
                   if (taskRead.getProgressMessage() != null) {
-                     output += taskRead.getProgressMessage();
+                     System.out.println(taskRead.getProgressMessage());
                   }
-                  System.out.println(output);
                }
             }
             try {

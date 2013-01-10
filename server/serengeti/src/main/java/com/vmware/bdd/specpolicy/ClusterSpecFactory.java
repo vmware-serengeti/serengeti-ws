@@ -35,6 +35,7 @@ public class ClusterSpecFactory {
    private static final String HDFS_TEMPLATE_SPEC = "hdfs-template-spec.json";
    private static final String HDFS_MAPRED_TEMPLATE_SPEC = "hdfs-mapred-template-spec.json";
    private static final String HDFS_HBASE_TEMPLATE_SPEC = "hdfs-hbase-template-spec.json";
+   private static final String HDFS_MAPRED_MAPR_TEMPLATE_SPEC = "hdfs-mapred-mapr-template-spec.json";
 
    private static File locateSpecFile(String filename) {
       // try to locate file directly
@@ -88,18 +89,27 @@ public class ClusterSpecFactory {
     * @return default cluster spec
     * @throws FileNotFoundException
     */
-   public static ClusterCreate createDefaultSpec(ClusterType type)
+   public static ClusterCreate createDefaultSpec(ClusterType type, final String vendor)
          throws FileNotFoundException {
       // loading from file each time is slow but fine
-      switch (type) {
-      case HDFS:
-         return loadFromFile(locateSpecFile(HDFS_TEMPLATE_SPEC));
-      case HDFS_MAPRED:
-         return loadFromFile(locateSpecFile(HDFS_MAPRED_TEMPLATE_SPEC));
-      case HDFS_HBASE:
-         return loadFromFile(locateSpecFile(HDFS_HBASE_TEMPLATE_SPEC));
-      default:
-         throw BddException.INVALID_PARAMETER("cluster type", type);
+      if (vendor.trim().equalsIgnoreCase("mapr")) {
+         switch (type) {
+         case HDFS_MAPRED:
+            return loadFromFile(locateSpecFile(HDFS_MAPRED_MAPR_TEMPLATE_SPEC));
+         default:
+            throw BddException.INVALID_PARAMETER("cluster type", type);
+         }
+      } else {
+         switch (type) {
+         case HDFS:
+            return loadFromFile(locateSpecFile(HDFS_TEMPLATE_SPEC));
+         case HDFS_MAPRED:
+            return loadFromFile(locateSpecFile(HDFS_MAPRED_TEMPLATE_SPEC));
+         case HDFS_HBASE:
+            return loadFromFile(locateSpecFile(HDFS_HBASE_TEMPLATE_SPEC));
+         default:
+            throw BddException.INVALID_PARAMETER("cluster type", type);
+         }
       }
    }
 
@@ -119,7 +129,7 @@ public class ClusterSpecFactory {
          return spec;
       }
 
-      ClusterCreate newSpec = createDefaultSpec(spec.getType());
+      ClusterCreate newSpec = createDefaultSpec(spec.getType(), spec.getVendor());
 
       // --name
       if (spec.getName() != null) {
@@ -129,6 +139,16 @@ public class ClusterSpecFactory {
       // --distro
       if (spec.getDistro() != null) {
          newSpec.setDistro(spec.getDistro());
+      }
+
+      //vendor
+      if (spec.getVendor() != null) {
+         newSpec.setVendor(spec.getVendor());
+      }
+
+      //version
+      if(spec.getVersion() != null) {
+         newSpec.setVersion(spec.getVersion());
       }
 
       // --dsNames

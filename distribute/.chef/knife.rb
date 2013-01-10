@@ -33,5 +33,4 @@ knife[:ssh_password] = "password"
 knife[:bootstrap_by_facet] = false # if true, bootstrap the nodes facet by facet; if false, bootstrap all nodes in paralell.
 
 # yum server
-knife[:yum_repos] = [ yum_repos_url ] # the urls to yum server's .repo or .rpm file
-knife[:disable_external_yum_repo] = true # if the provisioned VM doesn't have network access to WWW, set this to true
+knife[:yum_repos] = [ yum_repos_url ] # the urls to yum server's .repo file

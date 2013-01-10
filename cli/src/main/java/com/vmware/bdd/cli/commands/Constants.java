@@ -122,15 +122,8 @@ public class Constants {
    public static final String TOPLOGY_FORMAT = "Accepted topology file format: for each line, rackname1: hostname1, hostname2,...";
    public static final String OVERWRITE_TOPOLOGY = "WARNING: you will overwrite the existing topology. Existing Hadoop clusters may be impacted and cannot work well if you remove some hosts these clusters are using.";
    public static final String TYPE_SPECFILE_CONFLICT = "--type will not take effect when you specify --specFile.";
-   public static final String WRONG_NUM_OF_MASTERNODES = "the number of namenode or jobtracker is larger than 1.";
-   public static final String WRONG_NUM_OF_WORKERNODES = "no worker exists";
-   public static final String WRONG_NUM_OF_ZOOKEEPER = "the number of zookeepers is less than 3";
-   public static final String ODD_NUM_OF_ZOOKEEPER = "the number of zookeepers is better to be odd numbers";
    public static final String ZOOKEEPER_NOT_RESIZE = "zookeeper node groups are not allowed to resize.";
-   public static final String REGISONSERVER_DATANODE_SEPERATION = "RegionServer and Datanode are separated, which will impact performance.";
-   
    public static final String PARAMS_EXCLUSION = " cannot be set at the same time.";
-
    public static final String PARAMS_EXCLUSION_PAIR_NETWORK_ADD_IP_DHCP = "ip and dhcp";
    public static final String PARAMS_NETWORK_ADD_IP_DHCP_NOT_NULL = "You must enter one of ip,dhcp.";
    public static final String PARAMS_NETWORK_ADD_DNS = "dns";
@@ -157,6 +150,7 @@ public class Constants {
    public static final String PARAM_NOT_EXISTED = " cannot be found. Please add it first.";
    public static final String PARAM__NO_DEFAULT_DISTRO = "no default distro, please install and/or set a distro by --distro";
    public static final String PARAM_NOT_CONTAIN_HORIZONTAL_LINE = " cannot contain '-'.";
+   public static final String PARAM_NOT_CONTAIN_BLANK_SPACE = " cannot contain blank space.";
 
    public static final int FORMAT_COLUMN_DISTANCE = 2;
    public static final String FORMAT_TABLE_COLUMN_NAME = "NAME";
@@ -196,7 +190,8 @@ public class Constants {
    public static final String PARAM_NO_DISTRO_AVAILABLE = "no distro available,please upload one distro";
    public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure you want to continue (Y/N)? ";
    public static final String PARAM_CLUSTER_IN_BLACK_LIST_WARNING =
-         "not allowed to customize in Serengeti. Your settings will not take effect.";
+         "not allowed to customize in Serengeti.";
+   public static final String PARAM_CLUSTER_NOT_TAKE_EFFECT = "Your settings will not take effect.";
    public static final String PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING =
          "not regular configuration properties in Apache Hadoop. ";
    public static final String PARAM_CLUSTER_CONFIG_RUNNING_JOB_WARNING =

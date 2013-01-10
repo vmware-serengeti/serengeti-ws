@@ -169,13 +169,13 @@ public class VcDataStoreManager {
 
    public List<DatastoreRead> getAllDatastoreReads() {
       logger.debug("get all datastores.");
+      List<DatastoreRead> result = new ArrayList<DatastoreRead>();
       List<VcDataStoreEntity> entities =
          VcDataStoreEntity.findAllSortByName();
       if (entities.isEmpty()) {
-         return null;
+         return result;
       }
 
-      List<DatastoreRead> result = new ArrayList<DatastoreRead>();
       DatastoreRead read = new DatastoreRead();
       read.setName(entities.get(0).getName());
       read.setType(entities.get(0).getType());

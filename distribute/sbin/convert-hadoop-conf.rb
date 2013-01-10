@@ -46,12 +46,12 @@ def convert(conf_dirs, prop_files, txt_files)
   conf_dirs.each do |dir|
     if File.exist?(File.join(dir, 'core-site.xml'))
       entry = 'hadoop'
-    elsif File.exist?(File.join(dir, 'hbase-site.xml')) 
+    elsif File.exist?(File.join(dir, 'hbase-site.xml'))
       entry = 'hbase'
-    elsif File.exist?(File.join(dir, 'java.env')) 
+    elsif File.exist?(File.join(dir, 'zoo.cfg'))
       entry = 'zookeeper'
-    else 
-      next 
+    else
+      next
     end
     $configurable_files[entry].each do |f|
       conf = {}
@@ -94,7 +94,7 @@ def parse_arg(args)
   options.indent = 2
   options.verbose = false
   opts = OptionParser.new do |opts|
-    opts.banner = "Convert the xml configuration files into json format.\nUsage: convert.rb [options] dir1 dir2 ..."
+    opts.banner = "Convert hadoop xml configuration files into json format.\nUsage: convert-hadoop-conf.rb [options] dir1 dir2 ..."
     opts.separator ""
     opts.separator "Specific Options:"
     opts.on("-i", "--indent [IDENT_NUM]", Integer, "the indent number") do |indent|

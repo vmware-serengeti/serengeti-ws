@@ -14,8 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +21,6 @@ import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -31,7 +28,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
-import org.xml.sax.SAXException;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
@@ -39,64 +35,108 @@ import com.vmware.bdd.utils.ValidateResult.Type;
 
 public class AppConfigValidationFactory {
 
-    static final Logger logger = Logger.getLogger(AppConfigValidationFactory.class);
+   static final Logger logger = Logger.getLogger(AppConfigValidationFactory.class);
 
-    @SuppressWarnings("unchecked")
-    public static ValidateResult blackListHandle(Map<String, Object> config) {
-        ValidateResult validateResult = new ValidateResult();
-        String jsonStr = CommonUtil.readJsonFile("blacklist.json");
-        Gson gson = new Gson();
-        List<Map<String, List<String>>> blackList = gson.fromJson(jsonStr, List.class);
-        for (Entry<String, Object> configType : config.entrySet()) {
-            if (((String) configType.getKey()).trim().equalsIgnoreCase("hadoop")
-            		|| ((String) configType.getKey()).trim().equalsIgnoreCase("hbase") 
-            		|| ((String) configType.getKey()).trim().equalsIgnoreCase("zookeeper")
-                ) {
-                if (!(configType.getValue() instanceof Map)) {
-                    throw new RuntimeException(Constants.CLUSTER_CONFIG_ERROR);
-                }
-                Map<String, Object> propertyConfig = (Map<String, Object>) (configType.getValue());
-                String configFileName = "";
-                for (Entry<String, Object> configFileEntry : propertyConfig.entrySet()) {
-                    configFileName = configFileEntry.getKey();
-                    validateBySameFileName(configFileName, configFileEntry.getValue(), blackList, validateResult,
-                            ValidationType.BLACK_LIST);
-                }
-            }
-        }
-        return validateResult;
-    }
+   @SuppressWarnings("unchecked")
+   public static ValidateResult blackListHandle(Map<String, Object> config) {
+      ValidateResult validateResult = new ValidateResult();
+      String jsonStr = CommonUtil.readJsonFile("blacklist.json");
+      Gson gson = new Gson();
+      List<Map<String, Map<String, List<String>>>> blackList = gson.fromJson(jsonStr, List.class);
+      return processAppConfigValidation(config, validateResult, blackList, ValidationType.BLACK_LIST);
+   }
 
     @SuppressWarnings("unchecked")
     public static ValidateResult whiteListHandle(Map<String, Object> config) {
         ValidateResult validateResult = new ValidateResult();
         String jsonStr = CommonUtil.readJsonFile("whitelist.json");
         Gson gson = new Gson();
-        List<Map<String, List<Map<String, String>>>> whiteList = gson.fromJson(jsonStr, List.class);
-        for (Entry<String, Object> configType : config.entrySet()) {
-            if (((String) configType.getKey()).trim().equalsIgnoreCase("hadoop")
-            		|| ((String) configType.getKey()).trim().equalsIgnoreCase("hbase")
-            		|| ((String) configType.getKey()).trim().equalsIgnoreCase("zookeeper")
-                ) {
-                if (!(configType.getValue() instanceof Map)) {
-                    throw new RuntimeException(Constants.CLUSTER_CONFIG_ERROR);
-                }
-                Map<String, Object> propertyConfig = (Map<String, Object>) (configType.getValue());
-                String configFileName = "";
-                for (Entry<String, Object> configFileEntry : propertyConfig.entrySet()) {
-                    configFileName = configFileEntry.getKey();
-                    validateBySameFileName(configFileName, configFileEntry.getValue(), whiteList, validateResult,
-                            ValidationType.WHITE_LIST);
-                    if (validateResult.getType() == Type.VALID) {
-                       valdiateSpecialFileFormat(configFileName, configFileEntry.getValue(), validateResult);
-                    }
-                }
-            }
-        }
-        return validateResult;
+        List<Map<String, Map<String,List<Map<String, String>>>>> whiteList = gson.fromJson(jsonStr, List.class);
+        return processAppConfigValidation(config,validateResult,whiteList,ValidationType.WHITE_LIST);
     }
 
-//    process non key-value xml files such as fair-scheduler.xml below
+   /*
+    * Validate the config type whether valid or not. Config type is a first nesting level in a configuration,
+    * such as 'hadoop','hbase','zookeeper' etc. If all of the config types is true, we will validate configure
+    * files of each config type.
+    */
+   @SuppressWarnings("unchecked")
+   private static <T> ValidateResult processAppConfigValidation(Map<String, Object> config,
+         ValidateResult validateResult, List<Map<String, Map<String, List<T>>>> list, ValidationType type) {
+      validateConfigType(config, list);
+      for (Entry<String, Object> configTypeEntry : config.entrySet()) {
+         if (!(configTypeEntry.getValue() instanceof Map)) {
+            throw new RuntimeException(Constants.CLUSTER_CONFIG_FORMAT_ERROR);
+         }
+         Map<String, Object> propertyConfig = (Map<String, Object>) (configTypeEntry.getValue());
+         String configFileName = "";
+         for (Entry<String, Object> configFileEntry : propertyConfig.entrySet()) {
+            configFileName = configFileEntry.getKey();
+            if (!validateConfigFileName(configTypeEntry.getKey(), configFileName, configFileEntry,
+                  list, type, validateResult)) {
+               continue;
+            }
+            if (type.equals(ValidationType.WHITE_LIST) && validateResult.getType() == Type.VALID) {
+               valdiateSpecialFileFormat(configFileName, configFileEntry.getValue(), validateResult);
+            }
+         }
+      }
+      return validateResult;
+   }
+
+   private static <T> void validateConfigType (Map<String, Object> config, List<Map<String, Map<String, List<T>>>> list) {
+      String configType = "";
+      boolean found = false;
+      for (Entry<String, Object> configTypeEntry : config.entrySet()) {
+         configType = configTypeEntry.getKey();
+         found = false;
+         for (Map<String, Map<String, List<T>>> listTypeMap : list) {
+            if (listTypeMap.containsKey(configType)) {
+               found = true;
+            }
+         }
+         if(!found) {
+            break;
+         }
+      }
+      if(!found) {
+         StringBuffer errorMsg = new StringBuffer();
+         errorMsg.append(Constants.CLUSTER_CONFIG_TYPE_ERROR);
+         for(Map<String, Map<String, List<T>>> listTypeMap : list) {
+            errorMsg.append(listTypeMap.keySet().iterator().next());
+            errorMsg.append(", ");
+         }
+         errorMsg.replace(errorMsg.length()-2, errorMsg.length(),". ");
+         throw new RuntimeException(errorMsg.toString());
+      }
+   }
+
+   private static <T> boolean validateConfigFileName(String configType, final String configFileName,Entry<String, Object> configFileEntry,
+         List<Map<String, Map<String, List<T>>>> list, ValidationType type, ValidateResult validateResult) {
+      for (Map<String, Map<String, List<T>>> listTypeMap : list) {
+         if (listTypeMap.containsKey(configType)) {
+            if (!(listTypeMap.get(configType) instanceof Map)) {
+               throw new RuntimeException(Constants.LIST_CONFIG_ERROR);
+            }
+            Map<String, List<T>> listFileMap = listTypeMap.get(configType);
+            if (!listFileMap.containsKey(configFileName)) {
+               if (type.equals(ValidationType.WHITE_LIST)) {
+                  if (validateResult.getType().equals(ValidateResult.Type.VALID)) {
+                     validateResult.setType(ValidateResult.Type.WHITE_LIST_NO_EXIST_FILE_NAME);
+                  }
+                  if (!validateResult.getNoExistFileNamesByConfigType(configType).contains(configFileName)) {
+                     validateResult.addNoExistFileName(configType, configFileName);
+                  }
+               }
+               return false;
+            }
+            validateBySameFileName(configFileName, configFileEntry.getValue(), listFileMap, validateResult, type);
+         }
+      }
+      return true;
+   }
+
+   //    process non key-value xml files such as fair-scheduler.xml below
 //    <?xml version="1.0"?>
 //    <allocations>
 //      <pool name="sample_pool">
@@ -242,60 +282,58 @@ public class AppConfigValidationFactory {
 }
 
    @SuppressWarnings("unchecked")
-    private static <T> void validateBySameFileName(String fileName, Object configProperties,
-            List<Map<String, T>> warnPropertyList, ValidateResult validateResult, ValidationType validationType) {
-        for (Map<String, T> warnPropertyFileMap : warnPropertyList) {
-            if (warnPropertyFileMap.containsKey(fileName) && configProperties instanceof Map) {
-                Map<String, Object> configPropertyMap = (Map<String, Object>) configProperties;
-                List<String> removeList=new ArrayList<String>();
-                for (Entry<String, Object> configProperty : configPropertyMap.entrySet()) {
-                    if (validationType == ValidationType.WHITE_LIST) {
-                        for (Entry<String, T> warnPropertyFileEntry : warnPropertyFileMap.entrySet()) {
-                            if (warnPropertyFileEntry.getValue() instanceof List) {
-                                List<Object> propertyList = (List<Object>) warnPropertyFileEntry.getValue();
-                                if (!validateWhiteListPropertis(propertyList, configProperty.getKey(),
-                                        String.valueOf(configProperty.getValue()), validateResult)) {
-                                }
-                            }
-                        }
-                    } else if (validationType == ValidationType.BLACK_LIST) {
-                        for (Entry<String, T> warnPropertyFileEntry : warnPropertyFileMap.entrySet()) {
-                            if (warnPropertyFileEntry.getValue() instanceof List) {
-                                List<String> propertyList = (List<String>) warnPropertyFileEntry.getValue();
-                                for (String propertyName : propertyList) {
-                                    if (configProperty.getKey().equals(propertyName)) {
-                                        validateResult.setType(ValidateResult.Type.NAME_IN_BLACK_LIST);
-                                        validateResult.addFailureName(configProperty.getKey());
-                                        validateResult.putProperty(fileName, propertyName);
-                                        removeList.add(propertyName);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                //remove black property from configuration
-                for(String pName:removeList){
-                   configPropertyMap.remove(pName);
-                }
+   private static <T> void validateBySameFileName(final String fileName, Object configProperties,
+         Map<String, List<T>> listFileMap, ValidateResult validateResult, ValidationType validationType) {
+      if (configProperties instanceof Map) {
+         Map<String, Object> configPropertyMap = (Map<String, Object>) configProperties;
+         List<String> removeList = new ArrayList<String>();
+         for (Entry<String, Object> configProperty : configPropertyMap.entrySet()) {
+            for (Entry<String, List<T>> listFileEntry : listFileMap.entrySet()) {
+               if (listFileEntry.getKey().equals(fileName) && listFileEntry.getValue() instanceof List) {
+                  List<T> propertiesPerListFile = (List<T>) listFileEntry.getValue();
+                  if (validationType == ValidationType.BLACK_LIST) {
+                     validateBlackListPropertis(fileName, propertiesPerListFile, configProperty.getKey(),
+                           validateResult, removeList);
+                  } else if (validationType == ValidationType.WHITE_LIST) {
+                     validateWhiteListPropertis(propertiesPerListFile, configProperty.getKey(),
+                           String.valueOf(configProperty.getValue()), validateResult);
+                  }
+               }
             }
-        }
-    }
+         }
+         //remove black property from configuration
+         for (String pName : removeList) {
+            configPropertyMap.remove(pName);
+         }
+      }
+   }
 
     private static boolean validatePropertyValueFormat(final String value, final String format) {
         //TODO
         return true;
     }
 
+    private static <T> void validateBlackListPropertis(final String fileName, List<T> propertiesPerListFile, String configPropertyName,
+          ValidateResult validateResult, List<String> removeList) {
+       for (T propertyName : propertiesPerListFile) {
+          if ((propertyName instanceof String) && (configPropertyName.equals((String)propertyName))) {
+             validateResult.setType(ValidateResult.Type.NAME_IN_BLACK_LIST);
+             validateResult.addFailureName(configPropertyName);
+             validateResult.putProperty(fileName, (String)propertyName);
+             removeList.add((String)propertyName);
+          }
+       }
+    }
+
     @SuppressWarnings("unchecked")
-    private static boolean validateWhiteListPropertis(List<Object> propertyList, String configPropertyName,
+    private static <T> void validateWhiteListPropertis(List<T> propertiesPerListFile, String configPropertyName,
             String configPropertyValue, ValidateResult validateResult) {
         ValidateResult.Type validateType = ValidateResult.Type.WHITE_LIST_INVALID_NAME;
-        for (Object obj : propertyList) {
-            if (obj instanceof Map) {
-                Map<String, String> property = (Map<String, String>) obj;
-
-                if ((property.get("nameIsPattern") != null && property.get("nameIsPattern").trim().equalsIgnoreCase("true") && configPropertyName.matches(property.get("name")))
+        for (T t : propertiesPerListFile) {
+            if (t instanceof Map) {
+                Map<String, String> property = (Map<String, String>) t;
+                if ((property.get("nameIsPattern") != null && property.get("nameIsPattern").
+                      trim().equalsIgnoreCase("true") && configPropertyName.matches(property.get("name")))
                       || property.get("name").trim().equalsIgnoreCase(configPropertyName)) {
                     if (property.get("valueFormat") != null && !property.get("valueFormat").isEmpty()
                             && !validatePropertyValueFormat(configPropertyValue, property.get("valueFormat"))) {
@@ -306,24 +344,25 @@ public class AppConfigValidationFactory {
             }
         }
         if (validateType == ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
-            validateResult.addFailureName(configPropertyName);
+            if(!validateResult.getFailureNames().contains(configPropertyName)){
+               validateResult.addFailureName(configPropertyName);               
+            }
             if (validateResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_VALUE
                     || validateResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME_VALUE) {
                 validateResult.setType(ValidateResult.Type.WHITE_LIST_INVALID_NAME_VALUE);
             } else {
                 validateResult.setType(ValidateResult.Type.WHITE_LIST_INVALID_NAME);
             }
-            return false;
         } else if (validateType == ValidateResult.Type.WHITE_LIST_INVALID_VALUE) {
-            validateResult.addFailureName(configPropertyValue);
+            if(!validateResult.getFailureValues().contains(configPropertyValue)) {
+               validateResult.addFailureValue(configPropertyValue);               
+            }
             if (validateResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME
                     || validateResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME_VALUE) {
                 validateResult.setType(ValidateResult.Type.WHITE_LIST_INVALID_NAME_VALUE);
             } else {
                 validateResult.setType(ValidateResult.Type.WHITE_LIST_INVALID_VALUE);
             }
-            return false;
         }
-        return true;
     }
 }

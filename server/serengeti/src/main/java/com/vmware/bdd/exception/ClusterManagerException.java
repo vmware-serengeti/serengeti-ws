@@ -26,7 +26,7 @@ public class ClusterManagerException extends BddException {
       super(cause, "CLUSTER", errorId, detail);
    }
 
-   public static ClusterManagerException MAFINSET_NOT_FOUND_ERROR(String clusterName) {
+   public static ClusterManagerException MANIFEST_NOT_FOUND_ERROR(String clusterName) {
       return new ClusterManagerException(null, "MANIFEST_NOT_FOUND_ERROR",
             clusterName);
    }

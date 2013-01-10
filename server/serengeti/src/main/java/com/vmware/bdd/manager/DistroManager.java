@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,15 +31,21 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Configuration;
 
 class RolePackageMapping {
    private List<String> roles;
    private String tarball;
-
+   //yum or ubuntu apt repos
+   @Expose
+   @SerializedName("package_repos")
+   private List<String> packageRepos;
    public List<String> getRoles() {
       return roles;
    }
@@ -54,6 +61,15 @@ class RolePackageMapping {
    public void setTarball(String tarball) {
       this.tarball = tarball;
    }
+
+   public List<String> getPackageRepos() {
+      return packageRepos;
+   }
+
+   public void setPackageRepos(List<String> packageRepos) {
+      this.packageRepos = packageRepos;
+   }
+
 }
 
 class Distro {
@@ -61,7 +77,8 @@ class Distro {
 
    private String name;
    private Boolean hveSupported;
-   private String version; // ignored now
+   private String vendor = "Apache";
+   private String version;
    private List<RolePackageMapping> packages;
 
    public String getName() {
@@ -78,6 +95,14 @@ class Distro {
 
    public void setHveSupported(Boolean hveSupported) {
       this.hveSupported = hveSupported;
+   }
+
+   public String getVendor() {
+      return vendor;
+   }
+
+   public void setVendor(String vendor) {
+      this.vendor = vendor;
    }
 
    public String getVersion() {
@@ -119,6 +144,8 @@ class Distro {
       }
 
       dr.setName(this.getName());
+      dr.setVendor(this.getVendor());
+      dr.setVersion(this.getVersion());
       dr.setHveSupported(this.getHveSupported() == null ? false : this.getHveSupported());
       dr.setRoles(new ArrayList<String>(roles));
       return dr;
@@ -133,12 +160,17 @@ class Distro {
 
 public class DistroManager {
    private static String distroRootUrl = "http://localhost/distros/";
+   private static String VENDOR = "serengeti.distro_vendor";
    private static String distrosManifestUrl;
    private static final Logger logger = Logger.getLogger(DistroManager.class);
 
    static {
       distroRootUrl = Configuration.getString("serengeti.distro_root", distroRootUrl);
       distrosManifestUrl = distroRootUrl + "/manifest";
+   }
+
+   public enum PackagesExistStatus {
+      NONE, TARBALL, REPO, BOTH
    }
 
    private Map<String, Distro> distros = null;
@@ -179,8 +211,10 @@ public class DistroManager {
             Type type = new TypeToken<ArrayList<Distro>>() {
             }.getType();
             List<Distro> distrosList = gson.fromJson(readDistroManifest(), type);
-            for (Distro d : distrosList) {
-               distrosLoading.put(d.getName(), d);
+            if (distrosList != null) {
+               for (Distro d : distrosList) {
+                  distrosLoading.put(d.getName(), d);
+               }
             }
          } catch (JsonSyntaxException e) {
             logger.error("failed to parse manifest: " + distrosManifestUrl, e);
@@ -210,26 +244,65 @@ public class DistroManager {
       return null;
    }
 
+   public PackagesExistStatus checkPackagesExistStatus(final String distroName) {
+      loadManifest(false);
+      Distro distro = distros.get(distroName);
+      boolean hasPackageRepo = false, hasTarball = false;
+      for (RolePackageMapping pkg : distro.getPackages()) {
+         List<String> packageRepos = pkg.getPackageRepos();
+         if (packageRepos != null && !packageRepos.isEmpty()) {
+            hasPackageRepo = true;
+         }
+         if (!CommonUtil.isBlank(pkg.getTarball())) {
+            hasTarball = true;
+            if (hasPackageRepo) {
+               return PackagesExistStatus.BOTH;
+            }
+         }
+      }
+      if (!hasPackageRepo && !hasTarball) {
+         return PackagesExistStatus.NONE;
+      } else if (hasPackageRepo) {
+         return PackagesExistStatus.REPO;
+      } else {
+         return PackagesExistStatus.TARBALL;
+      }
+   }
+
    public List<DistroRead> getDistros() {
       loadManifest(false);
       List<DistroRead> drs = new ArrayList<DistroRead>();
-
+      String vendorStr = Configuration.getStrings(VENDOR, "");
+      List<String> vendors =
+            Arrays.asList(vendorStr.indexOf(",") != -1 ? vendorStr.split(",")
+                  : new String[] { vendorStr });
+      List<String>  errorVendors = new ArrayList<String> ();
       for (Distro distro : distros.values()) {
          DistroRead dr = distro.convert();
+         //check vendor name is whether configured in serengeti.properties
+         if (! vendors.contains(dr.getVendor())) {
+            errorVendors.add(dr.getVendor());
+         }
          if (dr != null) {
             drs.add(dr);
          } else {
             logger.error("discard invalid distro: " + distro);
          }
       }
-
+      StringBuffer errorMsg = new StringBuffer();
+      if (!errorVendors.isEmpty()) {
+         String errorVendorsStr=errorVendors.toString().substring(1, errorVendors.toString().length()-1);
+         errorMsg.append(errorVendorsStr).append(" can not be found in serengeti.properties. ");
+      }
+      if(errorMsg.length() > 0) {
+         throw BddException.INTERNAL(null, errorMsg.toString());
+      }
       return drs;
    }
 
    public DistroRead getDistroByName(String name) {
       loadManifest(false);
       DistroRead dr = null;
-
       Distro distro = distros.get(name);
       if (distro != null) {
          dr = distro.convert();
@@ -239,5 +312,18 @@ public class DistroManager {
       }
 
       return dr;
+   }
+
+   public List<String> getPackageRepos(String distroName) {
+      loadManifest(true);
+      Distro distro = distros.get(distroName);
+      List<String> packageRepos = new ArrayList<String> ();
+      for (RolePackageMapping pkg : distro.getPackages()) {
+         List<String> subPackageRepos = pkg.getPackageRepos();
+         if (subPackageRepos != null && !subPackageRepos.isEmpty()) {
+            packageRepos.addAll(subPackageRepos);
+         }
+      }
+      return packageRepos.isEmpty() ? null : packageRepos;
    }
 }

@@ -1,6 +1,7 @@
 [
  {
    "name" : "apache",
+   "vendor" : "Apache",
    "version" : "1.0.1",
    "packages" : [
     {

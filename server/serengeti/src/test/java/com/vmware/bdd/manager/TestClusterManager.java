@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.testng.annotations.AfterClass;
@@ -92,6 +93,7 @@ public class TestClusterManager {
       clusterManager.setClusterConfigMgr(ccMgr);
       clusterManager.setTaskManager(new TaskManager());
       clusterManager.setNetworkManager(new NetworkManager());
+      clusterManager.setDistroManager(new DistroManager());
 
       Set<String> rpNames = vcmgr.getRpMgr().getAllRPNames();
       for (String name : rpNames) {
@@ -368,18 +370,17 @@ public class TestClusterManager {
       ClusterCreate createSpec = new ClusterCreate();
       createSpec.setName(CLUSTER_NAME);
       createSpec.setNetworkName(NETWORK_NAME);
-      Map<String, Object> configuration = new HashMap<String, Object>();
       String configJson = 
          "{\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.security.group.mapping\":\"xxx\",\"hadoop.security.authorization\":false}}}}";
       Map config = (new Gson()).fromJson(configJson, Map.class);
-      createSpec.setConfiguration(config);
+      createSpec.setConfiguration((Map<String, Object>)config.get("cluster_configuration"));
       NodeGroupCreate[] nodegroups = new NodeGroupCreate[1];
       NodeGroupCreate group = new NodeGroupCreate();
       nodegroups[0] = group;
       configJson = 
          "{\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.security.group.mapping\":\"yyy\",\"hadoop.security.authorization\":false}}}}";
       Map groupConfig = (new Gson()).fromJson(configJson, Map.class);
-      group.setConfiguration(groupConfig);
+      group.setConfiguration((Map<String, Object>)groupConfig.get("cluster_configuration"));
 
       Long id = clusterManager.configCluster(CLUSTER_NAME, createSpec);
       TaskEntity task = TaskEntity.findById(id);
@@ -543,5 +544,40 @@ public class TestClusterManager {
                cluster.getStatus().equals(ClusterStatus.RUNNING));
       } catch (Exception e) {
       }
+   }
+
+   @Test(groups = { "testClusterManager" }, dependsOnMethods = { "testCreateCluster" })
+   public void testGetClusterByName() throws Exception {
+      ClusterRead clusterRead = clusterManager.getClusterByName(CLUSTER_NAME, false);
+      assertNotNull("clusterRead shouldn't be null", clusterRead);
+      assertTrue("cluster " + CLUSTER_NAME
+            + " should be running, but get status: " + clusterRead.getStatus(),
+            clusterRead.getStatus().equals(ClusterStatus.RUNNING));
+   }
+
+   @Test(groups = { "testClusterManager" }, dependsOnMethods = { "testCreateCluster" })
+   public void testGetClusterSpec() throws Exception {
+      ClusterCreate clusterSpec = clusterManager.getClusterSpec(CLUSTER_NAME);
+      Gson gson = new Gson();
+      String specJson = gson.toJson(clusterSpec);
+      assertTrue("vcClusters must be null", specJson.indexOf("vc_clusters") == -1);
+      assertTrue("templateId must be null", specJson.indexOf("template_id") == -1);
+      assertTrue("distroMap must be null", specJson.indexOf("distro_map") == -1);
+      assertTrue("sharedPattern must be null", specJson.indexOf("vc_shared_datastore_pattern") == -1);
+      assertTrue("localPattern must be null", specJson.indexOf("vc_local_datastore_pattern") == -1);
+      assertTrue("distro must be null", specJson.indexOf("distro") == -1);
+      assertTrue("validateConfig must be null", specJson.indexOf("validateConfig") == -1);
+      assertTrue("rack_topology_policy must be null", specJson.indexOf("rack_topology_policy") == -1);
+      assertTrue("hostToRackMap must be null", specJson.indexOf("rack_topology") == -1);
+      assertTrue("vc_clusters must be null", specJson.indexOf("vc_clusters") == -1);
+      assertTrue("groupType must be null", specJson.indexOf("groupType") == -1);
+      assertTrue("rpNames must be null", specJson.indexOf("groupType") == -1);
+      assertTrue("dsNames must be null", specJson.indexOf("dsNames") == -1);
+      assertTrue("namePattern must be null", specJson.indexOf("name_pattern") == -1);
+      assertTrue("diskBisect must be null", Pattern.compile("([\\s\\S]*\"bisect\":false[\\s\\S]*){3}")
+            .matcher(specJson).matches());
+      assertTrue("vmFolderPath must be null", specJson.indexOf("vm_folder_path") == -1);
+      assertTrue("httpProxy must be null", specJson.indexOf("http_proxy") == -1);
+      assertTrue("noProxy must be null", specJson.indexOf("no_proxy") == -1);
    }
 }

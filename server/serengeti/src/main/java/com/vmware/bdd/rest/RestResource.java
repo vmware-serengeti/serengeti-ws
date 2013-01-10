@@ -138,6 +138,10 @@ public class RestResource {
    public void createCluster(@RequestBody ClusterCreate createSpec,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
+      String clusterName = createSpec.getName();
+      if (!CommonUtil.validateClusterName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
       Long taskId = clusterMgr.createCluster(createSpec);
       redirectRequest(taskId, request, response);
    }
@@ -421,7 +425,7 @@ public class RestResource {
 
    @RequestMapping(value = "/datastores", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   public List<DatastoreRead> getDatastore() {
+   public List<DatastoreRead> getDatastores() {
       return datastoreMgr.getAllDatastoreReads();
    }
 

@@ -1,7 +1,5 @@
 package com.vmware.bdd.entity;
 
-import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,8 +10,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
-import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.utils.AuAssert;
 
 @Entity
 @SequenceGenerator(name = "IdSequence", sequenceName = "node_group_association_seq", allocationSize = 1)

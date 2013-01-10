@@ -34,7 +34,7 @@ public class HadoopDistroMap {
    @Expose
    @SerializedName("zookeeper")
    private String zookeeperUrl;
-   
+
    public String getName() {
       return name;
    }
@@ -71,4 +71,5 @@ public class HadoopDistroMap {
    public void setZookeeperUrl(String zookeeperUrl) {
       this.zookeeperUrl = zookeeperUrl;
    }
+
 }

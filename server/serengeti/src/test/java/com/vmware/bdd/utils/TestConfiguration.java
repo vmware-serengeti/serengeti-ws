@@ -12,17 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.apitypes;
+package com.vmware.bdd.utils;
 
-/**
- * <p>
- * This class is the common enum of Datastore command.
- * </p>
- */
-public class Datastore {
-   
-   public enum DatastoreType {
-      SHARED, LOCAL, TEMPFS
+import static org.testng.AssertJUnit.assertEquals;
+
+import org.testng.annotations.Test;
+
+public class TestConfiguration {
+
+   @Test
+   public void testGetStrings () {
+      String proxy = "";
+      proxy = Configuration.getStrings("serengeti.no_proxy", "127.0.0.1");
+      assertEquals(proxy,"192.168.0.1,192.168.0.2");
+      proxy = Configuration.getStrings("serengeti.no_proxy_no_comma", "127.0.0.1");
+      assertEquals(proxy,"192.168.0.1 192.168.0.2");
+      proxy = Configuration.getStrings("serengeti.http_proxy", "127.0.0.1");
+      assertEquals(proxy,"proxy.domain.com:3128");
+      proxy = Configuration.getStrings("serengeti.svn_proxy", "127.0.0.1");
+      assertEquals(proxy,"127.0.0.1");
    }
-   
 }

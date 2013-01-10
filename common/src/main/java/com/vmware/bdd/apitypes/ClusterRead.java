@@ -147,8 +147,10 @@ public class ClusterRead {
             NodeGroupRead nodeGroup = matchNodeGroupByName(nodeGroups,nodeGroupName);
             if (nodeGroup == null) {
                 invalidNodeGroup.add(nodeGroupName);
-            } else if (nodeGroup.getRoles() == null || nodeGroup.getRoles().size() != 1
-                || !nodeGroup.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {
+            } else if (nodeGroup.getRoles() == null || nodeGroup.getRoles().size() > 2
+                || !nodeGroup.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())
+                || (nodeGroup.getRoles().size() == 2 && !nodeGroup.getRoles().contains(HadoopRole.TEMPFS_CLIENT_ROLE.toString()))
+                ) {
                    invalidNodeGroup.add(nodeGroupName);
             }
             if (!invalidNodeGroup.isEmpty()) {
@@ -162,7 +164,8 @@ public class ClusterRead {
       } else {
          int count = 0;
          for(NodeGroupRead nodeGroup : getNodeGroups()) {
-            if (nodeGroup.getRoles() != null && nodeGroup.getRoles().size() == 1 && nodeGroup.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {
+            if (nodeGroup.getRoles() != null && nodeGroup.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString()) 
+                && (nodeGroup.getRoles().size() == 1 || (nodeGroup.getRoles().size() == 2 && nodeGroup.getRoles().contains(HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
                if(nodeGroupNames != null && nodeGroupNames.length > 0){
                   nodeGroupNames[0].add(nodeGroup.getName());
                }
