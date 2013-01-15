@@ -331,6 +331,11 @@ if [ -e /opt/serengeti/etc/lock_down ]; then
   /opt/serengeti/sbin/set-password -a
 fi
 
+# Node VM use default password if serengeti is beta build
+if [ ! -e /opt/serengeti/etc/lock_down ]; then
+  echo "knife[:vm_use_default_password] = true" >> /opt/serengeti/.chef/knife.rb
+fi
+
 # remove ovf env file
 rm -f "#{SERENGETI_VC_PROPERTIES}"
 
