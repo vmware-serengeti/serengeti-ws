@@ -61,6 +61,7 @@ import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Configuration;
+import com.vmware.bdd.utils.Constants;
 
 public class ClusterConfigManager {
    private static final long serialVersionUID = 1L;
@@ -132,7 +133,7 @@ public class ClusterConfigManager {
             distroMgr.getDistroByName(cluster.getDistro()) == null) {
            throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
       }
-      if (!cluster.getVendor().equalsIgnoreCase("Mapr")) {
+      if (!cluster.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
          cluster.validateClusterCreate(failedMsgList, warningMsgList, distroMgr
                .getDistroByName(cluster.getDistro()).getRoles());
       }
@@ -162,7 +163,8 @@ public class ClusterConfigManager {
                Gson gson = new Gson();
                ClusterEntity clusterEntity = new ClusterEntity(name);
                clusterEntity.setDistro(cluster.getDistro());
-
+               clusterEntity.setDistroVendor(cluster.getDistroVendor());
+               clusterEntity.setDistroVersion(cluster.getDistroVersion());
                clusterEntity.setStartAfterDeploy(true);
                if (cluster.getRpNames() != null
                      && cluster.getRpNames().size() > 0) {
@@ -576,6 +578,8 @@ public class ClusterConfigManager {
 
       CommonClusterExpandPolicy.expandDistro(clusterEntity, clusterConfig,
             distroMgr);
+      clusterConfig.setDistroVendor(clusterEntity.getDistroVendor());
+      clusterConfig.setDistroVersion(clusterEntity.getDistroVersion());
       clusterConfig.setHttpProxy(httpProxy);
       clusterConfig.setNoProxy(noProxy);
       clusterConfig.setTopologyPolicy(clusterEntity.getTopologyPolicy());

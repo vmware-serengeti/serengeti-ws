@@ -322,6 +322,8 @@ public class ClusterManager {
       spec.setHostToRackMap(null);
       spec.setHttpProxy(null);
       spec.setNoProxy(null);
+      spec.setDistroVendor(null);
+      spec.setDistroVersion(null);
       NodeGroupCreate[] groups = spec.getNodeGroups();
       if (groups != null) {
          for (NodeGroupCreate group : groups) {
@@ -352,8 +354,8 @@ public class ClusterManager {
          setDefaultDistro(createSpec);
       }
       DistroRead distroRead=this.getDistroManager().getDistroByName(createSpec.getDistro());
-      createSpec.setVendor(distroRead.getVendor());
-      createSpec.setVersion(distroRead.getVersion());
+      createSpec.setDistroVendor(distroRead.getVendor());
+      createSpec.setDistroVersion(distroRead.getVersion());
       createSpec = ClusterSpecFactory.getCustomizedSpec(createSpec);
 
       String name = createSpec.getName();

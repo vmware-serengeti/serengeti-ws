@@ -41,6 +41,7 @@ import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.Saveable;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.specpolicy.ClusterSpecFactory;
+import com.vmware.bdd.utils.Constants;
 
 public class TestClusterConfigManager {
    private static ClusterConfigManager clusterMgr = new ClusterConfigManager();
@@ -132,7 +133,7 @@ public class TestClusterConfigManager {
       spec.setRpNames(rps);
       spec.setNetworkName("dhcpNet1");
       spec.setDistro("apache");
-      spec.setVendor("Apache");
+      spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       spec.setType(ClusterType.HDFS_MAPRED);
       spec = ClusterSpecFactory.getCustomizedSpec(spec);
       clusterMgr.createClusterConfig(spec);
@@ -167,7 +168,7 @@ public class TestClusterConfigManager {
       spec.setRpNames(rps);
       spec.setNetworkName("dhcpNet1");
       spec.setDistro("apache");
-      spec.setVendor("Apache");
+      spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       spec.setExternalHDFS(hdfsArray[0]);
       String clusterConfigJson = 
          "{\"configuration\":{\"hadoop\":{\"core-site.xml\":{\"fs.default.name\":\"" + hdfsArray[1] + "\"}}}}";
@@ -248,7 +249,7 @@ public class TestClusterConfigManager {
       spec.setRpNames(rps);
       spec.setNetworkName("dhcpNet1");
       spec.setDistro("apache");
-      spec.setVendor("Apache");
+      spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       String clusterConfigJson = 
          "{\"configuration\":{\"hadoop\":{\"core-site.xml\":{\"fs.default.name\":\"" + hdfsArray[1] + "\"}}}}";
       Map clusterConfig = (new Gson()).fromJson(clusterConfigJson, Map.class);
@@ -327,7 +328,7 @@ public class TestClusterConfigManager {
       spec.setRpNames(rps);
       spec.setNetworkName("dhcpNet1");
       spec.setDistro("apache");
-      spec.setVendor("Apache");
+      spec.setDistroVendor(Constants.DEFAULT_VENDOR);
 
       //build a master group, a datanode group, a compute node group with strict association and tempfs.
       NodeGroupCreate[] ngs = new NodeGroupCreate[3];

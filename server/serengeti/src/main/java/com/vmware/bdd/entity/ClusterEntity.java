@@ -44,7 +44,6 @@ import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.dal.DAL;
-import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ConfigInfo;
 
@@ -69,6 +68,12 @@ public class ClusterEntity extends EntityBase {
    @Column(name = "distro")
    private String distro;
 
+   @Column(name = "distro_vendor")
+   private String distroVendor;
+
+   @Column(name = "distro_version")
+   private String distroVersion;
+   
    @Enumerated(EnumType.STRING)
    @Column(name = "topology", nullable = false)
    private TopologyType topologyPolicy;
@@ -154,6 +159,22 @@ public class ClusterEntity extends EntityBase {
 
    public void setDistro(String distro) {
       this.distro = distro;
+   }
+
+   public String getDistroVendor() {
+      return distroVendor;
+   }
+
+   public void setDistroVendor(String distroVendor) {
+      this.distroVendor = distroVendor;
+   }
+
+   public String getDistroVersion() {
+      return distroVersion;
+   }
+
+   public void setDistroVersion(String distroVersion) {
+      this.distroVersion = distroVersion;
    }
 
    public boolean isStartAfterDeploy() {

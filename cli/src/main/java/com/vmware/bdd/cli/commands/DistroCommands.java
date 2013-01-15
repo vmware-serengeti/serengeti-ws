@@ -68,6 +68,10 @@ public class DistroCommands implements CommandMarker {
          distroColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_NAME, Arrays.asList("getName"));
          distroColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_VENDOR, Arrays.asList("getVendor"));
+         distroColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_VERSION, Arrays.asList("getVersion"));
+         distroColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_HVE, Arrays.asList("isHveSupported"));
          distroColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_ROLES, Arrays.asList("getRoles"));

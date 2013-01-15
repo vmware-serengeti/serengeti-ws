@@ -28,6 +28,7 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.Constants;
 
 public class ClusterSpecFactory {
    private static final Logger logger = Logger.getLogger(ClusterSpecFactory.class);
@@ -92,7 +93,7 @@ public class ClusterSpecFactory {
    public static ClusterCreate createDefaultSpec(ClusterType type, final String vendor)
          throws FileNotFoundException {
       // loading from file each time is slow but fine
-      if (vendor.trim().equalsIgnoreCase("mapr")) {
+      if (vendor.trim().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
          switch (type) {
          case HDFS_MAPRED:
             return loadFromFile(locateSpecFile(HDFS_MAPRED_MAPR_TEMPLATE_SPEC));
@@ -129,7 +130,7 @@ public class ClusterSpecFactory {
          return spec;
       }
 
-      ClusterCreate newSpec = createDefaultSpec(spec.getType(), spec.getVendor());
+      ClusterCreate newSpec = createDefaultSpec(spec.getType(), spec.getDistroVendor());
 
       // --name
       if (spec.getName() != null) {
@@ -142,13 +143,13 @@ public class ClusterSpecFactory {
       }
 
       //vendor
-      if (spec.getVendor() != null) {
-         newSpec.setVendor(spec.getVendor());
+      if (spec.getDistroVendor() != null) {
+         newSpec.setDistroVendor(spec.getDistroVendor());
       }
 
       //version
-      if(spec.getVersion() != null) {
-         newSpec.setVersion(spec.getVersion());
+      if(spec.getDistroVersion() != null) {
+         newSpec.setDistroVersion(spec.getDistroVersion());
       }
 
       // --dsNames

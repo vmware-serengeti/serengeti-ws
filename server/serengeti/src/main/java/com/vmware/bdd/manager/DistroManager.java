@@ -38,6 +38,7 @@ import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Configuration;
+import com.vmware.bdd.utils.Constants;
 
 class RolePackageMapping {
    private List<String> roles;
@@ -77,7 +78,7 @@ class Distro {
 
    private String name;
    private Boolean hveSupported;
-   private String vendor = "Apache";
+   private String vendor = Constants.DEFAULT_VENDOR;
    private String version;
    private List<RolePackageMapping> packages;
 
@@ -273,6 +274,7 @@ public class DistroManager {
       loadManifest(false);
       List<DistroRead> drs = new ArrayList<DistroRead>();
       String vendorStr = Configuration.getStrings(VENDOR, "");
+      vendorStr = vendorStr.toLowerCase();
       List<String> vendors =
             Arrays.asList(vendorStr.indexOf(",") != -1 ? vendorStr.split(",")
                   : new String[] { vendorStr });
@@ -280,7 +282,7 @@ public class DistroManager {
       for (Distro distro : distros.values()) {
          DistroRead dr = distro.convert();
          //check vendor name is whether configured in serengeti.properties
-         if (! vendors.contains(dr.getVendor())) {
+         if (! vendors.contains(dr.getVendor().toLowerCase())) {
             errorVendors.add(dr.getVendor());
          }
          if (dr != null) {

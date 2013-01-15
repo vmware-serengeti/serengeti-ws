@@ -45,14 +45,18 @@ public class ClusterCreate {
    @Expose
    private String name;
    private ClusterType type;
-   private String vendor;
    private String externalHDFS;
    @Expose
    @SerializedName("groups")
    private NodeGroupCreate[] nodeGroups;
    @Expose
    private String distro;
-   private String version;
+   @Expose
+   @SerializedName("distro_vendor")
+   private String distroVendor;
+   @Expose
+   @SerializedName("distro_version")
+   private String distroVersion;
    @Expose
    @SerializedName("http_proxy")
    private String httpProxy;
@@ -105,7 +109,8 @@ public class ClusterCreate {
       this.distro = cluster.distro;
       this.name = cluster.name;
       this.type = cluster.type;
-      this.vendor = cluster.vendor;
+      this.distroVendor = cluster.distroVendor;
+      this.distroVersion = cluster.distroVersion;
       this.externalHDFS = cluster.externalHDFS;
       this.networkName = cluster.networkName;
       this.nodeGroups = cluster.nodeGroups;
@@ -146,14 +151,6 @@ public class ClusterCreate {
       this.type = type;
    }
 
-   public String getVendor() {
-      return vendor;
-   }
-
-   public void setVendor(String vendor) {
-      this.vendor = vendor;
-   }
-
    public void setExternalHDFS(String externalHDFS) {
       this.externalHDFS = externalHDFS;
    }
@@ -170,12 +167,20 @@ public class ClusterCreate {
       this.distro = distro;
    }
 
-   public String getVersion() {
-      return version;
+   public String getDistroVendor() {
+      return distroVendor;
    }
 
-   public void setVersion(String version) {
-      this.version = version;
+   public void setDistroVendor(String distroVendor) {
+      this.distroVendor = distroVendor;
+   }
+
+   public String getDistroVersion() {
+      return distroVersion;
+   }
+
+   public void setDistroVersion(String distroVersion) {
+      this.distroVersion = distroVersion;
    }
 
    public String getHttpProxy() {
@@ -724,9 +729,9 @@ public class ClusterCreate {
 
    // For HDFS2, at present, serengeti only support cdh4 of Cloudera.
    public boolean supportedWithHdfs2() {
-      if (this.getVendor().equalsIgnoreCase(Constants.CLOUDERA_VENDOR)) {
+      if (this.getDistroVendor().equalsIgnoreCase(Constants.CDH_VENDOR)) {
          Pattern pattern = Pattern.compile(Constants.CDH4_1_PATTERN);
-         if (pattern.matcher(this.getVersion()).matches()) {
+         if (pattern.matcher(this.getDistroVersion()).matches()) {
             return true;
          }
       }

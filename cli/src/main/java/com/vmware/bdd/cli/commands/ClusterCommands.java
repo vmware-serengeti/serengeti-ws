@@ -168,8 +168,8 @@ public class ClusterCommands implements CommandMarker {
          return;
       }
       DistroRead distroRead = distroRestClient.get(clusterCreate.getDistro());
-      clusterCreate.setVendor(distroRead.getVendor());
-      clusterCreate.setVersion(distroRead.getVersion());
+      clusterCreate.setDistroVendor(distroRead.getVendor());
+      clusterCreate.setDistroVersion(distroRead.getVersion());
       if (rpNames != null) {
          List<String> rpNamesList = CommandsUtils.inputsConvert(rpNames);
          if (rpNamesList.isEmpty()) {
