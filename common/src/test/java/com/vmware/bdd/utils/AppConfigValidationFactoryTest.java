@@ -43,7 +43,7 @@ public class AppConfigValidationFactoryTest {
       corePopertysMap.put("hadoop.tmp.dir", "/tmp");
       hdfsPopertysMap.put("dfs.http.address", "localhost");
       mapredPopertysMap.put("mapred.job.tracker","127.0.1.2");
-      hbaseSiteMap.put("hbase.rootdir", "/root");
+      hbaseSiteMap.put("hbase.cluster.distributed", "false");
       zookeeperEnvMap.put("JVMFLAGS", "-Xmx1g");
       zookeeperEnvMap.put("other", "error");
       hadoopFileMap.put("core-site.xml", corePopertysMap);
@@ -103,7 +103,7 @@ public class AppConfigValidationFactoryTest {
       assertEquals(validateResult.getType(),ValidateResult.Type.NAME_IN_BLACK_LIST);
       assertEquals(validateResult.getFailureNames().get(0), "dfs.http.address");
       assertEquals(validateResult.getFailureNames().get(1), "mapred.job.tracker");
-      assertEquals(validateResult.getFailureNames().get(2), "hbase.rootdir"); 
+      assertEquals(validateResult.getFailureNames().get(2), "hbase.cluster.distributed");
    }
 
 }

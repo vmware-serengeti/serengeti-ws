@@ -162,7 +162,6 @@ def init_blacklist(filename)
       {
         "hbase": {
           "hbase-site.xml": [
-            "hbase.rootdir",
             "hbase.cluster.distributed",
             "hbase.zookeeper.quorum"
           ],
