@@ -51,12 +51,14 @@ public class CommonUtilTest {
    public void testValidateNodeGroupName() {
       assertEquals(CommonUtil.validateNodeGroupName("nodeGroupName1"), true);
       assertEquals(CommonUtil.validateNodeGroupName("nodeGroupName2"), true);
-      assertEquals(CommonUtil.validateNodeGroupName("nodeGroupName3_"), true);
-      assertEquals(CommonUtil.validateNodeGroupName("nodeGroupName4 "), true);
+      assertEquals(CommonUtil.validateNodeGroupName("nodeGroupName3_"), false);
+      assertEquals(CommonUtil.validateNodeGroupName("nodeGroupName4 "), false);
       assertEquals(CommonUtil.validateNodeGroupName("nodeGroupName-5"), false);
       assertEquals(CommonUtil.validateNodeGroupName("nodeGroupName6-"), false);
       assertEquals(CommonUtil.validateNodeGroupName("-nodeGroupName7"), false);
-      assertEquals(CommonUtil.validateNodeGroupName("nodeGroup Name8"), true);
+      assertEquals(CommonUtil.validateNodeGroupName("nodeGroup Name8"), false);
+      assertEquals(CommonUtil.validateNodeGroupName("nodeGroup_Name9"), false);
+      assertEquals(CommonUtil.validateNodeGroupName("_nodeGroupName10"), false);
    }
 
    @Test
