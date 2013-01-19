@@ -252,7 +252,7 @@ public class ClusterCommands implements CommandMarker {
       }
 
       // Validate that the specified file is correct json format and proper value.
-      if (specFilePath != null) {
+      if (specFilePath != null && !clusterCreate.getDistro().equalsIgnoreCase(com.vmware.bdd.utils.Constants.MAPR_VENDOR)) {
          List<String> distroRoles = findDistroRoles(clusterCreate);
          clusterCreate.validateClusterCreate(failedMsgList, warningMsgList, distroRoles);
       }
