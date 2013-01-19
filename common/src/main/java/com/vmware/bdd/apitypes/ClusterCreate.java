@@ -475,6 +475,11 @@ public class ClusterCreate {
       boolean namenodeHACheck = false;
       //role count
       int masterCount = 0, jobtrackerCount = 0, hbasemasterCount = 0, zookeeperCount = 0, workerCount = 0, numOfJournalNode = 0;
+      boolean appendWarningStr = false;
+      if (warningMsgList !=null && warningMsgList.isEmpty()) {
+         appendWarningStr = true;
+      }
+
       //Find NodeGroupCreate array from current ClusterCreate instance.
       NodeGroupCreate[] nodeGroupCreates = getNodeGroups();
       if (nodeGroupCreates == null || nodeGroupCreates.length == 0) {
@@ -601,6 +606,9 @@ public class ClusterCreate {
          }
          if (numOfJournalNode > 0 && !namenodeHACheck) {
             failedMsgList.add(Constants.NO_NAMENODE_HA);
+         }
+         if(!warningMsgList.isEmpty() && appendWarningStr) {
+            warningMsgList.set(0, "Warning: " + warningMsgList.get(0));
          }
       }
    }
