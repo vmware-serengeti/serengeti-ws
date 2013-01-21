@@ -185,6 +185,15 @@
       ],
       "hdfs-site.xml": [
         {
+          "name": "dfs.socket.timeout"
+        },
+        {
+          "name": "dfs.datanode.drop.cache.behind.writes"
+        },
+        {
+          "name": "dfs.datanode.sync.behind.writes"
+        },
+        {
           "name": "dfs.namenode.logging.level"
         },
         {
