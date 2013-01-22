@@ -46,7 +46,8 @@ public class Constants {
    public static final String WRONG_NUM_OF_NODEGROUPS = "the node groups including jobtracker, zookeeper or hmaster is larger than 1";
    public static final String WRONG_NUM_OF_WORKERNODES = "no worker exists";
    public static final String DATA_CLIENT_NODE_JOURNALNODE_COEXIST = "journal nodes are not allowed to be on data nodes or client nodes";
-   public static final String TEMPFS_NOT_ALLOWED = "the disk type of TEMPFS can only be set on compute nodes with strict association to data nodes";
+   public static final String STORAGE_TYPE_ALLOWED = "The allowed storage types include SHARED, LOCAL, and TEMPFS";
+   public static final String TEMPFS_NOT_ALLOWED = "the storage type of TEMPFS can only be set on compute nodes with strict association to data nodes";
    public static final String DEFAULT_VENDOR = "Apache";
    public static final String CDH_VENDOR = "CDH";
    public static final String GPHD_VENDOR = "GPHD";

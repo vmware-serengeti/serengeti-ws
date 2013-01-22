@@ -343,25 +343,34 @@ public class ClusterCreate {
       return valid;
    }
 
-   public void validateTempfs(List<String> failedMsgList) {
+   public void validateStorageType(List<String> failedMsgList) {
       for (NodeGroupCreate nodeGroupCreate : getNodeGroups()) {
          StorageRead storageDef = nodeGroupCreate.getStorage();
          if (storageDef != null) {
             String storageType = storageDef.getType();
-            if (storageType != null && storageType.equals(DatastoreType.TEMPFS.toString())) {//tempfs disk type
-               if (nodeGroupCreate.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {//compute node
-                  PlacementPolicy placementPolicy = nodeGroupCreate.getPlacementPolicies();
-                  if (placementPolicy != null) {
-                     List<GroupAssociation> groupAssociations = placementPolicy.getGroupAssociations();
-                     if (groupAssociations != null) {
-                        GroupAssociationType associationType = groupAssociations.get(0).getType();
-                        if (associationType != null && associationType == GroupAssociationType.STRICT) {
-                           continue;
+
+            if (storageType != null) {
+               storageType = storageType.toUpperCase();
+               //only support storage type of TEMPFS/LOCAL/SHARED
+               if (!storageType.equals(DatastoreType.TEMPFS.toString())
+                     && !storageType.equals(DatastoreType.LOCAL.toString())
+                     && !storageType.equals(DatastoreType.SHARED.toString())) {
+                  failedMsgList.add("Storage type " + storageType + " is not allowed. " + Constants.STORAGE_TYPE_ALLOWED);
+               } else if (storageType.equals(DatastoreType.TEMPFS.toString())) {//tempfs disk type
+                  if (nodeGroupCreate.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {//compute node
+                     PlacementPolicy placementPolicy = nodeGroupCreate.getPlacementPolicies();
+                     if (placementPolicy != null) {
+                        List<GroupAssociation> groupAssociations = placementPolicy.getGroupAssociations();
+                        if (groupAssociations != null) {
+                           GroupAssociationType associationType = groupAssociations.get(0).getType();
+                           if (associationType != null && associationType == GroupAssociationType.STRICT) {
+                              continue;
+                           }
                         }
                      }
                   }
+                  failedMsgList.add(Constants.TEMPFS_NOT_ALLOWED);
                }
-               failedMsgList.add(Constants.TEMPFS_NOT_ALLOWED);
             }
          }
       }
@@ -498,9 +507,10 @@ public class ClusterCreate {
 
          validateNodeGroupRoles(failedMsgList);
 
-         // check tempfs relationship: if a compute node has strict association with a data node, its disk type
-         // can be set to "TEMPFS". Otherwise, it is not allowed to use tempfs as the disk type.
-         validateTempfs(failedMsgList);
+         // check supported storage type: LOCAL/SHARED/TEMPFS For tempfs relationship: if a compute node has 
+         // strict association with a data node, its disk type can be set to "TEMPFS". Otherwise, it is not 
+         // allowed to use tempfs as the disk type.
+         validateStorageType(failedMsgList);
 
          for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
             // check node group's instanceNum
