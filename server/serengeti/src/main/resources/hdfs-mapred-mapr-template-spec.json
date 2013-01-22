@@ -4,17 +4,21 @@
     {
       "name":"master",
       "roles":[
-       "mapr_cldb", 
-       "mapr_jobtracker",
-       "mapr_nfs",
-       "mapr_webserver",
-       "mapr_fileserver",
-       "mapr_tasktracker",
-       "mapr_metrics",
-       "mapr_mysql_client"
+        "mapr_cldb", 
+        "mapr_jobtracker",
+        "mapr_nfs",
+        "mapr_webserver",
+        "mapr_fileserver",
+        "mapr_tasktracker",
+        "mapr_metrics"
       ],
-      "instance_type":MEDIUM,
-      "instance_num":2,
+      "cpu":2,
+      "memory":7680,
+      "storage" : {
+        "type": "LOCAL",
+        "size": 50
+      },
+      "instance_num":3,
       "ha":"on"
     },
     {
@@ -24,37 +28,56 @@
         "mapr_tasktracker",
         "mapr_nfs"
       ],
-      "instance_type":SMALL,
+      "cpu":2,
+      "memory":4096,
+      "storage" : {
+        "type": "LOCAL",
+        "size": 50
+      },
       "instance_num":3,
       "ha":"off"
     },
     {
       "name":"client",
       "roles":[
-		"mapr_node", 
 		"mapr_pig",
 		"mapr_hive",
-		"hive_server"
+		"mapr_hive_server"
       ],
-      "instance_type":SMALL,
+      "cpu":1,
+      "memory":4096,
+      "storage" : {
+        "type": "SHARED",
+        "size": 50
+      },
       "instance_num":1,
       "ha":"off"
     },
     {
       "name":"zookeeper",
       "roles":[
-		"mapr_zookeeper"
+	    "mapr_zookeeper"
       ],
-      "instance_type":SMALL,
+      "cpu":1,
+      "memory":1024,
+      "storage" : {
+        "type": "SHARED",
+        "size": 20
+      },
       "instance_num":3,
       "ha":"off"
     },
     {
-      "name":"mysql-server",
+      "name":"mysqlserver",
       "roles":[
-		"mapr_mysql_server"
+	    "mapr_mysql_server"
       ],
-      "instance_type":SMALL,
+      "cpu":1,
+      "memory":1024,
+      "storage" : {
+        "type": "SHARED",
+        "size": 20
+      },
       "instance_num":1,
       "ha":"off"
     }
