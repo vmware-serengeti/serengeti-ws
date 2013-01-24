@@ -70,6 +70,7 @@ public class ClusterConfigManager {
    private static final String TEMPLATE_ID = "template_id";
    private static final String HTTP_PROXY = "serengeti.http_proxy";
    private static final String NO_PROXY = "serengeti.no_proxy";
+   private static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE = "elastic_runtime.automation.enable";
    private VcResourcePoolManager rpMgr;
    private NetworkManager networkMgr;
    private DistroManager distroMgr;
@@ -79,6 +80,7 @@ public class ClusterConfigManager {
          "centos57-x64");
    private String httpProxy = Configuration.getString(HTTP_PROXY.toString(), "");
    private String noProxy = Configuration.getStrings(NO_PROXY.toString(), "");
+   private boolean automationEnable = Configuration.getBoolean(ELASTIC_RUNTIME_AUTOMATION_ENABLE, false); 
 
    public VcDataStoreManager getDatastoreMgr() {
       return datastoreMgr;
@@ -166,6 +168,11 @@ public class ClusterConfigManager {
                clusterEntity.setDistroVendor(cluster.getDistroVendor());
                clusterEntity.setDistroVersion(cluster.getDistroVersion());
                clusterEntity.setStartAfterDeploy(true);
+               if (cluster.getAutomationEnable() == null) {
+                  clusterEntity.setAutomationEnable(automationEnable);
+               } else {
+                  clusterEntity.setAutomationEnable(cluster.getAutomationEnable());
+               }
                if (cluster.getRpNames() != null
                      && cluster.getRpNames().size() > 0) {
                   logger.debug("resource pool " + cluster.getRpNames()
@@ -583,6 +590,7 @@ public class ClusterConfigManager {
       clusterConfig.setHttpProxy(httpProxy);
       clusterConfig.setNoProxy(noProxy);
       clusterConfig.setTopologyPolicy(clusterEntity.getTopologyPolicy());
+      clusterConfig.setAutomationEnable(clusterEntity.isAutomationEnable());
 
       Map<String, String> hostToRackMap = rackInfoMgr.exportHostRackMap();
       if ((clusterConfig.getTopologyPolicy() == TopologyType.RACK_AS_RACK ||

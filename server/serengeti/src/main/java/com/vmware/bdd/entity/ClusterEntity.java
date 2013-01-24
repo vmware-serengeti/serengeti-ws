@@ -111,6 +111,9 @@ public class ClusterEntity extends EntityBase {
    @Type(type = "text")
    private String hadoopConfig;
 
+   @Column(name = "automation_enable")
+   private Boolean automationEnable;
+
    ClusterEntity() {
 
    }
@@ -389,5 +392,13 @@ public class ClusterEntity extends EntityBase {
          }
       }
       return false;
+   }
+
+   public Boolean isAutomationEnable() {
+      return automationEnable;
+   }
+
+   public void setAutomationEnable(Boolean automationEnable) {
+      this.automationEnable = automationEnable;
    }
 }

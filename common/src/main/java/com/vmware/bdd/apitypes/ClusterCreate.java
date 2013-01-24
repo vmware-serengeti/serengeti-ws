@@ -101,6 +101,11 @@ public class ClusterCreate {
    private Map<String, Object> configuration;
    private Boolean validateConfig = true;
 
+   //elastic runtime automation enable flag
+   @Expose
+   @SerializedName("automation_enable")
+   private Boolean automationEnable;
+
    public ClusterCreate() {
    }
 
@@ -767,4 +772,11 @@ public class ClusterCreate {
       return null;
    }
 
+   public Boolean getAutomationEnable() {
+      return automationEnable;
+   }
+
+   public void setAutomationEnable(Boolean automationEnable) {
+      this.automationEnable = automationEnable;
+   }
 }

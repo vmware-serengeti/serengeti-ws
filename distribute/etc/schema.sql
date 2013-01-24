@@ -78,6 +78,7 @@ create table cluster (
    vc_rp_names         text,
    network_id          bigint,
    start_after_deploy  boolean,
+   automation_enable   boolean,
    configuration       text,
    primary key (id),
    foreign key(network_id) references network(id) ON DELETE CASCADE

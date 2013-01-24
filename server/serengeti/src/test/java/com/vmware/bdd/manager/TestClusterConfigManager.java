@@ -146,6 +146,7 @@ public class TestClusterConfigManager {
       cluster =
             ClusterEntity.findClusterEntityByName("my-cluster");
       Assert.assertTrue(cluster != null);
+      Assert.assertEquals(cluster.isAutomationEnable(), Boolean.FALSE);
 
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster");
       String manifest = gson.toJson(attrs);
