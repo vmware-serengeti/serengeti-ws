@@ -481,6 +481,24 @@ public class ClusterCreate {
    }
 
    /**
+    * Check if any compute only node group exists.
+    */
+   public boolean containsComputeOnlyNodeGroups() {
+      int count = 0;
+      for(NodeGroupCreate nodeGroup : this.getNodeGroups()) {
+         if (nodeGroup.getRoles() != null
+               && nodeGroup.getRoles().contains(
+                     HadoopRole.HADOOP_TASKTRACKER.toString())
+               && (nodeGroup.getRoles().size() == 1 || (nodeGroup.getRoles()
+                     .size() == 2 && nodeGroup.getRoles().contains(
+                     HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
+            count ++;
+         }
+      }
+      return count != 0 ? true : false;
+   }
+
+   /**
     * Validate nodeGroupCreates member formats and values in the ClusterCreate.
     */
    public void validateClusterCreate(List<String> failedMsgList,

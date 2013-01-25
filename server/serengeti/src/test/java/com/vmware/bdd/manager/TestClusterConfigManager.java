@@ -146,7 +146,7 @@ public class TestClusterConfigManager {
       cluster =
             ClusterEntity.findClusterEntityByName("my-cluster");
       Assert.assertTrue(cluster != null);
-      Assert.assertEquals(cluster.isAutomationEnable(), Boolean.FALSE);
+      Assert.assertEquals(cluster.isAutomationEnable(), null); //not a D/C seperation cluster
 
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster");
       String manifest = gson.toJson(attrs);
@@ -394,6 +394,7 @@ public class TestClusterConfigManager {
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster-dc-tempfs");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
+      Assert.assertEquals(cluster.isAutomationEnable(), Boolean.FALSE);
       Assert.assertTrue("manifest should contains nodegroups",
             manifest.indexOf("master") != -1);
       Assert.assertTrue("manifest is inconsistent",

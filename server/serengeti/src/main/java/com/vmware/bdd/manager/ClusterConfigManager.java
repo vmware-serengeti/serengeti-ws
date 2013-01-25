@@ -168,11 +168,18 @@ public class ClusterConfigManager {
                clusterEntity.setDistroVendor(cluster.getDistroVendor());
                clusterEntity.setDistroVersion(cluster.getDistroVersion());
                clusterEntity.setStartAfterDeploy(true);
-               if (cluster.getAutomationEnable() == null) {
-                  clusterEntity.setAutomationEnable(automationEnable);
-               } else {
-                  clusterEntity.setAutomationEnable(cluster.getAutomationEnable());
+
+               Boolean autoFlag = cluster.getAutomationEnable();
+               if (cluster.containsComputeOnlyNodeGroups()) {
+                  if (autoFlag == null) {
+                     clusterEntity.setAutomationEnable(automationEnable);
+                  } else {
+                     clusterEntity.setAutomationEnable(autoFlag);
+                  }
+               } else if (autoFlag != null) {
+                  throw BddException.INVALID_PARAMETER("automation enable", autoFlag);
                }
+
                if (cluster.getRpNames() != null
                      && cluster.getRpNames().size() > 0) {
                   logger.debug("resource pool " + cluster.getRpNames()
