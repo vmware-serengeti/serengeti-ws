@@ -5,11 +5,11 @@
       "name":"master",
       "roles":[
         "mapr_cldb", 
-        "mapr_jobtracker",
         "mapr_nfs",
-        "mapr_webserver",
         "mapr_fileserver",
+        "mapr_jobtracker",
         "mapr_tasktracker",
+        "mapr_webserver",
         "mapr_metrics"
       ],
       "cpu":2,
@@ -24,9 +24,9 @@
     {
       "name":"worker",
       "roles":[
+        "mapr_nfs",
         "mapr_fileserver",
-        "mapr_tasktracker",
-        "mapr_nfs"
+        "mapr_tasktracker"
       ],
       "cpu":2,
       "memory":4096,
@@ -40,9 +40,8 @@
     {
       "name":"client",
       "roles":[
-		"mapr_pig",
-		"mapr_hive",
-		"mapr_hive_server"
+        "mapr_pig",
+        "mapr_hive"
       ],
       "cpu":1,
       "memory":4096,
@@ -56,7 +55,7 @@
     {
       "name":"zookeeper",
       "roles":[
-	    "mapr_zookeeper"
+        "mapr_zookeeper"
       ],
       "cpu":1,
       "memory":1024,
@@ -65,12 +64,12 @@
         "size": 20
       },
       "instance_num":3,
-      "ha":"off"
+      "ha":"on"
     },
     {
       "name":"mysqlserver",
       "roles":[
-	    "mapr_mysql_server"
+        "mapr_mysql_server"
       ],
       "cpu":1,
       "memory":1024,
