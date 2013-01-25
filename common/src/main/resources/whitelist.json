@@ -882,6 +882,9 @@
         },
         {
           "name": "HADOOP_TASKTRACKER_OPTS"
+        },
+        {
+           "name": "HADOOP_LOG_DIR"
         }
       ],
       "log4j.properties": [
