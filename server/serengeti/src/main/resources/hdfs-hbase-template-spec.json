@@ -8,7 +8,7 @@
       ],
       "instance_type":SMALL,
       "instance_num":3,
-      "ha":"off"
+      "ha":"on"
     },
     {
       "name":"master",
