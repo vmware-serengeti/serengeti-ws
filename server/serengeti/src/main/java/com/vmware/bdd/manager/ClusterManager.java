@@ -205,7 +205,7 @@ public class ClusterManager {
       AuAssert.check(clusterConfig != null);
 
       TaskEntity task = taskManager.createCmdlineTask(null, listener);
-
+      task.setTarget(targets.get(0));
       String[] cmdArray =
             listener.getTaskCommand(cluster.getName(), task.getWorkDir()
                   .getAbsolutePath() + "/" + fileName);
@@ -836,6 +836,7 @@ public class ClusterManager {
       // submit a MQ task
       TaskListener listener = new VHMReceiveListener(clusterName);
       TaskEntity task = taskManager.createMessageTask(false, listener);
+      task.setTarget(clusterName);
       ClusterEntity.updateStatus(cluster.getName(), ClusterStatus.VHM_RUNNING);
       DAL.inTransactionUpdate(task);
       Map<String,Object> sendParam = new HashMap <String,Object> ();

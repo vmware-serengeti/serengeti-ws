@@ -123,7 +123,10 @@ public class TaskEntity extends EntityBase {
 
    @Column(name = "retry")
    private boolean retry = true;
-   
+
+   @Column(name = "target")
+   private String target;
+
    public TaskListener getTaskListener() {
       if (listener == null) {
          depersistListener();
@@ -369,5 +372,13 @@ public class TaskEntity extends EntityBase {
       } else {
          return Type.INNER;
       }
+   }
+
+   public String getTarget() {
+      return target;
+   }
+
+   public void setTarget(String target) {
+      this.target = target;
    }
 }

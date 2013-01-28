@@ -32,13 +32,14 @@ public class TaskRead {
    private String errorMessage;
    private String workDir;
    private String progressMessage;
+   private String target;
 
    public TaskRead() {
 
    }
 
    public TaskRead(Long id, Status status, Type type, Double progress, String errorMessage,
-         String workDir, String progressMessage) {
+         String workDir, String progressMessage, String target) {
       this.id = id;
       this.status = status;
       this.type = type;
@@ -46,6 +47,7 @@ public class TaskRead {
       this.errorMessage = errorMessage;
       this.workDir = workDir;
       this.progressMessage = progressMessage;
+      this.target = target;
    }
 
    public String getProgressMessage() {
@@ -102,5 +104,13 @@ public class TaskRead {
 
    public void setWorkDir(String workDir) {
       this.workDir = workDir;
+   }
+
+   public String getTarget() {
+      return target;
+   }
+
+   public void setTarget(String target) {
+      this.target = target;
    }
 }

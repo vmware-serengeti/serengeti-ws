@@ -64,7 +64,6 @@ import com.vmware.bdd.manager.VcDataStoreManager;
 import com.vmware.bdd.manager.VcResourcePoolManager;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.Configuration;
 import com.vmware.bdd.utils.IpAddressUtil;
 
 @Controller
