@@ -164,6 +164,6 @@ create table task (
    progress_msg   text,
    listener     bytea,
    retry        boolean,
-   target       varchar(255) not null,
+   target       varchar(255),
    primary key (id)
 );
