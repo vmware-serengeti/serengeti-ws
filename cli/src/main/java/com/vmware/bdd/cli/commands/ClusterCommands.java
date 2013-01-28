@@ -449,6 +449,15 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
+   @CliCommand(value = "cluster autoscale", help = "Set elasticity automation default value, enable/disable cluster elasticity automation")
+   public void autoScale(
+         @CliOption(key = { "default" }, mandatory = false, specifiedDefaultValue = "true", help = "The elasticity automation default value") final Boolean defaultValue,
+         @CliOption(key = { "enable" }, mandatory = false, specifiedDefaultValue = "true", help = "Enable or disable elasticity automation") final Boolean enable,
+         @CliOption(key = { "clusterName" }, mandatory = false, help = "The cluster to enable or disable elasticity automation") final String clusterName) {
+      restClient.autoScale(defaultValue, enable, clusterName);
+      
+   }
+   
    @CliCommand(value = "cluster limit", help = "Set the cluster resources including stopping some cmopute nodes, set disk priorities")
    public void limitCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,

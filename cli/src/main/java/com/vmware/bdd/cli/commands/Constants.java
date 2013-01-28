@@ -36,6 +36,7 @@ public class Constants {
    public static final String REST_PATH_DISTROS = "distros";
    public static final String REST_PATH_DISTRO = "distro";
    public static final String REST_PATH_CONFIG = "config";
+   public static final String REST_PATH_AUTOSCALE = "autoscale";
    public static final String REST_PATH_SPEC = "spec";
    public static final String REST_PATH_TOPOLOGY = "racks";
 

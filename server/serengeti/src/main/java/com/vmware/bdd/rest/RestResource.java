@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.vmware.bdd.apitypes.AutoScale;
 import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterPriority;
@@ -63,6 +64,7 @@ import com.vmware.bdd.manager.VcDataStoreManager;
 import com.vmware.bdd.manager.VcResourcePoolManager;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.Configuration;
 import com.vmware.bdd.utils.IpAddressUtil;
 
 @Controller
@@ -296,6 +298,17 @@ public class RestResource {
       redirectRequest(taskId, request, response);
    }
 
+   @RequestMapping(value = "/clusters/autoscale", method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.OK)
+   public void autoScale(@RequestBody AutoScale autoScale,
+         HttpServletRequest request, HttpServletResponse response)
+         throws Exception {
+      Boolean defaultValue = autoScale.getDefaultValue();
+      Boolean enable = autoScale.getEnable();
+      String clusterName = autoScale.getClusterName();
+      
+      clusterMgr.autoScale(defaultValue, enable, clusterName);
+   }
    @RequestMapping(value = "/cluster/{clusterName}/limit", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void limitCluster(

@@ -66,11 +66,13 @@ import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ClusterCmdUtil;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
+import com.vmware.bdd.utils.Configuration;
 import com.vmware.bdd.utils.Constants;
 
 public class ClusterManager {
 
    static final Logger logger = Logger.getLogger(ClusterManager.class);
+   private static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE = "elastic_runtime.automation.enable";
    private ClusterConfigManager clusterConfigMgr;
    private CloudProviderManager cloudProviderMgr;
    private NetworkManager networkManager;
@@ -902,5 +904,13 @@ public class ClusterManager {
             String channelId) {
          properties.put(RABBITMQ_CHANNEL, channelId);
       }
+   }
+
+   public void autoScale(Boolean defaultValue, Boolean enable,
+         String clusterName) {
+      if (defaultValue != null) { // set serengeti.properties
+         Configuration.setBoolean(ELASTIC_RUNTIME_AUTOMATION_ENABLE, defaultValue);
+      }
+      //TODO reset cluster(s) automation enabling
    }
 }

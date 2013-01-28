@@ -32,11 +32,11 @@ import com.vmware.bdd.exception.BddException;
  */
 public class Configuration {
    private static Logger logger = Logger.getLogger(Configuration.class);
-   private static org.apache.commons.configuration.Configuration _config =
+   private static org.apache.commons.configuration.PropertiesConfiguration _config =
          init();
 
-   private static org.apache.commons.configuration.Configuration init() {
-      org.apache.commons.configuration.Configuration config = null;
+   private static org.apache.commons.configuration.PropertiesConfiguration init() {
+      org.apache.commons.configuration.PropertiesConfiguration config = null;
       String homeDir = System.getProperties().getProperty("serengeti.home.dir");
       String configFileName = null;
       if (homeDir != null && homeDir.length() > 0) {
@@ -49,6 +49,7 @@ public class Configuration {
       try {
          logger.info("Reading properties file serengeti.properties");
          config = new PropertiesConfiguration(configFileName);
+         config.setAutoSave(true);
       } catch (ConfigurationException ex) {
          // error out if the configuration file is not there
          String message = "Failed to load serengeti configuration file: " + configFileName;
@@ -249,5 +250,14 @@ public class Configuration {
     */
    public static boolean containsKey(String key) {
       return _config.containsKey(key);
+   }
+
+   /**
+    * Set the boolean value of a given key
+    * @param key
+    * @param value
+    */
+   public static void setBoolean(String key, Boolean value) {
+      _config.setProperty(key, value);
    }
 }
