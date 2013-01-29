@@ -547,12 +547,12 @@ public class ClusterCommands implements CommandMarker {
    public void unlimitCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
          @CliOption(key = { "nodeGroup" }, mandatory = false, help = "The node group name") final String nodeGroupName,
-         @CliOption(key = { "activeComputeNodes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "The flag to power on all compute nodes") final boolean activeComputeNodes,
+         @CliOption(key = { "startComputeNodes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "The flag to power on all compute nodes") final boolean startComputeNodes,
          @CliOption(key = { "diskIOPriority" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "The relative disk I/O priorities: HIGH, NORNAL, LOW") final boolean diskIOPriority) {
 
       try {
          int activeComputeNodeNum = -2;
-         if (activeComputeNodes) {
+         if (startComputeNodes) {
             activeComputeNodeNum = -1;
          }
          ClusterRead cluster = restClient.get(clusterName, false);

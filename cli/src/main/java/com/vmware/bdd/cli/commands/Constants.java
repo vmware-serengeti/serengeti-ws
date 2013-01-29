@@ -99,7 +99,7 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_ADD = "added";
    public static final String OUTPUT_OP_RESULT_UPLOAD = "uploaded";
    public static final String OUTPUT_OP_RESULT_LIMIT = "limited";
-   public static final String OUTPUT_OP_RESULT_STOP_COMPUTE_NODE = "compute nodes stopped";
+   public static final String OUTPUT_OP_RESULT_STOP_COMPUTE_NODE = "compute nodes adjusted";
    public static final String OUTPUT_OP_RESULT_START_COMPUTE_NODE = "compute nodes started";
    public static final String OUTPUT_OP_RESULT_UNLIMIT = "unlimited";
    public static final String OUTPUT_OP_RESULT_PRIORITY = "prioritized";
