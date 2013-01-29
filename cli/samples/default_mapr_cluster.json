@@ -73,6 +73,7 @@
     {
       "name" : "client",
       "roles" : [
+        "mapr_client",
         "mapr_pig",
         "mapr_hive"
       ],
