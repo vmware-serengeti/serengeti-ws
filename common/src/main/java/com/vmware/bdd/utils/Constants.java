@@ -29,7 +29,7 @@ public class Constants {
    public static final String CLUSTER_LIMIT_INFO_NODE_GROUPS = "node_groups";
    public static final String CLUSTER_LIMIT_INFO_SERENGETI_INSTANCE = "serengeti_instance";
    public static final String CLUSTER_NAME_PATTERN = "[a-zA-Z0-9_]+";
-   public static final String NODE_GROUP_NAME_PATTERN = "[a-zA-Z0-9_\\s]+";
+   public static final String NODE_GROUP_NAME_PATTERN = "[a-zA-Z0-9]+";
    public static final String NAME_PATTERN = "[a-zA-Z0-9_\\-\\s]+";
    public static final String VC_DATASTORE_NAME_PATTERN = "[a-zA-Z0-9_\\-\\s\\?\\*]+";
    public static final String MULTI_INPUTS_CHECK = " cannot be empty, please check it.";
@@ -46,9 +46,13 @@ public class Constants {
    public static final String WRONG_NUM_OF_NODEGROUPS = "the node groups including jobtracker, zookeeper or hmaster is larger than 1";
    public static final String WRONG_NUM_OF_WORKERNODES = "no worker exists";
    public static final String DATA_CLIENT_NODE_JOURNALNODE_COEXIST = "journal nodes are not allowed to be on data nodes or client nodes";
-   public static final String TEMPFS_NOT_ALLOWED = "the disk type of TEMPFS can only be set on compute nodes with strict association to data nodes";
+   public static final String STORAGE_TYPE_ALLOWED = "The allowed storage types include SHARED, LOCAL, and TEMPFS";
+   public static final String TEMPFS_NOT_ALLOWED = "the storage type of TEMPFS can only be set on compute nodes with strict association to data nodes";
    public static final String DEFAULT_VENDOR = "Apache";
-   public static final String CLOUDERA_VENDOR = "Cloudera";
+   public static final String CDH_VENDOR = "CDH";
+   public static final String GPHD_VENDOR = "GPHD";
+   public static final String HDP_VENDOR = "HDP";
+   public static final String MAPR_VENDOR = "MAPR";
    public static final String CURRENT_DISTRO_CAN_NOT_SUPPORT_HDFS2 = "HA and federation feature can not be supported in current distro";
    public static final String CDH4_1_PATTERN = "4\\.1(\\.\\d){0,2}";
 }

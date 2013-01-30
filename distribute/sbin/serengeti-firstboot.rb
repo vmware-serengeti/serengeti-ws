@@ -269,6 +269,9 @@ updateVCPassword = "#{h["vcpassword"]}".gsub("$", "\\$")
 templateid = "template_id = " + "#{template_moid}"
 vcdatacenterline = "vc_datacenter = " + "#{vcdatacenter}"
 
+serengeti_root_folder_prefix = Hash[File.read("#{SERENGETI_WEBAPP_CONF}").split("\n").map{|line|line.delete(" ").strip.split('=') if line.strip[0]!='#'}]['serengeti.root_folder_prefix']
+serengeti_uuid = "#{serengeti_root_folder_prefix}-#{vApp_name}"
+
 system <<EOF
 
 #stop tomcat for update serengeti.properties
@@ -331,6 +334,11 @@ if [ -e /opt/serengeti/etc/lock_down ]; then
   /opt/serengeti/sbin/set-password -a
 fi
 
+# Node VM use default password if serengeti is beta build
+if [ ! -e /opt/serengeti/etc/lock_down ]; then
+  echo "knife[:vm_use_default_password] = true" >> /opt/serengeti/.chef/knife.rb
+fi
+
 # remove ovf env file
 rm -f "#{SERENGETI_VC_PROPERTIES}"
 
@@ -340,16 +348,17 @@ su - "#{SERENGETI_USER}" -c "ssh-keygen -t rsa -N '' -f /home/#{SERENGETI_USER}/
 
 # init vhm property file
 if [ -e "#{VHM_CONF}" ]; then
+  sed -i "s|uuid=.*$|uuid=#{serengeti_uuid}|g" "#{VHM_CONF}"
   sed -i "s|vCenterId=.*$|vCenterId=#{h["evs_IP"]}|g" "#{VHM_CONF}"
   sed -i "s|vCenterUser=.*$|vCenterUser=#{vcuser}|g"  "#{VHM_CONF}"
   sed -i "s|vCenterPwd=.*$|vCenterPwd=#{updateVCPassword}|g" "#{VHM_CONF}"
   sed -i "s|keyStorePath=.*$|keyStorePath=#{SERENGETI_KEYSTORE_PATH}|g" "#{VHM_CONF}"
   sed -i "s|keyStorePwd=.*$|keyStorePwd=#{SERENGETI_KEYSTORE_PWD}|g" "#{VHM_CONF}"
   sed -i "s|extensionKey=.*$|extensionKey=#{SERENGETI_VCEXT_ID}|g" "#{VHM_CONF}"
-  sed -i "s|vHadoopUser=.*$|vHadoopUser=root|g" "#{VHM_CONF}"
-  sed -i "s|vHadoopPwd=.*$|vHadoopPwd=password|g" "#{VHM_CONF}"
+  sed -i "s|vHadoopUser=.*$|vHadoopUser=serengeti|g" "#{VHM_CONF}"
   sed -i "s|vHadoopHome=.*$|vHadoopHome=/usr/lib/hadoop|g" "#{VHM_CONF}"
   sed -i "s|vHadoopExcludeTTFile=.*$|vHadoopExcludeTTFile=/usr/lib/hadoop/conf/mapred.hosts.exclude|g" "#{VHM_CONF}"
+  sed -i "s|vHadoopPrvkeyFile=.*$|vHadoopPrvkeyFile=/home/serengeti/.ssh/id_rsa|g" "#{VHM_CONF}"
   chmod 400 "#{VHM_CONF}"
   chown serengeti:serengeti "#{VHM_CONF}"
 fi

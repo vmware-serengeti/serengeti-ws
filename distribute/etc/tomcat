@@ -136,7 +136,7 @@ stop_tomcat() {
             tlog "Stop ok"
          else
             tlog "Stop failed"
-          fi
+         fi
          ;;
       * )
          tlog "Stop failed, tomcat still found running ($pid)"
@@ -146,24 +146,31 @@ stop_tomcat() {
 }
 
 case "$1" in
- start)
-        # carry forward any extra start args
-        shift # to consume "start" arg
-	start_tomcat "$@"
-	;;
- stop)
-        # carry forward any extra stop args
-        shift # to consume "stop" arg
-	stop_tomcat "$@"
- 	;;
+   start)
+      # carry forward any extra start args
+      shift # to consume "start" arg
+      start_tomcat "$@"
+   ;;
+   stop)
+      # carry forward any extra stop args
+      shift # to consume "stop" arg
+      stop_tomcat "$@"
+   ;;
+   restart)
+      # carry forward any extra restart args
+      shift # to consume "restart" arg
+      stop_tomcat "$@"
+      sleep 3
+      start_tomcat "$@"
+   ;;
 #@$(devel,#) debug)
 #@$(devel,#)        echo $"Starting Tomcat in remote-debuggable mode. Debug listening port is 8001..."
 #@$(devel,#)        export JAVA_OPTS="${JAVA_OPTS}${JAVA_OPTS:+ }-Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=n"
 #@$(devel,#)        $CATALINA_HOME/bin/startup.sh #&> /dev/null
 #@$(devel,#)        rc_status -v
 #@$(devel,#)        ;;
- *)
- 	echo $"Usage: $0 {start|stop}"
- 	;;
+   *)
+      echo $"Usage: $0 {start|stop|restart}"
+   ;;
 esac
 

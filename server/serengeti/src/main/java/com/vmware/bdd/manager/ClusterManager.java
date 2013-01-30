@@ -36,6 +36,7 @@ import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
+import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
@@ -52,6 +53,7 @@ import com.vmware.bdd.manager.task.ConfigureClusterListener;
 import com.vmware.bdd.manager.task.CreateClusterListener;
 import com.vmware.bdd.manager.task.DeleteClusterListener;
 import com.vmware.bdd.manager.task.MessageTaskWorker;
+import com.vmware.bdd.manager.task.PrioritizeClusterListener;
 import com.vmware.bdd.manager.task.QueryClusterListener;
 import com.vmware.bdd.manager.task.StartClusterListener;
 import com.vmware.bdd.manager.task.StopClusterListener;
@@ -64,11 +66,13 @@ import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ClusterCmdUtil;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
+import com.vmware.bdd.utils.Configuration;
 import com.vmware.bdd.utils.Constants;
 
 public class ClusterManager {
 
    static final Logger logger = Logger.getLogger(ClusterManager.class);
+   private static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE = "elastic_runtime.automation.enable";
    private ClusterConfigManager clusterConfigMgr;
    private CloudProviderManager cloudProviderMgr;
    private NetworkManager networkManager;
@@ -201,7 +205,7 @@ public class ClusterManager {
       AuAssert.check(clusterConfig != null);
 
       TaskEntity task = taskManager.createCmdlineTask(null, listener);
-
+      task.setTarget(targets.get(0));
       String[] cmdArray =
             listener.getTaskCommand(cluster.getName(), task.getWorkDir()
                   .getAbsolutePath() + "/" + fileName);
@@ -322,6 +326,8 @@ public class ClusterManager {
       spec.setHostToRackMap(null);
       spec.setHttpProxy(null);
       spec.setNoProxy(null);
+      spec.setDistroVendor(null);
+      spec.setDistroVersion(null);
       NodeGroupCreate[] groups = spec.getNodeGroups();
       if (groups != null) {
          for (NodeGroupCreate group : groups) {
@@ -352,8 +358,8 @@ public class ClusterManager {
          setDefaultDistro(createSpec);
       }
       DistroRead distroRead=this.getDistroManager().getDistroByName(createSpec.getDistro());
-      createSpec.setVendor(distroRead.getVendor());
-      createSpec.setVersion(distroRead.getVersion());
+      createSpec.setDistroVendor(distroRead.getVendor());
+      createSpec.setDistroVersion(distroRead.getVersion());
       createSpec = ClusterSpecFactory.getCustomizedSpec(createSpec);
 
       String name = createSpec.getName();
@@ -830,6 +836,7 @@ public class ClusterManager {
       // submit a MQ task
       TaskListener listener = new VHMReceiveListener(clusterName);
       TaskEntity task = taskManager.createMessageTask(false, listener);
+      task.setTarget(clusterName);
       ClusterEntity.updateStatus(cluster.getName(), ClusterStatus.VHM_RUNNING);
       DAL.inTransactionUpdate(task);
       Map<String,Object> sendParam = new HashMap <String,Object> ();
@@ -842,6 +849,30 @@ public class ClusterManager {
       taskManager.submit(task, new MessageTaskWorker(sendParam));
 
       return task.getId();
+   }
+
+   /*
+    * Change the disk I/O priority of the cluster or a node group   
+    */
+   public Long prioritizeCluster(final String clusterName,
+         final String nodeGroupName, final Priority diskIOPriority) throws Exception {
+      if (nodeGroupName == null) {
+         logger.info("Change the node group "+ nodeGroupName + " disk I/O priority to " + diskIOPriority);
+      } else {
+         logger.info("Change the cluster " + clusterName + " disk I/O priority to " + diskIOPriority);
+      }
+      ClusterEntity cluster =
+            ClusterEntity.findClusterEntityByName(clusterName);
+      // cluster must be running or stopped status
+      if (!ClusterStatus.RUNNING.equals(cluster.getStatus()) || !ClusterStatus.STOPPED.equals(cluster.getStatus())) {
+         String msg = "Cluster is not in running or stopped status.";
+         logger.error(msg);
+         throw ClusterManagerException.LIMIT_CLUSTER_NOT_ALLOWED_ERROR(clusterName, msg);
+      }
+      PrioritizeClusterListener listener =
+            new PrioritizeClusterListener(clusterName);
+      return createClusterMgmtTaskWithErrorSetting(cluster, listener,
+            ClusterStatus.PRIORITIZING);
    }
 
    static class SystemProperties {
@@ -874,5 +905,13 @@ public class ClusterManager {
             String channelId) {
          properties.put(RABBITMQ_CHANNEL, channelId);
       }
+   }
+
+   public void autoScale(Boolean defaultValue, Boolean enable,
+         String clusterName) {
+      if (defaultValue != null) { // set serengeti.properties
+         Configuration.setBoolean(ELASTIC_RUNTIME_AUTOMATION_ENABLE, defaultValue);
+      }
+      //TODO reset cluster(s) automation enabling
    }
 }

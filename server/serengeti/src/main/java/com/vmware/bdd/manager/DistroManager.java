@@ -38,6 +38,7 @@ import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Configuration;
+import com.vmware.bdd.utils.Constants;
 
 class RolePackageMapping {
    private List<String> roles;
@@ -77,7 +78,7 @@ class Distro {
 
    private String name;
    private Boolean hveSupported;
-   private String vendor = "Apache";
+   private String vendor = Constants.DEFAULT_VENDOR;
    private String version;
    private List<RolePackageMapping> packages;
 
@@ -273,15 +274,18 @@ public class DistroManager {
       loadManifest(false);
       List<DistroRead> drs = new ArrayList<DistroRead>();
       String vendorStr = Configuration.getStrings(VENDOR, "");
+      String vendorStrTmp = vendorStr.toLowerCase();
       List<String> vendors =
-            Arrays.asList(vendorStr.indexOf(",") != -1 ? vendorStr.split(",")
-                  : new String[] { vendorStr });
+            Arrays.asList(vendorStrTmp.indexOf(",") != -1 ? vendorStrTmp.split(",")
+                  : new String[] { vendorStrTmp });
       List<String>  errorVendors = new ArrayList<String> ();
       for (Distro distro : distros.values()) {
          DistroRead dr = distro.convert();
          //check vendor name is whether configured in serengeti.properties
-         if (! vendors.contains(dr.getVendor())) {
-            errorVendors.add(dr.getVendor());
+         if (! vendors.contains(dr.getVendor().toLowerCase())) {
+            if (!errorVendors.contains(dr.getVendor())) {
+               errorVendors.add(dr.getVendor());
+            }
          }
          if (dr != null) {
             drs.add(dr);
@@ -291,8 +295,10 @@ public class DistroManager {
       }
       StringBuffer errorMsg = new StringBuffer();
       if (!errorVendors.isEmpty()) {
-         String errorVendorsStr=errorVendors.toString().substring(1, errorVendors.toString().length()-1);
-         errorMsg.append(errorVendorsStr).append(" can not be found in serengeti.properties. ");
+         errorMsg.append(" At present, we only allow vendor [").append(vendorStr).append("], ");
+         String errorVendorsStr = errorVendors.toString();
+         errorMsg.append("You can configure ").append(errorVendorsStr).append("to \"serengeti.distro_vendor\"" +
+                        " property in the serengeti.properties file, to support new distro vendor.");
       }
       if(errorMsg.length() > 0) {
          throw BddException.INTERNAL(null, errorMsg.toString());

@@ -16,9 +16,11 @@ package com.vmware.bdd.apitypes;
 
 import java.util.List;
 
+import com.vmware.bdd.utils.Constants;
+
 public class DistroRead {
    private String name;
-   private String vendor = "Apache";
+   private String vendor = Constants.DEFAULT_VENDOR;
    private String version;
    private boolean hveSupported;
    private List<String> roles;

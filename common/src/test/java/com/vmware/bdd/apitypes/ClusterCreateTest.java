@@ -26,23 +26,23 @@ public class ClusterCreateTest {
    @Test
    public void testSupportedWithHdfs2() {
       ClusterCreate cluster = new ClusterCreate();
-      cluster.setVendor(Constants.DEFAULT_VENDOR);
-      cluster.setVersion("1.0.1");
+      cluster.setDistroVendor(Constants.DEFAULT_VENDOR);
+      cluster.setDistroVersion("1.0.1");
       assertEquals(false, cluster.supportedWithHdfs2());
-      cluster.setVendor(Constants.CLOUDERA_VENDOR);
-      cluster.setVersion("1.0.0");
+      cluster.setDistroVendor(Constants.CDH_VENDOR);
+      cluster.setDistroVersion("1.0.0");
       assertEquals(false, cluster.supportedWithHdfs2());
-      cluster.setVersion("3u3");
+      cluster.setDistroVersion("3u3");
       assertEquals(false, cluster.supportedWithHdfs2());
-      cluster.setVersion("4.0.1");
+      cluster.setDistroVersion("4.0.1");
       assertEquals(false, cluster.supportedWithHdfs2());
-      cluster.setVersion("4.1.2");
+      cluster.setDistroVersion("4.1.2");
       assertEquals(true, cluster.supportedWithHdfs2());
-      cluster.setVersion("4.1");
+      cluster.setDistroVersion("4.1");
       assertEquals(true, cluster.supportedWithHdfs2());
-      cluster.setVersion("4.1.0.2");
+      cluster.setDistroVersion("4.1.0.2");
       assertEquals(true, cluster.supportedWithHdfs2());
-      cluster.setVersion("4.1.0.2.3");
+      cluster.setDistroVersion("4.1.0.2.3");
       assertEquals(false, cluster.supportedWithHdfs2());
    }
 
@@ -50,7 +50,7 @@ public class ClusterCreateTest {
    public void testGetDefaultDistroName() {
       ClusterCreate cluster = new ClusterCreate();
       DistroRead dr1 = new DistroRead();
-      dr1.setVendor(Constants.CLOUDERA_VENDOR);
+      dr1.setVendor(Constants.CDH_VENDOR);
       dr1.setName("CDH");
       Assert.assertNull(cluster.getDefaultDistroName(new DistroRead[] { dr1 }));
       DistroRead dr2 = new DistroRead();

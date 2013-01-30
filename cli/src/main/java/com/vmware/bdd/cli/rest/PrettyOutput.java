@@ -27,4 +27,10 @@ public interface PrettyOutput {
    boolean isRefresh(boolean realTime) throws Exception;
 
    void prettyOutput() throws Exception;
+   
+   /**
+    * 
+    * @return completed task summaries in a workflow
+    */
+   String[] getCompletedTaskSummary();
 }

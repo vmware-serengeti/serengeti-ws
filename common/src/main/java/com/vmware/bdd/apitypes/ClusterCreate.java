@@ -45,14 +45,18 @@ public class ClusterCreate {
    @Expose
    private String name;
    private ClusterType type;
-   private String vendor;
    private String externalHDFS;
    @Expose
    @SerializedName("groups")
    private NodeGroupCreate[] nodeGroups;
    @Expose
    private String distro;
-   private String version;
+   @Expose
+   @SerializedName("distro_vendor")
+   private String distroVendor;
+   @Expose
+   @SerializedName("distro_version")
+   private String distroVersion;
    @Expose
    @SerializedName("http_proxy")
    private String httpProxy;
@@ -97,6 +101,11 @@ public class ClusterCreate {
    private Map<String, Object> configuration;
    private Boolean validateConfig = true;
 
+   //elastic runtime automation enable flag
+   @Expose
+   @SerializedName("automation_enable")
+   private Boolean automationEnable;
+
    public ClusterCreate() {
    }
 
@@ -105,7 +114,8 @@ public class ClusterCreate {
       this.distro = cluster.distro;
       this.name = cluster.name;
       this.type = cluster.type;
-      this.vendor = cluster.vendor;
+      this.distroVendor = cluster.distroVendor;
+      this.distroVersion = cluster.distroVersion;
       this.externalHDFS = cluster.externalHDFS;
       this.networkName = cluster.networkName;
       this.nodeGroups = cluster.nodeGroups;
@@ -146,14 +156,6 @@ public class ClusterCreate {
       this.type = type;
    }
 
-   public String getVendor() {
-      return vendor;
-   }
-
-   public void setVendor(String vendor) {
-      this.vendor = vendor;
-   }
-
    public void setExternalHDFS(String externalHDFS) {
       this.externalHDFS = externalHDFS;
    }
@@ -170,12 +172,20 @@ public class ClusterCreate {
       this.distro = distro;
    }
 
-   public String getVersion() {
-      return version;
+   public String getDistroVendor() {
+      return distroVendor;
    }
 
-   public void setVersion(String version) {
-      this.version = version;
+   public void setDistroVendor(String distroVendor) {
+      this.distroVendor = distroVendor;
+   }
+
+   public String getDistroVersion() {
+      return distroVersion;
+   }
+
+   public void setDistroVersion(String distroVersion) {
+      this.distroVersion = distroVersion;
    }
 
    public String getHttpProxy() {
@@ -338,25 +348,34 @@ public class ClusterCreate {
       return valid;
    }
 
-   public void validateTempfs(List<String> failedMsgList) {
+   public void validateStorageType(List<String> failedMsgList) {
       for (NodeGroupCreate nodeGroupCreate : getNodeGroups()) {
          StorageRead storageDef = nodeGroupCreate.getStorage();
          if (storageDef != null) {
             String storageType = storageDef.getType();
-            if (storageType != null && storageType.equals(DatastoreType.TEMPFS.toString())) {//tempfs disk type
-               if (nodeGroupCreate.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {//compute node
-                  PlacementPolicy placementPolicy = nodeGroupCreate.getPlacementPolicies();
-                  if (placementPolicy != null) {
-                     List<GroupAssociation> groupAssociations = placementPolicy.getGroupAssociations();
-                     if (groupAssociations != null) {
-                        GroupAssociationType associationType = groupAssociations.get(0).getType();
-                        if (associationType != null && associationType == GroupAssociationType.STRICT) {
-                           continue;
+
+            if (storageType != null) {
+               storageType = storageType.toUpperCase();
+               //only support storage type of TEMPFS/LOCAL/SHARED
+               if (!storageType.equals(DatastoreType.TEMPFS.toString())
+                     && !storageType.equals(DatastoreType.LOCAL.toString())
+                     && !storageType.equals(DatastoreType.SHARED.toString())) {
+                  failedMsgList.add("Storage type " + storageType + " is not allowed. " + Constants.STORAGE_TYPE_ALLOWED);
+               } else if (storageType.equals(DatastoreType.TEMPFS.toString())) {//tempfs disk type
+                  if (nodeGroupCreate.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {//compute node
+                     PlacementPolicy placementPolicy = nodeGroupCreate.getPlacementPolicies();
+                     if (placementPolicy != null) {
+                        List<GroupAssociation> groupAssociations = placementPolicy.getGroupAssociations();
+                        if (groupAssociations != null) {
+                           GroupAssociationType associationType = groupAssociations.get(0).getType();
+                           if (associationType != null && associationType == GroupAssociationType.STRICT) {
+                              continue;
+                           }
                         }
                      }
                   }
+                  failedMsgList.add(Constants.TEMPFS_NOT_ALLOWED);
                }
-               failedMsgList.add(Constants.TEMPFS_NOT_ALLOWED);
             }
          }
       }
@@ -462,6 +481,24 @@ public class ClusterCreate {
    }
 
    /**
+    * Check if any compute only node group exists.
+    */
+   public boolean containsComputeOnlyNodeGroups() {
+      int count = 0;
+      for(NodeGroupCreate nodeGroup : this.getNodeGroups()) {
+         if (nodeGroup.getRoles() != null
+               && nodeGroup.getRoles().contains(
+                     HadoopRole.HADOOP_TASKTRACKER.toString())
+               && (nodeGroup.getRoles().size() == 1 || (nodeGroup.getRoles()
+                     .size() == 2 && nodeGroup.getRoles().contains(
+                     HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
+            count ++;
+         }
+      }
+      return count != 0 ? true : false;
+   }
+
+   /**
     * Validate nodeGroupCreates member formats and values in the ClusterCreate.
     */
    public void validateClusterCreate(List<String> failedMsgList,
@@ -470,6 +507,11 @@ public class ClusterCreate {
       boolean namenodeHACheck = false;
       //role count
       int masterCount = 0, jobtrackerCount = 0, hbasemasterCount = 0, zookeeperCount = 0, workerCount = 0, numOfJournalNode = 0;
+      boolean appendWarningStr = false;
+      if (warningMsgList !=null && warningMsgList.isEmpty()) {
+         appendWarningStr = true;
+      }
+
       //Find NodeGroupCreate array from current ClusterCreate instance.
       NodeGroupCreate[] nodeGroupCreates = getNodeGroups();
       if (nodeGroupCreates == null || nodeGroupCreates.length == 0) {
@@ -488,9 +530,10 @@ public class ClusterCreate {
 
          validateNodeGroupRoles(failedMsgList);
 
-         // check tempfs relationship: if a compute node has strict association with a data node, its disk type
-         // can be set to "TEMPFS". Otherwise, it is not allowed to use tempfs as the disk type.
-         validateTempfs(failedMsgList);
+         // check supported storage type: LOCAL/SHARED/TEMPFS For tempfs relationship: if a compute node has 
+         // strict association with a data node, its disk type can be set to "TEMPFS". Otherwise, it is not 
+         // allowed to use tempfs as the disk type.
+         validateStorageType(failedMsgList);
 
          for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
             // check node group's instanceNum
@@ -596,6 +639,9 @@ public class ClusterCreate {
          }
          if (numOfJournalNode > 0 && !namenodeHACheck) {
             failedMsgList.add(Constants.NO_NAMENODE_HA);
+         }
+         if(!warningMsgList.isEmpty() && appendWarningStr) {
+            warningMsgList.set(0, "Warning: " + warningMsgList.get(0));
          }
       }
    }
@@ -724,9 +770,9 @@ public class ClusterCreate {
 
    // For HDFS2, at present, serengeti only support cdh4 of Cloudera.
    public boolean supportedWithHdfs2() {
-      if (this.getVendor().equalsIgnoreCase(Constants.CLOUDERA_VENDOR)) {
+      if (this.getDistroVendor().equalsIgnoreCase(Constants.CDH_VENDOR)) {
          Pattern pattern = Pattern.compile(Constants.CDH4_1_PATTERN);
-         if (pattern.matcher(this.getVersion()).matches()) {
+         if (pattern.matcher(this.getDistroVersion()).matches()) {
             return true;
          }
       }
@@ -744,4 +790,11 @@ public class ClusterCreate {
       return null;
    }
 
+   public Boolean getAutomationEnable() {
+      return automationEnable;
+   }
+
+   public void setAutomationEnable(Boolean automationEnable) {
+      this.automationEnable = automationEnable;
+   }
 }

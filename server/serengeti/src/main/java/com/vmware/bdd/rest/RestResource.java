@@ -35,8 +35,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.vmware.bdd.apitypes.AutoScale;
 import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.ClusterPriority;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.DatastoreAdd;
 import com.vmware.bdd.apitypes.DatastoreRead;
@@ -44,6 +46,7 @@ import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetworkRead;
+import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.apitypes.RackInfoList;
 import com.vmware.bdd.apitypes.ResourcePoolAdd;
@@ -294,6 +297,17 @@ public class RestResource {
       redirectRequest(taskId, request, response);
    }
 
+   @RequestMapping(value = "/clusters/autoscale", method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.OK)
+   public void autoScale(@RequestBody AutoScale autoScale,
+         HttpServletRequest request, HttpServletResponse response)
+         throws Exception {
+      Boolean defaultValue = autoScale.getDefaultValue();
+      Boolean enable = autoScale.getEnable();
+      String clusterName = autoScale.getClusterName();
+      
+      clusterMgr.autoScale(defaultValue, enable, clusterName);
+   }
    @RequestMapping(value = "/cluster/{clusterName}/limit", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void limitCluster(
@@ -314,6 +328,29 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("instance number", String.valueOf(activeComputeNodeNum));
       }
       Long taskId = clusterMgr.limitCluster(clusterName, groupName, activeComputeNodeNum);
+      redirectRequest(taskId, request, response);
+   }
+
+   @RequestMapping(value = "/cluster/{clusterName}/priority", method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.ACCEPTED)
+   public void prioritizeCluster(
+         @PathVariable("clusterName") String clusterName,
+         @RequestBody ClusterPriority requestBody, HttpServletRequest request,
+         HttpServletResponse response) throws Exception {
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateClusterName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+      Priority ioPriority = requestBody.getDiskIOPriority();
+      String groupName = requestBody.getNodeGroupName();
+      if(!CommonUtil.isBlank(groupName) && !CommonUtil.validateNodeGroupName(groupName)) {
+         throw BddException.INVALID_PARAMETER("node group name", groupName);
+      }
+      // The active compute node number must be a positive number or -1.
+      if (ioPriority == null) {
+         logger.error("Priority cannot be null!");
+         throw BddException.INVALID_PARAMETER("disk i/o priority", ioPriority);
+      }
+      Long taskId = clusterMgr.prioritizeCluster(clusterName, groupName, ioPriority);
       redirectRequest(taskId, request, response);
    }
 

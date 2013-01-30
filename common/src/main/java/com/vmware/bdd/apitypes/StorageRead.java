@@ -29,7 +29,10 @@ public class StorageRead {
    @Expose
    @SerializedName("bisect")
    private boolean diskBisect;
-   
+
+   @Expose
+   private Priority shares;
+
    @Expose
    @SerializedName("size")
    private int sizeGB;
@@ -76,6 +79,14 @@ public class StorageRead {
 
    public void setSizeGB(int sizeGB) {
       this.sizeGB = sizeGB;
+   }
+
+   public Priority getShares() {
+      return shares;
+   }
+
+   public void setShares(Priority shares) {
+      this.shares = shares;
    }
 
 }

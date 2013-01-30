@@ -61,6 +61,7 @@ import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Configuration;
+import com.vmware.bdd.utils.Constants;
 
 public class ClusterConfigManager {
    private static final long serialVersionUID = 1L;
@@ -69,6 +70,7 @@ public class ClusterConfigManager {
    private static final String TEMPLATE_ID = "template_id";
    private static final String HTTP_PROXY = "serengeti.http_proxy";
    private static final String NO_PROXY = "serengeti.no_proxy";
+   private static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE = "elastic_runtime.automation.enable";
    private VcResourcePoolManager rpMgr;
    private NetworkManager networkMgr;
    private DistroManager distroMgr;
@@ -78,6 +80,7 @@ public class ClusterConfigManager {
          "centos57-x64");
    private String httpProxy = Configuration.getString(HTTP_PROXY.toString(), "");
    private String noProxy = Configuration.getStrings(NO_PROXY.toString(), "");
+   private boolean automationEnable = Configuration.getBoolean(ELASTIC_RUNTIME_AUTOMATION_ENABLE, false); 
 
    public VcDataStoreManager getDatastoreMgr() {
       return datastoreMgr;
@@ -132,7 +135,7 @@ public class ClusterConfigManager {
             distroMgr.getDistroByName(cluster.getDistro()) == null) {
            throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
       }
-      if (!cluster.getVendor().equalsIgnoreCase("Mapr")) {
+      if (!cluster.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
          cluster.validateClusterCreate(failedMsgList, warningMsgList, distroMgr
                .getDistroByName(cluster.getDistro()).getRoles());
       }
@@ -162,8 +165,21 @@ public class ClusterConfigManager {
                Gson gson = new Gson();
                ClusterEntity clusterEntity = new ClusterEntity(name);
                clusterEntity.setDistro(cluster.getDistro());
-
+               clusterEntity.setDistroVendor(cluster.getDistroVendor());
+               clusterEntity.setDistroVersion(cluster.getDistroVersion());
                clusterEntity.setStartAfterDeploy(true);
+
+               Boolean autoFlag = cluster.getAutomationEnable();
+               if (cluster.containsComputeOnlyNodeGroups()) {
+                  if (autoFlag == null) {
+                     clusterEntity.setAutomationEnable(automationEnable);
+                  } else {
+                     clusterEntity.setAutomationEnable(autoFlag);
+                  }
+               } else if (autoFlag != null) {
+                  throw BddException.INVALID_PARAMETER("automation enable", autoFlag);
+               }
+
                if (cluster.getRpNames() != null
                      && cluster.getRpNames().size() > 0) {
                   logger.debug("resource pool " + cluster.getRpNames()
@@ -576,9 +592,12 @@ public class ClusterConfigManager {
 
       CommonClusterExpandPolicy.expandDistro(clusterEntity, clusterConfig,
             distroMgr);
+      clusterConfig.setDistroVendor(clusterEntity.getDistroVendor());
+      clusterConfig.setDistroVersion(clusterEntity.getDistroVersion());
       clusterConfig.setHttpProxy(httpProxy);
       clusterConfig.setNoProxy(noProxy);
       clusterConfig.setTopologyPolicy(clusterEntity.getTopologyPolicy());
+      clusterConfig.setAutomationEnable(clusterEntity.isAutomationEnable());
 
       Map<String, String> hostToRackMap = rackInfoMgr.exportHostRackMap();
       if ((clusterConfig.getTopologyPolicy() == TopologyType.RACK_AS_RACK ||

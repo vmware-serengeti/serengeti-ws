@@ -351,6 +351,13 @@ public class RestClient {
                   || oldProgress != progress) {
                //clear screen and show progress every few seconds 
                clearScreen();
+               //output completed task summary first in the case there are several related tasks
+               if (prettyOutput != null && prettyOutput.length > 0
+                     && prettyOutput[0].getCompletedTaskSummary() != null) {
+                  for (String summary : prettyOutput[0].getCompletedTaskSummary()) {
+                     System.out.println(summary + "\n");
+                  }
+               }
                System.out.println(taskStatus + " " + progress + "%\n");
 
                if (prettyOutput != null && prettyOutput.length > 0) {

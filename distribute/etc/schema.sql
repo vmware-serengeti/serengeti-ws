@@ -67,16 +67,19 @@ create table ip_block (
 
 create sequence cluster_seq;
 create table cluster (
-   id           bigint       not null unique DEFAULT nextval('cluster_seq'::regclass),
-   name         varchar(255) not null unique,
-   distro       varchar(255),
-   topology     varchar(255) not null,
-   status       varchar(255) not null,
-   vc_datastore_names text,
-   vc_rp_names  text,
-   network_id   bigint,
-   start_after_deploy boolean,
-   configuration text,
+   id                  bigint       not null unique DEFAULT nextval('cluster_seq'::regclass),
+   name                varchar(255) not null unique,
+   distro              varchar(255),
+   distro_vendor       varchar(255),
+   distro_version      varchar(255),
+   topology            varchar(255) not null,
+   status              varchar(255) not null,
+   vc_datastore_names  text,
+   vc_rp_names         text,
+   network_id          bigint,
+   start_after_deploy  boolean,
+   automation_enable   boolean,
+   configuration       text,
    primary key (id),
    foreign key(network_id) references network(id) ON DELETE CASCADE
 );
@@ -161,5 +164,6 @@ create table task (
    progress_msg   text,
    listener     bytea,
    retry        boolean,
+   target       varchar(255),
    primary key (id)
 );
