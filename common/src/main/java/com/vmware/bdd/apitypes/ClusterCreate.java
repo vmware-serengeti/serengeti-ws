@@ -106,6 +106,11 @@ public class ClusterCreate {
    @SerializedName("automation_enable")
    private Boolean automationEnable;
 
+   //vhm minimum number of compute nodes staying powered on
+   @Expose
+   @SerializedName("vhm_min_num")
+   private int vhmMinNum;
+
    public ClusterCreate() {
    }
 
@@ -796,5 +801,13 @@ public class ClusterCreate {
 
    public void setAutomationEnable(Boolean automationEnable) {
       this.automationEnable = automationEnable;
+   }
+
+   public int getVhmMinNum() {
+      return vhmMinNum;
+   }
+
+   public void setVhmMinNum(int vhmMinNum) {
+      this.vhmMinNum = vhmMinNum;
    }
 }

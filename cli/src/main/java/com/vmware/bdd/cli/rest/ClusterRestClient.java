@@ -26,10 +26,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
-import com.vmware.bdd.apitypes.AutoScale;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterPriority;
 import com.vmware.bdd.apitypes.ClusterRead;
+import com.vmware.bdd.apitypes.Elasticity;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.Priority;
@@ -111,14 +111,15 @@ public class ClusterRestClient {
       restClient.deleteObject(id, path, httpverb, outputCallBack);
    }
 
-   public void autoScale(Boolean defaultValue, Boolean enable, String clusterName) {
-      final String path = Constants.REST_PATH_CLUSTERS + "/" + Constants.REST_PATH_AUTOSCALE;
+   public void setElasticity(String clusterName, boolean enableAutomation, int minNum) {
+      final String path = Constants.REST_PATH_CLUSTERS + "/" + Constants.REST_PATH_ELASTICITY;
       final HttpMethod httpverb = HttpMethod.PUT;
 
-      AutoScale requestBody = new AutoScale();
-      requestBody.setDefaultValue(defaultValue);
-      requestBody.setEnable(enable);
+      Elasticity requestBody = new Elasticity();
+      requestBody.setEnable(enableAutomation);
       requestBody.setClusterName(clusterName);
+      requestBody.setMinComputeNodeNum(minNum);
+
       restClient.update(requestBody, path, httpverb);
    }
 

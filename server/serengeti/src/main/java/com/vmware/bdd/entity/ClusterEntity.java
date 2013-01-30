@@ -33,6 +33,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Type;
@@ -113,6 +114,9 @@ public class ClusterEntity extends EntityBase {
 
    @Column(name = "automation_enable")
    private Boolean automationEnable;
+
+   @Column(name = "vhm_min_num")
+   private int vhmMinNum;
 
    ClusterEntity() {
 
@@ -400,5 +404,13 @@ public class ClusterEntity extends EntityBase {
 
    public void setAutomationEnable(Boolean automationEnable) {
       this.automationEnable = automationEnable;
+   }
+
+   public int getVhmMinNum() {
+      return vhmMinNum;
+   }
+
+   public void setVhmMinNum(int vhmMinNum) {
+      this.vhmMinNum = vhmMinNum;
    }
 }

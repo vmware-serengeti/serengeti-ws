@@ -10,13 +10,13 @@ import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.BddMessageUtil;
 import com.vmware.bdd.utils.ClusterCmdUtil;
 
-public class PrioritizeClusterListener implements TaskListener {
+public class VMReconfigureListener implements TaskListener {
    private static final long serialVersionUID = 1126241595749117009L;
-   private static final Logger logger = Logger.getLogger(PrioritizeClusterListener.class);
+   private static final Logger logger = Logger.getLogger(VMReconfigureListener.class);
 
    private String clusterName;
 
-   public PrioritizeClusterListener(String clusterName) {
+   public VMReconfigureListener(String clusterName) {
       super();
       this.clusterName = clusterName;
    }
