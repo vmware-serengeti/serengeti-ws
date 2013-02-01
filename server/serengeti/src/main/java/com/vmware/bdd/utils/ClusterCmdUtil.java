@@ -37,6 +37,8 @@ public class ClusterCmdUtil {
          .getNonEmptyString("start_cluster_node.cmd");
    private static final String CONFIGURE_CLUSTER_CMD = Configuration
          .getNonEmptyString("configure_cluster.cmd");
+   private static final String CONFIGURE_HARDWARE_CMD = Configuration
+         .getNonEmptyString("configure_hardware.cmd");
 
    private static String getLogLevel() {
       if (logLevel.isGreaterOrEqual(Level.ERROR)) {
@@ -89,6 +91,12 @@ public class ClusterCmdUtil {
    public static String[] getConfigureClusterCmdArray(String clusterName,
          String fileName) {
       return CONFIGURE_CLUSTER_CMD.replaceAll(":cluster_name", clusterName)
+            .replaceAll(":json_file", fileName).replaceAll(":log_level", getLogLevel()).split(" ");
+   }
+
+   public static String[] getConfigureHardwareCmdArray(String clusterName,
+         String fileName) {
+      return CONFIGURE_HARDWARE_CMD.replaceAll(":cluster_name", clusterName)
             .replaceAll(":json_file", fileName).replaceAll(":log_level", getLogLevel()).split(" ");
    }
 

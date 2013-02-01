@@ -926,6 +926,7 @@ public class ClusterManager {
          if (enableAutoElasticity) {
             cluster.setVhmMinNum(minNum);
          }
+         DAL.inTransactionUpdate(cluster);
          VMReconfigureListener listener =
                new VMReconfigureListener(clusterName);
          createClusterMgmtTaskWithErrorSetting(cluster, listener,

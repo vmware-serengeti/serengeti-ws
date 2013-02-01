@@ -51,6 +51,6 @@ public class VMReconfigureListener implements TaskListener {
 
    @Override
    public String[] getTaskCommand(String clusterName, String fileName) {
-      return ClusterCmdUtil.getQueryClusterCmdArray(clusterName, fileName);
+      return ClusterCmdUtil.getConfigureHardwareCmdArray(clusterName, fileName);
    }
 }

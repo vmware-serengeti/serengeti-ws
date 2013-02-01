@@ -179,6 +179,7 @@ public class ClusterConfigManager {
                } else if (autoFlag != null) {
                   throw BddException.INVALID_PARAMETER("automation enable", autoFlag);
                }
+               clusterEntity.setVhmMinNum(cluster.getVhmMinNum());
 
                if (cluster.getRpNames() != null
                      && cluster.getRpNames().size() > 0) {
@@ -598,6 +599,7 @@ public class ClusterConfigManager {
       clusterConfig.setNoProxy(noProxy);
       clusterConfig.setTopologyPolicy(clusterEntity.getTopologyPolicy());
       clusterConfig.setAutomationEnable(clusterEntity.isAutomationEnable());
+      clusterConfig.setVhmMinNum(clusterEntity.getVhmMinNum());
 
       Map<String, String> hostToRackMap = rackInfoMgr.exportHostRackMap();
       if ((clusterConfig.getTopologyPolicy() == TopologyType.RACK_AS_RACK ||
