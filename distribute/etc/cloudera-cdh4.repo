@@ -1,0 +1,7 @@
+[cloudera-cdh4]
+name=Cloudera's Distribution for Hadoop, Version 4
+baseurl=http://archive.cloudera.com/cdh4/redhat/5/x86_64/cdh/4.1.2/
+gpgkey=http://archive.cloudera.com/cdh4/redhat/5/x86_64/cdh/RPM-GPG-KEY-cloudera
+gpgcheck=1
+enabled=1
+

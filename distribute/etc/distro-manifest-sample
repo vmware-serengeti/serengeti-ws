@@ -1,0 +1,52 @@
+[
+  {
+    "name" : "apache",
+    "vendor" : "Apache",
+    "version" : "1.0.1",
+    "packages" : [
+      {
+        "roles" : ["hadoop_namenode", "hadoop_jobtracker", "hadoop_tasktracker", "hadoop_datanode", "hadoop_client"],
+        "tarball" : "apache/1.0.1/hadoop-1.0.1.tar.gz"
+      },
+      {
+        "roles" : ["pig"],
+        "tarball" : "apache/1.0.1/pig-0.9.2.tar.gz"
+      },
+      {
+        "roles" : ["hive", "hive_server"],
+        "tarball" : "apache/1.0.1/hive-0.8.1.tar.gz"
+      },
+      {
+        "roles" : ["hbase_master", "hbase_regionserver", "hbase_client"],
+        "tarball" : "apache/1.0.1/hbase-0.94.0.tar.gz"
+      },
+      {
+        "roles" : ["zookeeper"],
+        "tarball" : "apache/1.0.1/zookeeper-3.4.3.tar.gz"
+      }
+    ]
+  },
+  {
+    "name" : "mapr",
+    "vendor" : "MAPR",
+    "version" : "2.1.1",
+    "packages" : [
+      {
+        "roles" : ["mapr_zookeeper", "mapr_cldb", "mapr_jobtracker", "mapr_tasktracker", "mapr_fileserver", "mapr_nfs", "mapr_webserver", "mapr_metrics", "mapr_client", "mapr_pig", "mapr_hive", "mapr_hive_server", "mapr_mysql_server"],
+        "package_repos" : ["http://yum_server_ip/yum/mapr-m5.repo"]
+      }
+    ]
+  },
+  {
+    "name" : "cdh4",
+    "vendor" : "CDH",
+    "version" : "4.1.2",
+    "packages" : [
+      {
+        "roles" : ["hadoop_namenode", "hadoop_jobtracker", "hadoop_tasktracker", "hadoop_datanode", "hadoop_journalnode", "hadoop_client", "hive", "hive_server", "pig", "hbase_master", "hbase_regionserver", "hbase_client", "zookeeper"],
+       "package_repos" : ["http://yum_server_ip/yum/cloudera-cdh4.repo"]
+      }
+    ]
+  }
+]
+
