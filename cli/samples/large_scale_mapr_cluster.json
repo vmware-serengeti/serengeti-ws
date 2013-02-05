@@ -32,13 +32,30 @@
       "haFlag" : "on"
     },
     {
-      "name" : "master",
+      "name" : "cldb",
       "roles" : [
         "mapr_cldb",
         "mapr_nfs",
+        "mapr_fileserver"
+      ],
+      "instanceNum" : 3,
+      "placementPolicies": {
+        "instancePerHost": 1
+      },
+      "storage" : {
+        "type" : "LOCAL",
+        "sizeGB" : 50
+      },
+      "cpuNum" : 2,
+      "memCapacityMB" : 7680,
+      "haFlag" : "on"
+    },
+    {
+      "name" : "jobtracker",
+      "roles" : [
+        "mapr_nfs",
         "mapr_fileserver",
         "mapr_jobtracker",
-        "mapr_tasktracker",
         "mapr_webserver",
         "mapr_metrics"
       ],
@@ -61,7 +78,7 @@
         "mapr_fileserver",
         "mapr_tasktracker"
       ],
-      "instanceNum" : 3,
+      "instanceNum" : 5, // set a bigger number of nodes in worker group to create a large scale cluster
       "storage" : {
         "type" : "LOCAL",
         "sizeGB" : 50
