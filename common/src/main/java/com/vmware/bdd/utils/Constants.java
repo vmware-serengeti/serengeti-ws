@@ -31,6 +31,7 @@ public class Constants {
    public static final String CLUSTER_NAME_PATTERN = "[a-zA-Z0-9_]+";
    public static final String NODE_GROUP_NAME_PATTERN = "[a-zA-Z0-9]+";
    public static final String NAME_PATTERN = "[a-zA-Z0-9_\\-\\s]+";
+   public static final String PORT_GROUP_NAME_PATTERN = "[a-zA-Z0-9_\\-\\s\\.]+";
    public static final String VC_DATASTORE_NAME_PATTERN = "[a-zA-Z0-9_\\-\\s\\?\\*]+";
    public static final String MULTI_INPUTS_CHECK = " cannot be empty, please check it.";
    public static final String WRONG_NUM_OF_JOBTRACKER = "the number of jobtrackers is more than 1";

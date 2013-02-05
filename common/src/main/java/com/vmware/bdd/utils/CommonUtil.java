@@ -75,6 +75,10 @@ public class CommonUtil {
       return match(input, Constants.NAME_PATTERN);
    }
 
+   public static boolean validatePortGroupName(final String input) {
+      return match(input, Constants.PORT_GROUP_NAME_PATTERN);
+   }
+
    public static boolean validateClusterName(final String input) {
       return match(input, Constants.CLUSTER_NAME_PATTERN);
    }

@@ -35,6 +35,19 @@ public class CommonUtilTest {
    }
 
    @Test
+   public void validatePortGroupName() {
+      assertEquals(CommonUtil.validatePortGroupName("name1"), true);
+      assertEquals(CommonUtil.validatePortGroupName("Name2"), true);
+      assertEquals(CommonUtil.validatePortGroupName("name3_"), true);
+      assertEquals(CommonUtil.validatePortGroupName("name4 "), true);
+      assertEquals(CommonUtil.validatePortGroupName("name-5"), true);
+      assertEquals(CommonUtil.validatePortGroupName("name6-"), true);
+      assertEquals(CommonUtil.validatePortGroupName("-name7-"), true);
+      assertEquals(CommonUtil.validatePortGroupName("VM network192.168.0.1"), true);
+      assertEquals(CommonUtil.validatePortGroupName("192.168.0.2VM network"), true);
+   }
+
+   @Test
    public void testValidateClusterName() {
       assertEquals(CommonUtil.validateClusterName("clusterName1"), true);
       assertEquals(CommonUtil.validateClusterName("clusterName2"), true);

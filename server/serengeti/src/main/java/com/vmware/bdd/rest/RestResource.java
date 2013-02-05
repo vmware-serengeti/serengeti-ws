@@ -519,7 +519,7 @@ public class RestResource {
       if (CommonUtil.isBlank(na.getName()) || !CommonUtil.validateName(na.getName())) {
          throw BddException.INVALID_PARAMETER("name", na.getName());
       }
-      if (CommonUtil.isBlank(na.getPortGroup()) || !CommonUtil.validateName(na.getPortGroup())) {
+      if (CommonUtil.isBlank(na.getPortGroup()) || !CommonUtil.validatePortGroupName(na.getPortGroup())) {
          throw BddException.INVALID_PARAMETER("port group", na.getPortGroup());
       }
 
