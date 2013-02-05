@@ -306,6 +306,7 @@ public class ClusterCommands implements CommandMarker {
          if (name == null) {
             ClusterRead[] clusters = restClient.getAll(detail);
             if (clusters != null) {
+               Arrays.sort(clusters);
                prettyOutputClustersInfo(clusters, detail);
             }
          } else {

@@ -63,6 +63,7 @@ public class DistroCommands implements CommandMarker {
 
    private void prettyOutputDistrosInfo(DistroRead[] distros) {
       if (distros != null) {
+         Arrays.sort(distros);
          LinkedHashMap<String, List<String>> distroColumnNamesWithGetMethodNames =
                new LinkedHashMap<String, List<String>>();
          distroColumnNamesWithGetMethodNames.put(

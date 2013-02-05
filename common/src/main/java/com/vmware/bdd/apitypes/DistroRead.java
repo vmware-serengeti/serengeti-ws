@@ -16,9 +16,10 @@ package com.vmware.bdd.apitypes;
 
 import java.util.List;
 
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
-public class DistroRead {
+public class DistroRead implements Comparable<DistroRead>{
    private String name;
    private String vendor = Constants.DEFAULT_VENDOR;
    private String version;
@@ -63,5 +64,13 @@ public class DistroRead {
 
    public void setRoles(List<String> roles) {
       this.roles = roles;
+   }
+
+   @Override
+   public int compareTo(DistroRead distroRead) {
+      if (CommonUtil.isBlank(distroRead.getName())) {
+         return 1;
+      }
+      return this.getName().compareTo(distroRead.getName());
    }
 }

@@ -27,7 +27,7 @@ import com.vmware.bdd.utils.CommonUtil;
 /**
  * Cluster get output
  */
-public class ClusterRead {
+public class ClusterRead implements Comparable<ClusterRead>{
    public enum ClusterStatus {
       RUNNING, PROVISIONING, PROVISION_ERROR, UPGRADING, UPDATING, DELETING, 
       STOPPED, ERROR, STOPPING, STARTING, CONFIGURING, CONFIGURE_ERROR, NA, 
@@ -251,4 +251,13 @@ public class ClusterRead {
          return roleOrders.length;
       }
    }
+
+   @Override
+   public int compareTo(ClusterRead cluster) {
+      if (CommonUtil.isBlank(cluster.getName())) {
+         return 1;
+      }
+      return this.getName().compareTo(cluster.getName());
+   }
+
 }
