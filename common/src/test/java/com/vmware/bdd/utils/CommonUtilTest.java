@@ -83,6 +83,7 @@ public class CommonUtilTest {
       vcDataStoreNames.add("vcData Store_Name2");
       vcDataStoreNames.add("vcDataStoreName3-");
       vcDataStoreNames.add("vcDataStoreName192.168.0.1");
+      vcDataStoreNames.add("vcDataStoreName(192.168.0.1)");
       assertEquals(CommonUtil.validateVcDataStoreNames(vcDataStoreNames), true);
 
       List<String> errorVcDataStoreNames1 = new ArrayList<String>();
