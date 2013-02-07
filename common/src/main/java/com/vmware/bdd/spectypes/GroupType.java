@@ -22,11 +22,16 @@ import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 public enum GroupType {
    ZOOKEEPER_GROUP("zookeeper"),
    JOURNALNODE_GROUP("journalnode"),
-   MASTER_GROUP("master"), 
+   MASTER_GROUP("master"),
    HBASE_MASTER_GROUP("hbase_master"),
    MASTER_JOBTRACKER_GROUP("job_tracker"),
-   WORKER_GROUP("worker"), 
-   CLIENT_GROUP("client");
+   WORKER_GROUP("worker"),
+   CLIENT_GROUP("client"),
+   MAPR_MASTER_GROUP("mapr_master"),
+   MAPR_WORKER_GROUP("worker"),
+   MAPR_CLIENT_GROUP("client"),
+   MAPR_ZOOKEEPER_GROUP("mapr_zookeeper"),
+   MAPR_MYSQL_SERVER("mapr_mysql_server");
 
    private String description;
 
@@ -53,6 +58,10 @@ public enum GroupType {
       switch (this) {
       case WORKER_GROUP:
          return DatastoreType.LOCAL;
+      case MAPR_WORKER_GROUP:
+         return DatastoreType.LOCAL;
+      case MAPR_MASTER_GROUP:
+         return DatastoreType.LOCAL;
       default:
          return DatastoreType.SHARED;
       }
@@ -73,8 +82,19 @@ public enum GroupType {
          return ZOOKEEPER_GROUP;
       } else if (roles.contains(HadoopRole.HADOOP_JOURNALNODE_ROLE)) {
          return JOURNALNODE_GROUP;   
-      } else {
+      } else if (roles.contains(HadoopRole.HADOOP_CLIENT_ROLE)) {
          return CLIENT_GROUP;
+      } else if (roles.contains(HadoopRole.MAPR_CLDB_ROLE)  && roles.contains(HadoopRole.MAPR_JOBTRACKER_ROLE)
+            && roles.contains(HadoopRole.MAPR_WEBSERVER_ROLE) && roles.contains(HadoopRole.MAPR_METRICS_ROLE)) {
+         return MAPR_MASTER_GROUP;
+      }  else if (roles.contains(HadoopRole.MAPR_TASKTRACKER_ROLE) && !roles.contains(HadoopRole.MAPR_JOBTRACKER_ROLE)) {
+         return MAPR_WORKER_GROUP;
+      } else if (roles.contains(HadoopRole.MAPR_MYSQL_SERVER_ROLE)) {
+         return MAPR_MYSQL_SERVER;
+      } else if (roles.contains(HadoopRole.MAPR_ZOOKEEPER_ROLE)) {
+         return MAPR_ZOOKEEPER_GROUP;
+      } else {
+         return MAPR_CLIENT_GROUP;
       }
    }
 }

@@ -15,7 +15,6 @@
       "cpu":2,
       "memory":7680,
       "storage" : {
-        "type": "LOCAL",
         "size": 50
       },
       "instance_num":3,
@@ -31,7 +30,6 @@
       "cpu":2,
       "memory":4096,
       "storage" : {
-        "type": "LOCAL",
         "size": 50
       },
       "instance_num":3,
@@ -47,7 +45,6 @@
       "cpu":1,
       "memory":4096,
       "storage" : {
-        "type": "SHARED",
         "size": 50
       },
       "instance_num":1,
@@ -61,7 +58,6 @@
       "cpu":1,
       "memory":1024,
       "storage" : {
-        "type": "SHARED",
         "size": 20
       },
       "instance_num":3,
@@ -75,7 +71,6 @@
       "cpu":1,
       "memory":1024,
       "storage" : {
-        "type": "SHARED",
         "size": 20
       },
       "instance_num":1,
