@@ -931,6 +931,16 @@ public class ClusterManager {
                new VMReconfigureListener(clusterName);
          createClusterMgmtTaskWithErrorSetting(cluster, listener,
                ClusterStatus.VMRECONFIGURING);
+         //temp fix for vhm integration
+         try {
+            Thread.sleep(8);
+         } catch (InterruptedException e) {
+            //do nothing
+         }
+         if (cluster.getStatus() != ClusterStatus.ERROR) {
+            cluster.setStatus(ClusterStatus.RUNNING);
+            DAL.inTransactionUpdate(cluster);
+         }
       }
       
    }
