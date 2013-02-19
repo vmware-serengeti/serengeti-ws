@@ -490,7 +490,7 @@ public class ClusterConfigManager {
          groupEntity.setStorageSize(group.getStorage().getSizeGB());
          List<String> groupRoles = group.getRoles();
          //currently, ignore input from CLI and hard code here
-         if (groupRoles.contains(HadoopRole.ZOOKEEPER_ROLE.toString()) && groupRoles.size() == 1) {
+         if ((groupRoles.contains(HadoopRole.ZOOKEEPER_ROLE.toString()) || groupRoles.contains(HadoopRole.MAPR_ZOOKEEPER_ROLE.toString())) && groupRoles.size() == 1) {
             groupEntity.setDiskBisect(true);
          } else {
             groupEntity.setDiskBisect(false);
