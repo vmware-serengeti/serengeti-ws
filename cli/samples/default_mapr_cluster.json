@@ -1,7 +1,7 @@
 {
   "nodeGroups" : [
     {
-      "name" : "mysqlserver",
+      "name" : "mysql",
       "roles" : [
         "mapr_mysql_server"
       ],
