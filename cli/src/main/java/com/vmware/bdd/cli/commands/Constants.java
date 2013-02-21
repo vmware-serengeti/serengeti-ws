@@ -85,8 +85,8 @@ public class Constants {
    public static final String OUTPUT_OP_RESIZE = "resize";
    public static final String OUTPUT_OP_SET_ELASTICITY = "setElasticity";
    public static final String OUTPUT_OP_QUOTA_SET = "quota";
-   public static final String OUTPUT_OP_LIMIT = "limit";
-   public static final String OUTPUT_OP_UNLIMIT = "unlimit";
+   public static final String OUTPUT_OP_ADJUSTMENT = "Adjustment";
+   public static final String OUTPUT_OP_ADJUSTMENT_SUCCEEDED = "succeeded";
    public static final String OUTPUT_OP_ADJUSTMENT_FAILED = "failed";
    public static final String OUTPUT_OP_RESUME = "resume";
    public static final String OUTPUT_OP_RESULT_FAIL = "failed";
