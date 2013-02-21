@@ -79,6 +79,7 @@ create table cluster (
    network_id          bigint,
    start_after_deploy  boolean,
    automation_enable   boolean,
+   vhm_min_num         integer,
    configuration       text,
    primary key (id),
    foreign key(network_id) references network(id) ON DELETE CASCADE

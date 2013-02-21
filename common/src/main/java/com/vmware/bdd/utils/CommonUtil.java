@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2012-2013 VMware, Inc. All Rights Reservedrved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,10 @@ public class CommonUtil {
 
    public static boolean validateName(final String input) {
       return match(input, Constants.NAME_PATTERN);
+   }
+
+   public static boolean validatePortGroupName(final String input) {
+      return match(input, Constants.PORT_GROUP_NAME_PATTERN);
    }
 
    public static boolean validateClusterName(final String input) {

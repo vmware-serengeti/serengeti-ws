@@ -1,0 +1,151 @@
+{
+  "nodeGroups" : [
+    {
+      "name" : "zookeeper",
+      "roles" : [
+        "zookeeper"
+      ],
+      "instanceNum" : 3,
+      "instanceType" : "SMALL",
+      "storage" : {
+        "type" : "shared",
+        "sizeGB" : 20
+      },
+      "cpuNum" : 1,
+      "memCapacityMB" : 3748,
+      "haFlag" : "on",
+      "configuration" : {
+      }
+    },
+    {
+      "name" : "master",
+      "roles" : [
+        "hadoop_namenode",
+        "hbase_master"
+      ],
+      "instanceNum" : 1,
+      "instanceType" : "MEDIUM",
+      "storage" : {
+        "type" : "shared",
+        "sizeGB" : 50
+      },
+      "cpuNum" : 2,
+      "memCapacityMB" : 7500,
+      "haFlag" : "on",
+      "configuration" : {
+      }
+    },
+    {
+      "name" : "worker",
+      "roles" : [
+        "hadoop_datanode",
+        "hbase_regionserver"
+      ],
+      "instanceNum" : 3,
+      "instanceType" : "SMALL",
+      "storage" : {
+        "type" : "local",
+        "sizeGB" : 50
+      },
+      "cpuNum" : 1,
+      "memCapacityMB" : 3748,
+      "haFlag" : "off",
+      "configuration" : {
+      }
+    },
+    {
+      "name" : "client",
+      "roles" : [
+        "hadoop_client",
+        "hbase_client"
+      ],
+      "instanceNum" : 1,
+      "instanceType" : "SMALL",
+      "storage" : {
+        "type" : "shared",
+        "sizeGB" : 50
+      },
+      "cpuNum" : 1,
+      "memCapacityMB" : 3748,
+      "haFlag" : "off",
+      "configuration" : {
+      }
+    }
+  ],
+  // we suggest running convert-hadoop-conf.rb to generate "configuration" section and paste the output here
+  "configuration" : {
+    "hadoop": {
+      "core-site.xml": {
+        // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/core-default.html
+        // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample: 
+        // "io.file.buffer.size": "4096"
+      },
+      "hdfs-site.xml": {
+        // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/hdfs-default.html
+      },
+      "mapred-site.xml": {
+        // check for all settings at http://hadoop.apache.org/common/docs/r1.0.0/mapred-default.html
+      },
+      "hadoop-env.sh": {
+        // "HADOOP_HEAPSIZE": "",
+        // "HADOOP_NAMENODE_OPTS": "",
+        // "HADOOP_DATANODE_OPTS": "",
+        // "HADOOP_SECONDARYNAMENODE_OPTS": "",
+        // "HADOOP_JOBTRACKER_OPTS": "",
+        // "HADOOP_TASKTRACKER_OPTS": "",
+        // "HADOOP_CLASSPATH": "",
+        // "JAVA_HOME": "",
+        // "PATH": ""
+      },
+      "log4j.properties": {
+        // "hadoop.root.logger": "DEBUG,DRFA",
+        // "hadoop.security.logger": "DEBUG,DRFA"
+      },
+      "fair-scheduler.xml": {
+        // check for all settings at http://hadoop.apache.org/docs/r1.0.0/fair_scheduler.html
+        // "text": "the full content of fair-scheduler.xml in one line"
+      },
+      "capacity-scheduler.xml": {
+        // check for all settings at http://hadoop.apache.org/docs/r1.0.0/capacity_scheduler.html
+      },
+      "mapred-queue-acls.xml": {
+        // check for all settings at http://hadoop.apache.org/docs/r1.0.0/cluster_setup.html#Configuring+the+Hadoop+Daemons
+        // "mapred.queue.queue-name.acl-submit-job": "",
+        // "mapred.queue.queue-name.acl-administer-jobs", ""
+      }
+    },
+    "hbase": {
+      "hbase-site.xml": {
+        // check for all settings at http://hbase.apache.org/configuration.html#hbase.site
+      },
+      "hbase-env.sh": {
+        // "JAVA_HOME": "",
+        // "PATH": "",
+        // "HBASE_CLASSPATH": "",
+        // "HBASE_HEAPSIZE": "",
+        // "HBASE_OPTS": "",
+        // "HBASE_USE_GC_LOGFILE": "",
+        // "HBASE_JMX_BASE": "",
+        // "HBASE_MASTER_OPTS": "",
+        // "HBASE_REGIONSERVER_OPTS": "",
+        // "HBASE_THRIFT_OPTS": "",
+        // "HBASE_ZOOKEEPER_OPTS": "",
+        // "HBASE_REGIONSERVERS": "",
+        // "HBASE_SSH_OPTS": "",
+        // "HBASE_NICENESS": "",
+        // "HBASE_SLAVE_SLEEP": ""
+      },
+      "log4j.properties": {
+        // "hbase.root.logger": "DEBUG,DRFA"
+      }
+    },
+    "zookeeper": {
+      "java.env": {
+        // "JVMFLAGS": "-Xmx2g"
+      },
+      "log4j.properties": {
+        // "zookeeper.root.logger": "DEBUG,DRFA"
+      }
+    }
+  }
+}

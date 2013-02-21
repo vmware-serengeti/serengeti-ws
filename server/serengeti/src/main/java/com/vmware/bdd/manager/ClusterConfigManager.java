@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2012-2013 VMware, Inc. All Rights Reservedrved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -179,6 +179,7 @@ public class ClusterConfigManager {
                } else if (autoFlag != null) {
                   throw BddException.INVALID_PARAMETER("automation enable", autoFlag);
                }
+               clusterEntity.setVhmMinNum(cluster.getVhmMinNum());
 
                if (cluster.getRpNames() != null
                      && cluster.getRpNames().size() > 0) {
@@ -489,7 +490,7 @@ public class ClusterConfigManager {
          groupEntity.setStorageSize(group.getStorage().getSizeGB());
          List<String> groupRoles = group.getRoles();
          //currently, ignore input from CLI and hard code here
-         if (groupRoles.contains(HadoopRole.ZOOKEEPER_ROLE.toString()) && groupRoles.size() == 1) {
+         if ((groupRoles.contains(HadoopRole.ZOOKEEPER_ROLE.toString()) || groupRoles.contains(HadoopRole.MAPR_ZOOKEEPER_ROLE.toString())) && groupRoles.size() == 1) {
             groupEntity.setDiskBisect(true);
          } else {
             groupEntity.setDiskBisect(false);
@@ -598,6 +599,7 @@ public class ClusterConfigManager {
       clusterConfig.setNoProxy(noProxy);
       clusterConfig.setTopologyPolicy(clusterEntity.getTopologyPolicy());
       clusterConfig.setAutomationEnable(clusterEntity.isAutomationEnable());
+      clusterConfig.setVhmMinNum(clusterEntity.getVhmMinNum());
 
       Map<String, String> hostToRackMap = rackInfoMgr.exportHostRackMap();
       if ((clusterConfig.getTopologyPolicy() == TopologyType.RACK_AS_RACK ||

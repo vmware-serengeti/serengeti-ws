@@ -51,6 +51,12 @@ public class TestClusterCmdUtil {
       assertEquals(cmd.length, 5);
    }
 
+   //@Test
+   public void testConfigureHardwareCmdArray() {
+      String[] cmd = ClusterCmdUtil.getConfigureHardwareCmdArray("abc", "spec");
+      assertEquals(cmd.length, 5);
+   }
+
    @Test
    public void testNodeFullName() {
       String nodeName = ClusterCmdUtil.getFullNodeName("cluster", "group", null);

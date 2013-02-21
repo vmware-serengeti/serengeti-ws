@@ -19,7 +19,7 @@
       "instanceType": "SMALL",
       "storage": {
         "type": "LOCAL",
-        "sizeGB": 20
+        "sizeGB": 50
       },
       "placementPolicies": {
         "instancePerHost": 1,
@@ -37,7 +37,7 @@
       "instanceType": "SMALL",
       "storage": {
         "type": "LOCAL",
-        "sizeGB": 10
+        "sizeGB": 20
       },
   	  "placementPolicies": {
         "groupAssociations":[
@@ -61,4 +61,3 @@
 	  }
   ]
 }
-

@@ -1,5 +1,5 @@
 /*****************************************************************************
- *   Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ *   Copyright (c) 2012-2013 VMware, Inc. All Rights Reservedrved
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
@@ -63,6 +63,7 @@ public class DistroCommands implements CommandMarker {
 
    private void prettyOutputDistrosInfo(DistroRead[] distros) {
       if (distros != null) {
+         Arrays.sort(distros);
          LinkedHashMap<String, List<String>> distroColumnNamesWithGetMethodNames =
                new LinkedHashMap<String, List<String>>();
          distroColumnNamesWithGetMethodNames.put(

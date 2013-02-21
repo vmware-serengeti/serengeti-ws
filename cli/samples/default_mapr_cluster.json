@@ -1,7 +1,7 @@
 {
   "nodeGroups" : [
     {
-      "name" : "mysqlserver",
+      "name" : "mysql",
       "roles" : [
         "mapr_mysql_server"
       ],
@@ -11,7 +11,7 @@
         "sizeGB" : 20
       },
       "cpuNum" : 1,
-      "memCapacityMB" : 1024,
+      "memCapacityMB" : 2048,
       "haFlag" : "off"
     },
     {
@@ -28,7 +28,7 @@
         "sizeGB" : 20
       },
       "cpuNum" : 1,
-      "memCapacityMB" : 1024,
+      "memCapacityMB" : 2048,
       "haFlag" : "on"
     },
     {
@@ -82,7 +82,7 @@
         "type" : "SHARED",
         "sizeGB" : 50
       },
-      "cpuNum" : 1,
+      "cpuNum" : 2,
       "memCapacityMB" : 4096,
       "haFlag" : "off"
     }

@@ -1,6 +1,6 @@
 /***************************************************************************
 
- * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2012-2013 VMware, Inc. All Rights Reservedrved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,13 +53,13 @@ import com.vmware.bdd.manager.task.ConfigureClusterListener;
 import com.vmware.bdd.manager.task.CreateClusterListener;
 import com.vmware.bdd.manager.task.DeleteClusterListener;
 import com.vmware.bdd.manager.task.MessageTaskWorker;
-import com.vmware.bdd.manager.task.PrioritizeClusterListener;
 import com.vmware.bdd.manager.task.QueryClusterListener;
 import com.vmware.bdd.manager.task.StartClusterListener;
 import com.vmware.bdd.manager.task.StopClusterListener;
 import com.vmware.bdd.manager.task.TaskListener;
 import com.vmware.bdd.manager.task.UpdateClusterListener;
 import com.vmware.bdd.manager.task.VHMReceiveListener;
+import com.vmware.bdd.manager.task.VMReconfigureListener;
 import com.vmware.bdd.specpolicy.ClusterSpecFactory;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
@@ -869,10 +869,10 @@ public class ClusterManager {
          logger.error(msg);
          throw ClusterManagerException.LIMIT_CLUSTER_NOT_ALLOWED_ERROR(clusterName, msg);
       }
-      PrioritizeClusterListener listener =
-            new PrioritizeClusterListener(clusterName);
+      VMReconfigureListener listener =
+            new VMReconfigureListener(clusterName);
       return createClusterMgmtTaskWithErrorSetting(cluster, listener,
-            ClusterStatus.PRIORITIZING);
+            ClusterStatus.VMRECONFIGURING);
    }
 
    static class SystemProperties {
@@ -907,11 +907,41 @@ public class ClusterManager {
       }
    }
 
-   public void autoScale(Boolean defaultValue, Boolean enable,
-         String clusterName) {
-      if (defaultValue != null) { // set serengeti.properties
-         Configuration.setBoolean(ELASTIC_RUNTIME_AUTOMATION_ENABLE, defaultValue);
+   // we will not use task for vm reconfig for now
+   public void setElasticity(String clusterName, boolean enableAutoElasticity, int minNum) {
+      final ClusterEntity cluster =
+            ClusterEntity.findClusterEntityByName(clusterName);
+      if (cluster == null) {
+         logger.error("cluster " + clusterName + " does not exist");
+         throw BddException.NOT_FOUND("cluster", clusterName);
       }
-      //TODO reset cluster(s) automation enabling
+      Boolean preEnableSetting = cluster.isAutomationEnable();
+      int preMinNum = cluster.getVhmMinNum();
+      if (preEnableSetting == null) {
+         logger.error("cluster " + clusterName + " is not a D/C separation cluster, and cannot set elasticity");
+         throw BddException.NOT_FOUND("cluster", clusterName);
+      }
+      if (preEnableSetting != enableAutoElasticity || preMinNum != minNum) {
+         cluster.setAutomationEnable(enableAutoElasticity);
+         if (enableAutoElasticity) {
+            cluster.setVhmMinNum(minNum);
+         }
+         DAL.inTransactionUpdate(cluster);
+         VMReconfigureListener listener =
+               new VMReconfigureListener(clusterName);
+         createClusterMgmtTaskWithErrorSetting(cluster, listener,
+               ClusterStatus.VMRECONFIGURING);
+         //temp fix for vhm integration
+         try {
+            Thread.sleep(8);
+         } catch (InterruptedException e) {
+            //do nothing
+         }
+         if (cluster.getStatus() != ClusterStatus.ERROR) {
+            cluster.setStatus(ClusterStatus.RUNNING);
+            DAL.inTransactionUpdate(cluster);
+         }
+      }
+      
    }
 }

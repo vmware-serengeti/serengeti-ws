@@ -1,5 +1,5 @@
 /*****************************************************************************
- *   Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ *   Copyright (c) 2012-2013 VMware, Inc. All Rights Reservedrved
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
@@ -306,6 +306,7 @@ public class ClusterCommands implements CommandMarker {
          if (name == null) {
             ClusterRead[] clusters = restClient.getAll(detail);
             if (clusters != null) {
+               Arrays.sort(clusters);
                prettyOutputClustersInfo(clusters, detail);
             }
          } else {
@@ -449,13 +450,19 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   @CliCommand(value = "cluster autoscale", help = "Set elasticity automation default value, enable/disable cluster elasticity automation")
-   public void autoScale(
-         @CliOption(key = { "default" }, mandatory = false, specifiedDefaultValue = "true", help = "The elasticity automation default value") final Boolean defaultValue,
-         @CliOption(key = { "enable" }, mandatory = false, specifiedDefaultValue = "true", help = "Enable or disable elasticity automation") final Boolean enable,
-         @CliOption(key = { "clusterName" }, mandatory = false, help = "The cluster to enable or disable elasticity automation") final String clusterName) {
-      restClient.autoScale(defaultValue, enable, clusterName);
-      
+   @CliCommand(value = "cluster enableAutoElasticity", help = "enable cluster elasticity automation")
+   public void enableAutoElasticity(
+         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
+         @CliOption(key = { "minComputeNodeNum" }, mandatory = false, help = "The minimum number of compute nodes staying powered on") final int minComputeNodeNum) {
+      boolean enable = true;
+      restClient.setElasticity(name, enable, minComputeNodeNum);
+   }
+   
+   @CliCommand(value = "cluster disableAutoElasticity", help = "disable cluster elasticity automation")
+   public void disableAutoElasticity(
+         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name) {
+      boolean enable = false;
+      restClient.setElasticity(name, enable, 0);
    }
    
    @CliCommand(value = "cluster limit", help = "Set the cluster resources including stopping some cmopute nodes, set disk priorities")

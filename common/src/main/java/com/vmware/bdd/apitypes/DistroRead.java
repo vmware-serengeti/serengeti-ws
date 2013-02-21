@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2012-2013 VMware, Inc. All Rights Reservedrved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,10 @@ package com.vmware.bdd.apitypes;
 
 import java.util.List;
 
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
-public class DistroRead {
+public class DistroRead implements Comparable<DistroRead>{
    private String name;
    private String vendor = Constants.DEFAULT_VENDOR;
    private String version;
@@ -63,5 +64,13 @@ public class DistroRead {
 
    public void setRoles(List<String> roles) {
       this.roles = roles;
+   }
+
+   @Override
+   public int compareTo(DistroRead distroRead) {
+      if (CommonUtil.isBlank(distroRead.getName())) {
+         return 1;
+      }
+      return this.getName().compareTo(distroRead.getName());
    }
 }

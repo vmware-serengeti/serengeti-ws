@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2012-2013 VMware, Inc. All Rights Reservedrved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,19 @@ public class CommonUtilTest {
       assertEquals(CommonUtil.validateName("name-5"), true);
       assertEquals(CommonUtil.validateName("name6-"), true);
       assertEquals(CommonUtil.validateName("-name7-"), true);
+   }
+
+   @Test
+   public void validatePortGroupName() {
+      assertEquals(CommonUtil.validatePortGroupName("name1"), true);
+      assertEquals(CommonUtil.validatePortGroupName("Name2"), true);
+      assertEquals(CommonUtil.validatePortGroupName("name3_"), true);
+      assertEquals(CommonUtil.validatePortGroupName("name4 "), true);
+      assertEquals(CommonUtil.validatePortGroupName("name-5"), true);
+      assertEquals(CommonUtil.validatePortGroupName("name6-"), true);
+      assertEquals(CommonUtil.validatePortGroupName("-name7-"), true);
+      assertEquals(CommonUtil.validatePortGroupName("VM network192.168.0.1"), true);
+      assertEquals(CommonUtil.validatePortGroupName("192.168.0.2VM network"), true);
    }
 
    @Test
@@ -69,6 +82,8 @@ public class CommonUtilTest {
       vcDataStoreNames.add("vcDataStore_Nam?");
       vcDataStoreNames.add("vcData Store_Name2");
       vcDataStoreNames.add("vcDataStoreName3-");
+      vcDataStoreNames.add("vcDataStoreName192.168.0.1");
+      vcDataStoreNames.add("vcDataStoreName(192.168.0.1)");
       assertEquals(CommonUtil.validateVcDataStoreNames(vcDataStoreNames), true);
 
       List<String> errorVcDataStoreNames1 = new ArrayList<String>();

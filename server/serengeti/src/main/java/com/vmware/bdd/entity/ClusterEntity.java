@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2012-2013 VMware, Inc. All Rights Reservedrved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Type;
@@ -113,6 +114,9 @@ public class ClusterEntity extends EntityBase {
 
    @Column(name = "automation_enable")
    private Boolean automationEnable;
+
+   @Column(name = "vhm_min_num")
+   private int vhmMinNum;
 
    ClusterEntity() {
 
@@ -400,5 +404,13 @@ public class ClusterEntity extends EntityBase {
 
    public void setAutomationEnable(Boolean automationEnable) {
       this.automationEnable = automationEnable;
+   }
+
+   public int getVhmMinNum() {
+      return vhmMinNum;
+   }
+
+   public void setVhmMinNum(int vhmMinNum) {
+      this.vhmMinNum = vhmMinNum;
    }
 }

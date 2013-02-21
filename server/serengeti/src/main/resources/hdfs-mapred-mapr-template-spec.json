@@ -15,7 +15,6 @@
       "cpu":2,
       "memory":7680,
       "storage" : {
-        "type": "LOCAL",
         "size": 50
       },
       "instance_num":3,
@@ -31,7 +30,6 @@
       "cpu":2,
       "memory":4096,
       "storage" : {
-        "type": "LOCAL",
         "size": 50
       },
       "instance_num":3,
@@ -44,10 +42,9 @@
         "mapr_pig",
         "mapr_hive"
       ],
-      "cpu":1,
+      "cpu":2,
       "memory":4096,
       "storage" : {
-        "type": "SHARED",
         "size": 50
       },
       "instance_num":1,
@@ -59,23 +56,21 @@
         "mapr_zookeeper"
       ],
       "cpu":1,
-      "memory":1024,
+      "memory":2048,
       "storage" : {
-        "type": "SHARED",
         "size": 20
       },
       "instance_num":3,
       "ha":"on"
     },
     {
-      "name":"mysqlserver",
+      "name":"mysql",
       "roles":[
         "mapr_mysql_server"
       ],
       "cpu":1,
-      "memory":1024,
+      "memory":2048,
       "storage" : {
-        "type": "SHARED",
         "size": 20
       },
       "instance_num":1,

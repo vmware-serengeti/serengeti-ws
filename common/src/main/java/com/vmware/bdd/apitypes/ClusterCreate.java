@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2012-2013 VMware, Inc. All Rights Reservedrved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,6 +105,11 @@ public class ClusterCreate {
    @Expose
    @SerializedName("automation_enable")
    private Boolean automationEnable;
+
+   //vhm minimum number of compute nodes staying powered on
+   @Expose
+   @SerializedName("vhm_min_num")
+   private int vhmMinNum;
 
    public ClusterCreate() {
    }
@@ -796,5 +801,13 @@ public class ClusterCreate {
 
    public void setAutomationEnable(Boolean automationEnable) {
       this.automationEnable = automationEnable;
+   }
+
+   public int getVhmMinNum() {
+      return vhmMinNum;
+   }
+
+   public void setVhmMinNum(int vhmMinNum) {
+      this.vhmMinNum = vhmMinNum;
    }
 }

@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2012-2013 VMware, Inc. All Rights Reservedrved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.vmware.bdd.apitypes.AutoScale;
 import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterPriority;
@@ -43,6 +42,7 @@ import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.DatastoreAdd;
 import com.vmware.bdd.apitypes.DatastoreRead;
 import com.vmware.bdd.apitypes.DistroRead;
+import com.vmware.bdd.apitypes.Elasticity;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetworkRead;
@@ -297,17 +297,21 @@ public class RestResource {
       redirectRequest(taskId, request, response);
    }
 
-   @RequestMapping(value = "/clusters/autoscale", method = RequestMethod.PUT)
+   @RequestMapping(value = "/clusters/elasticity", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.OK)
-   public void autoScale(@RequestBody AutoScale autoScale,
+   public void setElasticity(@RequestBody Elasticity autoScale,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
-      Boolean defaultValue = autoScale.getDefaultValue();
-      Boolean enable = autoScale.getEnable();
+      boolean enableAutoElasticity = autoScale.isEnableAutoElasticity();
+      int minNum = autoScale.getMinComputeNodeNum();
+
       String clusterName = autoScale.getClusterName();
-      
-      clusterMgr.autoScale(defaultValue, enable, clusterName);
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateClusterName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+      clusterMgr.setElasticity(clusterName, enableAutoElasticity, minNum);
    }
+
    @RequestMapping(value = "/cluster/{clusterName}/limit", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void limitCluster(
@@ -515,7 +519,7 @@ public class RestResource {
       if (CommonUtil.isBlank(na.getName()) || !CommonUtil.validateName(na.getName())) {
          throw BddException.INVALID_PARAMETER("name", na.getName());
       }
-      if (CommonUtil.isBlank(na.getPortGroup()) || !CommonUtil.validateName(na.getPortGroup())) {
+      if (CommonUtil.isBlank(na.getPortGroup()) || !CommonUtil.validatePortGroupName(na.getPortGroup())) {
          throw BddException.INVALID_PARAMETER("port group", na.getPortGroup());
       }
 

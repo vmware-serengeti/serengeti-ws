@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,5 +109,8 @@ public class ClusterConfigException extends BddException {
    }
    public static ClusterConfigException MANIFEST_CONFIG_TARBALL_REPO_NONE() {
       return new ClusterConfigException(null, "MANIFEST_CONFIG_TARBALL_REPO_NONE");
+   }
+   public static ClusterConfigException CLUSTER_CONFIG_DATASTORE_TYPE_NONEXISTENT(String msg) {
+      return new ClusterConfigException(null, "CLUSTER_CONFIG_DATASTORE_TYPE_NONEXISTENT", msg);
    }
 }

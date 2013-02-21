@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2012-2013 VMware, Inc. All Rights Reservedrved
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,11 +27,11 @@ import com.vmware.bdd.utils.CommonUtil;
 /**
  * Cluster get output
  */
-public class ClusterRead {
+public class ClusterRead implements Comparable<ClusterRead>{
    public enum ClusterStatus {
       RUNNING, PROVISIONING, PROVISION_ERROR, UPGRADING, UPDATING, DELETING, 
       STOPPED, ERROR, STOPPING, STARTING, CONFIGURING, CONFIGURE_ERROR, NA, 
-      VHM_RUNNING, PRIORITIZING
+      VHM_RUNNING, VMRECONFIGURING
    }
 
    @Expose
@@ -251,4 +251,13 @@ public class ClusterRead {
          return roleOrders.length;
       }
    }
+
+   @Override
+   public int compareTo(ClusterRead cluster) {
+      if (CommonUtil.isBlank(cluster.getName())) {
+         return 1;
+      }
+      return this.getName().compareTo(cluster.getName());
+   }
+
 }

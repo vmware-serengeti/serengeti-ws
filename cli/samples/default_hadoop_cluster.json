@@ -86,7 +86,9 @@
         // "PATH": ""
       },
       "log4j.properties": {
-        // "hadoop.root.logger": "DEBUG,DRFA",
+        // "hadoop.root.logger": "INFO,RFA",
+        // "log4j.appender.RFA.MaxBackupIndex": "10",
+        // "log4j.appender.RFA.MaxFileSize": "100MB",
         // "hadoop.security.logger": "DEBUG,DRFA"
       },
       "fair-scheduler.xml": {

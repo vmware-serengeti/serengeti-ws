@@ -1,5 +1,5 @@
 /*****************************************************************************
- *   Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ *   Copyright (c) 2012-2013 VMware, Inc. All Rights Reservedrved
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
@@ -36,7 +36,7 @@ public class Constants {
    public static final String REST_PATH_DISTROS = "distros";
    public static final String REST_PATH_DISTRO = "distro";
    public static final String REST_PATH_CONFIG = "config";
-   public static final String REST_PATH_AUTOSCALE = "autoscale";
+   public static final String REST_PATH_ELASTICITY = "elasticity";
    public static final String REST_PATH_SPEC = "spec";
    public static final String REST_PATH_TOPOLOGY = "racks";
 
@@ -83,6 +83,7 @@ public class Constants {
    public static final String OUTPUT_OP_START = "start";
    public static final String OUTPUT_OP_STOP = "stop";
    public static final String OUTPUT_OP_RESIZE = "resize";
+   public static final String OUTPUT_OP_SET_ELASTICITY = "setElasticity";
    public static final String OUTPUT_OP_QUOTA_SET = "quota";
    public static final String OUTPUT_OP_LIMIT = "limit";
    public static final String OUTPUT_OP_UNLIMIT = "unlimit";
@@ -152,6 +153,8 @@ public class Constants {
    public static final String PARAM_CLUSTER_FAILED_INSTANCE_NUM_NEGATIVE = "instanceNum can not be negative";
    public static final String PARAM_CLUSTER = "cluster name";
    public static final String PARAM_DISTRO = "distro name";
+   public static final String PARAM_MODE_AUTO = "auto";
+   public static final String PARAM_MODE_MANUAL = "manual";
    public static final String PARAM_NETWORK_NAME = "network name";
    public static final String PARAM_NOT_SPECIFIED = " is not specified, please check it.";
    public static final String PARAM_NOT_EXISTED = " cannot be found. Please add it first.";

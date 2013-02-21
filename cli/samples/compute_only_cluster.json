@@ -8,9 +8,9 @@
       ],
       "instanceNum": 1,
       "instanceType": "LARGE",
-      "cpuNum": 6,
-      "memCapacityMB": 2048,
-      "haFlag": "off"
+      "cpuNum": 2,
+      "memCapacityMB": 7500,
+      "haFlag": "on"
     },
     {
       "name": "worker",
@@ -18,11 +18,11 @@
         "hadoop_tasktracker"
       ],
       "instanceNum": 4,
-      "cpuNum": 2,
-      "memCapacityMB": 1024,
+      "cpuNum": 1,
+      "memCapacityMB": 3748,
       "storage": {
         "type": "LOCAL",
-        "sizeGB": 10
+        "sizeGB": 20
       },
       "rpNames": [
         "sample_resource_pool1", // change this to the resource pool added via Serengeti CLI
@@ -39,9 +39,10 @@
       ],
       "instanceNum": 1,
       "cpuNum": 1,
+      "memCapacityMB": 3748,
       "storage": {
         "type": "LOCAL",
-        "sizeGB": 10
+        "sizeGB": 50
       },
       "rpNames": [
         "sample_resource_pool3"  // change this to the resource pool added via Serengeti CLI
@@ -73,7 +74,9 @@
         // "PATH": ""
       },
       "log4j.properties": {
-        // "hadoop.root.logger": "DEBUG,DRFA",
+        // "hadoop.root.logger": "INFO,RFA",
+        // "log4j.appender.RFA.MaxBackupIndex": "10",
+        // "log4j.appender.RFA.MaxFileSize": "100MB",
         // "hadoop.security.logger": "DEBUG,DRFA"
       }
     }
