@@ -186,7 +186,7 @@ public class CommonClusterExpandPolicy {
             throw ClusterConfigException.CLUSTER_CONFIG_DATASTORE_TYPE_NONEXISTENT(msg);
          }
       }
-      if (groupType == GroupType.ZOOKEEPER_GROUP) {
+      if (groupType == GroupType.ZOOKEEPER_GROUP || groupType == GroupType.MAPR_ZOOKEEPER_GROUP) {
          ngEntity.setDiskBisect(true);         
       } else {
          ngEntity.setDiskBisect(false);
