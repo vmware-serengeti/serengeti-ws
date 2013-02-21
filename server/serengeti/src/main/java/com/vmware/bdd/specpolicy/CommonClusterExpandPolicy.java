@@ -172,6 +172,19 @@ public class CommonClusterExpandPolicy {
             storeType = DatastoreType.SHARED;
          }
          ngEntity.setStorageType(storeType);
+      } else {
+         if ((sharedPattern == null || sharedPattern.isEmpty()) 
+               && (ngEntity.getStorageType().equals(DatastoreType.SHARED))) {
+            String msg = "Group " + ngEntity.getName() + "'s  type is SHARED, but no shared datastore in serengeti.";
+            logger.error(msg);
+            throw ClusterConfigException.CLUSTER_CONFIG_DATASTORE_TYPE_NONEXISTENT(msg);
+         }
+         if ((localPattern == null || localPattern.isEmpty()) 
+               && (ngEntity.getStorageType().equals(DatastoreType.LOCAL))) {
+            String msg = "Group " + ngEntity.getName() + "'s  type is LOCAL, but no local datastore in serengeti.";
+            logger.error(msg);
+            throw ClusterConfigException.CLUSTER_CONFIG_DATASTORE_TYPE_NONEXISTENT(msg);
+         }
       }
       if (groupType == GroupType.ZOOKEEPER_GROUP) {
          ngEntity.setDiskBisect(true);         

@@ -110,4 +110,7 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException MANIFEST_CONFIG_TARBALL_REPO_NONE() {
       return new ClusterConfigException(null, "MANIFEST_CONFIG_TARBALL_REPO_NONE");
    }
+   public static ClusterConfigException CLUSTER_CONFIG_DATASTORE_TYPE_NONEXISTENT(String msg) {
+      return new ClusterConfigException(null, "CLUSTER_CONFIG_DATASTORE_TYPE_NONEXISTENT", msg);
+   }
 }
