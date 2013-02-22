@@ -450,21 +450,6 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   @CliCommand(value = "cluster enableAutoElasticity", help = "enable cluster elasticity automation")
-   public void enableAutoElasticity(
-         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
-         @CliOption(key = { "minComputeNodeNum" }, mandatory = false, help = "The minimum number of compute nodes staying powered on") final int minComputeNodeNum) {
-      boolean enable = true;
-      restClient.setElasticity(name, enable, minComputeNodeNum);
-   }
-   
-   @CliCommand(value = "cluster disableAutoElasticity", help = "disable cluster elasticity automation")
-   public void disableAutoElasticity(
-         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name) {
-      boolean enable = false;
-      restClient.setElasticity(name, enable, 0);
-   }
-   
    @CliCommand(value = "cluster limit", help = "Set number of instances powered on in a node group")
    public void limitCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
