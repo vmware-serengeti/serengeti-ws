@@ -18,13 +18,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import junit.framework.Assert;
-
 import org.apache.log4j.Logger;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
@@ -126,16 +126,16 @@ public class TestClusterEntity {
             ClusterEntity clusterRead =
                   ClusterEntity.findClusterEntityByName(CLUSTER_NAME);
 
-            Assert.assertNotNull(clusterRead);
-            Assert.assertTrue(clusterRead.getNodeGroups().size() == 2);
+            assertNotNull(clusterRead);
+            assertTrue(clusterRead.getNodeGroups().size() == 2);
 
             NodeGroupEntity groupRead =
                   NodeGroupEntity.findNodeGroupEntityByName(clusterRead,
                         COMPUTE_GROUP);
 
-            Assert.assertNotNull(groupRead);
-            Assert.assertTrue(groupRead.getCpuNum() == 1);
-            Assert.assertTrue(groupRead.getGroupAssociations().size() == 1);
+            assertNotNull(groupRead);
+            assertTrue(groupRead.getCpuNum() == 1);
+            assertTrue(groupRead.getGroupAssociations().size() == 1);
 
             return null;
          }

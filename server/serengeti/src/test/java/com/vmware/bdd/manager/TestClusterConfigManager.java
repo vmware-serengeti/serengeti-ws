@@ -19,10 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import junit.framework.Assert;
-
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.AssertJUnit.assertEquals;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -145,15 +145,15 @@ public class TestClusterConfigManager {
       }
       cluster =
             ClusterEntity.findClusterEntityByName("my-cluster");
-      Assert.assertTrue(cluster != null);
-      Assert.assertEquals(cluster.isAutomationEnable(), null); //not a D/C seperation cluster
+      assertTrue(cluster != null);
+      assertEquals(cluster.isAutomationEnable(), null); //not a D/C seperation cluster
 
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
-      Assert.assertTrue("manifest should contains nodegroups",
+      assertTrue("manifest should contains nodegroups",
             manifest.indexOf("master") != -1);
-      //Assert.assertTrue("manifest is inconsistent",
+      //assertTrue("manifest is inconsistent",
         //    manifest.indexOf("{\"name\":\"my-cluster\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"bisect\":false,\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/master\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"bisect\":false,\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/worker\"},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"pig\",\"hive\",\"hive_server\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"bisect\":false,\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster/client\"}],\"distro\":\"apache\",\"http_proxy\":\"\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
@@ -225,16 +225,16 @@ public class TestClusterConfigManager {
       }
       cluster =
             ClusterEntity.findClusterEntityByName("my-cluster-external-hdfs");
-      Assert.assertTrue(cluster != null);
+      assertTrue(cluster != null);
       
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster-external-hdfs");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
-      Assert.assertTrue("\"fs.default.name\" must be coved with external HDFS uri in both of cluster and group configuration.",
+      assertTrue("\"fs.default.name\" must be coved with external HDFS uri in both of cluster and group configuration.",
             Pattern.compile("([\\s\\S]*" + hdfsArray[0] + "[\\s\\S]*){3}").matcher(manifest).matches());
-      Assert.assertTrue("\"fs.default.name\" must be coved under the cluster level", manifest.indexOf(hdfsArray[1]) == -1);
-      Assert.assertTrue("\"fs.default.name\" must be coved under the node group 1 level", manifest.indexOf(hdfsArray[2]) == -1);
-      Assert.assertTrue("\"fs.default.name\" must be coved under the node group 2 level", manifest.indexOf(hdfsArray[3]) == -1);
+      assertTrue("\"fs.default.name\" must be coved under the cluster level", manifest.indexOf(hdfsArray[1]) == -1);
+      assertTrue("\"fs.default.name\" must be coved under the node group 1 level", manifest.indexOf(hdfsArray[2]) == -1);
+      assertTrue("\"fs.default.name\" must be coved under the node group 2 level", manifest.indexOf(hdfsArray[3]) == -1);
       
    }
 
@@ -308,16 +308,16 @@ public class TestClusterConfigManager {
       }
       cluster =
             ClusterEntity.findClusterEntityByName("my-cluster-external-hdfs-failure");
-      Assert.assertTrue(cluster != null);
+      assertTrue(cluster != null);
 
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster-external-hdfs-failure");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
-      Assert.assertTrue("\"fs.default.name\" must be coved with external HDFS uri in both of cluster and group configuration.",
+      assertTrue("\"fs.default.name\" must be coved with external HDFS uri in both of cluster and group configuration.",
             Pattern.compile("([\\s\\S]*" + hdfsArray[0] + "[\\s\\S]*){3}").matcher(manifest).matches()==false);
-      Assert.assertTrue("\"fs.default.name\" must be coved under the cluster level", manifest.indexOf(hdfsArray[1]) != -1);
-      Assert.assertTrue("\"fs.default.name\" must be coved under the node group 1 level", manifest.indexOf(hdfsArray[2]) != -1);
-      Assert.assertTrue("\"fs.default.name\" must be coved under the node group 2 level", manifest.indexOf(hdfsArray[3]) != -1);
+      assertTrue("\"fs.default.name\" must be coved under the cluster level", manifest.indexOf(hdfsArray[1]) != -1);
+      assertTrue("\"fs.default.name\" must be coved under the node group 1 level", manifest.indexOf(hdfsArray[2]) != -1);
+      assertTrue("\"fs.default.name\" must be coved under the node group 2 level", manifest.indexOf(hdfsArray[3]) != -1);
       
    }
    @Test
@@ -389,17 +389,17 @@ public class TestClusterConfigManager {
       }
       cluster =
             ClusterEntity.findClusterEntityByName("my-cluster-dc-tempfs");
-      Assert.assertTrue(cluster != null);
+      assertTrue(cluster != null);
 
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster-dc-tempfs");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
-      Assert.assertEquals(cluster.isAutomationEnable(), Boolean.FALSE);
-      Assert.assertTrue("manifest should contains nodegroups",
+      assertEquals(cluster.isAutomationEnable(), Boolean.FALSE);
+      assertTrue("manifest should contains nodegroups",
             manifest.indexOf("master") != -1);
-      Assert.assertTrue("manifest is inconsistent",
+      assertTrue("manifest is inconsistent",
             manifest.indexOf("[\"tempfs_server\",\"hadoop_datanode\"]") != -1);
-      Assert.assertTrue("manifest is inconsistent",
+      assertTrue("manifest is inconsistent",
             manifest.indexOf("[\"tempfs_client\",\"hadoop_tasktracker\"]") != -1);
    }
 
@@ -431,15 +431,15 @@ public class TestClusterConfigManager {
 
       ClusterEntity cluster =
             ClusterEntity.findClusterEntityByName("my-cluster1");
-      Assert.assertTrue(cluster != null);
+      assertTrue(cluster != null);
       
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster1");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
-      Assert.assertTrue("manifest should contains nodegroups",
+      assertTrue("manifest should contains nodegroups",
             manifest.indexOf("master") != -1 && manifest.indexOf("slave") != -1);
 
-      Assert.assertTrue("manifest is inconsistent.",
+      assertTrue("manifest is inconsistent.",
             manifest.indexOf(
                   "{\"name\":\"my-cluster1\",\"groups\":[{\"name\":\"expanded_master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster1/expanded_master\"},{\"name\":\"slave\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":10,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":3,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster1/slave\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork1\",\"type\":\"static\",\"gateway\":\"192.168.1.254\",\"netmask\":\"255.255.0.0\",\"dns\":[\"2.2.2.2\"],\"ip\":[\"192.168.1.1-192.168.1.3\",\"192.168.1.102\",\"192.168.1.104-192.168.1.110\"]}]") != -1);
    }
@@ -472,15 +472,15 @@ public class TestClusterConfigManager {
 
       ClusterEntity cluster =
             ClusterEntity.findClusterEntityByName("my-cluster-slave2");
-      Assert.assertTrue(cluster != null);
+      assertTrue(cluster != null);
 
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster-slave2");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
-      Assert.assertTrue("manifest should contains nodegroups",
+      assertTrue("manifest should contains nodegroups",
             manifest.indexOf("master") != -1 && manifest.indexOf("slave") != -1);
 
-      Assert.assertTrue("manifest is inconsistent.",
+      assertTrue("manifest is inconsistent.",
             manifest.indexOf(
                   "{\"name\":\"my-cluster-slave2\",\"groups\":[{\"name\":\"expanded_master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster-slave2/expanded_master\"},{\"name\":\"slave\",\"roles\":[\"hadoop_tasktracker\",\"hadoop_datanode\"],\"instance_num\":10,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":3,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster-slave2/slave\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
@@ -513,15 +513,15 @@ public class TestClusterConfigManager {
 
       ClusterEntity cluster =
             ClusterEntity.findClusterEntityByName("my-cluster2");
-      Assert.assertTrue(cluster != null);
+      assertTrue(cluster != null);
 
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster2");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
-      Assert.assertTrue("manifest should contains nodegroups",
+      assertTrue("manifest should contains nodegroups",
             manifest.indexOf("main_group") != -1 && manifest.indexOf("expanded_master") != -1
             && manifest.indexOf("expanded_worker") != -1);
-      Assert.assertTrue("manifest is inconsistent",
+      assertTrue("manifest is inconsistent",
             manifest.indexOf("{\"name\":\"my-cluster2\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":100},\"cpu\":3,\"memory\":15000,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster2/main_group\"},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster2/expanded_master\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster2/expanded_worker\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
@@ -553,13 +553,13 @@ public class TestClusterConfigManager {
 
          ClusterEntity cluster =
                ClusterEntity.findClusterEntityByName("my-cluster3");
-         Assert.assertTrue(cluster != null);
+         assertTrue(cluster != null);
          ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster3");
          String manifest = gson.toJson(attrs);
          System.out.println(manifest);
-         Assert.assertTrue("should get exception", false);
+         assertTrue("should get exception", false);
       } catch (BddException e) {
-         Assert.assertTrue("get expected exception.", true);
+         assertTrue("get expected exception.", true);
       }
    }
 
@@ -601,15 +601,15 @@ public class TestClusterConfigManager {
 
          ClusterEntity cluster =
                ClusterEntity.findClusterEntityByName("my-cluster3");
-         Assert.assertTrue(cluster != null);
+         assertTrue(cluster != null);
          ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster3");
          String manifest = gson.toJson(attrs);
          System.out.println(manifest);
-         Assert.assertTrue("should get exception", false);
+         assertTrue("should get exception", false);
       } catch (BddException e) {
-         Assert.assertTrue("should get ClusterConfigException.MORE_THAN_ONE_NAMENODE_GROUP exception", 
+         assertTrue("should get ClusterConfigException.MORE_THAN_ONE_NAMENODE_GROUP exception", 
                e.getErrorId().equals("MORE_THAN_ONE_NAMENODE_GROUP") && e.getSection().equals("CLUSTER_CONFIG"));
-         Assert.assertTrue("get expected exception.", true);
+         assertTrue("get expected exception.", true);
       }
    }
 
@@ -633,14 +633,14 @@ public class TestClusterConfigManager {
       }
       cluster =
             ClusterEntity.findClusterEntityByName("my-cluster4");
-      Assert.assertTrue(cluster != null);
+      assertTrue(cluster != null);
 
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster4");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
-      Assert.assertTrue("manifest should contains nodegroups",
+      assertTrue("manifest should contains nodegroups",
             manifest.indexOf("master") != -1);
-      Assert.assertTrue("manifest is inconsistent",
+      assertTrue("manifest is inconsistent",
             manifest.indexOf("{\"name\":\"my-cluster4\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster4/master\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster4/worker\"},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"hive_server\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster4/client\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
@@ -675,15 +675,15 @@ public class TestClusterConfigManager {
 
       ClusterEntity cluster =
             ClusterEntity.findClusterEntityByName("my-cluster5");
-      Assert.assertTrue(cluster != null);
+      assertTrue(cluster != null);
 
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster5");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
-      Assert.assertTrue("manifest should contains nodegroups",
+      assertTrue("manifest should contains nodegroups",
             manifest.indexOf("main_group") != -1 && manifest.indexOf("expanded_master") != -1
             && manifest.indexOf("expanded_worker") != -1);
-      Assert.assertTrue("manifest is inconsistent",
+      assertTrue("manifest is inconsistent",
             manifest.indexOf("{\"name\":\"my-cluster5\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":3,\"memory\":15000,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster5/main_group\"},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster5/expanded_master\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster5/expanded_worker\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
@@ -721,15 +721,15 @@ public class TestClusterConfigManager {
 
       ClusterEntity cluster =
             ClusterEntity.findClusterEntityByName("my-cluster6");
-      Assert.assertTrue(cluster != null);
+      assertTrue(cluster != null);
 
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster6");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
-      Assert.assertTrue("manifest should contains nodegroups",
+      assertTrue("manifest should contains nodegroups",
             manifest.indexOf("main_group") != -1 && manifest.indexOf("expanded_master") != -1
             && manifest.indexOf("expanded_worker") != -1);
-      Assert.assertTrue("manifest is inconsistent",
+      assertTrue("manifest is inconsistent",
             manifest.indexOf("{\"name\":\"my-cluster6\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"local\",\"size\":100,\"name_pattern\":[\"vmfs*\",\"local1\"]},\"cpu\":3,\"memory\":15000,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster6/main_group\"},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster6/expanded_master\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster6/expanded_worker\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
@@ -762,15 +762,15 @@ public class TestClusterConfigManager {
 
       ClusterEntity cluster =
             ClusterEntity.findClusterEntityByName("my-cluster7");
-      Assert.assertTrue(cluster != null);
+      assertTrue(cluster != null);
 
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster7");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
-      Assert.assertTrue("manifest should contains nodegroups",
+      assertTrue("manifest should contains nodegroups",
             manifest.indexOf("main_group") != -1
             && manifest.indexOf("expanded_worker") != -1);
-      Assert.assertTrue("manifest is inconsistent",
+      assertTrue("manifest is inconsistent",
             manifest.indexOf("{\"name\":\"my-cluster7\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":100},\"cpu\":3,\"memory\":15000,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster7/main_group\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster7/expanded_worker\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
@@ -794,14 +794,14 @@ public class TestClusterConfigManager {
       }
       cluster =
             ClusterEntity.findClusterEntityByName("my-cluster8");
-      Assert.assertTrue(cluster != null);
+      assertTrue(cluster != null);
 
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster8");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
-      Assert.assertTrue("manifest should contains nodegroups",
+      assertTrue("manifest should contains nodegroups",
             manifest.indexOf("master") != -1);
-      Assert.assertTrue("manifest is inconsistent",
+      assertTrue("manifest is inconsistent",
             manifest.indexOf("{\"name\":\"my-cluster8\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster8/master\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster8/worker\"},{\"name\":\"client\",\"roles\":[\"hive\",\"hadoop_client\",\"hive_server\",\"pig\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster8/client\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1
             && manifest.indexOf("\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.security.group.mapping\":\"xyz\",\"hadoop.security.authorization\":true}}}") != -1);
    }
@@ -838,15 +838,15 @@ public class TestClusterConfigManager {
 
       ClusterEntity cluster =
             ClusterEntity.findClusterEntityByName("my-cluster9");
-      Assert.assertTrue(cluster != null);
+      assertTrue(cluster != null);
 
       ClusterCreate attrs = clusterMgr.getClusterConfig("my-cluster9");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
-      Assert.assertTrue("manifest should contains nodegroups",
+      assertTrue("manifest should contains nodegroups",
             manifest.indexOf("main_group") != -1 && manifest.indexOf("expanded_master") != -1
             && manifest.indexOf("expanded_worker") != -1);
-      Assert.assertTrue("manifest is inconsistent",
+      assertTrue("manifest is inconsistent",
             manifest.indexOf("{\"name\":\"my-cluster9\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":100},\"cpu\":3,\"memory\":15000,\"ha\":\"off\",\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.security.group.mapping\":\"xxx\",\"hadoop.security.authorization\":false}}},\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster9/main_group\"},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster9/expanded_master\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-xxx-uuid/my-cluster9/expanded_worker\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 }

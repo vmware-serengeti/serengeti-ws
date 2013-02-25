@@ -18,11 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.Assert;
-
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import static org.testng.AssertJUnit.assertTrue;
 
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.DatastoreRead;
@@ -79,7 +78,7 @@ public class TestVcProviderManager {
    @Test(groups = {"testVCProvider"}, dependsOnMethods = { "com.vmware.bdd.manager.TestClusterManager.testDeleteClusterNegative" })
    public void testDefaultValue() {
       System.out.println("datacenter: " + mgr.getDataCenter());
-      Assert.assertTrue("datacenter should not be empty.",
+      assertTrue("datacenter should not be empty.",
             mgr.getDataCenter() != null);
    }
 
@@ -87,7 +86,7 @@ public class TestVcProviderManager {
    public void testGetManifest() {
       String manifest = mgr.getManifest();
       System.out.println(manifest);
-      Assert.assertTrue("manifest should contains type",
+      assertTrue("manifest should contains type",
             manifest.indexOf("type") != -1);
    }
 
@@ -101,13 +100,13 @@ public class TestVcProviderManager {
       rpMgr.addResourcePool("rp6", "vc_cluster2", "rp4");
       String manifest = mgr.getManifest();
       System.out.println(manifest);
-      Assert.assertTrue(
+      assertTrue(
             "manifest should contains resource pools",
             manifest.indexOf("vc_clusters") != -1
                   && manifest.indexOf("vc_rps") != -1
                   && manifest.indexOf("line*") != -1);
       VcResourcePoolEntity rpEntity = VcResourcePoolEntity.findByClusterAndRp("vc_cluster2", "rp4");
-      Assert.assertTrue("should find rp entity", rpEntity != null && rpEntity.getName().equals("rp6"));
+      assertTrue("should find rp entity", rpEntity != null && rpEntity.getName().equals("rp6"));
    }
 
    @Test(groups = {"testVCProvider"}, dependsOnMethods = { "testAddResourcePools" })
@@ -119,7 +118,7 @@ public class TestVcProviderManager {
       mgr.getDatastoreMgr().addDataStores("disks", DatastoreType.SHARED, rps);
       String manifest = mgr.getManifest();
       System.out.println(manifest);
-      Assert.assertTrue(
+      assertTrue(
             "manifest should contains datastores",
             manifest
                   .indexOf("\"vc_shared_datastore_pattern\":[\"shared-disk*\",\"disk2\",\"disk1\"]") != -1);
@@ -130,17 +129,17 @@ public class TestVcProviderManager {
 
       try {
          rpMgr.addResourcePool("rp1", "vc_cluster1", "rp1");
-         Assert.assertTrue("should get exception.", false);
+         assertTrue("should get exception.", false);
       } catch (VcProviderException e) {
-         Assert.assertTrue(
+         assertTrue(
                "Should catch resource pool already existed exception.", e
                      .getErrorId().equals("VC_RESOURCE_POOL_ALREADY_ADDED"));
       }
       try {
          rpMgr.addResourcePool("rp2", "vc_cluster4", "rp2");
-         Assert.assertTrue("should get exception.", false);
+         assertTrue("should get exception.", false);
       } catch (BddException e) {
-         Assert.assertTrue(
+         assertTrue(
                "Should catch resource pool already existed exception.", e
                      .getErrorId().equals("ALREADY_EXISTS"));
       }
@@ -155,10 +154,10 @@ public class TestVcProviderManager {
       try {
          mgr.getDatastoreMgr()
                .addDataStores("disks", DatastoreType.SHARED, rps);
-         Assert.assertTrue("should get exception", false);
+         assertTrue("should get exception", false);
       } catch (BddException e) {
          e.printStackTrace();
-         Assert.assertTrue("get expected exception.", true);
+         assertTrue("get expected exception.", true);
       }
    }
 
@@ -171,7 +170,7 @@ public class TestVcProviderManager {
       mgr.getDatastoreMgr().addDataStores("locals", DatastoreType.LOCAL, rps);
       String manifest = mgr.getManifest();
       System.out.println(manifest);
-      Assert.assertTrue(
+      assertTrue(
             "manifest should contains datastores",
             manifest
                   .indexOf("\"vc_local_datastore_pattern\":[\"local-d*\",\"locald2\",\"locald1\"]") != -1);
@@ -186,10 +185,10 @@ public class TestVcProviderManager {
       try {
          mgr.getDatastoreMgr()
                .addDataStores("locals", DatastoreType.LOCAL, rps);
-         Assert.assertTrue("should get exception", false);
+         assertTrue("should get exception", false);
       } catch (BddException e) {
          e.printStackTrace();
-         Assert.assertTrue("get expected exception.", true);
+         assertTrue("get expected exception.", true);
       }
    }
 
@@ -197,32 +196,32 @@ public class TestVcProviderManager {
    public void testDeleteResourcePools() {
       rpMgr.deleteResourcePool("rp1");
       VcResourcePoolEntity entity = VcResourcePoolEntity.findByName("rp1");
-      Assert.assertTrue("resource pool should have been deleted.", entity == null);
+      assertTrue("resource pool should have been deleted.", entity == null);
    }
 
    @Test(groups = {"testVCProvider"}, dependsOnMethods = { "testDeleteResourcePools" })
    public void testDeleteNonExistedResourcePools() {
       try {
          rpMgr.deleteResourcePool("test-rp");
-         Assert.assertTrue("should get exception", false);
+         assertTrue("should get exception", false);
       } catch (VcProviderException exception) {
          exception.printStackTrace();
-         Assert.assertTrue("get expected exception.", true);
+         assertTrue("get expected exception.", true);
       }
    }
 
    @Test(groups = {"testVCProvider"}, dependsOnMethods = { "testDeleteNonExistedResourcePools" })
    public void testListDatastores() {
       List<DatastoreRead> datastores = mgr.getDatastoreMgr().getAllDatastoreReads();
-      Assert.assertTrue("should get two datastores", datastores.size() == 2);
-      Assert.assertTrue("should get three disks", datastores.get(0).getDatastoreReadDetails().size() == 3);
+      assertTrue("should get two datastores", datastores.size() == 2);
+      assertTrue("should get three disks", datastores.get(0).getDatastoreReadDetails().size() == 3);
    }
 
    @Test(groups = {"testVCProvider"}, dependsOnMethods = { "testListDatastores" })
    public void testGetAllLocalDatastores() {
       Set<String> datastores = mgr.getDatastoreMgr().getAllLocalDatastores();
       System.out.println("got local datastores: " + datastores);
-      Assert.assertTrue("should get three datastores", datastores.size() == 3);
+      assertTrue("should get three datastores", datastores.size() == 3);
    }
 
 
@@ -230,31 +229,31 @@ public class TestVcProviderManager {
    public void testGetAllSharedDatastores() {
       Set<String> datastores = mgr.getDatastoreMgr().getAllSharedDatastores();
       System.out.println("got shared datastores: " + datastores);
-      Assert.assertTrue("should get three datastores", datastores.size() == 3);
+      assertTrue("should get three datastores", datastores.size() == 3);
    }
 
    @Test(groups = {"testVCProvider"}, dependsOnMethods = { "testGetAllSharedDatastores" })
    public void testGetDatastore() {
       DatastoreRead datastore = mgr.getDatastoreMgr().getDatastoreRead("locals");
-      Assert.assertTrue("should get three disks", datastore.getDatastoreReadDetails().size() == 3);
-      Assert.assertTrue("should get local type", datastore.getType() == DatastoreType.LOCAL);
+      assertTrue("should get three disks", datastore.getDatastoreReadDetails().size() == 3);
+      assertTrue("should get local type", datastore.getType() == DatastoreType.LOCAL);
    }
 
    @Test(groups = {"testVCProvider"}, dependsOnMethods = { "testGetDatastore" })
    public void testDeleteDatastore() {
       mgr.getDatastoreMgr().deleteDatastore("locals");
       DatastoreRead datastore = mgr.getDatastoreMgr().getDatastoreRead("locals");
-      Assert.assertTrue("data store should have been deleted", datastore == null);
+      assertTrue("data store should have been deleted", datastore == null);
    }
 
    @Test(groups = {"testVCProvider"}, dependsOnMethods = { "testDeleteDatastore" })
    public void testDeleteNonExistedDatastore() {
       try {
          mgr.getDatastoreMgr().deleteDatastore("test-store");
-         Assert.assertTrue("should get exception", false);
+         assertTrue("should get exception", false);
       } catch (VcProviderException exception) {
          exception.printStackTrace();
-         Assert.assertTrue("get expected exception.", true);
+         assertTrue("get expected exception.", true);
       }
    }
 }
