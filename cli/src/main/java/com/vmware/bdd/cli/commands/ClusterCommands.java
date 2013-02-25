@@ -1,5 +1,5 @@
 /*****************************************************************************
- *   Copyright (c) 2012-2013 VMware, Inc. All Rights Reservedrved
+ *   Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
@@ -450,152 +450,62 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   @CliCommand(value = "cluster enableAutoElasticity", help = "enable cluster elasticity automation")
-   public void enableAutoElasticity(
-         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
-         @CliOption(key = { "minComputeNodeNum" }, mandatory = false, help = "The minimum number of compute nodes staying powered on") final int minComputeNodeNum) {
-      boolean enable = true;
-      restClient.setElasticity(name, enable, minComputeNodeNum);
-   }
-   
-   @CliCommand(value = "cluster disableAutoElasticity", help = "disable cluster elasticity automation")
-   public void disableAutoElasticity(
-         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name) {
-      boolean enable = false;
-      restClient.setElasticity(name, enable, 0);
-   }
-   
-   @CliCommand(value = "cluster limit", help = "Set the cluster resources including stopping some cmopute nodes, set disk priorities")
+   @CliCommand(value = "cluster limit", help = "Set number of instances powered on in a node group")
    public void limitCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
          @CliOption(key = { "nodeGroup" }, mandatory = false, help = "The node group name") final String nodeGroupName,
-         @CliOption(key = { "activeComputeNodeNum" }, mandatory = false, help = "The number of instances powered on") final int activeComputeNodeNum,
-         @CliOption(key = { "diskIOPriority" }, mandatory = false, help = "The relative disk I/O priorities: HIGH, NORNAL, LOW") final String diskIOPriority) {
+         @CliOption(key = { "activeComputeNodeNum" }, mandatory = false, help = "The number of instances powered on") final int activeComputeNodeNum) {
 
       try {
          // The active compute node number must be an integer and cannot be less than zero.
          if (activeComputeNodeNum < 0) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_LIMIT,
-                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
-                  + "activeComputeNodeNum=" + activeComputeNodeNum);
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null,
+                  null, Constants.OUTPUT_OP_ADJUSTMENT_FAILED,
+                  "Invalid instance number:" + activeComputeNodeNum + " .");
             return;
          }
          ClusterRead cluster = restClient.get(clusterName, false);
          if (cluster == null) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_LIMIT,
-                  Constants.OUTPUT_OP_RESULT_FAIL, "cluster " + clusterName
-                  + " does not exsit.");
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null,
+                  null, Constants.OUTPUT_OP_ADJUSTMENT_FAILED, "cluster "
+                        + clusterName + " is not exsit !");
             return;
          }
-         if (activeComputeNodeNum > 0) {
-            if (!cluster.validateLimit(nodeGroupName)) {
-               return;
-            } else {
-               //step 1: stop some compute nodes
-               restClient.limitCluster(clusterName, nodeGroupName, activeComputeNodeNum);
-            }
+         if (!cluster.validateLimit(nodeGroupName)) {
+            return;
          }
-         Priority ioPriority = null;
-         if (diskIOPriority != null) {
-            ioPriority = Priority.valueOf(diskIOPriority.toUpperCase());
-         }
-
-         //step 2: set some resource values
-         if (ioPriority != null) {
-            String[] taskSummary = null;
-            if (activeComputeNodeNum > 0) {
-               taskSummary = new String[1];
-               taskSummary[0] = Constants.OUTPUT_OBJECT_CLUSTER + " " + clusterName + " " + Constants.OUTPUT_OP_RESULT_STOP_COMPUTE_NODE;
-            }
-            restClient.prioritizeCluster(clusterName, nodeGroupName, ioPriority, taskSummary);
-            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, clusterName, Constants.OUTPUT_OP_RESULT_PRIORITY);
-         } else if (activeComputeNodeNum > 0) {
-            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, clusterName, Constants.OUTPUT_OP_RESULT_STOP_COMPUTE_NODE);
-         } else { //show status
-            ClusterRead clusterRead = restClient.get(clusterName, true);
-            updateRunningNodes(clusterRead);
-            prettyOutputDynamicResourceInfo(clusterRead);
-         }
-      } catch (IllegalArgumentException ex) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-               clusterName, Constants.OUTPUT_OP_LIMIT,
-               Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE + " "
-                     + "diskIOPriority=" + diskIOPriority);
+         restClient.limitCluster(clusterName, nodeGroupName, activeComputeNodeNum);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OP_ADJUSTMENT, null,
+               Constants.OUTPUT_OP_ADJUSTMENT_SUCCEEDED);
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-               clusterName, Constants.OUTPUT_OP_LIMIT,
-               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null,
+               null, Constants.OUTPUT_OP_ADJUSTMENT_FAILED, e.getMessage());
       }
    }
 
-   private void updateRunningNodes(ClusterRead clusterRead) {
-      if (clusterRead != null) {
-         List<NodeGroupRead>  ngs = clusterRead.getNodeGroups();
-         if (ngs != null) {
-            for (NodeGroupRead ng : ngs) {
-               int count = 0;
-               List<NodeRead>  nodes = ng.getInstances();
-               if (nodes != null) {
-                  for (NodeRead node : nodes) {
-                     if (node.getStatus().equals(Constants.NODE_RUNNING_STATUS)) {
-                        count++;
-                     }
-                  }
-                  ng.setRunningNodesNum(count);
-               }
-            }
-         }
-      }
-   }
-
-   @CliCommand(value = "cluster unlimit", help = "Reset the cluster resources to the default values including start some compute nodes and reset disk priority to the normal level")
+   @CliCommand(value = "cluster unlimit", help = "Reset nodes in a node group powered on")
    public void unlimitCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
-         @CliOption(key = { "nodeGroup" }, mandatory = false, help = "The node group name") final String nodeGroupName,
-         @CliOption(key = { "startComputeNodes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "The flag to power on all compute nodes") final boolean startComputeNodes,
-         @CliOption(key = { "diskIOPriority" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "The relative disk I/O priorities: HIGH, NORNAL, LOW") final boolean diskIOPriority) {
+         @CliOption(key = { "nodeGroup" }, mandatory = false, help = "The node group name") final String nodeGroupName) {
 
       try {
-         int activeComputeNodeNum = -2;
-         if (startComputeNodes) {
-            activeComputeNodeNum = -1;
-         }
+         int activeComputeNodeNum = -1;
          ClusterRead cluster = restClient.get(clusterName, false);
          if (cluster == null) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_UNLIMIT,
-                  Constants.OUTPUT_OP_RESULT_FAIL, "cluster " + clusterName
-                  + " does not exsit.");
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null,
+                  null, Constants.OUTPUT_OP_ADJUSTMENT_FAILED, "cluster "
+                        + clusterName + " is not exsit !");
             return;
          }
-         //step 1: start all compute nodes
-         if(activeComputeNodeNum == -1) {
-            if (!cluster.validateLimit(nodeGroupName)) {
-               return;
-            } else {
-               restClient.limitCluster(clusterName, nodeGroupName, activeComputeNodeNum);
-            }
+         if (!cluster.validateLimit(nodeGroupName)) {
+            return;
          }
-         //step 2: reset resources to default values
-         if(diskIOPriority) {
-            String[] taskSummary = null;
-            if (activeComputeNodeNum == -1) {
-               taskSummary = new String[1];
-               taskSummary[0] = Constants.OUTPUT_OBJECT_CLUSTER + " " + clusterName + " " + Constants.OUTPUT_OP_RESULT_START_COMPUTE_NODE;
-            }
-            restClient.prioritizeCluster(clusterName, nodeGroupName, Priority.NORMAL, taskSummary);
-            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, clusterName, Constants.OUTPUT_OP_RESULT_PRIORITY_RESET);
-         } else if (activeComputeNodeNum == -1){
-            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, clusterName, Constants.OUTPUT_OP_RESULT_START_COMPUTE_NODE);
-         } else {
-            System.out.println(Constants.AT_LEAST_ONE_OPTION);
-         }
+         restClient.limitCluster(clusterName, nodeGroupName, activeComputeNodeNum);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OP_ADJUSTMENT, null,
+               Constants.OUTPUT_OP_ADJUSTMENT_SUCCEEDED);
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-               clusterName, Constants.OUTPUT_OP_UNLIMIT,
-               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null,
+               null, Constants.OUTPUT_OP_ADJUSTMENT_FAILED, e.getMessage());
       }
    }
 

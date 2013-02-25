@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved
+ * Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -186,7 +186,7 @@ public class CommonClusterExpandPolicy {
             throw ClusterConfigException.CLUSTER_CONFIG_DATASTORE_TYPE_NONEXISTENT(msg);
          }
       }
-      if (groupType == GroupType.ZOOKEEPER_GROUP) {
+      if (groupType == GroupType.ZOOKEEPER_GROUP || groupType == GroupType.MAPR_ZOOKEEPER_GROUP) {
          ngEntity.setDiskBisect(true);         
       } else {
          ngEntity.setDiskBisect(false);

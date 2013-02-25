@@ -1,5 +1,5 @@
 /*****************************************************************************
- *   Copyright (c) 2012-2013 VMware, Inc. All Rights Reservedrved
+ *   Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
@@ -85,8 +85,8 @@ public class Constants {
    public static final String OUTPUT_OP_RESIZE = "resize";
    public static final String OUTPUT_OP_SET_ELASTICITY = "setElasticity";
    public static final String OUTPUT_OP_QUOTA_SET = "quota";
-   public static final String OUTPUT_OP_LIMIT = "limit";
-   public static final String OUTPUT_OP_UNLIMIT = "unlimit";
+   public static final String OUTPUT_OP_ADJUSTMENT = "Adjustment";
+   public static final String OUTPUT_OP_ADJUSTMENT_SUCCEEDED = "succeeded";
    public static final String OUTPUT_OP_ADJUSTMENT_FAILED = "failed";
    public static final String OUTPUT_OP_RESUME = "resume";
    public static final String OUTPUT_OP_RESULT_FAIL = "failed";

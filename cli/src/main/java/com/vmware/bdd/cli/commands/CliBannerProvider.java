@@ -1,6 +1,6 @@
 /*
  * Copyright 2011-2012 the original author or authors.
- * Portions copyright(c) 2012 VMware, Inc. All rights Reserved.
+ * Portions copyright(c) 2012-2013 VMware, Inc. All rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
