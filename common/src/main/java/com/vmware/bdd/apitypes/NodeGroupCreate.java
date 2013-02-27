@@ -281,8 +281,8 @@ public class NodeGroupCreate {
                r.setRacks(new String[0]);
             }
 
-            if (getStorage() == null || getStorage().getType() == null
-                  || getStorage().getType().equals(DatastoreType.SHARED.toString())) {
+            if (getStorage() != null && getStorage().getType() != null
+                  && getStorage().getType().equals(DatastoreType.SHARED.toString())) {
                warningMsgList.add(new StringBuilder()
                            .append("Warning: Cluster PRack Policy will not take effect when node group ")
                            .append(getName()).append(" uses SHARED storage.").toString());
