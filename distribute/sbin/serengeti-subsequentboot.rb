@@ -140,14 +140,10 @@ def get_connection_info(vc_info)
     :vsphere_server => vc_info["evs_IP"]
   }
 
-  if is_enterprise_edition?
-    info[:cert] = SERENGETI_CERT_FILE
-    info[:key] = SERENGETI_PRIVATE_KEY
-    info[:extension_key] = get_extension_id
-  else
-    info[:vsphere_username] = vc_info["vcusername"]
-    info[:vsphere_password] = vc_info["vcpassword"]
-  end
+  info[:cert] = SERENGETI_CERT_FILE
+  info[:key] = SERENGETI_PRIVATE_KEY
+  info[:extension_key] = get_extension_id
+
   info
 end
 
@@ -188,28 +184,6 @@ system <<EOF
 sed -i "s/distro_root =.*/#{distroip}/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/vc_datacenter = .*/#{vcdatacenterline}/" "#{SERENGETI_WEBAPP_CONF}"
 sed -i "s/template_id = .*/#{templateid}/" "#{SERENGETI_WEBAPP_CONF}"
-
-# no need to rewrite vc info file in vc ext case 
-if [ ! -e #{ENTERPRISE_EDITION_FLAG} ]; then
-  echo "vc_addr: #{h["evs_IP"]}" > "#{SERENGETI_CLOUD_MANAGER_CONF}"
-  echo "vc_user: #{vcuser}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
-  echo "vc_pwd:  #{updateVCPassword}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
-  chmod 400 "#{SERENGETI_CLOUD_MANAGER_CONF}"
-  chown serengeti:serengeti "#{SERENGETI_CLOUD_MANAGER_CONF}"
-
-  # re-init vhm property file
-  if [ -e "#{VHM_CONF}" ]; then
-    sed -i "s|vCenterId=.*$|vCenterId=#{h["evs_IP"]}|g" "#{VHM_CONF}"
-    sed -i "s|vCenterUser=.*$|vCenterUser=#{vcuser}|g"  "#{VHM_CONF}"
-    sed -i "s|vCenterPwd=.*$|vCenterPwd=#{updateVCPassword}|g" "#{VHM_CONF}"
-    sed -i "s|vHadoopUser=.*$|vHadoopUser=root|g" "#{VHM_CONF}"
-    sed -i "s|vHadoopPwd=.*$|vHadoopPwd=password|g" "#{VHM_CONF}"
-    sed -i "s|vHadoopHome=.*$|vHadoopHome=/usr/lib/hadoop|g" "#{VHM_CONF}"
-    sed -i "s|vHadoopExcludeTTFile=.*$|vHadoopExcludeTTFile=/usr/lib/hadoop/conf/mapred.hosts.exclude|g" "#{VHM_CONF}"
-    chmod 400 "#{VHM_CONF}"
-    chown serengeti:serengeti "#{VHM_CONF}"
-  fi
-fi
 
 #kill tomcat using shell direclty to avoid failing to stop tomcat
 pidlist=`ps -ef|grep tomcat | grep -v "grep"|awk '{print $2}'`
