@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.dal.DAL;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.Saveable;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.BddMessageUtil;
@@ -34,10 +35,14 @@ public class UpdateClusterListener implements TaskListener {
          .getLogger(UpdateClusterListener.class);
 
    private String clusterName;
+   private String nodeGroupName;
+   private int oldInstanceNum;
 
-   public UpdateClusterListener(String clusterName) {
+   public UpdateClusterListener(String clusterName, String nodeGroupName, int oldInstanceNum) {
       super();
       this.clusterName = clusterName;
+      this.nodeGroupName = nodeGroupName;
+      this.oldInstanceNum = oldInstanceNum;
    }
 
    @Override
@@ -57,7 +62,11 @@ public class UpdateClusterListener implements TaskListener {
             ClusterEntity cluster =
                   ClusterEntity.findClusterEntityByName(clusterName);
             AuAssert.check(cluster != null);
+            NodeGroupEntity group =
+                  NodeGroupEntity.findNodeGroupEntityByName(cluster, nodeGroupName);
+            AuAssert.check(group != null);
             cluster.setStatus(ClusterStatus.RUNNING);
+            group.setDefineInstanceNum(oldInstanceNum);
             logger.error("failed to update cluster " + clusterName
                   + " revert to previous status");
             return null;
