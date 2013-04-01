@@ -147,8 +147,7 @@ def init_blacklist(filename)
             "HADOOP_MAPRED_HOME",
             "HADOOP_HDFS_HOME",
             "HADOOP_CONF_DIR",
-            "HADOOP_PID_DIR",
-            "HADOOP_LOG_DIR"
+            "HADOOP_PID_DIR"
           ],
           "log4j.properties": []
         }

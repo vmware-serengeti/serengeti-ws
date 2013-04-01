@@ -748,7 +748,8 @@ public class ClusterManager {
       final int oldInstanceNum = group.getDefineInstanceNum();
       group.setDefineInstanceNum(instanceNum);
       DAL.inTransactionUpdate(group);
-      UpdateClusterListener listener = new UpdateClusterListener(clusterName);
+      UpdateClusterListener listener =
+            new UpdateClusterListener(clusterName, nodeGroupName, oldInstanceNum);
 
       try {
          return createClusterMgmtTask(cluster, listener, ClusterStatus.UPDATING);
