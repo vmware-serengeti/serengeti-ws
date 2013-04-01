@@ -21,7 +21,7 @@ rm $SERENGETI_CERT_DIR/* -f
 # generate keystore
 keytool -genkey -keyalg rsa \
 	-storetype jks \
-	-alias serengeti \
+	-alias vc_ext \
 	-keypass $KEYSTORE_PWD \
 	-keystore $SERENGETI_CERT_DIR/serengeti.jks \
 	-storepass $KEYSTORE_PWD \
@@ -29,7 +29,7 @@ keytool -genkey -keyalg rsa \
 	-validity 3650
 
 # export certificate
-keytool -exportcert -alias serengeti \
+keytool -exportcert -alias vc_ext \
 	-keypass $KEYSTORE_PWD \
 	-keystore $SERENGETI_CERT_DIR/serengeti.jks \
 	-storepass $KEYSTORE_PWD \
@@ -38,7 +38,7 @@ keytool -exportcert -alias serengeti \
 
 # export to pkcs12 store
 keytool -importkeystore \
-	-alias serengeti \
+	-alias vc_ext \
 	-srckeystore $SERENGETI_CERT_DIR/serengeti.jks \
 	-srckeypass $KEYSTORE_PWD \
 	-srcstorepass $KEYSTORE_PWD \

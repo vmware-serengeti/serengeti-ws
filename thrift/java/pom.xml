@@ -1,0 +1,133 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.vmware.bdd</groupId>
+	<artifactId>software-management</artifactId>
+	<packaging>jar</packaging>
+	<version>${serengeti.version}</version>
+	<name>Serengeti Software Management Service</name>
+	<url>http://serengeti.cloudfoundry.com/</url>
+
+	<parent>
+		<groupId>com.vmware.bdd</groupId>
+		<artifactId>serengeti-master</artifactId>
+		<version>${serengeti.version}</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<properties>
+		<thrift.executable>thrift</thrift.executable>
+		<generated-sources>../generated-sources</generated-sources>
+		<thrift.file>../softwareManagement.thrift</thrift.file>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.vmware.bdd</groupId>
+			<artifactId>commons-serengeti</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.thrift</groupId>
+			<artifactId>libthrift</artifactId>
+			<version>0.9.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.5.8</version>
+		</dependency>
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>thrift</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>generate-sources</id>
+								<phase>generate-sources</phase>
+								<configuration>
+									<tasks>
+										<mkdir dir="generated-sources" />
+										<exec executable="${thrift.executable}" failonerror="true">
+											<arg value="--gen" />
+											<arg value="java" />
+											<arg value="-o" />
+											<arg value="${generated-sources}" />
+											<arg value="${thrift.file}" />
+										</exec>
+										<exec executable="${thrift.executable}" failonerror="true">
+											<arg value="--gen" />
+											<arg value="rb" />
+											<arg value="-o" />
+											<arg value="${generated-sources}" />
+											<arg value="${thrift.file}" />
+										</exec>
+										<copy todir="src/main/java" overwrite="true">
+											<fileset dir="${generated-sources}/gen-java" />
+										</copy>
+										<copy todir="../ruby/lib" overwrite="true">
+											<fileset dir="${generated-sources}/gen-rb" />
+										</copy>
+									</tasks>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+				<pluginManagement>
+					<plugins>
+						<!--This plugin's configuration is used to store Eclipse m2e settings 
+							only. It has no influence on the Maven build itself. -->
+						<plugin>
+							<groupId>org.eclipse.m2e</groupId>
+							<artifactId>lifecycle-mapping</artifactId>
+							<version>1.0.0</version>
+							<configuration>
+								<lifecycleMappingMetadata>
+									<pluginExecutions>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>
+													org.apache.maven.plugins
+												</groupId>
+												<artifactId>
+													maven-antrun-plugin
+												</artifactId>
+												<versionRange>
+													[1.3,)
+												</versionRange>
+												<goals>
+													<goal>run</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
+												<ignore></ignore>
+											</action>
+										</pluginExecution>
+									</pluginExecutions>
+								</lifecycleMappingMetadata>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+	</profiles>
+</project>
+  

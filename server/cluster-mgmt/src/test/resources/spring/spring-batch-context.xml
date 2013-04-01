@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+   xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="
+   http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/batch
+   http://www.springframework.org/schema/batch/spring-batch.xsd">
+
+   <beans:import resource="./datasource-context.xml"/>   
+   <beans:import resource="./tx-context.xml"/>
+
+   <beans:bean id="taskExecutor"
+      class="org.springframework.core.task.SimpleAsyncTaskExecutor">
+   </beans:bean>
+
+   <beans:bean id="jobExplorer"
+      class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean">
+      <beans:property name="dataSource" ref="dataSource" />
+   </beans:bean>
+
+   <beans:bean id="jobRepository"
+      class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">
+      <beans:property name="dataSource" ref="dataSource" />
+      <beans:property name="transactionManager" ref="transactionManager" />
+      <beans:property name="databaseType" value="postgres" />
+      <beans:property name="tablePrefix" value="BATCH_" />
+      <beans:property name="isolationLevelForCreate"
+         value="ISOLATION_DEFAULT" />
+   </beans:bean>
+
+   <beans:bean id="jobLauncher"
+      class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+      <beans:property name="jobRepository" ref="jobRepository" />
+      <beans:property name="taskExecutor" ref="taskExecutor" />
+   </beans:bean>
+
+   <beans:bean id="jobRegistry"
+      class="org.springframework.batch.core.configuration.support.MapJobRegistry" />
+
+   <beans:bean id="jobRegistryBeanPostProcessor"
+      class="org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor">
+      <beans:property name="jobRegistry" ref="jobRegistry" />
+   </beans:bean>
+
+   <beans:bean id="jobOperator"
+      class="org.springframework.batch.core.launch.support.SimpleJobOperator">
+      <beans:property name="jobExplorer" ref="jobExplorer" />
+      <beans:property name="jobRepository" ref="jobRepository" />
+      <beans:property name="jobRegistry" ref="jobRegistry" />
+      <beans:property name="jobLauncher" ref="jobLauncher" />
+   </beans:bean>
+
+   <beans:bean id="jobExecutionStatusHolder"
+      class="com.vmware.bdd.service.job.InMemoryJobExecutionStatusHolder" />
+
+   <beans:import resource="classpath*:/spring/*-jobs.xml" />
+
+</beans:beans>

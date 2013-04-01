@@ -29,11 +29,10 @@ import org.springframework.stereotype.Component;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterPriority;
 import com.vmware.bdd.apitypes.ClusterRead;
-import com.vmware.bdd.apitypes.Elasticity;
+import com.vmware.bdd.apitypes.ElasticityRequestBody;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.Priority;
-import com.vmware.bdd.apitypes.VHMRequestBody;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 
@@ -53,9 +52,12 @@ public class ClusterRestClient {
 
    public void configCluster(ClusterCreate clusterConfig) {
       String clusterName = clusterConfig.getName();
-      final String path = Constants.REST_PATH_CLUSTER + "/" + clusterName + "/" + Constants.REST_PATH_CONFIG;
+      final String path =
+            Constants.REST_PATH_CLUSTER + "/" + clusterName + "/"
+                  + Constants.REST_PATH_CONFIG;
       final HttpMethod httpverb = HttpMethod.PUT;
-      PrettyOutput outputCallBack = getClusterPrettyOutputCallBack(this, clusterName);
+      PrettyOutput outputCallBack =
+            getClusterPrettyOutputCallBack(this, clusterName);
       restClient.update(clusterConfig, path, httpverb, outputCallBack);
    }
 
@@ -63,14 +65,18 @@ public class ClusterRestClient {
       final String path = Constants.REST_PATH_CLUSTER;
       final HttpMethod httpverb = HttpMethod.GET;
 
-      return restClient.getObject(id, ClusterRead.class, path, httpverb, detail);
+      return restClient
+            .getObject(id, ClusterRead.class, path, httpverb, detail);
    }
 
    public ClusterCreate getSpec(String id) {
-      final String path = Constants.REST_PATH_CLUSTER + "/" + id + "/" + Constants.REST_PATH_SPEC;
+      final String path =
+            Constants.REST_PATH_CLUSTER + "/" + id + "/"
+                  + Constants.REST_PATH_SPEC;
       final HttpMethod httpverb = HttpMethod.GET;
 
-      return restClient.getObjectByPath(ClusterCreate.class, path, httpverb, false);
+      return restClient.getObjectByPath(ClusterCreate.class, path, httpverb,
+            false);
    }
 
    public ClusterRead[] getAll(Boolean detail) {
@@ -81,11 +87,13 @@ public class ClusterRestClient {
             detail);
    }
 
-   public void actionOps(String id, String callbackId, Map<String, String> queryStrings) {
+   public void actionOps(String id, String callbackId,
+         Map<String, String> queryStrings) {
       final String path = Constants.REST_PATH_CLUSTER;
       final HttpMethod httpverb = HttpMethod.PUT;
 
-      PrettyOutput outputCallBack = getClusterPrettyOutputCallBack(this, callbackId);
+      PrettyOutput outputCallBack =
+            getClusterPrettyOutputCallBack(this, callbackId);
       restClient.actionOps(id, path, httpverb, queryStrings, outputCallBack);
    }
 
@@ -96,11 +104,14 @@ public class ClusterRestClient {
    public void resize(String clusterName, String nodeGroup, int instanceNum) {
       final String path =
             Constants.REST_PATH_CLUSTER + "/" + clusterName + "/"
-                  + Constants.REST_PATH_NODEGROUP + "/" + nodeGroup + "/instancenum";
+                  + Constants.REST_PATH_NODEGROUP + "/" + nodeGroup
+                  + "/instancenum";
       final HttpMethod httpverb = HttpMethod.PUT;
 
-      PrettyOutput outputCallBack = getClusterPrettyOutputCallBack(this, clusterName);
-      restClient.update(Integer.valueOf(instanceNum), path, httpverb, outputCallBack);
+      PrettyOutput outputCallBack =
+            getClusterPrettyOutputCallBack(this, clusterName);
+      restClient.update(Integer.valueOf(instanceNum), path, httpverb,
+            outputCallBack);
    }
 
    public void delete(String id) {
@@ -111,62 +122,35 @@ public class ClusterRestClient {
       restClient.deleteObject(id, path, httpverb, outputCallBack);
    }
 
-   public void setElasticity(String clusterName, boolean enableAutomation, int minNum) {
-      final String path = Constants.REST_PATH_CLUSTERS + "/" + Constants.REST_PATH_ELASTICITY;
+   public void setElasticity(String clusterName,
+         ElasticityRequestBody requestBody) {
+      final String path =
+            Constants.REST_PATH_CLUSTER + "/" + clusterName + "/"
+                  + Constants.REST_PATH_ELASTICITY;
       final HttpMethod httpverb = HttpMethod.PUT;
-
-      Elasticity requestBody = new Elasticity();
-      requestBody.setEnable(enableAutomation);
-      requestBody.setClusterName(clusterName);
-      requestBody.setMinComputeNodeNum(minNum);
-
-      restClient.update(requestBody, path, httpverb);
-   }
-
-   public void limitCluster(String clusterName, String nodeGroupName, int activeComputeNodeNum) {
-      final String path = Constants.REST_PATH_CLUSTER + "/" + clusterName + "/" + "limit";
-      final HttpMethod httpverb = HttpMethod.PUT;
-
-      VHMRequestBody requestBody = new VHMRequestBody();
-      requestBody.setActiveComputeNodeNum(activeComputeNodeNum);
-      requestBody.setNodeGroupName(nodeGroupName);
       restClient.update(requestBody, path, httpverb);
    }
 
    public void prioritizeCluster(String clusterName, String nodeGroupName,
-         Priority diskIOPriority, String... completedTaskSummary) {
-      final String path = Constants.REST_PATH_CLUSTER + "/" + clusterName + "/" + "priority";
+         Priority diskIOPriority) {
+      final String path =
+            Constants.REST_PATH_CLUSTER + "/" + clusterName + "/" + "priority";
       final HttpMethod httpverb = HttpMethod.PUT;
 
       ClusterPriority requestBody = new ClusterPriority();
       requestBody.setDiskIOPriority(diskIOPriority);
       requestBody.setNodeGroupName(nodeGroupName);
-      PrettyOutput outputCallBack =
-            getPrioritizeClusterOutputCallBack(completedTaskSummary);
-      restClient.update(requestBody, path, httpverb, outputCallBack);
+      restClient.update(requestBody, path, httpverb);
    }
 
-   private PrettyOutput getPrioritizeClusterOutputCallBack(final String...completedTaskSummary) {
-      return new PrettyOutput() {
-         public void prettyOutput() throws Exception {
-         
-         }
-
-         public boolean isRefresh(boolean realTime) throws Exception {
-            return false;
-         }
-
-         public String[] getCompletedTaskSummary() {
-            return completedTaskSummary;
-         }
-      };
-   }
    private PrettyOutput getClusterPrettyOutputCallBack(
-         final ClusterRestClient clusterRestClient, final String id, final String... completedTaskSummary) {
+         final ClusterRestClient clusterRestClient, final String id,
+         final String... completedTaskSummary) {
       return new PrettyOutput() {
          private String ngSnapshotInJson = null;
          private boolean needUpdate = true;
          private ClusterRead cluster = null;
+
          public void prettyOutput() throws Exception {
             try {
                if (cluster != null) {
@@ -220,18 +204,22 @@ public class ClusterRestClient {
                columnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_STATUS,
                      Arrays.asList("getStatus"));
-               columnNamesWithGetMethodNames.put(Constants.FORMAT_TABLE_COLUMN_TASK, Arrays.asList("getAction"));
+               columnNamesWithGetMethodNames.put(
+                     Constants.FORMAT_TABLE_COLUMN_TASK,
+                     Arrays.asList("getAction"));
                CommandsUtils.printInTableFormat(columnNamesWithGetMethodNames,
                      nodes.toArray(), Constants.OUTPUT_INDENT);
-            }  else {
+            } else {
                System.out.println();
             }
          }
 
-         private boolean checkOutputUpdate(List<NodeGroupRead> nodeGroups) throws JsonGenerationException, IOException {
+         private boolean checkOutputUpdate(List<NodeGroupRead> nodeGroups)
+               throws JsonGenerationException, IOException {
             ObjectMapper mapper = new ObjectMapper();
             String ngCurrentInJson = mapper.writeValueAsString(nodeGroups);
-            if (ngSnapshotInJson != null && ngSnapshotInJson.equals(ngCurrentInJson)) {
+            if (ngSnapshotInJson != null
+                  && ngSnapshotInJson.equals(ngCurrentInJson)) {
                needUpdate = false;
             } else {
                ngSnapshotInJson = ngCurrentInJson;

@@ -31,7 +31,8 @@ public enum GroupType {
    MAPR_WORKER_GROUP("worker"),
    MAPR_CLIENT_GROUP("client"),
    MAPR_ZOOKEEPER_GROUP("mapr_zookeeper"),
-   MAPR_MYSQL_SERVER("mapr_mysql_server");
+   MAPR_MYSQL_SERVER_GROUP("mapr_mysql_server"),
+   YARN_RESOURCEMANAGER_GROUP("resourcemanager");
 
    private String description;
 
@@ -57,9 +58,7 @@ public enum GroupType {
    public DatastoreType getStorageEnumType() {
       switch (this) {
       case WORKER_GROUP:
-         return DatastoreType.LOCAL;
       case MAPR_WORKER_GROUP:
-         return DatastoreType.LOCAL;
       case MAPR_MASTER_GROUP:
          return DatastoreType.LOCAL;
       default:
@@ -72,9 +71,12 @@ public enum GroupType {
          return MASTER_GROUP;
       } else if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE)) {
          return MASTER_JOBTRACKER_GROUP;
-      } else if (roles.contains(HadoopRole.HADOOP_DATANODE) ||
-            roles.contains(HadoopRole.HADOOP_TASKTRACKER) ||
-            roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE)) {
+      } else if (roles.contains(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE)) {
+         return YARN_RESOURCEMANAGER_GROUP;
+      } else if (roles.contains(HadoopRole.HADOOP_DATANODE)
+            || roles.contains(HadoopRole.HADOOP_TASKTRACKER)
+            || roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE)
+            || roles.contains(HadoopRole.HADOOP_NODEMANAGER_ROLE)) {
          return WORKER_GROUP;
       } else if(roles.contains(HadoopRole.HBASE_MASTER_ROLE)){
          return HBASE_MASTER_GROUP;
@@ -90,7 +92,7 @@ public enum GroupType {
       }  else if (roles.contains(HadoopRole.MAPR_TASKTRACKER_ROLE) && !roles.contains(HadoopRole.MAPR_JOBTRACKER_ROLE)) {
          return MAPR_WORKER_GROUP;
       } else if (roles.contains(HadoopRole.MAPR_MYSQL_SERVER_ROLE)) {
-         return MAPR_MYSQL_SERVER;
+         return MAPR_MYSQL_SERVER_GROUP;
       } else if (roles.contains(HadoopRole.MAPR_ZOOKEEPER_ROLE)) {
          return MAPR_ZOOKEEPER_GROUP;
       } else {

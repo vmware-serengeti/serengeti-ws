@@ -36,11 +36,14 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.DistroRead;
+import com.vmware.bdd.apitypes.ElasticityRequestBody;
+import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityOperation;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityMode;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.ClusterRestClient;
@@ -89,7 +92,7 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume,
          @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation,
          @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes) {
-      //validate the name
+      // validate the name
       if (name.indexOf("-") != -1) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
@@ -103,7 +106,7 @@ public class ClusterCommands implements CommandMarker {
                      + Constants.PARAM_NOT_CONTAIN_BLANK_SPACE);
          return;
       }
-      //process resume
+      // process resume
       if (resume) {
          resumeCreateCluster(name);
          return;
@@ -116,9 +119,10 @@ public class ClusterCommands implements CommandMarker {
       if (type != null) {
          ClusterType clusterType = ClusterType.getByDescription(type);
          if (clusterType == null) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
-                  Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
-                  Constants.INVALID_VALUE + " " + "type=" + type);
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  name, Constants.OUTPUT_OP_CREATE,
+                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
+                        + " " + "type=" + type);
             return;
          }
          clusterCreate.setType(clusterType);
@@ -131,9 +135,10 @@ public class ClusterCommands implements CommandMarker {
          try {
             clusterCreate.setTopologyPolicy(TopologyType.valueOf(topology));
          } catch (IllegalArgumentException ex) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
-                  Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
-                  Constants.INVALID_VALUE + " " + "topologyType=" + topology);
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  name, Constants.OUTPUT_OP_CREATE,
+                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
+                        + " " + "topologyType=" + topology);
             return;
          }
       } else {
@@ -153,19 +158,22 @@ public class ClusterCommands implements CommandMarker {
                return;
             }
          } else {
-            String defaultDistroName = clusterCreate.getDefaultDistroName(distroRestClient.getAll());
+            String defaultDistroName =
+                  clusterCreate.getDefaultDistroName(distroRestClient.getAll());
             if (CommandsUtils.isBlank(defaultDistroName)) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                      name, Constants.OUTPUT_OP_CREATE,
-                     Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM__NO_DEFAULT_DISTRO);
+                     Constants.OUTPUT_OP_RESULT_FAIL,
+                     Constants.PARAM__NO_DEFAULT_DISTRO);
                return;
             } else {
                clusterCreate.setDistro(defaultDistroName);
             }
          }
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CREATE,
-               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+               e.getMessage());
          return;
       }
       DistroRead distroRead = distroRestClient.get(clusterCreate.getDistro());
@@ -201,12 +209,15 @@ public class ClusterCommands implements CommandMarker {
       try {
          if (specFilePath != null) {
             ClusterCreate clusterSpec =
-                  CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile(specFilePath));
+                  CommandsUtils.getObjectByJsonString(ClusterCreate.class,
+                        CommandsUtils.dataFromFile(specFilePath));
+            clusterCreate.setSpecFile(true);
             clusterCreate.setExternalHDFS(clusterSpec.getExternalHDFS());
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
-            validateConfiguration(clusterCreate, skipConfigValidation, warningMsgList);
-            if (!validateHAInfo(clusterCreate.getNodeGroups())){
+            validateConfiguration(clusterCreate, skipConfigValidation,
+                  warningMsgList);
+            if (!validateHAInfo(clusterCreate.getNodeGroups())) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                      name, Constants.OUTPUT_OP_CREATE,
                      Constants.OUTPUT_OP_RESULT_FAIL,
@@ -216,8 +227,9 @@ public class ClusterCommands implements CommandMarker {
          }
          networkNames = getNetworkNames();
       } catch (Exception e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CREATE,
-               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+               e.getMessage());
          return;
       }
 
@@ -252,10 +264,14 @@ public class ClusterCommands implements CommandMarker {
          }
       }
 
-      // Validate that the specified file is correct json format and proper value.
-      if (specFilePath != null && !clusterCreate.getDistro().equalsIgnoreCase(com.vmware.bdd.utils.Constants.MAPR_VENDOR)) {
+      // Validate that the specified file is correct json format and proper
+      // value.
+      if (specFilePath != null
+            && !clusterCreate.getDistro().equalsIgnoreCase(
+                  com.vmware.bdd.utils.Constants.MAPR_VENDOR)) {
          List<String> distroRoles = findDistroRoles(clusterCreate);
-         clusterCreate.validateClusterCreate(failedMsgList, warningMsgList, distroRoles);
+         clusterCreate.validateClusterCreate(failedMsgList, warningMsgList,
+               distroRoles);
       }
 
       // give a warning message if both type and specFilePath are specified
@@ -276,10 +292,12 @@ public class ClusterCommands implements CommandMarker {
             return;
          }
          restClient.create(clusterCreate);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_RESULT_CREAT);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_RESULT_CREAT);
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CREATE,
-               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+               e.getMessage());
       }
    }
 
@@ -344,7 +362,7 @@ public class ClusterCommands implements CommandMarker {
    public void deleteCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name) {
 
-      //rest invocation
+      // rest invocation
       try {
          restClient.delete(name);
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
@@ -364,14 +382,16 @@ public class ClusterCommands implements CommandMarker {
       queryStrings
             .put(Constants.QUERY_ACTION_KEY, Constants.QUERY_ACTION_START);
 
-      //rest invocation
+      // rest invocation
       try {
          restClient.actionOps(clusterName, queryStrings);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+         CommandsUtils.printCmdSuccess(
+               Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
                Constants.OUTPUT_OP_RESULT_START);
 
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+         CommandsUtils.printCmdFailure(
+               Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
                Constants.OUTPUT_OP_START, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
       }
@@ -383,13 +403,15 @@ public class ClusterCommands implements CommandMarker {
       Map<String, String> queryStrings = new HashMap<String, String>();
       queryStrings.put(Constants.QUERY_ACTION_KEY, Constants.QUERY_ACTION_STOP);
 
-      //rest invocation
+      // rest invocation
       try {
          restClient.actionOps(clusterName, queryStrings);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+         CommandsUtils.printCmdSuccess(
+               Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
                Constants.OUTPUT_OP_RESULT_STOP);
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+         CommandsUtils.printCmdFailure(
+               Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
                Constants.OUTPUT_OP_STOP, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
       }
@@ -411,16 +433,20 @@ public class ClusterCommands implements CommandMarker {
                            + " does not exsit.");
                return;
             }
-            //disallow scale out zookeeper node group.
+            // disallow scale out zookeeper node group.
             List<NodeGroupRead> ngs = cluster.getNodeGroups();
             boolean found = false;
             for (NodeGroupRead ng : ngs) {
                if (ng.getName().equals(nodeGroup)) {
                   found = true;
-                  if (ng.getRoles() != null && ng.getRoles().contains(HadoopRole.ZOOKEEPER_ROLE.toString())) {
-                     CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                           name, Constants.OUTPUT_OP_RESIZE,
-                           Constants.OUTPUT_OP_RESULT_FAIL, Constants.ZOOKEEPER_NOT_RESIZE);
+                  if (ng.getRoles() != null
+                        && ng.getRoles().contains(
+                              HadoopRole.ZOOKEEPER_ROLE.toString())) {
+                     CommandsUtils.printCmdFailure(
+                           Constants.OUTPUT_OBJECT_CLUSTER, name,
+                           Constants.OUTPUT_OP_RESIZE,
+                           Constants.OUTPUT_OP_RESULT_FAIL,
+                           Constants.ZOOKEEPER_NOT_RESIZE);
                      return;
                   }
                   break;
@@ -431,7 +457,7 @@ public class ClusterCommands implements CommandMarker {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                      name, Constants.OUTPUT_OP_RESIZE,
                      Constants.OUTPUT_OP_RESULT_FAIL, "node group " + nodeGroup
-                     + " does not exist.");
+                           + " does not exist.");
                return;
             }
 
@@ -450,62 +476,138 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   @CliCommand(value = "cluster limit", help = "Set number of instances powered on in a node group")
-   public void limitCluster(
+   @SuppressWarnings("unchecked")
+   @CliCommand(value = "cluster setElasticity", help = "set cluster elasticity")
+   public void setElasticity(
+         @CliOption(key = { "mode" }, mandatory = true, help = "The elasticity mode: auto, manual") final String mode,
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
-         @CliOption(key = { "nodeGroup" }, mandatory = false, help = "The node group name") final String nodeGroupName,
-         @CliOption(key = { "activeComputeNodeNum" }, mandatory = false, help = "The number of instances powered on") final int activeComputeNodeNum) {
-
+         @CliOption(key = { "minComputeNodeNum" }, mandatory = false, help = "The minimum number of compute nodes staying powered on (valid in auto mode)") final Integer minComputeNodeNum,
+         @CliOption(key = { "nodeGroup" }, mandatory = false, help = "The node group name (valid in manual mode)") final String nodeGroupName,
+         @CliOption(key = { "targetComputeNodeNum" }, mandatory = false, help = "The number of instances powered on (valid in manual mode)") final Integer targetComputeNodeNum) {
       try {
-         // The active compute node number must be an integer and cannot be less than zero.
-         if (activeComputeNodeNum < 0) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null,
-                  null, Constants.OUTPUT_OP_ADJUSTMENT_FAILED,
-                  "Invalid instance number:" + activeComputeNodeNum + " .");
-            return;
-         }
          ClusterRead cluster = restClient.get(clusterName, false);
          if (cluster == null) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null,
-                  null, Constants.OUTPUT_OP_ADJUSTMENT_FAILED, "cluster "
-                        + clusterName + " is not exsit !");
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  clusterName, Constants.OUTPUT_OP_SET_ELASTICITY,
+                  Constants.OUTPUT_OP_RESULT_FAIL, "cluster " + clusterName
+                        + " does not exsit.");
             return;
          }
-         if (!cluster.validateLimit(nodeGroupName)) {
-            return;
+
+         ElasticityRequestBody requestBody = new ElasticityRequestBody();
+         ElasticityMode elasticityMode =
+               ElasticityMode.valueOf(mode.toUpperCase());
+         if (elasticityMode == ElasticityMode.AUTO) { // auto mode
+            if (minComputeNodeNum != null && minComputeNodeNum < 0) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                     clusterName, Constants.OUTPUT_OP_SET_ELASTICITY,
+                     Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
+                           + " minComputeNodeNum");
+               return;
+            }
+            requestBody.setElasticityOperation(ElasticityOperation.OP_SET_AUTO);
+            requestBody.setMinComputeNodeNum(minComputeNodeNum);
+            restClient.setElasticity(clusterName, requestBody);
+         } else { // manual mode
+            if (targetComputeNodeNum == null || targetComputeNodeNum < 0) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                     clusterName, Constants.OUTPUT_OP_SET_ELASTICITY,
+                     Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
+                           + "targetComputeNodeNum");
+               return;
+            }
+            if (!cluster.validateSetManualElasticity(nodeGroupName)) {
+               return;
+            }
+
+            requestBody
+                  .setElasticityOperation(ElasticityOperation.OP_SET_MANUAL);
+            requestBody.setNodeGroupName(nodeGroupName);
+            requestBody.setActiveComputeNodeNum(targetComputeNodeNum);
+
+            restClient.setElasticity(clusterName, requestBody);
+            if (targetComputeNodeNum > 0) {
+               CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
+                     clusterName, Constants.OUTPUT_OP_RESULT_STOP_COMPUTE_NODE);
+            } else { // show status
+               ClusterRead clusterRead = restClient.get(clusterName, true);
+               updateRunningNodes(clusterRead);
+               prettyOutputDynamicResourceInfo(clusterRead);
+            }
          }
-         restClient.limitCluster(clusterName, nodeGroupName, activeComputeNodeNum);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OP_ADJUSTMENT, null,
-               Constants.OUTPUT_OP_ADJUSTMENT_SUCCEEDED);
+      } catch (IllegalArgumentException e) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+               clusterName, Constants.OUTPUT_OP_SET_ELASTICITY,
+               Constants.OUTPUT_OP_RESULT_FAIL, "mode " + mode + " is unrecognized");
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null,
-               null, Constants.OUTPUT_OP_ADJUSTMENT_FAILED, e.getMessage());
+         if (e.getMessage() != null) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  clusterName, Constants.OUTPUT_OP_SET_ELASTICITY,
+                  Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+         }
       }
    }
 
-   @CliCommand(value = "cluster unlimit", help = "Reset nodes in a node group powered on")
-   public void unlimitCluster(
-         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
-         @CliOption(key = { "nodeGroup" }, mandatory = false, help = "The node group name") final String nodeGroupName) {
-
+   // clean up all VHM settings, set auto-elasticity to false and power on all VMs
+   // which are already powered off by manual VHM.
+   @CliCommand(value = "cluster resetElasticity", help = "reset cluster elasticity")
+   public void resetElasticity(
+         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName) {
       try {
-         int activeComputeNodeNum = -1;
          ClusterRead cluster = restClient.get(clusterName, false);
          if (cluster == null) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null,
-                  null, Constants.OUTPUT_OP_ADJUSTMENT_FAILED, "cluster "
-                        + clusterName + " is not exsit !");
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  clusterName, Constants.OUTPUT_OP_RESET_ELASTICITY,
+                  Constants.OUTPUT_OP_RESULT_FAIL, "cluster " + clusterName
+                        + " does not exsit.");
             return;
          }
-         if (!cluster.validateLimit(nodeGroupName)) {
-            return;
-         }
-         restClient.limitCluster(clusterName, nodeGroupName, activeComputeNodeNum);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OP_ADJUSTMENT, null,
-               Constants.OUTPUT_OP_ADJUSTMENT_SUCCEEDED);
+         ElasticityRequestBody requestBody = new ElasticityRequestBody();
+         requestBody.setElasticityOperation(ElasticityOperation.OP_RESET);
+         restClient.setElasticity(clusterName, requestBody);
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OP_ADJUSTMENT, null,
-               null, Constants.OUTPUT_OP_ADJUSTMENT_FAILED, e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+               clusterName, Constants.OUTPUT_OP_RESET_ELASTICITY,
+               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+      }
+   }
+
+   @CliCommand(value = "cluster priority", help = "Set the disk priorities for the whole cluster or a specified node group")
+   public void prioritizeCluster(
+         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
+         @CliOption(key = { "nodeGroup" }, mandatory = false, help = "The node group name") final String nodeGroupName,
+         @CliOption(key = { "diskIOPriority" }, mandatory = true, help = "The relative disk I/O priorities: HIGH, NORNAL, LOW") final String diskIOPriority) {
+      Priority ioPriority = null;
+      try {
+         ioPriority = Priority.valueOf(diskIOPriority.toUpperCase());
+         restClient.prioritizeCluster(clusterName, nodeGroupName, ioPriority);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
+               clusterName, Constants.OUTPUT_OP_RESULT_PRIORITY);
+      } catch (IllegalArgumentException ex) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+               clusterName, Constants.OUTPUT_OP_RESULT_PRIORITY,
+               Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE + " "
+                     + "diskIOPriority = " + diskIOPriority);
+      }
+   }
+
+   private void updateRunningNodes(ClusterRead clusterRead) {
+      if (clusterRead != null) {
+         List<NodeGroupRead> ngs = clusterRead.getNodeGroups();
+         if (ngs != null) {
+            for (NodeGroupRead ng : ngs) {
+               int count = 0;
+               List<NodeRead> nodes = ng.getInstances();
+               if (nodes != null) {
+                  for (NodeRead node : nodes) {
+                     if (node.getStatus().equals(Constants.NODE_RUNNING_STATUS)) {
+                        count++;
+                     }
+                  }
+                  ng.setRunningNodesNum(count);
+               }
+            }
+         }
       }
    }
 
@@ -519,17 +621,20 @@ public class ClusterCommands implements CommandMarker {
       try {
          if (info) {
             if (name != null) {
-               System.out.println("Warning: can't specify option --name and --info at the same time");
+               System.out
+                     .println("Warning: can't specify option --name and --info at the same time");
                return;
             }
             String fsUrl = hadoopConfiguration.get("fs.default.name");
             String jtUrl = hadoopConfiguration.get("mapred.job.tracker");
-            if ((fsUrl == null || fsUrl.length() == 0) && (jtUrl == null || jtUrl.length() == 0)) {
-               System.out.println("There is no targeted cluster. Please use \"cluster target --name\" to target first");
+            if ((fsUrl == null || fsUrl.length() == 0)
+                  && (jtUrl == null || jtUrl.length() == 0)) {
+               System.out
+                     .println("There is no targeted cluster. Please use \"cluster target --name\" to target first");
                return;
             }
-            if(targetClusterName != null && targetClusterName.length() > 0){
-               System.out.println("Cluster         : " + targetClusterName);            	
+            if (targetClusterName != null && targetClusterName.length() > 0) {
+               System.out.println("Cluster         : " + targetClusterName);
             }
             if (fsUrl != null && fsUrl.length() > 0) {
                System.out.println("HDFS url        : " + fsUrl);
@@ -545,8 +650,7 @@ public class ClusterCommands implements CommandMarker {
                ClusterRead[] clusters = restClient.getAll(false);
                if (clusters != null && clusters.length > 0) {
                   cluster = clusters[0];
-               }
-               else {
+               } else {
                   noCluster = true;
                }
             } else {
@@ -554,11 +658,12 @@ public class ClusterCommands implements CommandMarker {
             }
 
             if (cluster == null) {
-               if(noCluster) {
-                  System.out.println("There is no available cluster for targeting.");
-               }
-               else {
-            	  System.out.println("Failed to target cluster: The cluster " + name + " not found"); 
+               if (noCluster) {
+                  System.out
+                        .println("There is no available cluster for targeting.");
+               } else {
+                  System.out.println("Failed to target cluster: The cluster "
+                        + name + " not found");
                }
                setFsURL("");
                setJobTrackerURL("");
@@ -585,7 +690,8 @@ public class ClusterCommands implements CommandMarker {
                            String jobTrackerIP = nodes.get(0).getIp();
                            setJobTracker(jobTrackerIP);
                         } else {
-                           throw new CliRestException("no job tracker available");
+                           throw new CliRestException(
+                                 "no job tracker available");
                         }
                      }
                      if (role.equals("hive_server")) {
@@ -595,26 +701,29 @@ public class ClusterCommands implements CommandMarker {
                            setHiveServerAddress(hiveServerIP);
                            hasHiveServer = true;
                         } else {
-                           throw new CliRestException("no hive server available");
+                           throw new CliRestException(
+                                 "no hive server available");
                         }
                      }
                   }
                }
-               if (cluster.getExternalHDFS() != null && !cluster.getExternalHDFS().isEmpty()) {
+               if (cluster.getExternalHDFS() != null
+                     && !cluster.getExternalHDFS().isEmpty()) {
                   setFsURL(cluster.getExternalHDFS());
                   hasHDFS = true;
                }
-               if(!hasHDFS){
-            	   setFsURL("");
+               if (!hasHDFS) {
+                  setFsURL("");
                }
-               if(!hasHiveServer){
-            	   this.setHiveServerUrl("");
+               if (!hasHiveServer) {
+                  this.setHiveServerUrl("");
                }
             }
          }
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_TARGET,
-               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_TARGET, Constants.OUTPUT_OP_RESULT_FAIL,
+               e.getMessage());
          setFsURL("");
          setJobTrackerURL("");
          this.setHiveServerUrl("");
@@ -632,11 +741,11 @@ public class ClusterCommands implements CommandMarker {
 
    private void setJobTracker(String jobTrackerAddress) {
       String jobTrackerUrl = jobTrackerAddress + ":8021";
-      setJobTrackerURL(jobTrackerUrl);      
+      setJobTrackerURL(jobTrackerUrl);
    }
 
-   private void setJobTrackerURL(String jobTrackerUrl){
-	   hadoopConfiguration.set("mapred.job.tracker", jobTrackerUrl);
+   private void setJobTrackerURL(String jobTrackerUrl) {
+      hadoopConfiguration.set("mapred.job.tracker", jobTrackerUrl);
    }
 
    private void setHiveServerAddress(String hiveServerAddress) {
@@ -646,9 +755,9 @@ public class ClusterCommands implements CommandMarker {
          throw new CliRestException("faild to set hive server address");
       }
    }
-   
+
    private void setHiveServerUrl(String hiveServerUrl) {
-	   this.hiveServerUrl = hiveServerUrl;
+      this.hiveServerUrl = hiveServerUrl;
    }
 
    @CliCommand(value = "cluster config", help = "Config an existing cluster")
@@ -657,10 +766,12 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "specFile" }, mandatory = true, help = "The spec file name path") final String specFilePath,
          @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation,
          @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes) {
-      //validate the name
+      // validate the name
       if (name.indexOf("-") != -1) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CONFIG,
-               Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_CLUSTER + Constants.PARAM_NOT_CONTAIN_HORIZONTAL_LINE);
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_CONFIG, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.PARAM_CLUSTER
+                     + Constants.PARAM_NOT_CONTAIN_HORIZONTAL_LINE);
          return;
       }
       try {
@@ -669,24 +780,29 @@ public class ClusterCommands implements CommandMarker {
          ClusterCreate clusterConfig = new ClusterCreate();
          clusterConfig.setName(clusterRead.getName());
          ClusterCreate clusterSpec =
-               CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile(specFilePath));
+               CommandsUtils.getObjectByJsonString(ClusterCreate.class,
+                     CommandsUtils.dataFromFile(specFilePath));
          clusterConfig.setNodeGroups(clusterSpec.getNodeGroups());
          clusterConfig.setConfiguration(clusterSpec.getConfiguration());
          clusterConfig.setExternalHDFS(clusterSpec.getExternalHDFS());
          List<String> warningMsgList = new ArrayList<String>();
-         validateConfiguration(clusterConfig, skipConfigValidation, warningMsgList);
+         validateConfiguration(clusterConfig, skipConfigValidation,
+               warningMsgList);
          // add a confirm message for running job
-         warningMsgList.add("Warning: " + Constants.PARAM_CLUSTER_CONFIG_RUNNING_JOB_WARNING);
+         warningMsgList.add("Warning: "
+               + Constants.PARAM_CLUSTER_CONFIG_RUNNING_JOB_WARNING);
          if (!CommandsUtils.showWarningMsg(clusterConfig.getName(),
                Constants.OUTPUT_OBJECT_CLUSTER, Constants.OUTPUT_OP_CONFIG,
                warningMsgList, alwaysAnswerYes)) {
             return;
          }
          restClient.configCluster(clusterConfig);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_RESULT_CONFIG);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_RESULT_CONFIG);
       } catch (Exception e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, Constants.OUTPUT_OP_CONFIG,
-               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_CONFIG, Constants.OUTPUT_OP_RESULT_FAIL,
+               e.getMessage());
          return;
       }
    }
@@ -748,11 +864,14 @@ public class ClusterCommands implements CommandMarker {
          System.out.printf("cluster name: %s, distro: %s, status: %s",
                cluster.getName(), cluster.getDistro(), cluster.getStatus());
       } else {
-         System.out.printf("cluster name: %s, distro: %s, topology: %s, status: %s",
-               cluster.getName(), cluster.getDistro(), topology, cluster.getStatus());
+         System.out.printf(
+               "cluster name: %s, distro: %s, topology: %s, status: %s",
+               cluster.getName(), cluster.getDistro(), topology,
+               cluster.getStatus());
       }
       System.out.println();
-      if(cluster.getExternalHDFS() != null && !cluster.getExternalHDFS().isEmpty()) {
+      if (cluster.getExternalHDFS() != null
+            && !cluster.getExternalHDFS().isEmpty()) {
          System.out.printf("external HDFS: %s\n", cluster.getExternalHDFS());
       }
       LinkedHashMap<String, List<String>> ngColumnNamesWithGetMethodNames =
@@ -760,16 +879,17 @@ public class ClusterCommands implements CommandMarker {
       List<NodeGroupRead> nodegroups = cluster.getNodeGroups();
       if (nodegroups != null) {
          ngColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_GROUP_NAME, Arrays.asList("getName"));
+               Constants.FORMAT_TABLE_COLUMN_GROUP_NAME,
+               Arrays.asList("getName"));
          ngColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_RUNNING_NODES, Arrays.asList("getRunningNodesNum"));
+               Constants.FORMAT_TABLE_COLUMN_RUNNING_NODES,
+               Arrays.asList("getRunningNodesNum"));
          ngColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_IOSHARES,
                Arrays.asList("getStorage", "getShares"));
          try {
-            CommandsUtils.printInTableFormat(
-                  ngColumnNamesWithGetMethodNames, nodegroups.toArray(),
-                  Constants.OUTPUT_INDENT);
+            CommandsUtils.printInTableFormat(ngColumnNamesWithGetMethodNames,
+                  nodegroups.toArray(), Constants.OUTPUT_INDENT);
          } catch (Exception e) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   cluster.getName(), Constants.OUTPUT_OP_LIST,
@@ -784,11 +904,14 @@ public class ClusterCommands implements CommandMarker {
          System.out.printf("cluster name: %s, distro: %s, status: %s",
                cluster.getName(), cluster.getDistro(), cluster.getStatus());
       } else {
-         System.out.printf("cluster name: %s, distro: %s, topology: %s, status: %s",
-               cluster.getName(), cluster.getDistro(), topology, cluster.getStatus());
+         System.out.printf(
+               "cluster name: %s, distro: %s, topology: %s, status: %s",
+               cluster.getName(), cluster.getDistro(), topology,
+               cluster.getStatus());
       }
       System.out.println();
-      if(cluster.getExternalHDFS() != null && !cluster.getExternalHDFS().isEmpty()) {
+      if (cluster.getExternalHDFS() != null
+            && !cluster.getExternalHDFS().isEmpty()) {
          System.out.printf("external HDFS: %s\n", cluster.getExternalHDFS());
       }
       LinkedHashMap<String, List<String>> ngColumnNamesWithGetMethodNames =
@@ -796,7 +919,8 @@ public class ClusterCommands implements CommandMarker {
       List<NodeGroupRead> nodegroups = cluster.getNodeGroups();
       if (nodegroups != null) {
          ngColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_GROUP_NAME, Arrays.asList("getName"));
+               Constants.FORMAT_TABLE_COLUMN_GROUP_NAME,
+               Arrays.asList("getName"));
          ngColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_ROLES, Arrays.asList("getRoles"));
          ngColumnNamesWithGetMethodNames.put(
@@ -806,6 +930,9 @@ public class ClusterCommands implements CommandMarker {
                Arrays.asList("getCpuNum"));
          ngColumnNamesWithGetMethodNames.put(Constants.FORMAT_TABLE_COLUMN_MEM,
                Arrays.asList("getMemCapacityMB"));
+         ngColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_IOSHARE,
+               Arrays.asList("getIoShares", "toString"));
          ngColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_TYPE,
                Arrays.asList("getStorage", "getType"));
@@ -823,7 +950,8 @@ public class ClusterCommands implements CommandMarker {
                nColumnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_HOST,
                      Arrays.asList("getHostName"));
-               if (topology == TopologyType.RACK_AS_RACK || topology == TopologyType.HVE) {
+               if (topology == TopologyType.RACK_AS_RACK
+                     || topology == TopologyType.HVE) {
                   nColumnNamesWithGetMethodNames.put(
                         Constants.FORMAT_TABLE_COLUMN_RACK,
                         Arrays.asList("getRack"));
@@ -869,7 +997,7 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private void showFailedMsg(String name, List<String> failedMsgList) {
-      //cluster creation failed message.
+      // cluster creation failed message.
       StringBuilder failedMsg = new StringBuilder();
       failedMsg.append(Constants.INVALID_VALUE);
       if (failedMsgList.size() > 1) {
@@ -888,7 +1016,8 @@ public class ClusterCommands implements CommandMarker {
             failedMsg.toString());
    }
 
-   private void validateConfiguration(ClusterCreate cluster, boolean skipConfigValidation, List<String> warningMsgList) {
+   private void validateConfiguration(ClusterCreate cluster,
+         boolean skipConfigValidation, List<String> warningMsgList) {
       // validate blacklist
       ValidateResult blackListResult = validateBlackList(cluster);
       if (blackListResult != null) {
@@ -912,16 +1041,20 @@ public class ClusterCommands implements CommandMarker {
    }
 
    /*
-    * Validate a configuration of the cluster at first. Validate configurations of all of node groups then.
-    * And merge the failed info which have been producted by validation between cluster level and node group
-    * level.
+    * Validate a configuration of the cluster at first. Validate configurations
+    * of all of node groups then. And merge the failed info which have been
+    * producted by validation between cluster level and node group level.
     */
-   private ValidateResult validateConfiguration(ClusterCreate cluster, ValidationType validationType) {
+   private ValidateResult validateConfiguration(ClusterCreate cluster,
+         ValidationType validationType) {
       ValidateResult validateResult = new ValidateResult();
       // validate cluster level Configuration
       ValidateResult vr = null;
-      if (cluster.getConfiguration() != null && !cluster.getConfiguration().isEmpty()) {
-         vr = AppConfigValidationUtils.validateConfig(validationType, cluster.getConfiguration());
+      if (cluster.getConfiguration() != null
+            && !cluster.getConfiguration().isEmpty()) {
+         vr =
+               AppConfigValidationUtils.validateConfig(validationType,
+                     cluster.getConfiguration());
          if (vr.getType() != ValidateResult.Type.VALID) {
             validateResult.setType(vr.getType());
             validateResult.setFailureNames(vr.getFailureNames());
@@ -929,13 +1062,17 @@ public class ClusterCommands implements CommandMarker {
          }
       }
       List<String> failureNames = new LinkedList<String>();
-      Map<String,List<String>> noExistingFileNamesMap = new HashMap<String,List<String>>();
+      Map<String, List<String>> noExistingFileNamesMap =
+            new HashMap<String, List<String>>();
       failureNames.addAll(validateResult.getFailureNames());
       noExistingFileNamesMap.putAll(validateResult.getNoExistFileNames());
       // validate nodegroup level Configuration
       for (NodeGroupCreate nodeGroup : cluster.getNodeGroups()) {
-         if (nodeGroup.getConfiguration() != null && !nodeGroup.getConfiguration().isEmpty()) {
-            vr = AppConfigValidationUtils.validateConfig(validationType, nodeGroup.getConfiguration());
+         if (nodeGroup.getConfiguration() != null
+               && !nodeGroup.getConfiguration().isEmpty()) {
+            vr =
+                  AppConfigValidationUtils.validateConfig(validationType,
+                        nodeGroup.getConfiguration());
             if (vr.getType() != ValidateResult.Type.VALID) {
                validateResult.setType(vr.getType());
                // merge failed names between cluster level and node group level.
@@ -944,12 +1081,16 @@ public class ClusterCommands implements CommandMarker {
                      failureNames.add(failureName);
                   }
                }
-               // merge no existing file names between cluster level and node group level 
-               for (Entry<String, List<String>> noExistingFileNames : vr.getNoExistFileNames().entrySet()) {
+               // merge no existing file names between cluster level and node
+               // group level
+               for (Entry<String, List<String>> noExistingFileNames : vr
+                     .getNoExistFileNames().entrySet()) {
                   String configType = noExistingFileNames.getKey();
                   if (noExistingFileNamesMap.containsKey(configType)) {
-                     List<String> noExistingFilesTemp = noExistingFileNames.getValue();
-                     List<String> noExistingFiles = noExistingFileNamesMap.get(configType);
+                     List<String> noExistingFilesTemp =
+                           noExistingFileNames.getValue();
+                     List<String> noExistingFiles =
+                           noExistingFileNamesMap.get(configType);
                      for (String fileName : noExistingFilesTemp) {
                         if (!noExistingFiles.contains(fileName)) {
                            noExistingFiles.add(fileName);
@@ -957,7 +1098,8 @@ public class ClusterCommands implements CommandMarker {
                      }
                      noExistingFileNamesMap.put(configType, noExistingFiles);
                   } else {
-                     noExistingFileNamesMap.put(configType, noExistingFileNames.getValue());
+                     noExistingFileNamesMap.put(configType,
+                           noExistingFileNames.getValue());
                   }
                }
             }
@@ -968,17 +1110,20 @@ public class ClusterCommands implements CommandMarker {
       return validateResult;
    }
 
-   private void addWhiteListWarning(final String clusterName, ValidateResult whiteListResult,
-         List<String> warningMsgList) {
-      if(whiteListResult.getType() == ValidateResult.Type.WHITE_LIST_NO_EXIST_FILE_NAME) {
-         String noExistingWarningMsg = getValidateWarningMsg(whiteListResult.getNoExistFileNames());
+   private void addWhiteListWarning(final String clusterName,
+         ValidateResult whiteListResult, List<String> warningMsgList) {
+      if (whiteListResult.getType() == ValidateResult.Type.WHITE_LIST_NO_EXIST_FILE_NAME) {
+         String noExistingWarningMsg =
+               getValidateWarningMsg(whiteListResult.getNoExistFileNames());
          if (warningMsgList != null) {
             warningMsgList.add(noExistingWarningMsg);
          }
-      }else if (whiteListResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
-         String noExistingWarningMsg = getValidateWarningMsg(whiteListResult.getNoExistFileNames());
-         String failureNameWarningMsg = getValidateWarningMsg(whiteListResult.getFailureNames(),
-               Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING);
+      } else if (whiteListResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
+         String noExistingWarningMsg =
+               getValidateWarningMsg(whiteListResult.getNoExistFileNames());
+         String failureNameWarningMsg =
+               getValidateWarningMsg(whiteListResult.getFailureNames(),
+                     Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING);
          if (warningMsgList != null) {
             warningMsgList.add(noExistingWarningMsg);
             warningMsgList.add(failureNameWarningMsg);
@@ -986,24 +1131,29 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   private void addBlackListWarning(ValidateResult blackListResult, List<String> warningList) {
+   private void addBlackListWarning(ValidateResult blackListResult,
+         List<String> warningList) {
       if (blackListResult.getType() == ValidateResult.Type.NAME_IN_BLACK_LIST) {
-         String warningMsg = getValidateWarningMsg(blackListResult.getFailureNames(), 
-               Constants.PARAM_CLUSTER_IN_BLACK_LIST_WARNING + Constants.PARAM_CLUSTER_NOT_TAKE_EFFECT);
+         String warningMsg =
+               getValidateWarningMsg(blackListResult.getFailureNames(),
+                     Constants.PARAM_CLUSTER_IN_BLACK_LIST_WARNING
+                           + Constants.PARAM_CLUSTER_NOT_TAKE_EFFECT);
          if (warningList != null) {
             warningList.add(warningMsg);
          }
       }
    }
 
-   private String getValidateWarningMsg(List<String> failureNames, String warningMsg) {
+   private String getValidateWarningMsg(List<String> failureNames,
+         String warningMsg) {
       StringBuilder warningMsgBuff = new StringBuilder();
       if (failureNames != null && !failureNames.isEmpty()) {
          warningMsgBuff.append("Warning: ");
          for (String failureName : failureNames) {
             warningMsgBuff.append(failureName).append(", ");
          }
-         warningMsgBuff.delete(warningMsgBuff.length() - 2, warningMsgBuff.length());
+         warningMsgBuff.delete(warningMsgBuff.length() - 2,
+               warningMsgBuff.length());
          if (failureNames.size() > 1) {
             warningMsgBuff.append(" are ");
          } else {
@@ -1014,35 +1164,39 @@ public class ClusterCommands implements CommandMarker {
       return warningMsgBuff.toString();
    }
 
-   private String getValidateWarningMsg(Map<String,List<String>> noExistingFilesMap) {
+   private String getValidateWarningMsg(
+         Map<String, List<String>> noExistingFilesMap) {
       StringBuilder warningMsgBuff = new StringBuilder();
       if (noExistingFilesMap != null && !noExistingFilesMap.isEmpty()) {
          warningMsgBuff.append("Warning: ");
-         for (Entry<String, List<String>> noExistingFilesEntry : noExistingFilesMap.entrySet()) {
+         for (Entry<String, List<String>> noExistingFilesEntry : noExistingFilesMap
+               .entrySet()) {
             List<String> noExistingFileNames = noExistingFilesEntry.getValue();
             for (String noExistingFileName : noExistingFileNames) {
                warningMsgBuff.append(noExistingFileName).append(", ");
             }
-            warningMsgBuff.delete(warningMsgBuff.length() - 2, warningMsgBuff.length());
+            warningMsgBuff.delete(warningMsgBuff.length() - 2,
+                  warningMsgBuff.length());
             if (noExistingFileNames.size() > 1) {
                warningMsgBuff.append(" are ");
             } else {
                warningMsgBuff.append(" is ");
             }
             warningMsgBuff.append("not existing in ");
-            warningMsgBuff.append(noExistingFilesEntry.getKey()+ " scope , ");
+            warningMsgBuff.append(noExistingFilesEntry.getKey() + " scope , ");
          }
-         warningMsgBuff.replace(warningMsgBuff.length() - 2, warningMsgBuff.length(),". ");
+         warningMsgBuff.replace(warningMsgBuff.length() - 2,
+               warningMsgBuff.length(), ". ");
          warningMsgBuff.append(Constants.PARAM_CLUSTER_NOT_TAKE_EFFECT);
       }
       return warningMsgBuff.toString();
    }
 
    private boolean validateHAInfo(NodeGroupCreate[] nodeGroups) {
-      List<String> haFlagList = Arrays.asList("off","on","ft");
-      if (nodeGroups != null){
-         for(NodeGroupCreate group : nodeGroups){
-            if (!haFlagList.contains(group.getHaFlag().toLowerCase())){
+      List<String> haFlagList = Arrays.asList("off", "on", "ft");
+      if (nodeGroups != null) {
+         for (NodeGroupCreate group : nodeGroups) {
+            if (!haFlagList.contains(group.getHaFlag().toLowerCase())) {
                return false;
             }
          }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<vmSchema>
+    <diskSchema parentSnap="" parent="" name="tmTestVM-sridharr">
+        <disks>
+            <disk mode="persistent" initialSizeMB="1024" externalAddress="VirtualLsiLogicController:0:0" type="OS" name="OS.vmdk"/>
+            <disk mode="persistent" initialSizeMB="1024" externalAddress="VirtualLsiLogicController:0:1" type="BIN" name="BIN.vmdk"/>
+            <disk mode="persistent" initialSizeMB="1024" externalAddress="VirtualLsiLogicController:0:2" type="DATA" name="DATA.vmdk">
+                <diskAttributes>
+                    <diskAttribute>FINAL</diskAttribute>
+                </diskAttributes>
+            </disk>
+        </disks>
+    </diskSchema>
+    <resourceSchema priority="Low" cpuReservationMHz="1024" memReservationSize="0" memSize="1024" numCPUs="1" name="simpleResourceSchema"/>
+    <networkSchema name="simpleNetworkSchema">
+        <networks>
+            <network vcNetwork="VM Network" nicLabel="Network Adapter 1"/>
+        </networks>
+    </networkSchema>
+</vmSchema>

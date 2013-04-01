@@ -52,9 +52,12 @@ public enum HadoopRole {
    MAPR_HIVE_ROLE("mapr_hive"),
    MAPR_HIVE_SERVER_ROLE("mapr_hive_server"),
    MAPR_ZOOKEEPER_ROLE("mapr_zookeeper"),
-   MAPR_CLIENT("mapr_client"),
+   MAPR_CLIENT_ROLE("mapr_client"),
    MAPR_MYSQL_SERVER_ROLE("mapr_mysql_server"),
-   MAPR_MYSQL_CLIENT_ROLE("mapr_mysql_client");
+   MAPR_MYSQL_CLIENT_ROLE("mapr_mysql_client"),
+   // yarn
+   HADOOP_NODEMANAGER_ROLE("hadoop_nodemanager"),
+   HADOOP_RESOURCEMANAGER_ROLE("hadoop_resourcemanager");
 
    private String description;
 

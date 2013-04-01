@@ -1,0 +1,112 @@
+{
+  "nodeGroups":[
+    {
+      "name": "Zookeeper",
+      "roles": [
+        "zookeeper"
+      ],
+      "instanceNum": "[3,3,3]",
+      "instanceType": "[SMALL]",
+      "haFlag": "on",
+      "editable": "false"
+    },
+    {
+      "name": "DataMaster",
+      "description": "It is the VM running the Hadoop NameNode service. It manages HDFS data and assigns tasks to workers. The number of VM can only be one. User can specify size of VM.",
+      "roles": [
+        "hadoop_namenode"
+      ],
+      "groupType": "master",
+      "instanceNum": "[1,1,1]",
+      "instanceType": "[MEDIUM,SMALL,LARGE,EXTRA_LARGE]",
+      "cpuNum": "[2,1,8]",
+      "memCapacityMB": "[7500,3748,max]",
+      "storage": {
+        "type": "[SHARED,LOCAL]",
+        "sizeGB": "[50,10,max]"
+      },
+      "haFlag": "on"
+    },
+    {
+      "name": "ComputeMaster",
+      "description": "It is the VM running the Hadoop JobTracker service. It manages task trackers and assigns tasks to them. The number of VM can only be one. User can specify size of VM.",
+      "roles": [
+        "hadoop_jobtracker"
+      ],
+      "groupType": "master",
+      "instanceNum": "[1,1,1]",
+      "instanceType": "[MEDIUM,SMALL,LARGE,EXTRA_LARGE]",
+      "cpuNum": "[2,1,8]",
+      "memCapacityMB": "[7500,3748,max]",
+      "storage": {
+        "type": "[SHARED,LOCAL]",
+        "sizeGB": "[50,10,max]"
+      },
+      "haFlag": "on"
+    },
+    {
+      "name": "HBaseMaster",
+      "description": "It is the VM running the HBase HMaster service. It manages HRegionservers. User can specify number and size of VMs in this group.",
+      "roles": [
+        "hbase_master"
+      ],
+      "groupType": "master",
+      "instanceNum": "[1,1,max]",
+      "instanceType": "[MEDIUM,SMALL,LARGE,EXTRA_LARGE]",
+      "cpuNum": "[2,1,8]",
+      "memCapacityMB": "[7500,3748,max]",
+      "storage": {
+        "type": "[SHARED,LOCAL]",
+        "sizeGB": "[50,10,max]"
+      },
+      "haFlag": "on"
+    },
+    {
+      "name": "Worker",
+      "description": "They are VMs running the Hadoop DataNode, TaskTracker and HBase HRegionServer services. They store HDFS data, execute tasks and store HRegion. User can specify number and size of VMs in this group.",
+      "roles": [
+        "hadoop_datanode",
+        "hadoop_tasktracker",
+        "hbase_regionserver"
+      ],
+      "instanceType": "[SMALL,MEDIUM,LARGE,EXTRA_LARGE]",
+      "groupType": "worker",
+      "instanceNum": "[3,1,max]",
+      "cpuNum": "[1,1,8]",
+      "memCapacityMB": "[3748,3748,max]",	
+      "storage": {
+        "type": "[LOCAL,SHARED]",
+        "sizeGB": "[50,20,max]"
+      },
+      "haFlag": "off"
+    },
+    {
+      "name": "Client",
+      "description": "They are VMs that contain Hadoop client components. You can access HDFS, submit MapReduce jobs, run Pig scripts, or run HIVE queries from the VM. User can specify the number and size of VMs in this group.",
+      "roles": [
+        "hadoop_client",
+        "hive",
+        "hive_server",
+        "pig",
+        "hbase_client"
+      ],
+      "instanceType": "[SMALL,MEDIUM,LARGE,EXTRA_LARGE]",
+      "groupType": "client",
+      "instanceNum": "[1,0,max]",
+      "cpuNum": "[1,1,8]",
+      "memCapacityMB": "[3748,3748,max]",
+      "storage": {
+        "type": "[SHARED,LOCAL]",
+        "sizeGB": "[50,20,max]"
+      },
+      "haFlag": "off"
+    }
+  ],
+  "configuration": {
+    "zookeeper": {
+      "java.env": {
+        "jvm_option": "-Xmx2g"
+      }
+    }
+  }
+}

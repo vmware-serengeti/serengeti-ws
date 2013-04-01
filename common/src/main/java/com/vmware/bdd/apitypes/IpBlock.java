@@ -14,6 +14,11 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.vmware.bdd.utils.IpAddressUtil;
+
 
 /**
  * This class defines a inclusive interval.
@@ -22,7 +27,14 @@ package com.vmware.bdd.apitypes;
 public class IpBlock {
    private String beginIp;
    private String endIp; // included in the interval
-   
+
+   public IpBlock() {
+   }
+
+   public IpBlock(String beginIp, String endIp) {
+      this.beginIp = beginIp;
+      this.endIp = endIp;
+   }
    public String getBeginIp() {
       return beginIp;
    }
@@ -55,5 +67,19 @@ public class IpBlock {
          sb.append(endIp);
       }
       return sb.toString();
+   }
+
+   public static List<String> getIpAddressFromIpBlock(List<IpBlock> ipBlocks) {
+      List<String> ips = new ArrayList<String>();
+      for (IpBlock block : ipBlocks) {
+         String startIp = block.getBeginIp();
+         String endIp = block.getEndIp();
+         Long startIpl = IpAddressUtil.getAddressAsLong(startIp);
+         Long endIpl = IpAddressUtil.getAddressAsLong(endIp);
+         for (Long ipl = startIpl; ipl <= endIpl; ipl ++) {
+            ips.add(IpAddressUtil.getAddressFromLong(ipl).getHostAddress());
+         }
+      }
+      return ips;
    }
 }

@@ -3,7 +3,6 @@ require "rexml/document"
 include REXML
 require "socket"
 require "fileutils"
-require "fog"
 require "yaml"
 
 #serengeti server user
@@ -15,7 +14,8 @@ SERENGETI_HOME="/opt/serengeti"
 SERENGETI_WEBAPP_HOME="#{SERENGETI_HOME}/conf"
 #serengeti webservice properties
 SERENGETI_WEBAPP_CONF="#{SERENGETI_WEBAPP_HOME}/serengeti.properties"
-SERENGETI_CLOUD_MANAGER_CONF="#{SERENGETI_WEBAPP_HOME}/cloud-manager.vsphere.yaml"
+SERENGETI_VC_CONF="#{SERENGETI_WEBAPP_HOME}/vc.properties"
+
 #cookbook related .chef/knife.rb
 CHEF_CONF="#{SERENGETI_HOME}/.chef/knife.rb"
 #serengeti tmp folder
@@ -43,30 +43,19 @@ SERENGETI_PRIVATE_KEY="/opt/serengeti/.certs/private.pem"
 SERENGETI_KEYSTORE_PATH="/opt/serengeti/.certs/serengeti.jks"
 SERENGETI_KEYSTORE_PWD=%x[openssl rand -base64 6].strip
 
-VCEXT_TOOL_DIR="/opt/serengeti/vcext"
-VCEXT_TOOL_JAR=%x[ls #{VCEXT_TOOL_DIR}/vcext-*.jar].strip
+ENTERPRISE_EDITION_FLAG="/opt/serengeti/etc/enterprise"
 
 GENERATE_CERT_SCRIPT="/opt/serengeti/sbin/generate-certs.sh"
-
-def get_extension_id
-  if File.exist? SERENGETI_CLOUD_MANAGER_CONF
-    vc_info = YAML.load(File.open(SERENGETI_CLOUD_MANAGER_CONF))
-    return vc_info["extension_key"] unless vc_info["extension_key"].nil?
-  end
-  "com.vmware.serengeti." + %x[uuidgen].strip[0..7]
-end
-
-SERENGETI_VCEXT_ID=get_extension_id
-
 CLEAR_OVF_ENV_SCRIPT="/opt/serengeti/sbin/clear-ovf-env.sh"
+
+def is_enterprise_edition?
+  File.exist? ENTERPRISE_EDITION_FLAG
+end
 
 system <<EOF
 /usr/sbin/rabbitmqctl add_vhost /chef
 /usr/sbin/rabbitmqctl add_user chef testing
 /usr/sbin/rabbitmqctl set_permissions -p /chef chef ".*" ".*" ".*"
-mkdir -p "#{SERENGETI_TMP}"
-touch "#{SERENGETI_VC_PROPERTIES}"
-/usr/sbin/vmware-rpctool 'info-get guestinfo.ovfEnv' > "#{SERENGETI_VC_PROPERTIES}"
 mkdir -p "#{SERENGETI_HOME}/.chef"
 cp /etc/chef/*.pem "#{SERENGETI_HOME}/.chef"
 cp "#{SERENGETI_HOME}/.chef/knife.rb" "#{SERENGETI_HOME}/.chef/knife.rb.bak"
@@ -76,6 +65,10 @@ chmod +x "#{SERENGETI_SCRIPTS_HOME}/serengeti-knife-config"
 su - "#{SERENGETI_USER}" -s /usr/bin/expect "#{SERENGETI_SCRIPTS_HOME}/serengeti-knife-config"
 rm -rf "#{SERENGETI_HOME}/.chef/knife.rb"
 mv "#{SERENGETI_HOME}/.chef/knife.rb.bak" "#{SERENGETI_HOME}/.chef/knife.rb"
+
+mkdir -p "#{SERENGETI_TMP}"
+touch "#{SERENGETI_VC_PROPERTIES}"
+/usr/sbin/vmware-rpctool 'info-get guestinfo.ovfEnv' > "#{SERENGETI_VC_PROPERTIES}"
 EOF
 
 properties_doc = Document.new File.new "#{SERENGETI_VC_PROPERTIES}"
@@ -109,6 +102,18 @@ h["evs_thumbprint"] =
   properties_doc.elements["*/ve:vServiceEnvironmentSection/evs:GuestApi/evs:X509Thumbprint"].text
 puts("evs X509Thumbprint: " + "#{h["evs_thumbprint"]}")
 
+VCEXT_INSTANCE_ID="#{h["evs_SelfMoRef"]}"
+
+# see getBootstrapInstanceId() in Configuration.java
+def get_extension_id moref
+  vmid = Integer(moref.split('-')[1])
+  # same to Java Long's hashCode
+  vmid = (vmid >> 32 ^ vmid) & 0xffffffff
+  # convert to hex string
+  "com.vmware.aurora.vcext.instance-#{vmid.to_s(16)}"
+end
+
+SERENGETI_VCEXT_ID = get_extension_id VCEXT_INSTANCE_ID
 #save dhcp init configuration
 FileUtils.cp("#{ETH_CONFIG_FILE}", "#{ETH_CONFIG_FILE_DHCP}")
 FileUtils.cp("#{DNS_CONFIG_FILE}", "#{DNS_CONFIG_FILE_DHCP}")
@@ -150,12 +155,6 @@ puts("distro ip: #{distroip}")
 fqdn_url="chef_server_url         " + "'http:\\/\\/#{ethip}:4000'"
 puts("fqdn_url: #{fqdn_url}")
 
-#init resource flag, it records the initial value for initResources
-#if fog or tomcat failed, we also init resources after reboot or re-configuration
-if ("#{h["initResources"]}" == "True") then
-   FileUtils.touch("#{SERENGETI_HOME}/logs/not-init")
-end
-
 system <<EOF
 sed -i "s/chef_server_url.*/#{fqdn_url}/" "#{CHEF_CONF}" #update CHEF_URL
 
@@ -172,12 +171,12 @@ sed -i "s|yum_server_ip|#{ethip}|g" "#{SERENGETI_HOME}/www/distros/manifest.samp
 chmod +x "#{SERENGETI_SCRIPTS_HOME}/serengeti-chef-init.sh"
 su - "#{SERENGETI_USER}" -s /bin/bash "#{SERENGETI_SCRIPTS_HOME}/serengeti-chef-init.sh"
 
-#get serengeti cli jar name automatically
+# get serengeti cli jar name automatically
 clijarfullname=`find /opt/serengeti/cli -name serengeti-cli*.jar`
 clijarname=${clijarfullname##*\/}
 echo ${clijarname}
 
-#touch serengeti cli bash
+# touch serengeti cli bash
 chown serengeti:serengeti "#{SERENGETI_CLI_HOME}" -R #
 touch "#{SERENGETI_SCRIPTS_HOME}/serengeti"
 chown serengeti:serengeti "#{SERENGETI_SCRIPTS_HOME}/serengeti"
@@ -204,96 +203,36 @@ else
 fi
 SHELLEOF
 
-#write system configuration
+# write system configuration
 echo "PATH=\\$PATH:\"#{SERENGETI_SCRIPTS_HOME}\"" >> /etc/profile
-echo "CLOUD_MANAGER_CONFIG_DIR=\"#{SERENGETI_HOME}\"/conf" >> /etc/profile
 
-# generate certificate and private key
+# generate keystores
 bash #{GENERATE_CERT_SCRIPT} #{SERENGETI_KEYSTORE_PWD}
-
-# register serengeti server as vc extension service
-echo "registering serengeti server as vc ext service"
-java -jar #{VCEXT_TOOL_JAR} \
-  -evsURL "#{h["evs_url"]}" \
-  -evsToken "#{h["evs_token"]}" \
-  -evsThumbprint "#{h["evs_thumbprint"]}" \
-  -extKey "#{SERENGETI_VCEXT_ID}" \
-  -cert "#{SERENGETI_CERT_FILE}"
-ret=$?
-if [ $ret != 0 ]; then
-  echo "failed to register serengeti server as vc ext service"
-  exit 1
-fi
-
 EOF
-
-def get_connection_info(vc_info) 
-  cloud_server = 'vsphere'
-  info = {:provider => cloud_server,
-    :vsphere_server => vc_info["evs_IP"]
-  }
-
-  info[:cert] = SERENGETI_CERT_FILE
-  info[:key] = SERENGETI_PRIVATE_KEY
-  info[:extension_key] = SERENGETI_VCEXT_ID
-
-  info
-end
-
-conn_info = get_connection_info(h)
-connection = Fog::Compute.new(conn_info)
-
-mob = connection.get_vm_mob_ref_by_moid(h["evs_SelfMoRef"])
-vmdatastores = mob.datastore.map {|ds| "#{ds.info.name}"}     #serengeti server Datastore name
-puts("serengeti server datastore: " + "#{vmdatastores[0]}")
-vmrp = "#{mob.resourcePool.parent.name}"		      #serengeti server resource pool name
-puts("serengeti server resource pool: " + "#{vmrp}")
-vApp_name = "#{mob.parentVApp.name}"                               #serengeti vApp name
-puts("serengeti vApp name: " + "#{vApp_name}")
-vmcluster = "#{mob.resourcePool.owner.name}" #serengeti server vc cluster name
-puts("serengeti server vc cluster: " + "#{vmcluster}")
-datacenter = mob.resourcePool.owner
-while datacenter.parent
-  break if datacenter.class.to_s == 'Datacenter'
-  datacenter = datacenter.parent
-end
-vcdatacenter = datacenter.name #serengeti server datastore name
-puts("serengeti server datacenter: " + "#{vcdatacenter}")
-vms = mob.resourcePool.vm
-template_mob = vms.find {|v| v.name == "#{h["templatename"]}"}
-template_moid = template_mob._ref
-puts("template id: " + "#{template_moid}")
-
-vcuser = "#{h["vcusername"]}"
-puts("vc user: " + "#{vcuser}")
-updateVCPassword = "#{h["vcpassword"]}".gsub("$", "\\$")
-templateid = "template_id = " + "#{template_moid}"
-vcdatacenterline = "vc_datacenter = " + "#{vcdatacenter}"
-
-serengeti_root_folder_prefix = Hash[File.read("#{SERENGETI_WEBAPP_CONF}").split("\n").map{|line|line.delete(" ").strip.split('=') if line.strip[0]!='#'}]['serengeti.root_folder_prefix']
-serengeti_uuid = "#{serengeti_root_folder_prefix}-#{vApp_name}"
 
 system <<EOF
 
-#stop tomcat for update serengeti.properties
+# stop tomcat for update serengeti.properties
 /etc/init.d/tomcat stop
 
-# update serengeti uuid
-sed -i "s/serengeti.uuid =.*/serengeti.uuid = #{vApp_name}/" "#{SERENGETI_WEBAPP_CONF}"
-
-#update serengeti.properties for web service
+# update serengeti.properties for web service
 sed -i "s/distro_root =.*/#{distroip}/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/vc_datacenter = .*/#{vcdatacenterline}/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/template_id = .*/#{templateid}/" "#{SERENGETI_WEBAPP_CONF}"
 
-echo "vc_addr: #{h["evs_IP"]}" > "#{SERENGETI_CLOUD_MANAGER_CONF}"
+if [ "#{h["initResources"]}" == "True" ]; then
+  sed -i "s/init_resource = .*/init_resource = true/" "#{SERENGETI_WEBAPP_CONF}"
+else
+  sed -i "s/init_resource = .*/init_resource = false/" "#{SERENGETI_WEBAPP_CONF}"
+fi
 
-echo "key: #{SERENGETI_PRIVATE_KEY}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
-echo "cert: #{SERENGETI_CERT_FILE}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
-echo "extension_key: #{SERENGETI_VCEXT_ID}" >> "#{SERENGETI_CLOUD_MANAGER_CONF}"
-
-chmod 400 "#{SERENGETI_CLOUD_MANAGER_CONF}"
-chown serengeti:serengeti "#{SERENGETI_CLOUD_MANAGER_CONF}"
+# update vc properties
+sed -i "s|vim.host =.*$|vim.host = #{h["evs_IP"]}|g" "#{SERENGETI_VC_CONF}"
+sed -i "s|vim.port =.*$|vim.port = 443|g" "#{SERENGETI_VC_CONF}"
+sed -i "s|vim.evs_url =.*$|vim.evs_url = #{h["evs_url"]}|g"  "#{SERENGETI_VC_CONF}"
+sed -i "s|vim.evs_token =.*$|vim.evs_token = #{h["evs_token"]}|g" "#{SERENGETI_VC_CONF}"
+sed -i "s|vim.thumbprint =.*$|vim.thumbprint = #{h["evs_thumbprint"]}|g" "#{SERENGETI_VC_CONF}"
+sed -i "s|cms.keystore =.*$|cms.keystore = #{SERENGETI_KEYSTORE_PATH}|g" "#{SERENGETI_VC_CONF}"
+sed -i "s|cms.keystore_pswd =.*$|cms.keystore_pswd = #{SERENGETI_KEYSTORE_PWD}|g" "#{SERENGETI_VC_CONF}"
+sed -i "s|vim.cms_moref =.*$|vim.cms_moref = VirtualMachine:#{h["evs_SelfMoRef"]}|g" "#{SERENGETI_VC_CONF}"
 
 #kill tomcat using shell direclty to avoid failing to stop tomcat
 pidlist=`ps -ef|grep tomcat | grep -v "grep"|awk '{print $2}'`
@@ -311,24 +250,8 @@ else
 fi
 
 #start serengeti web service
+chmod a+w #{SERENGETI_WEBAPP_CONF}
 /etc/init.d/tomcat start
-
-#serengeti cli connect first
-connecthost="connect --host localhost:8080 --username serengeti --password password"
-su - "#{SERENGETI_USER}" -c "#{SERENGETI_SCRIPTS_HOME}/serengeti \\"${connecthost}\\""
-
-#add default resourcepool, datastore, and dhcp network
-if [ "#{h["initResources"]}" == "True" ]; then
-   rpadd="resourcepool add --name defaultRP --vcrp \\"#{vmrp}\\" --vccluster \\"#{vmcluster}\\""
-   dsadd="datastore add --name defaultDSShared --spec \\"#{vmdatastores[0]}\\" --type SHARED"
-   ntadd="network add --name defaultNetwork --portGroup \\"#{h["networkName"]}\\" --dhcp"
-   touch "#{SERENGETI_CLI_HOME}/initResources"
-   echo ${rpadd} >> "#{SERENGETI_CLI_HOME}/initResources"
-   echo ${dsadd} >> "#{SERENGETI_CLI_HOME}/initResources"
-   echo ${ntadd} >> "#{SERENGETI_CLI_HOME}/initResources"
-   su - "#{SERENGETI_USER}" -c "#{SERENGETI_SCRIPTS_HOME}/serengeti --cmdfile #{SERENGETI_CLI_HOME}/initResources"
-   rm -rf "#{SERENGETI_HOME}/logs/not-init"
-fi
 
 # generate random password for root/serengeti user when lockdown
 if [ -e /opt/serengeti/etc/lock_down ]; then
@@ -348,11 +271,22 @@ rm -rf "/home/#{SERENGETI_USER}/.ssh"
 su - "#{SERENGETI_USER}" -c "ssh-keygen -t rsa -N '' -f /home/#{SERENGETI_USER}/.ssh/id_rsa"
 
 # init vhm property file
+init_uuid=`grep "^serengeti.initialize.uuid" #{SERENGETI_WEBAPP_CONF} | awk '{print $3}'`
+while [ "${init_uuid}" = "" -o "${init_uuid}" = "true" ]
+do
+   sleep 1
+   echo "waiting serengeti uuid is intialized"
+   init_uuid=`grep "^serengeti.initialize.uuid" #{SERENGETI_WEBAPP_CONF} | awk '{print $3}'`
+done
+serengeti_vapp_name=`grep "^serengeti.uuid" #{SERENGETI_WEBAPP_CONF} | awk '{print $3}'`
+serengeti_root_folder_prefix=`grep "^serengeti.root_folder_prefix" #{SERENGETI_WEBAPP_CONF} | awk '{print $3}'`
+serengeti_uuid="${serengeti_root_folder_prefix}-${serengeti_vapp_name}"
+echo serengeti_uuid=${serengeti_uuid} 
+chmod a-w #{SERENGETI_WEBAPP_CONF}
+
 if [ -e "#{VHM_CONF}" ]; then
-  sed -i "s|uuid=.*$|uuid=#{serengeti_uuid}|g" "#{VHM_CONF}"
+  sed -i "s|uuid=.*$|uuid=${serengeti_uuid}|g" "#{VHM_CONF}"
   sed -i "s|vCenterId=.*$|vCenterId=#{h["evs_IP"]}|g" "#{VHM_CONF}"
-  sed -i "s|vCenterUser=.*$|vCenterUser=#{vcuser}|g"  "#{VHM_CONF}"
-  sed -i "s|vCenterPwd=.*$|vCenterPwd=#{updateVCPassword}|g" "#{VHM_CONF}"
   sed -i "s|keyStorePath=.*$|keyStorePath=#{SERENGETI_KEYSTORE_PATH}|g" "#{VHM_CONF}"
   sed -i "s|keyStorePwd=.*$|keyStorePwd=#{SERENGETI_KEYSTORE_PWD}|g" "#{VHM_CONF}"
   sed -i "s|extensionKey=.*$|extensionKey=#{SERENGETI_VCEXT_ID}|g" "#{VHM_CONF}"
@@ -360,6 +294,8 @@ if [ -e "#{VHM_CONF}" ]; then
   sed -i "s|vHadoopHome=.*$|vHadoopHome=/usr/lib/hadoop|g" "#{VHM_CONF}"
   sed -i "s|vHadoopExcludeTTFile=.*$|vHadoopExcludeTTFile=/usr/lib/hadoop/conf/mapred.hosts.exclude|g" "#{VHM_CONF}"
   sed -i "s|vHadoopPrvkeyFile=.*$|vHadoopPrvkeyFile=/home/serengeti/.ssh/id_rsa|g" "#{VHM_CONF}"
+  grep -q "vCenterThumbprint" "#{VHM_CONF}" || echo "vCenterThumbprint=" >> "#{VHM_CONF}"
+  sed -i "s|vCenterThumbprint=.*$|vCenterThumbprint=#{h["evs_thumbprint"]}|g" "#{VHM_CONF}"
   chmod 400 "#{VHM_CONF}"
   chown serengeti:serengeti "#{VHM_CONF}"
 fi

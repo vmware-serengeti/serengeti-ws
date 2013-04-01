@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+   xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="
+   http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/batch
+   http://www.springframework.org/schema/batch/spring-batch.xsd">
+
+   <beans:bean id="jobListener"
+      class="com.vmware.bdd.service.job.SimpleJobExecutionListener">
+      <beans:property name="jobExecutionStatusHolder"
+         ref="jobExecutionStatusHolder" />
+   </beans:bean>
+   <beans:bean id="stepListener"
+      class="com.vmware.bdd.service.job.SimpleStepExecutionListener">
+      <beans:property name="jobRegistry" ref="jobRegistry" />
+      <beans:property name="jobExecutionStatusHolder"
+         ref="jobExecutionStatusHolder" />
+   </beans:bean>
+
+   <beans:bean name="placementPlanTasklet"
+      class="com.vmware.bdd.manager.job.PlacementPlanTasklet">
+      <beans:property name="jobExecutionStatusHolder"
+         ref="jobExecutionStatusHolder" />
+   </beans:bean>
+   <beans:bean name="provisionTasklet"
+      class="com.vmware.bdd.manager.job.ProvisionTasklet">
+      <beans:property name="jobExecutionStatusHolder"
+         ref="jobExecutionStatusHolder" />
+   </beans:bean>
+   <beans:bean name="installTasklet"
+      class="com.vmware.bdd.manager.job.InstallTasklet">
+      <beans:property name="jobExecutionStatusHolder"
+         ref="jobExecutionStatusHolder" />
+   </beans:bean>
+
+   <job id="helloWorldJob" job-repository="jobRepository">
+      <step id="plan" next="provision">
+         <tasklet ref="placementPlanTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="provision" next="install">
+         <tasklet ref="provisionTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="install">
+         <tasklet ref="installTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <listeners>
+         <listener ref="jobListener" />
+      </listeners>
+   </job>
+
+</beans:beans>

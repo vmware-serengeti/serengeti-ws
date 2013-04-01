@@ -1,0 +1,40 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>com.vmware.bdd</groupId>
+   <artifactId>svr-test</artifactId>
+   <packaging>jar</packaging>
+   <name>Serengeti Server Test Module</name>
+   <url>http://serengeti.cloudfoundry.com/</url>
+   <version>${serengeti.version}</version>
+
+   <parent>
+      <groupId>com.vmware.bdd</groupId>
+      <artifactId>serengeti-master</artifactId>
+      <version>${serengeti.version}</version>
+      <relativePath>../../pom.xml</relativePath>
+   </parent>
+
+   <dependencies>
+      <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>cluster-mgmt</artifactId>
+         <version>${serengeti.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.testng</groupId>
+         <artifactId>testng</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.googlecode.jmockit</groupId>
+         <artifactId>jmockit</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.mockito</groupId>
+         <artifactId>mockito-core</artifactId>
+         <scope>test</scope>
+      </dependency>
+   </dependencies>
+</project>

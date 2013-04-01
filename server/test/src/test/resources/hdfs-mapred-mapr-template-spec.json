@@ -1,0 +1,80 @@
+{
+  "distro":"mapr",
+  "groups":[
+    {
+      "name":"master",
+      "roles":[
+        "mapr_cldb", 
+        "mapr_nfs",
+        "mapr_fileserver",
+        "mapr_jobtracker",
+        "mapr_tasktracker",
+        "mapr_webserver",
+        "mapr_metrics"
+      ],
+      "cpu":2,
+      "memory":7680,
+      "storage" : {
+        "size": 50
+      },
+      "instance_num":3,
+      "ha":"on"
+    },
+    {
+      "name":"worker",
+      "roles":[
+        "mapr_nfs",
+        "mapr_fileserver",
+        "mapr_tasktracker"
+      ],
+      "cpu":2,
+      "memory":4096,
+      "storage" : {
+        "size": 50
+      },
+      "instance_num":3,
+      "ha":"off"
+    },
+    {
+      "name":"client",
+      "roles":[
+        "mapr_client",
+        "mapr_pig",
+        "mapr_hive"
+      ],
+      "cpu":2,
+      "memory":4096,
+      "storage" : {
+        "size": 50
+      },
+      "instance_num":1,
+      "ha":"off"
+    },
+    {
+      "name":"zookeeper",
+      "roles":[
+        "mapr_zookeeper"
+      ],
+      "cpu":1,
+      "memory":2048,
+      "storage" : {
+        "size": 20
+      },
+      "instance_num":3,
+      "ha":"on"
+    },
+    {
+      "name":"mysql",
+      "roles":[
+        "mapr_mysql_server"
+      ],
+      "cpu":1,
+      "memory":2048,
+      "storage" : {
+        "size": 20
+      },
+      "instance_num":1,
+      "ha":"off"
+    }
+  ]
+}

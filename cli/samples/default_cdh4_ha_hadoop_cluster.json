@@ -62,8 +62,8 @@
         "hadoop_datanode"
       ],
       "instanceNum": 3,
-      "cpuNum": 2,
-      "memCapacityMB": 7500,
+      "cpuNum": 1,
+      "memCapacityMB": 3748,
       "storage": {
         "type": "LOCAL",
         "sizeGB": 50

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<vmSchema>
+    <diskSchema parentSnap="snap0" parent="tmTestVM-sridharr" name="testCompLayer">
+        <disks>
+            <disk datastore="hd1" mode="persistent" initialSizeMB="1024" externalAddress="ParaVirtualSCSIController:1:3" type="DATA" name="DATA.vmdk">
+                <diskAttributes>
+                    <diskAttribute>PROMOTE</diskAttribute>
+                </diskAttributes>
+            </disk>
+            <disk datastore="hd1" mode="persistent" initialSizeMB="1024" externalAddress="VirtualLsiLogicController:0:4" type="ARCHIVE" name="ARCHIVE.vmdk">
+                <diskAttributes>
+                    <diskAttribute>PROMOTE</diskAttribute>
+                </diskAttributes>
+            </disk>
+        </disks>
+    </diskSchema>
+    <resourceSchema priority="Low" cpuReservationMHz="1024" memReservationSize="0" memSize="1024" numCPUs="1" name="simpleResourceSchema"/>
+    <networkSchema parent="tmTestVM-sridharr" name="simpleNetworkSchema">
+        <networks>
+            <network vcNetwork="VM Network" nicLabel="Network Adapter 2"/>
+        </networks>
+    </networkSchema>
+</vmSchema>

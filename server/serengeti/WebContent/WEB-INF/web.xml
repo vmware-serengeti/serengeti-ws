@@ -10,8 +10,7 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-		   WEB-INF/applicationContext.xml
-           WEB-INF/spring-security-context.xml
+		   WEB-INF/spring/*-context.xml
 		</param-value>
 	</context-param>
 
@@ -53,13 +52,21 @@
    </filter-mapping>
 
 	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>		
+	</listener>
+	
+	<listener>
+		<listener-class>com.vmware.bdd.web.ResourceInitializer</listener-class>
 	</listener>
 
 	<!-- Servlet for REST APIs -->
 	<servlet>
 		<servlet-name>restapi</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/spring/restapi-servlet.xml</param-value>
+		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>

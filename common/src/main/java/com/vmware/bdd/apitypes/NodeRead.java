@@ -55,7 +55,18 @@ public class NodeRead {
    private int totalRAMInMB;
 
    @Expose
+   private List<String> volumes;
+
+   @Expose
    private int totalCPUInMHz;
+
+   public List<String> getVolumes() {
+      return volumes;
+   }
+
+   public void setVolumes(List<String> volumes) {
+      this.volumes = volumes;
+   }
 
    public String getName() {
       return name;

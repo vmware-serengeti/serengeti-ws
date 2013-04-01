@@ -1,0 +1,66 @@
+[
+  {
+  	"vmName" : "hadoop-master-0",
+  	"nodeGroup" : {},
+  	"cluster" : {},
+  	"targetVcCluster" : "cluster-ws",
+  	"targetRp" : "rp1",
+  	"targetHost" : "10.1.1.1"
+  },
+  {
+    "vmName" : "hadoop-data-0",
+  	"nodeGroup" : {},
+  	"cluster" : {},
+  	"targetVcCluster" : "cluster-ws",
+  	"targetRp" : "rp1",
+  	"targetHost" : "10.1.1.1"
+  },
+  {
+    "vmName" : "hadoop-data-1",
+  	"nodeGroup" : {},
+  	"cluster" : {},
+  	"targetVcCluster" : "cluster-ws",
+  	"targetRp" : "rp1",
+  	"targetHost" : "10.1.1.2"
+  },
+  {
+    "vmName" : "hadoop-compute-0",
+  	"nodeGroup" : {},
+  	"cluster" : {},
+  	"targetVcCluster" : "cluster-ws",
+  	"targetRp" : "rp1",
+  	"targetHost" : "10.1.1.1"
+  },
+  {
+    "vmName" : "hadoop-compute-2",
+  	"nodeGroup" : {},
+  	"cluster" : {},
+  	"targetVcCluster" : "cluster-ws",
+  	"targetRp" : "rp1",
+  	"targetHost" : "10.1.1.2"
+  },
+  {
+    "vmName" : "hadoop-compute-3",
+  	"nodeGroup" : {},
+  	"cluster" : {},
+  	"targetVcCluster" : "cluster-ws",
+  	"targetRp" : "rp1",
+  	"targetHost" : "10.1.1.2"
+  },
+  {
+    "vmName" : "hadoop-compute-4",
+    "nodeGroup" : {},
+  	"cluster" : {},
+  	"targetVcCluster" : "cluster-ws",
+  	"targetRp" : "rp1",
+  	"targetHost" : "10.1.1.3"
+  },
+  {
+    "vmName" : "hadoop-compute-5",
+  	"nodeGroup" : {},
+  	"cluster" : {},
+  	"targetVcCluster" : "cluster-ws",
+  	"targetRp" : "rp1",
+  	"targetHost" : "10.1.1.3"
+  }
+]

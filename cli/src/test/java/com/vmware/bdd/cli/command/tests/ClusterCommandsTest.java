@@ -460,7 +460,7 @@ public class ClusterCommandsTest extends MockRestServer {
         task.setType(Type.INNER);
         task.setProgress(0.8);
         task.setProgressMessage("some more details here:");
-        task.setStatus(Status.RUNNING);
+        task.setStatus(Status.STARTED);
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/task/12", HttpMethod.GET, HttpStatus.OK,
                 mapper.writeValueAsString(task));
 
@@ -482,7 +482,7 @@ public class ClusterCommandsTest extends MockRestServer {
                 HttpStatus.OK, mapper.writeValueAsString(cluster));
 
         task.setProgress(1.0);
-        task.setStatus(Status.SUCCESS);
+        task.setStatus(Status.COMPLETED);
         buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/task/12", HttpMethod.GET, HttpStatus.OK,
                 mapper.writeValueAsString(task));
 
@@ -670,86 +670,5 @@ public class ClusterCommandsTest extends MockRestServer {
      } catch (Exception e) {
         Assert.fail("failed to parse cluster spec", e);
      }
-   }
-
-   @Test
-   public void testLimitUnlimitClusterWithProgress() throws  Exception {
-      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
-      ObjectMapper mapper = new ObjectMapper();
-      StorageRead sr1 = new StorageRead();
-      sr1.setType("Type1");
-      sr1.setSizeGB(100);
-      StorageRead sr2 = new StorageRead();
-      sr2.setType("Type2");
-      sr2.setSizeGB(200);
-      NodeRead nr1 = new NodeRead();
-      nr1.setHostName("test1.vmware.com");
-      nr1.setIp("192.168.0.1");
-      nr1.setName("node1");
-      nr1.setStatus("Service Ready");
-      NodeRead nr2 = new NodeRead();
-      nr2.setHostName("test2.vmware.com");
-      nr2.setIp("192.168.0.2");
-      nr2.setName("node2");
-      nr2.setStatus("Service Ready");
-      NodeRead nr3 = new NodeRead();
-      nr3.setHostName("test3.vmware.com");
-      nr3.setIp("192.168.0.3");
-      nr3.setName("node3");
-      nr3.setStatus("Service Ready");
-      NodeRead nr4 = new NodeRead();
-      nr4.setHostName("test4.vmware.com");
-      nr4.setIp("192.168.0.4");
-      nr4.setName("node4");
-      nr4.setStatus("create");
-      List<NodeRead> instances1 = new LinkedList<NodeRead>();
-      instances1.add(nr1);
-      instances1.add(nr2);
-      List<NodeRead> instances2 = new LinkedList<NodeRead>();
-      instances2.add(nr3);
-      instances2.add(nr4);
-      List<String> roles1 = new LinkedList<String>();
-      roles1.add(Constants.ROLE_HADOOP_JOB_TRACKER);
-      List<String> roles2 = new LinkedList<String>();
-      roles2.add(Constants.ROLE_HADOOP_TASKTRACKER);
-      NodeGroupRead ngr1 = new NodeGroupRead();
-      ngr1.setName("NodeGroup1");
-      ngr1.setCpuNum(6);
-      ngr1.setMemCapacityMB(2048);
-      ngr1.setStorage(sr1);
-      ngr1.setInstanceNum(1);
-      ngr1.setInstances(instances1);
-      ngr1.setRoles(roles1);
-      NodeGroupRead ngr2 = new NodeGroupRead();
-      ngr2.setName("NodeGroup2");
-      ngr2.setCpuNum(12);
-      ngr2.setMemCapacityMB(2048);
-      ngr2.setStorage(sr2);
-      ngr2.setInstanceNum(20);
-      ngr2.setInstances(instances2);
-      ngr2.setRoles(roles2);
-      ClusterRead cr1 = new ClusterRead();
-      cr1.setName("cluster1");
-      cr1.setDistro("distro1");
-      cr1.setInstanceNum(10);
-      cr1.setStatus(ClusterRead.ClusterStatus.RUNNING);
-      List<NodeGroupRead> nodeGroupRead1 = new LinkedList<NodeGroupRead>();
-      nodeGroupRead1.add(ngr1);
-      nodeGroupRead1.add(ngr2);
-      cr1.setNodeGroups(nodeGroupRead1);
-      
-      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
-            mapper.writeValueAsString(cr1));
-      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/limit", HttpMethod.PUT, 
-            HttpStatus.NO_CONTENT, "");
-      clusterCommands.limitCluster("cluster1", "NodeGroup2", 1);
-
-      setup();
-      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
-            mapper.writeValueAsString(cr1));
-      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/limit", HttpMethod.PUT, 
-            HttpStatus.NO_CONTENT, "");
-      clusterCommands.unlimitCluster("cluster1", "NodeGroup2");
-      CookieCache.clear();
    }
 }

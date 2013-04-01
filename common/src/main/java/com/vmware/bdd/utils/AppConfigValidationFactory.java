@@ -136,19 +136,21 @@ public class AppConfigValidationFactory {
       return true;
    }
 
-   //    process non key-value xml files such as fair-scheduler.xml below
-//    <?xml version="1.0"?>
-//    <allocations>
-//      <pool name="sample_pool">
-//        <minMaps>5</minMaps>
-//        <minReduces>5</minReduces>
-//        <weight>2.0</weight>
-//      </pool>
-//      <user name="sample_user">
-//        <maxRunningJobs>6</maxRunningJobs>
-//      </user>
-//      <userMaxJobsDefault>3</userMaxJobsDefault>
-//    </allocations>
+   /*
+    * process non key-value xml files such as fair-scheduler.xml below
+    * <?xml version="1.0"?>
+    *   <allocations>
+    *     <pool name="sample_pool">
+    *       <minMaps>5</minMaps>
+    *       <minReduces>5</minReduces>
+    *       <weight>2.0</weight>
+    *     </pool>
+    *     <user name="sample_user">
+    *       <maxRunningJobs>6</maxRunningJobs>
+    *     </user>
+    *    <userMaxJobsDefault>3</userMaxJobsDefault>
+    *  </allocations>
+    */
     @SuppressWarnings("unchecked")
    private static void valdiateSpecialFileFormat(String configFileName,
          Object configProperties, ValidateResult validateResult) {

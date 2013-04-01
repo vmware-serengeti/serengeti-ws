@@ -19,6 +19,7 @@ import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * JSON object for VC cluster definition
@@ -30,14 +31,20 @@ public class VcCluster {
    @Expose
    private String name;
    @Expose
-   private List<String> vc_rps;
+   @SerializedName("vc_rps")
+   private List<String> vcRps;
 
    public VcCluster(String name, List<String> rps) {
       this.name = name;
-      this.vc_rps = rps;
-      if (vc_rps == null) {
-         vc_rps = new ArrayList<String>();
+      this.vcRps = rps;
+      if (vcRps == null) {
+         vcRps = new ArrayList<String>();
       }
+   }
+   
+   public VcCluster(VcCluster other) {
+      this.name = other.name;
+      this.vcRps = other.vcRps;
    }
 
    public String getName() {
@@ -48,22 +55,26 @@ public class VcCluster {
       this.name = name;
    }
 
-   public List<String> getVc_rps() {
-      return vc_rps;
+   public void setVcRps(List<String> vcRps) {
+      this.vcRps = vcRps;
+   }
+
+   public List<String> getVcRps() {
+      return vcRps;
    }
 
    public void addVCResourcePools(List<String> rps) {
       if (rps == null) {
          return;
       }
-      vc_rps.addAll(rps);
+      vcRps.addAll(rps);
    }
 
    public void addVCResourcePool(String rp) {
       if (rp == null) {
          return;
       }
-      vc_rps.add(rp);
+      vcRps.add(rp);
    }
    
    public String toString() {

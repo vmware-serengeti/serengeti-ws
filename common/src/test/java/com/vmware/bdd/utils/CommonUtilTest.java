@@ -15,6 +15,7 @@
 package com.vmware.bdd.utils;
 
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,4 +95,12 @@ public class CommonUtilTest {
       assertEquals(CommonUtil.validateVcDataStoreNames(errorVcDataStoreNames2), false);
    }
 
+   @Test
+   public void testGetDatastoreJavaPattern() {
+      String datastore = "(192.168.0.1)datastore";
+      String pattern = CommonUtil.getDatastoreJavaPattern("(192.168.0.1)datasto?e");
+      assertTrue(datastore.matches(pattern));
+      pattern = CommonUtil.getDatastoreJavaPattern("(192.168.0.1)data*");
+      assertTrue(datastore.matches(pattern));
+   }
 }

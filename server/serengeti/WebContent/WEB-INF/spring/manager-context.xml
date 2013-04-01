@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<context:component-scan base-package="com.vmware.bdd.service.impl"></context:component-scan>
+
+	<bean id="clusterConfigMgr" class="com.vmware.bdd.manager.ClusterConfigManager">
+		<property name="rpMgr">
+			<ref bean="resourcePoolService" />
+		</property>
+		<property name="networkMgr">
+			<ref bean="networkService" />
+		</property>
+		<property name="distroMgr">
+			<ref bean="distroManager" />
+		</property>
+		<property name="datastoreMgr">
+			<ref bean="datastoreService" />
+		</property>
+		<property name="rackInfoMgr">
+			<ref bean="rackInfoManager" />
+		</property>
+	</bean>
+	<bean id="distroManager" class="com.vmware.bdd.manager.DistroManager" />
+
+	<bean id="rackInfoManager" class="com.vmware.bdd.manager.RackInfoManager" />
+
+	<bean id="clusterEntityManager" class="com.vmware.bdd.manager.ClusterEntityManager" />
+
+	<bean id="clusterManager" class="com.vmware.bdd.manager.ClusterManager">
+		<property name="clusterConfigMgr">
+			<ref bean="clusterConfigMgr" />
+		</property>
+		<property name="networkManager">
+			<ref bean="networkService" />
+		</property>
+		<property name="jobManager">
+			<ref bean="jobManager" />
+		</property>
+		<property name="distroManager">
+			<ref bean="distroManager" />
+		</property>
+	</bean>
+
+	<bean id="jobManager" class="com.vmware.bdd.manager.JobManager">
+		<property name="jobRepository">
+			<ref bean="jobRepository" />
+		</property>
+		<property name="jobLauncher">
+			<ref bean="jobLauncher" />
+		</property>
+		<property name="jobExplorer">
+			<ref bean="jobExplorer" />
+		</property>
+		<property name="jobOperator">
+			<ref bean="jobOperator" />
+		</property>
+		<property name="jobRegistry">
+			<ref bean="jobRegistry" />
+		</property>
+		<property name="jobExecutionStatusHolder">
+			<ref bean="jobExecutionStatusHolder" />
+		</property>
+	</bean>
+
+	<bean id="clusteringService" class="com.vmware.bdd.service.impl.ClusteringService">
+		<property name="configMgr">
+			<ref bean="clusterConfigMgr" />
+		</property>
+		<property name="networkMgr">
+			<ref bean="networkService" />
+		</property>
+	</bean>
+
+	<bean id="executionService" class="com.vmware.bdd.service.impl.ExecutionService" />
+
+</beans>

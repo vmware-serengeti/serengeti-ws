@@ -131,7 +131,7 @@ public class RestClient {
          }
       } catch (CliRestException cliRestException) {
          if (cliRestException.getStatus() == HttpStatus.UNAUTHORIZED) {
-            System.out.println(Constants.CONNECT_UNAUTHORIZATION);
+            System.out.println(Constants.CONNECT_UNAUTHORIZATION_CONNECT);
             //recover old hostUri
             hostUri = oldHostUri;
             return Connect.ConnectType.UNAUTHORIZATION;
@@ -378,24 +378,25 @@ public class RestClient {
             } catch (InterruptedException ex) {
                //ignore
             }
-         } while (taskRead.getStatus() != TaskRead.Status.SUCCESS
+         } while (taskRead.getStatus() != TaskRead.Status.COMPLETED
                && taskRead.getStatus() != TaskRead.Status.FAILED);
 
          String logdir = taskRead.getWorkDir();
          String errorMsg = taskRead.getErrorMessage();
          if (taskRead.getStatus().equals(TaskRead.Status.FAILED)) {
             if (!CommandsUtils.isBlank(logdir)) {
-               String outputErrorInfo = Constants.OUTPUT_LOG_INFO + logdir;
+               String outputErrorInfo = Constants.OUTPUT_LOG_INFO + Constants.COMMON_LOG_FILE_PATH + "," + logdir;
                if (errorMsg != null) {
                   outputErrorInfo = errorMsg + " " + outputErrorInfo;
                }
                throw new CliRestException(outputErrorInfo);
             } else if (errorMsg != null && !errorMsg.isEmpty()){
-               throw new CliRestException(errorMsg);
+               String outputErrorInfo = errorMsg + " " + Constants.OUTPUT_LOG_INFO + Constants.COMMON_LOG_FILE_PATH;
+               throw new CliRestException(outputErrorInfo);
             } else {
                throw new CliRestException("task failed");
             }
-         } else if (taskRead.getStatus().equals(TaskRead.Status.SUCCESS)) {
+         } else if (taskRead.getStatus().equals(TaskRead.Status.COMPLETED)) {
             if (taskRead.getType().equals(Type.VHM)) {
                if (prettyOutput != null && prettyOutput.length > 0 && prettyOutput[0].isRefresh(true)) {
                   //clear screen and show progress every few seconds 
@@ -638,7 +639,7 @@ public class RestClient {
    @SuppressWarnings("rawtypes")
    private boolean validateAuthorization(ResponseEntity response) {
       if (response.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-         System.out.println(Constants.CONNECT_UNAUTHORIZATION);
+         System.out.println(Constants.CONNECT_UNAUTHORIZATION_OPT);
          return false;
       }
       return true;

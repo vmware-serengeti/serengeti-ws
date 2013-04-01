@@ -20,7 +20,7 @@ package com.vmware.bdd.apitypes;
  */
 public class TaskRead {
    public enum Status {
-      CREATED, SUBMITTED, RUNNING, SUCCESS, FAILED
+      ABANDONED, STARTING, STARTED, STOPPED, STOPPING, COMPLETED, FAILED, UNKNOWN
    }
    public enum Type {
       INNER, VHM 
@@ -104,6 +104,13 @@ public class TaskRead {
 
    public void setWorkDir(String workDir) {
       this.workDir = workDir;
+   }
+
+   @Override
+   public String toString() {
+      return "TaskRead [id=" + id + ", status=" + status + ", type=" + type
+            + ", progress=" + progress + ", errorMessage=" + errorMessage + ", workDir="
+            + workDir + ", progressMessage=" + progressMessage + "]";
    }
 
    public String getTarget() {

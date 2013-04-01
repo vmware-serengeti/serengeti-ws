@@ -14,10 +14,11 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -31,7 +32,6 @@ import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksTy
 import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
-import com.vmware.bdd.utils.Constants;
 
 /**
  * Cluster creation parameters
@@ -65,7 +65,7 @@ public class NodeGroupCreate {
    private List<VcCluster> vcClusters;
    @Expose
    @SerializedName("ha")
-   private String haFlag="off";
+   private String haFlag = "off";
    @Expose
    @SerializedName("cluster_configuration")
    private Map<String, Object> configuration;
@@ -194,9 +194,16 @@ public class NodeGroupCreate {
       this.groupType = groupType;
    }
 
-   public List<VcCluster> getVcClusters() {
+   public List<VcCluster> getVcClusters(ClusterCreate cluster) {
+      if (this.vcClusters == null || this.vcClusters.size() == 0) {
+         return cluster.getVcClusters();
+      }
       return vcClusters;
    }
+
+   //   public List<VcCluster> getVcClusters() {
+   //      return vcClusters;
+   //   }
 
    public void setVcClusters(List<VcCluster> vcClusters) {
       this.vcClusters = vcClusters;
@@ -213,8 +220,8 @@ public class NodeGroupCreate {
    public Integer calculateHostNum() {
       Integer hostNumber = null;
       PlacementPolicy policies = getPlacementPolicies();
-      if (policies != null && policies.getInstancePerHost() != null &&
-          policies.getInstancePerHost() > 0) {
+      if (policies != null && policies.getInstancePerHost() != null
+            && policies.getInstancePerHost() > 0) {
          if (getInstanceNum() % policies.getInstancePerHost() == 0) {
             hostNumber = getInstanceNum() / policies.getInstancePerHost();
          } else {
@@ -224,20 +231,52 @@ public class NodeGroupCreate {
 
       return hostNumber;
    }
-   
-   private boolean isWorkerGroup() {
-	   List<String> roles = getRoles();
-	   if (roles.contains(HadoopRole.HADOOP_DATANODE.toString()) 
-			   || roles.contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {
-		   return true;
-	   }
-	   return false;
+
+   @JsonIgnore
+   public String getReferredGroup() {
+      if (this.placementPolicies != null
+            && this.placementPolicies.getGroupAssociations() != null
+            && this.placementPolicies.getGroupAssociations().size() != 0) {
+         return this.placementPolicies.getGroupAssociations().get(0)
+               .getReference();
+      }
+      return null;
    }
 
-   @SuppressWarnings("unused")
-   public boolean validatePlacementPolicies(ClusterCreate cluster, Map<String, NodeGroupCreate> groups,
-         List<String> failedMsgList, List<String> warningMsgList) {
-      boolean valid = true;    
+   @JsonIgnore
+   public boolean isStrictReferred() {
+      if (this.placementPolicies != null
+            && this.placementPolicies.getGroupAssociations() != null
+            && this.placementPolicies.getGroupAssociations().size() != 0
+            && GroupAssociationType.STRICT.equals(this.placementPolicies
+                  .getGroupAssociations().get(0).getType())) {
+         return true;
+      }
+      return false;
+   }
+
+   public Integer instancePerHost() {
+      if (this.placementPolicies != null
+            && this.placementPolicies.getInstancePerHost() != null) {
+         return this.placementPolicies.getInstancePerHost();
+      }
+      return null;
+   }
+
+   @JsonIgnore
+   private boolean isWorkerGroup() {
+      List<String> roles = getRoles();
+      if (roles.contains(HadoopRole.HADOOP_DATANODE.toString())
+            || roles.contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {
+         return true;
+      }
+      return false;
+   }
+
+   public boolean validatePlacementPolicies(ClusterCreate cluster,
+         Map<String, NodeGroupCreate> groups, List<String> failedMsgList,
+         List<String> warningMsgList) {
+      boolean valid = true;
       TopologyType topologyType = cluster.getTopologyPolicy();
       if (topologyType != null
             && (topologyType.equals(TopologyType.HVE) || topologyType
@@ -281,26 +320,38 @@ public class NodeGroupCreate {
                r.setRacks(new String[0]);
             }
 
-            if (getStorage() != null && getStorage().getType() != null
-                  && getStorage().getType().equals(DatastoreType.SHARED.toString())) {
-               warningMsgList.add(new StringBuilder()
-                           .append("Warning: Cluster PRack Policy will not take effect when node group ")
-                           .append(getName()).append(" uses SHARED storage.").toString());
+            if (getStorage() != null
+                  && getStorage().getType() != null
+                  && getStorage().getType().equals(
+                        DatastoreType.SHARED.toString())) {
+               warningMsgList
+                     .add(new StringBuilder()
+                           .append(
+                                 "Warning: Cluster PRack Policy will not take effect when node group ")
+                           .append(getName()).append(" uses SHARED storage.")
+                           .toString());
             }
          }
 
          if (policies.getGroupAssociations() != null) {
             // only support 1 group association now
             if (policies.getGroupRacks() != null) {
-                warningMsgList.add(new StringBuilder().append("Warning: Cluster PRack Policy will not take effect when node group ") 
-                       .append(getName())
-                       .append(" specifies groupAssociations meanwhile").toString());
+               warningMsgList
+                     .add(new StringBuilder()
+                           .append(
+                                 "Warning: Cluster PRack Policy will not take effect when node group ")
+                           .append(getName())
+                           .append(" specifies groupAssociations meanwhile")
+                           .toString());
             }
             if (policies.getGroupAssociations().size() != 1) {
                valid = false;
-               failedMsgList.add(new StringBuilder().append(getName())
-                     .append(".placementPolicies.groupAssociations.size should be 1")
-                     .toString());
+               failedMsgList
+                     .add(new StringBuilder()
+                           .append(getName())
+                           .append(
+                                 ".placementPolicies.groupAssociations.size should be 1")
+                           .toString());
             } else {
                GroupAssociation a = policies.getGroupAssociations().get(0);
 
@@ -310,19 +361,28 @@ public class NodeGroupCreate {
 
                if (a.getReference() == null) {
                   valid = false;
-                  failedMsgList.add(new StringBuilder().append(getName())
-                        .append(".placementPolicies.groupAssociations[0].reference not set").toString());
+                  failedMsgList
+                        .add(new StringBuilder()
+                              .append(getName())
+                              .append(
+                                    ".placementPolicies.groupAssociations[0].reference not set")
+                              .toString());
                } else if (a.getReference().equals(getName())) {
                   valid = false;
-                  failedMsgList.add(new StringBuilder()
-                        .append(getName())
-                        .append(".placementPolicies.groupAssociations[0] refers to itself").toString());
+                  failedMsgList
+                        .add(new StringBuilder()
+                              .append(getName())
+                              .append(
+                                    ".placementPolicies.groupAssociations[0] refers to itself")
+                              .toString());
                } else if (!groups.containsKey(a.getReference())) {
                   valid = false;
-                  failedMsgList.add(new StringBuilder()
-                        .append(getName())
-                        .append(".placementPolicies.groupAssociations[0] refers to invalid node group ")
-                        .append(a.getReference()).toString());
+                  failedMsgList
+                        .add(new StringBuilder()
+                              .append(getName())
+                              .append(
+                                    ".placementPolicies.groupAssociations[0] refers to invalid node group ")
+                              .append(a.getReference()).toString());
                } else {
                   /*
                    *  This is normal case, do more checks.
@@ -338,34 +398,42 @@ public class NodeGroupCreate {
                       * unspecified. This rule follows the underlying placement algorithm.
                       */
                      int hostNum = 1;
-                     int refHostNum = groups.get(a.getReference()).getInstanceNum();
+                     int refHostNum =
+                           groups.get(a.getReference()).getInstanceNum();
                      if (calculateHostNum() != null) {
                         hostNum = calculateHostNum();
                      }
                      if (groups.get(a.getReference()).calculateHostNum() != null) {
-                        refHostNum = groups.get(a.getReference()).calculateHostNum();
+                        refHostNum =
+                              groups.get(a.getReference()).calculateHostNum();
                      }
                      if (hostNum > refHostNum) {
                         valid = false;
-                        failedMsgList.add(new StringBuilder()
-                              .append(getName())
-                              .append(".placementPolicies.groupAssociations[0] requires " +
-                                      "more hosts than the referenced node group ")
-                              .append(a.getReference()).toString());
+                        failedMsgList
+                              .add(new StringBuilder()
+                                    .append(getName())
+                                    .append(
+                                          ".placementPolicies.groupAssociations[0] requires "
+                                                + "more hosts than the referenced node group ")
+                                    .append(a.getReference()).toString());
                      }
                   }
 
                   // current implementation only support sum(in/out degree) <= 1
-                  PlacementPolicy refPolicies = groups.get(a.getReference())
-                        .getPlacementPolicies();
-                  if (refPolicies != null && refPolicies.getGroupAssociations() != null &&
-                        !refPolicies.getGroupAssociations().isEmpty()) {
+                  PlacementPolicy refPolicies =
+                        groups.get(a.getReference()).getPlacementPolicies();
+                  if (refPolicies != null
+                        && refPolicies.getGroupAssociations() != null
+                        && !refPolicies.getGroupAssociations().isEmpty()) {
                      valid = false;
-                     failedMsgList.add(new StringBuilder()
-                           .append(getName())
-                           .append(".placementPolicies.groupAssociations[0] refers to node group ")
-                           .append(a.getReference())
-                           .append(" which also has reference(s)").toString());
+                     failedMsgList
+                           .add(new StringBuilder()
+                                 .append(getName())
+                                 .append(
+                                       ".placementPolicies.groupAssociations[0] refers to node group ")
+                                 .append(a.getReference())
+                                 .append(" which also has reference(s)")
+                                 .toString());
                   }
                }
             }

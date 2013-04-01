@@ -23,9 +23,24 @@ import com.google.gson.annotations.SerializedName;
  * Storage get output
  */
 public class StorageRead {
+
+   public enum DiskSplitPolicy {
+      // separate this disk on datastores as much as possible
+      EVEN_SPLIT,
+      // separate this disk on datastore as less as possible
+      AGGREGATE,
+      // separate this disk onto at most two datastores, first try with two if possible 
+      BI_SECTOR
+   }
+
+   public enum DiskScsiControllerType {
+      LSI_CONTROLLER, 
+      PARA_VIRTUAL_CONTROLLER
+   }
+
    @Expose
    private String type;
-   
+
    @Expose
    @SerializedName("bisect")
    private boolean diskBisect;
@@ -36,10 +51,17 @@ public class StorageRead {
    @Expose
    @SerializedName("size")
    private int sizeGB;
+
    private List<String> dsNames;
+
    @Expose
    @SerializedName("name_pattern")
    private List<String> namePattern;
+
+   @SerializedName("split_policy")
+   private DiskSplitPolicy splitPolicy;
+   private DiskScsiControllerType controllerType;
+   private String allocType;
 
    public List<String> getDsNames() {
       return dsNames;
@@ -81,6 +103,13 @@ public class StorageRead {
       this.sizeGB = sizeGB;
    }
 
+   public DiskSplitPolicy getSplitPolicy() {
+      return splitPolicy;
+   }
+
+   public void setSplitPolicy(DiskSplitPolicy splitPolicy) {
+      this.splitPolicy = splitPolicy;
+   }
    public Priority getShares() {
       return shares;
    }
@@ -89,4 +118,19 @@ public class StorageRead {
       this.shares = shares;
    }
 
+   public DiskScsiControllerType getControllerType() {
+      return controllerType;
+   }
+
+   public void setControllerType(DiskScsiControllerType controllerType) {
+      this.controllerType = controllerType;
+   }
+
+   public String getAllocType() {
+      return allocType;
+   }
+
+   public void setAllocType(String allocType) {
+      this.allocType = allocType;
+   }
 }

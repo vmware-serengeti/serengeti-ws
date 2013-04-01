@@ -80,6 +80,9 @@ create table cluster (
    start_after_deploy  boolean,
    automation_enable   boolean,
    vhm_min_num         integer,
+   latest_task_id      bigint,
+   vhm_master_moid     varchar(255),
+   vhm_jobtracker_port varchar(255),
    configuration       text,
    primary key (id),
    foreign key(network_id) references network(id) ON DELETE CASCADE
@@ -98,6 +101,7 @@ create table node_group (
    storage_type           varchar(255),
    storage_size           integer,
    disk_bisect            boolean,
+   ioshare_type           varchar(16),
    vc_datastore_names     text,
    vc_rp_names            text,
    group_racks            text,
@@ -127,8 +131,11 @@ create table hadoop_node (
    host_name    varchar(255),
    status       varchar(255),
    action       varchar(255),
+   power_status_changed       boolean,
    vc_datastores text,
+   volumes      varchar(255),
    ip_address   varchar(255),
+   guest_host_name  varchar(255),
    node_group_id bigint,
    vc_rp_id     bigint,
    primary key (id),
@@ -152,19 +159,8 @@ create table physical_host (
    foreign key(rack_id) references rack(id) ON DELETE CASCADE
 );
 
-create sequence task_seq;
-create table task (
-   id           bigint       not null unique DEFAULT nextval('task_seq'::regclass),
-   status       varchar(255) not null,
-   progress     float8       not null,
-   cmd_array_json varchar(255) not null,
-   ctime        timestamp with time zone,
-   ftime        timestamp with time zone,
-   cookie       varchar(255),
-   error        text,
-   progress_msg   text,
-   listener     bytea,
-   retry        boolean,
-   target       varchar(255),
-   primary key (id)
+create sequence server_info_seq;
+create table server_info (
+  id           bigint       not null unique DEFAULT nextval('server_info_seq'::regclass),
+  resource_initialized boolean not null DEFAULT false
 );

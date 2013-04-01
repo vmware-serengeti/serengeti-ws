@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+            "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+            "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
+    <property name="hibernate.connection.username">sa</property>
+    <property name="hibernate.connection.password"></property>
+    <property name="hibernate.connection.isolation">8</property>
+
+    <!-- JDBC connection pool (use the built-in) -->
+    <property name="connection.pool_size">1</property>
+
+    <!-- SQL dialect -->
+    <property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
+
+    <!-- Enable Hibernate's automatic session context management -->
+    <property name="hibernate.current_session_context_class">thread</property>
+
+    <!-- Disable the second-level cache  -->
+    <property name="cache.provider_class">org.hibernate.cache.NoCacheProvider</property>
+
+    <!-- Echo all executed SQL to stdout -->
+    <property name="show_sql">false</property>
+
+    <!-- Update the database schema on startup -->
+    <property name="hibernate.hbm2ddl.auto">update</property>
+  </session-factory>
+</hibernate-configuration>

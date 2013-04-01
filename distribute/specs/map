@@ -1,0 +1,68 @@
+[
+  {
+    "vendor" : "Apache",
+    "version" : "1.0.1",
+    "type" : "Basic Hadoop Cluster",
+    "path" : "apache1.0/basic/spec.json"
+  },
+  {
+    "vendor" : "Apache",
+    "version" : "1.0.1",
+    "type" : "HBase Cluster",
+    "path" : "apache1.0/hbase/spec.json"
+  },
+  {
+    "vendor" : "CDH",
+    "version" : "3u3",
+    "type" : "Basic Hadoop Cluster",
+    "path" : "apache1.0/basic/spec.json"
+  },
+  {
+    "vendor" : "CDH",
+    "version" : "3u3",
+    "type" : "HBase Cluster",
+    "path" : "apache1.0/hbase/spec.json"
+  },
+  {
+    "vendor" : "CDH",
+    "version" : "4.1.2",
+    "type" : "Basic Hadoop Cluster",
+    "path" : "cdh4/basic/spec.json"
+  },
+  {
+    "vendor" : "CDH",
+    "version" : "4.1.2",
+    "type" : "HBase Cluster",
+    "path" : "cdh4/hbase/spec.json"
+  },
+  {
+    "vendor" : "GPHD",
+    "version" : "1.2.0.0",
+    "type" : "Basic Hadoop Cluster",
+    "path" : "apache1.0/basic/spec.json"
+  },
+  {
+    "vendor" : "GPHD",
+    "version" : "1.2.0.0",
+    "type" : "HBase Cluster",
+    "path" : "apache1.0/hbase/spec.json"
+  },
+  {
+    "vendor" : "HDP",
+    "version" : "1.0.7",
+    "type" : "Basic Hadoop Cluster",
+    "path" : "apache1.0/basic/spec.json"
+  },
+  {
+    "vendor" : "HDP",
+    "version" : "1.0.7",
+    "type" : "HBase Cluster",
+    "path" : "apache1.0/hbase/spec.json"
+  },
+  {
+    "vendor" : "MAPR",
+    "version" : "2.1.1",
+    "type" : "Basic Hadoop Cluster",
+    "path" : "mapr/basic/spec.json"
+  }
+]

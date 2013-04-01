@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -35,13 +36,16 @@ import com.vmware.bdd.spectypes.HadoopDistroMap;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.ServiceType;
 import com.vmware.bdd.spectypes.VcCluster;
+import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
 /**
  * Cluster creation spec
  */
-public class ClusterCreate {
+public class ClusterCreate implements Serializable {
+   private static final long serialVersionUID = -7460690272330642247L;
+
    @Expose
    private String name;
    private ClusterType type;
@@ -73,6 +77,7 @@ public class ClusterCreate {
    @Expose
    @SerializedName("deploy_policy")
    private String deployPolicy;
+
    private List<String> dsNames;
    private String networkName;
    @Expose
@@ -99,17 +104,10 @@ public class ClusterCreate {
    @Expose
    @SerializedName("cluster_configuration")
    private Map<String, Object> configuration;
+
    private Boolean validateConfig = true;
 
-   //elastic runtime automation enable flag
-   @Expose
-   @SerializedName("automation_enable")
-   private Boolean automationEnable;
-
-   //vhm minimum number of compute nodes staying powered on
-   @Expose
-   @SerializedName("vhm_min_num")
-   private int vhmMinNum;
+   private boolean specFile;
 
    public ClusterCreate() {
    }
@@ -257,14 +255,6 @@ public class ClusterCreate {
       this.templateId = templateId;
    }
 
-   public String getDeployPolicy() {
-      return deployPolicy;
-   }
-
-   public void setDeployPolicy(String deployPolicy) {
-      this.deployPolicy = deployPolicy;
-   }
-
    public List<NetworkAdd> getNetworking() {
       return networking;
    }
@@ -329,11 +319,35 @@ public class ClusterCreate {
       this.validateConfig = validateConfig;
    }
 
-   public boolean validateNodeGroupPlacementPolicies(List<String> failedMsgList,
-         List<String> warningMsgList) {
+   /**
+    * @return the deployPolicy
+    */
+   public String getDeployPolicy() {
+      return deployPolicy;
+   }
+
+   /**
+    * @param deployPolicy
+    *           the deployPolicy to set
+    */
+   public void setDeployPolicy(String deployPolicy) {
+      this.deployPolicy = deployPolicy;
+   }
+
+   public boolean isSpecFile() {
+      return specFile;
+   }
+
+   public void setSpecFile(boolean specFile) {
+      this.specFile = specFile;
+   }
+
+   public boolean validateNodeGroupPlacementPolicies(
+         List<String> failedMsgList, List<String> warningMsgList) {
       boolean valid = true;
 
-      Map<String, NodeGroupCreate> allGroups = new TreeMap<String, NodeGroupCreate>();
+      Map<String, NodeGroupCreate> allGroups =
+            new TreeMap<String, NodeGroupCreate>();
 
       if (getNodeGroups() == null) {
          return valid;
@@ -365,15 +379,21 @@ public class ClusterCreate {
                if (!storageType.equals(DatastoreType.TEMPFS.toString())
                      && !storageType.equals(DatastoreType.LOCAL.toString())
                      && !storageType.equals(DatastoreType.SHARED.toString())) {
-                  failedMsgList.add("Storage type " + storageType + " is not allowed. " + Constants.STORAGE_TYPE_ALLOWED);
+                  failedMsgList.add("Storage type " + storageType
+                        + " is not allowed. " + Constants.STORAGE_TYPE_ALLOWED);
                } else if (storageType.equals(DatastoreType.TEMPFS.toString())) {//tempfs disk type
-                  if (nodeGroupCreate.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {//compute node
-                     PlacementPolicy placementPolicy = nodeGroupCreate.getPlacementPolicies();
+                  if (nodeGroupCreate.getRoles().contains(
+                        HadoopRole.HADOOP_TASKTRACKER.toString())) {//compute node
+                     PlacementPolicy placementPolicy =
+                           nodeGroupCreate.getPlacementPolicies();
                      if (placementPolicy != null) {
-                        List<GroupAssociation> groupAssociations = placementPolicy.getGroupAssociations();
+                        List<GroupAssociation> groupAssociations =
+                              placementPolicy.getGroupAssociations();
                         if (groupAssociations != null) {
-                           GroupAssociationType associationType = groupAssociations.get(0).getType();
-                           if (associationType != null && associationType == GroupAssociationType.STRICT) {
+                           GroupAssociationType associationType =
+                                 groupAssociations.get(0).getType();
+                           if (associationType != null
+                                 && associationType == GroupAssociationType.STRICT) {
                               continue;
                            }
                         }
@@ -406,11 +426,16 @@ public class ClusterCreate {
    public boolean validateNodeGroupRoles(List<String> failedMsgList) {
       boolean valid = true;
       Set<String> roles = new HashSet<String>();
+      if (getNodeGroups() == null) {
+         return false;
+      }
+
       for (NodeGroupCreate ngc : getNodeGroups()) {
          List<String> nodeGroupRoles = ngc.getRoles();
-         if(nodeGroupRoles == null || nodeGroupRoles.isEmpty()) {
+         if (nodeGroupRoles == null || nodeGroupRoles.isEmpty()) {
             valid = false;
-            failedMsgList.add("missing role attribute for node group '" + ngc.getName() + "' ");
+            failedMsgList.add("missing role attribute for node group '"
+                  + ngc.getName() + "' ");
          } else {
             roles.addAll(ngc.getRoles());
          }
@@ -421,14 +446,20 @@ public class ClusterCreate {
             valid = false;
             failedMsgList.add("missing jobtracker/tasktracker role");
          } else {
-            if (roles.contains("hadoop_namenode") || roles.contains("hadoop_datanode")) {
+            if (roles.contains("hadoop_namenode")
+                  || roles.contains("hadoop_datanode")) {
                valid = false;
                failedMsgList.add("redundant namenode/datanode role");
             }
             if (!roles.contains("hadoop_jobtracker")
-                  || !roles.contains("hadoop_tasktracker")) {
+                  && !roles.contains("hadoop_resourcemanager")) {
                valid = false;
-               failedMsgList.add("missing jobtracker/tasktracker role");
+               failedMsgList.add("missing jobtracker/resourcemanager role");
+            }
+            if (!roles.contains("hadoop_tasktracker")
+                  && !roles.contains("hadoop_nodemanager")) {
+               valid = false;
+               failedMsgList.add("missing tasktracker/nodemanager role");
             }
          }
       } else { //case 2
@@ -437,7 +468,7 @@ public class ClusterCreate {
          for (ServiceType service : ServiceType.values()) {
             //identify partially match
             int matched = 0;
-            for (HadoopRole role: service.getRoles()) {
+            for (HadoopRole role : service.getRoles()) {
                if (roles.contains(role.toString())) {
                   matched++;
                }
@@ -445,17 +476,29 @@ public class ClusterCreate {
             if (matched == service.getRoles().size()) {
                serviceTypes.add(service);
             } else if (matched != 0) {
-               failedMsgList.add("some roles in " + service + " " + service.getRoles() + " cannot be found in the spec file");
+               failedMsgList
+                     .add("some roles in " + service + " " + service.getRoles()
+                           + " cannot be found in the spec file");
                valid = false;
             }
          }
 
+         boolean isYarn = serviceTypes.contains(ServiceType.YARN);
+         if (isYarn && serviceTypes.contains(ServiceType.MAPRED)) {
+            failedMsgList.add(" " + ServiceType.MAPRED + " "
+                  + ServiceType.MAPRED.getRoles() + " and " + ServiceType.YARN
+                  + " " + ServiceType.YARN.getRoles()
+                  + " \ncannot be set at the same time");
+            valid = false;
+         }
          //validate the relationships of services
          if (valid == true && !serviceTypes.isEmpty()) {
-            for (ServiceType service: serviceTypes) {
-               EnumSet<ServiceType> dependency = service.depend();
+            for (ServiceType service : serviceTypes) {
+               EnumSet<ServiceType> dependency = service.depend(isYarn);
                if (dependency != null && !serviceTypes.containsAll(dependency)) {
-                  failedMsgList.add("some dependent services " + dependency + " " + service + " relies on cannot be found in the spec file");
+                  failedMsgList.add("some dependent services " + dependency
+                        + " " + service
+                        + " relies on cannot be found in the spec file");
                   valid = false;
                }
             }
@@ -473,7 +516,8 @@ public class ClusterCreate {
       if (hasHDFSUrlConfigured()) {
          try {
             URI uri = new URI(getExternalHDFS());
-            if (!"hdfs".equalsIgnoreCase(uri.getScheme()) || uri.getHost() == null) {
+            if (!"hdfs".equalsIgnoreCase(uri.getScheme())
+                  || uri.getHost() == null) {
                return false;
             }
             return true;
@@ -485,19 +529,40 @@ public class ClusterCreate {
       return false;
    }
 
+   public int totalInstances() {
+      int num = 0;
+
+      for (int i = 0; i < nodeGroups.length; i++) {
+         num += nodeGroups[i].getInstanceNum();
+      }
+
+      return num;
+   }
+
+   public NodeGroupCreate getNodeGroup(String name) {
+      AuAssert.check(name != null);
+
+      for (NodeGroupCreate nodeGroup : this.nodeGroups) {
+         if (nodeGroup.getName().equals(name)) {
+            return nodeGroup;
+         }
+      }
+      return null;
+   }
+
    /**
     * Check if any compute only node group exists.
     */
    public boolean containsComputeOnlyNodeGroups() {
       int count = 0;
-      for(NodeGroupCreate nodeGroup : this.getNodeGroups()) {
+      for (NodeGroupCreate nodeGroup : this.getNodeGroups()) {
          if (nodeGroup.getRoles() != null
                && nodeGroup.getRoles().contains(
                      HadoopRole.HADOOP_TASKTRACKER.toString())
                && (nodeGroup.getRoles().size() == 1 || (nodeGroup.getRoles()
                      .size() == 2 && nodeGroup.getRoles().contains(
                      HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
-            count ++;
+            count++;
          }
       }
       return count != 0 ? true : false;
@@ -511,9 +576,10 @@ public class ClusterCreate {
       // if hadoop2 namenode ha is enabled
       boolean namenodeHACheck = false;
       //role count
-      int masterCount = 0, jobtrackerCount = 0, hbasemasterCount = 0, zookeeperCount = 0, workerCount = 0, numOfJournalNode = 0;
+      int masterCount = 0, jobtrackerCount = 0, resourcemanagerCount = 0, hbasemasterCount = 0, zookeeperCount =
+            0, workerCount = 0, numOfJournalNode = 0;
       boolean appendWarningStr = false;
-      if (warningMsgList !=null && warningMsgList.isEmpty()) {
+      if (warningMsgList != null && warningMsgList.isEmpty()) {
          appendWarningStr = true;
       }
 
@@ -525,9 +591,8 @@ public class ClusterCreate {
       } else {
          // check external HDFS
          if (hasHDFSUrlConfigured() && !validateHDFSUrl()) {
-            failedMsgList.add(new StringBuilder()
-                         .append("externalHDFS=")
-                         .append(getExternalHDFS()).toString());
+            failedMsgList.add(new StringBuilder().append("externalHDFS=")
+                  .append(getExternalHDFS()).toString());
          }
 
          // check placement policies
@@ -570,6 +635,13 @@ public class ClusterCreate {
                         failedMsgList.add(Constants.WRONG_NUM_OF_JOBTRACKER);
                      }
                      break;
+                  case RESOURCEMANAGER:
+                     resourcemanagerCount++;
+                     if (nodeGroupCreate.getInstanceNum() >= 0
+                           && nodeGroupCreate.getInstanceNum() != 1) {
+                        failedMsgList.add(Constants.WRONG_NUM_OF_RESOURCEMANAGER);
+                     }
+                     break;
                   case HBASE_MASTER:
                      hbasemasterCount++;
                      if (nodeGroupCreate.getInstanceNum() == 0) {
@@ -582,15 +654,19 @@ public class ClusterCreate {
                      if (nodeGroupCreate.getInstanceNum() > 0
                            && nodeGroupCreate.getInstanceNum() < 3) {
                         failedMsgList.add(Constants.WRONG_NUM_OF_ZOOKEEPER);
-                     } else if (nodeGroupCreate.getInstanceNum() > 0 && nodeGroupCreate.getInstanceNum() % 2 == 0) {
+                     } else if (nodeGroupCreate.getInstanceNum() > 0
+                           && nodeGroupCreate.getInstanceNum() % 2 == 0) {
                         warningMsgList.add(Constants.ODD_NUM_OF_ZOOKEEPER);
                      }
                      break;
                   case JOURNAL_NODE:
                      numOfJournalNode += nodeGroupCreate.getInstanceNum();
-                     if (nodeGroupCreate.getRoles().contains(HadoopRole.HADOOP_DATANODE.toString()) ||
-                           nodeGroupCreate.getRoles().contains(HadoopRole.HADOOP_CLIENT_ROLE.toString())) {
-                        failedMsgList.add(Constants.DATA_CLIENT_NODE_JOURNALNODE_COEXIST);
+                     if (nodeGroupCreate.getRoles().contains(
+                           HadoopRole.HADOOP_DATANODE.toString())
+                           || nodeGroupCreate.getRoles().contains(
+                                 HadoopRole.HADOOP_CLIENT_ROLE.toString())) {
+                        failedMsgList
+                              .add(Constants.DATA_CLIENT_NODE_JOURNALNODE_COEXIST);
                      }
                      break;
                   case WORKER:
@@ -604,8 +680,12 @@ public class ClusterCreate {
 
                      //check if datanode and region server are seperate
                      List<String> roles = nodeGroupCreate.getRoles();
-                     if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString()) && !roles.contains(HadoopRole.HADOOP_DATANODE.toString())) {
-                        warningMsgList.add(Constants.REGISONSERVER_DATANODE_SEPERATION);
+                     if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE
+                           .toString())
+                           && !roles.contains(HadoopRole.HADOOP_DATANODE
+                                 .toString())) {
+                        warningMsgList
+                              .add(Constants.REGISONSERVER_DATANODE_SEPERATION);
                      }
                      break;
                   case CLIENT:
@@ -623,7 +703,8 @@ public class ClusterCreate {
          }
          if (!supportedWithHdfs2()) {
             if (namenodeHACheck || masterCount > 1) {
-               failedMsgList.add(Constants.CURRENT_DISTRO_CAN_NOT_SUPPORT_HDFS2);
+               failedMsgList
+                     .add(Constants.CURRENT_DISTRO_CAN_NOT_SUPPORT_HDFS2);
             }
          } else if (namenodeHACheck) {
             if (numOfJournalNode >= 0 && numOfJournalNode < 3) {
@@ -636,7 +717,8 @@ public class ClusterCreate {
                failedMsgList.add(Constants.NAMENODE_AUTO_FAILOVER_ZOOKEEPER);
             }
          }
-         if ((jobtrackerCount > 1) || (zookeeperCount > 1) || (hbasemasterCount > 1)) {
+         if ((jobtrackerCount > 1) || (resourcemanagerCount > 1) || (zookeeperCount > 1)
+               || (hbasemasterCount > 1)) {
             failedMsgList.add(Constants.WRONG_NUM_OF_NODEGROUPS);
          }
          if (workerCount == 0) {
@@ -645,7 +727,7 @@ public class ClusterCreate {
          if (numOfJournalNode > 0 && !namenodeHACheck) {
             failedMsgList.add(Constants.NO_NAMENODE_HA);
          }
-         if(!warningMsgList.isEmpty() && appendWarningStr) {
+         if (!warningMsgList.isEmpty() && appendWarningStr) {
             warningMsgList.set(0, "Warning: " + warningMsgList.get(0));
          }
       }
@@ -692,7 +774,7 @@ public class ClusterCreate {
 
    //define role of the node group .
    private enum NodeGroupRole {
-      MASTER, JOB_TRACKER, WORKER, CLIENT, HBASE_MASTER, ZOOKEEPER, JOURNAL_NODE, NONE
+      MASTER, JOB_TRACKER, RESOURCEMANAGER, WORKER, CLIENT, HBASE_MASTER, ZOOKEEPER, JOURNAL_NODE, NONE
    }
 
    private List<NodeGroupRole> getNodeGroupRoles(NodeGroupCreate nodeGroupCreate) {
@@ -700,7 +782,7 @@ public class ClusterCreate {
       //Find roles list from current  NodeGroupCreate instance.
       List<String> roles = nodeGroupCreate.getRoles();
       for (NodeGroupRole role : NodeGroupRole.values()) {
-         if (roles !=null && matchRole(role, roles)) {
+         if (roles != null && matchRole(role, roles)) {
             groupRoles.add(role);
          }
       }
@@ -733,6 +815,12 @@ public class ClusterCreate {
          } else {
             return false;
          }
+      case RESOURCEMANAGER:
+         if (roles.contains(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString())) {
+            return true;
+         } else {
+            return false;
+         }   
       case HBASE_MASTER:
          if (roles.contains(HadoopRole.HBASE_MASTER_ROLE.toString())) {
             return true;
@@ -754,7 +842,8 @@ public class ClusterCreate {
       case WORKER:
          if (roles.contains(HadoopRole.HADOOP_DATANODE.toString())
                || roles.contains(HadoopRole.HADOOP_TASKTRACKER.toString())
-               || roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString())) {
+               || roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString())
+               || roles.contains(HadoopRole.HADOOP_NODEMANAGER_ROLE.toString())) {
             return true;
          } else {
             return false;
@@ -793,21 +882,5 @@ public class ClusterCreate {
          }
       }
       return null;
-   }
-
-   public Boolean getAutomationEnable() {
-      return automationEnable;
-   }
-
-   public void setAutomationEnable(Boolean automationEnable) {
-      this.automationEnable = automationEnable;
-   }
-
-   public int getVhmMinNum() {
-      return vhmMinNum;
-   }
-
-   public void setVhmMinNum(int vhmMinNum) {
-      this.vhmMinNum = vhmMinNum;
    }
 }

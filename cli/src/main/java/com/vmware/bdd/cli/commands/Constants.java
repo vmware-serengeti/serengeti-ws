@@ -69,6 +69,7 @@ public class Constants {
    public static final String OUTPUT_OBJECT_DATASTORE = "datastore";
    public static final String OUTPUT_OBJECT_DISTRO = "distro";
    public static final String OUTPUT_OBJECT_NETWORK = "network";
+   public static final String OUTPUT_OBJECT_NODE_GROUP = "node group";
    public static final String OUTPUT_OBJECT_NODE = "node";
    public static final String OUTPUT_OBJECT_RESOURCEPOOL = "resourcepool";
    public static final String OUTPUT_OBJECT_TOPOLOGY = "topology";
@@ -84,9 +85,10 @@ public class Constants {
    public static final String OUTPUT_OP_STOP = "stop";
    public static final String OUTPUT_OP_RESIZE = "resize";
    public static final String OUTPUT_OP_SET_ELASTICITY = "setElasticity";
+   public static final String OUTPUT_OP_RESET_ELASTICITY = "resetElasticity";
    public static final String OUTPUT_OP_QUOTA_SET = "quota";
-   public static final String OUTPUT_OP_ADJUSTMENT = "Adjustment";
-   public static final String OUTPUT_OP_ADJUSTMENT_SUCCEEDED = "succeeded";
+   public static final String OUTPUT_OP_LIMIT = "limit";
+   public static final String OUTPUT_OP_UNLIMIT = "unlimit";
    public static final String OUTPUT_OP_ADJUSTMENT_FAILED = "failed";
    public static final String OUTPUT_OP_RESUME = "resume";
    public static final String OUTPUT_OP_RESULT_FAIL = "failed";
@@ -110,6 +112,7 @@ public class Constants {
    public static final String OUTPUT_HOST_REFUSE = "Connection refused. Please check the port number.";
    public static final String OUTPUT_HOST_TIMEOUT = "connection timeout";
    public static final String OUTPUT_LOG_INFO = "you can get task failure details from serengeti server log at: ";
+   public static final String COMMON_LOG_FILE_PATH = "/opt/serengeti/logs/serengeti*,/opt/serengeti/logs/ironfan*";
    public static final String HTTP_CONNECTION_PREFIX = "http://";
    public static final String HTTP_CONNECTION_SUFFIX = "/serengeti/api/";
    public static final String HTTP_CONNECTION_API = "api/";
@@ -175,6 +178,7 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_INSTANCE = "INSTANCE";
    public static final String FORMAT_TABLE_COLUMN_CPU = "CPU";
    public static final String FORMAT_TABLE_COLUMN_MEM = "MEM(MB)";
+   public static final String FORMAT_TABLE_COLUMN_IOSHARE = "IO SHARES";
    public static final String FORMAT_TABLE_COLUMN_TYPE = "TYPE";
    public static final String FORMAT_TABLE_COLUMN_SIZE = "SIZE(GB)";
    public static final String FORMAT_TABLE_COLUMN_RUNNING_NODES = "RUNNING NODE NUMBER";
@@ -211,7 +215,10 @@ public class Constants {
    public static final String PARAM_CLUSTER_CONFIG_RUNNING_JOB_WARNING =
          "Applying new Hadoop configuration will restart Hadoop processes and may lead to termination of running jobs.";
    public static final String PARAM_CLUSTER_SPEC_HA_ERROR = "The ha property must be one of 'off', 'on' and 'ft' in spec file ";
-   public static final String CONNECT_UNAUTHORIZATION = "The connection is refused, may be invalid password or overtime session, please try to reconnect!";
+   public static final String CONNECT_UNAUTHORIZATION_CONNECT =
+         "The connection is refused, may be invalid username or invalid password, please try to reconnect!";
+   public static final String CONNECT_UNAUTHORIZATION_OPT =
+         "The connection is refused, may be overtime session, please try to reconnect!";
    public static final String CONNECT_USER_NAME = "The user name";
    public static final String CONNECT_PASSWORD = "The password";
    public static final String CONNECT_CAN_NOT_BE_NULL = " can not be null!";

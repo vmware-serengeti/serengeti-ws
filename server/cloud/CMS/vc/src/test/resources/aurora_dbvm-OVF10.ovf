@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ovf:Envelope xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vmw="http://www.vmware.com/schema/ovf">
+  <References>
+    <File ovf:href="aurora_dbvm-root.vmdk" ovf:id="aurora_dbvm-root.vmdk_id" ovf:size="1115122"/>
+  </References>
+  <NetworkSection>
+    <Info>List of logical networks used in the package</Info>
+    <Network ovf:name="Network 1">
+      <Description>The Network 1 network</Description>
+    </Network>
+    <Network ovf:name="Network 2">
+      <Description>The Network 2 network</Description>
+    </Network>
+  </NetworkSection>
+  <vmw:IpAssignmentSection ovf:required="false" vmw:protocols="IPv4" vmw:schemes="ovfenv">
+    <Info>Supported IP assignment schemes</Info>
+  </vmw:IpAssignmentSection>
+  <DiskSection>
+    <Info>List of the virtual disks and partitions needed</Info>
+    <Disk ovf:diskId="root" ovf:capacity="8192" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" ovf:fileRef="aurora_dbvm-root.vmdk_id" ovf:populatedSize="655360"/>
+  </DiskSection>
+  <VirtualSystem ovf:id="aurora-dbvm">
+    <Info>A virtual machine</Info>
+    <ProductSection ovf:required="false">
+      <Info>VM ISV branding information</Info>
+      <Product>aurora-dbvm</Product>
+      <Vendor>VMware, Inc.</Vendor>
+      <!--
+            Version is the actual product version in the
+            form X.X.X.X where X is an unsigned 16-bit integer.
+
+            FullVersion is a descriptive version string
+            including, for example, alpha or beta designations
+            and other release criteria.
+        -->
+      <Version>0.8.0.4</Version>
+      <FullVersion>0.8.0.4 Build 374539</FullVersion>
+      <ProductUrl/>
+      <VendorUrl/>
+      <AppUrl>http://${vami.ip0.aurora-dbvm}/</AppUrl>
+      <Category>Application</Category>
+    </ProductSection>
+    <ProductSection ovf:class="vm" ovf:required="false">
+      <Info>VM specific properties</Info>
+      <Property ovf:key="vmname" ovf:type="string" ovf:value="aurora-dbvm"/>
+    </ProductSection>
+    <AnnotationSection>
+      <Info/>
+      <Annotation/>
+    </AnnotationSection>
+    <OperatingSystemSection ovf:id="85" ovf:version="11" vmw:osType="sles11_64Guest">
+      <Info>Guest Operating System</Info>
+      <Description>SUSE Linux Enterprise Server 11.0 64bit</Description>
+    </OperatingSystemSection>
+    <VirtualHardwareSection ovf:transport="com.vmware.guestInfo" ovf:required="false">
+      <Info>Virtual Hardware Requirements</Info>
+      <System>
+        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+        <vssd:InstanceID>0</vssd:InstanceID>
+        <vssd:VirtualSystemType>vmx-07</vssd:VirtualSystemType>
+      </System>
+      <Item>
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName>2 virtual CPU</rasd:ElementName>
+        <rasd:InstanceID>1</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>2</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName>4096 MB of memory</rasd:ElementName>
+        <rasd:InstanceID>2</rasd:InstanceID>
+        <rasd:Reservation>409</rasd:Reservation>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>4096</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Address>0</rasd:Address>
+        <rasd:ElementName>IDE Controller 0</rasd:ElementName>
+        <rasd:InstanceID>3</rasd:InstanceID>
+        <rasd:ResourceType>5</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+        <rasd:ElementName>CD/DVD Drive 1</rasd:ElementName>
+        <rasd:InstanceID>4</rasd:InstanceID>
+        <rasd:Parent>3</rasd:Parent>
+        <rasd:ResourceType>15</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>1</rasd:AddressOnParent>
+        <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+        <rasd:ElementName>CD/DVD Drive 2</rasd:ElementName>
+        <rasd:InstanceID>5</rasd:InstanceID>
+        <rasd:Parent>3</rasd:Parent>
+        <rasd:ResourceType>15</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>1</rasd:AddressOnParent>
+        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+        <rasd:Connection>Network 1</rasd:Connection>
+        <rasd:ElementName>Ethernet adapter on "Network 1"</rasd:ElementName>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:ResourceSubType>VmxNet3</rasd:ResourceSubType>
+        <rasd:ResourceType>10</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>2</rasd:AddressOnParent>
+        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+        <rasd:Connection>Network 2</rasd:Connection>
+        <rasd:ElementName>Ethernet adapter on "Network 2"</rasd:ElementName>
+        <rasd:InstanceID>7</rasd:InstanceID>
+        <rasd:ResourceSubType>VmxNet3</rasd:ResourceSubType>
+        <rasd:ResourceType>10</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:Address>0</rasd:Address>
+        <rasd:ElementName>SCSI Controller 0  - lsilogic</rasd:ElementName>
+        <rasd:InstanceID>8</rasd:InstanceID>
+        <rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+        <rasd:ResourceType>6</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk 1</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/root</rasd:HostResource>
+        <rasd:InstanceID>9</rasd:InstanceID>
+        <rasd:Parent>8</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+    </VirtualHardwareSection>
+  </VirtualSystem>
+</ovf:Envelope>

@@ -2,7 +2,7 @@
 
 service="sudo /sbin/service"
 
-for name in couchdb postgresql rabbitmq-server httpd tomcat chef-solr chef-expander chef-server chef-server-webui; do
+for name in couchdb postgresql rabbitmq-server httpd thrift-service tomcat chef-solr chef-expander chef-server chef-server-webui; do
   $service $name start
 
   if [ $? -ne 0 ]; then

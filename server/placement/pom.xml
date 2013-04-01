@@ -1,0 +1,40 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>placement</artifactId>
+	<packaging>jar</packaging>
+	<name>Serengeti Placement Service</name>
+	<url>http://maven.apache.org</url>
+
+	<parent>
+		<groupId>com.vmware.bdd</groupId>
+		<artifactId>serengeti-master</artifactId>
+		<version>${serengeti.version}</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.vmware.bdd</groupId>
+			<artifactId>commons-serengeti</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.vmware.aurora</groupId>
+			<artifactId>vc</artifactId>
+			<version>${aurora.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

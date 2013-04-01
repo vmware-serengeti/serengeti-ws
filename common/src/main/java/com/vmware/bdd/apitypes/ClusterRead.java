@@ -133,10 +133,10 @@ public class ClusterRead implements Comparable<ClusterRead>{
    }
 
    /*
-    * Validate the limit,make sure the specified node group is a compute only node group.
+    * Validate the manual elastic parameters, make sure the specified node group is a compute only node group.
     * If user have not specified the node group name,the cluster must contain compute only node.   
     */
-   public boolean validateLimit(String nodeGroupName, List<String>... nodeGroupNames) {
+   public boolean validateSetManualElasticity(String nodeGroupName, List<String>... nodeGroupNames) {
       if (!CommonUtil.isBlank(nodeGroupName)) {
          List<NodeGroupRead> nodeGroups = getNodeGroups();
          if(nodeGroups != null && !nodeGroups.isEmpty()){

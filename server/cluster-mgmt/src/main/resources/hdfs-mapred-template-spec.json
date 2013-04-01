@@ -1,0 +1,37 @@
+{
+  "distro":"apache",
+  "groups":[
+    {
+      "name":"master",
+      "roles":[
+        "hadoop_namenode",
+        "hadoop_jobtracker"
+      ],
+      "instance_type":MEDIUM,
+      "instance_num":1,
+      "ha":"on"
+    },
+    {
+      "name":"worker",
+      "roles":[
+        "hadoop_datanode",
+        "hadoop_tasktracker"
+      ],
+      "instance_type":SMALL,
+      "instance_num":3,
+      "ha":"off"
+    },
+    {
+      "name":"client",
+      "roles":[
+        "hadoop_client",
+        "hive",
+        "hive_server",
+        "pig"
+      ],
+      "instance_type":SMALL,
+      "instance_num":1,
+      "ha":"off"
+    }
+  ]
+}

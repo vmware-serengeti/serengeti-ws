@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+   xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="
+   http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/batch
+   http://www.springframework.org/schema/batch/spring-batch.xsd">
+
+   <beans:bean id="jobManager" class="com.vmware.bdd.manager.JobManager">
+      <beans:property name="jobOperator" ref="jobOperator" />
+      <beans:property name="jobExplorer" ref="jobExplorer" />
+      <beans:property name="jobRepository" ref="jobRepository" />
+      <beans:property name="jobRegistry" ref="jobRegistry" />
+      <beans:property name="jobLauncher" ref="jobLauncher" />
+      <beans:property name="jobExecutionStatusHolder"
+         ref="jobExecutionStatusHolder" />
+   </beans:bean>
+
+   <beans:import resource="classpath*:/spring/spring-batch-context.xml" />
+
+</beans:beans>

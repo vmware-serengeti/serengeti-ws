@@ -1,0 +1,75 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.vmware.aurora</groupId>
+  <artifactId>buildconfig-switcher</artifactId>
+  <packaging>pom</packaging>
+  <name>Switcher for buildconfig jar</name>
+
+  <parent>
+    <groupId>com.vmware.aurora</groupId>
+    <artifactId>datacloud-master</artifactId>
+    <version>${aurora.version}</version>
+    <relativePath>../../../pom.xml</relativePath>
+  </parent>
+
+  <profiles>
+
+    <profile>
+      <id>obj</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>env.OBJDIR</name>
+          <value>obj</value>
+        </property>
+      </activation>
+      <modules>
+        <module>obj</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>opt</id>
+      <activation>
+        <property>
+          <name>env.OBJDIR</name>
+          <value>opt</value>
+        </property>
+      </activation>
+      <modules>
+        <module>opt</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>beta</id>
+      <activation>
+        <property>
+          <name>env.OBJDIR</name>
+          <value>beta</value>
+        </property>
+      </activation>
+      <modules>
+        <module>beta</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>release</id>
+      <activation>
+        <property>
+          <name>env.OBJDIR</name>
+          <value>release</value>
+        </property>
+      </activation>
+      <modules>
+        <module>release</module>
+      </modules>
+    </profile>
+
+  </profiles>
+</project>

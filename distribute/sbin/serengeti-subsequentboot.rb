@@ -3,7 +3,6 @@ require "rexml/document"
 include REXML
 require "socket"
 require "fileutils"
-require "fog"
 
 #serengeti server user
 SERENGETI_USER="serengeti"
@@ -14,7 +13,6 @@ SERENGETI_HOME="/opt/serengeti"
 SERENGETI_WEBAPP_HOME="#{SERENGETI_HOME}/conf"
 #serengeti webservice properties
 SERENGETI_WEBAPP_CONF="#{SERENGETI_WEBAPP_HOME}/serengeti.properties"
-SERENGETI_CLOUD_MANAGER_CONF="#{SERENGETI_WEBAPP_HOME}/cloud-manager.vsphere.yaml"
 #cookbook related .chef/knife.rb
 CHEF_CONF="#{SERENGETI_HOME}/.chef/knife.rb"
 #serengeti tmp folder
@@ -32,7 +30,6 @@ DNS_CONFIG_FILE="/etc/resolv.conf"
 DNS_CONFIG_FILE_DHCP="/etc/resolv.conf.bak"
 DNS_CONFIG_FILE_TMP="/etc/resolv.conf.tmp"
 
-VHM_CONF="/opt/serengeti/conf/vhm.properties"
 ENTERPRISE_EDITION_FLAG="/opt/serengeti/etc/enterprise"
 
 SERENGETI_CERT_FILE="/opt/serengeti/.certs/serengeti.pem"
@@ -40,14 +37,6 @@ SERENGETI_PRIVATE_KEY="/opt/serengeti/.certs/private.pem"
 
 def is_enterprise_edition?
   File.exist? ENTERPRISE_EDITION_FLAG
-end
-
-def get_extension_id
-  if File.exist? SERENGETI_CLOUD_MANAGER_CONF
-    vc_info = YAML.load(File.open(SERENGETI_CLOUD_MANAGER_CONF))
-    return vc_info["extension_key"] unless vc_info["extension_key"].nil?
-  end
-  "com.vmware.serengeti." + %x[uuidgen].strip[0..7]
 end
 
 HTTPD_CONF="/etc/httpd/conf/httpd.conf"
@@ -133,48 +122,6 @@ sed -i "s|http://.*/yum|http://#{ethip}/yum|" "#{SERENGETI_HOME}/www/yum/repos/b
 sed -i "s|http://.*/yum|http://#{ethip}/yum|" "#{SERENGETI_HOME}/.chef/knife.rb"
 EOF
 
-
-def get_connection_info(vc_info)
-  cloud_server = 'vsphere'
-  info = {:provider => cloud_server,
-    :vsphere_server => vc_info["evs_IP"]
-  }
-
-  info[:cert] = SERENGETI_CERT_FILE
-  info[:key] = SERENGETI_PRIVATE_KEY
-  info[:extension_key] = get_extension_id
-
-  info
-end
-
-conn_info = get_connection_info(h)
-connection = Fog::Compute.new(conn_info)
-
-mob = connection.get_vm_mob_ref_by_moid(h["evs_SelfMoRef"])
-vmdatastores = mob.datastore.map {|ds| "#{ds.info.name}"}  	#serengeti server Datastore name
-puts("serengeti server datastore: " + "#{vmdatastores[0]}")
-vmrp = "#{mob.resourcePool.parent.name}"					#serengeti server resource pool name
-puts("serengeti server resource pool: " + "#{vmrp}")
-vmcluster = "#{mob.resourcePool.owner.name}" #serengeti server vc cluster name
-puts("serengeti server vc cluster: " + "#{vmcluster}")
-datacenter = mob.resourcePool.owner
-while datacenter.parent
-  break if datacenter.class.to_s == 'Datacenter'
-  datacenter = datacenter.parent
-end
-vcdatacenter = datacenter.name #serengeti server datastore name
-puts("serengeti server datacenter: " + "#{vcdatacenter}")
-vms = mob.resourcePool.vm
-template_mob = vms.find {|v| v.name == "#{h["templatename"]}"}
-template_moid = template_mob._ref
-puts("template id: " + "#{template_moid}")
-
-vcuser = "#{h["vcusername"]}"
-puts("vc user: " + "#{vcuser}")
-updateVCPassword = "#{h["vcpassword"]}".gsub("$", "\\$")
-templateid = "template_id = " + "#{template_moid}"
-vcdatacenterline = "vc_datacenter = " + "#{vcdatacenter}"
-
 system <<EOF
 
 #stop tomcat for update serengeti.properties
@@ -182,8 +129,6 @@ system <<EOF
 
 #update serengeti.properties for web service
 sed -i "s/distro_root =.*/#{distroip}/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/vc_datacenter = .*/#{vcdatacenterline}/" "#{SERENGETI_WEBAPP_CONF}"
-sed -i "s/template_id = .*/#{templateid}/" "#{SERENGETI_WEBAPP_CONF}"
 
 #kill tomcat using shell direclty to avoid failing to stop tomcat
 pidlist=`ps -ef|grep tomcat | grep -v "grep"|awk '{print $2}'`
@@ -202,22 +147,6 @@ fi
 
 #start serengeti web service
 /etc/init.d/tomcat start
-
-#serengeti cli connect first
-connecthost="connect --host localhost:8080 --username serengeti --password password"
-su - "#{SERENGETI_USER}" -c "#{SERENGETI_SCRIPTS_HOME}/serengeti \\"${connecthost}\\""
-
-if [[ -f "#{SERENGETI_HOME}/logs/not-init" ]];then
-   rpadd="resourcepool add --name defaultRP --vcrp \\"#{vmrp}\\" --vccluster \\"#{vmcluster}\\""
-   dsadd="datastore add --name defaultDSShared --spec \\"#{vmdatastores[0]}\\" --type SHARED"
-   ntadd="network add --name defaultNetwork --portGroup \\"#{h["networkName"]}\\" --dhcp"
-   touch "#{SERENGETI_CLI_HOME}/initResources"
-   echo ${rpadd} >> "#{SERENGETI_CLI_HOME}/initResources"
-   echo ${dsadd} >> "#{SERENGETI_CLI_HOME}/initResources"
-   echo ${ntadd} >> "#{SERENGETI_CLI_HOME}/initResources"
-   su - "#{SERENGETI_USER}" -c "#{SERENGETI_SCRIPTS_HOME}/serengeti --cmdfile #{SERENGETI_CLI_HOME}/initResources"
-   rm -rf "#{SERENGETI_HOME}/logs/not-init"
-fi
 
 # update serengeti server ip address in httpd conf
 if [ -e "#{HTTPD_CONF}" ]; then

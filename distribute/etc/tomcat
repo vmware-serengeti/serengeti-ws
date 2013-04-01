@@ -29,7 +29,7 @@ user="serengeti"
 
 # Set PID file path, needed for force shutdown
 export CATALINA_PID=/var/tmp/catalina.pid
-export JAVA_OPTS="${JAVA_OPTS}${JAVA_OPTS:+ }-Dserengeti.home.dir=${SERENGETI_HOME} -Dlog4j.configuration=file:${SERENGETI_HOME}/conf/log4j.properties"
+export JAVA_OPTS="${JAVA_OPTS}${JAVA_OPTS:+ }-Dserengeti.home.dir=${SERENGETI_HOME} -Dlog4j.configuration=file:${SERENGETI_HOME}/conf/log4j.properties -DPROPERTY_FILE_PREFIX=${SERENGETI_HOME}/conf/vc -Xmx2000m"
 
 #############################################################################
 # IMP NOTE: This script assumes that there's at most one tomcat java process

@@ -22,6 +22,7 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
@@ -106,6 +107,32 @@ public class CommonUtil {
    private static boolean match(final String input, final String regex) {
       Pattern pattern = Pattern.compile(regex);
       return pattern.matcher(input).matches();
+   }
+
+   public static boolean matchDatastorePattern(Set<String> patterns, Set<String> datastores) {
+      for (String pattern : patterns) {
+         // the datastore pattern is defined as wildcard
+         pattern = getDatastoreJavaPattern(pattern);
+         for (String datastore : datastores) {
+            try {
+               if (datastore.matches(pattern)) {
+                  return true;
+               }
+            } catch (Exception e) {
+               logger.error(e.getMessage());
+               continue;
+            }
+         }
+      }
+      return false;
+   }
+
+   public static String escapePattern(String pattern) {
+      return pattern.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
+   }
+
+   public static String getDatastoreJavaPattern(String pattern) {
+      return escapePattern(pattern).replace("?", ".").replace("*", ".*");
    }
 
 }

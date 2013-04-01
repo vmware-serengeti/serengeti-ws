@@ -18,8 +18,8 @@
         "hadoop_tasktracker"
       ],
       "instanceNum": 4,
-      "cpuNum": 2,
-      "memCapacityMB": 7500,
+      "cpuNum": 1,
+      "memCapacityMB": 3748,
       "storage": {
         "type": "LOCAL",
         "sizeGB": 20

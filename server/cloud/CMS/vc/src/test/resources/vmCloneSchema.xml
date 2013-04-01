@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<vmSchema>
+    <diskSchema parentSnap="snap0" parent="testCompLayer" name="testCompLayer">
+        <disks>
+        </disks>
+    </diskSchema>
+    <resourceSchema priority="Low" cpuReservationMHz="1024" memReservationSize="0" memSize="1024" numCPUs="1" name="simpleResourceSchema"/>
+    <networkSchema parent="tmTestVM-sridharr" name="simpleNetworkSchema">
+        <networks>
+            <network vcNetwork="VM Network" nicLabel="Network Adapter 2"/>
+        </networks>
+    </networkSchema>
+</vmSchema>

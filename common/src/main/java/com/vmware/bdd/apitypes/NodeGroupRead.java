@@ -40,6 +40,11 @@ public class NodeGroupRead {
 
    @Expose
    private NetworkRead networking;
+   
+   @Expose
+   @SerializedName("disk_priority")
+   private Priority ioShares;
+   
    @Expose
    private StorageRead storage;
 
@@ -119,6 +124,14 @@ public class NodeGroupRead {
 
    public void setStorage(StorageRead storage) {
       this.storage = storage;
+   }
+
+   public Priority getIoShares() {
+      return ioShares;
+   }
+
+   public void setIoShares(Priority ioShares) {
+      this.ioShares = ioShares;
    }
 
    public PlacementPolicy getPlacementPolicies() {

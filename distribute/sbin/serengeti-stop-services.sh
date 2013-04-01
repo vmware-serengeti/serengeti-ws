@@ -2,7 +2,7 @@
 
 service="sudo /sbin/service"
 
-for name in chef-server-webui chef-server chef-expander chef-solr tomcat vhm httpd rabbitmq-server postgresql couchdb; do
+for name in chef-server-webui chef-server chef-expander chef-solr thrift-service tomcat vhm httpd rabbitmq-server postgresql couchdb; do
   if [ "${name}" == "vhm" ]; then
     sh /opt/serengeti/sbin/vhm-stop.sh
     continue

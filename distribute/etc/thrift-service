@@ -1,0 +1,109 @@
+#!/bin/bash
+#
+# Thrift service
+#
+# chkconfig: 2345 75 20
+# description: Start software management thrift service
+#
+
+if [ "${SERENGETI_HOME}" == "" ]; then
+  SERENGETI_HOME='/opt/serengeti'
+fi
+
+user="serengeti"
+user_home="/home/serengeti"
+
+# Set PID file path, needed for force shutdown
+export management_pid_file=/var/tmp/management-thrift.pid
+
+mkdir -p /var/tmp
+
+tlog() {
+   echo `date` thrift-service: "$@"
+}
+
+get_running_management_server_pid() {
+   pid=`pgrep -f 'ruby[[:space:]].+run_management_server\.rb' | xargs echo`
+   echo ${pid}
+}
+
+delete_pid_file() {
+   pid_file = $1
+   if [ -f $pid_file ]; then
+      if rm -f $pid_file ; then
+         tlog "forcefully removed stale $pid_file"
+         return 0
+      else
+         tlog "could not remove stale $pid_file"
+         return 1
+      fi
+   else
+      tlog "no need to remove stale $pid_file"
+      return 0
+   fi
+}
+
+
+check_stale_pid_file() {
+   exit_code = 0
+   pid=`get_running_management_server_pid`
+   if [ "${pid}" != "" ]; then
+      delete_pid_file ${management_pid_file}
+      exit_code += $?
+   fi
+   return $exit_code
+}
+
+start_thrift_service() {
+   tlog "Starting thrift service"
+   if [ ! check_stale_pid_file ]; then
+      tlog "Start failed"
+      return 1
+   fi
+   export HOME=${user_home}
+   cd ${SERENGETI_HOME}
+   sudo -E -u "$user" ${SERENGETI_HOME}/sbin/run_thrift_server.sh
+
+   pid=`get_running_management_server_pid`
+   if [ "${pid}" != "" ]; then
+     echo "${pid}" > ${management_pid_file}
+     tlog "management server process id: ${pid}"
+   else
+    tlog "Start failed"
+   fi
+
+}
+
+stop_thrift_service() {
+   tlog "Stopping thrift service"
+
+   pid=`get_running_management_server_pid`
+   tlog "stopping management server process: ${pid}"
+   if [ "${pid}" != "" ]; then
+     kill -9 ${pid}
+   fi
+}
+
+case "$1" in
+   start)
+      # carry forward any extra start args
+      shift # to consume "start" arg
+      start_thrift_service "$@"
+   ;;
+   stop)
+      # carry forward any extra stop args
+      shift # to consume "stop" arg
+      stop_thrift_service "$@"
+   ;;
+   restart)
+      # carry forward any extra restart args
+      shift # to consume "restart" arg
+      stop_thrift_service "$@"
+      sleep 3
+      start_thrift_service "$@"
+   ;;
+   *)
+      echo $"Usage: $0 {start|stop|restart}"
+   ;;
+esac
+

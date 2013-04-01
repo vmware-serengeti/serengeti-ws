@@ -1,0 +1,139 @@
+{
+  "finished": false,
+  "progress": 50, 
+  "succeed": false,
+  "status": "running",
+  "total": 10,
+  "success": 2,
+  "failure": 0,
+  "running": 5,
+ 
+  "error_code": 0,
+  "error_msg": "",
+ 
+  "cluster_data": {
+    "name": "hadoop_cluster_test",
+    "template_id": "vm_template_name_in_vc",
+    "distro": "CDH3u3",
+    "instance_num": 5,
+    "groups": [
+      {
+        "name": "master",
+        "roles": ["hadoop", "hadoop_namenode", "hadoop_jobtracker"],
+        "instance_num": 1,
+        "cpu": 2,
+        "memory": 2048,
+        "networking": {
+          "port_group": "CFNetwork"
+        },
+        "vc_clusters": {
+          "name": "Cluster1",
+          "vc_rps": ["rp1", "rp2"]
+        },
+        "storage": {
+          "type": "shared",
+          "size": 10
+        },
+ 
+        "instances": [
+          {
+            "name" => "vm-098asdjfliu34",
+            "moid" : "vm-01",
+            "status" => "poweredOn",
+            "ip_address" => "10.112.113.118",
+            "hostname" => "tli-centos",
+ 
+            "datastores" => [
+              { "name" => "datastore1",    
+                "size" => 40 
+              },      
+            ],
+            "vc_cluster": {
+               "name": "Cluster1",
+               "vc_rp": "rp1"
+            },
+            "action_name" => "Create",
+            "action_status" => "running",
+ 
+            "finished" => false, 
+            "progress" => 80,
+            "succeed" => false,
+            "created" => false,
+            "bootstrapped" => false,
+            "deleted" => false,
+ 
+            "error_code": 0,
+            "error_msg": ""
+          },
+          {
+            "name" => "vm-j89aw4hth",
+            "moid" : "vm-02",
+            "status" => "poweredOn",
+            "ip_address" => "10.112.113.119",
+            "hostname" => "tli-centosasdf",
+ 
+            "datastores" => [
+              { "name" => "datastore1",    
+                "size" => 40 
+              }    
+            ],
+            "vc_cluster": {
+               "name": "Cluster1",
+               "vc_rp": "rp1"
+            },
+            "action_name" => "Create",
+            "action_status" => "running",
+ 
+            "finished" => true, 
+            "progress" => 100,
+            "succeed" => true,
+            "created" => true,
+            "bootstrapped" => true,
+            "deleted" => false,
+ 
+            "error_code": 0,
+            "error_msg": ""
+          }
+        ]
+      },
+      {
+        "name": "worker",
+        "roles": ["hadoop", "hadoop_worker"],
+        "instance_num": 3,
+        "cpu": 2,
+        "memory": 2048,
+        "networking": {
+          "port_group": "CFNetwork"
+        },
+        "vc_clusters": {
+          "name": "Cluster1",
+          "vc_rps": ["rp1", "rp2"]
+        },
+        "storage": {
+          "type": "shared",
+          "size": 10
+        },
+        "instances" : [ ]
+      },
+      {
+        "name": "client",
+        "roles": ["hadoop_client", "pig", "hive"],
+        "instance_num": 1,
+        "cpu": 2,
+        "memory": 2048,
+        "networking": {
+          "port_group": "CFNetwork"
+        },
+        "vc_clusters": {
+          "name": "Cluster1",
+          "vc_rps": ["rp1", "rp2"]
+        },
+        "storage": {
+          "type": "shared",
+          "size": 10
+        },
+        "instances" : []
+      },
+    ]
+  }
+}

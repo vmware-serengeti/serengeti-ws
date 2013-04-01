@@ -27,7 +27,8 @@ public enum ServiceType {
    PIG(EnumSet.of(HadoopRole.PIG_ROLE)),
    HIVE_SERVER(EnumSet.of(HadoopRole.HIVE_SERVER_ROLE)), 
    HIVE(EnumSet.of(HadoopRole.HIVE_ROLE)),
-   HBASE_CLIENT(EnumSet.of(HadoopRole.HBASE_CLIENT_ROLE));
+   HBASE_CLIENT(EnumSet.of(HadoopRole.HBASE_CLIENT_ROLE)),
+   YARN(EnumSet.of(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE, HadoopRole.HADOOP_NODEMANAGER_ROLE));
 
    private EnumSet<HadoopRole> roles;
    private ServiceType(EnumSet<HadoopRole> roles) {
@@ -46,9 +47,10 @@ public enum ServiceType {
       return strings;
    }
 
-   public EnumSet<ServiceType> depend() {
+   public EnumSet<ServiceType> depend(boolean isYarn) {
       switch(this) {
       case MAPRED:
+      case YARN:   
          return EnumSet.of(HDFS);
       case HBASE:
          return EnumSet.of(HDFS, ZOOKEEPER);
@@ -57,7 +59,7 @@ public enum ServiceType {
       case HIVE_SERVER:
       case HIVE:
       case PIG:
-         return EnumSet.of(MAPRED);
+         return isYarn ? EnumSet.of(YARN) : EnumSet.of(MAPRED);
       case HBASE_CLIENT:
          return EnumSet.of(HBASE);
       default:

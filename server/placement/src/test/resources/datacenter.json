@@ -1,0 +1,162 @@
+{
+  "name": "serengetiDC",
+  "clusters": [
+    {
+      "name": "cluster-ws",
+      "hosts": [
+        {
+          "name": "10.1.1.1",
+          "datastores": [
+            {
+              "name": "shared1"
+            },
+            {
+              "name": "local1"
+            },
+            {
+              "name": "local2"
+            },
+            {
+              "name" : "tli3"
+            }
+          ]
+        },
+        {
+          "name": "10.1.1.2",
+          "datastores": [
+            {
+              "name": "shared1"
+            },
+            {
+              "name": "shared2"
+            },
+            {
+              "name": "local3"
+            },
+            {
+              "name" : "tli2"
+            }
+          ]
+        },
+        {
+          "name": "10.1.1.3",
+          "datastores": [
+            {
+              "name": "shared2"
+            },
+            {
+              "name" : "shared3"
+            },
+            {
+              "name": "local4"
+            }
+          ]
+        }
+      ],
+      "rps": [ 
+        { "name" : "rp1" }, 
+        { "name" : "rp2" }     
+      ],
+      "datastores": [
+        {
+          "name": "shared1"
+        },
+        {
+          "name": "local1"
+        },
+        {
+          "name": "local2"
+        },
+        {
+          "name": "local3"
+        },
+        {
+          "name": "shared2"
+        },
+        {
+          "name": "shared3"
+        },
+        {
+          "name": "local4"
+        },
+        {
+          "name" : "tli2"
+        }
+      ]
+    },
+    {
+      "name": "cluster-dev",
+      "hosts": [
+        {
+          "name": "10.1.2.1",
+          "datastores": [
+            {
+              "name": "shared4"
+            },
+            {
+              "name": "local5"
+            }
+          ]  
+        }
+      ],
+      "rps": [
+        { "name" : "rp1" },
+        { "name" : "rp3" }      
+      ],
+      "datastores": [
+        {
+          "name": "shared1"
+        },
+        {
+          "name": "local5"
+        }
+      ]
+    }
+  ],
+  "datastores": [
+    {
+      "name" : "shared1",
+      "freeSpace" : 100
+    },
+    {
+      "name" : "shared2",
+      "freeSpace" : 150
+    },
+    {
+      "name" : "shared3",
+      "freeSpace" : 100
+    },
+    {
+      "name" : "shared4",
+      "freeSpace" : 100
+    },
+    {
+      "name" : "tli2",
+      "freeSpace" : 500
+    },
+    {
+      "name" : "local1",
+      "freeSpace" : 80
+    },
+    {
+      "name" : "local2",
+      "freeSpace" : 200
+    },
+    {
+      "name" : "local3",
+      "freeSpace" : 100
+    },
+    {
+      "name" : "local4",
+      "freeSpace" : 300
+    },
+    {
+      "name" : "local5",
+      "freeSpace" : 400
+    },
+    {
+      "name" : "tli3",
+      "freeSpace" : 300
+    }
+  ]
+}
