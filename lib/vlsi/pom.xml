@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>com.vmware.aurora</groupId>
+      <artifactId>datacloud-master</artifactId>
+      <version>${aurora.version}</version>
+      <relativePath>../../server/pom.xml</relativePath>
+   </parent>
+
+   <artifactId>vlsiLibrary</artifactId>
+   <name>vlsi common file</name>
+   <packaging>pom</packaging>
+
+   <properties>
+      <vlsi.groupId>${project.parent.groupId}</vlsi.groupId>
+
+      <vlsi.core.artifactId>vlsiCore</vlsi.core.artifactId>
+      <vlsi.core.jar>vlsi-core.jar</vlsi.core.jar>
+
+      <vlsi.client.artifactId>vlsiClient</vlsi.client.artifactId>
+      <vlsi.client.jar>vlsi-client.jar</vlsi.client.jar>
+
+      <vim.vmodl.artifactId>vimVmodl</vim.vmodl.artifactId>
+      <vim.vmodl.jar>vim-vmodl.jar</vim.vmodl.jar>
+
+      <query.vmodl.artifactId>queryVmodl</query.vmodl.artifactId>
+      <query.vmodl.jar>query-vmodl.jar</query.vmodl.jar>
+
+      <reflect.vmodl.artifactId>reflectVmodl</reflect.vmodl.artifactId>
+      <reflect.vmodl.jar>reflect-vmodl.jar</reflect.vmodl.jar>
+
+      <VLSI_ROOT>.</VLSI_ROOT>
+   </properties>
+
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-install-plugin</artifactId>
+            <executions>
+               <execution>
+                  <id>install-vsli-core</id>
+                  <phase>compile</phase>
+                  <goals>
+                     <goal>install-file</goal>
+                  </goals>
+                  <configuration>
+                     <file>${VLSI_ROOT}/${vlsi.core.jar}</file>
+                     <groupId>${vlsi.groupId}</groupId>
+                     <artifactId>${vlsi.core.artifactId}</artifactId>
+                     <version>${vmware.vlsi.version}</version>
+                     <packaging>jar</packaging>
+                     <generatePom>true</generatePom>
+                  </configuration>
+               </execution>
+               <execution>
+                  <id>install-vsli-client</id>
+                  <phase>compile</phase>
+                  <goals>
+                     <goal>install-file</goal>
+                  </goals>
+                  <configuration>
+                     <file>${VLSI_ROOT}/${vlsi.client.jar}</file>
+                     <groupId>${vlsi.groupId}</groupId>
+                     <artifactId>${vlsi.client.artifactId}</artifactId>
+                     <version>${vmware.vlsi.version}</version>
+                     <packaging>jar</packaging>
+                     <generatePom>true</generatePom>
+                  </configuration>
+               </execution>
+               <execution>
+                  <id>install-vim-vmodl</id>
+                  <phase>compile</phase>
+                  <goals>
+                     <goal>install-file</goal>
+                  </goals>
+                  <configuration>
+                     <file>${VLSI_ROOT}/${vim.vmodl.jar}</file>
+                     <groupId>${vlsi.groupId}</groupId>
+                     <artifactId>${vim.vmodl.artifactId}</artifactId>
+                     <version>${vmware.vlsi.version}</version>
+                     <packaging>jar</packaging>
+                     <generatePom>true</generatePom>
+                  </configuration>
+               </execution>
+               <execution>
+                  <id>install-query-vmodl</id>
+                  <phase>compile</phase>
+                  <goals>
+                     <goal>install-file</goal>
+                  </goals>
+                  <configuration>
+                     <file>${VLSI_ROOT}/${query.vmodl.jar}</file>
+                     <groupId>${vlsi.groupId}</groupId>
+                     <artifactId>${query.vmodl.artifactId}</artifactId>
+                     <version>${vmware.vlsi.version}</version>
+                     <packaging>jar</packaging>
+                     <generatePom>true</generatePom>
+                  </configuration>
+               </execution>
+               <execution>
+                  <id>install-reflect-vmodl</id>
+                  <phase>compile</phase>
+                  <goals>
+                     <goal>install-file</goal>
+                  </goals>
+                  <configuration>
+                     <file>${VLSI_ROOT}/${reflect.vmodl.jar}</file>
+                     <groupId>${vlsi.groupId}</groupId>
+                     <artifactId>${reflect.vmodl.artifactId}</artifactId>
+                     <version>${vmware.vlsi.version}</version>
+                     <packaging>jar</packaging>
+                     <generatePom>true</generatePom>
+                  </configuration>
+               </execution>
+           </executions>
+         </plugin>
+      </plugins>
+   </build>
+</project>

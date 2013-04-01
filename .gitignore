@@ -3,4 +3,4 @@
 **.settings
 **target
 **test-output
-lib/vlsi
+lib/vlsi/*.jar
