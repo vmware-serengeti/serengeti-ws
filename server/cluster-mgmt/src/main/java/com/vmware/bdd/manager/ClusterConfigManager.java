@@ -229,6 +229,7 @@ public class ClusterConfigManager {
                   .NETWORK_IS_NOT_FOUND(networkName, name);
          }
          clusterEntity.setNetwork(networkEntity);
+         clusterEntity.setVhmJobTrackerPort("50030");
          if (cluster.getConfiguration() != null
                && cluster.getConfiguration().size() > 0) {
             // validate hadoop config
@@ -283,7 +284,6 @@ public class ClusterConfigManager {
    
    private void updateVhmJobTrackerPort(ClusterCreate cluster,
          ClusterEntity clusterEntity) {
-      clusterEntity.setVhmJobTrackerPort("50030");
       if (cluster.getConfiguration().containsKey("hadoop")) {
          @SuppressWarnings("unchecked")
          Map<String, Object> hadoopConfig =
