@@ -353,49 +353,249 @@
           "name": "topology.script.file.name"
         }
       ],
+      "yarn-site.xml": [
+        {
+          "name": "yarn.ipc.client.factory.class"
+        },
+        {
+          "name": "yarn.ipc.serializer.type"
+        },
+        {
+          "name": "yarn.ipc.server.factory.class"
+        },
+        {
+          "name": "yarn.ipc.exception.factory.class"
+        },
+        {
+          "name": "yarn.ipc.record.factory.class"
+        },
+        {
+          "name": "yarn.ipc.rpc.class"
+        },
+        {
+          "name": "yarn.resourcemanager.address"
+        },
+        {
+          "name": "yarn.resourcemanager.client.thread-count"
+        },
+        {
+          "name": "yarn.am.liveness-monitor.expiry-interval-ms"
+        },
+        {
+          "name": "yarn.resourcemanager.principal"
+        },
+        {
+          "name": "yarn.resourcemanager.scheduler.address"
+        },
+        {
+          "name": "yarn.resourcemanager.scheduler.client.thread-count"
+        },
+        {
+          "name": "yarn.resourcemanager.webapp.address"
+        },
+        {
+          "name": "yarn.resourcemanager.resource-tracker.address"
+        },
+        {
+          "name": "yarn.acl.enable"
+        },
+        {
+          "name": "yarn.admin.acl"
+        },
+        {
+          "name": "yarn.resourcemanager.admin.address"
+        },
+        {
+          "name": "yarn.resourcemanager.admin.client.thread-count"
+        },
+        {
+          "name": "yarn.resourcemanager.amliveliness-monitor.interval-ms"
+        },
+        {
+          "name": "yarn.resourcemanager.am.max-retries"
+        },
+        {
+          "name": "yarn.resourcemanager.container.liveness-monitor.interval-ms"
+        },
+        {
+          "name": "yarn.resourcemanager.keytab"
+        },
+        {
+          "name": "yarn.nm.liveness-monitor.expiry-interval-ms"
+        },
+        {
+          "name": "yarn.resourcemanager.nm.liveness-monitor.interval-ms"
+        },
+        {
+          "name": "yarn.resourcemanager.nodes.include-path"
+        },
+        {
+          "name": "yarn.resourcemanager.nodes.exclude-path"
+        },
+        {
+          "name": "yarn.resourcemanager.resource-tracker.client.thread-count"
+        },
+        {
+          "name": "yarn.resourcemanager.scheduler.class"
+        },
+        {
+          "name": "yarn.scheduler.minimum-allocation-mb"
+        },
+        {
+          "name": "yarn.scheduler.maximum-allocation-mb"
+        },
+        {
+          "name": "yarn.resourcemanager.store.class"
+        },
+        {
+          "name": "yarn.resourcemanager.zookeeper-store.address"
+        },
+        {
+          "name": "yarn.resourcemanager.zookeeper-store.session.timeout-ms"
+        },
+        {
+          "name": "yarn.resourcemanager.max-completed-applications"
+        },
+        {
+          "name": "yarn.resourcemanager.delayed.delegation-token.removal-interval-ms"
+        },
+        {
+          "name": "yarn.resourcemanager.application-tokens.master-key-rolling-interval-secs"
+        },
+        {
+          "name": "yarn.nodemanager.address"
+        },
+        {
+          "name": "yarn.nodemanager.admin-env"
+        },
+        {
+          "name": "yarn.nodemanager.env-whitelist"
+        },
+        {
+          "name": "yarn.nodemanager.container-executor.class"
+        },
+        {
+          "name": "yarn.nodemanager.container-manager.thread-count"
+        },
+        {
+          "name": "yarn.nodemanager.delete.thread-count"
+        },
+        {
+          "name": "yarn.nodemanager.delete.debug-delay-sec"
+        },
+        {
+          "name": "yarn.nodemanager.heartbeat.interval-ms"
+        },
+        {
+          "name": "yarn.nodemanager.keytab"
+        },
+        {
+          "name": "yarn.nodemanager.local-dirs"
+        },
+        {
+          "name": "yarn.nodemanager.localizer.address"
+        },
+        {
+          "name": "yarn.nodemanager.localizer.cache.cleanup.interval-ms"
+        },
+        {
+          "name": "yarn.nodemanager.localizer.cache.target-size-mb"
+        },
+        {
+          "name": "yarn.nodemanager.localizer.client.thread-count"
+        },
+        {
+          "name": "yarn.nodemanager.localizer.fetch.thread-count"
+        },
+        {
+          "name": "yarn.nodemanager.log-dirs"
+        },
+        {
+          "name": "yarn.log-aggregation-enable"
+        },
+        {
+          "name": "yarn.nodemanager.log.retain-seconds"
+        },
+        {
+          "name": "yarn.nodemanager.remote-app-log-dir"
+        },
+        {
+          "name": "yarn.nodemanager.remote-app-log-dir-suffix"
+        },
+        {
+          "name": "yarn.nodemanager.resource.memory-mb"
+        },
+        {
+          "name": "yarn.nodemanager.vmem-pmem-ratio"
+        },
+        {
+          "name": "yarn.nodemanager.webapp.address"
+        },
+        {
+          "name": "yarn.nodemanager.container-monitor.interval-ms"
+        },
+        {
+          "name": "yarn.nodemanager.container-monitor.resource-calculator.class"
+        },
+        {
+          "name": "yarn.nodemanager.health-checker.interval-ms"
+        },
+        {
+          "name": "yarn.nodemanager.health-checker.script.timeout-ms"
+        },
+        {
+          "name": "yarn.nodemanager.health-checker.script.path"
+        },
+        {
+          "name": "yarn.nodemanager.health-checker.script.opts"
+        },
+        {
+          "name": "yarn.nodemanager.disk-health-checker.interval-ms"
+        },
+        {
+          "name": "yarn.nodemanager.disk-health-checker.min-healthy-disks"
+        },
+        {
+          "name": "yarn.nodemanager.linux-container-executor.path"
+        },
+        {
+          "name": "yarn.nodemanager.log-aggregation.compression-type"
+        },
+        {
+          "name": "yarn.nodemanager.principal"
+        },
+        {
+          "name": "yarn.nodemanager.aux-services"
+        },
+        {
+          "name": "yarn.nodemanager.sleep-delay-before-sigkill.ms"
+        },
+        {
+          "name": "yarn.nodemanager.process-kill-wait.ms"
+        },
+        {
+          "name": "yarn.nodemanager.aux-services.mapreduce.shuffle.class"
+        },
+        {
+          "name": "mapreduce.job.jar"
+        },
+        {
+          "name": "mapreduce.job.hdfs-servers"
+        },
+        {
+          "name": "yarn.web-proxy.principal"
+        },
+        {
+          "name": "yarn.web-proxy.keytab"
+        },
+        {
+          "name": "yarn.web-proxy.address"
+        },
+        {
+          "name": "yarn.application.classpath"
+        }
+      ],
       "mapred-site.xml": [
-        {
-          "name": "mapred.task.cache.levels"
-        },
-        {
-          "name": "mapred.jobtracker.taskScheduler"
-        },
-        {
-          "name": "mapred.fairscheduler.poolnameproperty"
-        },
-        {
-          "name": "mapred.fairscheduler.preemption"
-        },
-        {
-          "name": "mapred.fairscheduler.pool"
-        },
-        {
-          "name": "mapred.fairscheduler.poolnameproperty"
-        },
-        {
-          "name": "mapred.fairscheduler.allocation.file"
-        },
-        {
-          "name": "mapred.fairscheduler.sizebasedweight"
-        },
-        {
-          "name": "mapred.fairscheduler.preemption.only.log"
-        },
-        {
-          "name": "mapred.fairscheduler.update.interval"
-        },
-        {
-          "name": "mapred.fairscheduler.preemption.interval"
-        },
-        {
-          "name": "mapred.fairscheduler.weightadjuster"
-        },
-        {
-          "name": "mapred.fairscheduler.loadmanager"
-        },
-        {
-          "name": "mapred.fairscheduler.taskselector"
-        },
         {
           "name": "hadoop.job.history.location"
         },
@@ -403,7 +603,10 @@
           "name": "hadoop.job.history.user.location"
         },
         {
-          "name": "mapred.job.tracker.history.completed.location"
+          "name": "hadoop.rpc.socket.factory.class.JobSubmissionProtocol"
+        },
+        {
+          "name": "io.map.index.skip"
         },
         {
           "name": "io.sort.factor"
@@ -418,115 +621,28 @@
           "name": "io.sort.spill.percent"
         },
         {
-          "name": "io.map.index.skip"
+          "name": "jobclient.output.filter"
         },
         {
-          "name": "mapred.job.tracker.http.address"
+          "name": "job.end.retry.attempts"
         },
         {
-          "name": "mapred.job.tracker.handler.count"
+          "name": "job.end.retry.interval"
         },
         {
-          "name": "mapred.task.tracker.report.address"
+          "name": "keep.failed.task.files"
         },
         {
-          "name": "mapred.system.dir"
+          "name": "mapred.acls.enabled"
         },
         {
-          "name": "mapreduce.jobtracker.staging.root.dir"
-        },
-        {
-          "name": "mapred.temp.dir"
-        },
-        {
-          "name": "mapred.local.dir.minspacestart"
-        },
-        {
-          "name": "mapred.local.dir.minspacekill"
-        },
-        {
-          "name": "mapred.tasktracker.expiry.interval"
-        },
-        {
-          "name": "mapred.tasktracker.resourcecalculatorplugin"
-        },
-        {
-          "name": "mapred.tasktracker.taskmemorymanager.monitoring-interval"
-        },
-        {
-          "name": "mapred.tasktracker.tasks.sleeptime-before-sigkill"
-        },
-        {
-          "name": "mapred.map.tasks"
-        },
-        {
-          "name": "mapred.reduce.tasks"
-        },
-        {
-          "name": "mapreduce.tasktracker.outofband.heartbeat"
-        },
-        {
-          "name": "mapreduce.tasktracker.outofband.heartbeat.damper"
-        },
-        {
-          "name": "mapred.jobtracker.restart.recover"
-        },
-        {
-          "name": "mapred.jobtracker.job.history.block.size"
-        },
-        {
-          "name": "mapreduce.job.split.metainfo.maxsize"
-        },
-        {
-          "name": "mapred.jobtracker.taskScheduler"
-        },
-        {
-          "name": "mapred.jobtracker.taskScheduler.maxRunningTasksPerJob"
-        },
-        {
-          "name": "mapred.map.max.attempts"
-        },
-        {
-          "name": "mapred.reduce.max.attempts"
-        },
-        {
-          "name": "mapred.reduce.parallel.copies"
-        },
-        {
-          "name": "mapreduce.reduce.shuffle.maxfetchfailures"
-        },
-        {
-          "name": "mapreduce.reduce.shuffle.connect.timeout"
-        },
-        {
-          "name": "mapreduce.reduce.shuffle.read.timeout"
-        },
-        {
-          "name": "mapred.task.timeout"
-        },
-        {
-          "name": "mapred.tasktracker.map.tasks.maximum"
-        },
-        {
-          "name": "mapred.tasktracker.reduce.tasks.maximum"
-        },
-        {
-          "name": "mapred.jobtracker.completeuserjobs.maximum"
-        },
-        {
-          "name": "mapreduce.reduce.input.limit"
-        },
-        {
-          "name": "mapred.job.tracker.retiredjobs.cache.size"
-        },
-        {
-          "name": "mapred.job.tracker.jobhistory.lru.cache.size"
+          "name": "mapred.child.env"
         },
         {
           "name": "mapred.child.java.opts"
         },
         {
-          "name": "mapred.child.env"
+          "name": "mapred.child.tmp"
         },
         {
           "name": "mapred.child.ulimit"
@@ -535,94 +651,67 @@
           "name": "mapred.cluster.map.memory.mb"
         },
         {
-          "name": "mapred.cluster.reduce.memory.mb"
-        },
-        {
           "name": "mapred.cluster.max.map.memory.mb"
         },
         {
           "name": "mapred.cluster.max.reduce.memory.mb"
         },
         {
-          "name": "mapred.job.map.memory.mb"
+          "name": "mapred.cluster.reduce.memory.mb"
         },
         {
-          "name": "mapred.job.reduce.memory.mb"
-        },
-        {
-          "name": "mapred.child.tmp"
-        },
-        {
-          "name": "mapred.inmem.merge.threshold"
-        },
-        {
-          "name": "mapred.job.shuffle.merge.percent"
-        },
-        {
-          "name": "mapred.job.shuffle.input.buffer.percent"
-        },
-        {
-          "name": "mapred.job.reduce.input.buffer.percent"
-        },
-        {
-          "name": "mapred.map.tasks.speculative.execution"
-        },
-        {
-          "name": "mapred.reduce.tasks.speculative.execution"
-        },
-        {
-          "name": "mapred.job.reuse.jvm.num.tasks"
-        },
-        {
-          "name": "mapred.min.split.size"
-        },
-        {
-         "name": "mapred.jobtracker.maxtasks.per.job"
-        },
-        {
-          "name": "mapred.submit.replication"
-        },
-        {
-          "name": "mapred.tasktracker.dns.interface"
-        },
-        {
-          "name": "mapred.tasktracker.dns.nameserver"
-        },
-        {
-          "name": "tasktracker.http.threads"
-        },
-        {
-          "name": "mapred.task.tracker.http.address"
-        },
-        {
-          "name": "keep.failed.task.files"
-        },
-        {
-          "name": "mapred.output.compress"
-        },
-        {
-          "name": "mapred.output.compression.type"
-        },
-        {
-          "name": "mapred.output.compression.codec"
+          "name": "mapred.combine.recordsBeforeProgress"
         },
         {
           "name": "mapred.compress.map.output"
         },
         {
-          "name": "mapred.map.output.compression.codec"
+          "name": "mapred.fairscheduler.allocation.file"
         },
         {
-          "name": "map.sort.class"
+          "name": "mapred.fairscheduler.loadmanager"
         },
         {
-          "name": "mapred.userlog.limit.kb"
+          "name": "mapred.fairscheduler.pool"
         },
         {
-          "name": "mapred.userlog.retain.hours"
+          "name": "mapred.fairscheduler.poolnameproperty"
         },
         {
-          "name": "mapred.user.jobconf.limit"
+          "name": "mapred.fairscheduler.preemption"
+        },
+        {
+          "name": "mapred.fairscheduler.preemption.interval"
+        },
+        {
+          "name": "mapred.fairscheduler.preemption.only.log"
+        },
+        {
+          "name": "mapred.fairscheduler.sizebasedweight"
+        },
+        {
+          "name": "mapred.fairscheduler.taskselector"
+        },
+        {
+          "name": "mapred.fairscheduler.update.interval"
+        },
+        {
+          "name": "mapred.fairscheduler.weightadjuster"
+        },
+        {
+          "name": "mapred.healthChecker.interval"
+        },
+        {
+          "name": "mapred.healthChecker.script.args"
+        },
+        {
+          "name": "mapred.healthChecker.script.path"
+        },
+        {
+          "name": "mapred.healthChecker.script.timeout"
+        },
+        {
+          "name": "mapred.heartbeats.in.second"
         },
         {
           "name": "mapred.hosts"
@@ -631,34 +720,166 @@
           "name": "mapred.hosts.exclude"
         },
         {
-          "name": "mapred.heartbeats.in.second"
+          "name": "mapred.inmem.merge.threshold"
         },
         {
-          "name": "mapred.max.tracker.blacklists"
+          "name": "mapred.job.map.memory.mb"
         },
         {
-          "name": "mapred.jobtracker.blacklist.fault-timeout-window"
+          "name": "mapred.job.queue.name"
+        },
+        {
+          "name": "mapred.job.reduce.input.buffer.percent"
+        },
+        {
+          "name": "mapred.job.reduce.memory.mb"
+        },
+        {
+          "name": "mapred.job.reuse.jvm.num.tasks"
+        },
+        {
+          "name": "mapred.job.shuffle.input.buffer.percent"
+        },
+        {
+          "name": "mapred.job.shuffle.merge.percent"
         },
         {
           "name": "mapred.jobtracker.blacklist.fault-bucket-width"
         },
         {
-          "name": "mapred.max.tracker.failures"
+          "name": "mapred.jobtracker.blacklist.fault-timeout-window"
         },
         {
-          "name": "jobclient.output.filter"
+          "name": "mapred.jobtracker.completeuserjobs.maximum"
+        },
+        {
+          "name": "mapred.job.tracker.handler.count"
+        },
+        {
+          "name": "mapred.job.tracker.history.completed.location"
+        },
+        {
+          "name": "mapred.job.tracker.http.address"
+        },
+        {
+          "name": "mapred.jobtracker.job.history.block.size"
+        },
+        {
+          "name": "mapred.job.tracker.jobhistory.lru.cache.size"
+        },
+        {
+          "name": "mapred.jobtracker.maxtasks.per.job"
         },
         {
           "name": "mapred.job.tracker.persist.jobstatus.active"
         },
         {
-          "name": "mapred.job.tracker.persist.jobstatus.hours"
-        },
-        {
           "name": "mapred.job.tracker.persist.jobstatus.dir"
         },
         {
-          "name": "mapreduce.job.complete.cancel.delegation.tokens"
+          "name": "mapred.job.tracker.persist.jobstatus.hours"
+        },
+        {
+          "name": "mapred.jobtracker.restart.recover"
+        },
+        {
+          "name": "mapred.job.tracker.retiredjobs.cache.size"
+        },
+        {
+          "name": "mapred.jobtracker.taskScheduler"
+        },
+        {
+          "name": "mapred.jobtracker.taskScheduler.maxRunningTasksPerJob"
+        },
+        {
+          "name": "mapred.line.input.format.linespermap"
+        },
+        {
+          "name": "mapred.local.dir.minspacekill"
+        },
+        {
+          "name": "mapred.local.dir.minspacestart"
+        },
+        {
+          "name": "mapred.map.max.attempts"
+        },
+        {
+          "name": "mapred.map.output.compression.codec"
+        },
+        {
+          "name": "mapred.map.tasks"
+        },
+        {
+          "name": "mapred.map.tasks.speculative.execution"
+        },
+        {
+          "name": "mapred.max.tracker.blacklists"
+        },
+        {
+          "name": "mapred.max.tracker.failures"
+        },
+        {
+          "name": "mapred.merge.recordsBeforeProgress"
+        },
+        {
+          "name": "mapred.min.split.size"
+        },
+        {
+          "name": "mapred.output.compress"
+        },
+        {
+          "name": "mapred.output.compression.codec"
+        },
+        {
+          "name": "mapred.output.compression.type"
+        },
+        {
+          "name": "mapred.queue.default.state"
+        },
+        {
+          "name": "mapred.queue.names"
+        },
+        {
+          "name": "mapred.reduce.max.attempts"
+        },
+        {
+          "name": "mapred.reduce.parallel.copies"
+        },
+        {
+          "name": "mapred.reduce.slowstart.completed.maps"
+        },
+        {
+          "name": "mapred.reduce.tasks"
+        },
+        {
+          "name": "mapred.reduce.tasks.speculative.execution"
+        },
+        {
+          "name": "mapred.skip.attempts.to.start.skipping"
+        },
+        {
+          "name": "mapred.skip.map.auto.incr.proc.count"
+        },
+        {
+          "name": "mapred.skip.map.max.skip.records"
+        },
+        {
+          "name": "mapred.skip.out.dir"
+        },
+        {
+          "name": "mapred.skip.reduce.auto.incr.proc.count"
+        },
+        {
+          "name": "mapred.skip.reduce.max.skip.groups"
+        },
+        {
+          "name": "mapred.submit.replication"
+        },
+        {
+          "name": "mapred.system.dir"
+        },
+        {
+          "name": "mapred.task.cache.levels"
         },
         {
           "name": "mapred.task.profile"
@@ -670,49 +891,85 @@
           "name": "mapred.task.profile.reduces"
         },
         {
-          "name": "mapred.line.input.format.linespermap"
+          "name": "mapred.task.timeout"
         },
         {
-          "name": "mapred.skip.attempts.to.start.skipping"
+          "name": "mapred.tasktracker.dns.interface"
         },
         {
-          "name": "mapred.skip.map.auto.incr.proc.count"
+          "name": "mapred.tasktracker.dns.nameserver"
         },
         {
-          "name": "mapred.skip.reduce.auto.incr.proc.count"
+          "name": "mapred.tasktracker.expiry.interval"
         },
         {
-          "name": "mapred.skip.out.dir"
+          "name": "mapred.task.tracker.http.address"
         },
         {
-          "name": "mapred.skip.map.max.skip.records"
+          "name": "mapred.tasktracker.indexcache.mb"
         },
         {
-          "name": "mapred.skip.reduce.max.skip.groups"
+          "name": "mapred.tasktracker.map.tasks.maximum"
         },
         {
-          "name": "job.end.retry.attempts"
+          "name": "mapred.tasktracker.reduce.tasks.maximum"
         },
         {
-          "name": "job.end.retry.interval"
+          "name": "mapred.task.tracker.report.address"
         },
         {
-          "name": "hadoop.rpc.socket.factory.class.JobSubmissionProtocol"
+          "name": "mapred.tasktracker.resourcecalculatorplugin"
         },
         {
-          "name": "mapred.task.cache.levels"
+          "name": "mapred.task.tracker.task-controller"
         },
         {
-          "name": "mapred.queue.names"
+          "name": "mapred.tasktracker.taskmemorymanager.monitoring-interval"
         },
         {
-          "name": "mapred.acls.enabled"
+          "name": "mapred.tasktracker.tasks.sleeptime-before-sigkill"
         },
         {
-          "name": "mapred.queue.default.state"
+          "name": "mapred.temp.dir"
         },
         {
-          "name": "mapred.job.queue.name"
+          "name": "mapreduce.admin.user.env"
+        },
+        {
+          "name": "mapreduce.client.completion.pollinterval"
+        },
+        {
+          "name": "mapreduce.client.output.filter"
+        },
+        {
+          "name": "mapreduce.client.progressmonitor.pollinterval"
+        },
+        {
+          "name": "mapreduce.client.submit.file.replication"
+        },
+        {
+          "name": "mapreduce.cluster.acls.enabled"
+        },
+        {
+          "name": "mapreduce.cluster.administrators"
+        },
+        {
+          "name": "mapreduce.cluster.local.dir"
+        },
+        {
+          "name": "mapreduce.cluster.temp.dir"
+        },
+        {
+          "name": "mapreduce.framework.name"
+        },
+        {
+          "name": "mapreduce.ifile.readahead"
+        },
+        {
+          "name": "mapreduce.ifile.readahead.bytes"
+        },
+        {
+          "name": "mapreduce.input.fileinputformat.split.minsize"
         },
         {
           "name": "mapreduce.job.acl-modify-job"
@@ -721,44 +978,401 @@
           "name": "mapreduce.job.acl-view-job"
         },
         {
-          "name": "mapreduce.cluster.administrators"
+          "name": "mapreduce.job.committer.setup.cleanup.needed"
         },
         {
-          "name": "mapred\\.queue\\.[0-9a-zA-Z-_]+\\.acl-administer-jobs",
-          "nameIsPattern": "true"
+          "name": "mapreduce.job.complete.cancel.delegation.tokens"
         },
         {
-          "name": "mapred.tasktracker.indexcache.mb"
+          "name": "mapreduce.job.counters.limit"
         },
         {
-          "name": "mapred.combine.recordsBeforeProgress"
+          "name": "mapreduce.job.end-notification.max.attempts"
         },
         {
-          "name": "mapred.merge.recordsBeforeProgress"
+          "name": "mapreduce.job.end-notification.max.retry.interval"
         },
         {
-          "name": "mapred.reduce.slowstart.completed.maps"
+          "name": "mapreduce.job.end-notification.retry.attempts"
         },
         {
-          "name": "mapred.task.tracker.task-controller"
+          "name": "mapreduce.job.end-notification.retry.interval"
+        },
+        {
+          "name": "mapreduce.job.end-notification.url"
+        },
+        {
+          "name": "mapreduce.jobhistory.address"
+        },
+        {
+          "name": "mapreduce.jobhistory.keytab"
+        },
+        {
+          "name": "mapreduce.jobhistory.principal"
+        },
+        {
+          "name": "mapreduce.jobhistory.webapp.address"
+        },
+        {
+          "name": "mapreduce.job.jvm.numtasks"
+        },
+        {
+          "name": "mapreduce.job.maps"
+        },
+        {
+          "name": "mapreduce.job.maxtaskfailures.per.tracker"
+        },
+        {
+          "name": "mapreduce.job.queuename"
+        },
+        {
+          "name": "mapreduce.job.reduces"
+        },
+        {
+          "name": "mapreduce.job.reduce.slowstart.completedmaps"
+        },
+        {
+          "name": "mapreduce.job.skip.outdir"
+        },
+        {
+          "name": "mapreduce.job.speculative.slownodethreshold"
+        },
+        {
+          "name": "mapreduce.job.speculative.slowtaskthreshold"
+        },
+        {
+          "name": "mapreduce.job.speculative.speculativecap"
+        },
+        {
+          "name": "mapreduce.job.split.metainfo.maxsize"
+        },
+        {
+          "name": "mapreduce.jobtracker.address"
+        },
+        {
+          "name": "mapreduce.jobtracker.expire.trackers.interval"
+        },
+        {
+          "name": "mapreduce.jobtracker.handler.count"
+        },
+        {
+          "name": "mapreduce.jobtracker.heartbeats.in.second"
+        },
+        {
+          "name": "mapreduce.jobtracker.hosts.exclude.filename"
+        },
+        {
+          "name": "mapreduce.jobtracker.hosts.filename"
+        },
+        {
+          "name": "mapreduce.jobtracker.http.address"
+        },
+        {
+          "name": "mapreduce.jobtracker.instrumentation"
+        },
+        {
+          "name": "mapreduce.jobtracker.jobhistory.block.size"
+        },
+        {
+          "name": "mapreduce.jobtracker.jobhistory.completed.location"
+        },
+        {
+          "name": "mapreduce.jobtracker.jobhistory.location"
+        },
+        {
+          "name": "mapreduce.jobtracker.jobhistory.lru.cache.size"
+        },
+        {
+          "name": "mapreduce.jobtracker.jobhistory.task.numberprogresssplits"
+        },
+        {
+          "name": "mapreduce.jobtracker.maxtasks.perjob"
+        },
+        {
+          "name": "mapreduce.jobtracker.persist.jobstatus.active"
+        },
+        {
+          "name": "mapreduce.jobtracker.persist.jobstatus.dir"
+        },
+        {
+          "name": "mapreduce.jobtracker.persist.jobstatus.hours"
+        },
+        {
+          "name": "mapreduce.jobtracker.restart.recover"
+        },
+        {
+          "name": "mapreduce.jobtracker.retiredjobs.cache.size"
+        },
+        {
+          "name": "mapreduce.jobtracker.staging.root.dir"
+        },
+        {
+          "name": "mapreduce.jobtracker.system.dir"
+        },
+        {
+          "name": "mapreduce.jobtracker.taskcache.levels"
+        },
+        {
+          "name": "mapreduce.jobtracker.taskscheduler"
+        },
+        {
+          "name": "mapreduce.jobtracker.taskscheduler.maxrunningtasks.perjob"
+        },
+        {
+          "name": "mapreduce.jobtracker.tasktracker.maxblacklists"
+        },
+        {
+          "name": "mapreduce.job.ubertask.enable"
+        },
+        {
+          "name": "mapreduce.job.ubertask.maxbytes"
+        },
+        {
+          "name": "mapreduce.job.ubertask.maxmaps"
+        },
+        {
+          "name": "mapreduce.job.ubertask.maxreduces"
+        },
+        {
+          "name": "mapreduce.job.userhistorylocation"
+        },
+        {
+          "name": "mapreduce.job.userlog.retain.hours"
+        },
+        {
+          "name": "mapreduce.local.clientfactory.class.name"
+        },
+        {
+          "name": "mapreduce.map.log.level"
+        },
+        {
+          "name": "mapreduce.map.maxattempts"
+        },
+        {
+          "name": "mapreduce.map.output.compress"
+        },
+        {
+          "name": "mapreduce.map.output.compress.codec"
+        },
+        {
+          "name": "mapreduce.map.skip.maxrecords"
+        },
+        {
+          "name": "mapreduce.map.skip.proc.count.autoincr"
+        },
+        {
+          "name": "mapreduce.map.sort.spill.percent"
+        },
+        {
+          "name": "mapreduce.map.speculative"
+        },
+        {
+          "name": "mapreduce.output.fileoutputformat.compress"
+        },
+        {
+          "name": "mapreduce.output.fileoutputformat.compress.codec"
+        },
+        {
+          "name": "mapreduce.output.fileoutputformat.compress.type"
+        },
+        {
+          "name": "mapreduce.reduce.input.buffer.percent"
+        },
+        {
+          "name": "mapreduce.reduce.input.limit"
+        },
+        {
+          "name": "mapreduce.reduce.log.level"
+        },
+        {
+          "name": "mapreduce.reduce.markreset.buffer.percent"
+        },
+        {
+          "name": "mapreduce.reduce.maxattempts"
+        },
+        {
+          "name": "mapreduce.reduce.merge.inmem.threshold"
+        },
+        {
+          "name": "mapreduce.reduce.shuffle.connect.timeout"
+        },
+        {
+          "name": "mapreduce.reduce.shuffle.input.buffer.percent"
+        },
+        {
+          "name": "mapreduce.reduce.shuffle.maxfetchfailures"
+        },
+        {
+          "name": "mapreduce.reduce.shuffle.memory.limit.percent"
+        },
+        {
+          "name": "mapreduce.reduce.shuffle.merge.percent"
+        },
+        {
+          "name": "mapreduce.reduce.shuffle.parallelcopies"
+        },
+        {
+          "name": "mapreduce.reduce.shuffle.read.timeout"
+        },
+        {
+          "name": "mapreduce.reduce.skip.maxgroups"
+        },
+        {
+          "name": "mapreduce.reduce.skip.proc.count.autoincr"
+        },
+        {
+          "name": "mapreduce.reduce.speculative"
+        },
+        {
+          "name": "mapreduce.shuffle.port"
+        },
+        {
+          "name": "mapreduce.shuffle.ssl.enabled"
+        },
+        {
+          "name": "mapreduce.shuffle.ssl.file.buffer.size"
+        },
+        {
+          "name": "mapreduce.task.files.preserve.failedtasks"
+        },
+        {
+          "name": "mapreduce.task.files.preserve.filepattern"
+        },
+        {
+          "name": "mapreduce.task.io.sort.factor"
+        },
+        {
+          "name": "mapreduce.task.io.sort.mb"
+        },
+        {
+          "name": "mapreduce.task.merge.progress.records"
+        },
+        {
+          "name": "mapreduce.task.profile"
+        },
+        {
+          "name": "mapreduce.task.profile.maps"
+        },
+        {
+          "name": "mapreduce.task.profile.reduces"
+        },
+        {
+          "name": "mapreduce.task.skip.start.attempts"
+        },
+        {
+          "name": "mapreduce.task.timeout"
+        },
+        {
+          "name": "mapreduce.task.tmp.dir"
+        },
+        {
+          "name": "mapreduce.tasktracker.dns.interface"
+        },
+        {
+          "name": "mapreduce.tasktracker.dns.nameserver"
         },
         {
           "name": "mapreduce.tasktracker.group"
         },
         {
-          "name": "mapred.healthChecker.script.path"
+          "name": "mapreduce.tasktracker.healthchecker.interval"
         },
         {
-          "name": "mapred.healthChecker.interval"
+          "name": "mapreduce.tasktracker.healthchecker.script.args"
         },
         {
-          "name": "mapred.healthChecker.script.timeout"
+          "name": "mapreduce.tasktracker.healthchecker.script.path"
         },
         {
-          "name": "mapred.healthChecker.script.args"
+          "name": "mapreduce.tasktracker.healthchecker.script.timeout"
         },
         {
-          "name": "mapreduce.job.counters.limit"
+          "name": "mapreduce.tasktracker.http.address"
+        },
+        {
+          "name": "mapreduce.tasktracker.http.threads"
+        },
+        {
+          "name": "mapreduce.tasktracker.indexcache.mb"
+        },
+        {
+          "name": "mapreduce.tasktracker.instrumentation"
+        },
+        {
+          "name": "mapreduce.tasktracker.local.dir.minspacekill"
+        },
+        {
+          "name": "mapreduce.tasktracker.local.dir.minspacestart"
+        },
+        {
+          "name": "mapreduce.tasktracker.map.tasks.maximum"
+        },
+        {
+          "name": "mapreduce.tasktracker.outofband.heartbeat"
+        },
+        {
+          "name": "mapreduce.tasktracker.outofband.heartbeat.damper"
+        },
+        {
+          "name": "mapreduce.tasktracker.reduce.tasks.maximum"
+        },
+        {
+          "name": "mapreduce.tasktracker.report.address"
+        },
+        {
+          "name": "mapreduce.tasktracker.resourcecalculatorplugin"
+        },
+        {
+          "name": "mapreduce.tasktracker.taskcontroller"
+        },
+        {
+          "name": "mapreduce.tasktracker.taskmemorymanager.monitoringinterval"
+        },
+        {
+          "name": "mapreduce.tasktracker.tasks.sleeptimebeforesigkill"
+        },
+        {
+          "name": "mapreduce.task.userlog.limit.kb"
+        },
+        {
+          "name": "mapred.user.jobconf.limit"
+        },
+        {
+          "name": "mapred.userlog.limit.kb"
+        },
+        {
+          "name": "mapred.userlog.retain.hours"
+        },
+        {
+          "name": "map.sort.class"
+        },
+        {
+          "name": "tasktracker.http.threads"
+        },
+        {
+          "name": "yarn.app.mapreduce.am.job.client.port-range"
+        },
+        {
+          "name": "yarn.app.mapreduce.am.job.task.listener.thread-count"
+        },
+        {
+          "name": "yarn.app.mapreduce.am.resource.mb"
+        },
+        {
+          "name": "yarn.app.mapreduce.am.scheduler.heartbeat.interval-ms"
+        },
+        {
+          "name": "yarn.app.mapreduce.am.staging-dir"
+        },
+        {
+          "name": "yarn.app.mapreduce.client-am.ipc.max-retries"
+        },
+        {
+          "name": "yarn.app.mapreduce.client.max-retries"
+        },
+        {
+          "name": "mapred\\.queue\\.[0-9a-zA-Z-_]+\\.acl-administer-jobs",
+          "nameIsPattern": "true"
         }
       ],
       "fair-scheduler.xml": [

@@ -186,6 +186,7 @@ def init_conf_files
       "core-site.xml",
       "hdfs-site.xml",
       "mapred-site.xml",
+      "yarn-site.xml",
       "fair-scheduler.xml",
       "capacity-scheduler.xml",
       "mapred-queue-acls.xml",
