@@ -34,6 +34,7 @@ import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
+import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.spectypes.VcCluster;
 
 @Service
@@ -273,5 +274,18 @@ public class ResourcePoolService implements IResourcePoolService {
       }
       rpDao.delete(entity);
       logger.debug("successfully deleted resource pool " + rpName);
+   }
+
+   @Override
+   public boolean isDeployedUnderCluster(final String clusterName,
+         final String vcRPName) {
+      if (VcResourceUtils.findRPInVCCluster(clusterName, vcRPName) != null) {
+         return false;
+      } else if ((VcResourceUtils.findRPInVCCluster(clusterName, "") != null)
+            && ("[" + clusterName + "]").equals(vcRPName)) {
+         return true;
+      } else {
+         return false;
+      }
    }
 }

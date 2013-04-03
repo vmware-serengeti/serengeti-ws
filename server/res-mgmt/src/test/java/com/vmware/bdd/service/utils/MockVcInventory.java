@@ -59,7 +59,9 @@ public class MockVcInventory {
 
          VcResourcePool rp1 = Mockito.mock(VcResourcePool.class);
          Mockito.when(cluster1.searchRP("[cluster1]/rp1")).thenReturn(rp1);
-
+         VcResourcePool clusterRP = Mockito.mock(VcResourcePool.class);
+         Mockito.when(cluster1.searchRP("[cluster1]")).thenReturn(clusterRP);
+         
          List<VcVirtualMachine> vms = new ArrayList<VcVirtualMachine>();
          VcVirtualMachine vm = Mockito.mock(VcVirtualMachine.class);
          vms.add(vm);

@@ -46,4 +46,18 @@ public interface IResourcePoolService {
 
    void deleteResourcePool(String rpName);
 
+   /**
+    * <p>
+    * This method is used for verifying whether current vApp is deployed under
+    * the cluster direct or not. More specifically, returns <code>true</code> if
+    * current vApp is deployed under cluster. Otherwise, returns
+    * <code>false</code>.
+    * 
+    * @param clusterName
+    * @param vcRPName
+    * @return
+    */
+   boolean isDeployedUnderCluster(final String clusterName,
+         final String vcRPName);
+
 }

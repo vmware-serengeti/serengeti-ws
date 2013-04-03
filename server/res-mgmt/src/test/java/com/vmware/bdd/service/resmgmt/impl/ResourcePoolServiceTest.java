@@ -20,6 +20,7 @@ import java.util.Set;
 
 import mockit.Expectations;
 import mockit.Mocked;
+import mockit.Mockit;
 import mockit.NonStrict;
 import mockit.Verifications;
 
@@ -35,6 +36,8 @@ import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
+import com.vmware.bdd.service.utils.MockVcContext;
+import com.vmware.bdd.service.utils.MockVcInventory;
 import com.vmware.bdd.spectypes.VcCluster;
 
 /**
@@ -62,6 +65,8 @@ public class ResourcePoolServiceTest extends BaseResourceTest {
    @BeforeClass
    public void beforeClass() {
       rpSvc = new ResourcePoolService();
+      Mockit.setUpMock(MockVcContext.class);
+      Mockit.setUpMock(MockVcInventory.class);
    }
 
    @Test(groups = { "res-mgmt" })
@@ -240,4 +245,12 @@ public class ResourcePoolServiceTest extends BaseResourceTest {
       rpSvc.setClusterDao(clusterDao);
       rpSvc.deleteResourcePool("testRP");
    }
+
+   @Test(groups = { "res-mgmt" })
+   public void testIsDeployedUnderCluster() {
+      Assert.assertTrue(rpSvc.isDeployedUnderCluster("cluster1", "[cluster1]"));
+      Assert.assertFalse(rpSvc.isDeployedUnderCluster("cluster1", "rp1"));
+      Assert.assertFalse(rpSvc.isDeployedUnderCluster("cluster1", "rp2"));
+   }
+
 }

@@ -146,15 +146,14 @@ public class ResourceInitializerService implements IResourceInitializerService {
       logger.info("server mob id:" + serverMobId);
       final VcVirtualMachine serverVm = findVM(serverMobId);
       VcResourcePool vcRP = getVmRp(serverVm);
-
-      logger.info("vc rp: " + vcRP.getName() + ", cluster: "
-            + vcRP.getVcCluster().getName());
-
       String clusterName = vcRP.getVcCluster().getName();
       String vcRPName = vcRP.getName();
+      logger.info("vc rp: " + vcRPName + ", cluster: " + clusterName);
       String networkName = getVMNetwork(serverVm);
       List<String> dsNames = getVmDatastore(serverVm);
-
+      if (rpSvc.isDeployedUnderCluster(clusterName, vcRPName)) {
+         vcRPName = "";
+      }
       addResourceIntoDB(clusterName, vcRPName, networkName, dsNames);
    }
 

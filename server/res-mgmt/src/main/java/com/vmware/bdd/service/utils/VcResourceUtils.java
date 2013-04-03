@@ -147,11 +147,16 @@ public class VcResourceUtils {
                @Override
                protected VcResourcePool body() throws Exception {
                   List<VcCluster> vcClusters = VcInventory.getClusters();
+                  String targetRP = "";
                   for (VcCluster vcCluster : vcClusters) {
                      if (!clusterName.equals(vcCluster.getName())) {
                         continue;
                      }
-                     String targetRP = "[" + clusterName + "]/" + vcRPName;
+                     if (CommonUtil.isBlank(vcRPName)) {
+                        targetRP = "[" + clusterName + "]";
+                     } else {
+                        targetRP = "[" + clusterName + "]/" + vcRPName;
+                     }
                      return vcCluster.searchRP(targetRP);
                   }
                   return null;
