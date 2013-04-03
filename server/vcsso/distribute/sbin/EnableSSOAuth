@@ -1,0 +1,62 @@
+#!/bin/bash
+
+#Usage
+if [[ $# == 0 || $# > 1 ]]
+then
+  echo "Usage: EnableSSOAuth sso_lookup_service_https_url"
+  exit 0
+fi
+
+SERENGETI_HOME=/opt/serengeti
+SSO_TOOL_HOME=${SERENGETI_HOME}/ssotool
+SSO_DATA_DIR=ssoData
+SERENGETI_PROP_FILE=${SERENGETI_HOME}/conf/serengeti.properties
+NEW_SSO_PROVIDER_FILE=spring-security-context.xml
+SSO_PROVIDER_FILE_HOME=${SERENGETI_HOME}/tomcat6/webapps/serengeti/WEB-INF
+SSO_PROVIDER_FILE=${SSO_PROVIDER_FILE_HOME}/spring-security-context.xml
+SSO_TOOL_JAR=`ls ${SSO_TOOL_HOME}/regtool.jar`
+java -jar ${SSO_TOOL_JAR} storeSsoData -d $1 -f ${SSO_TOOL_HOME}/${SSO_DATA_DIR}
+if [ $? != 0 ]
+then
+  echo "Please check if sso lookup serivce https url is correct, and sso services work normally."
+  exit 1
+fi
+
+echo "Prepare the authentication component"
+chmod 600 ${SERENGETI_PROP_FILE}
+cd ${SSO_TOOL_HOME}/${SSO_DATA_DIR}
+
+#write sts information into serengeti.properites for the first time
+#or update sts information afterwards
+#ssoLocations.txt is as below:
+# groupcheck=https://a.b.c.d:port/sso-adminserver/sdk
+# admin=https://a.b.c.d:port/sso-adminserver/sdk
+# sts=https://a.b.c.d:port/ims/STSService?wsdl
+
+while read line
+do
+  expr $line : 'sts=' > /dev/null
+  if [ $? == 0 ]
+  then
+    grep 'sts=' ${SERENGETI_PROP_FILE} > /dev/null
+    if [ $? == 0 ]
+    then
+      sed -i "s|sts=.*|$line|" ${SERENGETI_PROP_FILE}
+    else
+      echo -e "\n$line" >> ${SERENGETI_PROP_FILE}
+    fi
+  fi
+done < "ssoLocations.txt"
+
+sts_crts_new_dir="sts_crts_dir = ${SSO_TOOL_HOME}/ssoData"
+grep 'sts_crts_dir =' ${SERENGETI_PROP_FILE} > /dev/null
+    if [ $? == 0 ]
+    then
+      sed -i "s|sts_crts_dir =.*|$sts_crts_new_dir|" ${SERENGETI_PROP_FILE}
+    else
+      echo $sts_crts_new_dir >> ${SERENGETI_PROP_FILE}
+    fi
+
+chmod 400 ${SERENGETI_PROP_FILE}
+
+echo "SSO Authentication is enabled now. Please restart the Serengeti web server  to complete the procedure by the command 'sudo service tomcat stop/start'."

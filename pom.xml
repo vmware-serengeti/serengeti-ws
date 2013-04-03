@@ -18,6 +18,7 @@
 		<module>server/dal</module>
 		<module>server/aop</module>
 		<module>server/authentication</module>
+		<module>server/vcsso</module>
 		<module>server/cluster-mgmt</module>
 		<module>server/serengeti</module>
 		<module>server/test</module>

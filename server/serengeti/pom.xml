@@ -25,6 +25,11 @@
 		<artifactId>authentication</artifactId>
 		<version>${serengeti.version}</version>
 	  </dependency>
+	  <dependency>
+		<groupId>com.vmware.bdd</groupId>
+		<artifactId>vcsso</artifactId>
+		<version>${serengeti.version}</version>
+	  </dependency>
    </dependencies>
 
    <build>

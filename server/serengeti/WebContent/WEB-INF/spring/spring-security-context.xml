@@ -8,23 +8,49 @@
 		http://www.springframework.org/schema/beans
 		http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
-	<http entry-point-ref="restAuthenticationEntryPoint" auto-config="true">
-		<intercept-url pattern="/**" access="IS_AUTHENTICATED_FULLY" />
-		<form-login authentication-failure-handler-ref="noRedirectFailureHandler"
-			authentication-success-handler-ref="noRedirectSuccessHandler" />
-		<logout invalidate-session="true" />
-	</http>
+    <http entry-point-ref="restAuthenticationEntryPoint">
+       <intercept-url pattern="/api/*" access="IS_AUTHENTICATED_FULLY"/>
+       <custom-filter before="BASIC_AUTH_FILTER" ref="userAuthenticationFilter"/>
+       <custom-filter after="BASIC_AUTH_FILTER" ref="samlAuthenticationFilter"/>
+    </http>
 
-	<beans:bean id="noRedirectSuccessHandler" class="com.vmware.bdd.rest.NoRedirectSuccessHandler" />
-	<beans:bean id="noRedirectFailureHandler" class="com.vmware.bdd.rest.NoRedirectFailureHandler" />
-	<beans:bean id="restAuthenticationEntryPoint" class="com.vmware.bdd.rest.RestAuthenticationEntryPoint" />
+    <beans:bean id="noRedirectSuccessHandler" class="com.vmware.bdd.rest.NoRedirectSuccessHandler"/>
+    <beans:bean id="noRedirectFailureHandler" class="com.vmware.bdd.rest.NoRedirectFailureHandler"/>
+    <beans:bean id="redirectSuccessHandler" class="com.vmware.bdd.security.sso.RedirectSuccessHandler"/>
+    <beans:bean id="redirectFailureHandler" class="com.vmware.bdd.security.sso.RedirectFailureHandler"/>
+    <beans:bean id="restAuthenticationEntryPoint" class="com.vmware.bdd.rest.RestAuthenticationEntryPoint"/>
 
-	<authentication-manager alias="authenticationManager">
-		<authentication-provider ref="userAuthenticationProvider" />
-	</authentication-manager>
+    <beans:bean id="userAuthenticationFilter" class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
+    	<beans:property name="authenticationManager" ref="authenticationManager" />
+    	<beans:property name="authenticationSuccessHandler" ref="noRedirectSuccessHandler"/>
+    	<beans:property name="authenticationFailureHandler" ref="noRedirectFailureHandler"/>
+    </beans:bean>
 
-	<beans:bean id="userService" class="com.vmware.bdd.security.service.impl.UserService" />
-	<beans:bean id="userAuthenticationProvider" class="com.vmware.bdd.security.UserAuthenticationProvider">
-		<beans:property name="userService" ref="userService" />
-	</beans:bean>
+    <beans:bean id="samlAuthenticationFilter" class="com.vmware.bdd.security.sso.SamlAuthenticationFilter">
+    	<beans:property name="authenticationManager" ref="samlAuthenticationManager" />
+    	<beans:property name="authenticationSuccessHandler" ref="redirectSuccessHandler"/>
+    	<beans:property name="authenticationFailureHandler" ref="redirectFailureHandler"/>
+    </beans:bean>
+
+    <authentication-manager alias="authenticationManager">
+   		<authentication-provider ref="userAuthenticationProvider" />
+    </authentication-manager>
+
+    <beans:bean id="samlAuthenticationManager" class="org.springframework.security.authentication.ProviderManager">
+    	<beans:property name="providers">
+        	<beans:list>
+            	<beans:ref bean="samlAuthenticationProvider" />
+         	</beans:list>
+   		</beans:property>
+   </beans:bean>
+
+   <beans:bean id="userService" class="com.vmware.bdd.security.service.impl.UserService" />
+   <beans:bean id="userAuthenticationProvider" class="com.vmware.bdd.security.sso.UserAuthenticationProvider">
+   		<beans:property name="userService" ref="userService" />
+   </beans:bean>
+
+   <beans:bean id="samlAuthenticationProvider" class="com.vmware.bdd.security.sso.SamlAuthenticationProvider">
+   		<beans:property name="userService" ref="userService" />
+   </beans:bean>
+
 </beans:beans>
