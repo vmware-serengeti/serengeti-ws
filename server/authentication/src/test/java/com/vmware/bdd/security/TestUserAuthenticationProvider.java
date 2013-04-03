@@ -59,15 +59,15 @@ public class TestUserAuthenticationProvider {
          Configuration configuration;
          {
             Configuration.getString("vim.host");
-            returns("vc-aurora-db0.prom.eng.vmware.com");
+            returns("192.168.0.1");
          };
          {
             Configuration.getString("vim.thumbprint");
-            returns("78:97:dc:69:96:83:77:a8:33:0c:5c:62:73:ae:50:5c:62:fb:b0:09");
+            returns("28:37:dc:69:96:43:77:a8:33:0c:5c:64:73:ae:50:2c:62:fb:c0:09");
          };
          {
-            Configuration.getInt("vim.port", 443);
-            returns(443);
+            Configuration.getInt("vim.port", 110);
+            returns(110);
          }
       };
 
