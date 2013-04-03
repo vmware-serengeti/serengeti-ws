@@ -143,6 +143,10 @@ public class CommandsUtils {
       return CommonUtil.isBlank(str);
    }
 
+   public static String notNull(final String str, final String desStr) {
+      return CommonUtil.notNull(str, desStr);
+   }
+
    /**
     * Show a table(include table column names and table contents) by left
     * justifying. More specifically, the {@code columnNamesWithGetMethodNames}

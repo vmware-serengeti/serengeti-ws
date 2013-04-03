@@ -345,8 +345,10 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("vc cluster name",
                rpSpec.getVcClusterName());
       }
-      if (CommonUtil.isBlank(rpSpec.getResourcePoolName())
-            || !CommonUtil.validateName(rpSpec.getResourcePoolName())) {
+      rpSpec.setResourcePoolName(CommonUtil.notNull(
+            rpSpec.getResourcePoolName(), ""));
+      if (!CommonUtil.isBlank(rpSpec.getResourcePoolName())
+            && !CommonUtil.validateName(rpSpec.getResourcePoolName())) {
          throw BddException.INVALID_PARAMETER("vc resource pool name",
                rpSpec.getResourcePoolName());
       }

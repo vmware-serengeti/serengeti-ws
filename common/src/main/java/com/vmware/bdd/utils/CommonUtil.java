@@ -72,6 +72,10 @@ public class CommonUtil {
       return str == null || str.trim().isEmpty();
    }
 
+   public static String notNull(final String str, final String desStr) {
+      return str == null ? desStr : str;
+   }
+
    public static boolean validateName(final String input) {
       return match(input, Constants.NAME_PATTERN);
    }

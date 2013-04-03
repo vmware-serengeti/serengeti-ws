@@ -44,12 +44,12 @@ public class ResourcePoolCommands implements CommandMarker {
    @CliCommand(value = "resourcepool add", help = "Add a new resource pool")
    public void addResourcePool(
          @CliOption(key = { "name" }, mandatory = true, help = "The resource pool name") final String name,
-         @CliOption(key = { "vcrp" }, mandatory = true, help = "The vc rp name") final String vcrp,
+         @CliOption(key = { "vcrp" }, mandatory = false, help = "The vc rp name") final String vcrp,
          @CliOption(key = { "vccluster" }, mandatory = true, help = "The vc cluster name") final String vccluster) {
       //build ResourcePoolAdd object
       ResourcePoolAdd rpAdd = new ResourcePoolAdd();
       rpAdd.setName(name);
-      rpAdd.setResourcePoolName(vcrp);
+      rpAdd.setResourcePoolName(CommandsUtils.notNull(vcrp, ""));
       rpAdd.setVcClusterName(vccluster);
 
       //rest invocation
