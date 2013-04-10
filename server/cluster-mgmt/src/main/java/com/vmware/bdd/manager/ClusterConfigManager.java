@@ -519,6 +519,7 @@ public class ClusterConfigManager {
       groupEntity.setCpuNum(group.getCpuNum());
       groupEntity.setDefineInstanceNum(group.getInstanceNum());
       groupEntity.setMemorySize(group.getMemCapacityMB());
+      groupEntity.setSwapRatio(group.getSwapRatio());
       groupEntity.setName(group.getName());
       groupEntity.setNodeType(group.getInstanceType());
 
@@ -816,6 +817,12 @@ public class ClusterConfigManager {
       if (memory > 0) {
          group.setMemCapacityMB(memory);
       }
+
+      Float swapRatio = ngEntity.getSwapRatio();
+      if (swapRatio > 0) {
+         group.setSwapRatio(swapRatio);
+      }
+
       if (ngEntity.getNodeType() != null) {
          group.setInstanceType(ngEntity.getNodeType());
       }

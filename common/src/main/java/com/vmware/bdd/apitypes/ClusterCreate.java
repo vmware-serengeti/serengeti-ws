@@ -406,6 +406,26 @@ public class ClusterCreate implements Serializable {
       }
    }
 
+   private void validateSwapRatio(NodeGroupCreate[] nodeGroups,
+         List<String> failedMsgList) {
+      boolean validated = true;
+      StringBuilder invalidNodeGroupNames = new StringBuilder();
+      for (NodeGroupCreate nodeGroup : nodeGroups) {
+         if (nodeGroup.getSwapRatio() <= 0) {
+            validated = false;
+            invalidNodeGroupNames.append(nodeGroup.getName()).append(",");
+         }
+      }
+      if (!validated) {
+         StringBuilder errorMsgBuff = new StringBuilder();
+         invalidNodeGroupNames.delete(invalidNodeGroupNames.length() - 1,
+               invalidNodeGroupNames.length());
+         failedMsgList.add(errorMsgBuff
+               .append("'swapRatio' must be greater than 0 in group ")
+               .append(invalidNodeGroupNames.toString()).toString());
+      }
+   }
+
    /*
     * Validate 2 cases. Case 1: compute node group with external hdfs node group.
     * Case 2: The dependency check of HDFS, MapReduce, HBase, Zookeeper, Hadoop 
@@ -604,6 +624,9 @@ public class ClusterCreate implements Serializable {
          // strict association with a data node, its disk type can be set to "TEMPFS". Otherwise, it is not 
          // allowed to use tempfs as the disk type.
          validateStorageType(failedMsgList);
+
+         // check node group's swapRatio
+         validateSwapRatio(nodeGroupCreates, failedMsgList);
 
          for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
             // check node group's instanceNum

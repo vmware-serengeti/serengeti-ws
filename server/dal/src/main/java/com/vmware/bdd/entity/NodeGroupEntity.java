@@ -70,6 +70,9 @@ public class NodeGroupEntity extends EntityBase {
    @Column(name = "memory")
    private int memorySize;
 
+   @Column(name = "swap_ratio")
+   private Float swapRatio = 1F;
+
    @Enumerated(EnumType.STRING)
    @Column(name = "storage_type")
    private DatastoreType storageType;
@@ -143,13 +146,14 @@ public class NodeGroupEntity extends EntityBase {
    }
 
    public NodeGroupEntity(String name, int defineInstanceNum, int cpuNum,
-         int memorySize, DatastoreType storageType, int storageSize,
-         boolean diskBisect) {
+         int memorySize, Float swapRatio, DatastoreType storageType,
+         int storageSize, boolean diskBisect) {
       super();
       this.name = name;
       this.defineInstanceNum = defineInstanceNum;
       this.cpuNum = cpuNum;
       this.memorySize = memorySize;
+      this.swapRatio = swapRatio;
       this.storageType = storageType;
       this.storageSize = storageSize;
       this.diskBisect = diskBisect;
@@ -215,6 +219,14 @@ public class NodeGroupEntity extends EntityBase {
 
    public void setMemorySize(int memorySize) {
       this.memorySize = memorySize;
+   }
+
+   public Float getSwapRatio() {
+      return swapRatio;
+   }
+
+   public void setSwapRatio(Float swapRatio) {
+      this.swapRatio = swapRatio;
    }
 
    public DatastoreType getStorageType() {
@@ -375,6 +387,7 @@ public class NodeGroupEntity extends EntityBase {
       nodeGroupRead.setName(this.name);
       nodeGroupRead.setCpuNum(this.cpuNum);
       nodeGroupRead.setMemCapacityMB(this.memorySize);
+      nodeGroupRead.setSwapRatio(this.swapRatio);
       nodeGroupRead.setInstanceNum(this.getRealInstanceNum());
       nodeGroupRead.setIoShares(this.ioShares);
 

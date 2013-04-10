@@ -59,6 +59,9 @@ public class NodeGroupCreate {
    @Expose
    @SerializedName("memory")
    private int memCapacityMB;
+   @Expose
+   @SerializedName("swap_ratio")
+   private Float swapRatio = 1F;
    private List<String> rpNames;
    @Expose
    @SerializedName("vc_clusters")
@@ -86,6 +89,7 @@ public class NodeGroupCreate {
       this.instanceType = group.instanceType;
       this.placementPolicies = group.placementPolicies;
       this.memCapacityMB = group.memCapacityMB;
+      this.swapRatio = group.swapRatio;
       this.name = group.name;
       this.roles = group.roles;
       this.rpNames = group.rpNames;
@@ -160,6 +164,14 @@ public class NodeGroupCreate {
 
    public void setMemCapacityMB(int memCapacityMB) {
       this.memCapacityMB = memCapacityMB;
+   }
+
+   public Float getSwapRatio() {
+      return swapRatio;
+   }
+
+   public void setSwapRatio(Float swapRatio) {
+      this.swapRatio = swapRatio;
    }
 
    public StorageRead getStorage() {

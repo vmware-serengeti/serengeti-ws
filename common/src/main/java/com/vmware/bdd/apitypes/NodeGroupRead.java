@@ -39,6 +39,10 @@ public class NodeGroupRead {
    private int memCapacityMB;
 
    @Expose
+   @SerializedName("swap_ratio")
+   private Float swapRatio = 1F;
+
+   @Expose
    private NetworkRead networking;
    
    @Expose
@@ -108,6 +112,14 @@ public class NodeGroupRead {
 
    public void setInstanceNum(int instanceNum) {
       this.instanceNum = instanceNum;
+   }
+
+   public Float getSwapRatio() {
+      return swapRatio;
+   }
+
+   public void setSwapRatio(Float swapRatio) {
+      this.swapRatio = swapRatio;
    }
 
    public NetworkRead getNetworking() {

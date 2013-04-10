@@ -192,9 +192,12 @@ public class PlacementPlanner implements IPlacementPlanner {
          diskAllocType = AllocationType.valueOf(nodeGroup.getStorage().getAllocType());
       }
       // swap disk
-      disks.add(new DiskSpec(PlacementUtil.SWAP_DISK, (nodeGroup
-            .getMemCapacityMB() + 1023) / 1024, node.getVmName(), false, false,
-            DiskScsiControllerType.LSI_CONTROLLER, null, diskAllocType));
+      int swapDisk =
+            (((int) Math.ceil(nodeGroup.getMemCapacityMB()
+                  * nodeGroup.getSwapRatio()) + 1023) / 1024);
+      disks.add(new DiskSpec(PlacementUtil.SWAP_DISK, swapDisk, node
+            .getVmName(), false, false, DiskScsiControllerType.LSI_CONTROLLER,
+            null, diskAllocType));
 
       // data disks
       if (!DatastoreType.TEMPFS.name().equalsIgnoreCase(
