@@ -12,6 +12,7 @@
       },
       "cpuNum" : 1,
       "memCapacityMB" : 2048,
+      "swapRatio" : 2,
       "haFlag" : "off"
     },
     {
@@ -29,6 +30,7 @@
       },
       "cpuNum" : 1,
       "memCapacityMB" : 2048,
+      "swapRatio" : 2,
       "haFlag" : "on"
     },
     {
@@ -52,6 +54,7 @@
       },
       "cpuNum" : 2,
       "memCapacityMB" : 7680,
+      "swapRatio" : 2,
       "haFlag" : "on"
     },
     {
@@ -68,6 +71,7 @@
       },
       "cpuNum" : 2,
       "memCapacityMB" : 4096,
+      "swapRatio" : 2,
       "haFlag" : "off"
     },
     {
@@ -84,6 +88,7 @@
       },
       "cpuNum" : 2,
       "memCapacityMB" : 4096,
+      "swapRatio" : 2,
       "haFlag" : "off"
     }
   ]
