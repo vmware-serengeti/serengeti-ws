@@ -353,6 +353,44 @@
           "name": "topology.script.file.name"
         }
       ],
+      "yarn-env.sh": [
+        {
+          "name": "YARN_OPTS"
+        },
+        {
+          "name": "YARN_HEAPSIZE"
+        },
+        {
+          "name": "JAVA_HEAP_MAX"
+        },
+        {
+          "name": "YARN_RESOURCEMANAGER_OPTS"
+        },
+        {
+          "name": "YARN_RESOURCEMANAGER_HEAPSIZE"
+        },
+        {
+          "name": "YARN_NODEMANAGER_OPTS"
+        },
+        {
+          "name": "YARN_NODEMANAGER_HEAPSIZE"
+        },
+        {
+          "name": "YARN_PROXYSERVER_OPTS"
+        },
+        {
+          "name": "YARN_PROXYSERVER_HEAPSIZE"
+        },
+        {
+          "name": "YARN_CLIENT_OPTS"
+        },
+        {
+          "name": "YARN_ROOT_LOGGER"
+        },
+        {
+          "name": "YARN_CLASSPATH"
+        }
+      ],
       "yarn-site.xml": [
         {
           "name": "yarn.ipc.client.factory.class"
