@@ -33,10 +33,12 @@ import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
+import com.vmware.aurora.vc.VcCache;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.vim.binding.vim.Folder;
+import com.vmware.vim.binding.vim.VirtualMachine;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import com.vmware.vim.vmomi.core.types.VmodlTypeMap;
 
@@ -174,6 +176,58 @@ public class VcResourceUtils {
          }
       }
       return null;
+   }
+
+   /*
+    * Vc has no API to retrieve a VM's parent folder, we have to search from
+    * root folder here, and currently, assume Serengeti Server is deployed in a
+    * child folder of root.
+    */
+   public static Folder findParentFolderOfVm(final VcVirtualMachine serverVm) {
+      return VcContext.inVcSessionDo(new VcSession<Folder>() {
+         @Override
+         protected Folder body() throws Exception {
+            for (ManagedObjectReference folderRef : serverVm.getDatacenter()
+                  .getVmFolder().getChildEntity()) {
+               if (VmodlTypeMap.Factory.getTypeMap().getVmodlType(Folder.class)
+                     .getWsdlName().equals(folderRef.getType())) {
+                  Folder folder = MoUtil.getManagedObject(folderRef);
+                  for (ManagedObjectReference vmRef : folder.getChildEntity()) {
+                     if (VmodlTypeMap.Factory.getTypeMap()
+                           .getVmodlType(VirtualMachine.class).getWsdlName()
+                           .equals(vmRef.getType())) {
+                        VirtualMachine child = MoUtil.getManagedObject(vmRef);
+                        if (child._getRef().equals(serverVm.getMoRef())) {
+                           return folder;
+                        }
+                     }
+                  }
+               }
+            }
+            return null;
+         }
+      });
+   }
+
+   public static VcVirtualMachine findTemplateVmWithinFolder(
+         final Folder parentFolder, final String templateVmName) {
+      logger.info("parent folder name: " + parentFolder.getName());
+      return VcContext.inVcSessionDo(new VcSession<VcVirtualMachine>() {
+         @Override
+         protected VcVirtualMachine body() throws Exception {
+            for (ManagedObjectReference vmRef : parentFolder.getChildEntity()) {
+               if (VmodlTypeMap.Factory.getTypeMap()
+                     .getVmodlType(VirtualMachine.class).getWsdlName()
+                     .equals(vmRef.getType())) {
+                  VirtualMachine child = MoUtil.getManagedObject(vmRef);
+                  if (child.getConfig().getName().equals(templateVmName)) {
+                     return (VcVirtualMachine) VcCache.get(child);
+                  }
+               }
+            }
+            return null;
+         }
+      });
    }
 
    public static Folder findFolderByNameList(final VcDatacenter dc, final List<String> folderNames) {

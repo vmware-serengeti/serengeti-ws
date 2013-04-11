@@ -41,6 +41,7 @@ import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.util.CmsWorker;
+import com.vmware.aurora.vc.MoUtil;
 import com.vmware.aurora.vc.DeviceId;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcCluster;
@@ -53,6 +54,7 @@ import com.vmware.aurora.vc.VcSnapshot;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcevent.VcEventRouter;
 import com.vmware.aurora.vc.vcservice.VcContext;
+import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
@@ -101,9 +103,12 @@ import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.vim.binding.vim.Folder;
+import com.vmware.vim.binding.vim.VirtualMachine;
 import com.vmware.vim.binding.vim.fault.VmFaultToleranceOpIssuesList;
 import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
+import com.vmware.vim.binding.vmodl.ManagedObjectReference;
+import com.vmware.vim.vmomi.core.types.VmodlTypeMap;
 
 public class ClusteringService implements IClusteringService {
    private static final Logger logger = Logger
@@ -216,22 +221,34 @@ public class ClusteringService implements IClusteringService {
          throw ClusteringServiceException.TEMPLATE_ID_NOT_FOUND();
       }
       VcVirtualMachine serverVm = VcCache.get(serverMobId);
-      VcResourcePool vApp = serverVm.getParentVApp();
-      initUUID(vApp);
-      for (VcVirtualMachine vm : vApp.getChildVMs()) {
-         // assume only two vm under serengeti vApp, serengeti server and template
-         if (!vm.getName().equals(serverVm.getName())) {
-            logger.info("got template vm: " + vm.getName());
-            return vm;
+
+      if (ConfigInfo.isDeployAsVApp()) {
+         VcResourcePool vApp = serverVm.getParentVApp();
+         initUUID(vApp.getName());
+         for (VcVirtualMachine vm : vApp.getChildVMs()) {
+            // assume only two vm under serengeti vApp, serengeti server and
+            // template
+            if (!vm.getName().equals(serverVm.getName())) {
+               logger.info("got template vm: " + vm.getName());
+               return vm;
+            }
          }
+         return null;
+      } else {
+         String templateVmName = ConfigInfo.getTemplateVmName();
+         logger.info(templateVmName);
+         Folder parentFolder = VcResourceUtils.findParentFolderOfVm(serverVm);
+         AuAssert.check(parentFolder != null);
+         initUUID(parentFolder.getName());
+         return VcResourceUtils.findTemplateVmWithinFolder(parentFolder,
+               templateVmName);
       }
-      return null;
    }
 
-   private void initUUID(VcResourcePool vApp) {
+   private void initUUID(String uuid) {
       if (ConfigInfo.isInitUUID()) {
-         ConfigInfo.setSerengetiUUID(vApp.getName());
-         ConfigInfo.setInitUUID(false); // disable uuid initialization after first time get vapp name
+         ConfigInfo.setSerengetiUUID(uuid);
+         ConfigInfo.setInitUUID(false);
          ConfigInfo.save();
       }
    }

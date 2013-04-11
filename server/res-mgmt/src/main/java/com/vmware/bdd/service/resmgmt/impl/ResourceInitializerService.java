@@ -40,6 +40,7 @@ import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceInitializerService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.vim.binding.vim.VirtualMachine;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 
@@ -244,15 +245,18 @@ public class ResourceInitializerService implements IResourceInitializerService {
             VcContext.inVcSessionDo(new VcSession<VcResourcePool>() {
                @Override
                protected VcResourcePool body() throws Exception {
-                  VcResourcePool vApp = serverVm.getParentVApp();
-                  logger.info("vApp name: " + vApp.getName());
-                  VcResourcePool vcRP = vApp.getParent();
-                  return vcRP;
+                  if (ConfigInfo.isDeployAsVApp()) {
+                     VcResourcePool vApp = serverVm.getParentVApp();
+                     logger.info("vApp name: " + vApp.getName());
+                     VcResourcePool vcRP = vApp.getParent();
+                     return vcRP;
+                  } else {
+                     return serverVm.getResourcePool();
+                  }
                }
             });
       return vcRP;
    }
-
 
    /**
     * @param serverMobId

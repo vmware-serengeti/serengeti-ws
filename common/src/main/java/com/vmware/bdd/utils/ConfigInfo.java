@@ -35,6 +35,8 @@ public class ConfigInfo {
    private static String serengetiRootFolderPrefix;
    private static String serengetiUUID;
    private static boolean initUUID;
+   private static boolean deployAsVApp;
+   private static String templateVmName;
 
    static {
       mqEnabled = Configuration.getBoolean("task.enable_mq", mqEnabled);
@@ -50,6 +52,8 @@ public class ConfigInfo {
       serengetiRootFolderPrefix = Configuration.getString("serengeti.root_folder_prefix");
       serengetiUUID = Configuration.getString(SERENGETI_UUID_KEY);
       initUUID = Configuration.getBoolean(SERENGETI_INITIALIZE_UUID, true);
+      deployAsVApp = Configuration.getBoolean("deploy_as_vapp");
+      templateVmName = Configuration.getString("template_vm_name");
    }
 
    public static boolean isDebugEnabled() {
@@ -114,11 +118,23 @@ public class ConfigInfo {
       Configuration.setBoolean(SERENGETI_INITIALIZE_UUID, initUUID);
    }
 
+   public static boolean isDeployAsVApp() {
+      return deployAsVApp;
+   }
+
+   public static String getTemplateVmName() {
+      return templateVmName;
+   }
+
    public static void save() {
       Configuration.save();
    }
 
    public static String getSerengetiRootFolder() {
-      return serengetiRootFolderPrefix + "-" + serengetiUUID;
+      if (deployAsVApp) {
+         return serengetiRootFolderPrefix + "-" + serengetiUUID;
+      } else {
+         return serengetiUUID;
+      }
    }
 }
