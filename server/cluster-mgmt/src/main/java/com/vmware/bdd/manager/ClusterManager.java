@@ -37,12 +37,11 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.DistroRead;
+import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityOperation;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.Priority;
-import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityOperation;
-import com.vmware.bdd.dal.IRackDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
@@ -74,7 +73,7 @@ public class ClusterManager {
 
    private ClusterEntityManager clusterEntityMgr;
 
-   private IRackDAO rackDao;
+   private RackInfoManager rackInfoMgr;
 
    private IClusteringService clusteringService;
 
@@ -120,13 +119,13 @@ public class ClusterManager {
       this.clusterEntityMgr = clusterEntityMgr;
    }
 
-   public IRackDAO getRackDao() {
-      return rackDao;
+   public RackInfoManager getRackInfoMgr() {
+      return rackInfoMgr;
    }
 
    @Autowired
-   public void setRackDao(IRackDAO rackDao) {
-      this.rackDao = rackDao;
+   public void setRackInfoMgr(RackInfoManager rackInfoMgr) {
+      this.rackInfoMgr = rackInfoMgr;
    }
 
    public DistroManager getDistroManager() {
@@ -353,8 +352,8 @@ public class ClusterManager {
             new JobParameter(ClusterStatus.PROVISION_ERROR.name()));
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
             createSpec.getName()));
-      param.put(JobConstants.VERIFY_NODE_STATUS_SCOPE_PARAM,
-            new JobParameter(JobConstants.CLUSTER_NODE_SCOPE_VALUE));
+      param.put(JobConstants.VERIFY_NODE_STATUS_SCOPE_PARAM, new JobParameter(
+            JobConstants.CLUSTER_NODE_SCOPE_VALUE));
       JobParameters jobParameters = new JobParameters(param);
       return jobManager.runJob(JobConstants.CREATE_CLUSTER_JOB_NAME,
             jobParameters);
@@ -741,7 +740,8 @@ public class ClusterManager {
       }
 
       ValidationUtils.validHostNumber(clusterEntityMgr, group, instanceNum);
-      ValidationUtils.hasEnoughHost(rackDao, group, instanceNum);
+      ValidationUtils.hasEnoughHost(rackInfoMgr, clusterEntityMgr, group,
+            instanceNum);
 
       int oldInstanceNum = group.getDefineInstanceNum();
       group.setDefineInstanceNum(instanceNum);
@@ -763,8 +763,8 @@ public class ClusterManager {
             new JobParameter(ClusterStatus.RUNNING.name()));
       param.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM,
             new JobParameter(ClusterStatus.RUNNING.name()));
-      param.put(JobConstants.VERIFY_NODE_STATUS_SCOPE_PARAM,
-            new JobParameter(JobConstants.GROUP_NODE_SCOPE_VALUE));
+      param.put(JobConstants.VERIFY_NODE_STATUS_SCOPE_PARAM, new JobParameter(
+            JobConstants.GROUP_NODE_SCOPE_VALUE));
       JobParameters jobParameters = new JobParameters(param);
       clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.UPDATING);
       try {
@@ -790,7 +790,6 @@ public class ClusterManager {
       }
 
       Boolean preEnableSetting = cluster.getAutomationEnable();
-      int preMinComputeNodeNum = cluster.getVhmMinNum();
 
       if (preEnableSetting == null) {
          if (op != ElasticityOperation.OP_SET_AUTO) {
@@ -900,7 +899,8 @@ public class ClusterManager {
          return jobManager.runJob(JobConstants.SET_MANUAL_ELASTICITY_JOB_NAME,
                jobParameters);
       } catch (Exception e) {
-         logger.error("Failed to set manual elasticity for cluster " + clusterName, e);
+         logger.error("Failed to set manual elasticity for cluster "
+               + clusterName, e);
          clusterEntityMgr.updateClusterStatus(clusterName,
                ClusterStatus.RUNNING);
          throw e;

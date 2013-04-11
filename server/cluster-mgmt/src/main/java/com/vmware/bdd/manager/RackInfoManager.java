@@ -119,4 +119,25 @@ public class RackInfoManager {
          rackDao.delete(rack);
       }
    }
+
+   @Transactional(readOnly = true)
+   public List<RackInfo> getRackInfos() {
+      List<RackInfo> racksInfo = new ArrayList<RackInfo>();
+
+      List<RackEntity> racks = rackDao.findAll();
+      for (RackEntity rack : racks) {
+         List<PhysicalHostEntity> hostEntities = rack.getHosts();
+         if (hostEntities != null && !hostEntities.isEmpty()) {
+            List<String> hosts = new ArrayList<String>(hostEntities.size());
+            for (PhysicalHostEntity he : hostEntities) {
+               hosts.add(he.getName());
+            }
+            RackInfo rackInfo = new RackInfo();
+            rackInfo.setName(rack.getName());
+            rackInfo.setHosts(hosts);
+            racksInfo.add(rackInfo);
+         }
+      }
+      return racksInfo;
+   }
 }

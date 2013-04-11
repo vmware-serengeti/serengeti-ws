@@ -8,28 +8,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksType;
 import com.vmware.bdd.apitypes.RackInfo;
-import com.vmware.bdd.dal.IRackDAO;
 import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
-import com.vmware.bdd.entity.PhysicalHostEntity;
-import com.vmware.bdd.entity.RackEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.RackInfoManager;
 
 public class ValidationUtils {
 
-   @Transactional(propagation = Propagation.MANDATORY)
-   public static void hasEnoughHost(IRackDAO rackDao,
-         NodeGroupEntity nodeGroup, int instanceNum) {
+   public static void hasEnoughHost(RackInfoManager rackInfoMgr,
+         ClusterEntityManager clusterEntityMgr, NodeGroupEntity nodeGroup,
+         int instanceNum) {
       if (nodeGroup.getInstancePerHost() != null) {
          // assume this value is already validated
          int requiredHostNum = instanceNum / nodeGroup.getInstancePerHost();
@@ -40,23 +35,7 @@ public class ValidationUtils {
                         GroupRacks.class);
             GroupRacksType rackType = groupRacks.getType();
 
-            List<RackInfo> racksInfo = new ArrayList<RackInfo>();
-
-            List<RackEntity> racks = rackDao.findAll();
-            for (RackEntity rack : racks) {
-               List<PhysicalHostEntity> hostEntities = rack.getHosts();
-               if (hostEntities != null && !hostEntities.isEmpty()) {
-                  List<String> hosts =
-                        new ArrayList<String>(hostEntities.size());
-                  for (PhysicalHostEntity he : hostEntities) {
-                     hosts.add(he.getName());
-                  }
-                  RackInfo rackInfo = new RackInfo();
-                  rackInfo.setName(rack.getName());
-                  rackInfo.setHosts(hosts);
-                  racksInfo.add(rackInfo);
-               }
-            }
+            List<RackInfo> racksInfo = rackInfoMgr.getRackInfos();
 
             Set<String> specifiedRacks =
                   new HashSet<String>(Arrays.asList(groupRacks.getRacks()));
@@ -91,11 +70,11 @@ public class ValidationUtils {
                      .toArray(new String[IntersecRacks.size()]));
             }
             nodeGroup.setGroupRacks((new Gson()).toJson(groupRacks));
+            clusterEntityMgr.update(nodeGroup);
          }
       }
    }
 
-   @Transactional(propagation = Propagation.MANDATORY)
    public static void validHostNumber(ClusterEntityManager clusterEntityMgr,
          NodeGroupEntity nodeGroup, int instanceNum) {
       Set<NodeGroupAssociation> associations = nodeGroup.getGroupAssociations();
@@ -132,7 +111,7 @@ public class ValidationUtils {
          }
       }
    }
-   
+
    @SuppressWarnings("unchecked")
    public static boolean validate(Map<String, Object> mMap, String clusterName) {
       if (mMap.get(Constants.FINISH_FIELD) instanceof Boolean
