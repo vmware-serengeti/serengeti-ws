@@ -153,6 +153,15 @@ public class JobUtils {
             if (ignoreMissing && node.getStatus() == NodeStatus.NOT_EXIST) {
                continue;
             }
+            if (expectedStatus == NodeStatus.VM_READY) {
+               // verify from VC 
+               VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
+               if (vm != null 
+                     && vm.isPoweredOn()
+                     && (VcVmUtil.getIpAddress(vm, false) != null)) {
+                  continue;
+               }
+            }
             throw ClusteringServiceException.VM_STATUS_ERROR(
                   node.getVmName(), node.getStatus().toString(), 
                   expectedStatus.toString());
