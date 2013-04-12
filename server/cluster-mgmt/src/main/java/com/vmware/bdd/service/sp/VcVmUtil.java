@@ -24,6 +24,7 @@ import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.vim.binding.vim.VirtualMachine.FaultToleranceState;
 import com.vmware.vim.binding.vim.vm.GuestInfo;
 
 public class VcVmUtil {
@@ -95,8 +96,13 @@ public class VcVmUtil {
          vNode.setTargetVcCluster(vm.getResourcePool()
                .getVcCluster().getName());
          vNode.setVmMobId(vm.getId());
-         vNode.setNodeStatus(NodeStatus.VM_READY);
-         vNode.setNodeAction(null);
+         if (vm.isPoweredOff()) {
+            vNode.setNodeStatus(NodeStatus.POWERED_OFF);
+            vNode.setNodeAction(Constants.NODE_ACTION_CLONING_FAILED);
+         } else {
+            vNode.setNodeStatus(NodeStatus.VM_READY);
+            vNode.setNodeAction(null);
+         }
       } else {
          vNode.setSuccess(false);
          if (vm != null) {
@@ -113,6 +119,19 @@ public class VcVmUtil {
          logger.error("Failed to get ip address of VM "
                + vNode.getVmName());
       }
+      String haFlag = vNode.getNodeGroup().getHaFlag();
+      if (haFlag != null && 
+            Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
+         // ha is enabled, need to check if secondary VM is ready either
+         if(vm.getFTState() == null ||
+               vm.getFTState() != FaultToleranceState.running) {
+            logger.fatal("Failed to power on FT secondary VM for node "
+                  + vNode.getVmName() + ", " + "FT state " 
+                  + vm.getFTState() + " is unexpected.");
+            success = false;
+         }
+      }
+
       return success;
    }
 }

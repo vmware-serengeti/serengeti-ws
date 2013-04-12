@@ -551,29 +551,7 @@ public class ClusterConfigManager {
       if (group.getRpNames() != null && group.getRpNames().size() > 0) {
          groupEntity.setVcRpNameList(group.getRpNames());
       }
-      if (group.getStorage() != null) {
-         groupEntity.setStorageSize(group.getStorage().getSizeGB());
-         List<String> groupRoles = group.getRoles();
-         //currently, ignore input from CLI and hard code here
-         if (groupRoles.contains(HadoopRole.ZOOKEEPER_ROLE.toString())
-               && groupRoles.size() == 1) {
-            groupEntity.setDiskBisect(true);
-         } else {
-            groupEntity.setDiskBisect(false);
-         }
-         String storageType = group.getStorage().getType();
-         if (storageType != null) {
-            if (storageType.equalsIgnoreCase(DatastoreType.TEMPFS.name())) {
-               groupEntity.setStorageType(DatastoreType.TEMPFS);
-               roles.add(HadoopRole.TEMPFS_CLIENT_ROLE.toString());
-            } else if (storageType.equalsIgnoreCase(DatastoreType.LOCAL.name())) {
-               groupEntity.setStorageType(DatastoreType.LOCAL);
-            } else {
-               groupEntity.setStorageType(DatastoreType.SHARED);
-            }
-         }
-         groupEntity.setVcDatastoreNameList(group.getStorage().getDsNames());
-      }
+      convertStorage(group, groupEntity, roles);
 
       roles.addAll(group.getRoles());
       List<String> sortedRolesByDependency = new ArrayList<String>();
@@ -624,6 +602,42 @@ public class ClusterConfigManager {
       logger.debug("finished to convert node group config for "
             + group.getName());
       return groupEntity;
+   }
+
+   private void convertStorage(NodeGroupCreate group,
+         NodeGroupEntity groupEntity, Set<String> roles) {
+      if (group.getStorage() != null) {
+         groupEntity.setStorageSize(group.getStorage().getSizeGB());
+         List<String> groupRoles = group.getRoles();
+         //currently, ignore input from CLI and hard code here
+         if (groupRoles.contains(HadoopRole.ZOOKEEPER_ROLE.toString())
+               && groupRoles.size() == 1) {
+            groupEntity.setDiskBisect(true);
+         } else {
+            groupEntity.setDiskBisect(false);
+         }
+         String storageType = group.getStorage().getType();
+         if (storageType != null) {
+            if (storageType.equalsIgnoreCase(DatastoreType.TEMPFS.name())) {
+               groupEntity.setStorageType(DatastoreType.TEMPFS);
+               roles.add(HadoopRole.TEMPFS_CLIENT_ROLE.toString());
+            } else if (storageType.equalsIgnoreCase(DatastoreType.LOCAL.name())) {
+               groupEntity.setStorageType(DatastoreType.LOCAL);
+            } else {
+               groupEntity.setStorageType(DatastoreType.SHARED);
+            }
+         }
+         groupEntity.setVcDatastoreNameList(group.getStorage().getDsNames());
+      }
+
+      if (groupEntity.getStorageType() == DatastoreType.LOCAL) {
+         // only when explicitly set to local, we'll choose local storage
+         if (group.getHaFlag() != null 
+               && Constants.HA_FLAG_FT.equals(group.getHaFlag().toLowerCase())) {
+            throw ClusterConfigException.LOCAL_STORAGE_USED_FOR_FT_GROUP(
+                  group.getName());
+         }
+      }
    }
 
    @Transactional(readOnly = true)
@@ -819,7 +833,7 @@ public class ClusterConfigManager {
       }
 
       Float swapRatio = ngEntity.getSwapRatio();
-      if (swapRatio > 0) {
+      if (swapRatio != null && swapRatio > 0) {
          group.setSwapRatio(swapRatio);
       }
 

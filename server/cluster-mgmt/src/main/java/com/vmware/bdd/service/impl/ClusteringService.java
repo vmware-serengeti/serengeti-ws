@@ -51,6 +51,7 @@ import com.vmware.aurora.vc.VcInventory;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcSnapshot;
 import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.aurora.vc.vcevent.VcEventRouter;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.IpBlock;
@@ -106,8 +107,6 @@ import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 public class ClusteringService implements IClusteringService {
    private static final Logger logger = Logger
          .getLogger(ClusteringService.class);
-   private static final String HA_FLAG_ON = "on";
-   private static final String HA_FLAG_FT = "ft";
    private ClusterConfigManager configMgr;
 
    private ClusterEntityManager clusterEntityMgr;
@@ -172,6 +171,8 @@ public class ClusteringService implements IClusteringService {
          Configuration.approveBootstrapInstanceId(Configuration.BootstrapUsage.FINALIZED);
 
          VcContext.initVcContext();
+         new VcEventRouter();
+         CmsWorker.addPeriodic(new VcInventory.SyncInventoryRequest());
          VcInventory.loadInventory();
          try {
             Thread.sleep(1000);
@@ -565,10 +566,12 @@ public class ClusteringService implements IClusteringService {
       String haFlag = vNode.getNodeGroup().getHaFlag();
       boolean ha = false;
       boolean ft = false;
-      if (HA_FLAG_ON.equals(haFlag.toLowerCase())) {
+      if (haFlag != null && 
+            Constants.HA_FLAG_ON.equals(haFlag.toLowerCase())) {
          ha = true;
       }
-      if (HA_FLAG_FT.equals(haFlag.toLowerCase())) {
+      if (haFlag != null && 
+            Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
          ha = true;
          ft = true;
          if (vNode.getNodeGroup().getCpuNum() > 1) {

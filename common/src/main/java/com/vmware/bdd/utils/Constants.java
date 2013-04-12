@@ -119,6 +119,8 @@ public class Constants {
    public static final String CLOUD_PROVIDER_TYPE_FIELD = "type";
    public static final String VSPHERE_PROVIDER_NAME = "static";
    public static final String VSPHERE_PROVIDER_TYPE = "VC";
+   public static final String HA_FLAG_ON = "on";
+   public static final String HA_FLAG_FT = "ft";
 
    private static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE =
          "elastic_runtime.automation.enable";

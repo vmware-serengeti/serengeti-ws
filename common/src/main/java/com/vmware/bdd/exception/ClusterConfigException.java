@@ -122,4 +122,7 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException CLUSTER_CONFIG_DATASTORE_TYPE_NONEXISTENT(String msg) {
       return new ClusterConfigException(null, "CLUSTER_CONFIG_DATASTORE_TYPE_NONEXISTENT", msg);
    }
+   public static ClusterConfigException LOCAL_STORAGE_USED_FOR_FT_GROUP(String group) {
+      return new ClusterConfigException(null, "LOCAL_STORAGE_USED_FOR_FT_GROUP", group);
+   }
 }
