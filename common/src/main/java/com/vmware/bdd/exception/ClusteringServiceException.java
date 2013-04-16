@@ -75,6 +75,12 @@ public class ClusteringServiceException extends BddException {
             clusterName);
    }
 
+   public static ClusteringServiceException CREATE_RESOURCE_POOL_FAILED(
+         String clusterName) {
+      return new ClusteringServiceException(null,
+            "CREATE_RESOURCE_POOL_FAILED", clusterName);
+   }
+
    public static ClusteringServiceException SET_AUTO_ELASTICITY_FAILED(
          String clusterName) {
       return new ClusteringServiceException(null, "SET_AUTO_ELASTICITY_FAILED",

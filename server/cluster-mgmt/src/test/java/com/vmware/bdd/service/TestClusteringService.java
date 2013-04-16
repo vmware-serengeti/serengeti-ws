@@ -130,6 +130,7 @@ public class TestClusteringService {
       ClusterCreate spec = createClusterSpec();
       node.setCluster(spec);
       node.setNodeGroup(spec.getNodeGroup("master"));
+      node.setTargetVcCluster("cluster-ws");
       vNodes.add(node);
       // create vm schema
       VmSchema vmSchema = createVmSchema();
@@ -187,6 +188,7 @@ public class TestClusteringService {
       ClusterCreate spec = createClusterSpec();
       node.setCluster(spec);
       node.setNodeGroup(spec.getNodeGroup("master"));
+      node.setTargetVcCluster("cluster-ws");
       vNodes.add(node);
       // create vm schema
       VmSchema vmSchema = createVmSchema();

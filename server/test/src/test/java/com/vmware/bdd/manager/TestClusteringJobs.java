@@ -289,6 +289,50 @@ public class TestClusteringJobs extends
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.RUNNING,
             "Cluster status should be RUNNING, but got " + cluster.getStatus());
       checkIpRange(cluster);
+      checkVcFolders(TEST_STATIC_IP_CLUSTER_NAME);
+      checkVcResourePools(cluster, ConfigInfo.getSerengetiUUID() + "-" 
+            + TEST_STATIC_IP_CLUSTER_NAME);
+   }
+
+   private void checkVcFolders(final String folderName) {
+      String rootFolderName = ConfigInfo.getSerengetiRootFolder();
+      String serverMobId =
+            Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
+      VcVirtualMachine serverVm = VcCache.get(serverMobId);
+      List<String> folderList = new ArrayList<String>(1);
+      folderList.add(rootFolderName);
+      Folder rootFolder =
+            VcResourceUtils.findFolderByNameList(serverVm.getDatacenter(),
+                  folderList);
+      Folder childFolder =
+            VcResourceUtils.findFolderByName(rootFolder, folderName);
+      Assert.assertNotNull(childFolder, "Folder " + folderName
+            + " is not exist.");
+   }
+
+   private void checkVcResourePools(ClusterRead cluster, final String rpName) {
+      VcResourcePool rp = VcResourceUtils.findRPInVCCluster(vcCluster, vcRP);
+      List<VcResourcePool> children = rp.getChildren();
+      boolean found = false;
+      VcResourcePool clusterRp = null;
+      for (VcResourcePool child : children) {
+         if (child.getName().equals(rpName)) {
+            found = true;
+            clusterRp = child;
+            break;
+         }
+      }
+      Assert.assertTrue(found, "Resource pool " + rpName + " is not created.");
+      found = false;
+      String groupRpName = cluster.getNodeGroups().get(0).getName();
+      for (VcResourcePool groupRp : clusterRp.getChildren()) {
+         if (groupRp.getName().equals(groupRpName)) {
+            found = true;
+            break;
+         }
+      }
+      Assert.assertTrue(found, "Resource pool " + groupRpName
+            + " is not created.");
    }
 
    private void checkIpRange(ClusterRead cluster) {

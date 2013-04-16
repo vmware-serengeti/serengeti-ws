@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -85,6 +86,7 @@ import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.service.sp.BaseProgressCallback;
 import com.vmware.bdd.service.sp.ConfigIOShareSP;
+import com.vmware.bdd.service.sp.CreateResourcePoolSP;
 import com.vmware.bdd.service.sp.CreateVmPrePowerOn;
 import com.vmware.bdd.service.sp.DeleteRpSp;
 import com.vmware.bdd.service.sp.DeleteVmByIdSP;
@@ -100,6 +102,7 @@ import com.vmware.bdd.service.sp.VcVmUtil;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.vim.binding.vim.Folder;
@@ -466,6 +469,167 @@ public class ClusteringService implements IClusteringService {
       }
    }
 
+
+   private void executeResourcePoolStoreProcedures(Callable<Void>[] defineSPs,
+         String type, String clusterName) throws InterruptedException {
+      NoProgressUpdateCallback callback = new NoProgressUpdateCallback();
+      ExecutionResult[] result =
+            Scheduler.executeStoredProcedures(
+                  com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
+                  defineSPs, callback);
+      if (result == null) {
+         logger.error("No " + type + " resource pool is created.");
+         throw ClusteringServiceException
+               .CREATE_RESOURCE_POOL_FAILED(clusterName);
+      }
+      int total = 0;
+      boolean success = true;
+      for (int i = 0; i < defineSPs.length; i++) {
+         if (result[i].finished && result[i].throwable == null) {
+            ++total;
+         } else if (result[i].throwable != null) {
+            logger.error("Failed to create " + type + " resource pool(s)",
+                  result[i].throwable);
+            success = false;
+         }
+      }
+      logger.info(total + " " + type + " resource pool(s) are created.");
+      if (!success) {
+         throw ClusteringServiceException
+               .CREATE_RESOURCE_POOL_FAILED(clusterName);
+      }
+   }
+
+   private Map<String, Integer> collectResourcePoolInfo(List<BaseNode> vNodes,
+         Map<String, List<String>> vcClusterRpNamesMap,
+         Map<Long, List<String>> rpNodeGroupNamesMap) {
+      List<String> resourcePoolNames = null;
+      List<String> nodeGroupNames = null;
+      int resourcePoolNameCount = 0;
+      int nodeGroupNameCount = 0;
+      for (BaseNode baseNode : vNodes) {
+         String vcCluster = baseNode.getTargetVcCluster();
+         AuAssert.check(!CommonUtil.isBlank(vcCluster),
+               "Vc cluster name cannot be null!");
+         if (!vcClusterRpNamesMap.containsKey(vcCluster)) {
+            resourcePoolNames = new ArrayList<String>();
+         } else {
+            resourcePoolNames = vcClusterRpNamesMap.get(vcCluster);
+         }
+         String vcRp = baseNode.getTargetRp();
+         long rpHashCode = vcCluster.hashCode() ^ (vcCluster + vcRp).hashCode();
+         if (!rpNodeGroupNamesMap.containsKey(rpHashCode)) {
+            nodeGroupNames = new ArrayList<String>();
+         } else {
+            nodeGroupNames = rpNodeGroupNamesMap.get(rpHashCode);
+         }
+         String nodeGroupName = baseNode.getNodeGroup().getName();
+         if (!nodeGroupNames.contains(nodeGroupName)) {
+            nodeGroupNames.add(nodeGroupName);
+            rpNodeGroupNamesMap.put(rpHashCode, nodeGroupNames);
+            nodeGroupNameCount++;
+         }
+         if (!resourcePoolNames.contains(vcRp)) {
+            resourcePoolNames.add(vcRp);
+            vcClusterRpNamesMap.put(vcCluster, resourcePoolNames);
+            resourcePoolNameCount++;
+         }
+      }
+      Map<String, Integer> countResult = new HashMap<String, Integer>();
+      countResult.put("resourcePoolNameCount", resourcePoolNameCount);
+      countResult.put("nodeGroupNameCount", nodeGroupNameCount);
+      return countResult;
+   }
+
+   private String createVcResourcePools(List<BaseNode> vNodes) {
+      logger.info("createVcResourcePools, start to create VC ResourcePool(s).");
+      /*
+       * define cluster resource pool name.
+       */
+      String clusterName = vNodes.get(0).getClusterName();
+      String uuid = ConfigInfo.getSerengetiUUID();
+      String clusterRpName = uuid + "-" + clusterName;
+
+      /*
+       * prepare resource pool names and node group names per resource pool for creating cluster
+       * resource pools and node group resource pool(s). 
+       */
+      Map<String, List<String>> vcClusterRpNamesMap =
+            new HashMap<String, List<String>>();
+      Map<Long, List<String>> rpNodeGroupNamesMap =
+            new HashMap<Long, List<String>>();
+      Map<String, Integer> countResult =
+            collectResourcePoolInfo(vNodes, vcClusterRpNamesMap,
+                  rpNodeGroupNamesMap);
+
+      try {
+         /*
+          * define cluster store procedures of resource pool(s)
+          */
+         int resourcePoolNameCount = countResult.get("resourcePoolNameCount");
+         Callable<Void>[] clusterSPs = new Callable[resourcePoolNameCount];
+         int i = 0;
+         for (Entry<String, List<String>> vcClusterRpNamesEntry : vcClusterRpNamesMap
+               .entrySet()) {
+            String vcClusterName = vcClusterRpNamesEntry.getKey();
+            List<String> resourcePoolNames = vcClusterRpNamesEntry.getValue();
+            for (String resourcePoolName : resourcePoolNames) {
+               VcResourcePool parentVcResourcePool =
+                     VcResourceUtils.findRPInVCCluster(vcClusterName,
+                           resourcePoolName);
+               CreateResourcePoolSP clusterSP =
+                     new CreateResourcePoolSP(parentVcResourcePool,
+                           clusterRpName);
+               clusterSPs[i] = clusterSP;
+               i++;
+            }
+         }
+
+         // execute store procedures to create cluster resource pool(s)
+         logger.info("ClusteringService, start to create cluster resource pool(s).");
+         executeResourcePoolStoreProcedures(clusterSPs, "cluster", clusterName);
+
+         /*
+          * define node group store procedures of resource pool(s)
+          */
+         int nodeGroupNameCount = countResult.get("nodeGroupNameCount");
+         Callable<Void>[] nodeGroupSPs = new Callable[nodeGroupNameCount];
+         i = 0;
+         for (Entry<String, List<String>> vcClusterRpNamesEntry : vcClusterRpNamesMap
+               .entrySet()) {
+            String vcClusterName = vcClusterRpNamesEntry.getKey();
+            List<String> resourcePoolNames = vcClusterRpNamesEntry.getValue();
+            for (String resourcePoolName : resourcePoolNames) {
+               VcResourcePool parentVcResourcePool = null;
+               String vcRPName =
+                     CommonUtil.isBlank(resourcePoolName) ? clusterRpName
+                           : resourcePoolName + "/" + clusterRpName;
+               parentVcResourcePool =
+                     VcResourceUtils.findRPInVCCluster(vcClusterName, vcRPName);
+               long rpHashCode =
+                     vcClusterName.hashCode()
+                           ^ (vcClusterName + resourcePoolName).hashCode();
+               for (String nodeGroupName : rpNodeGroupNamesMap.get(rpHashCode)) {
+                  CreateResourcePoolSP nodeGroupSP =
+                        new CreateResourcePoolSP(parentVcResourcePool,
+                              nodeGroupName);
+                  nodeGroupSPs[i] = nodeGroupSP;
+                  i++;
+               }
+            }
+         }
+
+         //execute store procedures to create node group resource pool(s)
+         logger.info("ClusteringService, start to create node group resource pool(s).");
+         executeResourcePoolStoreProcedures(nodeGroupSPs, "node group",
+               clusterName);
+      } catch (Exception e) {
+         logger.error("error in creating VC ResourcePool(s)", e);
+         throw BddException.INTERNAL(e, e.getMessage());
+      }
+      return clusterRpName;
+   }
+
    @SuppressWarnings("unchecked")
    @Override
    public boolean createVcVms(NetworkAdd networkAdd, List<BaseNode> vNodes,
@@ -475,6 +639,7 @@ public class ClusteringService implements IClusteringService {
          return true;
       }
       Map<String, Folder> folders = createVcFolders(vNodes.get(0).getCluster());
+      String clusterRpName = createVcResourcePools(vNodes);
       logger.info("syncCreateVMs, start to create VMs.");
       allocateStaticIp(networkAdd, vNodes, occupiedIps);
       Pair<Callable<Void>, Callable<Void>>[] storeProcedures =
@@ -490,9 +655,9 @@ public class ClusteringService implements IClusteringService {
          CreateVmPrePowerOn prePowerOn = getPrePowerOnFunc(vNode);
          CreateVmSP cloneVmSp =
                new CreateVmSP(vNode.getVmName(), createSchema,
-                     getVcResourcePool(vNode), getVcDatastore(vNode),
+                     getVcResourcePool(vNode, clusterRpName), getVcDatastore(vNode),
                      prePowerOn, query, guestVariable, false, 
-                     folders.get(vNode.getGroupName()), 
+                     folders.get(vNode.getGroupName()),
                      VcResourceUtils.findHost(vNode.getTargetHost()));
          CompensateCreateVmSP deleteVmSp = new CompensateCreateVmSP(cloneVmSp);
          storeProcedures[i] =
@@ -628,11 +793,20 @@ public class ClusteringService implements IClusteringService {
             .getTargetDs());
    }
 
-   private VcResourcePool getVcResourcePool(BaseNode vNode) {
+   private VcResourcePool getVcResourcePool(BaseNode vNode,
+         final String clusterRpName) {
       try {
+         String vcRPName = "";
+         if (CommonUtil.isBlank(vNode.getTargetRp())) {
+            vcRPName = clusterRpName + "/" + vNode.getNodeGroup().getName();
+         } else {
+            vcRPName =
+                  vNode.getTargetRp() + "/" + clusterRpName + "/"
+                        + vNode.getNodeGroup().getName();
+         }
          VcResourcePool rp =
                VcResourceUtils.findRPInVCCluster(vNode.getTargetVcCluster(),
-                     vNode.getTargetRp());
+                     vcRPName);
          if (rp == null) {
             throw ClusteringServiceException.TARGET_VC_RP_NOT_FOUND(
                   vNode.getTargetVcCluster(), vNode.getTargetRp());
