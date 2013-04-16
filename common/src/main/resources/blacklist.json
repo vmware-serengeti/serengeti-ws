@@ -17,7 +17,7 @@
         "mapred.local.dir",
         "mapred.task.cache.levels",
         "mapred.jobtracker.jobSchedulable",
-        "mapred.jobtracker.nodegroup.awareness"
+        "mapred.jobtracker.nodegroup.aware"
       ],
       "hadoop-env.sh": [
         "HADOOP_HOME",
