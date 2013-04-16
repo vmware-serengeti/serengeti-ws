@@ -40,9 +40,19 @@ public class ClusterCreateTest {
       assertEquals(true, cluster.supportedWithHdfs2());
       cluster.setDistroVersion("4.1");
       assertEquals(true, cluster.supportedWithHdfs2());
+      cluster.setDistroVersion("4.2");
+      assertEquals(true, cluster.supportedWithHdfs2());
       cluster.setDistroVersion("4.1.0.2");
       assertEquals(true, cluster.supportedWithHdfs2());
+      cluster.setDistroVersion("4.2.0.1");
+      assertEquals(true, cluster.supportedWithHdfs2());
+      cluster.setDistroVersion("4.15.0.1");
+      assertEquals(true, cluster.supportedWithHdfs2());
+      cluster.setDistroVersion("4.100.0.1");
+      assertEquals(false, cluster.supportedWithHdfs2());
       cluster.setDistroVersion("4.1.0.2.3");
+      assertEquals(false, cluster.supportedWithHdfs2());
+      cluster.setDistroVersion("4.2.0.2.3");
       assertEquals(false, cluster.supportedWithHdfs2());
    }
 

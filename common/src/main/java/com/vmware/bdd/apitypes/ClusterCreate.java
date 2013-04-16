@@ -888,7 +888,7 @@ public class ClusterCreate implements Serializable {
    // For HDFS2, at present, serengeti only support cdh4 of Cloudera.
    public boolean supportedWithHdfs2() {
       if (this.getDistroVendor().equalsIgnoreCase(Constants.CDH_VENDOR)) {
-         Pattern pattern = Pattern.compile(Constants.CDH4_1_PATTERN);
+         Pattern pattern = Pattern.compile(Constants.CDH4_PATTERN);
          if (pattern.matcher(this.getDistroVersion()).matches()) {
             return true;
          }
