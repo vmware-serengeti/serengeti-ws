@@ -37,6 +37,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.gson.Gson;
+import com.vmware.aurora.global.Configuration;
+import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
@@ -67,8 +69,10 @@ import com.vmware.bdd.service.resmgmt.IResourcePoolService;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.specpolicy.ClusterSpecFactory;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.TestResourceCleanupUtils;
+import com.vmware.vim.binding.vim.Folder;
 
 @ContextConfiguration(locations = {
       "file:../serengeti/WebContent/WEB-INF/spring/root-context.xml",
@@ -171,7 +175,6 @@ public class TestClusteringJobs extends
 
       // init vc context
       clusterSvc.init();
-
       cleanUpUtils = new TestResourceCleanupUtils();
       cleanUpUtils.setDsSvc(dsSvc);
       cleanUpUtils.setNetSvc(netSvc);
@@ -702,12 +705,42 @@ public class TestClusteringJobs extends
                clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
          Assert.assertTrue(false, "Cluster should not be found.");
       } catch (BddException e) {
-         if (e.getSection().equals("NOT_FOUND")) {
+         if (e.getErrorId().equals("NOT_FOUND")) {
             Assert.assertTrue(true);
-            return;
+         } else {
+            e.printStackTrace();
+            Assert.assertTrue(false, "Got unexpected exception");
          }
-         e.printStackTrace();
       }
+      assertChildRPRemoved(ConfigInfo.getSerengetiUUID() + "-" 
+            + TEST_STATIC_IP_CLUSTER_NAME);
+      assertFolderRemoved(TEST_STATIC_IP_CLUSTER_NAME);
+   }
+
+   private void assertChildRPRemoved(String rpName) {
+      VcResourcePool rp = VcResourceUtils.findRPInVCCluster(vcCluster, vcRP);
+      List<VcResourcePool> children = rp.getChildren();
+      boolean found = false;
+      for (VcResourcePool child : children) {
+         if (child.getName().equals(rpName)) {
+            found = true;
+            break;
+         }
+      }
+      Assert.assertFalse(found, "Resource pool " + rpName + " is not removed.");
+   }
+
+   private void assertFolderRemoved(String folderName) throws Exception {
+      String rootFolderName = ConfigInfo.getSerengetiRootFolder();
+      String serverMobId =
+         Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
+      VcVirtualMachine serverVm = VcCache.get(serverMobId);
+      List<String> folderList = new ArrayList<String>(1);
+      folderList.add(rootFolderName);
+      Folder rootFolder = VcResourceUtils.findFolderByNameList(
+            serverVm.getDatacenter(),  folderList);
+      Folder childFolder = VcResourceUtils.findFolderByName(rootFolder, folderName);
+      Assert.assertNull(childFolder, "Folder " + folderName + " is not removed.");
    }
 
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testDeleteCluster" })
@@ -741,7 +774,7 @@ public class TestClusteringJobs extends
                clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
          Assert.assertTrue(false, "Cluster should not be found.");
       } catch (BddException e) {
-         if (e.getSection().equals("NOT_FOUND")) {
+         if (e.getErrorId().equals("NOT_FOUND")) {
             Assert.assertTrue(true);
             return;
          }
