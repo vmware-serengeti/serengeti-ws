@@ -56,6 +56,9 @@ public class DeleteVmByIdSP implements Callable<Void> {
                logger.info("VM " + vcVm.getName() + " is FT primary VM, disable FT before delete it.");
                vcVm.turnOffFT();
             }
+            if (vcVm.isPoweredOn()) {
+               vcVm.powerOff();
+            }
             vcVm.destroy();
             return null;
          }

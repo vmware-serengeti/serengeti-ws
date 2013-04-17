@@ -84,6 +84,7 @@ import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.service.sp.BaseProgressCallback;
 import com.vmware.bdd.service.sp.ConfigIOShareSP;
 import com.vmware.bdd.service.sp.CreateVmPrePowerOn;
+import com.vmware.bdd.service.sp.DeleteRpSp;
 import com.vmware.bdd.service.sp.DeleteVmByIdSP;
 import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
 import com.vmware.bdd.service.sp.QueryIpAddress;
@@ -888,12 +889,75 @@ public class ClusteringService implements IClusteringService {
       boolean deleted = syncDeleteVMs(vNodes, statusUpdator);
       if (nodes.size() > 0) {
          try {
+            deleteChildRps(name, vNodes);
+         } catch (Exception e) {
+            logger.error("ignore delete resource pool error.", e);
+         }
+
+         try {
             deleteFolders(vNodes.get(0));
          } catch (Exception e) {
             logger.error("ignore delete folder error.", e);
          }
       }
       return deleted;
+   }
+
+   private void deleteChildRps(String hadoopClusterName, List<BaseNode> vNodes) {
+      logger.info("Start to delete child resource pools for cluster: " 
+            + hadoopClusterName);
+      Map<String, Map<String, VcResourcePool>> clusterMap = 
+         new HashMap<String, Map<String, VcResourcePool>>();
+      for (BaseNode node : vNodes) {
+         String vcClusterName = node.getTargetVcCluster();
+         String vcRpName = node.getTargetRp();
+         if (clusterMap.get(vcClusterName) == null) {
+            clusterMap.put(vcClusterName, new HashMap<String, VcResourcePool>());
+         }
+         Map<String, VcResourcePool> rpMap = clusterMap.get(vcClusterName);
+         if (rpMap.get(vcRpName) == null) {
+            VcResourcePool vcRp = 
+               VcResourceUtils.findRPInVCCluster(vcClusterName, vcRpName);
+            rpMap.put(vcRpName, vcRp);
+         }
+      }
+      List<VcResourcePool> rps = new ArrayList<VcResourcePool>();
+      for (Map<String, VcResourcePool> map : clusterMap.values()) {
+         rps.addAll(map.values());
+      }
+      Callable<Void>[] storedProcedures = new Callable[rps.size()];
+      String childRp = ConfigInfo.getSerengetiUUID() + "-" + hadoopClusterName;
+      int i = 0;
+      for (VcResourcePool rp : rps) {
+         DeleteRpSp sp = new DeleteRpSp(rp, childRp);
+         storedProcedures[i] = sp;
+         i ++;
+      }
+      try {
+         NoProgressUpdateCallback callback = new NoProgressUpdateCallback();
+         ExecutionResult[] result =
+               Scheduler
+                     .executeStoredProcedures(
+                           com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
+                           storedProcedures, callback);
+         if (result == null || result.length == 0) {
+            logger.error("No rp is deleted.");
+            return;
+         }
+         int total = 0;
+         for (int j = 0; j < storedProcedures.length; j++) {
+            if (result[j].throwable != null) {
+               DeleteRpSp sp = (DeleteRpSp)storedProcedures[j];
+               logger.error("Failed to delete child resource pool " + sp.getDeleteRpName()
+               		+ " under " + sp.getVcRp(), result[j].throwable);
+            } else {
+               total ++;
+            }
+         }
+      } catch (Exception e) {
+         logger.error("error in deleting resource pools", e);
+         throw BddException.INTERNAL(e, e.getMessage());
+      }
    }
 
    /**
