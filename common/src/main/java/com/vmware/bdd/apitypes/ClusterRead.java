@@ -54,6 +54,12 @@ public class ClusterRead implements Comparable<ClusterRead>{
    @Expose
    @SerializedName("groups")
    private List<NodeGroupRead> nodeGroups;
+   
+   private Boolean automationEnable;
+   
+   private int vhmMinNum;
+   
+   private Integer vhmTargetNum;
 
    private boolean nodeGroupSorted;
 
@@ -258,6 +264,38 @@ public class ClusterRead implements Comparable<ClusterRead>{
          return 1;
       }
       return this.getName().compareTo(cluster.getName());
+   }
+
+   public Boolean getAutomationEnable() {
+      return automationEnable;
+   }
+
+   public void setAutomationEnable(Boolean automationEnable) {
+      this.automationEnable = automationEnable;
+   }
+
+   public int getVhmMinNum() {
+      return vhmMinNum;
+   }
+
+   public void setVhmMinNum(int vhmMinNum) {
+      this.vhmMinNum = vhmMinNum;
+   }
+   
+   public String retrieveVhmTargetNum() {
+      if (vhmTargetNum == null) {
+         return "N/A";
+      } else {
+         return vhmTargetNum.toString();
+      }
+   }
+   
+   public Integer getVhmTargetNum() {
+      return vhmTargetNum;
+   }
+
+   public void setVhmTargetNum(Integer vhmTargetNum) {
+      this.vhmTargetNum = vhmTargetNum;
    }
 
 }

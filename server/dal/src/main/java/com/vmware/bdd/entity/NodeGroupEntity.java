@@ -84,6 +84,9 @@ public class NodeGroupEntity extends EntityBase {
    @Enumerated(EnumType.STRING)
    @Column(name = "ioshare_type")
    private Priority ioShares;
+   
+   @Column(name = "vhm_target_num")
+   private Integer vhmTargetNum;
 
    @ManyToOne
    @JoinColumn(name = "cluster_id")
@@ -248,6 +251,14 @@ public class NodeGroupEntity extends EntityBase {
    public void setIoShares(Priority ioShares) {
       this.ioShares = ioShares;
    }
+   
+   public Integer getVhmTargetNum() {
+      return vhmTargetNum;
+   }
+   
+   public void setVhmTargetNum(Integer vhmTargetNum) {
+      this.vhmTargetNum = vhmTargetNum;
+   }
 
    public Set<NodeEntity> getNodes() {
       return nodes;
@@ -379,6 +390,7 @@ public class NodeGroupEntity extends EntityBase {
       nodeGroupRead.setSwapRatio(this.swapRatio);
       nodeGroupRead.setInstanceNum(this.getRealInstanceNum());
       nodeGroupRead.setIoShares(this.ioShares);
+      nodeGroupRead.setVhmTargetNum(this.vhmTargetNum);
 
       Gson gson = new Gson();
       @SuppressWarnings("unchecked")

@@ -18,7 +18,8 @@ package com.vmware.bdd.apitypes;
  * This class is a DTO of the cluster setElasticity command.
  */
 public class ElasticityRequestBody {
-   private boolean enableAutoElasticity;
+   private Boolean enableAutoElasticity;
+   private Boolean enableManualElasticity;
    private Integer minComputeNodeNum; // min compute nodes that stay powered on
    private boolean calledByReset;
    private Integer activeComputeNodeNum;
@@ -30,14 +31,14 @@ public class ElasticityRequestBody {
    }
 
    public static enum ElasticityOperation {
-      OP_SET_AUTO, OP_SET_MANUAL, OP_RESET
+      OP_SET_AUTO, OP_SET_MANUAL
    }
 
-   public boolean getEnableAutoElasticity() {
+   public Boolean getEnableAutoElasticity() {
       return enableAutoElasticity;
    }
 
-   public void setEnableAutoElasticity(boolean enableAutoElasticity) {
+   public void setEnableAutoElasticity(Boolean enableAutoElasticity) {
       this.enableAutoElasticity = enableAutoElasticity;
    }
 
@@ -79,5 +80,13 @@ public class ElasticityRequestBody {
 
    public void setElasticityOperation(ElasticityOperation elasticityOperation) {
       this.elasticityOperation = elasticityOperation;
+   }
+
+   public Boolean getEnableManualElasticity() {
+      return enableManualElasticity;
+   }
+
+   public void setEnableManualElasticity(Boolean enableManualElasticity) {
+      this.enableManualElasticity = enableManualElasticity;
    }
 }

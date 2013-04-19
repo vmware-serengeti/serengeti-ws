@@ -86,11 +86,9 @@ public class Constants {
    public static final String OUTPUT_OP_START = "start";
    public static final String OUTPUT_OP_STOP = "stop";
    public static final String OUTPUT_OP_RESIZE = "resize";
-   public static final String OUTPUT_OP_SET_ELASTICITY = "setElasticity";
-   public static final String OUTPUT_OP_RESET_ELASTICITY = "resetElasticity";
+   public static final String OUTPUT_OP_SET_PARAM = "setParam";
+   public static final String OUTPUT_OP_RESET_PARAM = "resetParam";
    public static final String OUTPUT_OP_QUOTA_SET = "quota";
-   public static final String OUTPUT_OP_LIMIT = "limit";
-   public static final String OUTPUT_OP_UNLIMIT = "unlimit";
    public static final String OUTPUT_OP_FIX = "fix";
    public static final String OUTPUT_OP_ADJUSTMENT_FAILED = "failed";
    public static final String OUTPUT_OP_RESUME = "resume";
@@ -107,7 +105,10 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_LIMIT = "limited";
    public static final String OUTPUT_OP_RESULT_STOP_COMPUTE_NODE = "compute nodes adjusted";
    public static final String OUTPUT_OP_RESULT_START_COMPUTE_NODE = "compute nodes started";
-   public static final String OUTPUT_OP_RESULT_UNLIMIT = "unlimited";
+   public static final String OUTPUT_OP_RESULT_SET_AUTO_ELASTICITY = "auto elasticity setted";
+   public static final String OUTPUT_OP_RESULT_SET_MANUAL_ELASTICITY = "manual elasticity setted";
+   public static final String OUTPUT_OP_RESULT_RESET_AUTO_ELASTICITY = "auto elasticity resetted";
+   public static final String OUTPUT_OP_RESULT_RESET_MANUAL_ELASTICITY = "manual elasticity resetted";
    public static final String OUTPUT_OP_RESULT_PRIORITY = "prioritized";
    public static final String OUTPUT_OP_RESULT_PRIORITY_RESET = "priority reset";
    public static final String OUTPUT_OP_RESULT_FIX = "fixed";
@@ -184,6 +185,7 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_CPU = "CPU";
    public static final String FORMAT_TABLE_COLUMN_MEM = "MEM(MB)";
    public static final String FORMAT_TABLE_COLUMN_IOSHARE = "IO SHARES";
+   public static final String FORMAT_TABLE_COLUMN_TARGET_NUM = "TARGET NUM";
    public static final String FORMAT_TABLE_COLUMN_TYPE = "TYPE";
    public static final String FORMAT_TABLE_COLUMN_SIZE = "SIZE(GB)";
    public static final String FORMAT_TABLE_COLUMN_RUNNING_NODES = "RUNNING NODE NUMBER";

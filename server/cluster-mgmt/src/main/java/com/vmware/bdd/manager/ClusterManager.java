@@ -783,8 +783,8 @@ public class ClusterManager {
    }
 
    public void setAutoElasticity(String clusterName,
-         boolean enableAutoElasticity, Integer minComputeNodeNum,
-         ElasticityOperation op) throws Exception {
+         Boolean enableAutoElasticity, Integer minComputeNodeNum,
+         boolean calledByReset) throws Exception {
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");
@@ -792,9 +792,14 @@ public class ClusterManager {
       }
 
       Boolean preEnableSetting = cluster.getAutomationEnable();
+      Integer preVhmMinNumSetting = cluster.getVhmMinNum();
+      
+      if (enableAutoElasticity == preEnableSetting && minComputeNodeNum == preVhmMinNumSetting) {
+         return;
+      }
 
       if (preEnableSetting == null) {
-         if (op != ElasticityOperation.OP_SET_AUTO) {
+         if (calledByReset) {
             return;
          }
          logger.error("cluster " + clusterName
@@ -804,7 +809,9 @@ public class ClusterManager {
                "it is not a D/C seperation or Compute Only cluster");
       }
 
-      cluster.setAutomationEnable(enableAutoElasticity);
+      if (enableAutoElasticity != null) {
+         cluster.setAutomationEnable(enableAutoElasticity);
+      }
 
       if (minComputeNodeNum != null) {
          cluster.setVhmMinNum(minComputeNodeNum);
@@ -821,27 +828,21 @@ public class ClusterManager {
                clusterName, "it should be in RUNNING or STOPPED status");
       }
 
-      Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
-      param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
-      param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
-            clusterName));
-      JobParameters jobParameters = new JobParameters(param);
-      try {
-         jobManager.runJob(JobConstants.SET_AUTO_ELASTICITY_JOB_NAME,
-               jobParameters);
-      } catch (Exception e) {
-         logger.error("Failed to limit cluster " + clusterName, e);
-         throw e;
+      boolean sucess = clusteringService.setAutoElasticity(clusterName, null);
+      if (!sucess) {
+         throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
+               clusterName, "failed");
       }
    }
 
    /*
-    * Validate the limit.
     * set Manual Elasticity 
     */
    @SuppressWarnings("unchecked")
-   public Long setManualElasticity(String clusterName, String nodeGroupName,
-         int activeComputeNodeNum) throws Exception {
+   public Long setManualElasticity(String clusterName,
+         Boolean enableManualElasticity, String nodeGroupName,
+         Integer activeComputeNodeNum) throws Exception {
+      logger.info("clusterName: " + clusterName + ", enable?:" + enableManualElasticity + ", ngName: " + nodeGroupName + ",activeNodeNum:" + activeComputeNodeNum);
       logger.info("Set active compute node number to" + activeComputeNodeNum);
       ClusterRead cluster = getClusterByName(clusterName, false);
       // cluster must be contain node group
@@ -852,6 +853,7 @@ public class ClusterManager {
          logger.error(msg);
          throw BddException.INTERNAL(null, msg);
       }
+
       // cluster must be running status
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
          String msg = "Cluster is not running.";
@@ -862,6 +864,38 @@ public class ClusterManager {
       // node group must be compute only node
       List<String> nodeGroupNames = new ArrayList<String>();
       if (!cluster.validateSetManualElasticity(nodeGroupName, nodeGroupNames)) {
+         return null;
+      }
+      
+      ClusterEntity clusterEntity = clusterEntityMgr.findByName(clusterName);
+      Boolean preAutoEnableSetting = clusterEntity.getAutomationEnable();
+      NodeGroupEntity ngEntity = null;
+      Integer preActiveComputeNodeNum = null;
+      
+      if (nodeGroupName == null) {
+         preActiveComputeNodeNum = clusterEntity.getVhmTargetNum();
+      } else {
+         ngEntity = clusterEntityMgr.findByName(clusterName, nodeGroupName);
+         preActiveComputeNodeNum = ngEntity.getVhmTargetNum();
+      }
+      
+      if (activeComputeNodeNum == null) {
+         if (preActiveComputeNodeNum == null) {
+            return null;
+         } else {
+            activeComputeNodeNum = preActiveComputeNodeNum;
+         }
+      } else {
+         if (nodeGroupName == null) {
+            clusterEntity.setVhmTargetNum(activeComputeNodeNum);
+            clusterEntityMgr.update(clusterEntity);
+         } else {
+            ngEntity.setVhmTargetNum(activeComputeNodeNum);
+            clusterEntityMgr.update(ngEntity);
+         }
+      }
+      
+      if (preAutoEnableSetting && enableManualElasticity == null) {
          return null;
       }
 

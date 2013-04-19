@@ -64,7 +64,7 @@ public class NodeGroupRead {
    private PlacementPolicy placementPolicies;
 
    //this is for cli output only
-   private int runningNodesNum;
+   private Integer vhmTargetNum;
 
    public String getName() {
       return name;
@@ -153,12 +153,20 @@ public class NodeGroupRead {
    public void setPlacementPolicies(PlacementPolicy placementPolicies) {
       this.placementPolicies = placementPolicies;
    }
-
-   public int getRunningNodesNum() {
-      return runningNodesNum;
+   
+   public String retrieveVhmTargetNum() {
+      if (vhmTargetNum == null) {
+         return "N/A";
+      } else {
+         return vhmTargetNum.toString();
+      }
+   }
+   
+   public Integer getVhmTargetNum() {
+      return vhmTargetNum;
    }
 
-   public void setRunningNodesNum(int runningNodesNum) {
-      this.runningNodesNum = runningNodesNum;
+   public void setVhmTargetNum(Integer vhmTargetNum) {
+      this.vhmTargetNum = vhmTargetNum;
    }
 }

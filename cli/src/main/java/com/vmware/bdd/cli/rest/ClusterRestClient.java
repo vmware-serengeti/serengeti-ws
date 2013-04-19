@@ -129,7 +129,13 @@ public class ClusterRestClient {
             Constants.REST_PATH_CLUSTER + "/" + clusterName + "/"
                   + Constants.REST_PATH_ELASTICITY;
       final HttpMethod httpverb = HttpMethod.PUT;
-      restClient.update(requestBody, path, httpverb);
+      try {
+         restClient.update(requestBody, path, httpverb);
+      } catch (CliRestException e) {
+         if (e.getMessage() != null) {
+            throw e;
+         }
+      }
    }
 
    public void prioritizeCluster(String clusterName, String nodeGroupName,

@@ -251,7 +251,7 @@ public class RestResource {
          if (minComputeNodeNum != null && minComputeNodeNum < 0) {
             throw BddException.INVALID_PARAMETER("min compute node num", minComputeNodeNum.toString());
          }
-         clusterMgr.setAutoElasticity(clusterName, true, minComputeNodeNum, ElasticityOperation.OP_SET_AUTO);
+         clusterMgr.setAutoElasticity(clusterName, requestBody.getEnableAutoElasticity(), minComputeNodeNum, requestBody.getCalledByReset());
       } else if (requestBody.getElasticityOperation() == ElasticityOperation.OP_SET_MANUAL) {
          Integer activeComputeNodeNum = requestBody.getActiveComputeNodeNum();
          String groupName = requestBody.getNodeGroupName();
@@ -259,16 +259,11 @@ public class RestResource {
             throw BddException.INVALID_PARAMETER("node group name", groupName);
          }
          // The active compute node number must be a positive number or -1.
-         if (activeComputeNodeNum < -1) {
+         if (activeComputeNodeNum != null && activeComputeNodeNum < -1) {
             logger.error("Invalid instance number: " + activeComputeNodeNum + " !");
             throw BddException.INVALID_PARAMETER("instance number", activeComputeNodeNum.toString());
          }
-         clusterMgr.setAutoElasticity(clusterName, false, null, ElasticityOperation.OP_SET_MANUAL);
-         Long taskId = clusterMgr.setManualElasticity(clusterName, groupName, activeComputeNodeNum);
-         redirectRequest(taskId, request, response);
-      } else if (requestBody.getElasticityOperation() == ElasticityOperation.OP_RESET) {
-         clusterMgr.setAutoElasticity(clusterName, false, 0, ElasticityOperation.OP_RESET);
-         Long taskId = clusterMgr.setManualElasticity(clusterName, null, -1);
+         Long taskId = clusterMgr.setManualElasticity(clusterName, requestBody.getEnableManualElasticity(), groupName, activeComputeNodeNum);
          redirectRequest(taskId, request, response);
       } else {
          throw BddException.INVALID_PARAMETER("elasticity operation type", "");

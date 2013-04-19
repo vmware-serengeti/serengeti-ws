@@ -107,6 +107,9 @@ public class ClusterEntity extends EntityBase {
    @Column(name = "vhm_min_num")
    private int vhmMinNum;
    
+   @Column(name = "vhm_target_num")
+   private Integer vhmTargetNum;
+   
    // records the latest job id the cluster executes
    @Column(name = "latest_task_id")
    private Long latestTaskId;
@@ -297,6 +300,14 @@ public class ClusterEntity extends EntityBase {
 
    public void setVhmMinNum(int vhmMinNum) {
       this.vhmMinNum = vhmMinNum;
+   }
+   
+   public Integer getVhmTargetNum() {
+      return vhmTargetNum;
+   }
+   
+   public void setVhmTargetNum(Integer vhmTargetNum) {
+      this.vhmTargetNum = vhmTargetNum;
    }
 
    public Long getLatestTaskId() {

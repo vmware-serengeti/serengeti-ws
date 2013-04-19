@@ -50,7 +50,7 @@ import com.vmware.bdd.spectypes.HadoopRole;
 public class ClusterCommandsTest extends MockRestServer {
     @Autowired
     private ClusterCommands clusterCommands;
-
+    
     @Test
     public void testClusterResize() throws Exception {
         CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");

@@ -301,6 +301,9 @@ public class ClusterEntityManager {
       clusterRead.setStatus(cluster.getStatus());
       clusterRead.setDistro(cluster.getDistro());
       clusterRead.setTopologyPolicy(cluster.getTopologyPolicy());
+      clusterRead.setAutomationEnable(cluster.getAutomationEnable());
+      clusterRead.setVhmMinNum(cluster.getVhmMinNum());
+      clusterRead.setVhmTargetNum(cluster.getVhmTargetNum());
 
       List<NodeGroupRead> groupList = new ArrayList<NodeGroupRead>();
       for (NodeGroupEntity group : cluster.getNodeGroups()) {
