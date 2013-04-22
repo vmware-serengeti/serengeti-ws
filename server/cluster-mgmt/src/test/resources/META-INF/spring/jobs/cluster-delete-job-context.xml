@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+   http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/batch
+   http://www.springframework.org/schema/batch/spring-batch.xsd
+   http://www.springframework.org/schema/aop
+   http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<beans:import resource="classpath*:/META-INF/spring/jobs/common-job-context.xml" />
+
+	<beans:bean name="deleteClusterVMTasklet"
+		class="com.vmware.bdd.service.job.DeleteClusterVMStep">
+		<beans:property name="clusteringService" ref="clusteringService" />
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+	</beans:bean>
+	<beans:bean name="deleteClusterDataTasklet"
+		class="com.vmware.bdd.service.job.DeleteClusterNodeStep">
+		<beans:property name="networkMgr" ref="networkService" />
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+	</beans:bean>
+	<beans:bean name="softwareDeleteClusterTasklet"
+		class="com.vmware.bdd.service.job.software.SoftwareManagementStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
+		<beans:property name="managementOperation" value="DESTROY" />
+	</beans:bean>
+
+	<job id="deleteClusterJob" job-repository="jobRepository">
+		<step id="deleteClusterVM" next="softwareDeleteClusterStep">
+			<tasklet ref="deleteClusterVMTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="softwareDeleteClusterStep" next="deleteClusterData">
+			<tasklet ref="softwareDeleteClusterTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="deleteClusterData">
+			<tasklet ref="deleteClusterDataTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<listeners>
+			<listener ref="clusterJobListener" />
+		</listeners>
+	</job>
+
+</beans:beans>

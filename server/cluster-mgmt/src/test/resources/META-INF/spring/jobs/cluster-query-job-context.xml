@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+   http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/batch
+   http://www.springframework.org/schema/batch/spring-batch.xsd
+   http://www.springframework.org/schema/aop
+   http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<beans:import resource="classpath*:/META-INF/spring/jobs/common-job-context.xml" />
+
+	<beans:bean name="softwareQueryClusterTasklet"
+		class="com.vmware.bdd.service.job.software.SoftwareManagementStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
+		<beans:property name="managementOperation" value="QUERY" />
+	</beans:bean>
+
+	<job id="queryClusterJob" job-repository="jobRepository">
+		<step id="softwareQueryClusterStep">
+			<tasklet ref="softwareQueryClusterTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<listeners>
+			<listener ref="clusterJobListener" />
+		</listeners>
+	</job>
+</beans:beans>
