@@ -1,0 +1,104 @@
+{
+  "nodeGroups" : [
+    {
+      "name" : "mysql",
+      "roles" : [
+        "mapr_mysql_server"
+      ],
+      "instanceNum" : 1,
+      "storage" : {
+        "type" : "SHARED",
+        "sizeGB" : 20
+      },
+      "cpuNum" : 1,
+      "memCapacityMB" : 2048,
+      "haFlag" : "off"
+    },
+    {
+      "name" : "zookeeper",
+      "roles" : [
+        "mapr_zookeeper"
+      ],
+      "instanceNum" : 3,
+      "placementPolicies": {
+        "instancePerHost": 1
+      },
+      "storage" : {
+        "type" : "SHARED",
+        "sizeGB" : 20
+      },
+      "cpuNum" : 1,
+      "memCapacityMB" : 2048,
+      "haFlag" : "on"
+    },
+    {
+      "name" : "master",
+      "roles" : [
+        "mapr_cldb",
+        "mapr_nfs",
+        "mapr_fileserver",
+        "mapr_jobtracker",
+        "mapr_webserver",
+        "mapr_metrics"
+      ],
+      "instanceNum" : 3,
+      "placementPolicies": {
+        "instancePerHost": 1
+      },
+      "storage" : {
+        "type" : "LOCAL",
+        "sizeGB" : 50
+      },
+      "cpuNum" : 2,
+      "memCapacityMB" : 7500,
+      "haFlag" : "on"
+    },
+    {
+      "name" : "data",
+      "roles" : [
+        "mapr_fileserver",
+        "mapr_nfs"
+      ],
+      "instanceNum" : 3,
+      "storage" : {
+        "type" : "LOCAL",
+        "sizeGB" : 50
+      },
+      "cpuNum" : 1,
+      "memCapacityMB" : 4096,
+      "haFlag" : "off"
+    },
+    {
+      "name" : "compute",
+      "roles" : [
+        "mapr_fileserver",
+        "mapr_tasktracker"
+      ],
+      "instanceNum" : 6,
+      "storage" : {
+        "type" : "LOCAL",
+        "sizeGB" : 20
+      },
+      "cpuNum" : 2,
+      "memCapacityMB" : 7500,
+      "haFlag" : "off"
+    },
+    {
+      "name" : "client",
+      "roles" : [
+        "mapr_client",
+        "mapr_pig",
+        "mapr_hive"
+      ],
+      "instanceNum" : 1,
+      "storage" : {
+        "type" : "SHARED",
+        "sizeGB" : 50
+      },
+      "cpuNum" : 2,
+      "memCapacityMB" : 4096,
+      "haFlag" : "off"
+    }
+  ]
+}
+
