@@ -9,7 +9,17 @@
    http://www.springframework.org/schema/batch/spring-batch.xsd
    http://www.springframework.org/schema/aop
    http://www.springframework.org/schema/aop/spring-aop.xsd">
-
-   <beans:import resource="classpath*:/spring/jobs/*-context.xml" />
    
+   <beans:import resource="classpath*:/spring/jobs/common-job-context.xml" />
+   <job id="queryClusterJob" job-repository="jobRepository">
+      <step id="softwareQueryClusterStep">
+         <tasklet ref="softwareQueryClusterTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <listeners>
+         <listener ref="clusterJobListener" />
+      </listeners>
+   </job>
 </beans:beans>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+   xmlns:beans="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="
+   http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/batch
+   http://www.springframework.org/schema/batch/spring-batch.xsd
+   http://www.springframework.org/schema/aop
+   http://www.springframework.org/schema/aop/spring-aop.xsd">
+   
+   <beans:import resource="classpath*:/spring/jobs/common-job-context.xml" />
+   <job id="resumeClusterJob" job-repository="jobRepository">
+      <step id="removeBadNodeStep" next="updateResumeClusterDataStep1">
+         <tasklet ref="resumeClusterRemoveBadNodeTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="updateResumeClusterDataStep1" next="resumePlanStep">
+         <tasklet ref="updateClusterDataTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="resumePlanStep" next="updateResumeClusterDataStep2">
+         <tasklet ref="resumeResizeClusterPlanTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="updateResumeClusterDataStep2" next="resumeCreateVMStep">
+         <tasklet ref="updateClusterDataTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="resumeCreateVMStep" next="updateResumeClusterDataStep3">
+         <tasklet ref="createClusterVMTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="updateResumeClusterDataStep3" next="setAutoElasticityResumeStep">
+         <tasklet ref="updateClusterDataTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="setAutoElasticityResumeStep">
+         <tasklet ref="setAutoElasticityTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <listeners>
+         <listener ref="clusterJobListener" />
+      </listeners>
+   </job>
+   
+</beans:beans>

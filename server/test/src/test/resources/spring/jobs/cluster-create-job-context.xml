@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+   xmlns:beans="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="
+   http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/batch
+   http://www.springframework.org/schema/batch/spring-batch.xsd
+   http://www.springframework.org/schema/aop
+   http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+   <beans:import resource="classpath*:/spring/jobs/common-job-context.xml" />
+   <job id="createClusterJob" job-repository="jobRepository">
+      <step id="createClusterPlanStep" next="updateClusterDataStep1">
+         <tasklet ref="createClusterPlanTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="updateClusterDataStep1" next="createVMStep">
+         <tasklet ref="updateClusterDataTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="createVMStep" next="updateClusterDataStep2">
+         <tasklet ref="createClusterVMTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="updateClusterDataStep2" next="setAutoElasticityStep">
+         <tasklet ref="updateClusterDataTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="setAutoElasticityStep">
+         <tasklet ref="setAutoElasticityTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <listeners>
+         <listener ref="clusterJobListener" />
+      </listeners>
+   </job>
+   
+</beans:beans>

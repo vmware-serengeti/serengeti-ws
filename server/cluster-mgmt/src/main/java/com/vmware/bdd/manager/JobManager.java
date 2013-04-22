@@ -53,6 +53,21 @@ public class JobManager {
    }
 
    /**
+    * Run Spring Batch job with sub job.
+    * @param jobName the Spring Batch job name
+    * @param param job parameters
+    * @param subJobName sub job name
+    * @return
+    * @throws Exception
+    */
+   public long runJobWithSubJob(String jobName, JobParameters param,
+         String subJobName) throws Exception {
+      Job job = jobRegistry.getJob(jobName);
+      //TODO: add sub job logic here
+      return jobLauncher.run(job, param).getJobId();
+   }
+
+   /**
     * Try to stop a jobExecution
     * 
     * @param jobExecutionId

@@ -9,7 +9,24 @@
    http://www.springframework.org/schema/batch/spring-batch.xsd
    http://www.springframework.org/schema/aop
    http://www.springframework.org/schema/aop/spring-aop.xsd">
-
-   <beans:import resource="classpath*:/spring/jobs/*-context.xml" />
+   
+   <beans:import resource="classpath*:/spring/jobs/common-job-context.xml" />
+   <job id="deleteClusterJob" job-repository="jobRepository">
+      <step id="deleteClusterVM" next="deleteClusterData">
+         <tasklet ref="deleteClusterVMTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="deleteClusterData">
+         <tasklet ref="deleteClusterDataTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <listeners>
+         <listener ref="clusterJobListener" />
+      </listeners>
+   </job>
    
 </beans:beans>
