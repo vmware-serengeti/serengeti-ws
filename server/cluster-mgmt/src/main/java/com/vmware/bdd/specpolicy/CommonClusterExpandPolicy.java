@@ -222,11 +222,6 @@ public class CommonClusterExpandPolicy {
             throw ClusterConfigException.CLUSTER_CONFIG_DATASTORE_TYPE_NONEXISTENT(msg);
          }
       }
-      if (groupType == GroupType.ZOOKEEPER_GROUP) {
-         ngEntity.setDiskBisect(true);         
-      } else {
-         ngEntity.setDiskBisect(false);
-      }
    }
 
    public static void expandDistro(ClusterEntity clusterEntity, ClusterCreate clusterConfig, DistroManager distroMgr) {

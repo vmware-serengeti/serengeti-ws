@@ -101,7 +101,6 @@ create table node_group (
    ha_flag                varchar(10),
    storage_type           varchar(255),
    storage_size           integer,
-   disk_bisect            boolean,
    ioshare_type           varchar(16),
    vc_datastore_names     text,
    vc_rp_names            text,

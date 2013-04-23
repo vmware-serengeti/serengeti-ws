@@ -42,10 +42,6 @@ public class StorageRead {
    private String type;
 
    @Expose
-   @SerializedName("bisect")
-   private boolean diskBisect;
-
-   @Expose
    private Priority shares;
 
    @Expose
@@ -85,14 +81,6 @@ public class StorageRead {
 
    public void setType(String type) {
       this.type = type;
-   }
-   
-   public boolean getDiskBisect() {
-      return diskBisect;
-   }
-   
-   public void setDiskBisect(boolean diskBisect) {
-      this.diskBisect = diskBisect;
    }
 
    public int getSizeGB() {

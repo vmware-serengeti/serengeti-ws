@@ -136,6 +136,24 @@ public class VcResourceUtils {
       });
    }
 
+   public static VcCluster findVcCluster(final String clusterName) {
+      logger.debug("find vc cluster: " + clusterName);
+      VcCluster vcCluster =
+            VcContext.inVcSessionDo(new VcSession<VcCluster>() {
+               @Override
+               protected VcCluster body() throws Exception {
+                  List<VcCluster> vcClusters = VcInventory.getClusters();
+                  for (VcCluster vcCluster : vcClusters) {
+                     if (clusterName.equals(vcCluster.getName())) {
+                        return vcCluster;
+                     }
+                  }
+                  return null;
+               }
+            });
+      return vcCluster;
+   }
+
    /**
     * @param clusterName
     * @param vcRPName
@@ -143,7 +161,7 @@ public class VcResourceUtils {
     */
    public static VcResourcePool findRPInVCCluster(final String clusterName,
          final String vcRPName) {
-      logger.debug("find rp in vc:" + clusterName + "/" + vcRPName);
+      logger.debug("find rp in vc: " + clusterName + "/" + vcRPName);
       VcResourcePool vcRP =
             VcContext.inVcSessionDo(new VcSession<VcResourcePool>() {
                @Override

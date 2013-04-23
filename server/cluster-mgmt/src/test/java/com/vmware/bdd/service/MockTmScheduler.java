@@ -26,6 +26,7 @@ import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.service.sp.ConfigIOShareSP;
+import com.vmware.bdd.service.sp.CreateResourcePoolSP;
 import com.vmware.bdd.service.sp.DeleteVmByIdSP;
 import com.vmware.bdd.service.sp.StartVmSP;
 import com.vmware.bdd.service.sp.StopVmSP;
@@ -41,7 +42,8 @@ public class MockTmScheduler {
       STOP_VM,
       DELETE_VM,
       DELETE_FOLDER,
-      RECONFIGURE_VM
+      RECONFIGURE_VM,
+      CREATE_RP
    }
 
    private static Map<VmOperation, Boolean> flag = new HashMap<VmOperation, Boolean>();
@@ -89,6 +91,8 @@ public class MockTmScheduler {
          return VmOperation.CREATE_VM;
       } else if (sp instanceof ConfigIOShareSP) {
          return VmOperation.RECONFIGURE_VM;
+      } else if (sp instanceof CreateResourcePoolSP) {
+         return VmOperation.CREATE_RP;
       } else {
          logger.error("unsupported vm opration: " + sp);
          return null;

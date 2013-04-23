@@ -299,8 +299,10 @@ public class ClusterManager {
             group.setRpNames(null);
             group.getStorage().setDsNames(null);
             group.getStorage().setNamePattern(null);
-            group.getStorage().setDiskBisect(false);
             group.setVmFolderPath(null);
+            group.getStorage().setSplitPolicy(null);
+            group.getStorage().setControllerType(null);
+            group.getStorage().setAllocType(null);
          }
       }
       return spec;

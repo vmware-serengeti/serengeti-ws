@@ -42,7 +42,6 @@ import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.util.CmsWorker;
-import com.vmware.aurora.vc.MoUtil;
 import com.vmware.aurora.vc.DeviceId;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcCluster;
@@ -55,7 +54,6 @@ import com.vmware.aurora.vc.VcSnapshot;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcevent.VcEventRouter;
 import com.vmware.aurora.vc.vcservice.VcContext;
-import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
@@ -106,12 +104,9 @@ import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.vim.binding.vim.Folder;
-import com.vmware.vim.binding.vim.VirtualMachine;
 import com.vmware.vim.binding.vim.fault.VmFaultToleranceOpIssuesList;
 import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
-import com.vmware.vim.binding.vmodl.ManagedObjectReference;
-import com.vmware.vim.vmomi.core.types.VmodlTypeMap;
 
 public class ClusteringService implements IClusteringService {
    private static final Logger logger = Logger
@@ -472,6 +467,10 @@ public class ClusteringService implements IClusteringService {
 
    private void executeResourcePoolStoreProcedures(Callable<Void>[] defineSPs,
          String type, String clusterName) throws InterruptedException {
+      if (defineSPs.length == 0) {
+         logger.debug("no resource pool need to be created.");
+         return;
+      }
       NoProgressUpdateCallback callback = new NoProgressUpdateCallback();
       ExecutionResult[] result =
             Scheduler.executeStoredProcedures(
@@ -509,6 +508,12 @@ public class ClusteringService implements IClusteringService {
       int nodeGroupNameCount = 0;
       for (BaseNode baseNode : vNodes) {
          String vcCluster = baseNode.getTargetVcCluster();
+         VcCluster cluster = VcResourceUtils.findVcCluster(vcCluster);
+         if (!cluster.getConfig().getDRSEnabled()) {
+            logger.debug("DRS disabled for cluster " + vcCluster 
+                  + ", do not create child rp for this cluster.");
+            continue;
+         }
          AuAssert.check(!CommonUtil.isBlank(vcCluster),
                "Vc cluster name cannot be null!");
          if (!vcClusterRpNamesMap.containsKey(vcCluster)) {
@@ -598,6 +603,10 @@ public class ClusteringService implements IClusteringService {
          for (Entry<String, List<String>> vcClusterRpNamesEntry : vcClusterRpNamesMap
                .entrySet()) {
             String vcClusterName = vcClusterRpNamesEntry.getKey();
+            VcCluster vcCluster = VcResourceUtils.findVcCluster(vcClusterName);
+            if (!vcCluster.getConfig().getDRSEnabled()) {
+               continue;
+            }
             List<String> resourcePoolNames = vcClusterRpNamesEntry.getValue();
             for (String resourcePoolName : resourcePoolNames) {
                VcResourcePool parentVcResourcePool = null;
@@ -797,6 +806,13 @@ public class ClusteringService implements IClusteringService {
          final String clusterRpName) {
       try {
          String vcRPName = "";
+         VcCluster cluster = VcResourceUtils.findVcCluster(vNode.getTargetVcCluster());
+         if (!cluster.getConfig().getDRSEnabled()) {
+            logger.debug("DRS disabled for cluster " 
+                  + vNode.getTargetVcCluster() 
+                  + ", put VM under cluster directly.");
+            return cluster.getRootRP();
+         }
          if (CommonUtil.isBlank(vNode.getTargetRp())) {
             vcRPName = clusterRpName + "/" + vNode.getNodeGroup().getName();
          } else {

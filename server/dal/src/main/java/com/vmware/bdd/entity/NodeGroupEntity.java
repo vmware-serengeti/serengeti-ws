@@ -81,9 +81,6 @@ public class NodeGroupEntity extends EntityBase {
    @Column(name = "storage_size")
    private int storageSize;
 
-   @Column(name = "disk_bisect")
-   private boolean diskBisect;
-
    @Enumerated(EnumType.STRING)
    @Column(name = "ioshare_type")
    private Priority ioShares;
@@ -147,7 +144,7 @@ public class NodeGroupEntity extends EntityBase {
 
    public NodeGroupEntity(String name, int defineInstanceNum, int cpuNum,
          int memorySize, Float swapRatio, DatastoreType storageType,
-         int storageSize, boolean diskBisect) {
+         int storageSize) {
       super();
       this.name = name;
       this.defineInstanceNum = defineInstanceNum;
@@ -156,7 +153,6 @@ public class NodeGroupEntity extends EntityBase {
       this.swapRatio = swapRatio;
       this.storageType = storageType;
       this.storageSize = storageSize;
-      this.diskBisect = diskBisect;
       // default share level
       this.ioShares = Priority.NORMAL;
    }
@@ -243,14 +239,6 @@ public class NodeGroupEntity extends EntityBase {
 
    public void setStorageSize(int storageSize) {
       this.storageSize = storageSize;
-   }
-
-   public boolean getDiskBisect() {
-      return diskBisect;
-   }
-
-   public void setDiskBisect(boolean diskBisect) {
-      this.diskBisect = diskBisect;
    }
 
    public Priority getIoShares() {
@@ -412,7 +400,6 @@ public class NodeGroupEntity extends EntityBase {
       StorageRead storage = new StorageRead();
       storage.setType(this.storageType.toString());
       storage.setSizeGB(this.storageSize);
-      storage.setDiskBisect(this.diskBisect);
       storage.setDsNames(getVcDatastoreNameList());
       nodeGroupRead.setStorage(storage);
 
