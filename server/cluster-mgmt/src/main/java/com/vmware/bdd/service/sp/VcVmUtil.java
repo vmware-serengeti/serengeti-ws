@@ -92,9 +92,6 @@ public class VcVmUtil {
          vNode.setIpAddress(ip);
          vNode.setGuestHostName(VcVmUtil.getGuestHostName(vm, false));
          vNode.setTargetHost(vm.getHost().getName());
-         vNode.setTargetRp(vm.getResourcePool().getName());
-         vNode.setTargetVcCluster(vm.getResourcePool()
-               .getVcCluster().getName());
          vNode.setVmMobId(vm.getId());
          if (vm.isPoweredOff()) {
             vNode.setNodeStatus(NodeStatus.POWERED_OFF);
