@@ -5,7 +5,7 @@ import mockit.MockClass;
 
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.placement.entity.BaseNode;
-import com.vmware.bdd.service.sp.VcVmUtil;
+import com.vmware.bdd.utils.VcVmUtil;
 
 @MockClass(realClass = VcVmUtil.class)
 public class MockVcVmUtil {

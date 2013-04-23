@@ -33,7 +33,7 @@ import com.vmware.bdd.apitypes.ResourcePoolRead;
 
 /**
  * Work as a message queue
- *
+ * 
  */
 @Entity
 @SequenceGenerator(name = "IdSequence", sequenceName = "vc_resource_pool_seq", allocationSize = 1)
@@ -113,7 +113,7 @@ public class VcResourcePoolEntity extends EntityBase {
 
       List<NodeRead> nodeReads = new ArrayList<NodeRead>();
       for (NodeEntity node : nodes) {
-         NodeRead nodeRead = node.toNodeRead();
+         NodeRead nodeRead = node.toNodeRead(false);
          nodeReads.add(nodeRead);
       }
       Collections.sort(nodeReads, new Comparator<NodeRead>() {

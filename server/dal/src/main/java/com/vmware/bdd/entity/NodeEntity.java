@@ -15,33 +15,35 @@
 package com.vmware.bdd.entity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Type;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.NodeStatus;
-
+import com.vmware.bdd.utils.AuAssert;
 
 /**
  * Hadoop Node Entity class: describes hadoop node info
  * 
  */
 @Entity
-@SequenceGenerator(name = "IdSequence", sequenceName = "hadoop_node_seq", allocationSize = 1)
-@Table(name = "hadoop_node")
+@SequenceGenerator(name = "IdSequence", sequenceName = "node_seq", allocationSize = 1)
+@Table(name = "node")
 public class NodeEntity extends EntityBase {
    private static final Logger logger = Logger.getLogger(NodeEntity.class);
    @Column(name = "vm_name", unique = true, nullable = false)
@@ -84,16 +86,11 @@ public class NodeEntity extends EntityBase {
    @JoinColumn(name = "vc_rp_id")
    private VcResourcePoolEntity vcRp;
 
-   // JSON encoded datastore name array
-   @Column(name = "vc_datastores")
-   @Type(type = "text")
-   private String datastores;
-
-   @Column(name = "volumes")
-   private String volumes;
+   @OneToMany(mappedBy = "nodeEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+   private Set<DiskEntity> disks;
 
    public NodeEntity() {
-
+      this.disks = new HashSet<DiskEntity>();
    }
 
    public NodeEntity(String vmName, String rack, String hostName,
@@ -104,15 +101,15 @@ public class NodeEntity extends EntityBase {
       this.hostName = hostName;
       this.status = status;
       this.ipAddress = ipAddress;
+      this.disks = new HashSet<DiskEntity>();
    }
 
    public List<String> getVolumns() {
-      return new Gson().fromJson(volumes, new TypeToken<List<String>>() {
-      }.getType());
-   }
-
-   public void setVolumns(List<String> volumns) {
-      this.volumes = (new Gson()).toJson(volumns);
+      List<String> volumns = new ArrayList<String>();
+      for (DiskEntity disk : disks) {
+         volumns.add(disk.getDeviceName());
+      }
+      return volumns;
    }
 
    public String getGuestHostName() {
@@ -200,10 +197,9 @@ public class NodeEntity extends EntityBase {
    }
 
    public void setStatus(NodeStatus status, boolean validation) {
-      if(validation){
+      if (validation) {
          setStatus(status);
-      }
-      else{
+      } else {
          this.status = status;
       }
    }
@@ -243,21 +239,27 @@ public class NodeEntity extends EntityBase {
       this.vcRp = vcRp;
    }
 
-   @SuppressWarnings("unchecked")
    public List<String> getDatastoreNameList() {
-      return (new Gson()).fromJson(this.datastores,
-            (new ArrayList<String>()).getClass());
+      Set<String> datastores = new HashSet<String>(disks.size());
+      for (DiskEntity disk : disks) {
+         datastores.add(disk.getDatastoreName());
+      }
+      return new ArrayList<String>(datastores);
    }
 
-   public void setDatastoreNameList(List<String> datastoreNames) {
-      this.datastores = (new Gson()).toJson(datastoreNames);
+   public Set<DiskEntity> getDisks() {
+      return disks;
+   }
+
+   public void setDisks(Set<DiskEntity> disks) {
+      this.disks = disks;
    }
 
    public void copy(NodeEntity newNode) {
       this.ipAddress = newNode.getIpAddress();
       this.status = newNode.getStatus();
       this.action = newNode.getAction();
-      
+
       if (newNode.getRack() != null) {
          this.rack = newNode.getRack();
       }
@@ -270,12 +272,32 @@ public class NodeEntity extends EntityBase {
       if (newNode.getVcRp() != null) {
          this.vcRp = newNode.getVcRp();
       }
-      if (newNode.getDatastoreNameList() != null) {
-         this.datastores = (new Gson()).toJson(newNode.getDatastoreNameList());
+
+      if (newNode.getDisks() != null && !newNode.getDisks().isEmpty()) {
+         if (this.disks == null)
+            this.disks = new HashSet<DiskEntity>(newNode.disks.size());
+
+         for (DiskEntity disk : newNode.getDisks()) {
+            DiskEntity clone = disk.copy(disk);
+            clone.setNodeEntity(this);
+            this.disks.add(clone);
+         }
       }
    }
 
-   public NodeRead toNodeRead() {
+   public DiskEntity findDisk(String diskName) {
+      AuAssert.check(diskName != null && !diskName.isEmpty()
+            && this.disks != null);
+      for (DiskEntity disk : this.disks) {
+         if (disk.getName().equals(diskName))
+            return disk;
+      }
+
+      return null;
+   }
+
+   // if includeVolumes is true, this method must be called inside a transaction
+   public NodeRead toNodeRead(boolean includeVolumes) {
       NodeRead node = new NodeRead();
       node.setRack(this.rack);
       node.setHostName(this.hostName);
@@ -286,7 +308,8 @@ public class NodeEntity extends EntityBase {
       node.setAction(this.action);
       List<String> roleNames = nodeGroup.getRoleNameList();
       node.setRoles(roleNames);
-      node.setVolumes(this.getVolumns());
+      if (includeVolumes)
+         node.setVolumes(this.getVolumns());
       return node;
    }
 

@@ -370,6 +370,7 @@ public class NodeGroupEntity extends EntityBase {
       return datastores;
    }
 
+   // this method should be called inside a transaction
    public NodeGroupRead toNodeGroupRead() {
       NodeGroupRead nodeGroupRead = new NodeGroupRead();
       nodeGroupRead.setName(this.name);
@@ -395,7 +396,6 @@ public class NodeGroupEntity extends EntityBase {
          }
       });
       nodeGroupRead.setRoles(groupRoles);
-      //nodeGroupRead.setRoles(this.getRoleNameList());
 
       StorageRead storage = new StorageRead();
       storage.setType(this.storageType.toString());
@@ -405,7 +405,7 @@ public class NodeGroupEntity extends EntityBase {
 
       List<NodeRead> nodeList = new ArrayList<NodeRead>();
       for (NodeEntity node : this.nodes) {
-         nodeList.add(node.toNodeRead());
+         nodeList.add(node.toNodeRead(true));
       }
       nodeGroupRead.setInstances(nodeList);
 

@@ -122,9 +122,9 @@ create table node_group_association (
    foreign key(node_group_id) references node_group(id) ON DELETE CASCADE
 );
 
-create sequence hadoop_node_seq;
-create table hadoop_node (
-   id           bigint       not null unique DEFAULT nextval('hadoop_node_seq'::regclass),
+create sequence node_seq;
+create table node (
+   id           bigint       not null unique DEFAULT nextval('node_seq'::regclass),
    vm_name      varchar(255) not null unique,
    moid         varchar(255) unique,
    rack         varchar(255),
@@ -133,7 +133,7 @@ create table hadoop_node (
    action       varchar(255),
    power_status_changed       boolean,
    vc_datastores text,
-   volumes      varchar(255),
+   volumes       text,
    ip_address   varchar(255),
    guest_host_name  varchar(255),
    node_group_id bigint,
@@ -141,6 +141,23 @@ create table hadoop_node (
    primary key (id),
    foreign key(node_group_id) references node_group(id) ON DELETE CASCADE,
    foreign key(vc_rp_id) references vc_resource_pool(id) ON DELETE CASCADE
+);
+
+create sequence disk_seq;
+create table disk (
+   id             bigint       not null unique DEFAULT nextval('disk_seq'::regclass),
+   name           varchar(255),
+   size           integer,
+   alloc_type     varchar(255),
+   disk_type      varchar(255),
+   external_addr  varchar(255),
+   dev_name       varchar(255),
+   ds_moid        varchar(255),
+   ds_name        varchar(255),
+   vmdk_path      varchar(255),
+   node_id        bigint,
+   primary key (id),
+   foreign key(node_id) references node(id) ON DELETE CASCADE
 );
 
 create sequence rack_seq;

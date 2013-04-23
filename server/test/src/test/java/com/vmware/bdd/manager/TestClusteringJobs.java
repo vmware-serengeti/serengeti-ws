@@ -80,7 +80,7 @@ import com.vmware.vim.binding.vim.Folder;
       "file:../serengeti/WebContent/WEB-INF/spring/spring-batch-context.xml",
       "file:../serengeti/WebContent/WEB-INF/spring/tx-context.xml",
       "file:../serengeti/WebContent/WEB-INF/spring/manager-context.xml",
-      "file:src/test/resources/spring/serengeti-jobs-context.xml"})
+      "file:src/test/resources/spring/serengeti-jobs-context.xml" })
 public class TestClusteringJobs extends
       AbstractTransactionalTestNGSpringContextTests {
    private static final Logger logger = Logger
@@ -157,7 +157,7 @@ public class TestClusteringJobs extends
    public void setup() throws Exception {
       Properties testProperty = new Properties();
       testProperty.load(new FileInputStream(
-      "src/test/resources/vc-test.properties"));
+            "src/test/resources/vc-test.properties"));
       staticDns1 = testProperty.getProperty(TEST_STATIC_DNS1);
       staticDns2 = testProperty.getProperty(TEST_STATIC_DNS2);
       staticGateway = testProperty.getProperty(TEST_STATIC_GATEWAY);
@@ -167,8 +167,8 @@ public class TestClusteringJobs extends
       endIp = testProperty.getProperty(TEST_STATIC_END_IP);
       dhcpPortgroup = testProperty.getProperty(TEST_DHCP_VC_PORTGROUP);
       datastoreType =
-         DatastoreType.valueOf(testProperty
-               .getProperty(TEST_VC_DATASTORE_TYPE));
+            DatastoreType.valueOf(testProperty
+                  .getProperty(TEST_VC_DATASTORE_TYPE));
       datastoreSpec = testProperty.getProperty(TEST_VC_DATASTORE_SPEC);
       vcRP = testProperty.getProperty(TEST_VC_RESOURCEPOOL);
       vcCluster = testProperty.getProperty(TEST_VC_CLUSTER);
@@ -290,8 +290,9 @@ public class TestClusteringJobs extends
             "Cluster status should be RUNNING, but got " + cluster.getStatus());
       checkIpRange(cluster);
       checkVcFolders(TEST_STATIC_IP_CLUSTER_NAME);
-      checkVcResourePools(cluster, ConfigInfo.getSerengetiUUID() + "-" 
+      checkVcResourePools(cluster, ConfigInfo.getSerengetiUUID() + "-"
             + TEST_STATIC_IP_CLUSTER_NAME);
+      checkDiskLayout(cluster);
    }
 
    private void checkVcFolders(final String folderName) {
@@ -341,10 +342,9 @@ public class TestClusteringJobs extends
       for (NodeGroupRead group : groups) {
          for (NodeRead node : group.getInstances()) {
             String nodeIp = node.getIp();
-            Assert.assertTrue(ipAddresses.contains(nodeIp),
-                  "Ip address " + nodeIp + 
-                  " for node " + node.getName() + 
-                  " should be in the test ip range.");
+            Assert.assertTrue(ipAddresses.contains(nodeIp), "Ip address "
+                  + nodeIp + " for node " + node.getName()
+                  + " should be in the test ip range.");
             Assert.assertTrue(
                   node.getStatus().equals(NodeStatus.VM_READY.toString()),
                   "expected VM_READY, but got " + node.getStatus());
@@ -352,8 +352,19 @@ public class TestClusteringJobs extends
       }
    }
 
-   private void stopVmAfterStarted(String vmName, 
-         long jobExecutionId) throws InterruptedException, Exception {
+   private void checkDiskLayout(ClusterRead cluster) {
+      List<NodeGroupRead> groups = cluster.getNodeGroups();
+      for (NodeGroupRead group : groups) {
+         for (NodeRead node : group.getInstances()) {
+            Assert.assertTrue(node.getVolumes() != null
+                  && node.getVolumes().size() >= 2,
+                  "each node should have at least two disks");
+         }
+      }
+   }
+
+   private void stopVmAfterStarted(String vmName, long jobExecutionId)
+         throws InterruptedException, Exception {
       int retry = 0;
       while (retry <= 0) {
          Thread.sleep(50);
@@ -377,18 +388,20 @@ public class TestClusteringJobs extends
    }
 
    private boolean stopVcVm(String vmName) {
-      final VcVirtualMachine vm = VcResourceUtils.findVmInVcCluster(
-            vcCluster, vcRP, vmName);
+      final VcVirtualMachine vm =
+            VcResourceUtils.findVmInVcCluster(vcCluster, vcRP, vmName);
       boolean stopped = VcContext.inVcSessionDo(new VcSession<Boolean>() {
          @Override
-         protected boolean isTaskSession() { 
+         protected boolean isTaskSession() {
             return true;
          }
+
          @Override
          protected Boolean body() throws Exception {
             if (vm != null && vm.isPoweredOn()) {
                vm.powerOff();
-               logger.info("power off vm: " + vm.getName() + " to make cluster creation failed.");
+               logger.info("power off vm: " + vm.getName()
+                     + " to make cluster creation failed.");
                return true;
             } else {
                return false;
@@ -416,21 +429,22 @@ public class TestClusteringJobs extends
 
    private void assertTaskFailed(long jobExecutionId) {
       TaskRead tr = jobManager.getJobExecutionStatus(jobExecutionId);
-      Assert.assertTrue(TaskRead.Status.FAILED.equals(tr.getStatus()), 
+      Assert.assertTrue(TaskRead.Status.FAILED.equals(tr.getStatus()),
             "Should get task finished successful, but got " + tr.getStatus());
    }
 
    private void assertTaskSuccess(long jobExecutionId) {
       TaskRead tr = jobManager.getJobExecutionStatus(jobExecutionId);
-      Assert.assertTrue(TaskRead.Status.COMPLETED.equals(tr.getStatus()), 
+      Assert.assertTrue(TaskRead.Status.COMPLETED.equals(tr.getStatus()),
             "Should get task finished successful, but got " + tr.getStatus());
    }
 
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testCreateCluster" })
    @Transactional(propagation = Propagation.NEVER)
    public void testCreateClusterFailed() throws Exception {
-      ClusterCreate createSpec = ClusterSpecFactory.createDefaultSpec(
-            ClusterType.HDFS_MAPRED, Constants.DEFAULT_VENDOR);
+      ClusterCreate createSpec =
+            ClusterSpecFactory.createDefaultSpec(ClusterType.HDFS_MAPRED,
+                  Constants.DEFAULT_VENDOR);
       createSpec.setName(TEST_DHCP_CLUSTER_NAME);
       createSpec.setNetworkName(TEST_DHCP_NETWORK_NAME);
       createSpec.setDistro("apache");
@@ -450,14 +464,17 @@ public class TestClusteringJobs extends
             cluster.getInstanceNum() == 3,
             "Cluster instance number should be 3, but got "
                   + cluster.getInstanceNum());
-      Assert.assertTrue(cluster.getStatus() == ClusterStatus.PROVISION_ERROR,
-            "Cluster status should be PROVISION_ERROR, but got " + cluster.getStatus());
+      Assert.assertTrue(
+            cluster.getStatus() == ClusterStatus.PROVISION_ERROR,
+            "Cluster status should be PROVISION_ERROR, but got "
+                  + cluster.getStatus());
    }
 
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testCreateClusterFailed" })
    @Transactional(propagation = Propagation.NEVER)
    public void testClusterResume() throws Exception {
-      long jobExecutionId = clusterMgr.resumeClusterCreation(TEST_DHCP_CLUSTER_NAME);
+      long jobExecutionId =
+            clusterMgr.resumeClusterCreation(TEST_DHCP_CLUSTER_NAME);
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
       Assert.assertTrue(
@@ -477,13 +494,12 @@ public class TestClusteringJobs extends
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testClusterResume" })
    @Transactional(propagation = Propagation.NEVER)
    public void testClusterResizeFailed() throws Exception {
-      long jobExecutionId = clusterMgr.resizeCluster(TEST_DHCP_CLUSTER_NAME, "worker", 2);
+      long jobExecutionId =
+            clusterMgr.resizeCluster(TEST_DHCP_CLUSTER_NAME, "worker", 2);
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
-      Assert.assertTrue(
-            cluster.getStatus() == ClusterStatus.UPDATING,
-            "Cluster status should be UPDATING, but got "
-                  + cluster.getStatus());
+      Assert.assertTrue(cluster.getStatus() == ClusterStatus.UPDATING,
+            "Cluster status should be UPDATING, but got " + cluster.getStatus());
       stopVmAfterStarted(TEST_DHCP_CLUSTER_NAME + "-worker-1", jobExecutionId);
       waitTaskFinished(jobExecutionId);
       assertTaskFailed(jobExecutionId);
@@ -495,34 +511,36 @@ public class TestClusteringJobs extends
       assertTaskFailed(jobExecutionId);
    }
 
-   private void assertDefinedInstanceNum(String clusterName, 
-         String groupName, int num) {
-      NodeGroupEntity group = clusterEntityMgr.findByName(clusterName, groupName);
-      Assert.assertTrue(
-            group.getDefineInstanceNum() == num,
-            "Group defined instance number should be " + num +
-            ", but got " + group.getDefineInstanceNum());
+   private void assertDefinedInstanceNum(String clusterName, String groupName,
+         int num) {
+      NodeGroupEntity group =
+            clusterEntityMgr.findByName(clusterName, groupName);
+      Assert.assertTrue(group.getDefineInstanceNum() == num,
+            "Group defined instance number should be " + num + ", but got "
+                  + group.getDefineInstanceNum());
    }
 
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testClusterResizeFailed" })
    @Transactional(propagation = Propagation.NEVER)
    public void testClusterResizeSuccess() throws Exception {
       stopVcVm(TEST_DHCP_CLUSTER_NAME + "-worker-0");
-      long jobExecutionId = clusterMgr.resizeCluster(TEST_DHCP_CLUSTER_NAME, "worker", 2);
+      long jobExecutionId =
+            clusterMgr.resizeCluster(TEST_DHCP_CLUSTER_NAME, "worker", 2);
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
-      Assert.assertTrue(
-            cluster.getStatus() == ClusterStatus.UPDATING,
-            "Cluster status should be UPDATING, but got "
-                  + cluster.getStatus());
+      Assert.assertTrue(cluster.getStatus() == ClusterStatus.UPDATING,
+            "Cluster status should be UPDATING, but got " + cluster.getStatus());
       waitTaskFinished(jobExecutionId);
       assertTaskSuccess(jobExecutionId);
       assertDefinedInstanceNum(TEST_DHCP_CLUSTER_NAME, "worker", 2);
-      NodeEntity node = clusterEntityMgr.findByName(TEST_DHCP_CLUSTER_NAME, 
-            "worker", TEST_DHCP_CLUSTER_NAME + "-worker-0");
-      Assert.assertTrue(node.getStatus() == NodeStatus.POWERED_OFF,
-            "Stopped vm " + TEST_DHCP_CLUSTER_NAME + "-worker-0" +
-            " status should be Powered Off, but got " + node.getStatus());
+      NodeEntity node =
+            clusterEntityMgr.findByName(TEST_DHCP_CLUSTER_NAME, "worker",
+                  TEST_DHCP_CLUSTER_NAME + "-worker-0");
+      Assert.assertTrue(
+            node.getStatus() == NodeStatus.POWERED_OFF,
+            "Stopped vm " + TEST_DHCP_CLUSTER_NAME + "-worker-0"
+                  + " status should be Powered Off, but got "
+                  + node.getStatus());
       cluster = clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.RUNNING,
             "Cluster status should be RUNNING, but got " + cluster.getStatus());
@@ -630,12 +648,14 @@ public class TestClusteringJobs extends
       logger.info("got resource pools: " + rps);
       for (ResourcePoolRead rp : rps) {
          if (rp.getRpName().equals(TEST_RP_NAME)) {
-            logger.info("got resource pool related nodes: " + rp.getNodes().length);
-            assertTrue("should get more than or equals to 5, but got " + rps.get(0).getNodes().length, 
+            logger.info("got resource pool related nodes: "
+                  + rp.getNodes().length);
+            assertTrue("should get more than or equals to 5, but got "
+                  + rps.get(0).getNodes().length,
                   rps.get(0).getNodes().length >= 5);
          }
       }
-  }
+   }
 
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testLimitCluster" })
    @Transactional(propagation = Propagation.NEVER)
@@ -666,9 +686,10 @@ public class TestClusteringJobs extends
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.STOPPED,
             "Cluster status should be STOPPED, but got " + cluster.getStatus());
       NodeRead node = cluster.getNodeGroups().get(0).getInstances().get(0);
-      Assert.assertTrue(node.getStatus().equals(NodeStatus.POWERED_OFF.toString()),
-            "Node " + node.getName() + 
-            " status should be Powered Off, but got " + node.getStatus());
+      Assert.assertTrue(
+            node.getStatus().equals(NodeStatus.POWERED_OFF.toString()), "Node "
+                  + node.getName() + " status should be Powered Off, but got "
+                  + node.getStatus());
    }
 
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testStopCluster" })
@@ -756,7 +777,7 @@ public class TestClusteringJobs extends
             Assert.assertTrue(false, "Got unexpected exception");
          }
       }
-      assertChildRPRemoved(ConfigInfo.getSerengetiUUID() + "-" 
+      assertChildRPRemoved(ConfigInfo.getSerengetiUUID() + "-"
             + TEST_STATIC_IP_CLUSTER_NAME);
       assertFolderRemoved(TEST_STATIC_IP_CLUSTER_NAME);
    }
@@ -777,14 +798,17 @@ public class TestClusteringJobs extends
    private void assertFolderRemoved(String folderName) throws Exception {
       String rootFolderName = ConfigInfo.getSerengetiRootFolder();
       String serverMobId =
-         Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
+            Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
       VcVirtualMachine serverVm = VcCache.get(serverMobId);
       List<String> folderList = new ArrayList<String>(1);
       folderList.add(rootFolderName);
-      Folder rootFolder = VcResourceUtils.findFolderByNameList(
-            serverVm.getDatacenter(),  folderList);
-      Folder childFolder = VcResourceUtils.findFolderByName(rootFolder, folderName);
-      Assert.assertNull(childFolder, "Folder " + folderName + " is not removed.");
+      Folder rootFolder =
+            VcResourceUtils.findFolderByNameList(serverVm.getDatacenter(),
+                  folderList);
+      Folder childFolder =
+            VcResourceUtils.findFolderByName(rootFolder, folderName);
+      Assert.assertNull(childFolder, "Folder " + folderName
+            + " is not removed.");
    }
 
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testDeleteCluster" })
@@ -814,8 +838,7 @@ public class TestClusteringJobs extends
             "Cluster status should be DELETING, but got " + cluster.getStatus());
       waitTaskFinished(jobExecutionId);
       try {
-         cluster =
-               clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
+         cluster = clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
          Assert.assertTrue(false, "Cluster should not be found.");
       } catch (BddException e) {
          if (e.getErrorId().equals("NOT_FOUND")) {

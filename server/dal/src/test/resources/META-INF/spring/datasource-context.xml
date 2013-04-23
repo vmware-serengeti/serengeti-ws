@@ -38,6 +38,7 @@
             <value>com.vmware.bdd.entity.NodeGroupEntity</value>
             <value>com.vmware.bdd.entity.NodeGroupAssociation</value>
             <value>com.vmware.bdd.entity.NodeEntity</value>
+            <value>com.vmware.bdd.entity.DiskEntity</value>
             <value>com.vmware.bdd.entity.RackEntity</value>
             <value>com.vmware.bdd.entity.PhysicalHostEntity</value>
             <value>com.vmware.bdd.entity.ServerInfoEntity</value>

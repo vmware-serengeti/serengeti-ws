@@ -22,6 +22,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.ClusteringServiceException;
+import com.vmware.bdd.utils.JobUtils;
 
 public class ClusterNodeSyncupStep extends TrackableTasklet {
 

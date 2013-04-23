@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NetworkEntity;

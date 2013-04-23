@@ -306,9 +306,9 @@ public class BaseNode {
    /**
     * populate the base node with placement attributes,
     * cluster/rp/host/datastore, etc.
-    *
+    * 
     * make sure there are enough cpu/mem/storage inside the rp and vc host
-    *
+    * 
     * @param vcClusterName
     * @param rpName
     * @param host
@@ -355,6 +355,7 @@ public class BaseNode {
                            .getNextValidParaVirtualScsiIndex(paraVirtualScsiIndex);
             }
             tmDisk.allocationType = disk.getAllocType();
+            tmDisk.type = disk.getDiskType().getType();
             tmDisks.add(tmDisk);
          }
       }

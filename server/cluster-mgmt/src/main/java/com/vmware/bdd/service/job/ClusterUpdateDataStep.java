@@ -29,8 +29,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.vmware.aurora.composition.DiskSchema.Disk;
 import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.dal.IResourcePoolDAO;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.ClusteringServiceException;
@@ -38,11 +40,18 @@ import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.JobUtils;
+import com.vmware.bdd.utils.VcVmUtil;
 
 public class ClusterUpdateDataStep extends TrackableTasklet {
 
    private static final Logger logger = Logger
          .getLogger(ClusterUpdateDataStep.class);
+
+   private static final String SWAP_DEVICE_NAME = "/dev/sdb";
+   private static final String DEVICE_NAME_PREFIX = "/dev/sd";
+   private static final char DATA_DISK_START_INDEX = 'c';
+
 
    private INetworkService networkMgr;
 
@@ -118,16 +127,16 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
       if (created != null) {
          // only when node is created, we need to verify node status
          String verifyScope =
-            getJobParameters(chunkContext).getString(
-                  JobConstants.VERIFY_NODE_STATUS_SCOPE_PARAM);
-         if (verifyScope != null && verifyScope.equals(
-               JobConstants.GROUP_NODE_SCOPE_VALUE)) {
-            String groupName =
                getJobParameters(chunkContext).getString(
-                     JobConstants.GROUP_NAME_JOB_PARAM);
+                     JobConstants.VERIFY_NODE_STATUS_SCOPE_PARAM);
+         if (verifyScope != null
+               && verifyScope.equals(JobConstants.GROUP_NODE_SCOPE_VALUE)) {
+            String groupName =
+                  getJobParameters(chunkContext).getString(
+                        JobConstants.GROUP_NAME_JOB_PARAM);
             long oldInstanceNum =
-               getJobParameters(chunkContext).getLong(
-                     JobConstants.GROUP_INSTANCE_OLD_NUMBER_JOB_PARAM);
+                  getJobParameters(chunkContext).getLong(
+                        JobConstants.GROUP_INSTANCE_OLD_NUMBER_JOB_PARAM);
             verifyGroupVmReady(clusterName, groupName, oldInstanceNum);
          } else {
             verifyAllVmReady(clusterName);
@@ -143,8 +152,8 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          logger.info("No group name specified, ignore node status verification.");
          return;
       }
-      List<NodeEntity> nodes = getClusterEntityMgr().findAllNodes(
-            clusterName, groupName);
+      List<NodeEntity> nodes =
+            getClusterEntityMgr().findAllNodes(clusterName, groupName);
       List<NodeEntity> toBeVerified = new ArrayList<NodeEntity>();
       for (NodeEntity node : nodes) {
          long index = JobUtils.getVmIndex(node.getVmName());
@@ -166,14 +175,14 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
     * Add successfully created node, which information is got from vc creation.
     * If deleted any VM, or nodes during vm creation step, which may violate
     * placement policy. We'll remove the node if it's not re-created.
-    *
+    * 
     * @param clusterName
     * @param addedNodes
     * @param deletedNodeNames
     * @return
     */
-   public void addNodeToMetaData(String clusterName,
-         List<BaseNode> addedNodes, Set<String> deletedNodeNames) {
+   public void addNodeToMetaData(String clusterName, List<BaseNode> addedNodes,
+         Set<String> deletedNodeNames) {
       if (addedNodes == null || addedNodes.isEmpty()) {
          logger.info("No node is added!");
          return;
@@ -199,19 +208,23 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          }
       }
    }
-   
+
    private void updateVhmMasterMoid(String clusterName) {
       ClusterEntity cluster = getClusterEntityMgr().findByName(clusterName);
       if (cluster.getVhmMasterMoid() == null) {
-         List<NodeEntity> nodes = getClusterEntityMgr().findAllNodes(clusterName);
-         for (NodeEntity node: nodes) {
-            if(node.getMoId() != null && node.getNodeGroup().getRoles() != null) {
+         List<NodeEntity> nodes =
+               getClusterEntityMgr().findAllNodes(clusterName);
+         for (NodeEntity node : nodes) {
+            if (node.getMoId() != null
+                  && node.getNodeGroup().getRoles() != null) {
                @SuppressWarnings("unchecked")
-               List<String> roles = new Gson().fromJson(node.getNodeGroup().getRoles(), List.class);
+               List<String> roles =
+                     new Gson().fromJson(node.getNodeGroup().getRoles(),
+                           List.class);
                if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
                   cluster.setVhmMasterMoid(node.getMoId());
                   break;
-              }
+               }
             }
          }
       }
@@ -220,10 +233,12 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
    @Transactional
    private void replaceNodeEntity(BaseNode vNode) {
       logger.info("Add or replace node info for VM " + vNode.getVmName());
-      ClusterEntity cluster = getClusterEntityMgr().findByName(vNode.getClusterName());
+      ClusterEntity cluster =
+            getClusterEntityMgr().findByName(vNode.getClusterName());
       AuAssert.check(cluster != null);
-      NodeGroupEntity nodeGroupEntity = getClusterEntityMgr().findByName(
-            vNode.getClusterName(), vNode.getGroupName());
+      NodeGroupEntity nodeGroupEntity =
+            getClusterEntityMgr().findByName(vNode.getClusterName(),
+                  vNode.getGroupName());
       AuAssert.check(nodeGroupEntity != null);
       if (nodeGroupEntity.getNodes() == null) {
          nodeGroupEntity.setNodes(new HashSet<NodeEntity>());
@@ -251,20 +266,32 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          //set vc resource pool entity
          nodeEntity.setVcRp(rpDao.findByClusterAndRp(
                vNode.getTargetVcCluster(), vNode.getTargetRp()));
-         //set vc datastore name list
-         Set<String> dsNames = new HashSet<String>();
-         for (Disk disk : vNode.getVmSchema().diskSchema.getDisks()) {
-            dsNames.add(disk.datastore);
-         }
-         if (!dsNames.contains(vNode.getTargetDs())) {
-            dsNames.add(vNode.getTargetDs());
-         }
-         List<String> dsList = new ArrayList<String>();
-         dsList.addAll(dsNames);
-         nodeEntity.setDatastoreNameList(dsList);
 
-         // set volumns
-         nodeEntity.setVolumns(getNodeVolumes(vNode));
+         //set disk entities, only system and data disk here
+         Set<DiskEntity> diskEntities = nodeEntity.getDisks();
+         char c = DATA_DISK_START_INDEX;
+         for (Disk disk : vNode.getVmSchema().diskSchema.getDisks()) {
+            DiskEntity newDisk = nodeEntity.findDisk(disk.name);
+            if (newDisk == null) {
+               newDisk = new DiskEntity(disk.name);
+               diskEntities.add(newDisk);
+            }
+            newDisk.setSizeInMB(disk.initialSizeMB);
+            newDisk.setAllocType(disk.allocationType);
+            newDisk.setDatastoreName(disk.datastore);
+            newDisk.setDiskType(disk.type);
+            newDisk.setExternalAddress(disk.externalAddress);
+            newDisk.setNodeEntity(nodeEntity);
+
+            // get vm object and find the vmdk path
+            VcVmUtil.populateDiskInfo(newDisk, vNode.getVmMobId());
+            // swap disk
+            if (DiskType.SWAP_DISK.getType().equals(disk.type)) {
+               newDisk.setDeviceName(SWAP_DEVICE_NAME);
+            } else {
+               newDisk.setDeviceName(DEVICE_NAME_PREFIX + (c++));
+            }
+         }
       }
       nodeEntity.setNodeGroup(nodeGroupEntity);
 
@@ -290,22 +317,4 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          nodeEntity.setStatus(vNode.getNodeStatus());
       }
    }
-
-   /**
-    * get volumns start from sdc
-    *
-    * @param vNode
-    * @return
-    */
-   private List<String> getNodeVolumes(BaseNode vNode) {
-      List<Disk> disks = vNode.getVmSchema().diskSchema.getDisks();
-      // no system disk
-      int dataDiskNum = disks.size() - 1;
-      List<String> volumes = new ArrayList<String>();
-      for (char a = 'c'; a < 'c' + dataDiskNum; a++) {
-         volumes.add("/dev/sd" + a);
-      }
-      return volumes;
-   }
-
 }

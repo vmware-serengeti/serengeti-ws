@@ -33,6 +33,7 @@ import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.placement.entity.AbstractDatacenter;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractCluster;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractDatastore;
@@ -175,7 +176,7 @@ public class TestPlacementUtil {
       DiskSpec systemDisk = new DiskSpec();
       systemDisk.setName("OS.vmdk");
       systemDisk.setSeparable(false);
-      systemDisk.setSystemDisk(true);
+      systemDisk.setDiskType(DiskType.SYSTEM_DISK);
       systemDisk.setSize(SYSTEM_DISK_SIZE);
 
       disks.add(systemDisk);

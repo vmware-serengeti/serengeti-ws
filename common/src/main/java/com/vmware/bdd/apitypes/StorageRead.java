@@ -34,8 +34,28 @@ public class StorageRead {
    }
 
    public enum DiskScsiControllerType {
-      LSI_CONTROLLER, 
-      PARA_VIRTUAL_CONTROLLER
+      LSI_CONTROLLER, PARA_VIRTUAL_CONTROLLER
+   }
+
+   public enum DiskType {
+      SYSTEM_DISK("root.vmdk", "OS"), SWAP_DISK("swap.vmdk", "SWAP"), DATA_DISK(
+            "data.vmdk", "DATA");
+
+      public String diskName;
+      public String type;
+
+      private DiskType(String diskName, String type) {
+         this.diskName = diskName;
+         this.type = type;
+      }
+
+      public String getDiskName() {
+         return diskName;
+      }
+
+      public String getType() {
+         return type;
+      }
    }
 
    @Expose
@@ -98,6 +118,7 @@ public class StorageRead {
    public void setSplitPolicy(DiskSplitPolicy splitPolicy) {
       this.splitPolicy = splitPolicy;
    }
+
    public Priority getShares() {
       return shares;
    }

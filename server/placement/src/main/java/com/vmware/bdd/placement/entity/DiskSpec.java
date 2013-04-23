@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import com.vmware.aurora.vc.DiskSpec.AllocationType;
 import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
 import com.vmware.bdd.apitypes.StorageRead.DiskSplitPolicy;
+import com.vmware.bdd.apitypes.StorageRead.DiskType;
 
 public class DiskSpec implements Comparable<DiskSpec> {
    // GB
@@ -33,7 +34,7 @@ public class DiskSpec implements Comparable<DiskSpec> {
 
    private boolean separable;
 
-   private boolean systemDisk;
+   private DiskType diskType;
 
    private DiskScsiControllerType controller;
 
@@ -52,20 +53,21 @@ public class DiskSpec implements Comparable<DiskSpec> {
       this.parentNode = other.parentNode;
       this.targetDs = other.targetDs;
       this.separable = other.separable;
-      this.systemDisk = other.systemDisk;
+      this.diskType = other.diskType;
       this.controller = other.controller;
       this.splitPolicy = other.splitPolicy;
       this.allocType = other.allocType;
    }
 
    public DiskSpec(String name, int size, String parentNode, boolean separable,
-         boolean systemDisk, DiskScsiControllerType controller,
+         DiskType diskType, DiskScsiControllerType controller,
          DiskSplitPolicy splitPolicy, AllocationType allocType) {
       super();
       this.size = size;
       this.name = name;
       this.parentNode = parentNode;
       this.separable = separable;
+      this.diskType = diskType;
       this.controller = controller;
       this.splitPolicy = splitPolicy;
       this.allocType = allocType;
@@ -119,12 +121,12 @@ public class DiskSpec implements Comparable<DiskSpec> {
       this.splitPolicy = splitPolicy;
    }
 
-   public boolean isSystemDisk() {
-      return systemDisk;
+   public DiskType getDiskType() {
+      return diskType;
    }
 
-   public void setSystemDisk(boolean systemDisk) {
-      this.systemDisk = systemDisk;
+   public void setDiskType(DiskType diskType) {
+      this.diskType = diskType;
    }
 
    public DiskScsiControllerType getController() {
@@ -141,6 +143,10 @@ public class DiskSpec implements Comparable<DiskSpec> {
 
    public void setAllocType(AllocationType allocType) {
       this.allocType = allocType;
+   }
+
+   public boolean isSystemDisk() {
+      return DiskType.SYSTEM_DISK.equals(this.diskType);
    }
 
    @Override

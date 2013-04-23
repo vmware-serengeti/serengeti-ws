@@ -29,7 +29,8 @@ import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IClusteringService;
-import com.vmware.bdd.service.sp.VcVmUtil;
+import com.vmware.bdd.utils.JobUtils;
+import com.vmware.bdd.utils.VcVmUtil;
 
 public class ResizeClusterRemoveBadNodeStep extends TrackableTasklet {
    private IClusteringService clusteringService;

@@ -36,12 +36,12 @@ import com.vmware.bdd.dal.INodeGroupDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
-import com.vmware.bdd.service.sp.VcVmUtil;
 import com.vmware.bdd.software.mgmt.thrift.GroupData;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.VcVmUtil;
 
 @Transactional(readOnly = true)
 public class ClusterEntityManager {

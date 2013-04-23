@@ -12,24 +12,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.service.sp;
+package com.vmware.bdd.utils;
 
 import org.apache.log4j.Logger;
 
+import com.vmware.aurora.vc.DeviceId;
+import com.vmware.aurora.vc.MoUtil;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.placement.entity.BaseNode;
-import com.vmware.bdd.utils.Constants;
 import com.vmware.vim.binding.vim.VirtualMachine.FaultToleranceState;
 import com.vmware.vim.binding.vim.vm.GuestInfo;
+import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
+import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 
 public class VcVmUtil {
    private static final Logger logger = Logger.getLogger(VcVmUtil.class);
-   public static String getIpAddress(final VcVirtualMachine vcVm, 
+
+   public static String getIpAddress(final VcVirtualMachine vcVm,
          boolean inSession) {
       try {
          if (inSession) {
@@ -40,6 +45,7 @@ public class VcVmUtil {
             protected boolean isTaskSession() {
                return true;
             }
+
             @Override
             public String body() throws Exception {
                GuestInfo guest = vcVm.queryGuest();
@@ -63,6 +69,7 @@ public class VcVmUtil {
             protected boolean isTaskSession() {
                return true;
             }
+
             @Override
             public String body() throws Exception {
                GuestInfo guest = vcVm.queryGuest();
@@ -75,13 +82,13 @@ public class VcVmUtil {
       }
    }
 
-   public static boolean setBaseNodeForVm(BaseNode vNode, 
-         VcVirtualMachine vm) {
+   public static boolean setBaseNodeForVm(BaseNode vNode, VcVirtualMachine vm) {
       boolean success = true;
       String vmName = vm.getName();
       vm = VcCache.getIgnoreMissing(vm.getId()); //reload vm in case vm is changed from vc
       if (vm == null) {
-         logger.info("vm " + vmName + "is created, and then removed afterwards.");
+         logger.info("vm " + vmName
+               + "is created, and then removed afterwards.");
       }
       String ip = null;
       if (vm != null) {
@@ -113,22 +120,46 @@ public class VcVmUtil {
             }
          }
          success = false;
-         logger.error("Failed to get ip address of VM "
-               + vNode.getVmName());
+         logger.error("Failed to get ip address of VM " + vNode.getVmName());
       }
       String haFlag = vNode.getNodeGroup().getHaFlag();
-      if (haFlag != null && 
-            Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
+      if (haFlag != null && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
          // ha is enabled, need to check if secondary VM is ready either
-         if(vm.getFTState() == null ||
-               vm.getFTState() != FaultToleranceState.running) {
+         if (vm.getFTState() == null
+               || vm.getFTState() != FaultToleranceState.running) {
             logger.fatal("Failed to power on FT secondary VM for node "
-                  + vNode.getVmName() + ", " + "FT state " 
-                  + vm.getFTState() + " is unexpected.");
+                  + vNode.getVmName() + ", " + "FT state " + vm.getFTState()
+                  + " is unexpected.");
             success = false;
          }
       }
 
       return success;
+   }
+
+   public static VirtualDisk findVirtualDisk(String vmMobId, String externalAddr) {
+      VcVirtualMachine vm = VcCache.getIgnoreMissing(vmMobId);
+
+      DeviceId diskId = new DeviceId(externalAddr);
+      VirtualDevice device = vm.getVirtualDevice(diskId);
+      if (device == null)
+         return null;
+
+      AuAssert.check(device instanceof VirtualDisk);
+      return (VirtualDisk) device;
+   }
+
+   public static boolean populateDiskInfo(DiskEntity diskEntity, String vmMobId) {
+      VirtualDisk vDisk =
+            findVirtualDisk(vmMobId, diskEntity.getExternalAddress());
+      if (vDisk == null)
+         return false;
+
+      VirtualDisk.FlatVer2BackingInfo backing =
+            (VirtualDisk.FlatVer2BackingInfo) vDisk.getBacking();
+      diskEntity.setVmkdPath(backing.getFileName());
+      diskEntity.setDatastoreMoId(MoUtil.morefToString(backing.getDatastore()));
+      //      diskEntity.setDeviceName("");
+      return true;
    }
 }

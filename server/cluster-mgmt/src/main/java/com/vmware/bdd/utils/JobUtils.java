@@ -1,4 +1,4 @@
-package com.vmware.bdd.service.job;
+package com.vmware.bdd.utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,6 @@ import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.placement.entity.BaseNode;
-import com.vmware.bdd.service.sp.VcVmUtil;
 
 public class JobUtils {
    private static final Logger logger = Logger.getLogger(JobUtils.class);

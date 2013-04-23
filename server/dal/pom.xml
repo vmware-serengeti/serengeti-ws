@@ -19,6 +19,11 @@
          <artifactId>commons-serengeti</artifactId>
       </dependency>
       <dependency>
+         <groupId>com.vmware.aurora</groupId>
+         <artifactId>vc</artifactId>
+         <version>${aurora.version}</version>
+      </dependency>
+      <dependency>
          <groupId>org.hibernate</groupId>
          <artifactId>hibernate-core</artifactId>
       </dependency>

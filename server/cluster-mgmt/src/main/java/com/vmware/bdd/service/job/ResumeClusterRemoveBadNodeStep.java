@@ -26,6 +26,7 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IClusteringService;
+import com.vmware.bdd.utils.JobUtils;
 
 public class ResumeClusterRemoveBadNodeStep extends TrackableTasklet {
    private IClusteringService clusteringService;
