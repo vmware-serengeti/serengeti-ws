@@ -33,6 +33,8 @@ public class Constants {
    public static final String SET_MANUAL_ELASTICITY_INFO_NODE_GROUPS = "node_groups";
    public static final String SET_MANUAL_ELASTICITY_INFO_SERENGETI_INSTANCE =
          "serengeti_instance";
+   public static final String SET_MANUAL_ELASTICITY_INFO_RECEIVE_ROUTE_KEY =
+         "route_key";
    public static final String CLUSTER_NAME_PATTERN = "[a-zA-Z0-9_]+";
    public static final String NODE_GROUP_NAME_PATTERN = "[a-zA-Z0-9]+";
    public static final String NAME_PATTERN = "[a-zA-Z0-9_\\-\\s]+";

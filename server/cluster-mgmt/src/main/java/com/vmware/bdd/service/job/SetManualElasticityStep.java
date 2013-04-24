@@ -28,6 +28,7 @@ import com.vmware.bdd.command.MessageTask;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.task.VHMReceiveListener;
 import com.vmware.bdd.service.IExecutionService;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 
@@ -63,6 +64,7 @@ public class SetManualElasticityStep extends TrackableTasklet {
       sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_NODE_GROUPS, nodeGroupNames);
       sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_SERENGETI_INSTANCE,
             ConfigInfo.getSerengetiRootFolder());
+      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_RECEIVE_ROUTE_KEY, CommonUtil.getUUID());
 
       Map<String, Object> ret = executionService.execute(new MessageTask(sendParam,
             listener));

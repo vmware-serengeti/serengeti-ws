@@ -26,6 +26,7 @@ import com.vmware.bdd.manager.RuntimeConnectionManager;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
+import com.vmware.bdd.utils.Constants;
 
 public class MessageTask implements Callable<Map<String, Object>> {
    private static final Logger logger = Logger.getLogger(MessageTask.class);
@@ -72,10 +73,17 @@ public class MessageTask implements Callable<Map<String, Object>> {
       MessageProcessor messageProcessor = null;
       Thread messageProcessorThread = null;
       if (mqEnabled) {
-         messageProcessor = new MessageProcessor(ConfigInfo.getMqServerHost(),
-               ConfigInfo.getMqServerPort(), ConfigInfo.getMqServerUsername(),
-               ConfigInfo.getMqServerPassword(), ConfigInfo.getRuntimeMqExchangeName(),
-               "", ConfigInfo.getRuntimeMqReceiveRouteKey(), true, messageHandler);
+         messageProcessor =
+               new MessageProcessor(
+                     ConfigInfo.getMqServerHost(),
+                     ConfigInfo.getMqServerPort(),
+                     ConfigInfo.getMqServerUsername(),
+                     ConfigInfo.getMqServerPassword(),
+                     ConfigInfo.getRuntimeMqExchangeName(),
+                     "",
+                     (String) sendParam
+                           .get(Constants.SET_MANUAL_ELASTICITY_INFO_RECEIVE_ROUTE_KEY),
+                     true, messageHandler);
          messageProcessorThread = new Thread(messageProcessor);
          messageProcessorThread.setDaemon(true);
          messageProcessorThread.start();
@@ -85,8 +93,8 @@ public class MessageTask implements Callable<Map<String, Object>> {
          } catch (InterruptedException e) {
             logger.error(e.getMessage());
          }
-         runtimeConnectionManager.sendMessage(ConfigInfo.getRuntimeMqSendRouteKey(),
-               jsonStr);
+         runtimeConnectionManager.sendMessage(
+               ConfigInfo.getRuntimeMqSendRouteKey(), jsonStr);
          messageProcessor.graceStop(300000);
          try {
             messageProcessorThread.join();

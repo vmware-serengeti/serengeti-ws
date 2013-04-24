@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
@@ -137,6 +138,11 @@ public class CommonUtil {
 
    public static String getDatastoreJavaPattern(String pattern) {
       return escapePattern(pattern).replace("?", ".").replace("*", ".*");
+   }
+
+   public static String getUUID() {
+      UUID uuid = UUID.randomUUID();
+      return uuid.toString();
    }
 
 }
