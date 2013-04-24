@@ -15,7 +15,9 @@
 package com.vmware.bdd.service.resmgmt.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import mockit.Mock;
 import mockit.MockUp;
@@ -214,10 +216,12 @@ public class ResourceInitializerServiceTest extends BaseResourceTest{
       service.setRpSvc(rpSvc);
       service.setDsSvc(dsSvc);
       service.setNetworkSvc(networkSvc);
+      Map<DatastoreType, List<String>> dsMaps = new HashMap<DatastoreType, List<String>>();
       List<String> dsNames = new ArrayList<String>();
       dsNames.add("datastore1");
+      dsMaps.put(DatastoreType.SHARED, dsNames);
       service.addResourceIntoDB("testCluster", "serengetiRP", "serengetiNet",
-            dsNames);
+            dsMaps);
    }
 
    @Test(groups={"res-mgmt","dependsOnVC","dependsOnDB"})
@@ -233,6 +237,12 @@ public class ResourceInitializerServiceTest extends BaseResourceTest{
          rpDao.delete(rpEntity);
       }
       List<VcDatastoreEntity> dss = dsDao.findByName(ResourceInitializerService.DEFAULT_DS_SHARED);
+      if(dss != null && dss.size() > 0){
+         for(VcDatastoreEntity ds : dss){
+            dsDao.delete(ds);
+         }
+      }
+      dss = dsDao.findByName(ResourceInitializerService.DEFAULT_DS_LOCAL);
       if(dss != null && dss.size() > 0){
          for(VcDatastoreEntity ds : dss){
             dsDao.delete(ds);

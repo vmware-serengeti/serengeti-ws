@@ -15,7 +15,9 @@
 package com.vmware.bdd.service.resmgmt.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +41,8 @@ import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceInitializerService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
-import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.ConfigInfo;
+import com.vmware.bdd.utils.Constants;
 import com.vmware.vim.binding.vim.VirtualMachine;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 
@@ -55,6 +57,7 @@ public class ResourceInitializerService implements IResourceInitializerService {
 
    public static final String DEFAULT_NETWORK = "defaultNetwork";
    public static final String DEFAULT_DS_SHARED = "defaultDSShared";
+   public static final String DEFAULT_DS_LOCAL = "defaultDSLocal";
    public static final String DEFAULT_RP = "defaultRP";
 
    private static final Logger logger = Logger
@@ -151,7 +154,7 @@ public class ResourceInitializerService implements IResourceInitializerService {
       String vcRPName = vcRP.getName();
       logger.info("vc rp: " + vcRPName + ", cluster: " + clusterName);
       String networkName = getVMNetwork(serverVm);
-      List<String> dsNames = getVmDatastore(serverVm);
+      Map<DatastoreType, List<String>> dsNames = getVmDatastore(serverVm);
       if (rpSvc.isDeployedUnderCluster(clusterName, vcRPName)) {
          vcRPName = "";
       }
@@ -169,12 +172,18 @@ public class ResourceInitializerService implements IResourceInitializerService {
    @Transactional
    @RetryTransaction(2)
    public void addResourceIntoDB(String clusterName, String vcRPName,
-         String networkName, List<String> dsNames) {
+         String networkName, Map<DatastoreType, List<String>> dsNames) {
       rpSvc.addResourcePool(DEFAULT_RP, clusterName, vcRPName);
       logger.info("added resource pool with vc rp:" + vcRPName);
 
-      dsSvc.addDataStores(DEFAULT_DS_SHARED, DatastoreType.SHARED, dsNames);
-      logger.info("added datastore. " + dsNames.get(0));
+      if (!dsNames.get(DatastoreType.SHARED).isEmpty()) {
+         dsSvc.addDataStores(DEFAULT_DS_SHARED, DatastoreType.SHARED, 
+               dsNames.get(DatastoreType.SHARED));
+      } else if (!dsNames.get(DatastoreType.LOCAL).isEmpty()) {
+         dsSvc.addDataStores(DEFAULT_DS_LOCAL, DatastoreType.LOCAL, 
+               dsNames.get(DatastoreType.LOCAL));
+      }
+      logger.info("added datastore. " + dsNames);
 
       networkSvc.addDhcpNetwork(DEFAULT_NETWORK, networkName);
       logger.info("added network:" + networkName);
@@ -185,10 +194,18 @@ public class ResourceInitializerService implements IResourceInitializerService {
     * @param serverVm
     * @return
     */
-   private List<String> getVmDatastore(final VcVirtualMachine serverVm) {
-      List<String> dsNames = new ArrayList<String>();
+   private Map<DatastoreType, List<String>> getVmDatastore(
+         final VcVirtualMachine serverVm) {
+      Map<DatastoreType, List<String>> dsNames = 
+         new HashMap<DatastoreType, List<String>>();
+      dsNames.put(DatastoreType.LOCAL, new ArrayList<String>());
+      dsNames.put(DatastoreType.SHARED, new ArrayList<String>());
       for (VcDatastore ds : serverVm.getDatastores()) {
-         dsNames.add(ds.getName());
+         if (ds.isLocal()) {
+            dsNames.get(DatastoreType.LOCAL).add(ds.getName());
+         } else {
+            dsNames.get(DatastoreType.SHARED).add(ds.getName());
+         }
          break;
       }
       return dsNames;

@@ -15,6 +15,9 @@
 package com.vmware.bdd.service.resmgmt;
 
 import java.util.List;
+import java.util.Map;
+
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 
 /**
  * @author Jarred Li
@@ -29,7 +32,7 @@ public interface IResourceInitializerService {
    void initResource();
 
    void addResourceIntoDB(String clusterName, String vcRPName,
-         String networkName, List<String> dsNames);
+         String networkName, Map<DatastoreType, List<String>> dsNames);
 
    public void updateOrInsertServerInfo();
 

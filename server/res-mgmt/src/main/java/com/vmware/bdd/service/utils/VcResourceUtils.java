@@ -322,6 +322,12 @@ public class VcResourceUtils {
       VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
          protected Void body() {
+            try {
+               cl.update();
+            } catch (Exception e) {
+               logger.info("failed to update cluster " + cl.getName() 
+                     + ", ignore this error.", e);
+            }
             List<VcDatastore> dss = cl.getAllDatastores();
             if (dss != null) {
                for (VcDatastore ds : dss) {

@@ -72,6 +72,12 @@ public class Container implements IContainer {
 
       // translate datastores
       for (VcDatastore datastore : cluster.getAllDatastores()) {
+         if (!datastore.isAccessible() 
+               || !datastore.isInNormalMode()) {
+            logger.info("datastore " + datastore.getName() 
+                  + " is inaccessible or in maintanence mode. Ignore it.");
+            continue;
+         }
          if (this.dc.findAbstractDatastore(datastore.getName()) == null) {
             AbstractDatastore ds = new AbstractDatastore(datastore.getName());
             ds.setFreeSpace((int) (datastore.getFreeSpace() / (1024 * 1024 * 1024)));
@@ -88,15 +94,17 @@ public class Container implements IContainer {
       try {
          // add hosts
          for (VcHost host : cluster.getHosts()) {
-            if (host.getDatastores() != null && host.getDatastores().size() > 0) {
+            if (host.isConnected() && !host.isInMaintenanceMode() 
+                  && host.getDatastores() != null && host.getDatastores().size() > 0) {
                AbstractHost abstractHost = new AbstractHost(host.getName());
                for (VcDatastore datastore : host.getDatastores()) {
                   AbstractDatastore ds =
                         this.dc.findAbstractDatastore(datastore.getName());
-                  AuAssert.check(ds != null);
-                  abstractHost.addDatastore(ds);
-                  logger.info("added datastore " + ds.getName() + " to host "
-                        + host.getName());
+                  if (ds != null) {
+                     abstractHost.addDatastore(ds);
+                     logger.info("added datastore " + ds.getName() + " to host "
+                           + host.getName());
+                  }
                }
                abstractCluster.addHost(abstractHost);
                logger.info("added host " + host.getName() + " to container");
@@ -107,10 +115,11 @@ public class Container implements IContainer {
          for (VcDatastore datastore : cluster.getAllDatastores()) {
             AbstractDatastore ds =
                   this.dc.findAbstractDatastore(datastore.getName());
-            AuAssert.check(ds != null);
-            abstractCluster.addDatastore(ds);
-            logger.info("added datastore " + ds.getName() + " with space "
-                  + ds.getFreeSpace() + " to cluster " + cluster.getName());
+            if (ds != null) {
+               abstractCluster.addDatastore(ds);
+               logger.info("added datastore " + ds.getName() + " with space "
+                     + ds.getFreeSpace() + " to cluster " + cluster.getName());
+            }
          }
 
          this.dc.addCluster(abstractCluster);

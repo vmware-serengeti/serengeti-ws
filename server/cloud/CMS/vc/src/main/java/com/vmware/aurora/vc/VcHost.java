@@ -12,6 +12,8 @@ import java.util.List;
 import com.vmware.aurora.util.AuAssert;
 import com.vmware.vim.binding.vim.ClusterComputeResource;
 import com.vmware.vim.binding.vim.HostSystem;
+import com.vmware.vim.binding.vim.HostSystem.ConnectionState;
+import com.vmware.vim.binding.vim.host.RuntimeInfo;
 import com.vmware.vim.binding.vmodl.ManagedObject;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 
@@ -43,6 +45,8 @@ public interface VcHost extends VcObject {
     */
    abstract List<VcDatastore> getDatastores();
 
+   abstract boolean isConnected();
+   abstract boolean isInMaintenanceMode();
 }
 
 @SuppressWarnings("serial")
@@ -53,6 +57,7 @@ class VcHostImpl extends VcObjectImpl implements VcHost {
    private ManagedObjectReference parent;
    private ManagedObjectReference[] network;
    private ManagedObjectReference[] datastore;
+   private RuntimeInfo runtime;
 
    protected VcHostImpl(HostSystem host) throws Exception {
       super(host);
@@ -67,6 +72,7 @@ class VcHostImpl extends VcObjectImpl implements VcHost {
       parent = checkReady(host.getParent());
       network = checkReady(host.getNetwork());
       datastore = checkReady(host.getDatastore());
+      runtime = checkReady(host.getRuntime());
    }
 
    /* (non-Javadoc)
@@ -119,4 +125,16 @@ class VcHostImpl extends VcObjectImpl implements VcHost {
       // TODO Auto-generated method stub
       return null;
    }
+
+   @Override
+   public boolean isConnected() {
+      // TODO Auto-generated method stub
+      return ConnectionState.connected.equals(runtime.getConnectionState());
+   }
+
+   @Override
+   public boolean isInMaintenanceMode() {
+      return runtime.isInMaintenanceMode();
+   }
+
 }

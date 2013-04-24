@@ -13,6 +13,7 @@ import com.vmware.aurora.util.AuAssert;
 import com.vmware.vim.binding.vim.Datacenter;
 import com.vmware.vim.binding.vim.Datastore;
 import com.vmware.vim.binding.vim.Datastore.HostMount;
+import com.vmware.vim.binding.vim.Datastore.Summary.MaintenanceModeState;
 import com.vmware.vim.binding.vim.StoragePod;
 import com.vmware.vim.binding.vim.host.VmfsDatastoreInfo;
 import com.vmware.vim.binding.vim.host.VmfsVolume;
@@ -44,6 +45,8 @@ public interface VcDatastore extends VcObject {
    abstract String getUrl();
 
    abstract boolean isAccessible();
+
+   abstract boolean isInNormalMode();
 
    abstract boolean isVmfs();
 
@@ -160,6 +163,18 @@ class VcDatastoreImpl extends VcObjectImpl implements VcDatastore {
    @Override
    public boolean isAccessible() {
       return summary.isAccessible();
+   }
+
+   @Override
+   public boolean isInNormalMode() {
+      String strMode = summary.getMaintenanceMode();
+      if (strMode != null) {
+         MaintenanceModeState mode = MaintenanceModeState.valueOf(strMode);
+         if (mode == MaintenanceModeState.normal) {
+            return true;
+         }
+      }
+      return false;
    }
 
    /* (non-Javadoc)
