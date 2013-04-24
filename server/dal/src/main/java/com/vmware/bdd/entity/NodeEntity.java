@@ -35,6 +35,7 @@ import org.apache.log4j.Logger;
 
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.utils.AuAssert;
 
 /**
@@ -107,7 +108,8 @@ public class NodeEntity extends EntityBase {
    public List<String> getVolumns() {
       List<String> volumns = new ArrayList<String>();
       for (DiskEntity disk : disks) {
-         volumns.add(disk.getDeviceName());
+         if (!DiskType.SWAP_DISK.getType().equals(disk.getDiskType()))
+            volumns.add(disk.getDeviceName());
       }
       return volumns;
    }
