@@ -363,8 +363,8 @@ public class TestClusteringJobs extends
       for (NodeGroupRead group : groups) {
          for (NodeRead node : group.getInstances()) {
             Assert.assertTrue(node.getVolumes() != null
-                  && node.getVolumes().size() >= 2,
-                  "each node should have at least two disks");
+                  && node.getVolumes().size() >= 1,
+                  "each node should have at least one data disk");
          }
       }
    }
