@@ -187,6 +187,9 @@ public class VcResourceUtils {
 
    public static VcVirtualMachine findVmInVcCluster(String vcClusterName, String rpName, String vmName) {
       VcResourcePool rp = findRPInVCCluster(vcClusterName, rpName);
+      if (rp == null) {
+         return null;
+      }
       List<VcVirtualMachine> vms = rp.getChildVMs();
       for (VcVirtualMachine vm : vms) {
          if (vm.getName().equals(vmName)) {

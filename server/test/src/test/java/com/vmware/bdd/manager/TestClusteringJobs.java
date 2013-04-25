@@ -245,12 +245,18 @@ public class TestClusteringJobs extends
 
          @Override
          protected Void body() throws Exception {
-            for (VcVirtualMachine vm : vcRp.getChildVMs()) {
-               // assume only two vm under serengeti vApp, serengeti server and template
-               if (vm.isPoweredOn()) {
-                  vm.powerOff();
+            for (VcResourcePool clusterRp : vcRp.getChildren()) {
+               for (VcResourcePool groupRp : clusterRp.getChildren()) {
+                  for (VcVirtualMachine vm : groupRp.getChildVMs()) {
+                     // assume only two vm under serengeti vApp, serengeti server and template
+                     if (vm.isPoweredOn()) {
+                        vm.powerOff();
+                     }
+                     vm.destroy();
+                  }
+                  groupRp.destroy();
                }
-               vm.destroy();
+               clusterRp.destroy();
             }
             return null;
          }
@@ -363,8 +369,8 @@ public class TestClusteringJobs extends
       }
    }
 
-   private void stopVmAfterStarted(String vmName, long jobExecutionId)
-         throws InterruptedException, Exception {
+   private void stopVmAfterStarted(final String rpPath, final String vmName, 
+         long jobExecutionId) throws InterruptedException, Exception {
       int retry = 0;
       while (retry <= 0) {
          Thread.sleep(50);
@@ -378,7 +384,7 @@ public class TestClusteringJobs extends
             logger.info("===========FAILED============");
             break;
          }
-         boolean stopped = stopVcVm(vmName);
+         boolean stopped = stopVcVm(rpPath, vmName);
          if (stopped) {
             break;
          } else {
@@ -387,9 +393,12 @@ public class TestClusteringJobs extends
       }
    }
 
-   private boolean stopVcVm(String vmName) {
+   private boolean stopVcVm(final String rpPath, final String vmName) {
       final VcVirtualMachine vm =
-            VcResourceUtils.findVmInVcCluster(vcCluster, vcRP, vmName);
+            VcResourceUtils.findVmInVcCluster(vcCluster, rpPath, vmName);
+      if (vm == null) {
+         return false;
+      }
       boolean stopped = VcContext.inVcSessionDo(new VcSession<Boolean>() {
          @Override
          protected boolean isTaskSession() {
@@ -457,7 +466,9 @@ public class TestClusteringJobs extends
             cluster.getStatus() == ClusterStatus.PROVISIONING,
             "Cluster status should be PROVISIONING, but got "
                   + cluster.getStatus());
-      stopVmAfterStarted(TEST_DHCP_CLUSTER_NAME + "-worker-0", jobExecutionId);
+      stopVmAfterStarted(vcRP + "/" + ConfigInfo.getSerengetiUUID() + "-"
+            + TEST_DHCP_CLUSTER_NAME + "/" + "worker", TEST_DHCP_CLUSTER_NAME
+            + "-worker-0", jobExecutionId);
       waitTaskFinished(jobExecutionId);
       cluster = clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
       Assert.assertTrue(
@@ -498,9 +509,13 @@ public class TestClusteringJobs extends
             clusterMgr.resizeCluster(TEST_DHCP_CLUSTER_NAME, "worker", 2);
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
-      Assert.assertTrue(cluster.getStatus() == ClusterStatus.UPDATING,
-            "Cluster status should be UPDATING, but got " + cluster.getStatus());
-      stopVmAfterStarted(TEST_DHCP_CLUSTER_NAME + "-worker-1", jobExecutionId);
+      Assert.assertTrue(
+            cluster.getStatus() == ClusterStatus.UPDATING,
+            "Cluster status should be UPDATING, but got "
+                  + cluster.getStatus());
+      stopVmAfterStarted(vcRP + "/" + ConfigInfo.getSerengetiUUID() + "-"
+            + TEST_DHCP_CLUSTER_NAME + "/" + "worker", TEST_DHCP_CLUSTER_NAME
+            + "-worker-1", jobExecutionId);
       waitTaskFinished(jobExecutionId);
       assertTaskFailed(jobExecutionId);
       assertDefinedInstanceNum(TEST_DHCP_CLUSTER_NAME, "worker", 1);
@@ -523,9 +538,10 @@ public class TestClusteringJobs extends
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testClusterResizeFailed" })
    @Transactional(propagation = Propagation.NEVER)
    public void testClusterResizeSuccess() throws Exception {
-      stopVcVm(TEST_DHCP_CLUSTER_NAME + "-worker-0");
-      long jobExecutionId =
-            clusterMgr.resizeCluster(TEST_DHCP_CLUSTER_NAME, "worker", 2);
+      stopVcVm(vcRP + "/" + ConfigInfo.getSerengetiUUID() + "-"
+            + TEST_DHCP_CLUSTER_NAME + "/" + "worker",
+            TEST_DHCP_CLUSTER_NAME + "-worker-0");
+      long jobExecutionId = clusterMgr.resizeCluster(TEST_DHCP_CLUSTER_NAME, "worker", 2);
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.UPDATING,
