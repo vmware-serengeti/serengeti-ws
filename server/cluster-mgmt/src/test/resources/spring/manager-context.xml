@@ -64,6 +64,15 @@
 		<property name="jobExecutionStatusHolder">
 			<ref bean="jobExecutionStatusHolder" />
 		</property>
+		<property name="mainJobExecutionStatusHolder">
+			<ref bean="mainJobExecutionStatusHolder" />
+		</property>
+		<property name="mainJobExecutionListener">
+			<ref bean="mainJobListener" />
+		</property>
+		<property name="jobParametersExtractor">
+			<ref bean="jobParametersExtractor" />
+		</property>
 	</bean>
 
 	<bean id="clusteringService" class="com.vmware.bdd.service.impl.ClusteringService">

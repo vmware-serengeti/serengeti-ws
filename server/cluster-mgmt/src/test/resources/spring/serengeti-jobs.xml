@@ -7,12 +7,12 @@
    http://www.springframework.org/schema/batch
    http://www.springframework.org/schema/batch/spring-batch.xsd">
 
-   <beans:bean id="jobListener"
+   <beans:bean id="testJobListener"
       class="com.vmware.bdd.service.job.SimpleJobExecutionListener">
       <beans:property name="jobExecutionStatusHolder"
          ref="jobExecutionStatusHolder" />
    </beans:bean>
-   <beans:bean id="stepListener"
+   <beans:bean id="testStepListener"
       class="com.vmware.bdd.service.job.SimpleStepExecutionListener">
       <beans:property name="jobRegistry" ref="jobRegistry" />
       <beans:property name="jobExecutionStatusHolder"
@@ -39,23 +39,41 @@
       <step id="plan" next="provision">
          <tasklet ref="placementPlanTasklet" />
          <listeners>
-            <listener ref="stepListener" />
+            <listener ref="testStepListener" />
          </listeners>
       </step>
       <step id="provision" next="install">
          <tasklet ref="provisionTasklet" />
          <listeners>
-            <listener ref="stepListener" />
+            <listener ref="testStepListener" />
          </listeners>
       </step>
       <step id="install">
          <tasklet ref="installTasklet" />
          <listeners>
-            <listener ref="stepListener" />
+            <listener ref="testStepListener" />
          </listeners>
       </step>
       <listeners>
-         <listener ref="jobListener" />
+         <listener ref="testJobListener" />
+      </listeners>
+   </job>
+   
+   <job id="simpleJob" job-repository="jobRepository">
+      <step id="simplePlan" next="simpleInstall">
+         <tasklet ref="placementPlanTasklet" />
+         <listeners>
+            <listener ref="testStepListener" />
+         </listeners>
+      </step>      
+      <step id="simpleInstall">
+         <tasklet ref="installTasklet" />
+         <listeners>
+            <listener ref="testStepListener" />
+         </listeners>
+      </step>
+      <listeners>
+         <listener ref="testJobListener" />
       </listeners>
    </job>
 

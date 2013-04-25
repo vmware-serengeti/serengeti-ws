@@ -12,4 +12,12 @@
 
    <beans:import resource="classpath*:/META-INF/spring/jobs/*-context.xml" />
    
+   <beans:bean id="mainJobExecutionStatusHolder"
+      class="com.vmware.bdd.service.job.InMemoryJobExecutionStatusHolder"/>
+   <beans:bean id="jobExecutionStatusHolder"
+      class="com.vmware.bdd.service.job.InMemoryJobExecutionStatusHolder"/>
+      
+   <beans:bean id="jobParametersExtractor"
+      class="com.vmware.bdd.service.job.SubJobParametersExtractor"/>
+   
 </beans:beans>

@@ -120,8 +120,7 @@ public class JobUtils {
             continue;
          }
          VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getVmMobId());
-         if (vm == null 
-               || vm.isPoweredOff()
+         if (vm == null || vm.isPoweredOff()
                || (VcVmUtil.getIpAddress(vm, false) == null)) {
             deletedNodes.add(node);
             continue;
@@ -139,13 +138,13 @@ public class JobUtils {
       try {
          return Long.valueOf(split[2]);
       } catch (Exception e) {
-         logger.error("vm name " + vmName 
+         logger.error("vm name " + vmName
                + " violate serengeti vm name definition.");
          throw ClusteringServiceException.VM_NAME_VIOLATE_NAME_PATTERN(vmName);
       }
    }
 
-   public static void verifyNodesStatus(List<NodeEntity> nodes, 
+   public static void verifyNodesStatus(List<NodeEntity> nodes,
          NodeStatus expectedStatus, boolean ignoreMissing) {
       for (NodeEntity node : nodes) {
          if (node.getStatus() != expectedStatus) {
@@ -155,16 +154,24 @@ public class JobUtils {
             if (expectedStatus == NodeStatus.VM_READY) {
                // verify from VC 
                VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
-               if (vm != null 
-                     && vm.isPoweredOn()
+               if (vm != null && vm.isPoweredOn()
                      && (VcVmUtil.getIpAddress(vm, false) != null)) {
                   continue;
                }
             }
-            throw ClusteringServiceException.VM_STATUS_ERROR(
-                  node.getVmName(), node.getStatus().toString(), 
-                  expectedStatus.toString());
+            throw ClusteringServiceException.VM_STATUS_ERROR(node.getVmName(),
+                  node.getStatus().toString(), expectedStatus.toString());
          }
       }
+   }
+
+   public static String getSubJobParameterPrefixKey(int stepNumber, int paramIndex) {
+      return JobConstants.SUB_JOB_PARAMETERS_KEY_PREFIX + stepNumber + "."
+            + paramIndex;
+   }
+   
+   public static String getSubJobParameterPrefixValue(int stepNumber, int paramIndex) {
+      return JobConstants.SUB_JOB_PARAMETERS_VALUE_PREFIX + stepNumber + "."
+            + paramIndex;
    }
 }

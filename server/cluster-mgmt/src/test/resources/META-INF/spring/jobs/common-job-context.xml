@@ -14,6 +14,10 @@
 		class="com.vmware.bdd.service.job.SimpleJobExecutionListener">
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 	</beans:bean>
+	<beans:bean id="mainJobListener"
+		class="com.vmware.bdd.service.job.SimpleJobExecutionListener">
+		<beans:property name="jobExecutionStatusHolder" ref="mainJobExecutionStatusHolder" />
+	</beans:bean>
 	<beans:bean id="stepListener"
 		class="com.vmware.bdd.service.job.SimpleStepExecutionListener">
 		<beans:property name="jobRegistry" ref="jobRegistry" />
@@ -24,7 +28,11 @@
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 		<beans:property name="clusteringService" ref="clusteringService" />
 	</beans:bean>
-
+	<beans:bean id="clusterMainJobListener"
+		class="com.vmware.bdd.service.job.ClusterJobExecutionListener">
+		<beans:property name="jobExecutionStatusHolder" ref="mainJobExecutionStatusHolder" />
+		<beans:property name="clusteringService" ref="clusteringService" />
+	</beans:bean>
 	<beans:bean name="resumeResizeClusterPlanTasklet"
 		class="com.vmware.bdd.service.job.ResumeResizeClusterPlanStep">
 		<beans:property name="clusteringService" ref="clusteringService" />

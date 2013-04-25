@@ -52,4 +52,12 @@ public interface JobConstants {
    public static final String CURRENT_ERROR_MESSAGE= "currentErrorMessage";
    public static final String CLUSTER_RESOURCE_RESERVATION_ID_JOB_PARAM = "ResourceReservationId";
    public static final String EXPECTED_NODE_STATUS = "expectedNodeStatus";
+   public static final String SUB_JOB_ENABLED = "sub.job.enabled";
+   public static final String SUB_JOB_NUMBER = "sub.job.number";
+   public static final String SUB_JOB_PARAMETERS_NUMBER = "sub.job.parameters.number.";
+   public static final String SUB_JOB_PARAMETERS_KEY_PREFIX = "sub.job.parameters.parameter.key.";
+   public static final String SUB_JOB_PARAMETERS_VALUE_PREFIX = "sub.job.parameters.parameter.value.";
+   public static final String SUB_JOB_NODE_NAME = "sub.job.node.name";
+   public static final String SUB_JOB_NODES_SUCCEED = "sub.job.nodes.suceed";
+   public static final String SUB_JOB_NODES_FAIL = "sub.job.nodes.FAIL";
 }

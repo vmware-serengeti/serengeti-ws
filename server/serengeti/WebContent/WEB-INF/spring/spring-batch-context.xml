@@ -59,7 +59,6 @@
       <beans:property name="jobLauncher" ref="jobLauncher" />
    </beans:bean>
 
-   <beans:bean id="jobExecutionStatusHolder"
-      class="com.vmware.bdd.service.job.InMemoryJobExecutionStatusHolder" scope="singleton" />
+   
 
 </beans:beans>

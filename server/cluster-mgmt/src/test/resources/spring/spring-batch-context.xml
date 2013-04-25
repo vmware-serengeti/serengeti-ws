@@ -51,9 +51,4 @@
       <beans:property name="jobLauncher" ref="jobLauncher" />
    </beans:bean>
 
-   <beans:bean id="jobExecutionStatusHolder"
-      class="com.vmware.bdd.service.job.InMemoryJobExecutionStatusHolder" />
-
-   <beans:import resource="classpath*:/spring/*-jobs.xml" />
-
 </beans:beans>

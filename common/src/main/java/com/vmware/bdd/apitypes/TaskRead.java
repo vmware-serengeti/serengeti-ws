@@ -14,6 +14,9 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Task get output
  * 
@@ -22,9 +25,11 @@ public class TaskRead {
    public enum Status {
       ABANDONED, STARTING, STARTED, STOPPED, STOPPING, COMPLETED, FAILED, UNKNOWN
    }
+
    public enum Type {
-      INNER, VHM 
+      INNER, VHM
    }
+
    private Long id;
    private Status status;
    private Type type;
@@ -33,13 +38,16 @@ public class TaskRead {
    private String workDir;
    private String progressMessage;
    private String target;
+   private List<NodeStatus> succeedNodes = new ArrayList<NodeStatus>();
+   private List<NodeStatus> failNodes = new ArrayList<NodeStatus>();
 
    public TaskRead() {
 
    }
 
-   public TaskRead(Long id, Status status, Type type, Double progress, String errorMessage,
-         String workDir, String progressMessage, String target) {
+   public TaskRead(Long id, Status status, Type type, Double progress,
+         String errorMessage, String workDir, String progressMessage,
+         String target) {
       this.id = id;
       this.status = status;
       this.type = type;
@@ -108,9 +116,28 @@ public class TaskRead {
 
    @Override
    public String toString() {
-      return "TaskRead [id=" + id + ", status=" + status + ", type=" + type
-            + ", progress=" + progress + ", errorMessage=" + errorMessage + ", workDir="
-            + workDir + ", progressMessage=" + progressMessage + "]";
+      StringBuilder strBuilder = new StringBuilder();
+      strBuilder.append("TaskRead [id=" + id + ", status=" + status + ", type="
+            + type + ", progress=" + progress + ", errorMessage="
+            + errorMessage + ", workDir=" + workDir + ", progressMessage="
+            + progressMessage + "]");
+      if (this.succeedNodes.size() > 0) {
+         strBuilder.append(",succeed nodes=[");
+         for (TaskRead.NodeStatus status : succeedNodes) {
+            strBuilder.append(status.toString());
+            strBuilder.append(",");
+         }
+         strBuilder.append("]");
+      }
+      if (this.failNodes.size() > 0) {
+         strBuilder.append(",fail nodes=[");
+         for (TaskRead.NodeStatus status : failNodes) {
+            strBuilder.append(status.toString());
+            strBuilder.append(",");
+         }
+         strBuilder.append("]");
+      }
+      return strBuilder.toString();
    }
 
    public String getTarget() {
@@ -119,5 +146,111 @@ public class TaskRead {
 
    public void setTarget(String target) {
       this.target = target;
+   }
+
+   /**
+    * @return the succeedNodes
+    */
+   public List<NodeStatus> getSucceedNodes() {
+      return succeedNodes;
+   }
+
+   /**
+    * @param succeedNodes
+    *           the succeedNodes to set
+    */
+   public void setSucceedNodes(List<NodeStatus> succeedNodes) {
+      this.succeedNodes = succeedNodes;
+   }
+
+   /**
+    * @return the failNodes
+    */
+   public List<NodeStatus> getFailNodes() {
+      return failNodes;
+   }
+
+   /**
+    * @param failNodes
+    *           the failNodes to set
+    */
+   public void setFailNodes(List<NodeStatus> failNodes) {
+      this.failNodes = failNodes;
+   }
+
+   public static class NodeStatus {
+      private String nodeName;
+      private boolean succeed = true;
+      private String errorMessage;
+
+      public NodeStatus(String nodeName) {
+         this.nodeName = nodeName;
+      }
+
+      public NodeStatus(String nodeName, boolean succeed, String errorMessage) {
+         this(nodeName);
+         this.succeed = succeed;
+         this.errorMessage = errorMessage;
+      }
+
+      /**
+       * @return the nodeName
+       */
+      public String getNodeName() {
+         return nodeName;
+      }
+
+      /**
+       * @param nodeName
+       *           the nodeName to set
+       */
+      public void setNodeName(String nodeName) {
+         this.nodeName = nodeName;
+      }
+
+      /**
+       * @return the succeed
+       */
+      public boolean isSucceed() {
+         return succeed;
+      }
+
+      /**
+       * @param succeed
+       *           the succeed to set
+       */
+      public void setSucceed(boolean succeed) {
+         this.succeed = succeed;
+      }
+
+      /**
+       * @return the errorMessage
+       */
+      public String getErrorMessage() {
+         return errorMessage;
+      }
+
+      /**
+       * @param errorMessage
+       *           the errorMessage to set
+       */
+      public void setErrorMessage(String errorMessage) {
+         this.errorMessage = errorMessage;
+      }
+
+      @Override
+      public String toString() {
+         StringBuilder strBuilder = new StringBuilder();
+         strBuilder.append("nodeName:");
+         strBuilder.append(nodeName);
+         strBuilder.append(",succeed:");
+         strBuilder.append(succeed);
+         if (errorMessage != null) {
+            strBuilder.append(",error message:");
+            strBuilder.append(errorMessage);
+         }
+         return strBuilder.toString();
+      }
+
    }
 }

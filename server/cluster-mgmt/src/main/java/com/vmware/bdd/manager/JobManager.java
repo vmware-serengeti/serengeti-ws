@@ -1,37 +1,57 @@
 package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.StepExecutionListener;
+import org.springframework.batch.core.configuration.JobFactory;
 import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.configuration.support.ReferenceJobFactory;
 import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.job.SimpleJob;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.job.JobParametersExtractor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.apitypes.TaskRead.Type;
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
+import com.vmware.bdd.service.job.JobUtils;
+import com.vmware.bdd.service.job.SimpleStepExecutionListener;
+import com.vmware.bdd.service.job.SubJobStatus;
+import com.vmware.bdd.service.job.SubJobStep;
 import com.vmware.bdd.service.job.TrackableTasklet;
 
 public class JobManager {
    static final Logger logger = Logger.getLogger(JobManager.class);
-   JobRepository jobRepository;
-   JobLauncher jobLauncher;
-   JobExplorer jobExplorer;
-   JobOperator jobOperator;
-   JobRegistry jobRegistry;
-   JobExecutionStatusHolder jobExecutionStatusHolder;
+
+   private JobRepository jobRepository;
+   private JobLauncher jobLauncher;
+   private JobExplorer jobExplorer;
+   private JobOperator jobOperator;
+   private JobRegistry jobRegistry;
+   private JobExecutionStatusHolder jobExecutionStatusHolder;
+   private JobExecutionStatusHolder mainJobExecutionStatusHolder;
+   private JobParametersExtractor jobParametersExtractor;
+   private JobExecutionListener mainJobExecutionListener;
 
    @Autowired
    private ClusterEntityManager clusterEntityMgr;
@@ -53,18 +73,155 @@ public class JobManager {
    }
 
    /**
+    * Run Spring Batch job with sub job. The number of sub jobs is size of
+    * "jobParamtersList". Every element in the "jobParametersList" will be the
+    * job parameters for one sub job.
+    * 
+    * @param jobName
+    *           sub job name
+    * @param jobParametersList
+    *           List of job parameters for the sub job
+    * @param clusterName
+    *           cluster name
+    * @return job execution id
+    * @throws Exception
+    */
+   public long runSubJobForNodes(String jobName,
+         List<JobParameters> jobParametersList, String clusterName)
+         throws Exception {
+      return createAndLaunchJobWithSubJob(clusterName, jobName,
+            jobParametersList);
+   }
+
+   /**
     * Run Spring Batch job with sub job.
-    * @param jobName the Spring Batch job name
-    * @param param job parameters
-    * @param subJobName sub job name
-    * @return
+    * 
+    * @param jobName
+    *           the Spring Batch job name
+    * @param param
+    *           job parameters
+    * @param subJobName
+    *           sub job name
+    * @return job exection id
     * @throws Exception
     */
    public long runJobWithSubJob(String jobName, JobParameters param,
          String subJobName) throws Exception {
-      Job job = jobRegistry.getJob(jobName);
-      //TODO: add sub job logic here
-      return jobLauncher.run(job, param).getJobId();
+      logger.debug("::runJobWithSubJob: " + jobName + ", subJobName: "
+            + subJobName);
+      long result = Long.MIN_VALUE;
+      JobParameter clusterNameParameter =
+            param.getParameters().get(JobConstants.CLUSTER_NAME_JOB_PARAM);
+      String clusterName = (String) clusterNameParameter.getValue();
+      Job preparingJob = jobRegistry.getJob(jobName);
+      JobExecution preparingJobExecution = jobLauncher.run(preparingJob, param);
+      int subJobNumber = 0;
+      waitJobExecution(preparingJobExecution.getId(), Long.MAX_VALUE);
+      if (preparingJobExecution.getStatus() == BatchStatus.COMPLETED) {
+         subJobNumber =
+               preparingJobExecution.getExecutionContext().getInt(
+                     (JobConstants.SUB_JOB_NUMBER));
+         if (subJobNumber > 0) {
+            logger.debug("sub job number: " + subJobNumber);
+            List<JobParameters> subJobParametersList =
+                  new ArrayList<JobParameters>();
+            for (int i = 0; i < subJobNumber; i++) {
+               JobParameters subJobParameters =
+                     (JobParameters) preparingJobExecution
+                           .getExecutionContext()
+                           .get(JobConstants.SUB_JOB_PARAMETERS_KEY_PREFIX + i);
+               subJobParametersList.add(subJobParameters);
+            }
+            result =
+                  createAndLaunchJobWithSubJob(clusterName, subJobName,
+                        subJobParametersList);
+         }
+      }
+      if (result == Long.MIN_VALUE) {
+         logger.warn("Failure in preparing sub jobs");
+         throw TaskException.EXECUTION_FAILED("Failure in preparing sub jobs");
+      }
+      return result;
+   }
+
+   /**
+    * Create new Spring Batch job to execute sub jobs. The sub job name is
+    * "subJobName", the number of sub jobs is size of "subJobParameters". One
+    * element in the "subJobParameters" will be the JobParameters of sub job.
+    * 
+    * @param clusterName
+    *           cluster name
+    * @param subJobName
+    *           sub job name
+    * @param subJobParameters
+    *           sub job parameter
+    * @return job execution id
+    * @throws Exception
+    */
+   private long createAndLaunchJobWithSubJob(String clusterName,
+         String subJobName, List<JobParameters> subJobParameters)
+         throws Exception {
+      SimpleJob mainJob = new SimpleJob("composed-job");
+      StepExecutionListener[] jobStepListeners = createJobStepListener();
+      Map<String, JobParameter> mainJobParams =
+            new TreeMap<String, JobParameter>();
+      mainJobParams.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(
+            new Date()));
+      mainJobParams.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
+            clusterName));
+      //enable sub job indicator to for job progress query
+      mainJobParams.put(JobConstants.SUB_JOB_ENABLED, new JobParameter(1l));
+      Job subJob = jobRegistry.getJob(subJobName);
+      for (int stepNumber = 0, j = subJobParameters.size(); stepNumber < j; stepNumber++) {
+         SubJobStep subJobStep = new SubJobStep();
+         subJobStep.setName(subJobName + "-subJobStep-" + stepNumber);
+         subJobStep.setJob(subJob);
+         subJobStep.setJobParametersExtractor(jobParametersExtractor);
+         subJobStep.setJobExecutionStatusHolder(jobExecutionStatusHolder);
+         subJobStep
+               .setMainJobExecutionStatusHolder(mainJobExecutionStatusHolder);
+         subJobStep.setJobLauncher(jobLauncher);
+         subJobStep.setJobRepository(jobRepository);
+         subJobStep.setStepExecutionListeners(jobStepListeners);
+         subJobStep.afterPropertiesSet();
+         mainJob.addStep(subJobStep);
+         logger.debug("added sub job step: " + subJobStep.getName());
+         int subJobParametersNumber =
+               subJobParameters.get(stepNumber).getParameters().keySet().size();
+         mainJobParams.put(JobConstants.SUB_JOB_PARAMETERS_NUMBER + stepNumber,
+               new JobParameter((long) subJobParametersNumber));
+         int count = 0;
+         for (String key : subJobParameters.get(stepNumber).getParameters()
+               .keySet()) {
+            int index = count++;
+            mainJobParams.put(
+                  JobUtils.getSubJobParameterPrefixKey(stepNumber, index),
+                  new JobParameter(key));
+            mainJobParams.put(
+                  JobUtils.getSubJobParameterPrefixValue(stepNumber, index),
+                  subJobParameters.get(stepNumber).getParameters().get(key));
+         }
+      }
+      mainJob
+            .setJobExecutionListeners(new JobExecutionListener[] { mainJobExecutionListener });
+      mainJob.setJobRepository(jobRepository);
+      mainJob.afterPropertiesSet();
+      JobFactory jobFactory = new ReferenceJobFactory(mainJob);
+      jobRegistry.register(jobFactory);
+      logger.info("registered job: " + mainJob.getName());
+      JobParameters mainJobParameters = new JobParameters(mainJobParams);
+      JobExecution mainJobExecution =
+            jobLauncher.run(mainJob, mainJobParameters);
+      logger.info("launched main job: " + mainJob.getName());
+      return mainJobExecution.getId();
+   }
+
+   private StepExecutionListener[] createJobStepListener() {
+      SimpleStepExecutionListener jobStepListener =
+            new SimpleStepExecutionListener();
+      jobStepListener.setJobRegistry(jobRegistry);
+      jobStepListener.setJobExecutionStatusHolder(mainJobExecutionStatusHolder);
+      return new SimpleStepExecutionListener[] { jobStepListener };
    }
 
    /**
@@ -109,13 +266,19 @@ public class JobManager {
 
       TaskRead jobStatus = new TaskRead();
       jobStatus.setId(jobExecutionId);
+      JobParameters jobParameters =
+            jobExecution.getJobInstance().getJobParameters();
       String clusterName =
-            jobExecution.getJobInstance().getJobParameters()
-                  .getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
+            jobParameters.getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
       jobStatus.setTarget(clusterName);
-      jobStatus.setProgress(jobExecutionStatusHolder
-            .getCurrentProgress(jobExecutionId));
-
+      long subJobEnabled = jobParameters.getLong(JobConstants.SUB_JOB_ENABLED);
+      if (subJobEnabled != 1) {
+         jobStatus.setProgress(jobExecutionStatusHolder
+               .getCurrentProgress(jobExecutionId));
+      } else {
+         jobStatus.setProgress(mainJobExecutionStatusHolder
+               .getCurrentProgress(jobExecutionId));
+      }
       Status status = null;
       switch (jobExecution.getStatus()) {
       case ABANDONED:
@@ -144,8 +307,21 @@ public class JobManager {
          status = Status.UNKNOWN;
       }
       jobStatus.setStatus(status);
-
-      if (status.equals(Status.FAILED)) {
+      if (subJobEnabled == 1) {
+         List<SubJobStatus> succeedNodes =
+               (ArrayList<SubJobStatus>) jobExecution.getExecutionContext()
+                     .get(JobConstants.SUB_JOB_NODES_SUCCEED);
+         List<SubJobStatus> failNodes =
+               (ArrayList<SubJobStatus>) jobExecution.getExecutionContext()
+                     .get(JobConstants.SUB_JOB_NODES_FAIL);
+         if (succeedNodes != null) {
+            jobStatus.setSucceedNodes(convert(succeedNodes));
+         }
+         if (failNodes != null) {
+            jobStatus.setFailNodes(convert(failNodes));
+         }
+      }
+      if (status.equals(Status.FAILED) && subJobEnabled != 1) {
          String workDir =
                TrackableTasklet.getFromJobExecutionContext(
                      jobExecution.getExecutionContext(),
@@ -160,6 +336,17 @@ public class JobManager {
       }
 
       return jobStatus;
+   }
+
+   private List<TaskRead.NodeStatus> convert(List<SubJobStatus> subJobStatus) {
+      List<TaskRead.NodeStatus> result = new ArrayList<TaskRead.NodeStatus>();
+      for (SubJobStatus status : subJobStatus) {
+         TaskRead.NodeStatus nodeStatus =
+               new TaskRead.NodeStatus(status.getNodeName(),
+                     status.isSucceed(), status.getErrorMessage());
+         result.add(nodeStatus);
+      }
+      return result;
    }
 
    /**
@@ -242,6 +429,22 @@ public class JobManager {
       return jobOperator;
    }
 
+   /**
+    * @return the jobParametersExtractor
+    */
+   public JobParametersExtractor getJobParametersExtractor() {
+      return jobParametersExtractor;
+   }
+
+   /**
+    * @param jobParametersExtractor
+    *           the jobParametersExtractor to set
+    */
+   public void setJobParametersExtractor(
+         JobParametersExtractor jobParametersExtractor) {
+      this.jobParametersExtractor = jobParametersExtractor;
+   }
+
    public void setJobOperator(JobOperator jobOperator) {
       this.jobOperator = jobOperator;
    }
@@ -263,11 +466,43 @@ public class JobManager {
       this.jobExecutionStatusHolder = jobExecutionStatusHolder;
    }
 
+   /**
+    * @return the mainJobExecutionStatusHolder
+    */
+   public JobExecutionStatusHolder getMainJobExecutionStatusHolder() {
+      return mainJobExecutionStatusHolder;
+   }
+
+   /**
+    * @param mainJobExecutionStatusHolder
+    *           the mainJobExecutionStatusHolder to set
+    */
+   public void setMainJobExecutionStatusHolder(
+         JobExecutionStatusHolder subJobExecutionStatusHolder) {
+      this.mainJobExecutionStatusHolder = subJobExecutionStatusHolder;
+   }
+
    public ClusterEntityManager getClusterEntityMgr() {
       return clusterEntityMgr;
    }
 
    public void setClusterEntityMgr(ClusterEntityManager clusterEntityMgr) {
       this.clusterEntityMgr = clusterEntityMgr;
+   }
+
+   /**
+    * @return the mainJobExecutionListener
+    */
+   public JobExecutionListener getMainJobExecutionListener() {
+      return mainJobExecutionListener;
+   }
+
+   /**
+    * @param mainJobExecutionListener
+    *           the mainJobExecutionListener to set
+    */
+   public void setMainJobExecutionListener(
+         JobExecutionListener mainJobExecutionListener) {
+      this.mainJobExecutionListener = mainJobExecutionListener;
    }
 }
