@@ -59,5 +59,5 @@ public interface JobConstants {
    public static final String SUB_JOB_PARAMETERS_VALUE_PREFIX = "sub.job.parameters.parameter.value.";
    public static final String SUB_JOB_NODE_NAME = "sub.job.node.name";
    public static final String SUB_JOB_NODES_SUCCEED = "sub.job.nodes.suceed";
-   public static final String SUB_JOB_NODES_FAIL = "sub.job.nodes.FAIL";
+   public static final String SUB_JOB_NODES_FAIL = "sub.job.nodes.fail";
 }

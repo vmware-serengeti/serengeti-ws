@@ -126,9 +126,9 @@ module Software
         end
 
         def getOperationStatusWithDetail(clusterName)
-          log.info("get operation status for cluster name: #{clusterName}")
+          log.debug("get operation status for cluster name: #{clusterName}")
           status = getClusterOperationStatus(clusterName, true)
-          log.info("status: #{status.inspect}")
+          log.debug("status: #{status.inspect}")
           status
         end
 
