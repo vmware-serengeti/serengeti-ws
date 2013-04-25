@@ -27,6 +27,11 @@
          ref="jobExecutionStatusHolder" />
       <beans:property name="clusteringService" ref="clusteringService" />
    </beans:bean>
+   <beans:bean id="clusterMainJobListener"
+		class="com.vmware.bdd.service.job.ClusterJobExecutionListener">
+		<beans:property name="jobExecutionStatusHolder" ref="mainJobExecutionStatusHolder" />
+		<beans:property name="clusteringService" ref="clusteringService" />
+	</beans:bean>
    <beans:bean id="resizeClusterJobListener"
       class="com.vmware.bdd.service.job.ResizeClusterJobExecutionListener">
       <beans:property name="jobExecutionStatusHolder"
