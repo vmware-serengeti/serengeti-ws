@@ -17,6 +17,7 @@ import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.placement.entity.BaseNode;
+import com.vmware.bdd.service.job.JobConstants;
 
 public class JobUtils {
    private static final Logger logger = Logger.getLogger(JobUtils.class);

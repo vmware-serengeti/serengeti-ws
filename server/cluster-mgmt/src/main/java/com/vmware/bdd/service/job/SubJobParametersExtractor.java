@@ -24,6 +24,8 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.step.job.JobParametersExtractor;
 
+import com.vmware.bdd.utils.JobUtils;
+
 /**
  * @author Jarred Li
  * @version 0.9

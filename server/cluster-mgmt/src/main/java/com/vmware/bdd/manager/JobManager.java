@@ -34,11 +34,11 @@ import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
-import com.vmware.bdd.service.job.JobUtils;
 import com.vmware.bdd.service.job.SimpleStepExecutionListener;
 import com.vmware.bdd.service.job.SubJobStatus;
 import com.vmware.bdd.service.job.SubJobStep;
 import com.vmware.bdd.service.job.TrackableTasklet;
+import com.vmware.bdd.utils.JobUtils;
 
 public class JobManager {
    static final Logger logger = Logger.getLogger(JobManager.class);
