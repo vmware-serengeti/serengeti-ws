@@ -45,6 +45,32 @@ public class ConnectionCommands implements CommandMarker {
 
    @CliCommand(value = "connect", help = "Connect a serengeti server")
    public void conn(
+         @CliOption(key = { "host" }, mandatory = true, help = "The serengeti host with optional port number, e.g. hostname:port") final String hostName) {
+      Map<String,String> loginInfo = new HashMap<String,String>();
+      String username = null;
+      String password = null;
+      loginInfo.put("username", username);
+      loginInfo.put("password", password);
+      try {
+         if (CommandsUtils.isBlank(username)) {
+            if(!prompt(Constants.CONNECT_ENTER_USER_NAME, PromptType.USER_NAME, loginInfo)){
+               return ;
+            }
+         }
+         if (CommandsUtils.isBlank(password)) {
+            if(!prompt(Constants.CONNECT_ENTER_PASSWORD, PromptType.PASSWORD, loginInfo)){
+               return ;
+            }
+         }
+         connect(hostName, loginInfo, 3);
+      } catch (Exception e) {
+         System.out.println();
+         printConnectionFailure(e.getMessage());
+      }
+   }
+
+   @CliCommand(value = "loggedConnect", help = "Connect a serengeti server with username/password as options and get logged into cli history")
+   public void loggedConn(
          @CliOption(key = { "host" }, mandatory = true, help = "The serengeti host with optional port number, e.g. hostname:port") final String hostName,
          @CliOption(key = { "username" }, mandatory = false, help = "The serengeti user name") final String username,
          @CliOption(key = { "password" }, mandatory = false, help = "The serengeti password") final String password) {
