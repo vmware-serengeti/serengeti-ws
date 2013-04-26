@@ -37,6 +37,8 @@ public class Constants {
    public static final String REST_PATH_DISTRO = "distro";
    public static final String REST_PATH_CONFIG = "config";
    public static final String REST_PATH_ELASTICITY = "elasticity";
+   public static final String REST_PATH_FIX = "fix";
+   public static final String REST_PATH_FIX_DISK = "disk";
    public static final String REST_PATH_SPEC = "spec";
    public static final String REST_PATH_TOPOLOGY = "racks";
 
@@ -89,6 +91,7 @@ public class Constants {
    public static final String OUTPUT_OP_QUOTA_SET = "quota";
    public static final String OUTPUT_OP_LIMIT = "limit";
    public static final String OUTPUT_OP_UNLIMIT = "unlimit";
+   public static final String OUTPUT_OP_FIX = "fix";
    public static final String OUTPUT_OP_ADJUSTMENT_FAILED = "failed";
    public static final String OUTPUT_OP_RESUME = "resume";
    public static final String OUTPUT_OP_RESULT_FAIL = "failed";
@@ -107,6 +110,7 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_UNLIMIT = "unlimited";
    public static final String OUTPUT_OP_RESULT_PRIORITY = "prioritized";
    public static final String OUTPUT_OP_RESULT_PRIORITY_RESET = "priority reset";
+   public static final String OUTPUT_OP_RESULT_FIX = "fixed";
    public static final String OUTPUT_OP_NODEGROUP_MISSING = "must specify nodegroup name when node name is specified";
    public static final String OUTPUT_UNKNOWN_HOST = "unknown host";
    public static final String OUTPUT_HOST_REFUSE = "Connection refused. Please check the port number.";
@@ -164,6 +168,7 @@ public class Constants {
    public static final String PARAM__NO_DEFAULT_DISTRO = "no default distro, please install and/or set a distro by --distro";
    public static final String PARAM_NOT_CONTAIN_HORIZONTAL_LINE = " cannot contain '-'.";
    public static final String PARAM_NOT_CONTAIN_BLANK_SPACE = " cannot contain blank space.";
+   public static final String PARAM_SHOULD_SPECIFY_DISK = "You should specify --disk .";
 
    public static final int FORMAT_COLUMN_DISTANCE = 2;
    public static final String FORMAT_TABLE_COLUMN_NAME = "NAME";

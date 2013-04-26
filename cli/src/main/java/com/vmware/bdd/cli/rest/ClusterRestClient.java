@@ -30,6 +30,7 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterPriority;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ElasticityRequestBody;
+import com.vmware.bdd.apitypes.FixDiskRequestBody;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.Priority;
@@ -141,6 +142,17 @@ public class ClusterRestClient {
       requestBody.setDiskIOPriority(diskIOPriority);
       requestBody.setNodeGroupName(nodeGroupName);
       restClient.update(requestBody, path, httpverb);
+   }
+
+   public void fixDisk(final String clusterName, FixDiskRequestBody requestBody) {
+      final String path =
+            Constants.REST_PATH_CLUSTER + "/" + clusterName + "/"
+                  + Constants.REST_PATH_FIX + "/"
+                  + Constants.REST_PATH_FIX_DISK;
+      final HttpMethod httpverb = HttpMethod.PUT;
+      PrettyOutput outputCallBack =
+            getClusterPrettyOutputCallBack(this, clusterName);
+      restClient.update(requestBody, path, httpverb, outputCallBack);
    }
 
    private PrettyOutput getClusterPrettyOutputCallBack(

@@ -37,13 +37,14 @@ import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.ElasticityRequestBody;
+import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityMode;
 import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityOperation;
+import com.vmware.bdd.apitypes.FixDiskRequestBody;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.Priority;
-import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityMode;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.ClusterRestClient;
@@ -803,6 +804,38 @@ public class ClusterCommands implements CommandMarker {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_CONFIG, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
+         return;
+      }
+   }
+
+   @CliCommand(value = "cluster fix", help = "Fix a cluster failure")
+   public void fixCluster(
+         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
+         @CliOption(key = { "disk" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Recover a disk failure") final boolean isDiskFailure,
+         @CliOption(key = { "parallel" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether use parallel way to recovery node or not") final boolean parallel,
+         @CliOption(key = { "nodeGroup" }, mandatory = false, help = "The node group name which failure belong to") final String nodeGroupName) {
+      try {
+
+         if (!isDiskFailure) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  clusterName, Constants.OUTPUT_OP_FIX,
+                  Constants.OUTPUT_OP_RESULT_FAIL,
+                  Constants.PARAM_SHOULD_SPECIFY_DISK);
+            return;
+         } else {
+            FixDiskRequestBody requestBody = new FixDiskRequestBody();
+            requestBody.setParallel(parallel);
+            if(!CommandsUtils.isBlank(nodeGroupName)) {
+               requestBody.setNodeGroupName(nodeGroupName);               
+            }
+            restClient.fixDisk(clusterName, requestBody);
+         }
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
+               clusterName, Constants.OUTPUT_OP_RESULT_FIX);
+      } catch (Exception e) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+               clusterName, Constants.OUTPUT_OP_FIX,
+               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          return;
       }
    }

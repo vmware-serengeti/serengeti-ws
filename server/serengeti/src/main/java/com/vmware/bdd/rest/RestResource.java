@@ -45,6 +45,7 @@ import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.DatastoreAdd;
 import com.vmware.bdd.apitypes.DatastoreRead;
 import com.vmware.bdd.apitypes.DistroRead;
+import com.vmware.bdd.apitypes.FixDiskRequestBody;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetworkRead;
@@ -295,6 +296,16 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("disk i/o priority", ioPriority);
       }
       clusterMgr.prioritizeCluster(clusterName, groupName, ioPriority);
+   }
+
+   @RequestMapping(value = "/cluster/{clusterName}/fix/disk", method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.ACCEPTED)
+   public void fixCluster(@PathVariable("clusterName") String clusterName,
+         @RequestBody FixDiskRequestBody requestBody,
+         HttpServletRequest request, HttpServletResponse response)
+         throws Exception {
+      Long taskId = null;
+      redirectRequest(taskId, request, response);
    }
 
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.GET, produces = "application/json")
