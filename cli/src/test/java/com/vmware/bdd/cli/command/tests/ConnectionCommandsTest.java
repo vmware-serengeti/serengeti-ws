@@ -29,12 +29,12 @@ import com.vmware.bdd.cli.commands.ConnectionCommands;
 public class ConnectionCommandsTest extends MockRestServer {
    @Autowired
    private ConnectionCommands connectionCommands;
-   
+
    @Test
-   public void testConn() throws Exception {
+   public void testLoggedConn() throws Exception {
       buildReqRespWithoutReqBody(
             "http://127.0.0.1:8080/serengeti/j_spring_security_check?j_username=username&j_password=password",
             HttpMethod.POST, HttpStatus.OK, "");
-      connectionCommands.conn("127.0.0.1:8080", "username", "password");
+      connectionCommands.loggedConn("127.0.0.1:8080", "username", "password");
    }
 }
