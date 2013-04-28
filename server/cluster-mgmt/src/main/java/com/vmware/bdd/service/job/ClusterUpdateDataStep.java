@@ -200,12 +200,27 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          nodeEntity.setGuestHostName(vNode.getGuestHostName());
          nodeEntity.setCpuNum(vNode.getCpu());
          nodeEntity.setMemorySize((long) vNode.getMem());
+
          //set vc resource pool entity
          nodeEntity.setVcRp(rpDao.findByClusterAndRp(
                vNode.getTargetVcCluster(), vNode.getTargetRp()));
 
-         //set disk entities, only system and data disk here
+         // set disk entities, include system/swap/data disk
          Set<DiskEntity> diskEntities = nodeEntity.getDisks();
+
+         // system disk
+         DiskEntity systemDisk = nodeEntity.findSystemDisk();
+         if (systemDisk == null)
+            systemDisk = new DiskEntity(nodeEntity.getVmName() + ".vmdk");
+         systemDisk.setDiskType(DiskType.SYSTEM_DISK.getType());
+         systemDisk.setExternalAddress(DiskEntity
+               .getSystemDiskExternalAddress());
+         systemDisk.setNodeEntity(nodeEntity);
+         systemDisk.setDatastoreName(vNode.getTargetDs());
+         VcVmUtil.populateDiskInfo(systemDisk, vNode.getVmMobId());
+         diskEntities.add(systemDisk);
+
+         // swap and data disk
          char c = DATA_DISK_START_INDEX;
          for (Disk disk : vNode.getVmSchema().diskSchema.getDisks()) {
             DiskEntity newDisk = nodeEntity.findDisk(disk.name);

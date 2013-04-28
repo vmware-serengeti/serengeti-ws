@@ -87,10 +87,9 @@
 		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
 		<beans:property name="managementOperation" value="DISABLE_OPERATION_FLAG" />
 	</beans:bean>
-		<beans:bean name="stopSingleVMTasklet"
+	<beans:bean name="stopSingleVMTasklet"
 		class="com.vmware.bdd.service.job.vm.StopSingleVMStep">
 		<beans:property name="clusteringService" ref="clusteringService" />
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 	</beans:bean>
-	
 </beans:beans>

@@ -142,7 +142,7 @@ public class NodeGroupEntity extends EntityBase {
 
    public NodeGroupEntity() {
       // default share level
-      this.ioShares = Priority.NORMAL;
+      this.ioShares = Priority.Normal;
    }
 
    public NodeGroupEntity(String name, int defineInstanceNum, int cpuNum,
@@ -157,7 +157,7 @@ public class NodeGroupEntity extends EntityBase {
       this.storageType = storageType;
       this.storageSize = storageSize;
       // default share level
-      this.ioShares = Priority.NORMAL;
+      this.ioShares = Priority.Normal;
    }
 
    public String getHadoopConfig() {
@@ -370,7 +370,7 @@ public class NodeGroupEntity extends EntityBase {
    }
 
    public Set<String> getUsedVcDatastores() {
-      HashSet<String> datastores = new HashSet<String>();
+      Set<String> datastores = new HashSet<String>();
       for (NodeEntity node : nodes) {
          List<String> vcDss = node.getDatastoreNameList();
          if (vcDss != null) {

@@ -485,7 +485,6 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   @SuppressWarnings("unchecked")
    @CliCommand(value = "cluster setParam", help = "set cluster parameters")
    public void setParam(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
@@ -578,7 +577,6 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   @SuppressWarnings("unchecked")
    @CliCommand(value = "cluster resetParam", help = "reset cluster parameters")
    public void resetParam(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
@@ -620,7 +618,7 @@ public class ClusterCommands implements CommandMarker {
             requestBody.setActiveComputeNodeNum(-1);
          }
          if (ioShares || all) {
-            requestBody.setIoPriority(Priority.NORMAL);
+            requestBody.setIoPriority(Priority.Normal);
          }
          requestBody.setNodeGroupName(nodeGroupName);
          restClient.setParam(cluster, requestBody);

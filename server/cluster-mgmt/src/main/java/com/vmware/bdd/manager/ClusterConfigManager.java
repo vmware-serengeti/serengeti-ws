@@ -608,7 +608,6 @@ public class ClusterConfigManager {
          NodeGroupEntity groupEntity, Set<String> roles) {
       if (group.getStorage() != null) {
          groupEntity.setStorageSize(group.getStorage().getSizeGB());
-         List<String> groupRoles = group.getRoles();
          //currently, ignore input from CLI and hard code here
          String storageType = group.getStorage().getType();
          if (storageType != null) {
@@ -915,6 +914,7 @@ public class ClusterConfigManager {
       }
       storage.setNamePattern(getStoreNamePattern(storageType, storeNames));
       storage.setDsNames(storeNames);
+      storage.setShares(ngEntity.getIoShares());
 
       // set storage split policy based on group roles
       if (enumRoles.size() == 1

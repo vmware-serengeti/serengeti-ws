@@ -114,7 +114,7 @@ public class NodeEntity extends EntityBase {
    public List<String> getVolumns() {
       List<String> volumns = new ArrayList<String>();
       for (DiskEntity disk : disks) {
-         if (!DiskType.SWAP_DISK.getType().equals(disk.getDiskType()))
+         if (DiskType.DATA_DISK.getType().equals(disk.getDiskType()))
             volumns.add(disk.getDeviceName());
       }
       return volumns;
@@ -331,6 +331,16 @@ public class NodeEntity extends EntityBase {
             && this.disks != null);
       for (DiskEntity disk : this.disks) {
          if (disk.getName().equals(diskName))
+            return disk;
+      }
+
+      return null;
+   }
+
+   public DiskEntity findSystemDisk() {
+      AuAssert.check(this.disks != null);
+      for (DiskEntity disk : this.disks) {
+         if (DiskType.SYSTEM_DISK.getType().equals(disk.getDiskType()))
             return disk;
       }
 

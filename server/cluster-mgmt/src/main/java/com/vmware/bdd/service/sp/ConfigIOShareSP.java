@@ -15,30 +15,12 @@
 
 package com.vmware.bdd.service.sp;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 
-import org.apache.log4j.Logger;
-
-import com.vmware.aurora.vc.DeviceId;
-import com.vmware.aurora.vc.VcCache;
-import com.vmware.aurora.vc.VcVirtualMachine;
-import com.vmware.aurora.vc.VmConfigUtil;
-import com.vmware.aurora.vc.vcservice.VcContext;
-import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.Priority;
-import com.vmware.vim.binding.impl.vim.SharesInfoImpl;
-import com.vmware.vim.binding.impl.vim.vm.device.VirtualDeviceSpecImpl;
-import com.vmware.vim.binding.vim.SharesInfo;
-import com.vmware.vim.binding.vim.SharesInfo.Level;
-import com.vmware.vim.binding.vim.StorageResourceManager.IOAllocationInfo;
-import com.vmware.vim.binding.impl.vim.StorageResourceManager_Impl.IOAllocationInfoImpl;
-import com.vmware.vim.binding.vim.vm.device.VirtualDeviceSpec;
-import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
+import com.vmware.bdd.utils.VcVmUtil;
 
 public class ConfigIOShareSP implements Callable<Void> {
-   private static final Logger logger = Logger.getLogger(ConfigIOShareSP.class);
    private String vmId;
    private Priority ioShares;
 
@@ -66,43 +48,7 @@ public class ConfigIOShareSP implements Callable<Void> {
 
    @Override
    public Void call() throws Exception {
-      final VcVirtualMachine vcVm = getVcVm();
-
-      if (vcVm == null) {
-         logger.info("vm " + vmId + " is not found.");
-         return null;
-      }
-      VcContext.inVcSessionDo(new VcSession<Void>() {
-         @Override
-         protected Void body() throws Exception {
-            List<VirtualDeviceSpec> deviceSpecs = new ArrayList<VirtualDeviceSpec>();
-            for (DeviceId slot :vcVm.getVirtualDiskIds()) {
-               SharesInfo shares = new SharesInfoImpl();
-               shares.setLevel(Level.valueOf(ioShares.toString().toLowerCase()));
-               IOAllocationInfo allocationInfo = new IOAllocationInfoImpl();
-               allocationInfo.setShares(shares);
-               VirtualDisk vmdk = (VirtualDisk) vcVm.getVirtualDevice(slot);
-               vmdk.setStorageIOAllocation(allocationInfo);
-               VirtualDeviceSpec spec = new VirtualDeviceSpecImpl();
-               spec.setOperation(VirtualDeviceSpec.Operation.edit);
-               spec.setDevice(vmdk);
-               deviceSpecs.add(spec);
-            }
-            logger.info("reconfiguring disks in vm " + vmId + " io share level to "
-                  + ioShares);
-            vcVm.reconfigure(VmConfigUtil.createConfigSpec(deviceSpecs));
-            logger.info("reconfigured disks in vm " + vmId + " io share level to "
-                  + ioShares);
-            return null;
-         }
-         protected boolean isTaskSession() {
-            return true;
-         }
-      });
+      VcVmUtil.configIOShares(vmId, ioShares);
       return null;
-   }
-
-   public VcVirtualMachine getVcVm() {
-      return VcCache.getIgnoreMissing(vmId);
    }
 }

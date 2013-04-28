@@ -27,6 +27,7 @@ import com.vmware.aurora.global.DiskSize;
 import com.vmware.aurora.composition.DiskSchema.Disk;
 import com.vmware.aurora.util.AuAssert;
 import com.vmware.aurora.vc.DeviceId;
+import com.vmware.aurora.vc.DiskType;
 import com.vmware.aurora.vc.VcCluster;
 import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;
@@ -35,9 +36,9 @@ import com.vmware.aurora.vc.VcVirtualMachine.DiskCreateSpec;
 
 /**
  * Utility Class for the DiskSchema
- *
+ * 
  * @author sridharr
- *
+ * 
  */
 public class DiskSchemaUtil {
 
@@ -50,7 +51,7 @@ public class DiskSchemaUtil {
    }
 
    /**
-    *
+    * 
     * @param template
     * @param diskMap
     */
@@ -64,7 +65,7 @@ public class DiskSchemaUtil {
    /**
     * Get the set of disks to add to the newly cloned Vm (from the DiskSchema
     * information)
-    *
+    * 
     * @param hostList
     *           the list of hosts that have access to the datastores on which
     *           the disks are to be added
@@ -78,21 +79,31 @@ public class DiskSchemaUtil {
     * @return ArrayList of CreateSpec for the new disks to add hostList is
     *         updated
     */
-   public static List<DiskCreateSpec> getDisksToAdd(
-         List<VcHost> hostList, VcResourcePool rp, VcDatastore ds,
-         DiskSchema diskSchema,
+   public static List<DiskCreateSpec> getDisksToAdd(List<VcHost> hostList,
+         VcResourcePool rp, VcDatastore ds, DiskSchema diskSchema,
          HashMap<String, Disk.Operation> diskMap) {
       List<DiskCreateSpec> result = new ArrayList<DiskCreateSpec>();
-      // XXX : TODO Go through the hierarchy of DiskSchemas to ensure that these disks are to be added, not modified
-      // However, it appears that changing disk mode to independent_persistent is not supported in vSphere 5.1.
-      // That means we can no longer mark the OS and BIN disks to independent_persistent so that they are not snapshoted
+      /* XXX : TODO Go through the hierarchy of DiskSchemas to ensure that these
+       * disks are to be added, not modified. However, it appears that changing 
+       * disk mode to independent_persistent is not supported in vSphere 5.1.
+       * That means we can no longer mark the OS and BIN disks to independent_persistent 
+       * so that they are not snapshoted
+       */
       VcCluster cluster = rp.getVcCluster();
 
       HashMap<VcHost, Integer> hostCount = new HashMap<VcHost, Integer>();
 
       int numDisks = 0;
-      numDisks += diskSchema.getDisks().size();
       for (DiskSchema.Disk disk : diskSchema.getDisks()) {
+         if (disk.vmdkPath != null && !disk.vmdkPath.isEmpty()) {
+            // existed virtual disk, no need to create, need to attach.
+            continue;
+         }
+         if (DiskType.OS.getTypeName().equals(disk.type)) {
+            // system disk is either be cloned or attached, it will never be added.
+            continue;
+         }
+         numDisks++;
          VcDatastore diskDs = null;
          if (!disk.datastore.equals("")) {
             // Find the right datastore from the list of cluster datastores
@@ -113,9 +124,11 @@ public class DiskSchemaUtil {
          } else {
             // Make sure we don't already have an existing disk of the same address
             AuAssert.check(diskMap.get(disk.externalAddress) == null);
-            DiskCreateSpec createSpec = new DiskCreateSpec(new DeviceId(
-                        disk.externalAddress), diskDs, disk.name, disk.mode,
-                        DiskSize.sizeFromMB(disk.initialSizeMB), disk.allocationType);
+            DiskCreateSpec createSpec =
+                  new DiskCreateSpec(new DeviceId(disk.externalAddress),
+                        diskDs, disk.name, disk.mode,
+                        DiskSize.sizeFromMB(disk.initialSizeMB),
+                        disk.allocationType);
             result.add(createSpec);
          }
       }

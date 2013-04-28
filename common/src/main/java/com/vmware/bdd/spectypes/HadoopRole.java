@@ -71,9 +71,11 @@ public enum HadoopRole {
    public String toString() {
       return this.description;
    }
-   
+
    public boolean shouldRunAfterHDFS() {
-      if (this.equals(HadoopRole.HBASE_CLIENT_ROLE) || this.equals(HadoopRole.HBASE_MASTER_ROLE) || this.equals(HadoopRole.HBASE_REGIONSERVER_ROLE)) {
+      if (this.equals(HadoopRole.HBASE_CLIENT_ROLE)
+            || this.equals(HadoopRole.HBASE_MASTER_ROLE)
+            || this.equals(HadoopRole.HBASE_REGIONSERVER_ROLE)) {
          return true;
       }
       return false;
@@ -91,9 +93,10 @@ public enum HadoopRole {
    }
 
    /**
-    * Compare the order of roles according to their dependencies(the enum ordial is very important here)
-    *
-    *
+    * Compare the order of roles according to their dependencies(the enum ordial
+    * is very important here)
+    * 
+    * 
     */
    public static class RoleComparactor implements Comparator<String> {
       @Override
@@ -118,7 +121,8 @@ public enum HadoopRole {
          if (role1Dependency.ordinal() == role2Dependency.ordinal()) {
             return 0;
          } else {
-            return (role1Dependency.ordinal() > role2Dependency.ordinal()) ? 1 : -1;
+            return (role1Dependency.ordinal() > role2Dependency.ordinal()) ? 1
+                  : -1;
          }
       }
    }

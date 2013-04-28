@@ -168,7 +168,6 @@ public class Container implements IContainer {
                      + host.getName()
                      + " is estimated to have enough resource to place virtual node "
                      + vNode.getBaseNodeNames());
-               ;
                candidates.add(host);
             }
          }

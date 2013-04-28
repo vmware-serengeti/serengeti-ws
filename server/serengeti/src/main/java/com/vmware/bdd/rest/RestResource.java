@@ -326,7 +326,9 @@ public class RestResource {
          @RequestBody FixDiskRequestBody requestBody,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
-      Long taskId = null;
+      Long taskId =
+            clusterMgr.fixDiskFailures(clusterName,
+                  requestBody.getNodeGroupName());
       redirectRequest(taskId, request, response);
    }
 
