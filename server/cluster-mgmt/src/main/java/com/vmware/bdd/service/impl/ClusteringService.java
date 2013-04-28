@@ -124,7 +124,7 @@ public class ClusteringService implements IClusteringService {
    private IPlacementService placementService;
 
    private String templateSnapId;
-   private VcVirtualMachine vcVm;
+   private VcVirtualMachine templateVm;
    private BaseNode templateNode;
    private String templateNetworkLabel;
    private static boolean initialized = false;
@@ -173,6 +173,14 @@ public class ClusteringService implements IClusteringService {
       this.rpDao = rpDao;
    }
 
+   public String getTemplateSnapId() {
+      return templateSnapId;
+   }
+
+   public String getTemplateVmId() {
+      return templateVm.getId();
+   }
+
    public synchronized void init() {
       if (!initialized) {
          // XXX hack to approve bootstrap instance id, should be moved out of Configuration
@@ -207,10 +215,10 @@ public class ClusteringService implements IClusteringService {
    }
 
    private void convertTemplateVm() {
-      templateNode = new BaseNode(vcVm.getName());
+      templateNode = new BaseNode(templateVm.getName());
       List<DiskSpec> diskSpecs = new ArrayList<DiskSpec>();
-      for (DeviceId slot : vcVm.getVirtualDiskIds()) {
-         VirtualDisk vmdk = (VirtualDisk) vcVm.getVirtualDevice(slot);
+      for (DeviceId slot : templateVm.getVirtualDiskIds()) {
+         VirtualDisk vmdk = (VirtualDisk) templateVm.getVirtualDevice(slot);
          DiskSpec spec = new DiskSpec();
          spec.setSize((int) (vmdk.getCapacityInKB() / (1024 * 1024)));
          spec.setDiskType(DiskType.SYSTEM_DISK);
@@ -276,7 +284,7 @@ public class ClusteringService implements IClusteringService {
          } else {
             templateSnapId = snapshots.get(0).getName();
          }
-         vcVm = templateVM;
+         this.templateVm = templateVM;
       } catch (Exception e) {
          logger.error("Clustering service initialization error.");
          throw BddException.INTERNAL(e,
@@ -288,7 +296,8 @@ public class ClusteringService implements IClusteringService {
       templateNetworkLabel = VcContext.inVcSessionDo(new VcSession<String>() {
          @Override
          protected String body() throws Exception {
-            VirtualDevice[] devices = vcVm.getConfig().getHardware().getDevice();
+            VirtualDevice[] devices =
+                  templateVm.getConfig().getHardware().getDevice();
             for (VirtualDevice device : devices) {
                if (device.getKey() == 4000) {
                   return device.getDeviceInfo().getLabel();
@@ -299,18 +308,17 @@ public class ClusteringService implements IClusteringService {
       });
    }
 
-   private Map<String, String> getNetworkGuestVariable(NetworkAdd networkAdd,
-         BaseNode baseNode) {
+   public static Map<String, String> getNetworkGuestVariable(
+         NetworkAdd networkAdd, String ipAddress, String guestHostName) {
       Map<String, String> networkJson = new HashMap<String, String>();
       networkJson
             .put(Constants.GUEST_VARIABLE_POLICY_KEY, networkAdd.getType());
-      networkJson.put(Constants.GUEST_VARIABLE_IP_KEY, baseNode.getIpAddress());
+      networkJson.put(Constants.GUEST_VARIABLE_IP_KEY, ipAddress);
       networkJson.put(Constants.GUEST_VARIABLE_NETMASK_KEY,
             networkAdd.getNetmask());
       networkJson.put(Constants.GUEST_VARIABLE_GATEWAY_KEY,
             networkAdd.getGateway());
-      networkJson.put(Constants.GUEST_VARIABLE_HOSTNAME_KEY,
-            baseNode.getGuestHostName());
+      networkJson.put(Constants.GUEST_VARIABLE_HOSTNAME_KEY, guestHostName);
       networkJson.put(Constants.GUEST_VARIABLE_DNS_KEY_0, networkAdd.getDns1());
       networkJson.put(Constants.GUEST_VARIABLE_DNS_KEY_1, networkAdd.getDns2());
       return networkJson;
@@ -453,7 +461,8 @@ public class ClusteringService implements IClusteringService {
             folderList.add(folderName);
          }
          CreateVMFolderSP sp =
-               new CreateVMFolderSP(vcVm.getDatacenter(), null, folderList);
+               new CreateVMFolderSP(templateVm.getDatacenter(), null,
+                     folderList);
          storeProcedures[i] = sp;
          i++;
       }
@@ -693,7 +702,8 @@ public class ClusteringService implements IClusteringService {
          BaseNode vNode = vNodes.get(i);
          VmSchema createSchema = getVmSchema(vNode);
          Map<String, String> guestVariable =
-               getNetworkGuestVariable(networkAdd, vNode);
+               getNetworkGuestVariable(networkAdd, vNode.getIpAddress(),
+                     vNode.getGuestHostName());
          // timeout is 10 mintues
          QueryIpAddress query =
                new QueryIpAddress(Constants.VM_POWER_ON_WAITING_SEC);
@@ -873,8 +883,8 @@ public class ClusteringService implements IClusteringService {
 
    private VmSchema getVmSchema(BaseNode vNode) {
       VmSchema schema = vNode.getVmSchema();
-      schema.diskSchema.setParent(vcVm.getId());
-      schema.diskSchema.setParentSnap(templateSnapId);
+      schema.diskSchema.setParent(getTemplateVmId());
+      schema.diskSchema.setParentSnap(getTemplateSnapId());
       return schema;
    }
 
@@ -1214,7 +1224,7 @@ public class ClusteringService implements IClusteringService {
       // path format: <serengeti...>/<cluster name>/<group name>
       String[] folderNames = path.split("/");
       AuAssert.check(folderNames.length == 3);
-      VcDatacenter dc = vcVm.getDatacenter();
+      VcDatacenter dc = templateVm.getDatacenter();
       List<String> deletedFolders = new ArrayList<String>();
       deletedFolders.add(folderNames[0]);
       deletedFolders.add(folderNames[1]);

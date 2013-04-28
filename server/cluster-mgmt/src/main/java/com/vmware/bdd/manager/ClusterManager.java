@@ -29,6 +29,7 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
@@ -46,7 +47,9 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterConfigException;
+import com.vmware.bdd.exception.ClusterHealServiceException;
 import com.vmware.bdd.exception.ClusterManagerException;
+import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.resmgmt.INetworkService;
@@ -75,6 +78,8 @@ public class ClusterManager {
    private RackInfoManager rackInfoMgr;
 
    private IClusteringService clusteringService;
+
+   private IClusterHealService clusterHealService;
 
    public JobManager getJobManager() {
       return jobManager;
@@ -143,6 +148,15 @@ public class ClusterManager {
    @Autowired
    public void setClusteringService(IClusteringService clusteringService) {
       this.clusteringService = clusteringService;
+   }
+
+   public IClusterHealService getClusterHealService() {
+      return clusterHealService;
+   }
+
+   @Autowired
+   public void setClusterHealService(IClusterHealService clusterHealService) {
+      this.clusterHealService = clusterHealService;
    }
 
    public Map<String, Object> getClusterConfigManifest(String clusterName,
@@ -793,8 +807,9 @@ public class ClusterManager {
 
       Boolean preEnableSetting = cluster.getAutomationEnable();
       Integer preVhmMinNumSetting = cluster.getVhmMinNum();
-      
-      if (enableAutoElasticity == preEnableSetting && minComputeNodeNum == preVhmMinNumSetting) {
+
+      if (enableAutoElasticity == preEnableSetting
+            && minComputeNodeNum == preVhmMinNumSetting) {
          return;
       }
 
@@ -842,7 +857,9 @@ public class ClusterManager {
    public Long setManualElasticity(String clusterName,
          Boolean enableManualElasticity, String nodeGroupName,
          Integer activeComputeNodeNum) throws Exception {
-      logger.info("clusterName: " + clusterName + ", enable?:" + enableManualElasticity + ", ngName: " + nodeGroupName + ",activeNodeNum:" + activeComputeNodeNum);
+      logger.info("clusterName: " + clusterName + ", enable?:"
+            + enableManualElasticity + ", ngName: " + nodeGroupName
+            + ",activeNodeNum:" + activeComputeNodeNum);
       logger.info("Set active compute node number to" + activeComputeNodeNum);
       ClusterRead cluster = getClusterByName(clusterName, false);
       // cluster must be contain node group
@@ -866,19 +883,19 @@ public class ClusterManager {
       if (!cluster.validateSetManualElasticity(nodeGroupName, nodeGroupNames)) {
          return null;
       }
-      
+
       ClusterEntity clusterEntity = clusterEntityMgr.findByName(clusterName);
       Boolean preAutoEnableSetting = clusterEntity.getAutomationEnable();
       NodeGroupEntity ngEntity = null;
       Integer preActiveComputeNodeNum = null;
-      
+
       if (nodeGroupName == null) {
          preActiveComputeNodeNum = clusterEntity.getVhmTargetNum();
       } else {
          ngEntity = clusterEntityMgr.findByName(clusterName, nodeGroupName);
          preActiveComputeNodeNum = ngEntity.getVhmTargetNum();
       }
-      
+
       if (activeComputeNodeNum == null) {
          if (preActiveComputeNodeNum == null) {
             return null;
@@ -894,7 +911,7 @@ public class ClusterManager {
             clusterEntityMgr.update(ngEntity);
          }
       }
-      
+
       if (preAutoEnableSetting && enableManualElasticity == null) {
          return null;
       }
@@ -1036,6 +1053,93 @@ public class ClusterManager {
             nodeGroup.setIoShares(ioShares);
             clusterEntityMgr.update(nodeGroup);
          }
+      }
+   }
+
+   public Long fixDiskFailures(String clusterName, String groupName)
+         throws Exception {
+      ClusterStatus oldStatus =
+            clusterEntityMgr.findByName(clusterName).getStatus();
+
+      if (ClusterStatus.RUNNING != oldStatus) {
+         throw ClusterHealServiceException.NOT_SUPPORTED(clusterName,
+               "cluster is not in RUNNING status");
+      }
+
+      List<NodeGroupEntity> nodeGroups;
+
+      if (groupName != null) {
+         NodeGroupEntity nodeGroup =
+               clusterEntityMgr.findByName(clusterName, groupName);
+         AuAssert.check(nodeGroup != null);
+
+         nodeGroups = new ArrayList<NodeGroupEntity>(1);
+         nodeGroups.add(nodeGroup);
+      } else {
+         nodeGroups = clusterEntityMgr.findAllGroups(clusterName);
+      }
+
+      // only fix worker nodes that have datanode or tasktracker roles
+      boolean workerNodesFound = false;
+      JobParametersBuilder parametersBuilder = new JobParametersBuilder();
+      List<JobParameters> jobParameterList = new ArrayList<JobParameters>();
+
+      for (NodeGroupEntity nodeGroup : nodeGroups) {
+         List<String> roles = nodeGroup.getRoleNameList();
+
+         // TODO: more fine control on node roles
+         if (!roles.contains(HadoopRole.HADOOP_DATANODE.toString())
+               && !roles.contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {
+            logger.info("node group " + nodeGroup.getName()
+                  + " is not a worker node group, pass it");
+            continue;
+         }
+
+         workerNodesFound = true;
+         for (NodeEntity node : clusterEntityMgr.findAllNodes(clusterName,
+               nodeGroup.getName())) {
+            if (clusterHealService.hasBadDisks(node.getVmName())) {
+               logger.warn("node " + node.getVmName()
+                     + " has bad disks. Fixing it..");
+
+               JobParameters nodeParameters =
+                     parametersBuilder
+                           .addString(JobConstants.CLUSTER_NAME_JOB_PARAM,
+                                 clusterName)
+                           .addString(JobConstants.TARGET_NAME_JOB_PARAM,
+                                 node.getVmName())
+                           .addString(JobConstants.GROUP_NAME_JOB_PARAM,
+                                 nodeGroup.getName())
+                           .addString(JobConstants.SUB_JOB_NODE_NAME,
+                                 node.getVmName()).toJobParameters();
+               jobParameterList.add(nodeParameters);
+            }
+         }
+      }
+
+      if (!workerNodesFound) {
+         throw ClusterHealServiceException.NOT_SUPPORTED(clusterName,
+               "only support fixing disk failures for worker nodes");
+      }
+
+      // all target nodes are healthy, simply return
+      if (jobParameterList.isEmpty()) {
+         logger.info("all target nodes are healthy, simply return");
+         throw ClusterHealServiceException.NOT_NEEDED(clusterName);
+      }
+
+      try {
+         clusterEntityMgr.updateClusterStatus(clusterName,
+               ClusterStatus.MAINTENANCE);
+         return jobManager.runSubJobForNodes(
+               JobConstants.FIX_NODE_DISK_FAILURE_JOB_NAME, jobParameterList,
+               clusterName);
+      } catch (Exception e) {
+         logger.error("failed to fix disk failures, " + e.getMessage());
+         throw e;
+      } finally {
+         logger.info("reset to previous status " + oldStatus);
+         clusterEntityMgr.updateClusterStatus(clusterName, oldStatus);
       }
    }
 }

@@ -21,7 +21,7 @@ package com.vmware.bdd.apitypes;
  */
 
 public enum Priority {
-   LOW, NORMAL, HIGH
+   Low, Normal, High
 }
 
 

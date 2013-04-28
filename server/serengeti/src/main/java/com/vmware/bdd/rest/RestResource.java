@@ -270,21 +270,26 @@ public class RestResource {
 
    @RequestMapping(value = "/cluster/{clusterName}/elasticity", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
-   public void setElasticity(@PathVariable("clusterName") String clusterName, @RequestBody ElasticityRequestBody requestBody, HttpServletRequest request,
-         HttpServletResponse response) throws Exception {
-      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateClusterName(clusterName)) {
+   public void setElasticity(@PathVariable("clusterName") String clusterName,
+         @RequestBody ElasticityRequestBody requestBody,
+         HttpServletRequest request, HttpServletResponse response)
+         throws Exception {
+      if (CommonUtil.isBlank(clusterName)
+            || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
       if (requestBody.getElasticityOperation() == ElasticityOperation.OP_SET_AUTO) {
          Integer minComputeNodeNum = requestBody.getMinComputeNodeNum();
          if (minComputeNodeNum != null && minComputeNodeNum < 0) {
-            throw BddException.INVALID_PARAMETER("min compute node num", minComputeNodeNum.toString());
+            throw BddException.INVALID_PARAMETER("min compute node num",
+                  minComputeNodeNum.toString());
          }
          clusterMgr.setAutoElasticity(clusterName, requestBody.getEnableAutoElasticity(), minComputeNodeNum, requestBody.getCalledByReset());
       } else if (requestBody.getElasticityOperation() == ElasticityOperation.OP_SET_MANUAL) {
          Integer activeComputeNodeNum = requestBody.getActiveComputeNodeNum();
          String groupName = requestBody.getNodeGroupName();
-         if (!CommonUtil.isBlank(groupName) && !CommonUtil.validateNodeGroupName(groupName)) {
+         if (!CommonUtil.isBlank(groupName)
+               && !CommonUtil.validateNodeGroupName(groupName)) {
             throw BddException.INVALID_PARAMETER("node group name", groupName);
          }
          // The active compute node number must be a positive number or -1.
@@ -293,6 +298,7 @@ public class RestResource {
             throw BddException.INVALID_PARAMETER("instance number", activeComputeNodeNum.toString());
          }
          Long taskId = clusterMgr.setManualElasticity(clusterName, requestBody.getEnableManualElasticity(), groupName, activeComputeNodeNum);
+
          redirectRequest(taskId, request, response);
       } else {
          throw BddException.INVALID_PARAMETER("elasticity operation type", "");
@@ -328,7 +334,9 @@ public class RestResource {
          @RequestBody FixDiskRequestBody requestBody,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
-      Long taskId = null;
+      Long taskId =
+            clusterMgr.fixDiskFailures(clusterName,
+                  requestBody.getNodeGroupName());
       redirectRequest(taskId, request, response);
    }
 

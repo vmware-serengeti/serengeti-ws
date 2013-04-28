@@ -33,7 +33,7 @@ import com.vmware.aurora.vc.DiskSpec.AllocationType;
 @SequenceGenerator(name = "IdSequence", sequenceName = "disk_seq", allocationSize = 1)
 @Table(name = "disk")
 public class DiskEntity extends EntityBase {
-   // system disk will not be recorded
+   private static final String SYSTEM_DISK_ADDRESS = "VirtualLsiLogicController:0:0";
 
    @Column(name = "name")
    private String name;
@@ -171,6 +171,10 @@ public class DiskEntity extends EntityBase {
       disk.vmkdPath = other.vmkdPath;
 
       return disk;
+   }
+   
+   public static String getSystemDiskExternalAddress() {
+      return SYSTEM_DISK_ADDRESS;
    }
 
    // inside a vm, the disk name is unique

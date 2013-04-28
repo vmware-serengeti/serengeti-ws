@@ -84,7 +84,7 @@ public class NodeEntity extends EntityBase {
 
    @Column(name = "memory")
    private Long memorySize;
-   
+
    @ManyToOne
    @JoinColumn(name = "node_group_id")
    private NodeGroupEntity nodeGroup;
@@ -114,7 +114,7 @@ public class NodeEntity extends EntityBase {
    public List<String> getVolumns() {
       List<String> volumns = new ArrayList<String>();
       for (DiskEntity disk : disks) {
-         if (!DiskType.SWAP_DISK.getType().equals(disk.getDiskType()))
+         if (DiskType.DATA_DISK.getType().equals(disk.getDiskType()))
             volumns.add(disk.getDeviceName());
       }
       return volumns;
@@ -171,7 +171,7 @@ public class NodeEntity extends EntityBase {
    public NodeStatus getStatus() {
       return status;
    }
-   
+
 
    /*
     * This method will compare the setting status with existing status.
@@ -240,7 +240,8 @@ public class NodeEntity extends EntityBase {
    }
 
    /**
-    * @param cpuNum the cpuNum to set
+    * @param cpuNum
+    *           the cpuNum to set
     */
    public void setCpuNum(Integer cpuNum) {
       this.cpuNum = cpuNum;
@@ -254,7 +255,8 @@ public class NodeEntity extends EntityBase {
    }
 
    /**
-    * @param memorySize the memorySize to set
+    * @param memorySize
+    *           the memorySize to set
     */
    public void setMemorySize(Long memorySize) {
       this.memorySize = memorySize;
@@ -335,6 +337,16 @@ public class NodeEntity extends EntityBase {
       return null;
    }
 
+   public DiskEntity findSystemDisk() {
+      AuAssert.check(this.disks != null);
+      for (DiskEntity disk : this.disks) {
+         if (DiskType.SYSTEM_DISK.getType().equals(disk.getDiskType()))
+            return disk;
+      }
+
+      return null;
+   }
+
    // if includeVolumes is true, this method must be called inside a transaction
    public NodeRead toNodeRead(boolean includeVolumes) {
       NodeRead node = new NodeRead();
@@ -345,8 +357,10 @@ public class NodeEntity extends EntityBase {
       node.setMoId(this.moId);
       node.setStatus(this.status.toString());
       node.setAction(this.action);
-      node.setCpuNumber(this.cpuNum);
-      node.setMemory(this.memorySize);
+      if (this.cpuNum != null)
+         node.setCpuNumber(this.cpuNum);
+      if (this.memorySize != null)
+         node.setMemory(this.memorySize);
       List<String> roleNames = nodeGroup.getRoleNameList();
       node.setRoles(roleNames);
       if (includeVolumes)

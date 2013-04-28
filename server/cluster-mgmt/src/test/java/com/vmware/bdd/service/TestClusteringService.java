@@ -66,7 +66,7 @@ public class TestClusteringService {
             Mockito.mock(VcDatacenter.class));
 
       // set vcVm field
-      Field field = service.getClass().getDeclaredField("vcVm");
+      Field field = service.getClass().getDeclaredField("templateVm");
       field.setAccessible(true);
       field.set(service, vm);
    }
@@ -138,7 +138,7 @@ public class TestClusteringService {
 
       // mock a clusterEntityMgr and node group entity
       NodeGroupEntity nodeGroup = Mockito.mock(NodeGroupEntity.class);
-      Mockito.when(nodeGroup.getIoShares()).thenReturn(Priority.HIGH);
+      Mockito.when(nodeGroup.getIoShares()).thenReturn(Priority.High);
       ClusterEntityManager entityMgr = Mockito.mock(ClusterEntityManager.class);
       Mockito.when(entityMgr.findByName("test", "master"))
             .thenReturn(nodeGroup);
@@ -197,7 +197,7 @@ public class TestClusteringService {
 
       // mock a clusterEntityMgr and node group entity
       NodeGroupEntity nodeGroup = Mockito.mock(NodeGroupEntity.class);
-      Mockito.when(nodeGroup.getIoShares()).thenReturn(Priority.HIGH);
+      Mockito.when(nodeGroup.getIoShares()).thenReturn(Priority.High);
 
       ClusterEntityManager entityMgr = Mockito.mock(ClusterEntityManager.class);
       Mockito.when(entityMgr.findByName("test", "master"))
@@ -224,7 +224,7 @@ public class TestClusteringService {
       node1.setMoId("vm-1102");
       targetNodes.add(node2);
       MockTmScheduler.setFlag(VmOperation.RECONFIGURE_VM, true);
-      int done = service.configIOShares("cluster", targetNodes, Priority.HIGH);
+      int done = service.configIOShares("cluster", targetNodes, Priority.High);
       Assert.assertTrue(done == 2, "2 nodes been configured IO share level");
    }
 }

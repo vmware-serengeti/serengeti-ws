@@ -11,7 +11,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.gson.Gson;
@@ -20,6 +20,7 @@ import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
@@ -40,8 +41,8 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
    @Autowired
    private ClusterEntityManager clusterEntityMgr;
 
-   @BeforeMethod
-   public void setup() {
+   @BeforeClass
+   public static void setup() {
 
    }
 
@@ -134,6 +135,9 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
    @Test(groups = { "testClusterEntityManager" })
    @Transactional
    public void testClusterEntityManagerFuns() {
+      ClusterEntity cluster = clusterEntityMgr.findByName(CLUSTER_NAME);
+      if (cluster != null)
+         clusterEntityMgr.delete(cluster);
       testInsertClusterEntity();
       testUpdateClusterEntity();
       testUpdateNodeGroupEntity();
@@ -147,13 +151,16 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
 
       // start validation
       ClusterEntity read = clusterEntityMgr.findByName(CLUSTER_NAME);
-      Assert.assertTrue(read != null, "cluster " + CLUSTER_NAME + " should exist");
+      Assert.assertTrue(read != null, "cluster " + CLUSTER_NAME
+            + " should exist");
 
       NodeGroupEntity hdfs = clusterEntityMgr.findByName(cluster, HDFS_GROUP);
-      Assert.assertTrue(hdfs != null, "node group " + HDFS_GROUP + " should exist");
+      Assert.assertTrue(hdfs != null, "node group " + HDFS_GROUP
+            + " should exist");
 
       NodeEntity hdfsNode = clusterEntityMgr.findByName(hdfs, HDFS_NODE_0);
-      Assert.assertTrue(hdfsNode != null, "node " + HDFS_NODE_0 + " should exist");
+      Assert.assertTrue(hdfsNode != null, "node " + HDFS_NODE_0
+            + " should exist");
    }
 
    private void testUpdateClusterEntity() {
@@ -169,7 +176,8 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
    }
 
    private void testUpdateNodeGroupEntity() {
-      NodeGroupEntity hdfs = clusterEntityMgr.findByName(CLUSTER_NAME, HDFS_GROUP);
+      NodeGroupEntity hdfs =
+            clusterEntityMgr.findByName(CLUSTER_NAME, HDFS_GROUP);
       Assert.assertNotNull(hdfs);
       hdfs.setDefineInstanceNum(2);
       clusterEntityMgr.update(hdfs);
@@ -178,7 +186,7 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
             .getDefineInstanceNum() == 2,
             "defined instance number should be update to 2");
    }
-   
+
    private void testDeleteEntity() {
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(CLUSTER_NAME);
       for (NodeEntity node : nodes) {

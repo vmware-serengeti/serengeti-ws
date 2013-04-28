@@ -16,6 +16,7 @@
 package com.vmware.aurora.composition;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -30,9 +31,9 @@ import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 /**
  * Class representing the DiskSchema
- *
+ * 
  * @author sridharr
- *
+ * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "diskSchema")
@@ -43,11 +44,9 @@ public class DiskSchema extends Schema {
 
    public static class Disk extends Schema {
       public enum Operation {
-         CLONE,
-         ADD,
-         REMOVE,
-         PROMOTE
+         CLONE, ADD, REMOVE, PROMOTE
       }
+
       @XmlAttribute()
       public String name;
 
@@ -69,6 +68,9 @@ public class DiskSchema extends Schema {
       @XmlAttribute()
       public String datastore;
 
+      @XmlAttribute()
+      public String vmdkPath;
+
       @XmlElementWrapper(name = "diskAttributes")
       @XmlElement(name = "diskAttribute")
       public ArrayList<DiskAttribute> attributes;
@@ -85,7 +87,7 @@ public class DiskSchema extends Schema {
 
    @XmlElementWrapper(name = "disks")
    @XmlElement(name = "disk")
-   private ArrayList<Disk> disks;
+   private List<Disk> disks;
 
    @XmlAttribute()
    private String parent;
@@ -105,7 +107,7 @@ public class DiskSchema extends Schema {
       this.disks = disks;
    }
 
-   public ArrayList<Disk> getDisks() {
+   public List<Disk> getDisks() {
       return this.disks;
    }
 

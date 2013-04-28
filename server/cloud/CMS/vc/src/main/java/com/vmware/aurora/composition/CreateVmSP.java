@@ -23,7 +23,9 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import com.vmware.aurora.composition.DiskSchema.Disk;
+import com.vmware.aurora.global.DiskSize;
 import com.vmware.aurora.vc.DeviceId;
+import com.vmware.aurora.vc.DiskType;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;
@@ -31,16 +33,20 @@ import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcSnapshot;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.VcVirtualMachine.DiskCreateSpec;
+import com.vmware.aurora.vc.VmConfigUtil;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
+import com.vmware.vim.binding.impl.vim.vm.device.VirtualDiskImpl;
 import com.vmware.vim.binding.vim.Folder;
+import com.vmware.vim.binding.vim.vm.device.VirtualDeviceSpec;
+import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 
 /**
  * Stored Procedure for Creating a VM from a template
- *
+ * 
  * @author sridharr
- *
+ * 
  */
 public class CreateVmSP implements Callable<Void> {
    final String newVmName;
@@ -60,13 +66,15 @@ public class CreateVmSP implements Callable<Void> {
          VcResourcePool targetRp, VcDatastore targetDs,
          IPrePostPowerOn prePowerOn, IPrePostPowerOn postPowerOn,
          Map<String, String> bootupConfigs, boolean linkedClone, Folder vmFolder) {
-      this(newVmName, vmSchema, targetRp, targetDs, prePowerOn, postPowerOn, bootupConfigs, linkedClone, vmFolder, null);
+      this(newVmName, vmSchema, targetRp, targetDs, prePowerOn, postPowerOn,
+            bootupConfigs, linkedClone, vmFolder, null);
    }
 
    public CreateVmSP(String newVmName, VmSchema vmSchema,
          VcResourcePool targetRp, VcDatastore targetDs,
          IPrePostPowerOn prePowerOn, IPrePostPowerOn postPowerOn,
-         Map<String, String> bootupConfigs, boolean linkedClone, Folder vmFolder, VcHost host) {
+         Map<String, String> bootupConfigs, boolean linkedClone,
+         Folder vmFolder, VcHost host) {
       this.newVmName = newVmName;
       this.vmSchema = vmSchema;
       this.targetRp = targetRp;
@@ -98,8 +106,10 @@ public class CreateVmSP implements Callable<Void> {
 
    public void callInternal() throws Exception {
       // Find the template and template snapshot to clone from
-      final VcVirtualMachine template = VcCache.get(vmSchema.diskSchema.getParent());
-      VcSnapshot snap = template.getSnapshotByName(vmSchema.diskSchema.getParentSnap());
+      final VcVirtualMachine template =
+            VcCache.get(vmSchema.diskSchema.getParent());
+      VcSnapshot snap =
+            template.getSnapshotByName(vmSchema.diskSchema.getParentSnap());
 
       ConfigSpecImpl configSpec = new ConfigSpecImpl();
 
@@ -110,11 +120,6 @@ public class CreateVmSP implements Callable<Void> {
             new VcVirtualMachine.CreateSpec(newVmName, snap, targetRp,
                   targetDs, vmFolder, linkedClone, configSpec);
 
-      // Get list of disks to add
-      List<VcHost> hostList = new ArrayList<VcHost>();
-      List<DiskCreateSpec> addDisks = DiskSchemaUtil.getDisksToAdd(hostList, targetRp, targetDs,
-                  vmSchema.diskSchema, diskMap);
-
       // Clone from the template
       vcVm = template.cloneVm(vmSpec, null);
 
@@ -122,6 +127,11 @@ public class CreateVmSP implements Callable<Void> {
          vcVm.disableDrs();
       }
 
+      // Get list of disks to add
+      List<VcHost> hostList = new ArrayList<VcHost>();
+      List<DiskCreateSpec> addDisks =
+            DiskSchemaUtil.getDisksToAdd(hostList, targetRp, targetDs,
+                  vmSchema.diskSchema, diskMap);
       DiskCreateSpec[] tmpAddDisks = new DiskCreateSpec[addDisks.size()];
       tmpAddDisks = addDisks.toArray(tmpAddDisks);
 
@@ -130,8 +140,29 @@ public class CreateVmSP implements Callable<Void> {
       if (hostList.size() > 0 && !hostList.contains(vcVm.getHost())) {
          vcVm.migrate(hostList.get(0));
       }
-      // Add the new disks
+      // add the new disks
       vcVm.changeDisks(null, tmpAddDisks);
+
+      // attach existed disks
+      List<VirtualDeviceSpec> deviceChange = new ArrayList<VirtualDeviceSpec>();
+      for (Disk disk : vmSchema.diskSchema.getDisks()) {
+         if (disk.vmdkPath == null || disk.vmdkPath.isEmpty()
+               || DiskType.OS.getTypeName().equals(disk.type))
+            continue;
+
+         VirtualDisk.FlatVer2BackingInfo backing =
+               new VirtualDiskImpl.FlatVer2BackingInfoImpl();
+         backing.setFileName(disk.vmdkPath);
+         backing.setDiskMode(disk.mode.toString());
+
+         deviceChange.add(vcVm.attachVirtualDiskSpec(new DeviceId(
+               disk.externalAddress), backing, false, DiskSize
+               .sizeFromMB(disk.initialSizeMB)));
+      }
+
+      if (!deviceChange.isEmpty()) {
+         vcVm.reconfigure(VmConfigUtil.createConfigSpec(deviceChange));
+      }
 
       if (linkedClone) {
          // Promote necessary disks
@@ -149,8 +180,8 @@ public class CreateVmSP implements Callable<Void> {
       // XXX : TODO - can we set these in the ConfigSpec BEFORE clone? Current assert does not allow that.
       ConfigSpecImpl newConfigSpec = new ConfigSpecImpl();
       // Network changes
-      NetworkSchemaUtil.setNetworkSchema(newConfigSpec, targetRp.getVcCluster(),
-            vmSchema.networkSchema, vcVm);
+      NetworkSchemaUtil.setNetworkSchema(newConfigSpec,
+            targetRp.getVcCluster(), vmSchema.networkSchema, vcVm);
 
       // Resource schema
       ResourceSchemaUtil.setResourceSchema(newConfigSpec,

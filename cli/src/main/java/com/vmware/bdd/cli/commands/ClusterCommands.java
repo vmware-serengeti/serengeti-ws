@@ -660,8 +660,8 @@ public class ClusterCommands implements CommandMarker {
 
          // reset IOShares
          if (ioShares || all) {
-            restClient.prioritizeCluster(clusterName, nodeGroupName,
-                  Priority.NORMAL);
+            restClient
+                  .prioritizeCluster(clusterName, nodeGroupName, Priority.Normal);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                   clusterName, Constants.OUTPUT_OP_RESULT_PRIORITY);
 

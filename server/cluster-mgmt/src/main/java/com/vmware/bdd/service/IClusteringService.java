@@ -163,4 +163,16 @@ public interface IClusteringService {
     * @return
     */
    public boolean stopSingleVM(String clusterName, String nodeName, StatusUpdater statusUpdator, boolean... vmPoweroff);
+
+    /**
+    * get the snapshot id of the template vm
+    * @return
+    */
+   public String getTemplateSnapId();
+
+   /**
+    * get the vm id of template vm
+    * @return
+    */
+   public String getTemplateVmId();
 }

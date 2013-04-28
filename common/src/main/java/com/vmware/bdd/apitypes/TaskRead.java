@@ -183,8 +183,10 @@ public class TaskRead {
       private boolean succeed = true;
       private String errorMessage;
 
-      public NodeStatus(){}
-      
+      public NodeStatus() {
+
+      }
+
       public NodeStatus(String nodeName) {
          this.nodeName = nodeName;
       }
