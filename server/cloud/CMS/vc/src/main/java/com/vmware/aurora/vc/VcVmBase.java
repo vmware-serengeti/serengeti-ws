@@ -23,6 +23,8 @@ public interface VcVmBase extends VcObject {
 
    VirtualController getVirtualController(DeviceId deviceId);
 
+   VirtualDevice getDeviceByLabel(String label);
+
    String getDiskChangeId(DeviceId deviceId);
 
    abstract VcDatacenter getDatacenter();
@@ -143,7 +145,7 @@ abstract class VcVmBaseImpl extends VcObjectImpl implements VcVmBase {
     * @param label virtual device label
     * @return virtual device, null if not found
     */
-   protected VirtualDevice getDeviceByLabel(String label) {
+   public VirtualDevice getDeviceByLabel(String label) {
       VirtualDevice target = null;
       for (VirtualDevice device : getDevice()) {
          if (device.getDeviceInfo().getLabel().equalsIgnoreCase(label)) {

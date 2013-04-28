@@ -44,6 +44,10 @@
 		class="com.vmware.bdd.service.job.ClusterUpdateDataStep">
 		<beans:property name="networkMgr" ref="networkService" />
 	</beans:bean>
+	<beans:bean name="clusterNodeStatusVerifyTasklet"
+		class="com.vmware.bdd.service.job.ClusterNodeStatusVerifyStep">
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+	</beans:bean>
 	<beans:bean name="createClusterVMTasklet"
 		class="com.vmware.bdd.service.job.CreateClusterVMStep">
 		<beans:property name="clusteringService" ref="clusteringService" />

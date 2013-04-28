@@ -36,6 +36,7 @@ import com.vmware.aurora.composition.CreateVmSP;
 import com.vmware.aurora.composition.DeleteVMFolderSP;
 import com.vmware.aurora.composition.DiskSchema;
 import com.vmware.aurora.composition.DiskSchema.Disk;
+import com.vmware.aurora.composition.NetworkSchema.Network;
 import com.vmware.aurora.composition.VmSchema;
 import com.vmware.aurora.composition.compensation.CompensateCreateVmSP;
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
@@ -54,6 +55,7 @@ import com.vmware.aurora.vc.VcSnapshot;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcevent.VcEventRouter;
 import com.vmware.aurora.vc.vcservice.VcContext;
+import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
@@ -106,6 +108,7 @@ import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.VcVmUtil;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.fault.VmFaultToleranceOpIssuesList;
+import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
 import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
@@ -123,6 +126,7 @@ public class ClusteringService implements IClusteringService {
    private String templateSnapId;
    private VcVirtualMachine vcVm;
    private BaseNode templateNode;
+   private String templateNetworkLabel;
    private static boolean initialized = false;
 
    public INetworkService getNetworkMgr() {
@@ -190,6 +194,7 @@ public class ClusteringService implements IClusteringService {
          Scheduler.init(50, 50);
          CmsWorker.addPeriodic(new ClusterNodeUpdator(getClusterEntityMgr()));
          snapshotTemplateVM();
+         loadTemplateNetworkLable();
          convertTemplateVm();
          initialized = true;
       }
@@ -277,6 +282,21 @@ public class ClusteringService implements IClusteringService {
       }
    }
 
+   private void loadTemplateNetworkLable() {
+      templateNetworkLabel = VcContext.inVcSessionDo(new VcSession<String>() {
+         @Override
+         protected String body() throws Exception {
+            VirtualDevice[] devices = vcVm.getConfig().getHardware().getDevice();
+            for (VirtualDevice device : devices) {
+               if (device.getKey() == 4000) {
+                  return device.getDeviceInfo().getLabel();
+               }
+            }
+            return null;
+         }
+      });
+   }
+
    private Map<String, String> getNetworkGuestVariable(NetworkAdd networkAdd,
          BaseNode baseNode) {
       Map<String, String> networkJson = new HashMap<String, String>();
@@ -292,6 +312,17 @@ public class ClusteringService implements IClusteringService {
       networkJson.put(Constants.GUEST_VARIABLE_DNS_KEY_0, networkAdd.getDns1());
       networkJson.put(Constants.GUEST_VARIABLE_DNS_KEY_1, networkAdd.getDns2());
       return networkJson;
+   }
+
+   private void setNetworkSchema(List<BaseNode> vNodes) {
+      logger.info("Start to set network schema for template nic.");
+      for (BaseNode node : vNodes) {
+         List<Network> networks = node.getVmSchema().networkSchema.networks;
+         if (!networks.isEmpty()) {
+            // reset the first network label since template vm contains one nic by default
+            networks.get(0).nicLabel = templateNetworkLabel;
+         }
+      }
    }
 
    /**
@@ -651,6 +682,7 @@ public class ClusteringService implements IClusteringService {
       Map<String, Folder> folders = createVcFolders(vNodes.get(0).getCluster());
       String clusterRpName = createVcResourcePools(vNodes);
       logger.info("syncCreateVMs, start to create VMs.");
+      setNetworkSchema(vNodes);
       allocateStaticIp(networkAdd, vNodes, occupiedIps);
       Pair<Callable<Void>, Callable<Void>>[] storeProcedures =
             new Pair[vNodes.size()];

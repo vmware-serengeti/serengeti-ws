@@ -30,12 +30,18 @@
             <listener ref="stepListener" />
          </listeners>
       </step>
-      <step id="updateClusterDataStep2" next="setAutoElasticityStep">
+      <step id="updateClusterDataStep2" next="nodeStatusVerifyStep">
          <tasklet ref="updateClusterDataTasklet" />
          <listeners>
             <listener ref="stepListener" />
          </listeners>
       </step>
+		<step id="nodeStatusVerifyStep" next="setAutoElasticityStep">
+			<tasklet ref="clusterNodeStatusVerifyTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
       <step id="setAutoElasticityStep">
          <tasklet ref="setAutoElasticityTasklet" />
          <listeners>
