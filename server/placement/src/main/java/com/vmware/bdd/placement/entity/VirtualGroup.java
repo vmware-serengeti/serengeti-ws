@@ -113,7 +113,7 @@ public class VirtualGroup implements Comparable<VirtualGroup> {
    }
 
    public boolean isStrictAssociated() {
-      return strictAssociated;
+      return strictAssociated == null ? false : strictAssociated;
    }
 
    public void setStrictAssociated(boolean strictAssociated) {
