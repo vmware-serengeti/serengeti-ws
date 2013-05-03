@@ -47,11 +47,17 @@ public class SoftwareManagementStep extends TrackableTasklet {
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,
          JobExecutionStatusHolder jobExecutionStatusHolder) throws Exception {
-      String clusterName =
+      
+      String targetName =
             getJobParameters(chunkContext).getString(
-                  JobConstants.CLUSTER_NAME_JOB_PARAM);
+                  JobConstants.TARGET_NAME_JOB_PARAM);
+      if (targetName == null) {
+         targetName =
+               getJobParameters(chunkContext).getString(
+                     JobConstants.CLUSTER_NAME_JOB_PARAM);
+      }
       String jobName = chunkContext.getStepContext().getJobName();
-      logger.info("cluster : " + clusterName + ", operation: "
+      logger.info("target : " + targetName + ", operation: "
             + managementOperation + ", jobname: " + jobName);
       StatusUpdater statusUpdater =
             new DefaultStatusUpdater(jobExecutionStatusHolder,
@@ -69,9 +75,9 @@ public class SoftwareManagementStep extends TrackableTasklet {
          needAllocIp = false;
       }
       // write cluster spec file
-      File specFile = clusterManager.writeClusterSpecFile(clusterName, workDir, needAllocIp);
+      File specFile = clusterManager.writeClusterSpecFile(targetName, workDir, needAllocIp);
       ISoftwareManagementTask task =
-            createCommandTask(clusterName, specFile.getAbsolutePath(),
+            createCommandTask(targetName, specFile.getAbsolutePath(),
                   statusUpdater);
 
       //Map<String, Object> ret = executionService.execute(cmd);

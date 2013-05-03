@@ -44,9 +44,9 @@ public class SoftwareManagement {
     /**
      * Query operation progress
      * 
-     * @param clusterName
+     * @param targetName
      */
-    public OperationStatusWithDetail getOperationStatusWithDetail(String clusterName) throws ClusterOperationException, org.apache.thrift.TException;
+    public OperationStatusWithDetail getOperationStatusWithDetail(String targetName) throws ClusterOperationException, org.apache.thrift.TException;
 
   }
 
@@ -54,7 +54,7 @@ public class SoftwareManagement {
 
     public void runClusterOperation(ClusterOperation clusterOperation, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.runClusterOperation_call> resultHandler) throws org.apache.thrift.TException;
 
-    public void getOperationStatusWithDetail(String clusterName, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.getOperationStatusWithDetail_call> resultHandler) throws org.apache.thrift.TException;
+    public void getOperationStatusWithDetail(String targetName, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.getOperationStatusWithDetail_call> resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -104,16 +104,16 @@ public class SoftwareManagement {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "runClusterOperation failed: unknown result");
     }
 
-    public OperationStatusWithDetail getOperationStatusWithDetail(String clusterName) throws ClusterOperationException, org.apache.thrift.TException
+    public OperationStatusWithDetail getOperationStatusWithDetail(String targetName) throws ClusterOperationException, org.apache.thrift.TException
     {
-      send_getOperationStatusWithDetail(clusterName);
+      send_getOperationStatusWithDetail(targetName);
       return recv_getOperationStatusWithDetail();
     }
 
-    public void send_getOperationStatusWithDetail(String clusterName) throws org.apache.thrift.TException
+    public void send_getOperationStatusWithDetail(String targetName) throws org.apache.thrift.TException
     {
       getOperationStatusWithDetail_args args = new getOperationStatusWithDetail_args();
-      args.setClusterName(clusterName);
+      args.setTargetName(targetName);
       sendBase("getOperationStatusWithDetail", args);
     }
 
@@ -180,24 +180,24 @@ public class SoftwareManagement {
       }
     }
 
-    public void getOperationStatusWithDetail(String clusterName, org.apache.thrift.async.AsyncMethodCallback<getOperationStatusWithDetail_call> resultHandler) throws org.apache.thrift.TException {
+    public void getOperationStatusWithDetail(String targetName, org.apache.thrift.async.AsyncMethodCallback<getOperationStatusWithDetail_call> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      getOperationStatusWithDetail_call method_call = new getOperationStatusWithDetail_call(clusterName, resultHandler, this, ___protocolFactory, ___transport);
+      getOperationStatusWithDetail_call method_call = new getOperationStatusWithDetail_call(targetName, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class getOperationStatusWithDetail_call extends org.apache.thrift.async.TAsyncMethodCall {
-      private String clusterName;
-      public getOperationStatusWithDetail_call(String clusterName, org.apache.thrift.async.AsyncMethodCallback<getOperationStatusWithDetail_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private String targetName;
+      public getOperationStatusWithDetail_call(String targetName, org.apache.thrift.async.AsyncMethodCallback<getOperationStatusWithDetail_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
-        this.clusterName = clusterName;
+        this.targetName = targetName;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
         prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("getOperationStatusWithDetail", org.apache.thrift.protocol.TMessageType.CALL, 0));
         getOperationStatusWithDetail_args args = new getOperationStatusWithDetail_args();
-        args.setClusterName(clusterName);
+        args.setTargetName(targetName);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -271,7 +271,7 @@ public class SoftwareManagement {
       public getOperationStatusWithDetail_result getResult(I iface, getOperationStatusWithDetail_args args) throws org.apache.thrift.TException {
         getOperationStatusWithDetail_result result = new getOperationStatusWithDetail_result();
         try {
-          result.success = iface.getOperationStatusWithDetail(args.clusterName);
+          result.success = iface.getOperationStatusWithDetail(args.targetName);
         } catch (ClusterOperationException coe) {
           result.coe = coe;
         }
@@ -1099,7 +1099,7 @@ public class SoftwareManagement {
   public static class getOperationStatusWithDetail_args implements org.apache.thrift.TBase<getOperationStatusWithDetail_args, getOperationStatusWithDetail_args._Fields>, java.io.Serializable, Cloneable   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("getOperationStatusWithDetail_args");
 
-    private static final org.apache.thrift.protocol.TField CLUSTER_NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("clusterName", org.apache.thrift.protocol.TType.STRING, (short)1);
+    private static final org.apache.thrift.protocol.TField TARGET_NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("targetName", org.apache.thrift.protocol.TType.STRING, (short)1);
 
     private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
     static {
@@ -1107,11 +1107,11 @@ public class SoftwareManagement {
       schemes.put(TupleScheme.class, new getOperationStatusWithDetail_argsTupleSchemeFactory());
     }
 
-    public String clusterName; // required
+    public String targetName; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-      CLUSTER_NAME((short)1, "clusterName");
+      TARGET_NAME((short)1, "targetName");
 
       private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -1126,8 +1126,8 @@ public class SoftwareManagement {
        */
       public static _Fields findByThriftId(int fieldId) {
         switch(fieldId) {
-          case 1: // CLUSTER_NAME
-            return CLUSTER_NAME;
+          case 1: // TARGET_NAME
+            return TARGET_NAME;
           default:
             return null;
         }
@@ -1171,7 +1171,7 @@ public class SoftwareManagement {
     public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
-      tmpMap.put(_Fields.CLUSTER_NAME, new org.apache.thrift.meta_data.FieldMetaData("clusterName", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+      tmpMap.put(_Fields.TARGET_NAME, new org.apache.thrift.meta_data.FieldMetaData("targetName", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(getOperationStatusWithDetail_args.class, metaDataMap);
@@ -1181,18 +1181,18 @@ public class SoftwareManagement {
     }
 
     public getOperationStatusWithDetail_args(
-      String clusterName)
+      String targetName)
     {
       this();
-      this.clusterName = clusterName;
+      this.targetName = targetName;
     }
 
     /**
      * Performs a deep copy on <i>other</i>.
      */
     public getOperationStatusWithDetail_args(getOperationStatusWithDetail_args other) {
-      if (other.isSetClusterName()) {
-        this.clusterName = other.clusterName;
+      if (other.isSetTargetName()) {
+        this.targetName = other.targetName;
       }
     }
 
@@ -1202,40 +1202,40 @@ public class SoftwareManagement {
 
     @Override
     public void clear() {
-      this.clusterName = null;
+      this.targetName = null;
     }
 
-    public String getClusterName() {
-      return this.clusterName;
+    public String getTargetName() {
+      return this.targetName;
     }
 
-    public getOperationStatusWithDetail_args setClusterName(String clusterName) {
-      this.clusterName = clusterName;
+    public getOperationStatusWithDetail_args setTargetName(String targetName) {
+      this.targetName = targetName;
       return this;
     }
 
-    public void unsetClusterName() {
-      this.clusterName = null;
+    public void unsetTargetName() {
+      this.targetName = null;
     }
 
-    /** Returns true if field clusterName is set (has been assigned a value) and false otherwise */
-    public boolean isSetClusterName() {
-      return this.clusterName != null;
+    /** Returns true if field targetName is set (has been assigned a value) and false otherwise */
+    public boolean isSetTargetName() {
+      return this.targetName != null;
     }
 
-    public void setClusterNameIsSet(boolean value) {
+    public void setTargetNameIsSet(boolean value) {
       if (!value) {
-        this.clusterName = null;
+        this.targetName = null;
       }
     }
 
     public void setFieldValue(_Fields field, Object value) {
       switch (field) {
-      case CLUSTER_NAME:
+      case TARGET_NAME:
         if (value == null) {
-          unsetClusterName();
+          unsetTargetName();
         } else {
-          setClusterName((String)value);
+          setTargetName((String)value);
         }
         break;
 
@@ -1244,8 +1244,8 @@ public class SoftwareManagement {
 
     public Object getFieldValue(_Fields field) {
       switch (field) {
-      case CLUSTER_NAME:
-        return getClusterName();
+      case TARGET_NAME:
+        return getTargetName();
 
       }
       throw new IllegalStateException();
@@ -1258,8 +1258,8 @@ public class SoftwareManagement {
       }
 
       switch (field) {
-      case CLUSTER_NAME:
-        return isSetClusterName();
+      case TARGET_NAME:
+        return isSetTargetName();
       }
       throw new IllegalStateException();
     }
@@ -1277,12 +1277,12 @@ public class SoftwareManagement {
       if (that == null)
         return false;
 
-      boolean this_present_clusterName = true && this.isSetClusterName();
-      boolean that_present_clusterName = true && that.isSetClusterName();
-      if (this_present_clusterName || that_present_clusterName) {
-        if (!(this_present_clusterName && that_present_clusterName))
+      boolean this_present_targetName = true && this.isSetTargetName();
+      boolean that_present_targetName = true && that.isSetTargetName();
+      if (this_present_targetName || that_present_targetName) {
+        if (!(this_present_targetName && that_present_targetName))
           return false;
-        if (!this.clusterName.equals(that.clusterName))
+        if (!this.targetName.equals(that.targetName))
           return false;
       }
 
@@ -1302,12 +1302,12 @@ public class SoftwareManagement {
       int lastComparison = 0;
       getOperationStatusWithDetail_args typedOther = (getOperationStatusWithDetail_args)other;
 
-      lastComparison = Boolean.valueOf(isSetClusterName()).compareTo(typedOther.isSetClusterName());
+      lastComparison = Boolean.valueOf(isSetTargetName()).compareTo(typedOther.isSetTargetName());
       if (lastComparison != 0) {
         return lastComparison;
       }
-      if (isSetClusterName()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.clusterName, typedOther.clusterName);
+      if (isSetTargetName()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.targetName, typedOther.targetName);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -1332,11 +1332,11 @@ public class SoftwareManagement {
       StringBuilder sb = new StringBuilder("getOperationStatusWithDetail_args(");
       boolean first = true;
 
-      sb.append("clusterName:");
-      if (this.clusterName == null) {
+      sb.append("targetName:");
+      if (this.targetName == null) {
         sb.append("null");
       } else {
-        sb.append(this.clusterName);
+        sb.append(this.targetName);
       }
       first = false;
       sb.append(")");
@@ -1382,10 +1382,10 @@ public class SoftwareManagement {
             break;
           }
           switch (schemeField.id) {
-            case 1: // CLUSTER_NAME
+            case 1: // TARGET_NAME
               if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-                struct.clusterName = iprot.readString();
-                struct.setClusterNameIsSet(true);
+                struct.targetName = iprot.readString();
+                struct.setTargetNameIsSet(true);
               } else { 
                 org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
               }
@@ -1405,9 +1405,9 @@ public class SoftwareManagement {
         struct.validate();
 
         oprot.writeStructBegin(STRUCT_DESC);
-        if (struct.clusterName != null) {
-          oprot.writeFieldBegin(CLUSTER_NAME_FIELD_DESC);
-          oprot.writeString(struct.clusterName);
+        if (struct.targetName != null) {
+          oprot.writeFieldBegin(TARGET_NAME_FIELD_DESC);
+          oprot.writeString(struct.targetName);
           oprot.writeFieldEnd();
         }
         oprot.writeFieldStop();
@@ -1428,12 +1428,12 @@ public class SoftwareManagement {
       public void write(org.apache.thrift.protocol.TProtocol prot, getOperationStatusWithDetail_args struct) throws org.apache.thrift.TException {
         TTupleProtocol oprot = (TTupleProtocol) prot;
         BitSet optionals = new BitSet();
-        if (struct.isSetClusterName()) {
+        if (struct.isSetTargetName()) {
           optionals.set(0);
         }
         oprot.writeBitSet(optionals, 1);
-        if (struct.isSetClusterName()) {
-          oprot.writeString(struct.clusterName);
+        if (struct.isSetTargetName()) {
+          oprot.writeString(struct.targetName);
         }
       }
 
@@ -1442,8 +1442,8 @@ public class SoftwareManagement {
         TTupleProtocol iprot = (TTupleProtocol) prot;
         BitSet incoming = iprot.readBitSet(1);
         if (incoming.get(0)) {
-          struct.clusterName = iprot.readString();
-          struct.setClusterNameIsSet(true);
+          struct.targetName = iprot.readString();
+          struct.setTargetNameIsSet(true);
         }
       }
     }

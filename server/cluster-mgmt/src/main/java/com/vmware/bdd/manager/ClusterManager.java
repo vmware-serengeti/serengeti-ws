@@ -194,11 +194,12 @@ public class ClusterManager {
       }
    }
 
-   public File writeClusterSpecFile(String clusterName, File workDir,
+   public File writeClusterSpecFile(String targetName, File workDir,
          boolean needAllocIp) {
+      String clusterName = targetName.split("-")[0];
       String fileName = clusterName + ".json";
       List<String> targets = new ArrayList<String>(1);
-      targets.add(clusterName);
+      targets.add(targetName);
       Map<String, Object> clusterConfig =
             getClusterConfigManifest(clusterName, targets, needAllocIp);
 

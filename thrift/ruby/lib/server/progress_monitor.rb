@@ -32,11 +32,12 @@ module Software
           @log ||= Logger.new(STDOUT)
         end
 
-        def getClusterOperationStatus(clusterName, withDetail = false)
+        def getClusterOperationStatus(targetName, withDetail = false)
           if(withDetail)
             clusterDetail = OperationStatusWithDetail.new
           end
 
+          clusterName = fetchClusterName(targetName)
           clusterMain = OperationStatus.new
           clusterMain.total = 0
           clusterMain.success = 0
@@ -54,7 +55,7 @@ module Software
             nodes = []
             query = Chef::Search::Query.new
             query.search(:node, "cluster_name:#{clusterName}") do |n|
-              nodes.push(n) if n.name.start_with?(clusterName)
+              nodes.push(n) if n.name.start_with?(targetName)
             end
             nodes = nodes.sort_by! { |n| n.name }
             nodes.each do |node|
@@ -148,6 +149,10 @@ module Software
           cluster[:succeed] = (cluster[:success] == cluster[:total])
           cluster[:error_msg] = ERROR_BOOTSTAP_FAIL if cluster[:finished] and !cluster[:succeed]
           data = JSON.parse(cluster.to_json) # convert keys from symbol to string
+        end
+
+        def fetchClusterName(targetName)
+          return targetName.split('-')[0]
         end
 
       end

@@ -96,7 +96,7 @@ struct OperationStatusWithDetail{
 */
 struct ClusterOperation{
   1:required ClusterAction action,
-  2:required string clusterName,
+  2:required string targetName,
   3:required string specFileName,
   4:optional string logLevel,
 }
@@ -115,6 +115,6 @@ service SoftwareManagement{
   /**
     Query operation progress
    */
-  OperationStatusWithDetail getOperationStatusWithDetail(1:string clusterName) throws (1:ClusterOperationException coe),
+  OperationStatusWithDetail getOperationStatusWithDetail(1:string targetName) throws (1:ClusterOperationException coe),
 }
 

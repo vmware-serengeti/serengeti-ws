@@ -166,13 +166,13 @@ module Software
       class ClusterOperation
         include ::Thrift::Struct, ::Thrift::Struct_Union
         ACTION = 1
-        CLUSTERNAME = 2
+        TARGETNAME = 2
         SPECFILENAME = 3
         LOGLEVEL = 4
 
         FIELDS = {
           ACTION => {:type => ::Thrift::Types::I32, :name => 'action', :enum_class => ::Software::Mgmt::Thrift::ClusterAction},
-          CLUSTERNAME => {:type => ::Thrift::Types::STRING, :name => 'clusterName'},
+          TARGETNAME => {:type => ::Thrift::Types::STRING, :name => 'targetName'},
           SPECFILENAME => {:type => ::Thrift::Types::STRING, :name => 'specFileName'},
           LOGLEVEL => {:type => ::Thrift::Types::STRING, :name => 'logLevel', :optional => true}
         }
@@ -181,7 +181,7 @@ module Software
 
         def validate
           raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field action is unset!') unless @action
-          raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field clusterName is unset!') unless @clusterName
+          raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field targetName is unset!') unless @targetName
           raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field specFileName is unset!') unless @specFileName
           unless @action.nil? || ::Software::Mgmt::Thrift::ClusterAction::VALID_VALUES.include?(@action)
             raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Invalid value of field action!')

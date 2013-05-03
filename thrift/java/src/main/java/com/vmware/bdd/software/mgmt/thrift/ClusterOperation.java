@@ -37,7 +37,7 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("ClusterOperation");
 
   private static final org.apache.thrift.protocol.TField ACTION_FIELD_DESC = new org.apache.thrift.protocol.TField("action", org.apache.thrift.protocol.TType.I32, (short)1);
-  private static final org.apache.thrift.protocol.TField CLUSTER_NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("clusterName", org.apache.thrift.protocol.TType.STRING, (short)2);
+  private static final org.apache.thrift.protocol.TField TARGET_NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("targetName", org.apache.thrift.protocol.TType.STRING, (short)2);
   private static final org.apache.thrift.protocol.TField SPEC_FILE_NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("specFileName", org.apache.thrift.protocol.TType.STRING, (short)3);
   private static final org.apache.thrift.protocol.TField LOG_LEVEL_FIELD_DESC = new org.apache.thrift.protocol.TField("logLevel", org.apache.thrift.protocol.TType.STRING, (short)4);
 
@@ -52,7 +52,7 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
    * @see ClusterAction
    */
   public ClusterAction action; // required
-  public String clusterName; // required
+  public String targetName; // required
   public String specFileName; // required
   public String logLevel; // optional
 
@@ -63,7 +63,7 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
      * @see ClusterAction
      */
     ACTION((short)1, "action"),
-    CLUSTER_NAME((short)2, "clusterName"),
+    TARGET_NAME((short)2, "targetName"),
     SPEC_FILE_NAME((short)3, "specFileName"),
     LOG_LEVEL((short)4, "logLevel");
 
@@ -82,8 +82,8 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
       switch(fieldId) {
         case 1: // ACTION
           return ACTION;
-        case 2: // CLUSTER_NAME
-          return CLUSTER_NAME;
+        case 2: // TARGET_NAME
+          return TARGET_NAME;
         case 3: // SPEC_FILE_NAME
           return SPEC_FILE_NAME;
         case 4: // LOG_LEVEL
@@ -134,7 +134,7 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
     tmpMap.put(_Fields.ACTION, new org.apache.thrift.meta_data.FieldMetaData("action", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.EnumMetaData(org.apache.thrift.protocol.TType.ENUM, ClusterAction.class)));
-    tmpMap.put(_Fields.CLUSTER_NAME, new org.apache.thrift.meta_data.FieldMetaData("clusterName", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+    tmpMap.put(_Fields.TARGET_NAME, new org.apache.thrift.meta_data.FieldMetaData("targetName", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.SPEC_FILE_NAME, new org.apache.thrift.meta_data.FieldMetaData("specFileName", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
@@ -149,12 +149,12 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
 
   public ClusterOperation(
     ClusterAction action,
-    String clusterName,
+    String targetName,
     String specFileName)
   {
     this();
     this.action = action;
-    this.clusterName = clusterName;
+    this.targetName = targetName;
     this.specFileName = specFileName;
   }
 
@@ -165,8 +165,8 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
     if (other.isSetAction()) {
       this.action = other.action;
     }
-    if (other.isSetClusterName()) {
-      this.clusterName = other.clusterName;
+    if (other.isSetTargetName()) {
+      this.targetName = other.targetName;
     }
     if (other.isSetSpecFileName()) {
       this.specFileName = other.specFileName;
@@ -183,7 +183,7 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
   @Override
   public void clear() {
     this.action = null;
-    this.clusterName = null;
+    this.targetName = null;
     this.specFileName = null;
     this.logLevel = null;
   }
@@ -220,27 +220,27 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
     }
   }
 
-  public String getClusterName() {
-    return this.clusterName;
+  public String getTargetName() {
+    return this.targetName;
   }
 
-  public ClusterOperation setClusterName(String clusterName) {
-    this.clusterName = clusterName;
+  public ClusterOperation setTargetName(String targetName) {
+    this.targetName = targetName;
     return this;
   }
 
-  public void unsetClusterName() {
-    this.clusterName = null;
+  public void unsetTargetName() {
+    this.targetName = null;
   }
 
-  /** Returns true if field clusterName is set (has been assigned a value) and false otherwise */
-  public boolean isSetClusterName() {
-    return this.clusterName != null;
+  /** Returns true if field targetName is set (has been assigned a value) and false otherwise */
+  public boolean isSetTargetName() {
+    return this.targetName != null;
   }
 
-  public void setClusterNameIsSet(boolean value) {
+  public void setTargetNameIsSet(boolean value) {
     if (!value) {
-      this.clusterName = null;
+      this.targetName = null;
     }
   }
 
@@ -302,11 +302,11 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
       }
       break;
 
-    case CLUSTER_NAME:
+    case TARGET_NAME:
       if (value == null) {
-        unsetClusterName();
+        unsetTargetName();
       } else {
-        setClusterName((String)value);
+        setTargetName((String)value);
       }
       break;
 
@@ -334,8 +334,8 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
     case ACTION:
       return getAction();
 
-    case CLUSTER_NAME:
-      return getClusterName();
+    case TARGET_NAME:
+      return getTargetName();
 
     case SPEC_FILE_NAME:
       return getSpecFileName();
@@ -356,8 +356,8 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
     switch (field) {
     case ACTION:
       return isSetAction();
-    case CLUSTER_NAME:
-      return isSetClusterName();
+    case TARGET_NAME:
+      return isSetTargetName();
     case SPEC_FILE_NAME:
       return isSetSpecFileName();
     case LOG_LEVEL:
@@ -388,12 +388,12 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
         return false;
     }
 
-    boolean this_present_clusterName = true && this.isSetClusterName();
-    boolean that_present_clusterName = true && that.isSetClusterName();
-    if (this_present_clusterName || that_present_clusterName) {
-      if (!(this_present_clusterName && that_present_clusterName))
+    boolean this_present_targetName = true && this.isSetTargetName();
+    boolean that_present_targetName = true && that.isSetTargetName();
+    if (this_present_targetName || that_present_targetName) {
+      if (!(this_present_targetName && that_present_targetName))
         return false;
-      if (!this.clusterName.equals(that.clusterName))
+      if (!this.targetName.equals(that.targetName))
         return false;
     }
 
@@ -441,12 +441,12 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
         return lastComparison;
       }
     }
-    lastComparison = Boolean.valueOf(isSetClusterName()).compareTo(typedOther.isSetClusterName());
+    lastComparison = Boolean.valueOf(isSetTargetName()).compareTo(typedOther.isSetTargetName());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    if (isSetClusterName()) {
-      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.clusterName, typedOther.clusterName);
+    if (isSetTargetName()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.targetName, typedOther.targetName);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -499,11 +499,11 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
     }
     first = false;
     if (!first) sb.append(", ");
-    sb.append("clusterName:");
-    if (this.clusterName == null) {
+    sb.append("targetName:");
+    if (this.targetName == null) {
       sb.append("null");
     } else {
-      sb.append(this.clusterName);
+      sb.append(this.targetName);
     }
     first = false;
     if (!first) sb.append(", ");
@@ -533,8 +533,8 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
     if (action == null) {
       throw new org.apache.thrift.protocol.TProtocolException("Required field 'action' was not present! Struct: " + toString());
     }
-    if (clusterName == null) {
-      throw new org.apache.thrift.protocol.TProtocolException("Required field 'clusterName' was not present! Struct: " + toString());
+    if (targetName == null) {
+      throw new org.apache.thrift.protocol.TProtocolException("Required field 'targetName' was not present! Struct: " + toString());
     }
     if (specFileName == null) {
       throw new org.apache.thrift.protocol.TProtocolException("Required field 'specFileName' was not present! Struct: " + toString());
@@ -584,10 +584,10 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
-          case 2: // CLUSTER_NAME
+          case 2: // TARGET_NAME
             if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
-              struct.clusterName = iprot.readString();
-              struct.setClusterNameIsSet(true);
+              struct.targetName = iprot.readString();
+              struct.setTargetNameIsSet(true);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
@@ -628,9 +628,9 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
         oprot.writeI32(struct.action.getValue());
         oprot.writeFieldEnd();
       }
-      if (struct.clusterName != null) {
-        oprot.writeFieldBegin(CLUSTER_NAME_FIELD_DESC);
-        oprot.writeString(struct.clusterName);
+      if (struct.targetName != null) {
+        oprot.writeFieldBegin(TARGET_NAME_FIELD_DESC);
+        oprot.writeString(struct.targetName);
         oprot.writeFieldEnd();
       }
       if (struct.specFileName != null) {
@@ -663,7 +663,7 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
     public void write(org.apache.thrift.protocol.TProtocol prot, ClusterOperation struct) throws org.apache.thrift.TException {
       TTupleProtocol oprot = (TTupleProtocol) prot;
       oprot.writeI32(struct.action.getValue());
-      oprot.writeString(struct.clusterName);
+      oprot.writeString(struct.targetName);
       oprot.writeString(struct.specFileName);
       BitSet optionals = new BitSet();
       if (struct.isSetLogLevel()) {
@@ -680,8 +680,8 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
       TTupleProtocol iprot = (TTupleProtocol) prot;
       struct.action = ClusterAction.findByValue(iprot.readI32());
       struct.setActionIsSet(true);
-      struct.clusterName = iprot.readString();
-      struct.setClusterNameIsSet(true);
+      struct.targetName = iprot.readString();
+      struct.setTargetNameIsSet(true);
       struct.specFileName = iprot.readString();
       struct.setSpecFileNameIsSet(true);
       BitSet incoming = iprot.readBitSet(1);

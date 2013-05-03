@@ -75,13 +75,13 @@ public class SoftwareManagementClient implements SoftwareManagement.Iface {
          return managementClient.runClusterOperation(clusterOperation);
       } catch (ClusterOperationException e) {
          logger.error("Failed run cluseter operation for cluster: "
-               + clusterOperation.getClusterName());
+               + clusterOperation.getTargetName());
          throw SoftwareManagementException.CLUSTER_OPERATIOIN_FAILURE(e,
-               clusterOperation.getClusterName(), clusterOperation.getAction()
+               clusterOperation.getTargetName(), clusterOperation.getAction()
                      .toString(), e.getMessage());
       } catch (Throwable t) {
          throw SoftwareManagementException.CLUSTER_OPERATIOIN_UNKNOWN_ERROR(t,
-               clusterOperation.getClusterName(), clusterOperation.getAction()
+               clusterOperation.getTargetName(), clusterOperation.getAction()
                      .toString());
       }
    }
@@ -92,17 +92,17 @@ public class SoftwareManagementClient implements SoftwareManagement.Iface {
     */
    @Override
    public OperationStatusWithDetail getOperationStatusWithDetail(
-         String clusterName) {
+         String targetName) {
       try {
-         return managementClient.getOperationStatusWithDetail(clusterName);
+         return managementClient.getOperationStatusWithDetail(targetName);
       } catch (ClusterOperationException e) {
-         logger.error("Failed to get operation status for cluster: "
-               + clusterName);
+         logger.error("Failed to get operation status for target: "
+               + targetName);
          throw SoftwareManagementException.GET_OPERATIOIN_STATUS_FAILURE(e,
-               clusterName, e.getMessage());
+               targetName, e.getMessage());
       } catch (Throwable t) {
          throw SoftwareManagementException.GET_OPERATIOIN_STATUS_UNKNOWN_ERROR(
-               t, clusterName);
+               t, targetName);
       }
    }
 }

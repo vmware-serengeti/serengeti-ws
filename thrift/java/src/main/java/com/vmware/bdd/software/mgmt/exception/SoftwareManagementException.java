@@ -45,26 +45,26 @@ public class SoftwareManagementException extends BddException {
    }
 
    public static SoftwareManagementException CLUSTER_OPERATIOIN_FAILURE(
-         Throwable t, String clusterName, String operation, String errorMessage) {
+         Throwable t, String targetName, String operation, String errorMessage) {
       return new SoftwareManagementException(t, "CLUSTER_OPERATIOIN_FAILURE",
-            operation, clusterName, errorMessage);
+            operation, targetName, errorMessage);
    }
 
    public static SoftwareManagementException CLUSTER_OPERATIOIN_UNKNOWN_ERROR(
-         Throwable t, String clusterName, String operation) {
+         Throwable t, String targetName, String operation) {
       return new SoftwareManagementException(t,
-            "CLUSTER_OPERATIOIN_UNKNOWN_ERROR", operation, clusterName);
+            "CLUSTER_OPERATIOIN_UNKNOWN_ERROR", operation, targetName);
    }
 
    public static SoftwareManagementException GET_OPERATIOIN_STATUS_FAILURE(
-         Throwable t, String clusterName, String errorMessage) {
+         Throwable t, String targetName, String errorMessage) {
       return new SoftwareManagementException(t,
-            "GET_OPERATIOIN_STATUS_FAILURE", clusterName, errorMessage);
+            "GET_OPERATIOIN_STATUS_FAILURE", targetName, errorMessage);
    }
 
    public static SoftwareManagementException GET_OPERATIOIN_STATUS_UNKNOWN_ERROR(
-         Throwable t, String clusterName) {
+         Throwable t, String targetName) {
       return new SoftwareManagementException(t,
-            "GET_OPERATIOIN_STATUS_UNKNOWN_ERROR", clusterName);
+            "GET_OPERATIOIN_STATUS_UNKNOWN_ERROR", targetName);
    }
 }

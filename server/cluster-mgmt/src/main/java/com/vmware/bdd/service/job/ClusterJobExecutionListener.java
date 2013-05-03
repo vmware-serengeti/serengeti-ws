@@ -55,6 +55,9 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
    public void beforeJob(JobExecution je) {
       String clusterName =
             getJobParameters(je).getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
+      if (clusterName == null) {
+         clusterName = getJobParameters(je).getString(JobConstants.TARGET_NAME_JOB_PARAM).split("-")[0];
+      }
       clusterEntityMgr.updateClusterTaskId(clusterName, je.getId());
       super.beforeJob(je);
    }
@@ -86,6 +89,9 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
                   JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM);
       String clusterName =
             getJobParameters(je).getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
+      if (clusterName == null) {
+         clusterName = getJobParameters(je).getString(JobConstants.TARGET_NAME_JOB_PARAM).split("-")[0];
+      }
       Boolean success =
             TrackableTasklet.getFromJobExecutionContext(
                   je.getExecutionContext(),

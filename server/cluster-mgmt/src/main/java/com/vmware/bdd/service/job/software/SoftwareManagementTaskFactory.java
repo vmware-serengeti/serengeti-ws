@@ -29,7 +29,7 @@ import com.vmware.bdd.software.mgmt.thrift.ClusterOperation;
  */
 public class SoftwareManagementTaskFactory {
 
-   public static ISoftwareManagementTask createCommandTask(String clusterName,
+   public static ISoftwareManagementTask createCommandTask(String targetName,
          String specFileName, StatusUpdater statusUpdater,
          ManagementOperation managementOperation,
          ClusterEntityManager clusterEntityManager) {
@@ -65,7 +65,7 @@ public class SoftwareManagementTaskFactory {
       default:
          break;
       }
-      clusterOperation.setClusterName(clusterName);
+      clusterOperation.setTargetName(targetName);
       clusterOperation.setSpecFileName(specFileName);
       clusterOperation.setLogLevel(ClusterCmdUtil.getLogLevel());
       IronfanSoftwareManagementTask task =

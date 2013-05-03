@@ -30,6 +30,7 @@ public interface JobConstants {
    public static final String CLUSTER_DELETED_NODES_JOB_PARAM = "clusterDeletedNodes";
    public static final String CLUSTER_ID_JOB_PARAM = "clusterId";
    public static final String CLUSTER_NAME_JOB_PARAM = "clusterName";
+   public static final String TARGET_NAME_JOB_PARAM = "targetName";
    public static final String CLUSTER_USED_IP_JOB_PARAM = "clusterUsedIps";
    public static final String GROUP_NAME_JOB_PARAM = "groupName";
    public static final String GROUP_INSTANCE_NEW_NUMBER_JOB_PARAM = "newInstanceNumber";

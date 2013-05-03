@@ -32,6 +32,11 @@ public class ClusterNodeSyncupStep extends TrackableTasklet {
       String clusterName =
             getJobParameters(chunkContext).getString(
                   JobConstants.CLUSTER_NAME_JOB_PARAM);
+      if (clusterName == null) {
+         clusterName =
+               getJobParameters(chunkContext).getString(
+                     JobConstants.TARGET_NAME_JOB_PARAM).split("-")[0];
+      }
       getClusterEntityMgr().syncUp(clusterName);
       Boolean success =
             getFromJobExecutionContext(chunkContext,

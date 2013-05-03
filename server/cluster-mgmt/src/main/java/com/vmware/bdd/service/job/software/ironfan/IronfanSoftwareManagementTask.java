@@ -46,7 +46,7 @@ public class IronfanSoftwareManagementTask implements ISoftwareManagementTask {
 
    @Override
    public synchronized Map<String, Object> call() throws Exception {
-      logger.info("cluster : " + clusterOperation.getClusterName()
+      logger.info("cluster : " + clusterOperation.getTargetName()
             + " operation: " + clusterOperation.getAction().toString());
       Map<String, Object> result = new HashMap<String, Object>();
       //This is for create cluster test only. As there is UT in TestClusteringJobs.testCreateCluster
@@ -65,11 +65,11 @@ public class IronfanSoftwareManagementTask implements ISoftwareManagementTask {
             && action != ClusterAction.ENABLE_CHEF_CLIENT
             && action != ClusterAction.DESTROY) {
          monitor =
-               new ProgressMonitor(clusterOperation.getClusterName(),
+               new ProgressMonitor(clusterOperation.getTargetName(),
                      statusUpdater, clusterEntityMgr);
          progressThread =
                new Thread(monitor, "ProgressMonitor-"
-                     + clusterOperation.getClusterName());
+                     + clusterOperation.getTargetName());
          progressThread.setDaemon(true);
          progressThread.start();
       }
@@ -79,7 +79,7 @@ public class IronfanSoftwareManagementTask implements ISoftwareManagementTask {
          exitCode = client.runClusterOperation(clusterOperation);
       } catch (Throwable t) {
          logger.error(" operation : " + clusterOperation.getAction()
-               + " failed on cluster: " + clusterOperation.getClusterName(), t);
+               + " failed on cluster: " + clusterOperation.getTargetName(), t);
       } finally {
          if (progressThread != null) {
             if (monitor != null) {
@@ -92,12 +92,12 @@ public class IronfanSoftwareManagementTask implements ISoftwareManagementTask {
       }
       OperationStatusWithDetail detailedStatus =
             client.getOperationStatusWithDetail(clusterOperation
-                  .getClusterName());
+                  .getTargetName());
       statusUpdater.setProgress(((double) (detailedStatus.getOperationStatus()
             .getProgress())) / 100);
       boolean finished =
             clusterEntityMgr.handleOperationStatus(
-                  clusterOperation.getClusterName(), detailedStatus);
+                  clusterOperation.getTargetName().split("-")[0], detailedStatus);
       logger.info("updated progress. finished? " + finished);
 
       boolean succeed = true;

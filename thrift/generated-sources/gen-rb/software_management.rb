@@ -30,13 +30,13 @@ module Software
             raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'runClusterOperation failed: unknown result')
           end
 
-          def getOperationStatusWithDetail(clusterName)
-            send_getOperationStatusWithDetail(clusterName)
+          def getOperationStatusWithDetail(targetName)
+            send_getOperationStatusWithDetail(targetName)
             return recv_getOperationStatusWithDetail()
           end
 
-          def send_getOperationStatusWithDetail(clusterName)
-            send_message('getOperationStatusWithDetail', GetOperationStatusWithDetail_args, :clusterName => clusterName)
+          def send_getOperationStatusWithDetail(targetName)
+            send_message('getOperationStatusWithDetail', GetOperationStatusWithDetail_args, :targetName => targetName)
           end
 
           def recv_getOperationStatusWithDetail()
@@ -66,7 +66,7 @@ module Software
             args = read_args(iprot, GetOperationStatusWithDetail_args)
             result = GetOperationStatusWithDetail_result.new()
             begin
-              result.success = @handler.getOperationStatusWithDetail(args.clusterName)
+              result.success = @handler.getOperationStatusWithDetail(args.targetName)
             rescue ::Software::Mgmt::Thrift::ClusterOperationException => coe
               result.coe = coe
             end
@@ -113,10 +113,10 @@ module Software
 
         class GetOperationStatusWithDetail_args
           include ::Thrift::Struct, ::Thrift::Struct_Union
-          CLUSTERNAME = 1
+          TARGETNAME = 1
 
           FIELDS = {
-            CLUSTERNAME => {:type => ::Thrift::Types::STRING, :name => 'clusterName'}
+            TARGETNAME => {:type => ::Thrift::Types::STRING, :name => 'targetName'}
           }
 
           def struct_fields; FIELDS; end

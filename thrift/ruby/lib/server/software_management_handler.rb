@@ -51,7 +51,7 @@ module Software
         def runClusterOperation(clusterOperation)
           log.info("start:==============================================================================")
           log.info("cluster action: #{clusterOperation.action}")
-          log.info("cluster name: #{clusterOperation.clusterName}")
+          log.info("target name: #{clusterOperation.targetName}")
 
           Chef::Config[:distro] = 'centos5-vmware'
           optionStr = "-f #{clusterOperation.specFileName} --yes --bootstrap"
@@ -70,12 +70,13 @@ module Software
             operation = createStopOperation
             optionStr = "-f #{clusterOperation.specFileName} --yes"
           when ClusterAction::DESTROY
-            clusterFile = "#{@serengetiHome}/tmp/.ironfan-clusters/#{clusterOperation.clusterName}.rb"
+            clusterName = targetName.split('-')[0]
+            clusterFile = "#{@serengetiHome}/tmp/.ironfan-clusters/#{clusterName}.rb"
             if File::exist?(clusterFile)
               operation = createDestroyOperation
               optionStr = "-f #{clusterOperation.specFileName} --yes"
             else
-              log.info("cluster #{clusterOperation.clusterName} does not exist")
+              log.info("cluster #{clusterName} does not exist")
               return 0
             end
           when ClusterAction::CONFIGURE
@@ -113,7 +114,7 @@ module Software
           operation.configure_chef
           options = optionStr.split
           operation.parse_options(options)
-          operation.name_args = [clusterOperation.clusterName]
+          operation.name_args = [clusterOperation.targetName]
           exitCode = 0
           begin
             operation.run
@@ -125,9 +126,9 @@ module Software
           exitCode
         end
 
-        def getOperationStatusWithDetail(clusterName)
-          log.debug("get operation status for cluster name: #{clusterName}")
-          status = getClusterOperationStatus(clusterName, true)
+        def getOperationStatusWithDetail(targetName)
+          log.debug("get operation status for target name: #{targetName}")
+          status = getClusterOperationStatus(targetName, true)
           log.debug("status: #{status.inspect}")
           status
         end

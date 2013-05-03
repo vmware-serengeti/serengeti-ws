@@ -31,15 +31,15 @@ import com.vmware.bdd.utils.TracedRunnable;
 public class ProgressMonitor extends TracedRunnable {
    private static final Logger logger = Logger.getLogger(ProgressMonitor.class);
 
-   private String clusterName;
+   private String targetName;
    private StatusUpdater statusUpdater;
    private int queryInteral = 1000 * 10;
    private ClusterEntityManager clusterEntityMgr;
    private volatile boolean stop;
 
-   public ProgressMonitor(String clusterName, StatusUpdater statusUpdater,
+   public ProgressMonitor(String targetName, StatusUpdater statusUpdater,
          ClusterEntityManager clusterEntityMgr) {
-      this.clusterName = clusterName;
+      this.targetName = targetName;
       this.statusUpdater = statusUpdater;
       this.clusterEntityMgr = clusterEntityMgr;
    }
@@ -64,12 +64,12 @@ public class ProgressMonitor extends TracedRunnable {
     */
    @Override
    public void doWork() throws Exception {
-      logger.info("start monitor operation progress, cluster name :"
-            + clusterName);
+      logger.info("start monitor operation progress, target name :"
+            + targetName);
       SoftwareManagementClient monitorClient = new SoftwareManagementClient();
       monitorClient.init();
       OperationStatusWithDetail detailedStatus =
-            monitorClient.getOperationStatusWithDetail(clusterName);
+            monitorClient.getOperationStatusWithDetail(targetName);
       logger.info("progress finished? "
             + detailedStatus.getOperationStatus().isFinished());
       while (detailedStatus != null && !stop) {
@@ -77,7 +77,7 @@ public class ProgressMonitor extends TracedRunnable {
             int progress = detailedStatus.getOperationStatus().getProgress();
             statusUpdater.setProgress(((double) progress) / 100);
          }
-         clusterEntityMgr.handleOperationStatus(clusterName, detailedStatus);
+         clusterEntityMgr.handleOperationStatus(targetName.split("-")[0], detailedStatus);
          logger.info("operation has not finished. wait again");
          try {
             Thread.sleep(queryInteral);
@@ -87,7 +87,8 @@ public class ProgressMonitor extends TracedRunnable {
          }
          logger.info("before query progress");
          detailedStatus =
-               monitorClient.getOperationStatusWithDetail(clusterName);
+               monitorClient.getOperationStatusWithDetail(targetName);
+         logger.info(detailedStatus.toString());
          logger.info("after query progress");
       }
       if (monitorClient != null) {
