@@ -32,11 +32,11 @@ import com.vmware.bdd.software.mgmt.thrift.ServerData;
 
 
 public class SoftwareManagementClientTest {
-   
+
    private static final String clusterName = "cc2";
    private static final String configFileName =
          "/opt/serengeti/logs/task/3/1/cc2.json";
-   
+
    private SoftwareManagementClient client;
 
    @BeforeClass(groups = { "software-management" })
@@ -54,7 +54,7 @@ public class SoftwareManagementClientTest {
    public void createCluster() {
       ClusterOperation clusterOperation = new ClusterOperation();
       clusterOperation.setAction(ClusterAction.CREATE);
-      clusterOperation.setClusterName(clusterName);
+      clusterOperation.setTargetName(clusterName);
       clusterOperation.setSpecFileName(configFileName);
       client.runClusterOperation(clusterOperation);
    }
@@ -63,7 +63,7 @@ public class SoftwareManagementClientTest {
    public void queryCluster() {
       ClusterOperation clusterOperation = new ClusterOperation();
       clusterOperation.setAction(ClusterAction.QUERY);
-      clusterOperation.setClusterName(clusterName);
+      clusterOperation.setTargetName(clusterName);
       clusterOperation.setSpecFileName(configFileName);
       client.runClusterOperation(clusterOperation);
    }
@@ -72,7 +72,7 @@ public class SoftwareManagementClientTest {
    public void updateCluster() {
       ClusterOperation clusterOperation = new ClusterOperation();
       clusterOperation.setAction(ClusterAction.UPDATE);
-      clusterOperation.setClusterName(clusterName);
+      clusterOperation.setTargetName(clusterName);
       clusterOperation.setSpecFileName(configFileName);
       client.runClusterOperation(clusterOperation);
    }
@@ -81,7 +81,7 @@ public class SoftwareManagementClientTest {
    public void startCluster() {
       ClusterOperation clusterOperation = new ClusterOperation();
       clusterOperation.setAction(ClusterAction.START);
-      clusterOperation.setClusterName(clusterName);
+      clusterOperation.setTargetName(clusterName);
       clusterOperation.setSpecFileName(configFileName);
       client.runClusterOperation(clusterOperation);
    }
@@ -90,7 +90,7 @@ public class SoftwareManagementClientTest {
    public void stopCluster() {
       ClusterOperation clusterOperation = new ClusterOperation();
       clusterOperation.setAction(ClusterAction.STOP);
-      clusterOperation.setClusterName(clusterName);
+      clusterOperation.setTargetName(clusterName);
       clusterOperation.setSpecFileName(configFileName);
       client.runClusterOperation(clusterOperation);
    }
@@ -99,7 +99,7 @@ public class SoftwareManagementClientTest {
    public void deleteCluster() {
       ClusterOperation clusterOperation = new ClusterOperation();
       clusterOperation.setAction(ClusterAction.DESTROY);
-      clusterOperation.setClusterName(clusterName);
+      clusterOperation.setTargetName(clusterName);
       clusterOperation.setSpecFileName(configFileName);
       client.runClusterOperation(clusterOperation);
    }
@@ -108,7 +108,7 @@ public class SoftwareManagementClientTest {
    public void configureCluster() {
       ClusterOperation clusterOperation = new ClusterOperation();
       clusterOperation.setAction(ClusterAction.CONFIGURE);
-      clusterOperation.setClusterName(clusterName);
+      clusterOperation.setTargetName(clusterName);
       clusterOperation.setSpecFileName(configFileName);
       client.runClusterOperation(clusterOperation);
    }
@@ -117,11 +117,10 @@ public class SoftwareManagementClientTest {
    public void enableChefClientFlag() {
       ClusterOperation clusterOperation = new ClusterOperation();
       clusterOperation.setAction(ClusterAction.ENABLE_CHEF_CLIENT);
-      clusterOperation.setClusterName(clusterName);
+      clusterOperation.setTargetName(clusterName);
       clusterOperation.setSpecFileName(configFileName);
       client.runClusterOperation(clusterOperation);
    }
-
 
    @Test(groups = { "software-management" })
    public void getOperationStatusWithDetail() {
