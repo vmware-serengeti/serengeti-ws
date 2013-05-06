@@ -123,6 +123,15 @@ public class SoftwareManagementClientTest {
    }
 
    @Test(groups = { "software-management" })
+   public void disableChefClientFlag() {
+      ClusterOperation clusterOperation = new ClusterOperation();
+      clusterOperation.setAction(ClusterAction.DISABLE_CHEF_CLIENT);
+      clusterOperation.setTargetName(clusterName);
+      clusterOperation.setSpecFileName(configFileName);
+      client.runClusterOperation(clusterOperation);
+   }
+
+   @Test(groups = { "software-management" })
    public void getOperationStatusWithDetail() {
       OperationStatusWithDetail status =
             client.getOperationStatusWithDetail(clusterName);

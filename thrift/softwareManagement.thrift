@@ -32,7 +32,8 @@ enum ClusterAction {
   DESTROY = 6,
   CONFIGURE = 7,
   CONFIGURE_HARDWARE = 8,
-  ENABLE_CHEF_CLIENT = 9
+  ENABLE_CHEF_CLIENT = 9,
+  DISABLE_CHEF_CLIENT = 10
 } 
 enum ServerStatus{
   VM_READY=1,

@@ -20,7 +20,8 @@ public enum ClusterAction implements org.apache.thrift.TEnum {
   DESTROY(6),
   CONFIGURE(7),
   CONFIGURE_HARDWARE(8),
-  ENABLE_CHEF_CLIENT(9);
+  ENABLE_CHEF_CLIENT(9),
+  DISABLE_CHEF_CLIENT(10);
 
   private final int value;
 
@@ -59,6 +60,8 @@ public enum ClusterAction implements org.apache.thrift.TEnum {
         return CONFIGURE_HARDWARE;
       case 9:
         return ENABLE_CHEF_CLIENT;
+      case 10:
+        return DISABLE_CHEF_CLIENT;
       default:
         return null;
     }

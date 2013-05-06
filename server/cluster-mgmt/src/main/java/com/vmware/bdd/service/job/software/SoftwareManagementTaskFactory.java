@@ -62,6 +62,9 @@ public class SoftwareManagementTaskFactory {
       case ENABLE_OPERATION_FLAG:
          clusterOperation.setAction(ClusterAction.ENABLE_CHEF_CLIENT);
          break;
+      case DISABLE_OPERATION_FLAG:
+         clusterOperation.setAction(ClusterAction.DISABLE_CHEF_CLIENT);
+         break;
       default:
          break;
       }

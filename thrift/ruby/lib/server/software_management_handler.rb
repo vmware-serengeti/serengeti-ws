@@ -88,6 +88,9 @@ module Software
           when ClusterAction::ENABLE_CHEF_CLIENT
             operation = createStartOperation
             optionStr = "-f #{clusterOperation.specFileName} --set-chef-client-flag true --yes"
+          when ClusterAction::DISABLE_CHEF_CLIENT
+            operation = createStartOperation
+            optionStr = "-f #{clusterOperation.specFileName} --set-chef-client-flag false --yes"
           else
             log.info("invalid operation")
           end
