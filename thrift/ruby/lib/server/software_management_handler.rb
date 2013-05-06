@@ -70,7 +70,7 @@ module Software
             operation = createStopOperation
             optionStr = "-f #{clusterOperation.specFileName} --yes"
           when ClusterAction::DESTROY
-            clusterName = targetName.split('-')[0]
+            clusterName = clusterOperation.targetName.split('-')[0]
             clusterFile = "#{@serengetiHome}/tmp/.ironfan-clusters/#{clusterName}.rb"
             if File::exist?(clusterFile)
               operation = createDestroyOperation
