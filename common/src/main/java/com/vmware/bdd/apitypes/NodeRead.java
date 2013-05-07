@@ -52,13 +52,13 @@ public class NodeRead {
    private List<String> roles;
 
    @Expose
-   private int totalRAMInMB;
+   private long memory;
 
    @Expose
    private List<String> volumes;
 
    @Expose
-   private int totalCPUInMHz;
+   private int cpuNumber;
 
    public List<String> getVolumes() {
       return volumes;
@@ -132,20 +132,20 @@ public class NodeRead {
       this.roles = roles;
    }
 
-   public int getTotalRAMInMB() {
-      return totalRAMInMB;
+   public long getMemory() {
+      return memory;
    }
 
-   public void setTotalRAMInMB(int totalRAMInMB) {
-      this.totalRAMInMB = totalRAMInMB;
+   public void setMemory(long m) {
+      this.memory = m;
    }
 
-   public int getTotalCPUInMHz() {
-      return totalCPUInMHz;
+   public int getCpuNumber() {
+      return cpuNumber;
    }
 
-   public void setTotalCPUInMHz(int totalCPUInMHz) {
-      this.totalCPUInMHz = totalCPUInMHz;
+   public void setCpuNumber(int cpu) {
+      this.cpuNumber = cpu;
    }
 
 }

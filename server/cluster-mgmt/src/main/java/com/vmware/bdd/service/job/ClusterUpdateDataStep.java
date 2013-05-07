@@ -262,7 +262,8 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          nodeEntity.setHostName(vNode.getTargetHost());
          nodeEntity.setIpAddress(vNode.getIpAddress());
          nodeEntity.setGuestHostName(vNode.getGuestHostName());
-
+         nodeEntity.setCpuNum(vNode.getCpu());
+         nodeEntity.setMemorySize((long) vNode.getMem());
          //set vc resource pool entity
          nodeEntity.setVcRp(rpDao.findByClusterAndRp(
                vNode.getTargetVcCluster(), vNode.getTargetRp()));

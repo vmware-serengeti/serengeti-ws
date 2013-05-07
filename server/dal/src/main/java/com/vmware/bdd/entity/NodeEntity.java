@@ -79,6 +79,12 @@ public class NodeEntity extends EntityBase {
    @Column(name = "guest_host_name")
    private String guestHostName;
 
+   @Column(name = "cpu_number")
+   private Integer cpuNum;
+
+   @Column(name = "memory")
+   private Long memorySize;
+   
    @ManyToOne
    @JoinColumn(name = "node_group_id")
    private NodeGroupEntity nodeGroup;
@@ -165,6 +171,7 @@ public class NodeEntity extends EntityBase {
    public NodeStatus getStatus() {
       return status;
    }
+   
 
    /*
     * This method will compare the setting status with existing status.
@@ -225,6 +232,34 @@ public class NodeEntity extends EntityBase {
       this.ipAddress = ipAddress;
    }
 
+   /**
+    * @return the cpuNum
+    */
+   public Integer getCpuNum() {
+      return cpuNum;
+   }
+
+   /**
+    * @param cpuNum the cpuNum to set
+    */
+   public void setCpuNum(Integer cpuNum) {
+      this.cpuNum = cpuNum;
+   }
+
+   /**
+    * @return the memorySize
+    */
+   public Long getMemorySize() {
+      return memorySize;
+   }
+
+   /**
+    * @param memorySize the memorySize to set
+    */
+   public void setMemorySize(Long memorySize) {
+      this.memorySize = memorySize;
+   }
+
    public NodeGroupEntity getNodeGroup() {
       return nodeGroup;
    }
@@ -261,6 +296,8 @@ public class NodeEntity extends EntityBase {
       this.ipAddress = newNode.getIpAddress();
       this.status = newNode.getStatus();
       this.action = newNode.getAction();
+      this.memorySize = newNode.getMemorySize();
+      this.cpuNum = newNode.getCpuNum();
 
       if (newNode.getRack() != null) {
          this.rack = newNode.getRack();
@@ -308,6 +345,8 @@ public class NodeEntity extends EntityBase {
       node.setMoId(this.moId);
       node.setStatus(this.status.toString());
       node.setAction(this.action);
+      node.setCpuNumber(this.cpuNum);
+      node.setMemory(this.memorySize);
       List<String> roleNames = nodeGroup.getRoleNameList();
       node.setRoles(roleNames);
       if (includeVolumes)

@@ -1343,4 +1343,36 @@ public class ClusteringService implements IClusteringService {
          throw BddException.INTERNAL(e, e.getMessage());
       }
    }
+
+
+   @Override
+   public boolean startSingleVM(String clusterName, String nodeName, StatusUpdater statusUpdator) {
+      NodeEntity node = this.clusterEntityMgr.findNodeByName(nodeName);
+      QueryIpAddress query = new QueryIpAddress(600);
+      VcHost host = null;
+      if (node.getHostName() != null) {
+         host = VcResourceUtils.findHost(node.getHostName());
+      }
+      Map<String, String> bootupConfigs = new HashMap<String, String>();
+      VcVirtualMachine vcVm = VcCache.getIgnoreMissing(node.getMoId());
+      if (vcVm == null) {
+         logger.info("VC vm does not exist for node: " + node.getVmName());
+         return false;
+      }
+      StartVmSP startVMSP = new StartVmSP(vcVm, query, bootupConfigs, host);
+      return VcVmUtil.runSPOnSingleVM(node, startVMSP);
+   }
+
+   @Override
+   public boolean stopSingleVM(String clusterName, String nodeName, StatusUpdater statusUpdator) {
+      NodeEntity node = this.clusterEntityMgr.findNodeByName(nodeName);
+      VcVirtualMachine vcVm = VcCache.getIgnoreMissing(node.getMoId());
+      if (vcVm == null) {
+         logger.info("VC vm does not exist for node: " + node.getVmName());
+         return false;
+      }
+      StopVmSP stopVMSP = new StopVmSP(vcVm);
+      return VcVmUtil.runSPOnSingleVM(node, stopVMSP);
+   }
+
 }

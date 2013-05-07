@@ -14,8 +14,12 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import java.util.concurrent.Callable;
+
 import org.apache.log4j.Logger;
 
+import com.vmware.aurora.composition.concurrent.ExecutionResult;
+import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.vc.DeviceId;
 import com.vmware.aurora.vc.MoUtil;
 import com.vmware.aurora.vc.VcCache;
@@ -24,8 +28,10 @@ import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.entity.DiskEntity;
+import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.placement.entity.BaseNode;
+import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
 import com.vmware.vim.binding.vim.VirtualMachine.FaultToleranceState;
 import com.vmware.vim.binding.vim.vm.GuestInfo;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
@@ -161,5 +167,47 @@ public class VcVmUtil {
       diskEntity.setDatastoreMoId(MoUtil.morefToString(backing.getDatastore()));
       //      diskEntity.setDeviceName("");
       return true;
+   }
+   
+   public static boolean runSPOnSingleVM(NodeEntity node, Callable<Void> call){
+      boolean operationResult = true;
+      if (node == null || node.getMoId() == null) {
+         logger.info("VC vm does not exist for node: " + node.getVmName());
+         return false;
+      }
+      VcVirtualMachine vcVm = VcCache.getIgnoreMissing(node.getMoId());
+      if (vcVm == null) {
+         // cannot find VM
+         logger.info("VC vm does not exist for node: " + node.getVmName());
+         return false;
+      }
+      Callable<Void>[] storeProceduresArray = new Callable[1];
+      storeProceduresArray[0] = call;
+      NoProgressUpdateCallback callback = new NoProgressUpdateCallback();
+      try {
+         ExecutionResult[] result =
+               Scheduler
+                     .executeStoredProcedures(
+                           com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
+                           storeProceduresArray, callback);
+         if (result == null) {
+            logger.error("No result from composition layer");
+            return false;
+         }
+         else{
+            if(result[0].finished && result[0].throwable == null){
+               operationResult = true;
+               logger.info("successfully run operation on vm for node: " + node.getVmName());
+            }
+            else{
+               operationResult = false;
+               logger.error("failed in run operation on vm for node: " + node.getVmName());
+            }
+         }
+      }catch (Exception e) {
+         operationResult = false;
+         logger.error("error in run operation on vm.", e);         
+      }
+      return operationResult;      
    }
 }

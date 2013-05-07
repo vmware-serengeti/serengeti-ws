@@ -34,6 +34,7 @@ import com.vmware.bdd.apitypes.FixDiskRequestBody;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 
@@ -112,6 +113,19 @@ public class ClusterRestClient {
       PrettyOutput outputCallBack =
             getClusterPrettyOutputCallBack(this, clusterName);
       restClient.update(Integer.valueOf(instanceNum), path, httpverb,
+            outputCallBack);
+   }
+   
+   public void scale(ResourceScale scale){
+      final String path =
+            Constants.REST_PATH_CLUSTER + "/" + scale.getClusterName() + "/"
+                  + Constants.REST_PATH_NODEGROUP + "/" + scale.getNodeGroupName()
+                  + "/scale";
+      final HttpMethod httpverb = HttpMethod.PUT;
+
+      PrettyOutput outputCallBack =
+            getClusterPrettyOutputCallBack(this, scale.getClusterName());
+      restClient.update(scale, path, httpverb,
             outputCallBack);
    }
 

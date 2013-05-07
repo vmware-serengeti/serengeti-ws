@@ -144,4 +144,23 @@ public interface IClusteringService {
     * @return
     */
    public int configIOShares(String clusterName, List<NodeEntity> targetNodes, Priority ioShares);
+   
+   /**
+    * start a node in the cluster
+    * 
+    * @param clusterName
+    * @param nodeName
+    * @return
+    */
+   public boolean startSingleVM(String clusterName, String nodeName, StatusUpdater statusUpdator);
+   
+   /**
+    * stop a node in the cluster
+    * 
+    * @param clusterName
+    * @param nodeName
+    * @param statusUpdator
+    * @return
+    */
+   public boolean stopSingleVM(String clusterName, String nodeName, StatusUpdater statusUpdator);
 }

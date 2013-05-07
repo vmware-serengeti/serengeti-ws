@@ -45,6 +45,7 @@ import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.ClusterRestClient;
@@ -422,9 +423,11 @@ public class ClusterCommands implements CommandMarker {
    public void resizeCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
          @CliOption(key = { "nodeGroup" }, mandatory = true, help = "The node group name") final String nodeGroup,
-         @CliOption(key = { "instanceNum" }, mandatory = true, help = "The resized number of instances. It should be larger that existing one") final int instanceNum) {
+         @CliOption(key = { "instanceNum" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The resized number of instances. It should be larger that existing one") final int instanceNum,
+         @CliOption(key = { "cpuNumPerNode" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The number of vCPU for the nodes in this group") final int cpuNumber,
+         @CliOption(key = { "memCapacityMbPerNode" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The number of memory size in Mb for the nodes in this group") final int memory) {
 
-      if (instanceNum > 1) {
+      if (instanceNum > 1 || cpuNumber > 0 || memory > 0) {
          try {
             ClusterRead cluster = restClient.get(name, false);
             if (cluster == null) {
@@ -442,7 +445,8 @@ public class ClusterCommands implements CommandMarker {
                   found = true;
                   if (ng.getRoles() != null
                         && ng.getRoles().contains(
-                              HadoopRole.ZOOKEEPER_ROLE.toString())) {
+                              HadoopRole.ZOOKEEPER_ROLE.toString())
+                        && instanceNum > 1) {
                      CommandsUtils.printCmdFailure(
                            Constants.OUTPUT_OBJECT_CLUSTER, name,
                            Constants.OUTPUT_OP_RESIZE,
@@ -461,8 +465,13 @@ public class ClusterCommands implements CommandMarker {
                            + " does not exist.");
                return;
             }
-
-            restClient.resize(name, nodeGroup, instanceNum);
+            if (instanceNum > 1) {
+               restClient.resize(name, nodeGroup, instanceNum);
+            } else if (cpuNumber > 0 || memory > 0) {
+               ResourceScale resScale =
+                     new ResourceScale(name, nodeGroup, cpuNumber, memory);
+               restClient.scale(resScale);
+            }
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                   name, Constants.OUTPUT_OP_RESULT_RESIZE);
          } catch (CliRestException e) {
@@ -476,7 +485,7 @@ public class ClusterCommands implements CommandMarker {
                Constants.INVALID_VALUE + " instanceNum=" + instanceNum);
       }
    }
-   
+
    @SuppressWarnings("unchecked")
    @CliCommand(value = "cluster setParam", help = "set cluster parameters")
    public void setParam(
@@ -555,7 +564,8 @@ public class ClusterCommands implements CommandMarker {
             restClient.setElasticity(clusterName, requestBody);
             if (targetComputeNodeNum != null && targetComputeNodeNum > 0) {
                CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                     clusterName, Constants.OUTPUT_OP_RESULT_SET_MANUAL_ELASTICITY);
+                     clusterName,
+                     Constants.OUTPUT_OP_RESULT_SET_MANUAL_ELASTICITY);
             } else { // show status
                ClusterRead clusterRead = restClient.get(clusterName, true);
                prettyOutputDynamicResourceInfo(clusterRead);
@@ -585,7 +595,7 @@ public class ClusterCommands implements CommandMarker {
          }
       }
    }
-   
+
    @SuppressWarnings("unchecked")
    @CliCommand(value = "cluster resetParam", help = "reset cluster parameters")
    public void resetParam(
@@ -605,10 +615,10 @@ public class ClusterCommands implements CommandMarker {
                         + " does not exsit.");
             return;
          }
-         
+
          ElasticityRequestBody requestBody = new ElasticityRequestBody();
          requestBody.setCalledByReset(true);
-         
+
          // reset Auto Elasticity parameters
          if (elasticityMode || minComputeNodeNum || all) {
             requestBody.setElasticityOperation(ElasticityOperation.OP_SET_AUTO);
@@ -621,10 +631,12 @@ public class ClusterCommands implements CommandMarker {
                requestBody.setMinComputeNodeNum(0);
             }
             restClient.setElasticity(clusterName, requestBody);
-            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_RESULT_RESET_AUTO_ELASTICITY);
+            CommandsUtils
+                  .printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
+                        clusterName,
+                        Constants.OUTPUT_OP_RESULT_RESET_AUTO_ELASTICITY);
          }
-         
+
          if (elasticityMode || targetComputeNodeNum || all) {
             requestBody
                   .setElasticityOperation(ElasticityOperation.OP_SET_MANUAL);
@@ -642,16 +654,17 @@ public class ClusterCommands implements CommandMarker {
             }
             restClient.setElasticity(clusterName, requestBody);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_RESULT_RESET_MANUAL_ELASTICITY);
+                  clusterName,
+                  Constants.OUTPUT_OP_RESULT_RESET_MANUAL_ELASTICITY);
          }
-         
+
          // reset IOShares
          if (ioShares || all) {
-            restClient
-                  .prioritizeCluster(clusterName, nodeGroupName, Priority.NORMAL);
+            restClient.prioritizeCluster(clusterName, nodeGroupName,
+                  Priority.NORMAL);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                   clusterName, Constants.OUTPUT_OP_RESULT_PRIORITY);
-            
+
          }
       } catch (CliRestException e) {
          if (e.getMessage() != null) {
@@ -659,7 +672,7 @@ public class ClusterCommands implements CommandMarker {
                   clusterName, Constants.OUTPUT_OP_RESET_PARAM,
                   Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          }
-      }      
+      }
    }
 
    @CliCommand(value = "cluster target", help = "Set or query target cluster to run commands")
@@ -875,8 +888,8 @@ public class ClusterCommands implements CommandMarker {
          } else {
             FixDiskRequestBody requestBody = new FixDiskRequestBody();
             requestBody.setParallel(parallel);
-            if(!CommandsUtils.isBlank(nodeGroupName)) {
-               requestBody.setNodeGroupName(nodeGroupName);               
+            if (!CommandsUtils.isBlank(nodeGroupName)) {
+               requestBody.setNodeGroupName(nodeGroupName);
             }
             restClient.fixDisk(clusterName, requestBody);
          }
@@ -1003,8 +1016,7 @@ public class ClusterCommands implements CommandMarker {
                cluster.getDistro(), autoElasticityStatus, minComputeNodeNum,
                cluster.retrieveVhmTargetNum(), cluster.getStatus());
       } else {
-         String headerPattern =
-               "  %-15s%-9s%-11s%-15s%-24s%-26s%-10s\n";
+         String headerPattern = "  %-15s%-9s%-11s%-15s%-24s%-26s%-10s\n";
          System.out.printf(headerPattern, "CLUSTER NAME", "DISTRO", "TOPOLOGY",
                "AUTO ELASTIC", "MIN COMPUTE NODES NUM",
                "TARGET COMPUTE NODES NUM", "STATUS");

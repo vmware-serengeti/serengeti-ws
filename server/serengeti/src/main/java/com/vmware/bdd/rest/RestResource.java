@@ -54,6 +54,7 @@ import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.apitypes.RackInfoList;
 import com.vmware.bdd.apitypes.ResourcePoolAdd;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
+import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Type;
 import com.vmware.bdd.exception.BddException;
@@ -62,6 +63,7 @@ import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.DistroManager;
 import com.vmware.bdd.manager.JobManager;
 import com.vmware.bdd.manager.RackInfoManager;
+import com.vmware.bdd.manager.ScaleManager;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
@@ -87,6 +89,8 @@ public class RestResource {
    private DistroManager distroManager;
    @Autowired
    private IDatastoreService datastoreSvc;
+   @Autowired
+   private ScaleManager scaleMgr;
 
    private static final String ERR_CODE_FILE = "serengeti-errcode.properties";
    private static final int DEFAULT_HTTP_ERROR_CODE = 500;
@@ -236,6 +240,31 @@ public class RestResource {
       }
       Long taskId =
             clusterMgr.resizeCluster(clusterName, groupName, instanceNum);
+      redirectRequest(taskId, request, response);
+   }
+   
+   @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}/scale", method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.ACCEPTED)
+   public void scale(@PathVariable("clusterName") String clusterName,
+         @PathVariable("groupName") String groupName,
+         @RequestBody ResourceScale scale, HttpServletRequest request,
+         HttpServletResponse response) throws Exception {
+      if (CommonUtil.isBlank(clusterName)
+            || !CommonUtil.validateClusterName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+
+      if (CommonUtil.isBlank(groupName)
+            || !CommonUtil.validateNodeGroupName(groupName)) {
+         throw BddException.INVALID_PARAMETER("node group name", groupName);
+      }
+
+      if (scale.getCpuNumber() <= 0 && scale.getMemory() <= 0) {
+         throw BddException.INVALID_PARAMETER("node group scale parameter",scale);
+      }
+      logger.info("scale cluster: " + scale.toString());
+      Long taskId =
+            scaleMgr.scaleNodeGroupResource(scale);
       redirectRequest(taskId, request, response);
    }
 

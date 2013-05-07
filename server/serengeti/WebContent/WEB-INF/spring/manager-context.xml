@@ -73,7 +73,14 @@
 			<ref bean="jobParametersExtractor" />
 		</property>
 	</bean>
-
+	<bean id="scaleManager" class="com.vmware.bdd.manager.ScaleManager">
+		<property name="jobManager">
+			<ref bean="jobManager" />
+		</property>
+		<property name="clusterEntityMgr">
+			<ref bean="clusterEntityManager" />
+		</property>
+	</bean>
 	<bean id="clusteringService" class="com.vmware.bdd.service.impl.ClusteringService">
 		<property name="configMgr">
 			<ref bean="clusterConfigMgr" />
@@ -84,5 +91,11 @@
 	</bean>
 
 	<bean id="executionService" class="com.vmware.bdd.service.impl.ExecutionService" />
+	
+	<bean id="scaleService" class="com.vmware.bdd.service.impl.ScaleService">
+		<property name="clusterEntityMgr">
+			<ref bean="clusterEntityManager"/>
+		</property>
+	</bean>
 
 </beans>

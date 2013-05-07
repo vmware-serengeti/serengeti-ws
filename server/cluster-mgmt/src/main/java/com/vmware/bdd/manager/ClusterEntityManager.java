@@ -115,6 +115,10 @@ public class ClusterEntityManager {
       return nodeDao.findByName(nodeGroup, nodeName);
    }
 
+   public NodeEntity findNodeByName(String nodeName) {
+      return nodeDao.findByName(nodeName);
+   }
+
    public List<ClusterEntity> findAllClusters() {
       return clusterDao.findAll();
    }
@@ -211,8 +215,9 @@ public class ClusterEntityManager {
                         oldNode.setAction(serverData.getAction());
                         logger.debug("node status: "
                               + NodeStatus.fromString(serverData.getStatus()));
-                        oldNode.setStatus(NodeStatus.fromString(serverData
-                              .getStatus()),false);
+                        oldNode.setStatus(
+                              NodeStatus.fromString(serverData.getStatus()),
+                              false);
                         logger.debug("new node:" + oldNode.getVmName()
                               + ", status: " + oldNode.getStatus());
                         update(oldNode);
@@ -234,7 +239,7 @@ public class ClusterEntityManager {
       node.setIpAddress(null);
       node.setHostName(null);
       node.setMoId(null);
-      if (node.getAction() != null 
+      if (node.getAction() != null
             && !(node.getAction().equals(Constants.NODE_ACTION_CLONING_VM))
             && !(node.getAction().equals(Constants.NODE_ACTION_CLONING_FAILED))) {
          node.setAction(null);
@@ -247,6 +252,14 @@ public class ClusterEntityManager {
       List<NodeEntity> nodes = findAllNodes(clusterName);
 
       for (NodeEntity node : nodes) {
+         refreshNodeStatus(node, false);
+      }
+   }
+
+   @Transactional
+   synchronized public void syncUpNode(String clusterName, String nodeName) {
+      NodeEntity node = findNodeByName(nodeName);
+      if (node != null) {
          refreshNodeStatus(node, false);
       }
    }
@@ -277,8 +290,9 @@ public class ClusterEntityManager {
             if (ipAddress != null) {
                node.setStatus(NodeStatus.VM_READY);
                node.setIpAddress(ipAddress);
-               if (node.getAction() != null 
-                     && node.getAction().equals(Constants.NODE_ACTION_WAITING_IP)) {
+               if (node.getAction() != null
+                     && node.getAction().equals(
+                           Constants.NODE_ACTION_WAITING_IP)) {
                   node.setAction(null);
                }
             }
@@ -335,8 +349,8 @@ public class ClusterEntityManager {
    }
 
    @Transactional
-   synchronized public void refreshNodeByMobId(String vmId, 
-         String action, boolean inSession) {
+   synchronized public void refreshNodeByMobId(String vmId, String action,
+         boolean inSession) {
       NodeEntity node = nodeDao.findByMobId(vmId);
       if (node != null) {
          refreshNodeStatus(node, inSession);
@@ -372,22 +386,22 @@ public class ClusterEntityManager {
          node.setAction(nodeAction);
       }
    }
-   
+
    @Transactional
    public void updateClusterTaskId(String clusterName, Long taskId) {
       ClusterEntity cluster = clusterDao.findByName(clusterName);
       cluster.setLatestTaskId(taskId);
       clusterDao.update(cluster);
    }
-   
+
    public List<Long> getLatestTaskIds() {
       List<ClusterEntity> clusters = clusterDao.findAll();
       List<Long> taskIds = new ArrayList<Long>(clusters.size());
-      
-      for(ClusterEntity cluster : clusters) {
+
+      for (ClusterEntity cluster : clusters) {
          taskIds.add(cluster.getLatestTaskId());
       }
-      
+
       return taskIds;
    }
 }

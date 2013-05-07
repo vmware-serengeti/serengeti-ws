@@ -140,6 +140,8 @@ create table node (
    guest_host_name  varchar(255),
    node_group_id bigint,
    vc_rp_id     bigint,
+   cpu_number             integer,
+   memory                 bigint,
    primary key (id),
    foreign key(node_group_id) references node_group(id) ON DELETE CASCADE,
    foreign key(vc_rp_id) references vc_resource_pool(id) ON DELETE CASCADE

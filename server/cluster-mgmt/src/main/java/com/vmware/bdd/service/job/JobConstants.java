@@ -24,6 +24,7 @@ public interface JobConstants {
    public static final String CONFIG_CLUSTER_JOB_NAME = "configClusterJob";
    public static final String SET_MANUAL_ELASTICITY_JOB_NAME = "setManualElasticityJob";
    public static final String QUERY_CLUSTER_JOB_NAME = "queryClusterJob";
+   
    public static final String CLUSTER_SPEC_JOB_PARAM = "clusterSpec";
    public static final String CLUSTER_ADDED_NODES_JOB_PARAM = "clusterAddedNodes";
    public static final String CLUSTER_EXISTING_NODES_JOB_PARAM = "clusterExistingNodes";
@@ -38,10 +39,11 @@ public interface JobConstants {
    public static final String GROUP_ACTIVE_COMPUTE_NODE_NUMBER_JOB_PARAM = "activeComputeNodeNumber";
    public static final String HADOOP_JOBTRACKER_IP_JOB_PARAM = "hadoopJobTrackerIP";
    public static final String TIMESTAMP_JOB_PARAM = "timeStamp";
-   public static final String CLUSTER_OPERATION_SUCCESS = "isSuccess";
-   public static final String CLUSTER_DELETE_VM_OPERATION_SUCCESS = "isDeleted";
-   public static final String CLUSTER_CREATE_VM_OPERATION_SUCCESS = "isCreated";
-   public static final String CLUSTER_SET_AUTO_ELASTICITY_SUCCESS = "isSet";
+   public static final String CLUSTER_OPERATION_SUCCESS = "cluster.isSuccess";
+   public static final String NODE_OPERATION_SUCCESS = "node.isSuccess";
+   public static final String CLUSTER_DELETE_VM_OPERATION_SUCCESS = "cluster.isDeleted";
+   public static final String CLUSTER_CREATE_VM_OPERATION_SUCCESS = "cluster.isCreated";
+   public static final String CLUSTER_SET_AUTO_ELASTICITY_SUCCESS = "cluster.isSet";
    public static final String CLUSTER_OPERATION_INIT_STATUS = "clusterOperationInitStatus";
    public static final String CLUSTER_SUCCESS_STATUS_JOB_PARAM = "clusterSuccessStatus";
    public static final String CLUSTER_FAILURE_STATUS_JOB_PARAM = "clusterFailureStatus";
@@ -60,4 +62,8 @@ public interface JobConstants {
    public static final String SUB_JOB_NODE_NAME = "sub.job.node.name";
    public static final String SUB_JOB_NODES_SUCCEED = "sub.job.nodes.suceed";
    public static final String SUB_JOB_NODES_FAIL = "sub.job.nodes.fail";
+   
+   public static final String NODE_SCALE_JOB_NAME = "scaleSingleNodeJob";
+   public static final String NODE_SCALE_CPU_NUMBER = "node.scale.cpu";
+   public static final String NODE_SCALE_MEMORY_SIZE = "node.scale.memory";
 }
