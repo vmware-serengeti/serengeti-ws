@@ -15,30 +15,69 @@
 package com.vmware.bdd.service.job;
 
 import org.apache.log4j.Logger;
+import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.launch.NoSuchJobException;
+
+import com.vmware.bdd.exception.BddException;
 
 public class SimpleJobExecutionListener implements JobExecutionListener {
-   static final Logger logger = Logger.getLogger(SimpleJobExecutionListener.class);
-   JobExecutionStatusHolder jobExecutionStatusHolder;
+	private static final Logger logger = Logger
+			.getLogger(SimpleJobExecutionListener.class);
+	private JobExecutionStatusHolder jobExecutionStatusHolder;
+	private JobRegistry jobRegistry;
 
-   @Override
-   public void afterJob(JobExecution je) {
-      jobExecutionStatusHolder.unregisterJobExecution(je.getId());
-   }
+	public JobRegistry getJobRegistry() {
+		return jobRegistry;
+	}
 
-   @Override
-   public void beforeJob(JobExecution je) {
-      jobExecutionStatusHolder.registerJobExecution(je.getId());
-   }
+	public void setJobRegistry(JobRegistry jobRegistry) {
+		this.jobRegistry = jobRegistry;
+	}
 
-   public JobExecutionStatusHolder getJobExecutionStatusHolder() {
-      return jobExecutionStatusHolder;
-   }
+	@Override
+	public void afterJob(JobExecution je) {
+		jobExecutionStatusHolder.unregisterJobExecution(je.getId());
+		unRegisterJob(je);
+	}
 
-   public void setJobExecutionStatusHolder(
-         JobExecutionStatusHolder jobExecutionStatusHolder) {
-      this.jobExecutionStatusHolder = jobExecutionStatusHolder;
-   }
+	@Override
+	public void beforeJob(JobExecution je) {
+		jobExecutionStatusHolder.registerJobExecution(je.getId());
+	}
 
+	public JobExecutionStatusHolder getJobExecutionStatusHolder() {
+		return jobExecutionStatusHolder;
+	}
+
+	public void setJobExecutionStatusHolder(
+			JobExecutionStatusHolder jobExecutionStatusHolder) {
+		this.jobExecutionStatusHolder = jobExecutionStatusHolder;
+	}
+
+	private void unRegisterJob(JobExecution je) {
+		logger.info("unRegisterJob entered");
+		String jobName = je.getJobInstance().getJobName();
+		JobParameters jobParameters = je.getJobInstance().getJobParameters();
+		long subJobEnabled = jobParameters
+				.getLong(JobConstants.SUB_JOB_ENABLED);
+		// sub job launcher
+		if (subJobEnabled == 1) {
+			if (jobRegistry != null) {
+				try {
+					Job job = jobRegistry.getJob(jobName);
+					if (job != null) {
+						jobRegistry.unregister(jobName);
+						logger.info("unregistered sub job launcher. " + jobName);
+					}
+				} catch (NoSuchJobException e) {
+					throw BddException.INTERNAL(e,
+							"No spring batch job is registered. " + jobName);
+				}
+			}
+		}
+	}
 }

@@ -158,10 +158,11 @@ public class JobManager {
     * @return job execution id
     * @throws Exception
     */
-   private long createAndLaunchJobWithSubJob(String clusterName,
+   private synchronized long createAndLaunchJobWithSubJob(String clusterName,
          String subJobName, List<JobParameters> subJobParameters)
          throws Exception {
-      SimpleJob mainJob = new SimpleJob("composed-job");
+      SimpleJob mainJob = new SimpleJob("composed-job-" + clusterName + "-" + subJobName + "-" + System.nanoTime());
+	  //SimpleJob mainJob = new SimpleJob("composed-job-" + clusterName + "-" + subJobName);
       StepExecutionListener[] jobStepListeners = createJobStepListener();
       Map<String, JobParameter> mainJobParams =
             new TreeMap<String, JobParameter>();

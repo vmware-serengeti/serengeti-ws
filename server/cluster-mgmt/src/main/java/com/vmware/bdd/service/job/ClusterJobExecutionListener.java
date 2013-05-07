@@ -28,95 +28,96 @@ import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.service.IClusteringService;
 
 public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
-   private static final Logger logger = Logger
-         .getLogger(ClusterJobExecutionListener.class);
-   private IClusteringService clusteringService;
+	private static final Logger logger = Logger
+			.getLogger(ClusterJobExecutionListener.class);
+	private IClusteringService clusteringService;
 
-   private ClusterEntityManager clusterEntityMgr;
+	private ClusterEntityManager clusterEntityMgr;
 
-   public IClusteringService getClusteringService() {
-      return clusteringService;
-   }
 
-   public void setClusteringService(IClusteringService clusteringService) {
-      this.clusteringService = clusteringService;
-   }
+	public IClusteringService getClusteringService() {
+		return clusteringService;
+	}
 
-   public ClusterEntityManager getClusterEntityMgr() {
-      return clusterEntityMgr;
-   }
+	public void setClusteringService(IClusteringService clusteringService) {
+		this.clusteringService = clusteringService;
+	}
 
-   @Autowired
-   public void setClusterEntityMgr(ClusterEntityManager clusterEntityMgr) {
-      this.clusterEntityMgr = clusterEntityMgr;
-   }
+	public ClusterEntityManager getClusterEntityMgr() {
+		return clusterEntityMgr;
+	}
 
-   @Override
-   public void beforeJob(JobExecution je) {
-      String clusterName =
-            getJobParameters(je).getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
-      if (clusterName == null) {
-         clusterName = getJobParameters(je).getString(JobConstants.TARGET_NAME_JOB_PARAM).split("-")[0];
-      }
-      clusterEntityMgr.updateClusterTaskId(clusterName, je.getId());
-      super.beforeJob(je);
-   }
+	@Autowired
+	public void setClusterEntityMgr(ClusterEntityManager clusterEntityMgr) {
+		this.clusterEntityMgr = clusterEntityMgr;
+	}
 
-   public void afterJob(JobExecution je) {
-      releaseResource(je);
-      setClusterStatus(je);
-      super.afterJob(je);
-   }
 
-   private void releaseResource(JobExecution je) {
-      UUID reservationId =
-            TrackableTasklet.getFromJobExecutionContext(
-                  je.getExecutionContext(),
-                  JobConstants.CLUSTER_RESOURCE_RESERVATION_ID_JOB_PARAM,
-                  UUID.class);
-      if (reservationId != null) {
-         // release the resource reservation if some step failed, and the resource is not released yet.
-         clusteringService.commitReservation(reservationId);
-      }
-   }
+	@Override
+	public void beforeJob(JobExecution je) {
+		String clusterName = getJobParameters(je).getString(
+				JobConstants.CLUSTER_NAME_JOB_PARAM);
+		if (clusterName == null) {
+			clusterName = getJobParameters(je).getString(
+					JobConstants.TARGET_NAME_JOB_PARAM).split("-")[0];
+		}
+		clusterEntityMgr.updateClusterTaskId(clusterName, je.getId());
+		super.beforeJob(je);
+	}
 
-   private void setClusterStatus(JobExecution je) {
-      String successStatus =
-            getJobParameters(je).getString(
-                  JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM);
-      String failureStatus =
-            getJobParameters(je).getString(
-                  JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM);
-      String clusterName =
-            getJobParameters(je).getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
-      if (clusterName == null) {
-         clusterName = getJobParameters(je).getString(JobConstants.TARGET_NAME_JOB_PARAM).split("-")[0];
-      }
-      Boolean success =
-            TrackableTasklet.getFromJobExecutionContext(
-                  je.getExecutionContext(),
-                  JobConstants.CLUSTER_OPERATION_SUCCESS, Boolean.class);
+	public void afterJob(JobExecution je) {
+		releaseResource(je);
+		setClusterStatus(je);
+		super.afterJob(je);
+	}
 
-      if (success == null || success) {
-         success = (je.getExitStatus().equals(ExitStatus.COMPLETED));
-      }
+	private void releaseResource(JobExecution je) {
+		UUID reservationId = TrackableTasklet.getFromJobExecutionContext(
+				je.getExecutionContext(),
+				JobConstants.CLUSTER_RESOURCE_RESERVATION_ID_JOB_PARAM,
+				UUID.class);
+		if (reservationId != null) {
+			// release the resource reservation if some step failed, and the
+			// resource is not released yet.
+			clusteringService.commitReservation(reservationId);
+		}
+	}
 
-      ClusterStatus status = null;
-      if (success & successStatus != null) {
-         status = ClusterStatus.valueOf(successStatus);
-      } else if (!success && failureStatus != null) {
-         status = ClusterStatus.valueOf(failureStatus);
-      }
+	private void setClusterStatus(JobExecution je) {
+		String successStatus = getJobParameters(je).getString(
+				JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM);
+		String failureStatus = getJobParameters(je).getString(
+				JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM);
+		String clusterName = getJobParameters(je).getString(
+				JobConstants.CLUSTER_NAME_JOB_PARAM);
+		if (clusterName == null) {
+			clusterName = getJobParameters(je).getString(
+					JobConstants.TARGET_NAME_JOB_PARAM).split("-")[0];
+		}
+		Boolean success = TrackableTasklet.getFromJobExecutionContext(
+				je.getExecutionContext(),
+				JobConstants.CLUSTER_OPERATION_SUCCESS, Boolean.class);
 
-      logger.info("set cluster " + clusterName + " status to " + status);
-      ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
-      if (cluster != null && status != null) {
-         clusterEntityMgr.updateClusterStatus(clusterName, status);
-      }
-   }
+		if (success == null || success) {
+			success = (je.getExitStatus().equals(ExitStatus.COMPLETED));
+		}
 
-   JobParameters getJobParameters(JobExecution je) {
-      return je.getJobInstance().getJobParameters();
-   }
+		ClusterStatus status = null;
+		if (success & successStatus != null) {
+			status = ClusterStatus.valueOf(successStatus);
+		} else if (!success && failureStatus != null) {
+			status = ClusterStatus.valueOf(failureStatus);
+		}
+
+		logger.info("set cluster " + clusterName + " status to " + status);
+		ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
+		if (cluster != null && status != null) {
+			clusterEntityMgr.updateClusterStatus(clusterName, status);
+		}
+	}
+
+	JobParameters getJobParameters(JobExecution je) {
+		return je.getJobInstance().getJobParameters();
+	}
 
 }

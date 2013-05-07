@@ -16,6 +16,7 @@
 	</beans:bean>
 	<beans:bean id="mainJobListener"
 		class="com.vmware.bdd.service.job.SimpleJobExecutionListener">
+		<beans:property name="jobRegistry" ref="jobRegistry" />
 		<beans:property name="jobExecutionStatusHolder" ref="mainJobExecutionStatusHolder" />
 	</beans:bean>
 	<beans:bean id="stepListener"
@@ -30,6 +31,7 @@
 	</beans:bean>
 	<beans:bean id="clusterMainJobListener"
 		class="com.vmware.bdd.service.job.ClusterJobExecutionListener">
+		<beans:property name="jobRegistry" ref="jobRegistry" />
 		<beans:property name="jobExecutionStatusHolder" ref="mainJobExecutionStatusHolder" />
 		<beans:property name="clusteringService" ref="clusteringService" />
 	</beans:bean>
