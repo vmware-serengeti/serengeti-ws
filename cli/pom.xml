@@ -146,15 +146,5 @@
          <name>Springframework Maven SNAPSHOT Repository</name>
          <url>http://repo.springsource.org/libs-snapshot</url>
       </repository>
-      <repository>
-         <id>spring-maven-milestone</id>
-         <name>Springframework Maven Milestone Repository</name>
-         <url>http://repo.springframework.org/libs-milestone</url>
-      </repository>
-      <repository>
-         <id>spring-roo-repository</id>
-         <name>Spring Roo Maven Repository</name>
-         <url>http://spring-roo-repository.springsource.org/release</url>
-      </repository>
    </repositories>
 </project>
