@@ -38,14 +38,8 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="stopSingleVMStep" next="singleNodeSyncupStep">
+		<step id="stopSingleVMStep" next="scaleSingleVMStep">
 			<tasklet ref="stopSingleVMTasklet" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
-		<step id="singleNodeSyncupStep" next="scaleSingleVMStep">
-			<tasklet ref="singleNodeSyncupTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

@@ -57,7 +57,7 @@
 			</listeners>
 		</step>
 		<step id="softwareCreateClusterStep">
-			<tasklet ref="softwareBootstrapTargetTasklet" />
+			<tasklet ref="softwareCreateClusterTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
