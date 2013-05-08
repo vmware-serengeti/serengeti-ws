@@ -60,7 +60,17 @@ public class ScaleService implements IScaleService {
             + ", memory: " + memory);
       NodeEntity node = clusterEntityMgr.findNodeByName(nodeName);
       ScaleVMSP scaleVMSP = new ScaleVMSP(node.getMoId(), cpuNumber, memory);
-      return VcVmUtil.runSPOnSingleVM(node, scaleVMSP);
+      boolean vmResult =  VcVmUtil.runSPOnSingleVM(node, scaleVMSP);
+      if(vmResult){
+         if(cpuNumber > 0){
+            node.setCpuNum(cpuNumber);
+         }
+         if(memory > 0){
+            node.setMemorySize(memory);
+         }
+         clusterEntityMgr.update(node);
+      }
+      return vmResult;
    }
 
 }

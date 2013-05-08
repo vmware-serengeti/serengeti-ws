@@ -44,6 +44,7 @@ public class ScaleManager {
    public long scaleNodeGroupResource(ResourceScale scale) throws Exception {
       String clusterName = scale.getClusterName();
       List<JobParameters> jobParametersList = buildJobParameters(scale);
+      updateNodeGroupResource(scale);
       //launch sub job to scale node one by one
       try {
          return jobManager.runSubJobForNodes(JobConstants.NODE_SCALE_JOB_NAME,
@@ -68,8 +69,10 @@ public class ScaleManager {
       List<JobParameters> jobParametersList = new ArrayList<JobParameters>();
       JobParametersBuilder parametersBuilder = new JobParametersBuilder();
       for (NodeEntity nodeEntity : nodes) {
-         if ((nodeEntity.getCpuNum() != scale.getCpuNumber() && scale.getCpuNumber() > 0)
-               || (nodeEntity.getMemorySize() != scale.getMemory() && scale.getMemory() > 0)) {
+         if ((nodeEntity.getCpuNum() != scale.getCpuNumber() && scale
+               .getCpuNumber() > 0)
+               || (nodeEntity.getMemorySize() != scale.getMemory() && scale
+                     .getMemory() > 0)) {
             logger.info("original cpu number :" + nodeEntity.getCpuNum()
                   + ". Expected cpu number: " + scale.getCpuNumber());
             String nodeName = nodeEntity.getVmName();
@@ -92,6 +95,19 @@ public class ScaleManager {
          }
       }
       return jobParametersList;
+   }
+
+   public void updateNodeGroupResource(ResourceScale scale) {
+      NodeGroupEntity nodeGroup =
+            clusterEntityMgr.findByName(scale.getClusterName(),
+                  scale.getNodeGroupName());
+      if (scale.getCpuNumber() > 0) {
+         nodeGroup.setCpuNum(scale.getCpuNumber());
+      }
+      if (scale.getMemory() > 0) {
+         nodeGroup.setMemorySize((int) scale.getMemory());
+      }
+      clusterEntityMgr.update(nodeGroup);
    }
 
    /**
