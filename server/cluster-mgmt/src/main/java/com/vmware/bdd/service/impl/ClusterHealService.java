@@ -473,7 +473,7 @@ public class ClusterHealService implements IClusterHealService {
             AuAssert.check(vm != null);
             return vm;
          } else if (pair.first.throwable != null) {
-            logger.error("Failed to create VM " + node.getVmName(),
+            logger.error("Failed to create replace VM for node " + node.getVmName(),
                   pair.first.throwable);
             throw ClusterHealServiceException.FAILED_CREATE_REPLACEMENT_VM(node
                   .getVmName());

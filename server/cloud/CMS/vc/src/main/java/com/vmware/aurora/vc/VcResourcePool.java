@@ -139,9 +139,9 @@ public interface VcResourcePool extends VcObject {
     * TODO: not tested
     */
    abstract VcTask createVm(final ConfigSpec config,
-         final IVcTaskCallback callback) throws Exception;
+         final IVcTaskCallback callback, Folder folder) throws Exception;
 
-   abstract VcVirtualMachine createVm(ConfigSpec config) throws Exception;
+   abstract VcVirtualMachine createVm(ConfigSpec config, Folder folder) throws Exception;
 
    /**
     * Use this method when the VM needs to be created on a specific datastore
@@ -149,6 +149,14 @@ public interface VcResourcePool extends VcObject {
     * @throws Exception
     */
    abstract VcVirtualMachine createVm(ConfigSpec config, VcDatastore ds)
+         throws Exception;
+   
+   /**
+    * Use this method when the VM needs to be created on a specific datastore 
+    * and in a specific vm folder
+    * @throws Exception
+    */
+   abstract VcVirtualMachine createVm(ConfigSpec config, VcDatastore ds, Folder folder)
          throws Exception;
 
    /**
@@ -651,12 +659,14 @@ class VcResourcePoolImpl extends VcObjectImpl implements VcResourcePool {
     * @see com.vmware.aurora.vc.VcResourcePool#createVm(com.vmware.vim.binding.vim.vm.ConfigSpec, com.vmware.aurora.vc.IVcTaskCallback)
     */
    @Override
-   public VcTask createVm(final ConfigSpec config, final IVcTaskCallback callback)
+   public VcTask createVm(final ConfigSpec config, final IVcTaskCallback callback, final Folder folder)
    throws Exception {
       final VcDatacenter dc = getVcCluster().getDatacenter();
       VcTask task = VcContext.getTaskMgr().execute(new IVcTaskBody() {
          public VcTask body() throws Exception {
-            final Folder vmFolder = dc.getVmFolder();
+            Folder vmFolder = folder;
+            if (vmFolder == null)
+               vmFolder = dc.getVmFolder();
             return new VcTask(TaskType.CreateVm,
                   vmFolder.createVm(config, moRef, null), callback);
          }
@@ -670,8 +680,8 @@ class VcResourcePoolImpl extends VcObjectImpl implements VcResourcePool {
     * @see com.vmware.aurora.vc.VcResourcePool#createVm(com.vmware.vim.binding.vim.vm.ConfigSpec)
     */
    @Override
-   public VcVirtualMachine createVm(ConfigSpec config) throws Exception {
-      VcTask task = createVm(config, VcCache.getRefreshVcTaskCB(this));
+   public VcVirtualMachine createVm(ConfigSpec config, Folder vmFolder) throws Exception {
+      VcTask task = createVm(config, VcCache.getRefreshVcTaskCB(this), vmFolder);
       VcVirtualMachine vm = (VcVirtualMachine) task.waitForCompletion();
       return vm;
    }
@@ -682,12 +692,21 @@ class VcResourcePoolImpl extends VcObjectImpl implements VcResourcePool {
    @Override
    public VcVirtualMachine createVm(ConfigSpec config, VcDatastore ds)
          throws Exception {
+      return createVm(config, ds, null);
+   }
+   
+   /* (non-Javadoc)
+    * @see com.vmware.aurora.vc.VcResourcePool#createVm(com.vmware.vim.binding.vim.vm.ConfigSpec, com.vmware.aurora.vc.VcDatastore, com.vmware.vim.binding.vim.Folder)
+    */
+   @Override
+   public VcVirtualMachine createVm(ConfigSpec config, VcDatastore ds, Folder vmFolder)
+         throws Exception {
       String vmPathName = String.format("[%s]", ds.getURLName());
       FileInfo info = new com.vmware.vim.binding.impl.vim.vm.FileInfoImpl();
       info.setVmPathName(vmPathName);
       AuAssert.check(config.getFiles() == null);
       config.setFiles(info);
-      return createVm(config);
+      return createVm(config, vmFolder);
    }
 
    /* (non-Javadoc)
