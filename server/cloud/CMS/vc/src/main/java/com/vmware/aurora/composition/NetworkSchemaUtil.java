@@ -25,6 +25,7 @@ import com.vmware.aurora.util.AuAssert;
 
 import com.vmware.aurora.vc.VcCluster;
 import com.vmware.aurora.vc.VcNetwork;
+import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.VmConfigUtil;
 import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
 import com.vmware.vim.binding.vim.vm.device.VirtualDeviceSpec;
@@ -46,26 +47,22 @@ public class NetworkSchemaUtil {
    }
 
    public static void setNetworkSchema(ConfigSpecImpl spec, VcCluster cluster,
-         NetworkSchema networkSchema) throws Exception {
+         NetworkSchema networkSchema, VcVirtualMachine vcVm) throws Exception {
       List<VirtualDeviceSpec> changes = new ArrayList<VirtualDeviceSpec>();
 
-      // Edit existing networks
-      /*
-      for (NetworkSchema.Network network : templateNetworkSchema.networks) {
-         VcNetwork vN = cluster.getNetwork(network.vcNetwork);
-         AuAssert.check(vN != null);
-         changes.add(template.getVcVm().reconfigNetworkSpec(network.nicLabel,
-               vN));
-      }*/
-
-      // Add new networks
       for (NetworkSchema.Network network : networkSchema.networks) {
          VcNetwork vN = cluster.getNetwork(network.vcNetwork);
          AuAssert.check(vN != null);
-         VirtualDeviceSpec deviceSpec =
-               VmConfigUtil
-                     .createNetworkDevice(VmConfigUtil.EthernetControllerType.VMXNET3, network.nicLabel, vN);
-         changes.add(deviceSpec);
+         if (network.nicLabel != null
+               && vcVm.getDeviceByLabel(network.nicLabel) != null) {
+            // Edit existing networks
+            changes.add(vcVm.reconfigNetworkSpec(network.nicLabel, vN));
+         } else {
+            // Add new networks
+            VirtualDeviceSpec deviceSpec = VmConfigUtil.createNetworkDevice(
+                  VmConfigUtil.EthernetControllerType.VMXNET3, network.nicLabel, vN);
+            changes.add(deviceSpec);
+         }
       }
 
       spec.setDeviceChange(changes.toArray(new VirtualDeviceSpec[changes.size()]));

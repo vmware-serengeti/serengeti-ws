@@ -18,8 +18,14 @@
             <listener ref="stepListener" />
          </listeners>
       </step>
-      <step id="updateResizeClusterDataStep1" next="resizePlanStep">
+      <step id="updateResizeClusterDataStep1" next="nodeStatusVerifyStep1">
          <tasklet ref="updateClusterDataTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="nodeStatusVerifyStep1" next="resizePlanStep">
+         <tasklet ref="clusterNodeStatusVerifyTasklet" />
          <listeners>
             <listener ref="stepListener" />
          </listeners>
@@ -42,8 +48,14 @@
             <listener ref="stepListener" />
          </listeners>
       </step>
-      <step id="updateResizeClusterDataStep3" next="setAutoElasticityResizeStep">
+      <step id="updateResizeClusterDataStep3" next="nodeStatusVerifyStep2">
          <tasklet ref="updateClusterDataTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="nodeStatusVerifyStep2" next="setAutoElasticityResizeStep">
+         <tasklet ref="clusterNodeStatusVerifyTasklet" />
          <listeners>
             <listener ref="stepListener" />
          </listeners>

@@ -220,7 +220,9 @@ public class PlacementPlanner implements IPlacementPlanner {
 
       ArrayList<Network> networks = new ArrayList<Network>();
       netSchema.networks = networks;
-
+      Network network = new Network();
+      network.vcNetwork = cluster.getNetworking().get(0).getPortGroup();
+      networks.add(network);
       node.getVmSchema().networkSchema = netSchema;
 
       // resource schema

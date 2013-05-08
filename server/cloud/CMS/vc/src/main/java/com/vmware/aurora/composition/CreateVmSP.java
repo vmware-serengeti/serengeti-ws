@@ -150,7 +150,7 @@ public class CreateVmSP implements Callable<Void> {
       ConfigSpecImpl newConfigSpec = new ConfigSpecImpl();
       // Network changes
       NetworkSchemaUtil.setNetworkSchema(newConfigSpec, targetRp.getVcCluster(),
-            vmSchema.networkSchema);
+            vmSchema.networkSchema, vcVm);
 
       // Resource schema
       ResourceSchemaUtil.setResourceSchema(newConfigSpec,

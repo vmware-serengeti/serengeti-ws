@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 
 import com.vmware.aurora.composition.DiskSchema;
 import com.vmware.aurora.composition.NetworkSchema;
+import com.vmware.aurora.composition.NetworkSchema.Network;
 import com.vmware.aurora.composition.ResourceSchema;
 import com.vmware.aurora.composition.VmSchema;
 import com.vmware.aurora.vc.VcDatacenter;
@@ -163,6 +164,7 @@ public class TestClusteringService {
       VmSchema vmSchema = new VmSchema();
       vmSchema.diskSchema = new DiskSchema();
       vmSchema.networkSchema = new NetworkSchema();
+      vmSchema.networkSchema.networks = new ArrayList<Network>();
       vmSchema.resourceSchema = new ResourceSchema();
       return vmSchema;
    }
