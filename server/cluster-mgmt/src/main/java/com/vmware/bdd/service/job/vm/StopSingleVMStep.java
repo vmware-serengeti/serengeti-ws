@@ -34,6 +34,7 @@ import com.vmware.bdd.service.job.TrackableTasklet;
 
 public class StopSingleVMStep extends TrackableTasklet {
    private IClusteringService clusteringService;
+   private boolean vmPoweroff = false;
 
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,
@@ -54,8 +55,8 @@ public class StopSingleVMStep extends TrackableTasklet {
             new DefaultStatusUpdater(jobExecutionStatusHolder,
                   getJobExecutionId(chunkContext));
       boolean success =
-            clusteringService
-                  .stopSingleVM(clusterName, nodeName, statusUpdator);
+            clusteringService.stopSingleVM(clusterName, nodeName,
+                  statusUpdator, vmPoweroff);
       putIntoJobExecutionContext(chunkContext,
             JobConstants.NODE_OPERATION_SUCCESS, success);
       putIntoJobExecutionContext(chunkContext,
@@ -70,5 +71,21 @@ public class StopSingleVMStep extends TrackableTasklet {
    public void setClusteringService(IClusteringService clusteringService) {
       this.clusteringService = clusteringService;
    }
+
+   /**
+    * @return the vmPoweroff
+    */
+   public boolean isVmPoweroff() {
+      return vmPoweroff;
+   }
+
+   /**
+    * @param vmPoweroff
+    *           the vmPoweroff to set
+    */
+   public void setVmPoweroff(boolean vmPoweroff) {
+      this.vmPoweroff = vmPoweroff;
+   }
+
 
 }

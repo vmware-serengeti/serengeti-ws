@@ -20,7 +20,7 @@
 			</listeners>
 		</step>
 		<step id="softwareConfigClusterStep">
-			<tasklet ref="softwareBootstrapClusterTasklet" />
+			<tasklet ref="softwareBootstrapTargetTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

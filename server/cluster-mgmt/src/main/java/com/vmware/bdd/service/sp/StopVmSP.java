@@ -31,16 +31,24 @@ import com.vmware.bdd.utils.Constants;
 public class StopVmSP implements Callable<Void> {
    private static final Logger logger = Logger.getLogger(StopVmSP.class);
    private final String vmId;
+   private final boolean vmPoweroff;
 
    public StopVmSP(VcVirtualMachine vcVm) {
       this.vmId = vcVm.getId();
+      this.vmPoweroff = false;
+   }
+
+   public StopVmSP(VcVirtualMachine vcVm, boolean vmShutdown) {
+      this.vmId = vcVm.getId();
+      this.vmPoweroff = vmShutdown;
    }
 
    @Override
    public Void call() throws Exception {
       final VcVirtualMachine vcVm = VcCache.getIgnoreMissing(vmId);
       if (vcVm == null) {
-         logger.info("vm " + vmId + " is deleted from vc. Ignore the power off request.");
+         logger.info("vm " + vmId
+               + " is deleted from vc. Ignore the power off request.");
       }
       if (vcVm.isPoweredOff()) {
          logger.info("vm " + vcVm.getName() + " is already powered off.");
@@ -49,10 +57,14 @@ public class StopVmSP implements Callable<Void> {
       VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
          protected Void body() throws Exception {
-            // set the bootup configs
-            vcVm.shutdownGuest(Constants.VM_SHUTDOWN_WAITING_SEC * 1000);
+            if (vmPoweroff) {
+               vcVm.powerOff();
+            } else {
+               vcVm.shutdownGuest(Constants.VM_SHUTDOWN_WAITING_SEC * 1000);
+            }
             return null;
          }
+
          protected boolean isTaskSession() {
             return true;
          }

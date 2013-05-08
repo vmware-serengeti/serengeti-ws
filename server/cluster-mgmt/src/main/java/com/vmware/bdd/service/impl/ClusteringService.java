@@ -172,8 +172,10 @@ public class ClusteringService implements IClusteringService {
    public synchronized void init() {
       if (!initialized) {
          // XXX hack to approve bootstrap instance id, should be moved out of Configuration
-         Configuration.approveBootstrapInstanceId(Configuration.BootstrapUsage.ALLOWED);
-         Configuration.approveBootstrapInstanceId(Configuration.BootstrapUsage.FINALIZED);
+         Configuration
+               .approveBootstrapInstanceId(Configuration.BootstrapUsage.ALLOWED);
+         Configuration
+               .approveBootstrapInstanceId(Configuration.BootstrapUsage.FINALIZED);
 
          VcContext.initVcContext();
          new VcEventRouter();
@@ -205,7 +207,7 @@ public class ClusteringService implements IClusteringService {
       for (DeviceId slot : vcVm.getVirtualDiskIds()) {
          VirtualDisk vmdk = (VirtualDisk) vcVm.getVirtualDevice(slot);
          DiskSpec spec = new DiskSpec();
-         spec.setSize((int)(vmdk.getCapacityInKB() / (1024 * 1024)));
+         spec.setSize((int) (vmdk.getCapacityInKB() / (1024 * 1024)));
          spec.setDiskType(DiskType.SYSTEM_DISK);
          spec.setController(DiskScsiControllerType.LSI_CONTROLLER);
          diskSpecs.add(spec);
@@ -299,7 +301,7 @@ public class ClusteringService implements IClusteringService {
     * allocation the network contains all allocated ip address to this cluster,
     * so some of them may already be occupied by existing node. So we need to
     * detect if that ip is allocated, before assign that one to one node
-    *
+    * 
     * @param networkAdd
     * @param vNodes
     * @param occupiedIps
@@ -312,7 +314,8 @@ public class ClusteringService implements IClusteringService {
          return;
       }
       logger.info("Start to allocate static ip address for each VM.");
-      List<String> availableIps = IpBlock.getIpAddressFromIpBlock(networkAdd.getIp());
+      List<String> availableIps =
+            IpBlock.getIpAddressFromIpBlock(networkAdd.getIp());
       AuAssert.check(availableIps.size() == vNodes.size());
       for (int i = 0; i < availableIps.size(); i++) {
          if (occupiedIps.contains(availableIps.get(i))) {
@@ -339,7 +342,8 @@ public class ClusteringService implements IClusteringService {
       String masterMoId = cluster.getVhmMasterMoid();
       if (masterMoId == null) {
          logger.error("masterMoId missed.");
-         throw ClusteringServiceException.SET_AUTO_ELASTICITY_FAILED(cluster.getName());
+         throw ClusteringServiceException.SET_AUTO_ELASTICITY_FAILED(cluster
+               .getName());
       }
       String serengetiUUID = ConfigInfo.getSerengetiRootFolder();
       int minComputeNodeNum = cluster.getVhmMinNum();
@@ -418,8 +422,7 @@ public class ClusteringService implements IClusteringService {
             folderList.add(folderName);
          }
          CreateVMFolderSP sp =
-               new CreateVMFolderSP(vcVm.getDatacenter(), null,
-                     folderList);
+               new CreateVMFolderSP(vcVm.getDatacenter(), null, folderList);
          storeProcedures[i] = sp;
          i++;
       }
@@ -511,7 +514,7 @@ public class ClusteringService implements IClusteringService {
          String vcCluster = baseNode.getTargetVcCluster();
          VcCluster cluster = VcResourceUtils.findVcCluster(vcCluster);
          if (!cluster.getConfig().getDRSEnabled()) {
-            logger.debug("DRS disabled for cluster " + vcCluster 
+            logger.debug("DRS disabled for cluster " + vcCluster
                   + ", do not create child rp for this cluster.");
             continue;
          }
@@ -665,14 +668,13 @@ public class ClusteringService implements IClusteringService {
          CreateVmPrePowerOn prePowerOn = getPrePowerOnFunc(vNode);
          CreateVmSP cloneVmSp =
                new CreateVmSP(vNode.getVmName(), createSchema,
-                     getVcResourcePool(vNode, clusterRpName), getVcDatastore(vNode),
-                     prePowerOn, query, guestVariable, false, 
-                     folders.get(vNode.getGroupName()),
+                     getVcResourcePool(vNode, clusterRpName),
+                     getVcDatastore(vNode), prePowerOn, query, guestVariable,
+                     false, folders.get(vNode.getGroupName()),
                      VcResourceUtils.findHost(vNode.getTargetHost()));
          CompensateCreateVmSP deleteVmSp = new CompensateCreateVmSP(cloneVmSp);
          storeProcedures[i] =
-               new Pair<Callable<Void>, Callable<Void>>(cloneVmSp,
-                     deleteVmSp);
+               new Pair<Callable<Void>, Callable<Void>>(cloneVmSp, deleteVmSp);
       }
 
       try {
@@ -759,12 +761,10 @@ public class ClusteringService implements IClusteringService {
       String haFlag = vNode.getNodeGroup().getHaFlag();
       boolean ha = false;
       boolean ft = false;
-      if (haFlag != null && 
-            Constants.HA_FLAG_ON.equals(haFlag.toLowerCase())) {
+      if (haFlag != null && Constants.HA_FLAG_ON.equals(haFlag.toLowerCase())) {
          ha = true;
       }
-      if (haFlag != null && 
-            Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
+      if (haFlag != null && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
          ha = true;
          ft = true;
          if (vNode.getNodeGroup().getCpuNum() > 1) {
@@ -784,10 +784,10 @@ public class ClusteringService implements IClusteringService {
       }
 
       NodeGroupEntity nodeGroup =
-         getClusterEntityMgr().findByName(vNode.getClusterName(),
-               vNode.getGroupName());
+            getClusterEntityMgr().findByName(vNode.getClusterName(),
+                  vNode.getGroupName());
       CreateVmPrePowerOn prePowerOn =
-         new CreateVmPrePowerOn(ha, ft, nodeGroup.getIoShares());
+            new CreateVmPrePowerOn(ha, ft, nodeGroup.getIoShares());
 
       return prePowerOn;
    }
@@ -807,10 +807,11 @@ public class ClusteringService implements IClusteringService {
          final String clusterRpName) {
       try {
          String vcRPName = "";
-         VcCluster cluster = VcResourceUtils.findVcCluster(vNode.getTargetVcCluster());
+         VcCluster cluster =
+               VcResourceUtils.findVcCluster(vNode.getTargetVcCluster());
          if (!cluster.getConfig().getDRSEnabled()) {
-            logger.debug("DRS disabled for cluster " 
-                  + vNode.getTargetVcCluster() 
+            logger.debug("DRS disabled for cluster "
+                  + vNode.getTargetVcCluster()
                   + ", put VM under cluster directly.");
             return cluster.getRootRP();
          }
@@ -900,8 +901,7 @@ public class ClusteringService implements IClusteringService {
       logger.info("startCluster, start.");
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(name);
       logger.info("startCluster, start to create store procedures.");
-      List<Callable<Void>> storeProcedures =
-            new ArrayList<Callable<Void>>();
+      List<Callable<Void>> storeProcedures = new ArrayList<Callable<Void>>();
       //TODO: integrate Ironfan to set boot up variables
       Map<String, String> bootupConfigs = new HashMap<String, String>();
       for (int i = 0; i < nodes.size(); i++) {
@@ -979,8 +979,7 @@ public class ClusteringService implements IClusteringService {
       logger.info("stopCluster, start.");
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(name);
       logger.info("stopCluster, start to create store procedures.");
-      List<Callable<Void>> storeProcedures =
-            new ArrayList<Callable<Void>>();
+      List<Callable<Void>> storeProcedures = new ArrayList<Callable<Void>>();
       for (int i = 0; i < nodes.size(); i++) {
          NodeEntity node = nodes.get(i);
          if (node.getMoId() == null) {
@@ -1067,7 +1066,8 @@ public class ClusteringService implements IClusteringService {
       return true;
    }
 
-   public List<BaseNode> getBadNodes(ClusterCreate cluster, List<BaseNode> existingNodes) {
+   public List<BaseNode> getBadNodes(ClusterCreate cluster,
+         List<BaseNode> existingNodes) {
       return placementService.getBadNodes(cluster, existingNodes);
    }
 
@@ -1112,20 +1112,21 @@ public class ClusteringService implements IClusteringService {
    }
 
    private void deleteChildRps(String hadoopClusterName, List<BaseNode> vNodes) {
-      logger.info("Start to delete child resource pools for cluster: " 
+      logger.info("Start to delete child resource pools for cluster: "
             + hadoopClusterName);
-      Map<String, Map<String, VcResourcePool>> clusterMap = 
-         new HashMap<String, Map<String, VcResourcePool>>();
+      Map<String, Map<String, VcResourcePool>> clusterMap =
+            new HashMap<String, Map<String, VcResourcePool>>();
       for (BaseNode node : vNodes) {
          String vcClusterName = node.getTargetVcCluster();
          String vcRpName = node.getTargetRp();
          if (clusterMap.get(vcClusterName) == null) {
-            clusterMap.put(vcClusterName, new HashMap<String, VcResourcePool>());
+            clusterMap
+                  .put(vcClusterName, new HashMap<String, VcResourcePool>());
          }
          Map<String, VcResourcePool> rpMap = clusterMap.get(vcClusterName);
          if (rpMap.get(vcRpName) == null) {
-            VcResourcePool vcRp = 
-               VcResourceUtils.findRPInVCCluster(vcClusterName, vcRpName);
+            VcResourcePool vcRp =
+                  VcResourceUtils.findRPInVCCluster(vcClusterName, vcRpName);
             rpMap.put(vcRpName, vcRp);
          }
       }
@@ -1139,7 +1140,7 @@ public class ClusteringService implements IClusteringService {
       for (VcResourcePool rp : rps) {
          DeleteRpSp sp = new DeleteRpSp(rp, childRp);
          storedProcedures[i] = sp;
-         i ++;
+         i++;
       }
       try {
          NoProgressUpdateCallback callback = new NoProgressUpdateCallback();
@@ -1155,11 +1156,13 @@ public class ClusteringService implements IClusteringService {
          int total = 0;
          for (int j = 0; j < storedProcedures.length; j++) {
             if (result[j].throwable != null) {
-               DeleteRpSp sp = (DeleteRpSp)storedProcedures[j];
-               logger.error("Failed to delete child resource pool " + sp.getDeleteRpName()
-               		+ " under " + sp.getVcRp(), result[j].throwable);
+               DeleteRpSp sp = (DeleteRpSp) storedProcedures[j];
+               logger.error(
+                     "Failed to delete child resource pool "
+                           + sp.getDeleteRpName() + " under " + sp.getVcRp(),
+                     result[j].throwable);
             } else {
-               total ++;
+               total++;
             }
          }
       } catch (Exception e) {
@@ -1171,7 +1174,7 @@ public class ClusteringService implements IClusteringService {
    /**
     * this method will delete the cluster root folder, if there is any VM
     * existed and powered on in the folder, the folder deletion will fail.
-    *
+    * 
     * @param folderNames
     */
    private void deleteFolders(BaseNode node) throws BddException {
@@ -1346,7 +1349,8 @@ public class ClusteringService implements IClusteringService {
 
 
    @Override
-   public boolean startSingleVM(String clusterName, String nodeName, StatusUpdater statusUpdator) {
+   public boolean startSingleVM(String clusterName, String nodeName,
+         StatusUpdater statusUpdator) {
       NodeEntity node = this.clusterEntityMgr.findNodeByName(nodeName);
       QueryIpAddress query = new QueryIpAddress(600);
       VcHost host = null;
@@ -1364,14 +1368,20 @@ public class ClusteringService implements IClusteringService {
    }
 
    @Override
-   public boolean stopSingleVM(String clusterName, String nodeName, StatusUpdater statusUpdator) {
+   public boolean stopSingleVM(String clusterName, String nodeName,
+         StatusUpdater statusUpdator, boolean... vmPoweroff) {
       NodeEntity node = this.clusterEntityMgr.findNodeByName(nodeName);
       VcVirtualMachine vcVm = VcCache.getIgnoreMissing(node.getMoId());
       if (vcVm == null) {
          logger.info("VC vm does not exist for node: " + node.getVmName());
          return false;
       }
-      StopVmSP stopVMSP = new StopVmSP(vcVm);
+      StopVmSP stopVMSP;
+      if (vmPoweroff.length > 0 && vmPoweroff[0]) {
+         stopVMSP = new StopVmSP(vcVm, true);
+      } else {
+         stopVMSP = new StopVmSP(vcVm);
+      }
       return VcVmUtil.runSPOnSingleVM(node, stopVMSP);
    }
 

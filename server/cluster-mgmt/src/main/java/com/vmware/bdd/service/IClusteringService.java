@@ -162,5 +162,5 @@ public interface IClusteringService {
     * @param statusUpdator
     * @return
     */
-   public boolean stopSingleVM(String clusterName, String nodeName, StatusUpdater statusUpdator);
+   public boolean stopSingleVM(String clusterName, String nodeName, StatusUpdater statusUpdator, boolean... vmPoweroff);
 }
