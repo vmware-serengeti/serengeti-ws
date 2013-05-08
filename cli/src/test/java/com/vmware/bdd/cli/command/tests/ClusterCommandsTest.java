@@ -33,7 +33,6 @@ import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
-import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
@@ -670,5 +669,101 @@ public class ClusterCommandsTest extends MockRestServer {
      } catch (Exception e) {
         Assert.fail("failed to parse cluster spec", e);
      }
+   }
+
+   @Test
+   public void testSetReSetParam() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+      ObjectMapper mapper = new ObjectMapper();
+      StorageRead sr1 = new StorageRead();
+      sr1.setType("Type1");
+      sr1.setSizeGB(100);
+      NodeRead nr1 = new NodeRead();
+      nr1.setHostName("test1.domain.com");
+      nr1.setIp("192.1.1.99");
+      nr1.setName("node1");
+      nr1.setStatus("running");
+      List<NodeRead> instances1 = new LinkedList<NodeRead>();
+      instances1.add(nr1);
+      List<String> roles1 = new LinkedList<String>();
+      roles1.add(Constants.ROLE_HADOOP_TASKTRACKER);
+      NodeGroupRead ngr1 = new NodeGroupRead();
+      ngr1.setName("NodeGroup1");
+      ngr1.setCpuNum(6);
+      ngr1.setMemCapacityMB(2048);
+      ngr1.setStorage(sr1);
+      ngr1.setInstanceNum(1);
+      ngr1.setInstances(instances1);
+      ngr1.setRoles(roles1);
+      ClusterRead cr1 = new ClusterRead();
+      cr1.setName("cluster1");
+      cr1.setDistro("distro1");
+      cr1.setInstanceNum(10);
+      cr1.setStatus(ClusterRead.ClusterStatus.RUNNING);
+      List<NodeGroupRead> nodeGroupRead1 = new LinkedList<NodeGroupRead>();
+      nodeGroupRead1.add(ngr1);
+      cr1.setNodeGroups(nodeGroupRead1);
+      cr1.setAutomationEnable(false);
+      cr1.setNodeGroups(nodeGroupRead1);
+
+      //setParam tests
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
+            mapper.writeValueAsString(cr1));
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/param", HttpMethod.PUT,
+            HttpStatus.NO_CONTENT, "");
+      clusterCommands.setParam("cluster1", "NodeGroup1", "MANUAL", null, null, "HIGH");
+
+      setup();
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
+            mapper.writeValueAsString(cr1));
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/param", HttpMethod.PUT,
+            HttpStatus.NO_CONTENT, "");
+      clusterCommands.setParam("cluster1", "NodeGroup1", "AUTO", null, 2, "HIGH");
+
+      setup();
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
+            mapper.writeValueAsString(cr1));
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/param_wait_for_result", HttpMethod.PUT,
+            HttpStatus.NO_CONTENT, "");
+      clusterCommands.setParam("cluster1", "NodeGroup1", "MANUAL", null, 2, "HIGH");
+
+      setup();
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
+            mapper.writeValueAsString(cr1));
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/param_wait_for_result", HttpMethod.PUT,
+            HttpStatus.NO_CONTENT, "");
+      clusterCommands.setParam("cluster1", null, "MANUAL", null, 2, "HIGH");
+
+      setup();
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
+            mapper.writeValueAsString(cr1));
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/param_wait_for_result", HttpMethod.PUT,
+            HttpStatus.NO_CONTENT, "");
+      clusterCommands.setParam("cluster1", "NodeGroup1", null, 2, 2, "HIGH");
+
+      //reset Param tests
+      setup();
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
+            mapper.writeValueAsString(cr1));
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/param_wait_for_result", HttpMethod.PUT,
+            HttpStatus.NO_CONTENT, "");
+      clusterCommands.resetParam("cluster1", null, true, false, false, false, false);
+
+      setup();
+      cr1.setVhmTargetNum(-1);
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
+            mapper.writeValueAsString(cr1));
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/param_wait_for_result", HttpMethod.PUT,
+            HttpStatus.NO_CONTENT, "");
+      clusterCommands.resetParam("cluster1", null, false, true, false, false, false);
+
+      setup();
+      cr1.setAutomationEnable(true);
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
+            mapper.writeValueAsString(cr1));
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/param", HttpMethod.PUT,
+            HttpStatus.NO_CONTENT, "");
+      clusterCommands.resetParam("cluster1", null, false, false, true, true, true);
+      CookieCache.clear();
    }
 }

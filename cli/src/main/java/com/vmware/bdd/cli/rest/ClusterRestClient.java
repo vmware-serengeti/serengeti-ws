@@ -27,13 +27,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.ClusterPriority;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ElasticityRequestBody;
+import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityMode;
 import com.vmware.bdd.apitypes.FixDiskRequestBody;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
-import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
@@ -137,30 +136,30 @@ public class ClusterRestClient {
       restClient.deleteObject(id, path, httpverb, outputCallBack);
    }
 
-   public void setElasticity(String clusterName,
-         ElasticityRequestBody requestBody) {
-      final String path =
-            Constants.REST_PATH_CLUSTER + "/" + clusterName + "/"
-                  + Constants.REST_PATH_ELASTICITY;
-      final HttpMethod httpverb = HttpMethod.PUT;
-      try {
-         restClient.update(requestBody, path, httpverb);
-      } catch (CliRestException e) {
-         if (e.getMessage() != null) {
-            throw e;
-         }
+   public void setParam(ClusterRead cluster, ElasticityRequestBody requestBody) {
+      String clusterName = cluster.getName();
+      if (cluster.needAsyncUpdateParam(requestBody)) {
+         asyncSetParam(clusterName, requestBody);
+      } else {
+         syncSetParam(clusterName, requestBody);
       }
    }
 
-   public void prioritizeCluster(String clusterName, String nodeGroupName,
-         Priority diskIOPriority) {
+   private void asyncSetParam(String clusterName, ElasticityRequestBody requestBody) {
       final String path =
-            Constants.REST_PATH_CLUSTER + "/" + clusterName + "/" + "priority";
+            Constants.REST_PATH_CLUSTER + "/" + clusterName + "/"
+                  + Constants.REST_PATH_ASYNC_PARAM;
       final HttpMethod httpverb = HttpMethod.PUT;
+      PrettyOutput outputCallBack =
+            getClusterPrettyOutputCallBack(this, clusterName);
+      restClient.update(requestBody, path, httpverb, outputCallBack);
+   }
 
-      ClusterPriority requestBody = new ClusterPriority();
-      requestBody.setDiskIOPriority(diskIOPriority);
-      requestBody.setNodeGroupName(nodeGroupName);
+   private void syncSetParam(String clusterName, ElasticityRequestBody requestBody) {
+      final String path =
+            Constants.REST_PATH_CLUSTER + "/" + clusterName + "/"
+                  + Constants.REST_PATH_SYNC_PARAM;
+      final HttpMethod httpverb = HttpMethod.PUT;
       restClient.update(requestBody, path, httpverb);
    }
 

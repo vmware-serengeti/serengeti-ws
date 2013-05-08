@@ -134,6 +134,18 @@ public class ClusterRead implements Comparable<ClusterRead>{
       return nodeGroups;
    }
 
+   public NodeGroupRead getNodeGroupByName(String nodeGroupName) {
+      List<NodeGroupRead> nodeGroups = this.getNodeGroups();
+      if (nodeGroups != null) {
+         for (NodeGroupRead ng : nodeGroups) {
+            if (ng.getName().equals(nodeGroupName)) {
+               return ng;
+            }
+         }
+      }
+      return null;
+   }
+
    public void setNodeGroups(List<NodeGroupRead> nodeGroups) {
       this.nodeGroups = nodeGroups;
    }
@@ -160,7 +172,7 @@ public class ClusterRead implements Comparable<ClusterRead>{
                    invalidNodeGroup.add(nodeGroupName);
             }
             if (!invalidNodeGroup.isEmpty()) {
-               System.out.println("Adjustment failed: The specified node group is not a compute only node group.");
+               System.out.println("Adjustment failed: The specified node group is not a compute only node group or the group name is incorrect.");
                return false;
             }
          } else {
@@ -298,4 +310,37 @@ public class ClusterRead implements Comparable<ClusterRead>{
       this.vhmTargetNum = vhmTargetNum;
    }
 
+   /*
+    * Check if invoke sync or async rest apis: if manual is set and targetNum is not empty;
+    * or current elasticity mode is manual and targetNum is not empty, we need to use async 
+    * rest api since start/stop vms will take some time to complete.
+    */
+   public boolean needAsyncUpdateParam(ElasticityRequestBody requestBody) {
+      Boolean enableAuto = requestBody.getEnableAuto();
+      if (enableAuto != null && !enableAuto && targetNumNotEmpty(requestBody)) { //set manual and targetNum != null
+         return true;
+      } else if (enableAuto == null) { //not set auto
+         Boolean existingElasticityMode = this.getAutomationEnable();
+         if (existingElasticityMode != null && !existingElasticityMode
+               && requestBody.getActiveComputeNodeNum() != null) { // existing is Manual and targetNum != null
+            return true;
+         }
+      }
+      return false;
+   }
+
+   private boolean targetNumNotEmpty(ElasticityRequestBody requestBody) {
+      String nodeGroupName = requestBody.getNodeGroupName();
+      Integer ngTargetNum = null;
+      if (nodeGroupName != null) {
+         NodeGroupRead ngRead = this.getNodeGroupByName(nodeGroupName);
+         ngTargetNum = ngRead.getVhmTargetNum();
+      }
+      if (requestBody.getActiveComputeNodeNum() != null 
+            || this.getVhmTargetNum() != null
+            || (ngTargetNum != null)) {
+         return true;
+      }
+      return false;
+   }
 }

@@ -15,31 +15,17 @@
 package com.vmware.bdd.apitypes;
 
 /**
- * This class is a DTO of the cluster setElasticity command.
+ * This class is a DTO of the cluster set/resetParam command.
  */
 public class ElasticityRequestBody {
-   private Boolean enableAutoElasticity;
-   private Boolean enableManualElasticity;
    private Integer minComputeNodeNum; // min compute nodes that stay powered on
-   private boolean calledByReset;
    private Integer activeComputeNodeNum;
    private String nodeGroupName;
-   private ElasticityOperation elasticityOperation;
+   private Boolean enableAuto;
+   private Priority ioPriority;
 
    public static enum ElasticityMode {
       AUTO, MANUAL
-   }
-
-   public static enum ElasticityOperation {
-      OP_SET_AUTO, OP_SET_MANUAL
-   }
-
-   public Boolean getEnableAutoElasticity() {
-      return enableAutoElasticity;
-   }
-
-   public void setEnableAutoElasticity(Boolean enableAutoElasticity) {
-      this.enableAutoElasticity = enableAutoElasticity;
    }
 
    public Integer getMinComputeNodeNum() {
@@ -48,14 +34,6 @@ public class ElasticityRequestBody {
 
    public void setMinComputeNodeNum(Integer minComputeNodeNum) {
       this.minComputeNodeNum = minComputeNodeNum;
-   }
-
-   public boolean getCalledByReset() {
-      return calledByReset;
-   }
-
-   public void setCalledByReset(boolean calledByReset) {
-      this.calledByReset = calledByReset;
    }
 
    public Integer getActiveComputeNodeNum() {
@@ -74,19 +52,19 @@ public class ElasticityRequestBody {
       this.nodeGroupName = nodeGroupName;
    }
 
-   public ElasticityOperation getElasticityOperation() {
-      return elasticityOperation;
+   public Priority getIoPriority() {
+      return ioPriority;
    }
 
-   public void setElasticityOperation(ElasticityOperation elasticityOperation) {
-      this.elasticityOperation = elasticityOperation;
+   public void setIoPriority(Priority ioPriority) {
+      this.ioPriority = ioPriority;
    }
 
-   public Boolean getEnableManualElasticity() {
-      return enableManualElasticity;
+   public Boolean getEnableAuto() {
+      return enableAuto;
    }
 
-   public void setEnableManualElasticity(Boolean enableManualElasticity) {
-      this.enableManualElasticity = enableManualElasticity;
+   public void setEnableAuto(Boolean enableAuto) {
+      this.enableAuto = enableAuto;
    }
 }
