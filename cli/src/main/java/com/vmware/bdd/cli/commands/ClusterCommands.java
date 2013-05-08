@@ -1007,8 +1007,9 @@ public class ClusterCommands implements CommandMarker {
       } else {
          autoElasticityStatus = "Disable";
       }
+      int width = cluster.getName().length() + 3 > 15 ? cluster.getName().length() + 3 : 15;
       if (topology == null || topology == TopologyType.NONE) {
-         String headerPattern = "  %-15s%-9s%-15s%-24s%-26s%-10s\n";
+         String headerPattern = "  %-" + width + "s%-9s%-15s%-24s%-26s%-10s\n";
          System.out.printf(headerPattern, "CLUSTER NAME", "DISTRO",
                "AUTO ELASTIC", "MIN COMPUTE NODES NUM",
                "TARGET COMPUTE NODES NUM", "STATUS");
@@ -1016,7 +1017,8 @@ public class ClusterCommands implements CommandMarker {
                cluster.getDistro(), autoElasticityStatus, minComputeNodeNum,
                cluster.retrieveVhmTargetNum(), cluster.getStatus());
       } else {
-         String headerPattern = "  %-15s%-9s%-11s%-15s%-24s%-26s%-10s\n";
+         String headerPattern =
+               "  %-" + width + "s%-9s%-11s%-15s%-24s%-26s%-10s\n";
          System.out.printf(headerPattern, "CLUSTER NAME", "DISTRO", "TOPOLOGY",
                "AUTO ELASTIC", "MIN COMPUTE NODES NUM",
                "TARGET COMPUTE NODES NUM", "STATUS");
