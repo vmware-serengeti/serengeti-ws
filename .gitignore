@@ -4,3 +4,4 @@
 **target
 **test-output
 lib/vlsi/*.jar
+cli/cli.properties

@@ -447,6 +447,7 @@ public class ClusteringService implements IClusteringService {
       }
    }
 
+   @SuppressWarnings("unchecked")
    private Map<String, Folder> createVcFolders(ClusterCreate cluster) {
       logger.info("createVcFolders, start to create VC Folders.");
       // get all nodegroups

@@ -36,9 +36,17 @@ import com.vmware.aurora.vc.VcVirtualMachine.DiskCreateSpec;
 import com.vmware.aurora.vc.VmConfigUtil;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
+import com.vmware.vim.binding.impl.vim.vApp.ProductSpecImpl;
+import com.vmware.vim.binding.impl.vim.vApp.VmConfigSpecImpl;
 import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
 import com.vmware.vim.binding.impl.vim.vm.device.VirtualDiskImpl;
 import com.vmware.vim.binding.vim.Folder;
+import com.vmware.vim.binding.vim.option.ArrayUpdateSpec.Operation;
+import com.vmware.vim.binding.vim.vApp.ProductInfo;
+import com.vmware.vim.binding.vim.vApp.ProductSpec;
+import com.vmware.vim.binding.vim.vApp.VmConfigInfo;
+import com.vmware.vim.binding.vim.vApp.VmConfigSpec;
+import com.vmware.vim.binding.vim.vm.ConfigSpec;
 import com.vmware.vim.binding.vim.vm.device.VirtualDeviceSpec;
 import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 
@@ -104,6 +112,46 @@ public class CreateVmSP implements Callable<Void> {
       return null;
    }
 
+   private boolean requireClone() {
+      for (Disk disk : vmSchema.diskSchema.getDisks()) {
+         // if the system disk is already exist, skip clone
+         if (DiskType.OS.getTypeName().equals(disk.type)
+               && disk.vmdkPath != null && !disk.vmdkPath.isEmpty()) {
+            return false;
+         }
+      }
+      return true;
+   }
+
+   private void copyParentVmSettings(VcVirtualMachine template,
+         ConfigSpec configSpec) {
+      configSpec.setName(newVmName);
+
+      // copy vApp config info
+      VmConfigInfo configInfo = template.getConfig().getVAppConfig();
+
+      VmConfigSpec vAppSpec = new VmConfigSpecImpl();
+      vAppSpec.setOvfEnvironmentTransport(configInfo
+            .getOvfEnvironmentTransport());
+
+      // product info
+      List<ProductSpec> productSpecs = new ArrayList<ProductSpec>();
+      for (ProductInfo info : configInfo.getProduct()) {
+         ProductSpec spec = new ProductSpecImpl();
+         spec.setInfo(info);
+         spec.setOperation(Operation.add);
+         productSpecs.add(spec);
+      }
+      vAppSpec.setProduct(productSpecs.toArray(new ProductSpec[productSpecs
+            .size()]));
+      
+      configSpec.setVAppConfig(vAppSpec);
+      configSpec.setGuestId(template.getConfig().getGuestId());
+      
+      // copy hardware version
+      configSpec.setVersion(template.getConfig().getVersion());
+   }
+
    public void callInternal() throws Exception {
       // Find the template and template snapshot to clone from
       final VcVirtualMachine template =
@@ -115,13 +163,16 @@ public class CreateVmSP implements Callable<Void> {
 
       HashMap<String, Disk.Operation> diskMap =
             new HashMap<String, Disk.Operation>();
-
-      final VcVirtualMachine.CreateSpec vmSpec =
-            new VcVirtualMachine.CreateSpec(newVmName, snap, targetRp,
-                  targetDs, vmFolder, linkedClone, configSpec);
-
-      // Clone from the template
-      vcVm = template.cloneVm(vmSpec, null);
+      if (requireClone()) {
+         VcVirtualMachine.CreateSpec vmSpec =
+               new VcVirtualMachine.CreateSpec(newVmName, snap, targetRp,
+                     targetDs, vmFolder, linkedClone, configSpec);
+         // Clone from the template
+         vcVm = template.cloneVm(vmSpec, null);
+      } else {
+         copyParentVmSettings(template, configSpec);
+         vcVm = targetRp.createVm(configSpec, targetDs, vmFolder);
+      }
 
       if (host != null) {
          vcVm.disableDrs();
@@ -132,8 +183,9 @@ public class CreateVmSP implements Callable<Void> {
       List<DiskCreateSpec> addDisks =
             DiskSchemaUtil.getDisksToAdd(hostList, targetRp, targetDs,
                   vmSchema.diskSchema, diskMap);
-      DiskCreateSpec[] tmpAddDisks = new DiskCreateSpec[addDisks.size()];
-      tmpAddDisks = addDisks.toArray(tmpAddDisks);
+
+      DiskCreateSpec[] tmpAddDisks =
+            addDisks.toArray(new DiskCreateSpec[addDisks.size()]);
 
       // If current host of VM is not in the list of hosts with access to the
       // datastore(s) for the new disk(s), then migrate the VM first
@@ -146,8 +198,7 @@ public class CreateVmSP implements Callable<Void> {
       // attach existed disks
       List<VirtualDeviceSpec> deviceChange = new ArrayList<VirtualDeviceSpec>();
       for (Disk disk : vmSchema.diskSchema.getDisks()) {
-         if (disk.vmdkPath == null || disk.vmdkPath.isEmpty()
-               || DiskType.OS.getTypeName().equals(disk.type))
+         if (disk.vmdkPath == null || disk.vmdkPath.isEmpty())
             continue;
 
          VirtualDisk.FlatVer2BackingInfo backing =
