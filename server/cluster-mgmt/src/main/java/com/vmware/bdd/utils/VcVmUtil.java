@@ -186,8 +186,9 @@ public class VcVmUtil {
             VirtualDisk.FlatVer2BackingInfo backing =
                   (VirtualDisk.FlatVer2BackingInfo) vDisk.getBacking();
             Datastore ds = MoUtil.getManagedObject(backing.getDatastore());
+            diskEntity.setSizeInMB((int) (vDisk.getCapacityInKB() / 1024));
             diskEntity.setDatastoreName(ds.getName());
-            diskEntity.setVmkdPath(backing.getFileName());
+            diskEntity.setVmdkPath(backing.getFileName());
             diskEntity.setDatastoreMoId(MoUtil.morefToString(ds._getRef()));
 
             return null;

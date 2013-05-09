@@ -14,12 +14,23 @@
  ***************************************************************************/
 package com.vmware.bdd.service.impl;
 
+import java.util.Set;
+
 import org.apache.log4j.Logger;
 
+import com.vmware.aurora.vc.VcDatastore;
+import com.vmware.aurora.vc.VcHost;
+import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.StorageRead.DiskType;
+import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
+import com.vmware.bdd.exception.ScaleServiceException;
+import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.service.IScaleService;
 import com.vmware.bdd.service.sp.ScaleVMSP;
+import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.utils.VcVmUtil;
 
 /**
@@ -32,6 +43,8 @@ public class ScaleService implements IScaleService {
    private static final Logger logger = Logger.getLogger(ScaleService.class);
 
    private ClusterEntityManager clusterEntityMgr;
+   
+   private ClusterConfigManager clusterConfigMgr;
 
 
    /**
@@ -49,6 +62,14 @@ public class ScaleService implements IScaleService {
    public void setClusterEntityMgr(ClusterEntityManager clusterEntityMgr) {
       this.clusterEntityMgr = clusterEntityMgr;
    }
+   
+   public ClusterConfigManager getClusterConfigMgr() {
+      return clusterConfigMgr;
+   }
+   
+   public void setClusterConfigMgr(ClusterConfigManager clusterConfigMgr) {
+      this.clusterConfigMgr = clusterConfigMgr;
+   }
 
 
    /* (non-Javadoc)
@@ -59,18 +80,89 @@ public class ScaleService implements IScaleService {
       logger.info("scale node: " + nodeName + ", cpu number: " + cpuNumber
             + ", memory: " + memory);
       NodeEntity node = clusterEntityMgr.findNodeByName(nodeName);
-      ScaleVMSP scaleVMSP = new ScaleVMSP(node.getMoId(), cpuNumber, memory);
-      boolean vmResult =  VcVmUtil.runSPOnSingleVM(node, scaleVMSP);
-      if(vmResult){
-         if(cpuNumber > 0){
+
+      DiskEntity swapDisk = findSwapDisk(node);
+      long newSwapSizeInMB =
+            (((long) Math.ceil(memory * node.getNodeGroup().getSwapRatio()) + 1023) / 1024) * 1024;
+
+      logger.info("new swap disk size(MB): " + newSwapSizeInMB);
+      VcDatastore targetDs =
+            getTargetDsForSwapDisk(node, swapDisk, newSwapSizeInMB);
+      
+      ScaleVMSP scaleVMSP =
+            new ScaleVMSP(node.getMoId(), cpuNumber, memory, targetDs,
+                  swapDisk, newSwapSizeInMB);
+      boolean vmResult = VcVmUtil.runSPOnSingleVM(node, scaleVMSP);
+      if (vmResult) {
+         if (cpuNumber > 0) {
             node.setCpuNum(cpuNumber);
          }
-         if(memory > 0){
+         if (memory > 0) {
             node.setMemorySize(memory);
+            VcVmUtil.populateDiskInfo(swapDisk, node.getMoId());
          }
          clusterEntityMgr.update(node);
       }
       return vmResult;
+   }
+
+   public DiskEntity findSwapDisk(NodeEntity node) {
+      DiskEntity swapDisk = null;
+      Set<DiskEntity> diskEntities = node.getDisks();
+      for (DiskEntity diskEntity : diskEntities) {
+         if (diskEntity.getDiskType().equals(DiskType.SWAP_DISK.getType())) {
+            swapDisk = diskEntity;
+            break;
+         }
+      }
+      return swapDisk;
+   }
+
+   public VcDatastore getTargetDsForSwapDisk(NodeEntity node,
+         DiskEntity swapDisk, long newSwapSizeInMB) {
+      ClusterCreate clusterSpec =
+            clusterConfigMgr.getClusterConfig(node.getNodeGroup().getCluster()
+                  .getName());
+      NodeGroupCreate ngSpec =
+            clusterSpec.getNodeGroup(node.getNodeGroup().getName());
+
+      // use current DS if it has enough space
+      VcDatastore currentDs =
+            VcResourceUtils.findDSInVcByName(swapDisk.getDatastoreName());
+      if (!currentDs.isAccessible()) {
+         throw ScaleServiceException.CURRENT_DATASTORE_UNACCESSIBLE(currentDs.getName());
+      }
+      if ((int) (currentDs.getFreeSpace() >> 20) > newSwapSizeInMB
+            - swapDisk.getSizeInMB()) {
+         return currentDs;
+      }
+
+      // else find a valid datastore with largest free space
+      VcHost locateHost = VcResourceUtils.findHost(node.getHostName());
+      String[] dsNamePatterns =
+            NodeGroupCreate.getDatastoreNamePattern(clusterSpec, ngSpec);
+      VcDatastore targetDs = null;
+      for (VcDatastore ds : locateHost.getDatastores()) {
+         if (!ds.isAccessible()) {
+            continue;
+         }
+         for (String pattern : dsNamePatterns) {
+            if (ds.getName().matches(pattern)) {
+               if (targetDs == null
+                     || targetDs.getFreeSpace() < ds.getFreeSpace()) {
+                  targetDs = ds;
+               }
+               break;
+            }
+         }
+      }
+
+      if (targetDs != null
+            && (int) (targetDs.getFreeSpace() >> 20) > newSwapSizeInMB) {
+         return targetDs;
+      }
+
+      throw ScaleServiceException.CANNOT_FIND_VALID_DATASTORE_FOR_SWAPDISK(node.getVmName());
    }
 
 }

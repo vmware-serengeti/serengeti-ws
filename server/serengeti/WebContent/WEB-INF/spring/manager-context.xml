@@ -96,6 +96,9 @@
 		<property name="clusterEntityMgr">
 			<ref bean="clusterEntityManager"/>
 		</property>
+		<property name="clusterConfigMgr">
+			<ref bean="clusterConfigMgr" />
+		</property>
 	</bean>
 
 </beans>

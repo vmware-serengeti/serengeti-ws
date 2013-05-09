@@ -63,7 +63,7 @@ public class DiskEntity extends EntityBase {
    private String deviceName;
 
    @Column(name = "vmdk_path")
-   private String vmkdPath;
+   private String vmdkPath;
 
    @ManyToOne
    @JoinColumn(name = "node_id")
@@ -142,12 +142,12 @@ public class DiskEntity extends EntityBase {
       this.deviceName = deviceName;
    }
 
-   public String getVmkdPath() {
-      return vmkdPath;
+   public String getVmdkPath() {
+      return vmdkPath;
    }
 
-   public void setVmkdPath(String vmkdPath) {
-      this.vmkdPath = vmkdPath;
+   public void setVmdkPath(String vmkdPath) {
+      this.vmdkPath = vmkdPath;
    }
 
    public NodeEntity getNodeEntity() {
@@ -168,7 +168,7 @@ public class DiskEntity extends EntityBase {
       disk.deviceName = other.deviceName;
       disk.diskType = other.diskType;
       disk.externalAddress = other.externalAddress;
-      disk.vmkdPath = other.vmkdPath;
+      disk.vmdkPath = other.vmdkPath;
 
       return disk;
    }
@@ -209,7 +209,7 @@ public class DiskEntity extends EntityBase {
             + ", diskType=" + diskType + ", allocType=" + allocType
             + ", externalAddress=" + externalAddress + ", datastoreName="
             + datastoreName + ", datastoreMoId=" + datastoreMoId
-            + ", deviceName=" + deviceName + ", vmkdPath=" + vmkdPath
+            + ", deviceName=" + deviceName + ", vmkdPath=" + vmdkPath
             + ", nodeEntity=" + nodeEntity + "]";
    }
 }

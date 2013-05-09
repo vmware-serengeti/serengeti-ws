@@ -95,7 +95,7 @@ public class TestClusterHealService {
       List<DiskEntity> disks = new ArrayList<DiskEntity>();
       for (int i = 0; i < 3; i++) {
          DiskEntity disk = new DiskEntity(DATA_DISK_NAME_PREFIX + i);
-         disk.setVmkdPath(LOCAL_DS_MOID_PREFIX + i + "/" + disk.getName());
+         disk.setVmdkPath(LOCAL_DS_MOID_PREFIX + i + "/" + disk.getName());
          disk.setDatastoreName(LOCAL_DS_NAME_PREFIX + i);
          disk.setDatastoreMoId(LOCAL_DS_MOID_PREFIX + i);
          disk.setSizeInMB(20 * 1024);
