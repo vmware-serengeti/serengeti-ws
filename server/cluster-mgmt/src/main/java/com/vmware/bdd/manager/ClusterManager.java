@@ -38,6 +38,7 @@ import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.NetworkRead;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.Priority;
@@ -303,6 +304,13 @@ public class ClusterManager {
             group.getStorage().setSplitPolicy(null);
             group.getStorage().setControllerType(null);
             group.getStorage().setAllocType(null);
+            if (group.getPlacementPolicies() != null) {
+               List<GroupAssociation> associations =
+                  group.getPlacementPolicies().getGroupAssociations();
+               if (associations != null && associations.isEmpty()) {
+                  group.getPlacementPolicies().setGroupAssociations(null);
+               }
+            }
          }
       }
       return spec;
