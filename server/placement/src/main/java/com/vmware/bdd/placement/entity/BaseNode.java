@@ -25,7 +25,6 @@ import com.vmware.aurora.composition.VmSchema;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
-import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.util.PlacementUtil;
@@ -255,35 +254,8 @@ public class BaseNode {
       AuAssert.check(this.nodeGroup != null
             && this.nodeGroup.getStorage() != null);
 
-      String[] patterns;
-      StorageRead storage = this.nodeGroup.getStorage();
-
-      if (storage.getNamePattern() != null) {
-         patterns = (String[]) storage.getNamePattern().toArray();
-      } else if (PlacementUtil.SHARED_DATASTORE_TYPE.equalsIgnoreCase(storage
-            .getType())) {
-         patterns =
-               cluster.getSharedPattern().toArray(
-                     new String[cluster.getSharedPattern().size()]);
-      } else if (PlacementUtil.LOCAL_DATASTORE_TYPE.equalsIgnoreCase(storage
-            .getType())) {
-         patterns =
-               cluster.getLocalPattern().toArray(
-                     new String[cluster.getLocalPattern().size()]);
-      } else {
-         // use local storage by default
-         if (!cluster.getLocalPattern().isEmpty()) {
-            patterns =
-                  cluster.getLocalPattern().toArray(
-                        new String[cluster.getLocalPattern().size()]);
-         } else {
-            patterns =
-                  cluster.getSharedPattern().toArray(
-                        new String[cluster.getSharedPattern().size()]);
-         }
-      }
-
-      return PlacementUtil.wildCardToRegex(patterns);
+      return NodeGroupCreate.getDatastoreNamePattern(this.cluster,
+            this.nodeGroup);
    }
 
    // GB

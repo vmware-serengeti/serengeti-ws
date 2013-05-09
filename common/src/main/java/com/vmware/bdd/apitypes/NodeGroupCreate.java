@@ -32,6 +32,8 @@ import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksTy
 import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
+import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
 
 /**
  * Cluster creation parameters
@@ -453,5 +455,45 @@ public class NodeGroupCreate {
       }
 
       return valid;
+   }
+
+   public static String[] getDatastoreNamePattern(ClusterCreate clusterSpec,
+         NodeGroupCreate nodeGroupSpec) {
+      AuAssert.check(nodeGroupSpec != null
+            && nodeGroupSpec.getStorage() != null);
+
+      String[] patterns;
+      StorageRead storage = nodeGroupSpec.getStorage();
+
+      if (storage.getNamePattern() != null) {
+         patterns = (String[]) storage.getNamePattern().toArray();
+      } else if (DatastoreType.SHARED.toString().equalsIgnoreCase(
+            storage.getType())) {
+         patterns =
+               clusterSpec.getSharedPattern().toArray(
+                     new String[clusterSpec.getSharedPattern().size()]);
+      } else if (DatastoreType.LOCAL.toString().equalsIgnoreCase(
+            storage.getType())) {
+         patterns =
+               clusterSpec.getLocalPattern().toArray(
+                     new String[clusterSpec.getLocalPattern().size()]);
+      } else {
+         // use local storage by default
+         if (!clusterSpec.getLocalPattern().isEmpty()) {
+            patterns =
+                  clusterSpec.getLocalPattern().toArray(
+                        new String[clusterSpec.getLocalPattern().size()]);
+         } else {
+            patterns =
+                  clusterSpec.getSharedPattern().toArray(
+                        new String[clusterSpec.getSharedPattern().size()]);
+         }
+      }
+
+      for (int i = 0; i < patterns.length; i++) {
+         patterns[i] = CommonUtil.getDatastoreJavaPattern(patterns[i]);
+      }
+
+      return patterns;
    }
 }

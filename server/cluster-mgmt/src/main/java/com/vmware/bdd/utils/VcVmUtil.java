@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
@@ -23,18 +25,29 @@ import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.vc.DeviceId;
 import com.vmware.aurora.vc.MoUtil;
 import com.vmware.aurora.vc.VcCache;
+import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.aurora.vc.VmConfigUtil;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
+import com.vmware.vim.binding.impl.vim.SharesInfoImpl;
+import com.vmware.vim.binding.impl.vim.StorageResourceManager_Impl.IOAllocationInfoImpl;
+import com.vmware.vim.binding.impl.vim.vm.device.VirtualDeviceSpecImpl;
+import com.vmware.vim.binding.vim.Datastore;
+import com.vmware.vim.binding.vim.SharesInfo;
+import com.vmware.vim.binding.vim.SharesInfo.Level;
+import com.vmware.vim.binding.vim.StorageResourceManager.IOAllocationInfo;
 import com.vmware.vim.binding.vim.VirtualMachine.FaultToleranceState;
 import com.vmware.vim.binding.vim.vm.GuestInfo;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
+import com.vmware.vim.binding.vim.vm.device.VirtualDeviceSpec;
 import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 
 public class VcVmUtil {
@@ -155,21 +168,98 @@ public class VcVmUtil {
       return (VirtualDisk) device;
    }
 
-   public static boolean populateDiskInfo(DiskEntity diskEntity, String vmMobId) {
-      VirtualDisk vDisk =
-            findVirtualDisk(vmMobId, diskEntity.getExternalAddress());
-      if (vDisk == null)
-         return false;
+   public static void populateDiskInfo(final DiskEntity diskEntity,
+         final String vmMobId) {
+      VcContext.inVcSessionDo(new VcSession<Void>() {
+         @Override
+         protected boolean isTaskSession() {
+            return true;
+         }
 
-      VirtualDisk.FlatVer2BackingInfo backing =
-            (VirtualDisk.FlatVer2BackingInfo) vDisk.getBacking();
-      diskEntity.setVmkdPath(backing.getFileName());
-      diskEntity.setDatastoreMoId(MoUtil.morefToString(backing.getDatastore()));
-      //      diskEntity.setDeviceName("");
+         @Override
+         protected Void body() throws Exception {
+            VirtualDisk vDisk =
+                  findVirtualDisk(vmMobId, diskEntity.getExternalAddress());
+            if (vDisk == null)
+               return null;
+
+            VirtualDisk.FlatVer2BackingInfo backing =
+                  (VirtualDisk.FlatVer2BackingInfo) vDisk.getBacking();
+            Datastore ds = MoUtil.getManagedObject(backing.getDatastore());
+            diskEntity.setDatastoreName(ds.getName());
+            diskEntity.setVmkdPath(backing.getFileName());
+            diskEntity.setDatastoreMoId(MoUtil.morefToString(ds._getRef()));
+
+            return null;
+         }
+      });
+   }
+
+   public static boolean isDatastoreAccessible(String dsMobId) {
+      final VcDatastore ds = VcCache.getIgnoreMissing(dsMobId);
+      try {
+         VcContext.inVcSessionDo(new VcSession<Void>() {
+            @Override
+            protected boolean isTaskSession() {
+               return true;
+            }
+
+            @Override
+            protected Void body() throws Exception {
+               ds.update();
+               return null;
+            }
+         });
+      } catch (Exception e) {
+         logger.info("failed to update datastore " + ds.getName()
+               + ", ignore this error.");
+      }
+      if (ds != null && ds.isAccessible())
+         return true;
+      return false;
+   }
+
+   public static boolean configIOShares(final String vmId,
+         final Priority ioShares) {
+      final VcVirtualMachine vcVm = VcCache.getIgnoreMissing(vmId);
+
+      if (vcVm == null) {
+         logger.info("vm " + vmId + " is not found.");
+         return false;
+      }
+      VcContext.inVcSessionDo(new VcSession<Void>() {
+         @Override
+         protected Void body() throws Exception {
+            List<VirtualDeviceSpec> deviceSpecs =
+                  new ArrayList<VirtualDeviceSpec>();
+            for (DeviceId slot : vcVm.getVirtualDiskIds()) {
+               SharesInfo shares = new SharesInfoImpl();
+               shares.setLevel(Level.valueOf(ioShares.toString().toLowerCase()));
+               IOAllocationInfo allocationInfo = new IOAllocationInfoImpl();
+               allocationInfo.setShares(shares);
+               VirtualDisk vmdk = (VirtualDisk) vcVm.getVirtualDevice(slot);
+               vmdk.setStorageIOAllocation(allocationInfo);
+               VirtualDeviceSpec spec = new VirtualDeviceSpecImpl();
+               spec.setOperation(VirtualDeviceSpec.Operation.edit);
+               spec.setDevice(vmdk);
+               deviceSpecs.add(spec);
+            }
+            logger.info("reconfiguring disks in vm " + vmId
+                  + " io share level to " + ioShares);
+            vcVm.reconfigure(VmConfigUtil.createConfigSpec(deviceSpecs));
+            logger.info("reconfigured disks in vm " + vmId
+                  + " io share level to " + ioShares);
+            return null;
+         }
+
+         protected boolean isTaskSession() {
+            return true;
+         }
+      });
       return true;
    }
-   
-   public static boolean runSPOnSingleVM(NodeEntity node, Callable<Void> call){
+
+   public static boolean runSPOnSingleVM(NodeEntity node, Callable<Void> call) {
       boolean operationResult = true;
       if (node == null || node.getMoId() == null) {
          logger.info("VC vm does not exist for node: " + node.getVmName());
@@ -181,6 +271,7 @@ public class VcVmUtil {
          logger.info("VC vm does not exist for node: " + node.getVmName());
          return false;
       }
+      @SuppressWarnings("unchecked")
       Callable<Void>[] storeProceduresArray = new Callable[1];
       storeProceduresArray[0] = call;
       NoProgressUpdateCallback callback = new NoProgressUpdateCallback();
@@ -193,21 +284,21 @@ public class VcVmUtil {
          if (result == null) {
             logger.error("No result from composition layer");
             return false;
-         }
-         else{
-            if(result[0].finished && result[0].throwable == null){
+         } else {
+            if (result[0].finished && result[0].throwable == null) {
                operationResult = true;
-               logger.info("successfully run operation on vm for node: " + node.getVmName());
-            }
-            else{
+               logger.info("successfully run operation on vm for node: "
+                     + node.getVmName());
+            } else {
                operationResult = false;
-               logger.error("failed in run operation on vm for node: " + node.getVmName());
+               logger.error("failed in run operation on vm for node: "
+                     + node.getVmName());
             }
          }
-      }catch (Exception e) {
+      } catch (Exception e) {
          operationResult = false;
-         logger.error("error in run operation on vm.", e);         
+         logger.error("error in run operation on vm.", e);
       }
-      return operationResult;      
+      return operationResult;
    }
 }

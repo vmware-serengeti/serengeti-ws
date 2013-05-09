@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+   xmlns:beans="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="
+   http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/batch
+   http://www.springframework.org/schema/batch/spring-batch.xsd
+   http://www.springframework.org/schema/aop
+   http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+   <beans:import
+      resource="classpath*:/META-INF/spring/jobs/common-job-context.xml" />
+
+   <beans:bean name="nodeRecoverDiskFailureTasklet"
+      class="com.vmware.bdd.service.job.heal.NodeRecoverDiskFailureStep">
+      <beans:property name="jobExecutionStatusHolder"
+         ref="jobExecutionStatusHolder" />
+   </beans:bean>
+   <beans:bean name="powerOffSingleVMTasklet"
+      class="com.vmware.bdd.service.job.vm.StopSingleVMStep">
+      <beans:property name="clusteringService" ref="clusteringService" />
+      <beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+      <beans:property name="vmPoweroff" value="true"/>
+   </beans:bean>
+
+   <beans:bean name="nodeUpdateDiskInfoTasklet"
+      class="com.vmware.bdd.service.job.heal.NodeUpdateDiskInfoStep">
+      <beans:property name="jobExecutionStatusHolder"
+         ref="jobExecutionStatusHolder" />
+   </beans:bean>
+
+   <job id="fixNodeDiskFailureJob" job-repository="jobRepository">
+      <step id="softwareEnableChefClientFlagStep" next="nodePowerOffStep">
+         <tasklet ref="softwareEnableOperationFlagTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="nodePowerOffStep" next="nodeRecoverDiskFailureStep">
+         <tasklet ref="powerOffSingleVMTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="nodeRecoverDiskFailureStep" next="nodeUpdateDiskInfoStep">
+         <tasklet ref="nodeRecoverDiskFailureTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="nodeUpdateDiskInfoStep" next="softwareConfigClusterStep">
+         <tasklet ref="nodeUpdateDiskInfoTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="softwareConfigClusterStep" next="softwareDisableChefClientFlagStep">
+         <tasklet ref="softwareBootstrapTargetTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="softwareDisableChefClientFlagStep">
+         <tasklet ref="softwareDisableOperationFlagTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <listeners>
+         <listener ref="clusterJobListener" />
+      </listeners>
+   </job>
+</beans:beans>

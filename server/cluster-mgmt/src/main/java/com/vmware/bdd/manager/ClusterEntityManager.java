@@ -34,6 +34,7 @@ import com.vmware.bdd.dal.IClusterDAO;
 import com.vmware.bdd.dal.INodeDAO;
 import com.vmware.bdd.dal.INodeGroupDAO;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.software.mgmt.thrift.GroupData;
@@ -185,6 +186,27 @@ public class ClusterEntityManager {
    @Transactional
    public void update(NodeEntity node) {
       nodeDao.update(node);
+   }
+
+   @Transactional
+   public void updateDisks(String nodeName, List<DiskEntity> diskSets) {
+      NodeEntity node = findNodeByName(nodeName);
+      for (DiskEntity disk : diskSets) {
+         boolean found = false;
+         for (DiskEntity old : node.getDisks()) {
+            if (disk.getName().equals(old.getName())) {
+               found = true;
+               old.setDatastoreName(disk.getDatastoreName());
+               old.setDatastoreMoId(disk.getDatastoreMoId());
+               old.setVmkdPath(disk.getVmkdPath());
+               old.setSizeInMB(disk.getSizeInMB());
+            }
+         }
+         if (!found) {
+            disk.setNodeEntity(node);
+            node.getDisks().add(disk);
+         }
+      }
    }
 
    @Transactional
@@ -403,5 +425,10 @@ public class ClusterEntityManager {
       }
 
       return taskIds;
+   }
+
+   public List<DiskEntity> getDisks(String nodeName) {
+      NodeEntity node = nodeDao.findByName(nodeName);
+      return new ArrayList<DiskEntity>(node.getDisks());
    }
 }

@@ -27,11 +27,9 @@ import com.vmware.bdd.utils.CommonUtil;
 /**
  * Cluster get output
  */
-public class ClusterRead implements Comparable<ClusterRead>{
+public class ClusterRead implements Comparable<ClusterRead> {
    public enum ClusterStatus {
-      RUNNING, PROVISIONING, PROVISION_ERROR, UPGRADING, UPDATING, DELETING, 
-      STOPPED, ERROR, STOPPING, STARTING, CONFIGURING, CONFIGURE_ERROR, NA, 
-      VHM_RUNNING, VMRECONFIGURING
+      RUNNING, PROVISIONING, PROVISION_ERROR, UPGRADING, UPDATING, DELETING, STOPPED, ERROR, STOPPING, STARTING, CONFIGURING, CONFIGURE_ERROR, NA, VHM_RUNNING, VMRECONFIGURING, MAINTENANCE
    }
 
    @Expose
@@ -134,6 +132,18 @@ public class ClusterRead implements Comparable<ClusterRead>{
       return nodeGroups;
    }
 
+   public NodeGroupRead getNodeGroupByName(String nodeGroupName) {
+      List<NodeGroupRead> nodeGroups = this.getNodeGroups();
+      if (nodeGroups != null) {
+         for (NodeGroupRead ng : nodeGroups) {
+            if (ng.getName().equals(nodeGroupName)) {
+               return ng;
+            }
+         }
+      }
+      return null;
+   }
+
    public void setNodeGroups(List<NodeGroupRead> nodeGroups) {
       this.nodeGroups = nodeGroups;
    }
@@ -142,44 +152,55 @@ public class ClusterRead implements Comparable<ClusterRead>{
     * Validate the manual elastic parameters, make sure the specified node group is a compute only node group.
     * If user have not specified the node group name,the cluster must contain compute only node.   
     */
-   public boolean validateSetManualElasticity(String nodeGroupName, List<String>... nodeGroupNames) {
+   public boolean validateSetManualElasticity(String nodeGroupName,
+         List<String>... nodeGroupNames) {
       if (!CommonUtil.isBlank(nodeGroupName)) {
          List<NodeGroupRead> nodeGroups = getNodeGroups();
-         if(nodeGroups != null && !nodeGroups.isEmpty()){
+         if (nodeGroups != null && !nodeGroups.isEmpty()) {
             List<String> invalidNodeGroup = new ArrayList<String>();
-            if(nodeGroupNames != null && nodeGroupNames.length > 0){
+            if (nodeGroupNames != null && nodeGroupNames.length > 0) {
                nodeGroupNames[0].add(nodeGroupName);
             }
-            NodeGroupRead nodeGroup = matchNodeGroupByName(nodeGroups,nodeGroupName);
+            NodeGroupRead nodeGroup =
+                  matchNodeGroupByName(nodeGroups, nodeGroupName);
             if (nodeGroup == null) {
-                invalidNodeGroup.add(nodeGroupName);
-            } else if (nodeGroup.getRoles() == null || nodeGroup.getRoles().size() > 2
-                || !nodeGroup.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())
-                || (nodeGroup.getRoles().size() == 2 && !nodeGroup.getRoles().contains(HadoopRole.TEMPFS_CLIENT_ROLE.toString()))
-                ) {
-                   invalidNodeGroup.add(nodeGroupName);
+               invalidNodeGroup.add(nodeGroupName);
+            } else if (nodeGroup.getRoles() == null
+                  || nodeGroup.getRoles().size() > 2
+                  || !nodeGroup.getRoles().contains(
+                        HadoopRole.HADOOP_TASKTRACKER.toString())
+                  || (nodeGroup.getRoles().size() == 2 && !nodeGroup.getRoles()
+                        .contains(HadoopRole.TEMPFS_CLIENT_ROLE.toString()))) {
+               invalidNodeGroup.add(nodeGroupName);
             }
             if (!invalidNodeGroup.isEmpty()) {
-               System.out.println("Adjustment failed: The specified node group is not a compute only node group.");
+               System.out.println("Adjustment failed: The specified node group is not a compute only node group or the group name is incorrect.");
                return false;
             }
          } else {
-            System.out.println("Adjustment failed: There is not node group under the cluster " + getName() + " !");
+            System.out
+                  .println("Adjustment failed: There is not node group under the cluster "
+                        + getName() + " !");
             return false;
          }
       } else {
          int count = 0;
-         for(NodeGroupRead nodeGroup : getNodeGroups()) {
-            if (nodeGroup.getRoles() != null && nodeGroup.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString()) 
-                && (nodeGroup.getRoles().size() == 1 || (nodeGroup.getRoles().size() == 2 && nodeGroup.getRoles().contains(HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
-               if(nodeGroupNames != null && nodeGroupNames.length > 0){
+         for (NodeGroupRead nodeGroup : getNodeGroups()) {
+            if (nodeGroup.getRoles() != null
+                  && nodeGroup.getRoles().contains(
+                        HadoopRole.HADOOP_TASKTRACKER.toString())
+                  && (nodeGroup.getRoles().size() == 1 || (nodeGroup.getRoles()
+                        .size() == 2 && nodeGroup.getRoles().contains(
+                        HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
+               if (nodeGroupNames != null && nodeGroupNames.length > 0) {
                   nodeGroupNames[0].add(nodeGroup.getName());
                }
-               count ++;
+               count++;
             }
          }
-         if(count == 0){
-            System.out.println("Adjustment failed: There's no compute only nodes in the cluster.");
+         if (count == 0) {
+            System.out
+                  .println("Adjustment failed: There's no compute only nodes in the cluster.");
             return false;
          }
       }
@@ -200,8 +221,8 @@ public class ClusterRead implements Comparable<ClusterRead>{
 
    /**
     * Compare the order of node groups according to their roles
-    *
-    *
+    * 
+    * 
     */
    private class NodeGroupReadComparactor implements Comparator<NodeGroupRead> {
       private final String[] roleOrders = { "namenode", "jobtracker",
@@ -239,7 +260,7 @@ public class ClusterRead implements Comparable<ClusterRead>{
          int ng1RolePos = findNodeGroupRole(ng1Roles);
          int ng2RolePos = findNodeGroupRole(ng2Roles);
          if (ng1RolePos < ng2RolePos) {
-            return -1; 
+            return -1;
          } else if (ng1Roles == ng2Roles) {
             return 0;
          } else {
@@ -298,4 +319,37 @@ public class ClusterRead implements Comparable<ClusterRead>{
       this.vhmTargetNum = vhmTargetNum;
    }
 
+   /*
+    * Check if invoke sync or async rest apis: if manual is set and targetNum is not empty;
+    * or current elasticity mode is manual and targetNum is not empty, we need to use async 
+    * rest api since start/stop vms will take some time to complete.
+    */
+   public boolean needAsyncUpdateParam(ElasticityRequestBody requestBody) {
+      Boolean enableAuto = requestBody.getEnableAuto();
+      if (enableAuto != null && !enableAuto && targetNumNotEmpty(requestBody)) { //set manual and targetNum != null
+         return true;
+      } else if (enableAuto == null) { //not set auto
+         Boolean existingElasticityMode = this.getAutomationEnable();
+         if (existingElasticityMode != null && !existingElasticityMode
+               && requestBody.getActiveComputeNodeNum() != null) { // existing is Manual and targetNum != null
+            return true;
+         }
+      }
+      return false;
+   }
+
+   private boolean targetNumNotEmpty(ElasticityRequestBody requestBody) {
+      String nodeGroupName = requestBody.getNodeGroupName();
+      Integer ngTargetNum = null;
+      if (nodeGroupName != null) {
+         NodeGroupRead ngRead = this.getNodeGroupByName(nodeGroupName);
+         ngTargetNum = ngRead.getVhmTargetNum();
+      }
+      if (requestBody.getActiveComputeNodeNum() != null 
+            || this.getVhmTargetNum() != null
+            || (ngTargetNum != null)) {
+         return true;
+      }
+      return false;
+   }
 }

@@ -36,7 +36,8 @@ public class Constants {
    public static final String REST_PATH_DISTROS = "distros";
    public static final String REST_PATH_DISTRO = "distro";
    public static final String REST_PATH_CONFIG = "config";
-   public static final String REST_PATH_ELASTICITY = "elasticity";
+   public static final String REST_PATH_SYNC_PARAM = "param";
+   public static final String REST_PATH_ASYNC_PARAM = "param_wait_for_result";
    public static final String REST_PATH_FIX = "fix";
    public static final String REST_PATH_FIX_DISK = "disk";
    public static final String REST_PATH_SPEC = "spec";
@@ -90,7 +91,7 @@ public class Constants {
    public static final String OUTPUT_OP_RESET_PARAM = "resetParam";
    public static final String OUTPUT_OP_QUOTA_SET = "quota";
    public static final String OUTPUT_OP_FIX = "fix";
-   public static final String OUTPUT_OP_ADJUSTMENT_FAILED = "failed";
+   public static final String OUTPUT_OP_RESULT_ADJUST = "ajusted";
    public static final String OUTPUT_OP_RESUME = "resume";
    public static final String OUTPUT_OP_RESULT_FAIL = "failed";
    public static final String OUTPUT_OP_RESULT_CREAT = "created";
@@ -102,15 +103,7 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_RESUME = "resumed";
    public static final String OUTPUT_OP_RESULT_ADD = "added";
    public static final String OUTPUT_OP_RESULT_UPLOAD = "uploaded";
-   public static final String OUTPUT_OP_RESULT_LIMIT = "limited";
-   public static final String OUTPUT_OP_RESULT_STOP_COMPUTE_NODE = "compute nodes adjusted";
-   public static final String OUTPUT_OP_RESULT_START_COMPUTE_NODE = "compute nodes started";
-   public static final String OUTPUT_OP_RESULT_SET_AUTO_ELASTICITY = "auto elasticity setted";
-   public static final String OUTPUT_OP_RESULT_SET_MANUAL_ELASTICITY = "manual elasticity setted";
-   public static final String OUTPUT_OP_RESULT_RESET_AUTO_ELASTICITY = "auto elasticity resetted";
-   public static final String OUTPUT_OP_RESULT_RESET_MANUAL_ELASTICITY = "manual elasticity resetted";
-   public static final String OUTPUT_OP_RESULT_PRIORITY = "prioritized";
-   public static final String OUTPUT_OP_RESULT_PRIORITY_RESET = "priority reset";
+   public static final String OUTPUT_OP_RESULT_RESET = "reset";
    public static final String OUTPUT_OP_RESULT_FIX = "fixed";
    public static final String OUTPUT_OP_NODEGROUP_MISSING = "must specify nodegroup name when node name is specified";
    public static final String OUTPUT_UNKNOWN_HOST = "unknown host";

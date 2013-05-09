@@ -37,10 +37,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.vmware.bdd.apitypes.ElasticityRequestBody;
-import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityOperation;
 import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.ClusterPriority;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.DatastoreAdd;
 import com.vmware.bdd.apitypes.DatastoreRead;
@@ -49,7 +47,6 @@ import com.vmware.bdd.apitypes.FixDiskRequestBody;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetworkRead;
-import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.apitypes.RackInfoList;
 import com.vmware.bdd.apitypes.ResourcePoolAdd;
@@ -268,58 +265,59 @@ public class RestResource {
       redirectRequest(taskId, request, response);
    }
 
-   @RequestMapping(value = "/cluster/{clusterName}/elasticity", method = RequestMethod.PUT)
+   @RequestMapping(value = "/cluster/{clusterName}/param_wait_for_result", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
-   public void setElasticity(@PathVariable("clusterName") String clusterName, @RequestBody ElasticityRequestBody requestBody, HttpServletRequest request,
+   public void asyncSetParam(@PathVariable("clusterName") String clusterName, @RequestBody ElasticityRequestBody requestBody, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
+      validateInput(clusterName, requestBody);
+      ClusterRead cluster = clusterMgr.getClusterByName(clusterName, false);
+      if (!cluster.needAsyncUpdateParam(requestBody)) {
+            throw BddException.BAD_REST_CALL(null, "the current cluster with this input is not valid.");
+      }
+
+      Long taskId =
+            clusterMgr.asyncSetParam(clusterName,
+                  requestBody.getNodeGroupName(),
+                  requestBody.getActiveComputeNodeNum(),
+                  requestBody.getMinComputeNodeNum(),
+                  requestBody.getEnableAuto(), requestBody.getIoPriority());
+      redirectRequest(taskId, request, response);
+   }
+   
+   @RequestMapping(value = "/cluster/{clusterName}/param", method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.OK)
+   public void syncSetParam(@PathVariable("clusterName") String clusterName, @RequestBody ElasticityRequestBody requestBody, HttpServletRequest request,
+         HttpServletResponse response) throws Exception {
+      validateInput(clusterName, requestBody);
+
+      clusterMgr.syncSetParam(clusterName, 
+            requestBody.getNodeGroupName(),
+            requestBody.getActiveComputeNodeNum(),
+            requestBody.getMinComputeNodeNum(), 
+            requestBody.getEnableAuto(),
+            requestBody.getIoPriority());
+   }
+
+   private void validateInput(String clusterName, ElasticityRequestBody requestBody) {
       if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
-      if (requestBody.getElasticityOperation() == ElasticityOperation.OP_SET_AUTO) {
-         Integer minComputeNodeNum = requestBody.getMinComputeNodeNum();
-         if (minComputeNodeNum != null && minComputeNodeNum < 0) {
-            throw BddException.INVALID_PARAMETER("min compute node num", minComputeNodeNum.toString());
-         }
-         clusterMgr.setAutoElasticity(clusterName, requestBody.getEnableAutoElasticity(), minComputeNodeNum, requestBody.getCalledByReset());
-      } else if (requestBody.getElasticityOperation() == ElasticityOperation.OP_SET_MANUAL) {
-         Integer activeComputeNodeNum = requestBody.getActiveComputeNodeNum();
-         String groupName = requestBody.getNodeGroupName();
-         if (!CommonUtil.isBlank(groupName) && !CommonUtil.validateNodeGroupName(groupName)) {
-            throw BddException.INVALID_PARAMETER("node group name", groupName);
-         }
-         // The active compute node number must be a positive number or -1.
-         if (activeComputeNodeNum != null && activeComputeNodeNum < -1) {
-            logger.error("Invalid instance number: " + activeComputeNodeNum + " !");
-            throw BddException.INVALID_PARAMETER("instance number", activeComputeNodeNum.toString());
-         }
-         Long taskId = clusterMgr.setManualElasticity(clusterName, requestBody.getEnableManualElasticity(), groupName, activeComputeNodeNum);
-         redirectRequest(taskId, request, response);
-      } else {
-         throw BddException.INVALID_PARAMETER("elasticity operation type", "");
-      }
-   }
 
-   @RequestMapping(value = "/cluster/{clusterName}/priority", method = RequestMethod.PUT)
-   @ResponseStatus(HttpStatus.OK)
-   public void prioritizeCluster(
-         @PathVariable("clusterName") String clusterName,
-         @RequestBody ClusterPriority requestBody, HttpServletRequest request,
-         HttpServletResponse response) throws Exception {
-      if (CommonUtil.isBlank(clusterName)
-            || !CommonUtil.validateClusterName(clusterName)) {
-         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      Integer minComputeNodeNum = requestBody.getMinComputeNodeNum();
+      if (minComputeNodeNum != null && minComputeNodeNum < 0) {
+         throw BddException.INVALID_PARAMETER("min compute node num", minComputeNodeNum.toString());
       }
-      Priority ioPriority = requestBody.getDiskIOPriority();
+
+      Integer activeComputeNodeNum = requestBody.getActiveComputeNodeNum();
       String groupName = requestBody.getNodeGroupName();
-      if (!CommonUtil.isBlank(groupName)
-            && !CommonUtil.validateNodeGroupName(groupName)) {
+      if (!CommonUtil.isBlank(groupName) && !CommonUtil.validateNodeGroupName(groupName)) {
          throw BddException.INVALID_PARAMETER("node group name", groupName);
       }
-      if (ioPriority == null) {
-         logger.error("Priority cannot be null!");
-         throw BddException.INVALID_PARAMETER("disk i/o priority", ioPriority);
+      // The active compute node number must be a positive number or -1.
+      if (activeComputeNodeNum != null && activeComputeNodeNum < -1) {
+         logger.error("Invalid instance number: " + activeComputeNodeNum + " !");
+         throw BddException.INVALID_PARAMETER("instance number", activeComputeNodeNum.toString());
       }
-      clusterMgr.prioritizeCluster(clusterName, groupName, ioPriority);
    }
 
    @RequestMapping(value = "/cluster/{clusterName}/fix/disk", method = RequestMethod.PUT)
@@ -328,7 +326,9 @@ public class RestResource {
          @RequestBody FixDiskRequestBody requestBody,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
-      Long taskId = null;
+      Long taskId =
+            clusterMgr.fixDiskFailures(clusterName,
+                  requestBody.getNodeGroupName());
       redirectRequest(taskId, request, response);
    }
 

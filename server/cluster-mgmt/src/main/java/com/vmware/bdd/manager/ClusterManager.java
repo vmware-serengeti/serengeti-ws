@@ -29,6 +29,7 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
@@ -38,6 +39,7 @@ import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.NetworkRead;
+import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.Priority;
@@ -46,7 +48,9 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterConfigException;
+import com.vmware.bdd.exception.ClusterHealServiceException;
 import com.vmware.bdd.exception.ClusterManagerException;
+import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.resmgmt.INetworkService;
@@ -75,6 +79,8 @@ public class ClusterManager {
    private RackInfoManager rackInfoMgr;
 
    private IClusteringService clusteringService;
+
+   private IClusterHealService clusterHealService;
 
    public JobManager getJobManager() {
       return jobManager;
@@ -143,6 +149,15 @@ public class ClusterManager {
    @Autowired
    public void setClusteringService(IClusteringService clusteringService) {
       this.clusteringService = clusteringService;
+   }
+
+   public IClusterHealService getClusterHealService() {
+      return clusterHealService;
+   }
+
+   @Autowired
+   public void setClusterHealService(IClusterHealService clusterHealService) {
+      this.clusterHealService = clusterHealService;
    }
 
    public Map<String, Object> getClusterConfigManifest(String clusterName,
@@ -303,6 +318,13 @@ public class ClusterManager {
             group.getStorage().setSplitPolicy(null);
             group.getStorage().setControllerType(null);
             group.getStorage().setAllocType(null);
+            if (group.getPlacementPolicies() != null) {
+               List<GroupAssociation> associations =
+                  group.getPlacementPolicies().getGroupAssociations();
+               if (associations != null && associations.isEmpty()) {
+                  group.getPlacementPolicies().setGroupAssociations(null);
+               }
+            }
          }
       }
       return spec;
@@ -782,43 +804,62 @@ public class ClusterManager {
       }
    }
 
-   public void setAutoElasticity(String clusterName,
-         Boolean enableAutoElasticity, Integer minComputeNodeNum,
-         boolean calledByReset) throws Exception {
+   /**
+    * set cluster parameters synchronously
+    * @param clusterName
+    * @param nodeGroupName
+    * @param activeComputeNodeNum
+    * @param minComputeNodeNum
+    * @param mode
+    * @param ioPriority
+    * @throws Exception
+    */
+   @SuppressWarnings("unchecked")
+   public  List<String> syncSetParam(String clusterName, String nodeGroupName,
+         Integer activeComputeNodeNum, Integer minComputeNodeNum,
+         Boolean enableAuto, Priority ioPriority) throws Exception {
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
+      ClusterRead clusterRead = getClusterByName(clusterName, false);
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");
          throw BddException.NOT_FOUND("cluster", clusterName);
       }
 
-      Boolean preEnableSetting = cluster.getAutomationEnable();
-      Integer preVhmMinNumSetting = cluster.getVhmMinNum();
-      
-      if (enableAutoElasticity == preEnableSetting && minComputeNodeNum == preVhmMinNumSetting) {
-         return;
+      if (enableAuto != null && enableAuto != cluster.getAutomationEnable()) {
+         cluster.setAutomationEnable(enableAuto);
       }
 
-      if (preEnableSetting == null) {
-         if (calledByReset) {
-            return;
-         }
-         logger.error("cluster " + clusterName
-               + " is not a D/C separation cluster, cannot set elasticity");
-         throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
-               clusterName,
-               "it is not a D/C seperation or Compute Only cluster");
-      }
-
-      if (enableAutoElasticity != null) {
-         cluster.setAutomationEnable(enableAutoElasticity);
-      }
-
-      if (minComputeNodeNum != null) {
+      if (minComputeNodeNum != null && minComputeNodeNum != cluster.getVhmMinNum()) {
          cluster.setVhmMinNum(minComputeNodeNum);
+      }
+
+      List<String> nodeGroupNames = new ArrayList<String>();
+      if (!clusterRead.validateSetManualElasticity(nodeGroupName, nodeGroupNames)) {
+         if (nodeGroupName != null) {
+            throw BddException.INVALID_PARAMETER("nodeGroup", nodeGroupName);
+         } else {
+            throw BddException.INVALID_PARAMETER("cluster", clusterName);
+         }
+      }
+
+      if (nodeGroupName == null && activeComputeNodeNum != null) {
+         if (activeComputeNodeNum != cluster.getVhmTargetNum()) {
+            cluster.setVhmTargetNum(activeComputeNodeNum);
+         }
       }
 
       clusterEntityMgr.update(cluster);
 
+      if (nodeGroupName != null) {
+         NodeGroupEntity ngEntity =
+               clusterEntityMgr.findByName(clusterName, nodeGroupName);
+         if (activeComputeNodeNum != ngEntity.getVhmTargetNum()) {
+            ngEntity.setVhmTargetNum(activeComputeNodeNum);
+            clusterEntityMgr.update(ngEntity);
+         }
+      }
+
+      //update vhm extra config file
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
             && !ClusterStatus.STOPPED.equals(cluster.getStatus())) {
          logger.error("cluster " + clusterName
@@ -833,27 +874,28 @@ public class ClusterManager {
          throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
                clusterName, "failed");
       }
-   }
 
-   /*
-    * set Manual Elasticity 
-    */
-   @SuppressWarnings("unchecked")
-   public Long setManualElasticity(String clusterName,
-         Boolean enableManualElasticity, String nodeGroupName,
-         Integer activeComputeNodeNum) throws Exception {
-      logger.info("clusterName: " + clusterName + ", enable?:" + enableManualElasticity + ", ngName: " + nodeGroupName + ",activeNodeNum:" + activeComputeNodeNum);
-      logger.info("Set active compute node number to" + activeComputeNodeNum);
-      ClusterRead cluster = getClusterByName(clusterName, false);
-      // cluster must be contain node group
-      List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
-      if (nodeGroups == null || nodeGroups.isEmpty()) {
-         String msg =
-               "There is no node group in cluster " + clusterName + " . ";
-         logger.error(msg);
-         throw BddException.INTERNAL(null, msg);
+      //update vm ioshares
+      if (ioPriority != null) {
+         prioritizeCluster(clusterName, nodeGroupName, ioPriority);
       }
 
+      return nodeGroupNames;
+   }
+
+   /**
+    * set cluster parameters asynchronously
+    * @param clusterName
+    * @param enableManualElasticity
+    * @param nodeGroupName
+    * @param activeComputeNodeNum
+    * @return
+    * @throws Exception
+    */
+   public Long asyncSetParam(String clusterName, String nodeGroupName,
+         Integer activeComputeNodeNum, Integer minComputeNodeNum,
+         Boolean enableAuto, Priority ioPriority) throws Exception {
+      ClusterRead cluster = getClusterByName(clusterName, false);
       // cluster must be running status
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
          String msg = "Cluster is not running.";
@@ -861,45 +903,12 @@ public class ClusterManager {
          throw ClusterManagerException.SET_MANUAL_ELASTICITY_NOT_ALLOWED_ERROR(
                clusterName, msg);
       }
-      // node group must be compute only node
-      List<String> nodeGroupNames = new ArrayList<String>();
-      if (!cluster.validateSetManualElasticity(nodeGroupName, nodeGroupNames)) {
-         return null;
-      }
-      
-      ClusterEntity clusterEntity = clusterEntityMgr.findByName(clusterName);
-      Boolean preAutoEnableSetting = clusterEntity.getAutomationEnable();
-      NodeGroupEntity ngEntity = null;
-      Integer preActiveComputeNodeNum = null;
-      
-      if (nodeGroupName == null) {
-         preActiveComputeNodeNum = clusterEntity.getVhmTargetNum();
-      } else {
-         ngEntity = clusterEntityMgr.findByName(clusterName, nodeGroupName);
-         preActiveComputeNodeNum = ngEntity.getVhmTargetNum();
-      }
-      
-      if (activeComputeNodeNum == null) {
-         if (preActiveComputeNodeNum == null) {
-            return null;
-         } else {
-            activeComputeNodeNum = preActiveComputeNodeNum;
-         }
-      } else {
-         if (nodeGroupName == null) {
-            clusterEntity.setVhmTargetNum(activeComputeNodeNum);
-            clusterEntityMgr.update(clusterEntity);
-         } else {
-            ngEntity.setVhmTargetNum(activeComputeNodeNum);
-            clusterEntityMgr.update(ngEntity);
-         }
-      }
-      
-      if (preAutoEnableSetting && enableManualElasticity == null) {
-         return null;
-      }
+
+      List<String> nodeGroupNames = syncSetParam(clusterName, nodeGroupName, activeComputeNodeNum,
+            minComputeNodeNum, enableAuto, ioPriority);
 
       // find hadoop job tracker ip
+      List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
       String hadoopJobTrackerIP = "";
       for (NodeGroupRead nodeGroup : nodeGroups) {
          if (nodeGroup.getRoles() != null
@@ -920,6 +929,13 @@ public class ClusterManager {
             clusterName));
       param.put(JobConstants.GROUP_NAME_JOB_PARAM,
             new JobParameter(new Gson().toJson(nodeGroupNames)));
+      if (activeComputeNodeNum == null) {
+         if (nodeGroupName == null) {
+            activeComputeNodeNum = cluster.getVhmTargetNum();
+         } else {
+            activeComputeNodeNum = cluster.getNodeGroupByName(nodeGroupName).getVhmTargetNum();
+         }
+      }
       param.put(JobConstants.GROUP_ACTIVE_COMPUTE_NODE_NUMBER_JOB_PARAM,
             new JobParameter(Long.valueOf(activeComputeNodeNum)));
       param.put(JobConstants.HADOOP_JOBTRACKER_IP_JOB_PARAM, new JobParameter(
@@ -1036,6 +1052,93 @@ public class ClusterManager {
             nodeGroup.setIoShares(ioShares);
             clusterEntityMgr.update(nodeGroup);
          }
+      }
+   }
+
+   public Long fixDiskFailures(String clusterName, String groupName)
+         throws Exception {
+      ClusterStatus oldStatus =
+            clusterEntityMgr.findByName(clusterName).getStatus();
+
+      if (ClusterStatus.RUNNING != oldStatus) {
+         throw ClusterHealServiceException.NOT_SUPPORTED(clusterName,
+               "cluster is not in RUNNING status");
+      }
+
+      List<NodeGroupEntity> nodeGroups;
+
+      if (groupName != null) {
+         NodeGroupEntity nodeGroup =
+               clusterEntityMgr.findByName(clusterName, groupName);
+         AuAssert.check(nodeGroup != null);
+
+         nodeGroups = new ArrayList<NodeGroupEntity>(1);
+         nodeGroups.add(nodeGroup);
+      } else {
+         nodeGroups = clusterEntityMgr.findAllGroups(clusterName);
+      }
+
+      // only fix worker nodes that have datanode or tasktracker roles
+      boolean workerNodesFound = false;
+      JobParametersBuilder parametersBuilder = new JobParametersBuilder();
+      List<JobParameters> jobParameterList = new ArrayList<JobParameters>();
+
+      for (NodeGroupEntity nodeGroup : nodeGroups) {
+         List<String> roles = nodeGroup.getRoleNameList();
+
+         // TODO: more fine control on node roles
+         if (!roles.contains(HadoopRole.HADOOP_DATANODE.toString())
+               && !roles.contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {
+            logger.info("node group " + nodeGroup.getName()
+                  + " is not a worker node group, pass it");
+            continue;
+         }
+
+         workerNodesFound = true;
+         for (NodeEntity node : clusterEntityMgr.findAllNodes(clusterName,
+               nodeGroup.getName())) {
+            if (clusterHealService.hasBadDisks(node.getVmName())) {
+               logger.warn("node " + node.getVmName()
+                     + " has bad disks. Fixing it..");
+
+               JobParameters nodeParameters =
+                     parametersBuilder
+                           .addString(JobConstants.CLUSTER_NAME_JOB_PARAM,
+                                 clusterName)
+                           .addString(JobConstants.TARGET_NAME_JOB_PARAM,
+                                 node.getVmName())
+                           .addString(JobConstants.GROUP_NAME_JOB_PARAM,
+                                 nodeGroup.getName())
+                           .addString(JobConstants.SUB_JOB_NODE_NAME,
+                                 node.getVmName()).toJobParameters();
+               jobParameterList.add(nodeParameters);
+            }
+         }
+      }
+
+      if (!workerNodesFound) {
+         throw ClusterHealServiceException.NOT_SUPPORTED(clusterName,
+               "only support fixing disk failures for worker nodes");
+      }
+
+      // all target nodes are healthy, simply return
+      if (jobParameterList.isEmpty()) {
+         logger.info("all target nodes are healthy, simply return");
+         throw ClusterHealServiceException.NOT_NEEDED(clusterName);
+      }
+
+      try {
+         clusterEntityMgr.updateClusterStatus(clusterName,
+               ClusterStatus.MAINTENANCE);
+         return jobManager.runSubJobForNodes(
+               JobConstants.FIX_NODE_DISK_FAILURE_JOB_NAME, jobParameterList,
+               clusterName);
+      } catch (Exception e) {
+         logger.error("failed to fix disk failures, " + e.getMessage());
+         throw e;
+      } finally {
+         logger.info("reset to previous status " + oldStatus);
+         clusterEntityMgr.updateClusterStatus(clusterName, oldStatus);
       }
    }
 }

@@ -80,7 +80,6 @@ public class SoftwareManagementStep extends TrackableTasklet {
             createCommandTask(targetName, specFile.getAbsolutePath(),
                   statusUpdater);
 
-      //Map<String, Object> ret = executionService.execute(cmd);
       Map<String, Object> ret = task.call();
 
       if (!(Boolean) ret.get("succeed")) {

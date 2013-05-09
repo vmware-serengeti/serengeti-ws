@@ -114,7 +114,7 @@ public class NodeEntity extends EntityBase {
    public List<String> getVolumns() {
       List<String> volumns = new ArrayList<String>();
       for (DiskEntity disk : disks) {
-         if (!DiskType.SWAP_DISK.getType().equals(disk.getDiskType()))
+         if (DiskType.DATA_DISK.getType().equals(disk.getDiskType()))
             volumns.add(disk.getDeviceName());
       }
       return volumns;
@@ -337,6 +337,16 @@ public class NodeEntity extends EntityBase {
       return null;
    }
 
+   public DiskEntity findSystemDisk() {
+      AuAssert.check(this.disks != null);
+      for (DiskEntity disk : this.disks) {
+         if (DiskType.SYSTEM_DISK.getType().equals(disk.getDiskType()))
+            return disk;
+      }
+
+      return null;
+   }
+
    // if includeVolumes is true, this method must be called inside a transaction
    public NodeRead toNodeRead(boolean includeVolumes) {
       NodeRead node = new NodeRead();
@@ -345,7 +355,7 @@ public class NodeEntity extends EntityBase {
       node.setIp(this.ipAddress);
       node.setName(this.vmName);
       node.setMoId(this.moId);
-      node.setStatus(this.status.toString());
+      node.setStatus(this.status != null ? this.status.toString() : null);
       node.setAction(this.action);
       if (this.cpuNum != null) {
          node.setCpuNumber(this.cpuNum);

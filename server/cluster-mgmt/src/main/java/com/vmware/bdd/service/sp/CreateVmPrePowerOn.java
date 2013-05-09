@@ -1,32 +1,16 @@
 package com.vmware.bdd.service.sp;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.log4j.Logger;
-
 import com.vmware.aurora.composition.IPrePostPowerOn;
-import com.vmware.aurora.vc.DeviceId;
 import com.vmware.aurora.vc.VcCluster;
 import com.vmware.aurora.vc.VcVirtualMachine;
-import com.vmware.aurora.vc.VmConfigUtil;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.exception.ClusteringServiceException;
-import com.vmware.vim.binding.impl.vim.SharesInfoImpl;
-import com.vmware.vim.binding.impl.vim.StorageResourceManager_Impl.IOAllocationInfoImpl;
-import com.vmware.vim.binding.impl.vim.vm.device.VirtualDeviceSpecImpl;
-import com.vmware.vim.binding.vim.SharesInfo;
-import com.vmware.vim.binding.vim.SharesInfo.Level;
-import com.vmware.vim.binding.vim.StorageResourceManager.IOAllocationInfo;
+import com.vmware.bdd.utils.VcVmUtil;
 import com.vmware.vim.binding.vim.cluster.DasVmSettings.RestartPriority;
-import com.vmware.vim.binding.vim.vm.device.VirtualDeviceSpec;
-import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 
 public class CreateVmPrePowerOn implements IPrePostPowerOn {
-   private static final Logger logger = Logger
-         .getLogger(CreateVmPrePowerOn.class);
    private VcVirtualMachine vm;
    private boolean ha;
    private boolean ft;
@@ -47,7 +31,7 @@ public class CreateVmPrePowerOn implements IPrePostPowerOn {
          enableFt(vm);
       }
       // by default, the share level is NORMAL
-      if (!Priority.NORMAL.equals(ioShares)) {
+      if (!Priority.Normal.equals(ioShares)) {
          configIOShares();
       }
       return null;
@@ -100,24 +84,7 @@ public class CreateVmPrePowerOn implements IPrePostPowerOn {
    }
 
    private void configIOShares() throws Exception {
-      List<VirtualDeviceSpec> deviceSpecs = new ArrayList<VirtualDeviceSpec>();
-      for (DeviceId slot : vm.getVirtualDiskIds()) {
-         SharesInfo shares = new SharesInfoImpl();
-         shares.setLevel(Level.valueOf(ioShares.toString().toLowerCase()));
-         IOAllocationInfo allocationInfo = new IOAllocationInfoImpl();
-         allocationInfo.setShares(shares);
-         VirtualDisk vmdk = (VirtualDisk) vm.getVirtualDevice(slot);
-         vmdk.setStorageIOAllocation(allocationInfo);
-         VirtualDeviceSpec spec = new VirtualDeviceSpecImpl();
-         spec.setOperation(VirtualDeviceSpec.Operation.edit);
-         spec.setDevice(vmdk);
-         deviceSpecs.add(spec);
-      }
-      logger.info("reconfiguring disks in vm " + vm.getId()
-            + " io share level to " + ioShares);
-      vm.reconfigure(VmConfigUtil.createConfigSpec(deviceSpecs));
-      logger.info("reconfigured disks in vm " + vm.getId()
-            + " io share level to " + ioShares);
+      VcVmUtil.configIOShares(vm.getId(), ioShares);
    }
 
    @Override

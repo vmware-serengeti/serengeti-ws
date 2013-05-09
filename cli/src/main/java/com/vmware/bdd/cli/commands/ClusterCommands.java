@@ -38,7 +38,6 @@ import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.ElasticityRequestBody;
 import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityMode;
-import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityOperation;
 import com.vmware.bdd.apitypes.FixDiskRequestBody;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
@@ -486,7 +485,6 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   @SuppressWarnings("unchecked")
    @CliCommand(value = "cluster setParam", help = "set cluster parameters")
    public void setParam(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
@@ -496,6 +494,7 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "targetComputeNodeNum" }, mandatory = false, help = "The number of instances powered on (valid in manual elasticity mode)") final Integer targetComputeNodeNum,
          @CliOption(key = { "ioShares" }, mandatory = false, help = "The relative disk I/O priorities: HIGH, NORNAL, LOW") final String ioShares) {
       try {
+         //validate if the cluster exists
          ClusterRead cluster = restClient.get(clusterName, false);
          if (cluster == null) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
@@ -505,7 +504,13 @@ public class ClusterCommands implements CommandMarker {
             return;
          }
 
+         //validate the node group type
+         if (!cluster.validateSetManualElasticity(nodeGroupName)) {
+            return;
+         }
+
          ElasticityMode mode = null;
+         //validate the input of elasticityMode
          if (elasticityMode != null) {
             try {
                mode = ElasticityMode.valueOf(elasticityMode.toUpperCase());
@@ -517,76 +522,52 @@ public class ClusterCommands implements CommandMarker {
             }
          }
 
-         ElasticityRequestBody requestBody = new ElasticityRequestBody();
-         if (mode == ElasticityMode.AUTO || minComputeNodeNum != null) {
-            if (minComputeNodeNum != null && minComputeNodeNum < 0) {
-               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                     clusterName, Constants.OUTPUT_OP_SET_PARAM,
-                     Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
-                           + " minComputeNodeNum");
-               return;
-            }
-            requestBody.setElasticityOperation(ElasticityOperation.OP_SET_AUTO);
-            requestBody.setEnableAutoElasticity(null);
-            if (mode == ElasticityMode.AUTO) {
-               requestBody.setEnableAutoElasticity(true);
-            } else if (mode == ElasticityMode.MANUAL) {
-               requestBody.setEnableAutoElasticity(false);
-            }
-            requestBody.setMinComputeNodeNum(minComputeNodeNum);
-            restClient.setElasticity(clusterName, requestBody);
-            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_RESULT_SET_AUTO_ELASTICITY);
+         //validate the input of minComputeNodeNum
+         if (minComputeNodeNum != null && minComputeNodeNum < 0) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  clusterName, Constants.OUTPUT_OP_SET_PARAM,
+                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
+                  + " minComputeNodeNum");
+            return;
          }
 
-         if (mode == ElasticityMode.MANUAL || targetComputeNodeNum != null) {
-            if (targetComputeNodeNum != null && targetComputeNodeNum < 0) {
-               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                     clusterName, Constants.OUTPUT_OP_SET_PARAM,
-                     Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
-                           + "targetComputeNodeNum");
-               return;
-            }
-            requestBody.setElasticityOperation(ElasticityOperation.OP_SET_AUTO);
-
-            if (!cluster.validateSetManualElasticity(nodeGroupName)) {
-               return;
-            }
-            requestBody
-                  .setElasticityOperation(ElasticityOperation.OP_SET_MANUAL);
-            requestBody.setNodeGroupName(nodeGroupName);
-            requestBody.setEnableManualElasticity(null);
-            if (mode == ElasticityMode.MANUAL) {
-               requestBody.setEnableManualElasticity(true);
-            }
-            requestBody.setActiveComputeNodeNum(targetComputeNodeNum);
-
-            restClient.setElasticity(clusterName, requestBody);
-            if (targetComputeNodeNum != null && targetComputeNodeNum > 0) {
-               CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                     clusterName,
-                     Constants.OUTPUT_OP_RESULT_SET_MANUAL_ELASTICITY);
-            } else { // show status
-               ClusterRead clusterRead = restClient.get(clusterName, true);
-               prettyOutputDynamicResourceInfo(clusterRead);
-            }
+         //validate the input of targetComputeNodeNum
+         if (targetComputeNodeNum != null && targetComputeNodeNum < 0) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  clusterName, Constants.OUTPUT_OP_SET_PARAM,
+                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
+                  + "targetComputeNodeNum");
+            return;
          }
 
+         //validate the input of ioShares
+         Priority ioPriority = null;
          if (ioShares != null) {
-            Priority ioPriority = null;
             try {
                ioPriority = Priority.valueOf(ioShares.toUpperCase());
             } catch (IllegalArgumentException ex) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                      clusterName, Constants.OUTPUT_OP_SET_PARAM,
                      Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
-                           + " " + "ioShares = " + ioShares);
+                     + " " + "ioShares = " + ioShares);
             }
-            restClient
-                  .prioritizeCluster(clusterName, nodeGroupName, ioPriority);
-            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_RESULT_PRIORITY);
          }
+
+         ElasticityRequestBody requestBody = new ElasticityRequestBody();
+         Boolean enableAuto = null;
+         if (mode != null) {
+            enableAuto = (mode == ElasticityMode.AUTO) ? true : false;
+         }
+         requestBody.setNodeGroupName(nodeGroupName);
+         requestBody.setEnableAuto(enableAuto);
+         requestBody.setActiveComputeNodeNum(targetComputeNodeNum);
+         requestBody.setMinComputeNodeNum(minComputeNodeNum);
+         requestBody.setIoPriority(ioPriority);
+         
+         restClient.setParam(cluster, requestBody);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
+                  clusterName, Constants.OUTPUT_OP_RESULT_ADJUST);
+         
       } catch (CliRestException e) {
          if (e.getMessage() != null) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
@@ -596,7 +577,6 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   @SuppressWarnings("unchecked")
    @CliCommand(value = "cluster resetParam", help = "reset cluster parameters")
    public void resetParam(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
@@ -607,6 +587,7 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "targetComputeNodeNum" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "reset targetComputeNodeNum to -1(activate all compute nodes)") final boolean targetComputeNodeNum,
          @CliOption(key = { "ioShares" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "reset disk I/O priorities to LOW") final boolean ioShares) {
       try {
+         //validate if the cluster exists
          ClusterRead cluster = restClient.get(clusterName, false);
          if (cluster == null) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
@@ -616,56 +597,33 @@ public class ClusterCommands implements CommandMarker {
             return;
          }
 
+         //validate the node group type
+         if (!cluster.validateSetManualElasticity(nodeGroupName)) {
+            return;
+         }
+
+         // reset Auto Elasticity parameters. The default values are:
+         // elasticityMode: manual
+         // targetComputeNodes: -1
+         // minComputeNodes: 0
+         // ioShares: normal
          ElasticityRequestBody requestBody = new ElasticityRequestBody();
-         requestBody.setCalledByReset(true);
-
-         // reset Auto Elasticity parameters
-         if (elasticityMode || minComputeNodeNum || all) {
-            requestBody.setElasticityOperation(ElasticityOperation.OP_SET_AUTO);
-            requestBody.setEnableAutoElasticity(null);
-            requestBody.setMinComputeNodeNum(null);
-            if (elasticityMode || all) {
-               requestBody.setEnableAutoElasticity(false);
-            }
-            if (minComputeNodeNum || all) {
-               requestBody.setMinComputeNodeNum(0);
-            }
-            restClient.setElasticity(clusterName, requestBody);
-            CommandsUtils
-                  .printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                        clusterName,
-                        Constants.OUTPUT_OP_RESULT_RESET_AUTO_ELASTICITY);
+         if (elasticityMode || all) {
+            requestBody.setEnableAuto(false);
          }
-
-         if (elasticityMode || targetComputeNodeNum || all) {
-            requestBody
-                  .setElasticityOperation(ElasticityOperation.OP_SET_MANUAL);
-            requestBody.setEnableManualElasticity(null);
-            requestBody.setActiveComputeNodeNum(null);
-            if (!cluster.validateSetManualElasticity(nodeGroupName)) {
-               return;
-            }
-            requestBody.setNodeGroupName(nodeGroupName);
-            if (elasticityMode || all) {
-               requestBody.setEnableManualElasticity(true);
-            }
-            if (targetComputeNodeNum || all) {
-               requestBody.setActiveComputeNodeNum(-1);
-            }
-            restClient.setElasticity(clusterName, requestBody);
-            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName,
-                  Constants.OUTPUT_OP_RESULT_RESET_MANUAL_ELASTICITY);
+         if (minComputeNodeNum || all) {
+            requestBody.setMinComputeNodeNum(0);
          }
-
-         // reset IOShares
+         if (targetComputeNodeNum || all) {
+            requestBody.setActiveComputeNodeNum(-1);
+         }
          if (ioShares || all) {
-            restClient.prioritizeCluster(clusterName, nodeGroupName,
-                  Priority.NORMAL);
-            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_RESULT_PRIORITY);
-
+            requestBody.setIoPriority(Priority.Normal);
          }
+         requestBody.setNodeGroupName(nodeGroupName);
+         restClient.setParam(cluster, requestBody);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
+               clusterName, Constants.OUTPUT_OP_RESULT_RESET);
       } catch (CliRestException e) {
          if (e.getMessage() != null) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
