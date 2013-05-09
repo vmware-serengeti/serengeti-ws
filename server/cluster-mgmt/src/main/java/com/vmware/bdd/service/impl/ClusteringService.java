@@ -730,7 +730,7 @@ public class ClusteringService implements IClusteringService {
                Scheduler
                      .executeStoredProcedures(
                            com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
-                           storeProcedures, storeProcedures.length - 1,
+                           storeProcedures, storeProcedures.length,
                            callback);
          if (result == null) {
             logger.error("No VM is created.");

@@ -200,8 +200,9 @@ public class ClusterHealService implements IClusterHealService {
             new ArrayList<DiskEntity>(badDisks.size());
 
       for (DiskEntity disk : badDisks) {
+         int requiredSize = disk.getSizeInMB() >> 10;
          AbstractDatastore ads =
-               getLeastUsedDatastore(usage, disk.getSizeInMB() >> 10);
+               getLeastUsedDatastore(usage, requiredSize);
          if (ads == null) {
             throw ClusterHealServiceException.NOT_ENOUGH_STORAGE(nodeName,
                   "can not find datastore with enough space to place disk "
@@ -216,6 +217,7 @@ public class ClusterHealService implements IClusterHealService {
          replacements.add(replacement);
 
          // increase reference by 1
+         ads.allocate(requiredSize);
          usage.put(ads, usage.get(ads) + 1);
       }
 
@@ -458,7 +460,7 @@ public class ClusterHealService implements IClusterHealService {
                Scheduler
                      .executeStoredProcedures(
                            com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
-                           storeProcedures, storeProcedures.length - 1, null);
+                           storeProcedures, 0, null);
 
          if (result == null) {
             logger.error("No VM is created.");

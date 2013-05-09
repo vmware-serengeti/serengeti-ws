@@ -1142,9 +1142,6 @@ public class ClusterManager {
       } catch (Exception e) {
          logger.error("failed to fix disk failures, " + e.getMessage());
          throw e;
-      } finally {
-         logger.info("reset to previous status " + oldStatus);
-         clusterEntityMgr.updateClusterStatus(clusterName, oldStatus);
       }
    }
 }

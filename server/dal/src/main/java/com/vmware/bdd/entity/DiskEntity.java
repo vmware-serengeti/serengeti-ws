@@ -24,6 +24,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.vmware.aurora.vc.DiskSpec.AllocationType;
+import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 /**
  * Disk Entity class: disk infos for a node entity
@@ -43,10 +44,16 @@ public class DiskEntity extends EntityBase {
 
    @Column(name = "disk_type")
    private String diskType;
-
+   
+   // thick/thin/lazy_zero etc.
    @Enumerated(EnumType.STRING)
    @Column(name = "alloc_type")
    private AllocationType allocType;
+   
+   // independent/persistent etc.
+   @Enumerated(EnumType.STRING)
+   @Column(name = "disk_mode")
+   private DiskMode diskMode;
 
    // path to find vmdk
    @Column(name = "external_addr")
@@ -108,6 +115,14 @@ public class DiskEntity extends EntityBase {
 
    public void setAllocType(AllocationType allocType) {
       this.allocType = allocType;
+   }
+
+   public DiskMode getDiskMode() {
+      return diskMode;
+   }
+
+   public void setDiskMode(DiskMode diskMode) {
+      this.diskMode = diskMode;
    }
 
    public String getExternalAddress() {
