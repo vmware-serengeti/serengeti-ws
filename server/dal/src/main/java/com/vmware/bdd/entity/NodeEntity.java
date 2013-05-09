@@ -355,7 +355,7 @@ public class NodeEntity extends EntityBase {
       node.setIp(this.ipAddress);
       node.setName(this.vmName);
       node.setMoId(this.moId);
-      node.setStatus(this.status.toString());
+      node.setStatus(this.status != null ? this.status.toString() : null);
       node.setAction(this.action);
       if (this.cpuNum != null) {
          node.setCpuNumber(this.cpuNum);

@@ -13,7 +13,7 @@
 		<artifactId>serengeti-master</artifactId>
 		<version>${serengeti.version}</version>
 		<relativePath>../pom.xml</relativePath>
-	</parent>	
+	</parent>
 
 	<modules>
 		<module>plugin-common</module>
@@ -31,9 +31,9 @@
 				<version>${serengeti.version}</version>
 			</dependency>
 			<dependency>
- 				<groupId>org.springframework.data</groupId>
- 				<artifactId>spring-data-hadoop</artifactId>
- 				<version>${spring.data.hadoop.version}</version>	
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-hadoop</artifactId>
+				<version>${spring.data.hadoop.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.shell</groupId>
@@ -53,11 +53,20 @@
 		<repository>
 			<id>spring-maven-snapshot</id>
 			<snapshots>
-					<enabled>true</enabled>
-					<updatePolicy>never</updatePolicy>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
 			</snapshots>
 			<name>Springframework Maven SNAPSHOT Repository</name>
 			<url>http://repo.springsource.org/libs-snapshot</url>
+		</repository>
+		<repository>
+			<id>spring-maven-ext-release-local</id>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</snapshots>
+			<name>Springframework Maven ext release local Repository</name>
+			<url>http://repo.springsource.org/ext-release-local</url>
 		</repository>
 	</repositories>
 </project>

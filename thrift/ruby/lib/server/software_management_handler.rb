@@ -107,13 +107,12 @@ module Software
           operation.config[:config_file]=@configFile
           operation.config[:verbosity] = 0
           if clusterOperation.logLevel
-            if clusterOperation.logLevel == "V"
+            if clusterOperation.logLevel == "-V"
               operation.config[:verbosity] = 1
-            elsif clusterOperation.logLevel == "VV"
+            elsif clusterOperation.logLevel == "-VV"
               operation.config[:verbosity] = 2
             end
           end
-          Chef::Log.level = :warn
           operation.configure_chef
           options = optionStr.split
           operation.parse_options(options)
