@@ -1414,6 +1414,10 @@ public class ClusteringService implements IClusteringService {
    public boolean stopSingleVM(String clusterName, String nodeName,
          StatusUpdater statusUpdator, boolean... vmPoweroff) {
       NodeEntity node = this.clusterEntityMgr.findNodeByName(nodeName);
+      if (node.getMoId() == null) {
+         logger.error("vm mobid for node " + node.getVmName() + " is null");
+         return false;
+      }
       VcVirtualMachine vcVm = VcCache.getIgnoreMissing(node.getMoId());
       if (vcVm == null) {
          logger.info("VC vm does not exist for node: " + node.getVmName());

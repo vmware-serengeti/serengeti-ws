@@ -50,8 +50,8 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
       } catch (Exception e) {
          logger.warn("failed to delete vm " + oldVm.getName() + " as "
                + e.getMessage());
-         logger.info("try to destroy it again");
-         oldVm.destroy(false);
+         logger.info("try to unregister it again");
+         oldVm.unregister();
       }
       logger.info("VM " + oldVm.getName() + " deleted");
    }
