@@ -129,8 +129,8 @@ public class ClusterHealService implements IClusterHealService {
       // scan all disks and filter out those don't have backing vmdk files or
       // whoes vmdkf file attaches to unaccessible datastores
       for (DiskEntity disk : disks) {
-         if (disk.getVmkdPath() == null
-               || disk.getVmkdPath().isEmpty()
+         if (disk.getVmdkPath() == null
+               || disk.getVmdkPath().isEmpty()
                || (disk.getDatastoreMoId() != null && !VcVmUtil
                      .isDatastoreAccessible(disk.getDatastoreMoId()))) {
             logger.info("disk " + disk.getName() + " is bad as datastore "
@@ -212,7 +212,7 @@ public class ClusterHealService implements IClusterHealService {
          DiskEntity replacement = disk.copy(disk);
          replacement.setDatastoreName(ads.getName());
          replacement.setDatastoreMoId(null);
-         replacement.setVmkdPath(null);
+         replacement.setVmdkPath(null);
          replacements.add(replacement);
 
          // increase reference by 1
@@ -314,7 +314,7 @@ public class ClusterHealService implements IClusterHealService {
          disk.allocationType = diskEntity.getAllocType();
          disk.datastore = diskEntity.getDatastoreName();
          disk.externalAddress = diskEntity.getExternalAddress();
-         disk.vmdkPath = diskEntity.getVmkdPath();
+         disk.vmdkPath = diskEntity.getVmdkPath();
          disk.mode = DiskMode.independent_persistent;
          disks.add(disk);
       }

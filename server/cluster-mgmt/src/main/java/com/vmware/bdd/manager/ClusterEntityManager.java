@@ -198,7 +198,7 @@ public class ClusterEntityManager {
                found = true;
                old.setDatastoreName(disk.getDatastoreName());
                old.setDatastoreMoId(disk.getDatastoreMoId());
-               old.setVmkdPath(disk.getVmkdPath());
+               old.setVmdkPath(disk.getVmdkPath());
                old.setSizeInMB(disk.getSizeInMB());
             }
          }

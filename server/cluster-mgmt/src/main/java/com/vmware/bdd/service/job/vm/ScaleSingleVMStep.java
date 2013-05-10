@@ -78,6 +78,4 @@ public class ScaleSingleVMStep extends TrackableTasklet {
    public void setScaleService(IScaleService scaleService) {
       this.scaleService = scaleService;
    }
-
-
 }
