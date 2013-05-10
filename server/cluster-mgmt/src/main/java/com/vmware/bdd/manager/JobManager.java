@@ -27,6 +27,7 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.job.JobParametersExtractor;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.apitypes.TaskRead.Type;
@@ -83,14 +84,19 @@ public class JobManager {
     *           List of job parameters for the sub job
     * @param clusterName
     *           cluster name
+    * @param sucessStatus
+    *           the status to be set on the cluster if job success
+    * @param failStatus
+    *           the status to be set on the cluster if job fail
     * @return job execution id
     * @throws Exception
     */
    public long runSubJobForNodes(String jobName,
-         List<JobParameters> jobParametersList, String clusterName)
-         throws Exception {
+         List<JobParameters> jobParametersList, String clusterName,
+         ClusterRead.ClusterStatus successStatus,
+         ClusterRead.ClusterStatus failStatus) throws Exception {
       return createAndLaunchJobWithSubJob(clusterName, jobName,
-            jobParametersList);
+            jobParametersList, successStatus, failStatus);
    }
 
    /**
@@ -102,11 +108,16 @@ public class JobManager {
     *           job parameters
     * @param subJobName
     *           sub job name
+    * @param sucessStatus
+    *           the status to be set on the cluster if job success
+    * @param failStatus
+    *           the status to be set on the cluster if job fail
     * @return job exection id
     * @throws Exception
     */
    public long runJobWithSubJob(String jobName, JobParameters param,
-         String subJobName) throws Exception {
+         String subJobName, ClusterRead.ClusterStatus successStatus,
+         ClusterRead.ClusterStatus failStatus) throws Exception {
       logger.debug("::runJobWithSubJob: " + jobName + ", subJobName: "
             + subJobName);
       long result = Long.MIN_VALUE;
@@ -134,7 +145,7 @@ public class JobManager {
             }
             result =
                   createAndLaunchJobWithSubJob(clusterName, subJobName,
-                        subJobParametersList);
+                        subJobParametersList, successStatus, failStatus);
          }
       }
       if (result == Long.MIN_VALUE) {
@@ -155,12 +166,17 @@ public class JobManager {
     *           sub job name
     * @param subJobParameters
     *           sub job parameter
+    * @param sucessStatus
+    *           the status to be set on the cluster if job success
+    * @param failStatus
+    *           the status to be set on the cluster if job fail
     * @return job execution id
     * @throws Exception
     */
    private synchronized long createAndLaunchJobWithSubJob(String clusterName,
-         String subJobName, List<JobParameters> subJobParameters)
-         throws Exception {
+         String subJobName, List<JobParameters> subJobParameters,
+         ClusterRead.ClusterStatus successStatus,
+         ClusterRead.ClusterStatus failStatus) throws Exception {
       SimpleJob mainJob =
             new SimpleJob("composed-job-" + clusterName + "-" + subJobName
                   + "-" + System.nanoTime());
@@ -172,6 +188,10 @@ public class JobManager {
             new Date()));
       mainJobParams.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
             clusterName));
+      mainJobParams.put(JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM,
+            new JobParameter(successStatus.name()));
+      mainJobParams.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM,
+            new JobParameter(failStatus.name()));
       //enable sub job indicator to for job progress query
       mainJobParams.put(JobConstants.SUB_JOB_ENABLED, new JobParameter(1l));
       Job subJob = jobRegistry.getJob(subJobName);

@@ -8,17 +8,16 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.testng.annotations.Test;
 
+import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.service.job.JobConstants;
 
@@ -102,7 +101,8 @@ public class TestJobManager {
       String subJobName = "simpleJob";
       long jobExecutionId =
             jobManager.runSubJobForNodes(subJobName, jobParametersList,
-                  clusterName);
+                  clusterName, ClusterRead.ClusterStatus.RUNNING,
+                  ClusterRead.ClusterStatus.ERROR);
       JobRegistry jobRegistry =
             context.getBean("jobRegistry", JobRegistry.class);
       while (true) {
@@ -149,7 +149,8 @@ public class TestJobManager {
       jobParametersList.add(nodeParameters);
       long jobExecutionId =
             jobManager.runSubJobForNodes("simpleJob", jobParametersList,
-                  clusterName);
+                  clusterName, ClusterRead.ClusterStatus.RUNNING,
+                  ClusterRead.ClusterStatus.ERROR);
       while (true) {
          Thread.sleep(50);
          TaskRead tr = jobManager.getJobExecutionStatus(jobExecutionId);

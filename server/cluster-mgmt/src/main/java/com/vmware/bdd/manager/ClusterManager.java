@@ -320,7 +320,7 @@ public class ClusterManager {
             group.getStorage().setAllocType(null);
             if (group.getPlacementPolicies() != null) {
                List<GroupAssociation> associations =
-                  group.getPlacementPolicies().getGroupAssociations();
+                     group.getPlacementPolicies().getGroupAssociations();
                if (associations != null && associations.isEmpty()) {
                   group.getPlacementPolicies().setGroupAssociations(null);
                }
@@ -806,6 +806,7 @@ public class ClusterManager {
 
    /**
     * set cluster parameters synchronously
+    * 
     * @param clusterName
     * @param nodeGroupName
     * @param activeComputeNodeNum
@@ -815,7 +816,7 @@ public class ClusterManager {
     * @throws Exception
     */
    @SuppressWarnings("unchecked")
-   public  List<String> syncSetParam(String clusterName, String nodeGroupName,
+   public List<String> syncSetParam(String clusterName, String nodeGroupName,
          Integer activeComputeNodeNum, Integer minComputeNodeNum,
          Boolean enableAuto, Priority ioPriority) throws Exception {
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
@@ -829,12 +830,14 @@ public class ClusterManager {
          cluster.setAutomationEnable(enableAuto);
       }
 
-      if (minComputeNodeNum != null && minComputeNodeNum != cluster.getVhmMinNum()) {
+      if (minComputeNodeNum != null
+            && minComputeNodeNum != cluster.getVhmMinNum()) {
          cluster.setVhmMinNum(minComputeNodeNum);
       }
 
       List<String> nodeGroupNames = new ArrayList<String>();
-      if (!clusterRead.validateSetManualElasticity(nodeGroupName, nodeGroupNames)) {
+      if (!clusterRead.validateSetManualElasticity(nodeGroupName,
+            nodeGroupNames)) {
          if (nodeGroupName != null) {
             throw BddException.INVALID_PARAMETER("nodeGroup", nodeGroupName);
          } else {
@@ -885,6 +888,7 @@ public class ClusterManager {
 
    /**
     * set cluster parameters asynchronously
+    * 
     * @param clusterName
     * @param enableManualElasticity
     * @param nodeGroupName
@@ -904,8 +908,9 @@ public class ClusterManager {
                clusterName, msg);
       }
 
-      List<String> nodeGroupNames = syncSetParam(clusterName, nodeGroupName, activeComputeNodeNum,
-            minComputeNodeNum, enableAuto, ioPriority);
+      List<String> nodeGroupNames =
+            syncSetParam(clusterName, nodeGroupName, activeComputeNodeNum,
+                  minComputeNodeNum, enableAuto, ioPriority);
 
       // find hadoop job tracker ip
       List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
@@ -933,7 +938,8 @@ public class ClusterManager {
          if (nodeGroupName == null) {
             activeComputeNodeNum = cluster.getVhmTargetNum();
          } else {
-            activeComputeNodeNum = cluster.getNodeGroupByName(nodeGroupName).getVhmTargetNum();
+            activeComputeNodeNum =
+                  cluster.getNodeGroupByName(nodeGroupName).getVhmTargetNum();
          }
       }
       param.put(JobConstants.GROUP_ACTIVE_COMPUTE_NODE_NUMBER_JOB_PARAM,
@@ -1132,7 +1138,7 @@ public class ClusterManager {
                ClusterStatus.MAINTENANCE);
          return jobManager.runSubJobForNodes(
                JobConstants.FIX_NODE_DISK_FAILURE_JOB_NAME, jobParameterList,
-               clusterName);
+               clusterName, oldStatus, ClusterStatus.ERROR);
       } catch (Exception e) {
          logger.error("failed to fix disk failures, " + e.getMessage());
          throw e;

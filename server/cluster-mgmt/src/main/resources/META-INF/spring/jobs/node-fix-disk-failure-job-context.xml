@@ -69,7 +69,7 @@
          </listeners>
       </step>
       <listeners>
-         <listener ref="clusterJobListener" />
+         <listener ref="singleNodeJobListener" />
       </listeners>
    </job>
 </beans:beans>

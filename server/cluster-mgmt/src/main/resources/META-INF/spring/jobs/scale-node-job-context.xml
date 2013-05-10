@@ -75,7 +75,7 @@
 			</listeners>
 		</step>
 		<listeners>
-			<listener ref="jobListener" />
+			<listener ref="singleNodeJobListener" />
 		</listeners>
 	</job>
 
