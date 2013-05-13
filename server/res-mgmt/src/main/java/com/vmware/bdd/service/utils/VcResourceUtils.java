@@ -51,7 +51,7 @@ public class VcResourceUtils {
 
    private static final int HARDWARE_VERSION_7 = 7;
    private static final int HARDWARE_VERSION_7_MAX_CPU = 8;
-   private static final int HARDWARE_VERSION_7_MAX_MEMORY = 256 * 1000; // 256G
+   private static final int HARDWARE_VERSION_7_MAX_MEMORY = 255 * 1000; // 255G
    private static final int HARDWARE_VERSION_8 = 8;
    private static final int HARDWARE_VERSION_8_MAX_CPU = 32;
    private static final int HARDWARE_VERSION_8_MAX_MEMORY = 1 * 1000 * 1000; //1T
@@ -387,13 +387,13 @@ public class VcResourceUtils {
 
    public static void checkVmMaxConfiguration(final String vmId,
          final int cpuNumber, final long memory) {
-      VcContext.inVcSessionDo(new VcSession<Void>() {
+      int hardwareVersion = VcContext.inVcSessionDo(new VcSession<Integer>() {
          @Override
-         protected Void body() throws Exception {
+         protected Integer body() throws Exception {
             final VcVirtualMachine vcVm = VcCache.getIgnoreMissing(vmId);
             if (vcVm == null) {
                logger.info("vm: " + vmId + " is not found.");
-               return null;
+               return -1;
             }
             VirtualMachine vimVm = vcVm.getManagedObject();
             EnvironmentBrowser envBrowser =
@@ -403,34 +403,37 @@ public class VcResourceUtils {
             int hardwareVersion =
                   configOption.getHardwareOptions().getHwVersion();
             logger.info("hardware version is: " + hardwareVersion);
-            if (hardwareVersion == HARDWARE_VERSION_7) {
-               if (cpuNumber > HARDWARE_VERSION_7_MAX_CPU) {
-                  logger.warn("cpu number is greater than :"
-                        + HARDWARE_VERSION_7_MAX_CPU);
-                  throw VcProviderException.CPU_EXCEED_LIMIT(vcVm.getName());
-               }
-               if (memory > HARDWARE_VERSION_7_MAX_MEMORY) {
-                  logger.warn("memory is greater than : "
-                        + HARDWARE_VERSION_7_MAX_MEMORY);
-                  throw VcProviderException.MEMORY_EXCEED_LIMIT(vcVm
-                        .getName());
-               }
-            } else if (hardwareVersion == HARDWARE_VERSION_8) {
-               if (cpuNumber > HARDWARE_VERSION_8_MAX_CPU) {
-                  logger.warn("cpu number is greater than :"
-                        + HARDWARE_VERSION_8_MAX_CPU);
-                  throw VcProviderException.CPU_EXCEED_LIMIT(vcVm.getName());
-               }
-               if (memory > HARDWARE_VERSION_8_MAX_MEMORY) {
-                  logger.warn("memory is greater than : "
-                        + HARDWARE_VERSION_8_MAX_MEMORY);
-                  throw VcProviderException.MEMORY_EXCEED_LIMIT(vcVm
-                        .getName());
-               }
-            }
-            return null;
+            return hardwareVersion;
          }
       });
+      compareMaxConfiguration(vmId, hardwareVersion, cpuNumber, memory);
+   }
 
+
+   private static void compareMaxConfiguration(String vcVmName,
+         int hardwareVersion, int cpuNumber, long memory) {
+      if (hardwareVersion == HARDWARE_VERSION_7) {
+         if (cpuNumber > HARDWARE_VERSION_7_MAX_CPU) {
+            logger.warn("cpu number is greater than :"
+                  + HARDWARE_VERSION_7_MAX_CPU);
+            throw VcProviderException.CPU_EXCEED_LIMIT(vcVmName);
+         }
+         if (memory > HARDWARE_VERSION_7_MAX_MEMORY) {
+            logger.warn("memory is greater than : "
+                  + HARDWARE_VERSION_7_MAX_MEMORY);
+            throw VcProviderException.MEMORY_EXCEED_LIMIT(vcVmName);
+         }
+      } else if (hardwareVersion == HARDWARE_VERSION_8) {
+         if (cpuNumber > HARDWARE_VERSION_8_MAX_CPU) {
+            logger.warn("cpu number is greater than :"
+                  + HARDWARE_VERSION_8_MAX_CPU);
+            throw VcProviderException.CPU_EXCEED_LIMIT(vcVmName);
+         }
+         if (memory > HARDWARE_VERSION_8_MAX_MEMORY) {
+            logger.warn("memory is greater than : "
+                  + HARDWARE_VERSION_8_MAX_MEMORY);
+            throw VcProviderException.MEMORY_EXCEED_LIMIT(vcVmName);
+         }
+      }
    }
 }

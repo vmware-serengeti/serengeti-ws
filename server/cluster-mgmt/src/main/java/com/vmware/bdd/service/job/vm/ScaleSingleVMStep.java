@@ -57,10 +57,6 @@ public class ScaleSingleVMStep extends TrackableTasklet {
                   JobConstants.NODE_SCALE_MEMORY_SIZE);
       int cpuNumber = Integer.parseInt(cpuNumberStr);
       long memory = Long.parseLong(memorySizeStr);
-      // vm max configuration check
-      VcResourceUtils.checkVmMaxConfiguration(
-            scaleService.getVmNameByNodeName(nodeName), cpuNumber, memory);
-
       boolean success =
             scaleService.scaleNodeResource(nodeName, cpuNumber, memory);
       putIntoJobExecutionContext(chunkContext,

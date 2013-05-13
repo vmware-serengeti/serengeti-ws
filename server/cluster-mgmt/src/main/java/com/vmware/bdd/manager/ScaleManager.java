@@ -28,6 +28,7 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.ScaleServiceException;
 import com.vmware.bdd.service.job.JobConstants;
+import com.vmware.bdd.service.utils.VcResourceUtils;
 
 /**
  * @author Jarred Li
@@ -50,6 +51,14 @@ public class ScaleManager {
       List<JobParameters> jobParametersList = buildJobParameters(scale);
       if (jobParametersList.size() == 0) {
          throw ScaleServiceException.NOT_NEEDED(clusterName);
+      }
+      String nodeGroupName = scale.getNodeGroupName();
+      List<NodeEntity> nodes =
+            clusterEntityMgr.findAllNodes(clusterName, nodeGroupName);
+      if (nodes.size() > 0) {
+         // vm max configuration check
+         VcResourceUtils.checkVmMaxConfiguration(nodes.get(0).getMoId(),
+               scale.getCpuNumber(), scale.getMemory());
       }
       updateNodeGroupResource(scale);
       //launch sub job to scale node one by one
