@@ -126,6 +126,17 @@ public class JobUtils {
             deletedNodes.add(node);
             continue;
          }
+         String haFlag = node.getNodeGroup().getHaFlag();
+         if (haFlag != null
+               && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
+            if (!VcVmUtil.verifyFTState(vm)) {
+               logger.info("FT secondary VM state incorrect for node "
+                     + vm.getName() + ", " + "FT state " + vm.getFTState()
+                     + " is unexpected.");
+               deletedNodes.add(node);
+               continue;
+            }
+         }
          occupiedIps.add(node.getIpAddress());
       }
       existingNodes.removeAll(deletedNodes);
@@ -155,23 +166,37 @@ public class JobUtils {
             if (expectedStatus == NodeStatus.VM_READY) {
                // verify from VC 
                VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
-               if (vm != null && vm.isPoweredOn()
-                     && (VcVmUtil.getIpAddress(vm, false) != null)) {
-                  continue;
+               if (vm == null || !vm.isPoweredOn()
+                     || (VcVmUtil.getIpAddress(vm, false) == null)) {
+                  throw ClusteringServiceException.VM_STATUS_ERROR(
+                        node.getVmName(), node.getStatus().toString(),
+                        expectedStatus.toString());
+               }
+
+               String haFlag = node.getNodeGroup().getHaFlag();
+               if (haFlag != null
+                     && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
+                  if (!VcVmUtil.verifyFTState(vm)) {
+                     logger.info("FT secondary VM state incorrect for node "
+                           + vm.getName() + ", " + "FT state "
+                           + vm.getFTState() + " is unexpected.");
+                     throw ClusteringServiceException.ENABLE_FT_FAILED(null,
+                           node.getVmName());
+                  }
                }
             }
-            throw ClusteringServiceException.VM_STATUS_ERROR(node.getVmName(),
-                  node.getStatus().toString(), expectedStatus.toString());
          }
       }
    }
 
-   public static String getSubJobParameterPrefixKey(int stepNumber, int paramIndex) {
+   public static String getSubJobParameterPrefixKey(int stepNumber,
+         int paramIndex) {
       return JobConstants.SUB_JOB_PARAMETERS_KEY_PREFIX + stepNumber + "."
             + paramIndex;
    }
-   
-   public static String getSubJobParameterPrefixValue(int stepNumber, int paramIndex) {
+
+   public static String getSubJobParameterPrefixValue(int stepNumber,
+         int paramIndex) {
       return JobConstants.SUB_JOB_PARAMETERS_VALUE_PREFIX + stepNumber + "."
             + paramIndex;
    }

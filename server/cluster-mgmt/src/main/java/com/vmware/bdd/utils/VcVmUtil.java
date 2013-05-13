@@ -141,19 +141,39 @@ public class VcVmUtil {
          success = false;
          logger.error("Failed to get ip address of VM " + vNode.getVmName());
       }
-      String haFlag = vNode.getNodeGroup().getHaFlag();
-      if (haFlag != null && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
-         // ha is enabled, need to check if secondary VM is ready either
-         if (vm.getFTState() == null
-               || vm.getFTState() != FaultToleranceState.running) {
-            logger.fatal("Failed to power on FT secondary VM for node "
-                  + vNode.getVmName() + ", " + "FT state " + vm.getFTState()
+      if (success) {
+         String haFlag = vNode.getNodeGroup().getHaFlag();
+         if (haFlag != null
+               && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
+            // ha is enabled, need to check if secondary VM is ready either
+            logger.error("Failed to power on FT secondary VM for node "
+                  + vm.getName() + ", " + "FT state " + vm.getFTState()
                   + " is unexpected.");
-            success = false;
+            return verifyFTState(vm);
          }
       }
-
       return success;
+   }
+
+   public static boolean verifyFTState(final VcVirtualMachine vm) {
+      try {
+         VcContext.inVcSessionDo(new VcSession<Void>() {
+            @Override
+            public Void body() throws Exception {
+               vm.updateRuntime();
+               return null;
+            }
+         });
+      } catch (Exception e) {
+         logger.error("Failed to update VM " + vm.getName()
+               + " runtime information,"
+               + " this may cause the FT state wrong.");
+      }
+      if (vm.getFTState() == null
+            || vm.getFTState() != FaultToleranceState.running) {
+         return false;
+      }
+      return true;
    }
 
    public static VirtualDisk findVirtualDisk(String vmMobId, String externalAddr) {
