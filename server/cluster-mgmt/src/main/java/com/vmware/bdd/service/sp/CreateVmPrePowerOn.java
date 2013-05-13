@@ -31,7 +31,7 @@ public class CreateVmPrePowerOn implements IPrePostPowerOn {
          enableFt(vm);
       }
       // by default, the share level is NORMAL
-      if (!Priority.Normal.equals(ioShares)) {
+      if (!Priority.NORMAL.equals(ioShares)) {
          configIOShares();
       }
       return null;

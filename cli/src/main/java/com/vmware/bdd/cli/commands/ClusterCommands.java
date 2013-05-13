@@ -519,6 +519,7 @@ public class ClusterCommands implements CommandMarker {
                      clusterName, Constants.OUTPUT_OP_SET_PARAM,
                      Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
                            + " elasticityMode = " + elasticityMode);
+               return;
             }
          }
 
@@ -550,6 +551,7 @@ public class ClusterCommands implements CommandMarker {
                      clusterName, Constants.OUTPUT_OP_SET_PARAM,
                      Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
                      + " " + "ioShares = " + ioShares);
+               return;
             }
          }
 
@@ -618,7 +620,7 @@ public class ClusterCommands implements CommandMarker {
             requestBody.setActiveComputeNodeNum(-1);
          }
          if (ioShares || all) {
-            requestBody.setIoPriority(Priority.Normal);
+            requestBody.setIoPriority(Priority.NORMAL);
          }
          requestBody.setNodeGroupName(nodeGroupName);
          restClient.setParam(cluster, requestBody);

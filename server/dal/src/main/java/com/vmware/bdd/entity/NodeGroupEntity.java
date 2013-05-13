@@ -142,7 +142,7 @@ public class NodeGroupEntity extends EntityBase {
 
    public NodeGroupEntity() {
       // default share level
-      this.ioShares = Priority.Normal;
+      this.ioShares = Priority.NORMAL;
    }
 
    public NodeGroupEntity(String name, int defineInstanceNum, int cpuNum,
@@ -157,7 +157,7 @@ public class NodeGroupEntity extends EntityBase {
       this.storageType = storageType;
       this.storageSize = storageSize;
       // default share level
-      this.ioShares = Priority.Normal;
+      this.ioShares = Priority.NORMAL;
    }
 
    public String getHadoopConfig() {
