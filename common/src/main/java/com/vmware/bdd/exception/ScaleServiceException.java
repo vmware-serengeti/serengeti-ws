@@ -33,6 +33,13 @@ public class ScaleServiceException extends BddException {
       return new ScaleServiceException(t, "JOB_LAUNCH_FAILURE", clusterName,
             errorMsg);
    }
+   
+   public static ScaleServiceException CPU_EXCEED_LIMIT(String vmName){
+      return new ScaleServiceException(null, "CPU_EXCEED_LIMIT", vmName);
+   }
 
+   public static ScaleServiceException MEMORY_EXCEED_LIMIT(String vmName){
+      return new ScaleServiceException(null, "MEMORY_EXCEED_LIMIT", vmName);
+   }
 
 }
