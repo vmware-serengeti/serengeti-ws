@@ -46,12 +46,12 @@ import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractCluster;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractDatastore;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
-import com.vmware.bdd.placement.entity.DiskSpec;
 import com.vmware.bdd.placement.entity.VirtualGroup;
 import com.vmware.bdd.placement.entity.VirtualNode;
 import com.vmware.bdd.placement.exception.PlacementException;
 import com.vmware.bdd.placement.interfaces.IPlacementPlanner;
 import com.vmware.bdd.placement.util.PlacementUtil;
+import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 
@@ -192,6 +192,9 @@ public class PlacementPlanner implements IPlacementPlanner {
       if (nodeGroup.getStorage().getAllocType() != null) {
          diskAllocType =
                AllocationType.valueOf(nodeGroup.getStorage().getAllocType());
+      } else {
+         // THICK as by default
+         diskAllocType = AllocationType.THICK;
       }
       // swap disk
       int swapDisk =
@@ -199,7 +202,8 @@ public class PlacementPlanner implements IPlacementPlanner {
                   * nodeGroup.getSwapRatio()) + 1023) / 1024);
       disks.add(new DiskSpec(DiskType.SWAP_DISK.getDiskName(), swapDisk, node
             .getVmName(), false, DiskType.SWAP_DISK,
-            DiskScsiControllerType.LSI_CONTROLLER, null, diskAllocType));
+            DiskScsiControllerType.LSI_CONTROLLER, null, diskAllocType
+                  .toString(), null, null, null));
 
       // data disks
       if (!DatastoreType.TEMPFS.name().equalsIgnoreCase(
@@ -208,7 +212,8 @@ public class PlacementPlanner implements IPlacementPlanner {
          disks.add(new DiskSpec(DiskType.DATA_DISK.getDiskName(), nodeGroup
                .getStorage().getSizeGB(), node.getVmName(), true,
                DiskType.DATA_DISK, nodeGroup.getStorage().getControllerType(),
-               nodeGroup.getStorage().getSplitPolicy(), diskAllocType));
+               nodeGroup.getStorage().getSplitPolicy(), diskAllocType
+                     .toString(), null, null, null));
       }
       node.setDisks(disks);
 
@@ -689,11 +694,11 @@ public class PlacementPlanner implements IPlacementPlanner {
                unseprable.add(new DiskSpec(disk.getName().split("\\.")[0]
                      + "0.vmdk", half, node.getVmName(), false, disk
                      .getDiskType(), disk.getController(), null, disk
-                     .getAllocType()));
+                     .getAllocType(), null, null, null));
                unseprable.add(new DiskSpec(disk.getName().split("\\.")[0]
                      + "1.vmdk", disk.getSize() - half, node.getVmName(),
                      false, disk.getDiskType(), disk.getController(), null,
-                     disk.getAllocType()));
+                     disk.getAllocType(), null, null, null));
                removed.add(disk);
             }
          }

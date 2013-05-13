@@ -23,12 +23,14 @@ import com.vmware.aurora.vc.VcHost;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.StorageRead;
+import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.service.impl.ClusterHealService;
 import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.spectypes.DiskSpec;
 
 public class TestClusterHealService {
    private static final Logger logger = Logger
@@ -99,6 +101,7 @@ public class TestClusterHealService {
          disk.setDatastoreName(LOCAL_DS_NAME_PREFIX + i);
          disk.setDatastoreMoId(LOCAL_DS_MOID_PREFIX + i);
          disk.setSizeInMB(20 * 1024);
+         disk.setDiskType(DiskType.SYSTEM_DISK.type);
          disks.add(disk);
       }
       Mockito.when(entityMgr.getDisks("bj-worker-1")).thenReturn(disks);
@@ -135,21 +138,21 @@ public class TestClusterHealService {
    @Test(groups = { "TestClusterHealService" })
    public void testGetBadDisks() {
       logger.info("test getBadDisks");
-      List<DiskEntity> badDisks = service.getBadDisks(NODE_1_NAME);
+      List<DiskSpec> badDisks = service.getBadDisks(NODE_1_NAME);
       Assert.assertTrue("disk 0 on local-datastore-0 should be bad",
             badDisks.size() == 1);
    }
 
    @Test(groups = { "TestClusterHealService" }, dependsOnMethods = { "testGetBadDisks" })
    public void testGetReplacementDisks() {
-      List<DiskEntity> badDisks = service.getBadDisks(NODE_1_NAME);
-      List<DiskEntity> replacements =
+      List<DiskSpec> badDisks = service.getBadDisks(NODE_1_NAME);
+      List<DiskSpec> replacements =
             service.getReplacementDisks(CLUSTER_NAME, NODE_GROUP_NAME,
                   NODE_1_NAME, badDisks);
 
       Assert.assertTrue(!replacements.isEmpty());
       String newDs = LOCAL_DS_NAME_PREFIX + 3;
       Assert.assertTrue("the replacement disk should be placed to " + newDs,
-            newDs.equals(replacements.get(0).getDatastoreName()));
+            newDs.equals(replacements.get(0).getTargetDs()));
    }
 }

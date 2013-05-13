@@ -39,8 +39,8 @@ import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractCluster;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractDatastore;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
-import com.vmware.bdd.placement.entity.DiskSpec;
 import com.vmware.bdd.placement.util.PlacementUtil;
+import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
 
 public class TestPlacementUtil {

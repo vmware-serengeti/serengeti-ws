@@ -16,9 +16,11 @@
 package com.vmware.bdd.placement.interfaces;
 
 import java.util.List;
+import java.util.Map;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.placement.entity.BaseNode;
+import com.vmware.bdd.spectypes.DiskSpec;
 
 
 public interface IPlacementService {
@@ -47,4 +49,21 @@ public interface IPlacementService {
     */
    public List<BaseNode> getBadNodes(ClusterCreate cluster,
          List<BaseNode> existedNodes);
+
+   /**
+    * badDisks are disks that are placed on unaccessible datastores. Find replacement
+    * disks for them on the target host, given the cluster spec and resource container
+    * 
+    * @param container
+    * @param spec
+    * @param groupName
+    * @param nodeName
+    * @param targetHost
+    * @param badDisks
+    * @param dsUsage
+    * @return
+    */
+   public List<DiskSpec> getReplacementDisks(IContainer container,
+         ClusterCreate spec, String groupName, String nodeName,
+         String targetHost, List<DiskSpec> badDisks, Map<String, Integer> dsUsage);
 }

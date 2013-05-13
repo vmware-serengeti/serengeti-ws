@@ -13,11 +13,10 @@
  * limitations under the License.
  ***************************************************************************/
 
-package com.vmware.bdd.placement.entity;
+package com.vmware.bdd.spectypes;
 
 import java.lang.reflect.Field;
 
-import com.vmware.aurora.vc.DiskSpec.AllocationType;
 import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
 import com.vmware.bdd.apitypes.StorageRead.DiskSplitPolicy;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
@@ -34,6 +33,7 @@ public class DiskSpec implements Comparable<DiskSpec> {
 
    private boolean separable;
 
+   // os/data/swap
    private DiskType diskType;
 
    private DiskScsiControllerType controller;
@@ -41,7 +41,15 @@ public class DiskSpec implements Comparable<DiskSpec> {
    // TODO support split policy
    private DiskSplitPolicy splitPolicy;
 
-   private AllocationType allocType;
+   // thick/thin
+   private String allocType;
+
+   private String externalAddress;
+   
+   // independent_persistent
+   private String diskMode;
+   
+   private String vmdkPath;
 
    public DiskSpec() {
       super();
@@ -57,11 +65,15 @@ public class DiskSpec implements Comparable<DiskSpec> {
       this.controller = other.controller;
       this.splitPolicy = other.splitPolicy;
       this.allocType = other.allocType;
+      this.externalAddress = other.externalAddress;
+      this.diskMode = other.diskMode;
+      this.vmdkPath = other.vmdkPath;
    }
 
    public DiskSpec(String name, int size, String parentNode, boolean separable,
          DiskType diskType, DiskScsiControllerType controller,
-         DiskSplitPolicy splitPolicy, AllocationType allocType) {
+         DiskSplitPolicy splitPolicy, String allocType,
+         String externalAddress, String diskMode, String vmdkPath) {
       super();
       this.size = size;
       this.name = name;
@@ -71,6 +83,9 @@ public class DiskSpec implements Comparable<DiskSpec> {
       this.controller = controller;
       this.splitPolicy = splitPolicy;
       this.allocType = allocType;
+      this.externalAddress = externalAddress;
+      this.diskMode = diskMode;
+      this.vmdkPath = vmdkPath;
    }
 
    public int getSize() {
@@ -137,16 +152,40 @@ public class DiskSpec implements Comparable<DiskSpec> {
       this.controller = controller;
    }
 
-   public AllocationType getAllocType() {
+   public String getAllocType() {
       return allocType;
    }
 
-   public void setAllocType(AllocationType allocType) {
+   public void setAllocType(String allocType) {
       this.allocType = allocType;
    }
 
    public boolean isSystemDisk() {
       return DiskType.SYSTEM_DISK.equals(this.diskType);
+   }
+
+   public String getExternalAddress() {
+      return externalAddress;
+   }
+
+   public void setExternalAddress(String externalAddress) {
+      this.externalAddress = externalAddress;
+   }
+
+   public String getDiskMode() {
+      return diskMode;
+   }
+
+   public void setDiskMode(String diskMode) {
+      this.diskMode = diskMode;
+   }
+
+   public String getVmdkPath() {
+      return vmdkPath;
+   }
+
+   public void setVmdkPath(String vmdkPath) {
+      this.vmdkPath = vmdkPath;
    }
 
    @Override
@@ -187,5 +226,30 @@ public class DiskSpec implements Comparable<DiskSpec> {
          return -1;
       else
          return 1;
+   }
+
+   @Override
+   public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((name == null) ? 0 : name.hashCode());
+      return result;
+   }
+
+   @Override
+   public boolean equals(Object obj) {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      DiskSpec other = (DiskSpec) obj;
+      if (name == null) {
+         if (other.name != null)
+            return false;
+      } else if (!name.equals(other.name))
+         return false;
+      return true;
    }
 }

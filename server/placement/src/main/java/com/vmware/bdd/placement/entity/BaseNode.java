@@ -22,12 +22,14 @@ import java.util.List;
 import com.vmware.aurora.composition.DiskSchema;
 import com.vmware.aurora.composition.DiskSchema.Disk;
 import com.vmware.aurora.composition.VmSchema;
+import com.vmware.aurora.vc.DiskSpec.AllocationType;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.util.PlacementUtil;
+import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
@@ -326,7 +328,8 @@ public class BaseNode {
                      PlacementUtil
                            .getNextValidParaVirtualScsiIndex(paraVirtualScsiIndex);
             }
-            tmDisk.allocationType = disk.getAllocType();
+            tmDisk.allocationType =
+                  AllocationType.valueOf(disk.getAllocType());
             tmDisk.type = disk.getDiskType().getType();
             tmDisks.add(tmDisk);
          }

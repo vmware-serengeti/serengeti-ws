@@ -16,15 +16,13 @@ package com.vmware.bdd.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.vmware.aurora.vc.DiskSpec.AllocationType;
-import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
+import com.vmware.bdd.apitypes.StorageRead.DiskType;
+import com.vmware.bdd.spectypes.DiskSpec;
 
 /**
  * Disk Entity class: disk infos for a node entity
@@ -34,7 +32,8 @@ import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 @SequenceGenerator(name = "IdSequence", sequenceName = "disk_seq", allocationSize = 1)
 @Table(name = "disk")
 public class DiskEntity extends EntityBase {
-   private static final String SYSTEM_DISK_ADDRESS = "VirtualLsiLogicController:0:0";
+   private static final String SYSTEM_DISK_ADDRESS =
+         "VirtualLsiLogicController:0:0";
 
    @Column(name = "name")
    private String name;
@@ -44,16 +43,14 @@ public class DiskEntity extends EntityBase {
 
    @Column(name = "disk_type")
    private String diskType;
-   
+
    // thick/thin/lazy_zero etc.
-   @Enumerated(EnumType.STRING)
    @Column(name = "alloc_type")
-   private AllocationType allocType;
-   
+   private String allocType;
+
    // independent/persistent etc.
-   @Enumerated(EnumType.STRING)
    @Column(name = "disk_mode")
-   private DiskMode diskMode;
+   private String diskMode;
 
    // path to find vmdk
    @Column(name = "external_addr")
@@ -109,19 +106,19 @@ public class DiskEntity extends EntityBase {
       this.diskType = diskType;
    }
 
-   public AllocationType getAllocType() {
+   public String getAllocType() {
       return allocType;
    }
 
-   public void setAllocType(AllocationType allocType) {
+   public void setAllocType(String allocType) {
       this.allocType = allocType;
    }
 
-   public DiskMode getDiskMode() {
+   public String getDiskMode() {
       return diskMode;
    }
 
-   public void setDiskMode(DiskMode diskMode) {
+   public void setDiskMode(String diskMode) {
       this.diskMode = diskMode;
    }
 
@@ -182,12 +179,28 @@ public class DiskEntity extends EntityBase {
       disk.datastoreName = other.datastoreName;
       disk.deviceName = other.deviceName;
       disk.diskType = other.diskType;
+      disk.diskMode = other.diskMode;
       disk.externalAddress = other.externalAddress;
       disk.vmdkPath = other.vmdkPath;
 
       return disk;
    }
-   
+
+   public DiskSpec toDiskSpec() {
+      DiskSpec spec = new DiskSpec();
+      spec.setName(this.name);
+      spec.setAllocType(this.allocType);
+      spec.setDiskMode(this.diskMode);
+      spec.setDiskType(DiskType.getDiskType(this.diskType));
+      spec.setExternalAddress(this.externalAddress);
+      spec.setSize(this.sizeInMB / 1024);
+      spec.setSeparable(false);
+      spec.setTargetDs(this.getDatastoreName());
+      spec.setVmdkPath(this.vmdkPath);
+
+      return spec;
+   }
+
    public static String getSystemDiskExternalAddress() {
       return SYSTEM_DISK_ADDRESS;
    }
@@ -222,9 +235,9 @@ public class DiskEntity extends EntityBase {
    public String toString() {
       return "DiskEntity [name=" + name + ", sizeInMB=" + sizeInMB
             + ", diskType=" + diskType + ", allocType=" + allocType
-            + ", externalAddress=" + externalAddress + ", datastoreName="
-            + datastoreName + ", datastoreMoId=" + datastoreMoId
-            + ", deviceName=" + deviceName + ", vmkdPath=" + vmdkPath
-            + ", nodeEntity=" + nodeEntity + "]";
+            + ", diskMode=" + diskMode + ", externalAddress=" + externalAddress
+            + ", datastoreName=" + datastoreName + ", datastoreMoId="
+            + datastoreMoId + ", deviceName=" + deviceName + ", vmkdPath="
+            + vmdkPath + ", nodeEntity=" + nodeEntity + "]";
    }
 }

@@ -20,23 +20,38 @@ import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 
+import com.vmware.aurora.composition.DiskSchema;
+import com.vmware.aurora.composition.NetworkSchema;
+import com.vmware.aurora.composition.ResourceSchema;
+import com.vmware.aurora.composition.VmSchema;
+import com.vmware.aurora.composition.DiskSchema.Disk;
+import com.vmware.aurora.composition.NetworkSchema.Network;
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.vc.DeviceId;
 import com.vmware.aurora.vc.MoUtil;
 import com.vmware.aurora.vc.VcCache;
+import com.vmware.aurora.vc.VcCluster;
 import com.vmware.aurora.vc.VcDatastore;
+import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.VmConfigUtil;
+import com.vmware.aurora.vc.DiskSpec.AllocationType;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
+import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
+import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
+import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.vim.binding.impl.vim.SharesInfoImpl;
 import com.vmware.vim.binding.impl.vim.StorageResourceManager_Impl.IOAllocationInfoImpl;
 import com.vmware.vim.binding.impl.vim.vm.device.VirtualDeviceSpecImpl;
@@ -49,9 +64,12 @@ import com.vmware.vim.binding.vim.vm.GuestInfo;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
 import com.vmware.vim.binding.vim.vm.device.VirtualDeviceSpec;
 import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
+import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 public class VcVmUtil {
    private static final Logger logger = Logger.getLogger(VcVmUtil.class);
+
+   private static final String DEFAULT_NIC_1_LABEL = "Network adapter 1";
 
    public static String getIpAddress(final VcVirtualMachine vcVm,
          boolean inSession) {
@@ -210,7 +228,7 @@ public class VcVmUtil {
             diskEntity.setDatastoreName(ds.getName());
             diskEntity.setVmdkPath(backing.getFileName());
             diskEntity.setDatastoreMoId(MoUtil.morefToString(ds._getRef()));
-
+            diskEntity.setDiskMode(backing.getDiskMode());
             return null;
          }
       });
@@ -321,5 +339,101 @@ public class VcVmUtil {
          logger.error("error in run operation on vm.", e);
       }
       return operationResult;
+   }
+
+   // get the parent vc resource pool of the node
+   public static VcResourcePool getTargetRp(String clusterName,
+         String groupName, NodeEntity node) {
+      String clusterRpName = ConfigInfo.getSerengetiUUID() + "-" + clusterName;
+
+      VcResourcePoolEntity rpEntity = node.getVcRp();
+      String vcRPName = "";
+
+      try {
+         VcCluster cluster =
+               VcResourceUtils.findVcCluster(rpEntity.getVcCluster());
+         if (!cluster.getConfig().getDRSEnabled()) {
+            logger.debug("DRS disabled for cluster " + rpEntity.getVcCluster()
+                  + ", put VM under cluster directly.");
+            return cluster.getRootRP();
+         }
+         if (CommonUtil.isBlank(rpEntity.getVcResourcePool())) {
+            vcRPName = clusterRpName + "/" + groupName;
+         } else {
+            vcRPName =
+                  rpEntity.getVcResourcePool() + "/" + clusterRpName + "/"
+                        + groupName;
+         }
+         VcResourcePool rp =
+               VcResourceUtils.findRPInVCCluster(rpEntity.getVcCluster(),
+                     vcRPName);
+         if (rp == null) {
+            throw ClusteringServiceException.TARGET_VC_RP_NOT_FOUND(
+                  rpEntity.getVcCluster(), vcRPName);
+         }
+         return rp;
+      } catch (Exception e) {
+         logger.error("Failed to get VC resource pool " + vcRPName
+               + " in vc cluster " + rpEntity.getVcCluster(), e);
+
+         throw ClusteringServiceException.TARGET_VC_RP_NOT_FOUND(
+               rpEntity.getVcCluster(), vcRPName);
+      }
+   }
+
+   public static VmSchema getVmSchema(ClusterCreate spec, String nodeGroup,
+         List<DiskSpec> diskSet, String templateVmId, String templateVmSnapId) {
+      NodeGroupCreate groupSpec = spec.getNodeGroup(nodeGroup);
+
+      VmSchema schema = new VmSchema();
+
+      // prepare resource schema
+      ResourceSchema resourceSchema = new ResourceSchema();
+      resourceSchema.name = "Resource Schema";
+      resourceSchema.cpuReservationMHz = 0;
+      resourceSchema.memReservationSize = 0;
+      resourceSchema.numCPUs = groupSpec.getCpuNum();
+      resourceSchema.memSize = groupSpec.getMemCapacityMB();
+      resourceSchema.priority =
+            com.vmware.aurora.interfaces.model.IDatabaseConfig.Priority.Normal;
+      schema.resourceSchema = resourceSchema;
+
+      // prepare disk schema
+      DiskSchema diskSchema = new DiskSchema();
+      ArrayList<Disk> disks = new ArrayList<Disk>(diskSet.size());
+      for (DiskSpec disk : diskSet) {
+         Disk tmDisk = new Disk();
+         tmDisk.name = disk.getName();
+         tmDisk.type = disk.getDiskType().getType();
+         tmDisk.initialSizeMB = disk.getSize() * 1024;
+         if (disk.getAllocType() != null && !disk.getAllocType().isEmpty())
+            tmDisk.allocationType =
+                  AllocationType.valueOf(disk.getAllocType().toUpperCase());
+         else
+            tmDisk.allocationType = null;
+         tmDisk.datastore = disk.getTargetDs();
+         tmDisk.externalAddress = disk.getExternalAddress();
+         tmDisk.vmdkPath = disk.getVmdkPath();
+         tmDisk.mode = DiskMode.valueOf(disk.getDiskMode());
+         disks.add(tmDisk);
+      }
+      diskSchema.setParent(templateVmId);
+      diskSchema.setParentSnap(templateVmSnapId);
+      diskSchema.setDisks(disks);
+      schema.diskSchema = diskSchema;
+
+      // prepare network schema
+      Network network = new Network();
+      network.vcNetwork = spec.getNetworking().get(0).getPortGroup();
+      network.nicLabel = DEFAULT_NIC_1_LABEL;
+      ArrayList<Network> networks = new ArrayList<Network>();
+      networks.add(network);
+
+      NetworkSchema networkSchema = new NetworkSchema();
+      networkSchema.name = "Network Schema";
+      networkSchema.networks = networks;
+      schema.networkSchema = networkSchema;
+
+      return schema;
    }
 }
