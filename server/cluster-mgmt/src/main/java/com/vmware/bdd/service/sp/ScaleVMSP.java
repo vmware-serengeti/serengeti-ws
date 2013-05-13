@@ -87,32 +87,45 @@ public class ScaleVMSP implements Callable<Void> {
                + " must be powered off before scaling");
          return null;
       }
-      VirtualMachine vimVm = vcVm.getManagedObject();
-      EnvironmentBrowser envBrowser =
-            MoUtil.getManagedObject(vimVm.getEnvironmentBrowser());
-      ConfigOption configOption = envBrowser.queryConfigOption(null, null);
-      int hardwareVersion = configOption.getHardwareOptions().getHwVersion();
-      logger.info("hardware version is: " + hardwareVersion);
       logger.info("scale vm,vmId:" + vmId + ",cpuNumber:" + cpuNumber
             + ",memory:" + memory);
-      if (hardwareVersion == HARDWARE_VERSION_7) {
-         if (cpuNumber > HARDWARE_VERSION_7_MAX_CPU) {
-            throw ScaleServiceException.CPU_EXCEED_LIMIT(vcVm.getName());
-         }
-         if (memory > HARDWARE_VERSION_7_MAX_MEMORY) {
-            throw ScaleServiceException.MEMORY_EXCEED_LIMIT(vcVm.getName());
-         }
-      } else if (hardwareVersion == HARDWARE_VERSION_8) {
-         if(cpuNumber > HARDWARE_VERSION_8_MAX_CPU){
-            throw ScaleServiceException.CPU_EXCEED_LIMIT(vcVm.getName());
-         }
-         if (memory > HARDWARE_VERSION_8_MAX_MEMORY) {
-            throw ScaleServiceException.MEMORY_EXCEED_LIMIT(vcVm.getName());
-         }
-      }
       return VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
          protected Void body() throws Exception {
+            VirtualMachine vimVm = vcVm.getManagedObject();
+            EnvironmentBrowser envBrowser =
+                  MoUtil.getManagedObject(vimVm.getEnvironmentBrowser());
+            ConfigOption configOption =
+                  envBrowser.queryConfigOption(null, null);
+            int hardwareVersion =
+                  configOption.getHardwareOptions().getHwVersion();
+            logger.info("hardware version is: " + hardwareVersion);
+            if (hardwareVersion == HARDWARE_VERSION_7) {
+               if (cpuNumber > HARDWARE_VERSION_7_MAX_CPU) {
+                  logger.warn("cpu number is greater than :"
+                        + HARDWARE_VERSION_7_MAX_CPU);
+                  throw ScaleServiceException.CPU_EXCEED_LIMIT(vcVm.getName());
+               }
+               if (memory > HARDWARE_VERSION_7_MAX_MEMORY) {
+                  logger.warn("memory is greater than : "
+                        + HARDWARE_VERSION_7_MAX_MEMORY);
+                  throw ScaleServiceException.MEMORY_EXCEED_LIMIT(vcVm
+                        .getName());
+               }
+            } else if (hardwareVersion == HARDWARE_VERSION_8) {
+               if (cpuNumber > HARDWARE_VERSION_8_MAX_CPU) {
+                  logger.warn("cpu number is greater than :"
+                        + HARDWARE_VERSION_7_MAX_CPU);
+                  throw ScaleServiceException.CPU_EXCEED_LIMIT(vcVm.getName());
+               }
+               if (memory > HARDWARE_VERSION_8_MAX_MEMORY) {
+                  logger.warn("memory is greater than : "
+                        + HARDWARE_VERSION_7_MAX_MEMORY);
+                  throw ScaleServiceException.MEMORY_EXCEED_LIMIT(vcVm
+                        .getName());
+               }
+            }
+            //start config vm if max configuration check is passed
             ConfigSpecImpl newConfigSpec = new ConfigSpecImpl();
             if (cpuNumber > 0) {
                newConfigSpec.setNumCPUs(cpuNumber);

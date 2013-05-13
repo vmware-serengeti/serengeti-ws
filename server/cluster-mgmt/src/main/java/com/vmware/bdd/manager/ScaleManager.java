@@ -54,16 +54,19 @@ public class ScaleManager {
       updateNodeGroupResource(scale);
       //launch sub job to scale node one by one
       try {
+         logger.info("set cluster to maintenace");
+         clusterEntityMgr.updateClusterStatus(clusterName,
+               ClusterStatus.MAINTENANCE);
+         logger.info("current cluster status: "
+               + clusterEntityMgr.findByName(clusterName).getStatus());
          return jobManager.runSubJobForNodes(JobConstants.NODE_SCALE_JOB_NAME,
                jobParametersList, clusterName, originalStatus,
                ClusterStatus.ERROR);
       } catch (Throwable t) {
          logger.error("Failed to start cluster " + clusterName, t);
+         clusterEntityMgr.updateClusterStatus(clusterName, originalStatus);
          throw ScaleServiceException.JOB_LAUNCH_FAILURE(clusterName, t,
                t.getMessage());
-      } finally {
-         logger.info("set cluster status to original.");
-         clusterEntityMgr.updateClusterStatus(clusterName, originalStatus);
       }
    }
 
