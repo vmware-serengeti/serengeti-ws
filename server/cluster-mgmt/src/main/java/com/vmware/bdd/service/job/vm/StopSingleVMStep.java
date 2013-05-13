@@ -18,6 +18,7 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
 import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.job.DefaultStatusUpdater;
 import com.vmware.bdd.service.job.JobConstants;
@@ -61,6 +62,9 @@ public class StopSingleVMStep extends TrackableTasklet {
             JobConstants.NODE_OPERATION_SUCCESS, success);
       putIntoJobExecutionContext(chunkContext,
             JobConstants.EXPECTED_NODE_STATUS, NodeStatus.POWERED_OFF);
+      if (!success) {
+         throw VcProviderException.STOP_VM_ERROR(nodeName);
+      }
       return RepeatStatus.FINISHED;
    }
 

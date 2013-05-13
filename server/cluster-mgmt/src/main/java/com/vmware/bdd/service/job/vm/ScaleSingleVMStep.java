@@ -17,11 +17,12 @@ package com.vmware.bdd.service.job.vm;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
-import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.exception.ScaleServiceException;
 import com.vmware.bdd.service.IScaleService;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
 import com.vmware.bdd.service.job.TrackableTasklet;
+import com.vmware.bdd.service.utils.VcResourceUtils;
 
 /**
  * @author Jarred Li
@@ -56,12 +57,17 @@ public class ScaleSingleVMStep extends TrackableTasklet {
                   JobConstants.NODE_SCALE_MEMORY_SIZE);
       int cpuNumber = Integer.parseInt(cpuNumberStr);
       long memory = Long.parseLong(memorySizeStr);
+      // vm max configuration check
+      VcResourceUtils.checkVmMaxConfiguration(
+            scaleService.getVmNameByNodeName(nodeName), cpuNumber, memory);
+
       boolean success =
             scaleService.scaleNodeResource(nodeName, cpuNumber, memory);
       putIntoJobExecutionContext(chunkContext,
             JobConstants.CLUSTER_OPERATION_SUCCESS, success);
-      putIntoJobExecutionContext(chunkContext,
-            JobConstants.EXPECTED_NODE_STATUS, NodeStatus.POWERED_OFF);
+      if (!success) {
+         throw ScaleServiceException.COMMON_SCALE_ERROR(nodeName);
+      }
       return RepeatStatus.FINISHED;
    }
 
@@ -73,7 +79,8 @@ public class ScaleSingleVMStep extends TrackableTasklet {
    }
 
    /**
-    * @param scaleService the scaleService to set
+    * @param scaleService
+    *           the scaleService to set
     */
    public void setScaleService(IScaleService scaleService) {
       this.scaleService = scaleService;

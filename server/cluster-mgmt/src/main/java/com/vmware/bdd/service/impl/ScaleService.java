@@ -43,7 +43,7 @@ public class ScaleService implements IScaleService {
    private static final Logger logger = Logger.getLogger(ScaleService.class);
 
    private ClusterEntityManager clusterEntityMgr;
-   
+
    private ClusterConfigManager clusterConfigMgr;
 
 
@@ -62,11 +62,11 @@ public class ScaleService implements IScaleService {
    public void setClusterEntityMgr(ClusterEntityManager clusterEntityMgr) {
       this.clusterEntityMgr = clusterEntityMgr;
    }
-   
+
    public ClusterConfigManager getClusterConfigMgr() {
       return clusterConfigMgr;
    }
-   
+
    public void setClusterConfigMgr(ClusterConfigManager clusterConfigMgr) {
       this.clusterConfigMgr = clusterConfigMgr;
    }
@@ -88,7 +88,7 @@ public class ScaleService implements IScaleService {
       logger.info("new swap disk size(MB): " + newSwapSizeInMB);
       VcDatastore targetDs =
             getTargetDsForSwapDisk(node, swapDisk, newSwapSizeInMB);
-      
+
       ScaleVMSP scaleVMSP =
             new ScaleVMSP(node.getMoId(), cpuNumber, memory, targetDs,
                   swapDisk, newSwapSizeInMB);
@@ -104,6 +104,12 @@ public class ScaleService implements IScaleService {
          clusterEntityMgr.update(node);
       }
       return vmResult;
+   }
+
+   @Override
+   public String getVmNameByNodeName(String nodeName) {
+      NodeEntity node = clusterEntityMgr.findNodeByName(nodeName);
+      return node.getMoId();
    }
 
    public DiskEntity findSwapDisk(NodeEntity node) {
@@ -130,7 +136,8 @@ public class ScaleService implements IScaleService {
       VcDatastore currentDs =
             VcResourceUtils.findDSInVcByName(swapDisk.getDatastoreName());
       if (!currentDs.isAccessible()) {
-         throw ScaleServiceException.CURRENT_DATASTORE_UNACCESSIBLE(currentDs.getName());
+         throw ScaleServiceException.CURRENT_DATASTORE_UNACCESSIBLE(currentDs
+               .getName());
       }
       if ((int) (currentDs.getFreeSpace() >> 20) > newSwapSizeInMB
             - swapDisk.getSizeInMB()) {
@@ -162,7 +169,8 @@ public class ScaleService implements IScaleService {
          return targetDs;
       }
 
-      throw ScaleServiceException.CANNOT_FIND_VALID_DATASTORE_FOR_SWAPDISK(node.getVmName());
+      throw ScaleServiceException.CANNOT_FIND_VALID_DATASTORE_FOR_SWAPDISK(node
+            .getVmName());
    }
 
 }

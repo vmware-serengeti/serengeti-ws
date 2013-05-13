@@ -24,5 +24,7 @@ package com.vmware.bdd.service;
 public interface IScaleService {
 
    public boolean scaleNodeResource(String nodeName, int cpuNumber, long memory);
+   
+   public String getVmNameByNodeName(String nodeName);
 
 }
