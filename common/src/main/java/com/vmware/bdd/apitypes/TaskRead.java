@@ -247,10 +247,10 @@ public class TaskRead {
          StringBuilder strBuilder = new StringBuilder();
          strBuilder.append("nodeName:");
          strBuilder.append(nodeName);
-         strBuilder.append(",succeed:");
+         strBuilder.append(", succeed:");
          strBuilder.append(succeed);
          if (errorMessage != null) {
-            strBuilder.append(",error message:");
+            strBuilder.append(", error message:");
             strBuilder.append(errorMessage);
          }
          return strBuilder.toString();
