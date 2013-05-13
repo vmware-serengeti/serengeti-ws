@@ -98,7 +98,7 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
 
             // copy the io share level from the original vm
             logger.info("set io share level same with parent vm");
-            if (!Priority.Normal.equals(ioShares)) {
+            if (!Priority.NORMAL.equals(ioShares)) {
                VcVmUtil.configIOShares(oldVmId, ioShares);
             }
             return null;
