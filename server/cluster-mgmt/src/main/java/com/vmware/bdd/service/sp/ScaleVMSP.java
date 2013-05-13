@@ -115,12 +115,12 @@ public class ScaleVMSP implements Callable<Void> {
             } else if (hardwareVersion == HARDWARE_VERSION_8) {
                if (cpuNumber > HARDWARE_VERSION_8_MAX_CPU) {
                   logger.warn("cpu number is greater than :"
-                        + HARDWARE_VERSION_7_MAX_CPU);
+                        + HARDWARE_VERSION_8_MAX_CPU);
                   throw ScaleServiceException.CPU_EXCEED_LIMIT(vcVm.getName());
                }
                if (memory > HARDWARE_VERSION_8_MAX_MEMORY) {
                   logger.warn("memory is greater than : "
-                        + HARDWARE_VERSION_7_MAX_MEMORY);
+                        + HARDWARE_VERSION_8_MAX_MEMORY);
                   throw ScaleServiceException.MEMORY_EXCEED_LIMIT(vcVm
                         .getName());
                }
