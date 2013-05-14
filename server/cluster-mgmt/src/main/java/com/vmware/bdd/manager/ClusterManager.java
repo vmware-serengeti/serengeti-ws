@@ -826,6 +826,11 @@ public class ClusterManager {
          throw BddException.NOT_FOUND("cluster", clusterName);
       }
 
+      //update vm ioshares
+      if (ioPriority != null) {
+         prioritizeCluster(clusterName, nodeGroupName, ioPriority);
+      }
+
       if (enableAuto != null && enableAuto != cluster.getAutomationEnable()) {
          cluster.setAutomationEnable(enableAuto);
       }
@@ -872,15 +877,12 @@ public class ClusterManager {
                clusterName, "it should be in RUNNING or STOPPED status");
       }
 
-      boolean sucess = clusteringService.setAutoElasticity(clusterName, null);
-      if (!sucess) {
-         throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
-               clusterName, "failed");
-      }
-
-      //update vm ioshares
-      if (ioPriority != null) {
-         prioritizeCluster(clusterName, nodeGroupName, ioPriority);
+      if (enableAuto != null && enableAuto) {
+         boolean sucess = clusteringService.setAutoElasticity(clusterName, null);
+         if (!sucess) {
+            throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
+                  clusterName, "failed");
+         }
       }
 
       return nodeGroupNames;
