@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.DiskSize;
 import com.vmware.aurora.vc.DeviceId;
+import com.vmware.aurora.vc.DiskSpec.AllocationType;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcVirtualMachine;
@@ -106,12 +107,14 @@ public class ScaleVMSP implements Callable<Void> {
             } else {
                vcVm.detachVirtualDisk(
                      new DeviceId(swapDisk.getExternalAddress()), true);
+               AllocationType allocType =
+                     swapDisk.getAllocType() == null ? null : AllocationType
+                           .valueOf(swapDisk.getAllocType());
                DiskCreateSpec[] addDisks =
                      { new DiskCreateSpec(new DeviceId(swapDisk
                            .getExternalAddress()), targetDs,
                            swapDisk.getName(), DiskMode.independent_persistent,
-                           DiskSize.sizeFromMB(newSwapSizeInMB), swapDisk
-                                 .getAllocType()) };
+                           DiskSize.sizeFromMB(newSwapSizeInMB), allocType) };
                // changeDisks() will run vcVm.reconfigure() itself
                vcVm.changeDisks(null, addDisks);
             }
@@ -125,5 +128,4 @@ public class ScaleVMSP implements Callable<Void> {
          }
       });
    }
-
 }

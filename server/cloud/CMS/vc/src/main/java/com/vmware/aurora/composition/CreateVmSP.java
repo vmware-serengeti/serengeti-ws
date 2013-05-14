@@ -123,6 +123,10 @@ public class CreateVmSP implements Callable<Void> {
       return true;
    }
 
+   /**
+    * copy parent vm's configurations, includes vApp configs, hardware version
+    * info
+    */
    private void copyParentVmSettings(VcVirtualMachine template,
          ConfigSpec configSpec) {
       configSpec.setName(newVmName);
@@ -144,10 +148,10 @@ public class CreateVmSP implements Callable<Void> {
       }
       vAppSpec.setProduct(productSpecs.toArray(new ProductSpec[productSpecs
             .size()]));
-      
+
       configSpec.setVAppConfig(vAppSpec);
       configSpec.setGuestId(template.getConfig().getGuestId());
-      
+
       // copy hardware version
       configSpec.setVersion(template.getConfig().getVersion());
    }

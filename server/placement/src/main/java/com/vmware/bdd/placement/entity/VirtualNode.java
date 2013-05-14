@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
+import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
 
 /**

@@ -17,7 +17,6 @@ package com.vmware.bdd.service.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,29 +28,20 @@ import org.springframework.stereotype.Service;
 
 import com.google.gson.internal.Pair;
 import com.vmware.aurora.composition.CreateVmSP;
-import com.vmware.aurora.composition.DiskSchema;
-import com.vmware.aurora.composition.DiskSchema.Disk;
-import com.vmware.aurora.composition.NetworkSchema;
-import com.vmware.aurora.composition.NetworkSchema.Network;
-import com.vmware.aurora.composition.ResourceSchema;
 import com.vmware.aurora.composition.VmSchema;
 import com.vmware.aurora.composition.compensation.CompensateCreateVmSP;
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
-import com.vmware.aurora.interfaces.model.IDatabaseConfig.Priority;
-import com.vmware.aurora.vc.DiskType;
 import com.vmware.aurora.vc.VcCache;
-import com.vmware.aurora.vc.VcCluster;
 import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;
-import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
-import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterHealServiceException;
 import com.vmware.bdd.exception.ClusteringServiceException;
@@ -63,13 +53,11 @@ import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.sp.QueryIpAddress;
 import com.vmware.bdd.service.sp.ReplaceVmPrePowerOn;
 import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
 import com.vmware.vim.binding.vim.Folder;
-import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 @Service
 public class ClusterHealService implements IClusterHealService {
@@ -77,7 +65,6 @@ public class ClusterHealService implements IClusterHealService {
          .getLogger(ClusterHealService.class);
 
    private static final String RECOVERY_VM_NAME_POSTFIX = "-recovery";
-   private static final String DEFAULT_NIC_1_LABEL = "Network adapter 1";
 
    private ClusterEntityManager clusterEntityMgr;
 
@@ -114,7 +101,7 @@ public class ClusterHealService implements IClusterHealService {
 
    @Override
    public boolean hasBadDisks(String nodeName) {
-      List<DiskEntity> badDisks = getBadDisks(nodeName);
+      List<DiskSpec> badDisks = getBadDisks(nodeName);
       if (badDisks != null && !badDisks.isEmpty())
          return true;
       else
@@ -122,12 +109,12 @@ public class ClusterHealService implements IClusterHealService {
    }
 
    @Override
-   public List<DiskEntity> getBadDisks(String nodeName) {
+   public List<DiskSpec> getBadDisks(String nodeName) {
       List<DiskEntity> disks = clusterEntityMgr.getDisks(nodeName);
-      List<DiskEntity> bads = new ArrayList<DiskEntity>();
+      List<DiskSpec> bads = new ArrayList<DiskSpec>();
 
       // scan all disks and filter out those don't have backing vmdk files or
-      // whoes vmdkf file attaches to unaccessible datastores
+      // whoes vmdk file attaches to unaccessible datastores
       for (DiskEntity disk : disks) {
          if (disk.getVmdkPath() == null
                || disk.getVmdkPath().isEmpty()
@@ -135,7 +122,7 @@ public class ClusterHealService implements IClusterHealService {
                      .isDatastoreAccessible(disk.getDatastoreMoId()))) {
             logger.info("disk " + disk.getName() + " is bad as datastore "
                   + disk.getDatastoreName() + " is not accessible");
-            bads.add(disk);
+            bads.add(disk.toDiskSpec());
          }
       }
 
@@ -179,42 +166,31 @@ public class ClusterHealService implements IClusterHealService {
       return result;
    }
 
-   private List<DiskEntity> findReplacementDisks(String nodeName,
-         List<DiskEntity> badDisks, Map<AbstractDatastore, Integer> usage) {
+   private List<DiskSpec> findReplacementDisks(String nodeName,
+         List<DiskSpec> badDisks, Map<AbstractDatastore, Integer> usage) {
       // reverse sort, in descending order
-      Comparator<DiskEntity> cmp = new Comparator<DiskEntity>() {
-         @Override
-         public int compare(DiskEntity arg0, DiskEntity arg1) {
-            if (arg0.getSizeInMB() > arg1.getSizeInMB())
-               return -1;
-            else if (arg0.getSizeInMB() < arg1.getSizeInMB())
-               return 1;
-
-            return 0;
-         }
-      };
       // bin pack problem, place large disk first. 
-      Collections.sort(badDisks, cmp);
+      Collections.sort(badDisks);
 
-      List<DiskEntity> replacements =
-            new ArrayList<DiskEntity>(badDisks.size());
+      List<DiskSpec> replacements = new ArrayList<DiskSpec>(badDisks.size());
 
-      for (DiskEntity disk : badDisks) {
-         AbstractDatastore ads =
-               getLeastUsedDatastore(usage, disk.getSizeInMB() >> 10);
+      for (DiskSpec disk : badDisks) {
+         int requiredSize = disk.getSize();
+         AbstractDatastore ads = getLeastUsedDatastore(usage, requiredSize);
          if (ads == null) {
             throw ClusterHealServiceException.NOT_ENOUGH_STORAGE(nodeName,
                   "can not find datastore with enough space to place disk "
-                        + disk.getName() + " with size " + disk.getSizeInMB()
-                        + " MB");
+                        + disk.getName() + " with size " + disk.getSize()
+                        + " GB");
          }
 
-         DiskEntity replacement = disk.copy(disk);
-         replacement.setDatastoreName(ads.getName());
-         replacement.setDatastoreMoId(null);
+         DiskSpec replacement = new DiskSpec(disk);
+         replacement.setTargetDs(ads.getName());
          replacement.setVmdkPath(null);
          replacements.add(replacement);
 
+         // deduct space
+         ads.allocate(requiredSize);
          // increase reference by 1
          usage.put(ads, usage.get(ads) + 1);
       }
@@ -223,8 +199,8 @@ public class ClusterHealService implements IClusterHealService {
    }
 
    @Override
-   public List<DiskEntity> getReplacementDisks(String clusterName,
-         String groupName, String nodeName, List<DiskEntity> badDisks) {
+   public List<DiskSpec> getReplacementDisks(String clusterName,
+         String groupName, String nodeName, List<DiskSpec> badDisks) {
       ClusterCreate spec = configMgr.getClusterConfig(clusterName);
 
       NodeEntity nodeEntity =
@@ -235,14 +211,14 @@ public class ClusterHealService implements IClusterHealService {
             filterDatastores(targetHost, spec, groupName);
 
       // initialize env for placement algorithm
-      int totalSizeInMB = 0;
+      int totalSizeInGB = 0;
       Map<AbstractDatastore, Integer> usage =
             new HashMap<AbstractDatastore, Integer>(validDatastores.size());
       List<AbstractDatastore> pools =
             new ArrayList<AbstractDatastore>(validDatastores.size());
 
       for (VcDatastore ds : validDatastores) {
-         totalSizeInMB += ds.getFreeSpace() >> 20;
+         totalSizeInGB += ds.getFreeSpace() >> 30;
          AbstractDatastore ads =
                new AbstractDatastore(ds.getName(),
                      (int) (ds.getFreeSpace() >> 30));
@@ -250,16 +226,16 @@ public class ClusterHealService implements IClusterHealService {
          usage.put(ads, 0);
       }
 
-      int requiredSizeInMB = 0;
-      for (DiskEntity disk : badDisks) {
-         requiredSizeInMB += disk.getSizeInMB();
+      int requiredSizeInGB = 0;
+      for (DiskSpec disk : badDisks) {
+         requiredSizeInGB += disk.getSize();
       }
 
-      if (totalSizeInMB < requiredSizeInMB) {
+      if (totalSizeInGB < requiredSizeInGB) {
          throw ClusterHealServiceException.NOT_ENOUGH_STORAGE(nodeName,
-               "required " + requiredSizeInMB + " MB storage on host "
-                     + targetHost.getName() + ", but only " + totalSizeInMB
-                     + " MB available");
+               "required " + requiredSizeInGB + " GB storage on host "
+                     + targetHost.getName() + ", but only " + totalSizeInGB
+                     + " GB available");
       }
 
       List<DiskEntity> goodDisks = clusterEntityMgr.getDisks(nodeName);
@@ -287,101 +263,11 @@ public class ClusterHealService implements IClusterHealService {
       return findReplacementDisks(nodeName, badDisks, usage);
    }
 
-   private VmSchema getVmSchema(ClusterCreate spec, String nodeGroup,
-         List<DiskEntity> diskSet) {
-      NodeGroupCreate groupSpec = spec.getNodeGroup(nodeGroup);
-
-      VmSchema schema = new VmSchema();
-
-      // prepare resource schema
-      ResourceSchema resourceSchema = new ResourceSchema();
-      resourceSchema.name = "Resource Schema";
-      resourceSchema.cpuReservationMHz = 0;
-      resourceSchema.memReservationSize = 0;
-      resourceSchema.numCPUs = groupSpec.getCpuNum();
-      resourceSchema.memSize = groupSpec.getMemCapacityMB();
-      resourceSchema.priority = Priority.Normal;
-      schema.resourceSchema = resourceSchema;
-
-      // prepare disk schema
-      DiskSchema diskSchema = new DiskSchema();
-      ArrayList<Disk> disks = new ArrayList<Disk>(diskSet.size());
-      for (DiskEntity diskEntity : diskSet) {
-         Disk disk = new Disk();
-         disk.name = diskEntity.getName();
-         disk.type = diskEntity.getDiskType();
-         disk.initialSizeMB = diskEntity.getSizeInMB();
-         disk.allocationType = diskEntity.getAllocType();
-         disk.datastore = diskEntity.getDatastoreName();
-         disk.externalAddress = diskEntity.getExternalAddress();
-         disk.vmdkPath = diskEntity.getVmdkPath();
-         disk.mode = DiskMode.independent_persistent;
-         disks.add(disk);
-      }
-      diskSchema.setParent(clusteringService.getTemplateVmId());
-      diskSchema.setParentSnap(clusteringService.getTemplateSnapId());
-      diskSchema.setDisks(disks);
-      schema.diskSchema = diskSchema;
-
-      // prepare network schema
-      Network network = new Network();
-      network.vcNetwork = spec.getNetworking().get(0).getPortGroup();
-      network.nicLabel = DEFAULT_NIC_1_LABEL;
-      ArrayList<Network> networks = new ArrayList<Network>();
-      networks.add(network);
-
-      NetworkSchema networkSchema = new NetworkSchema();
-      networkSchema.name = "Network Schema";
-      networkSchema.networks = networks;
-      schema.networkSchema = networkSchema;
-
-      return schema;
-   }
-
-   private VcResourcePool getTargetRp(String clusterName, String groupName,
-         NodeEntity node) {
-      String clusterRpName = ConfigInfo.getSerengetiUUID() + "-" + clusterName;
-
-      VcResourcePoolEntity rpEntity = node.getVcRp();
-      String vcRPName = "";
-
-      try {
-         VcCluster cluster =
-               VcResourceUtils.findVcCluster(rpEntity.getVcCluster());
-         if (!cluster.getConfig().getDRSEnabled()) {
-            logger.debug("DRS disabled for cluster " + rpEntity.getVcCluster()
-                  + ", put VM under cluster directly.");
-            return cluster.getRootRP();
-         }
-         if (CommonUtil.isBlank(rpEntity.getVcResourcePool())) {
-            vcRPName = clusterRpName + "/" + groupName;
-         } else {
-            vcRPName =
-                  rpEntity.getVcResourcePool() + "/" + clusterRpName + "/"
-                        + groupName;
-         }
-         VcResourcePool rp =
-               VcResourceUtils.findRPInVCCluster(rpEntity.getVcCluster(),
-                     vcRPName);
-         if (rp == null) {
-            throw ClusteringServiceException.TARGET_VC_RP_NOT_FOUND(
-                  rpEntity.getVcCluster(), vcRPName);
-         }
-         return rp;
-      } catch (Exception e) {
-         logger.error("Failed to get VC resource pool " + vcRPName
-               + " in vc cluster " + rpEntity.getVcCluster(), e);
-
-         throw ClusteringServiceException.TARGET_VC_RP_NOT_FOUND(
-               rpEntity.getVcCluster(), vcRPName);
-      }
-   }
-
-   private VcDatastore getTargetDatastore(List<DiskEntity> disks) {
+   private VcDatastore getTargetDatastore(List<DiskSpec> disks) {
       String datastore = null;
-      for (DiskEntity disk : disks) {
-         if (DiskType.OS.getTypeName().equals(disk.getDiskType())) {
-            datastore = disk.getDatastoreName();
+      for (DiskSpec disk : disks) {
+         if (DiskType.SYSTEM_DISK.equals(disk.getDiskType())) {
+            datastore = disk.getTargetDs();
          }
       }
       AuAssert.check(datastore != null);
@@ -410,8 +296,11 @@ public class ClusterHealService implements IClusterHealService {
    }
 
    private CreateVmSP getReplacementVmSp(ClusterCreate clusterSpec,
-         String groupName, NodeEntity node, List<DiskEntity> fullDiskSet) {
-      VmSchema createSchema = getVmSchema(clusterSpec, groupName, fullDiskSet);
+         String groupName, NodeEntity node, List<DiskSpec> fullDiskSet) {
+      VmSchema createSchema =
+            VcVmUtil.getVmSchema(clusterSpec, groupName, fullDiskSet,
+                  clusteringService.getTemplateVmId(),
+                  clusteringService.getTemplateSnapId());
 
       NetworkAdd networkAdd = clusterSpec.getNetworking().get(0);
       Map<String, String> guestVariable =
@@ -421,25 +310,34 @@ public class ClusterHealService implements IClusterHealService {
       // delete old vm and rename new vm in the prePowerOn
       ReplaceVmPrePowerOn prePowerOn =
             new ReplaceVmPrePowerOn(node.getMoId(), node.getVmName(),
-                  clusterSpec.getNodeGroup(groupName).getStorage().getShares());
+                  clusterSpec.getNodeGroup(groupName).getStorage().getShares(),
+                  fullDiskSet);
 
       // timeout is 10 mintues
       QueryIpAddress query =
             new QueryIpAddress(Constants.VM_POWER_ON_WAITING_SEC);
       return new CreateVmSP(node.getVmName() + RECOVERY_VM_NAME_POSTFIX,
-            createSchema, getTargetRp(clusterSpec.getName(), groupName, node),
-            getTargetDatastore(fullDiskSet), prePowerOn, query, guestVariable,
-            false, getTargetFolder(node, clusterSpec.getNodeGroup(groupName)),
-            getTargetHost(node));
+            createSchema, VcVmUtil.getTargetRp(clusterSpec.getName(),
+                  groupName, node), getTargetDatastore(fullDiskSet),
+            prePowerOn, query, guestVariable, false, getTargetFolder(node,
+                  clusterSpec.getNodeGroup(groupName)), getTargetHost(node));
    }
 
    @Override
    @SuppressWarnings("unchecked")
    public VcVirtualMachine createReplacementVm(String clusterName,
-         String groupName, String nodeName, List<DiskEntity> fullDiskSet) {
+         String groupName, String nodeName, List<DiskSpec> replacementDisks) {
       ClusterCreate spec = configMgr.getClusterConfig(clusterName);
       NodeEntity node =
             clusterEntityMgr.findByName(spec.getName(), groupName, nodeName);
+
+      // replace bad disks with fixing disk, combining as a new disk set
+      List<DiskSpec> fullDiskSet = new ArrayList<DiskSpec>();
+      for (DiskEntity disk : clusterEntityMgr.getDisks(nodeName)) {
+         fullDiskSet.add(disk.toDiskSpec());
+      }
+      fullDiskSet.removeAll(replacementDisks);
+      fullDiskSet.addAll(replacementDisks);
 
       CreateVmSP cloneVmSp =
             getReplacementVmSp(spec, groupName, node, fullDiskSet);
@@ -458,7 +356,7 @@ public class ClusterHealService implements IClusterHealService {
                Scheduler
                      .executeStoredProcedures(
                            com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
-                           storeProcedures, storeProcedures.length - 1, null);
+                           storeProcedures, 0, null);
 
          if (result == null) {
             logger.error("No VM is created.");
@@ -473,7 +371,8 @@ public class ClusterHealService implements IClusterHealService {
             AuAssert.check(vm != null);
             return vm;
          } else if (pair.first.throwable != null) {
-            logger.error("Failed to create replace VM for node " + node.getVmName(),
+            logger.error(
+                  "Failed to create replace VM for node " + node.getVmName(),
                   pair.first.throwable);
             throw ClusterHealServiceException.FAILED_CREATE_REPLACEMENT_VM(node
                   .getVmName());
@@ -499,7 +398,7 @@ public class ClusterHealService implements IClusterHealService {
 
    @Override
    public boolean fixDiskFailures(String clusterName, String groupName,
-         String nodeName, List<DiskEntity> fullDiskSet) {
+         String nodeName, List<DiskSpec> fullDiskSet) {
       return true;
    }
 }

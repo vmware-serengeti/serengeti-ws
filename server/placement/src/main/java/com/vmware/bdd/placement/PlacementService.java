@@ -18,6 +18,7 @@ package com.vmware.bdd.placement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ import com.vmware.bdd.placement.interfaces.IContainer;
 import com.vmware.bdd.placement.interfaces.IPlacementPlanner;
 import com.vmware.bdd.placement.interfaces.IPlacementService;
 import com.vmware.bdd.placement.util.PlacementUtil;
+import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
 
 /**
@@ -202,5 +204,14 @@ public class PlacementService implements IPlacementService {
       // remove policy violated VMs
       IPlacementPlanner planner = new PlacementPlanner();
       return planner.getBadNodes(cluster, existedNodes);
+   }
+
+   @Override
+   public List<DiskSpec> getReplacementDisks(IContainer container,
+         ClusterCreate spec, String groupName, String nodeName,
+         String targetHost, List<DiskSpec> badDisks,
+         Map<String, Integer> dsUsage) {
+      // TODO Auto-generated method stub
+      return null;
    }
 }

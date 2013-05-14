@@ -36,7 +36,6 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
 
    private boolean subJob = false;
 
-
    public IClusteringService getClusteringService() {
       return clusteringService;
    }

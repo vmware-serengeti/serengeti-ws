@@ -15,6 +15,9 @@
 package com.vmware.bdd.spectypes;
 
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public enum HadoopRole {
    //NOTE: when you add a new role, please put it into an appropriate position
@@ -125,5 +128,28 @@ public enum HadoopRole {
                   : -1;
          }
       }
+   }
+   
+   public static boolean hasMgmtRole(List<String> roles) {
+      HadoopRole[] mgmtRoles =
+            new HadoopRole[] { ZOOKEEPER_ROLE, HADOOP_JOURNALNODE_ROLE,
+                  HADOOP_NAMENODE_ROLE, HBASE_MASTER_ROLE,
+                  HADOOP_JOBTRACKER_ROLE, HIVE_SERVER_ROLE, MAPR_CLDB_ROLE,
+                  MAPR_JOBTRACKER_ROLE, MAPR_ZOOKEEPER_ROLE,
+                  MAPR_HBASE_MASTER_ROLE, MAPR_HIVE_SERVER_ROLE,
+                  HADOOP_RESOURCEMANAGER_ROLE };
+
+      Set<String> mgmtRoleDesc = new HashSet<String>(mgmtRoles.length);
+
+      for (HadoopRole role : mgmtRoles) {
+         mgmtRoleDesc.add(role.description);
+      }
+
+      for (String role : roles) {
+         if (mgmtRoleDesc.contains(role))
+            return true;
+      }
+
+      return false;
    }
 }

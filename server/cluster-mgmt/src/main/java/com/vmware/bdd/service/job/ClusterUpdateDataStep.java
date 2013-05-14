@@ -229,7 +229,7 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
                diskEntities.add(newDisk);
             }
             newDisk.setSizeInMB(disk.initialSizeMB);
-            newDisk.setAllocType(disk.allocationType);
+            newDisk.setAllocType(disk.allocationType.toString());
             newDisk.setDatastoreName(disk.datastore);
             newDisk.setDiskType(disk.type);
             newDisk.setExternalAddress(disk.externalAddress);

@@ -1093,10 +1093,9 @@ public class ClusterManager {
          List<String> roles = nodeGroup.getRoleNameList();
 
          // TODO: more fine control on node roles
-         if (!roles.contains(HadoopRole.HADOOP_DATANODE.toString())
-               && !roles.contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {
+         if (HadoopRole.hasMgmtRole(roles)) {
             logger.info("node group " + nodeGroup.getName()
-                  + " is not a worker node group, pass it");
+                  + " contains management roles, pass it");
             continue;
          }
 
@@ -1123,8 +1122,9 @@ public class ClusterManager {
       }
 
       if (!workerNodesFound) {
-         throw ClusterHealServiceException.NOT_SUPPORTED(clusterName,
-               "only support fixing disk failures for worker nodes");
+         throw ClusterHealServiceException
+               .NOT_SUPPORTED(clusterName,
+                     "only support fixing disk failures for worker/non-management nodes");
       }
 
       // all target nodes are healthy, simply return
@@ -1138,13 +1138,10 @@ public class ClusterManager {
                ClusterStatus.MAINTENANCE);
          return jobManager.runSubJobForNodes(
                JobConstants.FIX_NODE_DISK_FAILURE_JOB_NAME, jobParameterList,
-               clusterName, oldStatus, ClusterStatus.ERROR);
+               clusterName, oldStatus, oldStatus);
       } catch (Exception e) {
          logger.error("failed to fix disk failures, " + e.getMessage());
          throw e;
-      } finally {
-         logger.info("reset to previous status " + oldStatus);
-         clusterEntityMgr.updateClusterStatus(clusterName, oldStatus);
       }
    }
 }

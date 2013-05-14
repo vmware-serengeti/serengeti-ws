@@ -22,12 +22,12 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.aurora.vc.VcVirtualMachine;
-import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.job.ClusterUpdateDataStep;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
 import com.vmware.bdd.service.job.TrackableTasklet;
+import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
 
 public class NodeRecoverDiskFailureStep extends TrackableTasklet {
@@ -51,12 +51,12 @@ public class NodeRecoverDiskFailureStep extends TrackableTasklet {
             getJobParameters(chunkContext).getString(
                   JobConstants.SUB_JOB_NODE_NAME);
       // find bad disks
-      List<DiskEntity> badDisks = healService.getBadDisks(targetNode);
+      List<DiskSpec> badDisks = healService.getBadDisks(targetNode);
       AuAssert.check(!badDisks.isEmpty());
 
       // find replacements for bad disks
       logger.debug("get replacements for bad disks");
-      List<DiskEntity> replacements;
+      List<DiskSpec> replacements;
       try {
          replacements =
                healService.getReplacementDisks(clusterName, groupName,
@@ -68,14 +68,8 @@ public class NodeRecoverDiskFailureStep extends TrackableTasklet {
          throw e;
       }
 
-      List<DiskEntity> fullDiskSet = getClusterEntityMgr().getDisks(targetNode);
-      fullDiskSet.removeAll(badDisks);
-      /*
-       *  full disk set now contains completed and healthy disks, some of them have 
-       *  vmdk existed, some need to be created, depending on their vmdk_path field
-       */
-      fullDiskSet.addAll(replacements);
-      logger.debug("full disk set for recovery " + fullDiskSet.toString());
+      logger.debug("get replacement disk set for recovery "
+            + replacements.toString());
       jobExecutionStatusHolder.setCurrentStepProgress(
             getJobExecutionId(chunkContext), 0.3);
 
@@ -84,7 +78,7 @@ public class NodeRecoverDiskFailureStep extends TrackableTasklet {
       try {
          VcVirtualMachine newVm =
                healService.createReplacementVm(clusterName, groupName,
-                     targetNode, fullDiskSet);
+                     targetNode, replacements);
          if (newVm != null)
             logger.info("created replacement vm " + newVm.getId());
 
