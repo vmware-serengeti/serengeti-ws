@@ -50,8 +50,10 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="scaleSingleVMStep" next="startSingleVMStep">
+		<step id="scaleSingleVMStep">
 			<tasklet ref="scaleSingleVMTasklet" />
+			<next on="FAILED" to="rollbackScaleSingleVMStep" />
+			<next on="*" to="startSingleVMStep" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

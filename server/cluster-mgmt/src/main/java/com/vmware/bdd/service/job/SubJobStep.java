@@ -185,7 +185,14 @@ public class SubJobStep extends AbstractStep {
     */
    private void updateExecutionStatus(JobExecution subJobExecution,
          String nodeName, ExecutionContext mainJobExecutionContext) {
-      if (subJobExecution.getStatus().isUnsuccessful()) {
+      String rollbackStr =
+            subJobExecution.getExecutionContext().getString(
+                  JobConstants.SUB_JOB_FAIL_FLAG);
+      boolean rollback = false;
+      if (rollbackStr != null) {
+         rollback = Boolean.parseBoolean(rollbackStr);
+      }
+      if (subJobExecution.getStatus().isUnsuccessful() || rollback) {
          String errorMessage =
                subJobExecution.getExecutionContext().getString(
                      JobConstants.CURRENT_ERROR_MESSAGE);

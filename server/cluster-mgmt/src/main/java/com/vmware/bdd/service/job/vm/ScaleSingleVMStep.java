@@ -61,12 +61,24 @@ public class ScaleSingleVMStep extends TrackableTasklet {
                   JobConstants.NODE_SCALE_MEMORY_SIZE);
       int cpuNumber = Integer.parseInt(cpuNumberStr);
       long memory = Long.parseLong(memorySizeStr);
-      putIntoJobExecutionContext(chunkContext, JobConstants.NODE_SCALE_ROLLBACK, false);
+      putIntoJobExecutionContext(chunkContext,
+            JobConstants.NODE_SCALE_ROLLBACK, false);
       if (rollback) {
          logger.info("rollback vm configuration to original");
          cpuNumber = scaleService.getVmOriginalCpuNumber(nodeName);
          memory = scaleService.getVmOriginalMemory(nodeName);
-         putIntoJobExecutionContext(chunkContext, JobConstants.NODE_SCALE_ROLLBACK, true);
+         putIntoJobExecutionContext(chunkContext,
+               JobConstants.NODE_SCALE_ROLLBACK, true);
+         chunkContext.getStepContext().getStepExecution().getJobExecution()
+               .getExecutionContext()
+               .putString(JobConstants.SUB_JOB_FAIL_FLAG, "true");
+         chunkContext
+               .getStepContext()
+               .getStepExecution()
+               .getJobExecution()
+               .getExecutionContext()
+               .putString(JobConstants.CURRENT_ERROR_MESSAGE,
+                     "node scale was rollbacked");
       }
       boolean success =
             scaleService.scaleNodeResource(nodeName, cpuNumber, memory);
