@@ -96,7 +96,12 @@ public class SingleNodeSyncupStep extends TrackableTasklet {
          node.setMemorySize(memory);
          scaleService.updateSwapDisk(nodeName);
       }
-      getClusterEntityMgr().update(node);
+      boolean rollback =
+            getFromJobExecutionContext(chunkContext,
+                  JobConstants.NODE_SCALE_ROLLBACK, Boolean.class);
+      if (!rollback) {
+         getClusterEntityMgr().update(node);
+      }
 
       return RepeatStatus.FINISHED;
    }

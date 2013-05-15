@@ -65,6 +65,7 @@ public class ScaleSingleVMStep extends TrackableTasklet {
          logger.info("rollback vm configuration to original");
          cpuNumber = scaleService.getVmOriginalCpuNumber(nodeName);
          memory = scaleService.getVmOriginalMemory(nodeName);
+         putIntoJobExecutionContext(chunkContext, JobConstants.NODE_SCALE_ROLLBACK, true);
       }
       boolean success =
             scaleService.scaleNodeResource(nodeName, cpuNumber, memory);

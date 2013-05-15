@@ -442,7 +442,7 @@ public class VcVmUtil {
          return memory;
       } else {
          long temp = memory / 4;
-         return temp * 4;
+         return (temp + 1) * 4;
       }
    }
 }

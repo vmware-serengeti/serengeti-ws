@@ -74,7 +74,7 @@ public class TestJobManager {
       }
 
    }
-   
+
    @Test
    public void testJobWithCondition() throws Exception {
       ApplicationContext context =
@@ -85,9 +85,10 @@ public class TestJobManager {
       JobParameters nodeParameters =
             parametersBuilder
                   .addString(JobConstants.SUB_JOB_NODE_NAME,
-                        "node-fail-forever").toJobParameters();
+                        "node-fail-forever")
+                  .addString("date", new Date().toString()).toJobParameters();
       long jobExecutionId =
-            jobManager.runJob("simpleJobWithCondition",nodeParameters);
+            jobManager.runJob("simpleJobWithCondition", nodeParameters);
       logger.info("started simple job with condition");
       int retry = 0;
       while (retry <= 5) {
@@ -110,7 +111,7 @@ public class TestJobManager {
       }
 
    }
-   
+
    @Test
    public void testJobWithConditionSuccess() throws Exception {
       ApplicationContext context =
@@ -120,10 +121,10 @@ public class TestJobManager {
       JobParametersBuilder parametersBuilder = new JobParametersBuilder();
       JobParameters nodeParameters =
             parametersBuilder
-                  .addString(JobConstants.SUB_JOB_NODE_NAME,
-                        "node1").toJobParameters();
+                  .addString(JobConstants.SUB_JOB_NODE_NAME, "node1")
+                  .addString("date", new Date().toString()).toJobParameters();
       long jobExecutionId =
-            jobManager.runJob("simpleJobWithCondition",nodeParameters);
+            jobManager.runJob("simpleJobWithCondition", nodeParameters);
       logger.info("started simple job with condition");
       int retry = 0;
       while (retry <= 5) {

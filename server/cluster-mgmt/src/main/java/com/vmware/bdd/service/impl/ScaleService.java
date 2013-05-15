@@ -96,12 +96,6 @@ public class ScaleService implements IScaleService {
       return vmResult;
    }
 
-   @Override
-   public String getVmNameByNodeName(String nodeName) {
-      NodeEntity node = clusterEntityMgr.findNodeByName(nodeName);
-      return node.getMoId();
-   }
-
    public DiskEntity findSwapDisk(NodeEntity node) {
       DiskEntity swapDisk = null;
       Set<DiskEntity> diskEntities = node.getDisks();
