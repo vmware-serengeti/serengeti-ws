@@ -26,5 +26,11 @@ public interface IScaleService {
    public boolean scaleNodeResource(String nodeName, int cpuNumber, long memory);
    
    public String getVmNameByNodeName(String nodeName);
+   
+   public int getVmOriginalCpuNumber(String nodeName);
+   
+   public long getVmOriginalMemory(String nodeName);
+   
+   public void updateSwapDisk(String nodeName);
 
 }

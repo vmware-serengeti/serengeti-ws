@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job.vm;
 
+import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
@@ -22,7 +23,6 @@ import com.vmware.bdd.service.IScaleService;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
 import com.vmware.bdd.service.job.TrackableTasklet;
-import com.vmware.bdd.service.utils.VcResourceUtils;
 
 /**
  * @author Jarred Li
@@ -32,7 +32,11 @@ import com.vmware.bdd.service.utils.VcResourceUtils;
  */
 
 public class ScaleSingleVMStep extends TrackableTasklet {
+   private static final Logger logger = Logger
+         .getLogger(ScaleSingleVMStep.class);
+
    private IScaleService scaleService;
+   private boolean rollback;
 
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,
@@ -57,6 +61,11 @@ public class ScaleSingleVMStep extends TrackableTasklet {
                   JobConstants.NODE_SCALE_MEMORY_SIZE);
       int cpuNumber = Integer.parseInt(cpuNumberStr);
       long memory = Long.parseLong(memorySizeStr);
+      if (rollback) {
+         logger.info("rollback vm configuration to original");
+         cpuNumber = scaleService.getVmOriginalCpuNumber(nodeName);
+         memory = scaleService.getVmOriginalMemory(nodeName);
+      }
       boolean success =
             scaleService.scaleNodeResource(nodeName, cpuNumber, memory);
       putIntoJobExecutionContext(chunkContext,
@@ -81,4 +90,20 @@ public class ScaleSingleVMStep extends TrackableTasklet {
    public void setScaleService(IScaleService scaleService) {
       this.scaleService = scaleService;
    }
+
+   /**
+    * @return the rollback
+    */
+   public boolean isRollback() {
+      return rollback;
+   }
+
+   /**
+    * @param rollback
+    *           the rollback to set
+    */
+   public void setRollback(boolean rollback) {
+      this.rollback = rollback;
+   }
+
 }

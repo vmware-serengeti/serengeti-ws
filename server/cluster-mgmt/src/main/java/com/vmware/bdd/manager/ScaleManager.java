@@ -29,6 +29,7 @@ import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.ScaleServiceException;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.utils.VcVmUtil;
 
 /**
  * @author Jarred Li
@@ -48,6 +49,13 @@ public class ScaleManager {
       ClusterStatus originalStatus =
             clusterEntityMgr.findByName(clusterName).getStatus();
       logger.info("before scaling, cluster status is:" + originalStatus);
+      if (scale.getMemory() > 0) {
+         //VM's memory must be devisible by 4, otherwise VM can not be started
+         long converted = VcVmUtil.makeVmMemoryDevisibleBy4(scale.getMemory());
+         logger.info("user's setting for memory: " + scale.getMemory()
+               + " converted to : " + converted);
+         scale.setMemory(converted);
+      }
       List<JobParameters> jobParametersList = buildJobParameters(scale);
       if (jobParametersList.size() == 0) {
          throw ScaleServiceException.NOT_NEEDED(clusterName);

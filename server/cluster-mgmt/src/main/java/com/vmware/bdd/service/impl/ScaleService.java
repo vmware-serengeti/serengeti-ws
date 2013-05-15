@@ -93,16 +93,6 @@ public class ScaleService implements IScaleService {
             new ScaleVMSP(node.getMoId(), cpuNumber, memory, targetDs,
                   swapDisk, newSwapSizeInMB);
       boolean vmResult = VcVmUtil.runSPOnSingleVM(node, scaleVMSP);
-      if (vmResult) {
-         if (cpuNumber > 0) {
-            node.setCpuNum(cpuNumber);
-         }
-         if (memory > 0) {
-            node.setMemorySize(memory);
-            VcVmUtil.populateDiskInfo(swapDisk, node.getMoId());
-         }
-         clusterEntityMgr.update(node);
-      }
       return vmResult;
    }
 
@@ -171,6 +161,38 @@ public class ScaleService implements IScaleService {
 
       throw ScaleServiceException.CANNOT_FIND_VALID_DATASTORE_FOR_SWAPDISK(node
             .getVmName());
+   }
+
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.service.IScaleService#getVmOriginalCpuNumber(java.lang.String)
+    */
+   @Override
+   public int getVmOriginalCpuNumber(String nodeName) {
+      NodeEntity node = clusterEntityMgr.findNodeByName(nodeName);
+      return node.getCpuNum();
+   }
+
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.service.IScaleService#getVmOriginalMemory(java.lang.String)
+    */
+   @Override
+   public long getVmOriginalMemory(String nodeName) {
+      NodeEntity node = clusterEntityMgr.findNodeByName(nodeName);
+      return node.getMemorySize();
+   }
+
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.service.IScaleService#updateSwapDisk(java.lang.String)
+    */
+   @Override
+   public void updateSwapDisk(String nodeName) {
+      logger.info("update swap disk meta data for node: " + nodeName);
+      NodeEntity node = clusterEntityMgr.findNodeByName(nodeName);
+      DiskEntity swapDisk = findSwapDisk(node);
+      VcVmUtil.populateDiskInfo(swapDisk, node.getMoId());
    }
 
 }
