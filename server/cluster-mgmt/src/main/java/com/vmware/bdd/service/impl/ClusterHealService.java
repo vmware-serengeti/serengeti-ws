@@ -306,6 +306,7 @@ public class ClusterHealService implements IClusterHealService {
       Map<String, String> guestVariable =
             ClusteringService.getNetworkGuestVariable(networkAdd,
                   node.getIpAddress(), node.getGuestHostName());
+      VcVmUtil.addBootupUUID(guestVariable);
 
       // delete old vm and rename new vm in the prePowerOn
       ReplaceVmPrePowerOn prePowerOn =

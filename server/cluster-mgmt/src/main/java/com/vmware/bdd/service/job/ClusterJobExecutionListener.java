@@ -15,7 +15,6 @@
 package com.vmware.bdd.service.job;
 
 import java.util.UUID;
-
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -84,6 +83,7 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
       super.beforeJob(je);
    }
 
+   @Override
    public void afterJob(JobExecution je) {
       releaseResource(je);
       if (!subJob) {
@@ -145,5 +145,4 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
    JobParameters getJobParameters(JobExecution je) {
       return je.getJobInstance().getJobParameters();
    }
-
 }

@@ -46,6 +46,7 @@ public class Constants {
    public static final String GUEST_VARIABLE_NETMASK_KEY = "netmask";
    public static final String GUEST_VARIABLE_IP_KEY = "ipaddr";
    public static final String GUEST_VARIABLE_POLICY_KEY = "bootproto";
+   public static final String GUEST_VARIABLE_BOOTUP_UUID = "bootupUUID";
    public static final String NODE_ACTION_CLONING_VM = "Cloning VM";
    public static final String NODE_ACTION_CLONING_FAILED = "Cloning VM failed";
    public static final String NODE_ACTION_WAITING_IP = "Waiting for ip";

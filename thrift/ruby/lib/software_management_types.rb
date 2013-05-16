@@ -17,11 +17,8 @@ module Software
         STOP = 5
         DESTROY = 6
         CONFIGURE = 7
-        CONFIGURE_HARDWARE = 8
-        ENABLE_CHEF_CLIENT = 9
-        DISABLE_CHEF_CLIENT = 10
-        VALUE_MAP = {1 => "QUERY", 2 => "CREATE", 3 => "UPDATE", 4 => "START", 5 => "STOP", 6 => "DESTROY", 7 => "CONFIGURE", 8 => "CONFIGURE_HARDWARE", 9 => "ENABLE_CHEF_CLIENT", 10 => "DISABLE_CHEF_CLIENT"}
-        VALID_VALUES = Set.new([QUERY, CREATE, UPDATE, START, STOP, DESTROY, CONFIGURE, CONFIGURE_HARDWARE, ENABLE_CHEF_CLIENT, DISABLE_CHEF_CLIENT]).freeze
+        VALUE_MAP = {1 => "QUERY", 2 => "CREATE", 3 => "UPDATE", 4 => "START", 5 => "STOP", 6 => "DESTROY", 7 => "CONFIGURE"}
+        VALID_VALUES = Set.new([QUERY, CREATE, UPDATE, START, STOP, DESTROY, CONFIGURE]).freeze
       end
 
       module ServerStatus
@@ -174,7 +171,7 @@ module Software
         FIELDS = {
           ACTION => {:type => ::Thrift::Types::I32, :name => 'action', :enum_class => ::Software::Mgmt::Thrift::ClusterAction},
           TARGETNAME => {:type => ::Thrift::Types::STRING, :name => 'targetName'},
-          SPECFILENAME => {:type => ::Thrift::Types::STRING, :name => 'specFileName'},
+          SPECFILENAME => {:type => ::Thrift::Types::STRING, :name => 'specFileName', :optional => true},
           LOGLEVEL => {:type => ::Thrift::Types::STRING, :name => 'logLevel', :optional => true}
         }
 
@@ -183,7 +180,6 @@ module Software
         def validate
           raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field action is unset!') unless @action
           raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field targetName is unset!') unless @targetName
-          raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Required field specFileName is unset!') unless @specFileName
           unless @action.nil? || ::Software::Mgmt::Thrift::ClusterAction::VALID_VALUES.include?(@action)
             raise ::Thrift::ProtocolException.new(::Thrift::ProtocolException::UNKNOWN, 'Invalid value of field action!')
           end

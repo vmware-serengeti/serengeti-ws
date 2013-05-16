@@ -38,12 +38,6 @@
 	</beans:bean>
 
 	<job id="scaleSingleNodeJob" job-repository="jobRepository">
-		<step id="softwareEnableChefClientFlagStep" next="stopSingleVMStep">
-			<tasklet ref="softwareEnableOperationFlagTasklet" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
 		<step id="stopSingleVMStep" next="scaleSingleVMStep">
 			<tasklet ref="stopSingleVMTasklet" />
 			<listeners>
@@ -84,14 +78,8 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="softwareBootstrapSingleNodeStep" next="softwareDisableChefClientFlagStep">
+		<step id="softwareBootstrapSingleNodeStep">
 			<tasklet ref="softwareBootstrapTargetTasklet" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
-		<step id="softwareDisableChefClientFlagStep">
-			<tasklet ref="softwareDisableOperationFlagTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

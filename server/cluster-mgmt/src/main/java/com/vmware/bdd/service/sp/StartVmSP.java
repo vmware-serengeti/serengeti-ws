@@ -14,13 +14,17 @@
  ***************************************************************************/
 package com.vmware.bdd.service.sp;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.IPrePostPowerOn;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.VcVmUtil;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcVirtualMachine;
@@ -68,12 +72,18 @@ public class StartVmSP implements Callable<Void> {
          @Override
          protected Void body() throws Exception {
             // set the bootup configs
-            if (bootupConfigs != null) {
-               vcVm.setGuestConfigs(bootupConfigs);
+            Map<String, String> guestConfigs;
+            if (bootupConfigs == null) {
+               guestConfigs = new HashMap<String, String>();
+            } else {
+               guestConfigs = bootupConfigs;
             }
+            VcVmUtil.addBootupUUID(guestConfigs);
+            vcVm.setGuestConfigs(guestConfigs);
             vcVm.powerOn(host);
             return null;
          }
+
          protected boolean isTaskSession() {
             return true;
          }

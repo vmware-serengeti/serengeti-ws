@@ -62,8 +62,6 @@ public class IronfanSoftwareManagementTask implements ISoftwareManagementTask {
       ProgressMonitor monitor = null;
       ClusterAction action = clusterOperation.getAction();
       if (action != ClusterAction.STOP
-            && action != ClusterAction.ENABLE_CHEF_CLIENT
-            && action != ClusterAction.DISABLE_CHEF_CLIENT
             && action != ClusterAction.DESTROY) {
          monitor =
                new ProgressMonitor(clusterOperation.getTargetName(),

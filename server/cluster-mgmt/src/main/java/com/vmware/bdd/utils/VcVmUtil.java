@@ -15,7 +15,10 @@
 package com.vmware.bdd.utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
@@ -444,5 +447,11 @@ public class VcVmUtil {
          long temp = memory / 4;
          return (temp + 1) * 4;
       }
+   }
+   
+   public static void addBootupUUID(Map<String, String> bootupConfigs) {
+      AuAssert.check(bootupConfigs != null);
+      bootupConfigs.put(Constants.GUEST_VARIABLE_BOOTUP_UUID, UUID.randomUUID()
+            .toString());
    }
 }

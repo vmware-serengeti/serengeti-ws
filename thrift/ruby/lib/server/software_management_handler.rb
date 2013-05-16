@@ -54,7 +54,10 @@ module Software
           log.info("target name: #{clusterOperation.targetName}")
 
           Chef::Config[:distro] = 'centos5-vmware'
-          optionStr = "-f #{clusterOperation.specFileName} --yes --bootstrap"
+          optionStr = ""
+          unless clusterOperation.specFileName.nil?
+            optionStr = "-f #{clusterOperation.specFileName} --yes --bootstrap"
+          end
 
           case clusterOperation.action
           when ClusterAction::QUERY
@@ -82,15 +85,6 @@ module Software
           when ClusterAction::CONFIGURE
             operation = createConfigureOperation
             optionStr = "-f #{clusterOperation.specFileName} --yes"
-          when ClusterAction::CONFIGURE_HARDWARE
-            operation = createConfigureHardwareOperation
-            optionStr = "-f #{clusterOperation.specFileName} --yes"
-          when ClusterAction::ENABLE_CHEF_CLIENT
-            operation = createStartOperation
-            optionStr = "-f #{clusterOperation.specFileName} --set-chef-client-flag true --yes"
-          when ClusterAction::DISABLE_CHEF_CLIENT
-            operation = createStartOperation
-            optionStr = "-f #{clusterOperation.specFileName} --set-chef-client-flag false --yes"
           else
             log.info("invalid operation")
           end
@@ -162,11 +156,6 @@ module Software
         def createConfigureOperation
           clusterConfigureObject = Chef::Knife::ClusterBootstrap.new
         end
-
-        def createConfigureHardwareOperation
-          clusterConfigureObject = Chef::Knife::ClusterConfig.new
-        end
-
       end
     end
   end
