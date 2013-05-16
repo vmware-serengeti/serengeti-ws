@@ -43,6 +43,7 @@ import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
@@ -250,8 +251,6 @@ public class ClusterManager {
    }
 
    private void refreshClusterStatus(List<String> clusterNames) {
-      List<Long> jobExecutionIds = new ArrayList<Long>();
-
       for (String clusterName : clusterNames) {
          Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
          param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(
@@ -263,7 +262,14 @@ public class ClusterManager {
             long jobExecutionId =
                   jobManager.runJob(JobConstants.QUERY_CLUSTER_JOB_NAME,
                         jobParameters);
-            jobExecutionIds.add(jobExecutionId);
+            TaskRead status = jobManager.getJobExecutionStatus(jobExecutionId);
+            while (status.getStatus() != TaskRead.Status.COMPLETED
+                  && status.getStatus() != TaskRead.Status.FAILED
+                  && status.getStatus() != TaskRead.Status.ABANDONED
+                  && status.getStatus() != TaskRead.Status.STOPPED) {
+               Thread.sleep(1000);
+               status = jobManager.getJobExecutionStatus(jobExecutionId);
+            }
          } catch (Exception ex) {
             logger.error("failed to run query cluster job: " + clusterName, ex);
          }
@@ -277,7 +283,7 @@ public class ClusterManager {
       }
 
       // return the latest data from db
-      if (realTime && cluster.getStatus() == ClusterStatus.RUNNING
+      if (realTime && (cluster.getStatus() == ClusterStatus.RUNNING || cluster.getStatus() == ClusterStatus.VHM_RUNNING)
       // for not running cluster, we don't sync up status from chef
             && checkAndResetNodePowerStatusChanged(clusterName)) {
          refreshClusterStatus(clusterName);
@@ -841,8 +847,9 @@ public class ClusterManager {
       }
 
       List<String> nodeGroupNames = new ArrayList<String>();
-      if (!clusterRead.validateSetManualElasticity(nodeGroupName,
-            nodeGroupNames)) {
+      if ((enableAuto != null || minComputeNodeNum != null || activeComputeNodeNum != null)
+            && !clusterRead.validateSetManualElasticity(nodeGroupName,
+                  nodeGroupNames)) {
          if (nodeGroupName != null) {
             throw BddException.INVALID_PARAMETER("nodeGroup", nodeGroupName);
          } else {

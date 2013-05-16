@@ -504,8 +504,9 @@ public class ClusterCommands implements CommandMarker {
             return;
          }
 
-         //validate the node group type
-         if (!cluster.validateSetManualElasticity(nodeGroupName)) {
+         //validate the node group type for elasticity params
+         if ((elasticityMode != null || minComputeNodeNum != null || targetComputeNodeNum != null)
+               && !cluster.validateSetManualElasticity(nodeGroupName)) {
             return;
          }
 
@@ -600,7 +601,8 @@ public class ClusterCommands implements CommandMarker {
          }
 
          //validate the node group type
-         if (!cluster.validateSetManualElasticity(nodeGroupName)) {
+         if ((elasticityMode || minComputeNodeNum || targetComputeNodeNum) 
+               && !cluster.validateSetManualElasticity(nodeGroupName)) {
             return;
          }
 

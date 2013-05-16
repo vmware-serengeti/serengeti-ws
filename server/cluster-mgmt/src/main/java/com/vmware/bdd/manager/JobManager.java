@@ -289,6 +289,13 @@ public class JobManager {
 
       TaskRead jobStatus = new TaskRead();
       jobStatus.setId(jobExecutionId);
+
+      //identify VHM jobs
+      String jobName = jobExecution.getJobInstance().getJobName();
+      if (jobName.equals(JobConstants.SET_MANUAL_ELASTICITY_JOB_NAME)) {
+         jobStatus.setType(Type.VHM);
+      }
+
       JobParameters jobParameters =
             jobExecution.getJobInstance().getJobParameters();
       String clusterName =

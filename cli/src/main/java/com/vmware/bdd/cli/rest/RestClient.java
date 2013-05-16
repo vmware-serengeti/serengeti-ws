@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.fusesource.jansi.AnsiConsole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -52,7 +53,7 @@ import com.vmware.bdd.utils.CommonUtil;
  */
 @Component
 public class RestClient {
-
+   static final Logger logger = Logger.getLogger(RestClient.class);
    private String hostUri;
 
    @Autowired
@@ -368,8 +369,8 @@ public class RestClient {
             progress = (int) (taskRead.getProgress() * 100);
             taskStatus = taskRead.getStatus();
 
-            if ((prettyOutput != null && prettyOutput.length > 0 && prettyOutput[0]
-                  .isRefresh(false))
+            if ((prettyOutput != null && prettyOutput.length > 0 && (taskRead.getType() == Type.VHM ? prettyOutput[0]
+                  .isRefresh(true) : prettyOutput[0].isRefresh(false)))
                   || oldTaskStatus != taskStatus
                   || oldProgress != progress) {
                //clear screen and show progress every few seconds 
@@ -403,11 +404,13 @@ public class RestClient {
                //ignore
             }
          } while (taskRead.getStatus() != TaskRead.Status.COMPLETED
-               && taskRead.getStatus() != TaskRead.Status.FAILED);
+               && taskRead.getStatus() != TaskRead.Status.FAILED
+               && taskRead.getStatus() != TaskRead.Status.ABANDONED
+               && taskRead.getStatus() != TaskRead.Status.STOPPED);
 
          String logdir = taskRead.getWorkDir();
          String errorMsg = taskRead.getErrorMessage();
-         if (taskRead.getStatus().equals(TaskRead.Status.FAILED)) {
+         if (!taskRead.getStatus().equals(TaskRead.Status.COMPLETED)) {
             if (!CommandsUtils.isBlank(logdir)) {
                String outputErrorInfo =
                      Constants.OUTPUT_LOG_INFO + Constants.COMMON_LOG_FILE_PATH
@@ -424,8 +427,10 @@ public class RestClient {
             } else {
                throw new CliRestException("task failed");
             }
-         } else if (taskRead.getStatus().equals(TaskRead.Status.COMPLETED)) {
+         } else { //completed
             if (taskRead.getType().equals(Type.VHM)) {
+               logger.info("task type is vhm");
+               Thread.sleep(5*1000);
                if (prettyOutput != null && prettyOutput.length > 0
                      && prettyOutput[0].isRefresh(true)) {
                   //clear screen and show progress every few seconds 
