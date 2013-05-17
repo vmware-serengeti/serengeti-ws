@@ -32,12 +32,6 @@
    </beans:bean>
 
    <job id="fixNodeDiskFailureJob" job-repository="jobRepository">
-      <step id="nodePowerOffStep" next="nodeRecoverDiskFailureStep">
-         <tasklet ref="powerOffSingleVMTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
       <step id="nodeRecoverDiskFailureStep" next="nodeUpdateDiskInfoStep">
          <tasklet ref="nodeRecoverDiskFailureTasklet" />
          <listeners>

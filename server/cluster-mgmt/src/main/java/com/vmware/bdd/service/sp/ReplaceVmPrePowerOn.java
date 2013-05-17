@@ -14,6 +14,7 @@ import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.spectypes.DiskSpec;
+import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
 import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
 import com.vmware.vim.binding.vim.option.OptionValue;
@@ -44,7 +45,10 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
                + " is FT primary VM, disable FT before delete it.");
          oldVm.turnOffFT();
       }
-      if (oldVm.isPoweredOn()) {
+      // try guest shut down first, wait for 3 minutes, power it off after time out
+      if (oldVm.isPoweredOn()
+            && !oldVm
+                  .shutdownGuest(Constants.VM_FAST_SHUTDOWN_WAITING_SEC * 1000)) {
          oldVm.powerOff();
       }
 
