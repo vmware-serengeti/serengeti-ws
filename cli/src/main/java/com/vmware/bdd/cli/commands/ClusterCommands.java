@@ -980,7 +980,7 @@ public class ClusterCommands implements CommandMarker {
                cluster.retrieveVhmTargetNum(), cluster.getStatus());
       } else {
          String headerPattern =
-               "  %-" + width + "s%-9s%-11s%-15s%-24s%-26s%-10s\n";
+               "  %-" + width + "s%-9s%-14s%-15s%-24s%-26s%-10s\n";
          System.out.printf(headerPattern, "CLUSTER NAME", "DISTRO", "TOPOLOGY",
                "AUTO ELASTIC", "MIN COMPUTE NODES NUM",
                "TARGET COMPUTE NODES NUM", "STATUS");
