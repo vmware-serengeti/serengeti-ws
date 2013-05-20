@@ -466,7 +466,9 @@ public class NodeGroupCreate {
       StorageRead storage = nodeGroupSpec.getStorage();
 
       if (storage.getNamePattern() != null) {
-         patterns = (String[]) storage.getNamePattern().toArray();
+         patterns =
+               storage.getNamePattern().toArray(
+                     new String[storage.getNamePattern().size()]);
       } else if (DatastoreType.SHARED.toString().equalsIgnoreCase(
             storage.getType())) {
          patterns =
