@@ -18,12 +18,6 @@ public class ScaleServiceException extends BddException {
             dsName);
    }
 
-   public static ScaleServiceException CANNOT_FIND_VALID_DATASTORE_FOR_SWAPDISK(
-         String nodeName) {
-      return new ScaleServiceException(null,
-            "CANNOT_FIND_VALID_DATASTORE_FOR_SWAPDISK", nodeName);
-   }
-
    public static ScaleServiceException NOT_NEEDED(String clusterName) {
       return new ScaleServiceException(null, "NOT_NEEDED", clusterName);
    }

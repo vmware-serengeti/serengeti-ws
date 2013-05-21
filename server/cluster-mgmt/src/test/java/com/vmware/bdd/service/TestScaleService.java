@@ -170,7 +170,7 @@ public class TestScaleService {
       Assert.assertTrue("swap disk should be " + SWAP_DISK_NAME, swapDisk.getName() == SWAP_DISK_NAME);
    }
    
-   @Test(groups = { "TestScaleService" }, dependsOnMethods = { "testFindSwapDisk" }, expectedExceptions = { BddException.class })
+   @Test(groups = { "TestScaleService" }, dependsOnMethods = { "testFindSwapDisk" })
    public void testGetTargetDsForSwapDisk() {
       logger.info("test getTargetDsForSwapDisk");
       DiskEntity swapDisk = scaleService.findSwapDisk(nodeEntity);
@@ -183,6 +183,7 @@ public class TestScaleService {
       Assert.assertTrue("should select DS: " + DS3_NAME, ds.getName() == DS3_NAME);
       
       ds = scaleService.getTargetDsForSwapDisk(nodeEntity, swapDisk, 20 * 1024);
+      Assert.assertEquals(ds, null);
       
    }
 }

@@ -153,8 +153,10 @@ public class ScaleService implements IScaleService {
          return targetDs;
       }
 
-      throw ScaleServiceException.CANNOT_FIND_VALID_DATASTORE_FOR_SWAPDISK(node
-            .getVmName());
+      logger.warn("cannot find a proper datastore to scale up swap disk of vm: "
+            + node.getVmName());
+
+      return null;
    }
 
 
