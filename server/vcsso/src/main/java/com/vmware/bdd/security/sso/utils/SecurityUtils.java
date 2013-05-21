@@ -17,21 +17,39 @@ package com.vmware.bdd.security.sso.utils;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URL;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Audience;
+import org.opensaml.saml2.core.AudienceRestriction;
+import org.opensaml.saml2.core.Conditions;
+import org.opensaml.saml2.core.KeyInfoConfirmationDataType;
+import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.core.Subject;
+import org.opensaml.saml2.core.SubjectConfirmationData;
+import org.opensaml.xml.security.x509.BasicX509Credential;
+import org.opensaml.xml.signature.KeyInfo;
+import org.opensaml.xml.signature.Signature;
+import org.opensaml.xml.signature.SignatureValidator;
 import org.opensaml.xml.signature.X509Data;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 
 import com.vmware.bdd.utils.Configuration;
 import com.vmware.vim.sso.client.DefaultSecurityTokenServiceFactory;
+import com.vmware.vim.sso.client.DefaultTokenFactory;
+import com.vmware.vim.sso.client.SamlToken;
 import com.vmware.vim.sso.client.SecurityTokenService;
 import com.vmware.vim.sso.client.SecurityTokenServiceConfig;
 import com.vmware.vim.sso.client.SecurityTokenServiceConfig.ConnectionConfig;
@@ -40,6 +58,7 @@ public class SecurityUtils {
    private static final Logger logger = Logger.getLogger(SecurityUtils.class);
    private static final String SSO_CRTS_DIR = "sts_crts_dir";
    private static final String X509 = "X.509";
+   private static final String STS_PROP_KEY = "sts";
 
    public static SecurityTokenService getSTSClient(String stsLocation) {
       //get sts certs file dir
@@ -118,5 +137,130 @@ public class SecurityUtils {
          }
       }
       return certList;
+   }
+
+   public static void validateTokenFromSSO(Assertion assertion) {
+      try {
+         X509Certificate[] certs = getCertsFromAssertion(assertion);
+         if (certs != null) {
+            String stsLocation = Configuration.getString(STS_PROP_KEY);
+            if (stsLocation == null) {
+               throw new AuthenticationServiceException("SSO is not enabled");
+            }
+            SecurityTokenService stsClient =
+                  SecurityUtils.getSTSClient(stsLocation);
+            SamlToken ssoSamlToken =
+                  DefaultTokenFactory.createTokenFromDom(assertion.getDOM(),
+                        certs);
+            boolean validFromSSO = stsClient.validateToken(ssoSamlToken);
+            if (!validFromSSO) {
+               throw new BadCredentialsException("invalid saml token");
+            }
+         }
+      } catch (AuthenticationServiceException serviceException) {
+         throw serviceException;
+      } catch (BadCredentialsException badCredentialException) {
+         throw badCredentialException;
+      } catch (Exception e) {
+         logger.error("Cannot validate the token by sso: " + e.getMessage());
+         throw new BadCredentialsException(e.getMessage());
+      }
+   }
+
+   private static X509Certificate[] getCertsFromAssertion(Assertion assertion)
+         throws CertificateException {
+      List<X509Certificate> certList = new ArrayList<X509Certificate>();
+      Signature ds = assertion.getSignature();
+      if (ds != null) {
+         List<X509Data> x509Data = ds.getKeyInfo().getX509Datas();
+         certList = SecurityUtils.getCertsFromx509Data(x509Data);
+         if (certList.size() > 0) {
+            X509Certificate[] certs =
+                  certList.toArray(new X509Certificate[certList.size()]);
+            return certs;
+         }
+      }
+      return null;
+   }
+
+   public static void validateTimePeriod(Conditions conditions) {
+      long beforeTime = conditions.getNotBefore().getMillis();
+      long afterTime = conditions.getNotOnOrAfter().getMillis();
+      long currentTime = System.currentTimeMillis();
+      if (currentTime < beforeTime || currentTime > afterTime) {
+         String errorMsg = "SAML token has an invalid time period.";
+         logger.error(errorMsg);
+         throw new BadCredentialsException(errorMsg);
+      }
+   }
+
+   public static void validateAudienceURI(Conditions conditions) {
+      String loginUrl = getSamlLoginURI();
+      List<AudienceRestriction> audienceRestrictions = conditions.getAudienceRestrictions();
+      Audience audience = audienceRestrictions.get(0).getAudiences().get(0);
+      if (!loginUrl.equals(audience.getAudienceURI())) {
+         String errorMsg= "SAML token has an invalid audience URI.";
+         logger.error(errorMsg);
+         throw new BadCredentialsException(errorMsg);
+      }
+   }
+
+   private static String getSamlLoginURI() throws BadCredentialsException{
+      String ipAddress = "";
+      try {
+         Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+         NetworkInterface networkInterface = null;
+         while (networkInterfaces.hasMoreElements()) {
+            networkInterface = networkInterfaces.nextElement();
+            Enumeration<InetAddress> inetAddresses =
+                  networkInterface.getInetAddresses();
+            InetAddress inetAddress = null;
+            while (inetAddresses.hasMoreElements()) {
+               inetAddress = inetAddresses.nextElement();
+               if (!inetAddress.isLinkLocalAddress()
+                     && !inetAddress.isLoopbackAddress()) {
+                  ipAddress = inetAddress.getHostAddress();
+               }
+            }
+         }
+      } catch (SocketException e) {
+         logger.error("Cannot obtain a network interface: " + e.getMessage());
+      }
+      if(ipAddress.isEmpty()) {
+         String errorMsg = "Unknown host: Cannot obtain a valid ip address .";
+         logger.error(errorMsg);
+         throw new BadCredentialsException(errorMsg);
+      }
+      return "http://" + ipAddress + ":8080/serengeti/sp/sso";
+   }
+
+   public static void validateSignature(Response response, Assertion assertion) {
+      Signature responseSignature = response.getSignature();
+      Subject subject = assertion.getSubject();
+      SubjectConfirmationData subjectConfirmationData =
+            subject.getSubjectConfirmations().get(0)
+                  .getSubjectConfirmationData();
+      KeyInfoConfirmationDataType keyInfoConfirmationData =
+            (KeyInfoConfirmationDataType) subjectConfirmationData;
+      //Get the <ds:X509Data/> elements
+      KeyInfo keyInfo = (KeyInfo) keyInfoConfirmationData.getKeyInfos().get(0);
+      List<X509Data> x509Data = keyInfo.getX509Datas();
+      List<X509Certificate> certList = new ArrayList<X509Certificate>();
+      try {
+         certList = SecurityUtils.getCertsFromx509Data(x509Data);
+
+         BasicX509Credential publicCredential = new BasicX509Credential();
+         publicCredential.setEntityCertificate(certList.get(0));
+
+         SignatureValidator validator =
+               new SignatureValidator(publicCredential);
+         validator.validate(responseSignature);
+      } catch (Exception e) {
+         String errorMsg =
+               "SAML token cannot validate the response signatrue: "
+                     + e.getMessage();
+         logger.error(errorMsg);
+         throw new BadCredentialsException(errorMsg);
+      }
    }
 }
