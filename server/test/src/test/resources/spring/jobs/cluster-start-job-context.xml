@@ -12,12 +12,6 @@
    
    <beans:import resource="classpath*:/spring/jobs/common-job-context.xml" />
    <job id="startClusterJob" job-repository="jobRepository">
-      <step id="softwareEnableChefClientFlagStep" next="startClusterVM">
-         <tasklet ref="softwareEnableOperationFlagTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
       <step id="startClusterVM" next="startClusterNodeSyncup">
          <tasklet ref="startClusterVMTasklet" />
          <listeners>
