@@ -117,7 +117,9 @@ public class RestResource {
 
    @RequestMapping(value = "/hello", method = RequestMethod.GET)
    @ResponseStatus(HttpStatus.OK)
-   public void getHello() {
+   @ResponseBody
+   public String getHello() {
+      return "0.8.1";
    }
 
    // task API
