@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.dal.IClusterDAO;
 import com.vmware.bdd.dal.INodeDAO;
 import com.vmware.bdd.dal.INodeGroupDAO;
@@ -37,6 +39,7 @@ import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.software.mgmt.thrift.GroupData;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
@@ -360,6 +363,16 @@ public class ClusterEntityManager {
             }
          }
       }
+      
+      Set<VcResourcePoolEntity> rps = cluster.getUsedRps();
+      List<ResourcePoolRead> rpReads = new ArrayList<ResourcePoolRead>(rps.size());
+      for (VcResourcePoolEntity rp : rps) {
+         ResourcePoolRead rpRead = rp.toRest();
+         rpRead.setNodes(null);
+         rpReads.add(rpRead);
+      }
+      clusterRead.setResourcePools(rpReads);
+      
       return clusterRead;
    }
 

@@ -57,7 +57,11 @@ public class ClusterRead implements Comparable<ClusterRead> {
    @Expose
    @SerializedName("groups")
    private List<NodeGroupRead> nodeGroups;
-   
+
+   @Expose
+   @SerializedName("resourcepools")
+   private List<ResourcePoolRead> resourcePools;
+
    private Boolean automationEnable;
    
    private int vhmMinNum;
@@ -65,7 +69,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
    private Integer vhmTargetNum;
 
    private boolean nodeGroupSorted;
-
+   
    public ClusterRead() {
 
    }
@@ -159,6 +163,14 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
    public void setNodeGroups(List<NodeGroupRead> nodeGroups) {
       this.nodeGroups = nodeGroups;
+   }
+
+   public List<ResourcePoolRead> getResourcePools() {
+      return resourcePools;
+   }
+
+   public void setResourcePools(List<ResourcePoolRead> resourcePools) {
+      this.resourcePools = resourcePools;
    }
 
    /*
