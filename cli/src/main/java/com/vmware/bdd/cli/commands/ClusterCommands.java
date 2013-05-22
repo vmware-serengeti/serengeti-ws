@@ -505,7 +505,8 @@ public class ClusterCommands implements CommandMarker {
          }
 
          //validate the node group type
-         if (!cluster.validateSetManualElasticity(nodeGroupName)) {
+         if (!cluster.validateSetManualElasticity(cluster.getDistroVendor(), 
+               nodeGroupName)) {
             return;
          }
 
@@ -598,7 +599,8 @@ public class ClusterCommands implements CommandMarker {
          }
 
          //validate the node group type
-         if (!cluster.validateSetManualElasticity(nodeGroupName)) {
+         if (!cluster.validateSetManualElasticity(cluster.getDistroVendor(),
+               nodeGroupName)) {
             return;
          }
 

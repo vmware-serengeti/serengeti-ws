@@ -23,6 +23,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.Constants;
 
 /**
  * Cluster get output
@@ -37,6 +38,10 @@ public class ClusterRead implements Comparable<ClusterRead> {
    private String externalHDFS;
    @Expose
    private String distro;
+
+   @Expose
+   @SerializedName("distro_vendor")
+   private String distroVendor;
 
    @Expose
    @SerializedName("instance_num")
@@ -98,6 +103,14 @@ public class ClusterRead implements Comparable<ClusterRead> {
       this.distro = distro;
    }
 
+   public String getDistroVendor() {
+      return distroVendor;
+   }
+
+   public void setDistroVendor(String distroVendor) {
+      this.distroVendor = distroVendor;
+   }
+
    public TopologyType getTopologyPolicy() {
       return topologyPolicy;
    }
@@ -152,8 +165,8 @@ public class ClusterRead implements Comparable<ClusterRead> {
     * Validate the manual elastic parameters, make sure the specified node group is a compute only node group.
     * If user have not specified the node group name,the cluster must contain compute only node.   
     */
-   public boolean validateSetManualElasticity(String nodeGroupName,
-         List<String>... nodeGroupNames) {
+   public boolean validateSetManualElasticity(String distroVendor,
+         String nodeGroupName, List<String>... nodeGroupNames) {
       if (!CommonUtil.isBlank(nodeGroupName)) {
          List<NodeGroupRead> nodeGroups = getNodeGroups();
          if (nodeGroups != null && !nodeGroups.isEmpty()) {
@@ -165,13 +178,19 @@ public class ClusterRead implements Comparable<ClusterRead> {
                   matchNodeGroupByName(nodeGroups, nodeGroupName);
             if (nodeGroup == null) {
                invalidNodeGroup.add(nodeGroupName);
-            } else if (nodeGroup.getRoles() == null
-                  || nodeGroup.getRoles().size() > 2
-                  || !nodeGroup.getRoles().contains(
-                        HadoopRole.HADOOP_TASKTRACKER.toString())
-                  || (nodeGroup.getRoles().size() == 2 && !nodeGroup.getRoles()
-                        .contains(HadoopRole.TEMPFS_CLIENT_ROLE.toString()))) {
-               invalidNodeGroup.add(nodeGroupName);
+            }  else if (distroVendor.equalsIgnoreCase(Constants.MAPR_VENDOR)) {
+               if ((nodeGroup.getRoles() == null) || 
+                     !nodeGroup.getRoles().contains(HadoopRole.MAPR_TASKTRACKER_ROLE.toString()) ||
+                     nodeGroup.getRoles().contains(HadoopRole.MAPR_NFS_ROLE.toString())) {
+                  invalidNodeGroup.add(nodeGroupName);
+               }
+            } else {
+               if (nodeGroup.getRoles() == null || nodeGroup.getRoles().size() > 2 ||
+                     !nodeGroup.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())
+                     || (nodeGroup.getRoles().size() == 2 && !nodeGroup.getRoles().contains(
+                           HadoopRole.TEMPFS_CLIENT_ROLE.toString()))) {
+                  invalidNodeGroup.add(nodeGroupName);
+               }
             }
             if (!invalidNodeGroup.isEmpty()) {
                System.out.println("Adjustment failed: The specified node group is not a compute only node group or the group name is incorrect.");
@@ -186,16 +205,27 @@ public class ClusterRead implements Comparable<ClusterRead> {
       } else {
          int count = 0;
          for (NodeGroupRead nodeGroup : getNodeGroups()) {
-            if (nodeGroup.getRoles() != null
-                  && nodeGroup.getRoles().contains(
-                        HadoopRole.HADOOP_TASKTRACKER.toString())
-                  && (nodeGroup.getRoles().size() == 1 || (nodeGroup.getRoles()
-                        .size() == 2 && nodeGroup.getRoles().contains(
-                        HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
-               if (nodeGroupNames != null && nodeGroupNames.length > 0) {
-                  nodeGroupNames[0].add(nodeGroup.getName());
-               }
-               count++;
+            boolean isComputeOnly = false;
+            if (distroVendor.equalsIgnoreCase(Constants.MAPR_VENDOR)) {
+               if (nodeGroup.getRoles() != null && nodeGroup.getRoles().contains(HadoopRole.MAPR_TASKTRACKER_ROLE.toString()) &&
+                     !nodeGroup.getRoles().contains(HadoopRole.MAPR_NFS_ROLE.toString())){
+                  isComputeOnly = true;
+               } 
+            } else {
+               if (nodeGroup.getRoles() != null
+                     && nodeGroup.getRoles().contains(
+                           HadoopRole.HADOOP_TASKTRACKER.toString())
+                           && (nodeGroup.getRoles().size() == 1 || (nodeGroup.getRoles()
+                                 .size() == 2 && nodeGroup.getRoles().contains(
+                                       HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
+                  isComputeOnly = true;
+               }               
+            }
+            if (isComputeOnly) {
+            if (nodeGroupNames != null && nodeGroupNames.length > 0) {
+               nodeGroupNames[0].add(nodeGroup.getName());
+            }
+            count++;
             }
          }
          if (count == 0) {

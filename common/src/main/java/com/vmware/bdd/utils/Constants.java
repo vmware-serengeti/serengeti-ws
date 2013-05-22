@@ -98,6 +98,8 @@ public class Constants {
    public static final String CURRENT_DISTRO_CAN_NOT_SUPPORT_HDFS2 =
          "HA and federation feature can not be supported in current distro";
    public static final String CDH4_PATTERN = "4\\.[1-9]([0-9]){0,1}(\\.\\d){0,2}";
+   public static final String IP_PATTERN = 
+         "\\b((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\b";
 
    // rabbitMQ message format
    public static final String ERROR_CODE_FIELD = "error_code";

@@ -336,6 +336,7 @@ public class ClusterEntityManager {
       clusterRead.setName(cluster.getName());
       clusterRead.setStatus(cluster.getStatus());
       clusterRead.setDistro(cluster.getDistro());
+      clusterRead.setDistroVendor(cluster.getDistroVendor());
       clusterRead.setTopologyPolicy(cluster.getTopologyPolicy());
       clusterRead.setAutomationEnable(cluster.getAutomationEnable());
       clusterRead.setVhmMinNum(cluster.getVhmMinNum());

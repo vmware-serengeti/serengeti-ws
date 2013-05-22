@@ -82,7 +82,7 @@
 			</listeners>
 		</step>
 		<listeners>
-			<listener ref="clusterJobListener" />
+			<listener ref="createClusterJobListener" />
 		</listeners>
 	</job>
 
