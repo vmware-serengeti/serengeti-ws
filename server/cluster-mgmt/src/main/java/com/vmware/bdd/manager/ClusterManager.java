@@ -293,8 +293,10 @@ public class ClusterManager {
       }
 
       // return the latest data from db
-      if (realTime && (cluster.getStatus() == ClusterStatus.RUNNING || cluster.getStatus() == ClusterStatus.VHM_RUNNING)
-      // for not running cluster, we don't sync up status from chef
+      if (realTime
+            && (cluster.getStatus() == ClusterStatus.RUNNING || cluster
+                  .getStatus() == ClusterStatus.VHM_RUNNING)
+            // for not running cluster, we don't sync up status from chef
             && checkAndResetNodePowerStatusChanged(clusterName)) {
          refreshClusterStatus(clusterName);
       }
@@ -363,6 +365,8 @@ public class ClusterManager {
             getDistroManager().getDistroByName(createSpec.getDistro());
       createSpec.setDistroVendor(distroRead.getVendor());
       createSpec.setDistroVersion(distroRead.getVersion());
+      // create auto rps if vc cluster/rp is specified
+      createAutoRps(createSpec);
       ClusterCreate clusterSpec =
             ClusterSpecFactory.getCustomizedSpec(createSpec);
 
@@ -371,11 +375,11 @@ public class ClusterManager {
 
       List<String> dsNames = getUsedDS(clusterSpec.getDsNames());
       if (dsNames.isEmpty()) {
-         throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
+         throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
       List<VcCluster> vcClusters = getUsedVcClusters(clusterSpec.getRpNames());
       if (vcClusters.isEmpty()) {
-         throw ClusterConfigException.NO_DATASTORE_ADDED();
+         throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
@@ -397,6 +401,18 @@ public class ClusterManager {
       JobParameters jobParameters = new JobParameters(param);
       return jobManager.runJob(JobConstants.CREATE_CLUSTER_JOB_NAME,
             jobParameters);
+   }
+
+   private void createAutoRps(ClusterCreate createSpec) {
+      if (createSpec.getVcClusters() == null) {
+         return;
+      }
+      // user specify vc resource pools directly, create auto rp in meta db dynamically
+      List<VcCluster> vcClusters = createSpec.getVcClusters();
+      List<String> rpNames =
+            clusterConfigMgr.getRpMgr().addAutoResourcePools(vcClusters, true);
+      logger.info("added automation resource pools: " + rpNames);
+      createSpec.setRpNames(rpNames);
    }
 
    private void validateNetworkAccessibility(String clusterName,
@@ -895,10 +911,11 @@ public class ClusterManager {
       }
 
       if (enableAuto != null && enableAuto) {
-         boolean sucess = clusteringService.setAutoElasticity(clusterName, null);
+         boolean sucess =
+               clusteringService.setAutoElasticity(clusterName, null);
          if (!sucess) {
-            throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
-                  clusterName, "failed");
+            throw ClusterManagerException
+                  .SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(clusterName, "failed");
          }
       }
 

@@ -25,7 +25,7 @@ import com.vmware.bdd.spectypes.VcCluster;
  * @author Jarred Li
  * @since 0.8
  * @version 0.8
- *
+ * 
  */
 public interface IResourcePoolService {
 
@@ -60,4 +60,6 @@ public interface IResourcePoolService {
    boolean isDeployedUnderCluster(final String clusterName,
          final String vcRPName);
 
+   List<String> addAutoResourcePools(List<VcCluster> vcClusters,
+         boolean ignoreDuplicate);
 }

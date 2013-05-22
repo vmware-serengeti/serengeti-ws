@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -287,5 +288,55 @@ public class ResourcePoolService implements IResourcePoolService {
       } else {
          return false;
       }
+   }
+
+   private String getAutoRandomName() {
+      long ran = new Random().nextLong();
+      String name = "auto-" + ran;
+      boolean found = false;
+      for (int i = 0; i < 10; i++) {
+         VcResourcePoolEntity rpEntity = rpDao.findByName(name);
+         if (rpEntity != null) {
+            logger.debug("rp name " + name + " exists, get new one");
+         } else {
+            found = true;
+            break;
+         }
+      }
+      if (found) {
+         return name;
+      } else {
+         return null;
+      }
+   }
+
+   public synchronized List<String> addAutoResourcePools(
+         List<VcCluster> vcClusters, boolean ignoreDuplicate) {
+      List<String> rpNames = new ArrayList<String>();
+      for (VcCluster vcCluster : vcClusters) {
+         List<String> vcRps = vcCluster.getVcRps();
+         if (vcRps == null || vcRps.isEmpty()) {
+            addAutoResourcePool(rpNames, vcCluster, "");
+            continue;
+         }
+         for (String vcRp : vcRps) {
+            if (ignoreDuplicate && rpDao.isRPAdded(vcCluster.getName(), vcRp)) {
+               continue;
+            }
+            addAutoResourcePool(rpNames, vcCluster, vcRp);
+         }
+      }
+      return rpNames;
+   }
+
+   private void addAutoResourcePool(List<String> rpNames, VcCluster vcCluster,
+         String vcRp) {
+      String name = getAutoRandomName();
+      if (name == null) {
+         logger.error("Could not find a random rp name.");
+         throw VcProviderException.AUTO_RP_NAME_NOT_FOUND();
+      }
+      addResourcePool(name, vcCluster.getName(), vcRp);
+      rpNames.add(name);
    }
 }

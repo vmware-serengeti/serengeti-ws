@@ -91,4 +91,8 @@ public class VcProviderException extends BddException {
    public static VcProviderException STOP_VM_ERROR(String vmName) {
       return new VcProviderException(null, "STOP_VM_ERROR", vmName);
    }
+
+   public static VcProviderException AUTO_RP_NAME_NOT_FOUND() {
+      return new VcProviderException(null, "AUTO_RP_NAME_NOT_FOUND");
+   }
 }

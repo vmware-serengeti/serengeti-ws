@@ -34,6 +34,10 @@ public class VcCluster {
    @SerializedName("vc_rps")
    private List<String> vcRps;
 
+   public VcCluster() {
+      vcRps = new ArrayList<String>();
+   }
+
    public VcCluster(String name, List<String> rps) {
       this.name = name;
       this.vcRps = rps;
