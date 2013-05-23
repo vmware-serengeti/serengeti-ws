@@ -65,6 +65,7 @@ public class Constants {
    public static final String DISCONNECT_FAILURE = "Diconnect failed!";
    public static final String NEED_CONNECTION = "no connection to serengeti server, please connect first.";
 
+   public static final int SEPERATOR_LEN = 76;
    public static final String OUTPUT_INDENT = "  ";
    public static final String OUTPUT_SPLITTER = ", ";
    public static final String OUTPUT_OBJECT_CLUSTER = "cluster";

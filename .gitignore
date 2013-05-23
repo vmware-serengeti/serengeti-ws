@@ -1,6 +1,12 @@
 .classpath
 .project
+*.iml
+.idea/*
+*.ipr
+*.iws
 **.settings
 **target
 **test-output
+cscope*
+cli/cli.properties
 lib/vlsi/*.jar

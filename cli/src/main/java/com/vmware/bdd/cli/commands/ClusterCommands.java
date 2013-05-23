@@ -332,6 +332,7 @@ public class ClusterCommands implements CommandMarker {
             ClusterRead cluster = restClient.get(name, detail);
             if (cluster != null) {
                prettyOutputClusterInfo(cluster, detail);
+               printSeperator();
             }
          }
       } catch (CliRestException e) {
@@ -959,7 +960,6 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private void prettyOutputClusterInfo(ClusterRead cluster, boolean detail) {
-      //String headerPattern = "%15s\t%10s\t%20s\t%25s\t%12s\n";
       TopologyType topology = cluster.getTopologyPolicy();
       String autoElasticityStatus;
       String minComputeNodeNum = new Integer(cluster.getVhmMinNum()).toString();
@@ -971,30 +971,29 @@ public class ClusterCommands implements CommandMarker {
       } else {
          autoElasticityStatus = "Disable";
       }
-      int width = cluster.getName().length() + 3 > 15 ? cluster.getName().length() + 3 : 15;
-      if (topology == null || topology == TopologyType.NONE) {
-         String headerPattern = "  %-" + width + "s%-9s%-15s%-24s%-26s%-10s\n";
-         System.out.printf(headerPattern, "CLUSTER NAME", "DISTRO",
-               "AUTO ELASTIC", "MIN COMPUTE NODES NUM",
-               "TARGET COMPUTE NODES NUM", "STATUS");
-         System.out.printf(headerPattern, cluster.getName(),
-               cluster.getDistro(), autoElasticityStatus, minComputeNodeNum,
-               cluster.retrieveVhmTargetNum(), cluster.getStatus());
-      } else {
-         String headerPattern =
-               "  %-" + width + "s%-9s%-14s%-15s%-24s%-26s%-10s\n";
-         System.out.printf(headerPattern, "CLUSTER NAME", "DISTRO", "TOPOLOGY",
-               "AUTO ELASTIC", "MIN COMPUTE NODES NUM",
-               "TARGET COMPUTE NODES NUM", "STATUS");
-         System.out.printf(headerPattern, cluster.getName(),
-               cluster.getDistro(), topology, autoElasticityStatus,
-               minComputeNodeNum, cluster.retrieveVhmTargetNum(),
-               cluster.getStatus());
+
+      printSeperator();
+
+      // list cluster level params
+      LinkedHashMap<String, String> clusterParams = new LinkedHashMap<String, String>();
+      clusterParams.put("CLUSTER NAME", cluster.getName());
+      clusterParams.put("DISTRO", cluster.getDistro());
+      if (topology != null && topology != TopologyType.NONE) {
+         clusterParams.put("TOPOLOGY", topology.toString());
       }
+      clusterParams.put("AUTO ELASTIC", autoElasticityStatus);
+      clusterParams.put("MIN COMPUTE NODES NUM", minComputeNodeNum);
+      clusterParams.put("TARGET COMPUTE NODES NUM", cluster.retrieveVhmTargetNum());
+      clusterParams.put("STATUS", cluster.getStatus().toString());
       if (cluster.getExternalHDFS() != null
             && !cluster.getExternalHDFS().isEmpty()) {
-         System.out.printf("external HDFS: %s\n", cluster.getExternalHDFS());
+         clusterParams.put("EXTERNAL HDFS", cluster.getExternalHDFS());
       }
+      for (String key : clusterParams.keySet()) {
+         System.out.printf(Constants.OUTPUT_INDENT + "%-26s:" + Constants.OUTPUT_INDENT + "%s\n", key, clusterParams.get(key));
+      }
+      System.out.println();
+
       LinkedHashMap<String, List<String>> ngColumnNamesWithGetMethodNames =
             new LinkedHashMap<String, List<String>>();
       List<NodeGroupRead> nodegroups = cluster.getNodeGroups();
@@ -1076,8 +1075,17 @@ public class ClusterCommands implements CommandMarker {
    private void prettyOutputClustersInfo(ClusterRead[] clusters, boolean detail) {
       for (ClusterRead cluster : clusters) {
          prettyOutputClusterInfo(cluster, detail);
-         System.out.println();
       }
+      printSeperator();
+   }
+
+   private void printSeperator() {
+      StringBuffer seperator = new StringBuffer().append(Constants.OUTPUT_INDENT);
+      for (int i = 0; i < Constants.SEPERATOR_LEN; i++) {
+         seperator.append("=");
+      }
+      System.out.println(seperator.toString());
+      System.out.println();
    }
 
    private void showFailedMsg(String name, List<String> failedMsgList) {
