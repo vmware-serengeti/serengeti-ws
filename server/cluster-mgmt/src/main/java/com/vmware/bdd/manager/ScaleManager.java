@@ -26,7 +26,10 @@ import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.exception.ScaleServiceException;
 import com.vmware.bdd.service.job.JobConstants;
+import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.utils.VcVmUtil;
 
 /**
  * @author Jarred Li
@@ -43,16 +46,44 @@ public class ScaleManager {
 
    public long scaleNodeGroupResource(ResourceScale scale) throws Exception {
       String clusterName = scale.getClusterName();
+      ClusterStatus originalStatus =
+            clusterEntityMgr.findByName(clusterName).getStatus();
+      logger.info("before scaling, cluster status is:" + originalStatus);
+      if (scale.getMemory() > 0) {
+         //VM's memory must be devisible by 4, otherwise VM can not be started
+         long converted = VcVmUtil.makeVmMemoryDevisibleBy4(scale.getMemory());
+         logger.info("user's setting for memory: " + scale.getMemory()
+               + " converted to : " + converted);
+         scale.setMemory(converted);
+      }
       List<JobParameters> jobParametersList = buildJobParameters(scale);
+      if (jobParametersList.size() == 0) {
+         throw ScaleServiceException.NOT_NEEDED(clusterName);
+      }
+      String nodeGroupName = scale.getNodeGroupName();
+      List<NodeEntity> nodes =
+            clusterEntityMgr.findAllNodes(clusterName, nodeGroupName);
+      if (nodes.size() > 0) {
+         // vm max configuration check
+         VcResourceUtils.checkVmMaxConfiguration(nodes.get(0).getMoId(),
+               scale.getCpuNumber(), scale.getMemory());
+      }
       updateNodeGroupResource(scale);
       //launch sub job to scale node one by one
       try {
+         logger.info("set cluster to maintenace");
+         clusterEntityMgr.updateClusterStatus(clusterName,
+               ClusterStatus.MAINTENANCE);
+         logger.info("current cluster status: "
+               + clusterEntityMgr.findByName(clusterName).getStatus());
          return jobManager.runSubJobForNodes(JobConstants.NODE_SCALE_JOB_NAME,
-               jobParametersList, clusterName);
-      } catch (Exception e) {
-         logger.error("Failed to start cluster " + clusterName, e);
-         clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.ERROR);
-         throw e;
+               jobParametersList, clusterName, originalStatus,
+               ClusterStatus.ERROR);
+      } catch (Throwable t) {
+         logger.error("Failed to start cluster " + clusterName, t);
+         clusterEntityMgr.updateClusterStatus(clusterName, originalStatus);
+         throw ScaleServiceException.JOB_LAUNCH_FAILURE(clusterName, t,
+               t.getMessage());
       }
    }
 

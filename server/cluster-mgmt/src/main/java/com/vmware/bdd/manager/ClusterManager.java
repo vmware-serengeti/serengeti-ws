@@ -51,6 +51,7 @@ import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
@@ -260,8 +261,6 @@ public class ClusterManager {
    }
 
    private void refreshClusterStatus(List<String> clusterNames) {
-      List<Long> jobExecutionIds = new ArrayList<Long>();
-
       for (String clusterName : clusterNames) {
          Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
          param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(
@@ -273,7 +272,14 @@ public class ClusterManager {
             long jobExecutionId =
                   jobManager.runJob(JobConstants.QUERY_CLUSTER_JOB_NAME,
                         jobParameters);
-            jobExecutionIds.add(jobExecutionId);
+            TaskRead status = jobManager.getJobExecutionStatus(jobExecutionId);
+            while (status.getStatus() != TaskRead.Status.COMPLETED
+                  && status.getStatus() != TaskRead.Status.FAILED
+                  && status.getStatus() != TaskRead.Status.ABANDONED
+                  && status.getStatus() != TaskRead.Status.STOPPED) {
+               Thread.sleep(1000);
+               status = jobManager.getJobExecutionStatus(jobExecutionId);
+            }
          } catch (Exception ex) {
             logger.error("failed to run query cluster job: " + clusterName, ex);
          }
@@ -287,7 +293,7 @@ public class ClusterManager {
       }
 
       // return the latest data from db
-      if (realTime && cluster.getStatus() == ClusterStatus.RUNNING
+      if (realTime && (cluster.getStatus() == ClusterStatus.RUNNING || cluster.getStatus() == ClusterStatus.VHM_RUNNING)
       // for not running cluster, we don't sync up status from chef
             && checkAndResetNodePowerStatusChanged(clusterName)) {
          refreshClusterStatus(clusterName);
@@ -330,7 +336,7 @@ public class ClusterManager {
             group.getStorage().setAllocType(null);
             if (group.getPlacementPolicies() != null) {
                List<GroupAssociation> associations =
-                  group.getPlacementPolicies().getGroupAssociations();
+                     group.getPlacementPolicies().getGroupAssociations();
                if (associations != null && associations.isEmpty()) {
                   group.getPlacementPolicies().setGroupAssociations(null);
                }
@@ -816,6 +822,7 @@ public class ClusterManager {
 
    /**
     * set cluster parameters synchronously
+    * 
     * @param clusterName
     * @param nodeGroupName
     * @param activeComputeNodeNum
@@ -825,7 +832,7 @@ public class ClusterManager {
     * @throws Exception
     */
    @SuppressWarnings("unchecked")
-   public  List<String> syncSetParam(String clusterName, String nodeGroupName,
+   public List<String> syncSetParam(String clusterName, String nodeGroupName,
          Integer activeComputeNodeNum, Integer minComputeNodeNum,
          Boolean enableAuto, Priority ioPriority) throws Exception {
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
@@ -835,17 +842,24 @@ public class ClusterManager {
          throw BddException.NOT_FOUND("cluster", clusterName);
       }
 
+      //update vm ioshares
+      if (ioPriority != null) {
+         prioritizeCluster(clusterName, nodeGroupName, ioPriority);
+      }
+
       if (enableAuto != null && enableAuto != cluster.getAutomationEnable()) {
          cluster.setAutomationEnable(enableAuto);
       }
 
-      if (minComputeNodeNum != null && minComputeNodeNum != cluster.getVhmMinNum()) {
+      if (minComputeNodeNum != null
+            && minComputeNodeNum != cluster.getVhmMinNum()) {
          cluster.setVhmMinNum(minComputeNodeNum);
       }
 
       List<String> nodeGroupNames = new ArrayList<String>();
-      if (!clusterRead.validateSetManualElasticity(cluster.getDistroVendor(), 
-            nodeGroupName, nodeGroupNames)) {
+      if ((enableAuto != null || minComputeNodeNum != null || activeComputeNodeNum != null)
+            && !clusterRead.validateSetManualElasticity(
+                  cluster.getDistroVendor(), nodeGroupName, nodeGroupNames)) {
          if (nodeGroupName != null) {
             throw BddException.INVALID_PARAMETER("nodeGroup", nodeGroupName);
          } else {
@@ -880,15 +894,12 @@ public class ClusterManager {
                clusterName, "it should be in RUNNING or STOPPED status");
       }
 
-      boolean sucess = clusteringService.setAutoElasticity(clusterName, null);
-      if (!sucess) {
-         throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
-               clusterName, "failed");
-      }
-
-      //update vm ioshares
-      if (ioPriority != null) {
-         prioritizeCluster(clusterName, nodeGroupName, ioPriority);
+      if (enableAuto != null && enableAuto) {
+         boolean sucess = clusteringService.setAutoElasticity(clusterName, null);
+         if (!sucess) {
+            throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
+                  clusterName, "failed");
+         }
       }
 
       return nodeGroupNames;
@@ -896,6 +907,7 @@ public class ClusterManager {
 
    /**
     * set cluster parameters asynchronously
+    * 
     * @param clusterName
     * @param enableManualElasticity
     * @param nodeGroupName
@@ -915,8 +927,9 @@ public class ClusterManager {
                clusterName, msg);
       }
 
-      List<String> nodeGroupNames = syncSetParam(clusterName, nodeGroupName, activeComputeNodeNum,
-            minComputeNodeNum, enableAuto, ioPriority);
+      List<String> nodeGroupNames =
+            syncSetParam(clusterName, nodeGroupName, activeComputeNodeNum,
+                  minComputeNodeNum, enableAuto, ioPriority);
 
       // find hadoop job tracker ip
       List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
@@ -950,7 +963,8 @@ public class ClusterManager {
          if (nodeGroupName == null) {
             activeComputeNodeNum = cluster.getVhmTargetNum();
          } else {
-            activeComputeNodeNum = cluster.getNodeGroupByName(nodeGroupName).getVhmTargetNum();
+            activeComputeNodeNum =
+                  cluster.getNodeGroupByName(nodeGroupName).getVhmTargetNum();
          }
       }
       param.put(JobConstants.GROUP_ACTIVE_COMPUTE_NODE_NUMBER_JOB_PARAM,
@@ -1062,7 +1076,7 @@ public class ClusterManager {
       try {
          channel.connect();
       } catch (JSchException e) {
-         String errorMsg = "SSH connect failed: " + e.getMessage();
+         String errorMsg = "SSH connection failed: " + e.getMessage();
          logger.error(errorMsg);
          throw BddException.INTERNAL(null, errorMsg);
       }
@@ -1197,10 +1211,9 @@ public class ClusterManager {
          List<String> roles = nodeGroup.getRoleNameList();
 
          // TODO: more fine control on node roles
-         if (!roles.contains(HadoopRole.HADOOP_DATANODE.toString())
-               && !roles.contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {
+         if (HadoopRole.hasMgmtRole(roles)) {
             logger.info("node group " + nodeGroup.getName()
-                  + " is not a worker node group, pass it");
+                  + " contains management roles, pass it");
             continue;
          }
 
@@ -1227,8 +1240,9 @@ public class ClusterManager {
       }
 
       if (!workerNodesFound) {
-         throw ClusterHealServiceException.NOT_SUPPORTED(clusterName,
-               "only support fixing disk failures for worker nodes");
+         throw ClusterHealServiceException
+               .NOT_SUPPORTED(clusterName,
+                     "only support fixing disk failures for worker/non-management nodes");
       }
 
       // all target nodes are healthy, simply return
@@ -1242,13 +1256,10 @@ public class ClusterManager {
                ClusterStatus.MAINTENANCE);
          return jobManager.runSubJobForNodes(
                JobConstants.FIX_NODE_DISK_FAILURE_JOB_NAME, jobParameterList,
-               clusterName);
+               clusterName, oldStatus, oldStatus);
       } catch (Exception e) {
          logger.error("failed to fix disk failures, " + e.getMessage());
          throw e;
-      } finally {
-         logger.info("reset to previous status " + oldStatus);
-         clusterEntityMgr.updateClusterStatus(clusterName, oldStatus);
       }
    }
 }

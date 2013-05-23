@@ -14,10 +14,11 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job.vm;
 
+import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
-import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.exception.ScaleServiceException;
 import com.vmware.bdd.service.IScaleService;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
@@ -31,7 +32,11 @@ import com.vmware.bdd.service.job.TrackableTasklet;
  */
 
 public class ScaleSingleVMStep extends TrackableTasklet {
+   private static final Logger logger = Logger
+         .getLogger(ScaleSingleVMStep.class);
+
    private IScaleService scaleService;
+   private boolean rollback;
 
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,
@@ -56,12 +61,32 @@ public class ScaleSingleVMStep extends TrackableTasklet {
                   JobConstants.NODE_SCALE_MEMORY_SIZE);
       int cpuNumber = Integer.parseInt(cpuNumberStr);
       long memory = Long.parseLong(memorySizeStr);
+      putIntoJobExecutionContext(chunkContext,
+            JobConstants.NODE_SCALE_ROLLBACK, false);
+      if (rollback) {
+         logger.info("rollback vm configuration to original");
+         cpuNumber = scaleService.getVmOriginalCpuNumber(nodeName);
+         memory = scaleService.getVmOriginalMemory(nodeName);
+         putIntoJobExecutionContext(chunkContext,
+               JobConstants.NODE_SCALE_ROLLBACK, true);
+         chunkContext.getStepContext().getStepExecution().getJobExecution()
+               .getExecutionContext()
+               .putString(JobConstants.SUB_JOB_FAIL_FLAG, "true");
+         chunkContext
+               .getStepContext()
+               .getStepExecution()
+               .getJobExecution()
+               .getExecutionContext()
+               .putString(JobConstants.CURRENT_ERROR_MESSAGE,
+                     "node scale was rollbacked");
+      }
       boolean success =
             scaleService.scaleNodeResource(nodeName, cpuNumber, memory);
       putIntoJobExecutionContext(chunkContext,
             JobConstants.CLUSTER_OPERATION_SUCCESS, success);
-      putIntoJobExecutionContext(chunkContext,
-            JobConstants.EXPECTED_NODE_STATUS, NodeStatus.POWERED_OFF);
+      if (!success) {
+         throw ScaleServiceException.COMMON_SCALE_ERROR(nodeName);
+      }
       return RepeatStatus.FINISHED;
    }
 
@@ -73,9 +98,26 @@ public class ScaleSingleVMStep extends TrackableTasklet {
    }
 
    /**
-    * @param scaleService the scaleService to set
+    * @param scaleService
+    *           the scaleService to set
     */
    public void setScaleService(IScaleService scaleService) {
       this.scaleService = scaleService;
    }
+
+   /**
+    * @return the rollback
+    */
+   public boolean isRollback() {
+      return rollback;
+   }
+
+   /**
+    * @param rollback
+    *           the rollback to set
+    */
+   public void setRollback(boolean rollback) {
+      this.rollback = rollback;
+   }
+
 }

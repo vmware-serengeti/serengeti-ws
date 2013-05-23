@@ -117,7 +117,9 @@ public class RestResource {
 
    @RequestMapping(value = "/hello", method = RequestMethod.GET)
    @ResponseStatus(HttpStatus.OK)
-   public void getHello() {
+   @ResponseBody
+   public String getHello() {
+      return "0.8.1";
    }
 
    // task API
@@ -134,8 +136,9 @@ public class RestResource {
       // TODO add exception handling
       TaskRead task = jobManager.getJobExecutionStatus(taskId);
 
-      task.setType(Type.INNER); // XXX just keep the interface now
-
+      if (task.getType() == null) {
+         task.setType(Type.INNER); // XXX just keep the interface now
+      }
       return task;
    }
 

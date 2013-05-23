@@ -56,6 +56,17 @@ public class StorageRead {
       public String getType() {
          return type;
       }
+
+      public static DiskType getDiskType(String type) {
+         if (SYSTEM_DISK.getType().equals(type)) {
+            return SYSTEM_DISK;
+         } else if (SWAP_DISK.getType().equals(type)) {
+            return SWAP_DISK;
+         } else if (DATA_DISK.getType().equals(type)) {
+            return DATA_DISK;
+         } else
+            return null;
+      }
    }
 
    @Expose

@@ -17,7 +17,7 @@ package com.vmware.bdd.service;
 import java.util.List;
 
 import com.vmware.aurora.vc.VcVirtualMachine;
-import com.vmware.bdd.entity.DiskEntity;
+import com.vmware.bdd.spectypes.DiskSpec;
 
 /**
  * 
@@ -39,7 +39,7 @@ public interface IClusterHealService {
     * @param nodeName
     * @return
     */
-   public List<DiskEntity> getBadDisks(String nodeName);
+   public List<DiskSpec> getBadDisks(String nodeName);
 
    /**
     * for the specified bad disks, find their replacements in healthy datastores
@@ -50,8 +50,8 @@ public interface IClusterHealService {
     *           bad disks that locate on unaccessible datastores
     * @return replacement disks for the input bad disks
     */
-   public List<DiskEntity> getReplacementDisks(String clusterName,
-         String groupName, String nodeName, List<DiskEntity> badDisks);
+   public List<DiskSpec> getReplacementDisks(String clusterName,
+         String groupName, String nodeName, List<DiskSpec> badDisks);
 
    /**
     * fix disk failures for the specified node, say node A. Steps: 
@@ -65,11 +65,12 @@ public interface IClusterHealService {
     *  
     * @param clusterName
     * @param groupName
-    * @param diskSet
+    * @param nodeName
+    * @param replacementDisks
     * @return
     */
    public boolean fixDiskFailures(String clusterName, String groupName,
-         String nodeName, List<DiskEntity> fullDiskSet);
+         String nodeName, List<DiskSpec> replacementDisks);
    
    /**
     * create a replacement vm with the exact same settings with the origin one for 
@@ -79,12 +80,13 @@ public interface IClusterHealService {
     * @param clusterSpec
     * @param groupName
     * @param node
-    * @param fullDiskSet
+    * @param replacementDisks
+    *   disks to be created as their original one is not accessible
     * @return
     */
    public VcVirtualMachine createReplacementVm(String clusterName,
-         String groupName, String nodeName, List<DiskEntity> fullDiskSet);
-   
+         String groupName, String nodeName, List<DiskSpec> replacementDisks);
+    
    /**
     * update disk info with the input disk entity set
     * @param vmId

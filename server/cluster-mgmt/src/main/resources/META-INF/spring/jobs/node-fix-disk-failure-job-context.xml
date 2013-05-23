@@ -32,18 +32,6 @@
    </beans:bean>
 
    <job id="fixNodeDiskFailureJob" job-repository="jobRepository">
-      <step id="softwareEnableChefClientFlagStep" next="nodePowerOffStep">
-         <tasklet ref="softwareEnableOperationFlagTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
-      <step id="nodePowerOffStep" next="nodeRecoverDiskFailureStep">
-         <tasklet ref="powerOffSingleVMTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
       <step id="nodeRecoverDiskFailureStep" next="nodeUpdateDiskInfoStep">
          <tasklet ref="nodeRecoverDiskFailureTasklet" />
          <listeners>
@@ -56,20 +44,14 @@
             <listener ref="stepListener" />
          </listeners>
       </step>
-      <step id="softwareConfigClusterStep" next="softwareDisableChefClientFlagStep">
+      <step id="softwareConfigClusterStep">
          <tasklet ref="softwareBootstrapTargetTasklet" />
          <listeners>
             <listener ref="stepListener" />
          </listeners>
       </step>
-      <step id="softwareDisableChefClientFlagStep">
-         <tasklet ref="softwareDisableOperationFlagTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
       <listeners>
-         <listener ref="clusterJobListener" />
+         <listener ref="singleNodeJobListener" />
       </listeners>
    </job>
 </beans:beans>

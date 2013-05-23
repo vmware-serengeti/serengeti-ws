@@ -76,7 +76,6 @@ import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.placement.Container;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
-import com.vmware.bdd.placement.entity.DiskSpec;
 import com.vmware.bdd.placement.exception.PlacementException;
 import com.vmware.bdd.placement.interfaces.IPlacementService;
 import com.vmware.bdd.service.IClusteringService;
@@ -99,6 +98,7 @@ import com.vmware.bdd.service.sp.TakeSnapshotSP;
 import com.vmware.bdd.service.sp.UpdateVmProgressCallback;
 import com.vmware.bdd.service.sp.VcEventProcessor;
 import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
@@ -730,7 +730,7 @@ public class ClusteringService implements IClusteringService {
                Scheduler
                      .executeStoredProcedures(
                            com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
-                           storeProcedures, storeProcedures.length - 1,
+                           storeProcedures, storeProcedures.length,
                            callback);
          if (result == null) {
             logger.error("No VM is created.");

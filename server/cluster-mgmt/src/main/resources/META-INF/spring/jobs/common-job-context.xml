@@ -30,6 +30,12 @@
          ref="jobExecutionStatusHolder" />
       <beans:property name="clusteringService" ref="clusteringService" />
    </beans:bean>
+   <beans:bean id="singleNodeJobListener"
+		class="com.vmware.bdd.service.job.ClusterJobExecutionListener">
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+		<beans:property name="clusteringService" ref="clusteringService" />
+		<beans:property name="subJob" value="true" />
+	</beans:bean>
 	<beans:bean id="clusterMainJobListener"
 		class="com.vmware.bdd.service.job.ClusterJobExecutionListener">
 		<beans:property name="jobRegistry" ref="jobRegistry" />
@@ -78,20 +84,6 @@
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
 		<beans:property name="managementOperation" value="CONFIGURE" />
-	</beans:bean>
-	<beans:bean name="softwareEnableOperationFlagTasklet"
-		class="com.vmware.bdd.service.job.software.SoftwareManagementStep">
-		<beans:property name="clusterManager" ref="clusterManager" />
-		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
-		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
-		<beans:property name="managementOperation" value="ENABLE_OPERATION_FLAG" />
-	</beans:bean>
-	<beans:bean name="softwareDisableOperationFlagTasklet"
-		class="com.vmware.bdd.service.job.software.SoftwareManagementStep">
-		<beans:property name="clusterManager" ref="clusterManager" />
-		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
-		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
-		<beans:property name="managementOperation" value="DISABLE_OPERATION_FLAG" />
 	</beans:bean>
 	<beans:bean name="stopSingleVMTasklet"
 		class="com.vmware.bdd.service.job.vm.StopSingleVMStep">

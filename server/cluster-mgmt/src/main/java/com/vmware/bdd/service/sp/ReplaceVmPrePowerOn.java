@@ -3,14 +3,18 @@ package com.vmware.bdd.service.sp;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.IPrePostPowerOn;
+import com.vmware.aurora.vc.DeviceId;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.spectypes.DiskSpec;
+import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
 import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
 import com.vmware.vim.binding.vim.option.OptionValue;
@@ -24,11 +28,14 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
    private String newName;
    private Priority ioShares;
    private VcVirtualMachine vm;
+   private List<DiskSpec> fullDiskSet;
 
-   public ReplaceVmPrePowerOn(String vmId, String newName, Priority ioShares) {
+   public ReplaceVmPrePowerOn(String vmId, String newName, Priority ioShares,
+         List<DiskSpec> fullDiskSet) {
       this.oldVmId = vmId;
       this.newName = newName;
       this.ioShares = ioShares;
+      this.fullDiskSet = fullDiskSet;
    }
 
    private void destroyVm(VcVirtualMachine oldVm) throws Exception {
@@ -38,9 +45,21 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
                + " is FT primary VM, disable FT before delete it.");
          oldVm.turnOffFT();
       }
-      if (oldVm.isPoweredOn()) {
+      // try guest shut down first, wait for 3 minutes, power it off after time out
+      if (oldVm.isPoweredOn()
+            && !oldVm
+                  .shutdownGuest(Constants.VM_FAST_SHUTDOWN_WAITING_SEC * 1000)) {
          oldVm.powerOff();
       }
+
+      // detach existed vmdks on the old vm
+      for (DiskSpec disk : fullDiskSet) {
+         if (disk.getVmdkPath() != null && !disk.getVmdkPath().isEmpty()) {
+            oldVm.detachVirtualDisk(new DeviceId(disk.getExternalAddress()),
+                  false);
+         }
+      }
+
       /*
        * TRICK: destroy vm with unaccessible disks will throw exceptions, ignore 
        * it and destroy it again.
@@ -98,7 +117,7 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
 
             // copy the io share level from the original vm
             logger.info("set io share level same with parent vm");
-            if (!Priority.Normal.equals(ioShares)) {
+            if (!Priority.NORMAL.equals(ioShares)) {
                VcVmUtil.configIOShares(oldVmId, ioShares);
             }
             return null;

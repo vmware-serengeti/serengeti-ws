@@ -46,6 +46,7 @@ public class Constants {
    public static final String GUEST_VARIABLE_NETMASK_KEY = "netmask";
    public static final String GUEST_VARIABLE_IP_KEY = "ipaddr";
    public static final String GUEST_VARIABLE_POLICY_KEY = "bootproto";
+   public static final String GUEST_VARIABLE_BOOTUP_UUID = "bootupUUID";
    public static final String NODE_ACTION_CLONING_VM = "Cloning VM";
    public static final String NODE_ACTION_CLONING_FAILED = "Cloning VM failed";
    public static final String NODE_ACTION_WAITING_IP = "Waiting for ip";
@@ -53,6 +54,7 @@ public class Constants {
          "Failed to get VM ip address";
    public static final int VM_POWER_ON_WAITING_SEC = 600;
    public static final int VM_SHUTDOWN_WAITING_SEC = 600;
+   public static final int VM_FAST_SHUTDOWN_WAITING_SEC = 180;
    public static final String PORT_GROUP_NAME_PATTERN =
          "[a-zA-Z0-9_\\-\\s\\.]+";
    public static final String VC_DATASTORE_NAME_PATTERN =
@@ -126,6 +128,6 @@ public class Constants {
    public static final String HA_FLAG_ON = "on";
    public static final String HA_FLAG_FT = "ft";
 
-   private static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE =
+   public static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE =
          "elastic_runtime.automation.enable";
 }

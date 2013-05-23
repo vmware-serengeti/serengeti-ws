@@ -34,6 +34,16 @@
       <beans:property name="jobExecutionStatusHolder"
          ref="jobExecutionStatusHolder" />
    </beans:bean>
+   <beans:bean name="failedTasklet"
+      class="com.vmware.bdd.manager.job.FailedTasklet">
+      <beans:property name="jobExecutionStatusHolder"
+         ref="jobExecutionStatusHolder" />
+   </beans:bean>
+   <beans:bean name="succeededTasklet"
+      class="com.vmware.bdd.manager.job.SucceededTasklet">
+      <beans:property name="jobExecutionStatusHolder"
+         ref="jobExecutionStatusHolder" />
+   </beans:bean>
 
    <job id="helloWorldJob" job-repository="jobRepository">
       <step id="plan" next="provision">
@@ -68,6 +78,38 @@
       </step>      
       <step id="simpleInstall">
          <tasklet ref="installTasklet" />
+         <listeners>
+            <listener ref="testStepListener" />
+         </listeners>
+      </step>
+      <listeners>
+         <listener ref="testJobListener" />
+      </listeners>
+   </job>
+   
+   <job id="simpleJobWithCondition" job-repository="jobRepository">
+      <step id="simplePlanWithCondition" next="simpleInstallWithCondition">
+         <tasklet ref="placementPlanTasklet" />
+         <listeners>
+            <listener ref="testStepListener" />
+         </listeners>
+      </step>      
+      <step id="simpleInstallWithCondition">
+         <tasklet ref="installTasklet" />
+         <next on="FAILED" to="simpleFailed"/>
+         <next on="*" to="simpleSucceeded"/>
+         <listeners>
+            <listener ref="testStepListener" />
+         </listeners>
+      </step>
+      <step id="simpleFailed">
+         <tasklet ref="failedTasklet" />
+         <listeners>
+            <listener ref="testStepListener" />
+         </listeners>
+      </step>
+      <step id="simpleSucceeded">
+         <tasklet ref="succeededTasklet" />
          <listeners>
             <listener ref="testStepListener" />
          </listeners>

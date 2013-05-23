@@ -27,12 +27,15 @@ public class VcProviderException extends BddException {
       super(cause, "VC_PROVIDER", errorId, detail);
    }
 
-   public static VcProviderException VC_RESOURCE_POOL_ALREADY_ADDED(String resourcePoolName) {
-      return new VcProviderException(null, "VC_RESOURCE_POOL_ALREADY_ADDED", resourcePoolName);
+   public static VcProviderException VC_RESOURCE_POOL_ALREADY_ADDED(
+         String resourcePoolName) {
+      return new VcProviderException(null, "VC_RESOURCE_POOL_ALREADY_ADDED",
+            resourcePoolName);
    }
 
    public static VcProviderException NO_RESOURCE_POOL_FOUND(String[] names) {
-      return new VcProviderException(null, "NO_RESOURCE_POOL_FOUND", (Object[])names);
+      return new VcProviderException(null, "NO_RESOURCE_POOL_FOUND",
+            (Object[]) names);
    }
 
    public static VcProviderException RESOURCE_POOL_NOT_FOUND(String rpName) {
@@ -55,15 +58,37 @@ public class VcProviderException extends BddException {
       return new VcProviderException(null, "SERVER_NOT_FOUND", serverMobId);
    }
 
-   public static VcProviderException DATASTORE_IS_REFERENCED_BY_CLUSTER(List<String> clusterNames) {
-      return new VcProviderException(null, "DATASTORE_IS_REFERENCED_BY_CLUSTER", clusterNames);
+   public static VcProviderException DATASTORE_IS_REFERENCED_BY_CLUSTER(
+         List<String> clusterNames) {
+      return new VcProviderException(null,
+            "DATASTORE_IS_REFERENCED_BY_CLUSTER", clusterNames);
    }
 
-   public static VcProviderException RESOURCE_POOL_IS_REFERENCED_BY_CLUSTER(List<String> clusterNames) {
-      return new VcProviderException(null, "RESOURCE_POOL_IS_REFERENCED_BY_CLUSTER", clusterNames);
+   public static VcProviderException RESOURCE_POOL_IS_REFERENCED_BY_CLUSTER(
+         List<String> clusterNames) {
+      return new VcProviderException(null,
+            "RESOURCE_POOL_IS_REFERENCED_BY_CLUSTER", clusterNames);
    }
 
-   public static VcProviderException CONCURRENT_CLUSTER_CREATING(String clusterName){
-      return new VcProviderException(null,"CONCURRENT_CLUSTER_CREATING",clusterName);
+   public static VcProviderException CONCURRENT_CLUSTER_CREATING(
+         String clusterName) {
+      return new VcProviderException(null, "CONCURRENT_CLUSTER_CREATING",
+            clusterName);
+   }
+
+   public static VcProviderException CPU_EXCEED_LIMIT(String vmName) {
+      return new VcProviderException(null, "CPU_EXCEED_LIMIT", vmName);
+   }
+
+   public static VcProviderException MEMORY_EXCEED_LIMIT(String vmName) {
+      return new VcProviderException(null, "MEMORY_EXCEED_LIMIT", vmName);
+   }
+
+   public static VcProviderException START_VM_ERROR(String vmName) {
+      return new VcProviderException(null, "START_VM_ERROR", vmName);
+   }
+
+   public static VcProviderException STOP_VM_ERROR(String vmName) {
+      return new VcProviderException(null, "STOP_VM_ERROR", vmName);
    }
 }

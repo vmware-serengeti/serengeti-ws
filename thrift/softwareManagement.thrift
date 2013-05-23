@@ -30,10 +30,7 @@ enum ClusterAction {
   START = 4,
   STOP = 5,
   DESTROY = 6,
-  CONFIGURE = 7,
-  CONFIGURE_HARDWARE = 8,
-  ENABLE_CHEF_CLIENT = 9,
-  DISABLE_CHEF_CLIENT = 10
+  CONFIGURE = 7
 } 
 enum ServerStatus{
   VM_READY=1,
@@ -98,7 +95,7 @@ struct OperationStatusWithDetail{
 struct ClusterOperation{
   1:required ClusterAction action,
   2:required string targetName,
-  3:required string specFileName,
+  3:optional string specFileName,
   4:optional string logLevel,
 }
 

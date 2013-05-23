@@ -61,10 +61,12 @@ public interface JobConstants {
    public static final String SUB_JOB_PARAMETERS_VALUE_PREFIX = "sub.job.parameters.parameter.value.";
    public static final String SUB_JOB_NODE_NAME = "sub.job.node.name";
    public static final String SUB_JOB_NODES_SUCCEED = "sub.job.nodes.suceed";
-   public static final String SUB_JOB_NODES_FAIL = "sub.job.nodes.fail";   
+   public static final String SUB_JOB_NODES_FAIL = "sub.job.nodes.fail";
+   public static final String SUB_JOB_FAIL_FLAG = "subj.job.fail.flag";
    public static final String NODE_SCALE_JOB_NAME = "scaleSingleNodeJob";
    public static final String NODE_SCALE_CPU_NUMBER = "node.scale.cpu";
    public static final String NODE_SCALE_MEMORY_SIZE = "node.scale.memory";
+   public static final String NODE_SCALE_ROLLBACK = "node.scale.rollback";
    public static final String FIX_NODE_DISK_FAILURE_JOB_NAME = "fixNodeDiskFailureJob";
    public static final String REPLACE_VM_ID = "disk.fix.replacevm.id";
 }

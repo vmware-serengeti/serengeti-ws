@@ -700,12 +700,23 @@ public class ClusterCommandsTest extends MockRestServer {
       cr1.setDistro("distro1");
       cr1.setInstanceNum(10);
       cr1.setStatus(ClusterRead.ClusterStatus.RUNNING);
-      List<NodeGroupRead> nodeGroupRead1 = new LinkedList<NodeGroupRead>();
-      nodeGroupRead1.add(ngr1);
-      cr1.setNodeGroups(nodeGroupRead1);
+      List<NodeGroupRead> nodeGroupRead = new LinkedList<NodeGroupRead>();
+      nodeGroupRead.add(ngr1);
+      List<String> roles2 = new LinkedList<String>();
+      roles2.add(Constants.ROLE_HADOOP_CLIENT);
+      NodeGroupRead ngr2 = new NodeGroupRead();
+      ngr2.setName("NodeGroup2");
+      ngr2.setCpuNum(6);
+      ngr2.setMemCapacityMB(2048);
+      ngr2.setStorage(sr1);
+      ngr2.setInstanceNum(1);
+      ngr2.setInstances(instances1);
+      ngr2.setRoles(roles2);
+      nodeGroupRead.add(ngr2);
+      cr1.setNodeGroups(nodeGroupRead);
       cr1.setAutomationEnable(false);
-      cr1.setNodeGroups(nodeGroupRead1);
-
+      
+      
       //setParam tests
       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
             mapper.writeValueAsString(cr1));
@@ -741,6 +752,13 @@ public class ClusterCommandsTest extends MockRestServer {
             HttpStatus.NO_CONTENT, "");
       clusterCommands.setParam("cluster1", "NodeGroup1", null, 2, 2, "HIGH");
 
+      setup();
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
+            mapper.writeValueAsString(cr1));
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/param", HttpMethod.PUT,
+            HttpStatus.NO_CONTENT, "");
+      clusterCommands.setParam("cluster1", "NodeGroup2", null, null, null, "HIGH");
+
       //reset Param tests
       setup();
       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
@@ -764,6 +782,14 @@ public class ClusterCommandsTest extends MockRestServer {
       buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/param", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
       clusterCommands.resetParam("cluster1", null, false, false, true, true, true);
+
+      setup();
+      cr1.setAutomationEnable(true);
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
+            mapper.writeValueAsString(cr1));
+      buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/cluster/cluster1/param", HttpMethod.PUT,
+            HttpStatus.NO_CONTENT, "");
+      clusterCommands.resetParam("cluster1", "NodeGroup2", false, false, false, false, true);
       CookieCache.clear();
    }
 }

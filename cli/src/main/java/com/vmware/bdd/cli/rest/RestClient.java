@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.fusesource.jansi.AnsiConsole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -38,6 +39,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.vmware.bdd.apitypes.Connect;
 import com.vmware.bdd.apitypes.TaskRead;
+import com.vmware.bdd.apitypes.TaskRead.NodeStatus;
 import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.apitypes.TaskRead.Type;
 import com.vmware.bdd.cli.commands.CommandsUtils;
@@ -51,7 +53,7 @@ import com.vmware.bdd.utils.CommonUtil;
  */
 @Component
 public class RestClient {
-
+   static final Logger logger = Logger.getLogger(RestClient.class);
    private String hostUri;
 
    @Autowired
@@ -77,8 +79,7 @@ public class RestClient {
                && hostProperties.get(Constants.PROPERTY_HOST) != null) {
             hostUri =
                   Constants.HTTP_CONNECTION_PREFIX
-                        + (String) hostProperties
-                              .get(Constants.PROPERTY_HOST)
+                        + (String) hostProperties.get(Constants.PROPERTY_HOST)
                         + Constants.HTTP_CONNECTION_LOGIN_SUFFIX;
          }
       } catch (Exception e) {//not set yet; or read io error
@@ -97,7 +98,7 @@ public class RestClient {
 
    /**
     * connect to a Serengeti server
-    *
+    * 
     * @param host
     *           host url with optional port
     * @param username
@@ -105,19 +106,24 @@ public class RestClient {
     * @param password
     *           serengeti password
     */
-   public Connect.ConnectType connect(final String host, final String username, final String password) {
+   public Connect.ConnectType connect(final String host, final String username,
+         final String password) {
       String oldHostUri = hostUri;
 
-      hostUri = Constants.HTTP_CONNECTION_PREFIX + host + Constants.HTTP_CONNECTION_LOGIN_SUFFIX;
+      hostUri =
+            Constants.HTTP_CONNECTION_PREFIX + host
+                  + Constants.HTTP_CONNECTION_LOGIN_SUFFIX;
 
       try {
-         ResponseEntity<String> response = login(Constants.REST_PATH_LOGIN, String.class, username, password);
+         ResponseEntity<String> response =
+               login(Constants.REST_PATH_LOGIN, String.class, username,
+                     password);
 
          if (response.getStatusCode() == HttpStatus.OK) {
             //normal response
             updateHostproperty(host);
             String cookieValue = response.getHeaders().getFirst("Set-Cookie");
-            if(cookieValue.contains(";")){
+            if (cookieValue.contains(";")) {
                cookieValue = cookieValue.split(";")[0];
             }
             writeCookieInfo(cookieValue);
@@ -136,11 +142,16 @@ public class RestClient {
             hostUri = oldHostUri;
             return Connect.ConnectType.UNAUTHORIZATION;
          } else {
-            System.out.println(Constants.CONNECT_FAILURE + ": " + cliRestException.getStatus() + " " + cliRestException.getMessage().toLowerCase());
+            System.out.println(Constants.CONNECT_FAILURE + ": "
+                  + cliRestException.getStatus() + " "
+                  + cliRestException.getMessage().toLowerCase());
             return Connect.ConnectType.ERROR;
          }
       } catch (Exception e) {
-         System.out.println(Constants.CONNECT_FAILURE + ": " + (e.getCause() != null ? e.getCause().getMessage().toLowerCase() : e.getMessage()));
+         System.out.println(Constants.CONNECT_FAILURE
+               + ": "
+               + (e.getCause() != null ? e.getCause().getMessage()
+                     .toLowerCase() : e.getMessage()));
          return Connect.ConnectType.ERROR;
       }
       return Connect.ConnectType.SUCCESS;
@@ -149,7 +160,7 @@ public class RestClient {
    /**
     * Disconnect the session
     */
-   public void disconnect () {
+   public void disconnect() {
       try {
          checkConnection();
          logout(Constants.REST_PATH_LOGOUT, String.class);
@@ -158,12 +169,13 @@ public class RestClient {
             writeCookieInfo("");
          }
       } catch (Exception e) {
-         System.out.println(Constants.DISCONNECT_FAILURE + ":" + e.getMessage());
+         System.out
+               .println(Constants.DISCONNECT_FAILURE + ":" + e.getMessage());
       }
    }
 
    private void writeCookieInfo(String cookie) {
-      CookieCache.put("Cookie",cookie);
+      CookieCache.put("Cookie", cookie);
       Properties properties = new Properties();
       properties.put("Cookie", cookie);
       CommandsUtils.writeProperties(properties, Constants.PROPERTY_FILE);
@@ -172,7 +184,7 @@ public class RestClient {
    private String readCookieInfo() {
       String cookieValue = "";
       cookieValue = CookieCache.get("Cookie");
-      if (CommandsUtils.isBlank(cookieValue)){
+      if (CommandsUtils.isBlank(cookieValue)) {
          Properties properties = null;
          properties = CommandsUtils.readProperties(Constants.PROPERTY_FILE);
          if (properties != null) {
@@ -184,16 +196,19 @@ public class RestClient {
       return cookieValue;
    }
 
-   private <T> ResponseEntity<T> restGetById(final String path, final String id,
-         final Class<T> respEntityType, final boolean hasDetailQueryString) {
-      String targetUri = hostUri + Constants.HTTP_CONNECTION_API + path + "/" + id;
+   private <T> ResponseEntity<T> restGetById(final String path,
+         final String id, final Class<T> respEntityType,
+         final boolean hasDetailQueryString) {
+      String targetUri =
+            hostUri + Constants.HTTP_CONNECTION_API + path + "/" + id;
       if (hasDetailQueryString) {
          targetUri += Constants.QUERY_DETAIL;
       }
       return restGetByUri(targetUri, respEntityType);
    }
 
-   private <T> ResponseEntity<T> restGet(final String path, final Class<T> respEntityType, final boolean hasDetailQueryString) {
+   private <T> ResponseEntity<T> restGet(final String path,
+         final Class<T> respEntityType, final boolean hasDetailQueryString) {
       String targetUri = hostUri + Constants.HTTP_CONNECTION_API + path;
       if (hasDetailQueryString) {
          targetUri += Constants.QUERY_DETAIL;
@@ -201,16 +216,20 @@ public class RestClient {
       return restGetByUri(targetUri, respEntityType);
    }
 
-   private <T> ResponseEntity<T> login(final String path, final Class<T> respEntityType, final String username, final String password) {
+   private <T> ResponseEntity<T> login(final String path,
+         final Class<T> respEntityType, final String username,
+         final String password) {
       StringBuilder uriBuff = new StringBuilder();
       uriBuff.append(hostUri).append(path);
       if (!CommandsUtils.isBlank(username) && !CommandsUtils.isBlank(password)) {
-         uriBuff.append("?").append("j_username=").append(username).append("&j_password=").append(password);
+         uriBuff.append("?").append("j_username=").append(username)
+               .append("&j_password=").append(password);
       }
       return restPostByUri(uriBuff.toString(), respEntityType, false);
    }
 
-   private <T> ResponseEntity<T> logout(final String path, final Class<T> respEntityType) {
+   private <T> ResponseEntity<T> logout(final String path,
+         final Class<T> respEntityType) {
       StringBuilder uriBuff = new StringBuilder();
       uriBuff.append(hostUri).append(path);
       return restGetByUri(uriBuff.toString(), respEntityType);
@@ -260,8 +279,7 @@ public class RestClient {
          Properties hostProperty = new Properties();
          hostProperty.setProperty(Constants.PROPERTY_HOST, host);
          hostFile = new FileOutputStream(Constants.PROPERTY_FILE);
-         hostProperty.store(hostFile,
-               Constants.PROPERTY_FILE_HOST_COMMENT);
+         hostProperty.store(hostFile, Constants.PROPERTY_FILE_HOST_COMMENT);
       } catch (IOException e) {
          StringBuilder exceptionMsg = new StringBuilder();
          exceptionMsg.append(Constants.PROPERTY_FILE_HOST_FAILURE);
@@ -282,10 +300,15 @@ public class RestClient {
 
    /**
     * Create an object through rest apis
-    * @param entity the creation content
-    * @param path the rest url
-    * @param verb the http method
-    * @param prettyOutput output callback
+    * 
+    * @param entity
+    *           the creation content
+    * @param path
+    *           the rest url
+    * @param verb
+    *           the http method
+    * @param prettyOutput
+    *           output callback
     */
    public void createObject(Object entity, final String path,
          final HttpMethod verb, PrettyOutput... prettyOutput) {
@@ -337,7 +360,8 @@ public class RestClient {
          int progress = 0;
          do {
             ResponseEntity<TaskRead> taskResponse =
-                  restGetById(Constants.REST_PATH_TASK, taskId, TaskRead.class, false);
+                  restGetById(Constants.REST_PATH_TASK, taskId, TaskRead.class,
+                        false);
 
             //task will not return exception as it has status
             taskRead = taskResponse.getBody();
@@ -345,8 +369,8 @@ public class RestClient {
             progress = (int) (taskRead.getProgress() * 100);
             taskStatus = taskRead.getStatus();
 
-            if ((prettyOutput != null && prettyOutput.length > 0 && prettyOutput[0]
-                  .isRefresh(false))
+            if ((prettyOutput != null && prettyOutput.length > 0 && (taskRead.getType() == Type.VHM ? prettyOutput[0]
+                  .isRefresh(true) : prettyOutput[0].isRefresh(false)))
                   || oldTaskStatus != taskStatus
                   || oldProgress != progress) {
                //clear screen and show progress every few seconds 
@@ -354,7 +378,8 @@ public class RestClient {
                //output completed task summary first in the case there are several related tasks
                if (prettyOutput != null && prettyOutput.length > 0
                      && prettyOutput[0].getCompletedTaskSummary() != null) {
-                  for (String summary : prettyOutput[0].getCompletedTaskSummary()) {
+                  for (String summary : prettyOutput[0]
+                        .getCompletedTaskSummary()) {
                      System.out.println(summary + "\n");
                   }
                }
@@ -363,7 +388,7 @@ public class RestClient {
                if (prettyOutput != null && prettyOutput.length > 0) {
                   // print call back customize the detailed output case by case
                   prettyOutput[0].prettyOutput();
-               } 
+               }
 
                if (oldTaskStatus != taskStatus || oldProgress != progress) {
                   oldTaskStatus = taskStatus;
@@ -379,26 +404,35 @@ public class RestClient {
                //ignore
             }
          } while (taskRead.getStatus() != TaskRead.Status.COMPLETED
-               && taskRead.getStatus() != TaskRead.Status.FAILED);
+               && taskRead.getStatus() != TaskRead.Status.FAILED
+               && taskRead.getStatus() != TaskRead.Status.ABANDONED
+               && taskRead.getStatus() != TaskRead.Status.STOPPED);
 
          String logdir = taskRead.getWorkDir();
          String errorMsg = taskRead.getErrorMessage();
-         if (taskRead.getStatus().equals(TaskRead.Status.FAILED)) {
+         if (!taskRead.getStatus().equals(TaskRead.Status.COMPLETED)) {
             if (!CommandsUtils.isBlank(logdir)) {
-               String outputErrorInfo = Constants.OUTPUT_LOG_INFO + Constants.COMMON_LOG_FILE_PATH + "," + logdir;
+               String outputErrorInfo =
+                     Constants.OUTPUT_LOG_INFO + Constants.COMMON_LOG_FILE_PATH
+                           + "," + logdir;
                if (errorMsg != null) {
                   outputErrorInfo = errorMsg + " " + outputErrorInfo;
                }
                throw new CliRestException(outputErrorInfo);
-            } else if (errorMsg != null && !errorMsg.isEmpty()){
-               String outputErrorInfo = errorMsg + " " + Constants.OUTPUT_LOG_INFO + Constants.COMMON_LOG_FILE_PATH;
+            } else if (errorMsg != null && !errorMsg.isEmpty()) {
+               String outputErrorInfo =
+                     errorMsg + " " + Constants.OUTPUT_LOG_INFO
+                           + Constants.COMMON_LOG_FILE_PATH;
                throw new CliRestException(outputErrorInfo);
             } else {
                throw new CliRestException("task failed");
             }
-         } else if (taskRead.getStatus().equals(TaskRead.Status.COMPLETED)) {
+         } else { //completed
             if (taskRead.getType().equals(Type.VHM)) {
-               if (prettyOutput != null && prettyOutput.length > 0 && prettyOutput[0].isRefresh(true)) {
+               logger.info("task type is vhm");
+               Thread.sleep(5*1000);
+               if (prettyOutput != null && prettyOutput.length > 0
+                     && prettyOutput[0].isRefresh(true)) {
                   //clear screen and show progress every few seconds 
                   clearScreen();
                   System.out.println(taskStatus + " " + progress + "%\n");
@@ -408,6 +442,32 @@ public class RestClient {
                      prettyOutput[0].prettyOutput();
                   }
                }
+            } else {
+               printNodeStatus(taskRead);
+            }
+         }
+      }
+   }
+
+   /**
+    * @param taskRead
+    */
+   private void printNodeStatus(TaskRead taskRead) {
+      if (taskRead.getSucceedNodes().size() > 0
+            || taskRead.getFailNodes().size() > 0) {
+         System.out.println("Cluster node status, success: "
+               + taskRead.getSucceedNodes().size() + ", fail: "
+               + taskRead.getFailNodes().size());
+         if (taskRead.getFailNodes().size() > 0) {
+            System.out.println("failed nodes:");
+            for (NodeStatus ns : taskRead.getFailNodes()) {
+               System.out.println(ns);
+            }
+         }
+         if (taskRead.getSucceedNodes().size() > 0) {
+            System.out.println("success nodes:");
+            for (NodeStatus ns : taskRead.getSucceedNodes()) {
+               System.out.println(ns);
             }
          }
       }
@@ -424,11 +484,16 @@ public class RestClient {
 
    /**
     * Generic method to get an object by id
+    * 
     * @param id
-    * @param entityType the object type
-    * @param path the rest url
-    * @param verb the http method
-    * @param detail flag to retrieve detailed information or not
+    * @param entityType
+    *           the object type
+    * @param path
+    *           the rest url
+    * @param verb
+    *           the http method
+    * @param detail
+    *           flag to retrieve detailed information or not
     * @return the object
     */
    public <T> T getObject(final String id, Class<T> entityType,
@@ -436,7 +501,8 @@ public class RestClient {
       checkConnection();
       try {
          if (verb == HttpMethod.GET) {
-            ResponseEntity<T> response = restGetById(path, id, entityType, detail);
+            ResponseEntity<T> response =
+                  restGetById(path, id, entityType, detail);
             if (!validateAuthorization(response)) {
                return null;
             }
@@ -453,14 +519,15 @@ public class RestClient {
 
    /**
     * Method to get by path
+    * 
     * @param entityType
     * @param path
     * @param verb
     * @param detail
     * @return
     */
-   public <T> T getObjectByPath(Class<T> entityType,
-         final String path, final HttpMethod verb, final boolean detail) {
+   public <T> T getObjectByPath(Class<T> entityType, final String path,
+         final HttpMethod verb, final boolean detail) {
       checkConnection();
 
       try {
@@ -480,10 +547,15 @@ public class RestClient {
 
    /**
     * Generic method to get all objects of a type
-    * @param entityType object type
-    * @param path the rest url
-    * @param verb the http method
-    * @param detail flag to retrieve detailed information or not
+    * 
+    * @param entityType
+    *           object type
+    * @param path
+    *           the rest url
+    * @param verb
+    *           the http method
+    * @param detail
+    *           flag to retrieve detailed information or not
     * @return the objects
     */
    public <T> T getAllObjects(final Class<T> entityType, final String path,
@@ -508,10 +580,14 @@ public class RestClient {
 
    /**
     * Delete an object by id
-    * @param id 
-    * @param path the rest url
-    * @param verb the http method
-    * @param prettyOutput utput callback
+    * 
+    * @param id
+    * @param path
+    *           the rest url
+    * @param verb
+    *           the http method
+    * @param prettyOutput
+    *           utput callback
     */
    public void deleteObject(final String id, final String path,
          final HttpMethod verb, PrettyOutput... prettyOutput) {
@@ -533,7 +609,8 @@ public class RestClient {
    }
 
    private ResponseEntity<String> restDelete(String path, String id) {
-      String targetUri = hostUri + Constants.HTTP_CONNECTION_API + path + "/" + id;
+      String targetUri =
+            hostUri + Constants.HTTP_CONNECTION_API + path + "/" + id;
 
       HttpHeaders headers = buildHeaders();
       HttpEntity<String> entity = new HttpEntity<String>(headers);
@@ -552,11 +629,16 @@ public class RestClient {
 
    /**
     * process requests with query parameters
+    * 
     * @param id
-    * @param path the rest url
-    * @param verb the http method
-    * @param queryStrings required query strings
-    * @param prettyOutput output callback
+    * @param path
+    *           the rest url
+    * @param verb
+    *           the http method
+    * @param queryStrings
+    *           required query strings
+    * @param prettyOutput
+    *           output callback
     */
    public void actionOps(final String id, final String path,
          final HttpMethod verb, final Map<String, String> queryStrings,
@@ -564,7 +646,8 @@ public class RestClient {
       checkConnection();
       try {
          if (verb == HttpMethod.PUT) {
-            ResponseEntity<String> response = restActionOps(path, id, queryStrings);
+            ResponseEntity<String> response =
+                  restActionOps(path, id, queryStrings);
             if (!validateAuthorization(response)) {
                return;
             }
@@ -580,7 +663,8 @@ public class RestClient {
 
    private ResponseEntity<String> restActionOps(String path, String id,
          Map<String, String> queryStrings) {
-      String targetUri = hostUri + Constants.HTTP_CONNECTION_API + path + "/" + id;
+      String targetUri =
+            hostUri + Constants.HTTP_CONNECTION_API + path + "/" + id;
       if (queryStrings != null) {
          targetUri = targetUri + buildQueryStrings(queryStrings);
       }
@@ -594,19 +678,24 @@ public class RestClient {
       StringBuilder stringBuilder = new StringBuilder("?");
 
       Set<Entry<String, String>> entryset = queryStrings.entrySet();
-      for (Entry<String, String> entry: entryset) {
-    	  stringBuilder.append(entry.getKey() + "=" + entry.getValue());
+      for (Entry<String, String> entry : entryset) {
+         stringBuilder.append(entry.getKey() + "=" + entry.getValue());
       }
-      
+
       return stringBuilder.toString();
    }
 
    /**
-    * Update an object 
-    * @param entity the updated content
-    * @param path the rest url
-    * @param verb the http method
-    * @param prettyOutput output callback
+    * Update an object
+    * 
+    * @param entity
+    *           the updated content
+    * @param path
+    *           the rest url
+    * @param verb
+    *           the http method
+    * @param prettyOutput
+    *           output callback
     */
    public void update(Object entity, final String path, final HttpMethod verb,
          PrettyOutput... prettyOutput) {

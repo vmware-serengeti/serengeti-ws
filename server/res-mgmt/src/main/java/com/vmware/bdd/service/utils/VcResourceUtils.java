@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.vc.MoUtil;
+import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcCluster;
 import com.vmware.aurora.vc.VcDatacenter;
 import com.vmware.aurora.vc.VcDatastore;
@@ -33,41 +34,51 @@ import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
-import com.vmware.aurora.vc.VcCache;
+import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
+import com.vmware.vim.binding.vim.EnvironmentBrowser;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.VirtualMachine;
+import com.vmware.vim.binding.vim.vm.ConfigOption;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import com.vmware.vim.vmomi.core.types.VmodlTypeMap;
 
 public class VcResourceUtils {
 
-   private static final Logger logger = Logger
-         .getLogger(VcResourceUtils.class);
+   private static final Logger logger = Logger.getLogger(VcResourceUtils.class);
 
+   private static final int HARDWARE_VERSION_7 = 7;
+   private static final int HARDWARE_VERSION_7_MAX_CPU = 8;
+   private static final int HARDWARE_VERSION_7_MAX_MEMORY = 255 * 1000; // 255G
+   private static final int HARDWARE_VERSION_8 = 8;
+   private static final int HARDWARE_VERSION_8_MAX_CPU = 32;
+   private static final int HARDWARE_VERSION_8_MAX_MEMORY = 1 * 1000 * 1000; //1T
 
-   public static Collection<VcDatastore> findDSInVCByPattern(final String vcDSNamePattern) {
+   public static Collection<VcDatastore> findDSInVCByPattern(
+         final String vcDSNamePattern) {
       Collection<VcDatastore> result =
-         VcContext.inVcSessionDo(new VcSession<Collection<VcDatastore>>() {
-            @Override
-            protected Collection<VcDatastore> body() throws Exception {
-               Map<String, VcDatastore> dsMap =
-                  new HashMap<String, VcDatastore>();
+            VcContext.inVcSessionDo(new VcSession<Collection<VcDatastore>>() {
+               @Override
+               protected Collection<VcDatastore> body() throws Exception {
+                  Map<String, VcDatastore> dsMap =
+                        new HashMap<String, VcDatastore>();
 
-               List<VcCluster> vcClusters = VcInventory.getClusters();
-               for (VcCluster vcCluster : vcClusters) {
-                  for (VcDatastore vcDS : vcCluster.getAllDatastores()) {
-                     String pattern = CommonUtil.getDatastoreJavaPattern(vcDSNamePattern);
-                     if (vcDS.getName().matches(pattern)) {
-                        dsMap.put(vcDS.getName(), vcDS);
+                  List<VcCluster> vcClusters = VcInventory.getClusters();
+                  for (VcCluster vcCluster : vcClusters) {
+                     for (VcDatastore vcDS : vcCluster.getAllDatastores()) {
+                        String pattern =
+                              CommonUtil
+                                    .getDatastoreJavaPattern(vcDSNamePattern);
+                        if (vcDS.getName().matches(pattern)) {
+                           dsMap.put(vcDS.getName(), vcDS);
+                        }
                      }
                   }
+                  return dsMap.values();
                }
-               return dsMap.values();
-            }
-         });
+            });
       return result;
    }
 
@@ -138,19 +149,18 @@ public class VcResourceUtils {
 
    public static VcCluster findVcCluster(final String clusterName) {
       logger.debug("find vc cluster: " + clusterName);
-      VcCluster vcCluster =
-            VcContext.inVcSessionDo(new VcSession<VcCluster>() {
-               @Override
-               protected VcCluster body() throws Exception {
-                  List<VcCluster> vcClusters = VcInventory.getClusters();
-                  for (VcCluster vcCluster : vcClusters) {
-                     if (clusterName.equals(vcCluster.getName())) {
-                        return vcCluster;
-                     }
-                  }
-                  return null;
+      VcCluster vcCluster = VcContext.inVcSessionDo(new VcSession<VcCluster>() {
+         @Override
+         protected VcCluster body() throws Exception {
+            List<VcCluster> vcClusters = VcInventory.getClusters();
+            for (VcCluster vcCluster : vcClusters) {
+               if (clusterName.equals(vcCluster.getName())) {
+                  return vcCluster;
                }
-            });
+            }
+            return null;
+         }
+      });
       return vcCluster;
    }
 
@@ -185,7 +195,8 @@ public class VcResourceUtils {
       return vcRP;
    }
 
-   public static VcVirtualMachine findVmInVcCluster(String vcClusterName, String rpName, String vmName) {
+   public static VcVirtualMachine findVmInVcCluster(String vcClusterName,
+         String rpName, String vmName) {
       VcResourcePool rp = findRPInVCCluster(vcClusterName, rpName);
       if (rp == null) {
          return null;
@@ -251,7 +262,8 @@ public class VcResourceUtils {
       });
    }
 
-   public static Folder findFolderByNameList(final VcDatacenter dc, final List<String> folderNames) {
+   public static Folder findFolderByNameList(final VcDatacenter dc,
+         final List<String> folderNames) {
       if (folderNames.isEmpty()) {
          return null;
       }
@@ -274,7 +286,8 @@ public class VcResourceUtils {
       });
    }
 
-   public static Folder findFolderByName(final Folder folder, final String folderName) {
+   public static Folder findFolderByName(final Folder folder,
+         final String folderName) {
       if (folderName == null) {
          return null;
       }
@@ -287,12 +300,15 @@ public class VcResourceUtils {
    }
 
    private static Folder getFolder(Folder folder, String name) throws Exception {
-      logger.debug("query folder " + name + " from parent folder " + folder.getName());
+      logger.debug("query folder " + name + " from parent folder "
+            + folder.getName());
       ManagedObjectReference[] children = folder.getChildEntity();
       for (ManagedObjectReference ref : children) {
          logger.debug("parent: " + folder.getName());
-         logger.debug("children: type " + ref.getType() + ", value " + ref.getValue() + ", guid " + ref.getServerGuid());
-         if (VmodlTypeMap.Factory.getTypeMap().getVmodlType(Folder.class).getWsdlName().equals(ref.getType())) {
+         logger.debug("children: type " + ref.getType() + ", value "
+               + ref.getValue() + ", guid " + ref.getServerGuid());
+         if (VmodlTypeMap.Factory.getTypeMap().getVmodlType(Folder.class)
+               .getWsdlName().equals(ref.getType())) {
             Folder child = MoUtil.getManagedObject(ref);
             if (child.getName().equals(name)) {
                return child;
@@ -302,7 +318,8 @@ public class VcResourceUtils {
       return null;
    }
 
-   public static boolean isObjectInFolder(final Folder folder, final String mobId) {
+   public static boolean isObjectInFolder(final Folder folder,
+         final String mobId) {
       return VcContext.inVcSessionDo(new VcSession<Boolean>() {
          @Override
          protected Boolean body() throws Exception {
@@ -325,7 +342,7 @@ public class VcResourceUtils {
             try {
                cl.update();
             } catch (Exception e) {
-               logger.info("failed to update cluster " + cl.getName() 
+               logger.info("failed to update cluster " + cl.getName()
                      + ", ignore this error.", e);
             }
             List<VcDatastore> dss = cl.getAllDatastores();
@@ -334,7 +351,7 @@ public class VcResourceUtils {
                   try {
                      ds.update();
                   } catch (Exception e) {
-                     logger.info("failed to update datastore " + ds.getName() 
+                     logger.info("failed to update datastore " + ds.getName()
                            + ", ignore this error.", e);
                   }
                }
@@ -355,7 +372,9 @@ public class VcResourceUtils {
       folderNames.add(split[1]);
       Folder folder = null;
       try {
-         folder = VcResourceUtils.findFolderByNameList(vm.getDatacenter(), folderNames);
+         folder =
+               VcResourceUtils.findFolderByNameList(vm.getDatacenter(),
+                     folderNames);
       } catch (Exception e) {
          logger.debug("Failed to find vm folder in root folder.", e);
       }
@@ -363,6 +382,58 @@ public class VcResourceUtils {
          return VcResourceUtils.isObjectInFolder(folder, vm.getId());
       } else {
          return false;
+      }
+   }
+
+   public static void checkVmMaxConfiguration(final String vmId,
+         final int cpuNumber, final long memory) {
+      int hardwareVersion = VcContext.inVcSessionDo(new VcSession<Integer>() {
+         @Override
+         protected Integer body() throws Exception {
+            final VcVirtualMachine vcVm = VcCache.getIgnoreMissing(vmId);
+            if (vcVm == null) {
+               logger.info("vm: " + vmId + " is not found.");
+               return -1;
+            }
+            VirtualMachine vimVm = vcVm.getManagedObject();
+            EnvironmentBrowser envBrowser =
+                  MoUtil.getManagedObject(vimVm.getEnvironmentBrowser());
+            ConfigOption configOption =
+                  envBrowser.queryConfigOption(null, null);
+            int hardwareVersion =
+                  configOption.getHardwareOptions().getHwVersion();
+            logger.info("hardware version is: " + hardwareVersion);
+            return hardwareVersion;
+         }
+      });
+      compareMaxConfiguration(vmId, hardwareVersion, cpuNumber, memory);
+   }
+
+
+   private static void compareMaxConfiguration(String vcVmName,
+         int hardwareVersion, int cpuNumber, long memory) {
+      if (hardwareVersion == HARDWARE_VERSION_7) {
+         if (cpuNumber > HARDWARE_VERSION_7_MAX_CPU) {
+            logger.warn("cpu number is greater than :"
+                  + HARDWARE_VERSION_7_MAX_CPU);
+            throw VcProviderException.CPU_EXCEED_LIMIT(vcVmName);
+         }
+         if (memory > HARDWARE_VERSION_7_MAX_MEMORY) {
+            logger.warn("memory is greater than : "
+                  + HARDWARE_VERSION_7_MAX_MEMORY);
+            throw VcProviderException.MEMORY_EXCEED_LIMIT(vcVmName);
+         }
+      } else if (hardwareVersion == HARDWARE_VERSION_8) {
+         if (cpuNumber > HARDWARE_VERSION_8_MAX_CPU) {
+            logger.warn("cpu number is greater than :"
+                  + HARDWARE_VERSION_8_MAX_CPU);
+            throw VcProviderException.CPU_EXCEED_LIMIT(vcVmName);
+         }
+         if (memory > HARDWARE_VERSION_8_MAX_MEMORY) {
+            logger.warn("memory is greater than : "
+                  + HARDWARE_VERSION_8_MAX_MEMORY);
+            throw VcProviderException.MEMORY_EXCEED_LIMIT(vcVmName);
+         }
       }
    }
 }

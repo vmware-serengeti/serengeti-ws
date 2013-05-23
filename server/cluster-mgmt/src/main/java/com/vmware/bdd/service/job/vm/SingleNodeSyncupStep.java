@@ -24,6 +24,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.ClusteringServiceException;
+import com.vmware.bdd.service.IScaleService;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
 import com.vmware.bdd.service.job.TrackableTasklet;
@@ -39,6 +40,7 @@ import com.vmware.bdd.utils.JobUtils;
 public class SingleNodeSyncupStep extends TrackableTasklet {
    private static final Logger logger = Logger
          .getLogger(SingleNodeSyncupStep.class);
+   private IScaleService scaleService;
 
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,
@@ -54,6 +56,7 @@ public class SingleNodeSyncupStep extends TrackableTasklet {
       String nodeName =
             getJobParameters(chunkContext).getString(
                   JobConstants.SUB_JOB_NODE_NAME);
+      NodeEntity node = getClusterEntityMgr().findNodeByName(nodeName);
       getClusterEntityMgr().syncUpNode(clusterName, nodeName);
       Boolean success =
             getFromJobExecutionContext(chunkContext,
@@ -67,12 +70,54 @@ public class SingleNodeSyncupStep extends TrackableTasklet {
       if (expectedStatus != null) {
          logger.info("the node should be in status " + expectedStatus);
          List<NodeEntity> nodes = new ArrayList<NodeEntity>();
-         NodeEntity node = getClusterEntityMgr().findNodeByName(nodeName);
          if (node != null) {
             nodes.add(node);
             JobUtils.verifyNodesStatus(nodes, expectedStatus, true);
          }
       }
+      String cpuNumberStr =
+            getJobParameters(chunkContext).getString(
+                  JobConstants.NODE_SCALE_CPU_NUMBER);
+      String memorySizeStr =
+            getJobParameters(chunkContext).getString(
+                  JobConstants.NODE_SCALE_MEMORY_SIZE);
+      int cpuNumber = 0;
+      if (cpuNumberStr != null) {
+         cpuNumber = Integer.parseInt(cpuNumberStr);
+      }
+      long memory = 0;
+      if (memorySizeStr != null) {
+         memory = Long.parseLong(memorySizeStr);
+      }
+      if (cpuNumber > 0) {
+         node.setCpuNum(cpuNumber);
+      }
+      if (memory > 0) {
+         node.setMemorySize(memory);
+         scaleService.updateSwapDisk(nodeName);
+      }
+      boolean rollback =
+            getFromJobExecutionContext(chunkContext,
+                  JobConstants.NODE_SCALE_ROLLBACK, Boolean.class);
+      if (!rollback) {
+         getClusterEntityMgr().update(node);
+      }
+
       return RepeatStatus.FINISHED;
+   }
+
+   /**
+    * @return the scaleService
+    */
+   public IScaleService getScaleService() {
+      return scaleService;
+   }
+
+   /**
+    * @param scaleService
+    *           the scaleService to set
+    */
+   public void setScaleService(IScaleService scaleService) {
+      this.scaleService = scaleService;
    }
 }

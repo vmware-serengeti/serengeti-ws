@@ -19,12 +19,6 @@
 	</beans:bean>
 
 	<job id="startClusterJob" job-repository="jobRepository">
-		<step id="softwareEnableChefClientFlagStep" next="startClusterVM">
-			<tasklet ref="softwareEnableOperationFlagTasklet" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
 		<step id="startClusterVM" next="startClusterNodeSyncup">
 			<tasklet ref="startClusterVMTasklet" />
 			<listeners>
@@ -37,14 +31,8 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="softwareBootstrapClusterStep" next="softwareDisableChefClientFlagStep">
+		<step id="softwareBootstrapClusterStep">
 			<tasklet ref="softwareBootstrapTargetTasklet" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
-		<step id="softwareDisableChefClientFlagStep">
-			<tasklet ref="softwareDisableOperationFlagTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

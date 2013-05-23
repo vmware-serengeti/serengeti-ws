@@ -28,9 +28,6 @@ public enum ManagementOperation {
    START,
    STOP,
    DESTROY,
-   CONFIGURE,
-   CONFIGURE_HARDWARE,
-   ENABLE_OPERATION_FLAG,
-   DISABLE_OPERATION_FLAG
+   CONFIGURE
    
 }

@@ -760,11 +760,11 @@ public class TestClusteringJobs extends
    @Transactional(propagation = Propagation.NEVER)
    public void testConfigIOShares() throws Exception {
       clusterMgr.prioritizeCluster(TEST_STATIC_IP_CLUSTER_NAME, null,
-            Priority.High);
+            Priority.HIGH);
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
       for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {
-         Assert.assertTrue(nodeGroup.getIoShares().equals(Priority.High),
+         Assert.assertTrue(nodeGroup.getIoShares().equals(Priority.HIGH),
                "Node group " + nodeGroup.getName()
                      + " should have HIGH io share level");
       }

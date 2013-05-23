@@ -12,12 +12,12 @@
 
 	<beans:import resource="classpath*:/META-INF/spring/jobs/common-job-context.xml" />
 
-	<beans:bean name="scaleService"
-		class="com.vmware.bdd.service.impl.ScaleService">
+	<beans:bean name="scaleService" class="com.vmware.bdd.service.impl.ScaleService">
 		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
 	</beans:bean>
 	<beans:bean name="singleNodeSyncupTasklet"
 		class="com.vmware.bdd.service.job.vm.SingleNodeSyncupStep">
+		<beans:property name="scaleService" ref="scaleService" />
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 	</beans:bean>
 	<beans:bean name="scaleSingleVMTasklet"
@@ -30,27 +30,43 @@
 		<beans:property name="clusteringService" ref="clusteringService" />
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 	</beans:bean>
-	
+	<beans:bean name="rollbackSingleVMTasklet"
+		class="com.vmware.bdd.service.job.vm.ScaleSingleVMStep">
+		<beans:property name="scaleService" ref="scaleService" />
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+		<beans:property name="rollback" value="true"></beans:property>
+	</beans:bean>
+
 	<job id="scaleSingleNodeJob" job-repository="jobRepository">
-		<step id="softwareEnableChefClientFlagStep" next="stopSingleVMStep">
-			<tasklet ref="softwareEnableOperationFlagTasklet" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
 		<step id="stopSingleVMStep" next="scaleSingleVMStep">
 			<tasklet ref="stopSingleVMTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="scaleSingleVMStep" next="startSingleVMStep">
+		<step id="scaleSingleVMStep">
 			<tasklet ref="scaleSingleVMTasklet" />
+			<next on="FAILED" to="rollbackScaleSingleVMStep" />
+			<next on="*" to="startSingleVMStep" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="startSingleVMStep" next="singleNodeSyncupAfterStartStep">
+		<step id="startSingleVMStep">
+			<tasklet ref="startSingleVMTasklet" />
+			<next on="FAILED" to="rollbackScaleSingleVMStep" />
+			<next on="*" to="singleNodeSyncupAfterStartStep" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="rollbackScaleSingleVMStep" next="startSingleVMAfterRollbackStep">
+			<tasklet ref="rollbackSingleVMTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="startSingleVMAfterRollbackStep" next="singleNodeSyncupAfterStartStep">
 			<tasklet ref="startSingleVMTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
@@ -62,20 +78,14 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="softwareBootstrapSingleNodeStep" next="softwareDisableChefClientFlagStep">
+		<step id="softwareBootstrapSingleNodeStep">
 			<tasklet ref="softwareBootstrapTargetTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="softwareDisableChefClientFlagStep">
-			<tasklet ref="softwareDisableOperationFlagTasklet" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
 		<listeners>
-			<listener ref="jobListener" />
+			<listener ref="singleNodeJobListener" />
 		</listeners>
 	</job>
 

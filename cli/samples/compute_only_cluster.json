@@ -23,11 +23,7 @@
       "storage": {
         "type": "LOCAL",
         "sizeGB": 20
-      },
-      "rpNames": [
-        "sample_resource_pool1", // change this to the resource pool added via Serengeti CLI
-        "sample_resource_pool2"  // change this to the resource pool added via Serengeti CLI
-      ]
+      }
     },
     {
       "name": "client",
@@ -43,10 +39,7 @@
       "storage": {
         "type": "LOCAL",
         "sizeGB": 50
-      },
-      "rpNames": [
-        "sample_resource_pool3"  // change this to the resource pool added via Serengeti CLI
-      ]
+      }
     }
   ],
   "configuration": {

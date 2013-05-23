@@ -504,9 +504,10 @@ public class ClusterCommands implements CommandMarker {
             return;
          }
 
-         //validate the node group type
-         if (!cluster.validateSetManualElasticity(cluster.getDistroVendor(), 
-               nodeGroupName)) {
+         //validate the node group type for elasticity params
+         if ((elasticityMode != null || minComputeNodeNum != null || targetComputeNodeNum != null)
+               && !cluster.validateSetManualElasticity(
+                     cluster.getDistroVendor(), nodeGroupName)) {
             return;
          }
 
@@ -520,6 +521,7 @@ public class ClusterCommands implements CommandMarker {
                      clusterName, Constants.OUTPUT_OP_SET_PARAM,
                      Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
                            + " elasticityMode = " + elasticityMode);
+               return;
             }
          }
 
@@ -551,6 +553,7 @@ public class ClusterCommands implements CommandMarker {
                      clusterName, Constants.OUTPUT_OP_SET_PARAM,
                      Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
                      + " " + "ioShares = " + ioShares);
+               return;
             }
          }
 
@@ -599,8 +602,9 @@ public class ClusterCommands implements CommandMarker {
          }
 
          //validate the node group type
-         if (!cluster.validateSetManualElasticity(cluster.getDistroVendor(),
-               nodeGroupName)) {
+         if ((elasticityMode || minComputeNodeNum || targetComputeNodeNum)
+               && !cluster.validateSetManualElasticity(
+                     cluster.getDistroVendor(), nodeGroupName)) {
             return;
          }
 
@@ -620,7 +624,7 @@ public class ClusterCommands implements CommandMarker {
             requestBody.setActiveComputeNodeNum(-1);
          }
          if (ioShares || all) {
-            requestBody.setIoPriority(Priority.Normal);
+            requestBody.setIoPriority(Priority.NORMAL);
          }
          requestBody.setNodeGroupName(nodeGroupName);
          restClient.setParam(cluster, requestBody);
@@ -978,7 +982,7 @@ public class ClusterCommands implements CommandMarker {
                cluster.retrieveVhmTargetNum(), cluster.getStatus());
       } else {
          String headerPattern =
-               "  %-" + width + "s%-9s%-11s%-15s%-24s%-26s%-10s\n";
+               "  %-" + width + "s%-9s%-14s%-15s%-24s%-26s%-10s\n";
          System.out.printf(headerPattern, "CLUSTER NAME", "DISTRO", "TOPOLOGY",
                "AUTO ELASTIC", "MIN COMPUTE NODES NUM",
                "TARGET COMPUTE NODES NUM", "STATUS");

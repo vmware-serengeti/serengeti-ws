@@ -19,8 +19,8 @@ import java.util.concurrent.Callable;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.DiskSize;
-import com.vmware.aurora.util.AuAssert;
 import com.vmware.aurora.vc.DeviceId;
+import com.vmware.aurora.vc.DiskSpec.AllocationType;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcVirtualMachine;
@@ -32,8 +32,6 @@ import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.utils.VcVmUtil;
 import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
 import com.vmware.vim.binding.impl.vim.vm.device.VirtualDeviceSpecImpl;
-import com.vmware.vim.binding.impl.vim.vm.device.VirtualDiskImpl;
-import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
 import com.vmware.vim.binding.vim.vm.device.VirtualDeviceSpec;
 import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
@@ -53,7 +51,9 @@ public class ScaleVMSP implements Callable<Void> {
    private DiskEntity swapDisk;
    private long newSwapSizeInMB;
 
-   public ScaleVMSP(String vmId, int cpuNumber, long memory, VcDatastore targetDs, DiskEntity swapDisk, long newSwapSizeInMB) {
+
+   public ScaleVMSP(String vmId, int cpuNumber, long memory,
+         VcDatastore targetDs, DiskEntity swapDisk, long newSwapSizeInMB) {
       this.vmId = vmId;
       this.cpuNumber = cpuNumber;
       this.memory = memory;
@@ -81,7 +81,8 @@ public class ScaleVMSP implements Callable<Void> {
             + ",memory:" + memory);
       return VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
-         protected Void body() throws Exception {
+         protected Void body() throws Exception {            
+            //start config vm if max configuration check is passed
             ConfigSpecImpl newConfigSpec = new ConfigSpecImpl();
             if (cpuNumber > 0) {
                newConfigSpec.setNumCPUs(cpuNumber);
@@ -90,30 +91,38 @@ public class ScaleVMSP implements Callable<Void> {
                VmConfigUtil.setMemoryAndBalloon(newConfigSpec, memory);
             }
 
-            VirtualDisk vmSwapDisk =
-                  VcVmUtil.findVirtualDisk(vmId, swapDisk.getExternalAddress());
-            logger.info("current ds swap disk placed: " + swapDisk.getDatastoreName());
-            logger.info("target ds to place swap disk: " + targetDs.getName());
-            if (swapDisk.getDatastoreMoId() == targetDs.getId()) {
-               VirtualDeviceSpec devSpec = new VirtualDeviceSpecImpl();
-               devSpec.setOperation(VirtualDeviceSpec.Operation.edit);
-               vmSwapDisk.setCapacityInKB(newSwapSizeInMB * 1024);
-               devSpec.setDevice(vmSwapDisk);
-               VirtualDeviceSpec[] changes = { devSpec };
-               newConfigSpec.setDeviceChange(changes);
-               logger.info("finished resize swap disk size");
-            } else {
-               vcVm.detachVirtualDisk(new DeviceId(swapDisk.getExternalAddress()), true);
-               DiskCreateSpec[] addDisks =
-                     { new DiskCreateSpec(new DeviceId(swapDisk
-                           .getExternalAddress()), targetDs,
-                           swapDisk.getName(), DiskMode.independent_persistent,
-                           DiskSize.sizeFromMB(newSwapSizeInMB), swapDisk
-                                 .getAllocType()) };
-               // changeDisks() will run vcVm.reconfigure() itself
-               vcVm.changeDisks(null, addDisks);
-            }            
-            
+            if (targetDs != null) {
+               VirtualDisk vmSwapDisk =
+                     VcVmUtil.findVirtualDisk(vmId,
+                           swapDisk.getExternalAddress());
+               logger.info("current ds swap disk placed: "
+                     + swapDisk.getDatastoreName());
+               logger.info("target ds to place swap disk: "
+                     + targetDs.getName());
+               if (swapDisk.getDatastoreMoId() == targetDs.getId()) {
+                  VirtualDeviceSpec devSpec = new VirtualDeviceSpecImpl();
+                  devSpec.setOperation(VirtualDeviceSpec.Operation.edit);
+                  vmSwapDisk.setCapacityInKB(newSwapSizeInMB * 1024);
+                  devSpec.setDevice(vmSwapDisk);
+                  VirtualDeviceSpec[] changes = { devSpec };
+                  newConfigSpec.setDeviceChange(changes);
+                  logger.info("finished resize swap disk size");
+               } else {
+                  vcVm.detachVirtualDisk(
+                        new DeviceId(swapDisk.getExternalAddress()), true);
+                  AllocationType allocType =
+                        swapDisk.getAllocType() == null ? null : AllocationType
+                              .valueOf(swapDisk.getAllocType());
+                  DiskCreateSpec[] addDisks =
+                        { new DiskCreateSpec(new DeviceId(swapDisk
+                              .getExternalAddress()), targetDs, swapDisk
+                              .getName(), DiskMode.independent_persistent,
+                              DiskSize.sizeFromMB(newSwapSizeInMB), allocType) };
+                  // changeDisks() will run vcVm.reconfigure() itself
+                  vcVm.changeDisks(null, addDisks);
+               }
+            }
+
             vcVm.reconfigure(newConfigSpec);
             return null;
          }
@@ -123,5 +132,4 @@ public class ScaleVMSP implements Callable<Void> {
          }
       });
    }
-
 }

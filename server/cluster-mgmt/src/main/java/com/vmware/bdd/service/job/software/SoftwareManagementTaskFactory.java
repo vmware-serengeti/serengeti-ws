@@ -56,15 +56,6 @@ public class SoftwareManagementTaskFactory {
       case CONFIGURE:
          clusterOperation.setAction(ClusterAction.CONFIGURE);
          break;
-      case CONFIGURE_HARDWARE:
-         clusterOperation.setAction(ClusterAction.CONFIGURE_HARDWARE);
-         break;
-      case ENABLE_OPERATION_FLAG:
-         clusterOperation.setAction(ClusterAction.ENABLE_CHEF_CLIENT);
-         break;
-      case DISABLE_OPERATION_FLAG:
-         clusterOperation.setAction(ClusterAction.DISABLE_CHEF_CLIENT);
-         break;
       default:
          break;
       }

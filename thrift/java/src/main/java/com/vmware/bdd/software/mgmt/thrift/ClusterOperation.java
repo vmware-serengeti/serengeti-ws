@@ -53,7 +53,7 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
    */
   public ClusterAction action; // required
   public String targetName; // required
-  public String specFileName; // required
+  public String specFileName; // optional
   public String logLevel; // optional
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
@@ -128,7 +128,7 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
   }
 
   // isset id assignments
-  private _Fields optionals[] = {_Fields.LOG_LEVEL};
+  private _Fields optionals[] = {_Fields.SPEC_FILE_NAME,_Fields.LOG_LEVEL};
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
@@ -136,7 +136,7 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
         new org.apache.thrift.meta_data.EnumMetaData(org.apache.thrift.protocol.TType.ENUM, ClusterAction.class)));
     tmpMap.put(_Fields.TARGET_NAME, new org.apache.thrift.meta_data.FieldMetaData("targetName", org.apache.thrift.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
-    tmpMap.put(_Fields.SPEC_FILE_NAME, new org.apache.thrift.meta_data.FieldMetaData("specFileName", org.apache.thrift.TFieldRequirementType.REQUIRED, 
+    tmpMap.put(_Fields.SPEC_FILE_NAME, new org.apache.thrift.meta_data.FieldMetaData("specFileName", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.LOG_LEVEL, new org.apache.thrift.meta_data.FieldMetaData("logLevel", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
@@ -149,13 +149,11 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
 
   public ClusterOperation(
     ClusterAction action,
-    String targetName,
-    String specFileName)
+    String targetName)
   {
     this();
     this.action = action;
     this.targetName = targetName;
-    this.specFileName = specFileName;
   }
 
   /**
@@ -506,14 +504,16 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
       sb.append(this.targetName);
     }
     first = false;
-    if (!first) sb.append(", ");
-    sb.append("specFileName:");
-    if (this.specFileName == null) {
-      sb.append("null");
-    } else {
-      sb.append(this.specFileName);
+    if (isSetSpecFileName()) {
+      if (!first) sb.append(", ");
+      sb.append("specFileName:");
+      if (this.specFileName == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.specFileName);
+      }
+      first = false;
     }
-    first = false;
     if (isSetLogLevel()) {
       if (!first) sb.append(", ");
       sb.append("logLevel:");
@@ -535,9 +535,6 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
     }
     if (targetName == null) {
       throw new org.apache.thrift.protocol.TProtocolException("Required field 'targetName' was not present! Struct: " + toString());
-    }
-    if (specFileName == null) {
-      throw new org.apache.thrift.protocol.TProtocolException("Required field 'specFileName' was not present! Struct: " + toString());
     }
     // check for sub-struct validity
   }
@@ -634,9 +631,11 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
         oprot.writeFieldEnd();
       }
       if (struct.specFileName != null) {
-        oprot.writeFieldBegin(SPEC_FILE_NAME_FIELD_DESC);
-        oprot.writeString(struct.specFileName);
-        oprot.writeFieldEnd();
+        if (struct.isSetSpecFileName()) {
+          oprot.writeFieldBegin(SPEC_FILE_NAME_FIELD_DESC);
+          oprot.writeString(struct.specFileName);
+          oprot.writeFieldEnd();
+        }
       }
       if (struct.logLevel != null) {
         if (struct.isSetLogLevel()) {
@@ -664,12 +663,17 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
       TTupleProtocol oprot = (TTupleProtocol) prot;
       oprot.writeI32(struct.action.getValue());
       oprot.writeString(struct.targetName);
-      oprot.writeString(struct.specFileName);
       BitSet optionals = new BitSet();
-      if (struct.isSetLogLevel()) {
+      if (struct.isSetSpecFileName()) {
         optionals.set(0);
       }
-      oprot.writeBitSet(optionals, 1);
+      if (struct.isSetLogLevel()) {
+        optionals.set(1);
+      }
+      oprot.writeBitSet(optionals, 2);
+      if (struct.isSetSpecFileName()) {
+        oprot.writeString(struct.specFileName);
+      }
       if (struct.isSetLogLevel()) {
         oprot.writeString(struct.logLevel);
       }
@@ -682,10 +686,12 @@ public class ClusterOperation implements org.apache.thrift.TBase<ClusterOperatio
       struct.setActionIsSet(true);
       struct.targetName = iprot.readString();
       struct.setTargetNameIsSet(true);
-      struct.specFileName = iprot.readString();
-      struct.setSpecFileNameIsSet(true);
-      BitSet incoming = iprot.readBitSet(1);
+      BitSet incoming = iprot.readBitSet(2);
       if (incoming.get(0)) {
+        struct.specFileName = iprot.readString();
+        struct.setSpecFileNameIsSet(true);
+      }
+      if (incoming.get(1)) {
         struct.logLevel = iprot.readString();
         struct.setLogLevelIsSet(true);
       }

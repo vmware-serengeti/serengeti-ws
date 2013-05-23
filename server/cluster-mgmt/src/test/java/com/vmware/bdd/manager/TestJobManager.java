@@ -8,17 +8,16 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.testng.annotations.Test;
 
+import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.service.job.JobConstants;
 
@@ -77,6 +76,79 @@ public class TestJobManager {
    }
 
    @Test
+   public void testJobWithCondition() throws Exception {
+      ApplicationContext context =
+            new ClassPathXmlApplicationContext("spring/*.xml");
+
+      JobManager jobManager = (JobManager) context.getBean("jobManager");
+      JobParametersBuilder parametersBuilder = new JobParametersBuilder();
+      JobParameters nodeParameters =
+            parametersBuilder
+                  .addString(JobConstants.SUB_JOB_NODE_NAME,
+                        "node-fail-forever")
+                  .addString("date", new Date().toString()).toJobParameters();
+      long jobExecutionId =
+            jobManager.runJob("simpleJobWithCondition", nodeParameters);
+      logger.info("started simple job with condition");
+      int retry = 0;
+      while (retry <= 5) {
+         Thread.sleep(50);
+         TaskRead tr = jobManager.getJobExecutionStatus(jobExecutionId);
+         System.out.println("progress = " + tr.getProgress());
+         if (TaskRead.Status.COMPLETED.equals(tr.getStatus())) {
+            logger.info("===========COMPLETED============");
+            break;
+         }
+         if (TaskRead.Status.FAILED.equals(tr.getStatus())
+               || TaskRead.Status.STOPPED.equals(tr.getStatus())) {
+            ++retry;
+            logger.info("failed with error message: " + tr.getErrorMessage());
+            logger.info("===========RESTART: #" + jobExecutionId
+                  + "============");
+
+            jobExecutionId = jobManager.restartJobExecution(jobExecutionId);
+         }
+      }
+
+   }
+
+   @Test
+   public void testJobWithConditionSuccess() throws Exception {
+      ApplicationContext context =
+            new ClassPathXmlApplicationContext("spring/*.xml");
+
+      JobManager jobManager = (JobManager) context.getBean("jobManager");
+      JobParametersBuilder parametersBuilder = new JobParametersBuilder();
+      JobParameters nodeParameters =
+            parametersBuilder
+                  .addString(JobConstants.SUB_JOB_NODE_NAME, "node1")
+                  .addString("date", new Date().toString()).toJobParameters();
+      long jobExecutionId =
+            jobManager.runJob("simpleJobWithCondition", nodeParameters);
+      logger.info("started simple job with condition");
+      int retry = 0;
+      while (retry <= 5) {
+         Thread.sleep(50);
+         TaskRead tr = jobManager.getJobExecutionStatus(jobExecutionId);
+         System.out.println("progress = " + tr.getProgress());
+         if (TaskRead.Status.COMPLETED.equals(tr.getStatus())) {
+            logger.info("===========COMPLETED============");
+            break;
+         }
+         if (TaskRead.Status.FAILED.equals(tr.getStatus())
+               || TaskRead.Status.STOPPED.equals(tr.getStatus())) {
+            ++retry;
+            logger.info("failed with error message: " + tr.getErrorMessage());
+            logger.info("===========RESTART: #" + jobExecutionId
+                  + "============");
+
+            jobExecutionId = jobManager.restartJobExecution(jobExecutionId);
+         }
+      }
+
+   }
+
+   @Test
    public void testRunSubJobForNodes() throws Exception {
       ApplicationContext context =
             new ClassPathXmlApplicationContext("spring/*.xml");
@@ -102,9 +174,8 @@ public class TestJobManager {
       String subJobName = "simpleJob";
       long jobExecutionId =
             jobManager.runSubJobForNodes(subJobName, jobParametersList,
-                  clusterName);
-      JobRegistry jobRegistry =
-            context.getBean("jobRegistry", JobRegistry.class);
+                  clusterName, ClusterRead.ClusterStatus.RUNNING,
+                  ClusterRead.ClusterStatus.ERROR);
       while (true) {
          Thread.sleep(50);
          TaskRead tr = jobManager.getJobExecutionStatus(jobExecutionId);
@@ -149,7 +220,8 @@ public class TestJobManager {
       jobParametersList.add(nodeParameters);
       long jobExecutionId =
             jobManager.runSubJobForNodes("simpleJob", jobParametersList,
-                  clusterName);
+                  clusterName, ClusterRead.ClusterStatus.RUNNING,
+                  ClusterRead.ClusterStatus.ERROR);
       while (true) {
          Thread.sleep(50);
          TaskRead tr = jobManager.getJobExecutionStatus(jobExecutionId);
