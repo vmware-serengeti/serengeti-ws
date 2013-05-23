@@ -129,6 +129,24 @@ module Software
           status
         end
 
+	def resetNodeProvisionAttribute(targetName)
+          clusterName = fetchClusterName(targetName)
+          nodes = []
+          query = Chef::Search::Query.new
+          query.search(:node, "cluster_name:#{clusterName}") do |n|
+            nodes.push(n) if n.name.start_with?(targetName)
+          end
+          nodes = nodes.sort_by! { |n| n.name }
+          nodes.each do |node|
+            unless(node[:provision].nil?)
+              node[:provision][:progress] = 0
+              node[:provision][:action] = ""
+              node[:provision][:status] = "VM Ready"
+              node.save
+            end
+          end
+        end
+
         def createQueryOperation
           clusterShowObject = Chef::Knife::ClusterShow.new
         end

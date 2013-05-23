@@ -46,6 +46,21 @@ module Software
             raise ::Thrift::ApplicationException.new(::Thrift::ApplicationException::MISSING_RESULT, 'getOperationStatusWithDetail failed: unknown result')
           end
 
+          def resetNodeProvisionAttribute(targetName)
+            send_resetNodeProvisionAttribute(targetName)
+            recv_resetNodeProvisionAttribute()
+          end
+
+          def send_resetNodeProvisionAttribute(targetName)
+            send_message('resetNodeProvisionAttribute', ResetNodeProvisionAttribute_args, :targetName => targetName)
+          end
+
+          def recv_resetNodeProvisionAttribute()
+            result = receive_message(ResetNodeProvisionAttribute_result)
+            raise result.coe unless result.coe.nil?
+            return
+          end
+
         end
 
         class Processor
@@ -71,6 +86,17 @@ module Software
               result.coe = coe
             end
             write_result(result, oprot, 'getOperationStatusWithDetail', seqid)
+          end
+
+          def process_resetNodeProvisionAttribute(seqid, iprot, oprot)
+            args = read_args(iprot, ResetNodeProvisionAttribute_args)
+            result = ResetNodeProvisionAttribute_result.new()
+            begin
+              @handler.resetNodeProvisionAttribute(args.targetName)
+            rescue ::Software::Mgmt::Thrift::ClusterOperationException => coe
+              result.coe = coe
+            end
+            write_result(result, oprot, 'resetNodeProvisionAttribute', seqid)
           end
 
         end
@@ -134,6 +160,38 @@ module Software
 
           FIELDS = {
             SUCCESS => {:type => ::Thrift::Types::STRUCT, :name => 'success', :class => ::Software::Mgmt::Thrift::OperationStatusWithDetail},
+            COE => {:type => ::Thrift::Types::STRUCT, :name => 'coe', :class => ::Software::Mgmt::Thrift::ClusterOperationException}
+          }
+
+          def struct_fields; FIELDS; end
+
+          def validate
+          end
+
+          ::Thrift::Struct.generate_accessors self
+        end
+
+        class ResetNodeProvisionAttribute_args
+          include ::Thrift::Struct, ::Thrift::Struct_Union
+          TARGETNAME = 1
+
+          FIELDS = {
+            TARGETNAME => {:type => ::Thrift::Types::STRING, :name => 'targetName'}
+          }
+
+          def struct_fields; FIELDS; end
+
+          def validate
+          end
+
+          ::Thrift::Struct.generate_accessors self
+        end
+
+        class ResetNodeProvisionAttribute_result
+          include ::Thrift::Struct, ::Thrift::Struct_Union
+          COE = 1
+
+          FIELDS = {
             COE => {:type => ::Thrift::Types::STRUCT, :name => 'coe', :class => ::Software::Mgmt::Thrift::ClusterOperationException}
           }
 

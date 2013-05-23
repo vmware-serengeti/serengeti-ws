@@ -48,6 +48,13 @@ public class SoftwareManagement {
      */
     public OperationStatusWithDetail getOperationStatusWithDetail(String targetName) throws ClusterOperationException, org.apache.thrift.TException;
 
+    /**
+     * Reset node's provision attribute
+     * 
+     * @param targetName
+     */
+    public void resetNodeProvisionAttribute(String targetName) throws ClusterOperationException, org.apache.thrift.TException;
+
   }
 
   public interface AsyncIface {
@@ -55,6 +62,8 @@ public class SoftwareManagement {
     public void runClusterOperation(ClusterOperation clusterOperation, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.runClusterOperation_call> resultHandler) throws org.apache.thrift.TException;
 
     public void getOperationStatusWithDetail(String targetName, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.getOperationStatusWithDetail_call> resultHandler) throws org.apache.thrift.TException;
+
+    public void resetNodeProvisionAttribute(String targetName, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.resetNodeProvisionAttribute_call> resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -128,6 +137,29 @@ public class SoftwareManagement {
         throw result.coe;
       }
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "getOperationStatusWithDetail failed: unknown result");
+    }
+
+    public void resetNodeProvisionAttribute(String targetName) throws ClusterOperationException, org.apache.thrift.TException
+    {
+      send_resetNodeProvisionAttribute(targetName);
+      recv_resetNodeProvisionAttribute();
+    }
+
+    public void send_resetNodeProvisionAttribute(String targetName) throws org.apache.thrift.TException
+    {
+      resetNodeProvisionAttribute_args args = new resetNodeProvisionAttribute_args();
+      args.setTargetName(targetName);
+      sendBase("resetNodeProvisionAttribute", args);
+    }
+
+    public void recv_resetNodeProvisionAttribute() throws ClusterOperationException, org.apache.thrift.TException
+    {
+      resetNodeProvisionAttribute_result result = new resetNodeProvisionAttribute_result();
+      receiveBase(result, "resetNodeProvisionAttribute");
+      if (result.coe != null) {
+        throw result.coe;
+      }
+      return;
     }
 
   }
@@ -212,6 +244,38 @@ public class SoftwareManagement {
       }
     }
 
+    public void resetNodeProvisionAttribute(String targetName, org.apache.thrift.async.AsyncMethodCallback<resetNodeProvisionAttribute_call> resultHandler) throws org.apache.thrift.TException {
+      checkReady();
+      resetNodeProvisionAttribute_call method_call = new resetNodeProvisionAttribute_call(targetName, resultHandler, this, ___protocolFactory, ___transport);
+      this.___currentMethod = method_call;
+      ___manager.call(method_call);
+    }
+
+    public static class resetNodeProvisionAttribute_call extends org.apache.thrift.async.TAsyncMethodCall {
+      private String targetName;
+      public resetNodeProvisionAttribute_call(String targetName, org.apache.thrift.async.AsyncMethodCallback<resetNodeProvisionAttribute_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+        super(client, protocolFactory, transport, resultHandler, false);
+        this.targetName = targetName;
+      }
+
+      public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("resetNodeProvisionAttribute", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        resetNodeProvisionAttribute_args args = new resetNodeProvisionAttribute_args();
+        args.setTargetName(targetName);
+        args.write(prot);
+        prot.writeMessageEnd();
+      }
+
+      public void getResult() throws ClusterOperationException, org.apache.thrift.TException {
+        if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
+          throw new IllegalStateException("Method call not finished!");
+        }
+        org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
+        org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
+        (new Client(prot)).recv_resetNodeProvisionAttribute();
+      }
+    }
+
   }
 
   public static class Processor<I extends Iface> extends org.apache.thrift.TBaseProcessor<I> implements org.apache.thrift.TProcessor {
@@ -227,6 +291,7 @@ public class SoftwareManagement {
     private static <I extends Iface> Map<String,  org.apache.thrift.ProcessFunction<I, ? extends  org.apache.thrift.TBase>> getProcessMap(Map<String,  org.apache.thrift.ProcessFunction<I, ? extends  org.apache.thrift.TBase>> processMap) {
       processMap.put("runClusterOperation", new runClusterOperation());
       processMap.put("getOperationStatusWithDetail", new getOperationStatusWithDetail());
+      processMap.put("resetNodeProvisionAttribute", new resetNodeProvisionAttribute());
       return processMap;
     }
 
@@ -272,6 +337,30 @@ public class SoftwareManagement {
         getOperationStatusWithDetail_result result = new getOperationStatusWithDetail_result();
         try {
           result.success = iface.getOperationStatusWithDetail(args.targetName);
+        } catch (ClusterOperationException coe) {
+          result.coe = coe;
+        }
+        return result;
+      }
+    }
+
+    public static class resetNodeProvisionAttribute<I extends Iface> extends org.apache.thrift.ProcessFunction<I, resetNodeProvisionAttribute_args> {
+      public resetNodeProvisionAttribute() {
+        super("resetNodeProvisionAttribute");
+      }
+
+      public resetNodeProvisionAttribute_args getEmptyArgsInstance() {
+        return new resetNodeProvisionAttribute_args();
+      }
+
+      protected boolean isOneway() {
+        return false;
+      }
+
+      public resetNodeProvisionAttribute_result getResult(I iface, resetNodeProvisionAttribute_args args) throws org.apache.thrift.TException {
+        resetNodeProvisionAttribute_result result = new resetNodeProvisionAttribute_result();
+        try {
+          iface.resetNodeProvisionAttribute(args.targetName);
         } catch (ClusterOperationException coe) {
           result.coe = coe;
         }
@@ -1902,6 +1991,716 @@ public class SoftwareManagement {
           struct.setSuccessIsSet(true);
         }
         if (incoming.get(1)) {
+          struct.coe = new ClusterOperationException();
+          struct.coe.read(iprot);
+          struct.setCoeIsSet(true);
+        }
+      }
+    }
+
+  }
+
+  public static class resetNodeProvisionAttribute_args implements org.apache.thrift.TBase<resetNodeProvisionAttribute_args, resetNodeProvisionAttribute_args._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("resetNodeProvisionAttribute_args");
+
+    private static final org.apache.thrift.protocol.TField TARGET_NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("targetName", org.apache.thrift.protocol.TType.STRING, (short)1);
+
+    private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
+    static {
+      schemes.put(StandardScheme.class, new resetNodeProvisionAttribute_argsStandardSchemeFactory());
+      schemes.put(TupleScheme.class, new resetNodeProvisionAttribute_argsTupleSchemeFactory());
+    }
+
+    public String targetName; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      TARGET_NAME((short)1, "targetName");
+
+      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
+
+      static {
+        for (_Fields field : EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // TARGET_NAME
+            return TARGET_NAME;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final String _fieldName;
+
+      _Fields(short thriftId, String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.TARGET_NAME, new org.apache.thrift.meta_data.FieldMetaData("targetName", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      metaDataMap = Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(resetNodeProvisionAttribute_args.class, metaDataMap);
+    }
+
+    public resetNodeProvisionAttribute_args() {
+    }
+
+    public resetNodeProvisionAttribute_args(
+      String targetName)
+    {
+      this();
+      this.targetName = targetName;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public resetNodeProvisionAttribute_args(resetNodeProvisionAttribute_args other) {
+      if (other.isSetTargetName()) {
+        this.targetName = other.targetName;
+      }
+    }
+
+    public resetNodeProvisionAttribute_args deepCopy() {
+      return new resetNodeProvisionAttribute_args(this);
+    }
+
+    @Override
+    public void clear() {
+      this.targetName = null;
+    }
+
+    public String getTargetName() {
+      return this.targetName;
+    }
+
+    public resetNodeProvisionAttribute_args setTargetName(String targetName) {
+      this.targetName = targetName;
+      return this;
+    }
+
+    public void unsetTargetName() {
+      this.targetName = null;
+    }
+
+    /** Returns true if field targetName is set (has been assigned a value) and false otherwise */
+    public boolean isSetTargetName() {
+      return this.targetName != null;
+    }
+
+    public void setTargetNameIsSet(boolean value) {
+      if (!value) {
+        this.targetName = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, Object value) {
+      switch (field) {
+      case TARGET_NAME:
+        if (value == null) {
+          unsetTargetName();
+        } else {
+          setTargetName((String)value);
+        }
+        break;
+
+      }
+    }
+
+    public Object getFieldValue(_Fields field) {
+      switch (field) {
+      case TARGET_NAME:
+        return getTargetName();
+
+      }
+      throw new IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new IllegalArgumentException();
+      }
+
+      switch (field) {
+      case TARGET_NAME:
+        return isSetTargetName();
+      }
+      throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof resetNodeProvisionAttribute_args)
+        return this.equals((resetNodeProvisionAttribute_args)that);
+      return false;
+    }
+
+    public boolean equals(resetNodeProvisionAttribute_args that) {
+      if (that == null)
+        return false;
+
+      boolean this_present_targetName = true && this.isSetTargetName();
+      boolean that_present_targetName = true && that.isSetTargetName();
+      if (this_present_targetName || that_present_targetName) {
+        if (!(this_present_targetName && that_present_targetName))
+          return false;
+        if (!this.targetName.equals(that.targetName))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    public int compareTo(resetNodeProvisionAttribute_args other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      resetNodeProvisionAttribute_args typedOther = (resetNodeProvisionAttribute_args)other;
+
+      lastComparison = Boolean.valueOf(isSetTargetName()).compareTo(typedOther.isSetTargetName());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetTargetName()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.targetName, typedOther.targetName);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("resetNodeProvisionAttribute_args(");
+      boolean first = true;
+
+      sb.append("targetName:");
+      if (this.targetName == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.targetName);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class resetNodeProvisionAttribute_argsStandardSchemeFactory implements SchemeFactory {
+      public resetNodeProvisionAttribute_argsStandardScheme getScheme() {
+        return new resetNodeProvisionAttribute_argsStandardScheme();
+      }
+    }
+
+    private static class resetNodeProvisionAttribute_argsStandardScheme extends StandardScheme<resetNodeProvisionAttribute_args> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, resetNodeProvisionAttribute_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // TARGET_NAME
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.targetName = iprot.readString();
+                struct.setTargetNameIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, resetNodeProvisionAttribute_args struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.targetName != null) {
+          oprot.writeFieldBegin(TARGET_NAME_FIELD_DESC);
+          oprot.writeString(struct.targetName);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class resetNodeProvisionAttribute_argsTupleSchemeFactory implements SchemeFactory {
+      public resetNodeProvisionAttribute_argsTupleScheme getScheme() {
+        return new resetNodeProvisionAttribute_argsTupleScheme();
+      }
+    }
+
+    private static class resetNodeProvisionAttribute_argsTupleScheme extends TupleScheme<resetNodeProvisionAttribute_args> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, resetNodeProvisionAttribute_args struct) throws org.apache.thrift.TException {
+        TTupleProtocol oprot = (TTupleProtocol) prot;
+        BitSet optionals = new BitSet();
+        if (struct.isSetTargetName()) {
+          optionals.set(0);
+        }
+        oprot.writeBitSet(optionals, 1);
+        if (struct.isSetTargetName()) {
+          oprot.writeString(struct.targetName);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, resetNodeProvisionAttribute_args struct) throws org.apache.thrift.TException {
+        TTupleProtocol iprot = (TTupleProtocol) prot;
+        BitSet incoming = iprot.readBitSet(1);
+        if (incoming.get(0)) {
+          struct.targetName = iprot.readString();
+          struct.setTargetNameIsSet(true);
+        }
+      }
+    }
+
+  }
+
+  public static class resetNodeProvisionAttribute_result implements org.apache.thrift.TBase<resetNodeProvisionAttribute_result, resetNodeProvisionAttribute_result._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("resetNodeProvisionAttribute_result");
+
+    private static final org.apache.thrift.protocol.TField COE_FIELD_DESC = new org.apache.thrift.protocol.TField("coe", org.apache.thrift.protocol.TType.STRUCT, (short)1);
+
+    private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
+    static {
+      schemes.put(StandardScheme.class, new resetNodeProvisionAttribute_resultStandardSchemeFactory());
+      schemes.put(TupleScheme.class, new resetNodeProvisionAttribute_resultTupleSchemeFactory());
+    }
+
+    public ClusterOperationException coe; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      COE((short)1, "coe");
+
+      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
+
+      static {
+        for (_Fields field : EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // COE
+            return COE;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final String _fieldName;
+
+      _Fields(short thriftId, String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.COE, new org.apache.thrift.meta_data.FieldMetaData("coe", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRUCT)));
+      metaDataMap = Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(resetNodeProvisionAttribute_result.class, metaDataMap);
+    }
+
+    public resetNodeProvisionAttribute_result() {
+    }
+
+    public resetNodeProvisionAttribute_result(
+      ClusterOperationException coe)
+    {
+      this();
+      this.coe = coe;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public resetNodeProvisionAttribute_result(resetNodeProvisionAttribute_result other) {
+      if (other.isSetCoe()) {
+        this.coe = new ClusterOperationException(other.coe);
+      }
+    }
+
+    public resetNodeProvisionAttribute_result deepCopy() {
+      return new resetNodeProvisionAttribute_result(this);
+    }
+
+    @Override
+    public void clear() {
+      this.coe = null;
+    }
+
+    public ClusterOperationException getCoe() {
+      return this.coe;
+    }
+
+    public resetNodeProvisionAttribute_result setCoe(ClusterOperationException coe) {
+      this.coe = coe;
+      return this;
+    }
+
+    public void unsetCoe() {
+      this.coe = null;
+    }
+
+    /** Returns true if field coe is set (has been assigned a value) and false otherwise */
+    public boolean isSetCoe() {
+      return this.coe != null;
+    }
+
+    public void setCoeIsSet(boolean value) {
+      if (!value) {
+        this.coe = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, Object value) {
+      switch (field) {
+      case COE:
+        if (value == null) {
+          unsetCoe();
+        } else {
+          setCoe((ClusterOperationException)value);
+        }
+        break;
+
+      }
+    }
+
+    public Object getFieldValue(_Fields field) {
+      switch (field) {
+      case COE:
+        return getCoe();
+
+      }
+      throw new IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new IllegalArgumentException();
+      }
+
+      switch (field) {
+      case COE:
+        return isSetCoe();
+      }
+      throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof resetNodeProvisionAttribute_result)
+        return this.equals((resetNodeProvisionAttribute_result)that);
+      return false;
+    }
+
+    public boolean equals(resetNodeProvisionAttribute_result that) {
+      if (that == null)
+        return false;
+
+      boolean this_present_coe = true && this.isSetCoe();
+      boolean that_present_coe = true && that.isSetCoe();
+      if (this_present_coe || that_present_coe) {
+        if (!(this_present_coe && that_present_coe))
+          return false;
+        if (!this.coe.equals(that.coe))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    public int compareTo(resetNodeProvisionAttribute_result other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      resetNodeProvisionAttribute_result typedOther = (resetNodeProvisionAttribute_result)other;
+
+      lastComparison = Boolean.valueOf(isSetCoe()).compareTo(typedOther.isSetCoe());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetCoe()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.coe, typedOther.coe);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
+      }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("resetNodeProvisionAttribute_result(");
+      boolean first = true;
+
+      sb.append("coe:");
+      if (this.coe == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.coe);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+      // check for sub-struct validity
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class resetNodeProvisionAttribute_resultStandardSchemeFactory implements SchemeFactory {
+      public resetNodeProvisionAttribute_resultStandardScheme getScheme() {
+        return new resetNodeProvisionAttribute_resultStandardScheme();
+      }
+    }
+
+    private static class resetNodeProvisionAttribute_resultStandardScheme extends StandardScheme<resetNodeProvisionAttribute_result> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, resetNodeProvisionAttribute_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // COE
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
+                struct.coe = new ClusterOperationException();
+                struct.coe.read(iprot);
+                struct.setCoeIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, resetNodeProvisionAttribute_result struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.coe != null) {
+          oprot.writeFieldBegin(COE_FIELD_DESC);
+          struct.coe.write(oprot);
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class resetNodeProvisionAttribute_resultTupleSchemeFactory implements SchemeFactory {
+      public resetNodeProvisionAttribute_resultTupleScheme getScheme() {
+        return new resetNodeProvisionAttribute_resultTupleScheme();
+      }
+    }
+
+    private static class resetNodeProvisionAttribute_resultTupleScheme extends TupleScheme<resetNodeProvisionAttribute_result> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, resetNodeProvisionAttribute_result struct) throws org.apache.thrift.TException {
+        TTupleProtocol oprot = (TTupleProtocol) prot;
+        BitSet optionals = new BitSet();
+        if (struct.isSetCoe()) {
+          optionals.set(0);
+        }
+        oprot.writeBitSet(optionals, 1);
+        if (struct.isSetCoe()) {
+          struct.coe.write(oprot);
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, resetNodeProvisionAttribute_result struct) throws org.apache.thrift.TException {
+        TTupleProtocol iprot = (TTupleProtocol) prot;
+        BitSet incoming = iprot.readBitSet(1);
+        if (incoming.get(0)) {
           struct.coe = new ClusterOperationException();
           struct.coe.read(iprot);
           struct.setCoeIsSet(true);

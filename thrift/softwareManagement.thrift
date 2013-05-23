@@ -114,5 +114,11 @@ service SoftwareManagement{
     Query operation progress
    */
   OperationStatusWithDetail getOperationStatusWithDetail(1:string targetName) throws (1:ClusterOperationException coe),
+ 
+  /**
+   Reset node's provision attribute
+  */
+  void resetNodeProvisionAttribute(1:string targetName) throws (1:ClusterOperationException coe),
 }
+
 

@@ -50,19 +50,24 @@ public class IronfanSoftwareManagementTask implements ISoftwareManagementTask {
             + " operation: " + clusterOperation.getAction().toString());
       Map<String, Object> result = new HashMap<String, Object>();
       //This is for create cluster test only. As there is UT in TestClusteringJobs.testCreateCluster
-      if(Configuration.getBoolean("management.thrift.mock",false)){
+      if (Configuration.getBoolean("management.thrift.mock", false)) {
          result.put("succeed", true);
          result.put("exitCode", 0);
          return result;
       }
       final SoftwareManagementClient client = new SoftwareManagementClient();
       client.init();
-      
+
+      if (clusterOperation.getAction().ordinal() != ClusterAction.QUERY
+            .ordinal()) {
+         //Reset node's provision attribute
+         client.resetNodeProvisionAttribute(clusterOperation.getTargetName());
+      }
+
       Thread progressThread = null;
       ProgressMonitor monitor = null;
       ClusterAction action = clusterOperation.getAction();
-      if (action != ClusterAction.STOP
-            && action != ClusterAction.DESTROY) {
+      if (action != ClusterAction.STOP && action != ClusterAction.DESTROY) {
          monitor =
                new ProgressMonitor(clusterOperation.getTargetName(),
                      statusUpdater, clusterEntityMgr);
@@ -95,8 +100,8 @@ public class IronfanSoftwareManagementTask implements ISoftwareManagementTask {
       statusUpdater.setProgress(((double) (detailedStatus.getOperationStatus()
             .getProgress())) / 100);
       boolean finished =
-            clusterEntityMgr.handleOperationStatus(
-                  clusterOperation.getTargetName().split("-")[0], detailedStatus);
+            clusterEntityMgr.handleOperationStatus(clusterOperation
+                  .getTargetName().split("-")[0], detailedStatus);
       logger.info("updated progress. finished? " + finished);
 
       boolean succeed = true;

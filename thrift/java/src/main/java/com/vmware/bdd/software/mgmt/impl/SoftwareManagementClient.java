@@ -16,6 +16,7 @@ package com.vmware.bdd.software.mgmt.impl;
 
 
 import org.apache.log4j.Logger;
+import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
@@ -104,5 +105,26 @@ public class SoftwareManagementClient implements SoftwareManagement.Iface {
          throw SoftwareManagementException.GET_OPERATIOIN_STATUS_UNKNOWN_ERROR(
                t, targetName);
       }
+   }
+
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.software.mgmt.thrift.SoftwareManagement.Iface#resetNodeProvisionAttribute(java.lang.String)
+    */
+   @Override
+   public void resetNodeProvisionAttribute(String targetName)
+         throws ClusterOperationException, TException {
+      try {
+         managementClient.resetNodeProvisionAttribute(targetName);
+      } catch (ClusterOperationException e) {
+         logger.error("Failed to reset node provision attribute for target: "
+               + targetName);
+         throw SoftwareManagementException.GET_OPERATIOIN_STATUS_FAILURE(e,
+               targetName, e.getMessage());
+      } catch (Throwable t) {
+         throw SoftwareManagementException.GET_OPERATIOIN_STATUS_UNKNOWN_ERROR(
+               t, targetName);
+      }
+      
    }
 }
