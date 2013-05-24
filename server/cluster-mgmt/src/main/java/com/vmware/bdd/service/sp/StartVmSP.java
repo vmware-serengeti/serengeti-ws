@@ -14,22 +14,19 @@
  ***************************************************************************/
 package com.vmware.bdd.service.sp;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.IPrePostPowerOn;
-import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.Constants;
-import com.vmware.bdd.utils.VcVmUtil;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
+import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.VcVmUtil;
 
 /**
  * Store Procedure for start a vm
@@ -39,14 +36,12 @@ public class StartVmSP implements Callable<Void> {
    private static final Logger logger = Logger.getLogger(StartVmSP.class);
    private String vmId;
    private final IPrePostPowerOn postPowerOn;
-   private final Map<String, String> bootupConfigs;
    private VcHost host;
 
    public StartVmSP(VcVirtualMachine vcVm, IPrePostPowerOn postPowerOn,
-         Map<String, String> bootupConfigs, VcHost host) {
+         VcHost host) {
       this.vmId = vcVm.getId();
       this.postPowerOn = postPowerOn;
-      this.bootupConfigs = bootupConfigs;
       this.host = host;
    }
 
@@ -71,15 +66,17 @@ public class StartVmSP implements Callable<Void> {
       VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
          protected Void body() throws Exception {
-            // set the bootup configs
-            Map<String, String> guestConfigs;
-            if (bootupConfigs == null) {
-               guestConfigs = new HashMap<String, String>();
-            } else {
-               guestConfigs = bootupConfigs;
-            }
-            VcVmUtil.addBootupUUID(guestConfigs);
-            vcVm.setGuestConfigs(guestConfigs);
+            Map<String, String> bootupConfigs = vcVm.getGuestConfigs();
+            AuAssert.check(bootupConfigs != null);
+            
+            /* serengeti operation flag - a random generated uuid
+            * a script inside the vm compares this uuid with its stored value, if they are
+            * different, this VM decides it's started by Serengeti, otherwise, it's started
+            * by third parties.
+            */
+            VcVmUtil.addBootupUUID(bootupConfigs);
+            vcVm.setGuestConfigs(bootupConfigs);
+
             vcVm.powerOn(host);
             return null;
          }

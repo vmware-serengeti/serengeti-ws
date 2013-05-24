@@ -741,8 +741,7 @@ public class ClusteringService implements IClusteringService {
                Scheduler
                      .executeStoredProcedures(
                            com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
-                           storeProcedures, storeProcedures.length,
-                           callback);
+                           storeProcedures, storeProcedures.length, callback);
          if (result == null) {
             logger.error("No VM is created.");
             return false;
@@ -956,10 +955,8 @@ public class ClusteringService implements IClusteringService {
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(name);
       logger.info("startCluster, start to create store procedures.");
       List<Callable<Void>> storeProcedures = new ArrayList<Callable<Void>>();
-      //TODO: integrate Ironfan to set boot up variables
-      Map<String, String> bootupConfigs = new HashMap<String, String>();
-      for (int i = 0; i < nodes.size(); i++) {
 
+      for (int i = 0; i < nodes.size(); i++) {
          NodeEntity node = nodes.get(i);
          if (node.getMoId() == null) {
             logger.info("VC vm does not exist for node: " + node.getVmName());
@@ -971,12 +968,13 @@ public class ClusteringService implements IClusteringService {
             logger.info("VC vm does not exist for node: " + node.getVmName());
             continue;
          }
+
          QueryIpAddress query = new QueryIpAddress(600);
          VcHost host = null;
          if (node.getHostName() != null) {
             host = VcResourceUtils.findHost(node.getHostName());
          }
-         StartVmSP startSp = new StartVmSP(vcVm, query, bootupConfigs, host);
+         StartVmSP startSp = new StartVmSP(vcVm, query, host);
          storeProcedures.add(startSp);
       }
 
@@ -1401,23 +1399,23 @@ public class ClusteringService implements IClusteringService {
       }
    }
 
-
    @Override
    public boolean startSingleVM(String clusterName, String nodeName,
          StatusUpdater statusUpdator) {
       NodeEntity node = this.clusterEntityMgr.findNodeByName(nodeName);
       QueryIpAddress query = new QueryIpAddress(600);
+
       VcHost host = null;
       if (node.getHostName() != null) {
          host = VcResourceUtils.findHost(node.getHostName());
       }
-      Map<String, String> bootupConfigs = new HashMap<String, String>();
+
       VcVirtualMachine vcVm = VcCache.getIgnoreMissing(node.getMoId());
       if (vcVm == null) {
          logger.info("VC vm does not exist for node: " + node.getVmName());
          return false;
       }
-      StartVmSP startVMSP = new StartVmSP(vcVm, query, bootupConfigs, host);
+      StartVmSP startVMSP = new StartVmSP(vcVm, query, host);
       return VcVmUtil.runSPOnSingleVM(node, startVMSP);
    }
 

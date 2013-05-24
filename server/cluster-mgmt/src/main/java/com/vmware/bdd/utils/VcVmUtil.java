@@ -15,7 +15,6 @@
 package com.vmware.bdd.utils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -24,14 +23,15 @@ import java.util.concurrent.Callable;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.DiskSchema;
+import com.vmware.aurora.composition.DiskSchema.Disk;
 import com.vmware.aurora.composition.NetworkSchema;
+import com.vmware.aurora.composition.NetworkSchema.Network;
 import com.vmware.aurora.composition.ResourceSchema;
 import com.vmware.aurora.composition.VmSchema;
-import com.vmware.aurora.composition.DiskSchema.Disk;
-import com.vmware.aurora.composition.NetworkSchema.Network;
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.vc.DeviceId;
+import com.vmware.aurora.vc.DiskSpec.AllocationType;
 import com.vmware.aurora.vc.MoUtil;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcCluster;
@@ -39,7 +39,6 @@ import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.VmConfigUtil;
-import com.vmware.aurora.vc.DiskSpec.AllocationType;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.ClusterCreate;
