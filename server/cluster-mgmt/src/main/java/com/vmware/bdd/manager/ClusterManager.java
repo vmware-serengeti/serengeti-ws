@@ -874,8 +874,7 @@ public class ClusterManager {
 
       List<String> nodeGroupNames = new ArrayList<String>();
       if ((enableAuto != null || minComputeNodeNum != null || activeComputeNodeNum != null)
-            && !clusterRead.validateSetManualElasticity(
-                  cluster.getDistroVendor(), nodeGroupName, nodeGroupNames)) {
+            && !clusterRead.validateSetManualElasticity(nodeGroupName, nodeGroupNames)) {
          if (nodeGroupName != null) {
             throw BddException.INVALID_PARAMETER("nodeGroup", nodeGroupName);
          } else {
@@ -910,9 +909,8 @@ public class ClusterManager {
                clusterName, "it should be in RUNNING or STOPPED status");
       }
 
-      if (enableAuto != null && enableAuto) {
-         boolean sucess =
-               clusteringService.setAutoElasticity(clusterName, null);
+      if (enableAuto != null) {
+         boolean sucess = clusteringService.setAutoElasticity(clusterName, null);
          if (!sucess) {
             throw ClusterManagerException
                   .SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(clusterName, "failed");

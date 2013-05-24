@@ -92,7 +92,7 @@ public class Constants {
    public static final String OUTPUT_OP_RESET_PARAM = "resetParam";
    public static final String OUTPUT_OP_QUOTA_SET = "quota";
    public static final String OUTPUT_OP_FIX = "fix";
-   public static final String OUTPUT_OP_RESULT_ADJUST = "ajusted";
+   public static final String OUTPUT_OP_RESULT_ADJUST = "adjusted";
    public static final String OUTPUT_OP_RESUME = "resume";
    public static final String OUTPUT_OP_RESULT_FAIL = "failed";
    public static final String OUTPUT_OP_RESULT_CREAT = "created";
@@ -164,6 +164,7 @@ public class Constants {
    public static final String PARAM_NOT_CONTAIN_HORIZONTAL_LINE = " cannot contain '-'.";
    public static final String PARAM_NOT_CONTAIN_BLANK_SPACE = " cannot contain blank space.";
    public static final String PARAM_SHOULD_SPECIFY_DISK = "You should specify --disk .";
+   public static final String PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP = "The cluster must have compute only node group(s), and set/resetParam is only applicable to compute only node groups.";
 
    public static final int FORMAT_COLUMN_DISTANCE = 2;
    public static final String FORMAT_TABLE_COLUMN_NAME = "NAME";

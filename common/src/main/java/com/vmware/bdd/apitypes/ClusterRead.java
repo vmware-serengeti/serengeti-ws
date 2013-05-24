@@ -70,6 +70,8 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
    private boolean nodeGroupSorted;
    
+   private boolean dcSeperation;
+
    public ClusterRead() {
 
    }
@@ -140,6 +142,9 @@ public class ClusterRead implements Comparable<ClusterRead> {
    }
 
    public List<NodeGroupRead> getNodeGroups() {
+      if (nodeGroups == null) {
+         return null;
+      }
       NodeGroupReadComparactor comparactor = new NodeGroupReadComparactor();
       //Note: if node groups will be modified by server, please consider collections.unmodifiedList() first. 
       if (!nodeGroupSorted) {
@@ -177,10 +182,9 @@ public class ClusterRead implements Comparable<ClusterRead> {
     * Validate the manual elastic parameters, make sure the specified node group is a compute only node group.
     * If user have not specified the node group name,the cluster must contain compute only node.   
     */
-   public boolean validateSetManualElasticity(String distroVendor,
-         String nodeGroupName, List<String>... nodeGroupNames) {
+   public boolean validateSetManualElasticity(String nodeGroupName, List<String>... nodeGroupNames) {
+      List<NodeGroupRead> nodeGroups = getNodeGroups();
       if (!CommonUtil.isBlank(nodeGroupName)) {
-         List<NodeGroupRead> nodeGroups = getNodeGroups();
          if (nodeGroups != null && !nodeGroups.isEmpty()) {
             List<String> invalidNodeGroup = new ArrayList<String>();
             if (nodeGroupNames != null && nodeGroupNames.length > 0) {
@@ -205,44 +209,43 @@ public class ClusterRead implements Comparable<ClusterRead> {
                }
             }
             if (!invalidNodeGroup.isEmpty()) {
-               System.out.println("Adjustment failed: The specified node group is not a compute only node group or the group name is incorrect.");
                return false;
             }
          } else {
-            System.out
-                  .println("Adjustment failed: There is not node group under the cluster "
-                        + getName() + " !");
             return false;
          }
       } else {
-         int count = 0;
-         for (NodeGroupRead nodeGroup : getNodeGroups()) {
-            boolean isComputeOnly = false;
-            if (distroVendor.equalsIgnoreCase(Constants.MAPR_VENDOR)) {
-               if (nodeGroup.getRoles() != null && nodeGroup.getRoles().contains(HadoopRole.MAPR_TASKTRACKER_ROLE.toString()) &&
-                     !nodeGroup.getRoles().contains(HadoopRole.MAPR_NFS_ROLE.toString())){
-                  isComputeOnly = true;
-               } 
-            } else {
-               if (nodeGroup.getRoles() != null
-                     && nodeGroup.getRoles().contains(
-                           HadoopRole.HADOOP_TASKTRACKER.toString())
-                           && (nodeGroup.getRoles().size() == 1 || (nodeGroup.getRoles()
-                                 .size() == 2 && nodeGroup.getRoles().contains(
-                                       HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
-                  isComputeOnly = true;
-               }               
+         if (nodeGroups != null && !nodeGroups.isEmpty()) {
+            int count = 0;
+            for (NodeGroupRead nodeGroup : getNodeGroups()) {
+               boolean isComputeOnly = false;
+               if (distroVendor.equalsIgnoreCase(Constants.MAPR_VENDOR)) {
+                  if (nodeGroup.getRoles() != null && nodeGroup.getRoles().contains(HadoopRole.MAPR_TASKTRACKER_ROLE.toString()) &&
+                        !nodeGroup.getRoles().contains(HadoopRole.MAPR_NFS_ROLE.toString())){
+                     isComputeOnly = true;
+                  }
+               } else {
+                  if (nodeGroup.getRoles() != null
+                        && nodeGroup.getRoles().contains(
+                              HadoopRole.HADOOP_TASKTRACKER.toString())
+                              && (nodeGroup.getRoles().size() == 1 || (nodeGroup.getRoles()
+                                    .size() == 2 && nodeGroup.getRoles().contains(
+                                          HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
+                     isComputeOnly = true;
+                  }
+               }
+               if (isComputeOnly) {
+                  if (nodeGroupNames != null && nodeGroupNames.length > 0) {
+                     nodeGroupNames[0].add(nodeGroup.getName());
+                  }
+                  count++;
+               }
             }
-            if (isComputeOnly) {
-            if (nodeGroupNames != null && nodeGroupNames.length > 0) {
-               nodeGroupNames[0].add(nodeGroup.getName());
-            }
-            count++;
+            if (count == 0) {
+               return false;
             }
          }
-         if (count == 0) {
-            System.out
-                  .println("Adjustment failed: There's no compute only nodes in the cluster.");
+         else {
             return false;
          }
       }
@@ -393,5 +396,13 @@ public class ClusterRead implements Comparable<ClusterRead> {
          return true;
       }
       return false;
+   }
+
+   public boolean isDcSeperation() {
+      return dcSeperation;
+   }
+
+   public void setDcSeperation(boolean dcSeperation) {
+      this.dcSeperation = dcSeperation;
    }
 }

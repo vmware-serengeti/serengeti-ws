@@ -507,8 +507,10 @@ public class ClusterCommands implements CommandMarker {
 
          //validate the node group type for elasticity params
          if ((elasticityMode != null || minComputeNodeNum != null || targetComputeNodeNum != null)
-               && !cluster.validateSetManualElasticity(
-                     cluster.getDistroVendor(), nodeGroupName)) {
+               && !cluster.validateSetManualElasticity(nodeGroupName)) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  clusterName, Constants.OUTPUT_OP_SET_PARAM,
+                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
             return;
          }
 
@@ -603,9 +605,11 @@ public class ClusterCommands implements CommandMarker {
          }
 
          //validate the node group type
-         if ((elasticityMode || minComputeNodeNum || targetComputeNodeNum)
-               && !cluster.validateSetManualElasticity(
-                     cluster.getDistroVendor(), nodeGroupName)) {
+         if ((elasticityMode || minComputeNodeNum || targetComputeNodeNum) 
+               && !cluster.validateSetManualElasticity(nodeGroupName)) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  clusterName, Constants.OUTPUT_OP_RESET_PARAM,
+                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
             return;
          }
 

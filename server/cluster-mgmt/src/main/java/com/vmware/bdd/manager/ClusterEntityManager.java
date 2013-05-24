@@ -334,10 +334,11 @@ public class ClusterEntityManager {
    @SuppressWarnings("rawtypes")
    public ClusterRead toClusterRead(String clusterName) {
       ClusterEntity cluster = findByName(clusterName);
+      ClusterStatus clusterStatus = cluster.getStatus();
       ClusterRead clusterRead = new ClusterRead();
       clusterRead.setInstanceNum(cluster.getRealInstanceNum());
       clusterRead.setName(cluster.getName());
-      clusterRead.setStatus(cluster.getStatus());
+      clusterRead.setStatus(clusterStatus);
       clusterRead.setDistro(cluster.getDistro());
       clusterRead.setDistroVendor(cluster.getDistroVendor());
       clusterRead.setTopologyPolicy(cluster.getTopologyPolicy());
@@ -363,7 +364,7 @@ public class ClusterEntityManager {
             }
          }
       }
-      
+
       Set<VcResourcePoolEntity> rps = cluster.getUsedRps();
       List<ResourcePoolRead> rpReads = new ArrayList<ResourcePoolRead>(rps.size());
       for (VcResourcePoolEntity rp : rps) {
@@ -372,7 +373,11 @@ public class ClusterEntityManager {
          rpReads.add(rpRead);
       }
       clusterRead.setResourcePools(rpReads);
-      
+
+      if (clusterStatus == ClusterStatus.RUNNING || clusterStatus == ClusterStatus.STOPPED) {
+         clusterRead.setDcSeperation(clusterRead.validateSetManualElasticity(null)? true : false);
+      }
+
       return clusterRead;
    }
 
