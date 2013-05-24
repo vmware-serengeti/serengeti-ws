@@ -21,6 +21,8 @@ import java.util.concurrent.Callable;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.vim.binding.impl.vim.ResourceAllocationInfoImpl;
 import com.vmware.vim.binding.impl.vim.SharesInfoImpl;
 import com.vmware.vim.binding.vim.ResourceAllocationInfo;
@@ -35,11 +37,18 @@ public class CreateResourcePoolSP implements Callable<Void> {
 
    private VcResourcePool parentVcResourcePool;
    private String childVcResourcePoolName;
+   private NodeGroupCreate nodeGroup;
 
    public CreateResourcePoolSP(VcResourcePool parentVcResourcePool,
          final String childVcResourcePoolName) {
+      this(parentVcResourcePool, childVcResourcePoolName, null);
+   }
+
+   public CreateResourcePoolSP(VcResourcePool parentVcResourcePool,
+         final String childVcResourcePoolName, NodeGroupCreate nodeGroup) {
       this.parentVcResourcePool = parentVcResourcePool;
       this.childVcResourcePoolName = childVcResourcePoolName;
+      this.nodeGroup = nodeGroup;
    }
 
    @Override
@@ -68,7 +77,11 @@ public class CreateResourcePoolSP implements Callable<Void> {
          Boolean expandable = Boolean.valueOf(true);
          Long limit = Long.valueOf(-1);
          SharesInfo shares = new SharesInfoImpl();
-         shares.setLevel(SharesInfo.Level.normal);
+         if (nodeGroup != null && nodeGroup.isComputeOnlyGroup()) {
+            shares.setLevel(SharesInfo.Level.low);
+         } else {
+            shares.setLevel(SharesInfo.Level.normal);
+         }
          ResourceAllocationInfo cpu =
                new ResourceAllocationInfoImpl(reservation, expandable, limit,
                      shares, null);

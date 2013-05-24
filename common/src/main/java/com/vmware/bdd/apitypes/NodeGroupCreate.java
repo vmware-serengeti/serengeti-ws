@@ -287,6 +287,21 @@ public class NodeGroupCreate {
       return false;
    }
 
+   @JsonIgnore
+   public boolean isComputeOnlyGroup() {
+      List<String> roles = getRoles();
+      if (roles != null 
+            && ((roles.size() == 1 && roles.get(0).equals(HadoopRole.HADOOP_TASKTRACKER.toString())) 
+            || (roles.size() == 2 && roles.contains(HadoopRole.HADOOP_TASKTRACKER.toString())
+            && roles.contains(HadoopRole.TEMPFS_CLIENT_ROLE.toString()))
+            || (roles.contains(HadoopRole.MAPR_TASKTRACKER_ROLE.toString())
+                  && !roles.contains(HadoopRole.MAPR_NFS_ROLE.toString())))) {
+         return true;
+      } else {
+         return false;
+      }
+   }
+
    public boolean validatePlacementPolicies(ClusterCreate cluster,
          Map<String, NodeGroupCreate> groups, List<String> failedMsgList,
          List<String> warningMsgList) {

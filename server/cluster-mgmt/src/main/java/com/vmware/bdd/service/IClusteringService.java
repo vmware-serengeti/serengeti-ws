@@ -106,14 +106,14 @@ public interface IClusteringService {
    public List<BaseNode> getBadNodes(ClusterCreate cluster, List<BaseNode> existingNodes);
 
    /**
-    *
     * @param networkAdd
     * @param vNodes
     * @param statusUpdator
     * @param occupiedIps
     * @return
     */
-   public boolean createVcVms(NetworkAdd networkAdd, List<BaseNode> vNodes, StatusUpdater statusUpdator,
+   public boolean createVcVms(NetworkAdd networkAdd,
+         List<BaseNode> vNodes, StatusUpdater statusUpdator,
          Set<String> occupiedIps);
 
    /**

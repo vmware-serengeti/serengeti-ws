@@ -333,4 +333,5 @@ public class ClusterEntity extends EntityBase {
    public void setVhmJobTrackerPort(String vhmJobTrackerPort) {
       this.vhmJobTrackerPort = vhmJobTrackerPort;
    }
+
 }

@@ -546,9 +546,9 @@ public class ClusteringService implements IClusteringService {
 
    private Map<String, Integer> collectResourcePoolInfo(List<BaseNode> vNodes,
          Map<String, List<String>> vcClusterRpNamesMap,
-         Map<Long, List<String>> rpNodeGroupNamesMap) {
+         Map<Long, List<NodeGroupCreate>> rpNodeGroupsMap) {
       List<String> resourcePoolNames = null;
-      List<String> nodeGroupNames = null;
+      List<NodeGroupCreate> nodeGroups = null;
       int resourcePoolNameCount = 0;
       int nodeGroupNameCount = 0;
       for (BaseNode baseNode : vNodes) {
@@ -568,15 +568,15 @@ public class ClusteringService implements IClusteringService {
          }
          String vcRp = baseNode.getTargetRp();
          long rpHashCode = vcCluster.hashCode() ^ (vcCluster + vcRp).hashCode();
-         if (!rpNodeGroupNamesMap.containsKey(rpHashCode)) {
-            nodeGroupNames = new ArrayList<String>();
+         if (!rpNodeGroupsMap.containsKey(rpHashCode)) {
+            nodeGroups = new ArrayList<NodeGroupCreate>();
          } else {
-            nodeGroupNames = rpNodeGroupNamesMap.get(rpHashCode);
+            nodeGroups = rpNodeGroupsMap.get(rpHashCode);
          }
-         String nodeGroupName = baseNode.getNodeGroup().getName();
-         if (!nodeGroupNames.contains(nodeGroupName)) {
-            nodeGroupNames.add(nodeGroupName);
-            rpNodeGroupNamesMap.put(rpHashCode, nodeGroupNames);
+         NodeGroupCreate nodeGroup = baseNode.getNodeGroup();
+         if (!getAllNodeGroupNames(nodeGroups).contains(nodeGroup.getName())) {
+            nodeGroups.add(nodeGroup);
+            rpNodeGroupsMap.put(rpHashCode, nodeGroups);
             nodeGroupNameCount++;
          }
          if (!resourcePoolNames.contains(vcRp)) {
@@ -591,6 +591,14 @@ public class ClusteringService implements IClusteringService {
       return countResult;
    }
 
+   private List<String> getAllNodeGroupNames(List<NodeGroupCreate> nodeGroups) {
+      List<String> nodeGroupNames = new ArrayList<String>();
+      for (NodeGroupCreate nodeGroup : nodeGroups) {
+         nodeGroupNames.add(nodeGroup.getName());
+      }
+      return nodeGroupNames;
+   }
+
    private String createVcResourcePools(List<BaseNode> vNodes) {
       logger.info("createVcResourcePools, start to create VC ResourcePool(s).");
       /*
@@ -601,16 +609,16 @@ public class ClusteringService implements IClusteringService {
       String clusterRpName = uuid + "-" + clusterName;
 
       /*
-       * prepare resource pool names and node group names per resource pool for creating cluster
+       * prepare resource pool names and node group per resource pool for creating cluster
        * resource pools and node group resource pool(s). 
        */
       Map<String, List<String>> vcClusterRpNamesMap =
             new HashMap<String, List<String>>();
-      Map<Long, List<String>> rpNodeGroupNamesMap =
-            new HashMap<Long, List<String>>();
+      Map<Long, List<NodeGroupCreate>> rpNodeGroupsMap =
+            new HashMap<Long, List<NodeGroupCreate>>();
       Map<String, Integer> countResult =
             collectResourcePoolInfo(vNodes, vcClusterRpNamesMap,
-                  rpNodeGroupNamesMap);
+                  rpNodeGroupsMap);
 
       try {
          /*
@@ -663,10 +671,13 @@ public class ClusteringService implements IClusteringService {
                long rpHashCode =
                      vcClusterName.hashCode()
                            ^ (vcClusterName + resourcePoolName).hashCode();
-               for (String nodeGroupName : rpNodeGroupNamesMap.get(rpHashCode)) {
+               for (NodeGroupCreate nodeGroup : rpNodeGroupsMap.get(rpHashCode)) {
+                  AuAssert
+                        .check(nodeGroup != null,
+                              "create node group resource pool failed: node group cannot be null !");
                   CreateResourcePoolSP nodeGroupSP =
                         new CreateResourcePoolSP(parentVcResourcePool,
-                              nodeGroupName);
+                              nodeGroup.getName(), nodeGroup);
                   nodeGroupSPs[i] = nodeGroupSP;
                   i++;
                }
