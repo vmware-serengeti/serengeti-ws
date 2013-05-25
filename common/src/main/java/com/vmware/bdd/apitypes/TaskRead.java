@@ -180,6 +180,10 @@ public class TaskRead {
 
    public static class NodeStatus {
       private String nodeName;
+      private String ip;
+      private String status;
+      private long memory;
+      private int cpuNumber;
       private boolean succeed = true;
       private String errorMessage;
 
@@ -210,6 +214,38 @@ public class TaskRead {
        */
       public void setNodeName(String nodeName) {
          this.nodeName = nodeName;
+      }
+
+      public String getIp() {
+         return ip;
+      }
+
+      public void setIp(String ip) {
+         this.ip = ip;
+      }
+
+      public String getStatus() {
+         return status;
+      }
+
+      public void setStatus(String status) {
+         this.status = status;
+      }
+
+      public long getMemory() {
+         return memory;
+      }
+
+      public void setMemory(long memory) {
+         this.memory = memory;
+      }
+
+      public int getCpuNumber() {
+         return cpuNumber;
+      }
+
+      public void setCpuNumber(int cpuNumber) {
+         this.cpuNumber = cpuNumber;
       }
 
       /**

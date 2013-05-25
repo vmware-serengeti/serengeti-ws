@@ -342,7 +342,7 @@ public class RestClient {
    /*
     * Will process normal response with/without a task location header
     */
-   private void processResponse(ResponseEntity<String> response,
+   private TaskRead processResponse(ResponseEntity<String> response,
          HttpMethod verb, PrettyOutput... prettyOutput) throws Exception {
 
       HttpStatus responseStatus = response.getStatusCode();
@@ -433,7 +433,7 @@ public class RestClient {
                Thread.sleep(5*1000);
                if (prettyOutput != null && prettyOutput.length > 0
                      && prettyOutput[0].isRefresh(true)) {
-                  //clear screen and show progress every few seconds 
+                  //clear screen and show progress every few seconds
                   clearScreen();
                   System.out.println(taskStatus + " " + progress + "%\n");
 
@@ -443,34 +443,11 @@ public class RestClient {
                   }
                }
             } else {
-               printNodeStatus(taskRead);
+               return taskRead;
             }
          }
       }
-   }
-
-   /**
-    * @param taskRead
-    */
-   private void printNodeStatus(TaskRead taskRead) {
-      if (taskRead.getSucceedNodes().size() > 0
-            || taskRead.getFailNodes().size() > 0) {
-         System.out.println("Cluster node status, success: "
-               + taskRead.getSucceedNodes().size() + ", fail: "
-               + taskRead.getFailNodes().size());
-         if (taskRead.getFailNodes().size() > 0) {
-            System.out.println("failed nodes:");
-            for (NodeStatus ns : taskRead.getFailNodes()) {
-               System.out.println(ns);
-            }
-         }
-         if (taskRead.getSucceedNodes().size() > 0) {
-            System.out.println("success nodes:");
-            for (NodeStatus ns : taskRead.getSucceedNodes()) {
-               System.out.println(ns);
-            }
-         }
-      }
+      return null;
    }
 
    private void clearScreen() {
@@ -711,6 +688,23 @@ public class RestClient {
             throw new Exception(Constants.HTTP_VERB_ERROR);
          }
 
+      } catch (Exception e) {
+         throw new CliRestException(e.getMessage());
+      }
+   }
+
+   public TaskRead updateWithReturn(Object entity, final String path, final HttpMethod verb, PrettyOutput... prettyOutput) {
+      checkConnection();
+      try {
+         if (verb == HttpMethod.PUT) {
+            ResponseEntity<String> response = restUpdate(path, entity);
+            if (!validateAuthorization(response)) {
+               return null;
+            }
+            return processResponse(response, HttpMethod.PUT, prettyOutput);
+         } else {
+            throw new Exception(Constants.HTTP_VERB_ERROR);
+         }
       } catch (Exception e) {
          throw new CliRestException(e.getMessage());
       }

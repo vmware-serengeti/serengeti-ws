@@ -29,11 +29,11 @@ import org.springframework.stereotype.Component;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ElasticityRequestBody;
-import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityMode;
 import com.vmware.bdd.apitypes.FixDiskRequestBody;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.ResourceScale;
+import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 
@@ -115,7 +115,7 @@ public class ClusterRestClient {
             outputCallBack);
    }
    
-   public void scale(ResourceScale scale){
+   public TaskRead scale(ResourceScale scale){
       final String path =
             Constants.REST_PATH_CLUSTER + "/" + scale.getClusterName() + "/"
                   + Constants.REST_PATH_NODEGROUP + "/" + scale.getNodeGroupName()
@@ -124,7 +124,7 @@ public class ClusterRestClient {
 
       PrettyOutput outputCallBack =
             getClusterPrettyOutputCallBack(this, scale.getClusterName());
-      restClient.update(scale, path, httpverb,
+      return restClient.updateWithReturn(scale, path, httpverb,
             outputCallBack);
    }
 
@@ -163,7 +163,7 @@ public class ClusterRestClient {
       restClient.update(requestBody, path, httpverb);
    }
 
-   public void fixDisk(final String clusterName, FixDiskRequestBody requestBody) {
+   public TaskRead fixDisk(final String clusterName, FixDiskRequestBody requestBody) {
       final String path =
             Constants.REST_PATH_CLUSTER + "/" + clusterName + "/"
                   + Constants.REST_PATH_FIX + "/"
@@ -171,7 +171,7 @@ public class ClusterRestClient {
       final HttpMethod httpverb = HttpMethod.PUT;
       PrettyOutput outputCallBack =
             getClusterPrettyOutputCallBack(this, clusterName);
-      restClient.update(requestBody, path, httpverb, outputCallBack);
+      return restClient.updateWithReturn(requestBody, path, httpverb, outputCallBack);
    }
 
    private PrettyOutput getClusterPrettyOutputCallBack(

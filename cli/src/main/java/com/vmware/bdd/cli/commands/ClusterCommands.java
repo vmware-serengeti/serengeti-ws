@@ -45,6 +45,8 @@ import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.ResourceScale;
+import com.vmware.bdd.apitypes.TaskRead;
+import com.vmware.bdd.apitypes.TaskRead.NodeStatus;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.ClusterRestClient;
@@ -465,15 +467,20 @@ public class ClusterCommands implements CommandMarker {
                            + " does not exist.");
                return;
             }
+            TaskRead taskRead = null;
             if (instanceNum > 1) {
                restClient.resize(name, nodeGroup, instanceNum);
             } else if (cpuNumber > 0 || memory > 0) {
                ResourceScale resScale =
                      new ResourceScale(name, nodeGroup, cpuNumber, memory);
-               restClient.scale(resScale);
+               taskRead = restClient.scale(resScale);
             }
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                   name, Constants.OUTPUT_OP_RESULT_RESIZE);
+            if (taskRead != null) {
+               System.out.println();
+               printScaleReport(taskRead, name, nodeGroup);
+            }
          } catch (CliRestException e) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   name, Constants.OUTPUT_OP_RESIZE,
@@ -483,6 +490,46 @@ public class ClusterCommands implements CommandMarker {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_RESIZE, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.INVALID_VALUE + " instanceNum=" + instanceNum);
+      }
+   }
+
+   private void printScaleReport(TaskRead taskRead, String clusterName, String nodeGroupName) {
+      ClusterRead cluster = restClient.get(clusterName, true);
+      List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
+      List<NodeStatus> succeedNodes = taskRead.getSucceedNodes();
+      List<NodeStatus> failedNodes = taskRead.getFailNodes();
+      setNodeStatusInfo(succeedNodes, nodeGroups);
+      setNodeStatusInfo(failedNodes, nodeGroups);
+      LinkedHashMap<String, List<String>> columnNamesWithGetMethodNames =
+            new LinkedHashMap<String, List<String>>();
+      columnNamesWithGetMethodNames.put("IP", Arrays.asList("getIp"));
+      columnNamesWithGetMethodNames.put("NAME", Arrays.asList("getNodeName"));
+      columnNamesWithGetMethodNames.put("CPU", Arrays.asList("getCpuNumber"));
+      columnNamesWithGetMethodNames.put("MEM(MB)", Arrays.asList("getMemory"));
+      columnNamesWithGetMethodNames.put("STATUS", Arrays.asList("getStatus"));
+      columnNamesWithGetMethodNames.put("NOTES", Arrays.asList("getErrorMessage"));
+      try {
+         System.out.println("The resized node group: " + nodeGroupName);
+         System.out.println("The current resized nodes: " + succeedNodes.size());
+         CommandsUtils.printInTableFormat(columnNamesWithGetMethodNames,
+               succeedNodes.toArray(), Constants.OUTPUT_INDENT);
+         System.out.println("The failed resized nodes: " + failedNodes.size());
+         CommandsUtils.printInTableFormat(columnNamesWithGetMethodNames,
+               failedNodes.toArray(), Constants.OUTPUT_INDENT);
+      } catch (Exception e) {
+         throw new CliRestException(e.getMessage());
+      }
+   }
+
+   private void setNodeStatusInfo(List<NodeStatus> nodes, List<NodeGroupRead> nodeGroups) {
+      for (NodeStatus nodeStatus : nodes) {
+         NodeRead node = getNodeRead(nodeStatus.getNodeName(), nodeGroups);
+         if (node != null) {
+            nodeStatus.setIp(node.getIp());
+            nodeStatus.setStatus(node.getStatus());
+            nodeStatus.setCpuNumber(node.getCpuNumber());
+            nodeStatus.setMemory(node.getMemory());
+         }
       }
    }
 
@@ -847,7 +894,7 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "parallel" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether use parallel way to recovery node or not") final boolean parallel,
          @CliOption(key = { "nodeGroup" }, mandatory = false, help = "The node group name which failure belong to") final String nodeGroupName) {
       try {
-
+         TaskRead taskRead = null;
          if (!isDiskFailure) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   clusterName, Constants.OUTPUT_OP_FIX,
@@ -860,16 +907,54 @@ public class ClusterCommands implements CommandMarker {
             if (!CommandsUtils.isBlank(nodeGroupName)) {
                requestBody.setNodeGroupName(nodeGroupName);
             }
-            restClient.fixDisk(clusterName, requestBody);
+            taskRead = restClient.fixDisk(clusterName, requestBody);
+            if (taskRead == null) {
+               return;
+            }
          }
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                clusterName, Constants.OUTPUT_OP_RESULT_FIX);
+         System.out.println();
+         printClusterFixReport(taskRead, clusterName);
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                clusterName, Constants.OUTPUT_OP_FIX,
                Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          return;
       }
+   }
+
+   private void printClusterFixReport(TaskRead taskRead, String clusterName) throws Exception {
+      ClusterRead cluster = restClient.get(clusterName, true);
+      List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
+      List<NodeStatus> succeedNodes = taskRead.getSucceedNodes();
+      List<NodeStatus> failedNodes = taskRead.getFailNodes();
+      setNodeStatusInfo(succeedNodes, nodeGroups);
+      System.out.println("The fixed nodes: " + succeedNodes.size());
+      LinkedHashMap<String, List<String>> columnNamesWithGetMethodNames =
+            new LinkedHashMap<String, List<String>>();
+      columnNamesWithGetMethodNames.put("IP", Arrays.asList("getIp"));
+      columnNamesWithGetMethodNames.put("NAME", Arrays.asList("getNodeName"));
+      columnNamesWithGetMethodNames.put("STATUS", Arrays.asList("getStatus"));
+      CommandsUtils.printInTableFormat(columnNamesWithGetMethodNames,
+            succeedNodes.toArray(), Constants.OUTPUT_INDENT);
+      System.out.println("The recovery-failed nodes: " + failedNodes.size());
+      setNodeStatusInfo(failedNodes, nodeGroups);
+      columnNamesWithGetMethodNames.put("Error Message", Arrays.asList("getErrorMessage"));
+      CommandsUtils.printInTableFormat(columnNamesWithGetMethodNames,
+            failedNodes.toArray(), Constants.OUTPUT_INDENT);
+   }
+
+   private NodeRead getNodeRead(String nodeName, List<NodeGroupRead> nodeGroups) {
+      for (NodeGroupRead nodeGroup : nodeGroups) {
+         List<NodeRead> nodes = nodeGroup.getInstances();
+         for (NodeRead node : nodes) {
+            if(node.getName().equals(nodeName)) {
+               return node;
+            }
+         }
+      }
+      return null;
    }
 
    private void resumeCreateCluster(final String name) {
