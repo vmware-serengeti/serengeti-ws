@@ -345,6 +345,7 @@ public class ClusterEntityManager {
       clusterRead.setAutomationEnable(cluster.getAutomationEnable());
       clusterRead.setVhmMinNum(cluster.getVhmMinNum());
       clusterRead.setVhmTargetNum(cluster.getVhmTargetNum());
+      clusterRead.setIoShares(cluster.getIoShares());
 
       List<NodeGroupRead> groupList = new ArrayList<NodeGroupRead>();
       for (NodeGroupEntity group : cluster.getNodeGroups()) {
@@ -375,7 +376,7 @@ public class ClusterEntityManager {
       clusterRead.setResourcePools(rpReads);
 
       if (clusterStatus == ClusterStatus.RUNNING || clusterStatus == ClusterStatus.STOPPED) {
-         clusterRead.setDcSeperation(clusterRead.validateSetManualElasticity(null)? true : false);
+         clusterRead.setDcSeperation(clusterRead.validateSetManualElasticity());
       }
 
       return clusterRead;

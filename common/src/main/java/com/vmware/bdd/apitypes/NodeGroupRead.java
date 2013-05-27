@@ -44,11 +44,7 @@ public class NodeGroupRead {
 
    @Expose
    private NetworkRead networking;
-   
-   @Expose
-   @SerializedName("disk_priority")
-   private Priority ioShares;
-   
+
    @Expose
    private StorageRead storage;
 
@@ -62,9 +58,6 @@ public class NodeGroupRead {
    @Expose
    @SerializedName("placement_policies")
    private PlacementPolicy placementPolicies;
-
-   //this is for cli output only
-   private Integer vhmTargetNum;
 
    public String getName() {
       return name;
@@ -138,35 +131,11 @@ public class NodeGroupRead {
       this.storage = storage;
    }
 
-   public Priority getIoShares() {
-      return ioShares;
-   }
-
-   public void setIoShares(Priority ioShares) {
-      this.ioShares = ioShares;
-   }
-
    public PlacementPolicy getPlacementPolicies() {
       return placementPolicies;
    }
 
    public void setPlacementPolicies(PlacementPolicy placementPolicies) {
       this.placementPolicies = placementPolicies;
-   }
-   
-   public String retrieveVhmTargetNum() {
-      if (vhmTargetNum == null) {
-         return "N/A";
-      } else {
-         return vhmTargetNum.toString();
-      }
-   }
-   
-   public Integer getVhmTargetNum() {
-      return vhmTargetNum;
-   }
-
-   public void setVhmTargetNum(Integer vhmTargetNum) {
-      this.vhmTargetNum = vhmTargetNum;
    }
 }

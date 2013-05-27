@@ -759,15 +759,11 @@ public class TestClusteringJobs extends
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testDupStartCluster" })
    @Transactional(propagation = Propagation.NEVER)
    public void testConfigIOShares() throws Exception {
-      clusterMgr.prioritizeCluster(TEST_STATIC_IP_CLUSTER_NAME, null,
-            Priority.HIGH);
+      clusterMgr.prioritizeCluster(TEST_STATIC_IP_CLUSTER_NAME, Priority.HIGH);
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
-      for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {
-         Assert.assertTrue(nodeGroup.getIoShares().equals(Priority.HIGH),
-               "Node group " + nodeGroup.getName()
-                     + " should have HIGH io share level");
-      }
+      Assert.assertTrue(cluster.getIoShares().equals(Priority.HIGH),
+            "Cluster " + cluster.getName() + " should have HIGH io share level");
    }
 
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testConfigIOShares" })

@@ -914,7 +914,7 @@ public class ClusterConfigManager {
       }
       storage.setNamePattern(getStoreNamePattern(storageType, storeNames));
       storage.setDsNames(storeNames);
-      storage.setShares(ngEntity.getIoShares());
+      storage.setShares(ngEntity.getCluster().getIoShares());
 
       // set storage split policy based on group roles
       if (enumRoles.size() == 1

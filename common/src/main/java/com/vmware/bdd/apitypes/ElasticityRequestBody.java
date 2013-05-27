@@ -20,7 +20,6 @@ package com.vmware.bdd.apitypes;
 public class ElasticityRequestBody {
    private Integer minComputeNodeNum; // min compute nodes that stay powered on
    private Integer activeComputeNodeNum;
-   private String nodeGroupName;
    private Boolean enableAuto;
    private Priority ioPriority;
 
@@ -42,14 +41,6 @@ public class ElasticityRequestBody {
 
    public void setActiveComputeNodeNum(Integer activeComputeNodeNum) {
       this.activeComputeNodeNum = activeComputeNodeNum;
-   }
-
-   public String getNodeGroupName() {
-      return nodeGroupName;
-   }
-
-   public void setNodeGroupName(String nodeGroupName) {
-      this.nodeGroupName = nodeGroupName;
    }
 
    public Priority getIoPriority() {

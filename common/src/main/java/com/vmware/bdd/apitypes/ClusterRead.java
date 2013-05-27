@@ -68,6 +68,10 @@ public class ClusterRead implements Comparable<ClusterRead> {
    
    private Integer vhmTargetNum;
 
+   @Expose
+   @SerializedName("disk_priority")
+   private Priority ioShares;
+
    private boolean nodeGroupSorted;
    
    private boolean dcSeperation;
@@ -141,6 +145,14 @@ public class ClusterRead implements Comparable<ClusterRead> {
       this.status = status;
    }
 
+   public Priority getIoShares() {
+      return ioShares;
+   }
+
+   public void setIoShares(Priority ioShares) {
+      this.ioShares = ioShares;
+   }
+
    public List<NodeGroupRead> getNodeGroups() {
       if (nodeGroups == null) {
          return null;
@@ -182,72 +194,40 @@ public class ClusterRead implements Comparable<ClusterRead> {
     * Validate the manual elastic parameters, make sure the specified node group is a compute only node group.
     * If user have not specified the node group name,the cluster must contain compute only node.   
     */
-   public boolean validateSetManualElasticity(String nodeGroupName, List<String>... nodeGroupNames) {
+   public boolean validateSetManualElasticity(List<String>... nodeGroupNames) {
       List<NodeGroupRead> nodeGroups = getNodeGroups();
-      if (!CommonUtil.isBlank(nodeGroupName)) {
-         if (nodeGroups != null && !nodeGroups.isEmpty()) {
-            List<String> invalidNodeGroup = new ArrayList<String>();
-            if (nodeGroupNames != null && nodeGroupNames.length > 0) {
-               nodeGroupNames[0].add(nodeGroupName);
-            }
-            NodeGroupRead nodeGroup =
-                  matchNodeGroupByName(nodeGroups, nodeGroupName);
-            if (nodeGroup == null) {
-               invalidNodeGroup.add(nodeGroupName);
-            }  else if (distroVendor.equalsIgnoreCase(Constants.MAPR_VENDOR)) {
-               if ((nodeGroup.getRoles() == null) || 
-                     !nodeGroup.getRoles().contains(HadoopRole.MAPR_TASKTRACKER_ROLE.toString()) ||
-                     nodeGroup.getRoles().contains(HadoopRole.MAPR_NFS_ROLE.toString())) {
-                  invalidNodeGroup.add(nodeGroupName);
+
+      if (nodeGroups != null && !nodeGroups.isEmpty()) {
+         int count = 0;
+         for (NodeGroupRead nodeGroup : getNodeGroups()) {
+            boolean isComputeOnly = false;
+            if (distroVendor.equalsIgnoreCase(Constants.MAPR_VENDOR)) {
+               if (nodeGroup.getRoles() != null && nodeGroup.getRoles().contains(HadoopRole.MAPR_TASKTRACKER_ROLE.toString()) &&
+                     !nodeGroup.getRoles().contains(HadoopRole.MAPR_NFS_ROLE.toString())){
+                  isComputeOnly = true;
                }
             } else {
-               if (nodeGroup.getRoles() == null || nodeGroup.getRoles().size() > 2 ||
-                     !nodeGroup.getRoles().contains(HadoopRole.HADOOP_TASKTRACKER.toString())
-                     || (nodeGroup.getRoles().size() == 2 && !nodeGroup.getRoles().contains(
-                           HadoopRole.TEMPFS_CLIENT_ROLE.toString()))) {
-                  invalidNodeGroup.add(nodeGroupName);
+               if (nodeGroup.getRoles() != null
+                     && nodeGroup.getRoles().contains(
+                     HadoopRole.HADOOP_TASKTRACKER.toString())
+                     && (nodeGroup.getRoles().size() == 1 || (nodeGroup.getRoles()
+                     .size() == 2 && nodeGroup.getRoles().contains(
+                     HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
+                  isComputeOnly = true;
                }
             }
-            if (!invalidNodeGroup.isEmpty()) {
-               return false;
+            if (isComputeOnly) {
+               if (nodeGroupNames != null && nodeGroupNames.length > 0) {
+                  nodeGroupNames[0].add(nodeGroup.getName());
+               }
+               count++;
             }
-         } else {
+         }
+         if (count == 0) {
             return false;
          }
-      } else {
-         if (nodeGroups != null && !nodeGroups.isEmpty()) {
-            int count = 0;
-            for (NodeGroupRead nodeGroup : getNodeGroups()) {
-               boolean isComputeOnly = false;
-               if (distroVendor.equalsIgnoreCase(Constants.MAPR_VENDOR)) {
-                  if (nodeGroup.getRoles() != null && nodeGroup.getRoles().contains(HadoopRole.MAPR_TASKTRACKER_ROLE.toString()) &&
-                        !nodeGroup.getRoles().contains(HadoopRole.MAPR_NFS_ROLE.toString())){
-                     isComputeOnly = true;
-                  }
-               } else {
-                  if (nodeGroup.getRoles() != null
-                        && nodeGroup.getRoles().contains(
-                              HadoopRole.HADOOP_TASKTRACKER.toString())
-                              && (nodeGroup.getRoles().size() == 1 || (nodeGroup.getRoles()
-                                    .size() == 2 && nodeGroup.getRoles().contains(
-                                          HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
-                     isComputeOnly = true;
-                  }
-               }
-               if (isComputeOnly) {
-                  if (nodeGroupNames != null && nodeGroupNames.length > 0) {
-                     nodeGroupNames[0].add(nodeGroup.getName());
-                  }
-                  count++;
-               }
-            }
-            if (count == 0) {
-               return false;
-            }
-         }
-         else {
-            return false;
-         }
+      }else {
+         return false;
       }
       return true;
    }
@@ -384,15 +364,8 @@ public class ClusterRead implements Comparable<ClusterRead> {
    }
 
    private boolean targetNumNotEmpty(ElasticityRequestBody requestBody) {
-      String nodeGroupName = requestBody.getNodeGroupName();
-      Integer ngTargetNum = null;
-      if (nodeGroupName != null) {
-         NodeGroupRead ngRead = this.getNodeGroupByName(nodeGroupName);
-         ngTargetNum = ngRead.getVhmTargetNum();
-      }
-      if (requestBody.getActiveComputeNodeNum() != null 
-            || this.getVhmTargetNum() != null
-            || (ngTargetNum != null)) {
+      if (requestBody.getActiveComputeNodeNum() != null
+            || this.getVhmTargetNum() != null) {
          return true;
       }
       return false;

@@ -322,6 +322,5 @@ public class DatastoreService implements IDatastoreService {
          dsDao.insert(entity);
          logger.info("add shared datastore " + ds);
       }
-
    }
 }

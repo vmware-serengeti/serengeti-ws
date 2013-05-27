@@ -32,6 +32,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.vmware.bdd.apitypes.Priority;
 import org.hibernate.annotations.Type;
 
 import com.google.gson.Gson;
@@ -106,7 +107,11 @@ public class ClusterEntity extends EntityBase {
 
    @Column(name = "vhm_min_num")
    private int vhmMinNum;
-   
+
+   @Enumerated(EnumType.STRING)
+   @Column(name = "ioshare_type")
+   private Priority ioShares;
+
    @Column(name = "vhm_target_num")
    private Integer vhmTargetNum;
    
@@ -121,12 +126,14 @@ public class ClusterEntity extends EntityBase {
    private String vhmJobTrackerPort;
 
    ClusterEntity() {
+      this.ioShares = Priority.NORMAL;
    }
 
    public ClusterEntity(String name) {
       super();
       this.name = name;
       this.status = ClusterStatus.NA;
+      this.ioShares = Priority.NORMAL;
    }
 
    public NetworkEntity getNetwork() {
@@ -292,6 +299,14 @@ public class ClusterEntity extends EntityBase {
 
    public void setAutomationEnable(Boolean automationEnable) {
       this.automationEnable = automationEnable;
+   }
+
+   public Priority getIoShares() {
+      return ioShares;
+   }
+
+   public void setIoShares(Priority ioShares) {
+      this.ioShares = ioShares;
    }
 
    public int getVhmMinNum() {

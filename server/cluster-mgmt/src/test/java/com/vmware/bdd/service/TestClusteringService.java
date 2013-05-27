@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.vmware.bdd.entity.ClusterEntity;
 import mockit.Mockit;
 
 import org.apache.log4j.Logger;
@@ -137,11 +138,13 @@ public class TestClusteringService {
       node.setVmSchema(vmSchema);
 
       // mock a clusterEntityMgr and node group entity
-      NodeGroupEntity nodeGroup = Mockito.mock(NodeGroupEntity.class);
-      Mockito.when(nodeGroup.getIoShares()).thenReturn(Priority.HIGH);
+      ClusterEntity clusterEntity = Mockito.mock(ClusterEntity.class);
+      Mockito.when(clusterEntity.getIoShares()).thenReturn(Priority.HIGH);
       ClusterEntityManager entityMgr = Mockito.mock(ClusterEntityManager.class);
+      NodeGroupEntity nodeGroup = Mockito.mock(NodeGroupEntity.class);
       Mockito.when(entityMgr.findByName("test", "master"))
             .thenReturn(nodeGroup);
+      Mockito.when(entityMgr.findByName("test")).thenReturn(clusterEntity);
       Field field = service.getClass().getDeclaredField("clusterEntityMgr");
       field.setAccessible(true);
       field.set(service, entityMgr);
@@ -197,11 +200,13 @@ public class TestClusteringService {
 
       // mock a clusterEntityMgr and node group entity
       NodeGroupEntity nodeGroup = Mockito.mock(NodeGroupEntity.class);
-      Mockito.when(nodeGroup.getIoShares()).thenReturn(Priority.HIGH);
+      ClusterEntity clusterEntity = Mockito.mock(ClusterEntity.class);
+      Mockito.when(clusterEntity.getIoShares()).thenReturn(Priority.HIGH);
 
       ClusterEntityManager entityMgr = Mockito.mock(ClusterEntityManager.class);
       Mockito.when(entityMgr.findByName("test", "master"))
             .thenReturn(nodeGroup);
+      Mockito.when(entityMgr.findByName("test")).thenReturn(clusterEntity);
       Field field = service.getClass().getDeclaredField("clusterEntityMgr");
       field.setAccessible(true);
       field.set(service, entityMgr);

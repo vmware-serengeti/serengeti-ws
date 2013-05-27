@@ -840,7 +840,6 @@ public class ClusterManager {
     * set cluster parameters synchronously
     * 
     * @param clusterName
-    * @param nodeGroupName
     * @param activeComputeNodeNum
     * @param minComputeNodeNum
     * @param mode
@@ -848,9 +847,10 @@ public class ClusterManager {
     * @throws Exception
     */
    @SuppressWarnings("unchecked")
-   public List<String> syncSetParam(String clusterName, String nodeGroupName,
+   public List<String> syncSetParam(String clusterName,
          Integer activeComputeNodeNum, Integer minComputeNodeNum,
          Boolean enableAuto, Priority ioPriority) throws Exception {
+
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       ClusterRead clusterRead = getClusterByName(clusterName, false);
       if (cluster == null) {
@@ -860,8 +860,11 @@ public class ClusterManager {
 
       //update vm ioshares
       if (ioPriority != null) {
-         prioritizeCluster(clusterName, nodeGroupName, ioPriority);
+         prioritizeCluster(clusterName, ioPriority);
       }
+
+      // as  prioritizeCluster will update clusterEntity, here we need to refresh to avoid overriding
+      cluster = clusterEntityMgr.findByName(clusterName);
 
       if (enableAuto != null && enableAuto != cluster.getAutomationEnable()) {
          cluster.setAutomationEnable(enableAuto);
@@ -874,30 +877,17 @@ public class ClusterManager {
 
       List<String> nodeGroupNames = new ArrayList<String>();
       if ((enableAuto != null || minComputeNodeNum != null || activeComputeNodeNum != null)
-            && !clusterRead.validateSetManualElasticity(nodeGroupName, nodeGroupNames)) {
-         if (nodeGroupName != null) {
-            throw BddException.INVALID_PARAMETER("nodeGroup", nodeGroupName);
-         } else {
-            throw BddException.INVALID_PARAMETER("cluster", clusterName);
-         }
+            && !clusterRead.validateSetManualElasticity(nodeGroupNames)) {
+         throw BddException.INVALID_PARAMETER("cluster", clusterName);
       }
 
-      if (nodeGroupName == null && activeComputeNodeNum != null) {
+      if (activeComputeNodeNum != null) {
          if (activeComputeNodeNum != cluster.getVhmTargetNum()) {
             cluster.setVhmTargetNum(activeComputeNodeNum);
          }
       }
 
       clusterEntityMgr.update(cluster);
-
-      if (nodeGroupName != null) {
-         NodeGroupEntity ngEntity =
-               clusterEntityMgr.findByName(clusterName, nodeGroupName);
-         if (activeComputeNodeNum != ngEntity.getVhmTargetNum()) {
-            ngEntity.setVhmTargetNum(activeComputeNodeNum);
-            clusterEntityMgr.update(ngEntity);
-         }
-      }
 
       //update vhm extra config file
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
@@ -925,12 +915,11 @@ public class ClusterManager {
     * 
     * @param clusterName
     * @param enableManualElasticity
-    * @param nodeGroupName
     * @param activeComputeNodeNum
     * @return
     * @throws Exception
     */
-   public Long asyncSetParam(String clusterName, String nodeGroupName,
+   public Long asyncSetParam(String clusterName,
          Integer activeComputeNodeNum, Integer minComputeNodeNum,
          Boolean enableAuto, Priority ioPriority) throws Exception {
       ClusterRead cluster = getClusterByName(clusterName, false);
@@ -943,7 +932,7 @@ public class ClusterManager {
       }
 
       List<String> nodeGroupNames =
-            syncSetParam(clusterName, nodeGroupName, activeComputeNodeNum,
+            syncSetParam(clusterName, activeComputeNodeNum,
                   minComputeNodeNum, enableAuto, ioPriority);
 
       // find hadoop job tracker ip
@@ -975,12 +964,7 @@ public class ClusterManager {
       param.put(JobConstants.GROUP_NAME_JOB_PARAM,
             new JobParameter(new Gson().toJson(nodeGroupNames)));
       if (activeComputeNodeNum == null) {
-         if (nodeGroupName == null) {
-            activeComputeNodeNum = cluster.getVhmTargetNum();
-         } else {
-            activeComputeNodeNum =
-                  cluster.getNodeGroupByName(nodeGroupName).getVhmTargetNum();
-         }
+         activeComputeNodeNum = cluster.getVhmTargetNum();
       }
       param.put(JobConstants.GROUP_ACTIVE_COMPUTE_NODE_NUMBER_JOB_PARAM,
             new JobParameter(Long.valueOf(activeComputeNodeNum)));
@@ -1101,7 +1085,7 @@ public class ClusterManager {
    /*
     * Change the disk I/O priority of the cluster or a node group   
     */
-   public void prioritizeCluster(String clusterName, String nodeGroupName,
+   public void prioritizeCluster(String clusterName,
          Priority ioShares) throws Exception {
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       if (cluster == null) {
@@ -1109,40 +1093,12 @@ public class ClusterManager {
          throw BddException.NOT_FOUND("cluster", clusterName);
       }
 
-      // do all node groups have the required io share level already?
-      boolean diff = false;
-      if (nodeGroupName != null && !nodeGroupName.isEmpty()) {
-         NodeGroupEntity nodeGroup =
-               clusterEntityMgr.findByName(clusterName, nodeGroupName);
-         if (nodeGroup == null) {
-            logger.error("node group " + nodeGroupName + " does not exist");
-            throw BddException.NOT_FOUND("node group", nodeGroupName);
-         }
-         if (!ioShares.equals(nodeGroup.getIoShares())) {
-            diff = true;
-         }
-      } else {
-         for (NodeGroupEntity nodeGroup : clusterEntityMgr
-               .findAllGroups(clusterName)) {
-            if (!ioShares.equals(nodeGroup.getIoShares())) {
-               diff = true;
-               break;
-            }
-         }
-      }
-
-      // simply return since all target node groups have the required io share level
-      if (!diff)
+      if (ioShares.equals(cluster.getIoShares())) {
          return;
-
-      if (nodeGroupName != null && !nodeGroupName.isEmpty()) {
-         logger.info("Change all nodes' disk I/O shares to " + ioShares
-               + " in the node group " + nodeGroupName + " cluster "
-               + clusterName);
-      } else {
-         logger.info("Change all nodes' disk I/O shares to " + ioShares
-               + " in the cluster " + clusterName);
       }
+
+      logger.info("Change all nodes' disk I/O shares to " + ioShares
+            + " in the cluster " + clusterName);
 
       // cluster must be in RUNNING or STOPPEED status
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
@@ -1153,14 +1109,9 @@ public class ClusterManager {
                clusterName, msg);
       }
 
-      // get target nodes
+      // get target nodeuster
       List<NodeEntity> targetNodes;
-      if (nodeGroupName != null && !nodeGroupName.isEmpty()) {
-         targetNodes =
-               clusterEntityMgr.findAllNodes(clusterName, nodeGroupName);
-      } else {
-         targetNodes = clusterEntityMgr.findAllNodes(clusterName);
-      }
+      targetNodes = clusterEntityMgr.findAllNodes(clusterName);
 
       if (targetNodes.isEmpty()) {
          throw ClusterManagerException.PRIORITIZE_CLUSTER_NOT_ALLOWED_ERROR(
@@ -1180,18 +1131,8 @@ public class ClusterManager {
       }
 
       // update io shares in db
-      if (nodeGroupName != null && !nodeGroupName.isEmpty()) {
-         NodeGroupEntity nodeGroup =
-               clusterEntityMgr.findByName(clusterName, nodeGroupName);
-         nodeGroup.setIoShares(ioShares);
-         clusterEntityMgr.update(nodeGroup);
-      } else {
-         for (NodeGroupEntity nodeGroup : clusterEntityMgr
-               .findAllGroups(clusterName)) {
-            nodeGroup.setIoShares(ioShares);
-            clusterEntityMgr.update(nodeGroup);
-         }
-      }
+      cluster.setIoShares(ioShares);
+      clusterEntityMgr.update(cluster);
    }
 
    public Long fixDiskFailures(String clusterName, String groupName)

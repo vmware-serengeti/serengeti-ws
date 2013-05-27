@@ -536,7 +536,6 @@ public class ClusterCommands implements CommandMarker {
    @CliCommand(value = "cluster setParam", help = "set cluster parameters")
    public void setParam(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
-         @CliOption(key = { "nodeGroup" }, mandatory = false, help = "The node group name") final String nodeGroupName,
          @CliOption(key = { "elasticityMode" }, mandatory = false, help = "The elasticity mode: AUTO, MANUAL") final String elasticityMode,
          @CliOption(key = { "minComputeNodeNum" }, mandatory = false, help = "The minimum number of compute nodes staying powered on (valid in auto elasticity mode)") final Integer minComputeNodeNum,
          @CliOption(key = { "targetComputeNodeNum" }, mandatory = false, help = "The number of instances powered on (valid in manual elasticity mode)") final Integer targetComputeNodeNum,
@@ -554,7 +553,7 @@ public class ClusterCommands implements CommandMarker {
 
          //validate the node group type for elasticity params
          if ((elasticityMode != null || minComputeNodeNum != null || targetComputeNodeNum != null)
-               && !cluster.validateSetManualElasticity(nodeGroupName)) {
+               && !cluster.validateSetManualElasticity()) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   clusterName, Constants.OUTPUT_OP_SET_PARAM,
                   Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
@@ -612,7 +611,6 @@ public class ClusterCommands implements CommandMarker {
          if (mode != null) {
             enableAuto = (mode == ElasticityMode.AUTO) ? true : false;
          }
-         requestBody.setNodeGroupName(nodeGroupName);
          requestBody.setEnableAuto(enableAuto);
          requestBody.setActiveComputeNodeNum(targetComputeNodeNum);
          requestBody.setMinComputeNodeNum(minComputeNodeNum);
@@ -634,7 +632,6 @@ public class ClusterCommands implements CommandMarker {
    @CliCommand(value = "cluster resetParam", help = "reset cluster parameters")
    public void resetParam(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
-         @CliOption(key = { "nodeGroup" }, mandatory = false, help = "The node group name") final String nodeGroupName,
          @CliOption(key = { "all" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "reset all parameters") final boolean all,
          @CliOption(key = { "elasticityMode" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "reset elasticity mode to MANUAL") final boolean elasticityMode,
          @CliOption(key = { "minComputeNodeNum" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "reset minComputeNodeNum to 0") final boolean minComputeNodeNum,
@@ -653,7 +650,7 @@ public class ClusterCommands implements CommandMarker {
 
          //validate the node group type
          if ((elasticityMode || minComputeNodeNum || targetComputeNodeNum) 
-               && !cluster.validateSetManualElasticity(nodeGroupName)) {
+               && !cluster.validateSetManualElasticity()) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   clusterName, Constants.OUTPUT_OP_RESET_PARAM,
                   Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
@@ -678,7 +675,6 @@ public class ClusterCommands implements CommandMarker {
          if (ioShares || all) {
             requestBody.setIoPriority(Priority.NORMAL);
          }
-         requestBody.setNodeGroupName(nodeGroupName);
          restClient.setParam(cluster, requestBody);
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                clusterName, Constants.OUTPUT_OP_RESULT_RESET);
@@ -1073,6 +1069,7 @@ public class ClusterCommands implements CommandMarker {
       clusterParams.put("AUTO ELASTIC", autoElasticityStatus);
       clusterParams.put("MIN COMPUTE NODES NUM", minComputeNodeNum);
       clusterParams.put("TARGET COMPUTE NODES NUM", cluster.retrieveVhmTargetNum());
+      clusterParams.put("IO SHARES", cluster.getIoShares().toString());
       clusterParams.put("STATUS", cluster.getStatus().toString());
       if (cluster.getExternalHDFS() != null
             && !cluster.getExternalHDFS().isEmpty()) {
@@ -1099,12 +1096,6 @@ public class ClusterCommands implements CommandMarker {
                Arrays.asList("getCpuNum"));
          ngColumnNamesWithGetMethodNames.put(Constants.FORMAT_TABLE_COLUMN_MEM,
                Arrays.asList("getMemCapacityMB"));
-         ngColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_IOSHARE,
-               Arrays.asList("getIoShares", "toString"));
-         ngColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_TARGET_NUM,
-               Arrays.asList("retrieveVhmTargetNum", "toString"));
          ngColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_TYPE,
                Arrays.asList("getStorage", "getType"));

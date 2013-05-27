@@ -839,8 +839,9 @@ public class ClusteringService implements IClusteringService {
       NodeGroupEntity nodeGroup =
             getClusterEntityMgr().findByName(vNode.getClusterName(),
                   vNode.getGroupName());
+      ClusterEntity clusterEntity = getClusterEntityMgr().findByName(vNode.getClusterName());
       CreateVmPrePowerOn prePowerOn =
-            new CreateVmPrePowerOn(ha, ft, nodeGroup.getIoShares());
+            new CreateVmPrePowerOn(ha, ft, clusterEntity.getIoShares());
 
       return prePowerOn;
    }

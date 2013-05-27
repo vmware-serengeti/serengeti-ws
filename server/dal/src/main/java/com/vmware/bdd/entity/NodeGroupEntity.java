@@ -81,13 +81,6 @@ public class NodeGroupEntity extends EntityBase {
    @Column(name = "storage_size")
    private int storageSize;
 
-   @Enumerated(EnumType.STRING)
-   @Column(name = "ioshare_type")
-   private Priority ioShares;
-   
-   @Column(name = "vhm_target_num")
-   private Integer vhmTargetNum;
-
    @ManyToOne
    @JoinColumn(name = "cluster_id")
    private ClusterEntity cluster;
@@ -141,8 +134,6 @@ public class NodeGroupEntity extends EntityBase {
 
 
    public NodeGroupEntity() {
-      // default share level
-      this.ioShares = Priority.NORMAL;
    }
 
    public NodeGroupEntity(String name, int defineInstanceNum, int cpuNum,
@@ -156,8 +147,6 @@ public class NodeGroupEntity extends EntityBase {
       this.swapRatio = swapRatio;
       this.storageType = storageType;
       this.storageSize = storageSize;
-      // default share level
-      this.ioShares = Priority.NORMAL;
    }
 
    public String getHadoopConfig() {
@@ -242,22 +231,6 @@ public class NodeGroupEntity extends EntityBase {
 
    public void setStorageSize(int storageSize) {
       this.storageSize = storageSize;
-   }
-
-   public Priority getIoShares() {
-      return ioShares;
-   }
-
-   public void setIoShares(Priority ioShares) {
-      this.ioShares = ioShares;
-   }
-   
-   public Integer getVhmTargetNum() {
-      return vhmTargetNum;
-   }
-   
-   public void setVhmTargetNum(Integer vhmTargetNum) {
-      this.vhmTargetNum = vhmTargetNum;
    }
 
    public Set<NodeEntity> getNodes() {
@@ -389,8 +362,6 @@ public class NodeGroupEntity extends EntityBase {
       nodeGroupRead.setMemCapacityMB(this.memorySize);
       nodeGroupRead.setSwapRatio(this.swapRatio);
       nodeGroupRead.setInstanceNum(this.getRealInstanceNum());
-      nodeGroupRead.setIoShares(this.ioShares);
-      nodeGroupRead.setVhmTargetNum(this.vhmTargetNum);
 
       Gson gson = new Gson();
       @SuppressWarnings("unchecked")

@@ -280,7 +280,6 @@ public class RestResource {
 
       Long taskId =
             clusterMgr.asyncSetParam(clusterName,
-                  requestBody.getNodeGroupName(),
                   requestBody.getActiveComputeNodeNum(),
                   requestBody.getMinComputeNodeNum(),
                   requestBody.getEnableAuto(), requestBody.getIoPriority());
@@ -294,7 +293,6 @@ public class RestResource {
       validateInput(clusterName, requestBody);
 
       clusterMgr.syncSetParam(clusterName, 
-            requestBody.getNodeGroupName(),
             requestBody.getActiveComputeNodeNum(),
             requestBody.getMinComputeNodeNum(), 
             requestBody.getEnableAuto(),
@@ -312,10 +310,6 @@ public class RestResource {
       }
 
       Integer activeComputeNodeNum = requestBody.getActiveComputeNodeNum();
-      String groupName = requestBody.getNodeGroupName();
-      if (!CommonUtil.isBlank(groupName) && !CommonUtil.validateNodeGroupName(groupName)) {
-         throw BddException.INVALID_PARAMETER("node group name", groupName);
-      }
       // The active compute node number must be a positive number or -1.
       if (activeComputeNodeNum != null && activeComputeNodeNum < -1) {
          logger.error("Invalid instance number: " + activeComputeNodeNum + " !");
