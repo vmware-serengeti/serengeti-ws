@@ -82,12 +82,14 @@ public class ScaleService implements IScaleService {
       NodeEntity node = clusterEntityMgr.findNodeByName(nodeName);
 
       DiskEntity swapDisk = findSwapDisk(node);
-      long newSwapSizeInMB =
-            (((long) Math.ceil(memory * node.getNodeGroup().getSwapRatio()) + 1023) / 1024) * 1024;
-
-      logger.info("new swap disk size(MB): " + newSwapSizeInMB);
-      VcDatastore targetDs =
-            getTargetDsForSwapDisk(node, swapDisk, newSwapSizeInMB);
+      VcDatastore targetDs = null;
+      long newSwapSizeInMB = 0;
+      if (memory > 0) {
+         newSwapSizeInMB =
+               (((long) Math.ceil(memory * node.getNodeGroup().getSwapRatio()) + 1023) / 1024) * 1024;
+         logger.info("new swap disk size(MB): " + newSwapSizeInMB);
+         targetDs = getTargetDsForSwapDisk(node, swapDisk, newSwapSizeInMB);
+      }
 
       ScaleVMSP scaleVMSP =
             new ScaleVMSP(node.getMoId(), cpuNumber, memory, targetDs,
