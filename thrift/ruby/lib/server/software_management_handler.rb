@@ -138,12 +138,15 @@ module Software
           end
           nodes = nodes.sort_by! { |n| n.name }
           nodes.each do |node|
-            unless(node[:provision].nil?)
-              node[:provision][:progress] = 0
-              node[:provision][:action] = ""
-              node[:provision][:status] = "VM Ready"
-              node.save
-            end
+            attrs = get_provision_attrs(node)
+            attrs[:finished] = false
+            attrs[:succeed] = nil
+            attrs[:bootstrapped] = false
+            attrs[:status] = 'VM Ready'
+            attrs[:progress] = 0
+            attrs[:action] = 'Bootstrapping VM'
+            set_provision_attrs(node, attrs)
+            node.save
           end
         end
 
