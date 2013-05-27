@@ -117,6 +117,13 @@ module Software
           rescue SystemExit => e
             log.info("rescued a exit call")
             exitCode = e.status
+          rescue Exception => e
+            log.error("Exception was thrown during calling ironfan cluster APIs. Ironfan error message: #{e.message}")
+            stackTrace = e.backtrace.join("\n")
+            log.error(" Stack trace: #{stackTrace}")
+            exitCode = 1
+            error = ClusterOperationException.new("Exception was thrown during calling ironfan cluster APIs. Ironfan error message: #{e.message}")
+            raise error
           end
           log.info("end:================================================================================")
           exitCode
@@ -124,29 +131,45 @@ module Software
 
         def getOperationStatusWithDetail(targetName)
           log.debug("get operation status for target name: #{targetName}")
-          status = getClusterOperationStatus(targetName, true)
+          begin
+            status = getClusterOperationStatus(targetName, true)
+          rescue Exception => e
+            log.error("Exception was thrown during querying cluster status from Chef. Error message: #{e.message}")
+            stackTrace = e.backtrace.join("\n")
+            log.error(" Stack trace: #{stackTrace}")
+            error = ClusterOperationException.new("Exception was thrown during querying cluster status from Chef. Error message: #{e.message}")
+            raise error
+          end
           log.debug("status: #{status.inspect}")
           status
         end
 
 	def resetNodeProvisionAttribute(targetName)
-          clusterName = fetchClusterName(targetName)
-          nodes = []
-          query = Chef::Search::Query.new
-          query.search(:node, "cluster_name:#{clusterName}") do |n|
-            nodes.push(n) if n.name.start_with?(targetName)
-          end
-          nodes = nodes.sort_by! { |n| n.name }
-          nodes.each do |node|
-            attrs = get_provision_attrs(node)
-            attrs[:finished] = false
-            attrs[:succeed] = nil
-            attrs[:bootstrapped] = false
-            attrs[:status] = 'VM Ready'
-            attrs[:progress] = 0
-            attrs[:action] = 'Bootstrapping VM'
-            set_provision_attrs(node, attrs)
-            node.save
+          begin
+            clusterName = fetchClusterName(targetName)
+            nodes = []
+            query = Chef::Search::Query.new
+            query.search(:node, "cluster_name:#{clusterName}") do |n|
+              nodes.push(n) if n.name.start_with?(targetName)
+            end
+            nodes = nodes.sort_by! { |n| n.name }
+            nodes.each do |node|
+              attrs = get_provision_attrs(node)
+              attrs[:finished] = false
+              attrs[:succeed] = nil
+              attrs[:bootstrapped] = false
+              attrs[:status] = 'VM Ready'
+              attrs[:progress] = 0
+              attrs[:action] = 'Bootstrapping VM'
+              set_provision_attrs(node, attrs)
+              node.save
+            end
+          rescue Exception => e
+            log.error("Exception was thrown during reseting Chef node's attribute, error message: #{e.message}")
+            stackTrace = e.backtrace.join("\n")
+            log.error(" Stack trace: #{stackTrace}")
+            error = ClusterOperationException.new("Exception was thrown during reseting Chef node's attribute, error message: #{e.message}")
+            raise error
           end
         end
 
