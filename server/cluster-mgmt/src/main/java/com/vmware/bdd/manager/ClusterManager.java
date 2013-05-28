@@ -64,6 +64,7 @@ import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
+import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.specpolicy.ClusterSpecFactory;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
@@ -369,7 +370,11 @@ public class ClusterManager {
       createAutoRps(createSpec);
       ClusterCreate clusterSpec =
             ClusterSpecFactory.getCustomizedSpec(createSpec);
-
+      //Check the cpu, memory max configuration according vm hardware version 
+      for(NodeGroupCreate ng : createSpec.getNodeGroups()){
+         String templateVmId = clusteringService.getTemplateVmId();
+         VcResourceUtils.checkVmMaxConfiguration(templateVmId, ng.getCpuNum(), ng.getMemCapacityMB());
+      }
       String name = clusterSpec.getName();
       logger.info("ClusteringService, creating cluster " + name);
 
