@@ -427,9 +427,11 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "nodeGroup" }, mandatory = true, help = "The node group name") final String nodeGroup,
          @CliOption(key = { "instanceNum" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The resized number of instances. It should be larger that existing one") final int instanceNum,
          @CliOption(key = { "cpuNumPerNode" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The number of vCPU for the nodes in this group") final int cpuNumber,
-         @CliOption(key = { "memCapacityMbPerNode" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The number of memory size in Mb for the nodes in this group") final int memory) {
+         @CliOption(key = { "memCapacityMbPerNode" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The number of memory size in Mb for the nodes in this group") final long memory,
+         @CliOption(key = { "parallel" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether use parallel way to scale node group") final boolean parallel) {
 
-      if (instanceNum > 1 || cpuNumber > 0 || memory > 0) {
+      if ((instanceNum > 1 && cpuNumber == 0 && memory == 0)
+            || (instanceNum == 0 && (cpuNumber > 0 || memory > 0))) {
          try {
             ClusterRead cluster = restClient.get(name, false);
             if (cluster == null) {
@@ -487,13 +489,26 @@ public class ClusterCommands implements CommandMarker {
                   Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          }
       } else {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
-               Constants.OUTPUT_OP_RESIZE, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.INVALID_VALUE + " instanceNum=" + instanceNum);
+         if (instanceNum > 1 && (cpuNumber > 0 || memory > 0)) {
+            CommandsUtils
+                  .printCmdFailure(
+                        Constants.OUTPUT_OBJECT_CLUSTER,
+                        name,
+                        Constants.OUTPUT_OP_RESIZE,
+                        Constants.OUTPUT_OP_RESULT_FAIL,
+                        "Can not scale out and scale up/down at the same time, you have to run those commands separately");
+         } else {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  name, Constants.OUTPUT_OP_RESIZE,
+                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
+                        + " instanceNum=" + instanceNum + ",cpuNumPerNode="
+                        + cpuNumber + ",memCapacityMbPerNode=" + memory);
+         }
       }
    }
 
-   private void printScaleReport(TaskRead taskRead, String clusterName, String nodeGroupName) {
+   private void printScaleReport(TaskRead taskRead, String clusterName,
+         String nodeGroupName) {
       ClusterRead cluster = restClient.get(clusterName, true);
       List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
       List<NodeStatus> succeedNodes = taskRead.getSucceedNodes();
@@ -507,10 +522,12 @@ public class ClusterCommands implements CommandMarker {
       columnNamesWithGetMethodNames.put("CPU", Arrays.asList("getCpuNumber"));
       columnNamesWithGetMethodNames.put("MEM(MB)", Arrays.asList("getMemory"));
       columnNamesWithGetMethodNames.put("STATUS", Arrays.asList("getStatus"));
-      columnNamesWithGetMethodNames.put("NOTES", Arrays.asList("getErrorMessage"));
+      columnNamesWithGetMethodNames.put("NOTES",
+            Arrays.asList("getErrorMessage"));
       try {
          System.out.println("The resized node group: " + nodeGroupName);
-         System.out.println("The current resized nodes: " + succeedNodes.size());
+         System.out
+               .println("The current resized nodes: " + succeedNodes.size());
          CommandsUtils.printInTableFormat(columnNamesWithGetMethodNames,
                succeedNodes.toArray(), Constants.OUTPUT_INDENT);
          System.out.println("The failed resized nodes: " + failedNodes.size());
@@ -521,7 +538,8 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   private void setNodeStatusInfo(List<NodeStatus> nodes, List<NodeGroupRead> nodeGroups) {
+   private void setNodeStatusInfo(List<NodeStatus> nodes,
+         List<NodeGroupRead> nodeGroups) {
       for (NodeStatus nodeStatus : nodes) {
          NodeRead node = getNodeRead(nodeStatus.getNodeName(), nodeGroups);
          if (node != null) {
@@ -556,7 +574,8 @@ public class ClusterCommands implements CommandMarker {
                && !cluster.validateSetManualElasticity()) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   clusterName, Constants.OUTPUT_OP_SET_PARAM,
-                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
+                  Constants.OUTPUT_OP_RESULT_FAIL,
+                  Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
             return;
          }
 
@@ -579,7 +598,7 @@ public class ClusterCommands implements CommandMarker {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   clusterName, Constants.OUTPUT_OP_SET_PARAM,
                   Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
-                  + " minComputeNodeNum");
+                        + " minComputeNodeNum");
             return;
          }
 
@@ -588,7 +607,7 @@ public class ClusterCommands implements CommandMarker {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   clusterName, Constants.OUTPUT_OP_SET_PARAM,
                   Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
-                  + "targetComputeNodeNum");
+                        + "targetComputeNodeNum");
             return;
          }
 
@@ -601,7 +620,7 @@ public class ClusterCommands implements CommandMarker {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                      clusterName, Constants.OUTPUT_OP_SET_PARAM,
                      Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
-                     + " " + "ioShares = " + ioShares);
+                           + " " + "ioShares = " + ioShares);
                return;
             }
          }
@@ -615,11 +634,11 @@ public class ClusterCommands implements CommandMarker {
          requestBody.setActiveComputeNodeNum(targetComputeNodeNum);
          requestBody.setMinComputeNodeNum(minComputeNodeNum);
          requestBody.setIoPriority(ioPriority);
-         
+
          restClient.setParam(cluster, requestBody);
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_RESULT_ADJUST);
-         
+               clusterName, Constants.OUTPUT_OP_RESULT_ADJUST);
+
       } catch (CliRestException e) {
          if (e.getMessage() != null) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
@@ -649,11 +668,12 @@ public class ClusterCommands implements CommandMarker {
          }
 
          //validate the node group type
-         if ((elasticityMode || minComputeNodeNum || targetComputeNodeNum) 
+         if ((elasticityMode || minComputeNodeNum || targetComputeNodeNum)
                && !cluster.validateSetManualElasticity()) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   clusterName, Constants.OUTPUT_OP_RESET_PARAM,
-                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
+                  Constants.OUTPUT_OP_RESULT_FAIL,
+                  Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
             return;
          }
 
@@ -920,7 +940,8 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   private void printClusterFixReport(TaskRead taskRead, String clusterName) throws Exception {
+   private void printClusterFixReport(TaskRead taskRead, String clusterName)
+         throws Exception {
       ClusterRead cluster = restClient.get(clusterName, true);
       List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
       List<NodeStatus> succeedNodes = taskRead.getSucceedNodes();
@@ -936,7 +957,8 @@ public class ClusterCommands implements CommandMarker {
             succeedNodes.toArray(), Constants.OUTPUT_INDENT);
       System.out.println("The recovery-failed nodes: " + failedNodes.size());
       setNodeStatusInfo(failedNodes, nodeGroups);
-      columnNamesWithGetMethodNames.put("Error Message", Arrays.asList("getErrorMessage"));
+      columnNamesWithGetMethodNames.put("Error Message",
+            Arrays.asList("getErrorMessage"));
       CommandsUtils.printInTableFormat(columnNamesWithGetMethodNames,
             failedNodes.toArray(), Constants.OUTPUT_INDENT);
    }
@@ -945,7 +967,7 @@ public class ClusterCommands implements CommandMarker {
       for (NodeGroupRead nodeGroup : nodeGroups) {
          List<NodeRead> nodes = nodeGroup.getInstances();
          for (NodeRead node : nodes) {
-            if(node.getName().equals(nodeName)) {
+            if (node.getName().equals(nodeName)) {
                return node;
             }
          }
@@ -1060,7 +1082,8 @@ public class ClusterCommands implements CommandMarker {
       printSeperator();
 
       // list cluster level params
-      LinkedHashMap<String, String> clusterParams = new LinkedHashMap<String, String>();
+      LinkedHashMap<String, String> clusterParams =
+            new LinkedHashMap<String, String>();
       clusterParams.put("CLUSTER NAME", cluster.getName());
       clusterParams.put("DISTRO", cluster.getDistro());
       if (topology != null && topology != TopologyType.NONE) {
@@ -1068,7 +1091,8 @@ public class ClusterCommands implements CommandMarker {
       }
       clusterParams.put("AUTO ELASTIC", autoElasticityStatus);
       clusterParams.put("MIN COMPUTE NODES NUM", minComputeNodeNum);
-      clusterParams.put("TARGET COMPUTE NODES NUM", cluster.retrieveVhmTargetNum());
+      clusterParams.put("TARGET COMPUTE NODES NUM",
+            cluster.retrieveVhmTargetNum());
       clusterParams.put("IO SHARES", cluster.getIoShares().toString());
       clusterParams.put("STATUS", cluster.getStatus().toString());
       if (cluster.getExternalHDFS() != null
@@ -1076,7 +1100,8 @@ public class ClusterCommands implements CommandMarker {
          clusterParams.put("EXTERNAL HDFS", cluster.getExternalHDFS());
       }
       for (String key : clusterParams.keySet()) {
-         System.out.printf(Constants.OUTPUT_INDENT + "%-26s:" + Constants.OUTPUT_INDENT + "%s\n", key, clusterParams.get(key));
+         System.out.printf(Constants.OUTPUT_INDENT + "%-26s:"
+               + Constants.OUTPUT_INDENT + "%s\n", key, clusterParams.get(key));
       }
       System.out.println();
 
@@ -1160,7 +1185,8 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private void printSeperator() {
-      StringBuffer seperator = new StringBuffer().append(Constants.OUTPUT_INDENT);
+      StringBuffer seperator =
+            new StringBuffer().append(Constants.OUTPUT_INDENT);
       for (int i = 0; i < Constants.SEPERATOR_LEN; i++) {
          seperator.append("=");
       }
