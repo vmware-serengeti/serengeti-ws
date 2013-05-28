@@ -900,7 +900,8 @@ public class ClusterManager {
       }
 
       if (enableAuto != null) {
-         boolean sucess = clusteringService.setAutoElasticity(clusterName, null);
+         boolean sucess =
+               clusteringService.setAutoElasticity(clusterName, null);
          if (!sucess) {
             throw ClusterManagerException
                   .SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(clusterName, "failed");
@@ -919,9 +920,9 @@ public class ClusterManager {
     * @return
     * @throws Exception
     */
-   public Long asyncSetParam(String clusterName,
-         Integer activeComputeNodeNum, Integer minComputeNodeNum,
-         Boolean enableAuto, Priority ioPriority) throws Exception {
+   public Long asyncSetParam(String clusterName, Integer activeComputeNodeNum,
+         Integer minComputeNodeNum, Boolean enableAuto, Priority ioPriority)
+         throws Exception {
       ClusterRead cluster = getClusterByName(clusterName, false);
       // cluster must be running status
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
@@ -932,8 +933,8 @@ public class ClusterManager {
       }
 
       List<String> nodeGroupNames =
-            syncSetParam(clusterName, activeComputeNodeNum,
-                  minComputeNodeNum, enableAuto, ioPriority);
+            syncSetParam(clusterName, activeComputeNodeNum, minComputeNodeNum,
+                  enableAuto, ioPriority);
 
       // find hadoop job tracker ip
       List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
@@ -941,15 +942,18 @@ public class ClusterManager {
       for (NodeGroupRead nodeGroup : nodeGroups) {
          if (nodeGroup.getRoles() != null
                && (nodeGroup.getRoles().contains(
-                     HadoopRole.HADOOP_JOBTRACKER_ROLE.toString()) 
-                     || nodeGroup.getRoles().contains(HadoopRole.MAPR_JOBTRACKER_ROLE.toString()))) {
-            if (!cluster.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
+                     HadoopRole.HADOOP_JOBTRACKER_ROLE.toString()) || nodeGroup
+                     .getRoles().contains(
+                           HadoopRole.MAPR_JOBTRACKER_ROLE.toString()))) {
+            if (!cluster.getDistroVendor().equalsIgnoreCase(
+                  Constants.MAPR_VENDOR)) {
                AuAssert.check(nodeGroup.getInstanceNum() == 1,
                      "The Jobtracker only support one instance .");
             }
             hadoopJobTrackerIP = nodeGroup.getInstances().get(0).getIp();
             if (nodeGroup.getInstanceNum() > 1) {
-               hadoopJobTrackerIP = getActiveJobTrackerIp(hadoopJobTrackerIP, clusterName);
+               hadoopJobTrackerIP =
+                     getActiveJobTrackerIp(hadoopJobTrackerIP, clusterName);
             }
             AuAssert.check(!CommonUtil.isBlank(hadoopJobTrackerIP),
                   "Hadoop jobtracker cannot be null");
@@ -1018,7 +1022,8 @@ public class ClusterManager {
             channel.setPty(true); //to enable sudo
             channel.setCommand("sudo " + cmd);
             BufferedReader in =
-                  new BufferedReader(new InputStreamReader(channel.getInputStream()));
+                  new BufferedReader(new InputStreamReader(
+                        channel.getInputStream()));
             channel.connect();
             if (!testChannel(channel)) {
                errorMsg =
@@ -1052,13 +1057,12 @@ public class ClusterManager {
             logger.error(errorMsg);
             throw BddException.INTERNAL(null, errorMsg);
          }
-      }catch (JSchException e) {
+      } catch (JSchException e) {
          errorMsg = "SSH unknow error: " + e.getMessage();
          logger.error(errorMsg);
          throw BddException.INTERNAL(null, errorMsg);
-      }catch (IOException e) {
-         errorMsg =
-               "Obtain active jobtracker ip error: " + e.getMessage();
+      } catch (IOException e) {
+         errorMsg = "Obtain active jobtracker ip error: " + e.getMessage();
          logger.error(errorMsg);
          throw BddException.INTERNAL(null, errorMsg);
       }
@@ -1085,8 +1089,8 @@ public class ClusterManager {
    /*
     * Change the disk I/O priority of the cluster or a node group   
     */
-   public void prioritizeCluster(String clusterName,
-         Priority ioShares) throws Exception {
+   public void prioritizeCluster(String clusterName, Priority ioShares)
+         throws Exception {
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");
@@ -1137,8 +1141,13 @@ public class ClusterManager {
 
    public Long fixDiskFailures(String clusterName, String groupName)
          throws Exception {
-      ClusterStatus oldStatus =
-            clusterEntityMgr.findByName(clusterName).getStatus();
+      ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
+      if (cluster == null) {
+         logger.error("cluster " + clusterName + " does not exist");
+         throw BddException.NOT_FOUND("cluster", clusterName);
+      }
+
+      ClusterStatus oldStatus = cluster.getStatus();
 
       if (ClusterStatus.RUNNING != oldStatus) {
          throw ClusterHealServiceException.NOT_SUPPORTED(clusterName,
@@ -1150,7 +1159,10 @@ public class ClusterManager {
       if (groupName != null) {
          NodeGroupEntity nodeGroup =
                clusterEntityMgr.findByName(clusterName, groupName);
-         AuAssert.check(nodeGroup != null);
+         if (nodeGroup == null) {
+            logger.error("node group " + groupName + " does not exist");
+            throw BddException.NOT_FOUND("group", groupName);
+         }
 
          nodeGroups = new ArrayList<NodeGroupEntity>(1);
          nodeGroups.add(nodeGroup);
