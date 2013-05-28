@@ -34,6 +34,7 @@ import org.springframework.stereotype.Component;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
+import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.ElasticityRequestBody;
@@ -473,6 +474,15 @@ public class ClusterCommands implements CommandMarker {
             if (instanceNum > 1) {
                restClient.resize(name, nodeGroup, instanceNum);
             } else if (cpuNumber > 0 || memory > 0) {
+               if (cluster.getStatus().ordinal() != ClusterStatus.RUNNING
+                     .ordinal()) {
+                  CommandsUtils.printCmdFailure(
+                        Constants.OUTPUT_OBJECT_CLUSTER, name,
+                        Constants.OUTPUT_OP_RESIZE,
+                        Constants.OUTPUT_OP_RESULT_FAIL,
+                        "Cluster must be in 'RUNNING' state to scale up/down");
+                  return;
+               }
                ResourceScale resScale =
                      new ResourceScale(name, nodeGroup, cpuNumber, memory);
                taskRead = restClient.scale(resScale);
