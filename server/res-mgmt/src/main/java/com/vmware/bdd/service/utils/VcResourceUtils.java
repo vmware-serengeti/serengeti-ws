@@ -356,6 +356,22 @@ public class VcResourceUtils {
                   }
                }
             }
+            try {
+               List<VcHost> hosts = cl.getHosts();
+               if (hosts != null) {
+                  for (VcHost host : hosts) {
+                     try {
+                        host.update();
+                     } catch (Exception e) {
+                        logger.info("failed to update host " + host.getName()
+                              + ", ignore this error.", e);
+                     }
+                  }
+               }
+            } catch (Exception e) {
+               logger.info("failed to get host list on cluster " + cl.getName()
+                     + ", ignore this error.", e);
+            }
             return null;
          }
       });
