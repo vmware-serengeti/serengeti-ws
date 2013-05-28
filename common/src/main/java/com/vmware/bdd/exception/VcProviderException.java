@@ -79,6 +79,10 @@ public class VcProviderException extends BddException {
    public static VcProviderException CPU_EXCEED_LIMIT(String vmName) {
       return new VcProviderException(null, "CPU_EXCEED_LIMIT", vmName);
    }
+   
+   public static VcProviderException CPU_EXCEED_ONE(String vmName) {
+      return new VcProviderException(null, "CPU_EXCEED_ONE", vmName);
+   }
 
    public static VcProviderException MEMORY_EXCEED_LIMIT(String vmName) {
       return new VcProviderException(null, "MEMORY_EXCEED_LIMIT", vmName);

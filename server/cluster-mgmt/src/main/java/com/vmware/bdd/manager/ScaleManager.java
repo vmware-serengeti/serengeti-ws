@@ -67,6 +67,13 @@ public class ScaleManager {
          // vm max configuration check
          VcResourceUtils.checkVmMaxConfiguration(nodes.get(0).getMoId(),
                scale.getCpuNumber(), scale.getMemory());
+         if (scale.getCpuNumber() > 1) {
+            //cpu number check for vm with FT enabled
+            for (NodeEntity nodeEntity : nodes) {
+               VcResourceUtils.checkVmFTAndCpuNumber(nodeEntity.getMoId(),
+                     scale.getCpuNumber());
+            }
+         }
       }
       updateNodeGroupResource(scale);
       //launch sub job to scale node one by one

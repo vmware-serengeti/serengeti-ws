@@ -41,6 +41,7 @@ import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.vim.binding.vim.EnvironmentBrowser;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.VirtualMachine;
+import com.vmware.vim.binding.vim.VirtualMachine.FaultToleranceState;
 import com.vmware.vim.binding.vim.vm.ConfigOption;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import com.vmware.vim.vmomi.core.types.VmodlTypeMap;
@@ -398,6 +399,29 @@ public class VcResourceUtils {
          return VcResourceUtils.isObjectInFolder(folder, vm.getId());
       } else {
          return false;
+      }
+   }
+
+   public static void checkVmFTAndCpuNumber(final String vmId, final int cpuNumber) {
+      Boolean ftEnabled = VcContext.inVcSessionDo(new VcSession<Boolean>() {
+         @Override
+         protected Boolean body() throws Exception {
+            final VcVirtualMachine vcVm = VcCache.getIgnoreMissing(vmId);
+            if (vcVm == null) {
+               logger.info("vm: " + vmId + " is not found.");
+               return false;
+            }
+            FaultToleranceState ftState = vcVm.getFTState();
+            if (FaultToleranceState.notConfigured.ordinal() == ftState.ordinal()) {
+               return false;
+            }
+            return true;
+         }
+      });
+      if(ftEnabled){
+         if(cpuNumber > 1){
+            throw VcProviderException.CPU_EXCEED_ONE(vmId);
+         }
       }
    }
 
