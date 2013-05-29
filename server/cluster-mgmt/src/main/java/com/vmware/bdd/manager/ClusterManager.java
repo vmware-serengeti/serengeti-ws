@@ -370,11 +370,16 @@ public class ClusterManager {
       createAutoRps(createSpec);
       ClusterCreate clusterSpec =
             ClusterSpecFactory.getCustomizedSpec(createSpec);
-      //Check the cpu, memory max configuration according vm hardware version 
-      /*for(NodeGroupCreate ng : createSpec.getNodeGroups()){
-         String templateVmId = clusteringService.getTemplateVmId();
-         VcResourceUtils.checkVmMaxConfiguration(templateVmId, ng.getCpuNum(), ng.getMemCapacityMB());
-      }*/
+      //Check the cpu, memory max configuration according vm hardware version
+      if (clusterSpec != null && clusterSpec.getNodeGroups() != null) {
+         for (NodeGroupCreate ng : clusterSpec.getNodeGroups()) {
+            String templateVmId = clusteringService.getTemplateVmId();
+            if (templateVmId != null) {
+               VcResourceUtils.checkVmMaxConfiguration(templateVmId,
+                     ng.getCpuNum(), ng.getMemCapacityMB());
+            }
+         }
+      }
       String name = clusterSpec.getName();
       logger.info("ClusteringService, creating cluster " + name);
 
