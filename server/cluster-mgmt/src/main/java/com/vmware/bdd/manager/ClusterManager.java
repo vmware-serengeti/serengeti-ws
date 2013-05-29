@@ -371,10 +371,10 @@ public class ClusterManager {
       ClusterCreate clusterSpec =
             ClusterSpecFactory.getCustomizedSpec(createSpec);
       //Check the cpu, memory max configuration according vm hardware version 
-      for(NodeGroupCreate ng : createSpec.getNodeGroups()){
+      /*for(NodeGroupCreate ng : createSpec.getNodeGroups()){
          String templateVmId = clusteringService.getTemplateVmId();
          VcResourceUtils.checkVmMaxConfiguration(templateVmId, ng.getCpuNum(), ng.getMemCapacityMB());
-      }
+      }*/
       String name = clusterSpec.getName();
       logger.info("ClusteringService, creating cluster " + name);
 
