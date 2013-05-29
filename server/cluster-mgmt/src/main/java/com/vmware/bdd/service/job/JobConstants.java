@@ -36,8 +36,8 @@ public interface JobConstants {
    public static final String GROUP_NAME_JOB_PARAM = "groupName";
    public static final String GROUP_INSTANCE_NEW_NUMBER_JOB_PARAM = "newInstanceNumber";
    public static final String GROUP_INSTANCE_OLD_NUMBER_JOB_PARAM = "oldInstanceNumber";
-   public static final String GROUP_ACTIVE_COMPUTE_NODE_NUMBER_JOB_PARAM = "activeComputeNodeNumber";
-   public static final String HADOOP_JOBTRACKER_IP_JOB_PARAM = "hadoopJobTrackerIP";
+   public static final String ACTIVE_COMPUTE_NODE_NUMBER_JOB_PARAM = "activeComputeNodeNumber";
+   public static final String VHM_ACTION_JOB_PARAM = "vhmAction";
    public static final String TIMESTAMP_JOB_PARAM = "timeStamp";
    public static final String CLUSTER_OPERATION_SUCCESS = "cluster.isSuccess";
    public static final String NODE_OPERATION_SUCCESS = "node.isSuccess";

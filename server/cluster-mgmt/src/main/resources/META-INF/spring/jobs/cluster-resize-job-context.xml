@@ -17,6 +17,8 @@
       <beans:property name="jobExecutionStatusHolder"
          ref="jobExecutionStatusHolder" />
       <beans:property name="clusteringService" ref="clusteringService" />
+      <beans:property name="executionService" ref="executionService" />
+      <beans:property name="recoverAutoFlagAfterJob" value="true" />
    </beans:bean>
 
    <beans:bean name="resizeClusterRemoveBadNodeTasklet"

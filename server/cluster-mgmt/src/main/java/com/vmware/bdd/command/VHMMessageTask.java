@@ -28,8 +28,8 @@ import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 
-public class MessageTask implements Callable<Map<String, Object>> {
-   private static final Logger logger = Logger.getLogger(MessageTask.class);
+public class VHMMessageTask implements Callable<Map<String, Object>> {
+   private static final Logger logger = Logger.getLogger(VHMMessageTask.class);
 
    private Map<String, Object> sendParam;
    boolean mqEnabled;
@@ -39,14 +39,14 @@ public class MessageTask implements Callable<Map<String, Object>> {
 
    private RuntimeConnectionManager runtimeConnectionManager;
 
-   public MessageTask(Map<String, Object> sendParam, MessageHandler messageHandler,
+   public VHMMessageTask(Map<String, Object> sendParam, MessageHandler messageHandler,
          boolean mqEnabled) {
       this.sendParam = sendParam;
       this.messageHandler = messageHandler;
       this.mqEnabled = mqEnabled;
    }
 
-   public MessageTask(Map<String, Object> sendParam, MessageHandler messageHandler) {
+   public VHMMessageTask(Map<String, Object> sendParam, MessageHandler messageHandler) {
       this(sendParam, messageHandler, true);
    }
 
@@ -70,11 +70,11 @@ public class MessageTask implements Callable<Map<String, Object>> {
       /*
        * Message processing thread.
        */
-      MessageProcessor messageProcessor = null;
+      VHMMessageProcessor messageProcessor = null;
       Thread messageProcessorThread = null;
       if (mqEnabled) {
          messageProcessor =
-               new MessageProcessor(
+               new VHMMessageProcessor(
                      ConfigInfo.getMqServerHost(),
                      ConfigInfo.getMqServerPort(),
                      ConfigInfo.getMqServerUsername(),
@@ -126,5 +126,4 @@ public class MessageTask implements Callable<Map<String, Object>> {
       result.put("errorMessage", errorMessage);
       return result;
    }
-
 }

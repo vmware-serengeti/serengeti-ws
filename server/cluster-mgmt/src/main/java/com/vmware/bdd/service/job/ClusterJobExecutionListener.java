@@ -14,7 +14,16 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+
+import com.vmware.bdd.apitypes.LimitInstruction;
+import com.vmware.bdd.command.VHMMessageTask;
+import com.vmware.bdd.exception.TaskException;
+import com.vmware.bdd.service.IExecutionService;
+import com.vmware.bdd.utils.CommonUtil;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -25,15 +34,18 @@ import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.service.IClusteringService;
+import com.vmware.bdd.utils.Constants;
 
 public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
    private static final Logger logger = Logger
          .getLogger(ClusterJobExecutionListener.class);
    private IClusteringService clusteringService;
-
+   private IExecutionService executionService;
    private ClusterEntityManager clusterEntityMgr;
-
+   private Boolean recoverAutoFlagAfterJob;
    private boolean subJob = false;
+   private Boolean preAutoFlag;
+   private String clusterName;
 
    public IClusteringService getClusteringService() {
       return clusteringService;
@@ -43,6 +55,14 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
       this.clusteringService = clusteringService;
    }
 
+   public IExecutionService getExecutionService() {
+      return executionService;
+   }
+
+   public void setExecutionService(IExecutionService executionService) {
+      this.executionService = executionService;
+   }
+
    public ClusterEntityManager getClusterEntityMgr() {
       return clusterEntityMgr;
    }
@@ -50,6 +70,14 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
    @Autowired
    public void setClusterEntityMgr(ClusterEntityManager clusterEntityMgr) {
       this.clusterEntityMgr = clusterEntityMgr;
+   }
+
+   public Boolean getRecoverAutoFlagAfterJob() {
+      return recoverAutoFlagAfterJob;
+   }
+
+   public void setRecoverAutoFlagAfterJob(Boolean recoverAutoFlagAfterJob) {
+      this.recoverAutoFlagAfterJob = recoverAutoFlagAfterJob;
    }
 
    /**
@@ -69,17 +97,28 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
 
    @Override
    public void beforeJob(JobExecution je) {
-      if (!subJob) {
-         String clusterName =
+      clusterName =
+            getJobParameters(je).getString(
+                  JobConstants.CLUSTER_NAME_JOB_PARAM);
+      if (clusterName == null) {
+         clusterName =
                getJobParameters(je).getString(
-                     JobConstants.CLUSTER_NAME_JOB_PARAM);
-         if (clusterName == null) {
-            clusterName =
-                  getJobParameters(je).getString(
-                        JobConstants.TARGET_NAME_JOB_PARAM).split("-")[0];
-         }
+                     JobConstants.TARGET_NAME_JOB_PARAM).split("-")[0];
+      }
+      if (!subJob) {
          clusterEntityMgr.updateClusterTaskId(clusterName, je.getId());
       }
+
+      if (recoverAutoFlagAfterJob != null) {
+         setAutoFlag(false);
+         /* if there is no compute-only nodes, no extraConfig is set in vmx file,
+         VHM is not able to do any actions, in this case, preAutoFlag = null
+          */
+         if (preAutoFlag != null) {
+            waitForManual();
+         }
+      }
+
       super.beforeJob(je);
    }
 
@@ -88,6 +127,9 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
       releaseResource(je);
       if (!subJob) {
          setClusterStatus(je);
+      }
+      if (recoverAutoFlagAfterJob != null && recoverAutoFlagAfterJob) {
+         setAutoFlag(true);
       }
       super.afterJob(je);
    }
@@ -102,6 +144,52 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
          // release the resource reservation if some step failed, and the
          // resource is not released yet.
          clusteringService.commitReservation(reservationId);
+      }
+   }
+
+   private void waitForManual(){
+      logger.info("start notify VHM swithing to manual mode");
+      Map<String, Object> sendParam = new HashMap<String, Object>();
+      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_VERSION, Constants.VHM_PROTOCOL_VERSION);
+      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_CLUSTER_NAME, clusterName);
+      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_RECEIVE_ROUTE_KEY, CommonUtil.getUUID());
+      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_ACTION, LimitInstruction.actionWaitForManual);
+
+      Map<String, Object> ret = null;
+      try {
+         ret = executionService.execute(new VHMMessageTask(sendParam, null));
+         if (!(Boolean) ret.get("succeed")) {
+            String errorMessage = (String) ret.get("errorMessage");
+            throw TaskException.EXECUTION_FAILED(errorMessage);
+         }
+      } catch (Exception e) {
+         throw TaskException.EXECUTION_FAILED("failed to notify VHM swithing to manual for cluster: " + clusterName);
+      }
+   }
+
+   private void setAutoFlag(boolean isReset) {
+      ClusterEntity clusterEntity = clusterEntityMgr.findByName(clusterName);
+      Boolean value = null;
+
+      if (!isReset) {
+         preAutoFlag = clusterEntity.getAutomationEnable();
+         if (preAutoFlag == null || !preAutoFlag) {
+            return;
+         }
+         value = false;
+         logger.info("will set auto flag to false");
+      } else {
+         if (clusterEntity.getAutomationEnable() == preAutoFlag) {
+            return;
+         }
+         value = preAutoFlag;
+         logger.info("will recover auto flag to " + preAutoFlag);
+      }
+
+      clusterEntity.setAutomationEnable(value);
+      clusterEntityMgr.update(clusterEntity);
+      if (!clusteringService.setAutoElasticity(clusterName)) {
+         throw TaskException.EXECUTION_FAILED("failed to update auto flag for cluster: " + clusterName);
       }
    }
 

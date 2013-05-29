@@ -30,6 +30,15 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.ClusterRead;
+import com.vmware.bdd.apitypes.DistroRead;
+import com.vmware.bdd.apitypes.LimitInstruction;
+import com.vmware.bdd.apitypes.NetworkRead;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.NodeGroupRead;
+import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.apitypes.TaskRead;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -42,16 +51,8 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
-import com.vmware.bdd.apitypes.DistroRead;
-import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.apitypes.NodeGroupRead;
-import com.vmware.bdd.apitypes.Priority;
-import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
@@ -910,9 +911,8 @@ public class ClusterManager {
       }
 
       if (enableAuto != null) {
-         boolean sucess =
-               clusteringService.setAutoElasticity(clusterName, null);
-         if (!sucess) {
+         boolean success = clusteringService.setAutoElasticity(clusterName);
+         if (!success) {
             throw ClusterManagerException
                   .SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(clusterName, "failed");
          }
@@ -975,15 +975,19 @@ public class ClusterManager {
       param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
             clusterName));
-      param.put(JobConstants.GROUP_NAME_JOB_PARAM,
-            new JobParameter(new Gson().toJson(nodeGroupNames)));
       if (activeComputeNodeNum == null) {
          activeComputeNodeNum = cluster.getVhmTargetNum();
       }
-      param.put(JobConstants.GROUP_ACTIVE_COMPUTE_NODE_NUMBER_JOB_PARAM,
+      // TODO: transfer SET_TARGET/UNLIMIT from CLI directly
+      if (activeComputeNodeNum == -1) {
+         param.put(JobConstants.VHM_ACTION_JOB_PARAM,
+               new JobParameter(LimitInstruction.actionUnlimit));
+      } else {
+         param.put(JobConstants.VHM_ACTION_JOB_PARAM,
+               new JobParameter(LimitInstruction.actionSetTarget));
+      }
+      param.put(JobConstants.ACTIVE_COMPUTE_NODE_NUMBER_JOB_PARAM,
             new JobParameter(Long.valueOf(activeComputeNodeNum)));
-      param.put(JobConstants.HADOOP_JOBTRACKER_IP_JOB_PARAM, new JobParameter(
-            hadoopJobTrackerIP));
       param.put(JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM,
             new JobParameter(ClusterStatus.RUNNING.name()));
       param.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM,

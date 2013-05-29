@@ -366,8 +366,7 @@ public class ClusteringService implements IClusteringService {
    }
 
    @SuppressWarnings("unchecked")
-   public boolean setAutoElasticity(String clusterName,
-         StatusUpdater statusUpdator) {
+   public boolean setAutoElasticity(String clusterName) {
       logger.info("set auto elasticity for cluster " + clusterName);
 
       ClusterEntity cluster = getClusterEntityMgr().findByName(clusterName);

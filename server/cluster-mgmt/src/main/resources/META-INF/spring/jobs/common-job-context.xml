@@ -24,6 +24,23 @@
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 		<beans:property name="clusteringService" ref="clusteringService" />
 	</beans:bean>
+
+	<beans:bean id="waitVHMWithoutRecoverClusterJobListener"
+		class="com.vmware.bdd.service.job.ClusterJobExecutionListener">
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+		<beans:property name="clusteringService" ref="clusteringService" />
+		<beans:property name="executionService" ref="executionService" />
+		<beans:property name="recoverAutoFlagAfterJob" value="false" />
+	</beans:bean>
+
+	<beans:bean id="waitVHMAndRecoverClusterJobListener"
+		class="com.vmware.bdd.service.job.ClusterJobExecutionListener">
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+		<beans:property name="clusteringService" ref="clusteringService" />
+		<beans:property name="executionService" ref="executionService" />
+		<beans:property name="recoverAutoFlagAfterJob" value="true" />
+	</beans:bean>
+
 	<beans:bean id="createClusterJobListener"
       class="com.vmware.bdd.service.job.CreateClusterJobExecutionListener">
       <beans:property name="jobExecutionStatusHolder"
@@ -35,6 +52,8 @@
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 		<beans:property name="clusteringService" ref="clusteringService" />
 		<beans:property name="subJob" value="true" />
+		<beans:property name="executionService" ref="executionService" />
+		<beans:property name="recoverAutoFlagAfterJob" value="true" />
 	</beans:bean>
 	<beans:bean id="clusterMainJobListener"
 		class="com.vmware.bdd.service.job.ClusterJobExecutionListener">
@@ -70,7 +89,6 @@
 		class="com.vmware.bdd.service.job.ClusterNodeSyncupStep">
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 	</beans:bean>
-
 	<beans:bean name="softwareCreateClusterTasklet"
 		class="com.vmware.bdd.service.job.software.SoftwareManagementStep">
 		<beans:property name="clusterManager" ref="clusterManager" />

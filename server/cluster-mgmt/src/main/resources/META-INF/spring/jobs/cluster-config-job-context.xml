@@ -26,7 +26,7 @@
 			</listeners>
 		</step>
 		<listeners>
-			<listener ref="clusterJobListener" />
+			<listener ref="waitVHMAndRecoverClusterJobListener" />
 		</listeners>
 	</job>
 </beans:beans>

@@ -18,7 +18,7 @@
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 	</beans:bean>
 
-	<job id="stopClusterJob" job-repository="jobRepository">
+    <job id="stopClusterJob" job-repository="jobRepository">
 		<step id="stopClusterVM" next="stopClusterNodeSyncup">
 			<tasklet ref="stopClusterVMTasklet" />
 			<listeners>
@@ -32,9 +32,7 @@
 			</listeners>
 		</step>
 		<listeners>
-			<listener ref="clusterJobListener" />
+			<listener ref="waitVHMWithoutRecoverClusterJobListener" />
 		</listeners>
 	</job>
-
-
 </beans:beans>

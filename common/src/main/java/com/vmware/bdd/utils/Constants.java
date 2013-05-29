@@ -26,6 +26,8 @@ public class Constants {
          "Rack Policy in spec file will not benefit Hadoop running when not specify topology through CLI. By default, Hadoop cluster will use NONE topology.";
    public static final String FAIR_SCHEDULER_FILE_NAME = "fair-scheduler.xml";
    public static final String FAIR_SCHEDULER_FILE_ATTRIBUTE = "text";
+
+   public static final int VHM_PROTOCOL_VERSION = 3;
    public static final String SET_MANUAL_ELASTICITY_INFO_VERSION = "version";
    public static final String SET_MANUAL_ELASTICITY_INFO_CLUSTER_NAME = "cluster_name";
    public static final String SET_MANUAL_ELASTICITY_INFO_JOBTRACKER = "jobtracker";
@@ -35,6 +37,7 @@ public class Constants {
          "serengeti_instance";
    public static final String SET_MANUAL_ELASTICITY_INFO_RECEIVE_ROUTE_KEY =
          "route_key";
+   public static final String SET_MANUAL_ELASTICITY_INFO_ACTION = "action";
    public static final String CLUSTER_NAME_PATTERN = "[a-zA-Z0-9_]+";
    public static final String NODE_GROUP_NAME_PATTERN = "[a-zA-Z0-9]+";
    public static final String NAME_PATTERN = "[a-zA-Z0-9_\\-\\s]+";

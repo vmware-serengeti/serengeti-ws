@@ -26,8 +26,8 @@ import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.RabbitMQConsumer;
 import com.vmware.bdd.utils.TracedRunnable;
 
-public class MessageProcessor extends TracedRunnable {
-   private static final Logger logger = Logger.getLogger(MessageProcessor.class);
+public class VHMMessageProcessor extends TracedRunnable {
+   private static final Logger logger = Logger.getLogger(VHMMessageProcessor.class);
 
    private MessageHandler messageHandler;
    private RabbitMQConsumer mqConsumer;
@@ -35,7 +35,7 @@ public class MessageProcessor extends TracedRunnable {
    private volatile boolean success = false;
    private String errorMessage = null;
 
-   public MessageProcessor(String serverHost, int serverPort, String serverUsername,
+   public VHMMessageProcessor(String serverHost, int serverPort, String serverUsername,
          String serverPassword, String exchangeName, String queueName, String routeKey,
          boolean getQueue, MessageHandler messageHandler) throws IOException {
       super();
@@ -95,13 +95,16 @@ public class MessageProcessor extends TracedRunnable {
                }
             }
 
-            if (!success) {
+            // TODO: consider timeout issue
+            if (!success && messageHandler != null) {
                double progress = (Double) msgMap.get(Constants.PROGRESS_FIELD) / 100;
                //String progressMsg = (String) msgMap.get(Constants.PROGRESS_MESSAGE_FIELD);
                messageHandler.setProgress(progress);
             }
 
-            messageHandler.onMessage(msgMap);
+            if (messageHandler != null) {
+               messageHandler.onMessage(msgMap);
+            }
 
             return !finished;
          }

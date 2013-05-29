@@ -246,7 +246,7 @@ public class RabbitMQConsumer {
             extendExpirationTime();
          }
 
-         logger.debug("message received: " + message);
+         logger.info("message received: " + message);
          try {
             if (!listener.onMessage(message)) {
                logger.info("stop receiving messages normally");
