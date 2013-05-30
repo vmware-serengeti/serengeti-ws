@@ -83,10 +83,8 @@ public class ClusterManagerException extends BddException {
       return new ClusterManagerException(null, "ROLES_NOT_SUPPORTED", roles);
    }
 
-   public static ClusterManagerException SET_MANUAL_ELASTICITY_NOT_ALLOWED_ERROR(
-         String clusterName, String reason) {
-      return new ClusterManagerException(null, "CANNOT_SET_MANUAL_ELASTICITY",
-            clusterName, reason);
+   public static ClusterManagerException SET_MANUAL_ELASTICITY_NOT_ALLOWED_ERROR(String reason) {
+      return new ClusterManagerException(null, "CANNOT_SET_MANUAL_ELASTICITY", reason);
    }
 
    public static ClusterManagerException SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(

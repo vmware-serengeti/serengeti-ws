@@ -938,8 +938,7 @@ public class ClusterManager {
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
          String msg = "Cluster is not running.";
          logger.error(msg);
-         throw ClusterManagerException.SET_MANUAL_ELASTICITY_NOT_ALLOWED_ERROR(
-               clusterName, msg);
+         throw ClusterManagerException.SET_MANUAL_ELASTICITY_NOT_ALLOWED_ERROR(msg);
       }
 
       List<String> nodeGroupNames =
