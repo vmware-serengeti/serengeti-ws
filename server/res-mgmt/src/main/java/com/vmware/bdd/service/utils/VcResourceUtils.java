@@ -52,13 +52,13 @@ public class VcResourceUtils {
 
    private static final int HARDWARE_VERSION_7 = 7;
    private static final int HARDWARE_VERSION_7_MAX_CPU = 8;
-   private static final int HARDWARE_VERSION_7_MAX_MEMORY = 255 * 1000; // 255G
+   private static final int HARDWARE_VERSION_7_MAX_MEMORY = 255 * 1024; // 255G
    private static final int HARDWARE_VERSION_8 = 8;
    private static final int HARDWARE_VERSION_8_MAX_CPU = 32;
-   private static final int HARDWARE_VERSION_8_MAX_MEMORY = 1 * 1000 * 1000; //1T
+   private static final int HARDWARE_VERSION_8_MAX_MEMORY = 1011 * 1024; //1011 GB
    private static final int HARDWARE_VERSION_9 = 9;
    private static final int HARDWARE_VERSION_9_MAX_CPU = 64;
-   private static final int HARDWARE_VERSION_9_MAX_MEMORY = 1 * 1000 * 1000; //1T
+   private static final int HARDWARE_VERSION_9_MAX_MEMORY = 1011 * 1024; //1011 GB 
 
    public static Collection<VcDatastore> findDSInVCByPattern(
          final String vcDSNamePattern) {
