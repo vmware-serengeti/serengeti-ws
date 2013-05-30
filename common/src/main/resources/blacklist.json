@@ -4,13 +4,13 @@
       "core-site.xml": [
         "net.topology.impl",
         "net.topology.nodegroup.aware",
-        "dfs.block.replicator.classname"
+        "dfs.block.replicator.classname",
+        "topology.script.file.name"
       ],
       "hdfs-site.xml": [
         "dfs.http.address",
         "dfs.name.dir",
-        "dfs.data.dir",
-        "topology.script.file.name"
+        "dfs.data.dir"
       ],
       "mapred-site.xml": [
         "mapred.job.tracker",

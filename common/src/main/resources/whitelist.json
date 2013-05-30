@@ -171,9 +171,6 @@
           "name": "topology.node.switch.mapping.impl"
         },
         {
-          "name": "topology.script.file.name"
-        },
-        {
           "name": "topology.script.number.args"
         },
         {
@@ -185,37 +182,199 @@
       ],
       "hdfs-site.xml": [
         {
-          "name": "dfs.socket.timeout"
+          "name": "dfs.access.time.precision"
         },
         {
-          "name": "dfs.datanode.drop.cache.behind.writes"
+          "name": "dfs.balance.bandwidthPerSec"
         },
         {
-          "name": "dfs.datanode.sync.behind.writes"
+          "name": "dfs.block.access.key.update.interval"
         },
         {
-          "name": "dfs.namenode.logging.level"
+          "name": "dfs.block.access.token.enable"
         },
         {
-          "name": "dfs.secondary.http.address"
+          "name": "dfs.block.access.token.lifetime"
+        },
+        {
+          "name": "dfs.blockreport.initialDelay"
+        },
+        {
+          "name": "dfs.blockreport.initialDelay  <value>0</value>"
+        },
+        {
+          "name": "dfs.blockreport.intervalMsec"
+        },
+        {
+          "name": "dfs.blocksize"
+        },
+        {
+          "name": "dfs.block.size"
+        },
+        {
+          "name": "dfs.bytes-per-checksum"
+        },
+        {
+          "name": "dfs.client.block.write.replace-datanode-on-failure.enable"
+        },
+        {
+          "name": "dfs.client.block.write.replace-datanode-on-failure.policy"
+        },
+        {
+          "name": "dfs.client.block.write.retries"
+        },
+        {
+          "name": "dfs.client.failover.connection.retries"
+        },
+        {
+          "name": "dfs.client.failover.connection.retries.on.timeouts"
+        },
+        {
+          "name": "dfs.client.failover.max.attempts"
+        },
+        {
+          "name": "dfs.client.failover.sleep.base.millis"
+        },
+        {
+          "name": "dfs.client.failover.sleep.max.millis"
+        },
+        {
+          "name": "dfs.client.file-block-storage-locations.num-threads"
+        },
+        {
+          "name": "dfs.client.file-block-storage-locations.timeout"
+        },
+        {
+          "name": "dfs.client.https.keystore.resource"
+        },
+        {
+          "name": "dfs.client.https.need-auth"
+        },
+        {
+          "name": "dfs.client.local.interfaces"
+        },
+        {
+          "name": "dfs.client.use.datanode.hostname"
+        },
+        {
+          "name": "dfs.client-write-packet-size"
+        },
+        {
+          "name": "dfs.cluster.administrators"
         },
         {
           "name": "dfs.datanode.address"
         },
         {
-          "name": "dfs.datanode.http.address"
+          "name": "dfs.datanode.balance.bandwidthPerSec"
         },
         {
-          "name": "dfs.datanode.ipc.address"
+          "name": "dfs.datanode.data.dir"
+        },
+        {
+          "name": "dfs.datanode.data.dir.perm"
+        },
+        {
+          "name": "dfs.datanode.directoryscan.interval"
+        },
+        {
+          "name": "dfs.datanode.directoryscan.threads"
+        },
+        {
+          "name": "dfs.datanode.dns.interface"
+        },
+        {
+          "name": "dfs.datanode.dns.nameserver"
+        },
+        {
+          "name": "dfs.datanode.drop.cache.behind.reads"
+        },
+        {
+          "name": "dfs.datanode.drop.cache.behind.writes"
+        },
+        {
+          "name": "dfs.datanode.du.reserved"
+        },
+        {
+          "name": "dfs.datanode.failed.volumes.tolerated"
         },
         {
           "name": "dfs.datanode.handler.count"
         },
         {
+          "name": "dfs.datanode.hdfs-blocks-metadata.enabled"
+        },
+        {
+          "name": "dfs.datanode.http.address"
+        },
+        {
+          "name": "dfs.datanode.https.address"
+        },
+        {
+          "name": "dfs.datanode.ipc.address"
+        },
+        {
+          "name": "dfs.datanode.max.transfer.threads"
+        },
+        {
           "name": "dfs.datanode.max.xceivers"
         },
         {
+          "name": "dfs.datanode.plugins"
+        },
+        {
+          "name": "dfs.datanode.readahead.bytes"
+        },
+        {
           "name": "dfs.datanode.socket.write.timeout"
+        },
+        {
+          "name": "dfs.datanode.sync.behind.writes"
+        },
+        {
+          "name": "dfs.datanode.use.datanode.hostname"
+        },
+        {
+          "name": "dfs.default.chunk.view.size"
+        },
+        {
+          "name": "dfs.df.interval"
+        },
+        {
+          "name": "dfs.encrypt.data.transfer"
+        },
+        {
+          "name": "dfs.encrypt.data.transfer.algorithm"
+        },
+        {
+          "name": "dfs.ha.automatic-failover.enabled"
+        },
+        {
+          "name": "dfs.ha.log-roll.period"
+        },
+        {
+          "name": "dfs.ha.namenode.id"
+        },
+        {
+          "name": "dfs.ha.namenodes.EXAMPLENAMESERVICE"
+        },
+        {
+          "name": "dfs.ha.tail-edits.period"
+        },
+        {
+          "name": "dfs.heartbeat.interval"
+        },
+        {
+          "name": "dfs.hosts"
+        },
+        {
+          "name": "dfs.hosts.exclude"
+        },
+        {
+          "name": "dfs.https.address"
+        },
+        {
+          "name": "dfs.https.client.keystore.resource"
         },
         {
           "name": "dfs.https.enable"
@@ -227,115 +386,58 @@
           "name": "dfs.https.server.keystore.resource"
         },
         {
-          "name": "dfs.https.client.keystore.resource"
+          "name": "dfs.image.compress"
         },
         {
-          "name": "dfs.datanode.https.address"
+          "name": "dfs.image.compression.codec"
         },
         {
-          "name": "dfs.https.address"
+          "name": "dfs.image.transfer.bandwidthPerSec"
         },
         {
-          "name": "dfs.datanode.dns.interface"
+          "name": "dfs.journalnode.http-address"
         },
         {
-          "name": "dfs.datanode.dns.nameserver"
+          "name": "dfs.journalnode.rpc-address"
         },
         {
-          "name": "dfs.replication.considerLoad"
+          "name": "dfs.max.objects"
         },
         {
-          "name": "dfs.default.chunk.view.size"
-        },
-        {
-          "name": "dfs.datanode.du.reserved"
+          "name": "dfs.metrics.percentiles.intervals"
         },
         {
           "name": "dfs.name.edits.dir"
         },
         {
-          "name": "dfs.web.ugi"
+          "name": "dfs.namenode.accesstime.precision"
         },
         {
-          "name": "dfs.permissions"
+          "name": "dfs.namenode.backup.address"
         },
         {
-          "name": "dfs.permissions.supergroup"
+          "name": "dfs.namenode.backup.http-address"
         },
         {
-          "name": "dfs.block.access.token.enable"
+          "name": "dfs.namenode.checkpoint.check.period"
         },
         {
-          "name": "dfs.block.access.key.update.interval"
+          "name": "dfs.namenode.checkpoint.dir"
         },
         {
-          "name": "dfs.block.access.token.lifetime"
+          "name": "dfs.namenode.checkpoint.edits.dir"
         },
         {
-          "name": "dfs.datanode.data.dir.perm"
+          "name": "dfs.namenode.checkpoint.period"
         },
         {
-          "name": "dfs.replication"
-        },
-        {
-          "name": "dfs.replication.max"
-        },
-        {
-          "name": "dfs.replication.min"
-        },
-        {
-          "name": "dfs.block.size"
-        },
-        {
-          "name": "dfs.df.interval"
-        },
-        {
-          "name": "dfs.client.block.write.retries"
-        },
-        {
-          "name": "dfs.blockreport.intervalMsec"
-        },
-        {
-          "name": "dfs.blockreport.initialDelay"
-        },
-        {
-          "name": "dfs.heartbeat.interval"
-        },
-        {
-          "name": "dfs.namenode.handler.count"
-        },
-        {
-          "name": "dfs.safemode.threshold.pct"
-        },
-        {
-          "name": "dfs.safemode.extension"
-        },
-        {
-          "name": "dfs.balance.bandwidthPerSec"
-        },
-        {
-          "name": "dfs.hosts"
-        },
-        {
-          "name": "dfs.hosts.exclude"
-        },
-        {
-          "name": "dfs.max.objects"
+          "name": "dfs.namenode.checkpoint.txns"
         },
         {
           "name": "dfs.namenode.decommission.interval"
         },
         {
           "name": "dfs.namenode.decommission.nodes.per.interval"
-        },
-        {
-          "name": "dfs.replication.interval"
-        },
-        {
-          "name": "dfs.access.time.precision"
-        },
-        {
-          "name": "dfs.support.append"
         },
         {
           "name": "dfs.namenode.delegation.key.update-interval"
@@ -347,10 +449,151 @@
           "name": "dfs.namenode.delegation.token.renew-interval"
         },
         {
-          "name": "dfs.datanode.failed.volumes.tolerated"
+          "name": "dfs.namenode.edits.dir"
         },
         {
-          "name": "topology.script.file.name"
+          "name": "dfs.namenode.edits.journal-plugin.qjournal"
+        },
+        {
+          "name": "dfs.namenode.fs-limits.max-component-length"
+        },
+        {
+          "name": "dfs.namenode.fs-limits.max-directory-items"
+        },
+        {
+          "name": "dfs.namenode.handler.count"
+        },
+        {
+          "name": "dfs.namenode.http-address"
+        },
+        {
+          "name": "dfs.namenode.https-address"
+        },
+        {
+          "name": "dfs.namenode.invalidate.work.pct.per.iteration"
+        },
+        {
+          "name": "dfs.namenode.kerberos.internal.spnego.principal"
+        },
+        {
+          "name": "dfs.namenode.logging.level"
+        },
+        {
+          "name": "dfs.namenode.max.objects"
+        },
+        {
+          "name": "dfs.namenode.name.dir"
+        },
+        {
+          "name": "dfs.namenode.name.dir.restore"
+        },
+        {
+          "name": "dfs.namenode.num.checkpoints.retained"
+        },
+        {
+          "name": "dfs.namenode.num.extra.edits.retained"
+        },
+        {
+          "name": "dfs.namenode.plugins"
+        },
+        {
+          "name": "dfs.namenode.replication.considerLoad"
+        },
+        {
+          "name": "dfs.namenode.replication.interval"
+        },
+        {
+          "name": "dfs.namenode.replication.min"
+        },
+        {
+          "name": "dfs.namenode.replication.work.multiplier.per.iteration"
+        },
+        {
+          "name": "dfs.namenode.safemode.extension"
+        },
+        {
+          "name": "dfs.namenode.safemode.min.datanodes"
+        },
+        {
+          "name": "dfs.namenode.safemode.threshold-pct"
+        },
+        {
+          "name": "dfs.namenode.secondary.http-address"
+        },
+        {
+          "name": "dfs.namenode.shared.edits.dir"
+        },
+        {
+          "name": "dfs.namenode.support.allow.format"
+        },
+        {
+          "name": "dfs.nameservice.id"
+        },
+        {
+          "name": "dfs.nameservices"
+        },
+        {
+          "name": "dfs.permissions"
+        },
+        {
+          "name": "dfs.permissions.enabled"
+        },
+        {
+          "name": "dfs.permissions.supergroup"
+        },
+        {
+          "name": "dfs.permissions.superusergroup"
+        },
+        {
+          "name": "dfs.replication"
+        },
+        {
+          "name": "dfs.replication.considerLoad"
+        },
+        {
+          "name": "dfs.replication.interval"
+        },
+        {
+          "name": "dfs.replication.max"
+        },
+        {
+          "name": "dfs.replication.min"
+        },
+        {
+          "name": "dfs.safemode.extension"
+        },
+        {
+          "name": "dfs.safemode.threshold.pct"
+        },
+        {
+          "name": "dfs.secondary.http.address"
+        },
+        {
+          "name": "dfs.secondary.namenode.kerberos.internal.spnego.principal"
+        },
+        {
+          "name": "dfs.socket.timeout"
+        },
+        {
+          "name": "dfs.stream-buffer-size"
+        },
+        {
+          "name": "dfs.support.append"
+        },
+        {
+          "name": "dfs.webhdfs.enabled"
+        },
+        {
+          "name": "dfs.web.ugi"
+        },
+        {
+          "name": "hadoop.fuse.connection.timeout"
+        },
+        {
+          "name": "hadoop.fuse.timer.period"
+        },
+        {
+          "name": "hadoop.hdfs.configuration.version"
         }
       ],
       "yarn-env.sh": [
