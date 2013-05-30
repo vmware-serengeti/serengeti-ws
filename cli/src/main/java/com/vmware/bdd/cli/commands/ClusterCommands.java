@@ -432,7 +432,9 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "parallel" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether use parallel way to scale node group") final boolean parallel) {
 
       if ((instanceNum > 1 && cpuNumber == 0 && memory == 0)
-            || (instanceNum == 0 && (cpuNumber > 0 || memory > 0))) {
+            || (instanceNum == 0 && cpuNumber > 0 && memory == 0)
+            || (instanceNum == 0 && cpuNumber == 0 && memory > 0)
+            || (instanceNum == 0 && cpuNumber > 0 && memory > 0)) {
          try {
             ClusterRead cluster = restClient.get(name, false);
             if (cluster == null) {
