@@ -901,13 +901,12 @@ public class ClusterManager {
       clusterEntityMgr.update(cluster);
 
       //update vhm extra config file
-      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
-            && !ClusterStatus.STOPPED.equals(cluster.getStatus())) {
+      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
          logger.error("cluster " + clusterName
                + " cannot be reconfigured, it is in " + cluster.getStatus()
                + " status");
          throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
-               clusterName, "it should be in RUNNING or STOPPED status");
+               clusterName, "it should be in RUNNING status");
       }
 
       if (enableAuto != null) {
