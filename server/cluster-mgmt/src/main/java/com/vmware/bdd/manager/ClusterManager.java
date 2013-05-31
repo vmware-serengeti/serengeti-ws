@@ -389,7 +389,7 @@ public class ClusterManager {
          throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
       List<VcCluster> vcClusters = getUsedVcClusters(clusterSpec.getRpNames());
-      if (vcClusters.isEmpty()) {
+      if (vcClusters == null || vcClusters.isEmpty()) {
          throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
       // validate accessibility
