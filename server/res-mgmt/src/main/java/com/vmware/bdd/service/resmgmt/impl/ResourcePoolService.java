@@ -315,12 +315,16 @@ public class ResourcePoolService implements IResourcePoolService {
       List<String> rpNames = new ArrayList<String>();
       for (VcCluster vcCluster : vcClusters) {
          List<String> vcRps = vcCluster.getVcRps();
-         if (vcRps == null || vcRps.isEmpty()) {
-            addAutoResourcePool(rpNames, vcCluster, "");
-            continue;
+         if (vcRps == null) {
+            vcRps = new ArrayList<String>();
+         }
+         if (vcRps.isEmpty()) {
+            // add empty string to represent root rp of vc cluster
+            vcRps.add("");
          }
          for (String vcRp : vcRps) {
             if (ignoreDuplicate && rpDao.isRPAdded(vcCluster.getName(), vcRp)) {
+               rpNames.add(rpDao.getNameByClusterAndRp(vcCluster.getName(), vcRp));
                continue;
             }
             addAutoResourcePool(rpNames, vcCluster, vcRp);
