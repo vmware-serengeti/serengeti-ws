@@ -139,4 +139,12 @@ public class ClusteringServiceException extends BddException {
    public static ClusteringServiceException VM_STATUS_ERROR(String vmName, String actual, String expected) {
       return new ClusteringServiceException(null, "VM_STATUS_ERROR", vmName, actual, expected);
    }
+
+   public static ClusteringServiceException CLUSTER_NAME_TOO_LONG(String clusterName) {
+      return new ClusteringServiceException(null, "CLUSTER_NAME_TOO_LONG", clusterName);
+   }
+
+   public static ClusteringServiceException GROUP_NAME_TOO_LONG(String groupName) {
+      return new ClusteringServiceException(null, "GROUP_NAME_TOO_LONG", groupName);
+   }
 }

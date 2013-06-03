@@ -113,6 +113,7 @@ import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 public class ClusteringService implements IClusteringService {
+   private static final int VC_RP_MAX_NAME_LENGTH = 80;
    private static final Logger logger = Logger
          .getLogger(ClusteringService.class);
    private ClusterConfigManager configMgr;
@@ -606,6 +607,9 @@ public class ClusteringService implements IClusteringService {
       String clusterName = vNodes.get(0).getClusterName();
       String uuid = ConfigInfo.getSerengetiUUID();
       String clusterRpName = uuid + "-" + clusterName;
+      if (clusterRpName.length() > VC_RP_MAX_NAME_LENGTH) {
+         throw ClusteringServiceException.CLUSTER_NAME_TOO_LONG(clusterName);
+      }
 
       /*
        * prepare resource pool names and node group per resource pool for creating cluster
@@ -674,6 +678,10 @@ public class ClusteringService implements IClusteringService {
                   AuAssert
                         .check(nodeGroup != null,
                               "create node group resource pool failed: node group cannot be null !");
+                  if (nodeGroup.getName().length() > 80) {
+                     throw ClusteringServiceException
+                           .GROUP_NAME_TOO_LONG(clusterName);
+                  }
                   CreateResourcePoolSP nodeGroupSP =
                         new CreateResourcePoolSP(parentVcResourcePool,
                               nodeGroup.getName(), nodeGroup);
@@ -838,7 +846,8 @@ public class ClusteringService implements IClusteringService {
       NodeGroupEntity nodeGroup =
             getClusterEntityMgr().findByName(vNode.getClusterName(),
                   vNode.getGroupName());
-      ClusterEntity clusterEntity = getClusterEntityMgr().findByName(vNode.getClusterName());
+      ClusterEntity clusterEntity =
+            getClusterEntityMgr().findByName(vNode.getClusterName());
       CreateVmPrePowerOn prePowerOn =
             new CreateVmPrePowerOn(ha, ft, clusterEntity.getIoShares());
 
@@ -1098,8 +1107,8 @@ public class ClusteringService implements IClusteringService {
    public boolean removeBadNodes(ClusterCreate cluster,
          List<BaseNode> existingNodes, List<BaseNode> deletedNodes,
          Set<String> occupiedIps, StatusUpdater statusUpdator) {
-      logger.info("Start to remove node violate placement policy or in wrong status in cluster: "
-            + cluster.getName());
+      logger.info("Start to remove node violate placement policy " +
+      		"or in wrong status in cluster: " + cluster.getName());
       // call tm to remove bad nodes
       List<BaseNode> badNodes =
             placementService.getBadNodes(cluster, existingNodes);
@@ -1276,7 +1285,7 @@ public class ClusteringService implements IClusteringService {
    }
 
    @SuppressWarnings("unchecked")
-   private boolean syncDeleteVMs(List<BaseNode> badNodes,
+   public boolean syncDeleteVMs(List<BaseNode> badNodes,
          StatusUpdater statusUpdator) {
       logger.info("syncDeleteVMs, start to create store procedures.");
       List<Callable<Void>> storeProcedures = new ArrayList<Callable<Void>>();

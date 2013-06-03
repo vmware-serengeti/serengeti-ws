@@ -302,9 +302,9 @@ public class ClusterEntityManager {
          return;
       }
       // TODO: consider more status
-      if (vcVm.isPoweredOff()) {
+      if (!vcVm.isPoweredOn()) {
          node.setStatus(NodeStatus.POWERED_OFF);
-      } else if (vcVm.isPoweredOn()) {
+      } else {
          node.setStatus(NodeStatus.POWERED_ON);
       }
 

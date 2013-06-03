@@ -127,7 +127,7 @@ public class JobUtils {
             continue;
          }
          VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getVmMobId());
-         if (vm == null || vm.isPoweredOff()
+         if (vm == null || (!vm.isPoweredOn())
                || (VcVmUtil.getIpAddress(vm, false) == null)) {
             deletedNodes.add(node);
             continue;
@@ -172,7 +172,7 @@ public class JobUtils {
             if (expectedStatus == NodeStatus.VM_READY) {
                // verify from VC 
                VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
-               if (vm == null || !vm.isPoweredOn()
+               if (vm == null || (!vm.isPoweredOn())
                      || (VcVmUtil.getIpAddress(vm, false) == null)) {
                   throw ClusteringServiceException.VM_STATUS_ERROR(
                         node.getVmName(), node.getStatus().toString(),

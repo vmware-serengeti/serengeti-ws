@@ -64,8 +64,7 @@ public class ResizeClusterRemoveBadNodeStep extends TrackableTasklet {
       StatusUpdater statusUpdator = new DefaultStatusUpdater(
             jobExecutionStatusHolder, getJobExecutionId(chunkContext));
 
-      boolean deleted = clusteringService.removeBadNodes(
-            clusterSpec, existingNodes, deletedNodes, occupiedIps, statusUpdator);
+      boolean deleted = clusteringService.syncDeleteVMs(deletedNodes, statusUpdator);
       putIntoJobExecutionContext(chunkContext, 
             JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, existingNodes);
       putIntoJobExecutionContext(chunkContext, 
@@ -123,7 +122,7 @@ public class ResizeClusterRemoveBadNodeStep extends TrackableTasklet {
                }
                VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getVmMobId());
                if (vm == null 
-                     || vm.isPoweredOff()
+                     || (!vm.isPoweredOn())
                      || (VcVmUtil.getIpAddress(vm, false) == null)) {
                   deletedNodes.add(node);
                   continue;

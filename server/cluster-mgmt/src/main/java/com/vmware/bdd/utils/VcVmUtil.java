@@ -139,12 +139,12 @@ public class VcVmUtil {
          vNode.setGuestHostName(VcVmUtil.getGuestHostName(vm, false));
          vNode.setTargetHost(vm.getHost().getName());
          vNode.setVmMobId(vm.getId());
-         if (vm.isPoweredOff()) {
-            vNode.setNodeStatus(NodeStatus.POWERED_OFF);
-            vNode.setNodeAction(Constants.NODE_ACTION_CLONING_FAILED);
-         } else {
+         if (vm.isPoweredOn()) {
             vNode.setNodeStatus(NodeStatus.VM_READY);
             vNode.setNodeAction(null);
+         } else {
+            vNode.setNodeStatus(NodeStatus.POWERED_OFF);
+            vNode.setNodeAction(Constants.NODE_ACTION_CLONING_FAILED);
          }
       } else {
          vNode.setSuccess(false);

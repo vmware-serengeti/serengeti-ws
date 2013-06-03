@@ -22,6 +22,7 @@ import com.vmware.vim.binding.vim.event.EventEx;
 import com.vmware.vim.binding.vim.event.VmEvent;
 import com.vmware.vim.binding.vim.event.VmPoweredOffEvent;
 import com.vmware.vim.binding.vim.event.VmPoweredOnEvent;
+import com.vmware.vim.binding.vim.event.VmSuspendedEvent;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 
 public class VcEventProcessor {
@@ -101,6 +102,20 @@ public class VcEventProcessor {
                   }
                   break;
                }
+               case VmSuspended: {
+                  VmSuspendedEvent event = (VmSuspendedEvent)e;
+                  VcVirtualMachine vm = VcCache.getIgnoreMissing(event.getVm().getVm());
+                  if (vm == null) {
+                     return false;
+                  }
+                  vm.updateRuntime();
+                  if (clusterEntityMgr.getNodeByMobId(moId) != null) {
+                     logger.info("received serengeti managed vm suspended event for vm: "
+                           + vm.getName());
+                     clusterEntityMgr.refreshNodeByMobId(moId, null, true);
+                  }
+                  break;
+               }
             }
             VcCache.refreshAll(moRef);
             return false;
@@ -138,6 +153,20 @@ public class VcEventProcessor {
                            + vm.getName());
                      clusterEntityMgr.refreshNodeByVmName(moId, vm.getName(), 
                            Constants.NODE_ACTION_WAITING_IP, true);
+                  }
+                  break;
+               }
+               case VmSuspended: {
+                  VmSuspendedEvent event = (VmSuspendedEvent)e;
+                  VcVirtualMachine vm = VcCache.getIgnoreMissing(event.getVm().getVm());
+                  if (vm == null) {
+                     return false;
+                  }
+                  vm.updateRuntime();
+                  if (clusterEntityMgr.getNodeByVmName(vm.getName()) != null) {
+                     logger.info("received internal vm suspended event for vm: "
+                           + vm.getName());
+                     clusterEntityMgr.refreshNodeByVmName(moId, vm.getName(), null, true);
                   }
                   break;
                }
