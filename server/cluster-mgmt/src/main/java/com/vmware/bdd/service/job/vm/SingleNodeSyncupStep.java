@@ -85,23 +85,23 @@ public class SingleNodeSyncupStep extends TrackableTasklet {
       if (cpuNumberStr != null) {
          cpuNumber = Integer.parseInt(cpuNumberStr);
       }
+      boolean rollback =
+            getFromJobExecutionContext(chunkContext,
+                  JobConstants.NODE_SCALE_ROLLBACK, Boolean.class);
       long memory = 0;
       if (memorySizeStr != null) {
          memory = Long.parseLong(memorySizeStr);
       }
-      if (cpuNumber > 0) {
+      if (cpuNumber > 0 && !rollback) {
          node.setCpuNum(cpuNumber);
       }
       if (memory > 0) {
-         node.setMemorySize(memory);
+         if (!rollback) {
+            node.setMemorySize(memory);
+         }
          scaleService.updateSwapDisk(nodeName);
       }
-      boolean rollback =
-            getFromJobExecutionContext(chunkContext,
-                  JobConstants.NODE_SCALE_ROLLBACK, Boolean.class);
-      if (!rollback) {
-         getClusterEntityMgr().update(node);
-      }
+      getClusterEntityMgr().update(node);
 
       return RepeatStatus.FINISHED;
    }
