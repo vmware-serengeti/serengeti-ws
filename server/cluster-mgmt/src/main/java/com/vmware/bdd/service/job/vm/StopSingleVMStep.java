@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job.vm;
 
+import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
@@ -34,13 +35,16 @@ import com.vmware.bdd.service.job.TrackableTasklet;
  */
 
 public class StopSingleVMStep extends TrackableTasklet {
+   private static final Logger logger = Logger
+         .getLogger(StopSingleVMStep.class);
+
    private IClusteringService clusteringService;
    private boolean vmPoweroff = false;
+   private boolean checkVMStatus = false;
 
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,
          JobExecutionStatusHolder jobExecutionStatusHolder) throws Exception {
-
       String clusterName =
             getJobParameters(chunkContext).getString(
                   JobConstants.CLUSTER_NAME_JOB_PARAM);
@@ -52,18 +56,29 @@ public class StopSingleVMStep extends TrackableTasklet {
       String nodeName =
             getJobParameters(chunkContext).getString(
                   JobConstants.SUB_JOB_NODE_NAME);
-      StatusUpdater statusUpdator =
-            new DefaultStatusUpdater(jobExecutionStatusHolder,
-                  getJobExecutionId(chunkContext));
-      boolean success =
-            clusteringService.stopSingleVM(clusterName, nodeName,
-                  statusUpdator, vmPoweroff);
-      putIntoJobExecutionContext(chunkContext,
-            JobConstants.NODE_OPERATION_SUCCESS, success);
-      putIntoJobExecutionContext(chunkContext,
-            JobConstants.EXPECTED_NODE_STATUS, NodeStatus.POWERED_OFF);
-      if (!success) {
-         throw VcProviderException.STOP_VM_ERROR(nodeName);
+      String vmPowerOnStr =
+            getJobParameters(chunkContext).getString(
+                  JobConstants.NODE_SCALE_VM_POWER_ON);
+      logger.debug("nodename: " + nodeName + "vm original status is power on? "
+            + vmPowerOnStr);
+      boolean vmPowerOn = Boolean.parseBoolean(vmPowerOnStr);
+      if (!checkVMStatus || (checkVMStatus && !vmPowerOn)) {
+         logger.debug("check vm status: " + checkVMStatus
+               + ", vm original status is poweron? " + vmPowerOn);
+         StatusUpdater statusUpdator =
+               new DefaultStatusUpdater(jobExecutionStatusHolder,
+                     getJobExecutionId(chunkContext));
+         boolean success =
+               clusteringService.stopSingleVM(clusterName, nodeName,
+                     statusUpdator, vmPoweroff);
+
+         putIntoJobExecutionContext(chunkContext,
+               JobConstants.NODE_OPERATION_SUCCESS, success);
+         putIntoJobExecutionContext(chunkContext,
+               JobConstants.EXPECTED_NODE_STATUS, NodeStatus.POWERED_OFF);
+         if (!success) {
+            throw VcProviderException.STOP_VM_ERROR(nodeName);
+         }
       }
       return RepeatStatus.FINISHED;
    }
@@ -89,6 +104,21 @@ public class StopSingleVMStep extends TrackableTasklet {
     */
    public void setVmPoweroff(boolean vmPoweroff) {
       this.vmPoweroff = vmPoweroff;
+   }
+
+   /**
+    * @return the checkVMStatus
+    */
+   public boolean isCheckVMStatus() {
+      return checkVMStatus;
+   }
+
+   /**
+    * @param checkVMStatus
+    *           the checkVMStatus to set
+    */
+   public void setCheckVMStatus(boolean checkVMStatus) {
+      this.checkVMStatus = checkVMStatus;
    }
 
 

@@ -108,4 +108,10 @@
 		<beans:property name="clusteringService" ref="clusteringService" />
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 	</beans:bean>
+	<beans:bean name="stopSingleVMTaskletIfRequired"
+		class="com.vmware.bdd.service.job.vm.StopSingleVMStep">
+		<beans:property name="clusteringService" ref="clusteringService" />
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+		<beans:property name="checkVMStatus" value="true"></beans:property>
+	</beans:bean>
 </beans:beans>

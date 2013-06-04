@@ -22,6 +22,7 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.entity.NodeEntity;
@@ -114,6 +115,10 @@ public class ScaleManager {
             logger.info("original cpu number :" + nodeEntity.getCpuNum()
                   + ". Expected cpu number: " + scale.getCpuNumber());
             String nodeName = nodeEntity.getVmName();
+            boolean vmPowerOn =
+                  (nodeEntity.getStatus().ordinal() != NodeStatus.POWERED_OFF
+                        .ordinal());
+            logger.debug("orginal vm power on? " + vmPowerOn);
             JobParameters nodeParameters =
                   parametersBuilder
                         .addString(JobConstants.SUB_JOB_NODE_NAME, nodeName)
@@ -124,7 +129,8 @@ public class ScaleManager {
                               String.valueOf(scale.getCpuNumber()))
                         .addString(JobConstants.NODE_SCALE_MEMORY_SIZE,
                               String.valueOf(scale.getMemory()))
-                        .toJobParameters();
+                        .addString(JobConstants.NODE_SCALE_VM_POWER_ON,
+                              String.valueOf(vmPowerOn)).toJobParameters();
             jobParametersList.add(nodeParameters);
          } else {
             logger.info("This node does need to be scaled. "

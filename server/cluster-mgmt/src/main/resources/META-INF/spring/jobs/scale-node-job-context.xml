@@ -78,8 +78,14 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="softwareBootstrapSingleNodeStep">
+		<step id="softwareBootstrapSingleNodeStep" next="stopSingleVMStepIfRequired">
 			<tasklet ref="softwareBootstrapTargetTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="stopSingleVMStepIfRequired">
+			<tasklet ref="stopSingleVMTaskletIfRequired" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
