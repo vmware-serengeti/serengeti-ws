@@ -58,7 +58,7 @@ public class StopSingleVMStep extends TrackableTasklet {
                   JobConstants.SUB_JOB_NODE_NAME);
       String vmPowerOnStr =
             getJobParameters(chunkContext).getString(
-                  JobConstants.NODE_SCALE_VM_POWER_ON);
+                  JobConstants.IS_VM_POWER_ON);
       logger.debug("nodename: " + nodeName + "vm original status is power on? "
             + vmPowerOnStr);
       boolean vmPowerOn = Boolean.parseBoolean(vmPowerOnStr);

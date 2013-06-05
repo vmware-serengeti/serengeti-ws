@@ -129,7 +129,7 @@ public class ScaleManager {
                               String.valueOf(scale.getCpuNumber()))
                         .addString(JobConstants.NODE_SCALE_MEMORY_SIZE,
                               String.valueOf(scale.getMemory()))
-                        .addString(JobConstants.NODE_SCALE_VM_POWER_ON,
+                        .addString(JobConstants.IS_VM_POWER_ON,
                               String.valueOf(vmPowerOn)).toJobParameters();
             jobParametersList.add(nodeParameters);
          } else {

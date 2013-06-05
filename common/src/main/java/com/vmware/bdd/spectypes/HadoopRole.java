@@ -130,7 +130,9 @@ public enum HadoopRole {
       }
    }
    
-   public static boolean hasMgmtRole(List<String> roles) {
+   private static Set<String> mgmtRoleDesc;
+
+   static {
       HadoopRole[] mgmtRoles =
             new HadoopRole[] { ZOOKEEPER_ROLE, HADOOP_JOURNALNODE_ROLE,
                   HADOOP_NAMENODE_ROLE, HBASE_MASTER_ROLE,
@@ -139,12 +141,14 @@ public enum HadoopRole {
                   MAPR_HBASE_MASTER_ROLE, MAPR_HIVE_SERVER_ROLE,
                   HADOOP_RESOURCEMANAGER_ROLE };
 
-      Set<String> mgmtRoleDesc = new HashSet<String>(mgmtRoles.length);
+      mgmtRoleDesc = new HashSet<String>(mgmtRoles.length);
 
       for (HadoopRole role : mgmtRoles) {
          mgmtRoleDesc.add(role.description);
       }
+   }
 
+   public static boolean hasMgmtRole(List<String> roles) {
       for (String role : roles) {
          if (mgmtRoleDesc.contains(role))
             return true;

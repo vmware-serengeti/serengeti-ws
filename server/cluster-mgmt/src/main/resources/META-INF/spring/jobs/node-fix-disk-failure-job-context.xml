@@ -21,8 +21,9 @@
    <beans:bean name="powerOffSingleVMTasklet"
       class="com.vmware.bdd.service.job.vm.StopSingleVMStep">
       <beans:property name="clusteringService" ref="clusteringService" />
-      <beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
-      <beans:property name="vmPoweroff" value="true"/>
+      <beans:property name="jobExecutionStatusHolder"
+         ref="jobExecutionStatusHolder" />
+      <beans:property name="vmPoweroff" value="true" />
    </beans:bean>
 
    <beans:bean name="nodeUpdateDiskInfoTasklet"
@@ -44,8 +45,14 @@
             <listener ref="stepListener" />
          </listeners>
       </step>
-      <step id="softwareConfigClusterStep">
+      <step id="softwareConfigClusterStep" next="stopSingleVMStepIfRequired">
          <tasklet ref="softwareBootstrapTargetTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="stopSingleVMStepIfRequired">
+         <tasklet ref="stopSingleVMTaskletIfRequired" />
          <listeners>
             <listener ref="stepListener" />
          </listeners>

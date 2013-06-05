@@ -51,6 +51,7 @@ import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
+import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.entity.ClusterEntity;
@@ -96,7 +97,7 @@ public class ClusterManager {
    private IClusteringService clusteringService;
 
    private IClusterHealService clusterHealService;
-   
+
    private IExecutionService executionService;
 
    public JobManager getJobManager() {
@@ -894,7 +895,8 @@ public class ClusterManager {
          cluster.setAutomationEnable(enableAuto);
       }
 
-      if (minComputeNodeNum != null && minComputeNodeNum != cluster.getVhmMinNum()) {
+      if (minComputeNodeNum != null
+            && minComputeNodeNum != cluster.getVhmMinNum()) {
          cluster.setVhmMinNum(minComputeNodeNum);
       }
 
@@ -912,16 +914,17 @@ public class ClusterManager {
 
       //enableAuto is only set during cluster running status and 
       //other elasticity attributes are only set during cluster running/stop status 
-      if ((enableAuto != null) && !ClusterStatus.RUNNING.equals(cluster.getStatus())) {
-         logger.error("Cannot change elasticity mode, when cluster " + clusterName + 
-               " is in " + cluster.getStatus() + " status");
+      if ((enableAuto != null)
+            && !ClusterStatus.RUNNING.equals(cluster.getStatus())) {
+         logger.error("Cannot change elasticity mode, when cluster "
+               + clusterName + " is in " + cluster.getStatus() + " status");
          throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
                clusterName, "it should be in RUNNING status");
       }
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
             && !ClusterStatus.STOPPED.equals(cluster.getStatus())) {
-         logger.error("Cannot change elasticity parameters, when cluster " + clusterName + 
-               " is in " + cluster.getStatus() + " status");
+         logger.error("Cannot change elasticity parameters, when cluster "
+               + clusterName + " is in " + cluster.getStatus() + " status");
          throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
                clusterName, "it should be in RUNNING or STOPPED status");
       }
@@ -936,9 +939,10 @@ public class ClusterManager {
                   .SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(clusterName, "failed");
          }
       }
-      
+
       //waitForManual if switch to Manual and targetNodeNum is null
-      if (enableAuto != null && !enableAuto && cluster.getVhmTargetNum() == null) {
+      if (enableAuto != null && !enableAuto
+            && cluster.getVhmTargetNum() == null) {
          JobUtils.waitForManual(clusterName, executionService);
       }
 
@@ -962,7 +966,8 @@ public class ClusterManager {
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
          String msg = "Cluster is not running.";
          logger.error(msg);
-         throw ClusterManagerException.SET_MANUAL_ELASTICITY_NOT_ALLOWED_ERROR(msg);
+         throw ClusterManagerException
+               .SET_MANUAL_ELASTICITY_NOT_ALLOWED_ERROR(msg);
       }
 
       List<String> nodeGroupNames =
@@ -1003,11 +1008,11 @@ public class ClusterManager {
       }
       // TODO: transfer SET_TARGET/UNLIMIT from CLI directly
       if (activeComputeNodeNum == -1) {
-         param.put(JobConstants.VHM_ACTION_JOB_PARAM,
-               new JobParameter(LimitInstruction.actionUnlimit));
+         param.put(JobConstants.VHM_ACTION_JOB_PARAM, new JobParameter(
+               LimitInstruction.actionUnlimit));
       } else {
-         param.put(JobConstants.VHM_ACTION_JOB_PARAM,
-               new JobParameter(LimitInstruction.actionSetTarget));
+         param.put(JobConstants.VHM_ACTION_JOB_PARAM, new JobParameter(
+               LimitInstruction.actionSetTarget));
       }
       param.put(JobConstants.ACTIVE_COMPUTE_NODE_NUMBER_JOB_PARAM,
             new JobParameter(Long.valueOf(activeComputeNodeNum)));
@@ -1229,6 +1234,10 @@ public class ClusterManager {
                logger.warn("node " + node.getVmName()
                      + " has bad disks. Fixing it..");
 
+               boolean vmPowerOn =
+                     (node.getStatus().ordinal() != NodeStatus.POWERED_OFF
+                           .ordinal());
+
                JobParameters nodeParameters =
                      parametersBuilder
                            .addString(JobConstants.CLUSTER_NAME_JOB_PARAM,
@@ -1238,7 +1247,9 @@ public class ClusterManager {
                            .addString(JobConstants.GROUP_NAME_JOB_PARAM,
                                  nodeGroup.getName())
                            .addString(JobConstants.SUB_JOB_NODE_NAME,
-                                 node.getVmName()).toJobParameters();
+                                 node.getVmName())
+                           .addString(JobConstants.IS_VM_POWER_ON,
+                                 String.valueOf(vmPowerOn)).toJobParameters();
                jobParameterList.add(nodeParameters);
             }
          }
