@@ -14,16 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
-import com.vmware.bdd.apitypes.LimitInstruction;
-import com.vmware.bdd.command.VHMMessageTask;
-import com.vmware.bdd.exception.TaskException;
-import com.vmware.bdd.service.IExecutionService;
-import com.vmware.bdd.utils.CommonUtil;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -32,9 +24,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.service.IClusteringService;
-import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.service.IExecutionService;
+import com.vmware.bdd.utils.JobUtils;
 
 public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
    private static final Logger logger = Logger
@@ -114,8 +108,8 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
          /* if there is no compute-only nodes, no extraConfig is set in vmx file,
          VHM is not able to do any actions, in this case, preAutoFlag = null
           */
-         if (preAutoFlag != null) {
-            waitForManual();
+         if (preAutoFlag != null && preAutoFlag) { //only set manual has triggered waitForManual during setElasticity
+            JobUtils.waitForManual(clusterName, executionService);
          }
       }
 
@@ -128,6 +122,7 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
       if (!subJob) {
          setClusterStatus(je);
       }
+
       if (recoverAutoFlagAfterJob != null && recoverAutoFlagAfterJob) {
          setAutoFlag(true);
       }
@@ -144,26 +139,6 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
          // release the resource reservation if some step failed, and the
          // resource is not released yet.
          clusteringService.commitReservation(reservationId);
-      }
-   }
-
-   private void waitForManual(){
-      logger.info("start notify VHM swithing to manual mode");
-      Map<String, Object> sendParam = new HashMap<String, Object>();
-      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_VERSION, Constants.VHM_PROTOCOL_VERSION);
-      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_CLUSTER_NAME, clusterName);
-      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_RECEIVE_ROUTE_KEY, CommonUtil.getUUID());
-      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_ACTION, LimitInstruction.actionWaitForManual);
-
-      Map<String, Object> ret = null;
-      try {
-         ret = executionService.execute(new VHMMessageTask(sendParam, null));
-         if (!(Boolean) ret.get("succeed")) {
-            String errorMessage = (String) ret.get("errorMessage");
-            throw TaskException.EXECUTION_FAILED(errorMessage);
-         }
-      } catch (Exception e) {
-         throw TaskException.EXECUTION_FAILED("failed to notify VHM swithing to manual for cluster: " + clusterName);
       }
    }
 

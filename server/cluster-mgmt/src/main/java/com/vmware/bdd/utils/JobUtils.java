@@ -1,7 +1,9 @@
 package com.vmware.bdd.utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -9,14 +11,18 @@ import org.apache.log4j.Logger;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.LimitInstruction;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.command.VHMMessageTask;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.ClusteringServiceException;
+import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.placement.entity.BaseNode;
+import com.vmware.bdd.service.IExecutionService;
 import com.vmware.bdd.service.job.JobConstants;
 
 public class JobUtils {
@@ -199,5 +205,25 @@ public class JobUtils {
          int paramIndex) {
       return JobConstants.SUB_JOB_PARAMETERS_VALUE_PREFIX + stepNumber + "."
             + paramIndex;
+   }
+
+   public static void waitForManual(String clusterName, IExecutionService executionService){
+      logger.info("start notify VHM swithing to manual mode");
+      Map<String, Object> sendParam = new HashMap<String, Object>();
+      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_VERSION, Constants.VHM_PROTOCOL_VERSION);
+      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_CLUSTER_NAME, clusterName);
+      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_RECEIVE_ROUTE_KEY, CommonUtil.getUUID());
+      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_ACTION, LimitInstruction.actionWaitForManual);
+
+      Map<String, Object> ret = null;
+      try {
+         ret = executionService.execute(new VHMMessageTask(sendParam, null));
+         if (!(Boolean) ret.get("succeed")) {
+            String errorMessage = (String) ret.get("errorMessage");
+            throw TaskException.EXECUTION_FAILED(errorMessage);
+         }
+      } catch (Exception e) {
+         throw TaskException.EXECUTION_FAILED("failed to notify VHM swithing to manual for cluster: " + clusterName);
+      }
    }
 }

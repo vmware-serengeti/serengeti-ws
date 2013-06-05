@@ -30,15 +30,6 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.ClusterRead;
-import com.vmware.bdd.apitypes.DistroRead;
-import com.vmware.bdd.apitypes.LimitInstruction;
-import com.vmware.bdd.apitypes.NetworkRead;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.apitypes.NodeGroupRead;
-import com.vmware.bdd.apitypes.Priority;
-import com.vmware.bdd.apitypes.TaskRead;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -51,8 +42,17 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.apitypes.DistroRead;
+import com.vmware.bdd.apitypes.LimitInstruction;
+import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.NodeGroupRead;
+import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
@@ -62,6 +62,7 @@ import com.vmware.bdd.exception.ClusterHealServiceException;
 import com.vmware.bdd.exception.ClusterManagerException;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
+import com.vmware.bdd.service.IExecutionService;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
@@ -73,6 +74,7 @@ import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Configuration;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.ValidationUtils;
 
 public class ClusterManager {
@@ -94,6 +96,8 @@ public class ClusterManager {
    private IClusteringService clusteringService;
 
    private IClusterHealService clusterHealService;
+   
+   private IExecutionService executionService;
 
    public JobManager getJobManager() {
       return jobManager;
@@ -171,6 +175,15 @@ public class ClusterManager {
    @Autowired
    public void setClusterHealService(IClusterHealService clusterHealService) {
       this.clusterHealService = clusterHealService;
+   }
+
+   public IExecutionService getExecutionService() {
+      return executionService;
+   }
+
+   @Autowired
+   public void setExecutionService(IExecutionService executionService) {
+      this.executionService = executionService;
    }
 
    public Map<String, Object> getClusterConfigManifest(String clusterName,
@@ -881,8 +894,7 @@ public class ClusterManager {
          cluster.setAutomationEnable(enableAuto);
       }
 
-      if (minComputeNodeNum != null
-            && minComputeNodeNum != cluster.getVhmMinNum()) {
+      if (minComputeNodeNum != null && minComputeNodeNum != cluster.getVhmMinNum()) {
          cluster.setVhmMinNum(minComputeNodeNum);
       }
 
@@ -898,23 +910,36 @@ public class ClusterManager {
          }
       }
 
-      clusterEntityMgr.update(cluster);
-
-      //update vhm extra config file
-      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
-         logger.error("cluster " + clusterName
-               + " cannot be reconfigured, it is in " + cluster.getStatus()
-               + " status");
+      //enableAuto is only set during cluster running status and 
+      //other elasticity attributes are only set during cluster running/stop status 
+      if ((enableAuto != null) && !ClusterStatus.RUNNING.equals(cluster.getStatus())) {
+         logger.error("Cannot change elasticity mode, when cluster " + clusterName + 
+               " is in " + cluster.getStatus() + " status");
          throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
                clusterName, "it should be in RUNNING status");
       }
+      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
+            && !ClusterStatus.STOPPED.equals(cluster.getStatus())) {
+         logger.error("Cannot change elasticity parameters, when cluster " + clusterName + 
+               " is in " + cluster.getStatus() + " status");
+         throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
+               clusterName, "it should be in RUNNING or STOPPED status");
+      }
 
+      clusterEntityMgr.update(cluster);
+
+      //update vhm extra config file
       if (enableAuto != null) {
          boolean success = clusteringService.setAutoElasticity(clusterName);
          if (!success) {
             throw ClusterManagerException
                   .SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(clusterName, "failed");
          }
+      }
+      
+      //waitForManual if switch to Manual and targetNodeNum is null
+      if (enableAuto != null && !enableAuto && cluster.getVhmTargetNum() == null) {
+         JobUtils.waitForManual(clusterName, executionService);
       }
 
       return nodeGroupNames;
