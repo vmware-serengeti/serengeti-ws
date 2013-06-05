@@ -648,8 +648,8 @@ public class VcService {
 
       // Describe Aurora itself
       Description desc = new DescriptionImpl();
-      desc.setLabel("vFabric Data Director");
-      desc.setSummary("vFabric Data Director, instance " + Configuration.getCmsInstanceId());
+      desc.setLabel("VMware Serengeti Management Server");
+      desc.setSummary("VMware Serengeti Management Server, instance " + Configuration.getCmsInstanceId());
       us.setDescription(desc);
       us.setCompany("VMware, Inc.");
       us.setShownInSolutionManager(true);
@@ -658,8 +658,8 @@ public class VcService {
 
       // Describe the entities we manage (DBVM)
       ManagedEntityInfo info = new ManagedEntityInfoImpl();
-      info.setType("dbvm");
-      info.setDescription("vFabric Data Director data engine container");
+      info.setType("hadoop node");
+      info.setDescription("VMware Serengeti - Node Template");
       //info.setSmallIconUrl("https://*:443/some-16x16.png");
       ManagedEntityInfo[] infos = new ManagedEntityInfo[1];
       infos[0] = info;

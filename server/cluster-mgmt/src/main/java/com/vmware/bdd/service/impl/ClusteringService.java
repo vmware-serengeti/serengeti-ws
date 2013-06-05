@@ -449,28 +449,49 @@ public class ClusteringService implements IClusteringService {
 
    @SuppressWarnings("unchecked")
    private Map<String, Folder> createVcFolders(ClusterCreate cluster) {
-      logger.info("createVcFolders, start to create VC Folders.");
+      logger.info("createVcFolders, start to create cluster Folder.");
       // get all nodegroups
-      Callable<Void>[] storeProcedures =
-            new Callable[cluster.getNodeGroups().length];
-      int i = 0;
-      for (NodeGroupCreate group : cluster.getNodeGroups()) {
+      Callable<Void>[] storeProcedures = new Callable[1];
+      Folder clusterFolder = null;
+      if (cluster.getNodeGroups().length > 0) {
+         // create cluster folder first
+         NodeGroupCreate group = cluster.getNodeGroups()[0];
          String path = group.getVmFolderPath();
          String[] folderNames = path.split("/");
          List<String> folderList = new ArrayList<String>();
-         for (String folderName : folderNames) {
-            folderList.add(folderName);
+         for (int i = 0; i < folderNames.length - 1; i++) {
+            folderList.add(folderNames[i]);
          }
          CreateVMFolderSP sp =
-               new CreateVMFolderSP(templateVm.getDatacenter(), null,
+            new CreateVMFolderSP(templateVm.getDatacenter(), null,
+                  folderList);
+         storeProcedures[0] = sp;
+         Map<String, Folder> folders = executeFolderCreationProcedures(cluster, storeProcedures);
+         for (String name : folders.keySet()) {
+            clusterFolder = folders.get(name);
+            break;
+         }
+      }
+      logger.info("createVcFolders, start to create group Folders.");
+      storeProcedures = new Callable[cluster.getNodeGroups().length];
+      int i = 0;
+      for (NodeGroupCreate group : cluster.getNodeGroups()) {
+         List<String> folderList = new ArrayList<String>();
+         folderList.add(group.getName());
+         CreateVMFolderSP sp =
+               new CreateVMFolderSP(templateVm.getDatacenter(), clusterFolder,
                      folderList);
          storeProcedures[i] = sp;
          i++;
       }
+      return executeFolderCreationProcedures(cluster, storeProcedures);
+   }
+
+   private Map<String, Folder> executeFolderCreationProcedures(
+         ClusterCreate cluster, Callable<Void>[] storeProcedures) {
       Map<String, Folder> folders = new HashMap<String, Folder>();
       try {
          // execute store procedures to create vc folders
-         logger.info("ClusteringService, start to create folders.");
          NoProgressUpdateCallback callback = new NoProgressUpdateCallback();
          ExecutionResult[] result =
                Scheduler
@@ -485,7 +506,7 @@ public class ClusteringService implements IClusteringService {
 
          int total = 0;
          boolean success = true;
-         for (i = 0; i < storeProcedures.length; i++) {
+         for (int i = 0; i < storeProcedures.length; i++) {
             CreateVMFolderSP sp = (CreateVMFolderSP) storeProcedures[i];
             if (result[i].finished && result[i].throwable == null) {
                ++total;
