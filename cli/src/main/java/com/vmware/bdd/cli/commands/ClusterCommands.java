@@ -268,6 +268,7 @@ public class ClusterCommands implements CommandMarker {
          }
       }
 
+      clusterCreate.validateCDHVersion(warningMsgList);
       // Validate that the specified file is correct json format and proper
       // value.
       if (specFilePath != null

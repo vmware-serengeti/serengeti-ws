@@ -16,6 +16,9 @@ package com.vmware.bdd.apitypes;
 
 import static org.testng.AssertJUnit.assertEquals;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -67,6 +70,40 @@ public class ClusterCreateTest {
       dr2.setVendor(Constants.DEFAULT_VENDOR);
       dr2.setName("apache");
       assertEquals(dr2.getName(), cluster.getDefaultDistroName(new DistroRead[] { dr1, dr2 }));
+   }
+
+   @Test
+   public void testValidateCDHVersion() {
+      List<String> warningMsgList = new LinkedList<String>();
+      ClusterCreate cluster = new ClusterCreate();
+      cluster.setDistroVendor(Constants.CDH_VENDOR);
+      cluster.setDistroVersion("4.2.1");
+      cluster.validateCDHVersion(warningMsgList);
+      assertEquals(true, warningMsgList.size() == 0);
+      warningMsgList.clear();
+      cluster.setDistroVersion("4.2.2");
+      cluster.validateCDHVersion(warningMsgList);
+      assertEquals(true, warningMsgList.size() == 1);
+      warningMsgList.clear();
+      cluster.setDistroVersion("4.12.0");
+      cluster.validateCDHVersion(warningMsgList);
+      assertEquals(true, warningMsgList.size() == 1);
+      warningMsgList.clear();
+      cluster.setDistroVersion("4.1.2");
+      cluster.validateCDHVersion(warningMsgList);
+      assertEquals(true, warningMsgList.size() == 0);
+      warningMsgList.clear();
+      cluster.setDistroVersion("3");
+      cluster.validateCDHVersion(warningMsgList);
+      assertEquals(true, warningMsgList.size() == 0);
+      warningMsgList.clear();
+      cluster.setDistroVersion("4");
+      cluster.validateCDHVersion(warningMsgList);
+      assertEquals(true, warningMsgList.size() == 0);
+      warningMsgList.clear();
+      cluster.setDistroVersion("4.2");
+      cluster.validateCDHVersion(warningMsgList);
+      assertEquals(true, warningMsgList.size() == 0);
    }
 
 }

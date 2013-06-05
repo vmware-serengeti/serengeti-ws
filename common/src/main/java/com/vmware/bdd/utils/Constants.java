@@ -133,4 +133,5 @@ public class Constants {
 
    public static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE =
          "elastic_runtime.automation.enable";
+   public static final String MUST_CONFIGURE_FQDN = "CDH 4.2.1+ cluster deployed in a network without FQDN/IP resolution won't work.";
 }

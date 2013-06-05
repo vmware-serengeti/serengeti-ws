@@ -907,4 +907,41 @@ public class ClusterCreate implements Serializable {
       return null;
    }
 
+   public void validateCDHVersion(List<String> warningMsgList) {
+      // If current distro's version is greater than cdh4.2.1, the FQDN must be configured.
+      if (this.supportedWithHdfs2()
+            && (compare(this.getDistroVersion(), "4.2.1") > 0)) {
+         warningMsgList.add(Constants.MUST_CONFIGURE_FQDN);
+      }
+   }
+
+   private int compare(String srcVersion, String destVersion) {
+      String[] srcVersionArray = srcVersion.split("\\.");
+      String[] destVersionArray = destVersion.split("\\.");
+      for (int i = 0; i < srcVersionArray.length; i++) {
+         if (i >= destVersionArray.length) {
+           return compare(destVersionArray, srcVersionArray, 1);
+         }
+         if (Integer.parseInt(srcVersionArray[i]) > Integer
+               .parseInt(destVersionArray[i]) ) {
+            return 1;
+         } else if (Integer.parseInt(srcVersionArray[i]) < Integer
+               .parseInt(destVersionArray[i])) {
+            return -1;
+         }
+      }
+      if (destVersionArray.length > srcVersionArray.length) {
+        return compare(srcVersionArray, destVersionArray, -1);
+      }
+      return 0;
+   }
+
+   private int compare(String[] srcVersionArray, String[] destVersionArray, int type) {
+      for (int j = srcVersionArray.length; j < destVersionArray.length; j++) {
+         if (Integer.parseInt(destVersionArray[j]) > 0) {
+            return type;
+         }
+      }
+      return 0;
+   }
 }
