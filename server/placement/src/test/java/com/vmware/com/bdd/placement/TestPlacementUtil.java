@@ -24,11 +24,10 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
@@ -104,11 +103,10 @@ public class TestPlacementUtil {
       ClusterCreate cluster = getSimpleClusterSpec(DC_SPLIT_CLUSTER_SPEC);
 
       String json = readJson(fileName);
-      Gson gson = new Gson();
+      ObjectMapper mapper = new ObjectMapper();
       List<BaseNode> existedNodes;
       try {
-         existedNodes = gson.fromJson(json, new TypeToken<List<BaseNode>>() {
-         }.getType());
+         existedNodes = mapper.readValue(json, new TypeReference<List<BaseNode>>(){});
       } catch (Exception e) {
          logger.error(e.getMessage());
          throw e;
@@ -128,10 +126,10 @@ public class TestPlacementUtil {
       String json = TestPlacementUtil.readJson(fileName);
       logger.info(json);
 
-      Gson gson = new Gson();
+      ObjectMapper mapper = new ObjectMapper();
 
       try {
-         AbstractDatacenter dc = gson.fromJson(json, AbstractDatacenter.class);
+         AbstractDatacenter dc = mapper.readValue(json, AbstractDatacenter.class);
 
          // replace the abstract datastore objects in cluster/host with the ones 
          // in dc.datastores

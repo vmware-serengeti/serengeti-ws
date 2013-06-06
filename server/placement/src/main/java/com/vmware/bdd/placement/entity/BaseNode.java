@@ -67,6 +67,10 @@ public class BaseNode {
    private NodeStatus nodeStatus;
    private String nodeAction;
 
+   public BaseNode() {
+      super();
+   }
+   
    public BaseNode(String vmName) {
       super();
       this.vmName = vmName;

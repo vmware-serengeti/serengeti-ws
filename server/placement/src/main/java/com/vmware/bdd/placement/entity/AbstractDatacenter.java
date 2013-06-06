@@ -71,6 +71,10 @@ public class AbstractDatacenter extends AbstractObject {
       // GB
       int freeSpace;
 
+      public AbstractDatastore() {
+         super(null);
+      }
+      
       public AbstractDatastore(String name) {
          super(name);
       }
@@ -114,6 +118,10 @@ public class AbstractDatacenter extends AbstractObject {
       transient AbstractCluster parent;
       List<AbstractDatastore> datastores;
 
+      public AbstractHost() {
+         super(null);
+      }
+      
       public AbstractHost(String name) {
          super(name);
       }
@@ -235,6 +243,10 @@ public class AbstractDatacenter extends AbstractObject {
    }
 
    public static class AbstractRp extends AbstractObject {
+      public AbstractRp() {
+         super(null);
+      }
+      
       public AbstractRp(String name) {
          super(name);
       }
@@ -269,7 +281,11 @@ public class AbstractDatacenter extends AbstractObject {
       List<AbstractRp> rps;
 
       List<AbstractDatastore> datastores;
-
+      
+      public AbstractCluster() {
+         super(null);
+      }
+      
       public AbstractCluster(String name) {
          super(name);
       }
@@ -341,6 +357,10 @@ public class AbstractDatacenter extends AbstractObject {
 
    List<AbstractDatastore> datastores;
 
+   public AbstractDatacenter() {
+      super(null);
+   }
+   
    public AbstractDatacenter(String name) {
       super(name);
    }
