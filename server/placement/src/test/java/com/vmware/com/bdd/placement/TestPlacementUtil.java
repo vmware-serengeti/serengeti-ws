@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -88,10 +89,10 @@ public class TestPlacementUtil {
       String json = TestPlacementUtil.readJson(specName);
       logger.info(json);
 
-      Gson gson = new Gson();
+      ObjectMapper mapper = new ObjectMapper();
 
       try {
-         return gson.fromJson(json, ClusterCreate.class);
+         return mapper.readValue(json, ClusterCreate.class);
       } catch (Exception e) {
          logger.error(e.getMessage());
          throw e;
