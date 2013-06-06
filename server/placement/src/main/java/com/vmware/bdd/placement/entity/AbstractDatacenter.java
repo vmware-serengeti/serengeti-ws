@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.gson.Gson;
 import com.vmware.bdd.utils.AuAssert;
 
 abstract class AbstractObject {
@@ -74,7 +73,7 @@ public class AbstractDatacenter extends AbstractObject {
       public AbstractDatastore() {
          super(null);
       }
-      
+
       public AbstractDatastore(String name) {
          super(name);
       }
@@ -95,6 +94,12 @@ public class AbstractDatacenter extends AbstractObject {
       public void allocate(int sizeGB) {
          AuAssert.check(this.freeSpace - sizeGB >= 0);
          this.freeSpace -= sizeGB;
+      }
+
+      public AbstractDatastore clone() {
+         AbstractDatastore ad = new AbstractDatastore(this.name);
+         ad.freeSpace = this.freeSpace;
+         return ad;
       }
 
       @Override
@@ -121,7 +126,7 @@ public class AbstractDatacenter extends AbstractObject {
       public AbstractHost() {
          super(null);
       }
-      
+
       public AbstractHost(String name) {
          super(name);
       }
@@ -226,14 +231,22 @@ public class AbstractDatacenter extends AbstractObject {
       }
 
       /**
-       * deep clone a host object, use Gson as the tricky
+       * deep clone a host object, use json as the tricky
        * 
        * @param other
        * @return
        */
       public static AbstractHost clone(AbstractHost other) {
-         Gson gson = new Gson();
-         return gson.fromJson(gson.toJson(other), AbstractHost.class);
+         AbstractHost cloned = new AbstractHost(other.name);
+         cloned.parent = other.parent;
+         cloned.datastores =
+               new ArrayList<AbstractDatastore>(other.datastores.size());
+
+         for (AbstractDatastore ad : other.datastores) {
+            cloned.datastores.add(ad.clone());
+         }
+
+         return cloned;
       }
 
       @Override
@@ -246,7 +259,7 @@ public class AbstractDatacenter extends AbstractObject {
       public AbstractRp() {
          super(null);
       }
-      
+
       public AbstractRp(String name) {
          super(name);
       }
@@ -281,11 +294,11 @@ public class AbstractDatacenter extends AbstractObject {
       List<AbstractRp> rps;
 
       List<AbstractDatastore> datastores;
-      
+
       public AbstractCluster() {
          super(null);
       }
-      
+
       public AbstractCluster(String name) {
          super(name);
       }
@@ -360,7 +373,7 @@ public class AbstractDatacenter extends AbstractObject {
    public AbstractDatacenter() {
       super(null);
    }
-   
+
    public AbstractDatacenter(String name) {
       super(name);
    }
