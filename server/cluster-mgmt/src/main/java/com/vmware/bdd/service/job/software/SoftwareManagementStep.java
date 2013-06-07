@@ -39,15 +39,15 @@ public class SoftwareManagementStep extends TrackableTasklet {
 
    public ISoftwareManagementTask createCommandTask(String clusterName,
          String specFileName, StatusUpdater statusUpdater) {
-      return SoftwareManagementTaskFactory
-            .createCommandTask(clusterName, specFileName, statusUpdater,
-                  managementOperation, getClusterEntityMgr());
+      return SoftwareManagementTaskFactory.createCommandTask(clusterName,
+            specFileName, statusUpdater, managementOperation,
+            getClusterEntityMgr());
    }
 
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,
          JobExecutionStatusHolder jobExecutionStatusHolder) throws Exception {
-      
+
       String targetName =
             getJobParameters(chunkContext).getString(
                   JobConstants.TARGET_NAME_JOB_PARAM);
@@ -71,14 +71,20 @@ public class SoftwareManagementStep extends TrackableTasklet {
             JobConstants.CURRENT_COMMAND_WORK_DIR, workDir.getAbsolutePath());
 
       boolean needAllocIp = true;
-      if(ManagementOperation.DESTROY.equals(managementOperation)) {
+      if (ManagementOperation.DESTROY.equals(managementOperation)) {
          needAllocIp = false;
       }
-      // write cluster spec file
-      File specFile = clusterManager.writeClusterSpecFile(targetName, workDir, needAllocIp);
+      String specFilePath = null;
+      if (managementOperation.ordinal() != ManagementOperation.DESTROY
+            .ordinal()) {
+         // write cluster spec file
+         File specFile =
+               clusterManager.writeClusterSpecFile(targetName, workDir,
+                     needAllocIp);
+         specFilePath = specFile.getAbsolutePath();
+      }
       ISoftwareManagementTask task =
-            createCommandTask(targetName, specFile.getAbsolutePath(),
-                  statusUpdater);
+            createCommandTask(targetName, specFilePath, statusUpdater);
 
       Map<String, Object> ret = task.call();
 

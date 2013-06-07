@@ -77,7 +77,7 @@ module Software
             clusterFile = "#{@serengetiHome}/tmp/.ironfan-clusters/#{clusterName}.rb"
             if File::exist?(clusterFile)
               operation = createDestroyOperation
-              optionStr = "-f #{clusterOperation.specFileName} --yes"
+              optionStr = "--no-cloud --yes"
             else
               log.info("cluster #{clusterName} does not exist")
               return 0
