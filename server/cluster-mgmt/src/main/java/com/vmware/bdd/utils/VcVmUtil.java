@@ -440,14 +440,9 @@ public class VcVmUtil {
    }
 
    public static long makeVmMemoryDevisibleBy4(long memory) {
-      if ((memory % 4) == 0) {
-         return memory;
-      } else {
-         long temp = memory / 4;
-         return (temp + 1) * 4;
-      }
+      return CommonUtil.makeVmMemoryDevisibleBy4(memory);
    }
-   
+
    public static void addBootupUUID(Map<String, String> bootupConfigs) {
       AuAssert.check(bootupConfigs != null);
       bootupConfigs.put(Constants.GUEST_VARIABLE_BOOTUP_UUID, UUID.randomUUID()

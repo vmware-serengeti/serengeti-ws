@@ -145,4 +145,13 @@ public class CommonUtil {
       return uuid.toString();
    }
 
+   public static long makeVmMemoryDevisibleBy4(long memory) {
+      if ((memory % 4) == 0) {
+         return memory;
+      } else {
+         long temp = memory / 4;
+         return (temp + 1) * 4;
+      }
+   }
+
 }
