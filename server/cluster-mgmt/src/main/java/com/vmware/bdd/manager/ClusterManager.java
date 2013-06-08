@@ -932,7 +932,7 @@ public class ClusterManager {
       clusterEntityMgr.update(cluster);
 
       //update vhm extra config file
-      if (enableAuto != null) {
+      if (enableAuto != null || minComputeNodeNum != null) {
          boolean success = clusteringService.setAutoElasticity(clusterName);
          if (!success) {
             throw ClusterManagerException
