@@ -55,6 +55,7 @@ import com.vmware.bdd.cli.rest.DistroRestClient;
 import com.vmware.bdd.cli.rest.NetworkRestClient;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AppConfigValidationUtils;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
 import com.vmware.bdd.utils.ValidateResult;
 
@@ -1105,8 +1106,10 @@ public class ClusterCommands implements CommandMarker {
       clusterParams.put("MIN COMPUTE NODES NUM", minComputeNodeNum);
       clusterParams.put("TARGET COMPUTE NODES NUM",
             cluster.retrieveVhmTargetNum());
-      clusterParams.put("IO SHARES", cluster.getIoShares().toString());
-      clusterParams.put("STATUS", cluster.getStatus().toString());
+      clusterParams.put("IO SHARES", cluster.getIoShares() == null ? ""
+            : cluster.getIoShares().toString());
+      clusterParams.put("STATUS", cluster.getStatus() == null ? "" : cluster
+            .getStatus().toString());
       if (cluster.getExternalHDFS() != null
             && !cluster.getExternalHDFS().isEmpty()) {
          clusterParams.put("EXTERNAL HDFS", cluster.getExternalHDFS());

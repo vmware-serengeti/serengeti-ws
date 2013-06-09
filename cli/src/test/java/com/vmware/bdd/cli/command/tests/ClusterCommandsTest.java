@@ -697,6 +697,7 @@ public class ClusterCommandsTest extends MockRestServer {
       ngr1.setRoles(roles1);
       ClusterRead cr1 = new ClusterRead();
       cr1.setName("cluster1");
+      cr1.setDistroVendor("Apache");
       cr1.setDistro("distro1");
       cr1.setInstanceNum(10);
       cr1.setStatus(ClusterRead.ClusterStatus.RUNNING);

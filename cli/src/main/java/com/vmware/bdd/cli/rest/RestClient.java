@@ -39,7 +39,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.vmware.bdd.apitypes.Connect;
 import com.vmware.bdd.apitypes.TaskRead;
-import com.vmware.bdd.apitypes.TaskRead.NodeStatus;
 import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.apitypes.TaskRead.Type;
 import com.vmware.bdd.cli.commands.CommandsUtils;

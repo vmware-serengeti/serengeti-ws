@@ -14,6 +14,7 @@
  ******************************************************************************/
 package com.vmware.bdd.cli.command.tests;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -26,15 +27,16 @@ import com.vmware.bdd.cli.commands.ConnectionCommands;
  * This class is the test of connect command.
  */
 @ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
-public class ConnectionCommandsTest extends MockRestServer {
+public class AutoConnectionCommandsTest extends MockRestServer {
    @Autowired
    private ConnectionCommands connectionCommands;
 
    @Test
    public void testLoggedConn() throws Exception {
+      ObjectMapper mapper = new ObjectMapper();
       buildReqRespWithoutReqBody(
             "http://127.0.0.1:8080/serengeti/j_spring_security_check?j_username=username&j_password=password",
-            HttpMethod.POST, HttpStatus.OK, "");
+            HttpMethod.POST, HttpStatus.OK, mapper.writeValueAsString("ok"));
       connectionCommands.loggedConn("127.0.0.1:8080", "username", "password");
    }
 }

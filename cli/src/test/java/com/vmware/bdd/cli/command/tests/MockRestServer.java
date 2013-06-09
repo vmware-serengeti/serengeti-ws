@@ -51,7 +51,8 @@ import org.springframework.web.client.RestTemplate;
          responseHeaders.setContentLength(0l);
          responseHeaders.setLocation(new URI(location[0]));
       }
-      
+      responseHeaders.add("Set-Cookie", "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+
       mockServer.expect(RequestMatchers.requestTo(restUrl)).andExpect(RequestMatchers.method(method))
       .andRespond(ResponseCreators.withResponse(respBody, responseHeaders, status, ""));
    }
