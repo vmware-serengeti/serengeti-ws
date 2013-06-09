@@ -51,8 +51,8 @@ public class ScaleManager {
             clusterEntityMgr.findByName(clusterName).getStatus();
       logger.info("before scaling, cluster status is:" + originalStatus);
       if (scale.getMemory() > 0) {
-         //VM's memory must be devisible by 4, otherwise VM can not be started
-         long converted = VcVmUtil.makeVmMemoryDevisibleBy4(scale.getMemory());
+         //VM's memory must be divisible by 4, otherwise VM can not be started
+         long converted = VcVmUtil.makeVmMemoryDivisibleBy4(scale.getMemory());
          logger.info("user's setting for memory: " + scale.getMemory()
                + " converted to : " + converted);
          scale.setMemory(converted);

@@ -632,7 +632,7 @@ public class ClusterCreate implements Serializable {
             // check node group's instanceNum
             checkInstanceNum(nodeGroupCreate, failedMsgList);
             // make VM memory value devisible by 4
-            makeVmMemoryDevisibleBy4(nodeGroupCreate, warningMsgList);
+            makeVmMemoryDivisibleBy4(nodeGroupCreate, warningMsgList);
             // check node group's roles
             checkNodeGroupRoles(nodeGroupCreate, distroRoles, failedMsgList);
             // get node group role.
@@ -757,15 +757,15 @@ public class ClusterCreate implements Serializable {
       }
    }
 
-   private void makeVmMemoryDevisibleBy4(NodeGroupCreate nodeGroup,
+   private void makeVmMemoryDivisibleBy4(NodeGroupCreate nodeGroup,
          List<String> warningMsgList) {
       int memoryNum = nodeGroup.getMemCapacityMB();
       if (memoryNum > 0) {
-         //VM's memory must be devisible by 4, otherwise VM can not be started
-         long converted = CommonUtil.makeVmMemoryDevisibleBy4(memoryNum);
+         //VM's memory must be divisible by 4, otherwise VM can not be started
+         long converted = CommonUtil.makeVmMemoryDivisibleBy4(memoryNum);
          if (converted > memoryNum) {
             nodeGroup.setMemCapacityMB((int)converted);
-            warningMsgList.add(Constants.CONVERTED_MEMORY_DEVISIBLE_BY_4
+            warningMsgList.add(Constants.CONVERTED_MEMORY_DIVISIBLE_BY_4
                   + "So, 'memCapacityMB' will be converted from " + memoryNum
                   + " to " + converted + " automaticlly in the "
                   + nodeGroup.getName() + " group.");

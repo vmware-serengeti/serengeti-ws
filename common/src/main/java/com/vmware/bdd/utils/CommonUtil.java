@@ -145,7 +145,7 @@ public class CommonUtil {
       return uuid.toString();
    }
 
-   public static long makeVmMemoryDevisibleBy4(long memory) {
+   public static long makeVmMemoryDivisibleBy4(long memory) {
       if ((memory % 4) == 0) {
          return memory;
       } else {

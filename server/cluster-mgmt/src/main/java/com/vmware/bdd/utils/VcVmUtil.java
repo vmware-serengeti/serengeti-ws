@@ -439,8 +439,8 @@ public class VcVmUtil {
       return schema;
    }
 
-   public static long makeVmMemoryDevisibleBy4(long memory) {
-      return CommonUtil.makeVmMemoryDevisibleBy4(memory);
+   public static long makeVmMemoryDivisibleBy4(long memory) {
+      return CommonUtil.makeVmMemoryDivisibleBy4(memory);
    }
 
    public static void addBootupUUID(Map<String, String> bootupConfigs) {
