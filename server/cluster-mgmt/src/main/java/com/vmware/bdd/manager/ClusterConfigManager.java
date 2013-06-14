@@ -917,9 +917,10 @@ public class ClusterConfigManager {
       storage.setShares(ngEntity.getCluster().getIoShares());
 
       // set storage split policy based on group roles
-      if (enumRoles.size() == 1
+      if ((enumRoles.size() == 1 || (enumRoles.size() == 2
+            && enumRoles.contains(HadoopRole.HADOOP_JOURNALNODE_ROLE)))
             && (enumRoles.contains(HadoopRole.ZOOKEEPER_ROLE) || enumRoles
-                  .contains(HadoopRole.MAPR_ZOOKEEPER_ROLE))) {
+            .contains(HadoopRole.MAPR_ZOOKEEPER_ROLE))) {
          // if this group contains only one zookeeper role
          logger.debug("use bi_sector disk layout for zookeeper only group.");
          storage.setSplitPolicy(DiskSplitPolicy.BI_SECTOR);
