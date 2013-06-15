@@ -119,7 +119,7 @@ public class RestResource {
    @ResponseStatus(HttpStatus.OK)
    @ResponseBody
    public String getHello() {
-      return "0.8.1";
+      return "0.9.0";
    }
 
    // task API
