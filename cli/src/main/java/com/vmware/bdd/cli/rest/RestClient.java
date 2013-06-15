@@ -407,25 +407,14 @@ public class RestClient {
                && taskRead.getStatus() != TaskRead.Status.ABANDONED
                && taskRead.getStatus() != TaskRead.Status.STOPPED);
 
-         String logdir = taskRead.getWorkDir();
          String errorMsg = taskRead.getErrorMessage();
          if (!taskRead.getStatus().equals(TaskRead.Status.COMPLETED)) {
-            if (!CommandsUtils.isBlank(logdir)) {
-               String outputErrorInfo =
-                     Constants.OUTPUT_LOG_INFO + Constants.COMMON_LOG_FILE_PATH
-                           + "," + logdir;
-               if (errorMsg != null) {
-                  outputErrorInfo = errorMsg + " " + outputErrorInfo;
-               }
-               throw new CliRestException(outputErrorInfo);
-            } else if (errorMsg != null && !errorMsg.isEmpty()) {
-               String outputErrorInfo =
-                     errorMsg + " " + Constants.OUTPUT_LOG_INFO
-                           + Constants.COMMON_LOG_FILE_PATH;
-               throw new CliRestException(outputErrorInfo);
-            } else {
-               throw new CliRestException("task failed");
+            String outputErrorInfo =
+                  Constants.OUTPUT_LOG_INFO + Constants.COMMON_LOG_FILE_PATH;
+            if (errorMsg != null) {
+               outputErrorInfo = errorMsg + " " + outputErrorInfo;
             }
+            throw new CliRestException(outputErrorInfo);
          } else { //completed
             if (taskRead.getType().equals(Type.VHM)) {
                logger.info("task type is vhm");
