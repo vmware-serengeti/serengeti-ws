@@ -1,4 +1,4 @@
-Serengeti 0.8
+Serengeti 0.9
 
 Copyright (c) 2013 VMware, Inc. All Rights Reserved.
 
@@ -8,4 +8,4 @@ You may not use this product except in compliance with the License.
 This product may include a number of subcomponents with
 separate copyright notices and license terms. Your use of the source
 code for the these subcomponents is subject to the terms and
-conditions of the subcomponent's license, as noted in the LICENSE file. 
+conditions of the subcomponent's license, as noted in the LICENSE file.

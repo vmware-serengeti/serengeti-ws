@@ -1,4 +1,4 @@
-				               Apache License
+			       Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
@@ -202,10 +202,10 @@
 
 =======================================================================   
 
-Serengeti 0.8
+Serengeti 0.9
 
 
-Serengeti 0.8 includes a number of subcomponents with
+Serengeti 0.9 includes a number of subcomponents with
 separate copyright notices and license terms.  The product that 
 includes this file does not necessarily use all the open source 
 subcomponents referred to below. Your use of the source
@@ -218,7 +218,6 @@ SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
 
    >>> jquery-1.7.2
    >>> jquery-ui-1.8.22
-   >>> jsch-0.1.44-1
    >>> rubygem-fog-1.3.1
 
 
@@ -226,7 +225,10 @@ SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
 SECTION 2: Apache License, V2.0
 
    >>> ironfan-homebase-none
+   >>> mapr_hbase_master-none
+   >>> mapr_hbase_regionserver-none
    >>> rubygem-ironfan-3.1.4
+
 
 
 
@@ -303,40 +305,6 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
->>> jsch-0.1.44-1
-
-JSch 0.0.* was released under the GNU LGPL license.  Later, we have switched 
-over to a BSD-style license. 
-
-------------------------------------------------------------------------------
-Copyright (c) 2002-2010 Atsuhiko Yamanaka, JCraft,Inc. 
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-  1. Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
-
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
-     the documentation and/or other materials provided with the distribution.
-
-  3. The names of the authors may not be used to endorse or promote products
-     derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL JCRAFT,
-INC. OR ANY CONTRIBUTORS TO THIS SOFTWARE BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
 >>> rubygem-fog-1.3.1
 
 == Copyright
@@ -375,6 +343,38 @@ Apache License, V2.0 is applicable to the following component(s).
 License: Apache 2.0
 
 
+>>> mapr_hbase_master-none
+
+Copyright 2013 MapR Technologies, Inc
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+>>> mapr_hbase_regionserver-none
+
+Copyright 2013 MapR Technologies, Inc
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
 >>> rubygem-ironfan-3.1.4
 
 Author:: Philip (flip) Kromer (<flip@infochimps.com>)
@@ -392,6 +392,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
 
 
 
@@ -416,4 +417,4 @@ years from the date you acquired this Software product. Alternatively,
 the Source Files may accompany the VMware product.
 
 
-[SERENGETI08TPNV022513]
+[SERENGETI09NV061413]
