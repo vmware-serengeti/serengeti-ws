@@ -45,7 +45,7 @@ public class DatastoreCommandsTest extends MockRestServer {
    public void testCreateDatastore() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/datastores", HttpMethod.POST,
+            "https://127.0.0.1:8443/serengeti/api/datastores", HttpMethod.POST,
             HttpStatus.NO_CONTENT, "");
 
       //invalid type
@@ -64,7 +64,7 @@ public class DatastoreCommandsTest extends MockRestServer {
       ObjectMapper mapper = new ObjectMapper();
 
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/datastores", HttpMethod.POST,
+            "https://127.0.0.1:8443/serengeti/api/datastores", HttpMethod.POST,
             HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
 
       datastoreCommands.addDatastore("ds01", "ds*", "SHARED");
@@ -75,7 +75,7 @@ public class DatastoreCommandsTest extends MockRestServer {
    public void testDeleteDatastore() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/datastore/ds01", HttpMethod.DELETE,
+            "https://127.0.0.1:8443/serengeti/api/datastore/ds01", HttpMethod.DELETE,
             HttpStatus.NO_CONTENT, "");
 
       datastoreCommands.deleteDatastore("ds01");
@@ -90,7 +90,7 @@ public class DatastoreCommandsTest extends MockRestServer {
       ObjectMapper mapper = new ObjectMapper();
 
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/datastore/ds01", HttpMethod.DELETE,
+            "https://127.0.0.1:8443/serengeti/api/datastore/ds01", HttpMethod.DELETE,
             HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
       datastoreCommands.deleteDatastore("ds01");
@@ -144,7 +144,7 @@ public class DatastoreCommandsTest extends MockRestServer {
    private void testListDatastore(ObjectMapper mapper, DatastoreRead[] drs)
          throws Exception {
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/datastores", HttpMethod.GET,
+            "https://127.0.0.1:8443/serengeti/api/datastores", HttpMethod.GET,
             HttpStatus.OK, mapper.writeValueAsString(drs));
       datastoreCommands.listDatastore(null, true);
    }
@@ -153,7 +153,7 @@ public class DatastoreCommandsTest extends MockRestServer {
    private void testListDatastoreByName(ObjectMapper mapper, DatastoreRead rd)
          throws Exception {
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/datastore/rd1Name",
+            "https://127.0.0.1:8443/serengeti/api/datastore/rd1Name",
             HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(rd));
       datastoreCommands.listDatastore("rd1Name", true);
    }
@@ -165,7 +165,7 @@ public class DatastoreCommandsTest extends MockRestServer {
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/datastore/rd1Name",
+            "https://127.0.0.1:8443/serengeti/api/datastore/rd1Name",
             HttpMethod.GET, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
       datastoreCommands.listDatastore("rd1Name", true);
       CookieCache.clear();

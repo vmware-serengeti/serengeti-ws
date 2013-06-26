@@ -49,7 +49,7 @@ public class RestClientTest {
          }
       }
       String hostUri = getHostUriProperty();
-      assertEquals(hostUri, "http://serengeti.com:9090/serengeti/api/");
+      assertEquals(hostUri, "https://serengeti.com:9090/serengeti/api/");
       delete(cli_property_file);
    }
    
@@ -74,8 +74,8 @@ public class RestClientTest {
          hostProperties.load(hostFileReader);
          
          if (hostProperties != null && hostProperties.get(Constants.PROPERTY_HOST) != null) {
-            hostUri = Constants.HTTP_CONNECTION_PREFIX + (String) hostProperties.get(Constants.PROPERTY_HOST)
-                  + Constants.HTTP_CONNECTION_SUFFIX;
+            hostUri = Constants.HTTPS_CONNECTION_PREFIX + (String) hostProperties.get(Constants.PROPERTY_HOST)
+                  + Constants.HTTPS_CONNECTION_SUFFIX;
          }
       } catch (Exception e) {//not set yet; or read io error
          //nothing to do

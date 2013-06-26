@@ -112,10 +112,10 @@ public class Constants {
    public static final String OUTPUT_HOST_TIMEOUT = "connection timeout";
    public static final String OUTPUT_LOG_INFO = "you can get task failure details from serengeti server log at: ";
    public static final String COMMON_LOG_FILE_PATH = "/opt/serengeti/logs/serengeti*,/opt/serengeti/logs/ironfan*";
-   public static final String HTTP_CONNECTION_PREFIX = "http://";
-   public static final String HTTP_CONNECTION_SUFFIX = "/serengeti/api/";
-   public static final String HTTP_CONNECTION_API = "api/";
-   public static final String HTTP_CONNECTION_LOGIN_SUFFIX = "/serengeti/";
+   public static final String HTTPS_CONNECTION_PREFIX = "https://";
+   public static final String HTTPS_CONNECTION_SUFFIX = "/serengeti/api/";
+   public static final String HTTPS_CONNECTION_API = "api/";
+   public static final String HTTPS_CONNECTION_LOGIN_SUFFIX = "/serengeti/";
    public static final String PROPERTY_FILE = "cli.properties";
    public static final String PROPERTY_HOST = "host";
    public static final String PROPERTY_FILE_HOST_COMMENT = "update host information";
