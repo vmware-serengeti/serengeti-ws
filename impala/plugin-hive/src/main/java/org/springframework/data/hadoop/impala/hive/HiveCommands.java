@@ -31,7 +31,8 @@ import org.springframework.data.hadoop.hive.HiveTemplate;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.shell.support.util.StringUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.shell.support.util.OsUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -128,12 +129,12 @@ public class HiveCommands implements CommandMarker {
 		
 		try {
 			sb.append(StringUtils.collectionToDelimitedString(hiveTemplate.executeScript(new HiveScript(resource)),
-					StringUtils.LINE_SEPARATOR));
+					OsUtils.LINE_SEPARATOR));
 		} catch (Exception ex) {
 			return "Script [" + uri + "] failed - " + ex;
 		}
 		
-		return sb.append(StringUtils.LINE_SEPARATOR).append("Script [" + uri + "] executed succesfully").toString();
+		return sb.append(OsUtils.LINE_SEPARATOR).append("Script [" + uri + "] executed succesfully").toString();
 	}
 
 	

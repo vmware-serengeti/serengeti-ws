@@ -45,28 +45,14 @@
 		</dependencies>
 	</dependencyManagement>
 	<properties>
-		<spring.data.hadoop.version>1.0.0.RC1</spring.data.hadoop.version>
-		<spring.shell.version>1.0.0.M2</spring.shell.version>
+		<spring.data.hadoop.version>1.0.0.RELEASE</spring.data.hadoop.version>
+		<spring.shell.version>1.0.0.RELEASE</spring.shell.version>
 		<jar.mainclass>org.springframework.shell.Bootstrap</jar.mainclass>
 	</properties>
 	<repositories>
 		<repository>
-			<id>spring-maven-snapshot</id>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
-			</snapshots>
-			<name>Springframework Maven SNAPSHOT Repository</name>
-			<url>http://repo.springsource.org/libs-snapshot</url>
-		</repository>
-		<repository>
-			<id>spring-maven-ext-release-local</id>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
-			</snapshots>
-			<name>Springframework Maven ext release local Repository</name>
-			<url>http://repo.springsource.org/ext-release-local</url>
+			<id>spring-release</id>
+			<url>http://repo.springsource.org/libs-release/</url>
 		</repository>
 	</repositories>
 </project>

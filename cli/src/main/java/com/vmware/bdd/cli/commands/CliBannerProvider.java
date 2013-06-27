@@ -19,7 +19,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.plugin.support.DefaultBannerProvider;
-import org.springframework.shell.support.util.StringUtils;
+import org.springframework.shell.support.util.OsUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -35,15 +35,15 @@ public class CliBannerProvider extends DefaultBannerProvider implements CommandM
 	@CliCommand(value = { "version" }, help = "Displays current CLI version")
 	public String getBanner() {
 		StringBuffer buf = new StringBuffer();
-		buf.append("=================================================" + StringUtils.LINE_SEPARATOR);
-		buf.append("*  _____                                 _   _  *" + StringUtils.LINE_SEPARATOR);
-		buf.append("* / ____|  ___ _ __ ___ _ __   __ _  ___| |_(_) *" + StringUtils.LINE_SEPARATOR);
-		buf.append("* \\____ \\ / _ \\ '__/ _ \\ '_ \\ / _` |/ _ \\ __| | *" + StringUtils.LINE_SEPARATOR);
-		buf.append("*  ____) |  __/ | |  __/ | | | (_| |  __/ |_| | *" + StringUtils.LINE_SEPARATOR);
-		buf.append("* |_____/ \\___|_|  \\___|_| |_|\\__, |\\___|\\__|_| *" + StringUtils.LINE_SEPARATOR);
-		buf.append("*                             |___/             *" + StringUtils.LINE_SEPARATOR);
-		buf.append("*                                               *" + StringUtils.LINE_SEPARATOR);
-		buf.append("=================================================" + StringUtils.LINE_SEPARATOR);
+		buf.append("=================================================" + OsUtils.LINE_SEPARATOR);
+		buf.append("*  _____                                 _   _  *" + OsUtils.LINE_SEPARATOR);
+		buf.append("* / ____|  ___ _ __ ___ _ __   __ _  ___| |_(_) *" + OsUtils.LINE_SEPARATOR);
+		buf.append("* \\____ \\ / _ \\ '__/ _ \\ '_ \\ / _` |/ _ \\ __| | *" + OsUtils.LINE_SEPARATOR);
+		buf.append("*  ____) |  __/ | |  __/ | | | (_| |  __/ |_| | *" + OsUtils.LINE_SEPARATOR);
+		buf.append("* |_____/ \\___|_|  \\___|_| |_|\\__, |\\___|\\__|_| *" + OsUtils.LINE_SEPARATOR);
+		buf.append("*                             |___/             *" + OsUtils.LINE_SEPARATOR);
+		buf.append("*                                               *" + OsUtils.LINE_SEPARATOR);
+		buf.append("=================================================" + OsUtils.LINE_SEPARATOR);
 		buf.append("Version: " + this.getVersion());
 		return buf.toString();
 

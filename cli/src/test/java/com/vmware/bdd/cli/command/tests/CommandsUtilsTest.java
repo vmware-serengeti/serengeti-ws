@@ -26,7 +26,6 @@ import java.util.Properties;
 
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.springframework.shell.support.util.Assert;
 import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -234,7 +233,7 @@ public class CommandsUtilsTest {
       ClusterCreate clusterCreate =
             CommandsUtils.getObjectByJsonString(ClusterCreate.class,
                   jsonBuff.toString());
-      Assert.notNull(clusterCreate);
+      assertNotNull(clusterCreate);
       Map<String, Object> hadoopConfig =
             (Map<String, Object>) clusterCreate.getConfiguration()
                   .get("hadoop");

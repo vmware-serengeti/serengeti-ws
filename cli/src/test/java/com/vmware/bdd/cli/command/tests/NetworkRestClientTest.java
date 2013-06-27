@@ -17,6 +17,8 @@ package com.vmware.bdd.cli.command.tests;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.testng.AssertJUnit.assertNotNull;
+
 import org.codehaus.jackson.map.ObjectMapper;
 
 import org.testng.annotations.Test;
@@ -24,7 +26,7 @@ import org.testng.annotations.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.shell.support.util.Assert;
+
 import org.springframework.test.context.ContextConfiguration;
 
 import com.vmware.bdd.apitypes.IpBlock;
@@ -43,7 +45,7 @@ public class NetworkRestClientTest extends MockRestServer {
    @Test
    public void add() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
-      Assert.notNull(networkRestClient);
+      assertNotNull(networkRestClient);
       NetworkAdd networkAdd =new NetworkAdd();
       addByIP(networkAdd);
       addByDHCP(networkAdd);
