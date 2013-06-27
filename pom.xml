@@ -262,7 +262,7 @@
       <java.target.version>1.6</java.target.version>
       <spring.version>3.2.3.RELEASE</spring.version>
       <spring.security.version>3.1.4.RELEASE</spring.security.version>
-      <hadoop.version>1.0.1</hadoop.version>
+      <hadoop.version>1.2.0</hadoop.version>
       <aurora.version>2.5</aurora.version>
    </properties>
    <build>
