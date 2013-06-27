@@ -73,8 +73,7 @@
 		<servlet-name>restapi</servlet-name>
 		<url-pattern>/api/*</url-pattern>
 	</servlet-mapping>
-	<!-- End REST API server -->
-	<!-- 
+	<!-- End REST API server --> 
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Everything is https</web-resource-name>
@@ -88,5 +87,4 @@
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 		</user-data-constraint>
 	</security-constraint>
-	 -->
 </web-app>
