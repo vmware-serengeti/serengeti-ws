@@ -12,11 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.dal.entitiy;
+package com.vmware.bdd.dal;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import com.vmware.bdd.entity.NodeEntity;
+import com.vmware.bdd.entity.VcResourcePoolEntity;
+import org.apache.log4j.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -32,8 +37,6 @@ import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.TopologyType;
-import com.vmware.bdd.dal.IClusterDAO;
-import com.vmware.bdd.dal.INodeGroupDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
@@ -41,6 +44,7 @@ import com.vmware.bdd.entity.NodeGroupEntity;
 @ContextConfiguration(locations = {"classpath:/META-INF/spring/*-context.xml"})
 public class TestClusterDAO extends AbstractTransactionalTestNGSpringContextTests {
 
+   private static final Logger logger = Logger.getLogger(TestClusterDAO.class);
    private static final String CLUSTER_NAME = "bdd-cluster";
    private static final String HDFS_GROUP = "hdfs";
    private static final String COMPUTE_GROUP = "compute";
@@ -52,6 +56,8 @@ public class TestClusterDAO extends AbstractTransactionalTestNGSpringContextTest
    private IClusterDAO clusterDao;
    @Autowired
    private INodeGroupDAO nodeGroupDao;
+   @Autowired
+   private IResourcePoolDAO resourcePoolDao;
 
    @BeforeMethod
    public void setup() {
@@ -64,7 +70,7 @@ public class TestClusterDAO extends AbstractTransactionalTestNGSpringContextTest
 
    @Transactional
    @Test(groups = { "testClusterEntity" })
-   public void testInsert() {
+   public void testOperations() {
       ClusterEntity cluster = new ClusterEntity(CLUSTER_NAME);
       cluster.setDistro("apache");
       cluster.setTopologyPolicy(TopologyType.NONE);
@@ -78,8 +84,25 @@ public class TestClusterDAO extends AbstractTransactionalTestNGSpringContextTest
       hdfsGroup.setMemorySize(2048);
       hdfsGroup.setStorageSize(20);
       hdfsGroup.setStorageType(DatastoreType.LOCAL);
-      hdfsGroup.setDefineInstanceNum(1);
+      hdfsGroup.setDefineInstanceNum(2);
       hdfsGroup.setHaFlag("on");
+
+      Set<NodeEntity> hdfsNodes = new HashSet<NodeEntity>();
+      NodeEntity hdfsNode1 = new NodeEntity();
+      NodeEntity hdfsNode2 = new NodeEntity();
+      hdfsNode1.setVmName("hdfsNode1");
+      hdfsNode2.setVmName("hdfsNode2");
+
+      VcResourcePoolEntity vcRp1 = new VcResourcePoolEntity();
+      vcRp1.setName("RP1");
+      vcRp1.setVcCluster("Cluster1");
+      vcRp1.setVcResourcePool("VcRp1");
+      resourcePoolDao.insert(vcRp1);
+      hdfsNode1.setVcRp(vcRp1);
+
+      hdfsNodes.add(hdfsNode1);
+      hdfsNodes.add(hdfsNode2);
+      hdfsGroup.setNodes(hdfsNodes);
 
       ArrayList<String> roleStr = new ArrayList<String>();
       roleStr.add(HADOOP_ROLE);
@@ -97,6 +120,12 @@ public class TestClusterDAO extends AbstractTransactionalTestNGSpringContextTest
       computeGroup.setStorageType(DatastoreType.SHARED);
       computeGroup.setDefineInstanceNum(1);
       computeGroup.setHaFlag("on");
+
+      Set<NodeEntity> computeNodes = new HashSet<NodeEntity>();
+      NodeEntity computeNode1 = new NodeEntity();
+      computeNode1.setVmName("computeNode1");
+      computeNodes.add(computeNode1);
+      computeGroup.setNodes(computeNodes);
 
       roleStr.clear();
       roleStr.add(HADOOP_ROLE);
@@ -119,6 +148,7 @@ public class TestClusterDAO extends AbstractTransactionalTestNGSpringContextTest
 
       cluster.setNodeGroups(nodeGroups);
 
+      // test insert()
       clusterDao.insert(cluster);
 
       ClusterEntity clusterRead = clusterDao.findByName(CLUSTER_NAME);
@@ -132,6 +162,24 @@ public class TestClusterDAO extends AbstractTransactionalTestNGSpringContextTest
       Assert.assertNotNull(groupRead);
       Assert.assertTrue(groupRead.getCpuNum() == 1);
       Assert.assertTrue(groupRead.getGroupAssociations().size() == 1);
+
+      // test updateStatus()
+      clusterDao.updateStatus(CLUSTER_NAME, ClusterStatus.VHM_RUNNING);
+      clusterRead = clusterDao.findByName(CLUSTER_NAME);
+      Assert.assertTrue(clusterRead.getStatus() == ClusterStatus.VHM_RUNNING);
+
+      // test getAllNodes()
+      List<NodeEntity> allNodes = clusterDao.getAllNodes(CLUSTER_NAME);
+      logger.info(allNodes.size());
+      Assert.assertTrue(allNodes.size() == 3);
+
+      List<String> clusterNames = clusterDao.findClustersByUsedResourcePool("RP1");
+      Assert.assertTrue(clusterNames.size() == 1);
+      Assert.assertTrue(clusterNames.contains(CLUSTER_NAME));
+
+      clusterDao.delete(clusterRead);
+      resourcePoolDao.delete(vcRp1);
+
    }
 
 }
