@@ -256,11 +256,19 @@ public class BaseNode {
       return size;
    }
 
-   public String[] getDatastoreNamePattern() {
+   public String[] getDiskstoreNamePattern() {
       AuAssert.check(this.nodeGroup != null
             && this.nodeGroup.getStorage() != null);
 
-      return NodeGroupCreate.getDatastoreNamePattern(this.cluster,
+      return NodeGroupCreate.getDiskstoreNamePattern(this.cluster,
+            this.nodeGroup);
+   }
+   
+   public String[] getImagestoreNamePattern() {
+      AuAssert.check(this.nodeGroup != null
+            && this.nodeGroup.getStorage() != null);
+
+      return NodeGroupCreate.getImagestoreNamePattern(this.cluster,
             this.nodeGroup);
    }
 

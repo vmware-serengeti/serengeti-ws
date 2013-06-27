@@ -433,7 +433,7 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("vc data store name", dsSpec
                .getSpec().toString());
       }
-      datastoreSvc.addDataStores(dsSpec);
+      datastoreSvc.addDatastores(dsSpec);
    }
 
    @RequestMapping(value = "/datastore/{dsName}", method = RequestMethod.GET, produces = "application/json")

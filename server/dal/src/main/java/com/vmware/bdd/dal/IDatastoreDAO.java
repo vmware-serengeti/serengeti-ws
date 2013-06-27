@@ -23,7 +23,7 @@ import com.vmware.bdd.entity.VcDatastoreEntity;
  * @author Jarred Li
  * @since 0.8
  * @version 0.8
- *
+ * 
  */
 public interface IDatastoreDAO extends IBaseDAO<VcDatastoreEntity> {
    List<VcDatastoreEntity> findAllSortByName();
@@ -34,7 +34,5 @@ public interface IDatastoreDAO extends IBaseDAO<VcDatastoreEntity> {
 
    List<VcDatastoreEntity> findByNameAndType(DatastoreType type, String name);
 
-   boolean nameExisted(String name);
-
-   VcDatastoreEntity findByNameAndDatastore(String name, String datastoreName);
+   boolean nameExisted(String name);   
 }

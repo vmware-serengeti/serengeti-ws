@@ -76,20 +76,20 @@ public class DatastoreService implements IDatastoreService {
    }
 
    /* (non-Javadoc)
-    * @see com.vmware.bdd.service.impl.IDataStoreService#getAllSharedDatastores()
+    * @see com.vmware.bdd.service.impl.IDataStoreService#getAllSharedDiskstores()
     */
    @Override
    @Transactional(readOnly = true)
-   public Set<String> getAllSharedDatastores() {
+   public Set<String> getAllSharedDiskstores() {
       return getAllDatastoresByType(DatastoreType.SHARED);
    }
 
    /* (non-Javadoc)
-    * @see com.vmware.bdd.service.impl.IDataStoreService#getSharedDatastoresByNames(java.util.List)
+    * @see com.vmware.bdd.service.impl.IDataStoreService#getSharedDiskstoresByNames(java.util.List)
     */
    @Override
    @Transactional(readOnly = true)
-   public Set<String> getSharedDatastoresByNames(List<String> nameList) {
+   public Set<String> getSharedDiskstoresByNames(List<String> nameList) {
       if (nameList == null) {
          return null;
       }
@@ -101,11 +101,11 @@ public class DatastoreService implements IDatastoreService {
    }
 
    /* (non-Javadoc)
-    * @see com.vmware.bdd.service.impl.IDataStoreService#getLocalDatastoresByNames(java.util.List)
+    * @see com.vmware.bdd.service.impl.IDataStoreService#getLocalDiskstoresByNames(java.util.List)
     */
    @Override
    @Transactional(readOnly = true)
-   public Set<String> getLocalDatastoresByNames(List<String> nameList) {
+   public Set<String> getLocalDiskstoresByNames(List<String> nameList) {
       if (nameList == null) {
          return null;
       }
@@ -117,67 +117,69 @@ public class DatastoreService implements IDatastoreService {
    }
 
    /* (non-Javadoc)
-    * @see com.vmware.bdd.service.impl.IDataStoreService#getAllLocalDatastores()
+    * @see com.vmware.bdd.service.impl.IDataStoreService#getAllLocalDiskstores()
     */
    @Override
    @Transactional(readOnly = true)
-   public Set<String> getAllLocalDatastores() {
+   public Set<String> getAllLocalDiskstores() {
       return getAllDatastoresByType(DatastoreType.LOCAL);
    }
 
 
    /* (non-Javadoc)
-    * @see com.vmware.bdd.service.impl.IDataStoreService#getDatastoresByName(java.lang.String)
+    * @see com.vmware.bdd.service.impl.IDataStoreService#getDiskstoresByName(java.lang.String)
     */
    @Override
    @Transactional(readOnly = true)
-   public Set<String> getDatastoresByName(String name) {
-      List<VcDatastoreEntity> datastores = dsDao.findByName(name);
+   public Set<String> getDiskstoresByName(String name) {
+      List<VcDatastoreEntity> datastores = new ArrayList<VcDatastoreEntity>();
+      datastores.addAll(dsDao.findByNameAndType(DatastoreType.LOCAL, name));
+      datastores.addAll(dsDao.findByNameAndType(DatastoreType.SHARED, name));
       return getDatastorePattern(datastores);
    }
 
    /* (non-Javadoc)
-    * @see com.vmware.bdd.service.impl.IDataStoreService#getDatastoresByNameList(java.util.List)
+    * @see com.vmware.bdd.service.impl.IDataStoreService#getDiskstoresByNameList(java.util.List)
     */
    @Override
    @Transactional(readOnly = true)
-   public Set<String> getDatastoresByNameList(List<String> nameList) {
+   public Set<String> getDiskstoresByNames(List<String> nameList) {
       if (nameList == null) {
          return null;
       }
       Set<String> result = new HashSet<String>();
       for (String name : nameList) {
-         result.addAll(getDatastoresByName(name));
+         result.addAll(getDiskstoresByName(name));
       }
       return result;
    }
-
 
    /* (non-Javadoc)
     * @see com.vmware.bdd.service.impl.IDataStoreService#addDataStores(com.vmware.bdd.apitypes.DatastoreAdd)
     */
    @Override
    @Transactional
-   public void addDataStores(DatastoreAdd datastore) {
+   public void addDatastores(DatastoreAdd datastore) {
       addDatastoreEntity(datastore.getType(), datastore.getSpec(),
-            datastore.getName());
+            datastore.getName(), datastore.isImage());
    }
-
+   
    /* (non-Javadoc)
     * @see com.vmware.bdd.service.impl.IDataStoreService#addDataStores(java.lang.String, com.vmware.bdd.apitypes.Datastore.DatastoreType, java.util.List)
     */
    @Override
    @Transactional
-   public void addDataStores(String name, DatastoreType type, List<String> spec) {
-      addDatastoreEntity(type, spec, name);
+   public void addDatastores(String name, DatastoreType type,
+         List<String> spec) {
+      addDatastoreEntity(type, spec, name, false);
    }
 
    /* (non-Javadoc)
-    * @see com.vmware.bdd.service.impl.IDataStoreService#getAllDataStoreName()
+    * @see com.vmware.bdd.service.impl.IDataStoreService#getAllDatastoreName()
     */
    @Override
    @Transactional(readOnly = true)
-   public Set<String> getAllDataStoreName() {
+   public Set<String> getAllDatastoreNames() {
       List<VcDatastoreEntity> datastores = dsDao.findAllSortByName();
       Set<String> result = new HashSet<String>();
       for (VcDatastoreEntity ds : datastores) {
@@ -307,7 +309,7 @@ public class DatastoreService implements IDatastoreService {
    }
 
    private void addDatastoreEntity(final DatastoreType type,
-         final List<String> datastores, final String name) {
+         final List<String> datastores, final String name, final boolean image) {
       if (dsDao.nameExisted(name)) {
          throw BddException.ALREADY_EXISTS("datastore", name);
       }
@@ -317,10 +319,29 @@ public class DatastoreService implements IDatastoreService {
          }
          VcDatastoreEntity entity = new VcDatastoreEntity();
          entity.setType(type);
+
+         if (image)
+            entity.setType(DatastoreType.IMAGE);
+
          entity.setName(name);
          entity.setVcDatastore(ds);
          dsDao.insert(entity);
          logger.info("add shared datastore " + ds);
       }
+   }
+
+   @Override
+   public Set<String> getImagestoresByNames(List<String> nameList) {
+      Set<String> results = new HashSet<String>();
+      for (String name : nameList) {
+         results
+               .addAll(getAllDatastoresByTypeAndName(DatastoreType.IMAGE, name));
+      }
+      return results;
+   }
+
+   @Override
+   public Set<String> getAllImagestores() {
+      return getAllDatastoresByType(DatastoreType.IMAGE);
    }
 }

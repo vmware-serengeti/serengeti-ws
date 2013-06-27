@@ -61,7 +61,7 @@ public class TestClusterConfigManager {
    private static final Logger logger = Logger
          .getLogger(TestClusterConfigManager.class);
    private static ClusterConfigManager clusterConfigMgr;
-   
+
    private static TestResourceCleanupUtils cleanUpUtils;
    private static ClusterEntityManager clusterEntityMgr;
 
@@ -186,7 +186,7 @@ public class TestClusterConfigManager {
       sharedStores.add("share1");
       sharedStores.add("share2");
       try {
-         clusterConfigMgr.getDatastoreMgr().addDataStores("testSharedStore",
+         clusterConfigMgr.getDatastoreMgr().addDatastores("testSharedStore",
                DatastoreType.SHARED, sharedStores);
       } catch (Exception e) {
          logger.error("ignore create datastore testSharedStore exception. ", e);
@@ -195,7 +195,7 @@ public class TestClusterConfigManager {
       localStores.add("local1");
       localStores.add("vmfs*");
       try {
-         clusterConfigMgr.getDatastoreMgr().addDataStores("testLocalStore",
+         clusterConfigMgr.getDatastoreMgr().addDatastores("testLocalStore",
                DatastoreType.LOCAL, localStores);
       } catch (Exception e) {
          logger.error("ignore create datastore testLocalStore exception. ", e);
@@ -450,7 +450,8 @@ public class TestClusterConfigManager {
       Assert.assertTrue(cluster != null);
 
       ClusterCreate attrs =
-            clusterConfigMgr.getClusterConfig("my-cluster-external-hdfs-failure");
+            clusterConfigMgr
+                  .getClusterConfig("my-cluster-external-hdfs-failure");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
       Assert.assertTrue(
@@ -536,7 +537,8 @@ public class TestClusterConfigManager {
       cluster = clusterEntityMgr.findByName("my-cluster-dc-tempfs");
       Assert.assertTrue(cluster != null);
 
-      ClusterCreate attrs = clusterConfigMgr.getClusterConfig("my-cluster-dc-tempfs");
+      ClusterCreate attrs =
+            clusterConfigMgr.getClusterConfig("my-cluster-dc-tempfs");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
       Assert.assertTrue(manifest.indexOf("master") != -1,
@@ -620,7 +622,8 @@ public class TestClusterConfigManager {
       ClusterEntity cluster = clusterEntityMgr.findByName("my-cluster-slave2");
       Assert.assertTrue(cluster != null);
 
-      ClusterCreate attrs = clusterConfigMgr.getClusterConfig("my-cluster-slave2");
+      ClusterCreate attrs =
+            clusterConfigMgr.getClusterConfig("my-cluster-slave2");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
       Assert.assertTrue(

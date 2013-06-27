@@ -290,12 +290,15 @@ public class NodeGroupCreate {
    @JsonIgnore
    public boolean isComputeOnlyGroup() {
       List<String> roles = getRoles();
-      if (roles != null 
-            && ((roles.size() == 1 && roles.get(0).equals(HadoopRole.HADOOP_TASKTRACKER.toString())) 
-            || (roles.size() == 2 && roles.contains(HadoopRole.HADOOP_TASKTRACKER.toString())
-            && roles.contains(HadoopRole.TEMPFS_CLIENT_ROLE.toString()))
-            || (roles.contains(HadoopRole.MAPR_TASKTRACKER_ROLE.toString())
-                  && !roles.contains(HadoopRole.MAPR_NFS_ROLE.toString())))) {
+      if (roles != null
+            && ((roles.size() == 1 && roles.get(0).equals(
+                  HadoopRole.HADOOP_TASKTRACKER.toString()))
+                  || (roles.size() == 2
+                        && roles.contains(HadoopRole.HADOOP_TASKTRACKER
+                              .toString()) && roles
+                        .contains(HadoopRole.TEMPFS_CLIENT_ROLE.toString())) || (roles
+                  .contains(HadoopRole.MAPR_TASKTRACKER_ROLE.toString()) && !roles
+                  .contains(HadoopRole.MAPR_NFS_ROLE.toString())))) {
          return true;
       } else {
          return false;
@@ -472,7 +475,7 @@ public class NodeGroupCreate {
       return valid;
    }
 
-   public static String[] getDatastoreNamePattern(ClusterCreate clusterSpec,
+   public static String[] getImagestoreNamePattern(ClusterCreate clusterSpec,
          NodeGroupCreate nodeGroupSpec) {
       AuAssert.check(nodeGroupSpec != null
             && nodeGroupSpec.getStorage() != null);
@@ -480,30 +483,69 @@ public class NodeGroupCreate {
       String[] patterns;
       StorageRead storage = nodeGroupSpec.getStorage();
 
-      if (storage.getNamePattern() != null) {
+      // dsNames is not specified, use cluster level image stores
+      if (storage.getImagestoreNamePattern() == null) {
+         if (clusterSpec.getImagestorePattern() != null
+               && !clusterSpec.getImagestorePattern().isEmpty()) {
+            patterns =
+                  clusterSpec.getImagestorePattern().toArray(
+                        new String[clusterSpec.getImagestorePattern().size()]);
+         } else {
+            return getDiskstoreNamePattern(clusterSpec, nodeGroupSpec);
+         }
+      } else if (!storage.getImagestoreNamePattern().isEmpty()) {
+         // dsNames is specified and contains image stores
          patterns =
-               storage.getNamePattern().toArray(
-                     new String[storage.getNamePattern().size()]);
+               storage.getImagestoreNamePattern().toArray(
+                     new String[storage.getImagestoreNamePattern().size()]);
+      } else {
+         // dsNames is specified, but not contain any image store
+         return getDiskstoreNamePattern(clusterSpec, nodeGroupSpec);
+      }
+
+      for (int i = 0; i < patterns.length; i++) {
+         patterns[i] = CommonUtil.getDatastoreJavaPattern(patterns[i]);
+      }
+
+      return patterns;
+   }
+
+   public static String[] getDiskstoreNamePattern(ClusterCreate clusterSpec,
+         NodeGroupCreate nodeGroupSpec) {
+      AuAssert.check(nodeGroupSpec != null
+            && nodeGroupSpec.getStorage() != null);
+
+      String[] patterns;
+      StorageRead storage = nodeGroupSpec.getStorage();
+
+      if (storage.getDiskstoreNamePattern() != null) {
+         patterns =
+               storage.getDiskstoreNamePattern().toArray(
+                     new String[storage.getDiskstoreNamePattern().size()]);
       } else if (DatastoreType.SHARED.toString().equalsIgnoreCase(
             storage.getType())) {
          patterns =
-               clusterSpec.getSharedPattern().toArray(
-                     new String[clusterSpec.getSharedPattern().size()]);
+               clusterSpec.getSharedDiskstorePattern()
+                     .toArray(
+                           new String[clusterSpec.getSharedDiskstorePattern()
+                                 .size()]);
       } else if (DatastoreType.LOCAL.toString().equalsIgnoreCase(
             storage.getType())) {
          patterns =
-               clusterSpec.getLocalPattern().toArray(
-                     new String[clusterSpec.getLocalPattern().size()]);
+               clusterSpec.getLocalDiskstorePattern().toArray(
+                     new String[clusterSpec.getLocalDiskstorePattern().size()]);
       } else {
          // use local storage by default
-         if (!clusterSpec.getLocalPattern().isEmpty()) {
+         if (!clusterSpec.getLocalDiskstorePattern().isEmpty()) {
             patterns =
-                  clusterSpec.getLocalPattern().toArray(
-                        new String[clusterSpec.getLocalPattern().size()]);
+                  clusterSpec.getLocalDiskstorePattern().toArray(
+                        new String[clusterSpec.getLocalDiskstorePattern()
+                              .size()]);
          } else {
             patterns =
-                  clusterSpec.getSharedPattern().toArray(
-                        new String[clusterSpec.getSharedPattern().size()]);
+                  clusterSpec.getSharedDiskstorePattern().toArray(
+                        new String[clusterSpec.getSharedDiskstorePattern()
+                              .size()]);
          }
       }
 

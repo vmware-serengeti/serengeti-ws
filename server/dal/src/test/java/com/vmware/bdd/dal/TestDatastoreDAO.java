@@ -14,22 +14,19 @@
  ***************************************************************************/
 package com.vmware.bdd.dal;
 
-import com.vmware.bdd.apitypes.Datastore;
-import com.vmware.bdd.entity.VcDatastoreEntity;
+import java.util.List;
+
 import junit.framework.Assert;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
 
 import org.apache.log4j.Logger;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.List;
+import com.vmware.bdd.apitypes.Datastore;
+import com.vmware.bdd.entity.VcDatastoreEntity;
 
 /**
  * Author: Xiaoding Bian
@@ -106,13 +103,4 @@ public class TestDatastoreDAO {
       Assert.assertTrue(datastoreDAO.nameExisted("ds3"));
       Assert.assertTrue(!datastoreDAO.nameExisted("ds4"));
    }
-
-   @Test
-   public void testFindByNameAndDatastore() {
-      VcDatastoreEntity entity = datastoreDAO.findByNameAndDatastore("ds1", "test-ds1");
-      Assert.assertTrue(entity != null);
-      entity = datastoreDAO.findByNameAndDatastore("ds2", "no-exist-ds");
-      Assert.assertTrue(entity == null);
-   }
-
 }

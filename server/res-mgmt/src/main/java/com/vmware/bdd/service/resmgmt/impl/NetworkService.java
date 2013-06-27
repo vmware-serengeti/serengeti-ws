@@ -26,17 +26,16 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vmware.bdd.apitypes.IpAllocEntryRead;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkRead;
-import com.vmware.bdd.dal.IClusterDAO;
 import com.vmware.bdd.dal.IIpBlockDAO;
 import com.vmware.bdd.dal.INetworkDAO;
 import com.vmware.bdd.dal.INodeDAO;
 import com.vmware.bdd.dal.INodeGroupDAO;
 import com.vmware.bdd.entity.ClusterEntity;
-import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.IpBlockEntity;
 import com.vmware.bdd.entity.IpBlockEntity.BlockType;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NetworkEntity.AllocType;
+import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
 import com.vmware.bdd.exception.UniqueConstraintViolationException;
@@ -56,8 +55,6 @@ public class NetworkService implements Serializable, INetworkService {
 
    private IIpBlockDAO ipBlockDao;
 
-   private IClusterDAO clusterDao;
-
    private INodeGroupDAO nodeGroupDao;
 
    private INodeDAO nodeDao;
@@ -76,11 +73,6 @@ public class NetworkService implements Serializable, INetworkService {
    @Autowired
    public void setIpBlockDao(IIpBlockDAO ipBlockDao) {
       this.ipBlockDao = ipBlockDao;
-   }
-
-   @Autowired
-   public void setClusterDao(IClusterDAO clusterDao) {
-      this.clusterDao = clusterDao;
    }
 
    @Autowired

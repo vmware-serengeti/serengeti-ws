@@ -98,10 +98,10 @@
     "10.1.1.4" : "rack2",
     "10.1.2.1" : "rack3"
   },
-  "sharedPattern": [
+  "sharedDiskstorePattern": [
     "share*"
   ],
-  "localPattern": [
+  "localDiskstorePattern": [
   	"local*"
   ],
   "configuration" : {

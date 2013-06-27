@@ -129,7 +129,7 @@ public class TestClusterHealService {
       spec.setNodeGroups(nodeGroups);
       Set<String> patterns = new HashSet<String>();
       patterns.add(LOCAL_STORE_PATTERN);
-      spec.setLocalPattern(patterns);
+      spec.setLocalDiskstorePattern(patterns);
 
       Mockito.when(configMgr.getClusterConfig(CLUSTER_NAME)).thenReturn(spec);
       service.setConfigMgr(configMgr);

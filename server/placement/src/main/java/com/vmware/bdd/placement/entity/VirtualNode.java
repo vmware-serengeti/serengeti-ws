@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
@@ -133,23 +134,34 @@ public class VirtualNode {
     */
    public boolean hasEnoughStorage(AbstractHost host) {
       // total required storage space in this vNode
-      int required = 0;
+      int requiredDataDisk = 0;
+      int requiredSystemDisk = 0;
 
-      Set<String> namePatterns = new HashSet<String>();
+      Set<String> imagestoreNamePatterns = new HashSet<String>();
+      Set<String> diskstoreNamePatterns = new HashSet<String>();
 
       for (BaseNode node : this.nodes) {
          AuAssert.check(node.getDisks() != null);
          for (DiskSpec disk : node.getDisks()) {
-            required += disk.getSize();
+            if (disk.getDiskType() == DiskType.DATA_DISK)
+               requiredDataDisk += disk.getSize();
+            else
+               requiredSystemDisk += disk.getSize();
          }
-         namePatterns.addAll(Arrays.asList(node.getDatastoreNamePattern()));
+         imagestoreNamePatterns.addAll(Arrays.asList(node
+               .getImagestoreNamePattern()));
+         diskstoreNamePatterns.addAll(Arrays.asList(node
+               .getDiskstoreNamePattern()));
       }
 
-      int sum =
-            host.getTotalSpaceInGB(namePatterns.toArray(new String[namePatterns
-                  .size()]));
+      int sumData =
+            host.getTotalSpaceInGB(diskstoreNamePatterns
+                  .toArray(new String[diskstoreNamePatterns.size()]));
+      int sumSystem =
+            host.getTotalSpaceInGB(imagestoreNamePatterns
+                  .toArray(new String[imagestoreNamePatterns.size()]));
 
-      return (sum >= required);
+      return (sumSystem >= requiredSystemDisk && sumData >= requiredDataDisk);
    }
 
    /**

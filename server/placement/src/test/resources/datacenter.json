@@ -49,6 +49,9 @@
             },
             {
               "name": "local4"
+            },
+            {
+              "name" : "tli2"
             }
           ]
         }
@@ -95,6 +98,10 @@
             },
             {
               "name": "local5"
+            },
+            {
+              "name" : "tli2",
+              "freeSpace" : 500
             }
           ]  
         }
@@ -109,6 +116,10 @@
         },
         {
           "name": "local5"
+        },
+        {
+          "name" : "tli2",
+          "freeSpace" : 500
         }
       ]
     }

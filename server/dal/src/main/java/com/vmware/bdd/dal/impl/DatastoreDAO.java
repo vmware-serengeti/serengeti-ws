@@ -32,7 +32,7 @@ import com.vmware.bdd.entity.VcDatastoreEntity;
  * @author Jarred Li
  * @since 0.8
  * @version 0.8
- *
+ * 
  */
 @Repository
 @Transactional(readOnly = true)
@@ -60,7 +60,7 @@ public class DatastoreDAO extends BaseDAO<VcDatastoreEntity> implements
    @Override
    public List<VcDatastoreEntity> findByNameAndType(DatastoreType type,
          String name) {
-      logger.debug("findByNameAndType, name:" + name);
+      logger.debug("findByNameAndType, name: " + name + "type: " + type);
       Map<String, Object> propertyNameValues = new HashMap<String, Object>();
       propertyNameValues.put("name", name);
       propertyNameValues.put("type", type);
@@ -70,16 +70,6 @@ public class DatastoreDAO extends BaseDAO<VcDatastoreEntity> implements
    @Override
    public boolean nameExisted(String name) {
       List<VcDatastoreEntity> entities = findByName(name);
-      return (entities != null && entities.size() > 0);
-   }
-
-   @Override
-   public VcDatastoreEntity findByNameAndDatastore(String name,
-         String datastoreName) {
-      Map<String, String> propertyNameValues = new HashMap<String, String>();
-      propertyNameValues.put("name", name);
-      propertyNameValues.put("vcDatastore", datastoreName);
-
-      return this.findUniqueByCriteria(Restrictions.allEq(propertyNameValues));
+      return (entities != null && !entities.isEmpty());
    }
 }

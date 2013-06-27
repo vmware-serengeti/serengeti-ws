@@ -95,7 +95,7 @@ public class TestScaleService {
    @MockClass(realClass = NodeGroupCreate.class)
    public static class MockNodeGroupCreateForScale {
       @Mock
-      public static String[] getDatastoreNamePattern(ClusterCreate cluster, NodeGroupCreate ng) {
+      public static String[] getImagestoreNamePattern(ClusterCreate cluster, NodeGroupCreate ng) {
          String[] patterns = { DS_PATTERN };
          return patterns;         
       }

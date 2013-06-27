@@ -177,10 +177,10 @@ public class ResourceInitializerService implements IResourceInitializerService {
       logger.info("added resource pool with vc rp:" + vcRPName);
 
       if (!dsNames.get(DatastoreType.SHARED).isEmpty()) {
-         dsSvc.addDataStores(DEFAULT_DS_SHARED, DatastoreType.SHARED, 
+         dsSvc.addDatastores(DEFAULT_DS_SHARED, DatastoreType.SHARED, 
                dsNames.get(DatastoreType.SHARED));
       } else if (!dsNames.get(DatastoreType.LOCAL).isEmpty()) {
-         dsSvc.addDataStores(DEFAULT_DS_LOCAL, DatastoreType.LOCAL, 
+         dsSvc.addDatastores(DEFAULT_DS_LOCAL, DatastoreType.LOCAL, 
                dsNames.get(DatastoreType.LOCAL));
       }
       logger.info("added datastore. " + dsNames);

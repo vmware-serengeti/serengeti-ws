@@ -27,7 +27,6 @@ import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkRead;
-import com.vmware.bdd.dal.IIpBlockDAO;
 import com.vmware.bdd.dal.INetworkDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.IpBlockEntity;
@@ -38,8 +37,6 @@ import com.vmware.bdd.service.resmgmt.IResourceService;
 public class NetworkServiceTest {
    @Mocked
    private INetworkDAO networkDao;
-   @Mocked
-   private IIpBlockDAO ipBlockDao;
    @Mocked
    private IResourceService resService;
 

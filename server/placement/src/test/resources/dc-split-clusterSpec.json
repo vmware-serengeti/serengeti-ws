@@ -114,11 +114,14 @@
   },
   "topologyPolicy": "NONE",
   "hostToRackMap": {},
-  "sharedPattern": [
+  "sharedDiskstorePattern": [
     "share*"
   ],
-  "localPattern": [
+  "localDiskstorePattern": [
    "local*"
+  ],
+  "imagestorePattern": [
+   "tli*"
   ],
   "configuration" : {
   }
