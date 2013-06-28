@@ -18,7 +18,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,6 +34,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
@@ -74,6 +89,7 @@ class RolePackageMapping {
 }
 
 class Distro {
+
    private static final Logger logger = Logger.getLogger(Distro.class);
 
    private String name;
@@ -184,20 +200,42 @@ public class DistroManager {
       }
    }
 
-   private String readDistroManifest() throws IOException {
-      URL manifestUrl = new URL(distrosManifestUrl);
+   private String readDistroManifest() throws Exception {
       BufferedReader in = null;
+      DefaultHttpClient httpclient = new DefaultHttpClient();
+
       try {
-         in = new BufferedReader(
-               new InputStreamReader(manifestUrl.openStream()));
+         TrustStrategy trustStrategy = new TrustStrategy() {
+            @Override
+            public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+               return true;
+            }
+         };
+
+         SSLSocketFactory socketFactory = new SSLSocketFactory(trustStrategy,
+               SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+
+         Scheme sch = new Scheme("https", 443, socketFactory);
+         httpclient.getConnectionManager().getSchemeRegistry().register(sch);
+
+         HttpGet httpget = new HttpGet(new URI(distrosManifestUrl));
+
+         logger.info("executing request: " + httpget.getRequestLine());
+
+         HttpResponse response = httpclient.execute(httpget);
+         HttpEntity entity = response.getEntity();
+
+         in = new BufferedReader(new InputStreamReader(entity.getContent()));
 
          StringBuffer sb = new StringBuffer();
          String line;
          while ((line = in.readLine()) != null) {
             sb.append(line);
          }
+         EntityUtils.consume(entity);
          return sb.toString();
       } finally {
+         httpclient.getConnectionManager().shutdown();
          if (in != null) {
             in.close();
          }
@@ -221,7 +259,7 @@ public class DistroManager {
             logger.error("failed to parse manifest: " + distrosManifestUrl, e);
             throw BddException.INTERNAL(e, "failed to parse manifest: "
                   + distrosManifestUrl);
-         } catch (IOException e) {
+         } catch (Exception e) {
             logger.error("failed to read manifest: " + distrosManifestUrl, e);
             throw BddException
                   .INTERNAL(e, "failed to read manifest: " + distrosManifestUrl);
