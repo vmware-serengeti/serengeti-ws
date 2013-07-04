@@ -303,7 +303,7 @@ public class VcVmUtil {
    public static boolean runSPOnSingleVM(NodeEntity node, Callable<Void> call) {
       boolean operationResult = true;
       if (node == null || node.getMoId() == null) {
-         logger.info("VC vm does not exist for node: " + node.getVmName());
+         logger.info("VC vm does not exist for node: " + node == null ? null : node.getVmName());
          return false;
       }
       VcVirtualMachine vcVm = VcCache.getIgnoreMissing(node.getMoId());

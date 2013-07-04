@@ -60,6 +60,7 @@ public class SetAutoElasticitySP implements Callable<Void> {
    public Void call() throws Exception {
       if (vcVm == null) {
          logger.info("vm not exist. Ignore the enable auto elasticity request.");
+         return null;
       }
       final VcVirtualMachine vm = VcCache.getIgnoreMissing(vcVm.getId());
       if (vm == null) {

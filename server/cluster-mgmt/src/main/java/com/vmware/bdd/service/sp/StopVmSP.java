@@ -49,6 +49,7 @@ public class StopVmSP implements Callable<Void> {
       if (vcVm == null) {
          logger.info("vm " + vmId
                + " is deleted from vc. Ignore the power off request.");
+         return null;
       }
       if (vcVm.isPoweredOff()) {
          logger.info("vm " + vcVm.getName() + " is already powered off.");
