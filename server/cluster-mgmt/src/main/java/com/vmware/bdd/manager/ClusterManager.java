@@ -909,7 +909,7 @@ public class ClusterManager {
       }
 
       if (activeComputeNodeNum != null) {
-         if (activeComputeNodeNum != cluster.getVhmTargetNum()) {
+         if (!activeComputeNodeNum.equals(cluster.getVhmTargetNum())) {
             cluster.setVhmTargetNum(activeComputeNodeNum);
          }
       }
