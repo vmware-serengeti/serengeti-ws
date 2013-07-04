@@ -42,14 +42,6 @@ public class ScaleSingleVMStep extends TrackableTasklet {
    public RepeatStatus executeStep(ChunkContext chunkContext,
          JobExecutionStatusHolder jobExecutionStatusHolder) throws Exception {
 
-      String clusterName =
-            getJobParameters(chunkContext).getString(
-                  JobConstants.CLUSTER_NAME_JOB_PARAM);
-      if (clusterName == null) {
-         clusterName =
-               getJobParameters(chunkContext).getString(
-                     JobConstants.TARGET_NAME_JOB_PARAM).split("-")[0];
-      }
       String nodeName =
             getJobParameters(chunkContext).getString(
                   JobConstants.SUB_JOB_NODE_NAME);

@@ -17,7 +17,6 @@ package com.vmware.bdd.service.job;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import com.vmware.bdd.exception.TaskException;
-import com.vmware.bdd.service.job.DefaultStatusUpdater;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.IExecutionService;
 
@@ -28,9 +27,7 @@ public class SetAutoElasticityStep extends TrackableTasklet {
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext, 
          JobExecutionStatusHolder jobExecutionStatusHolder) throws Exception {
-      StatusUpdater statusUpdator = new DefaultStatusUpdater(jobExecutionStatusHolder, getJobExecutionId(chunkContext));
       String clusterName = getJobParameters(chunkContext).getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
-      StatusUpdater statusUpdater = new DefaultStatusUpdater(jobExecutionStatusHolder, getJobExecutionId(chunkContext));
 
       boolean success = clusteringService.setAutoElasticity(clusterName);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, success);

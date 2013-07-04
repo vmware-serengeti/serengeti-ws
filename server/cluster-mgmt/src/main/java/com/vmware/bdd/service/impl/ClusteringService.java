@@ -864,9 +864,6 @@ public class ClusteringService implements IClusteringService {
          }
       }
 
-      NodeGroupEntity nodeGroup =
-            getClusterEntityMgr().findByName(vNode.getClusterName(),
-                  vNode.getGroupName());
       ClusterEntity clusterEntity =
             getClusterEntityMgr().findByName(vNode.getClusterName());
       CreateVmPrePowerOn prePowerOn =
