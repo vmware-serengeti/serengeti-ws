@@ -74,6 +74,10 @@ public class StorageRead {
 
    private List<String> dsNames;
    
+   private List<String> dsNames4System;
+   
+   private List<String> dsNames4Data;
+   
    // internal used, data disk store name patterns
    private List<String> diskstoreNamePattern;
 
@@ -92,6 +96,22 @@ public class StorageRead {
 
    public void setDsNames(List<String> dsNames) {
       this.dsNames = dsNames;
+   }
+
+   public List<String> getDsNames4System() {
+      return dsNames4System;
+   }
+
+   public void setDsNames4System(List<String> dsNames4System) {
+      this.dsNames4System = dsNames4System;
+   }
+
+   public List<String> getDsNames4Data() {
+      return dsNames4Data;
+   }
+
+   public void setDsNames4Data(List<String> dsNames4Data) {
+      this.dsNames4Data = dsNames4Data;
    }
 
    public List<String> getDiskstoreNamePattern() {

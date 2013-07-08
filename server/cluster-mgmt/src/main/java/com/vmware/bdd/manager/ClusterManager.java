@@ -325,9 +325,8 @@ public class ClusterManager {
       spec.setVcClusters(null);
       spec.setTemplateId(null);
       spec.setDistroMap(null);
-      spec.setSharedDiskstorePattern(null);
-      spec.setLocalDiskstorePattern(null);
-      spec.setImagestorePattern(null);
+      spec.setSharedDatastorePattern(null);
+      spec.setLocalDatastorePattern(null);
       spec.setNetworking(null);
       spec.setRpNames(null);
       spec.setDsNames(null);

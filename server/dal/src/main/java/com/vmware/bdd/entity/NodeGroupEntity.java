@@ -101,9 +101,20 @@ public class NodeGroupEntity extends EntityBase {
     * by this node group, so we should avoid setting up the ManyToMany mapping.
     * JSON encoded VCDataStoreEntity name array
     */
+   // datastore for data disks
    @Column(name = "vc_datastore_names")
    @Type(type = "text")
    private String vcDatastoreNames;
+
+   @Column(name = "dd_datastore_names")
+   @Type(type = "text")
+   private String ddDatastoreNames;
+
+   // datastores for system|image disk 
+   @Column(name = "sd_datastore_names")
+   @Type(type = "text")
+   private String sdDatastoreNames;
+
 
    @Column(name = "roles")
    private String roles; // JSON string
@@ -263,7 +274,7 @@ public class NodeGroupEntity extends EntityBase {
    }
 
    public String getVcDatastoreNames() {
-      return this.vcDatastoreNames;
+      return vcDatastoreNames;
    }
 
    @SuppressWarnings("unchecked")
@@ -274,6 +285,34 @@ public class NodeGroupEntity extends EntityBase {
 
    public void setVcDatastoreNameList(List<String> vcDatastoreNameList) {
       this.vcDatastoreNames = (new Gson()).toJson(vcDatastoreNameList);
+   }
+
+   public String getDdDatastoreNames() {
+      return this.ddDatastoreNames;
+   }
+
+   @SuppressWarnings("unchecked")
+   public List<String> getDdDatastoreNameList() {
+      return (new Gson()).fromJson(ddDatastoreNames,
+            (new ArrayList<String>()).getClass());
+   }
+
+   public void setDdDatastoreNameList(List<String> ddDatastoreNameList) {
+      this.ddDatastoreNames = (new Gson()).toJson(ddDatastoreNameList);
+   }
+
+   public String getSdDatastoreNames() {
+      return sdDatastoreNames;
+   }
+
+   @SuppressWarnings("unchecked")
+   public List<String> getSdDatastoreNameList() {
+      return (new Gson()).fromJson(sdDatastoreNames,
+            (new ArrayList<String>()).getClass());
+   }
+
+   public void setSdDatastoreNameList(List<String> sdDatastoreNameList) {
+      this.sdDatastoreNames = (new Gson()).toJson(sdDatastoreNameList);
    }
 
    public String getRoles() {
@@ -382,7 +421,18 @@ public class NodeGroupEntity extends EntityBase {
       StorageRead storage = new StorageRead();
       storage.setType(this.storageType.toString());
       storage.setSizeGB(this.storageSize);
-      storage.setDsNames(getVcDatastoreNameList());
+
+      // set dsNames/dsNames4Data/dsNames4System
+      if (getVcDatastoreNameList() != null
+            && !getVcDatastoreNameList().isEmpty())
+         storage.setDsNames(getVcDatastoreNameList());
+      if (getSdDatastoreNameList() != null
+            && !getSdDatastoreNameList().isEmpty())
+         storage.setDsNames4System(getSdDatastoreNameList());
+      if (getDdDatastoreNameList() != null
+            && !getDdDatastoreNameList().isEmpty())
+         storage.setDsNames4Data(getDdDatastoreNameList());
+
       nodeGroupRead.setStorage(storage);
 
       List<NodeRead> nodeList = new ArrayList<NodeRead>();

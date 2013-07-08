@@ -30,21 +30,17 @@ import com.vmware.bdd.apitypes.DatastoreRead;
  */
 public interface IDatastoreService {
 
-   Set<String> getAllSharedDiskstores();
+   Set<String> getAllSharedDatastores();
 
-   Set<String> getSharedDiskstoresByNames(List<String> nameList);
+   Set<String> getSharedDatastoresByNames(List<String> nameList);
 
-   Set<String> getAllLocalDiskstores();
+   Set<String> getAllLocalDatastores();
 
-   Set<String> getLocalDiskstoresByNames(List<String> nameList);
+   Set<String> getLocalDatastoresByNames(List<String> nameList);
 
-   Set<String> getDiskstoresByName(String name);
+   Set<String> getDatastoresByName(String name);
 
-   Set<String> getDiskstoresByNames(List<String> nameList);
-
-   Set<String> getAllImagestores();
-
-   Set<String> getImagestoresByNames(List<String> nameList);
+   Set<String> getDatastoresByNames(List<String> nameList);
 
    // for CLI path
    Set<String> getAllDatastoreNames();

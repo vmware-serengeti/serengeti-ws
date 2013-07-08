@@ -580,11 +580,11 @@ public class ClusterConfigManager {
       Set<String> sharedPattern;
       Set<String> localPattern;
       if (dsNames != null) {
-         sharedPattern = datastoreMgr.getSharedDiskstoresByNames(dsNames);
-         localPattern = datastoreMgr.getLocalDiskstoresByNames(dsNames);
+         sharedPattern = datastoreMgr.getSharedDatastoresByNames(dsNames);
+         localPattern = datastoreMgr.getLocalDatastoresByNames(dsNames);
       } else {
-         sharedPattern = datastoreMgr.getAllSharedDiskstores();
-         localPattern = datastoreMgr.getAllLocalDiskstores();
+         sharedPattern = datastoreMgr.getAllSharedDatastores();
+         localPattern = datastoreMgr.getAllLocalDatastores();
       }
 
       CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity, groupType,
@@ -621,6 +621,10 @@ public class ClusterConfigManager {
             }
          }
          groupEntity.setVcDatastoreNameList(group.getStorage().getDsNames());
+         groupEntity.setSdDatastoreNameList(group.getStorage()
+               .getDsNames4System());
+         groupEntity.setDdDatastoreNameList(group.getStorage()
+               .getDsNames4Data());
       }
 
       if (groupEntity.getStorageType() == DatastoreType.LOCAL) {
@@ -699,25 +703,20 @@ public class ClusterConfigManager {
       if (clusterEntity.getVcDatastoreNameList() != null) {
          logger.debug("datastore specified at cluster level.");
          Set<String> sharedPattern =
-               datastoreMgr.getSharedDiskstoresByNames(clusterEntity
+               datastoreMgr.getSharedDatastoresByNames(clusterEntity
                      .getVcDatastoreNameList());
-         clusterConfig.setSharedDiskstorePattern(sharedPattern);
+         clusterConfig.setSharedDatastorePattern(sharedPattern);
          Set<String> localPattern =
-               datastoreMgr.getLocalDiskstoresByNames(clusterEntity
+               datastoreMgr.getLocalDatastoresByNames(clusterEntity
                      .getVcDatastoreNameList());
-         clusterConfig.setLocalDiskstorePattern(localPattern);
-         Set<String> imagePattern =
-               datastoreMgr.getImagestoresByNames(clusterEntity
-                     .getVcDatastoreNameList());
-         clusterConfig.setImagestorePattern(imagePattern);
+         clusterConfig.setLocalDatastorePattern(localPattern);
          clusterConfig.setDsNames(clusterEntity.getVcDatastoreNameList());
       } else {
          // set all shared and local datastores
-         clusterConfig.setSharedDiskstorePattern(datastoreMgr
-               .getAllSharedDiskstores());
-         clusterConfig.setLocalDiskstorePattern(datastoreMgr
-               .getAllLocalDiskstores());
-         clusterConfig.setImagestorePattern(datastoreMgr.getAllImagestores());
+         clusterConfig.setSharedDatastorePattern(datastoreMgr
+               .getAllSharedDatastores());
+         clusterConfig.setLocalDatastorePattern(datastoreMgr
+               .getAllLocalDatastores());
          logger.debug("no datastore config at cluster level.");
       }
       List<NodeGroupCreate> nodeGroups = new ArrayList<NodeGroupCreate>();
@@ -900,7 +899,11 @@ public class ClusterConfigManager {
          NodeGroupCreate group, EnumSet<HadoopRole> enumRoles) {
       int storageSize = ngEntity.getStorageSize();
       DatastoreType storageType = ngEntity.getStorageType();
+
       List<String> storeNames = ngEntity.getVcDatastoreNameList();
+      List<String> dataDiskStoreNames = ngEntity.getDdDatastoreNameList();
+      List<String> systemDiskStoreNames = ngEntity.getSdDatastoreNameList();
+
       if (storageSize <= 0 && storageType == null
             && (storeNames == null || storeNames.isEmpty())) {
          logger.debug("no storage specified for node group "
@@ -913,18 +916,31 @@ public class ClusterConfigManager {
             + ngEntity.getName());
       logger.debug("storage name pattern is " + storeNames + " for node group "
             + ngEntity.getName());
+      logger.debug("system disk storage name pattern is "
+            + systemDiskStoreNames + " for node group " + ngEntity.getName());
+      logger.debug("data disk storage name pattern is " + dataDiskStoreNames
+            + " for node group " + ngEntity.getName());
       StorageRead storage = new StorageRead();
       group.setStorage(storage);
       storage.setSizeGB(storageSize);
       if (storageType != null) {
          storage.setType(storageType.toString().toLowerCase());
       }
-      //      storage.setNamePattern(getStoreNamePattern(storageType, storeNames));s
-      storage.setImagestoreNamePattern(getImagestoreNamePattern(storeNames));
-      storage.setDiskstoreNamePattern(getDiskstoreNamePattern(storageType,
-            storeNames));
 
-      storage.setDsNames(storeNames);
+      if (systemDiskStoreNames != null && !systemDiskStoreNames.isEmpty())
+         storage.setImagestoreNamePattern(getDatastoreNamePattern(storageType,
+               systemDiskStoreNames));
+      else
+         storage.setImagestoreNamePattern(getDatastoreNamePattern(storageType,
+               storeNames));
+
+      if (dataDiskStoreNames != null && !dataDiskStoreNames.isEmpty())
+         storage.setDiskstoreNamePattern(getDatastoreNamePattern(storageType,
+               dataDiskStoreNames));
+      else
+         storage.setDiskstoreNamePattern(getDatastoreNamePattern(storageType,
+               storeNames));
+
       storage.setShares(ngEntity.getCluster().getIoShares());
 
       // set storage split policy based on group roles
@@ -954,7 +970,7 @@ public class ClusterConfigManager {
       if (storageType == null) {
          // check store names to see if local type storage is chosen.
          Set<String> storePattern =
-               datastoreMgr.getLocalDiskstoresByNames(storeNames);
+               datastoreMgr.getLocalDatastoresByNames(storeNames);
          if (storePattern != null && !storePattern.isEmpty()) {
             logger.info("datastore type is not set, but local datastore is used. Set scsi controller type to paravirtual");
             storage
@@ -977,25 +993,7 @@ public class ClusterConfigManager {
       }
    }
 
-   private List<String> getImagestoreNamePattern(List<String> storeNames) {
-      // if dsNames is not specified, return null
-      if (storeNames == null || storeNames.isEmpty()) {
-         return null;
-      }
-      Set<String> storePattern = datastoreMgr.getImagestoresByNames(storeNames);
-
-      // if dsNames does not contain image stores, return empty list
-      if (storePattern == null || storePattern.isEmpty()) {
-         logger.warn("No image datastore found for datastore name: " + storeNames
-               + ". Will use disk store definitions.");
-         return new ArrayList<String>();
-      }
-
-      // if dsNames contains image stores, return non-empty list
-      return new ArrayList<String>(storePattern);
-   }
-
-   private List<String> getDiskstoreNamePattern(DatastoreType storageType,
+   private List<String> getDatastoreNamePattern(DatastoreType storageType,
          List<String> storeNames) {
       if (storageType == null && (storeNames == null || storeNames.isEmpty())) {
          return null;
@@ -1003,12 +1001,12 @@ public class ClusterConfigManager {
       Set<String> storePattern = null;
       if (storageType == null) {
          logger.debug("storage type is not specified.");
-         storePattern = datastoreMgr.getDiskstoresByNames(storeNames);
+         storePattern = datastoreMgr.getDatastoresByNames(storeNames);
       }
       if (storageType == DatastoreType.LOCAL) {
-         storePattern = datastoreMgr.getLocalDiskstoresByNames(storeNames);
+         storePattern = datastoreMgr.getLocalDatastoresByNames(storeNames);
       } else {
-         storePattern = datastoreMgr.getSharedDiskstoresByNames(storeNames);
+         storePattern = datastoreMgr.getSharedDatastoresByNames(storeNames);
       }
 
       if (storePattern == null || storePattern.isEmpty()) {

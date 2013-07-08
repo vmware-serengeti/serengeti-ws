@@ -483,23 +483,14 @@ public class NodeGroupCreate {
       String[] patterns;
       StorageRead storage = nodeGroupSpec.getStorage();
 
-      // dsNames is not specified, use cluster level image stores
-      if (storage.getImagestoreNamePattern() == null) {
-         if (clusterSpec.getImagestorePattern() != null
-               && !clusterSpec.getImagestorePattern().isEmpty()) {
-            patterns =
-                  clusterSpec.getImagestorePattern().toArray(
-                        new String[clusterSpec.getImagestorePattern().size()]);
-         } else {
-            return getDiskstoreNamePattern(clusterSpec, nodeGroupSpec);
-         }
-      } else if (!storage.getImagestoreNamePattern().isEmpty()) {
-         // dsNames is specified and contains image stores
+      // dsNames4System is specified and not empty
+      if (storage.getImagestoreNamePattern() != null
+            && !storage.getImagestoreNamePattern().isEmpty()) {
          patterns =
                storage.getImagestoreNamePattern().toArray(
                      new String[storage.getImagestoreNamePattern().size()]);
       } else {
-         // dsNames is specified, but not contain any image store
+         // dsNames4System is not specified, use dsNames4Data or dsNames
          return getDiskstoreNamePattern(clusterSpec, nodeGroupSpec);
       }
 
@@ -525,26 +516,26 @@ public class NodeGroupCreate {
       } else if (DatastoreType.SHARED.toString().equalsIgnoreCase(
             storage.getType())) {
          patterns =
-               clusterSpec.getSharedDiskstorePattern()
+               clusterSpec.getSharedDatastorePattern()
                      .toArray(
-                           new String[clusterSpec.getSharedDiskstorePattern()
+                           new String[clusterSpec.getSharedDatastorePattern()
                                  .size()]);
       } else if (DatastoreType.LOCAL.toString().equalsIgnoreCase(
             storage.getType())) {
          patterns =
-               clusterSpec.getLocalDiskstorePattern().toArray(
-                     new String[clusterSpec.getLocalDiskstorePattern().size()]);
+               clusterSpec.getLocalDatastorePattern().toArray(
+                     new String[clusterSpec.getLocalDatastorePattern().size()]);
       } else {
          // use local storage by default
-         if (!clusterSpec.getLocalDiskstorePattern().isEmpty()) {
+         if (!clusterSpec.getLocalDatastorePattern().isEmpty()) {
             patterns =
-                  clusterSpec.getLocalDiskstorePattern().toArray(
-                        new String[clusterSpec.getLocalDiskstorePattern()
+                  clusterSpec.getLocalDatastorePattern().toArray(
+                        new String[clusterSpec.getLocalDatastorePattern()
                               .size()]);
          } else {
             patterns =
-                  clusterSpec.getSharedDiskstorePattern().toArray(
-                        new String[clusterSpec.getSharedDiskstorePattern()
+                  clusterSpec.getSharedDatastorePattern().toArray(
+                        new String[clusterSpec.getSharedDatastorePattern()
                               .size()]);
          }
       }

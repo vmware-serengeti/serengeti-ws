@@ -49,10 +49,10 @@ public class DatastoreCommandsTest extends MockRestServer {
             HttpStatus.NO_CONTENT, "");
 
       //invalid type
-      datastoreCommands.addDatastore("ds01", "ds*", "ANY", false);
+      datastoreCommands.addDatastore("ds01", "ds*", "ANY");
 
       //normal case
-      datastoreCommands.addDatastore("ds01", "ds*", "SHARED", false);
+      datastoreCommands.addDatastore("ds01", "ds*", "SHARED");
       CookieCache.clear();
    }
    
@@ -67,7 +67,7 @@ public class DatastoreCommandsTest extends MockRestServer {
             "https://127.0.0.1:8443/serengeti/api/datastores", HttpMethod.POST,
             HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
 
-      datastoreCommands.addDatastore("ds01", "ds*", "SHARED", false);
+      datastoreCommands.addDatastore("ds01", "ds*", "SHARED");
       CookieCache.clear();
    }
 

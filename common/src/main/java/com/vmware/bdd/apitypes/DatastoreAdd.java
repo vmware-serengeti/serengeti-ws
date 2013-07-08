@@ -28,9 +28,6 @@ public class DatastoreAdd {
    private String name;
    private List<String> spec;
    private DatastoreType type = DatastoreType.SHARED;
-   
-   // is this one a image store?
-   private boolean image;
 
    public List<String> getSpec() {
       return spec;
@@ -54,14 +51,6 @@ public class DatastoreAdd {
 
    public void setName(String name) {
       this.name = name;
-   }
-
-   public boolean isImage() {
-      return image;
-   }
-
-   public void setImage(boolean image) {
-      this.image = image;
    }
 
    public String toString() {

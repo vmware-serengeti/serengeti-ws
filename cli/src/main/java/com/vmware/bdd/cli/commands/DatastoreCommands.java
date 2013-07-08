@@ -47,8 +47,7 @@ public class DatastoreCommands implements CommandMarker {
          @CliOption(key = { "name" }, mandatory = true, help = "The datastore name.") final String name,
          @CliOption(key = { "spec" }, mandatory = true, help = "The datastore name(s) in vsphere: use \",\" among names.") final String spec,
          @CliOption(key = { "type" }, mandatory = false, unspecifiedDefaultValue = "SHARED", help = "Please specify the type for storage: "
-               + "SHARED or LOCAL") final String type,
-         @CliOption(key = { "image" }, mandatory = false, unspecifiedDefaultValue = "false", help = "Please specify whether it is a image store") final Boolean isImage) {
+               + "SHARED or LOCAL") final String type) {
 
       //build DatastoreAdd object
       try {
@@ -63,8 +62,7 @@ public class DatastoreCommands implements CommandMarker {
          } else {
             datastoreAdd.setSpec(CommandsUtils.inputsConvert(spec));
             datastoreAdd.setType(DatastoreType.valueOf(type.toUpperCase()));
-            datastoreAdd.setImage(isImage);
-            
+
             restClient.add(datastoreAdd);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_DATASTORE,
                   name, Constants.OUTPUT_OP_RESULT_ADD);

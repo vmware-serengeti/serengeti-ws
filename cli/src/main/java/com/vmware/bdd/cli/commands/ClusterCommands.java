@@ -55,7 +55,6 @@ import com.vmware.bdd.cli.rest.DistroRestClient;
 import com.vmware.bdd.cli.rest.NetworkRestClient;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AppConfigValidationUtils;
-import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
 import com.vmware.bdd.utils.ValidateResult;
 
