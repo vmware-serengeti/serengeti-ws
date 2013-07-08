@@ -33,6 +33,9 @@ public class ServerInfoEntity extends EntityBase{
    @Column(name = "resource_initialized", nullable = false)
    private boolean resourceInitialized;
 
+   @Column(name = "version")
+   private String version;
+
    /**
     * @return the resourceInitalized
     */
@@ -47,4 +50,11 @@ public class ServerInfoEntity extends EntityBase{
       this.resourceInitialized = resourceInitialized;
    }
 
+   public String getVersion() {
+      return version;
+   }
+
+   public void setVersion(String version) {
+      this.version = version;
+   }
 }
