@@ -16,6 +16,7 @@
 		<module>server/res-mgmt</module>
 		<module>server/placement</module>
 		<module>server/dal</module>
+		<module>server/fastclone</module>
 		<module>server/aop</module>
 		<module>server/authentication</module>
 		<module>server/cluster-mgmt</module>
