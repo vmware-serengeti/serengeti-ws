@@ -184,5 +184,6 @@ create table physical_host (
 create sequence server_info_seq;
 create table server_info (
   id           bigint       not null unique DEFAULT nextval('server_info_seq'::regclass),
-  resource_initialized boolean not null DEFAULT false
+  resource_initialized boolean not null DEFAULT false,
+  version      varchar(255)
 );

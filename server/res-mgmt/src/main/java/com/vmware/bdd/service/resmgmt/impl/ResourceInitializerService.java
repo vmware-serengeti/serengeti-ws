@@ -50,7 +50,7 @@ import com.vmware.vim.binding.vmodl.ManagedObjectReference;
  * @author Jarred Li
  * @since 0.8
  * @version 0.8
- *
+ * 
  */
 @Service
 public class ResourceInitializerService implements IResourceInitializerService {
@@ -177,10 +177,10 @@ public class ResourceInitializerService implements IResourceInitializerService {
       logger.info("added resource pool with vc rp:" + vcRPName);
 
       if (!dsNames.get(DatastoreType.SHARED).isEmpty()) {
-         dsSvc.addDatastores(DEFAULT_DS_SHARED, DatastoreType.SHARED, 
+         dsSvc.addDatastores(DEFAULT_DS_SHARED, DatastoreType.SHARED,
                dsNames.get(DatastoreType.SHARED));
       } else if (!dsNames.get(DatastoreType.LOCAL).isEmpty()) {
-         dsSvc.addDatastores(DEFAULT_DS_LOCAL, DatastoreType.LOCAL, 
+         dsSvc.addDatastores(DEFAULT_DS_LOCAL, DatastoreType.LOCAL,
                dsNames.get(DatastoreType.LOCAL));
       }
       logger.info("added datastore. " + dsNames);
@@ -196,8 +196,8 @@ public class ResourceInitializerService implements IResourceInitializerService {
     */
    private Map<DatastoreType, List<String>> getVmDatastore(
          final VcVirtualMachine serverVm) {
-      Map<DatastoreType, List<String>> dsNames = 
-         new HashMap<DatastoreType, List<String>>();
+      Map<DatastoreType, List<String>> dsNames =
+            new HashMap<DatastoreType, List<String>>();
       dsNames.put(DatastoreType.LOCAL, new ArrayList<String>());
       dsNames.put(DatastoreType.SHARED, new ArrayList<String>());
       for (VcDatastore ds : serverVm.getDatastores()) {
@@ -304,15 +304,18 @@ public class ResourceInitializerService implements IResourceInitializerService {
          ServerInfoEntity entity = entities.get(0);
          if (!entity.isResourceInitialized()) {
             entity.setResourceInitialized(true);
+            entity.setVersion(Configuration
+                  .getNonEmptyString("serengeti.version"));
             serverInfoDao.update(entity);
             logger.info("updated server info.");
          }
       } else {
          ServerInfoEntity entity = new ServerInfoEntity();
          entity.setResourceInitialized(true);
+         entity.setVersion(Configuration
+               .getNonEmptyString("serengeti.version"));
          serverInfoDao.insert(entity);
          logger.info("inserted server info.");
       }
    }
-
 }

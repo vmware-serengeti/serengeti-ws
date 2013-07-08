@@ -88,9 +88,6 @@ public class PlacementUtil {
          PARA_VIRTUAL_SCSI_EXTERNAL_ADDRESS_PREFIXES.length;
       int diskIndex = paraVirtualScsiIndex / 
          PARA_VIRTUAL_SCSI_EXTERNAL_ADDRESS_PREFIXES.length;
-      if (paraVirtualScsiIndex == CONTROLLER_RESERVED_CHANNEL) {
-         paraVirtualScsiIndex++;
-      }
       return PARA_VIRTUAL_SCSI_EXTERNAL_ADDRESS_PREFIXES[arrayIndex] + diskIndex;
    }
 }

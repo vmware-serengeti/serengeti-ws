@@ -240,9 +240,21 @@ public class ClusterHealService implements IClusterHealService {
       }
 
       List<DiskEntity> goodDisks = clusterEntityMgr.getDisks(nodeName);
-      goodDisks.removeAll(badDisks);
 
+      // collects datastore usages
       for (DiskEntity disk : goodDisks) {
+         boolean bad = false;
+         for (DiskSpec diskSpec : badDisks) {
+            if (disk.getName().equals(diskSpec.getName())) {
+               bad = true;
+               break;
+            }
+         }
+
+         // ignore bad disks
+         if (bad)
+            continue;
+
          AbstractDatastore targetAds = null;
          for (AbstractDatastore ads : pools) {
             if (ads.getName().equals(disk.getDatastoreName())) {
