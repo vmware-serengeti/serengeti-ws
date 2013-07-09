@@ -18,5 +18,4 @@
         	<bean class="com.vmware.bdd.cli.rest.RestErrorHandler"></bean>
         </property>
     </bean>
-
 </beans>

@@ -14,15 +14,24 @@
  *****************************************************************************/
 package com.vmware.bdd.cli.rest;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +45,10 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+
+import jline.ConsoleReader;
 
 import org.apache.log4j.Logger;
 import org.fusesource.jansi.AnsiConsole;
@@ -57,6 +69,8 @@ import com.vmware.bdd.apitypes.TaskRead.Type;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 import com.vmware.bdd.cli.commands.CookieCache;
+import com.vmware.bdd.cli.config.RunWayConfig;
+import com.vmware.bdd.cli.config.RunWayConfig.RunType;
 import com.vmware.bdd.utils.CommonUtil;
 
 /**
@@ -65,7 +79,9 @@ import com.vmware.bdd.utils.CommonUtil;
  */
 @Component
 public class RestClient {
+
    static final Logger logger = Logger.getLogger(RestClient.class);
+
    private String hostUri;
 
    @Autowired
@@ -164,10 +180,8 @@ public class RestClient {
             return Connect.ConnectType.ERROR;
          }
       } catch (Exception e) {
-         System.out.println(Constants.CONNECT_FAILURE
-               + ": "
-               + (e.getCause() != null ? e.getCause().getMessage()
-                     .toLowerCase() : e.getMessage()));
+         System.out.println(Constants.CONNECT_FAILURE + ": "
+               + (getExceptionMessage(e)));
          return Connect.ConnectType.ERROR;
       }
       return Connect.ConnectType.SUCCESS;
@@ -186,7 +200,7 @@ public class RestClient {
          }
       } catch (Exception e) {
          System.out
-               .println(Constants.DISCONNECT_FAILURE + ":" + e.getMessage());
+               .println(Constants.DISCONNECT_FAILURE + ": " + getExceptionMessage(e));
       }
    }
 
@@ -341,7 +355,7 @@ public class RestClient {
          }
 
       } catch (Exception e) {
-         throw new CliRestException(e.getMessage());
+         throw new CliRestException(getExceptionMessage(e));
       }
    }
 
@@ -495,7 +509,7 @@ public class RestClient {
             throw new Exception(Constants.HTTP_VERB_ERROR);
          }
       } catch (Exception e) {
-         throw new CliRestException(e.getMessage());
+         throw new CliRestException(getExceptionMessage(e));
       }
    }
 
@@ -523,7 +537,7 @@ public class RestClient {
             throw new Exception(Constants.HTTP_VERB_ERROR);
          }
       } catch (Exception e) {
-         throw new CliRestException(e.getMessage());
+         throw new CliRestException(getExceptionMessage(e));
       }
    }
 
@@ -556,7 +570,7 @@ public class RestClient {
             throw new Exception(Constants.HTTP_VERB_ERROR);
          }
       } catch (Exception e) {
-         throw new CliRestException(e.getMessage());
+         throw new CliRestException(getExceptionMessage(e));
       }
    }
 
@@ -586,7 +600,7 @@ public class RestClient {
          }
 
       } catch (Exception e) {
-         throw new CliRestException(e.getMessage());
+         throw new CliRestException(getExceptionMessage(e));
       }
    }
 
@@ -639,7 +653,7 @@ public class RestClient {
          }
 
       } catch (Exception e) {
-         throw new CliRestException(e.getMessage());
+         throw new CliRestException(getExceptionMessage(e));
       }
    }
 
@@ -694,7 +708,7 @@ public class RestClient {
          }
 
       } catch (Exception e) {
-         throw new CliRestException(e.getMessage());
+         throw new CliRestException(getExceptionMessage(e));
       }
    }
 
@@ -711,7 +725,7 @@ public class RestClient {
             throw new Exception(Constants.HTTP_VERB_ERROR);
          }
       } catch (Exception e) {
-         throw new CliRestException(e.getMessage());
+         throw new CliRestException(getExceptionMessage(e));
       }
    }
 
@@ -734,13 +748,19 @@ public class RestClient {
    }
 
    /*
-    * trust any SSL Certificate
+    * It will be trusted if users type 'yes' after CLI is aware of new SSL certificate. 
     */
    private static void trustSSLCertificate() {
+      String errorMsg = "";
       try {
+         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+         TrustManagerFactory tmf =
+               TrustManagerFactory.getInstance(TrustManagerFactory
+                     .getDefaultAlgorithm());
+         tmf.init(keyStore);
          SSLContext ctx = SSLContext.getInstance("SSL");
          ctx.init(new KeyManager[0],
-               new TrustManager[] { new DefaultTrustManager() },
+               new TrustManager[] { new DefaultTrustManager(keyStore) },
                new SecureRandom());
          SSLContext.setDefault(ctx);
          HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
@@ -749,25 +769,169 @@ public class RestClient {
                return true;
             }
          });
+      } catch (KeyStoreException e) {
+         errorMsg = "Key Store error: " + e.getMessage();
       } catch (KeyManagementException e) {
-         System.out.println("SSL Certificate error: " + e.getMessage());
+         errorMsg = "SSL Certificate error: " + e.getMessage();
       } catch (NoSuchAlgorithmException e) {
-         System.out.println("SSL Algorithm error: " + e.getMessage());
+         errorMsg = "SSL Algorithm error: " + e.getMessage();
+      } finally {
+         if (!CommandsUtils.isBlank(errorMsg)) {
+            System.out.println(errorMsg);
+            logger.error(errorMsg);
+         }
       }
    }
 
    private static class DefaultTrustManager implements X509TrustManager {
+
+      private KeyStore keyStore;
+
+      public DefaultTrustManager (KeyStore keyStore) {
+         this.keyStore = keyStore;
+      }
+
       @Override
-      public void checkClientTrusted(X509Certificate[] arg0, String arg1)
+      public void checkClientTrusted(X509Certificate[] chain, String authType)
             throws CertificateException {
       }
+
       @Override
-      public void checkServerTrusted(X509Certificate[] arg0, String arg1)
+      public void checkServerTrusted(X509Certificate[] chain, String authType)
             throws CertificateException {
+         String errorMsg = "";
+         /*
+          * load key store file 
+          */
+         char[] pwd = "changeit".toCharArray();
+         try {
+            File file = new File("serengeti.keystore");
+            if (file.isFile() == false) {
+               char SEP = File.separatorChar;
+               File dir =
+                     new File(System.getProperty("java.home") + SEP + "lib"
+                           + SEP + "security");
+               file = new File(dir, "serengeti.keystore");
+               if (file.isFile() == false) {
+                  file = new File(dir, "cacerts");
+               }
+            }
+            InputStream in = new FileInputStream(file);
+            keyStore.load(in, pwd);
+            if (in != null) {
+               in.close();
+            }
+            /*
+             * show certificate informations
+             */
+            MessageDigest sha1 = MessageDigest.getInstance("SHA1");
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            SimpleDateFormat dateFormate = new SimpleDateFormat("yyyy/MM/dd");
+            for (int i = 0; i < chain.length; i++) {
+               X509Certificate cert = chain[i];
+               sha1.update(cert.getEncoded());
+               md5.update(cert.getEncoded());
+               if (keyStore.getCertificate(String.valueOf(cert.hashCode())) != null) {
+                  if (i == chain.length - 1) {
+                     return;
+                  } else {
+                     continue;
+                  }
+               }
+               System.out.println("Certificate");
+               System.out.println("================================================================");
+               System.out.println("Subject:  " + cert.getSubjectDN());
+               System.out.println("Issuer:  " + cert.getIssuerDN());
+               System.out.println("SHA Fingerprint:  " + toHexString(sha1.digest()));
+               System.out.println("MD5 Fingerprint:  " + toHexString(md5.digest()));
+               System.out.println("Issued on:  " + dateFormate.format(cert.getNotBefore()));
+               System.out.println("Expires on:  " + dateFormate.format(cert.getNotAfter()));
+               System.out.println("Signature:  " + cert.getSignature());
+               System.out.println();
+
+               ConsoleReader reader = new ConsoleReader();
+               // Set prompt message
+               reader.setDefaultPrompt(Constants.PARAM_PROMPT_ADD_CERTIFICATE_MESSAGE);
+               // Read user input
+               String readMsg = "";
+               if (RunWayConfig.getRunType().equals(RunType.MANUAL)) {
+                  readMsg = reader.readLine();              
+               } else {
+                  readMsg = "yes";
+               }
+               if (!readMsg.trim().equalsIgnoreCase("yes")
+                     && !readMsg.trim().equalsIgnoreCase("y")) {
+                  if (i == chain.length - 1) {
+                     throw new CertificateException("Not find a valid certificate.");
+                  } else {
+                     continue;
+                  }
+               }
+               /*
+                *  add new certificate into key store file.
+                */
+               keyStore.setCertificateEntry(String.valueOf(cert.hashCode()), cert);
+               OutputStream out = new FileOutputStream("serengeti.keystore");
+               keyStore.store(out, pwd);
+               if (out != null) {
+                  out.close();
+               }
+            }
+
+         } catch (FileNotFoundException e) {
+            errorMsg = "Cannot find file warning: " + e.getMessage();
+         } catch (NoSuchAlgorithmException e) {
+            errorMsg = "SSL Algorithm error: " + e.getMessage();
+         } catch (IOException e) {
+            errorMsg = "SSL Algorithm error: " + e.getMessage();
+         } catch (KeyStoreException e) {
+            errorMsg = "Key store error: " + e.getMessage();
+         } finally {
+            if (!CommandsUtils.isBlank(errorMsg)) {
+               System.out.println(errorMsg);
+               logger.error(errorMsg);
+            }
+         }
       }
+
       @Override
       public X509Certificate[] getAcceptedIssuers() {
          return null;
       }
    }
+
+   private static final char[] HEXDIGITS = "0123456789abcdef".toCharArray();
+
+   /*
+    * transfer a byte array to a hexadecimal string 
+    */
+   private static String toHexString(byte[] bytes) {
+       StringBuilder sb = new StringBuilder(bytes.length * 3);
+       for (int b : bytes) {
+           b &= 0xff;
+           sb.append(HEXDIGITS[b >> 4]);
+           sb.append(HEXDIGITS[b & 15]);
+           sb.append(' ');
+       }
+       return sb.toString();
+   }
+
+   private String getExceptionMessage(Exception e) {
+      if (e.getCause() == null) {
+         return e.getMessage();
+      } else {
+         return getRootCause(e).getMessage();
+      }
+   }
+
+   private Throwable getRootCause(Exception e) {
+      Throwable cause = e.getCause();
+      Throwable rootCause = null;
+      while (cause != null) {
+         rootCause = cause;
+         cause = cause.getCause();
+      }
+      return rootCause;
+   }
+
 }

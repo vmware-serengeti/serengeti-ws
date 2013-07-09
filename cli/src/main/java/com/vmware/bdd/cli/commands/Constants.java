@@ -62,7 +62,7 @@ public class Constants {
    public static final String ACTION_OPS_FAILURE = "Unable to";
    public static final String CONNECT_SUCCESS = "Connected";
    public static final String CONNECT_FAILURE = "Cannot connect to the host";
-   public static final String DISCONNECT_FAILURE = "Diconnect failed!";
+   public static final String DISCONNECT_FAILURE = "Diconnect failed";
    public static final String NEED_CONNECTION = "no connection to serengeti server, please connect first.";
 
    public static final int SEPERATOR_LEN = 76;
@@ -209,6 +209,7 @@ public class Constants {
    public static final String DEFAULT_DISTRO = "apache";
    public static final String PARAM_NO_DISTRO_AVAILABLE = "no distro available,please upload one distro";
    public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure you want to continue (Y/N)? ";
+   public static final String PARAM_PROMPT_ADD_CERTIFICATE_MESSAGE = "Are you sure you want to add this certificate (Y/N)? ";
    public static final String PARAM_CLUSTER_IN_BLACK_LIST_WARNING =
          "not allowed to customize in Serengeti.";
    public static final String PARAM_CLUSTER_NOT_TAKE_EFFECT = "Your settings will not take effect.";
