@@ -202,7 +202,13 @@ public class ClusteringService implements IClusteringService {
          }
          // add event handler for Serengeti after VC event handler is registered.
          new VcEventProcessor(getClusterEntityMgr());
-         Scheduler.init(50, 50);
+
+         String poolSize =
+               Configuration.getNonEmptyString("serengeti.scheduler.poolsize");
+         AuAssert.check(poolSize != null);
+
+         Scheduler.init(Integer.parseInt(poolSize), Integer.parseInt(poolSize));
+         
          CmsWorker.addPeriodic(new ClusterNodeUpdator(getClusterEntityMgr()));
          snapshotTemplateVM();
          loadTemplateNetworkLable();
@@ -463,10 +469,11 @@ public class ClusteringService implements IClusteringService {
             folderList.add(folderNames[i]);
          }
          CreateVMFolderSP sp =
-            new CreateVMFolderSP(templateVm.getDatacenter(), null,
-                  folderList);
+               new CreateVMFolderSP(templateVm.getDatacenter(), null,
+                     folderList);
          storeProcedures[0] = sp;
-         Map<String, Folder> folders = executeFolderCreationProcedures(cluster, storeProcedures);
+         Map<String, Folder> folders =
+               executeFolderCreationProcedures(cluster, storeProcedures);
          for (String name : folders.keySet()) {
             clusterFolder = folders.get(name);
             break;
@@ -1125,8 +1132,8 @@ public class ClusteringService implements IClusteringService {
    public boolean removeBadNodes(ClusterCreate cluster,
          List<BaseNode> existingNodes, List<BaseNode> deletedNodes,
          Set<String> occupiedIps, StatusUpdater statusUpdator) {
-      logger.info("Start to remove node violate placement policy " +
-      		"or in wrong status in cluster: " + cluster.getName());
+      logger.info("Start to remove node violate placement policy "
+            + "or in wrong status in cluster: " + cluster.getName());
       // call tm to remove bad nodes
       List<BaseNode> badNodes =
             placementService.getBadNodes(cluster, existingNodes);
