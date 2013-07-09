@@ -145,7 +145,7 @@ public class CreateVmSP implements Callable<Void> {
       return true;
    }
 
-   private boolean vmTemplateCloned() {
+   private boolean vmExists() {
       if (vcVm != null) {
          // here get VM instance once again, to make sure the VM is not deleted by other client by mistake
          vcVm = VcCache.getIgnoreMissing(vcVm.getId());
@@ -208,7 +208,7 @@ public class CreateVmSP implements Callable<Void> {
 
       HashMap<String, Disk.Operation> diskMap =
             new HashMap<String, Disk.Operation>();
-      if (vmTemplateCloned()) {
+      if (vmExists()) {
          // try to revert the VM to snapshot, to rollback wrong configuration
          VcSnapshot snapshot = vcVm.getSnapshotByName(Constants.ROOT_SNAPSTHOT_NAME);
          if (snapshot == null) {
@@ -220,7 +220,7 @@ public class CreateVmSP implements Callable<Void> {
             snapshot.revert();
          }
       }
-      if (!vmTemplateCloned()) {
+      if (!vmExists()) {
          if (requireClone()) {
             VcVirtualMachine.CreateSpec vmSpec =
                   new VcVirtualMachine.CreateSpec(newVmName, snap, targetRp,

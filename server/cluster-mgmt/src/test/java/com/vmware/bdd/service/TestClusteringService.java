@@ -20,7 +20,9 @@ import com.vmware.aurora.composition.NetworkSchema;
 import com.vmware.aurora.composition.NetworkSchema.Network;
 import com.vmware.aurora.composition.ResourceSchema;
 import com.vmware.aurora.composition.VmSchema;
+import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcDatacenter;
+import com.vmware.aurora.vc.VcObject;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NetworkAdd;
@@ -53,6 +55,7 @@ public class TestClusteringService {
       Mockit.setUpMock(MockTmScheduler.class);
       Mockit.setUpMock(MockVcResourceUtils.class);
       Mockit.setUpMock(MockVcVmUtil.class);
+      Mockit.setUpMock(MockVcCache.class);
    }
 
    @BeforeClass(groups = { "TestClusteringService" })
@@ -132,6 +135,7 @@ public class TestClusteringService {
       node.setCluster(spec);
       node.setNodeGroup(spec.getNodeGroup("master"));
       node.setTargetVcCluster("cluster-ws");
+      node.setVmMobId("test-vm");
       vNodes.add(node);
       // create vm schema
       VmSchema vmSchema = createVmSchema();
@@ -151,8 +155,12 @@ public class TestClusteringService {
 
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, true);
       MockTmScheduler.setFlag(VmOperation.CREATE_VM, false);
+      MockVcCache.setGetFlag(false);
 
       boolean success = service.reconfigVms(networkAdd, vNodes, null, null);
+      Assert.assertTrue(!success, "should get create vm failed.");
+      MockVcCache.setGetFlag(true);
+      success = service.reconfigVms(networkAdd, vNodes, null, null);
       Assert.assertTrue(!success, "should get create vm failed.");
    }
 

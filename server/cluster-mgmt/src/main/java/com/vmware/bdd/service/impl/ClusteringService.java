@@ -130,6 +130,7 @@ public class ClusteringService implements IClusteringService {
    private BaseNode templateNode;
    private String templateNetworkLabel;
    private static boolean initialized = false;
+   private int cloneConcurrency;
 
    public INetworkService getNetworkMgr() {
       return networkMgr;
@@ -209,7 +210,14 @@ public class ClusteringService implements IClusteringService {
          AuAssert.check(poolSize != null);
 
          Scheduler.init(Integer.parseInt(poolSize), Integer.parseInt(poolSize));
-         
+         String concurrency =
+            Configuration.getNonEmptyString("serengeti.singlevm.concurrency");
+         if (concurrency != null) {
+            cloneConcurrency = Integer.parseInt(concurrency);
+         } else {
+            cloneConcurrency = 1;
+         }
+
          CmsWorker.addPeriodic(new ClusterNodeUpdator(getClusterEntityMgr()));
          snapshotTemplateVM();
          loadTemplateNetworkLable();
@@ -839,7 +847,7 @@ public class ClusteringService implements IClusteringService {
       String clusterRpName = createVcResourcePools(vNodes);
       logger.info("syncCreateVMs, start to create VMs.");
       FastCloneService<BaseNode> cloneSrv = new FastCloneServiceImpl<BaseNode>();
-      cloneSrv.addResource(templateNode, 1);
+      cloneSrv.addResource(templateNode, cloneConcurrency);
       for (int i = 0; i < vNodes.size(); i++) {
          BaseNode vNode = vNodes.get(i);
          vNode.setTargetVcDs(getVcDatastore(vNode));
@@ -847,6 +855,7 @@ public class ClusteringService implements IClusteringService {
          vNode.setTargetVcFoler(folders.get(vNode.getGroupName()));
          vNode.setTargetVcHost(VcResourceUtils.findHost(vNode.getTargetHost()));
       }
+      cloneSrv.addConsumers(vNodes);
 
       try {
          UpdateVmProgressCallback callback =
