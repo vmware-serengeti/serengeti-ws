@@ -23,6 +23,9 @@ import com.vmware.aurora.composition.DiskSchema;
 import com.vmware.aurora.composition.DiskSchema.Disk;
 import com.vmware.aurora.composition.VmSchema;
 import com.vmware.aurora.vc.DiskSpec.AllocationType;
+import com.vmware.aurora.vc.VcDatastore;
+import com.vmware.aurora.vc.VcHost;
+import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
@@ -31,6 +34,7 @@ import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.util.PlacementUtil;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 public class BaseNode {
@@ -66,6 +70,12 @@ public class BaseNode {
    private String guestHostName;
    private NodeStatus nodeStatus;
    private String nodeAction;
+   
+   // this class becomes overloaded 
+   private VcDatastore targetVcDs;
+   private VcResourcePool targetVcRp;
+   private VcHost targetVcHost;
+   private Folder targetVcFolder;
 
    public BaseNode() {
       super();
@@ -351,6 +361,38 @@ public class BaseNode {
       diskSchema.setName("Disk Schema");
       diskSchema.setDisks(tmDisks);
       this.vmSchema.diskSchema = diskSchema;
+   }
+
+   public VcDatastore getTargetVcDs() {
+      return targetVcDs;
+   }
+
+   public void setTargetVcDs(VcDatastore targetVcDs) {
+      this.targetVcDs = targetVcDs;
+   }
+
+   public VcResourcePool getTargetVcRp() {
+      return targetVcRp;
+   }
+
+   public void setTargetVcRp(VcResourcePool targetVcRp) {
+      this.targetVcRp = targetVcRp;
+   }
+
+   public VcHost getTargetVcHost() {
+      return targetVcHost;
+   }
+
+   public void setTargetVcHost(VcHost targetVcHost) {
+      this.targetVcHost = targetVcHost;
+   }
+
+   public Folder getTargetVcFolder() {
+      return targetVcFolder;
+   }
+
+   public void setTargetVcFoler(Folder targetVcFolder) {
+      this.targetVcFolder = targetVcFolder;
    }
 
    @Override
