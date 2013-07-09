@@ -100,6 +100,7 @@ public class Constants {
    public static final String GPHD_VENDOR = "GPHD";
    public static final String HDP_VENDOR = "HDP";
    public static final String MAPR_VENDOR = "MAPR";
+   public static final String PHD_VENDOR = "PHD";
    public static final String CURRENT_DISTRO_CAN_NOT_SUPPORT_HDFS2 =
          "HA and federation feature can not be supported in current distro";
    public static final String CDH4_PATTERN = "4\\.[1-9]([0-9]){0,1}(\\.\\d){0,2}";

@@ -57,6 +57,8 @@ public class ClusterCreateTest {
       assertEquals(false, cluster.supportedWithHdfs2());
       cluster.setDistroVersion("4.2.0.2.3");
       assertEquals(false, cluster.supportedWithHdfs2());
+      cluster.setDistroVendor(Constants.PHD_VENDOR);
+      assertEquals(true, cluster.supportedWithHdfs2());
    }
 
    @Test

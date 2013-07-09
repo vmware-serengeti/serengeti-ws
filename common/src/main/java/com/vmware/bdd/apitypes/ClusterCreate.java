@@ -906,13 +906,16 @@ public class ClusterCreate implements Serializable {
       return false;
    }
 
-   // For HDFS2, at present, serengeti only support cdh4 of Cloudera.
+   // For HDFS2, at present, serengeti support cdh4 of Cloudera, and PHD.
    public boolean supportedWithHdfs2() {
       if (this.getDistroVendor().equalsIgnoreCase(Constants.CDH_VENDOR)) {
          Pattern pattern = Pattern.compile(Constants.CDH4_PATTERN);
          if (pattern.matcher(this.getDistroVersion()).matches()) {
             return true;
          }
+      }
+      if (this.getDistroVendor().equalsIgnoreCase(Constants.PHD_VENDOR)) {
+         return true;
       }
       return false;
    }
@@ -930,7 +933,7 @@ public class ClusterCreate implements Serializable {
 
    public void validateCDHVersion(List<String> warningMsgList) {
       // If current distro's version is greater than cdh4.2.1, the FQDN must be configured.
-      if (this.supportedWithHdfs2()
+      if (this.getDistroVendor().equalsIgnoreCase(Constants.CDH_VENDOR)
             && (compare(this.getDistroVersion(), "4.2.1") > 0)) {
          warningMsgList.add(Constants.MUST_CONFIGURE_FQDN);
       }
