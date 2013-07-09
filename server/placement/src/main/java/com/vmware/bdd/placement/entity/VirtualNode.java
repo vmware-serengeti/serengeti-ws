@@ -203,6 +203,12 @@ public class VirtualNode {
 
    @Override
    public String toString() {
-      return "VirtualNode nodes=\n" + nodes;
+      StringBuilder str = new StringBuilder();
+      str.append("VirtualNode nodes=\n");
+      for (BaseNode node : nodes) {
+         str.append(node.getDetailDesc() + "\n");
+      }
+
+      return str.toString();
    }
 }

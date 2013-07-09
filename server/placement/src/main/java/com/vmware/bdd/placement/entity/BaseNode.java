@@ -70,8 +70,9 @@ public class BaseNode {
    private String guestHostName;
    private NodeStatus nodeStatus;
    private String nodeAction;
-   
-   // this class becomes overloaded 
+
+   // this class becomes overloaded
+   private boolean linkedClone;
    private VcDatastore targetVcDs;
    private VcResourcePool targetVcRp;
    private VcHost targetVcHost;
@@ -80,7 +81,7 @@ public class BaseNode {
    public BaseNode() {
       super();
    }
-   
+
    public BaseNode(String vmName) {
       super();
       this.vmName = vmName;
@@ -273,7 +274,7 @@ public class BaseNode {
       return NodeGroupCreate.getDiskstoreNamePattern(this.cluster,
             this.nodeGroup);
    }
-   
+
    public String[] getImagestoreNamePattern() {
       AuAssert.check(this.nodeGroup != null
             && this.nodeGroup.getStorage() != null);
@@ -350,8 +351,7 @@ public class BaseNode {
                      PlacementUtil
                            .getNextValidParaVirtualScsiIndex(paraVirtualScsiIndex);
             }
-            tmDisk.allocationType =
-                  AllocationType.valueOf(disk.getAllocType());
+            tmDisk.allocationType = AllocationType.valueOf(disk.getAllocType());
             tmDisk.type = disk.getDiskType().getType();
             tmDisks.add(tmDisk);
          }
@@ -361,6 +361,14 @@ public class BaseNode {
       diskSchema.setName("Disk Schema");
       diskSchema.setDisks(tmDisks);
       this.vmSchema.diskSchema = diskSchema;
+   }
+
+   public boolean isLinkedClone() {
+      return linkedClone;
+   }
+
+   public void setLinkedClone(boolean linkedClone) {
+      this.linkedClone = linkedClone;
    }
 
    public VcDatastore getTargetVcDs() {
@@ -397,6 +405,10 @@ public class BaseNode {
 
    @Override
    public String toString() {
+      return this.vmName;
+   }
+   
+   public String getDetailDesc() {
       StringBuilder result = new StringBuilder();
       String newLine = System.getProperty("line.separator");
 
