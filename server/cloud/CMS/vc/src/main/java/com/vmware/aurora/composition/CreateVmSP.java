@@ -68,7 +68,7 @@ public class CreateVmSP implements Callable<Void> {
    final Folder vmFolder; /* optional */
    final VcHost host; /* optinal */
 
-   transient VcVirtualMachine vcVm = null;
+   private VcVirtualMachine vcVm = null;
 
    public CreateVmSP(String newVmName, VmSchema vmSchema,
          VcResourcePool targetRp, VcDatastore targetDs,
@@ -84,6 +84,24 @@ public class CreateVmSP implements Callable<Void> {
          Map<String, String> bootupConfigs, boolean linkedClone,
          Folder vmFolder, VcHost host) {
       this.newVmName = newVmName;
+      this.vmSchema = vmSchema;
+      this.targetRp = targetRp;
+      this.targetDs = targetDs;
+      this.prePowerOn = prePowerOn;
+      this.postPowerOn = postPowerOn;
+      this.bootupConfigs = bootupConfigs;
+      this.linkedClone = linkedClone;
+      this.vmFolder = vmFolder;
+      this.host = host;
+   }
+
+   public CreateVmSP(VcVirtualMachine vcVm, VmSchema vmSchema,
+         VcResourcePool targetRp, VcDatastore targetDs,
+         IPrePostPowerOn prePowerOn, IPrePostPowerOn postPowerOn,
+         Map<String, String> bootupConfigs, boolean linkedClone,
+         Folder vmFolder, VcHost host) {
+      this.vcVm = vcVm;
+      this.newVmName = vcVm.getName();
       this.vmSchema = vmSchema;
       this.targetRp = targetRp;
       this.targetDs = targetDs;
@@ -130,13 +148,13 @@ public class CreateVmSP implements Callable<Void> {
    private void copyParentVmSettings(VcVirtualMachine template,
          ConfigSpec configSpec) {
       configSpec.setName(newVmName);
-      
+
       // copy guest OS info
       configSpec.setGuestId(template.getConfig().getGuestId());
 
       // copy hardware version
       configSpec.setVersion(template.getConfig().getVersion());
-      
+
       // copy vApp config info
       VmConfigInfo configInfo = template.getConfig().getVAppConfig();
 
@@ -145,7 +163,7 @@ public class CreateVmSP implements Callable<Void> {
          // used customized template.
          return;
       }
-      
+
       VmConfigSpec vAppSpec = new VmConfigSpecImpl();
       vAppSpec.setOvfEnvironmentTransport(configInfo
             .getOvfEnvironmentTransport());

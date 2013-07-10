@@ -19,6 +19,7 @@ import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.vim.binding.vim.event.Event;
 import com.vmware.vim.binding.vim.event.EventEx;
+import com.vmware.vim.binding.vim.event.VmClonedEvent;
 import com.vmware.vim.binding.vim.event.VmEvent;
 import com.vmware.vim.binding.vim.event.VmPoweredOffEvent;
 import com.vmware.vim.binding.vim.event.VmPoweredOnEvent;
@@ -50,7 +51,8 @@ public class VcEventProcessor {
          VcEventType.VmAppHealthChanged,
          VcEventType.NotEnoughResourcesToStartVmEvent,
          VcEventType.VmMaxRestartCountReached,
-         VcEventType.VmFailoverFailed);
+         VcEventType.VmFailoverFailed,
+         VcEventType.VmCloned);
 
    public VcEventProcessor(final ClusterEntityManager clusterEntityMgr) {
       /* High level handler for external vm events. */
@@ -153,6 +155,22 @@ public class VcEventProcessor {
                            + vm.getName());
                      clusterEntityMgr.refreshNodeByVmName(moId, vm.getName(), 
                            Constants.NODE_ACTION_WAITING_IP, true);
+                  }
+                  break;
+               }
+               case VmCloned: {
+                  VmClonedEvent event = (VmClonedEvent)e;
+                  e.getVm();
+                  VcVirtualMachine vm = VcCache.getIgnoreMissing(event.getVm().getVm());
+                  if (vm == null) {
+                     return false;
+                  }
+                  vm.updateRuntime();
+                  if (clusterEntityMgr.getNodeByVmName(vm.getName()) != null) {
+                     logger.info("received internal vm cloned event for vm: "
+                           + vm.getName());
+                     clusterEntityMgr.refreshNodeByVmName(moId, vm.getName(), 
+                           Constants.NODE_ACTION_RECONFIGURE, true);
                   }
                   break;
                }

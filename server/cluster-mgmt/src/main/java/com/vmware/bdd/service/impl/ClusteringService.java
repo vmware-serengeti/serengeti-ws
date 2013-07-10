@@ -30,15 +30,12 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
-import com.google.gson.internal.Pair;
 import com.vmware.aurora.composition.CreateVMFolderSP;
-import com.vmware.aurora.composition.CreateVmSP;
 import com.vmware.aurora.composition.DeleteVMFolderSP;
 import com.vmware.aurora.composition.DiskSchema;
 import com.vmware.aurora.composition.DiskSchema.Disk;
 import com.vmware.aurora.composition.NetworkSchema.Network;
 import com.vmware.aurora.composition.VmSchema;
-import com.vmware.aurora.composition.compensation.CompensateCreateVmSP;
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.global.Configuration;
@@ -70,6 +67,11 @@ import com.vmware.bdd.entity.resmgmt.ResourceReservation;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.exception.VcProviderException;
+import com.vmware.bdd.fastclone.impl.AbstractFastCopierFactory;
+import com.vmware.bdd.fastclone.impl.CreateVmSpFactory;
+import com.vmware.bdd.fastclone.impl.FastCloneServiceImpl;
+import com.vmware.bdd.fastclone.impl.VmCreateSpec;
+import com.vmware.bdd.fastclone.intf.FastCloneService;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.placement.Container;
@@ -128,6 +130,7 @@ public class ClusteringService implements IClusteringService {
    private BaseNode templateNode;
    private String templateNetworkLabel;
    private static boolean initialized = false;
+   private int cloneConcurrency;
 
    public INetworkService getNetworkMgr() {
       return networkMgr;
@@ -196,12 +199,30 @@ public class ClusteringService implements IClusteringService {
          try {
             Thread.sleep(1000);
          } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.warn("interupted during sleep " + e.getMessage());
          }
          // add event handler for Serengeti after VC event handler is registered.
          new VcEventProcessor(getClusterEntityMgr());
-         Scheduler.init(50, 50);
+         String poolSize =
+               Configuration.getNonEmptyString("serengeti.scheduler.poolsize");
+
+         if (poolSize == null) {
+            Scheduler.init(Constants.DEFAULT_SCHEDULER_POOL_SIZE,
+                  Constants.DEFAULT_SCHEDULER_POOL_SIZE);
+         } else {
+            Scheduler.init(Integer.parseInt(poolSize),
+                  Integer.parseInt(poolSize));
+         }
+
+         String concurrency =
+               Configuration
+                     .getNonEmptyString("serengeti.singlevm.concurrency");
+         if (concurrency != null) {
+            cloneConcurrency = Integer.parseInt(concurrency);
+         } else {
+            cloneConcurrency = 1;
+         }
+
          CmsWorker.addPeriodic(new ClusterNodeUpdator(getClusterEntityMgr()));
          snapshotTemplateVM();
          loadTemplateNetworkLable();
@@ -462,10 +483,11 @@ public class ClusteringService implements IClusteringService {
             folderList.add(folderNames[i]);
          }
          CreateVMFolderSP sp =
-            new CreateVMFolderSP(templateVm.getDatacenter(), null,
-                  folderList);
+               new CreateVMFolderSP(templateVm.getDatacenter(), null,
+                     folderList);
          storeProcedures[0] = sp;
-         Map<String, Folder> folders = executeFolderCreationProcedures(cluster, storeProcedures);
+         Map<String, Folder> folders =
+               executeFolderCreationProcedures(cluster, storeProcedures);
          for (String name : folders.keySet()) {
             clusterFolder = folders.get(name);
             break;
@@ -730,85 +752,76 @@ public class ClusteringService implements IClusteringService {
          logger.info("No vm to be created.");
          return true;
       }
+      setNetworkSchema(vNodes);
+      allocateStaticIp(networkAdd, vNodes, occupiedIps);
       Map<String, Folder> folders = createVcFolders(vNodes.get(0).getCluster());
       String clusterRpName = createVcResourcePools(vNodes);
       logger.info("syncCreateVMs, start to create VMs.");
-      setNetworkSchema(vNodes);
-      allocateStaticIp(networkAdd, vNodes, occupiedIps);
-      Pair<Callable<Void>, Callable<Void>>[] storeProcedures =
-            new Pair[vNodes.size()];
-      for (int i = 0; i < vNodes.size(); i++) {
-         BaseNode vNode = vNodes.get(i);
+      FastCloneService<VmCreateSpec> cloneSrv =
+            new FastCloneServiceImpl<VmCreateSpec>();
+      // set copier factory
+      AbstractFastCopierFactory<VmCreateSpec> copierFactory =
+            new CreateVmSpFactory();
+      cloneSrv.setFastCopierFactory(copierFactory);
+      VmCreateSpec sourceSpec = new VmCreateSpec();
+      sourceSpec.setVmId(templateVm.getId());
+      sourceSpec.setVmName(templateVm.getName());
+      cloneSrv.addResource(sourceSpec, cloneConcurrency);
+      List<VmCreateSpec> specs = new ArrayList<VmCreateSpec>();
+      Map<String, BaseNode> nodeMap = new HashMap<String, BaseNode>();
+      for (BaseNode vNode : vNodes) {
+         // prepare for cloning result
+         nodeMap.put(vNode.getVmName(), vNode);
+         vNode.setSuccess(false);
+         vNode.setFinished(true);
+         // generate create spec for fast clone
+         VmCreateSpec spec = new VmCreateSpec();
          VmSchema createSchema = getVmSchema(vNode);
+         spec.setSchema(createSchema);
          Map<String, String> guestVariable =
                getNetworkGuestVariable(networkAdd, vNode.getIpAddress(),
                      vNode.getGuestHostName());
+         spec.setBootupConfigs(guestVariable);
          // timeout is 10 mintues
          QueryIpAddress query =
                new QueryIpAddress(Constants.VM_POWER_ON_WAITING_SEC);
-         CreateVmPrePowerOn prePowerOn = getPrePowerOnFunc(vNode);
-         CreateVmSP cloneVmSp =
-               new CreateVmSP(vNode.getVmName(), createSchema,
-                     getVcResourcePool(vNode, clusterRpName),
-                     getVcDatastore(vNode), prePowerOn, query, guestVariable,
-                     false, folders.get(vNode.getGroupName()),
-                     VcResourceUtils.findHost(vNode.getTargetHost()));
-         CompensateCreateVmSP deleteVmSp = new CompensateCreateVmSP(cloneVmSp);
-         storeProcedures[i] =
-               new Pair<Callable<Void>, Callable<Void>>(cloneVmSp, deleteVmSp);
+         spec.setPostPowerOn(query);
+         spec.setPrePowerOn(getPrePowerOnFunc(vNode));
+         spec.setLinkedClone(false);
+         spec.setTargetDs(getVcDatastore(vNode));
+         spec.setTargetFolder(folders.get(vNode.getGroupName()));
+         spec.setTargetHost(VcResourceUtils.findHost(vNode.getTargetHost()));
+         spec.setTargetRp(getVcResourcePool(vNode, clusterRpName));
+         spec.setVmName(vNode.getVmName());
+         specs.add(spec);
       }
+      cloneSrv.addConsumers(specs);
 
       try {
          UpdateVmProgressCallback callback =
                new UpdateVmProgressCallback(clusterEntityMgr, statusUpdator,
                      vNodes.get(0).getClusterName());
-         // execute store procedures to create VMs
-         logger.info("ClusteringService, start to create vms.");
-         Pair<ExecutionResult, ExecutionResult>[] result =
-               Scheduler
-                     .executeStoredProcedures(
-                           com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
-                           storeProcedures, storeProcedures.length, callback);
-         if (result == null) {
-            logger.error("No VM is created.");
-            return false;
-         }
+         cloneSrv.setProgressCallback(callback);
 
-         int total = 0;
-         boolean success = true;
-         List<BaseNode> failedNodes = new ArrayList<BaseNode>();
-         for (int i = 0; i < storeProcedures.length; i++) {
-            Pair<ExecutionResult, ExecutionResult> pair = result[i];
-            BaseNode vNode = vNodes.get(i);
-            CreateVmSP sp = (CreateVmSP) storeProcedures[i].first;
-            if (pair.first.finished && pair.first.throwable == null
-                  && pair.second.finished == false) {
-               ++total;
-               VcVirtualMachine vm = sp.getVM();
-               AuAssert.check(vm != null);
-               boolean vmSucc = VcVmUtil.setBaseNodeForVm(vNode, vm);
+         // call fast clone service to copy templates
+         logger.info("ClusteringService, start to cloning template.");
+         boolean success = cloneSrv.start();
+         logger.info(cloneSrv.getCopied().size() + " VMs are created.");
+         for (VmCreateSpec spec : cloneSrv.getCopied()) {
+            BaseNode node = nodeMap.get(spec.getVmName());
+            node.setVmMobId(spec.getVmId());
+            VcVirtualMachine vm = VcCache.getIgnoreMissing(spec.getVmId());
+            if (vm != null) {
+               boolean vmSucc = VcVmUtil.setBaseNodeForVm(node, vm);
                if (!vmSucc) {
                   success = vmSucc;
                }
-               //replace plan information with the one got from vm
-            } else if (pair.first.throwable != null) {
-               processException(pair.first.throwable);
-               logger.error("Failed to create VM " + vNode.getVmName(),
-                     pair.first.throwable);
-
-               vNode.setSuccess(false);
-               if (sp.getVM() != null) {
-                  vNode.setVmMobId(sp.getVM().getId());
-               }
-               failedNodes.add(vNode);
-               success = false;
             }
-            vNode.setFinished(true);
+            node.setSuccess(success);
          }
-         logger.info(total + " VMs are created.");
          return success;
       } catch (Exception e) {
-         logger.error("error in creating VMs", e);
+         logger.error("error in cloning VMs", e);
          throw BddException.INTERNAL(e, e.getMessage());
       }
    }
@@ -1124,8 +1137,8 @@ public class ClusteringService implements IClusteringService {
    public boolean removeBadNodes(ClusterCreate cluster,
          List<BaseNode> existingNodes, List<BaseNode> deletedNodes,
          Set<String> occupiedIps, StatusUpdater statusUpdator) {
-      logger.info("Start to remove node violate placement policy " +
-      		"or in wrong status in cluster: " + cluster.getName());
+      logger.info("Start to remove node violate placement policy "
+            + "or in wrong status in cluster: " + cluster.getName());
       // call tm to remove bad nodes
       List<BaseNode> badNodes =
             placementService.getBadNodes(cluster, existingNodes);

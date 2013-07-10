@@ -53,6 +53,7 @@ public class Constants {
    public static final String NODE_ACTION_CLONING_VM = "Cloning VM";
    public static final String NODE_ACTION_CLONING_FAILED = "Cloning VM failed";
    public static final String NODE_ACTION_WAITING_IP = "Waiting for ip";
+   public static final String NODE_ACTION_RECONFIGURE = "Reconfiging VM";
    public static final String NODE_ACTION_GET_IP_FAILED =
          "Failed to get VM ip address";
    public static final int VM_POWER_ON_WAITING_SEC = 600;
@@ -136,4 +137,9 @@ public class Constants {
          "elastic_runtime.automation.enable";
    public static final String MUST_CONFIGURE_FQDN = "CDH 4.2.1+ cluster deployed in a network without FQDN/IP resolution won't work.";
    public static final String CONVERTED_MEMORY_DIVISIBLE_BY_4 = "VM's memory must be divisible by 4. ";
+   
+   public static final String ROOT_SNAPSTHOT_NAME = "serengeti-snapshot";
+   public static final String ROOT_SNAPSTHOT_DESC = "Serengeti template Root Snapshot";
+   
+   public static final int DEFAULT_SCHEDULER_POOL_SIZE = 1024;
 }

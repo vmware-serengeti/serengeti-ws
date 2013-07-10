@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.vmware.bdd.entity.ClusterEntity;
 import mockit.Mockit;
 
 import org.apache.log4j.Logger;
@@ -21,12 +20,15 @@ import com.vmware.aurora.composition.NetworkSchema;
 import com.vmware.aurora.composition.NetworkSchema.Network;
 import com.vmware.aurora.composition.ResourceSchema;
 import com.vmware.aurora.composition.VmSchema;
+import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcDatacenter;
+import com.vmware.aurora.vc.VcObject;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.VcProviderException;
@@ -53,6 +55,7 @@ public class TestClusteringService {
       Mockit.setUpMock(MockTmScheduler.class);
       Mockit.setUpMock(MockVcResourceUtils.class);
       Mockit.setUpMock(MockVcVmUtil.class);
+      Mockit.setUpMock(MockVcCache.class);
    }
 
    @BeforeClass(groups = { "TestClusteringService" })
@@ -70,6 +73,10 @@ public class TestClusteringService {
       Field field = service.getClass().getDeclaredField("templateVm");
       field.setAccessible(true);
       field.set(service, vm);
+
+      field = service.getClass().getDeclaredField("cloneConcurrency");
+      field.setAccessible(true);
+      field.set(service, 2);
    }
 
    @Test(groups = { "TestClusteringService" })
@@ -93,6 +100,8 @@ public class TestClusteringService {
       BaseNode node = new BaseNode("test-master-0");
       ClusterCreate spec = createClusterSpec();
       node.setCluster(spec);
+      VmSchema vmSchema = createVmSchema();
+      node.setVmSchema(vmSchema);
       vNodes.add(node);
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, false);
       try {
@@ -111,6 +120,8 @@ public class TestClusteringService {
       BaseNode node = new BaseNode("test-master-0");
       ClusterCreate spec = createClusterSpec();
       node.setCluster(spec);
+      VmSchema vmSchema = createVmSchema();
+      node.setVmSchema(vmSchema);
       vNodes.add(node);
       MockTmScheduler.setResultIsNull(true);
       try {
@@ -132,6 +143,7 @@ public class TestClusteringService {
       node.setCluster(spec);
       node.setNodeGroup(spec.getNodeGroup("master"));
       node.setTargetVcCluster("cluster-ws");
+      node.setVmMobId("test-vm");
       vNodes.add(node);
       // create vm schema
       VmSchema vmSchema = createVmSchema();
@@ -151,8 +163,12 @@ public class TestClusteringService {
 
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, true);
       MockTmScheduler.setFlag(VmOperation.CREATE_VM, false);
+      MockVcCache.setGetFlag(false);
 
       boolean success = service.createVcVms(networkAdd, vNodes, null, null);
+      Assert.assertTrue(!success, "should get create vm failed.");
+      MockVcCache.setGetFlag(true);
+      success = service.createVcVms(networkAdd, vNodes, null, null);
       Assert.assertTrue(!success, "should get create vm failed.");
    }
 
@@ -213,6 +229,8 @@ public class TestClusteringService {
 
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, true);
       MockTmScheduler.setFlag(VmOperation.CREATE_VM, true);
+      MockVcCache.setGetFlag(true);
+      
       boolean success = service.createVcVms(networkAdd, vNodes, null, null);
       Assert.assertTrue(success, "should get create vm success.");
    }

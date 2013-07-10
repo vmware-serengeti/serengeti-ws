@@ -23,6 +23,9 @@ import com.vmware.aurora.composition.DiskSchema;
 import com.vmware.aurora.composition.DiskSchema.Disk;
 import com.vmware.aurora.composition.VmSchema;
 import com.vmware.aurora.vc.DiskSpec.AllocationType;
+import com.vmware.aurora.vc.VcDatastore;
+import com.vmware.aurora.vc.VcHost;
+import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
@@ -31,6 +34,7 @@ import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.util.PlacementUtil;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 public class BaseNode {
@@ -67,10 +71,17 @@ public class BaseNode {
    private NodeStatus nodeStatus;
    private String nodeAction;
 
+   // this class becomes overloaded
+   private boolean linkedClone;
+   transient private VcDatastore targetVcDs;
+   transient private VcResourcePool targetVcRp;
+   transient private VcHost targetVcHost;
+   transient private Folder targetVcFolder;
+
    public BaseNode() {
       super();
    }
-   
+
    public BaseNode(String vmName) {
       super();
       this.vmName = vmName;
@@ -263,7 +274,7 @@ public class BaseNode {
       return NodeGroupCreate.getDiskstoreNamePattern(this.cluster,
             this.nodeGroup);
    }
-   
+
    public String[] getImagestoreNamePattern() {
       AuAssert.check(this.nodeGroup != null
             && this.nodeGroup.getStorage() != null);
@@ -340,8 +351,7 @@ public class BaseNode {
                      PlacementUtil
                            .getNextValidParaVirtualScsiIndex(paraVirtualScsiIndex);
             }
-            tmDisk.allocationType =
-                  AllocationType.valueOf(disk.getAllocType());
+            tmDisk.allocationType = AllocationType.valueOf(disk.getAllocType());
             tmDisk.type = disk.getDiskType().getType();
             tmDisks.add(tmDisk);
          }
@@ -353,8 +363,52 @@ public class BaseNode {
       this.vmSchema.diskSchema = diskSchema;
    }
 
+   public boolean isLinkedClone() {
+      return linkedClone;
+   }
+
+   public void setLinkedClone(boolean linkedClone) {
+      this.linkedClone = linkedClone;
+   }
+
+   public VcDatastore getTargetVcDs() {
+      return targetVcDs;
+   }
+
+   public void setTargetVcDs(VcDatastore targetVcDs) {
+      this.targetVcDs = targetVcDs;
+   }
+
+   public VcResourcePool getTargetVcRp() {
+      return targetVcRp;
+   }
+
+   public void setTargetVcRp(VcResourcePool targetVcRp) {
+      this.targetVcRp = targetVcRp;
+   }
+
+   public VcHost getTargetVcHost() {
+      return targetVcHost;
+   }
+
+   public void setTargetVcHost(VcHost targetVcHost) {
+      this.targetVcHost = targetVcHost;
+   }
+
+   public Folder getTargetVcFolder() {
+      return targetVcFolder;
+   }
+
+   public void setTargetVcFoler(Folder targetVcFolder) {
+      this.targetVcFolder = targetVcFolder;
+   }
+
    @Override
    public String toString() {
+      return this.vmName;
+   }
+   
+   public String getDetailDesc() {
       StringBuilder result = new StringBuilder();
       String newLine = System.getProperty("line.separator");
 

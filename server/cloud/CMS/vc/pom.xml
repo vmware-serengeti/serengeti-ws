@@ -76,6 +76,11 @@
          <version>${aurora.version}</version>
       </dependency>
       <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>commons-serengeti</artifactId>
+         <version>${serengeti.version}</version>
+      </dependency>
+      <dependency>
          <groupId>org.testng</groupId>
          <artifactId>testng</artifactId>
          <scope>test</scope>

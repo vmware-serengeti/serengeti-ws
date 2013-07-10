@@ -17,11 +17,12 @@ package com.vmware.bdd.service.job;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
-import com.vmware.bdd.utils.AuAssert;
+
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.service.resmgmt.INetworkService;
+import com.vmware.bdd.utils.AuAssert;
 
 public class DeleteClusterNodeStep extends TrackableTasklet {
    private static final Logger logger = Logger

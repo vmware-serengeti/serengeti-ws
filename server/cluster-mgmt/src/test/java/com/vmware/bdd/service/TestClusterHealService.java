@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import junit.framework.Assert;
-
 import mockit.Mock;
 import mockit.MockClass;
 import mockit.Mockit;

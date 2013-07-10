@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import junit.framework.Assert;
-
 import mockit.Mock;
 import mockit.MockClass;
 import mockit.Mockit;
@@ -26,7 +25,6 @@ import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
-import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.service.impl.ScaleService;
 import com.vmware.bdd.service.utils.VcResourceUtils;
