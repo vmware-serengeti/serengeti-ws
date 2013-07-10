@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * Keep <rack_name, hosts> pair
- *
+ * 
  */
 public class RackInfo {
    private String name;

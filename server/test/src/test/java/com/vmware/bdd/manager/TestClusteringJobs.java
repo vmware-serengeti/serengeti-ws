@@ -196,7 +196,7 @@ public class TestClusteringJobs extends
          specs.add(dsSpec);
       }
       try {
-         dsSvc.addDataStores(TEST_DATASTORE_NAME, datastoreType, specs);
+         dsSvc.addDatastores(TEST_DATASTORE_NAME, datastoreType, specs);
       } catch (Exception e) {
          logger.error("ignore create datastore exception. ", e);
       }

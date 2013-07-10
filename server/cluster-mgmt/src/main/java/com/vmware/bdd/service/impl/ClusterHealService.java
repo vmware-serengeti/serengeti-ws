@@ -133,8 +133,9 @@ public class ClusterHealService implements IClusterHealService {
          ClusterCreate spec, String groupName) {
       NodeGroupCreate groupSpec = spec.getNodeGroup(groupName);
       // get the datastore name pattern the node group can use
+      // TODO: system datastore for system disk
       String[] datastoreNamePatterns =
-            NodeGroupCreate.getDatastoreNamePattern(spec, groupSpec);
+            NodeGroupCreate.getDiskstoreNamePattern(spec, groupSpec);
 
       List<VcDatastore> candidates = new ArrayList<VcDatastore>();
       for (VcDatastore ds : targetHost.getDatastores()) {

@@ -132,8 +132,10 @@ public class ScaleService implements IScaleService {
 
       // else find a valid datastore with largest free space
       VcHost locateHost = VcResourceUtils.findHost(node.getHostName());
+      
+      // swap disk should use image store pattern
       String[] dsNamePatterns =
-            NodeGroupCreate.getDatastoreNamePattern(clusterSpec, ngSpec);
+            NodeGroupCreate.getImagestoreNamePattern(clusterSpec, ngSpec);
       VcDatastore targetDs = null;
       for (VcDatastore ds : locateHost.getDatastores()) {
          if (!ds.isAccessible()) {

@@ -41,7 +41,7 @@ public class RpCommandsTest extends MockRestServer {
    public void testCreateRp() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/resourcepools", HttpMethod.POST,
+            "https://127.0.0.1:8443/serengeti/api/resourcepools", HttpMethod.POST,
             HttpStatus.NO_CONTENT, "");
 
       rpCommands.addResourcePool("rp01", "vc_rp1", "vc_cluster1");
@@ -56,7 +56,7 @@ public class RpCommandsTest extends MockRestServer {
       ObjectMapper mapper = new ObjectMapper();
 
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/resourcepools", HttpMethod.POST,
+            "https://127.0.0.1:8443/serengeti/api/resourcepools", HttpMethod.POST,
             HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
 
       rpCommands.addResourcePool("rp01", "vc_rp1", "vc_cluster1");
@@ -67,7 +67,7 @@ public class RpCommandsTest extends MockRestServer {
    public void testDeleteRp() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/resourcepool/rp01", HttpMethod.DELETE,
+            "https://127.0.0.1:8443/serengeti/api/resourcepool/rp01", HttpMethod.DELETE,
             HttpStatus.NO_CONTENT, "");
 
       rpCommands.deleteResourcePool("rp01");
@@ -82,7 +82,7 @@ public class RpCommandsTest extends MockRestServer {
       ObjectMapper mapper = new ObjectMapper();
 
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/resourcepool/rp01", HttpMethod.DELETE,
+            "https://127.0.0.1:8443/serengeti/api/resourcepool/rp01", HttpMethod.DELETE,
             HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
       rpCommands.deleteResourcePool("rp01");
@@ -121,7 +121,7 @@ public class RpCommandsTest extends MockRestServer {
       rp.setNodes(nodes);
       
       ObjectMapper mapper = new ObjectMapper();
-      this.buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/resourcepool/test01",
+      this.buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/resourcepool/test01",
             HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(rp));
     
       rpCommands.getResourcePool("test01", true);
@@ -167,7 +167,7 @@ public class RpCommandsTest extends MockRestServer {
 
       ResourcePoolRead[] rps = { rp01, rp02 };
       ObjectMapper mapper = new ObjectMapper();
-      this.buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/resourcepools",
+      this.buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/resourcepools",
             HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(rps));
     
       rpCommands.getResourcePool(null, true);
@@ -181,7 +181,7 @@ public class RpCommandsTest extends MockRestServer {
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
 
-      this.buildReqRespWithoutReqBody("http://127.0.0.1:8080/serengeti/api/resourcepool/rp1",
+      this.buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/resourcepool/rp1",
             HttpMethod.GET, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
       rpCommands.getResourcePool("rp1", true);

@@ -104,6 +104,8 @@ create table node_group (
    storage_type           varchar(255),
    storage_size           integer,
    vc_datastore_names     text,
+   sd_datastore_names     text,
+   dd_datastore_names     text,
    vc_rp_names            text,
    group_racks            text,
    configuration          text,

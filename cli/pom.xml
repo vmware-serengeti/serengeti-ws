@@ -18,7 +18,7 @@
    </parent>
 
    <properties>
-      <spring.shell.version>1.0.0.M2</spring.shell.version>
+      <spring.shell.version>1.0.0.RELEASE</spring.shell.version>
       <jar.mainclass>org.springframework.shell.Bootstrap</jar.mainclass>
       <antlr.version>3.4</antlr.version>
    </properties>
@@ -32,11 +32,6 @@
          <groupId>org.springframework</groupId>
          <artifactId>spring-test</artifactId>
          <version>${spring.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework</groupId>
-         <artifactId>spring-test-mvc</artifactId>
-         <version>1.0.0.M1</version>
       </dependency>
       <dependency>
          <groupId>com.vmware.bdd.impala.plugin.hdfs</groupId>
@@ -135,16 +130,10 @@
          </plugin>
       </plugins>
    </build>
-
    <repositories>
-      <repository>
-         <id>spring-maven-snapshot</id>
-         <snapshots>
-            <enabled>true</enabled>
-            <updatePolicy>never</updatePolicy>
-         </snapshots>
-         <name>Springframework Maven SNAPSHOT Repository</name>
-         <url>http://repo.springsource.org/libs-snapshot</url>
-      </repository>
+   	<repository>
+		<id>spring-release</id>
+		<url>http://repo.springsource.org/libs-release/</url>
+	</repository>
    </repositories>
 </project>

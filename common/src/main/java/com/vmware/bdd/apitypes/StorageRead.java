@@ -16,9 +16,6 @@ package com.vmware.bdd.apitypes;
 
 import java.util.List;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 /**
  * Storage get output
  */
@@ -69,25 +66,28 @@ public class StorageRead {
       }
    }
 
-   @Expose
    private String type;
 
-   @Expose
    private Priority shares;
 
-   @Expose
-   @SerializedName("size")
    private int sizeGB;
 
    private List<String> dsNames;
+   
+   private List<String> dsNames4System;
+   
+   private List<String> dsNames4Data;
+   
+   // internal used, data disk store name patterns
+   private List<String> diskstoreNamePattern;
 
-   @Expose
-   @SerializedName("name_pattern")
-   private List<String> namePattern;
+   // internal used, system disk store name patterns
+   private List<String> imagestoreNamePattern;
 
-   @SerializedName("split_policy")
    private DiskSplitPolicy splitPolicy;
+
    private DiskScsiControllerType controllerType;
+
    private String allocType;
 
    public List<String> getDsNames() {
@@ -98,12 +98,36 @@ public class StorageRead {
       this.dsNames = dsNames;
    }
 
-   public List<String> getNamePattern() {
-      return namePattern;
+   public List<String> getDsNames4System() {
+      return dsNames4System;
    }
 
-   public void setNamePattern(List<String> namePattern) {
-      this.namePattern = namePattern;
+   public void setDsNames4System(List<String> dsNames4System) {
+      this.dsNames4System = dsNames4System;
+   }
+
+   public List<String> getDsNames4Data() {
+      return dsNames4Data;
+   }
+
+   public void setDsNames4Data(List<String> dsNames4Data) {
+      this.dsNames4Data = dsNames4Data;
+   }
+
+   public List<String> getDiskstoreNamePattern() {
+      return diskstoreNamePattern;
+   }
+
+   public void setDiskstoreNamePattern(List<String> diskstoreNamePattern) {
+      this.diskstoreNamePattern = diskstoreNamePattern;
+   }
+
+   public List<String> getImagestoreNamePattern() {
+      return imagestoreNamePattern;
+   }
+
+   public void setImagestoreNamePattern(List<String> imagestoreNamePattern) {
+      this.imagestoreNamePattern = imagestoreNamePattern;
    }
 
    public String getType() {

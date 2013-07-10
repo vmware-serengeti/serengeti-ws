@@ -143,10 +143,22 @@ public class CreateVmSP implements Callable<Void> {
    private void copyParentVmSettings(VcVirtualMachine template,
          ConfigSpec configSpec) {
       configSpec.setName(newVmName);
+      
+      // copy guest OS info
+      configSpec.setGuestId(template.getConfig().getGuestId());
 
+      // copy hardware version
+      configSpec.setVersion(template.getConfig().getVersion());
+      
       // copy vApp config info
       VmConfigInfo configInfo = template.getConfig().getVAppConfig();
 
+      if (configInfo == null) {
+         // the parent vm does not have vApp option enabled. This is possible when user
+         // used customized template.
+         return;
+      }
+      
       VmConfigSpec vAppSpec = new VmConfigSpecImpl();
       vAppSpec.setOvfEnvironmentTransport(configInfo
             .getOvfEnvironmentTransport());
@@ -163,10 +175,6 @@ public class CreateVmSP implements Callable<Void> {
             .size()]));
 
       configSpec.setVAppConfig(vAppSpec);
-      configSpec.setGuestId(template.getConfig().getGuestId());
-
-      // copy hardware version
-      configSpec.setVersion(template.getConfig().getVersion());
    }
 
    public void callInternal() throws Exception {

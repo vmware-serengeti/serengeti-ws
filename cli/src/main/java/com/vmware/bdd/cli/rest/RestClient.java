@@ -18,12 +18,25 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.log4j.Logger;
 import org.fusesource.jansi.AnsiConsole;
@@ -58,6 +71,10 @@ public class RestClient {
    @Autowired
    private RestTemplate client;
 
+   static {
+      trustSSLCertificate();
+   }
+
    private RestClient() {
       hostUri = getHostUriProperty();
    }
@@ -77,9 +94,9 @@ public class RestClient {
          if (hostProperties != null
                && hostProperties.get(Constants.PROPERTY_HOST) != null) {
             hostUri =
-                  Constants.HTTP_CONNECTION_PREFIX
+                  Constants.HTTPS_CONNECTION_PREFIX
                         + (String) hostProperties.get(Constants.PROPERTY_HOST)
-                        + Constants.HTTP_CONNECTION_LOGIN_SUFFIX;
+                        + Constants.HTTPS_CONNECTION_LOGIN_SUFFIX;
          }
       } catch (Exception e) {//not set yet; or read io error
       } finally {
@@ -110,8 +127,8 @@ public class RestClient {
       String oldHostUri = hostUri;
 
       hostUri =
-            Constants.HTTP_CONNECTION_PREFIX + host
-                  + Constants.HTTP_CONNECTION_LOGIN_SUFFIX;
+            Constants.HTTPS_CONNECTION_PREFIX + host
+                  + Constants.HTTPS_CONNECTION_LOGIN_SUFFIX;
 
       try {
          ResponseEntity<String> response =
@@ -199,7 +216,7 @@ public class RestClient {
          final String id, final Class<T> respEntityType,
          final boolean hasDetailQueryString) {
       String targetUri =
-            hostUri + Constants.HTTP_CONNECTION_API + path + "/" + id;
+            hostUri + Constants.HTTPS_CONNECTION_API + path + "/" + id;
       if (hasDetailQueryString) {
          targetUri += Constants.QUERY_DETAIL;
       }
@@ -208,7 +225,7 @@ public class RestClient {
 
    private <T> ResponseEntity<T> restGet(final String path,
          final Class<T> respEntityType, final boolean hasDetailQueryString) {
-      String targetUri = hostUri + Constants.HTTP_CONNECTION_API + path;
+      String targetUri = hostUri + Constants.HTTPS_CONNECTION_API + path;
       if (hasDetailQueryString) {
          targetUri += Constants.QUERY_DETAIL;
       }
@@ -329,7 +346,7 @@ public class RestClient {
    }
 
    private ResponseEntity<String> restPost(String path, Object entity) {
-      String targetUri = hostUri + Constants.HTTP_CONNECTION_API + path;
+      String targetUri = hostUri + Constants.HTTPS_CONNECTION_API + path;
 
       HttpHeaders headers = buildHeaders();
       HttpEntity<Object> postEntity = new HttpEntity<Object>(entity, headers);
@@ -575,7 +592,7 @@ public class RestClient {
 
    private ResponseEntity<String> restDelete(String path, String id) {
       String targetUri =
-            hostUri + Constants.HTTP_CONNECTION_API + path + "/" + id;
+            hostUri + Constants.HTTPS_CONNECTION_API + path + "/" + id;
 
       HttpHeaders headers = buildHeaders();
       HttpEntity<String> entity = new HttpEntity<String>(headers);
@@ -629,7 +646,7 @@ public class RestClient {
    private ResponseEntity<String> restActionOps(String path, String id,
          Map<String, String> queryStrings) {
       String targetUri =
-            hostUri + Constants.HTTP_CONNECTION_API + path + "/" + id;
+            hostUri + Constants.HTTPS_CONNECTION_API + path + "/" + id;
       if (queryStrings != null) {
          targetUri = targetUri + buildQueryStrings(queryStrings);
       }
@@ -699,7 +716,7 @@ public class RestClient {
    }
 
    private ResponseEntity<String> restUpdate(String path, Object entityName) {
-      String targetUri = hostUri + Constants.HTTP_CONNECTION_API + path;
+      String targetUri = hostUri + Constants.HTTPS_CONNECTION_API + path;
 
       HttpHeaders headers = buildHeaders();
       HttpEntity<Object> entity = new HttpEntity<Object>(entityName, headers);
@@ -716,4 +733,41 @@ public class RestClient {
       return true;
    }
 
+   /*
+    * trust any SSL Certificate
+    */
+   private static void trustSSLCertificate() {
+      try {
+         SSLContext ctx = SSLContext.getInstance("SSL");
+         ctx.init(new KeyManager[0],
+               new TrustManager[] { new DefaultTrustManager() },
+               new SecureRandom());
+         SSLContext.setDefault(ctx);
+         HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+            @Override
+            public boolean verify(String string, SSLSession ssls) {
+               return true;
+            }
+         });
+      } catch (KeyManagementException e) {
+         System.out.println("SSL Certificate error: " + e.getMessage());
+      } catch (NoSuchAlgorithmException e) {
+         System.out.println("SSL Algorithm error: " + e.getMessage());
+      }
+   }
+
+   private static class DefaultTrustManager implements X509TrustManager {
+      @Override
+      public void checkClientTrusted(X509Certificate[] arg0, String arg1)
+            throws CertificateException {
+      }
+      @Override
+      public void checkServerTrusted(X509Certificate[] arg0, String arg1)
+            throws CertificateException {
+      }
+      @Override
+      public X509Certificate[] getAcceptedIssuers() {
+         return null;
+      }
+   }
 }

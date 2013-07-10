@@ -325,8 +325,8 @@ public class ClusterManager {
       spec.setVcClusters(null);
       spec.setTemplateId(null);
       spec.setDistroMap(null);
-      spec.setSharedPattern(null);
-      spec.setLocalPattern(null);
+      spec.setSharedDatastorePattern(null);
+      spec.setLocalDatastorePattern(null);
       spec.setNetworking(null);
       spec.setRpNames(null);
       spec.setDsNames(null);
@@ -347,7 +347,8 @@ public class ClusterManager {
             group.setGroupType(null);
             group.setRpNames(null);
             group.getStorage().setDsNames(null);
-            group.getStorage().setNamePattern(null);
+            group.getStorage().setImagestoreNamePattern(null);
+            group.getStorage().setDiskstoreNamePattern(null);
             group.setVmFolderPath(null);
             group.getStorage().setSplitPolicy(null);
             group.getStorage().setControllerType(null);
@@ -498,7 +499,7 @@ public class ClusterManager {
       if (specifiedDsNames == null || specifiedDsNames.isEmpty()) {
          specifiedDsNames = new ArrayList<String>();
          specifiedDsNames.addAll(clusterConfigMgr.getDatastoreMgr()
-               .getAllDataStoreName());
+               .getAllDatastoreNames());
       }
       return specifiedDsNames;
    }
@@ -907,7 +908,7 @@ public class ClusterManager {
       }
 
       if (activeComputeNodeNum != null) {
-         if (activeComputeNodeNum != cluster.getVhmTargetNum()) {
+         if (!activeComputeNodeNum.equals(cluster.getVhmTargetNum())) {
             cluster.setVhmTargetNum(activeComputeNodeNum);
          }
       }
@@ -969,10 +970,6 @@ public class ClusterManager {
          throw ClusterManagerException
                .SET_MANUAL_ELASTICITY_NOT_ALLOWED_ERROR(msg);
       }
-
-      List<String> nodeGroupNames =
-            syncSetParam(clusterName, activeComputeNodeNum, minComputeNodeNum,
-                  enableAuto, ioPriority);
 
       // find hadoop job tracker ip
       List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();

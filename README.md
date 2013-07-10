@@ -40,14 +40,14 @@ Serengeti Web Service provides a RESTful API for resources managment and hadoop 
 <tr><td>GET</td><td>/distros</td><td>void</td><td>List of DistroRead</td><td>List all distros</td></tr>
 <tr><td>GET</td><td>/distro/{distroName}</td><td>distroName</td><td>DistroRead</td><td>Get a distro by name</td></tr>
 </table>
-Note: The url of all REST APIs is prefixed with http://hostname:8080/serengeti .
+Note: The url of all REST APIs is prefixed with https://hostname:8443/serengeti/api .
 
 ### Authentication
 Spring security In-Memory Authentication is used for Serengeti Authentication and user management.
 
 We don't provide html or JSPs for login, instead, the Spring default standard URL is used.
 User needs to set j_username and j_password and then POST login information to URL /serengeti/j_spring_security_check for authentication,
-e.g. send POST to http://localhost:8080/serengeti/j_spring_security_check?j_username=serengeti&j_password=password .
+e.g. send POST to https://localhost:8443/serengeti/j_spring_security_check?j_username=serengeti&j_password=password .
 
 Navigate to URL /serengeti/j_spring_security_logout means logout, and the session will be removed from server side.
 #### Session timeout

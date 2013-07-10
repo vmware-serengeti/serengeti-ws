@@ -72,7 +72,7 @@ public class Configuration {
            logger.info("Failed to load cms transient configuration file.");
         }
 
-        boolean devel = BuildInfo.getInstance().isDevel();
+        //boolean devel = BuildInfo.getInstance().isDevel();
         // XXX : TODO devel is set to false, even if isDevel itself returns true - need to debug why
         // Change to if (true) for now
         if (true) {

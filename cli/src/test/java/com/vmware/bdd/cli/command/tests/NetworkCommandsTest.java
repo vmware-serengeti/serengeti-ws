@@ -136,7 +136,7 @@ public class NetworkCommandsTest extends MockRestServer {
    public void testAddNetwork() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.POST,
+            "https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.POST,
             HttpStatus.NO_CONTENT, "");
       networkCommands.addNetwork("name", "portGroup", false, "192.168.0.12",
             "192.168.0.13", "192.168.0.1,192.167.0.4-100", "192.168.1.1",
@@ -152,7 +152,7 @@ public class NetworkCommandsTest extends MockRestServer {
       ObjectMapper mapper = new ObjectMapper();
       
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/networks", HttpMethod.POST,
+            "https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.POST,
             HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
       
       networkCommands.addNetwork("name", "portGroup", false, "192.168.0.12",
@@ -165,7 +165,7 @@ public class NetworkCommandsTest extends MockRestServer {
    public void testDeleteNetwork() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/network/name",
+            "https://127.0.0.1:8443/serengeti/api/network/name",
             HttpMethod.DELETE, HttpStatus.NO_CONTENT, "");
       networkCommands.deleteNetwork("name");
       CookieCache.clear();
@@ -179,7 +179,7 @@ public class NetworkCommandsTest extends MockRestServer {
       ObjectMapper mapper = new ObjectMapper();
       
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/network/name",
+            "https://127.0.0.1:8443/serengeti/api/network/name",
             HttpMethod.DELETE, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
       networkCommands.deleteNetwork("name");
       CookieCache.clear();
@@ -266,13 +266,13 @@ public class NetworkCommandsTest extends MockRestServer {
       try {
          if (detail) {
             buildReqRespWithoutReqBody(
-                  "http://127.0.0.1:8080/serengeti/api/networks?details=true",
+                  "https://127.0.0.1:8443/serengeti/api/networks?details=true",
                   HttpMethod.GET, HttpStatus.OK,
                   mapper.writeValueAsString(networks));
             networkCommands.getNetwork(null, detail);
          } else {
             buildReqRespWithoutReqBody(
-                  "http://127.0.0.1:8080/serengeti/api/networks",
+                  "https://127.0.0.1:8443/serengeti/api/networks",
                   HttpMethod.GET, HttpStatus.OK,
                   mapper.writeValueAsString(networks));
             networkCommands.getNetwork(null, detail);
@@ -289,13 +289,13 @@ public class NetworkCommandsTest extends MockRestServer {
       try {
          if (detail) {
             buildReqRespWithoutReqBody(
-                  "http://127.0.0.1:8080/serengeti/api/network/name1?details=true",
+                  "https://127.0.0.1:8443/serengeti/api/network/name1?details=true",
                   HttpMethod.GET, HttpStatus.OK,
                   mapper.writeValueAsString(network));
             networkCommands.getNetwork("name1", detail);
          } else {
             buildReqRespWithoutReqBody(
-                  "http://127.0.0.1:8080/serengeti/api/network/name1",
+                  "https://127.0.0.1:8443/serengeti/api/network/name1",
                   HttpMethod.GET, HttpStatus.OK,
                   mapper.writeValueAsString(network));
             networkCommands.getNetwork("name1", detail);
@@ -314,7 +314,7 @@ public class NetworkCommandsTest extends MockRestServer {
       ObjectMapper mapper = new ObjectMapper();
 
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/api/network/name1", HttpMethod.GET,
+            "https://127.0.0.1:8443/serengeti/api/network/name1", HttpMethod.GET,
             HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
       networkCommands.getNetwork("name1", false);
       CookieCache.clear();

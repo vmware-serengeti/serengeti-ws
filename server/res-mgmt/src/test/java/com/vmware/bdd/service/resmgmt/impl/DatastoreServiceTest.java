@@ -75,7 +75,7 @@ public class DatastoreServiceTest extends BaseResourceTest {
       datastoreSvc.setResService(resService);
       List<String> dsSpec = new ArrayList<String>();
       dsSpec.add("datastore");
-      datastoreSvc.addDataStores("testDS", DatastoreType.SHARED, dsSpec);
+      datastoreSvc.addDatastores("testDS", DatastoreType.SHARED, dsSpec);
 
       new Verifications() {
          {
@@ -137,7 +137,7 @@ public class DatastoreServiceTest extends BaseResourceTest {
          }
       };
       datastoreSvc.setDsDao(dsDao);
-      Set<String> names = datastoreSvc.getAllDataStoreName();
+      Set<String> names = datastoreSvc.getAllDatastoreNames();
       Assert.assertNotNull(names);
       Assert.assertEquals(names.size(), 1);
    }

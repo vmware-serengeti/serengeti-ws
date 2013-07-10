@@ -505,7 +505,8 @@ public class PlacementPlanner implements IPlacementPlanner {
       List<DiskSpec> result = new ArrayList<DiskSpec>();
 
       Collections.sort(disks, Collections.reverseOrder());
-      Collections.sort(datastores, Collections.reverseOrder());
+      // balance the datastore usage among multiple calls
+      Collections.shuffle(datastores);
 
       for (DiskSpec disk : disks) {
          int i = 0;
@@ -677,9 +678,14 @@ public class PlacementPlanner implements IPlacementPlanner {
       for (BaseNode node : vNode.getBaseNodes()) {
          List<DiskSpec> disks;
 
-         List<AbstractDatastore> datastores =
-               clonedHost.getDatastores(node.getDatastoreNamePattern());
+         List<AbstractDatastore> imagestores =
+               clonedHost.getDatastores(node.getImagestoreNamePattern());
 
+         List<AbstractDatastore> diskstores =
+               clonedHost.getDatastores(node.getDiskstoreNamePattern());
+
+         // system and swap disk
+         List<DiskSpec> systemDisks = new ArrayList<DiskSpec>();
          // un-separable disks
          List<DiskSpec> unseprable = new ArrayList<DiskSpec>();
          // separable disks
@@ -706,21 +712,31 @@ public class PlacementPlanner implements IPlacementPlanner {
          node.getDisks().removeAll(removed);
 
          for (DiskSpec disk : node.getDisks()) {
-            if (disk.isSeparable()) {
-               separable.add(disk);
+            if (DiskType.DATA_DISK == disk.getDiskType()) {
+               if (disk.isSeparable()) {
+                  separable.add(disk);
+               } else {
+                  unseprable.add(disk);
+               }
             } else {
-               unseprable.add(disk);
+               systemDisks.add(disk);
             }
          }
 
+         // place system disks first
+         disks = placeUnSeparableDisks(systemDisks, imagestores);
+
          // place un-separable disks
-         disks = placeUnSeparableDisks(unseprable, datastores);
+         List<DiskSpec> subDisks =
+               placeUnSeparableDisks(unseprable, diskstores);
          if (disks == null) {
             return false;
+         } else {
+            disks.addAll(subDisks);
          }
 
          // place separable disks
-         List<DiskSpec> subDisks = placeSeparableDisks(separable, datastores);
+         subDisks = placeSeparableDisks(separable, diskstores);
          if (subDisks == null) {
             return false;
          } else {

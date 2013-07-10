@@ -237,7 +237,7 @@ public class ClusterConfigManager {
                   cluster.getConfiguration(), cluster.isValidateConfig());
             clusterEntity.setHadoopConfig((new Gson()).toJson(cluster
                   .getConfiguration()));
-            
+
             updateVhmJobTrackerPort(cluster, clusterEntity);
          }
 
@@ -281,7 +281,7 @@ public class ClusterConfigManager {
          throw BddException.ALREADY_EXISTS(ex, "cluster", name);
       }
    }
-   
+
    private void updateVhmJobTrackerPort(ClusterCreate cluster,
          ClusterEntity clusterEntity) {
       if (cluster.getConfiguration().containsKey("hadoop")) {
@@ -621,14 +621,18 @@ public class ClusterConfigManager {
             }
          }
          groupEntity.setVcDatastoreNameList(group.getStorage().getDsNames());
+         groupEntity.setSdDatastoreNameList(group.getStorage()
+               .getDsNames4System());
+         groupEntity.setDdDatastoreNameList(group.getStorage()
+               .getDsNames4Data());
       }
 
       if (groupEntity.getStorageType() == DatastoreType.LOCAL) {
          // only when explicitly set to local, we'll choose local storage
-         if (group.getHaFlag() != null 
+         if (group.getHaFlag() != null
                && Constants.HA_FLAG_FT.equals(group.getHaFlag().toLowerCase())) {
-            throw ClusterConfigException.LOCAL_STORAGE_USED_FOR_FT_GROUP(
-                  group.getName());
+            throw ClusterConfigException.LOCAL_STORAGE_USED_FOR_FT_GROUP(group
+                  .getName());
          }
       }
    }
@@ -701,16 +705,18 @@ public class ClusterConfigManager {
          Set<String> sharedPattern =
                datastoreMgr.getSharedDatastoresByNames(clusterEntity
                      .getVcDatastoreNameList());
-         clusterConfig.setSharedPattern(sharedPattern);
+         clusterConfig.setSharedDatastorePattern(sharedPattern);
          Set<String> localPattern =
                datastoreMgr.getLocalDatastoresByNames(clusterEntity
                      .getVcDatastoreNameList());
-         clusterConfig.setLocalPattern(localPattern);
+         clusterConfig.setLocalDatastorePattern(localPattern);
          clusterConfig.setDsNames(clusterEntity.getVcDatastoreNameList());
       } else {
          // set all shared and local datastores
-         clusterConfig.setSharedPattern(datastoreMgr.getAllSharedDatastores());
-         clusterConfig.setLocalPattern(datastoreMgr.getAllLocalDatastores());
+         clusterConfig.setSharedDatastorePattern(datastoreMgr
+               .getAllSharedDatastores());
+         clusterConfig.setLocalDatastorePattern(datastoreMgr
+               .getAllLocalDatastores());
          logger.debug("no datastore config at cluster level.");
       }
       List<NodeGroupCreate> nodeGroups = new ArrayList<NodeGroupCreate>();
@@ -893,7 +899,11 @@ public class ClusterConfigManager {
          NodeGroupCreate group, EnumSet<HadoopRole> enumRoles) {
       int storageSize = ngEntity.getStorageSize();
       DatastoreType storageType = ngEntity.getStorageType();
+
       List<String> storeNames = ngEntity.getVcDatastoreNameList();
+      List<String> dataDiskStoreNames = ngEntity.getDdDatastoreNameList();
+      List<String> systemDiskStoreNames = ngEntity.getSdDatastoreNameList();
+
       if (storageSize <= 0 && storageType == null
             && (storeNames == null || storeNames.isEmpty())) {
          logger.debug("no storage specified for node group "
@@ -906,21 +916,38 @@ public class ClusterConfigManager {
             + ngEntity.getName());
       logger.debug("storage name pattern is " + storeNames + " for node group "
             + ngEntity.getName());
+      logger.debug("system disk storage name pattern is "
+            + systemDiskStoreNames + " for node group " + ngEntity.getName());
+      logger.debug("data disk storage name pattern is " + dataDiskStoreNames
+            + " for node group " + ngEntity.getName());
       StorageRead storage = new StorageRead();
       group.setStorage(storage);
       storage.setSizeGB(storageSize);
       if (storageType != null) {
          storage.setType(storageType.toString().toLowerCase());
       }
-      storage.setNamePattern(getStoreNamePattern(storageType, storeNames));
-      storage.setDsNames(storeNames);
+
+      if (systemDiskStoreNames != null && !systemDiskStoreNames.isEmpty())
+         storage.setImagestoreNamePattern(getDatastoreNamePattern(storageType,
+               systemDiskStoreNames));
+      else
+         storage.setImagestoreNamePattern(getDatastoreNamePattern(storageType,
+               storeNames));
+
+      if (dataDiskStoreNames != null && !dataDiskStoreNames.isEmpty())
+         storage.setDiskstoreNamePattern(getDatastoreNamePattern(storageType,
+               dataDiskStoreNames));
+      else
+         storage.setDiskstoreNamePattern(getDatastoreNamePattern(storageType,
+               storeNames));
+
       storage.setShares(ngEntity.getCluster().getIoShares());
 
       // set storage split policy based on group roles
-      if ((enumRoles.size() == 1 || (enumRoles.size() == 2
-            && enumRoles.contains(HadoopRole.HADOOP_JOURNALNODE_ROLE)))
+      if ((enumRoles.size() == 1 || (enumRoles.size() == 2 && enumRoles
+            .contains(HadoopRole.HADOOP_JOURNALNODE_ROLE)))
             && (enumRoles.contains(HadoopRole.ZOOKEEPER_ROLE) || enumRoles
-            .contains(HadoopRole.MAPR_ZOOKEEPER_ROLE))) {
+                  .contains(HadoopRole.MAPR_ZOOKEEPER_ROLE))) {
          // if this group contains only one zookeeper role
          logger.debug("use bi_sector disk layout for zookeeper only group.");
          storage.setSplitPolicy(DiskSplitPolicy.BI_SECTOR);
@@ -944,7 +971,7 @@ public class ClusterConfigManager {
          // check store names to see if local type storage is chosen.
          Set<String> storePattern =
                datastoreMgr.getLocalDatastoresByNames(storeNames);
-         if (storePattern != null && storePattern.size() > 0) {
+         if (storePattern != null && !storePattern.isEmpty()) {
             logger.info("datastore type is not set, but local datastore is used. Set scsi controller type to paravirtual");
             storage
                   .setControllerType(DiskScsiControllerType.PARA_VIRTUAL_CONTROLLER);
@@ -966,7 +993,7 @@ public class ClusterConfigManager {
       }
    }
 
-   private List<String> getStoreNamePattern(DatastoreType storageType,
+   private List<String> getDatastoreNamePattern(DatastoreType storageType,
          List<String> storeNames) {
       if (storageType == null && (storeNames == null || storeNames.isEmpty())) {
          return null;
@@ -974,7 +1001,7 @@ public class ClusterConfigManager {
       Set<String> storePattern = null;
       if (storageType == null) {
          logger.debug("storage type is not specified.");
-         storePattern = datastoreMgr.getDatastoresByNameList(storeNames);
+         storePattern = datastoreMgr.getDatastoresByNames(storeNames);
       }
       if (storageType == DatastoreType.LOCAL) {
          storePattern = datastoreMgr.getLocalDatastoresByNames(storeNames);
@@ -985,13 +1012,11 @@ public class ClusterConfigManager {
       if (storePattern == null || storePattern.isEmpty()) {
          logger.warn("No any datastore found for datastore name: " + storeNames
                + ", type: " + storageType
-               + ". Will use cluster storage definition.");
+               + ". Will use cluster level storage definition.");
          return null;
       }
 
-      List<String> result = new ArrayList<String>();
-      result.addAll(storePattern);
-      return result;
+      return new ArrayList<String>(storePattern);
    }
 
    private EnumSet<HadoopRole> getEnumRoles(List<String> roles, String distro) {

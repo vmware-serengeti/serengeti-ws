@@ -26,7 +26,7 @@ import com.vmware.bdd.apitypes.DatastoreRead;
  * @author Jarred Li
  * @since 0.8
  * @version 0.8
- *
+ * 
  */
 public interface IDatastoreService {
 
@@ -34,25 +34,26 @@ public interface IDatastoreService {
 
    Set<String> getSharedDatastoresByNames(List<String> nameList);
 
-   Set<String> getLocalDatastoresByNames(List<String> nameList);
-
    Set<String> getAllLocalDatastores();
+
+   Set<String> getLocalDatastoresByNames(List<String> nameList);
 
    Set<String> getDatastoresByName(String name);
 
-   Set<String> getDatastoresByNameList(List<String> nameList);
+   Set<String> getDatastoresByNames(List<String> nameList);
 
-   void addDataStores(DatastoreAdd datastore);
+   // for CLI path
+   Set<String> getAllDatastoreNames();
 
-   void addDataStores(String name, DatastoreType type,
-         List<String> spec);
-
-   Set<String> getAllDataStoreName();
-
+   // for CLI path
    DatastoreRead getDatastoreRead(String name);
 
+   // for CLI path
    List<DatastoreRead> getAllDatastoreReads();
 
-   void deleteDatastore(String name);
+   void addDatastores(DatastoreAdd datastore);
 
+   void addDatastores(String name, DatastoreType type, List<String> spec);
+
+   void deleteDatastore(String name);
 }

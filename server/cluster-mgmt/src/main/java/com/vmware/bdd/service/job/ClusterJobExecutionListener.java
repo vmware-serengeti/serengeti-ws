@@ -192,7 +192,7 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
       }
 
       ClusterStatus status = null;
-      if (success & successStatus != null) {
+      if (success && successStatus != null) {
          status = ClusterStatus.valueOf(successStatus);
       } else if (!success && failureStatus != null) {
          status = ClusterStatus.valueOf(failureStatus);

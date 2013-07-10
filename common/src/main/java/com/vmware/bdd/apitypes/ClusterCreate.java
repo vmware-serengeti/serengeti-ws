@@ -97,10 +97,14 @@ public class ClusterCreate implements Serializable {
    private Map<String, String> hostToRackMap;
    @Expose
    @SerializedName("vc_shared_datastore_pattern")
-   private Set<String> sharedPattern;
+   private Set<String> sharedDatastorePattern;
    @Expose
    @SerializedName("vc_local_datastore_pattern")
-   private Set<String> localPattern;
+   private Set<String> localDatastorePattern;
+   
+   // datastore patterns for system/swap disks
+   //   private Set<String> imagestorePattern;
+   
    @Expose
    @SerializedName("cluster_configuration")
    private Map<String, Object> configuration;
@@ -295,20 +299,20 @@ public class ClusterCreate implements Serializable {
       this.hostToRackMap = hostToRackMap;
    }
 
-   public Set<String> getSharedPattern() {
-      return sharedPattern;
+   public Set<String> getSharedDatastorePattern() {
+      return sharedDatastorePattern;
    }
 
-   public void setSharedPattern(Set<String> sharedPattern) {
-      this.sharedPattern = sharedPattern;
+   public void setSharedDatastorePattern(Set<String> sharedDatastorePattern) {
+      this.sharedDatastorePattern = sharedDatastorePattern;
    }
 
-   public Set<String> getLocalPattern() {
-      return localPattern;
+   public Set<String> getLocalDatastorePattern() {
+      return localDatastorePattern;
    }
 
-   public void setLocalPattern(Set<String> localPattern) {
-      this.localPattern = localPattern;
+   public void setLocalDatastorePattern(Set<String> localDatastorePattern) {
+      this.localDatastorePattern = localDatastorePattern;
    }
 
    public Boolean isValidateConfig() {

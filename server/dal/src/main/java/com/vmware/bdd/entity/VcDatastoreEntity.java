@@ -41,7 +41,7 @@ public class VcDatastoreEntity extends EntityBase {
    @Enumerated(EnumType.STRING)
    @Column(name = "type", nullable = false)
    private DatastoreType type;
-
+   
    public DatastoreType getType() {
       return type;
    }
@@ -65,6 +65,4 @@ public class VcDatastoreEntity extends EntityBase {
    public void setVcDatastore(String vcDatastore) {
       this.vcDatastore = vcDatastore;
    }
-
-
 }

@@ -132,7 +132,9 @@ public class DatastoreService implements IDatastoreService {
    @Override
    @Transactional(readOnly = true)
    public Set<String> getDatastoresByName(String name) {
-      List<VcDatastoreEntity> datastores = dsDao.findByName(name);
+      List<VcDatastoreEntity> datastores = new ArrayList<VcDatastoreEntity>();
+      datastores.addAll(dsDao.findByNameAndType(DatastoreType.LOCAL, name));
+      datastores.addAll(dsDao.findByNameAndType(DatastoreType.SHARED, name));
       return getDatastorePattern(datastores);
    }
 
@@ -141,7 +143,7 @@ public class DatastoreService implements IDatastoreService {
     */
    @Override
    @Transactional(readOnly = true)
-   public Set<String> getDatastoresByNameList(List<String> nameList) {
+   public Set<String> getDatastoresByNames(List<String> nameList) {
       if (nameList == null) {
          return null;
       }
@@ -152,13 +154,12 @@ public class DatastoreService implements IDatastoreService {
       return result;
    }
 
-
    /* (non-Javadoc)
     * @see com.vmware.bdd.service.impl.IDataStoreService#addDataStores(com.vmware.bdd.apitypes.DatastoreAdd)
     */
    @Override
    @Transactional
-   public void addDataStores(DatastoreAdd datastore) {
+   public void addDatastores(DatastoreAdd datastore) {
       addDatastoreEntity(datastore.getType(), datastore.getSpec(),
             datastore.getName());
    }
@@ -168,16 +169,16 @@ public class DatastoreService implements IDatastoreService {
     */
    @Override
    @Transactional
-   public void addDataStores(String name, DatastoreType type, List<String> spec) {
+   public void addDatastores(String name, DatastoreType type, List<String> spec) {
       addDatastoreEntity(type, spec, name);
    }
 
    /* (non-Javadoc)
-    * @see com.vmware.bdd.service.impl.IDataStoreService#getAllDataStoreName()
+    * @see com.vmware.bdd.service.impl.IDataStoreService#getAllDatastoreName()
     */
    @Override
    @Transactional(readOnly = true)
-   public Set<String> getAllDataStoreName() {
+   public Set<String> getAllDatastoreNames() {
       List<VcDatastoreEntity> datastores = dsDao.findAllSortByName();
       Set<String> result = new HashSet<String>();
       for (VcDatastoreEntity ds : datastores) {
@@ -317,6 +318,7 @@ public class DatastoreService implements IDatastoreService {
          }
          VcDatastoreEntity entity = new VcDatastoreEntity();
          entity.setType(type);
+
          entity.setName(name);
          entity.setVcDatastore(ds);
          dsDao.insert(entity);

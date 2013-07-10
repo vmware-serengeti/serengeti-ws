@@ -35,8 +35,8 @@ public class AutoConnectionCommandsTest extends MockRestServer {
    public void testLoggedConn() throws Exception {
       ObjectMapper mapper = new ObjectMapper();
       buildReqRespWithoutReqBody(
-            "http://127.0.0.1:8080/serengeti/j_spring_security_check?j_username=username&j_password=password",
+            "https://127.0.0.1:8443/serengeti/j_spring_security_check?j_username=username&j_password=password",
             HttpMethod.POST, HttpStatus.OK, mapper.writeValueAsString("ok"));
-      connectionCommands.loggedConn("127.0.0.1:8080", "username", "password");
+      connectionCommands.loggedConn("127.0.0.1:8443", "username", "password");
    }
 }

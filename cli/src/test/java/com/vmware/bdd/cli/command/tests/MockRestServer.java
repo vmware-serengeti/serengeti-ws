@@ -26,8 +26,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.test.web.client.RequestMatchers;
-import org.springframework.test.web.client.ResponseCreators;
+import org.springframework.test.web.client.match.MockRestRequestMatchers;
+//import org.springframework.test.web.client.RequestMatchers;
+import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.web.client.RestTemplate;
 
 @ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })public abstract class MockRestServer extends AbstractTestNGSpringContextTests {
@@ -53,22 +54,23 @@ import org.springframework.web.client.RestTemplate;
       }
       responseHeaders.add("Set-Cookie", "JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
 
-      mockServer.expect(RequestMatchers.requestTo(restUrl)).andExpect(RequestMatchers.method(method))
-      .andRespond(ResponseCreators.withResponse(respBody, responseHeaders, status, ""));
+      mockServer
+            .expect(MockRestRequestMatchers.requestTo(restUrl))
+            .andExpect(MockRestRequestMatchers.method(method))
+            .andRespond(MockRestResponseCreators
+                  .withStatus(status)
+                  .body(respBody)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .headers(responseHeaders));
    }
    
    protected void buildReqRespWithoutRespBody(final String restUrl,
-         final HttpMethod method, final HttpStatus status, final String reqBody) {
-      HttpHeaders responseHeaders = new HttpHeaders();
-      responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-      
+         final HttpMethod method, final HttpStatus status, final String reqBody) {      
       mockServer
-            .expect(RequestMatchers.requestTo(restUrl))
-            .andExpect(RequestMatchers.method(method))
-            .andExpect(RequestMatchers.header("Content-Type", MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(RequestMatchers.body(reqBody))
-            .andRespond(
-                  ResponseCreators
-                        .withResponse("", responseHeaders, status, ""));
+            .expect(MockRestRequestMatchers.requestTo(restUrl))
+            .andExpect(MockRestRequestMatchers.method(method))
+            .andExpect(MockRestRequestMatchers.header("Content-Type", MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(MockRestRequestMatchers.content().string(reqBody))
+            .andRespond(MockRestResponseCreators.withStatus(status));
    }
 }
