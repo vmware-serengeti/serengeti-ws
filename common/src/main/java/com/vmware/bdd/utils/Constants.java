@@ -140,4 +140,6 @@ public class Constants {
    
    public static final String ROOT_SNAPSTHOT_NAME = "serengeti-snapshot";
    public static final String ROOT_SNAPSTHOT_DESC = "Serengeti template Root Snapshot";
+   
+   public static final int DEFAULT_SCHEDULER_POOL_SIZE = 1024;
 }
