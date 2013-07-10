@@ -192,6 +192,9 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
       }
       nodeEntity.setVmName(vNode.getVmName());
       setNodeStatus(nodeEntity, vNode);
+      if (vNode.getVmMobId() == null && nodeEntity.getMoId() != null) {
+         vNode.setVmMobId(nodeEntity.getMoId());
+      }
       if (vNode.getVmMobId() != null) {
          nodeEntity.setMoId(vNode.getVmMobId());
          nodeEntity.setRack(vNode.getTargetRack());

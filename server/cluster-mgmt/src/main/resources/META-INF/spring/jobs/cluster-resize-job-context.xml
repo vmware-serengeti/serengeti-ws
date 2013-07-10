@@ -58,14 +58,8 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="resizeVMStep" next="resizeReconfigVm">
+		<step id="resizeVMStep" next="updateResizeClusterDataStep3">
 			<tasklet ref="createClusterVMTasklet" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
-		<step id="resizeReconfigVm" next="updateResizeClusterDataStep3">
-			<tasklet ref="reconfigVmTasket" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
