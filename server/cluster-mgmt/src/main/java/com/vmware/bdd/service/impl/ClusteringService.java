@@ -72,8 +72,10 @@ import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.fastclone.impl.AbstractFastCopierFactory;
+import com.vmware.bdd.fastclone.impl.CreateVmSpFactory;
 import com.vmware.bdd.fastclone.impl.FastCloneServiceImpl;
 import com.vmware.bdd.fastclone.impl.VmCloneSpFactory;
+import com.vmware.bdd.fastclone.impl.VmCreateSpec;
 import com.vmware.bdd.fastclone.intf.FastCloneService;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.ClusterEntityManager;
@@ -202,17 +204,22 @@ public class ClusteringService implements IClusteringService {
          try {
             Thread.sleep(1000);
          } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.warn("interupted during sleep " + e.getMessage());
          }
          // add event handler for Serengeti after VC event handler is registered.
          new VcEventProcessor(getClusterEntityMgr());
 
          String poolSize =
                Configuration.getNonEmptyString("serengeti.scheduler.poolsize");
-         AuAssert.check(poolSize != null);
-
-         Scheduler.init(Integer.parseInt(poolSize), Integer.parseInt(poolSize));
+         
+         if (poolSize == null) {
+            Scheduler.init(Constants.DEFAULT_SCHEDULER_POOL_SIZE,
+                  Constants.DEFAULT_SCHEDULER_POOL_SIZE);
+         } else {
+            Scheduler.init(Integer.parseInt(poolSize),
+                  Integer.parseInt(poolSize));
+         }
+         
          String concurrency =
                Configuration
                      .getNonEmptyString("serengeti.singlevm.concurrency");
@@ -854,11 +861,11 @@ public class ClusteringService implements IClusteringService {
       Map<String, Folder> folders = createVcFolders(vNodes.get(0).getCluster());
       String clusterRpName = createVcResourcePools(vNodes);
       logger.info("syncCreateVMs, start to create VMs.");
-      FastCloneService<BaseNode> cloneSrv =
-            new FastCloneServiceImpl<BaseNode>();
+      FastCloneService<VmCreateSpec> cloneSrv =
+            new FastCloneServiceImpl<VmCreateSpec>();
       // set copier factory
-      AbstractFastCopierFactory<BaseNode> copierFactory =
-            new VmCloneSpFactory();
+      AbstractFastCopierFactory<VmCreateSpec> copierFactory =
+            new CreateVmSpFactory();
       cloneSrv.setFastCopierFactory(copierFactory);
       cloneSrv.addResource(templateNode, cloneConcurrency);
       for (BaseNode vNode : vNodes) {
