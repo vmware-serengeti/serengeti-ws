@@ -826,12 +826,16 @@ public class RestClient {
              */
             MessageDigest sha1 = MessageDigest.getInstance("SHA1");
             MessageDigest md5 = MessageDigest.getInstance("MD5");
+            String md5Fingerprint = "";
+            String sha1Fingerprint = "";
             SimpleDateFormat dateFormate = new SimpleDateFormat("yyyy/MM/dd");
             for (int i = 0; i < chain.length; i++) {
                X509Certificate cert = chain[i];
                sha1.update(cert.getEncoded());
                md5.update(cert.getEncoded());
-               if (keyStore.getCertificate(String.valueOf(cert.hashCode())) != null) {
+               md5Fingerprint = toHexString(md5.digest());
+               sha1Fingerprint = toHexString(sha1.digest());
+               if (keyStore.getCertificate(md5Fingerprint) != null) {
                   if (i == chain.length - 1) {
                      return;
                   } else {
@@ -842,8 +846,8 @@ public class RestClient {
                System.out.println("================================================================");
                System.out.println("Subject:  " + cert.getSubjectDN());
                System.out.println("Issuer:  " + cert.getIssuerDN());
-               System.out.println("SHA Fingerprint:  " + toHexString(sha1.digest()));
-               System.out.println("MD5 Fingerprint:  " + toHexString(md5.digest()));
+               System.out.println("SHA Fingerprint:  " + sha1Fingerprint);
+               System.out.println("MD5 Fingerprint:  " + md5Fingerprint);
                System.out.println("Issued on:  " + dateFormate.format(cert.getNotBefore()));
                System.out.println("Expires on:  " + dateFormate.format(cert.getNotAfter()));
                System.out.println("Signature:  " + cert.getSignature());
@@ -870,7 +874,7 @@ public class RestClient {
                /*
                 *  add new certificate into key store file.
                 */
-               keyStore.setCertificateEntry(String.valueOf(cert.hashCode()), cert);
+               keyStore.setCertificateEntry(md5Fingerprint, cert);
                OutputStream out = new FileOutputStream("serengeti.keystore");
                keyStore.store(out, pwd);
                if (out != null) {
@@ -906,14 +910,17 @@ public class RestClient {
     * transfer a byte array to a hexadecimal string 
     */
    private static String toHexString(byte[] bytes) {
-       StringBuilder sb = new StringBuilder(bytes.length * 3);
-       for (int b : bytes) {
-           b &= 0xff;
-           sb.append(HEXDIGITS[b >> 4]);
-           sb.append(HEXDIGITS[b & 15]);
-           sb.append(' ');
-       }
-       return sb.toString();
+      StringBuilder sb = new StringBuilder(bytes.length * 3);
+      for (int b : bytes) {
+         b &= 0xff;
+         sb.append(HEXDIGITS[b >> 4]);
+         sb.append(HEXDIGITS[b & 15]);
+         sb.append(':');
+      }
+      if (sb.length() > 0) {
+         sb.delete(sb.length() - 1, sb.length());
+      }
+      return sb.toString().toUpperCase();
    }
 
    private String getExceptionMessage(Exception e) {

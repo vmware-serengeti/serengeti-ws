@@ -21,7 +21,6 @@
 		<module>server/cluster-mgmt</module>
 		<module>server/serengeti</module>
 		<module>server/test</module>
-                <module>server/install-cert</module>
 		<module>cli</module>
 		<module>frontend</module>
 	</modules>
