@@ -61,7 +61,7 @@ public class DatastoreServiceTest extends BaseResourceTest {
    }
 
    @Test(groups = { "res-mgmt" })
-   public void testGetSharedDiskstoresByNames() {
+   public void testGetSharedDatastoresByNames() {
       new Expectations() {
          {
             dsDao.findByNameAndType(DatastoreType.SHARED, anyString);
@@ -71,12 +71,12 @@ public class DatastoreServiceTest extends BaseResourceTest {
       datastoreSvc.setDsDao(dsDao);
       List<String> names = new ArrayList<String>();
       names.add("ds01");
-      Set<String> patterns = datastoreSvc.getSharedDiskstoresByNames(names);
+      Set<String> patterns = datastoreSvc.getSharedDatastoresByNames(names);
       Assert.assertTrue(patterns.size() == 1);
    }
 
    @Test(groups = { "res-mgmt" })
-   public void testGetLocalDiskstoresByNames() {
+   public void testGetLocalDatastoresByNames() {
       new Expectations() {
          {
             dsDao.findByNameAndType(DatastoreType.LOCAL, anyString);
@@ -86,35 +86,7 @@ public class DatastoreServiceTest extends BaseResourceTest {
       datastoreSvc.setDsDao(dsDao);
       List<String> names = new ArrayList<String>();
       names.add("ds01");
-      Set<String> patterns = datastoreSvc.getLocalDiskstoresByNames(names);
-      Assert.assertTrue(patterns.size() == 1);
-   }
-
-   @Test(groups = { "res-mgmt" })
-   public void testGetImagestoresByNames() {
-      new Expectations() {
-         {
-            dsDao.findByNameAndType(DatastoreType.IMAGE, anyString);
-            result = dss;
-         }
-      };
-      datastoreSvc.setDsDao(dsDao);
-      List<String> names = new ArrayList<String>();
-      names.add("ds01");
-      Set<String> patterns = datastoreSvc.getImagestoresByNames(names);
-      Assert.assertTrue(patterns.size() == 1);
-   }
-
-   @Test(groups = { "res-mgmt" })
-   public void testGetAllImagestores() {
-      new Expectations() {
-         {
-            dsDao.findByType(DatastoreType.IMAGE);
-            result = dss;
-         }
-      };
-      datastoreSvc.setDsDao(dsDao);
-      Set<String> patterns = datastoreSvc.getAllImagestores();
+      Set<String> patterns = datastoreSvc.getLocalDatastoresByNames(names);
       Assert.assertTrue(patterns.size() == 1);
    }
 
