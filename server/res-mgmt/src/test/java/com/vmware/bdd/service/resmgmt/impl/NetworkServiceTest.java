@@ -17,6 +17,7 @@ package com.vmware.bdd.service.resmgmt.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vmware.bdd.apitypes.NodeGroupRead;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.Verifications;
@@ -44,6 +45,7 @@ public class NetworkServiceTest {
 
    private List<NetworkEntity> networks;
    private NetworkEntity entity;
+   private NetworkEntity tempEntity;
 
    @BeforeClass
    public void beforeClass() {
@@ -156,4 +158,31 @@ public class NetworkServiceTest {
       Assert.assertEquals(networks.size(), 1);
    }
 
+   @Test(groups = { "res-mgmt" })
+   public void testUpdateNetwork() {
+      tempEntity = new NetworkEntity();
+      tempEntity.setName("defaultNet");
+      tempEntity.setAllocType(AllocType.DHCP);
+      tempEntity.setPortGroup("network1");
+      tempEntity.setClusters(new ArrayList<ClusterEntity>());
+      tempEntity.setIpBlocks(new ArrayList<IpBlockEntity>());
+
+      networkSvc.updateNetwork(tempEntity, AllocType.IP_POOL, "255.255.255.0", "192.168.1.1", "10.10.10.10", "5.5.5.5");
+      new Verifications() {
+         {
+            networkDao.update(withAny(tempEntity));
+         }
+      };
+   }
+
+   @Test(groups = { "res-mgmt" })
+   public void testFree() {
+      networkSvc.setNetworkDao(networkDao);
+      networkSvc.free(entity, 1L, 123456789);
+      new Verifications() {
+         {
+            networkDao.free(withAny(entity), anyLong, withAny(new ArrayList<IpBlockEntity>()));
+         }
+      };
+   }
 }

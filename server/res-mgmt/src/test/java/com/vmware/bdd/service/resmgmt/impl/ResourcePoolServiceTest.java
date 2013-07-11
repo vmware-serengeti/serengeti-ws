@@ -23,8 +23,10 @@ import mockit.Mocked;
 import mockit.Mockit;
 import mockit.NonStrict;
 import mockit.Verifications;
+import mockit.Mock;
 
 import org.apache.log4j.Logger;
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -251,6 +253,62 @@ public class ResourcePoolServiceTest extends BaseResourceTest {
       Assert.assertTrue(rpSvc.isDeployedUnderCluster("cluster1", "[cluster1]"));
       Assert.assertFalse(rpSvc.isDeployedUnderCluster("cluster1", "rp1"));
       Assert.assertFalse(rpSvc.isDeployedUnderCluster("cluster1", "rp2"));
+   }
+
+   @Test(groups = { "res-mgmt" })
+   public void testGetAllRpNamesAndToRest() {
+      new Expectations() {
+         {
+            List<VcResourcePoolEntity> rpEntities = new ArrayList<VcResourcePoolEntity>();
+            VcResourcePoolEntity rpEntity1 = new VcResourcePoolEntity();
+            rpEntity1.setName("rp1");
+            rpEntity1.setVcCluster("cluster1");
+            rpEntity1.setVcResourcePool("vcrp1");
+            rpEntities.add(rpEntity1);
+
+            VcResourcePoolEntity rpEntity2 = new VcResourcePoolEntity();
+            rpEntity2.setName("rp2");
+            rpEntity2.setVcCluster("cluster2");
+            rpEntity2.setVcResourcePool("vcrp2");
+            rpEntities.add(rpEntity2);
+
+            rpDao.findAllOrderByClusterName();
+            result = rpEntities;
+         }
+      };
+      rpSvc.setRpDao(rpDao);
+      Set<String> rpNames = rpSvc.getAllRPNames();
+      Assert.assertNotNull(rpNames);
+      Assert.assertEquals(rpNames.size(), 2);
+
+      List<ResourcePoolRead> rpReads = rpSvc.getAllResourcePoolForRest();
+      Assert.assertNotNull(rpReads);
+      Assert.assertEquals(rpReads.size(), 2);
+   }
+
+   @Test(groups = { "res-mgmt" }, expectedExceptions = VcProviderException.class)
+   public void testAddAutoResourcePools() {
+      new Expectations() {
+         {
+            rpDao.findByName(anyString);
+            result = null;
+            rpDao.isRPAdded(anyString, anyString);
+            result = true;
+         }
+      };
+      rpSvc.setRpDao(rpDao);
+      rpSvc.setResService(resService);
+      List<String> rps = new ArrayList<String>();
+      rps.add("rp1");
+      rps.add("rp2");
+      VcCluster cluster1 = Mockito.mock(VcCluster.class);
+      Mockito.when(cluster1.getName()).thenReturn("cluster1");
+      Mockito.when(cluster1.getVcRps()).thenReturn(rps);
+
+      List<VcCluster> clusters = new ArrayList<VcCluster>();
+      clusters.add(cluster1);
+
+      rpSvc.addAutoResourcePools(clusters, false);
    }
 
 }

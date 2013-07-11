@@ -60,9 +60,66 @@ public class DatastoreServiceTest extends BaseResourceTest {
       dss.add(ds);
    }
 
+   @Test(groups = { "res-mgmt" })
+   public void testGetSharedDiskstoresByNames() {
+      new Expectations() {
+         {
+            dsDao.findByNameAndType(DatastoreType.SHARED, anyString);
+            result = dss;
+         }
+      };
+      datastoreSvc.setDsDao(dsDao);
+      List<String> names = new ArrayList<String>();
+      names.add("ds01");
+      Set<String> patterns = datastoreSvc.getSharedDiskstoresByNames(names);
+      Assert.assertTrue(patterns.size() == 1);
+   }
 
    @Test(groups = { "res-mgmt" })
-   public void addDataStores() {
+   public void testGetLocalDiskstoresByNames() {
+      new Expectations() {
+         {
+            dsDao.findByNameAndType(DatastoreType.LOCAL, anyString);
+            result = dss;
+         }
+      };
+      datastoreSvc.setDsDao(dsDao);
+      List<String> names = new ArrayList<String>();
+      names.add("ds01");
+      Set<String> patterns = datastoreSvc.getLocalDiskstoresByNames(names);
+      Assert.assertTrue(patterns.size() == 1);
+   }
+
+   @Test(groups = { "res-mgmt" })
+   public void testGetImagestoresByNames() {
+      new Expectations() {
+         {
+            dsDao.findByNameAndType(DatastoreType.IMAGE, anyString);
+            result = dss;
+         }
+      };
+      datastoreSvc.setDsDao(dsDao);
+      List<String> names = new ArrayList<String>();
+      names.add("ds01");
+      Set<String> patterns = datastoreSvc.getImagestoresByNames(names);
+      Assert.assertTrue(patterns.size() == 1);
+   }
+
+   @Test(groups = { "res-mgmt" })
+   public void testGetAllImagestores() {
+      new Expectations() {
+         {
+            dsDao.findByType(DatastoreType.IMAGE);
+            result = dss;
+         }
+      };
+      datastoreSvc.setDsDao(dsDao);
+      Set<String> patterns = datastoreSvc.getAllImagestores();
+      Assert.assertTrue(patterns.size() == 1);
+   }
+
+   @Test(groups = { "res-mgmt" })
+   public void testAddDataStores() {
       new NonStrictExpectations() {
          {
             dsDao.nameExisted(anyString);
@@ -86,7 +143,7 @@ public class DatastoreServiceTest extends BaseResourceTest {
    }
 
    @Test(groups = { "res-mgmt" })
-   public void deleteDatastore() {
+   public void testDeleteDatastore() {
       new NonStrictExpectations() {
          {
             dsDao.findByName(anyString);
@@ -110,7 +167,7 @@ public class DatastoreServiceTest extends BaseResourceTest {
    }
 
    @Test(groups = { "res-mgmt" }, expectedExceptions = VcProviderException.class)
-   public void deleteDatastoreWithReference() {
+   public void testDeleteDatastoreWithReference() {
       new NonStrictExpectations() {
          {
             dsDao.findByName(anyString);
@@ -129,7 +186,7 @@ public class DatastoreServiceTest extends BaseResourceTest {
    }
 
    @Test(groups = { "res-mgmt" })
-   public void getAllDataStoreName() {
+   public void testGetAllDataStoreName() {
       new Expectations() {
          {
             dsDao.findAllSortByName();
@@ -143,7 +200,7 @@ public class DatastoreServiceTest extends BaseResourceTest {
    }
 
    @Test(groups = { "res-mgmt" })
-   public void getAllDatastoreReads() {
+   public void testGetAllDatastoreReads() {
       new Expectations() {
          {
             dsDao.findByName(anyString);
@@ -154,5 +211,4 @@ public class DatastoreServiceTest extends BaseResourceTest {
       DatastoreRead ds = datastoreSvc.getDatastoreRead("testDS");
       Assert.assertNotNull(ds);
    }
-
 }
