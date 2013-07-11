@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Semaphore;
 
 import com.vmware.aurora.composition.DiskSchema.Disk;
 import com.vmware.aurora.global.DiskSize;
@@ -68,7 +67,6 @@ public class CreateVmSP implements Callable<Void> {
    final boolean linkedClone;
    final Folder vmFolder; /* optional */
    final VcHost host; /* optinal */
-   final Semaphore controller; /* optional */
 
    transient VcVirtualMachine vcVm = null;
 
@@ -80,21 +78,11 @@ public class CreateVmSP implements Callable<Void> {
             bootupConfigs, linkedClone, vmFolder, null);
    }
 
-
    public CreateVmSP(String newVmName, VmSchema vmSchema,
          VcResourcePool targetRp, VcDatastore targetDs,
          IPrePostPowerOn prePowerOn, IPrePostPowerOn postPowerOn,
          Map<String, String> bootupConfigs, boolean linkedClone,
          Folder vmFolder, VcHost host) {
-      this(newVmName, vmSchema, targetRp, targetDs, prePowerOn, postPowerOn,
-            bootupConfigs, linkedClone, vmFolder, host, null);
-   }
-
-   public CreateVmSP(String newVmName, VmSchema vmSchema,
-         VcResourcePool targetRp, VcDatastore targetDs,
-         IPrePostPowerOn prePowerOn, IPrePostPowerOn postPowerOn,
-         Map<String, String> bootupConfigs, boolean linkedClone,
-         Folder vmFolder, VcHost host, Semaphore controller) {
       this.newVmName = newVmName;
       this.vmSchema = vmSchema;
       this.targetRp = targetRp;
@@ -105,7 +93,6 @@ public class CreateVmSP implements Callable<Void> {
       this.linkedClone = linkedClone;
       this.vmFolder = vmFolder;
       this.host = host;
-      this.controller = controller;
    }
 
    @Override
@@ -189,20 +176,11 @@ public class CreateVmSP implements Callable<Void> {
       HashMap<String, Disk.Operation> diskMap =
             new HashMap<String, Disk.Operation>();
       if (requireClone()) {
-         if (controller != null) {
-            controller.acquire();
-         }
-         try {
-            VcVirtualMachine.CreateSpec vmSpec =
-               new VcVirtualMachine.CreateSpec(newVmName, snap, targetRp,
-                     targetDs, vmFolder, linkedClone, configSpec);
-            // Clone from the template
-            vcVm = template.cloneVm(vmSpec, null);
-         } finally {
-            if (controller != null) {
-               controller.release();
-            }
-         }
+         VcVirtualMachine.CreateSpec vmSpec =
+            new VcVirtualMachine.CreateSpec(newVmName, snap, targetRp,
+                  targetDs, vmFolder, linkedClone, configSpec);
+         // Clone from the template
+         vcVm = template.cloneVm(vmSpec, null);
       } else {
          copyParentVmSettings(template, configSpec);
          vcVm = targetRp.createVm(configSpec, targetDs, vmFolder);

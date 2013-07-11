@@ -25,7 +25,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Semaphore;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +66,6 @@ import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.dal.IResourcePoolDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
-import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.resmgmt.ResourceReservation;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusteringServiceException;
@@ -115,7 +113,6 @@ import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 public class ClusteringService implements IClusteringService {
    private static final int VC_RP_MAX_NAME_LENGTH = 80;
-   private static final int MAX_CLONING_NUM = 4;
    private static final Logger logger = Logger
          .getLogger(ClusteringService.class);
    private ClusterConfigManager configMgr;
@@ -131,7 +128,6 @@ public class ClusteringService implements IClusteringService {
    private BaseNode templateNode;
    private String templateNetworkLabel;
    private static boolean initialized = false;
-   private Semaphore cloningController = null;
 
    public INetworkService getNetworkMgr() {
       return networkMgr;
@@ -202,14 +198,6 @@ public class ClusteringService implements IClusteringService {
          } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-         }
-         try {
-            int num = Configuration.getInt("vm.cloning.concurrent.num");
-            logger.info("get config for vm.cloning.concurrent.num: " + num);
-            cloningController = new Semaphore(num);
-         } catch (Exception e) {
-            logger.info("no config or invalid value for vm.cloning.concurrent.num. using default " + MAX_CLONING_NUM);
-            cloningController = new Semaphore(MAX_CLONING_NUM);
          }
          // add event handler for Serengeti after VC event handler is registered.
          new VcEventProcessor(getClusterEntityMgr());
@@ -764,8 +752,7 @@ public class ClusteringService implements IClusteringService {
                      getVcResourcePool(vNode, clusterRpName),
                      getVcDatastore(vNode), prePowerOn, query, guestVariable,
                      false, folders.get(vNode.getGroupName()),
-                     VcResourceUtils.findHost(vNode.getTargetHost()),
-                     cloningController);
+                     VcResourceUtils.findHost(vNode.getTargetHost()));
          CompensateCreateVmSP deleteVmSp = new CompensateCreateVmSP(cloneVmSp);
          storeProcedures[i] =
                new Pair<Callable<Void>, Callable<Void>>(cloneVmSp, deleteVmSp);
