@@ -962,6 +962,10 @@ public class ClusterManager {
    public Long asyncSetParam(String clusterName, Integer activeComputeNodeNum,
          Integer minComputeNodeNum, Boolean enableAuto, Priority ioPriority)
          throws Exception {
+
+      syncSetParam(clusterName, activeComputeNodeNum, minComputeNodeNum,
+            enableAuto, ioPriority);
+
       ClusterRead cluster = getClusterByName(clusterName, false);
       // cluster must be running status
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
