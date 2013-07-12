@@ -933,9 +933,14 @@ public class ClusterCreate implements Serializable {
 
    public void validateCDHVersion(List<String> warningMsgList) {
       // If current distro's version is greater than cdh4.2.1, the FQDN must be configured.
-      if (this.getDistroVendor().equalsIgnoreCase(Constants.CDH_VENDOR)
-            && (compare(this.getDistroVersion(), "4.2.1") > 0)) {
-         warningMsgList.add(Constants.MUST_CONFIGURE_FQDN);
+      if (this.getDistroVendor().equalsIgnoreCase(Constants.CDH_VENDOR)) {
+         Pattern pattern = Pattern.compile(Constants.CDH4_PATTERN);
+         if (!pattern.matcher(this.getDistroVersion()).matches()) {
+            return;
+         }
+         if (compare(this.getDistroVersion(), "4.2.1") > 0) {
+            warningMsgList.add(Constants.MUST_CONFIGURE_FQDN);
+         }
       }
    }
 

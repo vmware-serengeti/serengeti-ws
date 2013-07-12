@@ -106,6 +106,9 @@ public class ClusterCreateTest {
       cluster.setDistroVersion("4.2");
       cluster.validateCDHVersion(warningMsgList);
       assertEquals(true, warningMsgList.size() == 0);
+      cluster.setDistroVersion("3u6");
+      cluster.validateCDHVersion(warningMsgList);
+      assertEquals(true, warningMsgList.size() == 0);
    }
 
 }
