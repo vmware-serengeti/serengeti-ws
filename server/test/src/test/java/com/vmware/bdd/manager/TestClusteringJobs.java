@@ -245,20 +245,26 @@ public class TestClusteringJobs extends
 
          @Override
          protected Void body() throws Exception {
+            deleteChildVms(vcRp);
             for (VcResourcePool clusterRp : vcRp.getChildren()) {
+               deleteChildVms(clusterRp);
                for (VcResourcePool groupRp : clusterRp.getChildren()) {
-                  for (VcVirtualMachine vm : groupRp.getChildVMs()) {
-                     // assume only two vm under serengeti vApp, serengeti server and template
-                     if (vm.isPoweredOn()) {
-                        vm.powerOff();
-                     }
-                     vm.destroy();
-                  }
+                  deleteChildVms(groupRp);
                   groupRp.destroy();
                }
                clusterRp.destroy();
             }
             return null;
+         }
+
+         private void deleteChildVms(VcResourcePool groupRp) throws Exception {
+            for (VcVirtualMachine vm : groupRp.getChildVMs()) {
+               // assume only two vm under serengeti vApp, serengeti server and template
+               if (vm.isPoweredOn()) {
+                  vm.powerOff();
+               }
+               vm.destroy();
+            }
          }
       });
    }

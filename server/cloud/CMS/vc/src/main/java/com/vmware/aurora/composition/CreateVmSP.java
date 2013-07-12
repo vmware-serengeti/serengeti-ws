@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
+import org.apache.log4j.Logger;
+
 import com.vmware.aurora.composition.DiskSchema.Disk;
 import com.vmware.aurora.global.DiskSize;
 import com.vmware.aurora.vc.DeviceId;
@@ -36,6 +38,7 @@ import com.vmware.aurora.vc.VcVirtualMachine.DiskCreateSpec;
 import com.vmware.aurora.vc.VmConfigUtil;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
+import com.vmware.bdd.utils.Constants;
 import com.vmware.vim.binding.impl.vim.vApp.ProductSpecImpl;
 import com.vmware.vim.binding.impl.vim.vApp.VmConfigSpecImpl;
 import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
@@ -57,6 +60,7 @@ import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
  * 
  */
 public class CreateVmSP implements Callable<Void> {
+   private static final Logger logger = Logger.getLogger(CreateVmSP.class);
    final String newVmName;
    final VmSchema vmSchema;
    final VcResourcePool targetRp;
@@ -68,7 +72,7 @@ public class CreateVmSP implements Callable<Void> {
    final Folder vmFolder; /* optional */
    final VcHost host; /* optinal */
 
-   transient VcVirtualMachine vcVm = null;
+   private VcVirtualMachine vcVm = null;
 
    public CreateVmSP(String newVmName, VmSchema vmSchema,
          VcResourcePool targetRp, VcDatastore targetDs,
@@ -84,6 +88,24 @@ public class CreateVmSP implements Callable<Void> {
          Map<String, String> bootupConfigs, boolean linkedClone,
          Folder vmFolder, VcHost host) {
       this.newVmName = newVmName;
+      this.vmSchema = vmSchema;
+      this.targetRp = targetRp;
+      this.targetDs = targetDs;
+      this.prePowerOn = prePowerOn;
+      this.postPowerOn = postPowerOn;
+      this.bootupConfigs = bootupConfigs;
+      this.linkedClone = linkedClone;
+      this.vmFolder = vmFolder;
+      this.host = host;
+   }
+
+   public CreateVmSP(VcVirtualMachine vcVm, VmSchema vmSchema,
+         VcResourcePool targetRp, VcDatastore targetDs,
+         IPrePostPowerOn prePowerOn, IPrePostPowerOn postPowerOn,
+         Map<String, String> bootupConfigs, boolean linkedClone,
+         Folder vmFolder, VcHost host) {
+      this.vcVm = vcVm;
+      this.newVmName = vcVm.getName();
       this.vmSchema = vmSchema;
       this.targetRp = targetRp;
       this.targetDs = targetDs;
@@ -123,6 +145,17 @@ public class CreateVmSP implements Callable<Void> {
       return true;
    }
 
+   private boolean vmTemplateCloned() {
+      if (vcVm != null) {
+         // here get VM instance once again, to make sure the VM is not deleted by other client by mistake
+         vcVm = VcCache.getIgnoreMissing(vcVm.getId());
+         if (vcVm != null) {
+            return true;
+         }
+      }
+      return false;
+   }
+
    /**
     * copy parent vm's configurations, includes vApp configs, hardware version
     * info
@@ -130,13 +163,13 @@ public class CreateVmSP implements Callable<Void> {
    private void copyParentVmSettings(VcVirtualMachine template,
          ConfigSpec configSpec) {
       configSpec.setName(newVmName);
-      
+
       // copy guest OS info
       configSpec.setGuestId(template.getConfig().getGuestId());
 
       // copy hardware version
       configSpec.setVersion(template.getConfig().getVersion());
-      
+
       // copy vApp config info
       VmConfigInfo configInfo = template.getConfig().getVAppConfig();
 
@@ -145,7 +178,7 @@ public class CreateVmSP implements Callable<Void> {
          // used customized template.
          return;
       }
-      
+
       VmConfigSpec vAppSpec = new VmConfigSpecImpl();
       vAppSpec.setOvfEnvironmentTransport(configInfo
             .getOvfEnvironmentTransport());
@@ -175,15 +208,29 @@ public class CreateVmSP implements Callable<Void> {
 
       HashMap<String, Disk.Operation> diskMap =
             new HashMap<String, Disk.Operation>();
-      if (requireClone()) {
-         VcVirtualMachine.CreateSpec vmSpec =
-               new VcVirtualMachine.CreateSpec(newVmName, snap, targetRp,
-                     targetDs, vmFolder, linkedClone, configSpec);
-         // Clone from the template
-         vcVm = template.cloneVm(vmSpec, null);
-      } else {
-         copyParentVmSettings(template, configSpec);
-         vcVm = targetRp.createVm(configSpec, targetDs, vmFolder);
+      if (vmTemplateCloned()) {
+         // try to revert the VM to snapshot, to rollback wrong configuration
+         VcSnapshot snapshot = vcVm.getSnapshotByName(Constants.ROOT_SNAPSTHOT_NAME);
+         if (snapshot == null) {
+            logger.info("Invalide VM for Serengeti root snapshot does not exist, remove it.");
+            vcVm.destroy();
+            vcVm = null;
+         } else {
+            logger.info("Revert snapshot");
+            snapshot.revert();
+         }
+      }
+      if (!vmTemplateCloned()) {
+         if (requireClone()) {
+            VcVirtualMachine.CreateSpec vmSpec =
+                  new VcVirtualMachine.CreateSpec(newVmName, snap, targetRp,
+                        targetDs, vmFolder, linkedClone, configSpec);
+            // Clone from the template
+            vcVm = template.cloneVm(vmSpec, null);
+         } else {
+            copyParentVmSettings(template, configSpec);
+            vcVm = targetRp.createVm(configSpec, targetDs, vmFolder);
+         }
       }
 
       if (host != null) {

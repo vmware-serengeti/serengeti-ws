@@ -22,7 +22,6 @@ import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.vim.binding.impl.vim.ResourceAllocationInfoImpl;
 import com.vmware.vim.binding.impl.vim.SharesInfoImpl;
 import com.vmware.vim.binding.vim.ResourceAllocationInfo;

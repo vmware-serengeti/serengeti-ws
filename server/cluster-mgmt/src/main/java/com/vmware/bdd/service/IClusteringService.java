@@ -101,7 +101,7 @@ public interface IClusteringService {
     * @return
     */
    public boolean removeBadNodes(ClusterCreate cluster, List<BaseNode> existingNodes,
-         List<BaseNode> deletedNodes, Set<String> occupiedIps, StatusUpdater statusUpdator);
+         List<BaseNode> deletedNodes, StatusUpdater statusUpdator);
 
    public List<BaseNode> getBadNodes(ClusterCreate cluster, List<BaseNode> existingNodes);
 
@@ -114,9 +114,10 @@ public interface IClusteringService {
     * @param occupiedIps
     * @return
     */
-   public boolean createVcVms(NetworkAdd networkAdd,
-         List<BaseNode> vNodes, StatusUpdater statusUpdator,
-         Set<String> occupiedIps);
+   public boolean createVcVms(List<BaseNode> vNodes, StatusUpdater statusUpdator);
+
+   public boolean reconfigVms(NetworkAdd networkAdd, List<BaseNode> vNodes,
+         StatusUpdater statusUpdator, Set<String> occupiedIps);
 
    /**
     * Initialize clustering service

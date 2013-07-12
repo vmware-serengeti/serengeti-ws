@@ -17,21 +17,21 @@ package com.vmware.bdd.service.job;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.vmware.bdd.apitypes.LimitInstruction;
-import com.vmware.bdd.command.VHMMessageTask;
-import com.vmware.bdd.entity.ClusterEntity;
-import com.vmware.bdd.manager.ClusterEntityManager;
-import com.vmware.bdd.service.IClusteringService;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
+import com.vmware.bdd.apitypes.LimitInstruction;
 import com.vmware.bdd.command.MessageHandler;
+import com.vmware.bdd.command.VHMMessageTask;
+import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.exception.TaskException;
+import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.manager.task.VHMReceiveListener;
+import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.IExecutionService;
+import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
-import com.vmware.bdd.utils.AuAssert;
 
 public class SetManualElasticityStep extends TrackableTasklet {
    IExecutionService executionService;

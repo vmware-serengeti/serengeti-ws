@@ -8,6 +8,13 @@
    <packaging>pom</packaging>
    <name>Aurora Master project POM</name>
 
+   <parent>
+      <groupId>com.vmware.bdd</groupId>
+      <artifactId>serengeti-master</artifactId>
+      <version>${serengeti.version}</version>
+      <relativePath>../pom.xml</relativePath>
+   </parent>
+
    <modules>
       <module>../lib/vlsi</module>
       <module>cloud/common</module>

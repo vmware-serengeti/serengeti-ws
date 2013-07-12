@@ -66,11 +66,12 @@ import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.dal.IResourcePoolDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
-import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.resmgmt.ResourceReservation;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.exception.VcProviderException;
+import com.vmware.bdd.fastclone.impl.FastCloneServiceImpl;
+import com.vmware.bdd.fastclone.intf.FastCloneService;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.placement.Container;
@@ -730,17 +731,13 @@ public class ClusteringService implements IClusteringService {
       return clusterRpName;
    }
 
-   @SuppressWarnings("unchecked")
    @Override
-   public boolean createVcVms(NetworkAdd networkAdd, List<BaseNode> vNodes,
+   public boolean reconfigVms(NetworkAdd networkAdd, List<BaseNode> vNodes,
          StatusUpdater statusUpdator, Set<String> occupiedIps) {
       if (vNodes.isEmpty()) {
-         logger.info("No vm to be created.");
+         logger.info("No vm to be configured.");
          return true;
       }
-      Map<String, Folder> folders = createVcFolders(vNodes.get(0).getCluster());
-      String clusterRpName = createVcResourcePools(vNodes);
-      logger.info("syncCreateVMs, start to create VMs.");
       setNetworkSchema(vNodes);
       allocateStaticIp(networkAdd, vNodes, occupiedIps);
       Pair<Callable<Void>, Callable<Void>>[] storeProcedures =
@@ -755,12 +752,22 @@ public class ClusteringService implements IClusteringService {
          QueryIpAddress query =
                new QueryIpAddress(Constants.VM_POWER_ON_WAITING_SEC);
          CreateVmPrePowerOn prePowerOn = getPrePowerOnFunc(vNode);
-         CreateVmSP cloneVmSp =
-               new CreateVmSP(vNode.getVmName(), createSchema,
-                     getVcResourcePool(vNode, clusterRpName),
-                     getVcDatastore(vNode), prePowerOn, query, guestVariable,
-                     false, folders.get(vNode.getGroupName()),
-                     VcResourceUtils.findHost(vNode.getTargetHost()));
+         VcVirtualMachine vcVm = VcCache.getIgnoreMissing(vNode.getVmMobId());
+         CreateVmSP cloneVmSp = null;
+         if (vcVm != null) {
+            cloneVmSp =
+                  new CreateVmSP(vcVm, createSchema, vNode.getTargetVcRp(),
+                        vNode.getTargetVcDs(), prePowerOn, query,
+                        guestVariable, false, vNode.getTargetVcFolder(),
+                        vNode.getTargetVcHost());
+         } else {
+            cloneVmSp =
+                  new CreateVmSP(vNode.getVmName(), createSchema,
+                        vNode.getTargetVcRp(), vNode.getTargetVcDs(),
+                        prePowerOn, query, guestVariable, false,
+                        vNode.getTargetVcFolder(), vNode.getTargetVcHost());
+         }
+
          CompensateCreateVmSP deleteVmSp = new CompensateCreateVmSP(cloneVmSp);
          storeProcedures[i] =
                new Pair<Callable<Void>, Callable<Void>>(cloneVmSp, deleteVmSp);
@@ -771,14 +778,14 @@ public class ClusteringService implements IClusteringService {
                new UpdateVmProgressCallback(clusterEntityMgr, statusUpdator,
                      vNodes.get(0).getClusterName());
          // execute store procedures to create VMs
-         logger.info("ClusteringService, start to create vms.");
+         logger.info("ClusteringService, start to configure vms.");
          Pair<ExecutionResult, ExecutionResult>[] result =
                Scheduler
                      .executeStoredProcedures(
                            com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
                            storeProcedures, storeProcedures.length, callback);
          if (result == null) {
-            logger.error("No VM is created.");
+            logger.error("No VM is configured.");
             return false;
          }
 
@@ -801,7 +808,7 @@ public class ClusteringService implements IClusteringService {
                //replace plan information with the one got from vm
             } else if (pair.first.throwable != null) {
                processException(pair.first.throwable);
-               logger.error("Failed to create VM " + vNode.getVmName(),
+               logger.error("Failed to config VM " + vNode.getVmName(),
                      pair.first.throwable);
 
                vNode.setSuccess(false);
@@ -813,10 +820,48 @@ public class ClusteringService implements IClusteringService {
             }
             vNode.setFinished(true);
          }
-         logger.info(total + " VMs are created.");
+         logger.info(total + " VMs are configured.");
          return success;
       } catch (Exception e) {
-         logger.error("error in creating VMs", e);
+         logger.error("error in configuring VMs", e);
+         throw BddException.INTERNAL(e, e.getMessage());
+      }
+   }
+
+   @SuppressWarnings("unchecked")
+   @Override
+   public boolean createVcVms(List<BaseNode> vNodes, StatusUpdater statusUpdator) {
+      if (vNodes.isEmpty()) {
+         logger.info("No vm to be created.");
+         return true;
+      }
+      Map<String, Folder> folders = createVcFolders(vNodes.get(0).getCluster());
+      String clusterRpName = createVcResourcePools(vNodes);
+      logger.info("syncCreateVMs, start to create VMs.");
+      FastCloneService<BaseNode> cloneSrv = new FastCloneServiceImpl<BaseNode>();
+      cloneSrv.addResource(templateNode, 1);
+      for (int i = 0; i < vNodes.size(); i++) {
+         BaseNode vNode = vNodes.get(i);
+         vNode.setTargetVcDs(getVcDatastore(vNode));
+         vNode.setTargetVcRp(getVcResourcePool(vNode, clusterRpName));
+         vNode.setTargetVcFoler(folders.get(vNode.getGroupName()));
+         vNode.setTargetVcHost(VcResourceUtils.findHost(vNode.getTargetHost()));
+      }
+
+      try {
+         UpdateVmProgressCallback callback =
+               new UpdateVmProgressCallback(clusterEntityMgr, statusUpdator,
+                     vNodes.get(0).getClusterName());
+         cloneSrv.setProgressCallback(callback);
+
+         // call fast clone service to copy templates
+         logger.info("ClusteringService, start to cloning template.");
+         boolean success = cloneSrv.start();
+
+         logger.info(cloneSrv.getCopied().size() + " VMs are created.");
+         return success;
+      } catch (Exception e) {
+         logger.error("error in cloning VMs", e);
          throw BddException.INTERNAL(e, e.getMessage());
       }
    }
@@ -1131,7 +1176,7 @@ public class ClusteringService implements IClusteringService {
 
    public boolean removeBadNodes(ClusterCreate cluster,
          List<BaseNode> existingNodes, List<BaseNode> deletedNodes,
-         Set<String> occupiedIps, StatusUpdater statusUpdator) {
+         StatusUpdater statusUpdator) {
       logger.info("Start to remove node violate placement policy "
             + "or in wrong status in cluster: " + cluster.getName());
       // call tm to remove bad nodes
@@ -1146,7 +1191,7 @@ public class ClusteringService implements IClusteringService {
 
       if (badNodes != null && badNodes.size() > 0) {
          boolean deleted = syncDeleteVMs(badNodes, statusUpdator);
-         afterBadVcVmDelete(existingNodes, deletedNodes, badNodes, occupiedIps);
+         afterBadVcVmDelete(existingNodes, deletedNodes, badNodes);
          return deleted;
       }
       return true;
@@ -1158,8 +1203,7 @@ public class ClusteringService implements IClusteringService {
    }
 
    private void afterBadVcVmDelete(List<BaseNode> existingNodes,
-         List<BaseNode> deletedNodes, List<BaseNode> vcDeletedNodes,
-         Set<String> occupiedIps) {
+         List<BaseNode> deletedNodes, List<BaseNode> vcDeletedNodes) {
       // clean up in memory node list
       deletedNodes.addAll(vcDeletedNodes);
       Set<String> deletedNodeNames = new HashSet<String>();
@@ -1169,7 +1213,6 @@ public class ClusteringService implements IClusteringService {
       for (Iterator<BaseNode> ite = existingNodes.iterator(); ite.hasNext();) {
          BaseNode vNode = ite.next();
          if (deletedNodeNames.contains(vNode.getVmName())) {
-            occupiedIps.remove(vNode.getIpAddress());
             ite.remove();
          }
       }

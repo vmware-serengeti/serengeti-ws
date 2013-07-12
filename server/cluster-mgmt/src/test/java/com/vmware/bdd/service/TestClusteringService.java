@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.vmware.bdd.entity.ClusterEntity;
 import mockit.Mockit;
 
 import org.apache.log4j.Logger;
@@ -27,6 +26,7 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.VcProviderException;
@@ -96,7 +96,7 @@ public class TestClusteringService {
       vNodes.add(node);
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, false);
       try {
-         service.createVcVms(networkAdd, vNodes, null, null);
+         service.reconfigVms(networkAdd, vNodes, null, null);
          Assert.assertTrue(false, "should throw exception but not.");
       } catch (Exception e) {
          logger.info(e.getMessage(), e);
@@ -114,7 +114,7 @@ public class TestClusteringService {
       vNodes.add(node);
       MockTmScheduler.setResultIsNull(true);
       try {
-         service.createVcVms(networkAdd, vNodes, null, null);
+         service.reconfigVms(networkAdd, vNodes, null, null);
          Assert.assertTrue(false, "should throw exception but not.");
       } catch (Exception e) {
          logger.info(e.getMessage(), e);
@@ -152,7 +152,7 @@ public class TestClusteringService {
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, true);
       MockTmScheduler.setFlag(VmOperation.CREATE_VM, false);
 
-      boolean success = service.createVcVms(networkAdd, vNodes, null, null);
+      boolean success = service.reconfigVms(networkAdd, vNodes, null, null);
       Assert.assertTrue(!success, "should get create vm failed.");
    }
 
@@ -213,7 +213,7 @@ public class TestClusteringService {
 
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, true);
       MockTmScheduler.setFlag(VmOperation.CREATE_VM, true);
-      boolean success = service.createVcVms(networkAdd, vNodes, null, null);
+      boolean success = service.reconfigVms(networkAdd, vNodes, null, null);
       Assert.assertTrue(success, "should get create vm success.");
    }
 
