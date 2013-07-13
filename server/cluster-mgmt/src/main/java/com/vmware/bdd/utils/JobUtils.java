@@ -9,7 +9,6 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.vc.VcCache;
-import com.vmware.aurora.vc.VcSnapshot;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.LimitInstruction;
@@ -100,15 +99,12 @@ public class JobUtils {
     * @param occupiedIps
     */
    public static void removeNonExistNodes(List<BaseNode> existingNodes,
-         List<BaseNode> deletedNodes) {
+         List<BaseNode> deletedNodes, Set<String> occupiedIps) {
       for (BaseNode node : existingNodes) {
          if (node.getVmMobId() == null) {
             deletedNodes.add(node);
-            continue;
-         }
-         VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getVmMobId());
-         if (vm == null) {
-            deletedNodes.add(node);
+         } else {
+            occupiedIps.add(node.getIpAddress());
          }
       }
       existingNodes.removeAll(deletedNodes);
@@ -124,27 +120,30 @@ public class JobUtils {
     * @param occupiedIps
     */
    public static void separateVcUnreachableNodes(List<BaseNode> existingNodes,
-         List<BaseNode> deletedNodes) {
+         List<BaseNode> deletedNodes, Set<String> occupiedIps) {
       for (BaseNode node : existingNodes) {
          if (node.getVmMobId() == null) {
             deletedNodes.add(node);
             continue;
          }
          VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getVmMobId());
-         if (vm == null) {
+         if (vm == null || (!vm.isPoweredOn())
+               || (VcVmUtil.getIpAddress(vm, false) == null)) {
             deletedNodes.add(node);
             continue;
          }
-         if ((!vm.isPoweredOn())
-               || (VcVmUtil.getIpAddress(vm, false) == null)) {
-            // add check for snapshot
-            VcSnapshot snapshot = vm.getSnapshotByName(Constants.ROOT_SNAPSTHOT_NAME);
-            if (snapshot == null) {
-               // invalid node, delete it
+         String haFlag = node.getNodeGroup().getHaFlag();
+         if (haFlag != null
+               && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
+            if (!VcVmUtil.verifyFTState(vm)) {
+               logger.info("FT secondary VM state incorrect for node "
+                     + vm.getName() + ", " + "FT state " + vm.getFTState()
+                     + " is unexpected.");
                deletedNodes.add(node);
                continue;
             }
          }
+         occupiedIps.add(node.getIpAddress());
       }
       existingNodes.removeAll(deletedNodes);
    }

@@ -41,11 +41,13 @@ public class ResumeClusterRemoveBadNodeStep extends TrackableTasklet {
       ClusterCreate clusterSpec = configMgr.getClusterConfig(clusterName);
       List<BaseNode> existingNodes = JobUtils.getExistingNodes(clusterSpec, getClusterEntityMgr());
       List<BaseNode> deletedNodes = new ArrayList<BaseNode>();
-      JobUtils.separateVcUnreachableNodes(existingNodes, deletedNodes);
+      Set<String> occupiedIps = new HashSet<String>();
+      JobUtils.separateVcUnreachableNodes(existingNodes, deletedNodes, occupiedIps);
 
-      boolean deleted = clusteringService.removeBadNodes(clusterSpec, existingNodes, deletedNodes, statusUpdator);
+      boolean deleted = clusteringService.removeBadNodes(clusterSpec, existingNodes, deletedNodes, occupiedIps, statusUpdator);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, existingNodes);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_SPEC_JOB_PARAM, clusterSpec);
+      putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_USED_IP_JOB_PARAM, occupiedIps);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_DELETED_NODES_JOB_PARAM, deletedNodes);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_DELETE_VM_OPERATION_SUCCESS, deleted);
       return RepeatStatus.FINISHED;

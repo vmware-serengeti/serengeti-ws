@@ -14,14 +14,16 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
 import com.google.gson.reflect.TypeToken;
-import com.vmware.bdd.exception.ClusteringServiceException;
+import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IClusteringService;
 
@@ -36,20 +38,19 @@ public class CreateClusterVMStep extends TrackableTasklet {
             getJobExecutionId(chunkContext));
       List<BaseNode> nodes = getFromJobExecutionContext(chunkContext, JobConstants.CLUSTER_ADDED_NODES_JOB_PARAM,
             new TypeToken<List<BaseNode>>() {}.getType());
-      boolean success = clusteringService.createVcVms(nodes, statusUpdator);
+      ClusterCreate clusterSpec = getFromJobExecutionContext(chunkContext,JobConstants.CLUSTER_SPEC_JOB_PARAM, ClusterCreate.class);
+      Set<String> usedIps = getFromJobExecutionContext(chunkContext, JobConstants.CLUSTER_USED_IP_JOB_PARAM, new TypeToken<Set<String>>() {}.getType());
+      if (usedIps == null) {
+         usedIps = new HashSet<String>();
+      }
+      boolean success = clusteringService.createVcVms(clusterSpec.getNetworking().get(0), nodes, statusUpdator, usedIps);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_CREATE_VM_OPERATION_SUCCESS, success);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_ADDED_NODES_JOB_PARAM, nodes);
-      if (!success) {
-         UUID reservationId = getFromJobExecutionContext(chunkContext, JobConstants.CLUSTER_RESOURCE_RESERVATION_ID_JOB_PARAM, UUID.class);
-         if (reservationId != null) {
-            // release the resource reservation since vm is created
-            clusteringService.commitReservation(reservationId);
-            putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_RESOURCE_RESERVATION_ID_JOB_PARAM, null);
-         }
-         String clusterName =
-            getJobParameters(chunkContext).getString(
-                  JobConstants.CLUSTER_NAME_JOB_PARAM);
-         throw ClusteringServiceException.VM_CREATION_FAILED(clusterName);
+      UUID reservationId = getFromJobExecutionContext(chunkContext, JobConstants.CLUSTER_RESOURCE_RESERVATION_ID_JOB_PARAM, UUID.class);
+      if (reservationId != null) {
+         // release the resource reservation since vm is created
+         clusteringService.commitReservation(reservationId);
+         putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_RESOURCE_RESERVATION_ID_JOB_PARAM, null);
       }
       return RepeatStatus.FINISHED;
    }
