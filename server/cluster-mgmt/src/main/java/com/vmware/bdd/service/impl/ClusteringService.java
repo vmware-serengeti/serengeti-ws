@@ -16,6 +16,7 @@
 package com.vmware.bdd.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -70,7 +71,9 @@ import com.vmware.bdd.entity.resmgmt.ResourceReservation;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.exception.VcProviderException;
+import com.vmware.bdd.fastclone.impl.AbstractFastCopierFactory;
 import com.vmware.bdd.fastclone.impl.FastCloneServiceImpl;
+import com.vmware.bdd.fastclone.impl.VmCloneSpFactory;
 import com.vmware.bdd.fastclone.intf.FastCloneService;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.ClusterEntityManager;
@@ -211,7 +214,8 @@ public class ClusteringService implements IClusteringService {
 
          Scheduler.init(Integer.parseInt(poolSize), Integer.parseInt(poolSize));
          String concurrency =
-            Configuration.getNonEmptyString("serengeti.singlevm.concurrency");
+               Configuration
+                     .getNonEmptyString("serengeti.singlevm.concurrency");
          if (concurrency != null) {
             cloneConcurrency = Integer.parseInt(concurrency);
          } else {
@@ -242,6 +246,7 @@ public class ClusteringService implements IClusteringService {
          diskSpecs.add(spec);
       }
       templateNode.setDisks(diskSpecs);
+      templateNode.setVmMobId(templateVm.getId());
    }
 
    private VcVirtualMachine getTemplateVm() {
@@ -750,6 +755,8 @@ public class ClusteringService implements IClusteringService {
       allocateStaticIp(networkAdd, vNodes, occupiedIps);
       Pair<Callable<Void>, Callable<Void>>[] storeProcedures =
             new Pair[vNodes.size()];
+      String uuid = ConfigInfo.getSerengetiUUID();
+      String clusterRpName = uuid + "-" + vNodes.get(0).getClusterName();
       for (int i = 0; i < vNodes.size(); i++) {
          BaseNode vNode = vNodes.get(i);
          VmSchema createSchema = getVmSchema(vNode);
@@ -764,16 +771,17 @@ public class ClusteringService implements IClusteringService {
          CreateVmSP cloneVmSp = null;
          if (vcVm != null) {
             cloneVmSp =
-                  new CreateVmSP(vcVm, createSchema, vNode.getTargetVcRp(),
-                        vNode.getTargetVcDs(), prePowerOn, query,
-                        guestVariable, false, vNode.getTargetVcFolder(),
-                        vNode.getTargetVcHost());
+                  new CreateVmSP(vcVm, createSchema, getVcResourcePool(vNode,
+                        clusterRpName), getVcDatastore(vNode), prePowerOn,
+                        query, guestVariable, false, getVcFolder(vNode),
+                        VcResourceUtils.findHost(vNode.getTargetHost()));
          } else {
             cloneVmSp =
                   new CreateVmSP(vNode.getVmName(), createSchema,
-                        vNode.getTargetVcRp(), vNode.getTargetVcDs(),
-                        prePowerOn, query, guestVariable, false,
-                        vNode.getTargetVcFolder(), vNode.getTargetVcHost());
+                        getVcResourcePool(vNode, clusterRpName),
+                        getVcDatastore(vNode), prePowerOn, query,
+                        guestVariable, false, getVcFolder(vNode),
+                        VcResourceUtils.findHost(vNode.getTargetHost()));
          }
 
          CompensateCreateVmSP deleteVmSp = new CompensateCreateVmSP(cloneVmSp);
@@ -846,10 +854,14 @@ public class ClusteringService implements IClusteringService {
       Map<String, Folder> folders = createVcFolders(vNodes.get(0).getCluster());
       String clusterRpName = createVcResourcePools(vNodes);
       logger.info("syncCreateVMs, start to create VMs.");
-      FastCloneService<BaseNode> cloneSrv = new FastCloneServiceImpl<BaseNode>();
+      FastCloneService<BaseNode> cloneSrv =
+            new FastCloneServiceImpl<BaseNode>();
+      // set copier factory
+      AbstractFastCopierFactory<BaseNode> copierFactory =
+            new VmCloneSpFactory();
+      cloneSrv.setFastCopierFactory(copierFactory);
       cloneSrv.addResource(templateNode, cloneConcurrency);
-      for (int i = 0; i < vNodes.size(); i++) {
-         BaseNode vNode = vNodes.get(i);
+      for (BaseNode vNode : vNodes) {
          vNode.setTargetVcDs(getVcDatastore(vNode));
          vNode.setTargetVcRp(getVcResourcePool(vNode, clusterRpName));
          vNode.setTargetVcFoler(folders.get(vNode.getGroupName()));
@@ -866,7 +878,6 @@ public class ClusteringService implements IClusteringService {
          // call fast clone service to copy templates
          logger.info("ClusteringService, start to cloning template.");
          boolean success = cloneSrv.start();
-
          logger.info(cloneSrv.getCopied().size() + " VMs are created.");
          return success;
       } catch (Exception e) {
@@ -942,6 +953,13 @@ public class ClusteringService implements IClusteringService {
             + " is not found.");
       throw ClusteringServiceException.TARGET_VC_DATASTORE_NOT_FOUND(vNode
             .getTargetDs());
+   }
+
+   private Folder getVcFolder(BaseNode vNode) {
+      String path = vNode.getNodeGroup().getVmFolderPath();
+      String[] folderNames = path.split("/");
+      return VcResourceUtils.findFolderByNameList(templateVm.getDatacenter(),
+            Arrays.asList(folderNames));
    }
 
    private VcResourcePool getVcResourcePool(BaseNode vNode,

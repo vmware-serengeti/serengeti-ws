@@ -73,10 +73,10 @@ public class BaseNode {
 
    // this class becomes overloaded
    private boolean linkedClone;
-   private VcDatastore targetVcDs;
-   private VcResourcePool targetVcRp;
-   private VcHost targetVcHost;
-   private Folder targetVcFolder;
+   transient private VcDatastore targetVcDs;
+   transient private VcResourcePool targetVcRp;
+   transient private VcHost targetVcHost;
+   transient private Folder targetVcFolder;
 
    public BaseNode() {
       super();

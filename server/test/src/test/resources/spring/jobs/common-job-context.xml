@@ -159,5 +159,10 @@
       <beans:property name="executionService" ref="executionService" />
       <beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
    </beans:bean>
+   	<beans:bean name="reconfigVmTasket"
+		class="com.vmware.bdd.service.job.ConfigClusterVMStep">
+		<beans:property name="clusteringService" ref="clusteringService" />
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+	</beans:bean>
    
 </beans:beans>

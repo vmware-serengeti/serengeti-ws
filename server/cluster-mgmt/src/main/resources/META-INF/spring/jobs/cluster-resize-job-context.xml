@@ -1,97 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans:beans xmlns="http://www.springframework.org/schema/batch"
-   xmlns:beans="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
    http://www.springframework.org/schema/beans
    http://www.springframework.org/schema/beans/spring-beans.xsd
    http://www.springframework.org/schema/batch
    http://www.springframework.org/schema/batch/spring-batch.xsd
    http://www.springframework.org/schema/aop
    http://www.springframework.org/schema/aop/spring-aop.xsd">
-   
-   <beans:import resource="classpath*:/META-INF/spring/jobs/common-job-context.xml" />
-   
-   <beans:bean id="resizeClusterJobListener"
-      class="com.vmware.bdd.service.job.ResizeClusterJobExecutionListener">
-      <beans:property name="jobExecutionStatusHolder"
-         ref="jobExecutionStatusHolder" />
-      <beans:property name="clusteringService" ref="clusteringService" />
-      <beans:property name="executionService" ref="executionService" />
-      <beans:property name="recoverAutoFlagAfterJob" value="true" />
-   </beans:bean>
 
-   <beans:bean name="resizeClusterRemoveBadNodeTasklet"
-      class="com.vmware.bdd.service.job.ResizeClusterRemoveBadNodeStep">
-      <beans:property name="clusteringService" ref="clusteringService" />
-      <beans:property name="configMgr" ref="clusterConfigMgr" />
-      <beans:property name="jobExecutionStatusHolder"
-         ref="jobExecutionStatusHolder" />
-   </beans:bean>
-   
-   <job id="resizeClusterJob" job-repository="jobRepository">
-      <step id="resizeRemoveBadNodesStep" next="updateResizeClusterDataStep1">
-         <tasklet ref="resizeClusterRemoveBadNodeTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
-      <step id="updateResizeClusterDataStep1" next="nodeStatusVerifyStep1">
-         <tasklet ref="updateClusterDataTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
-      <step id="nodeStatusVerifyStep1" next="resizePlanStep">
-         <tasklet ref="clusterNodeStatusVerifyTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
-      <step id="resizePlanStep" next="updateResizeClusterDataStep2">
-         <tasklet ref="resumeResizeClusterPlanTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
-      <step id="updateResizeClusterDataStep2" next="resizeVMStep">
-         <tasklet ref="updateClusterDataTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
-      <step id="resizeVMStep" next="updateResizeClusterDataStep3">
-         <tasklet ref="createClusterVMTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
-      <step id="updateResizeClusterDataStep3" next="nodeStatusVerifyStep2">
-         <tasklet ref="updateClusterDataTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
-      <step id="nodeStatusVerifyStep2" next="setAutoElasticityResizeStep">
-         <tasklet ref="clusterNodeStatusVerifyTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
-      <step id="setAutoElasticityResizeStep" next="softwareResizeClusterStep">
-         <tasklet ref="setAutoElasticityTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
-      <step id="softwareResizeClusterStep">
-         <tasklet ref="softwareCreateClusterTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
-      <listeners>
-         <listener ref="resizeClusterJobListener" />
-      </listeners>
-   </job>
+	<beans:import resource="classpath*:/META-INF/spring/jobs/common-job-context.xml" />
+
+	<beans:bean id="resizeClusterJobListener"
+		class="com.vmware.bdd.service.job.ResizeClusterJobExecutionListener">
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+		<beans:property name="clusteringService" ref="clusteringService" />
+		<beans:property name="executionService" ref="executionService" />
+		<beans:property name="recoverAutoFlagAfterJob" value="true" />
+	</beans:bean>
+
+	<beans:bean name="resizeClusterRemoveBadNodeTasklet"
+		class="com.vmware.bdd.service.job.ResizeClusterRemoveBadNodeStep">
+		<beans:property name="clusteringService" ref="clusteringService" />
+		<beans:property name="configMgr" ref="clusterConfigMgr" />
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+	</beans:bean>
+
+	<job id="resizeClusterJob" job-repository="jobRepository">
+		<step id="resizeRemoveBadNodesStep" next="updateResizeClusterDataStep1">
+			<tasklet ref="resizeClusterRemoveBadNodeTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="updateResizeClusterDataStep1" next="nodeStatusVerifyStep1">
+			<tasklet ref="updateClusterDataTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="nodeStatusVerifyStep1" next="resizePlanStep">
+			<tasklet ref="clusterNodeStatusVerifyTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="resizePlanStep" next="updateResizeClusterDataStep2">
+			<tasklet ref="resumeResizeClusterPlanTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="updateResizeClusterDataStep2" next="resizeVMStep">
+			<tasklet ref="updateClusterDataTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="resizeVMStep" next="resizeReconfigVm">
+			<tasklet ref="createClusterVMTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="resizeReconfigVm" next="updateResizeClusterDataStep3">
+			<tasklet ref="reconfigVmTasket" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="updateResizeClusterDataStep3" next="nodeStatusVerifyStep2">
+			<tasklet ref="updateClusterDataTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="nodeStatusVerifyStep2" next="setAutoElasticityResizeStep">
+			<tasklet ref="clusterNodeStatusVerifyTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="setAutoElasticityResizeStep" next="softwareResizeClusterStep">
+			<tasklet ref="setAutoElasticityTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="softwareResizeClusterStep">
+			<tasklet ref="softwareCreateClusterTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<listeners>
+			<listener ref="resizeClusterJobListener" />
+		</listeners>
+	</job>
 </beans:beans>

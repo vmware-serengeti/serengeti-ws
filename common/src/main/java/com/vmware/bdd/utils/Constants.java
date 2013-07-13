@@ -54,6 +54,7 @@ public class Constants {
    public static final String NODE_ACTION_CLONING_FAILED = "Cloning VM failed";
    public static final String NODE_ACTION_WAITING_IP = "Waiting for ip";
    public static final String NODE_ACTION_RECONFIGURE = "Reconfiging VM";
+   public static final String NODE_ACTION_WAITING = "Waiting";
    public static final String NODE_ACTION_GET_IP_FAILED =
          "Failed to get VM ip address";
    public static final int VM_POWER_ON_WAITING_SEC = 600;

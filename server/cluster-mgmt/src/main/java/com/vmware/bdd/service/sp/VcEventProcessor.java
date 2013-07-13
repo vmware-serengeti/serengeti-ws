@@ -170,7 +170,7 @@ public class VcEventProcessor {
                      logger.info("received internal vm cloned event for vm: "
                            + vm.getName());
                      clusterEntityMgr.refreshNodeByVmName(moId, vm.getName(), 
-                           Constants.NODE_ACTION_RECONFIGURE, true);
+                           Constants.NODE_ACTION_WAITING, true);
                   }
                   break;
                }
