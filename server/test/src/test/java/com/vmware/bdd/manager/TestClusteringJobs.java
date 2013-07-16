@@ -40,6 +40,7 @@ import com.google.gson.Gson;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcResourcePool;
+import com.vmware.aurora.vc.VcSnapshot;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
@@ -72,6 +73,7 @@ import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.TestResourceCleanupUtils;
+import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
 import com.vmware.vim.binding.vim.Folder;
 
 @ContextConfiguration(locations = {
@@ -175,6 +177,7 @@ public class TestClusteringJobs extends
 
       // init vc context
       clusterSvc.init();
+      testSnapshot();
       cleanUpUtils = new TestResourceCleanupUtils();
       cleanUpUtils.setDsSvc(dsSvc);
       cleanUpUtils.setNetSvc(netSvc);
@@ -216,6 +219,39 @@ public class TestClusteringJobs extends
       } catch (Exception e) {
          logger.error("ignore create ip pool exception. ", e);
       }
+   }
+
+   private void testSnapshot() {
+      // test code, probably be useful for some investigation
+/*      VcContext.inVcSessionDo(new VcSession<Boolean>() {
+         @Override
+         protected boolean isTaskSession() {
+            return true;
+         }
+
+         @Override
+         protected Boolean body() throws Exception {
+            try {
+               VcVirtualMachine vm = VcCache.getIgnoreMissing("null:VirtualMachine:vm-3031");
+               VcSnapshot snap = vm.getSnapshotByName("serengeti-snapshot");
+               ConfigSpecImpl configSpec = new ConfigSpecImpl();
+               List<String> folders = new ArrayList<String>();
+               folders.add("line");
+               VcVirtualMachine.CreateSpec vmSpec =
+                  new VcVirtualMachine.CreateSpec("test-line1", snap,
+                        VcResourceUtils.findRPInVCCluster("dev-1", "line"), 
+                        VcResourceUtils.findDSInVcByName("line_1"),
+                        VcResourceUtils.findFolderByNameList(vm.getDatacenter(), folders), 
+                        false,
+                        configSpec);
+               // Clone from the template
+               VcVirtualMachine vcVm = vm.cloneVm(vmSpec, null);
+            } catch (Exception e) {
+               e.printStackTrace();
+            }
+            return null;
+         }
+      });*/
    }
 
    private void removeRackInfo() {
