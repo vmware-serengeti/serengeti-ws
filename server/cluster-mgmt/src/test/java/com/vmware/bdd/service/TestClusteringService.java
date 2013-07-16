@@ -73,6 +73,10 @@ public class TestClusteringService {
       Field field = service.getClass().getDeclaredField("templateVm");
       field.setAccessible(true);
       field.set(service, vm);
+
+      field = service.getClass().getDeclaredField("cloneConcurrency");
+      field.setAccessible(true);
+      field.set(service, 2);
    }
 
    @Test(groups = { "TestClusteringService" })
@@ -96,6 +100,8 @@ public class TestClusteringService {
       BaseNode node = new BaseNode("test-master-0");
       ClusterCreate spec = createClusterSpec();
       node.setCluster(spec);
+      VmSchema vmSchema = createVmSchema();
+      node.setVmSchema(vmSchema);
       vNodes.add(node);
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, false);
       try {
@@ -114,6 +120,8 @@ public class TestClusteringService {
       BaseNode node = new BaseNode("test-master-0");
       ClusterCreate spec = createClusterSpec();
       node.setCluster(spec);
+      VmSchema vmSchema = createVmSchema();
+      node.setVmSchema(vmSchema);
       vNodes.add(node);
       MockTmScheduler.setResultIsNull(true);
       try {
@@ -221,6 +229,8 @@ public class TestClusteringService {
 
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, true);
       MockTmScheduler.setFlag(VmOperation.CREATE_VM, true);
+      MockVcCache.setGetFlag(true);
+      
       boolean success = service.createVcVms(networkAdd, vNodes, null, null);
       Assert.assertTrue(success, "should get create vm success.");
    }

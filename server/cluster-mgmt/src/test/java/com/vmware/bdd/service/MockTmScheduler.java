@@ -15,7 +15,6 @@ import org.mockito.Mockito;
 
 import com.google.gson.internal.Pair;
 import com.vmware.aurora.composition.CreateVMFolderSP;
-import com.vmware.aurora.composition.CreateVmSP;
 import com.vmware.aurora.composition.DeleteVMFolderSP;
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Priority;
@@ -25,6 +24,8 @@ import com.vmware.aurora.vc.VcCluster;
 import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.bdd.fastclone.impl.CreateVmSP;
+import com.vmware.bdd.fastclone.impl.VmCreateSpec;
 import com.vmware.bdd.service.sp.ConfigIOShareSP;
 import com.vmware.bdd.service.sp.CreateResourcePoolSP;
 import com.vmware.bdd.service.sp.DeleteVmByIdSP;
@@ -108,16 +109,20 @@ public class MockTmScheduler {
       }
 
       ExecutionResult[] result = new ExecutionResult[storedProcedures.length];
-      VmOperation operation = getOperation(storedProcedures[0]);
-      boolean flag = getFlag(operation);
       for (int i = 0; i < result.length; i++) {
+         VmOperation operation = getOperation(storedProcedures[i]);
+         boolean flag = getFlag(operation);
          ExecutionResult r = null;
          if (flag) {
             r = new ExecutionResult(true, null);
             if (operation == VmOperation.CREATE_FOLDER) {
                CreateVMFolderSP sp = (CreateVMFolderSP)storedProcedures[i];
                setReturnFolder(sp);
+            } else if (operation == VmOperation.CREATE_VM) {
+               CreateVmSP sp = (CreateVmSP)storedProcedures[i];
+               setReturnVM(sp);
             }
+            r = new ExecutionResult(true, null);
          } else {
             r = new ExecutionResult(true, new Throwable("test failure"));
          }
@@ -141,18 +146,12 @@ public class MockTmScheduler {
 
    private static void setReturnVM(CreateVmSP sp) {
       try {
-         VcVirtualMachine vm = Mockito.mock(VcVirtualMachine.class);
-         VcHost host = Mockito.mock(VcHost.class);
-         Mockito.when(vm.getHost()).thenReturn(host);
-         Mockito.when(host.getName()).thenReturn("host1.eng.vmware.com");
-         VcResourcePool rp = Mockito.mock(VcResourcePool.class);
-         Mockito.when(vm.getResourcePool()).thenReturn(rp);
-         VcCluster cluster = Mockito.mock(VcCluster.class);
-         Mockito.when(rp.getVcCluster()).thenReturn(cluster);
-         Mockito.when(cluster.getName()).thenReturn("cluster-ws");
-         Field field = sp.getClass().getDeclaredField("vcVm");
+         VmCreateSpec spec = Mockito.mock(VmCreateSpec.class);
+         Mockito.when(spec.getVmName()).thenReturn(sp.getTargets().getFirst().getVmName());
+         Mockito.when(spec.getVmId()).thenReturn("create-vm-succ");
+         Field field = sp.getClass().getDeclaredField("targetVmSpec");
          field.setAccessible(true);
-         field.set(sp, vm);
+         field.set(sp, spec);
       } catch (Exception e) {
          logger.error("set return value failed.", e);
       }
