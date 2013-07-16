@@ -24,7 +24,6 @@ import java.util.Iterator;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 
-import com.vmware.aurora.buildinfo.BuildInfo;
 import com.vmware.aurora.exception.AuroraException;
 import com.vmware.aurora.exception.CommonException;
 import com.vmware.aurora.util.AuAssert;

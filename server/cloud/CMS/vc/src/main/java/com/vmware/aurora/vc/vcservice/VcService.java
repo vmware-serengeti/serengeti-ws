@@ -76,7 +76,8 @@ public class VcService {
    private static final Logger logger = Logger.getLogger(VcService.class);
 
    private static final Class<?> version = version8.class;
-   private static final int SESSION_TIME_OUT = 120000;
+   private static final int SESSION_TIME_OUT = Configuration.getInt(
+         "vc.session_time_out", 120000);
 
    /*
     * The following fields are VC login info, initialized once.
