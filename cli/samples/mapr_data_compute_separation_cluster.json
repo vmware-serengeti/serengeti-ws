@@ -74,7 +74,7 @@
         "mapr_fileserver",
         "mapr_tasktracker"
       ],
-      "instanceNum" : 6,
+      "instanceNum" : 3,
       "storage" : {
         "type" : "LOCAL",
         "sizeGB" : 20

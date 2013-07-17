@@ -20,7 +20,7 @@
       "roles": [
         "hadoop_datanode"
       ],
-      "instanceNum": 4,
+      "instanceNum": 3,
       "cpuNum": 1,
       "memCapacityMB": 3748,	
       "storage": {
@@ -34,7 +34,7 @@
       "roles": [
         "hadoop_nodemanager"
       ],
-      "instanceNum": 8,
+      "instanceNum": 3,
       "cpuNum": 2,
       "memCapacityMB": 7500,
       "storage": {

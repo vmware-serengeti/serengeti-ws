@@ -78,7 +78,7 @@
         "mapr_fileserver",
         "mapr_tasktracker"
       ],
-      "instanceNum" : 5, // set a bigger number of nodes in worker group to create a large scale cluster
+      "instanceNum" : 3, // set a bigger number of nodes in worker group to create a large scale cluster
       "storage" : {
         "type" : "LOCAL",
         "sizeGB" : 50

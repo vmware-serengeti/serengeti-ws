@@ -17,7 +17,7 @@
       "roles": [
         "hadoop_tasktracker"
       ],
-      "instanceNum": 4,
+      "instanceNum": 3,
       "cpuNum": 2,
       "memCapacityMB": 7500,
       "storage": {

@@ -76,8 +76,8 @@
     {
       "name": "worker",
       "roles": [
-        "hadoop_tasktracker",
-        "hadoop_datanode"
+        "hadoop_datanode",
+        "hadoop_tasktracker"
       ],
       "instanceNum": 3,
       "cpuNum": 2,
