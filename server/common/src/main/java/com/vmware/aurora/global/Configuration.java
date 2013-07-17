@@ -88,7 +88,6 @@ public class Configuration {
          throw AuroraException.APP_INIT_ERROR(ex, message);
       }
 
-
       logConfig(config);
       return config;
    }
