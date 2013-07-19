@@ -22,12 +22,12 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import com.vmware.aurora.util.AuAssert;
-
 import com.vmware.aurora.vc.VcCluster;
 import com.vmware.aurora.vc.VcNetwork;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.VmConfigUtil;
 import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
+import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
 import com.vmware.vim.binding.vim.vm.device.VirtualDeviceSpec;
 
 /**
@@ -53,16 +53,18 @@ public class NetworkSchemaUtil {
       for (NetworkSchema.Network network : networkSchema.networks) {
          VcNetwork vN = cluster.getNetwork(network.vcNetwork);
          AuAssert.check(vN != null);
-         if (network.nicLabel != null
-               && vcVm.getDeviceByLabel(network.nicLabel) != null) {
-            // Edit existing networks
-            changes.add(vcVm.reconfigNetworkSpec(network.nicLabel, vN));
-         } else {
-            // Add new networks
-            VirtualDeviceSpec deviceSpec = VmConfigUtil.createNetworkDevice(
-                  VmConfigUtil.EthernetControllerType.VMXNET3, network.nicLabel, vN);
-            changes.add(deviceSpec);
+         VirtualDevice nic = null;
+         if (network.nicLabel != null) {
+            nic = vcVm.getDeviceByLabel(network.nicLabel);
+            if (nic != null) {
+               // drop existing network to replace with vmxnet3 nic
+               changes.add(VmConfigUtil.removeDeviceSpec(nic));
+            }
          }
+         // Add new networks
+         VirtualDeviceSpec deviceSpec = VmConfigUtil.createNetworkDevice(
+               VmConfigUtil.EthernetControllerType.VMXNET3, network.nicLabel, vN);
+         changes.add(deviceSpec);
       }
 
       spec.setDeviceChange(changes.toArray(new VirtualDeviceSpec[changes.size()]));
