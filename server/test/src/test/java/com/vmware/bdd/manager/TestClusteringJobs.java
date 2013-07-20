@@ -223,7 +223,7 @@ public class TestClusteringJobs extends
 
    private void testSnapshot() {
       // test code, probably be useful for some investigation
-/*      VcContext.inVcSessionDo(new VcSession<Boolean>() {
+     /* VcContext.inVcSessionDo(new VcSession<Boolean>() {
          @Override
          protected boolean isTaskSession() {
             return true;
@@ -231,25 +231,27 @@ public class TestClusteringJobs extends
 
          @Override
          protected Boolean body() throws Exception {
-            try {
-               VcVirtualMachine vm = VcCache.getIgnoreMissing("null:VirtualMachine:vm-3031");
-               VcSnapshot snap = vm.getSnapshotByName("serengeti-snapshot");
-               ConfigSpecImpl configSpec = new ConfigSpecImpl();
-               List<String> folders = new ArrayList<String>();
-               folders.add("line");
-               VcVirtualMachine.CreateSpec vmSpec =
-                  new VcVirtualMachine.CreateSpec("test-line1", snap,
-                        VcResourceUtils.findRPInVCCluster("dev-1", "line"), 
-                        VcResourceUtils.findDSInVcByName("line_1"),
-                        VcResourceUtils.findFolderByNameList(vm.getDatacenter(), folders), 
-                        false,
-                        configSpec);
-               // Clone from the template
-               VcVirtualMachine vcVm = vm.cloneVm(vmSpec, null);
-            } catch (Exception e) {
-               e.printStackTrace();
+            while (true) {
+               try {
+                  VcVirtualMachine vm = VcCache.getIgnoreMissing("null:VirtualMachine:vm-3913");
+                  VcSnapshot snap = vm.getSnapshotByName("serengeti-snapshot");
+                  ConfigSpecImpl configSpec = new ConfigSpecImpl();
+                  List<String> folders = new ArrayList<String>();
+                  folders.add("line");
+                  VcVirtualMachine.CreateSpec vmSpec =
+                     new VcVirtualMachine.CreateSpec("test-line2", snap,
+                           VcResourceUtils.findRPInVCCluster("dev-1", "line"), 
+                           VcResourceUtils.findDSInVcByName("datastore1 (4)"),
+                           VcResourceUtils.findFolderByNameList(vm.getDatacenter(), folders), 
+                           false,
+                           configSpec);
+                  // Clone from the template
+                  VcVirtualMachine vcVm = vm.cloneVm(vmSpec, null);
+               } catch (Exception e) {
+                  e.printStackTrace();
+               }
             }
-            return null;
+//            return null;
          }
       });*/
    }
