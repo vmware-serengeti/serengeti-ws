@@ -37,6 +37,7 @@ import com.vmware.bdd.placement.entity.VirtualGroup;
 import com.vmware.bdd.placement.entity.VirtualNode;
 import com.vmware.bdd.placement.exception.PlacementException;
 import com.vmware.bdd.placement.interfaces.IContainer;
+import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
 
 public class Container implements IContainer {
@@ -179,13 +180,9 @@ public class Container implements IContainer {
    @Override
    public void allocate(VirtualNode vNode, AbstractHost host) {
       for (BaseNode node : vNode.getBaseNodes()) {
-         // system disk
-         this.dc.getDatastore(node.getTargetDs()).allocate(
-               node.getSystemDiskSize());
-         // other disks
-         for (Disk disk : node.getVmSchema().diskSchema.getDisks()) {
-            this.dc.getDatastore(disk.datastore).allocate(
-                  disk.initialSizeMB / 1024);
+         for (DiskSpec disk : node.getDisks()) {
+            this.dc.getDatastore(disk.getTargetDs()).allocate(
+                  disk.getSize());
          }
       }
    }

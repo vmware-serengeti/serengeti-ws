@@ -180,11 +180,14 @@ public class PlacementPlanner implements IPlacementPlanner {
       // initialize disks
       List<DiskSpec> disks = new ArrayList<DiskSpec>();
 
-      /*
-       * system disk is special as it will be inherited from template node, so we
-       * don't need to declare it in VmSchema
-       */
       DiskSpec systemDisk = new DiskSpec(templateNode.getDisks().get(0));
+      /*
+       * TRICK: here we count the size of vswp file into the system disk size, as the
+       * vswp file will be put together with system disk.
+       */
+      systemDisk.setSize(systemDisk.getSize()
+            + (nodeGroup.getMemCapacityMB() + 1023) / 1024);
+
       systemDisk.setDiskType(DiskType.SYSTEM_DISK);
       systemDisk.setSeparable(false);
       disks.add(systemDisk);

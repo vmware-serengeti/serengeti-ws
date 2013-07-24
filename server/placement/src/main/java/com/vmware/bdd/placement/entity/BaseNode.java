@@ -327,6 +327,10 @@ public class BaseNode {
       int paraVirtualScsiIndex = 0;
       for (DiskSpec disk : this.disks) {
          if (disk.isSystemDisk()) {
+            /*
+             * system disk is special as it will be inherited from template node, so we
+             * don't need to declare it in VmSchema
+             */
             setTargetDs(disk.getTargetDs());
          } else {
             Disk tmDisk = new Disk();
