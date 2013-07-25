@@ -919,10 +919,16 @@ public class ClusteringService implements IClusteringService {
       AbstractFastCopierFactory<VmCreateSpec> copierFactory =
             new CreateVmSpFactory();
       cloneSrv.setFastCopierFactory(copierFactory);
+
       VmCreateSpec sourceSpec = new VmCreateSpec();
+
+      // update vm info in vc cache, in case snapshot is removed by others
+      VcVmUtil.updateVm(templateVm.getId());
+
       sourceSpec.setVmId(templateVm.getId());
       sourceSpec.setVmName(templateVm.getName());
       cloneSrv.addResource(sourceSpec, cloneConcurrency);
+
       List<VmCreateSpec> specs = new ArrayList<VmCreateSpec>();
       Map<String, BaseNode> nodeMap = new HashMap<String, BaseNode>();
       for (BaseNode vNode : vNodes) {

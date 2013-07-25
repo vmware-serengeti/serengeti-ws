@@ -260,6 +260,27 @@ public class VcVmUtil {
       return false;
    }
 
+   public static void updateVm(String vmId) {
+      final VcVirtualMachine vm = VcCache.getIgnoreMissing(vmId);
+      try {
+         VcContext.inVcSessionDo(new VcSession<Void>() {
+            @Override
+            protected boolean isTaskSession() {
+               return true;
+            }
+
+            @Override
+            protected Void body() throws Exception {
+               vm.update();
+               return null;
+            }
+         });
+      } catch (Exception e) {
+         logger.info("failed to update vm " + vm.getName()
+               + ", ignore this error.");
+      }
+   }
+
    public static boolean configIOShares(final String vmId,
          final Priority ioShares) {
       final VcVirtualMachine vcVm = VcCache.getIgnoreMissing(vmId);
@@ -303,7 +324,8 @@ public class VcVmUtil {
    public static boolean runSPOnSingleVM(NodeEntity node, Callable<Void> call) {
       boolean operationResult = true;
       if (node == null || node.getMoId() == null) {
-         logger.info("VC vm does not exist for node: " + node == null ? null : node.getVmName());
+         logger.info("VC vm does not exist for node: " + node == null ? null
+               : node.getVmName());
          return false;
       }
       VcVirtualMachine vcVm = VcCache.getIgnoreMissing(node.getMoId());
