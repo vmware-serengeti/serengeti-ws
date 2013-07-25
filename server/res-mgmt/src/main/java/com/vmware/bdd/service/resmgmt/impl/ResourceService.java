@@ -313,6 +313,8 @@ public class ResourceService implements IResourceService {
                }
             }
             if (!found) {
+               logger.error("host " + vcHost + " has networks " + networks
+                     + " does not have target network " + portGroupName);
                result = false;
                break;
             }
