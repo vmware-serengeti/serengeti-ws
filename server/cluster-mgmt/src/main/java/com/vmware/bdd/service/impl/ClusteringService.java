@@ -988,30 +988,6 @@ public class ClusteringService implements IClusteringService {
       }
    }
 
-   private void processException(Throwable throwable) {
-      while (throwable.getCause() != null) {
-         throwable = throwable.getCause();
-         if (throwable instanceof VmFaultToleranceOpIssuesList) {
-            logger.error("Got FT operation error: "
-                  + throwable.getLocalizedMessage());
-            VmFaultToleranceOpIssuesList ftIssues =
-                  (VmFaultToleranceOpIssuesList) throwable;
-            Exception[] errors = ftIssues.getErrors();
-            if (errors != null) {
-               for (Exception e : errors) {
-                  logger.error("FT error: " + e.getLocalizedMessage());
-               }
-            }
-            Exception[] warnings = ftIssues.getWarnings();
-            if (warnings != null) {
-               for (Exception e : warnings) {
-                  logger.error("FT warning: " + e.getLocalizedMessage());
-               }
-            }
-         }
-      }
-   }
-
    private CreateVmPrePowerOn getPrePowerOnFunc(BaseNode vNode) {
       String haFlag = vNode.getNodeGroup().getHaFlag();
       boolean ha = false;
