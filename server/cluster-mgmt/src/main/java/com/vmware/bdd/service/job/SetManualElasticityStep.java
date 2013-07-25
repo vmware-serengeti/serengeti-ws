@@ -17,6 +17,7 @@ package com.vmware.bdd.service.job;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
@@ -42,6 +43,10 @@ public class SetManualElasticityStep extends TrackableTasklet {
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,
          JobExecutionStatusHolder jobExecutionStatusHolder) throws Exception {
+      Map<String, JobParameter> allParameters = getJobParameters(chunkContext).getParameters();
+      if (!allParameters.containsKey(JobConstants.VHM_ACTION_JOB_PARAM) && !allParameters.containsKey(JobConstants.ACTIVE_COMPUTE_NODE_NUMBER_JOB_PARAM)) {
+         return RepeatStatus.FINISHED;
+      }
       String clusterName = getJobParameters(chunkContext).getString(
             JobConstants.CLUSTER_NAME_JOB_PARAM);
       Long activeComputeNodeNum = getJobParameters(chunkContext).getLong(
@@ -96,7 +101,7 @@ public class SetManualElasticityStep extends TrackableTasklet {
       }
       clusterEntity.setAutomationEnable(false);
       clusterEntityManager.update(clusterEntity);
-      return clusteringService.setAutoElasticity(clusterName);
+      return clusteringService.setAutoElasticity(clusterName, false);
    }
 
    public IExecutionService getExecutionService() {

@@ -134,7 +134,7 @@ public interface IClusteringService {
     * @param clusterName
     * @return
     */
-   public boolean setAutoElasticity(String clusterName);
+   public boolean setAutoElasticity(String clusterName, boolean refreshAllNodes);
 
    /**
     * adjust disk io shares to specified level, NORMAL, HIGH or LOW

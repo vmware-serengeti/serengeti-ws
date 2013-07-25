@@ -79,11 +79,19 @@
 		<beans:property name="clusteringService" ref="clusteringService" />
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 	</beans:bean>
+	<beans:bean name="setAutoElasticityTaskletRefreshAllNodes"
+		class="com.vmware.bdd.service.job.SetAutoElasticityStep">
+		<beans:property name="executionService" ref="executionService" />
+		<beans:property name="clusteringService" ref="clusteringService" />
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+		<beans:property name="refreshAllNodes" value="true" />
+	</beans:bean>
 	<beans:bean name="setAutoElasticityTasklet"
 		class="com.vmware.bdd.service.job.SetAutoElasticityStep">
 		<beans:property name="executionService" ref="executionService" />
 		<beans:property name="clusteringService" ref="clusteringService" />
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+		<beans:property name="refreshAllNodes" value="false" />
 	</beans:bean>
 	<beans:bean name="clusterNodeSyncupTasklet"
 		class="com.vmware.bdd.service.job.ClusterNodeSyncupStep">
@@ -106,6 +114,11 @@
 	<beans:bean name="stopSingleVMTasklet"
 		class="com.vmware.bdd.service.job.vm.StopSingleVMStep">
 		<beans:property name="clusteringService" ref="clusteringService" />
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+	</beans:bean>
+	<beans:bean name="setManualElasticityTasklet"
+		class="com.vmware.bdd.service.job.SetManualElasticityStep">
+		<beans:property name="executionService" ref="executionService" />
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 	</beans:bean>
 	<beans:bean name="stopSingleVMTaskletIfRequired"

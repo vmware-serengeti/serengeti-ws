@@ -199,23 +199,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
       if (nodeGroups != null && !nodeGroups.isEmpty()) {
          int count = 0;
          for (NodeGroupRead nodeGroup : getNodeGroups()) {
-            boolean isComputeOnly = false;
-            if (distroVendor.equalsIgnoreCase(Constants.MAPR_VENDOR)) {
-               if (nodeGroup.getRoles() != null && nodeGroup.getRoles().contains(HadoopRole.MAPR_TASKTRACKER_ROLE.toString()) &&
-                     !nodeGroup.getRoles().contains(HadoopRole.MAPR_NFS_ROLE.toString())){
-                  isComputeOnly = true;
-               }
-            } else {
-               if (nodeGroup.getRoles() != null
-                     && nodeGroup.getRoles().contains(
-                     HadoopRole.HADOOP_TASKTRACKER.toString())
-                     && (nodeGroup.getRoles().size() == 1 || (nodeGroup.getRoles()
-                     .size() == 2 && nodeGroup.getRoles().contains(
-                     HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
-                  isComputeOnly = true;
-               }
-            }
-            if (isComputeOnly) {
+            if (CommonUtil.isComputeOnly(nodeGroup.getRoles(), distroVendor)) {
                if (nodeGroupNames != null && nodeGroupNames.length > 0) {
                   nodeGroupNames[0].add(nodeGroup.getName());
                }

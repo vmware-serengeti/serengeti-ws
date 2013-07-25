@@ -578,18 +578,12 @@ public class ClusterCreate implements Serializable {
     * Check if any compute only node group exists.
     */
    public boolean containsComputeOnlyNodeGroups() {
-      int count = 0;
       for (NodeGroupCreate nodeGroup : this.getNodeGroups()) {
-         if (nodeGroup.getRoles() != null
-               && nodeGroup.getRoles().contains(
-                     HadoopRole.HADOOP_TASKTRACKER.toString())
-               && (nodeGroup.getRoles().size() == 1 || (nodeGroup.getRoles()
-                     .size() == 2 && nodeGroup.getRoles().contains(
-                     HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
-            count++;
+         if (CommonUtil.isComputeOnly(nodeGroup.getRoles(), distroVendor)) {
+            return true;
          }
       }
-      return count != 0 ? true : false;
+      return false;
    }
 
    /**

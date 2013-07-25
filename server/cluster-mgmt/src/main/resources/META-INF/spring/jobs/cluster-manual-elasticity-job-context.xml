@@ -11,13 +11,6 @@
    http://www.springframework.org/schema/aop/spring-aop.xsd">
 
 	<beans:import resource="classpath*:/META-INF/spring/jobs/common-job-context.xml" />
-
-	<beans:bean name="setManualElasticityTasklet"
-		class="com.vmware.bdd.service.job.SetManualElasticityStep">
-		<beans:property name="executionService" ref="executionService" />
-		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
-	</beans:bean>
-
 	<job id="setManualElasticityJob" job-repository="jobRepository">
 		<step id="setManualElasticityStep">
 			<tasklet ref="setManualElasticityTasklet" />

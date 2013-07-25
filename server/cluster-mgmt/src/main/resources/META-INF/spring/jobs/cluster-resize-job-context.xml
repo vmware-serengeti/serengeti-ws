@@ -77,7 +77,7 @@
 			</listeners>
 		</step>
 		<step id="setAutoElasticityResizeStep" next="softwareResizeClusterStep">
-			<tasklet ref="setAutoElasticityTasklet" />
+			<tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

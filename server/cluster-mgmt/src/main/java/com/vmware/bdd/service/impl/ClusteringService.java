@@ -387,7 +387,7 @@ public class ClusteringService implements IClusteringService {
    }
 
    @SuppressWarnings("unchecked")
-   public boolean setAutoElasticity(String clusterName) {
+   public boolean setAutoElasticity(String clusterName, boolean refreshAllNodes) {
       logger.info("set auto elasticity for cluster " + clusterName);
 
       ClusterEntity cluster = getClusterEntityMgr().findByName(clusterName);
@@ -418,19 +418,18 @@ public class ClusteringService implements IClusteringService {
       Callable<Void>[] storeProcedures = new Callable[nodes.size()];
       int i = 0;
       for (NodeEntity node : nodes) {
-         List<String> roles =
-               new Gson().fromJson(node.getNodeGroup().getRoles(), List.class);
-         boolean isComputeOnlyNode = false;
-         if (roles.contains(HadoopRole.HADOOP_TASKTRACKER.toString())
-               && (roles.size() == 1 || (roles.size() == 2 && roles
-                     .contains(HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
-            isComputeOnlyNode = true;
-         }
          VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
          if (vm == null) {
             logger.error("cannot find node: " + node.getVmName());
             return false;
          }
+         if (!refreshAllNodes && !vm.getId().equalsIgnoreCase(masterMoId)) {
+            continue;
+         }
+         List<String> roles =
+               new Gson().fromJson(node.getNodeGroup().getRoles(), List.class);
+         String distroVendor = node.getNodeGroup().getCluster().getDistroVendor();
+         boolean isComputeOnlyNode = CommonUtil.isComputeOnly(roles, distroVendor);
          SetAutoElasticitySP sp =
                new SetAutoElasticitySP(vm, serengetiUUID, masterMoId,
                      masterUUID, enableAutoElasticity, minComputeNodeNum,

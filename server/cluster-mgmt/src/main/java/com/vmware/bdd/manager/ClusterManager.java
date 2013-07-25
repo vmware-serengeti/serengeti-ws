@@ -682,6 +682,10 @@ public class ClusterManager {
          throw ClusterManagerException.START_NOT_ALLOWED_ERROR(clusterName,
                "it should be in STOPPED status");
       }
+
+      cluster.setVhmTargetNum(-1);
+      clusterEntityMgr.update(cluster);
+
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
             clusterName));
@@ -934,7 +938,7 @@ public class ClusterManager {
 
       //update vhm extra config file
       if (enableAuto != null || minComputeNodeNum != null) {
-         boolean success = clusteringService.setAutoElasticity(clusterName);
+         boolean success = clusteringService.setAutoElasticity(clusterName, false);
          if (!success) {
             throw ClusterManagerException
                   .SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(clusterName, "failed");

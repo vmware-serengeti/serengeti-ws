@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.utils.VHMConstants;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.vc.VcCache;
@@ -72,15 +73,15 @@ public class SetAutoElasticitySP implements Callable<Void> {
 
             List<OptionValue> options = new ArrayList<OptionValue>();
             if (vm.getId().equalsIgnoreCase(masterMoId)) {
-               options.add(new OptionValueImpl("vhmInfo.vhm.enable", enableAutoElasticity.toString()));
-               options.add(new OptionValueImpl("vhmInfo.min.computeNodeNum", (new Integer(minComputeNodeNum)).toString()));
-               options.add(new OptionValueImpl("vhmInfo.jobtracker.port", jobTrackerPort));
+               options.add(new OptionValueImpl(VHMConstants.VHM_ENABLE, enableAutoElasticity.toString()));
+               options.add(new OptionValueImpl(VHMConstants.VHM_MIN_COMPUTENODE_NUM, (new Integer(minComputeNodeNum)).toString()));
+               options.add(new OptionValueImpl(VHMConstants.VHM_JOBTRACKER_PORT, jobTrackerPort));
             }
 
-            options.add(new OptionValueImpl("vhmInfo.masterVM.moid", masterMoId.split(":")[2]));
-            options.add(new OptionValueImpl("vhmInfo.masterVM.uuid", masterUUID));
-            options.add(new OptionValueImpl("vhmInfo.serengeti.uuid", serengetiUUID));
-            options.add(new OptionValueImpl("vhmInfo.elastic", (new Boolean(isComputeOnlyNode)).toString()));
+            options.add(new OptionValueImpl(VHMConstants.VHM_MASTER_MOID, masterMoId.split(":")[2]));
+            options.add(new OptionValueImpl(VHMConstants.VHM_MASTER_UUID, masterUUID));
+            options.add(new OptionValueImpl(VHMConstants.VHM_SERENGETI_UUID, serengetiUUID));
+            options.add(new OptionValueImpl(VHMConstants.VHM_ELASTIC, (new Boolean(isComputeOnlyNode)).toString()));
 
             OptionValue[] optionValues = options.toArray((OptionValue[]) Array.newInstance(OptionValue.class, options.size()));
             ConfigSpec spec = new ConfigSpecImpl();

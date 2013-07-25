@@ -20,6 +20,7 @@ import static org.testng.AssertJUnit.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vmware.bdd.spectypes.HadoopRole;
 import org.testng.annotations.Test;
 
 public class CommonUtilTest {
@@ -102,5 +103,24 @@ public class CommonUtilTest {
       assertTrue(datastore.matches(pattern));
       pattern = CommonUtil.getDatastoreJavaPattern("(192.168.0.1)data*");
       assertTrue(datastore.matches(pattern));
+   }
+
+   @Test
+   public void testIsComputeOnly() {
+      List<String> roles = new ArrayList<String>();
+      roles.add(HadoopRole.HADOOP_TASKTRACKER.toString());
+      String distroVendor = "apache";
+      assertTrue(CommonUtil.isComputeOnly(roles, distroVendor));
+      roles.add(HadoopRole.TEMPFS_CLIENT_ROLE.toString());
+      assertTrue(CommonUtil.isComputeOnly(roles, distroVendor));
+      roles.add(HadoopRole.HADOOP_DATANODE.toString());
+      assertTrue(!CommonUtil.isComputeOnly(roles, distroVendor));
+
+      roles.clear();
+      roles.add(HadoopRole.MAPR_TASKTRACKER_ROLE.toString());
+      distroVendor = Constants.MAPR_VENDOR;
+      assertTrue(CommonUtil.isComputeOnly(roles, distroVendor));
+      roles.add(HadoopRole.MAPR_NFS_ROLE.toString());
+      assertTrue(!CommonUtil.isComputeOnly(roles, distroVendor));
    }
 }

@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -157,9 +158,16 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
                List<String> roles =
                      new Gson().fromJson(node.getNodeGroup().getRoles(),
                            List.class);
-               if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
-                  cluster.setVhmMasterMoid(node.getMoId());
-                  break;
+               if (cluster.getDistro().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
+                  if (roles.contains(HadoopRole.MAPR_JOBTRACKER_ROLE.toString())) {
+                     cluster.setVhmMasterMoid(node.getMoId());
+                     break;
+                  }
+               } else {
+                  if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
+                     cluster.setVhmMasterMoid(node.getMoId());
+                     break;
+                  }
                }
             }
          }

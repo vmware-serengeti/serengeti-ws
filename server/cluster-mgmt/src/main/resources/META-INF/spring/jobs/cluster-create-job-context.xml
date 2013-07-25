@@ -51,7 +51,7 @@
 			</listeners>
 		</step>
 		<step id="setAutoElasticityStep" next="softwareCreateClusterStep">
-			<tasklet ref="setAutoElasticityTasklet" />
+			<tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
