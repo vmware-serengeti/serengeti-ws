@@ -15,6 +15,9 @@
 
 package com.vmware.bdd.service.impl;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,7 +28,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -386,6 +396,146 @@ public class ClusteringService implements IClusteringService {
       logger.info("Finished to allocate static ip address for VM.");
    }
 
+   private String getMaprActiveJobTrackerIp(final String maprNodeIP,
+         final String clusterName) {
+      String activeJobTrackerIp = "";
+      String errorMsg = "";
+      JSch jsch = new JSch();
+      String sshUser = Configuration.getString("mapr.ssh.user", "serengeti");
+      int sshPort = Configuration.getInt("mapr.ssh.port", 22);
+      String prvKeyFile =
+            Configuration.getString("serengeti.ssh.private.key.file",
+                  "/home/serengeti/.ssh/id_rsa");
+      ChannelExec channel = null;
+      try {
+         Session session = jsch.getSession(sshUser, maprNodeIP, sshPort);
+         jsch.addIdentity(prvKeyFile);
+         java.util.Properties config = new java.util.Properties();
+         config.put("StrictHostKeyChecking", "no");
+         session.setConfig(config);
+         session.setTimeout(15000);
+         session.connect();
+         logger.debug("SSH session is connected!");
+         channel = (ChannelExec) session.openChannel("exec");
+         if (channel != null) {
+            logger.debug("SSH channel is connected!");
+            StringBuffer buff = new StringBuffer();
+            String cmd =
+                  "maprcli node list -filter \"[rp==/*]and[svc==jobtracker]\" -columns ip";
+            logger.debug("exec command is: " + cmd);
+            channel.setPty(true); //to enable sudo
+            channel.setCommand("sudo " + cmd);
+            BufferedReader in =
+                  new BufferedReader(new InputStreamReader(
+                        channel.getInputStream()));
+            channel.connect();
+            if (!canChannelConnect(channel)) {
+               errorMsg =
+                     "Get active Jobtracker ip: SSH channel is not connected !";
+               logger.error(errorMsg);
+               throw BddException.INTERNAL(null, errorMsg);
+            }
+            while (true) {
+               String line = in.readLine();
+               buff.append(line);
+               logger.debug("jobtracker message: " + line);
+               if (channel.isClosed()) {
+                  int exitStatus = channel.getExitStatus();
+                  logger.debug("Exit status from exec is: " + exitStatus);
+                  break;
+               }
+            }
+            in.close();
+            Pattern ipPattern = Pattern.compile(Constants.IP_PATTERN);
+            Matcher matcher = ipPattern.matcher(buff.toString());
+            if (matcher.find()) {
+               activeJobTrackerIp = matcher.group();
+            } else {
+               errorMsg =
+                     "Cannot find jobtracker ip info in cluster" + clusterName;
+               logger.error(errorMsg);
+               throw BddException.INTERNAL(null, errorMsg);
+            }
+         } else {
+            errorMsg = "Get active Jobtracker ip: cannot open SSH channel.";
+            logger.error(errorMsg);
+            throw BddException.INTERNAL(null, errorMsg);
+         }
+      } catch (JSchException e) {
+         errorMsg = "SSH unknow error: " + e.getMessage();
+         logger.error(errorMsg);
+         throw BddException.INTERNAL(null, errorMsg);
+      } catch (IOException e) {
+         errorMsg = "Obtain active jobtracker ip error: " + e.getMessage();
+         logger.error(errorMsg);
+         throw BddException.INTERNAL(null, errorMsg);
+      } finally {
+         channel.disconnect();
+      }
+      return activeJobTrackerIp;
+   }
+
+   private boolean canChannelConnect(ChannelExec channel) {
+      if (channel == null) {
+         return false;
+      }
+      if (channel.isConnected()) {
+         return true;
+      }
+      try {
+         channel.connect();
+      } catch (JSchException e) {
+         String errorMsg = "SSH connection failed: " + e.getMessage();
+         logger.error(errorMsg);
+         throw BddException.INTERNAL(null, errorMsg);
+      }
+      return channel.isConnected();
+   }
+
+   private void updateVhmMasterMoid(String clusterName) {
+      ClusterEntity cluster = getClusterEntityMgr().findByName(clusterName);
+      if (cluster.getVhmMasterMoid() == null) {
+         List<NodeEntity> nodes =
+               getClusterEntityMgr().findAllNodes(clusterName);
+         for (NodeEntity node : nodes) {
+            if (node.getMoId() != null
+                  && node.getNodeGroup().getRoles() != null) {
+               @SuppressWarnings("unchecked")
+               List<String> roles =
+                     new Gson().fromJson(node.getNodeGroup().getRoles(),
+                           List.class);
+               if (cluster.getDistro().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
+                  if (roles.contains(HadoopRole.MAPR_JOBTRACKER_ROLE.toString())) {
+                     String thisJtIp = node.getIpAddress();
+                     String activeJtIp;
+                     try {
+                        activeJtIp = getMaprActiveJobTrackerIp(thisJtIp, clusterName);
+                        logger.info("fetched active JT Ip: " + activeJtIp);
+                     } catch (Exception e) {
+                        continue;
+                     }
+
+                     AuAssert.check(!CommonUtil.isBlank(thisJtIp), "falied to query active JobTracker Ip");
+                     for (NodeEntity jt : nodes) {
+                        if (jt.getIpAddress().equals(activeJtIp)) {
+                           cluster.setVhmMasterMoid(jt.getMoId());
+                           break;
+                        }
+                     }
+                     break;
+                  }
+               } else {
+                  if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
+                     cluster.setVhmMasterMoid(node.getMoId());
+                     break;
+                  }
+               }
+            }
+         }
+      }
+      getClusterEntityMgr().update(cluster);
+   }
+
    @SuppressWarnings("unchecked")
    public boolean setAutoElasticity(String clusterName, boolean refreshAllNodes) {
       logger.info("set auto elasticity for cluster " + clusterName);
@@ -400,10 +550,17 @@ public class ClusteringService implements IClusteringService {
 
       String masterMoId = cluster.getVhmMasterMoid();
       if (masterMoId == null) {
-         logger.error("masterMoId missed.");
-         throw ClusteringServiceException.SET_AUTO_ELASTICITY_FAILED(cluster
-               .getName());
+         // this will only occurs when creating cluster
+         updateVhmMasterMoid(clusterName);
+         cluster = getClusterEntityMgr().findByName(clusterName);
+         masterMoId = cluster.getVhmMasterMoid();
+         if (masterMoId == null) {
+            logger.error("masterMoId missed.");
+            throw ClusteringServiceException.SET_AUTO_ELASTICITY_FAILED(cluster
+                  .getName());
+         }
       }
+
       String serengetiUUID = ConfigInfo.getSerengetiRootFolder();
       int minComputeNodeNum = cluster.getVhmMinNum();
       String jobTrackerPort = cluster.getVhmJobTrackerPort();

@@ -36,39 +36,6 @@ public class CreateClusterJobExecutionListener extends
 
    public void afterJob(JobExecution je) {
       super.afterJob(je);
-      String clusterName =
-            getJobParameters(je).getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
-      ClusterEntity cluster = getClusterEntityMgr().findByName(clusterName);
-      if (cluster.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
-         logger.info("Update vhm master moid...");
-         List<NodeEntity> nodes =
-getClusterEntityMgr().findAllNodes(clusterName);
-         for (NodeEntity node : nodes) {
-            if (node.getMoId() != null
-                  && node.getNodeGroup().getRoles() != null) {
-               @SuppressWarnings("unchecked")
-               List<String> roles =
-                     new Gson().fromJson(node.getNodeGroup().getRoles(),
-                           List.class);
-               if (roles.contains(HadoopRole.MAPR_JOBTRACKER_ROLE.toString())) {
-                  String ip =
-                        ClusterManager.getActiveJobTrackerIp(
-                              node.getIpAddress(), cluster.getName());
-                  if (ip.equals(node.getIpAddress())) {
-                     cluster.setVhmMasterMoid(node.getMoId());
-                     break;
-                  }
-               }
-            }
-         }
-         if (!CommonUtil.isBlank(cluster.getVhmMasterMoid())) {
-            getClusterEntityMgr().update(cluster);
-         } else {
-            String errorMsg = "Cannot find vhm master moid in mapr distro.";
-            logger.error(errorMsg);
-            throw ClusteringServiceException.VM_CREATION_FAILED(clusterName);
-         }
-      }
    }
 
 }

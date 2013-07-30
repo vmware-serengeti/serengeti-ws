@@ -979,31 +979,6 @@ public class ClusterManager {
                .SET_MANUAL_ELASTICITY_NOT_ALLOWED_ERROR(msg);
       }
 
-      // find hadoop job tracker ip
-      List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
-      String hadoopJobTrackerIP = "";
-      for (NodeGroupRead nodeGroup : nodeGroups) {
-         if (nodeGroup.getRoles() != null
-               && (nodeGroup.getRoles().contains(
-                     HadoopRole.HADOOP_JOBTRACKER_ROLE.toString()) || nodeGroup
-                     .getRoles().contains(
-                           HadoopRole.MAPR_JOBTRACKER_ROLE.toString()))) {
-            if (!cluster.getDistroVendor().equalsIgnoreCase(
-                  Constants.MAPR_VENDOR)) {
-               AuAssert.check(nodeGroup.getInstanceNum() == 1,
-                     "The Jobtracker only support one instance .");
-            }
-            hadoopJobTrackerIP = nodeGroup.getInstances().get(0).getIp();
-            if (nodeGroup.getInstanceNum() > 1) {
-               hadoopJobTrackerIP =
-                     getActiveJobTrackerIp(hadoopJobTrackerIP, clusterName);
-            }
-            AuAssert.check(!CommonUtil.isBlank(hadoopJobTrackerIP),
-                  "Hadoop jobtracker cannot be null");
-            break;
-         }
-      }
-
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
@@ -1038,99 +1013,6 @@ public class ClusterManager {
                ClusterStatus.RUNNING);
          throw e;
       }
-   }
-
-   public static String getActiveJobTrackerIp(final String maprNodeIP,
-         final String clusterName) {
-      String activeJobTrackerIp = "";
-      String errorMsg = "";
-      JSch jsch = new JSch();
-      String sshUser = Configuration.getString("mapr.ssh.user", "serengeti");
-      int sshPort = Configuration.getInt("mapr.ssh.port", 22);
-      String prvKeyFile =
-            Configuration.getString("serengeti.ssh.private.key.file",
-                  "/home/serengeti/.ssh/id_rsa");
-      try {
-         Session session = jsch.getSession(sshUser, maprNodeIP, sshPort);
-         jsch.addIdentity(prvKeyFile);
-         java.util.Properties config = new java.util.Properties();
-         config.put("StrictHostKeyChecking", "no");
-         session.setConfig(config);
-         session.setTimeout(15000);
-         session.connect();
-         logger.debug("SSH session is connected!");
-         ChannelExec channel = (ChannelExec) session.openChannel("exec");
-         if (channel != null) {
-            logger.debug("SSH channel is connected!");
-            StringBuffer buff = new StringBuffer();
-            String cmd =
-                  "maprcli node list -filter \"[rp==/*]and[svc==jobtracker]\" -columns ip";
-            logger.debug("exec command is: " + cmd);
-            channel.setPty(true); //to enable sudo
-            channel.setCommand("sudo " + cmd);
-            BufferedReader in =
-                  new BufferedReader(new InputStreamReader(
-                        channel.getInputStream()));
-            channel.connect();
-            if (!testChannel(channel)) {
-               errorMsg =
-                     "Get active Jobtracker ip: SSH channel is not connected !";
-               logger.error(errorMsg);
-               throw BddException.INTERNAL(null, errorMsg);
-            }
-            while (true) {
-               String line = in.readLine();
-               buff.append(line);
-               logger.debug("jobtracker message: " + line);
-               if (channel.isClosed()) {
-                  int exitStatus = channel.getExitStatus();
-                  logger.debug("Exit status from exec is: " + exitStatus);
-                  break;
-               }
-            }
-            in.close();
-            Pattern ipPattern = Pattern.compile(Constants.IP_PATTERN);
-            Matcher matcher = ipPattern.matcher(buff.toString());
-            if (matcher.find()) {
-               activeJobTrackerIp = matcher.group();
-            } else {
-               errorMsg =
-                     "Cannot find jobtracker ip info in cluster" + clusterName;
-               logger.error(errorMsg);
-               throw BddException.INTERNAL(null, errorMsg);
-            }
-         } else {
-            errorMsg = "Get active Jobtracker ip: cannot open SSH channel.";
-            logger.error(errorMsg);
-            throw BddException.INTERNAL(null, errorMsg);
-         }
-      } catch (JSchException e) {
-         errorMsg = "SSH unknow error: " + e.getMessage();
-         logger.error(errorMsg);
-         throw BddException.INTERNAL(null, errorMsg);
-      } catch (IOException e) {
-         errorMsg = "Obtain active jobtracker ip error: " + e.getMessage();
-         logger.error(errorMsg);
-         throw BddException.INTERNAL(null, errorMsg);
-      }
-      return activeJobTrackerIp;
-   }
-
-   private static boolean testChannel(ChannelExec channel) {
-      if (channel == null) {
-         return false;
-      }
-      if (channel.isConnected()) {
-         return true;
-      }
-      try {
-         channel.connect();
-      } catch (JSchException e) {
-         String errorMsg = "SSH connection failed: " + e.getMessage();
-         logger.error(errorMsg);
-         throw BddException.INTERNAL(null, errorMsg);
-      }
-      return channel.isConnected();
    }
 
    /*
