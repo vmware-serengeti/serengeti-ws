@@ -1,12 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
    <modelVersion>4.0.0</modelVersion>
-   <groupId>com.vmware.bdd</groupId>
    <artifactId>cluster-mgmt</artifactId>
    <packaging>jar</packaging>
    <name>cluster management</name>
    <url>http://maven.apache.org</url>
-   <version>${serengeti.version}</version>
 
    <parent>
       <groupId>com.vmware.bdd</groupId>
@@ -17,38 +15,36 @@
 
    <dependencies>
       <dependency>
+         <groupId>com.google.code.gson</groupId>
+         <artifactId>gson</artifactId>
+      </dependency>
+      <dependency>
          <groupId>com.vmware.bdd</groupId>
          <artifactId>commons-serengeti</artifactId>
       </dependency>
       <dependency>
          <groupId>com.vmware.bdd</groupId>
          <artifactId>dal</artifactId>
-         <version>${serengeti.version}</version>
       </dependency>
       <dependency>
          <groupId>com.vmware.bdd</groupId>
          <artifactId>placement</artifactId>
-         <version>${serengeti.version}</version>
       </dependency>
       <dependency>
          <groupId>com.vmware.bdd</groupId>
          <artifactId>fastclone</artifactId>
-         <version>${serengeti.version}</version>
       </dependency>
       <dependency>
          <groupId>com.vmware.bdd</groupId>
          <artifactId>res-mgmt</artifactId>
-         <version>${serengeti.version}</version>
       </dependency>
       <dependency>
          <groupId>com.vmware.bdd</groupId>
          <artifactId>serengeti-aop</artifactId>
-         <version>${serengeti.version}</version>
       </dependency>
       <dependency>
          <groupId>com.vmware.bdd</groupId>
          <artifactId>software-management</artifactId>
-         <version>${serengeti.version}</version>
       </dependency>
       <dependency>
          <groupId>postgresql</groupId>
@@ -84,10 +80,6 @@
       <dependency>
          <groupId>commons-configuration</groupId>
          <artifactId>commons-configuration</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>com.google.code.gson</groupId>
-         <artifactId>gson</artifactId>
       </dependency>
       <dependency>
          <groupId>com.rabbitmq</groupId>
@@ -151,9 +143,8 @@
          <scope>provided</scope>
       </dependency>
       <dependency>
-         <groupId>com.vmware.aurora</groupId>
+         <groupId>com.vmware.bdd</groupId>
          <artifactId>vc</artifactId>
-         <version>${aurora.version}</version>
       </dependency>
       <dependency>
          <groupId>org.springframework</groupId>
@@ -164,8 +155,8 @@
          <artifactId>asm</artifactId>
       </dependency>
       <dependency>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpclient</artifactId>
+         <groupId>org.apache.httpcomponents</groupId>
+         <artifactId>httpclient</artifactId>
       </dependency>
    </dependencies>
 </project>

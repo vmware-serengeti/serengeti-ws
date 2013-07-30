@@ -22,10 +22,10 @@ import org.apache.log4j.Logger;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.resmgmt.IResourceInitializerService;
-import com.vmware.bdd.utils.Configuration;
 
 /**
  * @author Jarred Li

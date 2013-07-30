@@ -19,6 +19,8 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
+import com.vmware.aurora.global.Configuration;
+
 public class TestConfigSave {
 
    @Test

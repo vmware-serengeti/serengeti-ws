@@ -44,5 +44,9 @@
          <groupId>org.hibernate</groupId>
          <artifactId>hibernate-core</artifactId>
       </dependency>
+      <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>commons-aurora</artifactId>
+      </dependency>
    </dependencies>
 </project>

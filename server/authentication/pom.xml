@@ -1,12 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.vmware.bdd</groupId>
 	<artifactId>authentication</artifactId>
 	<packaging>jar</packaging>
 	<name>Serengeti Authentication Service</name>
 	<url>http://serengeti.cloudfoundry.com/</url>
-	<version>${serengeti.version}</version>
 
 	<parent>
 		<groupId>com.vmware.bdd</groupId>
@@ -17,9 +15,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.vmware.aurora</groupId>
+			<groupId>com.vmware.bdd</groupId>
 			<artifactId>vc</artifactId>
-			<version>${aurora.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vmware.bdd</groupId>
@@ -64,7 +61,6 @@
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
-			<version>2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>

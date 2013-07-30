@@ -23,9 +23,8 @@
 			<artifactId>commons-serengeti</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.aurora</groupId>
+			<groupId>com.vmware.bdd</groupId>
 			<artifactId>vc</artifactId>
-			<version>${aurora.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>

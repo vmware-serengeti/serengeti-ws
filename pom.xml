@@ -8,23 +8,25 @@
    <packaging>pom</packaging>
    <name>Serengeti Master project POM</name>
 
-	<modules>
-		<module>thrift/java</module>
-		<module>server</module>
-		<module>impala</module>
-		<module>common</module>
-		<module>server/res-mgmt</module>
-		<module>server/placement</module>
-		<module>server/dal</module>
-		<module>server/fastclone</module>
-		<module>server/aop</module>
-		<module>server/authentication</module>
-		<module>server/cluster-mgmt</module>
-		<module>server/serengeti</module>
-		<module>server/test</module>
-		<module>cli</module>
-		<module>frontend</module>
-	</modules>
+   <modules>
+      <module>thrift/java</module>
+      <module>impala</module>
+      <module>common</module>
+      <module>lib/vlsi</module>
+      <module>server/common</module>
+      <module>server/vc</module>
+      <module>server/res-mgmt</module>
+      <module>server/placement</module>
+      <module>server/dal</module>
+      <module>server/fastclone</module>
+      <module>server/aop</module>
+      <module>server/authentication</module>
+      <module>server/cluster-mgmt</module>
+      <module>server/serengeti</module>
+      <module>server/test</module>
+      <module>cli</module>
+      <module>frontend</module>
+   </modules>
 
    <dependencyManagement>
       <dependencies>
@@ -249,17 +251,147 @@
             <artifactId>testng</artifactId>
             <version>6.3.1</version>
             <scope>test</scope>
-          </dependency>
-          <dependency>
+         </dependency>
+         <dependency>
             <groupId>asm</groupId>
             <artifactId>asm</artifactId>
             <version>1.5.3</version>
-          </dependency>
-          <dependency>
+         </dependency>
+         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.1</version>
-          </dependency>
+         </dependency>
+         <dependency>
+            <groupId>org.jclouds</groupId>
+            <artifactId>jclouds-core</artifactId>
+            <version>1.0.0</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>vim-versions</artifactId>
+            <version>${vmware.vlsi.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>vimVmodl</artifactId>
+            <version>${vmware.vlsi.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>queryVmodl</artifactId>
+            <version>${vmware.vlsi.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>reflectVmodl</artifactId>
+            <version>${vmware.vlsi.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>vlsiClient</artifactId>
+            <version>${vmware.vlsi.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>vlsiCore</artifactId>
+            <version>${vmware.vlsi.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>stax2-api</artifactId>
+            <version>3.0.1</version>
+         </dependency>
+         <dependency>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>woodstox-core-asl</artifactId>
+            <version>4.0.6</version>
+         </dependency>
+         <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.1</version>
+         </dependency>
+         <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.4</version>
+         </dependency>
+         <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.4</version>
+         </dependency>
+         <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-annotations</artifactId>
+            <version>3.3.1.GA</version>
+         </dependency>
+         <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.48</version>
+         </dependency>
+         <dependency>
+            <groupId>javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.12.1.GA</version>
+         </dependency>
+         <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+         </dependency>
+         <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.1</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>fastclone</artifactId>
+            <version>${serengeti.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>dal</artifactId>
+            <version>${serengeti.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>serengeti-aop</artifactId>
+            <version>${serengeti.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>vc</artifactId>
+            <version>${serengeti.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>placement</artifactId>
+            <version>${serengeti.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>res-mgmt</artifactId>
+            <version>${serengeti.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>software-management</artifactId>
+            <version>${serengeti.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>buildconfig</artifactId>
+            <version>${serengeti.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>commons-aurora</artifactId>
+            <version>${serengeti.version}</version>
+         </dependency>
       </dependencies>
    </dependencyManagement>
    <properties>
@@ -269,7 +401,8 @@
       <spring.version>3.2.3.RELEASE</spring.version>
       <spring.security.version>3.1.4.RELEASE</spring.security.version>
       <hadoop.version>1.2.0</hadoop.version>
-      <aurora.version>2.5</aurora.version>
+      <vmware.vlsi.version>1.0.8</vmware.vlsi.version>
+      <bdd.skipTests>true</bdd.skipTests>
    </properties>
    <build>
       <pluginManagement>

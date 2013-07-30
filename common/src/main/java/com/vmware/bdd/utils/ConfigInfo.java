@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import com.vmware.aurora.global.Configuration;
+
 public class ConfigInfo {
    private static final String SERENGETI_INITIALIZE_UUID = "serengeti.initialize.uuid";
 

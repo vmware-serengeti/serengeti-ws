@@ -20,6 +20,7 @@ import java.util.Set;
 import org.apache.commons.configuration.ConversionException;
 import org.apache.log4j.Logger;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
@@ -33,7 +34,6 @@ import com.vmware.bdd.spectypes.HadoopDistroMap;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AppConfigValidationUtils;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
-import com.vmware.bdd.utils.Configuration;
 import com.vmware.bdd.utils.ValidateResult;
 
 public class CommonClusterExpandPolicy {

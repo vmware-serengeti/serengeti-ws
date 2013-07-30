@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.software.ISoftwareManagementTask;
@@ -27,7 +28,6 @@ import com.vmware.bdd.software.mgmt.impl.SoftwareManagementClient;
 import com.vmware.bdd.software.mgmt.thrift.ClusterAction;
 import com.vmware.bdd.software.mgmt.thrift.ClusterOperation;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
-import com.vmware.bdd.utils.Configuration;
 
 public class IronfanSoftwareManagementTask implements ISoftwareManagementTask {
    private static final Logger logger = Logger
