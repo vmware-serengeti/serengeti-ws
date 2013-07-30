@@ -9,12 +9,12 @@
    <name>Serengeti Master project POM</name>
 
    <modules>
-      <module>thrift/java</module>
       <module>impala</module>
-      <module>common</module>
       <module>lib/vlsi</module>
       <module>server/common</module>
       <module>server/vc</module>
+      <module>common</module>
+      <module>thrift/java</module>
       <module>server/res-mgmt</module>
       <module>server/placement</module>
       <module>server/dal</module>
