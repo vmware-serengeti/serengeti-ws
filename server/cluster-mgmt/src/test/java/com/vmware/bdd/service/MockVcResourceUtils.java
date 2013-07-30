@@ -55,4 +55,10 @@ public class MockVcResourceUtils {
    public static VcHost findHost(final String hostName) { 
       return null;
    }
+
+   @Mock
+   public static void refreshDatastore(final VcCluster c) {
+      return;
+   }
+
 }
