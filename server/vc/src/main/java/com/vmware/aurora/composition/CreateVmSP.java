@@ -155,31 +155,30 @@ public class CreateVmSP implements Callable<Void> {
       // copy hardware version
       configSpec.setVersion(template.getConfig().getVersion());
 
+
       // copy vApp config info
       VmConfigInfo configInfo = template.getConfig().getVAppConfig();
 
-      if (configInfo == null) {
-         // the parent vm does not have vApp option enabled. This is possible when user
-         // used customized template.
-         return;
+      // the parent vm might not have vApp option enabled. This is possible when user
+      // used customized template.
+      if (configInfo != null) {
+         VmConfigSpec vAppSpec = new VmConfigSpecImpl();
+         vAppSpec.setOvfEnvironmentTransport(configInfo
+               .getOvfEnvironmentTransport());
+
+         // product info
+         List<ProductSpec> productSpecs = new ArrayList<ProductSpec>();
+         for (ProductInfo info : configInfo.getProduct()) {
+            ProductSpec spec = new ProductSpecImpl();
+            spec.setInfo(info);
+            spec.setOperation(Operation.add);
+            productSpecs.add(spec);
+         }
+         vAppSpec.setProduct(productSpecs.toArray(new ProductSpec[productSpecs
+               .size()]));
+
+         configSpec.setVAppConfig(vAppSpec);
       }
-
-      VmConfigSpec vAppSpec = new VmConfigSpecImpl();
-      vAppSpec.setOvfEnvironmentTransport(configInfo
-            .getOvfEnvironmentTransport());
-
-      // product info
-      List<ProductSpec> productSpecs = new ArrayList<ProductSpec>();
-      for (ProductInfo info : configInfo.getProduct()) {
-         ProductSpec spec = new ProductSpecImpl();
-         spec.setInfo(info);
-         spec.setOperation(Operation.add);
-         productSpecs.add(spec);
-      }
-      vAppSpec.setProduct(productSpecs.toArray(new ProductSpec[productSpecs
-            .size()]));
-
-      configSpec.setVAppConfig(vAppSpec);
    }
 
    public void callInternal() throws Exception {
@@ -191,18 +190,34 @@ public class CreateVmSP implements Callable<Void> {
 
       ConfigSpecImpl configSpec = new ConfigSpecImpl();
 
+      // Resource schema
+      ResourceSchemaUtil.setResourceSchema(configSpec, vmSchema.resourceSchema);
+
+      // Add managed-by information
+      // VmConfigUtil.addManagedByToConfigSpec(
+      //      newConfigSpec, VcContext.getService().getExtensionKey(), "dbvm");
+
       HashMap<String, Disk.Operation> diskMap =
             new HashMap<String, Disk.Operation>();
       if (requireClone()) {
          VcVirtualMachine.CreateSpec vmSpec =
-            new VcVirtualMachine.CreateSpec(newVmName, snap, targetRp,
-                  targetDs, vmFolder, linkedClone, configSpec);
+               new VcVirtualMachine.CreateSpec(newVmName, snap, targetRp,
+                     targetDs, vmFolder, linkedClone, configSpec);
          // Clone from the template
          vcVm = template.cloneVm(vmSpec, null);
       } else {
+         // copy parent vm's version/product info/vapp options
          copyParentVmSettings(template, configSpec);
+
          vcVm = targetRp.createVm(configSpec, targetDs, vmFolder);
       }
+
+      configSpec = new ConfigSpecImpl();
+      // Network changes
+      NetworkSchemaUtil.setNetworkSchema(configSpec, targetRp.getVcCluster(),
+            vmSchema.networkSchema, vcVm);
+
+      vcVm.reconfigure(configSpec);
 
       if (host != null) {
          vcVm.disableDrs();
@@ -257,22 +272,6 @@ public class CreateVmSP implements Callable<Void> {
             vcVm.promoteDisks(disksToPromote.toArray(new DeviceId[0]));
          }
       }
-
-      // XXX : TODO - can we set these in the ConfigSpec BEFORE clone? Current assert does not allow that.
-      ConfigSpecImpl newConfigSpec = new ConfigSpecImpl();
-      // Network changes
-      NetworkSchemaUtil.setNetworkSchema(newConfigSpec,
-            targetRp.getVcCluster(), vmSchema.networkSchema, vcVm);
-
-      // Resource schema
-      ResourceSchemaUtil.setResourceSchema(newConfigSpec,
-            vmSchema.resourceSchema);
-
-      // Add managed-by information
-      // VmConfigUtil.addManagedByToConfigSpec(
-      //      newConfigSpec, VcContext.getService().getExtensionKey(), "dbvm");
-
-      vcVm.reconfigure(newConfigSpec);
 
       // set the bootup configs
       if (bootupConfigs != null) {

@@ -21,22 +21,29 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.log4j.Logger;
+
 import com.vmware.aurora.util.AuAssert;
 import com.vmware.aurora.vc.VcCluster;
 import com.vmware.aurora.vc.VcNetwork;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.VmConfigUtil;
 import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
+import com.vmware.vim.binding.impl.vim.vm.device.VirtualDeviceSpecImpl;
+import com.vmware.vim.binding.vim.vm.ConfigSpec;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
 import com.vmware.vim.binding.vim.vm.device.VirtualDeviceSpec;
+import com.vmware.vim.binding.vim.vm.device.VirtualEthernetCard;
 
 /**
  * Utility Class for the NetworkSchema
- *
+ * 
  * @author sridharr
- *
+ * 
  */
 public class NetworkSchemaUtil {
+   private static final Logger logger = Logger
+         .getLogger(NetworkSchemaUtil.class);
 
    public static NetworkSchema getSchema(String xmlSchema) throws JAXBException {
       return SchemaUtil.getSchema(xmlSchema, NetworkSchema.class);
@@ -62,11 +69,53 @@ public class NetworkSchemaUtil {
             }
          }
          // Add new networks
-         VirtualDeviceSpec deviceSpec = VmConfigUtil.createNetworkDevice(
-               VmConfigUtil.EthernetControllerType.VMXNET3, network.nicLabel, vN);
+         VirtualDeviceSpec deviceSpec =
+               VmConfigUtil.createNetworkDevice(
+                     VmConfigUtil.EthernetControllerType.VMXNET3,
+                     network.nicLabel, vN);
          changes.add(deviceSpec);
       }
 
       spec.setDeviceChange(changes.toArray(new VirtualDeviceSpec[changes.size()]));
+   }
+
+   public static void copyMacAddresses(ConfigSpec configSpec,
+         VcVirtualMachine parentVm, VcVirtualMachine childVm,
+         NetworkSchema networkSchema) {
+      List<VirtualDeviceSpec> changes = new ArrayList<VirtualDeviceSpec>();
+
+      for (NetworkSchema.Network network : networkSchema.networks) {
+         VirtualDevice nic = null;
+         String macAddr = null;
+         if (network.nicLabel != null) {
+            nic = parentVm.getDeviceByLabel(network.nicLabel);
+            macAddr = ((VirtualEthernetCard) nic).getMacAddress();
+            if (nic == null || macAddr == null)
+               continue;
+
+            logger.info("get parent vm's mac address " + macAddr);
+
+            // edit mac address
+            nic = childVm.getDeviceByLabel(network.nicLabel);
+
+            if (nic == null) {
+               logger.info("child vm does not have nic " + network.nicLabel);
+               continue;
+            }
+
+            // set mac address
+            ((VirtualEthernetCard) nic).setAddressType("Manual");
+            ((VirtualEthernetCard) nic).setMacAddress(macAddr);
+
+            VirtualDeviceSpec deviceSpec = new VirtualDeviceSpecImpl();
+            deviceSpec.setOperation(VirtualDeviceSpec.Operation.edit);
+            deviceSpec.setDevice(nic);
+
+            changes.add(deviceSpec);
+         }
+      }
+
+      configSpec.setDeviceChange(changes.toArray(new VirtualDeviceSpec[changes
+            .size()]));
    }
 }

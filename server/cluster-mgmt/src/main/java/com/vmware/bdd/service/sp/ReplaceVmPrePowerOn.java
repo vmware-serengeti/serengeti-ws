@@ -7,6 +7,8 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.IPrePostPowerOn;
+import com.vmware.aurora.composition.NetworkSchema;
+import com.vmware.aurora.composition.NetworkSchemaUtil;
 import com.vmware.aurora.vc.DeviceId;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
@@ -29,13 +31,15 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
    private Priority ioShares;
    private VcVirtualMachine vm;
    private List<DiskSpec> fullDiskSet;
+   private NetworkSchema networkSchema;
 
    public ReplaceVmPrePowerOn(String vmId, String newName, Priority ioShares,
-         List<DiskSpec> fullDiskSet) {
+         List<DiskSpec> fullDiskSet, NetworkSchema networkSchema) {
       this.oldVmId = vmId;
       this.newName = newName;
       this.ioShares = ioShares;
       this.fullDiskSet = fullDiskSet;
+      this.networkSchema = networkSchema;
    }
 
    private void destroyVm(VcVirtualMachine oldVm) throws Exception {
@@ -51,20 +55,20 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
                   .shutdownGuest(Constants.VM_FAST_SHUTDOWN_WAITING_SEC * 1000)) {
          oldVm.powerOff();
       }
-
-      // detach existed vmdks on the old vm
-      for (DiskSpec disk : fullDiskSet) {
-         if (disk.getVmdkPath() != null && !disk.getVmdkPath().isEmpty()) {
-            oldVm.detachVirtualDisk(new DeviceId(disk.getExternalAddress()),
-                  false);
-         }
-      }
-
+      
       /*
        * TRICK: destroy vm with unaccessible disks will throw exceptions, ignore 
        * it and destroy it again.
        */
       try {
+         // detach existed vmdks on the old vm
+         for (DiskSpec disk : fullDiskSet) {
+            if (disk.getVmdkPath() != null && !disk.getVmdkPath().isEmpty()) {
+               oldVm.detachVirtualDisk(new DeviceId(disk.getExternalAddress()),
+                     false);
+            }
+         }
+
          oldVm.destroy(false);
       } catch (Exception e) {
          logger.warn("failed to delete vm " + oldVm.getName() + " as "
@@ -84,6 +88,12 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
       }
       return options.toArray(new OptionValue[options.size()]);
    }
+   
+   private void copyNicSettings(VcVirtualMachine oldVm) throws Exception {
+      ConfigSpec configSpec = new ConfigSpecImpl();
+      NetworkSchemaUtil.copyMacAddresses(configSpec, oldVm, vm, networkSchema);
+      vm.reconfigure(configSpec);
+   }
 
    @Override
    public Void call() throws Exception {
@@ -98,6 +108,10 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
       VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
          protected Void body() throws Exception {
+            // copy parent vm's mac addresses
+            logger.info("copy parent vm's mac addresses");
+            copyNicSettings(oldVm);
+            
             // copy vhm related extra configures
             logger.info("copy vhm related extra configs from parent vm");
             OptionValue[] optionValues = getVhmExtraConfigs(oldVm);

@@ -16,19 +16,15 @@
 
 package com.vmware.bdd.manager;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameter;
@@ -38,11 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
-import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
@@ -51,7 +42,6 @@ import com.vmware.bdd.apitypes.LimitInstruction;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.TaskRead;
@@ -74,7 +64,6 @@ import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.ValidationUtils;
 
