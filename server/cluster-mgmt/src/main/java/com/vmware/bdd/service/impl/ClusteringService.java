@@ -305,14 +305,34 @@ public class ClusteringService implements IClusteringService {
       }
 
       try {
-         List<VcSnapshot> snapshots = templateVM.getSnapshots();
-         if (snapshots.isEmpty()) {
-            TakeSnapshotSP snapshotSp =
-                  new TakeSnapshotSP(templateVM.getId(), "snapshot", "snapshot");
-            snapshotSp.call();
-            templateSnapId = snapshotSp.getSnapId();
+         final VcSnapshot snapshot = templateVM.getSnapshotByName(Constants.ROOT_SNAPSTHOT_NAME);
+         if (snapshot == null) {
+            if (!ConfigInfo.isJustUpgraded()) {
+               TakeSnapshotSP snapshotSp =
+                     new TakeSnapshotSP(templateVM.getId(), Constants.ROOT_SNAPSTHOT_NAME, Constants.ROOT_SNAPSTHOT_DESC);
+               snapshotSp.call();
+               templateSnapId = snapshotSp.getSnapId();
+            }
          } else {
-            templateSnapId = snapshots.get(0).getName();
+            if (ConfigInfo.isJustUpgraded()) {
+               VcContext.inVcSessionDo(new VcSession<Boolean>() {
+                  @Override
+                  protected boolean isTaskSession() {
+                     return true;
+                  }
+
+                  @Override
+                  protected Boolean body() throws Exception {
+                     snapshot.remove();
+                     return true;
+                  }
+               });
+
+               ConfigInfo.setJustUpgraded(false);
+               ConfigInfo.save();
+            } else {
+               templateSnapId = snapshot.getName();
+            }
          }
          this.templateVm = templateVM;
       } catch (Exception e) {

@@ -18,6 +18,7 @@ import com.vmware.aurora.global.Configuration;
 
 public class ConfigInfo {
    private static final String SERENGETI_INITIALIZE_UUID = "serengeti.initialize.uuid";
+   private static final String SERENGETI_JUST_UPGRADED = "serengeti.just_upgraded";
 
    private static final String SERENGETI_UUID_KEY = "serengeti.uuid";
 
@@ -38,6 +39,7 @@ public class ConfigInfo {
    private static boolean initUUID;
    private static boolean deployAsVApp;
    private static String templateVmName;
+   private static boolean justUpgraded;
 
    static {
       mqEnabled = Configuration.getBoolean("task.enable_mq", mqEnabled);
@@ -54,6 +56,7 @@ public class ConfigInfo {
       initUUID = Configuration.getBoolean(SERENGETI_INITIALIZE_UUID, true);
       deployAsVApp = Configuration.getBoolean("deploy_as_vapp");
       templateVmName = Configuration.getString("template_vm_name");
+      justUpgraded = Configuration.getBoolean(SERENGETI_JUST_UPGRADED, false);
    }
 
    public static boolean isDebugEnabled() {
@@ -116,6 +119,15 @@ public class ConfigInfo {
 
    public static boolean isDeployAsVApp() {
       return deployAsVApp;
+   }
+
+   public static boolean isJustUpgraded() {
+      return justUpgraded;
+   }
+
+   public static void setJustUpgraded(boolean justUpgraded) {
+      ConfigInfo.justUpgraded = justUpgraded;
+      Configuration.setBoolean(SERENGETI_JUST_UPGRADED, justUpgraded);
    }
 
    public static String getTemplateVmName() {
