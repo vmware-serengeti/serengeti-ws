@@ -259,8 +259,8 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("node group name", groupName);
       }
 
-      if (scale.getCpuNumber() <= 0 && scale.getMemory() <= 0) {
-         throw BddException.INVALID_PARAMETER("node group scale parameter",scale);
+      if (scale.getCpuNumber() <= 0 || scale.getMemory() < 1024) {
+         throw BddException.INVALID_PARAMETER("node group scale parameter(cpu number must be greater than zero and memory size cannot be less than 1024MB)",scale);
       }
       logger.info("scale cluster: " + scale.toString());
       Long taskId =

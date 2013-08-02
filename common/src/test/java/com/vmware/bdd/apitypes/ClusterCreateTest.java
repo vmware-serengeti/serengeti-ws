@@ -345,6 +345,13 @@ public class ClusterCreateTest {
       assertEquals(
             "Warning: VM's memory must be divisible by 4. So, 'memCapacityMB' will be converted from 7501 to 7504 automaticlly in the master group.",
             warningMsgList.get(0));
+      
+      master.setMemCapacityMB(16);
+      worker.setMemCapacityMB(1023);
+      cluster.validateClusterCreate(failedMsgList, warningMsgList, distroRoles);
+      assertEquals(7, failedMsgList.size());
+      assertEquals("'memCapacityMB' cannot be less than 1024 in group master,worker in order for nodes to run normally",
+            failedMsgList.get(4));
    }
 
 }
