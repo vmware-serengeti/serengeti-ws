@@ -31,15 +31,14 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import com.vmware.aurora.composition.CreateVMFolderSP;
 import com.vmware.aurora.composition.DeleteVMFolderSP;
 import com.vmware.aurora.composition.DiskSchema;
@@ -831,11 +830,22 @@ public class ClusteringService implements IClusteringService {
          for (Entry<String, List<String>> vcClusterRpNamesEntry : vcClusterRpNamesMap
                .entrySet()) {
             String vcClusterName = vcClusterRpNamesEntry.getKey();
+            VcCluster vcCluster = VcResourceUtils.findVcCluster(vcClusterName);
+            if (vcCluster == null) {
+               String errorMsg = "Can not find vc cluster '" + vcClusterName + "'.";
+               logger.error(errorMsg);
+               throw BddException.INTERNAL(null, errorMsg);
+            }
             List<String> resourcePoolNames = vcClusterRpNamesEntry.getValue();
             for (String resourcePoolName : resourcePoolNames) {
                VcResourcePool parentVcResourcePool =
                      VcResourceUtils.findRPInVCCluster(vcClusterName,
                            resourcePoolName);
+               if (parentVcResourcePool == null) {
+                  String errorMsg = "Can not find vc resource pool '" + resourcePoolName + "'.";
+                  logger.error(errorMsg);
+                  throw BddException.INTERNAL(null, errorMsg);
+               }
                CreateResourcePoolSP clusterSP =
                      new CreateResourcePoolSP(parentVcResourcePool,
                            clusterRpName);
@@ -858,6 +868,11 @@ public class ClusteringService implements IClusteringService {
                .entrySet()) {
             String vcClusterName = vcClusterRpNamesEntry.getKey();
             VcCluster vcCluster = VcResourceUtils.findVcCluster(vcClusterName);
+            if (vcCluster == null) {
+               String errorMsg = "Can not find vc cluster '" + vcClusterName + "'.";
+               logger.error(errorMsg);
+               throw BddException.INTERNAL(null, errorMsg);
+            }
             if (!vcCluster.getConfig().getDRSEnabled()) {
                continue;
             }
@@ -869,6 +884,17 @@ public class ClusteringService implements IClusteringService {
                            : resourcePoolName + "/" + clusterRpName;
                parentVcResourcePool =
                      VcResourceUtils.findRPInVCCluster(vcClusterName, vcRPName);
+               if (parentVcResourcePool == null) {
+                  String errorMsg =
+                        "Can not find vc resource pool '"
+                              + vcRPName
+                              + "' "
+                              + (CommonUtil.isBlank(resourcePoolName) ? ""
+                                    : " in the vc resource pool '"
+                                          + resourcePoolName + "'") + ".";
+                  logger.error(errorMsg);
+                  throw BddException.INTERNAL(null, errorMsg);
+               }
                long rpHashCode =
                      vcClusterName.hashCode()
                            ^ (vcClusterName + resourcePoolName).hashCode();
