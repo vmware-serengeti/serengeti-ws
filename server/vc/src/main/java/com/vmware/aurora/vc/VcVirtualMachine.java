@@ -1429,6 +1429,14 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
 
    }
 
+   @Override
+   protected void processNotFoundException() throws Exception {
+      logger.error("vm " + MoUtil.morefToString(moRef)
+            + " is already deleted in VC. Purge from vc cache");
+      VcCache.purge(moRef);
+      VcCache.removeVmRpPair(moRef);
+   }
+
    /**
     * Refresh the storage info if the storage refresh flag is dirty.
     */

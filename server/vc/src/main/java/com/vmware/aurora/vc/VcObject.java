@@ -32,6 +32,7 @@ import com.vmware.vim.binding.vim.dvs.DistributedVirtualPortgroup;
 import com.vmware.vim.binding.vim.vm.Snapshot;
 import com.vmware.vim.binding.vmodl.ManagedObject;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
+import com.vmware.vim.binding.vmodl.fault.ManagedObjectNotFound;
 
 public interface VcObject extends Serializable, VcCache.IVcCacheObject {
    /**
@@ -121,6 +122,7 @@ public interface VcObject extends Serializable, VcCache.IVcCacheObject {
     * @throws Exception
     */
    public void updateRuntime() throws Exception;
+   
 }
 
 @SuppressWarnings("serial")
@@ -227,15 +229,30 @@ abstract class VcObjectImpl implements VcObject {
 
    protected synchronized void updateInternal(EnumSet<UpdateType> updates)
    throws Exception {
-      ManagedObject mo = getManagedObject();
-      if (updates.contains(UpdateType.CONFIG)) {
-         Profiler.inc(StatsType.VC_UPDATE_CONFIG, this);
-         update(mo);
+      try {
+         ManagedObject mo = getManagedObject();
+         if (updates.contains(UpdateType.CONFIG)) {
+            Profiler.inc(StatsType.VC_UPDATE_CONFIG, this);
+            update(mo);
+         }
+         if (updates.contains(UpdateType.RUNTIME)) {
+            Profiler.inc(StatsType.VC_UPDATE_RUNTIME, this);
+            updateRuntime(mo);
+         }
+      } catch (ManagedObjectNotFound mnf) {
+         if (mnf.getObj().equals(moRef)) {
+            processNotFoundException();
+         } else {
+            throw mnf;
+         }
       }
-      if (updates.contains(UpdateType.RUNTIME)) {
-         Profiler.inc(StatsType.VC_UPDATE_RUNTIME, this);
-         updateRuntime(mo);
-      }
+   }
+
+   protected void processNotFoundException() throws Exception {
+      logger.error("VC object " + MoUtil.morefToString(moRef)
+            + " is already deleted from VC. Purge from vc cache");
+      // in case the event is lost
+      VcCache.purge(moRef);
    }
 
    @Override
