@@ -115,7 +115,7 @@ module Software
           begin
             operation.run
           rescue SystemExit => e
-            log.info("rescued a exit call")
+            log.info("Ironfan exited with status code #{e.status}")
             exitCode = e.status
           rescue Exception => e
             log.error("Exception was thrown during calling ironfan cluster APIs. Ironfan error message: #{e.message}")
@@ -130,7 +130,7 @@ module Software
         end
 
         def getOperationStatusWithDetail(targetName)
-          log.debug("get operation status for target name: #{targetName}")
+          log.debug("get operation progress for cluster #{targetName} ...")
           begin
             status = getClusterOperationStatus(targetName, true)
           rescue Exception => e
@@ -140,7 +140,7 @@ module Software
             error = ClusterOperationException.new("Exception was thrown during querying cluster status from Chef. Error message: #{e.message}")
             raise error
           end
-          log.debug("status: #{status.inspect}")
+          log.debug("progress: #{status.operationStatus.inspect}")
           status
         end
 

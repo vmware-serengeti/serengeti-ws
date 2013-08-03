@@ -325,7 +325,7 @@ public class ClusterHealService implements IClusterHealService {
       ReplaceVmPrePowerOn prePowerOn =
             new ReplaceVmPrePowerOn(node.getMoId(), node.getVmName(),
                   clusterSpec.getNodeGroup(groupName).getStorage().getShares(),
-                  fullDiskSet);
+                  fullDiskSet, createSchema.networkSchema);
 
       // timeout is 10 mintues
       QueryIpAddress query =

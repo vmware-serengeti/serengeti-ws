@@ -45,6 +45,7 @@ import com.vmware.bdd.entity.resmgmt.ResourceReservation;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Constants;
 
 /**
@@ -189,6 +190,14 @@ public class ResourceService implements IResourceService {
       return findDSInVC(datastores);
    }
 
+   @Override
+   public void refreshDatastore() {
+      List<VcCluster> vcClusters = VcInventory.getClusters();
+      AuAssert.check(vcClusters != null && vcClusters.size() != 0);
+      for (VcCluster vcCluster : vcClusters) {
+         VcResourceUtils.refreshDatastore(vcCluster);
+      }
+   }
 
    @Override
    public boolean isDatastoreExistInVC(String dsName)
@@ -304,6 +313,8 @@ public class ResourceService implements IResourceService {
                }
             }
             if (!found) {
+               logger.error("host " + vcHost + " has networks " + networks
+                     + " does not have target network " + portGroupName);
                result = false;
                break;
             }

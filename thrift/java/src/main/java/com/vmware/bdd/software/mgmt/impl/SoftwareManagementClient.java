@@ -23,12 +23,12 @@ import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.software.mgmt.exception.SoftwareManagementException;
 import com.vmware.bdd.software.mgmt.thrift.ClusterOperation;
 import com.vmware.bdd.software.mgmt.thrift.ClusterOperationException;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.SoftwareManagement;
-import com.vmware.bdd.utils.Configuration;
 
 /**
  * @author Jarred Li

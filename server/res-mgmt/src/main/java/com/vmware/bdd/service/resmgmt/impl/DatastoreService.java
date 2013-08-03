@@ -312,6 +312,7 @@ public class DatastoreService implements IDatastoreService {
       if (dsDao.nameExisted(name)) {
          throw BddException.ALREADY_EXISTS("datastore", name);
       }
+      resService.refreshDatastore();
       for (String ds : datastores) {
          if (!resService.isDatastoreExistInVC(ds)) {
             throw VcProviderException.DATASTORE_NOT_FOUND(ds);

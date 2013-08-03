@@ -44,20 +44,20 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="nodeStatusVerifyStep" next="setAutoElasticityStep">
+		<step id="nodeStatusVerifyStep" next="softwareCreateClusterStep">
 			<tasklet ref="clusterNodeStatusVerifyTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="setAutoElasticityStep" next="softwareCreateClusterStep">
-			<tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
+		<step id="softwareCreateClusterStep" next="setAutoElasticityStep">
+			<tasklet ref="softwareCreateClusterTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="softwareCreateClusterStep">
-			<tasklet ref="softwareCreateClusterTasklet" />
+		<step id="setAutoElasticityStep">
+			<tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

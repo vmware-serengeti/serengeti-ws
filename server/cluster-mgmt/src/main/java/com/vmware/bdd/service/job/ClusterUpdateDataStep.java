@@ -104,7 +104,6 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
       }
       addNodeToMetaData(clusterName, addedNodes, deletedNodeNames);
       removeDeletedNode(clusterName, deletedNodeNames);
-      updateVhmMasterMoid(clusterName);
       return RepeatStatus.FINISHED;
    }
 
@@ -142,34 +141,6 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          if (deletedNodeNames.contains(node.getVmName())) {
             logger.info("Remove Node " + node.getVmName() + " from meta db.");
             getClusterEntityMgr().delete(node);
-         }
-      }
-   }
-
-   private void updateVhmMasterMoid(String clusterName) {
-      ClusterEntity cluster = getClusterEntityMgr().findByName(clusterName);
-      if (cluster.getVhmMasterMoid() == null) {
-         List<NodeEntity> nodes =
-               getClusterEntityMgr().findAllNodes(clusterName);
-         for (NodeEntity node : nodes) {
-            if (node.getMoId() != null
-                  && node.getNodeGroup().getRoles() != null) {
-               @SuppressWarnings("unchecked")
-               List<String> roles =
-                     new Gson().fromJson(node.getNodeGroup().getRoles(),
-                           List.class);
-               if (cluster.getDistro().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
-                  if (roles.contains(HadoopRole.MAPR_JOBTRACKER_ROLE.toString())) {
-                     cluster.setVhmMasterMoid(node.getMoId());
-                     break;
-                  }
-               } else {
-                  if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
-                     cluster.setVhmMasterMoid(node.getMoId());
-                     break;
-                  }
-               }
-            }
          }
       }
    }

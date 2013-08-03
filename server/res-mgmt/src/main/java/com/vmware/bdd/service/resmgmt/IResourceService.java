@@ -85,6 +85,11 @@ public interface IResourceService {
          throws VcProviderException;
 
    /**
+    * refresh datastores of available clusters
+    */
+   void refreshDatastore();
+
+   /**
     * Whether the datastore exist in the vCenter
     * @param dsName datastore name
     * @return true - the datastore exist in the vCenter,

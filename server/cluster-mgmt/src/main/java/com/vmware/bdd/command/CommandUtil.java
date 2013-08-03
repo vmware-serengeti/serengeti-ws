@@ -18,8 +18,8 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.Configuration;
 
 public class CommandUtil {
    private static final Logger logger = Logger.getLogger(CommandUtil.class);

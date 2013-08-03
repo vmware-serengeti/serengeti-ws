@@ -1,61 +1,53 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+   <artifactId>res-mgmt</artifactId>
+   <packaging>jar</packaging>
+   <name>Resource Management</name>
+   <url>http://serengeti.cloudfoundry.com/</url>
 
-	<groupId>com.vmware.bdd</groupId>
-	<artifactId>res-mgmt</artifactId>
-	<packaging>jar</packaging>
-	<name>Resource Management</name>
-	<url>http://serengeti.cloudfoundry.com/</url>
-	<version>${serengeti.version}</version>
+   <parent>
+      <groupId>com.vmware.bdd</groupId>
+      <artifactId>serengeti-master</artifactId>
+      <version>${serengeti.version}</version>
+      <relativePath>../../pom.xml</relativePath>
+   </parent>
 
-	<parent>
-		<groupId>com.vmware.bdd</groupId>
-		<artifactId>serengeti-master</artifactId>
-		<version>${serengeti.version}</version>
-		<relativePath>../../pom.xml</relativePath>
-	</parent>
-
-	<dependencies>
-		<dependency>
-			<groupId>com.vmware.bdd</groupId>
-			<artifactId>commons-serengeti</artifactId>
-			<version>${serengeti.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vmware.bdd</groupId>
-			<artifactId>dal</artifactId>
-			<version>${serengeti.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vmware.bdd</groupId>
-			<artifactId>serengeti-aop</artifactId>
-			<version>${serengeti.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vmware.aurora</groupId>
-			<artifactId>vc</artifactId>
-			<version>${aurora.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.testng</groupId>
-			<artifactId>testng</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
+   <dependencies>
+      <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>commons-serengeti</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>dal</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>serengeti-aop</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>vc</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.testng</groupId>
+         <artifactId>testng</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
          <groupId>com.googlecode.jmockit</groupId>
          <artifactId>jmockit</artifactId>
          <scope>test</scope>
-        </dependency>
-        <dependency>
+      </dependency>
+      <dependency>
          <groupId>org.mockito</groupId>
          <artifactId>mockito-core</artifactId>
          <scope>test</scope>
-        </dependency>
-        <dependency>
+      </dependency>
+      <dependency>
          <groupId>com.jcraft</groupId>
          <artifactId>jsch</artifactId>
-         <version>0.1.48</version>
-        </dependency>
-	</dependencies>
+      </dependency>
+   </dependencies>
 </project>

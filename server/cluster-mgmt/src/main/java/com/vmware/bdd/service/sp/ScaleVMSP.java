@@ -98,7 +98,7 @@ public class ScaleVMSP implements Callable<Void> {
                         + swapDisk.getDatastoreName());
                   logger.info("target ds to place swap disk: "
                         + targetDs.getName());
-                  if (swapDisk.getDatastoreMoId() == targetDs.getId()) {
+                  if (swapDisk.getDatastoreMoId().equals(targetDs.getId())) {
                      VirtualDeviceSpec devSpec = new VirtualDeviceSpecImpl();
                      devSpec.setOperation(VirtualDeviceSpec.Operation.edit);
                      vmSwapDisk.setCapacityInKB(newSwapSizeInMB * 1024);

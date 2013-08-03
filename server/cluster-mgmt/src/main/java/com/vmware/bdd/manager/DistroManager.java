@@ -43,10 +43,10 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.Configuration;
 import com.vmware.bdd.utils.Constants;
 
 class RolePackageMapping {

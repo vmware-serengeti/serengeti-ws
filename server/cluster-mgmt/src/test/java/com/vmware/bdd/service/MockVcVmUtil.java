@@ -46,4 +46,9 @@ public class MockVcVmUtil {
 
       return true;
    }
+   
+   @Mock
+   public static void updateVm(String vmId) {
+	   
+   }
 }
