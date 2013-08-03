@@ -101,8 +101,8 @@ public class CommandsUtils {
       return NodeGroupsCreate;
    }
 
-   public static void prettyJsonOutput(Object object, String fileName) 
-   throws JsonParseException, JsonMappingException, IOException {
+   public static void prettyJsonOutput(Object object, String fileName)
+         throws JsonParseException, JsonMappingException, IOException {
       OutputStream out = null;
       if (fileName != null) {
          out = new FileOutputStream(fileName);
@@ -119,6 +119,12 @@ public class CommandsUtils {
       prettyPrinter.indentArraysWith(indenter);
       generator.setPrettyPrinter(prettyPrinter);
       generator.writeObject(object);
+      if (fileName == null) {
+         System.out.println();
+      } else {
+         File file = new File(fileName);
+         System.out.println("Exported to file " + file.getAbsolutePath());
+      }
    }
 
    /**
