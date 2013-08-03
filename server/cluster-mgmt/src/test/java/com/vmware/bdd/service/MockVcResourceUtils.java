@@ -15,6 +15,7 @@ import com.vmware.bdd.service.utils.VcResourceUtils;
 @MockClass(realClass = VcResourceUtils.class)
 public class MockVcResourceUtils {
    private static boolean flag = true;
+
    @Mock
    public static VcResourcePool findRPInVCCluster(final String clusterName,
          final String vcRPName) {
@@ -52,8 +53,10 @@ public class MockVcResourceUtils {
    }
 
    @Mock
-   public static VcHost findHost(final String hostName) { 
-      return null;
+   public static VcHost findHost(final String hostName) {
+      VcHost host = Mockito.mock(VcHost.class);
+      Mockito.when(host.getName()).thenReturn("host1.eng.vmware.com");
+      return host;
    }
 
    @Mock

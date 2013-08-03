@@ -77,8 +77,10 @@ import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.fastclone.copier.impl.AbstractFastCopierFactory;
-import com.vmware.bdd.fastclone.copier.impl.CreateVmSpFactory;
+import com.vmware.bdd.fastclone.copier.impl.InnerHostTargetSelector;
+import com.vmware.bdd.fastclone.copier.impl.VmClonerFactory;
 import com.vmware.bdd.fastclone.intf.FastCloneService;
+import com.vmware.bdd.fastclone.intf.TargetSelector;
 import com.vmware.bdd.fastclone.resource.impl.VmCreateSpec;
 import com.vmware.bdd.fastclone.service.impl.FastCloneServiceImpl;
 import com.vmware.bdd.manager.ClusterConfigManager;
@@ -117,7 +119,6 @@ import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.VcVmUtil;
 import com.vmware.vim.binding.vim.Folder;
-import com.vmware.vim.binding.vim.fault.VmFaultToleranceOpIssuesList;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
 import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
@@ -305,11 +306,14 @@ public class ClusteringService implements IClusteringService {
       }
 
       try {
-         final VcSnapshot snapshot = templateVM.getSnapshotByName(Constants.ROOT_SNAPSTHOT_NAME);
+         final VcSnapshot snapshot =
+               templateVM.getSnapshotByName(Constants.ROOT_SNAPSTHOT_NAME);
          if (snapshot == null) {
             if (!ConfigInfo.isJustUpgraded()) {
                TakeSnapshotSP snapshotSp =
-                     new TakeSnapshotSP(templateVM.getId(), Constants.ROOT_SNAPSTHOT_NAME, Constants.ROOT_SNAPSTHOT_DESC);
+                     new TakeSnapshotSP(templateVM.getId(),
+                           Constants.ROOT_SNAPSTHOT_NAME,
+                           Constants.ROOT_SNAPSTHOT_DESC);
                snapshotSp.call();
                templateSnapId = snapshotSp.getSnapId();
             }
@@ -524,17 +528,20 @@ public class ClusteringService implements IClusteringService {
                      new Gson().fromJson(node.getNodeGroup().getRoles(),
                            List.class);
                if (cluster.getDistro().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
-                  if (roles.contains(HadoopRole.MAPR_JOBTRACKER_ROLE.toString())) {
+                  if (roles
+                        .contains(HadoopRole.MAPR_JOBTRACKER_ROLE.toString())) {
                      String thisJtIp = node.getIpAddress();
                      String activeJtIp;
                      try {
-                        activeJtIp = getMaprActiveJobTrackerIp(thisJtIp, clusterName);
+                        activeJtIp =
+                              getMaprActiveJobTrackerIp(thisJtIp, clusterName);
                         logger.info("fetched active JT Ip: " + activeJtIp);
                      } catch (Exception e) {
                         continue;
                      }
 
-                     AuAssert.check(!CommonUtil.isBlank(thisJtIp), "falied to query active JobTracker Ip");
+                     AuAssert.check(!CommonUtil.isBlank(thisJtIp),
+                           "falied to query active JobTracker Ip");
                      for (NodeEntity jt : nodes) {
                         if (jt.getIpAddress().equals(activeJtIp)) {
                            cluster.setVhmMasterMoid(jt.getMoId());
@@ -544,7 +551,8 @@ public class ClusteringService implements IClusteringService {
                      break;
                   }
                } else {
-                  if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
+                  if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE
+                        .toString())) {
                      cluster.setVhmMasterMoid(node.getMoId());
                      break;
                   }
@@ -604,8 +612,10 @@ public class ClusteringService implements IClusteringService {
          }
          List<String> roles =
                new Gson().fromJson(node.getNodeGroup().getRoles(), List.class);
-         String distroVendor = node.getNodeGroup().getCluster().getDistroVendor();
-         boolean isComputeOnlyNode = CommonUtil.isComputeOnly(roles, distroVendor);
+         String distroVendor =
+               node.getNodeGroup().getCluster().getDistroVendor();
+         boolean isComputeOnlyNode =
+               CommonUtil.isComputeOnly(roles, distroVendor);
          SetAutoElasticitySP sp =
                new SetAutoElasticitySP(vm, serengetiUUID, masterMoId,
                      masterUUID, enableAutoElasticity, minComputeNodeNum,
@@ -852,7 +862,8 @@ public class ClusteringService implements IClusteringService {
             String vcClusterName = vcClusterRpNamesEntry.getKey();
             VcCluster vcCluster = VcResourceUtils.findVcCluster(vcClusterName);
             if (vcCluster == null) {
-               String errorMsg = "Can not find vc cluster '" + vcClusterName + "'.";
+               String errorMsg =
+                     "Can not find vc cluster '" + vcClusterName + "'.";
                logger.error(errorMsg);
                throw BddException.INTERNAL(null, errorMsg);
             }
@@ -862,7 +873,9 @@ public class ClusteringService implements IClusteringService {
                      VcResourceUtils.findRPInVCCluster(vcClusterName,
                            resourcePoolName);
                if (parentVcResourcePool == null) {
-                  String errorMsg = "Can not find vc resource pool '" + resourcePoolName + "'.";
+                  String errorMsg =
+                        "Can not find vc resource pool '" + resourcePoolName
+                              + "'.";
                   logger.error(errorMsg);
                   throw BddException.INTERNAL(null, errorMsg);
                }
@@ -889,7 +902,8 @@ public class ClusteringService implements IClusteringService {
             String vcClusterName = vcClusterRpNamesEntry.getKey();
             VcCluster vcCluster = VcResourceUtils.findVcCluster(vcClusterName);
             if (vcCluster == null) {
-               String errorMsg = "Can not find vc cluster '" + vcClusterName + "'.";
+               String errorMsg =
+                     "Can not find vc cluster '" + vcClusterName + "'.";
                logger.error(errorMsg);
                throw BddException.INTERNAL(null, errorMsg);
             }
@@ -963,8 +977,13 @@ public class ClusteringService implements IClusteringService {
             new FastCloneServiceImpl<VmCreateSpec>();
       // set copier factory
       AbstractFastCopierFactory<VmCreateSpec> copierFactory =
-            new CreateVmSpFactory();
+            new VmClonerFactory();
       cloneSrv.setFastCopierFactory(copierFactory);
+
+      TargetSelector<VmCreateSpec> selector =
+            new InnerHostTargetSelector<VmCreateSpec>();
+
+      cloneSrv.setTargetSelector(selector);
 
       VmCreateSpec sourceSpec = new VmCreateSpec();
 
