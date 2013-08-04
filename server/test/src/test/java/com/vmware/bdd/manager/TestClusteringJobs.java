@@ -40,7 +40,6 @@ import com.google.gson.Gson;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcResourcePool;
-import com.vmware.aurora.vc.VcSnapshot;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
@@ -73,7 +72,6 @@ import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.TestResourceCleanupUtils;
-import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
 import com.vmware.vim.binding.vim.Folder;
 
 @ContextConfiguration(locations = {

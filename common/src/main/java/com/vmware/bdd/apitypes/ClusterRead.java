@@ -23,7 +23,6 @@ import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
 import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.Constants;
 
 /**
  * Cluster get output

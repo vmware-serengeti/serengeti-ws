@@ -184,7 +184,7 @@ public class NodeEntity extends EntityBase {
             && this.status.ordinal() >= NodeStatus.POWERED_ON.ordinal()) {
          if (status.ordinal() > this.status.ordinal()) {
             this.status = status;
-            logger.info("node " + getVmName() + " status changed to " + status);
+            logger.debug("node " + getVmName() + " status changed to " + status);
          }
          return;
       } else if (status.ordinal() <= NodeStatus.POWERED_OFF.ordinal()
@@ -193,14 +193,14 @@ public class NodeEntity extends EntityBase {
          // don't think that power status is changed
          if (this.status != status) {
             this.status = status;
-            logger.info("node " + getVmName() + " status changed to " + status);
+            logger.debug("node " + getVmName() + " status changed to " + status);
          }
          return;
       }
 
       if (this.status != status) {
          powerStatusChanged = true;
-         logger.info("node " + getVmName() + " status changed to " + status);
+         logger.debug("node " + getVmName() + " status changed to " + status);
          this.status = status;
       }
    }
@@ -219,7 +219,7 @@ public class NodeEntity extends EntityBase {
 
    public void setAction(String action) {
       if (this.action != action) {
-         logger.info("node " + getVmName() + " action changed to " + action);
+         logger.debug("node " + getVmName() + " action changed to " + action);
          this.action = action;
       }
    }

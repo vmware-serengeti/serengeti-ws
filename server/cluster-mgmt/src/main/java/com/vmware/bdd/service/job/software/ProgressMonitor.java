@@ -30,10 +30,15 @@ import com.vmware.bdd.utils.TracedRunnable;
  */
 public class ProgressMonitor extends TracedRunnable {
    private static final Logger logger = Logger.getLogger(ProgressMonitor.class);
+   private static final long QUERY_INTERVAL_DEFAULT = 1000 * 10; // 10 seconds
+   private static final long QUERY_INTERVAL_LONG = 1000 * 60 * 5; // 5 minutes
+   private static final long QUERY_INTERVAL_MAX = 1000 * 60 * 15; // 15 minutes
+   private static final int BIG_CLUSTER_NODES_COUNT = 100;
 
    private String targetName;
    private StatusUpdater statusUpdater;
-   private int queryInteral = 1000 * 10;
+   private String lastErrorMsg = null;
+   private long queryInterval = QUERY_INTERVAL_DEFAULT;
    private ClusterEntityManager clusterEntityMgr;
    private volatile boolean stop;
 
@@ -45,7 +50,7 @@ public class ProgressMonitor extends TracedRunnable {
    }
 
    /**
-    * @return the stop
+    * @return should stop monitoring?
     */
    public boolean isStop() {
       return stop;
@@ -53,10 +58,18 @@ public class ProgressMonitor extends TracedRunnable {
 
    /**
     * @param stop
-    *           the stop to set
+    *           stop monitoring
     */
    public void setStop(boolean stop) {
       this.stop = stop;
+   }
+
+   public String getLastErrorMsg() {
+      return lastErrorMsg;
+   }
+
+   private void setLastErrorMsg(String errorMsg) {
+      this.lastErrorMsg = errorMsg;
    }
 
    /* (non-Javadoc)
@@ -64,32 +77,49 @@ public class ProgressMonitor extends TracedRunnable {
     */
    @Override
    public void doWork() throws Exception {
-      logger.info("start monitor operation progress, target name :"
-            + targetName);
+      boolean exit = false;
+
+      logger.info("start monitor operation progress for target " + targetName);
+      OperationStatusWithDetail detailedStatus = null;
       SoftwareManagementClient monitorClient = new SoftwareManagementClient();
       monitorClient.init();
-      OperationStatusWithDetail detailedStatus =
-            monitorClient.getOperationStatusWithDetail(targetName);
-      logger.info("progress finished? "
-            + detailedStatus.getOperationStatus().isFinished());
-      while (detailedStatus != null && !stop) {
+
+      while (!exit) {
+         try {
+            Thread.sleep(queryInterval);
+         } catch (InterruptedException e) {
+            logger.info("monitor thread is waked up by caller to stop monitoring");
+            stop = true;
+         }
+         if (stop) {
+            logger.info("received stop signal, will do one more query then exit, so as to retrieve the final progress after Ironfan exits.");
+            exit = true;
+         }
+
+         logger.info("progress query started");
+         detailedStatus = monitorClient.getOperationStatusWithDetail(targetName);
+         if (null == detailedStatus) {
+            logger.error("Failed to query progress. Something wrong with the Monitor Service?");
+            break;
+         }
+         logger.info("progress finished? " + detailedStatus.getOperationStatus().isFinished());
+         logger.debug(detailedStatus.toString());
+         logger.info("progress query completed");
          if (detailedStatus.getOperationStatus().getProgress() < 100) {
             int progress = detailedStatus.getOperationStatus().getProgress();
             statusUpdater.setProgress(((double) progress) / 100);
          }
+         setLastErrorMsg(detailedStatus.getOperationStatus().getErrorMsg());
          clusterEntityMgr.handleOperationStatus(targetName.split("-")[0], detailedStatus);
-         logger.info("operation has not finished. wait again");
-         try {
-            Thread.sleep(queryInteral);
-         } catch (InterruptedException e) {
-            logger.info("Monitor thread was stopped");
-            break;
+
+         // for large scale cluster (100+ nodes), don't need to query too frequent which will cause too much overhead on Chef Server
+         if (queryInterval == QUERY_INTERVAL_DEFAULT) {
+            int size = detailedStatus.getClusterData().getClusterSize();
+            if (size > BIG_CLUSTER_NODES_COUNT) {
+               queryInterval = Math.min(QUERY_INTERVAL_MAX, QUERY_INTERVAL_LONG * (size / BIG_CLUSTER_NODES_COUNT));
+               logger.info("progress query interval set to " + queryInterval / 1000 + "s because this cluster has " + size + " nodes");
+            }
          }
-         logger.info("before query progress");
-         detailedStatus =
-               monitorClient.getOperationStatusWithDetail(targetName);
-         logger.info(detailedStatus.toString());
-         logger.info("after query progress");
       }
       if (monitorClient != null) {
          monitorClient.close();

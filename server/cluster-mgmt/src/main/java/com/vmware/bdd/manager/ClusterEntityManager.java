@@ -43,6 +43,7 @@ import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.software.mgmt.thrift.GroupData;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
+import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
@@ -215,9 +216,7 @@ public class ClusterEntityManager {
    @Transactional
    public boolean handleOperationStatus(String clusterName,
          OperationStatusWithDetail status) {
-      logger.info("handle operation status- finished: "
-            + status.getOperationStatus().isFinished()
-            + status.getOperationStatus());
+      logger.info("handle operation status: " + status.getOperationStatus());
       boolean finished = status.getOperationStatus().isFinished();
       final Map<String, GroupData> groups = status.getClusterData().getGroups();
 
@@ -347,12 +346,20 @@ public class ClusterEntityManager {
       clusterRead.setVhmTargetNum(cluster.getVhmTargetNum());
       clusterRead.setIoShares(cluster.getIoShares());
 
+      boolean computeOnly = true;
       List<NodeGroupRead> groupList = new ArrayList<NodeGroupRead>();
       for (NodeGroupEntity group : cluster.getNodeGroups()) {
          groupList.add(group.toNodeGroupRead());
+         if (group.getRoles() != null
+               && (group.getRoles().contains(
+                     HadoopRole.HADOOP_NAMENODE_ROLE.toString()) || group
+                     .getRoles().contains(HadoopRole.MAPR_CLDB_ROLE.toString()))) {
+            computeOnly = false;
+         }
       }
       clusterRead.setNodeGroups(groupList);
-      if (cluster.getHadoopConfig() != null) {
+
+      if (computeOnly && cluster.getHadoopConfig() != null) {
          Map conf = (new Gson()).fromJson(cluster.getHadoopConfig(), Map.class);
          Map hadoopConf = (Map) conf.get("hadoop");
          if (hadoopConf != null) {
@@ -451,4 +458,5 @@ public class ClusterEntityManager {
       NodeEntity node = nodeDao.findByName(nodeName);
       return new ArrayList<DiskEntity>(node.getDisks());
    }
+
 }

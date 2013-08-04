@@ -20,10 +20,12 @@ import java.util.concurrent.Callable;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.vc.VcCache;
+import com.vmware.aurora.vc.VcUtil;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.vim.binding.vim.vm.FaultToleranceConfigInfo;
+import com.vmware.vim.binding.vmodl.fault.ManagedObjectNotFound;
 
 /**
  * Stored Procedure to delete a VM
@@ -51,17 +53,23 @@ public class DeleteVmByIdSP implements Callable<Void> {
       VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
          protected Void body() throws Exception {
-            FaultToleranceConfigInfo info = vcVm.getConfig().getFtInfo();
-            if (info != null && info.getRole() == 1) {
-               logger.info("VM " + vcVm.getName() + " is FT primary VM, disable FT before delete it.");
-               vcVm.turnOffFT();
+            try {
+               FaultToleranceConfigInfo info = vcVm.getConfig().getFtInfo();
+               if (info != null && info.getRole() == 1) {
+                  logger.info("VM " + vcVm.getName() + " is FT primary VM, disable FT before delete it.");
+                  vcVm.turnOffFT();
+               }
+               if (vcVm.isPoweredOn()) {
+                  vcVm.powerOff();
+               }
+               vcVm.destroy();
+               return null;
+            } catch (ManagedObjectNotFound e) {
+               VcUtil.processNotFoundException(e, vmId, logger);
+               return null;
             }
-            if (vcVm.isPoweredOn()) {
-               vcVm.powerOff();
-            }
-            vcVm.destroy();
-            return null;
          }
+
          protected boolean isTaskSession() {
             return true;
          }

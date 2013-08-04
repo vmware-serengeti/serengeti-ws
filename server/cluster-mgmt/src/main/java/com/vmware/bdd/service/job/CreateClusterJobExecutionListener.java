@@ -14,19 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job;
 
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobExecution;
-
-import com.google.gson.Gson;
-import com.vmware.bdd.entity.ClusterEntity;
-import com.vmware.bdd.entity.NodeEntity;
-import com.vmware.bdd.exception.ClusteringServiceException;
-import com.vmware.bdd.manager.ClusterManager;
-import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.Constants;
 
 public class CreateClusterJobExecutionListener extends
       ClusterJobExecutionListener {
