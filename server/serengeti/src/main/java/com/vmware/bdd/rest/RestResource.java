@@ -66,6 +66,7 @@ import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.IpAddressUtil;
 
 @Controller
@@ -259,8 +260,8 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("node group name", groupName);
       }
 
-      if (scale.getCpuNumber() <= 0 || scale.getMemory() < 1024) {
-         throw BddException.INVALID_PARAMETER("node group scale parameter(cpu number must be greater than zero and memory size cannot be less than 1024MB)",scale);
+      if (scale.getCpuNumber() <= 0 || scale.getMemory() < Constants.MIN_MEM_SIZE) {
+         throw BddException.INVALID_PARAMETER("node group scale parameter(cpu number must be greater than zero and memory size cannot be less than " + Constants.MIN_MEM_SIZE + "MB)",scale);
       }
       logger.info("scale cluster: " + scale.toString());
       Long taskId =

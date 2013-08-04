@@ -30,6 +30,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -85,7 +86,8 @@ public class NodeGroupEntity extends EntityBase {
    private ClusterEntity cluster;
 
    @OneToMany(mappedBy = "nodeGroup", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-   private Set<NodeEntity> nodes;
+   @OrderBy("id")
+   private List<NodeEntity> nodes;
 
    /*
     * cluster definition field. VCResourcePool inside this array may not be used
@@ -243,11 +245,11 @@ public class NodeGroupEntity extends EntityBase {
       this.storageSize = storageSize;
    }
 
-   public Set<NodeEntity> getNodes() {
+   public List<NodeEntity> getNodes() {
       return nodes;
    }
 
-   public void setNodes(Set<NodeEntity> nodes) {
+   public void setNodes(List<NodeEntity> nodes) {
       this.nodes = nodes;
    }
 

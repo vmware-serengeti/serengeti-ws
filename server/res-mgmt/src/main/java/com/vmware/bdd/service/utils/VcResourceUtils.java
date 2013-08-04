@@ -381,6 +381,50 @@ public class VcResourceUtils {
       });
    }
 
+
+   public static void refreshNetwork(final VcCluster cl) {
+      VcContext.inVcSessionDo(new VcSession<Void>() {
+         @Override
+         protected Void body() {
+            try {
+               cl.update();
+            } catch (Exception e) {
+               logger.info("failed to update cluster " + cl.getName()
+                     + ", ignore this error.", e);
+            }
+            List<VcNetwork> networks = cl.getAllNetworks();
+            if (networks != null) {
+               for (VcNetwork network : networks) {
+                  try {
+                     network.update();
+                  } catch (Exception e) {
+                     logger.info(
+                           "failed to update network " + network.getName()
+                                 + ", ignore this error.", e);
+                  }
+               }
+            }
+            try {
+               List<VcHost> hosts = cl.getHosts();
+               if (hosts != null) {
+                  for (VcHost host : hosts) {
+                     try {
+                        host.update();
+                     } catch (Exception e) {
+                        logger.info("failed to update host " + host.getName()
+                              + ", ignore this error.", e);
+                     }
+                  }
+               }
+            } catch (Exception e) {
+               logger.info("failed to get host list on cluster " + cl.getName()
+                     + ", ignore this error.", e);
+            }
+            return null;
+         }
+      });
+   }
+
    public static boolean insidedRootFolder(VcVirtualMachine vm) {
       String root = ConfigInfo.getSerengetiRootFolder();
       List<String> folderNames = new ArrayList<String>();

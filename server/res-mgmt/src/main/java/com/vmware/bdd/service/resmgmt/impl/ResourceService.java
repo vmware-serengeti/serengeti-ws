@@ -261,11 +261,20 @@ public class ResourceService implements IResourceService {
       return VcResourceUtils.findNetworkInVC(networkEntity.getPortGroup());
    }
 
+   @Override
+   public void refreshNetwork() {
+      List<VcCluster> vcClusters = VcInventory.getClusters();
+      AuAssert.check(vcClusters != null && vcClusters.size() != 0);
+      for (VcCluster vcCluster : vcClusters) {
+         VcResourceUtils.refreshNetwork(vcCluster);
+      }
+   }
 
    @Override
    public boolean isNetworkExistInVc(String networkName)
          throws VcProviderException {
       boolean result = false;
+      refreshNetwork();
       VcNetwork network = VcResourceUtils.findNetworkInVC(networkName);
       if (network != null) {
          result = true;
@@ -297,6 +306,7 @@ public class ResourceService implements IResourceService {
    public boolean isNetworkSharedInCluster(String networkName,
          String clusterName) throws VcProviderException {
       boolean result = true;
+      refreshNetwork();
       VcNetwork vcNetwork = getNetworkByName(networkName);
       if (vcNetwork == null) {
          return false;

@@ -248,6 +248,12 @@ public class ClusterConfigManager {
                         clusterEntity, cluster.getDistro(), groups,
                         EnumSet.noneOf(HadoopRole.class),
                         cluster.isValidateConfig()));
+
+            //make sure memory size is no less than MIN_MEM_SIZE
+            validateMemorySize(clusterEntity.getNodeGroups(), failedMsgList);
+            if (!failedMsgList.isEmpty()) {
+               throw ClusterConfigException.INVALID_SPEC(failedMsgList);
+            }
          }
 
          if (cluster.getTopologyPolicy() == null) {
@@ -279,6 +285,27 @@ public class ClusterConfigManager {
          logger.info("can not create cluster " + name
                + ", which is already existed.");
          throw BddException.ALREADY_EXISTS(ex, "cluster", name);
+      }
+   }
+
+   private void validateMemorySize(Set<NodeGroupEntity> nodeGroups,
+         List<String> failedMsgList) {
+      boolean validated = true;
+      StringBuilder invalidNodeGroupNames = new StringBuilder();
+      for (NodeGroupEntity nodeGroup : nodeGroups) {
+         if (nodeGroup.getMemorySize() < Constants.MIN_MEM_SIZE) {
+            validated = false;
+            invalidNodeGroupNames.append(nodeGroup.getName()).append(",");
+         }
+      }
+      if (!validated) {
+         StringBuilder errorMsgBuff = new StringBuilder();
+         invalidNodeGroupNames.delete(invalidNodeGroupNames.length() - 1,
+               invalidNodeGroupNames.length());
+         failedMsgList.add(errorMsgBuff
+               .append("'memCapacityMB' cannot be less than " + Constants.MIN_MEM_SIZE + " in group ")
+               .append(invalidNodeGroupNames.toString())
+               .append(" in order for nodes to run normally").toString());
       }
    }
 

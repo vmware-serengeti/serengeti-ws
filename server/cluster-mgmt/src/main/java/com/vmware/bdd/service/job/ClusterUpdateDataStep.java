@@ -15,6 +15,7 @@
 package com.vmware.bdd.service.job;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -156,7 +157,7 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
                   vNode.getGroupName());
       AuAssert.check(nodeGroupEntity != null);
       if (nodeGroupEntity.getNodes() == null) {
-         nodeGroupEntity.setNodes(new HashSet<NodeEntity>());
+         nodeGroupEntity.setNodes(new LinkedList<NodeEntity>());
       }
 
       boolean insert = false;

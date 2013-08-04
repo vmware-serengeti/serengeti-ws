@@ -21,6 +21,7 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
@@ -233,10 +234,6 @@ public class ClusterRead implements Comparable<ClusterRead> {
     * 
     */
    private class NodeGroupReadComparactor implements Comparator<NodeGroupRead> {
-      private final String[] roleOrders = { "namenode", "jobtracker",
-            "hbase_master", "zookeeper", "datanode", "tasktracker",
-            "regionserver", "hadoop_client", "hbase_client", "pig", "hive" };
-
       @Override
       public int compare(NodeGroupRead ng1, NodeGroupRead ng2) {
          if (ng1 == ng2) {
@@ -255,35 +252,31 @@ public class ClusterRead implements Comparable<ClusterRead> {
          return compareBasedOnRoles(ng1Roles, ng2Roles);
       }
 
-      private int compareBasedOnRoles(List<String> ng1Roles,
-            List<String> ng2Roles) {
+      private int compareBasedOnRoles(List<String> ng1Roles, List<String> ng2Roles) {
          if (ng1Roles == ng2Roles) {
             return 0;
          }
-         if (ng1Roles == null) {
+         if (ng1Roles == null || ng1Roles.isEmpty()) {
             return 1;
-         } else if (ng2Roles == null) {
+         } else if (ng2Roles == null || ng2Roles.isEmpty()) {
             return -1;
          }
-         int ng1RolePos = findNodeGroupRole(ng1Roles);
-         int ng2RolePos = findNodeGroupRole(ng2Roles);
+
+         int ng1RolePos = findNodeGroupRoleMinIndex(ng1Roles);
+         int ng2RolePos = findNodeGroupRoleMinIndex(ng2Roles);
          if (ng1RolePos < ng2RolePos) {
             return -1;
-         } else if (ng1Roles == ng2Roles) {
+         } else if (ng1RolePos == ng2RolePos) {
             return 0;
          } else {
             return 1;
          }
       }
 
-      private int findNodeGroupRole(List<String> ng1Roles) {
-         String ngRolesString = ng1Roles.toString();
-         for (int i = 0; i < roleOrders.length; i++) {
-            if (ngRolesString.contains(roleOrders[i])) {
-               return i;
-            }
-         }
-         return roleOrders.length;
+      private int findNodeGroupRoleMinIndex(List<String> ngRoles) {
+         Collections.sort(ngRoles, new RoleComparactor());
+         HadoopRole role = HadoopRole.fromString(ngRoles.get(0));
+         return (null != role) ? role.ordinal() : -1;
       }
    }
 

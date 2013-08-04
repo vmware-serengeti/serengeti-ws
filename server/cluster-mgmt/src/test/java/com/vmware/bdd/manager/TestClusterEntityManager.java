@@ -2,6 +2,7 @@ package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -75,7 +76,7 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
       hdfsGroup.setRoles((new Gson()).toJson(roleStr));
 
       // add a hdfs node
-      Set<NodeEntity> nodes = new HashSet<NodeEntity>();
+      List<NodeEntity> nodes = new LinkedList<NodeEntity>();
       NodeEntity node0 = new NodeEntity();
       node0.setVmName(HDFS_NODE_0);
       node0.setNodeGroup(hdfsGroup);
