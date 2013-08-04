@@ -25,7 +25,7 @@ import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
 import com.vmware.bdd.service.job.TrackableTasklet;
 
-public class NodeUpdateDiskInfoStep extends TrackableTasklet {
+public class NodeUpdateDataStep extends TrackableTasklet {
 
    private static final Logger logger = Logger
          .getLogger(ClusterUpdateDataStep.class);
@@ -43,15 +43,18 @@ public class NodeUpdateDiskInfoStep extends TrackableTasklet {
             getFromJobExecutionContext(chunkContext,
                   JobConstants.REPLACE_VM_ID, String.class);
 
-      logger.debug("start update disk info for node");
       try {
+         logger.debug("start update disk info for node " + targetNode);
          healService.updateDiskData(vmId, targetNode);
+         
+         logger.debug("verify ip address for node " + targetNode);
+         healService.verifyNodeStatus(targetNode);         
       } catch (Exception e) {
          putIntoJobExecutionContext(chunkContext,
                JobConstants.CURRENT_ERROR_MESSAGE, e.getMessage());
          throw e;
       }
-
+      
       jobExecutionStatusHolder.setCurrentStepProgress(
             getJobExecutionId(chunkContext), 1.0);
       return RepeatStatus.FINISHED;

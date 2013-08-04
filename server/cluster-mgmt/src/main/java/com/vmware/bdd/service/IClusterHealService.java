@@ -54,15 +54,14 @@ public interface IClusterHealService {
          String groupName, String nodeName, List<DiskSpec> badDisks);
 
    /**
-    * fix disk failures for the specified node, say node A. Steps: 
-    * 1. power off VM A 
-    * 2. create a empty VM (named A.vm_name + "recovery") or clone one from
-    *    the template VM, depends on whether the system disk is corrupted or not,
-    *    with the exact same vccluster/host/rp/vc folder/network/cpu/mem settings
-    * 3. attach existing or create non-existing vmdks in fullDiskSet 
-    * 4. remove VM A, set node A's mobId to null
-    * 5. rename the recovered VM to A.vm_name and power on
-    *  
+    * fix disk failures for the specified node, say node A. Steps: 1). power off
+    * VM A, 2). create a empty VM (named A.vm_name + "recovery") or clone one from
+    * the template VM, depends on whether the system disk is corrupted or not,
+    * with the exact same vccluster/host/rp/vc folder/network/cpu/mem settings,
+    * 3). attach existing or create non-existing vmdks in fullDiskSet, 4). remove
+    * VM A, set node A's mobId to null, 5). rename the recovered VM to A.vm_name
+    * and power on
+    * 
     * @param clusterName
     * @param groupName
     * @param nodeName
@@ -71,27 +70,35 @@ public interface IClusterHealService {
     */
    public boolean fixDiskFailures(String clusterName, String groupName,
          String nodeName, List<DiskSpec> replacementDisks);
-   
+
    /**
-    * create a replacement vm with the exact same settings with the origin one for 
-    * the input node. attach good disks from the old vm and create replacement disks 
-    * for bad ones
+    * create a replacement vm with the exact same settings with the origin one
+    * for the input node. attach good disks from the old vm and create
+    * replacement disks for bad ones
     * 
     * @param clusterSpec
     * @param groupName
     * @param node
     * @param replacementDisks
-    *   disks to be created as their original one is not accessible
+    *           disks to be created as their original one is not accessible
     * @return
     */
    public VcVirtualMachine createReplacementVm(String clusterName,
          String groupName, String nodeName, List<DiskSpec> replacementDisks);
-    
+
    /**
     * update disk info with the input disk entity set
+    * 
     * @param vmId
     * @param nodeName
     * @param fullDiskSet
     */
    public void updateDiskData(String vmId, String nodeName);
+
+   /**
+    * verify node has correct status after vm fix, before software bootstrap
+    * 
+    * @param nodeName
+    */
+   public void verifyNodeStatus(String nodeName);
 }

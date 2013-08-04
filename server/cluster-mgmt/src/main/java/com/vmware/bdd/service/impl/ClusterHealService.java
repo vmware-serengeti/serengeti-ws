@@ -415,4 +415,14 @@ public class ClusterHealService implements IClusterHealService {
          String nodeName, List<DiskSpec> fullDiskSet) {
       return true;
    }
+
+   @Override
+   public void verifyNodeStatus(String nodeName) {
+      NodeEntity nodeEntity = clusterEntityMgr.findNodeByName(nodeName);
+
+      if (nodeEntity.getIpAddress() == null
+            || nodeEntity.getIpAddress().isEmpty()) {
+         throw ClusterHealServiceException.FAILED_TO_GET_IP(nodeName);
+      }
+   }
 }

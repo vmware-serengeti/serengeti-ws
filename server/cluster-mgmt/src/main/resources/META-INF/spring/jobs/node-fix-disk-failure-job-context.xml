@@ -26,21 +26,21 @@
       <beans:property name="vmPoweroff" value="true" />
    </beans:bean>
 
-   <beans:bean name="nodeUpdateDiskInfoTasklet"
-      class="com.vmware.bdd.service.job.heal.NodeUpdateDiskInfoStep">
+   <beans:bean name="nodeUpdateDataTasklet"
+      class="com.vmware.bdd.service.job.heal.NodeUpdateDataStep">
       <beans:property name="jobExecutionStatusHolder"
          ref="jobExecutionStatusHolder" />
    </beans:bean>
 
    <job id="fixNodeDiskFailureJob" job-repository="jobRepository">
-      <step id="nodeRecoverDiskFailureStep" next="nodeUpdateDiskInfoStep">
+      <step id="nodeRecoverDiskFailureStep" next="nodeUpdateDataStep">
          <tasklet ref="nodeRecoverDiskFailureTasklet" />
          <listeners>
             <listener ref="stepListener" />
          </listeners>
       </step>
-      <step id="nodeUpdateDiskInfoStep" next="softwareConfigClusterStep">
-         <tasklet ref="nodeUpdateDiskInfoTasklet" />
+      <step id="nodeUpdateDataStep" next="softwareConfigClusterStep">
+         <tasklet ref="nodeUpdateDataTasklet" />
          <listeners>
             <listener ref="stepListener" />
          </listeners>

@@ -57,7 +57,13 @@ public class ClusterHealServiceException extends BddException {
       return new ClusterHealServiceException(null, "FAILED_DELETE_VM", vmName);
    }
 
-   public static ClusterHealServiceException FAILED_RENAME_VM(String vmName, String newName) {
-      return new ClusterHealServiceException(null, "FAILED_RENAME_VM", vmName, newName);
+   public static ClusterHealServiceException FAILED_RENAME_VM(String vmName,
+         String newName) {
+      return new ClusterHealServiceException(null, "FAILED_RENAME_VM", vmName,
+            newName);
+   }
+
+   public static ClusterHealServiceException FAILED_TO_GET_IP(String nodeName) {
+      return new ClusterHealServiceException(null, "FAILED_TO_GET_IP", nodeName);
    }
 }
