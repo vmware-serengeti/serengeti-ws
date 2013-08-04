@@ -19,14 +19,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.vmware.aurora.composition.DiskSchema.Disk;
 import com.vmware.bdd.apitypes.NodeStatus;
@@ -38,7 +36,6 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.resmgmt.INetworkService;
-import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.VcVmUtil;
 

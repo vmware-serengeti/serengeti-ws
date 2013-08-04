@@ -32,6 +32,12 @@
          ref="jobExecutionStatusHolder" />
    </beans:bean>
 
+   <beans:bean name="nodeVerifyDataTasklet"
+      class="com.vmware.bdd.service.job.heal.NodeVerifyDataStep">
+      <beans:property name="jobExecutionStatusHolder"
+         ref="jobExecutionStatusHolder" />
+   </beans:bean>
+
    <job id="fixNodeDiskFailureJob" job-repository="jobRepository">
       <step id="nodeRecoverDiskFailureStep" next="nodeUpdateDataStep">
          <tasklet ref="nodeRecoverDiskFailureTasklet" />
@@ -39,8 +45,14 @@
             <listener ref="stepListener" />
          </listeners>
       </step>
-      <step id="nodeUpdateDataStep" next="softwareConfigClusterStep">
+      <step id="nodeUpdateDataStep" next="nodeVerifyDataStep">
          <tasklet ref="nodeUpdateDataTasklet" />
+         <listeners>
+            <listener ref="stepListener" />
+         </listeners>
+      </step>
+      <step id="nodeVerifyDataStep" next="softwareConfigClusterStep">
+         <tasklet ref="nodeVerifyDataTasklet" />
          <listeners>
             <listener ref="stepListener" />
          </listeners>

@@ -162,36 +162,41 @@ public class JobUtils {
       }
    }
 
-   public static void verifyNodesStatus(List<NodeEntity> nodes,
+   public static void verifyNodeStatus(NodeEntity node,
          NodeStatus expectedStatus, boolean ignoreMissing) {
-      for (NodeEntity node : nodes) {
-         if (node.getStatus() != expectedStatus) {
-            if (ignoreMissing && node.getStatus() == NodeStatus.NOT_EXIST) {
-               continue;
+      if (node.getStatus() != expectedStatus) {
+         if (ignoreMissing && node.getStatus() == NodeStatus.NOT_EXIST) {
+            return;
+         }
+         if (expectedStatus == NodeStatus.VM_READY) {
+            // verify from VC 
+            VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
+            if (vm == null || (!vm.isPoweredOn())
+                  || (VcVmUtil.getIpAddress(vm, false) == null)) {
+               throw ClusteringServiceException.VM_STATUS_ERROR(
+                     node.getVmName(), node.getStatus().toString(),
+                     expectedStatus.toString());
             }
-            if (expectedStatus == NodeStatus.VM_READY) {
-               // verify from VC 
-               VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
-               if (vm == null || (!vm.isPoweredOn())
-                     || (VcVmUtil.getIpAddress(vm, false) == null)) {
-                  throw ClusteringServiceException.VM_STATUS_ERROR(
-                        node.getVmName(), node.getStatus().toString(),
-                        expectedStatus.toString());
-               }
 
-               String haFlag = node.getNodeGroup().getHaFlag();
-               if (haFlag != null
-                     && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
-                  if (!VcVmUtil.verifyFTState(vm)) {
-                     logger.info("FT secondary VM state incorrect for node "
-                           + vm.getName() + ", " + "FT state "
-                           + vm.getFTState() + " is unexpected.");
-                     throw ClusteringServiceException.ENABLE_FT_FAILED(null,
-                           node.getVmName());
-                  }
+            String haFlag = node.getNodeGroup().getHaFlag();
+            if (haFlag != null
+                  && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
+               if (!VcVmUtil.verifyFTState(vm)) {
+                  logger.info("FT secondary VM state incorrect for node "
+                        + vm.getName() + ", " + "FT state " + vm.getFTState()
+                        + " is unexpected.");
+                  throw ClusteringServiceException.ENABLE_FT_FAILED(null,
+                        node.getVmName());
                }
             }
          }
+      }
+   }
+
+   public static void verifyNodesStatus(List<NodeEntity> nodes,
+         NodeStatus expectedStatus, boolean ignoreMissing) {
+      for (NodeEntity node : nodes) {
+         verifyNodeStatus(node, expectedStatus, ignoreMissing);
       }
    }
 
@@ -207,13 +212,18 @@ public class JobUtils {
             + paramIndex;
    }
 
-   public static void waitForManual(String clusterName, IExecutionService executionService){
+   public static void waitForManual(String clusterName,
+         IExecutionService executionService) {
       logger.info("start notify VHM swithing to manual mode");
       Map<String, Object> sendParam = new HashMap<String, Object>();
-      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_VERSION, Constants.VHM_PROTOCOL_VERSION);
-      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_CLUSTER_NAME, clusterName);
-      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_RECEIVE_ROUTE_KEY, CommonUtil.getUUID());
-      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_ACTION, LimitInstruction.actionWaitForManual);
+      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_VERSION,
+            Constants.VHM_PROTOCOL_VERSION);
+      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_CLUSTER_NAME,
+            clusterName);
+      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_RECEIVE_ROUTE_KEY,
+            CommonUtil.getUUID());
+      sendParam.put(Constants.SET_MANUAL_ELASTICITY_INFO_ACTION,
+            LimitInstruction.actionWaitForManual);
 
       Map<String, Object> ret = null;
       try {
@@ -223,7 +233,9 @@ public class JobUtils {
             throw TaskException.EXECUTION_FAILED(errorMessage);
          }
       } catch (Exception e) {
-         throw TaskException.EXECUTION_FAILED("failed to notify VHM swithing to manual for cluster: " + clusterName);
+         throw TaskException
+               .EXECUTION_FAILED("failed to notify VHM swithing to manual for cluster: "
+                     + clusterName);
       }
    }
 }

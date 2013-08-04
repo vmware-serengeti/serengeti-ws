@@ -39,6 +39,7 @@ import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
@@ -56,6 +57,7 @@ import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.VcVmUtil;
 import com.vmware.vim.binding.vim.Folder;
 
@@ -417,12 +419,8 @@ public class ClusterHealService implements IClusterHealService {
    }
 
    @Override
-   public void verifyNodeStatus(String nodeName) {
+   public void verifyNodeStatus(String vmId, String nodeName) {
       NodeEntity nodeEntity = clusterEntityMgr.findNodeByName(nodeName);
-
-      if (nodeEntity.getIpAddress() == null
-            || nodeEntity.getIpAddress().isEmpty()) {
-         throw ClusterHealServiceException.FAILED_TO_GET_IP(nodeName);
-      }
+      JobUtils.verifyNodeStatus(nodeEntity, NodeStatus.VM_READY, false);
    }
 }

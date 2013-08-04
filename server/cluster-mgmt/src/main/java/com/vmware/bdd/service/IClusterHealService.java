@@ -100,5 +100,5 @@ public interface IClusterHealService {
     * 
     * @param nodeName
     */
-   public void verifyNodeStatus(String nodeName);
+   public void verifyNodeStatus(String vmId, String nodeName);
 }
