@@ -130,7 +130,7 @@ public class PlacementService implements IPlacementService {
 
       logger.info("The following nodes have been successfully placed");
       for (BaseNode node : placedNodes) {
-         logger.info(node);
+         logger.info(node.getDetailDesc());
       }
 
       logger.info("The status of vc hosts after placement are shown as follows");
