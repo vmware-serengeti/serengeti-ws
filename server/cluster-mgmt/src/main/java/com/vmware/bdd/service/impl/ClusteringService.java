@@ -1346,6 +1346,9 @@ public class ClusteringService implements IClusteringService {
       // call tm to remove bad nodes
       List<BaseNode> badNodes =
             placementService.getBadNodes(cluster, existingNodes);
+      if (badNodes == null) {
+         badNodes = new ArrayList<BaseNode>();
+      }
       // append node in wrong status
       for (BaseNode node : deletedNodes) {
          if (node.getVmMobId() != null) {

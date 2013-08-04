@@ -252,9 +252,8 @@ abstract class VcObjectImpl implements VcObject {
       } catch (ManagedObjectNotFound mnf) {
          if (mnf.getObj().equals(moRef)) {
             processNotFoundException();
-         } else {
-            throw mnf;
          }
+         throw mnf;
       }
    }
 
