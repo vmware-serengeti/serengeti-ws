@@ -250,14 +250,6 @@ public class ClusterConfigManager {
                         cluster.isValidateConfig()));
          }
 
-         // check node group's memorySize
-         if (groups != null) {
-            cluster.validateMemorySize(groups, failedMsgList);
-         }
-         if (!failedMsgList.isEmpty()) {
-            throw ClusterConfigException.INVALID_SPEC(failedMsgList);
-         }
-
          if (cluster.getTopologyPolicy() == null) {
             clusterEntity.setTopologyPolicy(TopologyType.NONE);
          } else {
