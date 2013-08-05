@@ -433,7 +433,7 @@ public class ClusterCreate implements Serializable {
       }
    }
 
-   private void validateMemorySize(NodeGroupCreate[] nodeGroups,
+   public void validateMemorySize(NodeGroupCreate[] nodeGroups,
          List<String> failedMsgList) {
       boolean validated = true;
       StringBuilder invalidNodeGroupNames = new StringBuilder();
@@ -649,9 +649,6 @@ public class ClusterCreate implements Serializable {
 
          // check node group's swapRatio
          validateSwapRatio(nodeGroupCreates, failedMsgList);
-
-         // check node group's memorySize
-         validateMemorySize(nodeGroupCreates, failedMsgList);
 
          for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
             // check node group's instanceNum

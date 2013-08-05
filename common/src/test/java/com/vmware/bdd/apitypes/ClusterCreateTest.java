@@ -348,10 +348,9 @@ public class ClusterCreateTest {
       
       master.setMemCapacityMB(16);
       worker.setMemCapacityMB(1023);
-      cluster.validateClusterCreate(failedMsgList, warningMsgList, distroRoles);
-      assertEquals(7, failedMsgList.size());
+      cluster.validateMemorySize(cluster.getNodeGroups(), failedMsgList);
       assertEquals("'memCapacityMB' cannot be less than 1024 in group master,worker in order for nodes to run normally",
-            failedMsgList.get(4));
+            failedMsgList.get(3));
    }
 
 }
