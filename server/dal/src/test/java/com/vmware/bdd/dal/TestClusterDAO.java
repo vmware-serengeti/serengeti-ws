@@ -16,6 +16,7 @@ package com.vmware.bdd.dal;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -87,7 +88,7 @@ public class TestClusterDAO extends AbstractTransactionalTestNGSpringContextTest
       hdfsGroup.setDefineInstanceNum(2);
       hdfsGroup.setHaFlag("on");
 
-      Set<NodeEntity> hdfsNodes = new HashSet<NodeEntity>();
+      List<NodeEntity> hdfsNodes = new LinkedList<NodeEntity>();
       NodeEntity hdfsNode1 = new NodeEntity();
       NodeEntity hdfsNode2 = new NodeEntity();
       hdfsNode1.setVmName("hdfsNode1");
@@ -121,7 +122,7 @@ public class TestClusterDAO extends AbstractTransactionalTestNGSpringContextTest
       computeGroup.setDefineInstanceNum(1);
       computeGroup.setHaFlag("on");
 
-      Set<NodeEntity> computeNodes = new HashSet<NodeEntity>();
+      List<NodeEntity> computeNodes = new LinkedList<NodeEntity>();
       NodeEntity computeNode1 = new NodeEntity();
       computeNode1.setVmName("computeNode1");
       computeNodes.add(computeNode1);
