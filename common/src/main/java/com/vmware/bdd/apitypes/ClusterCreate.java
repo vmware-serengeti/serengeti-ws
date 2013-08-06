@@ -433,27 +433,6 @@ public class ClusterCreate implements Serializable {
       }
    }
 
-   public void validateMemorySize(NodeGroupCreate[] nodeGroups,
-         List<String> failedMsgList) {
-      boolean validated = true;
-      StringBuilder invalidNodeGroupNames = new StringBuilder();
-      for (NodeGroupCreate nodeGroup : nodeGroups) {
-         if (nodeGroup.getMemCapacityMB() < 1024) {
-            validated = false;
-            invalidNodeGroupNames.append(nodeGroup.getName()).append(",");
-         }
-      }
-      if (!validated) {
-         StringBuilder errorMsgBuff = new StringBuilder();
-         invalidNodeGroupNames.delete(invalidNodeGroupNames.length() - 1,
-               invalidNodeGroupNames.length());
-         failedMsgList.add(errorMsgBuff
-               .append("'memCapacityMB' cannot be less than 1024 in group ")
-               .append(invalidNodeGroupNames.toString())
-               .append(" in order for nodes to run normally").toString());
-      }
-   }
-
    /*
     * Validate 2 cases. Case 1: compute node group with external hdfs node group.
     * Case 2: The dependency check of HDFS, MapReduce, HBase, Zookeeper, Hadoop 
