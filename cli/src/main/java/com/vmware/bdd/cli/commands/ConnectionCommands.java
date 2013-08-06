@@ -16,6 +16,7 @@ package com.vmware.bdd.cli.commands;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import jline.ConsoleReader;
 
@@ -46,6 +47,9 @@ public class ConnectionCommands implements CommandMarker {
    @CliCommand(value = "connect", help = "Connect a serengeti server")
    public void conn(
          @CliOption(key = { "host" }, mandatory = true, help = "The serengeti host with optional port number, e.g. hostname:port") final String hostName) {
+      if (!validateHostPort(hostName)) {
+         return;
+      }
       Map<String,String> loginInfo = new HashMap<String,String>();
       String username = null;
       String password = null;
@@ -74,6 +78,9 @@ public class ConnectionCommands implements CommandMarker {
          @CliOption(key = { "host" }, mandatory = true, help = "The serengeti host with optional port number, e.g. hostname:port") final String hostName,
          @CliOption(key = { "username" }, mandatory = false, help = "The serengeti user name") final String username,
          @CliOption(key = { "password" }, mandatory = false, help = "The serengeti password") final String password) {
+      if (!validateHostPort(hostName)) {
+         return;
+      }
       Map<String,String> loginInfo = new HashMap<String,String>();
       loginInfo.put("username", username);
       loginInfo.put("password", password);
@@ -157,4 +164,15 @@ public class ConnectionCommands implements CommandMarker {
       }
       return enter;
    }
+
+   private boolean validateHostPort(String hostName) {
+      String hostPort = "(.*:0*8443)";
+      Pattern hostPortPattern = Pattern.compile(hostPort);
+      if (!hostPortPattern.matcher(hostName).matches()) {
+         System.out.println(Constants.CONNECT_PORT_IS_WRONG);
+         return false;
+      }
+      return true;
+   }
+
 }
