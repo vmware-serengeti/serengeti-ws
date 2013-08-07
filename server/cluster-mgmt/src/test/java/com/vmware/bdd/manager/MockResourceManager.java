@@ -159,6 +159,11 @@ public class MockResourceManager implements IResourceService {
 
    @Mock
    public void refreshDatastore() {
-      
+
+   }
+
+   @Override
+   public void refreshNetwork() {
+ 
    }
 }

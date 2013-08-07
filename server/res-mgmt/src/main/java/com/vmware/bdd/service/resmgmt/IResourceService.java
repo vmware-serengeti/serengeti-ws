@@ -127,6 +127,10 @@ public interface IResourceService {
    VcNetwork getNetworkByName(String networkName) throws VcProviderException;
 
    /**
+    * refresh networks of available clusters
+    */
+   void refreshNetwork();
+   /**
     * Whether the network exist in the vCenter
     * @param networkName
     * @return

@@ -117,7 +117,6 @@ import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.VcVmUtil;
 import com.vmware.vim.binding.vim.Folder;
-import com.vmware.vim.binding.vim.fault.VmFaultToleranceOpIssuesList;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
 import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
