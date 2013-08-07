@@ -125,6 +125,6 @@ public class SoftwareManagementClient implements SoftwareManagement.Iface {
          throw SoftwareManagementException.GET_OPERATIOIN_STATUS_UNKNOWN_ERROR(
                t, targetName);
       }
-      
    }
+
 }

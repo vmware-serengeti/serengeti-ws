@@ -187,7 +187,7 @@ public class OperationStatus implements org.apache.thrift.TBase<OperationStatus,
     this.finished = other.finished;
     this.succeed = other.succeed;
     this.progress = other.progress;
-    if (other.isSetError_msg()) {
+    if (other.isSetErrorMsg()) {
       this.error_msg = other.error_msg;
     }
     this.total = other.total;
@@ -288,25 +288,25 @@ public class OperationStatus implements org.apache.thrift.TBase<OperationStatus,
     __isset_bitfield = EncodingUtils.setBit(__isset_bitfield, __PROGRESS_ISSET_ID, value);
   }
 
-  public String getError_msg() {
+  public String getErrorMsg() {
     return this.error_msg;
   }
 
-  public OperationStatus setError_msg(String error_msg) {
-    this.error_msg = error_msg;
+  public OperationStatus setErrorMsg(String errorMsg) {
+    this.error_msg = errorMsg;
     return this;
   }
 
-  public void unsetError_msg() {
+  public void unsetErrorMsg() {
     this.error_msg = null;
   }
 
   /** Returns true if field error_msg is set (has been assigned a value) and false otherwise */
-  public boolean isSetError_msg() {
+  public boolean isSetErrorMsg() {
     return this.error_msg != null;
   }
 
-  public void setError_msgIsSet(boolean value) {
+  public void setErrorMsgIsSet(boolean value) {
     if (!value) {
       this.error_msg = null;
     }
@@ -432,9 +432,9 @@ public class OperationStatus implements org.apache.thrift.TBase<OperationStatus,
 
     case ERROR_MSG:
       if (value == null) {
-        unsetError_msg();
+        unsetErrorMsg();
       } else {
-        setError_msg((String)value);
+        setErrorMsg((String)value);
       }
       break;
 
@@ -485,7 +485,7 @@ public class OperationStatus implements org.apache.thrift.TBase<OperationStatus,
       return Integer.valueOf(getProgress());
 
     case ERROR_MSG:
-      return getError_msg();
+      return getErrorMsg();
 
     case TOTAL:
       return Integer.valueOf(getTotal());
@@ -517,7 +517,7 @@ public class OperationStatus implements org.apache.thrift.TBase<OperationStatus,
     case PROGRESS:
       return isSetProgress();
     case ERROR_MSG:
-      return isSetError_msg();
+      return isSetErrorMsg();
     case TOTAL:
       return isSetTotal();
     case SUCCESS:
@@ -570,8 +570,8 @@ public class OperationStatus implements org.apache.thrift.TBase<OperationStatus,
         return false;
     }
 
-    boolean this_present_error_msg = true && this.isSetError_msg();
-    boolean that_present_error_msg = true && that.isSetError_msg();
+    boolean this_present_error_msg = true && this.isSetErrorMsg();
+    boolean that_present_error_msg = true && that.isSetErrorMsg();
     if (this_present_error_msg || that_present_error_msg) {
       if (!(this_present_error_msg && that_present_error_msg))
         return false;
@@ -661,11 +661,11 @@ public class OperationStatus implements org.apache.thrift.TBase<OperationStatus,
         return lastComparison;
       }
     }
-    lastComparison = Boolean.valueOf(isSetError_msg()).compareTo(typedOther.isSetError_msg());
+    lastComparison = Boolean.valueOf(isSetErrorMsg()).compareTo(typedOther.isSetErrorMsg());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    if (isSetError_msg()) {
+    if (isSetErrorMsg()) {
       lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.error_msg, typedOther.error_msg);
       if (lastComparison != 0) {
         return lastComparison;
@@ -748,7 +748,7 @@ public class OperationStatus implements org.apache.thrift.TBase<OperationStatus,
       sb.append(this.progress);
       first = false;
     }
-    if (isSetError_msg()) {
+    if (isSetErrorMsg()) {
       if (!first) sb.append(", ");
       sb.append("error_msg:");
       if (this.error_msg == null) {
@@ -854,7 +854,7 @@ public class OperationStatus implements org.apache.thrift.TBase<OperationStatus,
           case 4: // ERROR_MSG
             if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
               struct.error_msg = iprot.readString();
-              struct.setError_msgIsSet(true);
+              struct.setErrorMsgIsSet(true);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
@@ -922,7 +922,7 @@ public class OperationStatus implements org.apache.thrift.TBase<OperationStatus,
         oprot.writeFieldEnd();
       }
       if (struct.error_msg != null) {
-        if (struct.isSetError_msg()) {
+        if (struct.isSetErrorMsg()) {
           oprot.writeFieldBegin(ERROR_MSG_FIELD_DESC);
           oprot.writeString(struct.error_msg);
           oprot.writeFieldEnd();
@@ -975,7 +975,7 @@ public class OperationStatus implements org.apache.thrift.TBase<OperationStatus,
       if (struct.isSetProgress()) {
         optionals.set(2);
       }
-      if (struct.isSetError_msg()) {
+      if (struct.isSetErrorMsg()) {
         optionals.set(3);
       }
       if (struct.isSetTotal()) {
@@ -1000,7 +1000,7 @@ public class OperationStatus implements org.apache.thrift.TBase<OperationStatus,
       if (struct.isSetProgress()) {
         oprot.writeI32(struct.progress);
       }
-      if (struct.isSetError_msg()) {
+      if (struct.isSetErrorMsg()) {
         oprot.writeString(struct.error_msg);
       }
       if (struct.isSetTotal()) {
@@ -1035,7 +1035,7 @@ public class OperationStatus implements org.apache.thrift.TBase<OperationStatus,
       }
       if (incoming.get(3)) {
         struct.error_msg = iprot.readString();
-        struct.setError_msgIsSet(true);
+        struct.setErrorMsgIsSet(true);
       }
       if (incoming.get(4)) {
         struct.total = iprot.readI32();

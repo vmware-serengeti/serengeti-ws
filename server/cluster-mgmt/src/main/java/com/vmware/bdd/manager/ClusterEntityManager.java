@@ -216,9 +216,7 @@ public class ClusterEntityManager {
    @Transactional
    public boolean handleOperationStatus(String clusterName,
          OperationStatusWithDetail status) {
-      logger.info("handle operation status- finished: "
-            + status.getOperationStatus().isFinished()
-            + status.getOperationStatus());
+      logger.info("handle operation status: " + status.getOperationStatus());
       boolean finished = status.getOperationStatus().isFinished();
       final Map<String, GroupData> groups = status.getClusterData().getGroups();
 

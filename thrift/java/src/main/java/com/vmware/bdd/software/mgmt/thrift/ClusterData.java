@@ -185,6 +185,14 @@ public class ClusterData implements org.apache.thrift.TBase<ClusterData, Cluster
     }
   }
 
+  public int getClusterSize() {
+     int size = 0;
+     for (GroupData group : this.groups.values()) {
+        size += group.getInstancesSize();
+     }
+     return size;
+   }
+
   public int getGroupsSize() {
     return (this.groups == null) ? 0 : this.groups.size();
   }

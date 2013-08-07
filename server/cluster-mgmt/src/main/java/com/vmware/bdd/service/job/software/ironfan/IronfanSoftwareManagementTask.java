@@ -27,7 +27,6 @@ import com.vmware.bdd.service.job.software.ProgressMonitor;
 import com.vmware.bdd.software.mgmt.impl.SoftwareManagementClient;
 import com.vmware.bdd.software.mgmt.thrift.ClusterAction;
 import com.vmware.bdd.software.mgmt.thrift.ClusterOperation;
-import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 
 public class IronfanSoftwareManagementTask implements ISoftwareManagementTask {
    private static final Logger logger = Logger
@@ -58,27 +57,21 @@ public class IronfanSoftwareManagementTask implements ISoftwareManagementTask {
       final SoftwareManagementClient client = new SoftwareManagementClient();
       client.init();
 
-      if (clusterOperation.getAction().ordinal() != ClusterAction.QUERY
-            .ordinal()) {
+      if (clusterOperation.getAction().ordinal() != ClusterAction.QUERY.ordinal()) {
          //Reset node's provision attribute
          client.resetNodeProvisionAttribute(clusterOperation.getTargetName());
       }
 
+      // start monitor thread
       Thread progressThread = null;
       ProgressMonitor monitor = null;
-      ClusterAction action = clusterOperation.getAction();
-      if (action != ClusterAction.STOP && action != ClusterAction.DESTROY) {
-         monitor =
-               new ProgressMonitor(clusterOperation.getTargetName(),
-                     statusUpdater, clusterEntityMgr);
-         progressThread =
-               new Thread(monitor, "ProgressMonitor-"
-                     + clusterOperation.getTargetName());
-         progressThread.setDaemon(true);
-         progressThread.start();
-      }
+      monitor = new ProgressMonitor(clusterOperation.getTargetName(), statusUpdater, clusterEntityMgr);
+      progressThread = new Thread(monitor, "ProgressMonitor-" + clusterOperation.getTargetName());
+      progressThread.setDaemon(true);
+      progressThread.start();
 
-      int exitCode = 1;
+      // start cluster operation
+      int exitCode = -1;
       try {
          exitCode = client.runClusterOperation(clusterOperation);
       } catch (Throwable t) {
@@ -87,44 +80,32 @@ public class IronfanSoftwareManagementTask implements ISoftwareManagementTask {
       } finally {
          if (progressThread != null) {
             if (monitor != null) {
-               monitor.setStop(true);
-            }
-            if (progressThread.isAlive()) {
-               progressThread.interrupt();
+               monitor.setStop(true); // tell monitor to stop monitoring then the thread will exit
+               progressThread.interrupt(); // wake it up to stop immediately if it's sleeping
+               progressThread.join();
             }
          }
-      }
-      OperationStatusWithDetail detailedStatus =
-            client.getOperationStatusWithDetail(clusterOperation
-                  .getTargetName());
-      statusUpdater.setProgress(((double) (detailedStatus.getOperationStatus()
-            .getProgress())) / 100);
-      boolean finished =
-            clusterEntityMgr.handleOperationStatus(clusterOperation
-                  .getTargetName().split("-")[0], detailedStatus);
-      logger.info("updated progress. finished? " + finished);
 
+         if (client != null) {
+            client.close();
+         }
+      }
+
+      // handle operation result
       boolean succeed = true;
       succeed = exitCode == 0;
       result.put("succeed", succeed);
       if (!succeed) {
          result.put("exitCode", exitCode);
-         String errorMessage =
-               detailedStatus.getOperationStatus().getError_msg();
+         String errorMessage = monitor.getLastErrorMsg();
          if (errorMessage == null) {
-            errorMessage = "command exited with non zero";
+            errorMessage = "command exited with " + exitCode;
          }
          result.put("errorMessage", errorMessage);
-         if (errorMessage != null) {
-            logger.error("command execution failed, error message is"
-                  + result.get("errorMessage"));
-         }
+         logger.error("command execution failed. " + result.get("errorMessage"));
       }
-      if (client != null) {
-         client.close();
-      }
+
       return result;
    }
-
 
 }
