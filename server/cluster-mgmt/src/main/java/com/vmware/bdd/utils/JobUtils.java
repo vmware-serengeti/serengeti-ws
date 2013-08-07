@@ -223,7 +223,7 @@ public class JobUtils {
             throw TaskException.EXECUTION_FAILED(errorMessage);
          }
       } catch (Exception e) {
-         throw TaskException.EXECUTION_FAILED("failed to notify VHM swithing to manual for cluster: " + clusterName);
+         logger.error("failed to notify VHM switching to manual mode for cluster: " + clusterName);
       }
    }
 }
