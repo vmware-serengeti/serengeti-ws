@@ -23,7 +23,6 @@ import mockit.Mocked;
 import mockit.Mockit;
 import mockit.NonStrict;
 import mockit.Verifications;
-import mockit.Mock;
 
 import org.apache.log4j.Logger;
 import org.mockito.Mockito;

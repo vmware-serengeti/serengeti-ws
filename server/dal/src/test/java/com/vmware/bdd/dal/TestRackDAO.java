@@ -14,18 +14,17 @@
  ***************************************************************************/
 package com.vmware.bdd.dal;
 
-import com.vmware.bdd.entity.PhysicalHostEntity;
-import com.vmware.bdd.entity.RackEntity;
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.Assert;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import java.util.ArrayList;
-import java.util.List;
+import com.vmware.bdd.entity.RackEntity;
 
 /**
  * Author: Xiaoding Bian

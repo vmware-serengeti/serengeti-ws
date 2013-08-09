@@ -23,7 +23,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.vmware.aurora.composition.DiskSchema.Disk;
 import com.vmware.aurora.vc.VcCluster;
 import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;

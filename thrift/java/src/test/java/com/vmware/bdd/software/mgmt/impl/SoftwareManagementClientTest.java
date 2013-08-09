@@ -26,7 +26,6 @@ import com.vmware.bdd.software.mgmt.thrift.ClusterAction;
 import com.vmware.bdd.software.mgmt.thrift.ClusterData;
 import com.vmware.bdd.software.mgmt.thrift.ClusterOperation;
 import com.vmware.bdd.software.mgmt.thrift.GroupData;
-import com.vmware.bdd.software.mgmt.thrift.OperationStatus;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
 

@@ -17,7 +17,6 @@ package com.vmware.bdd.service.resmgmt.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vmware.bdd.apitypes.NodeGroupRead;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.Verifications;
