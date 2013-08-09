@@ -1,17 +1,3 @@
-package com.vmware.bdd.security.sso;
-
-import static org.testng.AssertJUnit.assertEquals;
-
-import java.io.File;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.easymock.EasyMock;
-import org.easymock.EasyMockSupport;
-import org.easymock.IMocksControl;
-import org.opensaml.saml2.core.Assertion;
-import org.testng.annotations.Test;
-
 /***************************************************************************
  * Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +12,20 @@ import org.testng.annotations.Test;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
+package com.vmware.bdd.security.sso;
+
+import static org.testng.AssertJUnit.assertEquals;
+
+import java.io.File;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.easymock.EasyMock;
+import org.easymock.EasyMockSupport;
+import org.easymock.IMocksControl;
+import org.opensaml.saml2.core.Assertion;
+import org.testng.annotations.Test;
+
 import com.vmware.bdd.utils.FileUtils;
 
 public class TestVCSamlTokenAuthenticationFilter extends EasyMockSupport {

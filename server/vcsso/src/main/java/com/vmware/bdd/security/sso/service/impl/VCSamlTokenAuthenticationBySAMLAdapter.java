@@ -1,10 +1,3 @@
-package com.vmware.bdd.security.sso.service.impl;
-
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.Conditions;
-
-import org.springframework.security.core.AuthenticationException;
-
 /***************************************************************************
  * Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +12,12 @@ import org.springframework.security.core.AuthenticationException;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
+package com.vmware.bdd.security.sso.service.impl;
+
+import org.opensaml.saml2.core.Assertion;
+import org.opensaml.saml2.core.Conditions;
+
+import org.springframework.security.core.AuthenticationException;
 import com.vmware.bdd.security.sso.service.ISAMLAuthenticationAdapter;
 import com.vmware.bdd.security.sso.utils.SecurityUtils;
 
