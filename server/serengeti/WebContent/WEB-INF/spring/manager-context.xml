@@ -101,4 +101,10 @@
 		</property>
 	</bean>
 
+    <bean id="clusterInitializerService" class="com.vmware.bdd.service.impl.ClusterInitializerService">
+        <property name="clusterEntityManager">
+            <ref bean="clusterEntityManager"/>
+        </property>
+    </bean>
+
 </beans>

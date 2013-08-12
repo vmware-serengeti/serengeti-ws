@@ -31,6 +31,8 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.service.IClusterInitializerService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -134,6 +136,7 @@ public class ClusteringService implements IClusteringService {
    private INetworkService networkMgr;
    private IResourceService resMgr;
    private IPlacementService placementService;
+   private IClusterInitializerService clusterInitializerService;
 
    private String templateSnapId;
    private VcVirtualMachine templateVm;
@@ -166,6 +169,15 @@ public class ClusteringService implements IClusteringService {
    @Autowired
    public void setPlacementService(IPlacementService placementService) {
       this.placementService = placementService;
+   }
+
+   public IClusterInitializerService getClusterInitializerService() {
+      return clusterInitializerService;
+   }
+
+   @Autowired
+   public void setClusterInitializerService(IClusterInitializerService clusterInitializerService) {
+      this.clusterInitializerService = clusterInitializerService;
    }
 
    public ClusterEntityManager getClusterEntityMgr() {
@@ -237,6 +249,7 @@ public class ClusteringService implements IClusteringService {
          snapshotTemplateVM();
          loadTemplateNetworkLable();
          convertTemplateVm();
+         clusterInitializerService.transformClusterStatus(ClusterStatus.PROVISIONING, ClusterStatus.PROVISION_ERROR);
          initialized = true;
       }
    }

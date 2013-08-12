@@ -81,7 +81,6 @@ public class ResourceInitializer implements ServletContextListener {
    }
 
    private void initService(WebApplicationContext wac) {
-      logger.warn("test message");
       logger.info("init service start");
       clusterSvc = wac.getBean("clusteringService",IClusteringService.class);
       logger.info("got bean");
