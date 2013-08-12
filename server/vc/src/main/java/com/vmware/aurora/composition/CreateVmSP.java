@@ -202,7 +202,7 @@ public class CreateVmSP implements Callable<Void> {
       if (requireClone()) {
          VcVirtualMachine.CreateSpec vmSpec =
                new VcVirtualMachine.CreateSpec(newVmName, snap, targetRp,
-                     targetDs, vmFolder, linkedClone, configSpec);
+                     targetDs, vmFolder, host, linkedClone, configSpec);
          // Clone from the template
          vcVm = template.cloneVm(vmSpec, null);
       } else {
