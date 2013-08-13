@@ -110,8 +110,8 @@ public class Constants {
    public static final String OUTPUT_UNKNOWN_HOST = "unknown host";
    public static final String OUTPUT_HOST_REFUSE = "Connection refused. Please check the port number.";
    public static final String OUTPUT_HOST_TIMEOUT = "connection timeout";
-   public static final String OUTPUT_LOG_INFO = "you can get task failure details from serengeti server log at: ";
-   public static final String COMMON_LOG_FILE_PATH = "/opt/serengeti/logs/serengeti*,/opt/serengeti/logs/ironfan*";
+   public static final String OUTPUT_LOG_INFO = "you can find task failure details in serengeti server logs: ";
+   public static final String COMMON_LOG_FILE_PATH = "/opt/serengeti/logs/serengeti.log /opt/serengeti/logs/ironfan.log";
    public static final String HTTPS_CONNECTION_PREFIX = "https://";
    public static final String HTTPS_CONNECTION_SUFFIX = "/serengeti/api/";
    public static final String HTTPS_CONNECTION_API = "api/";
