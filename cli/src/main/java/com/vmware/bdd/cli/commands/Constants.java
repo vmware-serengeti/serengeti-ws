@@ -20,6 +20,7 @@ public class Constants {
    public static final String REST_GET_OP = "get";
    public static final String REST_GET_ALL_OP = "getAll";
 
+   public static final String REST_PATH_HELLO = "hello";
    public static final String REST_PATH_CLUSTER = "cluster";
    public static final String REST_PATH_CLUSTERS = "clusters";
    public static final String REST_PATH_RESOURCEPOOLS = "resourcepools";

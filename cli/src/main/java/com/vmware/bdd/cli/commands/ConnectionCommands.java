@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import jline.ConsoleReader;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -67,6 +68,7 @@ public class ConnectionCommands implements CommandMarker {
             }
          }
          connect(hostName, loginInfo, 3);
+         getServerVersion(hostName);
       } catch (Exception e) {
          System.out.println();
          printConnectionFailure(e.getMessage());
@@ -124,6 +126,18 @@ public class ConnectionCommands implements CommandMarker {
          }
       }
       return true;
+   }
+   
+   private void getServerVersion(final String hostName) throws Exception {
+      final String path = Constants.REST_PATH_HELLO;
+      final HttpMethod httpverb = HttpMethod.GET;
+
+      String serverVersion = conn.getObjectByPath(String.class, path, httpverb, false);
+      String cliVersion = com.vmware.bdd.utils.Constants.VERSION;
+      if (!cliVersion.equals(serverVersion)) {
+         System.out.println("Warning: CLI version "+ cliVersion + " does not match with management server version " + serverVersion + ".");
+         System.out.println("Please use the same version for CLI and management server. Otherwise, some commands may not be compatible");
+      }
    }
 
    private boolean prompt(String msg, PromptType promptType, Map<String,String> loginInfo) throws Exception {

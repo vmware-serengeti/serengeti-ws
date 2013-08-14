@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 @Order(Ordered.LOWEST_PRECEDENCE)
 public class ImpalaPluginBannerProvider implements BannerProvider, CommandMarker {
 
-	@CliCommand(value = { "version" }, help = "Displays current CLI version")
+	//@CliCommand(value = { "version" }, help = "Displays current CLI version")
 	public String getBanner() {
 		StringBuilder buf = new StringBuilder();
 		buf.append("_________ _______  ________  _______  _        _______ " + OsUtils.LINE_SEPARATOR);

@@ -22,6 +22,8 @@ import org.springframework.shell.plugin.support.DefaultBannerProvider;
 import org.springframework.shell.support.util.OsUtils;
 import org.springframework.stereotype.Component;
 
+import com.vmware.bdd.utils.Constants;
+
 /**
  * The class to set cli banners through spring shell
  */
@@ -53,7 +55,7 @@ public class CliBannerProvider extends DefaultBannerProvider implements CommandM
 	 * @see org.springframework.shell.plugin.BannerProvider#getVersion()
 	 */
 	public String getVersion() {
-		return "1.0.0";
+		return Constants.VERSION;
 	}
 
 	/* (non-Javadoc)

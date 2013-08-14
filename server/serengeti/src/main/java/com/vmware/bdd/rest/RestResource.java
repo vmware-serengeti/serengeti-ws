@@ -120,7 +120,7 @@ public class RestResource {
    @ResponseStatus(HttpStatus.OK)
    @ResponseBody
    public String getHello() {
-      return "1.0.0";
+      return Constants.VERSION;
    }
 
    // task API
