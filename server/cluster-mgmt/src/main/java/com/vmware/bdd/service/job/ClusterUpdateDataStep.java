@@ -172,6 +172,11 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
       if (vNode.getVmMobId() == null && nodeEntity.getMoId() != null) {
          vNode.setVmMobId(nodeEntity.getMoId());
       }
+
+      //set vc resource pool entity
+      nodeEntity.setVcRp(rpDao.findByClusterAndRp(vNode.getTargetVcCluster(),
+            vNode.getTargetRp()));
+
       if (vNode.getVmMobId() != null) {
          nodeEntity.setMoId(vNode.getVmMobId());
          nodeEntity.setRack(vNode.getTargetRack());
@@ -180,10 +185,6 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          nodeEntity.setGuestHostName(vNode.getGuestHostName());
          nodeEntity.setCpuNum(vNode.getCpu());
          nodeEntity.setMemorySize((long) vNode.getMem());
-
-         //set vc resource pool entity
-         nodeEntity.setVcRp(rpDao.findByClusterAndRp(
-               vNode.getTargetVcCluster(), vNode.getTargetRp()));
 
          // set disk entities, include system/swap/data disk
          Set<DiskEntity> diskEntities = nodeEntity.getDisks();

@@ -1429,6 +1429,7 @@ public class ClusteringService implements IClusteringService {
             new HashMap<String, Map<String, VcResourcePool>>();
       for (BaseNode node : vNodes) {
          String vcClusterName = node.getTargetVcCluster();
+         AuAssert.check(vcClusterName != null);
          String vcRpName = node.getTargetRp();
          if (clusterMap.get(vcClusterName) == null) {
             clusterMap
@@ -1438,7 +1439,9 @@ public class ClusteringService implements IClusteringService {
          if (rpMap.get(vcRpName) == null) {
             VcResourcePool vcRp =
                   VcResourceUtils.findRPInVCCluster(vcClusterName, vcRpName);
-            rpMap.put(vcRpName, vcRp);
+            if (vcRp != null) {
+               rpMap.put(vcRpName, vcRp);
+            }
          }
       }
       List<VcResourcePool> rps = new ArrayList<VcResourcePool>();
