@@ -422,11 +422,9 @@ public class ClusteringService implements IClusteringService {
       logger.info("Start to allocate static ip address for each VM.");
       List<String> availableIps =
             IpBlock.getIpAddressFromIpBlock(networkAdd.getIp());
+      availableIps.removeAll(occupiedIps);
       AuAssert.check(availableIps.size() == vNodes.size());
       for (int i = 0; i < availableIps.size(); i++) {
-         if (occupiedIps.contains(availableIps.get(i))) {
-            continue;
-         }
          vNodes.get(i).setIpAddress(availableIps.get(i));
       }
       logger.info("Finished to allocate static ip address for VM.");

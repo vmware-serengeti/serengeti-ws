@@ -148,6 +148,9 @@ public class VcVmUtil {
          }
       } else {
          vNode.setSuccess(false);
+         // in static ip case, vNode contains the allocated address,
+         // here reset the value in case the ip is unavailable from vc
+         vNode.setIpAddress(null); 
          if (vm != null) {
             vNode.setVmMobId(vm.getId());
             if (vm.isPoweredOn()) {
