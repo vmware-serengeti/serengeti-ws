@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -886,6 +887,10 @@ public class ClusterManager {
       cluster = clusterEntityMgr.findByName(clusterName);
 
       if (enableAuto != null && enableAuto != cluster.getAutomationEnable()) {
+         if (enableAuto && cluster.getDistro().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
+            logger.error("cluster " + clusterName + " is a MAPR distro, which cannot be auto scaled");
+            throw BddException.NOT_ALLOWED_SCALING("cluster", clusterName);
+         }
          cluster.setAutomationEnable(enableAuto);
       }
 

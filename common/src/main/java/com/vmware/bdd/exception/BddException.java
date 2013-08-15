@@ -45,7 +45,6 @@ public class BddException extends RuntimeException {
       return section + "." + errorId;
    }
 
-
    private static String formatErrorMessage(final String errorId,
          Object... args) {
       String msg = messageSource.getMessage(errorId, args, Locale.getDefault());
@@ -96,6 +95,10 @@ public class BddException extends RuntimeException {
 
    public static BddException NOT_FOUND(String object, String objectName) {
       return NOT_FOUND(null, object, objectName);
+   }
+
+   public static BddException NOT_ALLOWED_SCALING(String object, String objectName) {
+      return new BddException(null, "BDD", "NOT_ALLOWED_SCALING", object, objectName);
    }
 
    public static BddException ALREADY_EXISTS(Throwable ex, String object,
