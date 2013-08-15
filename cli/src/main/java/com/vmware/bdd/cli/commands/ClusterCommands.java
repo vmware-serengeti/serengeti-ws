@@ -431,10 +431,8 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "cpuNumPerNode" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The number of vCPU for the nodes in this group") final int cpuNumber,
          @CliOption(key = { "memCapacityMbPerNode" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The number of memory size in Mb for the nodes in this group") final long memory) {
 
-      if ((instanceNum > 1 && cpuNumber == 0 && memory == 0)
-            || (instanceNum == 0 && cpuNumber > 0 && memory == 0)
-            || (instanceNum == 0 && cpuNumber == 0 && memory > 0)
-            || (instanceNum == 0 && cpuNumber > 0 && memory > 0)) {
+      if ((instanceNum > 0 && cpuNumber == 0 && memory == 0)
+            || (instanceNum == 0 && (cpuNumber > 0 || memory > 0))) {
          try {
             ClusterRead cluster = restClient.get(name, false);
             if (cluster == null) {
@@ -473,7 +471,7 @@ public class ClusterCommands implements CommandMarker {
                return;
             }
             TaskRead taskRead = null;
-            if (instanceNum > 1) {
+            if (instanceNum > 0) {
                restClient.resize(name, nodeGroup, instanceNum);
             } else if (cpuNumber > 0 || memory > 0) {
                if (cluster.getStatus().ordinal() != ClusterStatus.RUNNING
@@ -501,7 +499,7 @@ public class ClusterCommands implements CommandMarker {
                   Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          }
       } else {
-         if (instanceNum > 1 && (cpuNumber > 0 || memory > 0)) {
+         if (instanceNum > 0 && (cpuNumber > 0 || memory > 0)) {
             CommandsUtils
                   .printCmdFailure(
                         Constants.OUTPUT_OBJECT_CLUSTER,
@@ -509,12 +507,22 @@ public class ClusterCommands implements CommandMarker {
                         Constants.OUTPUT_OP_RESIZE,
                         Constants.OUTPUT_OP_RESULT_FAIL,
                         "Can not scale out and scale up/down at the same time, you have to run those commands separately");
+         } else if (instanceNum == 0 && cpuNumber == 0 && memory == 0) {
+            CommandsUtils
+                  .printCmdFailure(
+                        Constants.OUTPUT_OBJECT_CLUSTER,
+                        name,
+                        Constants.OUTPUT_OP_RESIZE,
+                        Constants.OUTPUT_OP_RESULT_FAIL,
+                        "Please specify at least a postive value for instanceNum/cpuNumPerNode/memCapacityPerNode");
+
          } else {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   name, Constants.OUTPUT_OP_RESIZE,
                   Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
-                        + " instanceNum=" + instanceNum + ",cpuNumPerNode="
-                        + cpuNumber + ",memCapacityMbPerNode=" + memory);
+                        + (instanceNum < 0 ? " instanceNum=" + instanceNum + "," : "")
+                        + (cpuNumber < 0 ? " cpuNumPerNode=" + cpuNumber + "," : "")
+                        + (memory < 0 ? " memCapacityMbPerNode=" + memory : ""));
          }
       }
    }

@@ -68,22 +68,21 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="setAutoElasticityResumeStep" next="softwareResumeClusterStep">
+		<step id="softwareResumeClusterStep" next="setAutoElasticityResumeStep">
+			<tasklet ref="softwareCreateClusterTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="setAutoElasticityResumeStep">
 			<tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
 
-		<step id="softwareResumeClusterStep">
-			<tasklet ref="softwareCreateClusterTasklet" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
 		<listeners>
 			<listener ref="createClusterJobListener" />
 		</listeners>
 	</job>
-
 </beans:beans>
