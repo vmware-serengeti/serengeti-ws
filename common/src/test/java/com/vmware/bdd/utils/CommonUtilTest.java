@@ -123,4 +123,11 @@ public class CommonUtilTest {
       roles.add(HadoopRole.MAPR_NFS_ROLE.toString());
       assertTrue(!CommonUtil.isComputeOnly(roles, distroVendor));
    }
+   
+   @Test
+   public void testMakeVmMemoryDivisibleBy4() {
+      long max = Long.MAX_VALUE;
+      max = CommonUtil.makeVmMemoryDivisibleBy4(max);
+      assertTrue(max > 0);
+   }
 }

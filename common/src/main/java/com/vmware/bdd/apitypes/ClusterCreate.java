@@ -764,7 +764,7 @@ public class ClusterCreate implements Serializable {
       if (memoryNum > 0) {
          //VM's memory must be divisible by 4, otherwise VM can not be started
          long converted = CommonUtil.makeVmMemoryDivisibleBy4(memoryNum);
-         if (converted > memoryNum) {
+         if (converted < memoryNum) {
             nodeGroup.setMemCapacityMB((int)converted);
             warningMsgList.add(Constants.CONVERTED_MEMORY_DIVISIBLE_BY_4
                   + "So, 'memCapacityMB' will be converted from " + memoryNum
