@@ -16,6 +16,8 @@ package com.vmware.bdd.apitypes;
 
 import java.util.List;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 /**
  * Storage get output
  */
@@ -154,6 +156,7 @@ public class StorageRead {
       this.splitPolicy = splitPolicy;
    }
 
+   @JsonIgnore
    public Priority getShares() {
       return shares;
    }
