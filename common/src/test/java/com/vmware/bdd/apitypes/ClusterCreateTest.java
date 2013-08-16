@@ -343,7 +343,7 @@ public class ClusterCreateTest {
       assertEquals("client.roles=\"hive_server,hive\"", failedMsgList.get(2));
       assertEquals(1, warningMsgList.size());
       assertEquals(
-            "Warning: VM's memory must be divisible by 4. So, 'memCapacityMB' will be converted from 7501 to 7504 automaticlly in the master group.",
+            "Warning: VM's memory must be divisible by 4. So, 'memCapacityMB' will be converted from 7501 to 7500 automaticlly in the master group.",
             warningMsgList.get(0));
    }
 
