@@ -36,7 +36,9 @@ import org.apache.log4j.Logger;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
+import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
 
 /**
  * Hadoop Node Entity class: describes hadoop node info
@@ -345,6 +347,21 @@ public class NodeEntity extends EntityBase {
       }
 
       return null;
+   }
+
+   public boolean isObsoleteNode() {
+      // if resize failed, some node is out of cluster scope.
+      try {
+         long index = CommonUtil.getVmIndex(vmName);
+         if (index < nodeGroup.getDefineInstanceNum()) {
+            return false;
+         } else {
+            return true;
+         }
+      } catch (BddException e) {
+         logger.error("VM " + vmName + " violate name convention");
+         return true;
+      }
    }
 
    // if includeVolumes is true, this method must be called inside a transaction

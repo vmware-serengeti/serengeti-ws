@@ -182,7 +182,7 @@ public class ClusterManager {
       ClusterCreate clusterConfig =
             clusterConfigMgr.getClusterConfig(clusterName, needAllocIp);
       Map<String, String> cloudProvider = resMgr.getCloudProviderAttributes();
-      ClusterRead read = getClusterByName(clusterName, false);
+      ClusterRead read = clusterEntityMgr.toClusterRead(clusterName, true);
       Map<String, Object> attrs = new HashMap<String, Object>();
       attrs.put("cloud_provider", cloudProvider);
       attrs.put("cluster_definition", clusterConfig);
@@ -932,7 +932,8 @@ public class ClusterManager {
 
       //update vhm extra config file
       if (enableAuto != null || minComputeNodeNum != null) {
-         boolean success = clusteringService.setAutoElasticity(clusterName, false);
+         boolean success =
+               clusteringService.setAutoElasticity(clusterName, false);
          if (!success) {
             throw ClusterManagerException
                   .SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(clusterName, "failed");
@@ -1111,6 +1112,11 @@ public class ClusterManager {
          workerNodesFound = true;
          for (NodeEntity node : clusterEntityMgr.findAllNodes(clusterName,
                nodeGroup.getName())) {
+            if (node.isObsoleteNode()) {
+               logger.info("Ingore node " + node.getVmName()
+                     + ", for it violate VM name convention.");
+               continue;
+            }
             if (clusterHealService.hasBadDisks(node.getVmName())) {
                logger.warn("node " + node.getVmName()
                      + " has bad disks. Fixing it..");

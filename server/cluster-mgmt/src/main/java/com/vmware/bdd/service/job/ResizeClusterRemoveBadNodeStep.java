@@ -29,6 +29,7 @@ import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IClusteringService;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.VcVmUtil;
 
@@ -87,7 +88,7 @@ public class ResizeClusterRemoveBadNodeStep extends TrackableTasklet {
       List<BaseNode> needToBeVerified = new ArrayList<BaseNode>();
       for(BaseNode node : existingNodes) {
          if (node.getGroupName().equals(groupName)) {
-            long index = JobUtils.getVmIndex(node.getVmName());
+            long index = CommonUtil.getVmIndex(node.getVmName());
             if (index >= oldInstanceNum) {
                continue;
             }
@@ -110,7 +111,7 @@ public class ResizeClusterRemoveBadNodeStep extends TrackableTasklet {
          long newInstanceNum, long oldInstanceNum) {
       for(BaseNode node : existingNodes) {
          if (node.getGroupName().equals(groupName)) {
-            long index = JobUtils.getVmIndex(node.getVmName());
+            long index = CommonUtil.getVmIndex(node.getVmName());
             if (index >= newInstanceNum) {
                deletedNodes.add(node);
                continue;

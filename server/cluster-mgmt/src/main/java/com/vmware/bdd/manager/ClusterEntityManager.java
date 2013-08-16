@@ -330,8 +330,12 @@ public class ClusterEntityManager {
       update(node);
    }
 
-   @SuppressWarnings("rawtypes")
    public ClusterRead toClusterRead(String clusterName) {
+      return toClusterRead(clusterName, false);
+   }
+
+   @SuppressWarnings("rawtypes")
+   public ClusterRead toClusterRead(String clusterName, boolean ignoreObsoleteNode) {
       ClusterEntity cluster = findByName(clusterName);
       ClusterStatus clusterStatus = cluster.getStatus();
       ClusterRead clusterRead = new ClusterRead();
@@ -349,7 +353,7 @@ public class ClusterEntityManager {
       boolean computeOnly = true;
       List<NodeGroupRead> groupList = new ArrayList<NodeGroupRead>();
       for (NodeGroupEntity group : cluster.getNodeGroups()) {
-         groupList.add(group.toNodeGroupRead());
+         groupList.add(group.toNodeGroupRead(ignoreObsoleteNode));
          if (group.getRoles() != null
                && (group.getRoles().contains(
                      HadoopRole.HADOOP_NAMENODE_ROLE.toString()) || group

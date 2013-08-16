@@ -23,6 +23,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.ClusteringServiceException;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.JobUtils;
 
 public class ClusterNodeStatusVerifyStep extends TrackableTasklet {
@@ -81,7 +82,7 @@ public class ClusterNodeStatusVerifyStep extends TrackableTasklet {
             getClusterEntityMgr().findAllNodes(clusterName, groupName);
       List<NodeEntity> toBeVerified = new ArrayList<NodeEntity>();
       for (NodeEntity node : nodes) {
-         long index = JobUtils.getVmIndex(node.getVmName());
+         long index = CommonUtil.getVmIndex(node.getVmName());
          if (index < oldInstanceNum) {
             // do not verify existing nodes from last successful deployment
             continue;

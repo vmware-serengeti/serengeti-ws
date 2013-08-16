@@ -108,6 +108,12 @@ public class ScaleManager {
       List<JobParameters> jobParametersList = new ArrayList<JobParameters>();
       JobParametersBuilder parametersBuilder = new JobParametersBuilder();
       for (NodeEntity nodeEntity : nodes) {
+         if (nodeEntity.isObsoleteNode()) {
+            logger.info("Ingore node " + nodeEntity.getVmName()
+                  + ", for it violate VM name convention.");
+            continue;
+         }
+
          if ((nodeEntity.getCpuNum() != scale.getCpuNumber() && scale
                .getCpuNumber() > 0)
                || (nodeEntity.getMemorySize() != scale.getMemory() && scale

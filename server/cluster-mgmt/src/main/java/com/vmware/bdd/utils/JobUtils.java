@@ -162,20 +162,6 @@ public class JobUtils {
       existingNodes.removeAll(deletedNodes);
    }
 
-   public static long getVmIndex(String vmName) {
-      String[] split = vmName.split("-");
-      if (split.length < 3) {
-         throw ClusteringServiceException.VM_NAME_VIOLATE_NAME_PATTERN(vmName);
-      }
-      try {
-         return Long.valueOf(split[2]);
-      } catch (Exception e) {
-         logger.error("vm name " + vmName
-               + " violate serengeti vm name definition.");
-         throw ClusteringServiceException.VM_NAME_VIOLATE_NAME_PATTERN(vmName);
-      }
-   }
-
    public static void verifyNodeStatus(NodeEntity node,
          NodeStatus expectedStatus, boolean ignoreMissing) {
       if (node.getStatus() != expectedStatus) {
