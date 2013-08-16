@@ -400,7 +400,7 @@
       <java.target.version>1.6</java.target.version>
       <spring.version>3.2.3.RELEASE</spring.version>
       <spring.security.version>3.1.4.RELEASE</spring.security.version>
-      <hadoop.version>1.2.0</hadoop.version>
+      <hadoop.version>1.2.1</hadoop.version>
       <vmware.vlsi.version>1.0.8</vmware.vlsi.version>
       <bdd.skipTests>true</bdd.skipTests>
    </properties>
