@@ -31,8 +31,6 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
-import com.vmware.bdd.service.IClusterInitializerService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -65,12 +63,14 @@ import com.vmware.aurora.vc.vcevent.VcEventRouter;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
+import com.vmware.bdd.clone.spec.VmCreateSpec;
 import com.vmware.bdd.dal.IResourcePoolDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
@@ -78,13 +78,6 @@ import com.vmware.bdd.entity.resmgmt.ResourceReservation;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.exception.VcProviderException;
-import com.vmware.bdd.fastclone.copier.impl.AbstractFastCopierFactory;
-import com.vmware.bdd.fastclone.copier.impl.InnerHostTargetSelector;
-import com.vmware.bdd.fastclone.copier.impl.VmClonerFactory;
-import com.vmware.bdd.fastclone.intf.FastCloneService;
-import com.vmware.bdd.fastclone.intf.TargetSelector;
-import com.vmware.bdd.fastclone.resource.impl.VmCreateSpec;
-import com.vmware.bdd.fastclone.service.impl.FastCloneServiceImpl;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.placement.Container;
@@ -92,6 +85,7 @@ import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.placement.exception.PlacementException;
 import com.vmware.bdd.placement.interfaces.IPlacementService;
+import com.vmware.bdd.service.IClusterInitializerService;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.job.ClusterNodeUpdator;
 import com.vmware.bdd.service.job.StatusUpdater;
@@ -120,6 +114,7 @@ import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.VcVmUtil;
+import com.vmware.bdd.vmclone.service.intf.IClusterCloneService;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
 import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
@@ -144,6 +139,8 @@ public class ClusteringService implements IClusteringService {
    private String templateNetworkLabel;
    private static boolean initialized = false;
    private int cloneConcurrency;
+
+   private IClusterCloneService cloneService;
 
    public INetworkService getNetworkMgr() {
       return networkMgr;
@@ -204,6 +201,15 @@ public class ClusteringService implements IClusteringService {
 
    public String getTemplateVmId() {
       return templateVm.getId();
+   }
+
+   public IClusterCloneService getCloneService() {
+      return cloneService;
+   }
+
+   @Autowired
+   public void setCloneService(IClusterCloneService cloneService) {
+      this.cloneService = cloneService;
    }
 
    public synchronized void init() {
@@ -984,27 +990,14 @@ public class ClusteringService implements IClusteringService {
       Map<String, Folder> folders = createVcFolders(vNodes.get(0).getCluster());
       String clusterRpName = createVcResourcePools(vNodes);
       logger.info("syncCreateVMs, start to create VMs.");
-      FastCloneService<VmCreateSpec> cloneSrv =
-            new FastCloneServiceImpl<VmCreateSpec>();
-      // set copier factory
-      AbstractFastCopierFactory<VmCreateSpec> copierFactory =
-            new VmClonerFactory();
-      cloneSrv.setFastCopierFactory(copierFactory);
-
-      TargetSelector<VmCreateSpec> selector =
-            new InnerHostTargetSelector<VmCreateSpec>();
-
-      cloneSrv.setTargetSelector(selector);
-
-      VmCreateSpec sourceSpec = new VmCreateSpec();
 
       // update vm info in vc cache, in case snapshot is removed by others
       VcVmUtil.updateVm(templateVm.getId());
 
+      VmCreateSpec sourceSpec = new VmCreateSpec();
       sourceSpec.setVmId(templateVm.getId());
       sourceSpec.setVmName(templateVm.getName());
       sourceSpec.setTargetHost(templateVm.getHost());
-      cloneSrv.addResource(sourceSpec, cloneConcurrency);
 
       List<VmCreateSpec> specs = new ArrayList<VmCreateSpec>();
       Map<String, BaseNode> nodeMap = new HashMap<String, BaseNode>();
@@ -1034,26 +1027,27 @@ public class ClusteringService implements IClusteringService {
          spec.setVmName(vNode.getVmName());
          specs.add(spec);
       }
-      cloneSrv.addConsumers(specs);
 
       try {
          UpdateVmProgressCallback callback =
                new UpdateVmProgressCallback(clusterEntityMgr, statusUpdator,
                      vNodes.get(0).getClusterName());
-         cloneSrv.setProgressCallback(callback);
 
          // call fast clone service to copy templates
-         logger.info("ClusteringService, start to cloning template.");
-         boolean success = cloneSrv.start();
-         logger.info(cloneSrv.getCopied().size() + " VMs are created.");
-         for (VmCreateSpec spec : cloneSrv.getCopied()) {
+         logger.info("ClusteringService, start to clone template.");
+         List<VmCreateSpec> results =
+               cloneService.createCopies(sourceSpec, cloneConcurrency, specs,
+                     callback);
+         logger.info(results.size() + " VMs are created.");
+         boolean success = (specs.size() == results.size());
+         for (VmCreateSpec spec : results) {
             BaseNode node = nodeMap.get(spec.getVmName());
             node.setVmMobId(spec.getVmId());
             VcVirtualMachine vm = VcCache.getIgnoreMissing(spec.getVmId());
             if (vm != null) {
                boolean vmSucc = VcVmUtil.setBaseNodeForVm(node, vm);
                if (!vmSucc) {
-                  success = vmSucc;
+                  success = false;
                }
             }
             node.setSuccess(success);

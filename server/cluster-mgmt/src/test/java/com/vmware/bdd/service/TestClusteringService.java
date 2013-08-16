@@ -34,12 +34,14 @@ import com.vmware.aurora.composition.NetworkSchema;
 import com.vmware.aurora.composition.NetworkSchema.Network;
 import com.vmware.aurora.composition.ResourceSchema;
 import com.vmware.aurora.composition.VmSchema;
+import com.vmware.aurora.composition.concurrent.Scheduler.ProgressCallback;
 import com.vmware.aurora.vc.VcDatacenter;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.clone.spec.VmCreateSpec;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
@@ -49,6 +51,7 @@ import com.vmware.bdd.manager.MockResourceManager;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.MockTmScheduler.VmOperation;
 import com.vmware.bdd.service.impl.ClusteringService;
+import com.vmware.bdd.vmclone.service.intf.IClusterCloneService;
 
 public class TestClusteringService {
    private static final Logger logger = Logger
@@ -177,6 +180,15 @@ public class TestClusteringService {
       MockTmScheduler.setFlag(VmOperation.CREATE_VM, false);
       MockVcCache.setGetFlag(false);
 
+      // mock clone service
+      IClusterCloneService cloneService = Mockito.mock(IClusterCloneService.class);
+      Mockito.when(
+            cloneService.createCopies(Mockito.<VmCreateSpec> any(),
+                  Mockito.anyInt(), Mockito.anyList(),
+                  Mockito.<ProgressCallback> any())).thenReturn(
+            new ArrayList<VmCreateSpec>());
+      service.setCloneService(cloneService);
+
       boolean success = service.createVcVms(networkAdd, vNodes, null, null);
       Assert.assertTrue(!success, "should get create vm failed.");
       MockVcCache.setGetFlag(true);
@@ -242,7 +254,23 @@ public class TestClusteringService {
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, true);
       MockTmScheduler.setFlag(VmOperation.CREATE_VM, true);
       MockVcCache.setGetFlag(true);
-      
+
+      // mock clone service
+      int i = 0;
+      List<VmCreateSpec> nodes = new ArrayList<VmCreateSpec>();
+      for (BaseNode n : vNodes) {
+         VmCreateSpec s = new VmCreateSpec();
+         s.setVmName(n.getVmName());
+         s.setVmId("vm" + i);
+         nodes.add(s);
+      }
+      IClusterCloneService cloneService = Mockito.mock(IClusterCloneService.class);
+      Mockito.when(
+            cloneService.createCopies(Mockito.<VmCreateSpec> any(),
+                  Mockito.anyInt(), Mockito.anyList(),
+                  Mockito.<ProgressCallback> any())).thenReturn(nodes);
+      service.setCloneService(cloneService);
+
       boolean success = service.createVcVms(networkAdd, vNodes, null, null);
       Assert.assertTrue(success, "should get create vm success.");
    }

@@ -29,13 +29,13 @@ import org.mockito.Mockito;
 
 import com.google.gson.internal.Pair;
 import com.vmware.aurora.composition.CreateVMFolderSP;
+import com.vmware.aurora.composition.CreateVmSP;
 import com.vmware.aurora.composition.DeleteVMFolderSP;
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Priority;
 import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.composition.concurrent.Scheduler.ProgressCallback;
-import com.vmware.bdd.fastclone.copier.impl.VmCloner;
-import com.vmware.bdd.fastclone.resource.impl.VmCreateSpec;
+import com.vmware.bdd.clone.spec.VmCreateSpec;
 import com.vmware.bdd.service.sp.ConfigIOShareSP;
 import com.vmware.bdd.service.sp.CreateResourcePoolSP;
 import com.vmware.bdd.service.sp.DeleteVmByIdSP;
@@ -98,7 +98,7 @@ public class MockTmScheduler {
          return VmOperation.DELETE_FOLDER;
       } else if (sp instanceof DeleteVmByIdSP) {
          return VmOperation.DELETE_VM;
-      } else if (sp instanceof VmCloner) {
+      } else if (sp instanceof CreateVmSP) {
          return VmOperation.CREATE_VM;
       } else if (sp instanceof ConfigIOShareSP) {
          return VmOperation.RECONFIGURE_VM;
@@ -129,7 +129,7 @@ public class MockTmScheduler {
                CreateVMFolderSP sp = (CreateVMFolderSP)storedProcedures[i];
                setReturnFolder(sp);
             } else if (operation == VmOperation.CREATE_VM) {
-               VmCloner sp = (VmCloner)storedProcedures[i];
+               CreateVmSP sp = (CreateVmSP)storedProcedures[i];
                setReturnVM(sp);
             }
             r = new ExecutionResult(true, null);
@@ -154,10 +154,10 @@ public class MockTmScheduler {
       }
    }
 
-   private static void setReturnVM(VmCloner sp) {
+   private static void setReturnVM(CreateVmSP sp) {
       try {
          VmCreateSpec spec = Mockito.mock(VmCreateSpec.class);
-         Mockito.when(spec.getVmName()).thenReturn(sp.getTargets().getFirst().getVmName());
+         Mockito.when(spec.getVmName()).thenReturn("cluster-worker-0");
          Mockito.when(spec.getVmId()).thenReturn("create-vm-succ");
          Field field = sp.getClass().getDeclaredField("targetVmSpec");
          field.setAccessible(true);
@@ -184,7 +184,7 @@ public class MockTmScheduler {
          ExecutionResult s = null;
          if (flag) {
             if (operation == VmOperation.CREATE_VM) {
-               VmCloner sp = (VmCloner)storedProcedures[i].first;
+               CreateVmSP sp = (CreateVmSP)storedProcedures[i].first;
                setReturnVM(sp);
             }
             f = new ExecutionResult(true, null);

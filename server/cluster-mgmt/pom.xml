@@ -32,7 +32,7 @@
       </dependency>
       <dependency>
          <groupId>com.vmware.bdd</groupId>
-         <artifactId>fastclone</artifactId>
+         <artifactId>vmclone</artifactId>
       </dependency>
       <dependency>
          <groupId>com.vmware.bdd</groupId>
