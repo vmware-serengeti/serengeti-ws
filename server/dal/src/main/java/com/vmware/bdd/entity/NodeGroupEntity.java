@@ -371,6 +371,21 @@ public class NodeGroupEntity extends EntityBase {
       return nodes.size();
    }
 
+   public int getRealInstanceNum(boolean ignoreObsolete) {
+      if (!ignoreObsolete) {
+         return nodes.size();
+      } else {
+         int num = 0;
+         for (NodeEntity node : nodes) {
+            if (node.isObsoleteNode()) {
+               continue;
+            }
+            num ++;
+         }
+         return num;
+      }
+   }
+
    public Set<VcResourcePoolEntity> getUsedVcResourcePools() {
       HashSet<VcResourcePoolEntity> rps = new HashSet<VcResourcePoolEntity>();
       for (NodeEntity node : nodes) {
@@ -406,7 +421,7 @@ public class NodeGroupEntity extends EntityBase {
       nodeGroupRead.setCpuNum(this.cpuNum);
       nodeGroupRead.setMemCapacityMB(this.memorySize);
       nodeGroupRead.setSwapRatio(this.swapRatio);
-      nodeGroupRead.setInstanceNum(this.getRealInstanceNum());
+      nodeGroupRead.setInstanceNum(this.getRealInstanceNum(ignoreObsoleteNode));
 
       Gson gson = new Gson();
       @SuppressWarnings("unchecked")

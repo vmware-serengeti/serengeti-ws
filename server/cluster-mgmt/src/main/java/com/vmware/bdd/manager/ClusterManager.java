@@ -1114,7 +1114,8 @@ public class ClusterManager {
                nodeGroup.getName())) {
             if (node.isObsoleteNode()) {
                logger.info("Ingore node " + node.getVmName()
-                     + ", for it violate VM name convention.");
+                     + ", for it violate VM name convention."
+                     + "or exceed defined group instance number. ");
                continue;
             }
             if (clusterHealService.hasBadDisks(node.getVmName())) {

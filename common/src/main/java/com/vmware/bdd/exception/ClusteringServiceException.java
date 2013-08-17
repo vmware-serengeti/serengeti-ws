@@ -124,12 +124,6 @@ public class ClusteringServiceException extends BddException {
             vmName);
    }
 
-   public static ClusteringServiceException VM_NAME_VIOLATE_NAME_PATTERN(
-         String vmName) {
-      return new ClusteringServiceException(null,
-            "VM_NAME_VIOLATE_NAME_PATTERN", vmName);
-   }
-
    public static ClusteringServiceException VM_VIOLATE_PLACEMENT_POLICY(
          List<String> vmNames) {
       return new ClusteringServiceException(null,

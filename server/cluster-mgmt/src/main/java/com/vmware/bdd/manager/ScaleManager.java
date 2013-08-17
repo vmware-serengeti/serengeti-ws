@@ -109,8 +109,10 @@ public class ScaleManager {
       JobParametersBuilder parametersBuilder = new JobParametersBuilder();
       for (NodeEntity nodeEntity : nodes) {
          if (nodeEntity.isObsoleteNode()) {
-            logger.info("Ingore node " + nodeEntity.getVmName()
-                  + ", for it violate VM name convention.");
+            logger.info("Ingore node "
+                  + nodeEntity.getVmName()
+                  + ", for it violate VM name convention " 
+                  + "or exceed defined group instance number. ");
             continue;
          }
 

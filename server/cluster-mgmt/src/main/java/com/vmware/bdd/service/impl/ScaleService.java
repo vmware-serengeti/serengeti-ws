@@ -84,7 +84,7 @@ public class ScaleService implements IScaleService {
       DiskEntity swapDisk = findSwapDisk(node);
       VcDatastore targetDs = null;
       long newSwapSizeInMB = 0;
-      if (memory > 0) {
+      if (memory > getVmOriginalMemory(nodeName)) {
          newSwapSizeInMB =
                (((long) Math.ceil(memory * node.getNodeGroup().getSwapRatio()) + 1023) / 1024) * 1024;
          logger.info("new swap disk size(MB): " + newSwapSizeInMB);

@@ -237,9 +237,13 @@ public class ClusterEntity extends EntityBase {
    }
 
    public int getRealInstanceNum() {
+      return getRealInstanceNum(false);
+   }
+
+   public int getRealInstanceNum(boolean ignoreObsolete) {
       int instanceNum = 0;
       for (NodeGroupEntity group : nodeGroups) {
-         instanceNum += group.getRealInstanceNum();
+         instanceNum += group.getRealInstanceNum(ignoreObsolete);
       }
 
       return instanceNum;

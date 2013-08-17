@@ -97,8 +97,10 @@ public class BddException extends RuntimeException {
       return NOT_FOUND(null, object, objectName);
    }
 
-   public static BddException NOT_ALLOWED_SCALING(String object, String objectName) {
-      return new BddException(null, "BDD", "NOT_ALLOWED_SCALING", object, objectName);
+   public static BddException NOT_ALLOWED_SCALING(String object,
+         String objectName) {
+      return new BddException(null, "BDD", "NOT_ALLOWED_SCALING", object,
+            objectName);
    }
 
    public static BddException ALREADY_EXISTS(Throwable ex, String object,
@@ -121,5 +123,10 @@ public class BddException extends RuntimeException {
 
    public static BddException BAD_REST_CALL(Throwable ex, String reason) {
       return new BddException(ex, "BDD", "BAD_REST_CALL", reason);
+   }
+
+   public static BddException VM_NAME_VIOLATE_NAME_PATTERN(String vmName) {
+      return new ClusteringServiceException(null, "BDD",
+            "VM_NAME_VIOLATE_NAME_PATTERN", vmName);
    }
 }

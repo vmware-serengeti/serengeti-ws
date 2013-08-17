@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.spectypes.HadoopRole;
 
 public class CommonUtil {
@@ -177,14 +176,14 @@ public class CommonUtil {
    public static long getVmIndex(String vmName) throws BddException {
       String[] split = vmName.split("-");
       if (split.length < 3) {
-         throw ClusteringServiceException.VM_NAME_VIOLATE_NAME_PATTERN(vmName);
+         throw BddException.VM_NAME_VIOLATE_NAME_PATTERN(vmName);
       }
       try {
          return Long.valueOf(split[2]);
       } catch (Exception e) {
          logger.error("vm name " + vmName
                + " violate serengeti vm name definition.");
-         throw ClusteringServiceException.VM_NAME_VIOLATE_NAME_PATTERN(vmName);
+         throw BddException.VM_NAME_VIOLATE_NAME_PATTERN(vmName);
       }
    }
 

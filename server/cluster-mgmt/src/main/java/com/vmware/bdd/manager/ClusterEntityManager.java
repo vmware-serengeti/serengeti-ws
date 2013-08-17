@@ -339,7 +339,7 @@ public class ClusterEntityManager {
       ClusterEntity cluster = findByName(clusterName);
       ClusterStatus clusterStatus = cluster.getStatus();
       ClusterRead clusterRead = new ClusterRead();
-      clusterRead.setInstanceNum(cluster.getRealInstanceNum());
+      clusterRead.setInstanceNum(cluster.getRealInstanceNum(ignoreObsoleteNode));
       clusterRead.setName(cluster.getName());
       clusterRead.setStatus(clusterStatus);
       clusterRead.setDistro(cluster.getDistro());

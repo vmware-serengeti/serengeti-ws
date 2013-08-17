@@ -359,7 +359,7 @@ public class NodeEntity extends EntityBase {
             return true;
          }
       } catch (BddException e) {
-         logger.error("VM " + vmName + " violate name convention");
+         logger.warn("VM " + vmName + " violate name convention");
          return true;
       }
    }

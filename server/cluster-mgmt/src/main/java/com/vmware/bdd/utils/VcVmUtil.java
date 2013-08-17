@@ -358,7 +358,7 @@ public class VcVmUtil {
             } else {
                operationResult = false;
                logger.error("failed in run operation on vm for node: "
-                     + node.getVmName());
+                     + node.getVmName(), result[0].throwable);
             }
          }
       } catch (Exception e) {
