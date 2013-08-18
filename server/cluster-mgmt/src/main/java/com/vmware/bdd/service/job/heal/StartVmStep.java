@@ -19,14 +19,14 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.vmware.bdd.exception.ClusterHealServiceException;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.job.ClusterUpdateDataStep;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
 import com.vmware.bdd.service.job.TrackableTasklet;
+import com.vmware.bdd.utils.AuAssert;
 
-public class NodeVerifyDataStep extends TrackableTasklet {
+public class StartVmStep extends TrackableTasklet {
 
    private static final Logger logger = Logger
          .getLogger(ClusterUpdateDataStep.class);
@@ -40,13 +40,17 @@ public class NodeVerifyDataStep extends TrackableTasklet {
       String targetNode =
             getJobParameters(chunkContext).getString(
                   JobConstants.SUB_JOB_NODE_NAME);
-      String vmId =
+      String newVmId =
             getFromJobExecutionContext(chunkContext,
                   JobConstants.REPLACE_VM_ID, String.class);
+      
+      // if the replacement vm is not created, should exit in last step
+      AuAssert.check(newVmId != null);
+
+      logger.debug("power on the replacement vm " + targetNode);
 
       try {
-         logger.debug("verify ip address for node " + targetNode);
-         healService.verifyNodeStatus(vmId, targetNode);
+         healService.startVm(targetNode, newVmId);
       } catch (Exception e) {
          putIntoJobExecutionContext(chunkContext,
                JobConstants.CURRENT_ERROR_MESSAGE, e.getMessage());

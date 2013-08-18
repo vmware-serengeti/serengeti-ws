@@ -23,19 +23,15 @@ import org.apache.log4j.Logger;
 import com.vmware.aurora.composition.IPrePostPowerOn;
 import com.vmware.aurora.composition.NetworkSchema;
 import com.vmware.aurora.composition.NetworkSchemaUtil;
-import com.vmware.aurora.vc.DeviceId;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.Priority;
-import com.vmware.bdd.spectypes.DiskSpec;
-import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
 import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
 import com.vmware.vim.binding.vim.option.OptionValue;
 import com.vmware.vim.binding.vim.vm.ConfigSpec;
-import com.vmware.vim.binding.vim.vm.FaultToleranceConfigInfo;
 
 public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
    private static final Logger logger = Logger
@@ -44,53 +40,14 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
    private String newName;
    private Priority ioShares;
    private VcVirtualMachine vm;
-   private List<DiskSpec> fullDiskSet;
    private NetworkSchema networkSchema;
 
    public ReplaceVmPrePowerOn(String vmId, String newName, Priority ioShares,
-         List<DiskSpec> fullDiskSet, NetworkSchema networkSchema) {
+         NetworkSchema networkSchema) {
       this.oldVmId = vmId;
       this.newName = newName;
       this.ioShares = ioShares;
-      this.fullDiskSet = fullDiskSet;
       this.networkSchema = networkSchema;
-   }
-
-   private void destroyVm(VcVirtualMachine oldVm) throws Exception {
-      FaultToleranceConfigInfo info = oldVm.getConfig().getFtInfo();
-      if (info != null && info.getRole() == 1) {
-         logger.info("VM " + oldVm.getName()
-               + " is FT primary VM, disable FT before delete it.");
-         oldVm.turnOffFT();
-      }
-      // try guest shut down first, wait for 3 minutes, power it off after time out
-      if (oldVm.isPoweredOn()
-            && !oldVm
-                  .shutdownGuest(Constants.VM_FAST_SHUTDOWN_WAITING_SEC * 1000)) {
-         oldVm.powerOff();
-      }
-
-      /*
-       * TRICK: destroy vm with unaccessible disks will throw exceptions, ignore 
-       * it and destroy it again.
-       */
-      try {
-         // detach existed vmdks on the old vm
-         for (DiskSpec disk : fullDiskSet) {
-            if (disk.getVmdkPath() != null && !disk.getVmdkPath().isEmpty()) {
-               oldVm.detachVirtualDisk(new DeviceId(disk.getExternalAddress()),
-                     false);
-            }
-         }
-
-         oldVm.destroy(false);
-      } catch (Exception e) {
-         logger.warn("failed to delete vm " + oldVm.getName() + " as "
-               + e.getMessage());
-         logger.info("try to unregister it again");
-         oldVm.unregister();
-      }
-      logger.info("VM " + oldVm.getName() + " deleted");
    }
 
    private OptionValue[] getVhmExtraConfigs(VcVirtualMachine oldVm) {
@@ -143,10 +100,10 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
             }
 
             // the following two steps should be in a transaction theoretically
-            
+
             // destroy vm
             logger.info("destroy parent vm " + newName);
-            destroyVm(oldVm);
+            VcVmUtil.destroyVm(oldVmId, true);
 
             // rename vm
             logger.info("VM " + vm.getName() + " renamed to " + newName);

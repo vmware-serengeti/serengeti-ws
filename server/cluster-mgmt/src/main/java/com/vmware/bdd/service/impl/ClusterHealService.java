@@ -35,6 +35,7 @@ import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;
+import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NetworkAdd;
@@ -51,8 +52,10 @@ import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractDatastore;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
+import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
 import com.vmware.bdd.service.sp.QueryIpAddress;
 import com.vmware.bdd.service.sp.ReplaceVmPrePowerOn;
+import com.vmware.bdd.service.sp.StartVmSP;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
@@ -327,15 +330,13 @@ public class ClusterHealService implements IClusterHealService {
       ReplaceVmPrePowerOn prePowerOn =
             new ReplaceVmPrePowerOn(node.getMoId(), node.getVmName(),
                   clusterSpec.getNodeGroup(groupName).getStorage().getShares(),
-                  fullDiskSet, createSchema.networkSchema);
+                  createSchema.networkSchema);
 
-      // timeout is 10 mintues
-      QueryIpAddress query =
-            new QueryIpAddress(Constants.VM_POWER_ON_WAITING_SEC);
+      // power on the new vm, but not wait for ip address here. we have startVmStep to wait for ip
       return new CreateVmSP(node.getVmName() + RECOVERY_VM_NAME_POSTFIX,
             createSchema, VcVmUtil.getTargetRp(clusterSpec.getName(),
                   groupName, node), getTargetDatastore(fullDiskSet),
-            prePowerOn, query, guestVariable, false, getTargetFolder(node,
+            prePowerOn, null, guestVariable, false, getTargetFolder(node,
                   clusterSpec.getNodeGroup(groupName)), getTargetHost(node));
    }
 
@@ -373,7 +374,7 @@ public class ClusterHealService implements IClusterHealService {
                Scheduler
                      .executeStoredProcedures(
                            com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
-                           storeProcedures, 0, null);
+                           storeProcedures, 1, null);
 
          if (result == null) {
             logger.error("vm creation failed for node " + nodeName);
@@ -391,11 +392,7 @@ public class ClusterHealService implements IClusterHealService {
             logger.error(
                   "Failed to create replace VM for node " + node.getVmName(),
                   pair.first.throwable);
-            logger.info("start error handling for vm " + node.getVmName());
-            VcVmUtil
-                  .handleDiskRecoveryError(clusterName, groupName, node,
-                        node.getVmName() + RECOVERY_VM_NAME_POSTFIX,
-                        clusterEntityMgr);
+
             throw ClusterHealServiceException.FAILED_CREATE_REPLACEMENT_VM(node
                   .getVmName());
          }
@@ -407,13 +404,23 @@ public class ClusterHealService implements IClusterHealService {
       return null;
    }
 
-   public void updateDiskData(String vmId, String nodeName) {
-      // refresh node status 
-      clusterEntityMgr.refreshNodeByVmName(vmId, nodeName, false);
+   public void updateData(String clusterName, String groupName,
+         String nodeName, String newVmId) {
+      NodeEntity node = clusterEntityMgr.findNodeByName(nodeName);
+
+      logger.info("start update vm id and host info for node " + nodeName);
+      VcVirtualMachine vm = VcCache.getIgnoreMissing(newVmId);
+
+      node.setMoId(vm.getId());
+      node.setHostName(vm.getHost().getName());
+      clusterEntityMgr.update(node);
+
+      logger.info("sync up status for node " + nodeName);
+      clusterEntityMgr.syncUpNode(clusterName, nodeName);
 
       List<DiskEntity> fullDiskSet = clusterEntityMgr.getDisks(nodeName);
       for (DiskEntity disk : fullDiskSet) {
-         VcVmUtil.populateDiskInfo(disk, vmId);
+         VcVmUtil.populateDiskInfo(disk, newVmId);
       }
       clusterEntityMgr.updateDisks(nodeName, fullDiskSet);
    }
@@ -428,5 +435,105 @@ public class ClusterHealService implements IClusterHealService {
    public void verifyNodeStatus(String vmId, String nodeName) {
       NodeEntity nodeEntity = clusterEntityMgr.findNodeByName(nodeName);
       JobUtils.verifyNodeStatus(nodeEntity, NodeStatus.VM_READY, false);
+   }
+
+   @Override
+   public void startVm(String nodeName, String vmId) {
+      QueryIpAddress query =
+            new QueryIpAddress(Constants.VM_POWER_ON_WAITING_SEC);
+
+      VcVirtualMachine vcVm = VcCache.getIgnoreMissing(vmId);
+
+      if (vcVm == null) {
+         logger.error("VC vm does not exist for vmId: " + vmId);
+      }
+
+      VcHost host = vcVm.getHost();
+
+      Callable<Void>[] storeProceduresArray = new Callable[1];
+      storeProceduresArray[0] = new StartVmSP(vcVm, query, host);
+      NoProgressUpdateCallback callback = new NoProgressUpdateCallback();
+
+      try {
+         ExecutionResult[] result =
+               Scheduler
+                     .executeStoredProcedures(
+                           com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
+                           storeProceduresArray, callback);
+         if (result == null) {
+            logger.error("No result from composition layer");
+         } else {
+            if (result[0].finished && result[0].throwable == null) {
+               logger.info("successfully power on vm for node: " + nodeName);
+            } else {
+               logger.error("failed in powering on vm for node: " + nodeName,
+                     result[0].throwable);
+               throw ClusterHealServiceException.FAILED_POWER_ON_VM(nodeName);
+            }
+         }
+      } catch (InterruptedException e) {
+         logger.error("error in run operation on vm.", e);
+         throw ClusterHealServiceException.INTERNAL(e,
+               "error in executing startVmSp");
+      }
+   }
+
+   @Override
+   public VcVirtualMachine checkNodeStatus(String clusterName,
+         String groupName, String nodeName) {
+      NodeEntity node = clusterEntityMgr.findNodeByName(nodeName);
+
+      VcResourcePool rp = VcVmUtil.getTargetRp(clusterName, groupName, node);
+
+      String recoverVmName = node.getVmName() + RECOVERY_VM_NAME_POSTFIX;
+      if (node.getMoId() != null) {
+         VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
+         // the vm id is null iff the vm is removed
+         if (vm == null) {
+            throw ClusterHealServiceException.ERROR_STATUS(nodeName,
+                  "Serengeti and VC are inconsistent as vm " + nodeName
+                        + " is recorded in Seregeti, but not found in VC.");
+         }
+
+         VcVirtualMachine recoverVm = VcVmUtil.findVmInRp(rp, recoverVmName);
+         if (recoverVm != null) {
+            try {
+               VcVmUtil.destroyVm(recoverVm.getId(), false);
+            } catch (Exception e) {
+               logger.error("failed to remove obsolete recovery vm for node "
+                     + nodeName);
+               throw ClusterHealServiceException
+                     .FAILED_DELETE_VM(recoverVmName);
+            }
+         }
+
+         return null;
+      } else {
+         VcVirtualMachine oldVm = VcVmUtil.findVmInRp(rp, nodeName);
+         VcVirtualMachine recoverVm = VcVmUtil.findVmInRp(rp, recoverVmName);
+
+         if (oldVm != null && recoverVm != null) {
+            logger.error("vm " + oldVm.getId() + " and recover vm "
+                  + recoverVm.getId() + " both exist, this is not expected!.");
+            throw ClusterHealServiceException.ERROR_STATUS(nodeName, "vm "
+                  + nodeName + " and its recovery vm " + recoverVmName
+                  + " both exist, remove the one you created manually!");
+         } else if (oldVm == null && recoverVm == null) {
+            logger.error("original vm and recover vm for node " + nodeName
+                  + " both missed, this is not expected!.");
+            throw ClusterHealServiceException.ERROR_STATUS(nodeName, "vm "
+                  + nodeName + " and its recovery vm " + recoverVmName
+                  + " both missed, it's not expected!");
+         } else if (recoverVm != null) {
+            logger.info("recover vm " + recoverVm.getId()
+                  + " exists, rename it to " + nodeName);
+            VcVmUtil.rename(recoverVm.getId(), nodeName);
+            return recoverVm;
+         } else {
+            logger.info("recovery probably failed at power on last time, simply return vm "
+                  + oldVm.getId());
+            return oldVm;
+         }
+      }
    }
 }

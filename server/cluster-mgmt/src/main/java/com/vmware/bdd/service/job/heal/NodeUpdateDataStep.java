@@ -36,16 +36,22 @@ public class NodeUpdateDataStep extends TrackableTasklet {
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,
          JobExecutionStatusHolder jobExecutionStatusHolder) throws Exception {
+      String clusterName =
+            getJobParameters(chunkContext).getString(
+                  JobConstants.CLUSTER_NAME_JOB_PARAM);
+      String groupName =
+            getJobParameters(chunkContext).getString(
+                  JobConstants.GROUP_NAME_JOB_PARAM);
       String targetNode =
             getJobParameters(chunkContext).getString(
                   JobConstants.SUB_JOB_NODE_NAME);
-      String vmId =
+      String newVmId =
             getFromJobExecutionContext(chunkContext,
                   JobConstants.REPLACE_VM_ID, String.class);
 
       try {
-         logger.debug("start update disk info for node " + targetNode);
-         healService.updateDiskData(vmId, targetNode);
+         logger.debug("start update vm/disk info for node " + targetNode);
+         healService.updateData(clusterName, groupName, targetNode, newVmId);
       } catch (Exception e) {
          putIntoJobExecutionContext(chunkContext,
                JobConstants.CURRENT_ERROR_MESSAGE, e.getMessage());

@@ -53,6 +53,11 @@ public class ClusterHealServiceException extends BddException {
             vmName);
    }
 
+   public static ClusterHealServiceException FAILED_POWER_ON_VM(String vmName) {
+      return new ClusterHealServiceException(null, "FAILED_POWER_ON_VM",
+            vmName);
+   }
+
    public static ClusterHealServiceException FAILED_DELETE_VM(String vmName) {
       return new ClusterHealServiceException(null, "FAILED_DELETE_VM", vmName);
    }
@@ -65,5 +70,9 @@ public class ClusterHealServiceException extends BddException {
 
    public static ClusterHealServiceException FAILED_TO_GET_IP(String nodeName) {
       return new ClusterHealServiceException(null, "FAILED_TO_GET_IP", nodeName);
+   }
+
+   public static ClusterHealServiceException ERROR_STATUS(String nodeName, String errMsg) {
+      return new ClusterHealServiceException(null, "ERROR_STATUS", nodeName, errMsg);
    }
 }

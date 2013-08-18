@@ -22,6 +22,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.bdd.exception.ClusterHealServiceException;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.job.ClusterUpdateDataStep;
 import com.vmware.bdd.service.job.JobConstants;
@@ -50,47 +51,70 @@ public class NodeRecoverDiskFailureStep extends TrackableTasklet {
       String targetNode =
             getJobParameters(chunkContext).getString(
                   JobConstants.SUB_JOB_NODE_NAME);
-      // find bad disks
-      List<DiskSpec> badDisks = healService.getBadDisks(targetNode);
-      AuAssert.check(!badDisks.isEmpty());
 
-      // find replacements for bad disks
-      logger.debug("get replacements for bad disks");
-      List<DiskSpec> replacements;
+      VcVirtualMachine vm = null;
       try {
-         replacements =
-               healService.getReplacementDisks(clusterName, groupName,
-                     targetNode, badDisks);
-         AuAssert.check(badDisks.size() == replacements.size());
+         vm = healService.checkNodeStatus(clusterName, groupName, targetNode);
       } catch (Exception e) {
          putIntoJobExecutionContext(chunkContext,
                JobConstants.CURRENT_ERROR_MESSAGE, e.getMessage());
          throw e;
       }
 
-      logger.debug("get replacement disk set for recovery "
-            + replacements.toString());
-      jobExecutionStatusHolder.setCurrentStepProgress(
-            getJobExecutionId(chunkContext), 0.3);
+      // need to create replace vm to recover disk fix
+      if (vm == null) {
+         // find bad disks
+         List<DiskSpec> badDisks = healService.getBadDisks(targetNode);
+         AuAssert.check(!badDisks.isEmpty());
 
-      // clone and recover
-      logger.debug("start recovering bad VMs");
-      try {
-         VcVirtualMachine newVm =
-               healService.createReplacementVm(clusterName, groupName,
-                     targetNode, replacements);
-         if (newVm != null) {
-            logger.info("created replacement vm " + newVm.getId()
-                  + " for node " + targetNode);
+         // find replacements for bad disks
+         logger.debug("get replacements for bad disks");
+         List<DiskSpec> replacements;
+         try {
+            replacements =
+                  healService.getReplacementDisks(clusterName, groupName,
+                        targetNode, badDisks);
+            AuAssert.check(badDisks.size() == replacements.size());
+         } catch (Exception e) {
             putIntoJobExecutionContext(chunkContext,
-                  JobConstants.REPLACE_VM_ID, newVm.getId());
-         } else {
-            logger.error("failed creating replacement vm " + targetNode);
+                  JobConstants.CURRENT_ERROR_MESSAGE, e.getMessage());
+            throw e;
          }
-      } catch (Exception e) {
-         putIntoJobExecutionContext(chunkContext,
-               JobConstants.CURRENT_ERROR_MESSAGE, e.getMessage());
-         throw e;
+
+         logger.debug("get replacement disk set for recovery "
+               + replacements.toString());
+         jobExecutionStatusHolder.setCurrentStepProgress(
+               getJobExecutionId(chunkContext), 0.3);
+
+         // clone and recover
+         logger.debug("start recovering bad vm " + targetNode);
+         try {
+            VcVirtualMachine newVm =
+                  healService.createReplacementVm(clusterName, groupName,
+                        targetNode, replacements);
+
+            // assert, if creation failed, exception should be thrown from previous method
+            if (newVm != null) {
+               logger.info("created replacement vm " + newVm.getId()
+                     + " for node " + targetNode);
+
+               putIntoJobExecutionContext(chunkContext,
+                     JobConstants.REPLACE_VM_ID, newVm.getId());
+            } else {
+               logger.error("failed creating replacement vm for node "
+                     + targetNode);
+               throw ClusterHealServiceException
+                     .FAILED_CREATE_REPLACEMENT_VM(targetNode);
+            }
+         } catch (Exception e) {
+            putIntoJobExecutionContext(chunkContext,
+                  JobConstants.CURRENT_ERROR_MESSAGE, e.getMessage());
+
+            throw e;
+         }
+      } else {
+         putIntoJobExecutionContext(chunkContext, JobConstants.REPLACE_VM_ID,
+               vm.getId());
       }
 
       jobExecutionStatusHolder.setCurrentStepProgress(

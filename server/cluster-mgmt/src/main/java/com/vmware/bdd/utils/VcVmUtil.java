@@ -50,7 +50,6 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusteringServiceException;
-import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
 import com.vmware.bdd.service.utils.VcResourceUtils;
@@ -63,6 +62,7 @@ import com.vmware.vim.binding.vim.SharesInfo;
 import com.vmware.vim.binding.vim.SharesInfo.Level;
 import com.vmware.vim.binding.vim.StorageResourceManager.IOAllocationInfo;
 import com.vmware.vim.binding.vim.VirtualMachine.FaultToleranceState;
+import com.vmware.vim.binding.vim.vm.FaultToleranceConfigInfo;
 import com.vmware.vim.binding.vim.vm.GuestInfo;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
 import com.vmware.vim.binding.vim.vm.device.VirtualDeviceSpec;
@@ -327,9 +327,8 @@ public class VcVmUtil {
 
    public static boolean runSPOnSingleVM(NodeEntity node, Callable<Void> call) {
       boolean operationResult = true;
-      if (node == null || node.getMoId() == null) {
-         logger.info("VC vm does not exist for node: " + node == null ? null
-               : node.getVmName());
+      if (node.getMoId() == null) {
+         logger.info("VC vm does not exist for node: " + node.getVmName());
          return false;
       }
       VcVirtualMachine vcVm = VcCache.getIgnoreMissing(node.getMoId());
@@ -476,49 +475,93 @@ public class VcVmUtil {
             .toString());
    }
 
-   public static void handleDiskRecoveryError(final String clusterName,
-         final String groupName, final NodeEntity node,
-         final String recoveryVmName, ClusterEntityManager clusterEntityMgr) {
-      // unregister xxx-recovery vm, populate vm info
-      try {
-         VcVirtualMachine vm =
-               VcContext.inVcSessionDo(new VcSession<VcVirtualMachine>() {
-                  @Override
-                  protected VcVirtualMachine body() throws Exception {
-                     VcVirtualMachine oldVm = null;
-                     VcVirtualMachine newVm = null;
+   public static void destroyVm(final String vmId) throws Exception {
+      VcVirtualMachine vm = VcCache.getIgnoreMissing(vmId);
 
-                     VcResourcePool rp =
-                           VcVmUtil.getTargetRp(clusterName, groupName, node);
-                     for (VcVirtualMachine vm : rp.getChildVMs()) {
-                        if (vm.getName().equals(node.getVmName())) {
-                           oldVm = vm;
-                        }
-                        if (vm.getName().equals(recoveryVmName)) {
-                           newVm = vm;
-                        }
-                     }
-
-                     if (oldVm == null) {
-                        AuAssert.check(newVm != null);
-                        newVm.rename(node.getVmName());
-
-                        return newVm;
-                     } else {
-                        if (newVm != null) {
-                           newVm.unregister();
-                        }
-                        return oldVm;
-                     }
-                  }
-               });
-         
-         node.setMoId(vm.getId());
-         node.setHostName(vm.getHost().getName());
-         clusterEntityMgr.update(node);
-      } catch (Exception e) {
-         logger.error("ignore error when rolling back disk fix changes for node "
-               + node.getVmName());
+      FaultToleranceConfigInfo info = vm.getConfig().getFtInfo();
+      if (info != null && info.getRole() == 1) {
+         logger.info("VM " + vm.getName()
+               + " is FT primary VM, disable FT before delete it.");
+         vm.turnOffFT();
       }
+      // try guest shut down first, wait for 3 minutes, power it off after time out
+      if (vm.isPoweredOn()
+            && !vm.shutdownGuest(Constants.VM_FAST_SHUTDOWN_WAITING_SEC * 1000)) {
+         vm.powerOff();
+      }
+
+      /*
+       * TRICK: destroy vm with unaccessible disks will throw exceptions, ignore 
+       * it and destroy it again.
+       */
+      try {
+         vm.destroy(false);
+      } catch (Exception e) {
+         logger.warn("failed to delete vm " + vm.getName() + " as "
+               + e.getMessage());
+         logger.info("try to unregister it again");
+         vm.unregister();
+      }
+      logger.info("VM " + vm.getName() + " deleted");
+   }
+
+   public static void destroyVm(final String vmId, Boolean inSession)
+         throws Exception {
+      if (inSession) {
+         destroyVm(vmId);
+      } else {
+         VcContext.inVcSessionDo(new VcSession<Void>() {
+            @Override
+            protected Void body() throws Exception {
+               destroyVm(vmId);
+               return null;
+            }
+
+            @Override
+            protected boolean isTaskSession() {
+               return true;
+            }
+         });
+      }
+   }
+
+   public static VcVirtualMachine findVmInRp(final VcResourcePool rp,
+         final String vmName) {
+      return VcContext.inVcSessionDo(new VcSession<VcVirtualMachine>() {
+         @Override
+         protected VcVirtualMachine body() throws Exception {
+            VcVirtualMachine targetVm = null;
+            for (VcVirtualMachine vm : rp.getChildVMs()) {
+               if (vm.getName().equals(vmName)) {
+                  targetVm = vm;
+                  break;
+               }
+            }
+
+            return targetVm;
+         }
+
+         @Override
+         protected boolean isTaskSession() {
+            return true;
+         }
+      });
+   }
+
+   public static void rename(final String vmId, final String newName) {
+      VcContext.inVcSessionDo(new VcSession<Void>() {
+         @Override
+         protected Void body() throws Exception {
+            VcVirtualMachine vm = VcCache.getIgnoreMissing(vmId);
+            vm.rename(newName);
+
+            return null;
+         }
+
+         @Override
+         protected boolean isTaskSession() {
+            return true;
+         }
+      });
    }
 }

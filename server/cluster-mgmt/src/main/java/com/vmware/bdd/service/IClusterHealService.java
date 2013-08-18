@@ -55,12 +55,12 @@ public interface IClusterHealService {
 
    /**
     * fix disk failures for the specified node, say node A. Steps: 1). power off
-    * VM A, 2). create a empty VM (named A.vm_name + "recovery") or clone one from
-    * the template VM, depends on whether the system disk is corrupted or not,
-    * with the exact same vccluster/host/rp/vc folder/network/cpu/mem settings,
-    * 3). attach existing or create non-existing vmdks in fullDiskSet, 4). remove
-    * VM A, set node A's mobId to null, 5). rename the recovered VM to A.vm_name
-    * and power on
+    * VM A, 2). create a empty VM (named A.vm_name + "recovery") or clone one
+    * from the template VM, depends on whether the system disk is corrupted or
+    * not, with the exact same vccluster/host/rp/vc folder/network/cpu/mem
+    * settings, 3). attach existing or create non-existing vmdks in fullDiskSet,
+    * 4). remove VM A, set node A's mobId to null, 5). rename the recovered VM
+    * to A.vm_name and power on
     * 
     * @param clusterName
     * @param groupName
@@ -87,13 +87,22 @@ public interface IClusterHealService {
          String groupName, String nodeName, List<DiskSpec> replacementDisks);
 
    /**
-    * update disk info with the input disk entity set
+    * power on the specified vm
     * 
     * @param vmId
-    * @param nodeName
-    * @param fullDiskSet
     */
-   public void updateDiskData(String vmId, String nodeName);
+   public void startVm(String nodeName, String vmId);
+
+   /**
+    * update vm and disk info from the new vm
+    * 
+    * @param clusterName
+    * @param groupName
+    * @param nodeName
+    * @param newVmId
+    */
+   public void updateData(String clusterName, String groupName,
+         String nodeName, String newVmId);
 
    /**
     * verify node has correct status after vm fix, before software bootstrap
@@ -101,4 +110,16 @@ public interface IClusterHealService {
     * @param nodeName
     */
    public void verifyNodeStatus(String vmId, String nodeName);
+
+   /**
+    * check the status of vm and recovery vm, do something to make sure cluster fix
+    * is able to reentrant
+    * 
+    * @param clusterName
+    * @param groupName
+    * @param nodeName
+    * @return
+    */
+   public VcVirtualMachine checkNodeStatus(String clusterName, String groupName,
+         String nodeName);
 }
