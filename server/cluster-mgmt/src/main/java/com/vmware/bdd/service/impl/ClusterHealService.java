@@ -365,7 +365,8 @@ public class ClusterHealService implements IClusterHealService {
             new Pair<Callable<Void>, Callable<Void>>(cloneVmSp, deleteVmSp);
 
       // execute store procedures to create VMs
-      logger.info("ClusterHealService, start to create replacement vm.");
+      logger.info("ClusterHealService, start to create replacement vm for node "
+            + nodeName);
       Pair<ExecutionResult, ExecutionResult>[] result;
       try {
          result =
@@ -375,7 +376,7 @@ public class ClusterHealService implements IClusterHealService {
                            storeProcedures, 0, null);
 
          if (result == null) {
-            logger.error("No VM is created.");
+            logger.error("vm creation failed for node " + nodeName);
             return null;
          }
 
@@ -390,11 +391,16 @@ public class ClusterHealService implements IClusterHealService {
             logger.error(
                   "Failed to create replace VM for node " + node.getVmName(),
                   pair.first.throwable);
+            logger.info("start error handling for vm " + node.getVmName());
+            VcVmUtil
+                  .handleDiskRecoveryError(clusterName, groupName, node,
+                        node.getVmName() + RECOVERY_VM_NAME_POSTFIX,
+                        clusterEntityMgr);
             throw ClusterHealServiceException.FAILED_CREATE_REPLACEMENT_VM(node
                   .getVmName());
          }
       } catch (InterruptedException e) {
-         logger.error("error in creating VMs", e);
+         logger.error("error in fixing vm " + nodeName, e);
          throw BddException.INTERNAL(e, e.getMessage());
       }
 

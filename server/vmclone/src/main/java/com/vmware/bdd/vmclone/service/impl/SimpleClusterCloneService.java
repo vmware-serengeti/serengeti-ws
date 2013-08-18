@@ -55,7 +55,7 @@ public class SimpleClusterCloneService implements IClusterCloneService {
          CreateVmSP cloneVmSp =
                new CreateVmSP(consumer.getVmName(), consumer.getSchema(),
                      consumer.getTargetRp(), consumer.getTargetDs(),
-                     consumer.getPostPowerOn(), consumer.getPostPowerOn(),
+                     consumer.getPrePowerOn(), consumer.getPostPowerOn(),
                      consumer.getBootupConfigs(), false,
                      consumer.getTargetFolder(), consumer.getTargetHost());
          CompensateCreateVmSP deleteVmSp = new CompensateCreateVmSP(cloneVmSp);

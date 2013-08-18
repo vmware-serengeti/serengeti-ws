@@ -79,10 +79,11 @@ public class NodeRecoverDiskFailureStep extends TrackableTasklet {
          VcVirtualMachine newVm =
                healService.createReplacementVm(clusterName, groupName,
                      targetNode, replacements);
-         if (newVm != null) { 
-            logger.info("created replacement vm " + newVm.getId());
-            putIntoJobExecutionContext(chunkContext, JobConstants.REPLACE_VM_ID,
-               newVm.getId());
+         if (newVm != null) {
+            logger.info("created replacement vm " + newVm.getId()
+                  + " for node " + targetNode);
+            putIntoJobExecutionContext(chunkContext,
+                  JobConstants.REPLACE_VM_ID, newVm.getId());
          } else {
             logger.error("failed creating replacement vm " + targetNode);
          }

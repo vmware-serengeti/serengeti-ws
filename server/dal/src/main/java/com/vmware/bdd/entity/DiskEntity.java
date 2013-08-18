@@ -41,6 +41,7 @@ public class DiskEntity extends EntityBase {
    @Column(name = "size")
    private int sizeInMB;
 
+   // OS/SWAP/DATA
    @Column(name = "disk_type")
    private String diskType;
 

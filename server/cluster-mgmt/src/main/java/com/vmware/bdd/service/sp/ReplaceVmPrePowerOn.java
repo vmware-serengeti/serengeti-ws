@@ -69,7 +69,7 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
                   .shutdownGuest(Constants.VM_FAST_SHUTDOWN_WAITING_SEC * 1000)) {
          oldVm.powerOff();
       }
-      
+
       /*
        * TRICK: destroy vm with unaccessible disks will throw exceptions, ignore 
        * it and destroy it again.
@@ -102,7 +102,7 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
       }
       return options.toArray(new OptionValue[options.size()]);
    }
-   
+
    private void copyNicSettings(VcVirtualMachine oldVm) throws Exception {
       ConfigSpec configSpec = new ConfigSpecImpl();
       NetworkSchemaUtil.copyMacAddresses(configSpec, oldVm, vm, networkSchema);
@@ -114,20 +114,21 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
       final VcVirtualMachine oldVm = VcCache.getIgnoreMissing(oldVmId);
       if (oldVm == null) {
          logger.info("vm " + oldVmId
-               + " is not found in VC, ignore this delete.");
+               + " is not found in VC, ignore this disk fix.");
          return null;
       }
 
-      // delete old vm and rename the replacement VM to original name
+      // delete old vm and rename the replacement VM to its original name
       VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
          protected Void body() throws Exception {
             // copy parent vm's mac addresses
-            logger.info("copy parent vm's mac addresses");
+            logger.info("copy mac addresses of parent vm " + newName);
             copyNicSettings(oldVm);
-            
+
             // copy vhm related extra configures
-            logger.info("copy vhm related extra configs from parent vm");
+            logger.info("copy vhm related extra configs from parent vm "
+                  + newName);
             OptionValue[] optionValues = getVhmExtraConfigs(oldVm);
             if (optionValues.length != 0) {
                ConfigSpec spec = new ConfigSpecImpl();
@@ -135,19 +136,22 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
                vm.reconfigure(spec);
             }
 
+            // copy the io share level from the original vm
+            logger.info("set io share level same with parent vm " + newName);
+            if (!Priority.NORMAL.equals(ioShares)) {
+               VcVmUtil.configIOShares(vm.getId(), ioShares);
+            }
+
+            // the following two steps should be in a transaction theoretically
+            
             // destroy vm
-            logger.info("destroy parent vm");
+            logger.info("destroy parent vm " + newName);
             destroyVm(oldVm);
 
             // rename vm
             logger.info("VM " + vm.getName() + " renamed to " + newName);
             vm.rename(newName);
 
-            // copy the io share level from the original vm
-            logger.info("set io share level same with parent vm");
-            if (!Priority.NORMAL.equals(ioShares)) {
-               VcVmUtil.configIOShares(oldVmId, ioShares);
-            }
             return null;
          }
 

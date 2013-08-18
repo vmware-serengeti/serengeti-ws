@@ -50,6 +50,7 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusteringServiceException;
+import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
 import com.vmware.bdd.service.utils.VcResourceUtils;
@@ -150,7 +151,7 @@ public class VcVmUtil {
          vNode.setSuccess(false);
          // in static ip case, vNode contains the allocated address,
          // here reset the value in case the ip is unavailable from vc
-         vNode.setIpAddress(null); 
+         vNode.setIpAddress(null);
          if (vm != null) {
             vNode.setVmMobId(vm.getId());
             if (vm.isPoweredOn()) {
@@ -357,8 +358,9 @@ public class VcVmUtil {
                      + node.getVmName());
             } else {
                operationResult = false;
-               logger.error("failed in run operation on vm for node: "
-                     + node.getVmName(), result[0].throwable);
+               logger.error(
+                     "failed in run operation on vm for node: "
+                           + node.getVmName(), result[0].throwable);
             }
          }
       } catch (Exception e) {
@@ -472,5 +474,51 @@ public class VcVmUtil {
       AuAssert.check(bootupConfigs != null);
       bootupConfigs.put(Constants.GUEST_VARIABLE_BOOTUP_UUID, UUID.randomUUID()
             .toString());
+   }
+
+   public static void handleDiskRecoveryError(final String clusterName,
+         final String groupName, final NodeEntity node,
+         final String recoveryVmName, ClusterEntityManager clusterEntityMgr) {
+      // unregister xxx-recovery vm, populate vm info
+      try {
+         VcVirtualMachine vm =
+               VcContext.inVcSessionDo(new VcSession<VcVirtualMachine>() {
+                  @Override
+                  protected VcVirtualMachine body() throws Exception {
+                     VcVirtualMachine oldVm = null;
+                     VcVirtualMachine newVm = null;
+
+                     VcResourcePool rp =
+                           VcVmUtil.getTargetRp(clusterName, groupName, node);
+                     for (VcVirtualMachine vm : rp.getChildVMs()) {
+                        if (vm.getName().equals(node.getVmName())) {
+                           oldVm = vm;
+                        }
+                        if (vm.getName().equals(recoveryVmName)) {
+                           newVm = vm;
+                        }
+                     }
+
+                     if (oldVm == null) {
+                        AuAssert.check(newVm != null);
+                        newVm.rename(node.getVmName());
+
+                        return newVm;
+                     } else {
+                        if (newVm != null) {
+                           newVm.unregister();
+                        }
+                        return oldVm;
+                     }
+                  }
+               });
+         
+         node.setMoId(vm.getId());
+         node.setHostName(vm.getHost().getName());
+         clusterEntityMgr.update(node);
+      } catch (Exception e) {
+         logger.error("ignore error when rolling back disk fix changes for node "
+               + node.getVmName());
+      }
    }
 }
