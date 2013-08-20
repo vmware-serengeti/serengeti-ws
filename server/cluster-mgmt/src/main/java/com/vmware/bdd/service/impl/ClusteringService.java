@@ -955,7 +955,7 @@ public class ClusteringService implements IClusteringService {
                               "create node group resource pool failed: node group cannot be null !");
                   if (nodeGroup.getName().length() > 80) {
                      throw ClusteringServiceException
-                           .GROUP_NAME_TOO_LONG(clusterName);
+                           .GROUP_NAME_TOO_LONG(nodeGroup.getName());
                   }
                   CreateResourcePoolSP nodeGroupSP =
                         new CreateResourcePoolSP(parentVcResourcePool,
