@@ -304,7 +304,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
    }
    
    public String retrieveVhmTargetNum() {
-      if (vhmTargetNum == null) {
+      if (vhmTargetNum == null || vhmTargetNum == -1) {
          return "N/A";
       } else {
          return vhmTargetNum.toString();
