@@ -24,14 +24,15 @@ import com.vmware.aurora.vc.VcUtil;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
+import com.vmware.vim.binding.vim.VirtualMachine.ConnectionState;
 import com.vmware.vim.binding.vim.vm.FaultToleranceConfigInfo;
 import com.vmware.vim.binding.vmodl.fault.ManagedObjectNotFound;
 
 /**
  * Stored Procedure to delete a VM
- *
+ * 
  * @author Xin Li (xinli)
- *
+ * 
  */
 
 public class DeleteVmByIdSP implements Callable<Void> {
@@ -56,7 +57,8 @@ public class DeleteVmByIdSP implements Callable<Void> {
             try {
                FaultToleranceConfigInfo info = vcVm.getConfig().getFtInfo();
                if (info != null && info.getRole() == 1) {
-                  logger.info("VM " + vcVm.getName() + " is FT primary VM, disable FT before delete it.");
+                  logger.info("VM " + vcVm.getName()
+                        + " is FT primary VM, disable FT before delete it.");
                   vcVm.turnOffFT();
                }
                if (vcVm.isPoweredOn()) {
@@ -67,6 +69,16 @@ public class DeleteVmByIdSP implements Callable<Void> {
             } catch (ManagedObjectNotFound e) {
                VcUtil.processNotFoundException(e, vmId, logger);
                return null;
+            } catch (Exception e) {
+               //if vm is in inaccessible state, unregister VM directly
+               if (vcVm.getConnectionState() == ConnectionState.inaccessible) {
+                  logger.error("Failed to delete VM " + vcVm.getName(), e);
+                  logger.info("Unregister VM." + vcVm.getName());
+                  vcVm.unregister();
+                  return null;
+               } else {
+                  throw e;
+               }
             }
          }
 

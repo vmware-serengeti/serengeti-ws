@@ -60,6 +60,7 @@ import com.vmware.vim.binding.vim.ClusterComputeResource;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.VirtualDiskManager.VirtualDiskSpec;
 import com.vmware.vim.binding.vim.VirtualMachine;
+import com.vmware.vim.binding.vim.VirtualMachine.ConnectionState;
 import com.vmware.vim.binding.vim.VirtualMachine.DiskChangeInfo;
 import com.vmware.vim.binding.vim.VirtualMachine.FaultToleranceState;
 import com.vmware.vim.binding.vim.VirtualMachine.PowerState;
@@ -622,6 +623,8 @@ public interface VcVirtualMachine extends VcVmBase {
     * @return true if VM is in consistent powered off state.
     */
    abstract boolean isPoweredOff();
+
+   abstract ConnectionState getConnectionState();
 
    abstract FaultToleranceState getFTState();
 
@@ -2081,6 +2084,10 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
    @Override
    public boolean isPoweredOff() {
       return getPowerState() == PowerState.poweredOff;
+   }
+
+   public ConnectionState getConnectionState() {
+      return runtime.getConnectionState();
    }
 
    public FaultToleranceState getFTState() {
