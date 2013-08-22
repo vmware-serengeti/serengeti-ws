@@ -91,35 +91,22 @@ public class ScaleVMSP implements Callable<Void> {
                VmConfigUtil.setMemoryAndBalloon(newConfigSpec, memory);
 
                if (targetDs != null) {
-                  VirtualDisk vmSwapDisk =
-                        VcVmUtil.findVirtualDisk(vmId,
-                              swapDisk.getExternalAddress());
                   logger.info("current ds swap disk placed: "
                         + swapDisk.getDatastoreName());
                   logger.info("target ds to place swap disk: "
                         + targetDs.getName());
-                  if (swapDisk.getDatastoreMoId().equals(targetDs.getId())) {
-                     VirtualDeviceSpec devSpec = new VirtualDeviceSpecImpl();
-                     devSpec.setOperation(VirtualDeviceSpec.Operation.edit);
-                     vmSwapDisk.setCapacityInKB(newSwapSizeInMB * 1024);
-                     devSpec.setDevice(vmSwapDisk);
-                     VirtualDeviceSpec[] changes = { devSpec };
-                     newConfigSpec.setDeviceChange(changes);
-                     logger.info("finished resize swap disk size");
-                  } else {
-                     vcVm.detachVirtualDisk(
-                           new DeviceId(swapDisk.getExternalAddress()), true);
-                     AllocationType allocType =
-                           swapDisk.getAllocType() == null ? null : AllocationType
-                                 .valueOf(swapDisk.getAllocType());
-                     DiskCreateSpec[] addDisks =
-                           { new DiskCreateSpec(new DeviceId(swapDisk
-                                 .getExternalAddress()), targetDs, swapDisk
-                                 .getName(), DiskMode.independent_persistent,
-                                 DiskSize.sizeFromMB(newSwapSizeInMB), allocType) };
-                     // changeDisks() will run vcVm.reconfigure() itself
-                     vcVm.changeDisks(null, addDisks);
-                  }
+                  vcVm.detachVirtualDisk(
+                        new DeviceId(swapDisk.getExternalAddress()), true);
+                  AllocationType allocType =
+                        swapDisk.getAllocType() == null ? null : AllocationType
+                              .valueOf(swapDisk.getAllocType());
+                  DiskCreateSpec[] addDisks =
+                        { new DiskCreateSpec(new DeviceId(swapDisk
+                              .getExternalAddress()), targetDs, swapDisk
+                              .getName(), DiskMode.independent_persistent,
+                              DiskSize.sizeFromMB(newSwapSizeInMB), allocType) };
+                  // changeDisks() will run vcVm.reconfigure() itself
+                  vcVm.changeDisks(null, addDisks);
                }
             }
 
