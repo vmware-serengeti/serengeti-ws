@@ -14,7 +14,10 @@
  ******************************************************************************/
 package com.vmware.bdd.cli.command.tests;
 
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertNotNull;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -27,7 +30,6 @@ import java.util.Properties;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.testng.annotations.Test;
-import static org.testng.AssertJUnit.assertEquals;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.DistroRead;
@@ -288,6 +290,21 @@ public class CommandsUtilsTest {
       if (propertise != null) {
          assertEquals(propertise.getProperty("Cookie"), null);
       }
+   }
+
+   @Test
+   public void testGetExceptionMessage() {
+      try {
+         int number = 5 / 0;
+      } catch (ArithmeticException ae) {
+         try {
+            throw new RuntimeException(ae);
+         } catch (RuntimeException re) {
+            assertFalse(CommandsUtils.getExceptionMessage(re).contains(
+                  "java.lang.ArithmeticException:"));
+         }
+      }
+
    }
 
    private void removeProperties(String propertiesFilePath,

@@ -181,7 +181,7 @@ public class RestClient {
          }
       } catch (Exception e) {
          System.out.println(Constants.CONNECT_FAILURE + ": "
-               + (getExceptionMessage(e)));
+               + (CommandsUtils.getExceptionMessage(e)));
          return Connect.ConnectType.ERROR;
       }
       return Connect.ConnectType.SUCCESS;
@@ -199,8 +199,8 @@ public class RestClient {
             writeCookieInfo("");
          }
       } catch (Exception e) {
-         System.out
-               .println(Constants.DISCONNECT_FAILURE + ": " + getExceptionMessage(e));
+         System.out.println(Constants.DISCONNECT_FAILURE + ": "
+               + CommandsUtils.getExceptionMessage(e));
       }
    }
 
@@ -355,7 +355,7 @@ public class RestClient {
          }
 
       } catch (Exception e) {
-         throw new CliRestException(getExceptionMessage(e));
+         throw new CliRestException(CommandsUtils.getExceptionMessage(e));
       }
    }
 
@@ -509,7 +509,7 @@ public class RestClient {
             throw new Exception(Constants.HTTP_VERB_ERROR);
          }
       } catch (Exception e) {
-         throw new CliRestException(getExceptionMessage(e));
+         throw new CliRestException(CommandsUtils.getExceptionMessage(e));
       }
    }
 
@@ -537,7 +537,7 @@ public class RestClient {
             throw new Exception(Constants.HTTP_VERB_ERROR);
          }
       } catch (Exception e) {
-         throw new CliRestException(getExceptionMessage(e));
+         throw new CliRestException(CommandsUtils.getExceptionMessage(e));
       }
    }
 
@@ -570,7 +570,7 @@ public class RestClient {
             throw new Exception(Constants.HTTP_VERB_ERROR);
          }
       } catch (Exception e) {
-         throw new CliRestException(getExceptionMessage(e));
+         throw new CliRestException(CommandsUtils.getExceptionMessage(e));
       }
    }
 
@@ -600,7 +600,7 @@ public class RestClient {
          }
 
       } catch (Exception e) {
-         throw new CliRestException(getExceptionMessage(e));
+         throw new CliRestException(CommandsUtils.getExceptionMessage(e));
       }
    }
 
@@ -653,7 +653,7 @@ public class RestClient {
          }
 
       } catch (Exception e) {
-         throw new CliRestException(getExceptionMessage(e));
+         throw new CliRestException(CommandsUtils.getExceptionMessage(e));
       }
    }
 
@@ -708,7 +708,7 @@ public class RestClient {
          }
 
       } catch (Exception e) {
-         throw new CliRestException(getExceptionMessage(e));
+         throw new CliRestException(CommandsUtils.getExceptionMessage(e));
       }
    }
 
@@ -725,7 +725,7 @@ public class RestClient {
             throw new Exception(Constants.HTTP_VERB_ERROR);
          }
       } catch (Exception e) {
-         throw new CliRestException(getExceptionMessage(e));
+         throw new CliRestException(CommandsUtils.getExceptionMessage(e));
       }
    }
 
@@ -921,24 +921,6 @@ public class RestClient {
          sb.delete(sb.length() - 1, sb.length());
       }
       return sb.toString().toUpperCase();
-   }
-
-   private String getExceptionMessage(Exception e) {
-      if (e.getCause() == null) {
-         return e.getMessage();
-      } else {
-         return getRootCause(e).getMessage();
-      }
-   }
-
-   private Throwable getRootCause(Exception e) {
-      Throwable cause = e.getCause();
-      Throwable rootCause = null;
-      while (cause != null) {
-         rootCause = cause;
-         cause = cause.getCause();
-      }
-      return rootCause;
    }
 
 }

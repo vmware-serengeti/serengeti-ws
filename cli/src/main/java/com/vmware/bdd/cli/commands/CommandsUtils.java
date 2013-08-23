@@ -431,4 +431,22 @@ public class CommandsUtils {
       return continueCreate;
    }
 
+   public static String getExceptionMessage(Exception e) {
+      if (e.getCause() == null) {
+         return e.getMessage();
+      } else {
+         return getRootCause(e).getMessage();
+      }
+   }
+
+   private static Throwable getRootCause(Exception e) {
+      Throwable cause = e.getCause();
+      Throwable rootCause = null;
+      while (cause != null) {
+         rootCause = cause;
+         cause = cause.getCause();
+      }
+      return rootCause;
+   }
+
 }
