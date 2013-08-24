@@ -303,6 +303,7 @@ public class ClusterEntityManager {
       // TODO: consider more status
       if (!vcVm.isPoweredOn()) {
          node.setStatus(NodeStatus.POWERED_OFF);
+         node.setIpAddress(null);
       } else {
          node.setStatus(NodeStatus.POWERED_ON);
       }
