@@ -14,32 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.command;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+public class TestVHMMessageProcessor {
 
-import com.vmware.bdd.utils.AuAssert;
-
-public class ClusterCmdUtil {
-   private static final Level logLevel = Logger
-         .getRootLogger().getLevel();
-
-
-   public static String getLogLevel() {
-      if (logLevel.isGreaterOrEqual(Level.ERROR)) {
-         return "";
-      } else if (logLevel.isGreaterOrEqual(Level.INFO)) {
-         return "-V";
-      } else { 
-         return "-VV";
-      }
-   }
-
-   public static int getIndexFromNodeName(String node) {
-      AuAssert.check(node != null && !node.isEmpty());
-
-      String[] ary = node.split("-");
-      AuAssert.check(ary.length == 3);
-
-      return Integer.parseInt(ary[2]);
-   }
 }

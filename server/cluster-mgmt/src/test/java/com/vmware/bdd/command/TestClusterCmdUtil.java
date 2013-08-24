@@ -16,30 +16,21 @@ package com.vmware.bdd.command;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.testng.annotations.Test;
+import static org.testng.AssertJUnit.assertEquals;
 
-import com.vmware.bdd.utils.AuAssert;
+public class TestClusterCmdUtil {
 
-public class ClusterCmdUtil {
-   private static final Level logLevel = Logger
-         .getRootLogger().getLevel();
-
-
-   public static String getLogLevel() {
-      if (logLevel.isGreaterOrEqual(Level.ERROR)) {
-         return "";
-      } else if (logLevel.isGreaterOrEqual(Level.INFO)) {
-         return "-V";
-      } else { 
-         return "-VV";
-      }
+   @Test
+   public void testGetLogLevel() {
+      Logger.getRootLogger().setLevel(Level.WARN);
+      assertEquals(ClusterCmdUtil.getLogLevel(), "-V");
    }
 
-   public static int getIndexFromNodeName(String node) {
-      AuAssert.check(node != null && !node.isEmpty());
-
-      String[] ary = node.split("-");
-      AuAssert.check(ary.length == 3);
-
-      return Integer.parseInt(ary[2]);
+   @Test
+   public void testGetIndexFromNodeName() {
+      String node = "test-worker-0";
+      assertEquals(ClusterCmdUtil.getIndexFromNodeName(node), 0);
    }
+
 }

@@ -1,17 +1,19 @@
 package com.vmware.bdd.service;
 
-import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
-import com.vmware.bdd.entity.ClusterEntity;
-import com.vmware.bdd.manager.ClusterEntityManager;
-import com.vmware.bdd.service.impl.ClusterInitializerService;
-import junit.framework.Assert;
+import static org.testng.AssertJUnit.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.mockito.Mockito;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.service.impl.ClusterInitializerService;
 
 /**
  * Author: Xiaoding Bian
@@ -42,7 +44,7 @@ public class TestClusterInitializerService {
    public void testTransformClusterStatus() {
       adjustDbService.transformClusterStatus(ClusterStatus.PROVISIONING, ClusterStatus.PROVISION_ERROR);
       ClusterEntity cluster = adjustDbService.getClusterEntityManager().findAllClusters().get(0);
-      Assert.assertTrue(cluster.getStatus().equals(ClusterStatus.PROVISION_ERROR));
+      assertTrue(cluster.getStatus().equals(ClusterStatus.PROVISION_ERROR));
    }
 
 }
