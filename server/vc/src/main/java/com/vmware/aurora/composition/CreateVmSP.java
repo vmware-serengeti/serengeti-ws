@@ -187,7 +187,11 @@ public class CreateVmSP implements Callable<Void> {
             VcCache.get(vmSchema.diskSchema.getParent());
       VcSnapshot snap =
             template.getSnapshotByName(vmSchema.diskSchema.getParentSnap());
-
+      if (snap == null) {
+         // this is a blocking call
+         snap = template.createSnapshot(vmSchema.diskSchema.getParentSnap(), 
+               "Serengeti template Root Snapshot");
+      }
       ConfigSpecImpl configSpec = new ConfigSpecImpl();
 
       // Resource schema

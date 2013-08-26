@@ -318,7 +318,7 @@ public class ClusterHealService implements IClusterHealService {
       VmSchema createSchema =
             VcVmUtil.getVmSchema(clusterSpec, groupName, fullDiskSet,
                   clusteringService.getTemplateVmId(),
-                  clusteringService.getTemplateSnapId());
+                  Constants.ROOT_SNAPSTHOT_NAME);
 
       NetworkAdd networkAdd = clusterSpec.getNetworking().get(0);
       Map<String, String> guestVariable =

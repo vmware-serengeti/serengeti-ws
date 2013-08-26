@@ -133,7 +133,6 @@ public class ClusteringService implements IClusteringService {
    private IPlacementService placementService;
    private IClusterInitializerService clusterInitializerService;
 
-   private String templateSnapId;
    private VcVirtualMachine templateVm;
    private BaseNode templateNode;
    private String templateNetworkLabel;
@@ -193,10 +192,6 @@ public class ClusteringService implements IClusteringService {
    @Autowired
    public void setRpDao(IResourcePoolDAO rpDao) {
       this.rpDao = rpDao;
-   }
-
-   public String getTemplateSnapId() {
-      return templateSnapId;
    }
 
    public String getTemplateVmId() {
@@ -325,37 +320,10 @@ public class ClusteringService implements IClusteringService {
       }
 
       try {
-         final VcSnapshot snapshot =
-               templateVM.getSnapshotByName(Constants.ROOT_SNAPSTHOT_NAME);
-         if (snapshot == null) {
-            if (!ConfigInfo.isJustUpgraded()) {
-               TakeSnapshotSP snapshotSp =
-                     new TakeSnapshotSP(templateVM.getId(),
-                           Constants.ROOT_SNAPSTHOT_NAME,
-                           Constants.ROOT_SNAPSTHOT_DESC);
-               snapshotSp.call();
-               templateSnapId = snapshotSp.getSnapId();
-            }
-         } else {
-            if (ConfigInfo.isJustUpgraded()) {
-               VcContext.inVcSessionDo(new VcSession<Boolean>() {
-                  @Override
-                  protected boolean isTaskSession() {
-                     return true;
-                  }
-
-                  @Override
-                  protected Boolean body() throws Exception {
-                     snapshot.remove();
-                     return true;
-                  }
-               });
-
-               ConfigInfo.setJustUpgraded(false);
-               ConfigInfo.save();
-            } else {
-               templateSnapId = snapshot.getName();
-            }
+         if (ConfigInfo.isJustUpgraded()) {
+            removeRootSnapshot(templateVM);
+            ConfigInfo.setJustUpgraded(false);
+            ConfigInfo.save();
          }
          this.templateVm = templateVM;
       } catch (Exception e) {
@@ -363,6 +331,25 @@ public class ClusteringService implements IClusteringService {
          throw BddException.INTERNAL(e,
                "Clustering service initialization error.");
       }
+   }
+
+   private void removeRootSnapshot(final VcVirtualMachine templateVM) {
+      VcContext.inVcSessionDo(new VcSession<Boolean>() {
+         @Override
+         protected boolean isTaskSession() {
+            return true;
+         }
+
+         @Override
+         protected Boolean body() throws Exception {
+            VcSnapshot snapshot =
+               templateVM.getSnapshotByName(Constants.ROOT_SNAPSTHOT_NAME);
+            if (snapshot != null) {
+               snapshot.remove();
+            }
+            return true;
+         }
+      });
    }
 
    private void loadTemplateNetworkLable() {
@@ -1143,7 +1130,7 @@ public class ClusteringService implements IClusteringService {
    private VmSchema getVmSchema(BaseNode vNode) {
       VmSchema schema = vNode.getVmSchema();
       schema.diskSchema.setParent(getTemplateVmId());
-      schema.diskSchema.setParentSnap(getTemplateSnapId());
+      schema.diskSchema.setParentSnap(Constants.ROOT_SNAPSTHOT_NAME);
       return schema;
    }
 

@@ -145,7 +145,7 @@ public interface IClusteringService {
     * @return
     */
    public int configIOShares(String clusterName, List<NodeEntity> targetNodes, Priority ioShares);
-   
+
    /**
     * start a node in the cluster
     * 
@@ -154,7 +154,7 @@ public interface IClusteringService {
     * @return
     */
    public boolean startSingleVM(String clusterName, String nodeName, StatusUpdater statusUpdator);
-   
+
    /**
     * stop a node in the cluster
     * 
@@ -164,12 +164,6 @@ public interface IClusteringService {
     * @return
     */
    public boolean stopSingleVM(String clusterName, String nodeName, StatusUpdater statusUpdator, boolean... vmPoweroff);
-
-    /**
-    * get the snapshot id of the template vm
-    * @return
-    */
-   public String getTemplateSnapId();
 
    /**
     * get the vm id of template vm
