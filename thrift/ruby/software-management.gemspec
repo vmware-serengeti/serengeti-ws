@@ -3,7 +3,7 @@ Gem::Specification.new do |s|
   s.version = File.exist?('VERSION') ? File.read('VERSION') : ""
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["VMware Serengeti team (Jarred Li)"]
-  s.date = "2013-02-07"
+  s.date = "2013-08-27"
   s.description = "Expose Thrift service for software management. Serengete web service is the client"
   s.email = "hadoop-bj@vmware.com"
   s.extra_rdoc_files = [
