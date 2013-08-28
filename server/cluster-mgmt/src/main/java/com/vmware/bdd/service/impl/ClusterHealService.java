@@ -326,11 +326,21 @@ public class ClusterHealService implements IClusterHealService {
                   node.getIpAddress(), node.getGuestHostName());
       VcVmUtil.addBootupUUID(guestVariable);
 
+      String haFlag = clusterSpec.getNodeGroup(groupName).getHaFlag();
+      boolean ha = false;
+      boolean ft = false;
+      if (haFlag != null && Constants.HA_FLAG_ON.equals(haFlag.toLowerCase())) {
+         ha = true;
+      }
+      if (haFlag != null && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
+         ha = true;
+         ft = true;
+      }
       // delete old vm and rename new vm in the prePowerOn
       ReplaceVmPrePowerOn prePowerOn =
             new ReplaceVmPrePowerOn(node.getMoId(), node.getVmName(),
                   clusterSpec.getNodeGroup(groupName).getStorage().getShares(),
-                  createSchema.networkSchema);
+                  createSchema.networkSchema, ha, ft);
 
       // power on the new vm, but not wait for ip address here. we have startVmStep to wait for ip
       return new CreateVmSP(node.getVmName() + RECOVERY_VM_NAME_POSTFIX,

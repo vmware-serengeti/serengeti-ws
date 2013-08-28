@@ -89,10 +89,13 @@ public class NetworkSchemaUtil {
          String macAddr = null;
          if (network.nicLabel != null) {
             nic = parentVm.getDeviceByLabel(network.nicLabel);
-            macAddr = ((VirtualEthernetCard) nic).getMacAddress();
-            if (nic == null || macAddr == null)
+            if (nic == null) {
                continue;
-
+            }
+            macAddr = ((VirtualEthernetCard) nic).getMacAddress();
+            if (macAddr == null) {
+               continue;
+            }
             logger.info("get parent vm's mac address " + macAddr);
 
             // edit mac address

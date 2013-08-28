@@ -62,6 +62,7 @@ import com.vmware.vim.binding.vim.SharesInfo;
 import com.vmware.vim.binding.vim.SharesInfo.Level;
 import com.vmware.vim.binding.vim.StorageResourceManager.IOAllocationInfo;
 import com.vmware.vim.binding.vim.VirtualMachine.FaultToleranceState;
+import com.vmware.vim.binding.vim.cluster.DasVmSettings.RestartPriority;
 import com.vmware.vim.binding.vim.vm.FaultToleranceConfigInfo;
 import com.vmware.vim.binding.vim.vm.GuestInfo;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
@@ -563,5 +564,51 @@ public class VcVmUtil {
             return true;
          }
       });
+   }
+
+   public static void enableFt(final VcVirtualMachine vm) throws Exception {
+      try {
+         VcContext.inVcSessionDo(new VcSession<Void>() {
+            @Override
+            protected Void body() throws Exception {
+               // cdrom is not supported in FT mode
+               vm.detachAllCdroms();
+               // do not change disk mode to persistent here,
+               // instead set it to persistent before vm cloning
+               vm.turnOnFT(null);
+               return null;
+            }
+
+            protected boolean isTaskSession() {
+               return true;
+            }
+         });
+      } catch (Exception e) {
+         throw ClusteringServiceException.ENABLE_FT_FAILED(e, vm.getName());
+      }
+   }
+
+   public static void disableHa(final VcVirtualMachine vm) throws Exception {
+      VcCluster cluster = vm.getResourcePool().getVcCluster();
+      boolean clusterHa = cluster.getConfig().getHAEnabled();
+      if (!clusterHa) {
+         // cluster is not ha enabled, don't need to disable ha again
+         return;
+      }
+      try {
+         VcContext.inVcSessionDo(new VcSession<Void>() {
+            @Override
+            protected Void body() throws Exception {
+               vm.modifyHASettings(RestartPriority.disabled, null, null);
+               return null;
+            }
+
+            protected boolean isTaskSession() {
+               return true;
+            }
+         });
+      } catch (Exception e) {
+         throw ClusteringServiceException.DISABLE_HA_FAILED(e, vm.getName());
+      }
    }
 }

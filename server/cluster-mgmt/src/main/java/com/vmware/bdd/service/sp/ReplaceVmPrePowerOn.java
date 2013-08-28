@@ -41,13 +41,17 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
    private Priority ioShares;
    private VcVirtualMachine vm;
    private NetworkSchema networkSchema;
+   private boolean ha;
+   private boolean ft;
 
    public ReplaceVmPrePowerOn(String vmId, String newName, Priority ioShares,
-         NetworkSchema networkSchema) {
+         NetworkSchema networkSchema, boolean ha, boolean ft) {
       this.oldVmId = vmId;
       this.newName = newName;
       this.ioShares = ioShares;
       this.networkSchema = networkSchema;
+      this.ha = ha;
+      this.ft = ft;
    }
 
    private OptionValue[] getVhmExtraConfigs(VcVirtualMachine oldVm) {
@@ -97,6 +101,16 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
             logger.info("set io share level same with parent vm " + newName);
             if (!Priority.NORMAL.equals(ioShares)) {
                VcVmUtil.configIOShares(vm.getId(), ioShares);
+            }
+            // disable ha
+            if (!ha) {
+               logger.info("diable ha for vm " + newName);
+               VcVmUtil.disableHa(vm);
+            }
+            // enable ft
+            if (ft) {
+               logger.info("enable ft for vm " + newName);
+               VcVmUtil.enableFt(vm);
             }
 
             // the following two steps should be in a transaction theoretically

@@ -1063,7 +1063,7 @@ public class ClusteringService implements IClusteringService {
 
          logger.debug("ft is enabled is for VM " + vNode.getVmName());
          logger.debug("set disk mode to persistent for VM " + vNode.getVmName());
-         // change disk mode to persistent, instead of independent_persisten, since FT requires this
+         // change disk mode to persistent, instead of independent_persistent, since FT requires this
          DiskSchema diskSchema = vNode.getVmSchema().diskSchema;
          if (diskSchema.getDisks() != null) {
             for (Disk disk : diskSchema.getDisks()) {
