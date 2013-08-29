@@ -102,6 +102,12 @@ public class ClusteringServiceException extends BddException {
       return new ClusteringServiceException(cause, "DISABLE_HA_FAILED", vmName);
    }
 
+   public static ClusteringServiceException ENABLE_DISK_UUID_FAILED(Throwable cause,
+         String vmName) {
+      return new ClusteringServiceException(cause, "ENABLE_DISK_UUID_FAILED", vmName);
+   }
+
+
    public static ClusteringServiceException ENABLE_FT_FAILED(Throwable cause,
          String vmName) {
       return new ClusteringServiceException(cause, "ENABLE_FT_FAILED", vmName);

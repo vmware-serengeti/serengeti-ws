@@ -116,8 +116,9 @@ public class NodeEntity extends EntityBase {
    public List<String> getVolumns() {
       List<String> volumns = new ArrayList<String>();
       for (DiskEntity disk : disks) {
-         if (DiskType.DATA_DISK.getType().equals(disk.getDiskType()))
-            volumns.add(disk.getDeviceName());
+         if (DiskType.DATA_DISK.getType().equals(disk.getDiskType())
+               || DiskType.SWAP_DISK.getType().equals(disk.getDiskType()))
+            volumns.add(disk.getDiskType() + ":" + disk.getHardwareUUID());
       }
       return volumns;
    }

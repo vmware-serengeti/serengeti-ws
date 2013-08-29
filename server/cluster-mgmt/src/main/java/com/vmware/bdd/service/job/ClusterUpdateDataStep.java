@@ -44,11 +44,6 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
    private static final Logger logger = Logger
          .getLogger(ClusterUpdateDataStep.class);
 
-   private static final String SWAP_DEVICE_NAME = "/dev/sdb";
-   private static final String DEVICE_NAME_PREFIX = "/dev/sd";
-   private static final char DATA_DISK_START_INDEX = 'c';
-
-
    private INetworkService networkMgr;
 
    private IResourcePoolDAO rpDao;
@@ -202,7 +197,6 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          diskEntities.add(systemDisk);
 
          // swap and data disk
-         char c = DATA_DISK_START_INDEX;
          for (Disk disk : vNode.getVmSchema().diskSchema.getDisks()) {
             DiskEntity newDisk = nodeEntity.findDisk(disk.name);
             if (newDisk == null) {
@@ -218,12 +212,6 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
 
             // get vm object and find the vmdk path
             VcVmUtil.populateDiskInfo(newDisk, vNode.getVmMobId());
-            // swap disk
-            if (DiskType.SWAP_DISK.getType().equals(disk.type)) {
-               newDisk.setDeviceName(SWAP_DEVICE_NAME);
-            } else {
-               newDisk.setDeviceName(DEVICE_NAME_PREFIX + (c++));
-            }
          }
       }
       nodeEntity.setNodeGroup(nodeGroupEntity);
