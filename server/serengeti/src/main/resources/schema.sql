@@ -156,7 +156,7 @@ create table disk (
    alloc_type     varchar(255),
    disk_type      varchar(255),
    external_addr  varchar(255),
-   dev_name       varchar(255),
+   hardware_uuid  varchar(255),
    ds_moid        varchar(255),
    ds_name        varchar(255),
    vmdk_path      varchar(255),

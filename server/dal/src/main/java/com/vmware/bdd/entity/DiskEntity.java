@@ -26,7 +26,6 @@ import com.vmware.bdd.spectypes.DiskSpec;
 
 /**
  * Disk Entity class: disk infos for a node entity
- * 
  */
 @Entity
 @SequenceGenerator(name = "IdSequence", sequenceName = "disk_seq", allocationSize = 1)
@@ -63,9 +62,9 @@ public class DiskEntity extends EntityBase {
    @Column(name = "ds_moid")
    private String datastoreMoId;
 
-   // device name in os, sda/sdb/sdc
-   @Column(name = "dev_name")
-   private String deviceName;
+   // uuid to identify this disk
+   @Column(name = "hardware_uuid")
+   private String hardwareUUID;
 
    @Column(name = "vmdk_path")
    private String vmdkPath;
@@ -147,12 +146,12 @@ public class DiskEntity extends EntityBase {
       this.datastoreMoId = datastoreMoId;
    }
 
-   public String getDeviceName() {
-      return deviceName;
+   public String getHardwareUUID() {
+      return hardwareUUID;
    }
 
-   public void setDeviceName(String deviceName) {
-      this.deviceName = deviceName;
+   public void setHardwareUUID(String hardwareUUID) {
+      this.hardwareUUID = hardwareUUID;
    }
 
    public String getVmdkPath() {
@@ -178,7 +177,7 @@ public class DiskEntity extends EntityBase {
       disk.allocType = other.allocType;
       disk.datastoreMoId = other.datastoreMoId;
       disk.datastoreName = other.datastoreName;
-      disk.deviceName = other.deviceName;
+      disk.hardwareUUID = other.getHardwareUUID();
       disk.diskType = other.diskType;
       disk.diskMode = other.diskMode;
       disk.externalAddress = other.externalAddress;
@@ -238,7 +237,7 @@ public class DiskEntity extends EntityBase {
             + ", diskType=" + diskType + ", allocType=" + allocType
             + ", diskMode=" + diskMode + ", externalAddress=" + externalAddress
             + ", datastoreName=" + datastoreName + ", datastoreMoId="
-            + datastoreMoId + ", deviceName=" + deviceName + ", vmkdPath="
+            + datastoreMoId + ", hardwareUUID=" + hardwareUUID + ", vmkdPath="
             + vmdkPath + ", nodeEntity=" + nodeEntity + "]";
    }
 }

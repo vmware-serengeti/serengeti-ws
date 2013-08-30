@@ -69,6 +69,10 @@ import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
 import com.vmware.vim.binding.vim.vm.device.VirtualDeviceSpec;
 import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
+import com.vmware.vim.binding.vim.vm.FlagInfo;
+import com.vmware.vim.binding.impl.vim.vm.FlagInfoImpl;
+import com.vmware.vim.binding.vim.vm.ConfigSpec;
+import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
 
 public class VcVmUtil {
    private static final Logger logger = Logger.getLogger(VcVmUtil.class);
@@ -236,6 +240,7 @@ public class VcVmUtil {
             diskEntity.setVmdkPath(backing.getFileName());
             diskEntity.setDatastoreMoId(MoUtil.morefToString(ds._getRef()));
             diskEntity.setDiskMode(backing.getDiskMode());
+            diskEntity.setHardwareUUID(backing.getUuid());
             return null;
          }
       });
@@ -611,4 +616,27 @@ public class VcVmUtil {
          throw ClusteringServiceException.DISABLE_HA_FAILED(e, vm.getName());
       }
    }
+
+   public static void enableDiskUUID(final VcVirtualMachine vm) throws Exception {
+      try {
+         VcContext.inVcSessionDo(new VcSession<Void>() {
+            @Override
+            protected Void body() throws Exception {
+               FlagInfo flagInfo = new FlagInfoImpl();
+               flagInfo.setDiskUuidEnabled(true);
+               ConfigSpec configSpec = new ConfigSpecImpl();
+               configSpec.setFlags(flagInfo);
+               vm.reconfigure(configSpec);
+               return null;
+            }
+
+            protected boolean isTaskSession() {
+               return true;
+            }
+         });
+      } catch (Exception e) {
+         throw ClusteringServiceException.ENABLE_DISK_UUID_FAILED(e, vm.getName());
+      }
+   }
+
 }

@@ -102,6 +102,10 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
             if (!Priority.NORMAL.equals(ioShares)) {
                VcVmUtil.configIOShares(vm.getId(), ioShares);
             }
+
+            // enalbe disk UUID
+            VcVmUtil.enableDiskUUID(vm);
+
             // disable ha
             if (!ha) {
                logger.info("diable ha for vm " + newName);
