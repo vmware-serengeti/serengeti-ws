@@ -476,26 +476,29 @@ public class VcResourceUtils {
 
    public static void checkVmMaxConfiguration(final String vmId,
          final int cpuNumber, final long memory) {
-      int hardwareVersion = VcContext.inVcSessionDo(new VcSession<Integer>() {
-         @Override
-         protected Integer body() throws Exception {
-            final VcVirtualMachine vcVm = VcCache.getIgnoreMissing(vmId);
-            if (vcVm == null) {
-               logger.info("vm: " + vmId + " is not found.");
-               return -1;
+      final VcVirtualMachine vcVm = VcCache.getIgnoreMissing(vmId);
+      int hardwareVersion = 0;
+      if (vcVm == null) {
+         logger.info("vm: " + vmId + " is not found.");
+         hardwareVersion = -1;
+      } else {
+         hardwareVersion = VcContext.inVcSessionDo(new VcSession<Integer>() {
+            @Override
+            protected Integer body() throws Exception {
+               VirtualMachine vimVm = vcVm.getManagedObject();
+               EnvironmentBrowser envBrowser =
+                     MoUtil.getManagedObject(vimVm.getEnvironmentBrowser());
+               ConfigOption configOption =
+                     envBrowser.queryConfigOption(null, null);
+               int hardwareVersion =
+                     configOption.getHardwareOptions().getHwVersion();
+               logger.info("hardware version is: " + hardwareVersion);
+               return hardwareVersion;
             }
-            VirtualMachine vimVm = vcVm.getManagedObject();
-            EnvironmentBrowser envBrowser =
-                  MoUtil.getManagedObject(vimVm.getEnvironmentBrowser());
-            ConfigOption configOption =
-                  envBrowser.queryConfigOption(null, null);
-            int hardwareVersion =
-                  configOption.getHardwareOptions().getHwVersion();
-            logger.info("hardware version is: " + hardwareVersion);
-            return hardwareVersion;
-         }
-      });
-      compareMaxConfiguration(vmId, hardwareVersion, cpuNumber, memory);
+         });
+      }
+      compareMaxConfiguration(vcVm.getName(), hardwareVersion, cpuNumber,
+            memory);
    }
 
    private static void compareMaxConfiguration(String vcVmName,
