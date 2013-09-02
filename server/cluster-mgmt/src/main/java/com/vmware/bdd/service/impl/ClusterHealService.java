@@ -185,8 +185,8 @@ public class ClusterHealService implements IClusterHealService {
          AbstractDatastore ads = getLeastUsedDatastore(usage, requiredSize);
          if (ads == null) {
             throw ClusterHealServiceException.NOT_ENOUGH_STORAGE(nodeName,
-                  "can not find datastore with enough space to place disk "
-                        + disk.getName() + " with size " + disk.getSize()
+                  "Cannot find a datastore with enough space to place disk "
+                        + disk.getName() + " of size " + disk.getSize()
                         + " GB");
          }
 
@@ -239,7 +239,7 @@ public class ClusterHealService implements IClusterHealService {
 
       if (totalSizeInGB < requiredSizeInGB) {
          throw ClusterHealServiceException.NOT_ENOUGH_STORAGE(nodeName,
-               "required " + requiredSizeInGB + " GB storage on host "
+               "" + requiredSizeInGB + " GB storage is required on host "
                      + targetHost.getName() + ", but only " + totalSizeInGB
                      + " GB available");
       }
@@ -400,7 +400,7 @@ public class ClusterHealService implements IClusterHealService {
             return vm;
          } else if (pair.first.throwable != null) {
             logger.error(
-                  "Failed to create replace VM for node " + node.getVmName(),
+                  "Failed to create replacement virtual machine for node " + node.getVmName(),
                   pair.first.throwable);
 
             throw ClusterHealServiceException.FAILED_CREATE_REPLACEMENT_VM(node

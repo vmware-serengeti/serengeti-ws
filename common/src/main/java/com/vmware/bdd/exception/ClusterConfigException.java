@@ -95,8 +95,8 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException NO_VALID_RACK(String groupName) {
       return new ClusterConfigException(null, "NO_VALID_RACK", groupName);
    }
-   public static ClusterConfigException LACK_PHYSICAL_HOSTS(String groupName, int requiredHostNum, int provideHostNum) {
-      return new ClusterConfigException(null, "LACK_PHYSICAL_HOSTS", groupName, requiredHostNum, provideHostNum);
+   public static ClusterConfigException LACK_PHYSICAL_HOSTS(int requiredHostNum, String groupName, int provideHostNum) {
+      return new ClusterConfigException(null, "LACK_PHYSICAL_HOSTS", requiredHostNum, groupName, provideHostNum);
    }
    public static ClusterConfigException INVALID_ROLES(List<String> errors) {
       return new ClusterConfigException(null, "INVALID_ROLES", errors);
@@ -104,11 +104,11 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException INVALID_TOPOLOGY_POLICY(TopologyType topology, String reason) {
       return new ClusterConfigException(null, "INVALID_TOPOLOGY_POLICY", topology, reason);
    }
-   public static ClusterConfigException DATASTORE_UNACCESSIBLE(List<String> dsNames, List<String> clusters) {
-      return new ClusterConfigException(null, "DATASTORE_UNACCESSIBLE", dsNames, clusters);
+   public static ClusterConfigException DATASTORE_UNACCESSIBLE(List<String> clusters, List<String> dsNames) {
+      return new ClusterConfigException(null, "DATASTORE_UNACCESSIBLE", clusters, dsNames);
    }
    public static ClusterConfigException NETWORK_UNACCESSIBLE(String netName, String cluster) {
-      return new ClusterConfigException(null, "NETWORK_UNACCESSIBLE", cluster, netName);
+      return new ClusterConfigException(null, "NETWORK_UNACCESSIBLE", netName, cluster);
    }
    public static ClusterConfigException MUST_DEFINE_ONE_RACK(String groupName) {
       return new ClusterConfigException(null, "MUST_DEFINE_ONE_RACK", groupName);

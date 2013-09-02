@@ -125,7 +125,7 @@ public class Constants {
    public static final String INPUT_SPEC_PARAM = "\"spec\"";
    public static final String INPUT_RPNAMES_PARAM = "\"rpNames\"";
    public static final String INPUT_DSNAMES_PARAM = "\"dsNames\"";
-   public static final String MULTI_INPUTS_CHECK = " cannot be empty, please check it.";
+   public static final String MULTI_INPUTS_CHECK = " cannot be empty.";
    public static final String INPUT_INSTANCE_NUM_PARAM = "\"instanceNum\"";
    public static final String INTEGER_INPUTS_CHECK = " should be larger than existed, please check it.";
    public static final String INVALID_VALUE = "invalid value";

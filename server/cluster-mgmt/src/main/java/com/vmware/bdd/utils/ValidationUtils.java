@@ -70,11 +70,11 @@ public class ValidationUtils {
             if (rackType.equals(GroupRacksType.ROUNDROBIN)
                   && IntersecHostNum < requiredHostNum) {
                throw ClusterConfigException.LACK_PHYSICAL_HOSTS(
-                     nodeGroup.getName(), requiredHostNum, IntersecHostNum);
+                     requiredHostNum, nodeGroup.getName(), IntersecHostNum);
             } else if (rackType.equals(GroupRacksType.SAMERACK)
                   && requiredHostNum > maxIntersecHostNum) {
                throw ClusterConfigException.LACK_PHYSICAL_HOSTS(
-                     nodeGroup.getName(), requiredHostNum, maxIntersecHostNum);
+                     requiredHostNum, nodeGroup.getName(), maxIntersecHostNum);
             }
 
             if (specifiedRacks.isEmpty()) {

@@ -480,8 +480,8 @@ public class ClusterManager {
          for (VcCluster vcCluster : clusters) {
             vcClusterNames.add(vcCluster.getName());
          }
-         throw ClusterConfigException.DATASTORE_UNACCESSIBLE(dsNames,
-               vcClusterNames);
+         throw ClusterConfigException.DATASTORE_UNACCESSIBLE(vcClusterNames,
+        		 dsNames);
       }
    }
 
@@ -1075,7 +1075,7 @@ public class ClusterManager {
 
       if (ClusterStatus.RUNNING != oldStatus) {
          throw ClusterHealServiceException.NOT_SUPPORTED(clusterName,
-               "cluster is not in RUNNING status");
+               "The cluster status must be RUNNING");
       }
 
       List<NodeGroupEntity> nodeGroups;

@@ -187,7 +187,7 @@ public class ClusterCreateTest {
       cluster.setNodeGroups(new NodeGroupCreate[] { compute, data });
       cluster.validateStorageType(failedMsgList);
       assertEquals(1, failedMsgList.size());
-      assertEquals("Storage type NFS is not allowed. "
+      assertEquals("Invalid storage type NFS. "
             + Constants.STORAGE_TYPE_ALLOWED, failedMsgList.get(0));
       failedMsgList.clear();
       computeStorageRead.setType(DatastoreType.TEMPFS.toString());
@@ -220,17 +220,17 @@ public class ClusterCreateTest {
       data.setRoles(Arrays.asList(HadoopRole.HADOOP_DATANODE.toString()));
       assertEquals(false, cluster.validateNodeGroupRoles(failedMsgList));
       assertEquals(2, failedMsgList.size());
-      assertEquals("redundant namenode/datanode role", failedMsgList.get(0));
-      assertEquals("missing jobtracker/resourcemanager role",
+      assertEquals("Duplicate NameNode or DataNode role.", failedMsgList.get(0));
+      assertEquals("Missing JobTracker or ResourceManager role.",
             failedMsgList.get(1));
       failedMsgList.clear();
       cluster.setExternalHDFS("");
       cluster.setNodeGroups(new NodeGroupCreate[] { compute });
       assertEquals(false, cluster.validateNodeGroupRoles(failedMsgList));
       assertEquals(1, failedMsgList.size());
-      assertEquals("some roles in " + ServiceType.MAPRED + " "
+      assertEquals("Cannot find one or more roles in " + ServiceType.MAPRED + " "
             + ServiceType.MAPRED.getRoles()
-            + " cannot be found in the spec file", failedMsgList.get(0));
+            + " in the cluster specification file.", failedMsgList.get(0));
       failedMsgList.clear();
       NodeGroupCreate master = new NodeGroupCreate();
       master.setRoles(Arrays.asList(HadoopRole.HADOOP_JOBTRACKER_ROLE
@@ -337,13 +337,13 @@ public class ClusterCreateTest {
       cluster.setNodeGroups(new NodeGroupCreate[] { master, worker, client });
       cluster.validateClusterCreate(failedMsgList, warningMsgList, distroRoles);
       assertEquals(3, failedMsgList.size());
-      assertEquals("'swapRatio' must be greater than 0 in group master",
+      assertEquals("The 'swapRatio' must be greater than 0 in group master.",
             failedMsgList.get(0));
       assertEquals("worker.instanceNum=0", failedMsgList.get(1));
-      assertEquals("client.roles=\"hive_server,hive\"", failedMsgList.get(2));
+      assertEquals("client.roles=hive_server,hive.", failedMsgList.get(2));
       assertEquals(1, warningMsgList.size());
       assertEquals(
-            "Warning: VM's memory must be divisible by 4. So, 'memCapacityMB' will be converted from 7501 to 7500 automaticlly in the master group.",
+            "Warning: The size of the virtual machine memory must be evenly divisible by 4. For group master, 7500 replaces 7501 for the memCapacityMB value.",
             warningMsgList.get(0));
    }
 

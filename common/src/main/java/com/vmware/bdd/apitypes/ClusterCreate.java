@@ -386,8 +386,8 @@ public class ClusterCreate implements Serializable {
                if (!storageType.equals(DatastoreType.TEMPFS.toString())
                      && !storageType.equals(DatastoreType.LOCAL.toString())
                      && !storageType.equals(DatastoreType.SHARED.toString())) {
-                  failedMsgList.add("Storage type " + storageType
-                        + " is not allowed. " + Constants.STORAGE_TYPE_ALLOWED);
+                  failedMsgList.add("Invalid storage type " + storageType
+                        + ". " + Constants.STORAGE_TYPE_ALLOWED);
                } else if (storageType.equals(DatastoreType.TEMPFS.toString())) {//tempfs disk type
                   if (nodeGroupCreate.getRoles().contains(
                         HadoopRole.HADOOP_TASKTRACKER.toString())) {//compute node
@@ -428,8 +428,9 @@ public class ClusterCreate implements Serializable {
          invalidNodeGroupNames.delete(invalidNodeGroupNames.length() - 1,
                invalidNodeGroupNames.length());
          failedMsgList.add(errorMsgBuff
-               .append("'swapRatio' must be greater than 0 in group ")
-               .append(invalidNodeGroupNames.toString()).toString());
+               .append("The 'swapRatio' must be greater than 0 in group ")
+               .append(invalidNodeGroupNames.toString())
+               .append(".").toString());
       }
    }
 
@@ -461,8 +462,8 @@ public class ClusterCreate implements Serializable {
          List<String> nodeGroupRoles = ngc.getRoles();
          if (nodeGroupRoles == null || nodeGroupRoles.isEmpty()) {
             valid = false;
-            failedMsgList.add("missing role attribute for node group '"
-                  + ngc.getName() + "' ");
+            failedMsgList.add("Missing role attribute for node group "
+                  + ngc.getName() + ".");
          } else {
             roles.addAll(ngc.getRoles());
          }
@@ -471,22 +472,22 @@ public class ClusterCreate implements Serializable {
       if (validateHDFSUrl()) {
          if (getNodeGroups() == null) {
             valid = false;
-            failedMsgList.add("missing jobtracker/tasktracker role");
+            failedMsgList.add("Missing JobTracker or TaskTracker role.");
          } else {
             if (roles.contains("hadoop_namenode")
                   || roles.contains("hadoop_datanode")) {
                valid = false;
-               failedMsgList.add("redundant namenode/datanode role");
+               failedMsgList.add("Duplicate NameNode or DataNode role.");
             }
             if (!roles.contains("hadoop_jobtracker")
                   && !roles.contains("hadoop_resourcemanager")) {
                valid = false;
-               failedMsgList.add("missing jobtracker/resourcemanager role");
+               failedMsgList.add("Missing JobTracker or ResourceManager role.");
             }
             if (!roles.contains("hadoop_tasktracker")
                   && !roles.contains("hadoop_nodemanager")) {
                valid = false;
-               failedMsgList.add("missing tasktracker/nodemanager role");
+               failedMsgList.add("Missing TaskTracker or NodeManager role.");
             }
          }
       } else { //case 2
@@ -504,18 +505,18 @@ public class ClusterCreate implements Serializable {
                serviceTypes.add(service);
             } else if (matched != 0) {
                failedMsgList
-                     .add("some roles in " + service + " " + service.getRoles()
-                           + " cannot be found in the spec file");
+                     .add("Cannot find one or more roles in " + service + " " + service.getRoles()
+                           + " in the cluster specification file.");
                valid = false;
             }
          }
 
          boolean isYarn = serviceTypes.contains(ServiceType.YARN);
          if (isYarn && serviceTypes.contains(ServiceType.MAPRED)) {
-            failedMsgList.add(" " + ServiceType.MAPRED + " "
+            failedMsgList.add("You cannot set " + ServiceType.MAPRED + " "
                   + ServiceType.MAPRED.getRoles() + " and " + ServiceType.YARN
                   + " " + ServiceType.YARN.getRoles()
-                  + " \ncannot be set at the same time");
+                  + " \nat the same time.");
             valid = false;
          }
          //validate the relationships of services
@@ -767,9 +768,9 @@ public class ClusterCreate implements Serializable {
          if (converted < memoryNum) {
             nodeGroup.setMemCapacityMB((int)converted);
             warningMsgList.add(Constants.CONVERTED_MEMORY_DIVISIBLE_BY_4
-                  + "So, 'memCapacityMB' will be converted from " + memoryNum
-                  + " to " + converted + " automaticlly in the "
-                  + nodeGroup.getName() + " group.");
+                  + "For group " + nodeGroup.getName() + ", "
+                  + converted + " replaces " + memoryNum
+                  + " for the memCapacityMB value.");
          }
       }
    }
@@ -807,8 +808,8 @@ public class ClusterCreate implements Serializable {
       if (!validated) {
          rolesMsg.replace(0, 1, "");
          failedMsgList.add(new StringBuilder().append(nodeGroup.getName())
-               .append(".").append("roles=").append("\"")
-               .append(rolesMsg.toString()).append("\"").toString());
+               .append(".").append("roles=")
+               .append(rolesMsg.toString()).append(".").toString());
       }
       return validated;
    }

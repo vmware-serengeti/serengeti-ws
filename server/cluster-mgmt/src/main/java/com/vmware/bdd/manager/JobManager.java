@@ -164,7 +164,7 @@ public class JobManager {
       }
       if (result == Long.MIN_VALUE) {
          logger.warn("Failure in preparing sub jobs");
-         throw TaskException.EXECUTION_FAILED("Failure in preparing sub jobs");
+         throw TaskException.EXECUTION_FAILED("failed to prepare sub jobs.");
       }
       return result;
    }

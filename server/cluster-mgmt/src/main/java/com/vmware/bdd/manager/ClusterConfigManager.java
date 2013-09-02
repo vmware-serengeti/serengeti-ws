@@ -274,7 +274,7 @@ public class ClusterConfigManager {
             if (!hveSupported) {
                throw ClusterConfigException.INVALID_TOPOLOGY_POLICY(
                      clusterEntity.getTopologyPolicy(),
-                     "current distro does not support HVE");
+                     "current Hadoop distribution does not support HVE.");
             }
          }
 
@@ -413,12 +413,12 @@ public class ClusterConfigManager {
                      && ngc.calculateHostNum() > intersecHostNum) {
                   valid = false;
                   throw ClusterConfigException.LACK_PHYSICAL_HOSTS(
-                        ngc.getName(), ngc.calculateHostNum(), intersecHostNum);
+                        ngc.calculateHostNum(), ngc.getName(), intersecHostNum);
                } else if (rackType.equals(GroupRacksType.SAMERACK)
                      && ngc.calculateHostNum() > maxIntersecHostNum) {
                   valid = false;
                   throw ClusterConfigException.LACK_PHYSICAL_HOSTS(
-                        ngc.getName(), ngc.calculateHostNum(),
+                        ngc.calculateHostNum(), ngc.getName(),
                         maxIntersecHostNum);
                }
             }
@@ -707,7 +707,7 @@ public class ClusterConfigManager {
             && hostToRackMap.isEmpty()) {
          logger.error("trying to use host-rack topology which is absent");
          throw ClusterConfigException.INVALID_TOPOLOGY_POLICY(
-               clusterConfig.getTopologyPolicy(), "no rack information");
+               clusterConfig.getTopologyPolicy(), "no rack information.");
       }
       clusterConfig.setHostToRackMap(hostToRackMap);
 
