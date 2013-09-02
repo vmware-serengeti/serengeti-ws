@@ -229,8 +229,9 @@ public class Constants {
    public static final String CONNECT_PORT_IS_WRONG = "The port is wrong.";
    public static final String CONNECT_ENTER_USER_NAME = "Please enter the username: ";
    public static final String CONNECT_ENTER_PASSWORD = "Please enter the password: ";
-   public static final String CONNECT_CHECK_LOGIN = "You are not login. Run connect first.";
-   public static final String CONNECT_SESSION_TIME_OUT = "Session timeout. Run connect again.";
+
+   public static final String CONNECT_CHECK_LOGIN = "You are not logged in. Run the connect command to log in.";
+   public static final String CONNECT_SESSION_TIME_OUT = "The session timed out. Run the connect command to restart the session.";
    public static final String OUTPUT_OBJECT_CONNECT = "connect";
    public static final String NODE_RUNNING_STATUS = "Service Ready";
    public static final String AT_LEAST_ONE_OPTION = "Please use at least one option.";
