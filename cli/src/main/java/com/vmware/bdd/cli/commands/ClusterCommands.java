@@ -439,7 +439,7 @@ public class ClusterCommands implements CommandMarker {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                      name, Constants.OUTPUT_OP_RESIZE,
                      Constants.OUTPUT_OP_RESULT_FAIL, "cluster " + name
-                           + " does not exsit.");
+                           + " does not exist.");
                return;
             }
             // disallow scale out zookeeper node group.
@@ -585,7 +585,7 @@ public class ClusterCommands implements CommandMarker {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   clusterName, Constants.OUTPUT_OP_SET_PARAM,
                   Constants.OUTPUT_OP_RESULT_FAIL, "cluster " + clusterName
-                        + " does not exsit.");
+                        + " does not exist.");
             return;
          }
 
@@ -683,7 +683,7 @@ public class ClusterCommands implements CommandMarker {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   clusterName, Constants.OUTPUT_OP_RESET_PARAM,
                   Constants.OUTPUT_OP_RESULT_FAIL, "cluster " + clusterName
-                        + " does not exsit.");
+                        + " does not exist.");
             return;
          }
 
