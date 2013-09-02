@@ -161,7 +161,7 @@ public class Constants {
    public static final String PARAM_NETWORK_NAME = "network name";
    public static final String PARAM_NOT_SPECIFIED = " is not specified.";
    public static final String PARAM_NOT_EXISTED = " cannot be found. Please add it first.";
-   public static final String PARAM__NO_DEFAULT_DISTRO = "no default distro. Install a distribution and/or specify the distribution with the --distro parameter";
+   public static final String PARAM__NO_DEFAULT_DISTRO = "no default distro. Install a distribution and/or specify the distribution with the --distro parameter.";
    public static final String PARAM_NOT_CONTAIN_HORIZONTAL_LINE = " cannot contain '-'.";
    public static final String PARAM_NOT_CONTAIN_BLANK_SPACE = " cannot contain blank space.";
    public static final String PARAM_SHOULD_SPECIFY_DISK = "You should specify --disk .";
