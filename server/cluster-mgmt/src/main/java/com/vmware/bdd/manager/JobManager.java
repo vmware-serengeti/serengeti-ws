@@ -164,7 +164,7 @@ public class JobManager {
       }
       if (result == Long.MIN_VALUE) {
          logger.warn("Failure in preparing sub jobs");
-         throw TaskException.EXECUTION_FAILED("Failure in preparing sub jobs");
+         throw TaskException.EXECUTION_FAILED("failed to prepare sub jobs.");
       }
       return result;
    }
@@ -298,7 +298,7 @@ public class JobManager {
    public TaskRead getJobExecutionStatus(long jobExecutionId) {
       JobExecution jobExecution = jobExplorer.getJobExecution(jobExecutionId);
       if (jobExecution == null) {
-         throw BddException.NOT_FOUND("task", Long.toString(jobExecutionId));
+         throw BddException.NOT_FOUND("Task", Long.toString(jobExecutionId));
       }
 
       TaskRead jobStatus = new TaskRead();

@@ -90,7 +90,7 @@ public class ResourcePoolDAO extends BaseDAO<VcResourcePoolEntity> implements
 
       if (findByName(rpName) != null) {
          logger.info("resource pool name " + rpName + " is already existed.");
-         throw BddException.ALREADY_EXISTS("resource pool", rpName);
+         throw BddException.ALREADY_EXISTS("Resource pool", rpName);
       }
       VcResourcePoolEntity entity = new VcResourcePoolEntity();
       entity.setName(rpName);

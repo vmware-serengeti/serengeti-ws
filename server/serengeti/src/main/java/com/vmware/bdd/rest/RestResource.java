@@ -105,7 +105,7 @@ public class RestResource {
          config.load(ERR_CODE_FILE);
       } catch (ConfigurationException ex) {
          // error out if the configuration file is not there
-         String message = "Failed to load serengeti error message file.";
+         String message = "Cannot load Serengeti error message file.";
          Logger.getLogger(RestResource.class).fatal(message, ex);
          throw BddException.APP_INIT_ERROR(ex, message);
       }
@@ -260,9 +260,12 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("node group name", groupName);
       }
 
-      if (scale.getCpuNumber() <= 0 && scale.getMemory() < Constants.MIN_MEM_SIZE) {
-         throw BddException.INVALID_PARAMETER("node group scale parameter(cpu number must be greater than zero and memory size cannot be less than " + Constants.MIN_MEM_SIZE + "MB)",scale);
-      }
+	  if (scale.getCpuNumber() <= 0
+			&& scale.getMemory() < Constants.MIN_MEM_SIZE) {
+		 throw BddException.INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(
+						"node group scale parameter. The number of CPUs must be greater than zero, and the memory size in MB must be greater than or equal to "
+								+ Constants.MIN_MEM_SIZE + ":", scale);
+		}
       logger.info("scale cluster: " + scale.toString());
       Long taskId =
             scaleMgr.scaleNodeGroupResource(scale);
@@ -276,7 +279,7 @@ public class RestResource {
       validateInput(clusterName, requestBody);
       ClusterRead cluster = clusterMgr.getClusterByName(clusterName, false);
       if (!cluster.needAsyncUpdateParam(requestBody)) {
-            throw BddException.BAD_REST_CALL(null, "the current cluster with this input is not valid.");
+            throw BddException.BAD_REST_CALL(null, "invalid input to cluster.");
       }
 
       Long taskId =
@@ -375,14 +378,15 @@ public class RestResource {
       }
       if (CommonUtil.isBlank(rpSpec.getVcClusterName())
             || !CommonUtil.validateName(rpSpec.getVcClusterName())) {
-         throw BddException.INVALID_PARAMETER("vc cluster name",
+         throw BddException.INVALID_PARAMETER("vCenter Server cluster name",
                rpSpec.getVcClusterName());
       }
       rpSpec.setResourcePoolName(CommonUtil.notNull(
             rpSpec.getResourcePoolName(), ""));
       if (!CommonUtil.isBlank(rpSpec.getResourcePoolName())
             && !CommonUtil.validateName(rpSpec.getResourcePoolName())) {
-         throw BddException.INVALID_PARAMETER("vc resource pool name",
+         throw BddException.INVALID_PARAMETER(
+               "vCenter Server resource pool name",
                rpSpec.getResourcePoolName());
       }
 
@@ -405,7 +409,7 @@ public class RestResource {
       }
       ResourcePoolRead read = vcRpSvc.getResourcePoolForRest(rpName);
       if (read == null) {
-         throw BddException.NOT_FOUND("resource pool", rpName);
+         throw BddException.NOT_FOUND("Resource pool", rpName);
       }
       return read;
    }
@@ -427,12 +431,12 @@ public class RestResource {
       }
       if (CommonUtil.isBlank(dsSpec.getName())
             || !CommonUtil.validateName(dsSpec.getName())) {
-         throw BddException.INVALID_PARAMETER("date store name",
+         throw BddException.INVALID_PARAMETER("datestore name",
                dsSpec.getName());
       }
       if (!CommonUtil.validateVcDataStoreNames(dsSpec.getSpec())) {
-         throw BddException.INVALID_PARAMETER("vc data store name", dsSpec
-               .getSpec().toString());
+         throw BddException.INVALID_PARAMETER("vCenter Server datastore name",
+               dsSpec.getSpec().toString());
       }
       datastoreSvc.addDatastores(dsSpec);
    }
@@ -441,11 +445,11 @@ public class RestResource {
    @ResponseBody
    public DatastoreRead getDatastore(@PathVariable("dsName") final String dsName) {
       if (CommonUtil.isBlank(dsName) || !CommonUtil.validateName(dsName)) {
-         throw BddException.INVALID_PARAMETER("date store name", dsName);
+         throw BddException.INVALID_PARAMETER("datestore name", dsName);
       }
       DatastoreRead read = datastoreSvc.getDatastoreRead(dsName);
       if (read == null) {
-         throw BddException.NOT_FOUND("data store", dsName);
+         throw BddException.NOT_FOUND("Data store", dsName);
       }
       return read;
    }
@@ -489,7 +493,7 @@ public class RestResource {
             networkSvc.getNetworkByName(networkName, details != null ? details
                   : false);
       if (network == null) {
-         throw NetworkException.NOT_FOUND("network", networkName);
+         throw NetworkException.NOT_FOUND("Network", networkName);
       }
       return network;
    }
@@ -525,10 +529,10 @@ public class RestResource {
             throw BddException.INVALID_PARAMETER("gateway", na.getGateway());
          }
          if (na.getDns1() != null && !IpAddressUtil.isValidIp(na.getDns1())) {
-            throw BddException.INVALID_PARAMETER("primary dns", na.getDns1());
+            throw BddException.INVALID_PARAMETER("primary DNS", na.getDns1());
          }
          if (na.getDns2() != null && !IpAddressUtil.isValidIp(na.getDns2())) {
-            throw BddException.INVALID_PARAMETER("secondary dns", na.getDns2());
+            throw BddException.INVALID_PARAMETER("secondary DNS", na.getDns2());
          }
 
          AuAssert.check(na.getIp() != null, "Spring should guarantee this");
@@ -583,7 +587,7 @@ public class RestResource {
       }
       DistroRead distro = distroManager.getDistroByName(distroName);
       if (distro == null) {
-         throw BddException.NOT_FOUND("distro", distroName);
+         throw BddException.NOT_FOUND("Distro", distroName);
       }
 
       return distro;
@@ -597,7 +601,7 @@ public class RestResource {
          t = BddException.BAD_REST_CALL(t, t.getMessage());
       }
       BddException ex =
-            BddException.wrapIfNeeded(t, "REST API transport layer error");
+            BddException.wrapIfNeeded(t, "REST API transport layer error.");
       logger.error("rest call error", ex);
       response.setStatus(getHttpErrorCode(ex.getFullErrorId()));
       return new BddErrorMessage(ex.getFullErrorId(), extractErrorMessage(ex));

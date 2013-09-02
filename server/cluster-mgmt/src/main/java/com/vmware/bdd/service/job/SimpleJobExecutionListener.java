@@ -72,8 +72,8 @@ public class SimpleJobExecutionListener implements JobExecutionListener {
                   logger.info("unregistered sub job launcher. " + jobName);
                }
             } catch (NoSuchJobException e) {
-               throw BddException.INTERNAL(e,
-                     "No spring batch job is registered. " + jobName);
+               throw BddException.INTERNAL(e, jobName
+                     + " Spring batch job not registered.");
             }
          }
       }

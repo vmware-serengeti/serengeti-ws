@@ -79,7 +79,7 @@ public class RetryTransactionAdvice {
                      .wrap((ConstraintViolationException) rootCause);
             } else {
                throw BddException.wrapIfNeeded(ex,
-                     "Exception in a DAL transaction");
+                     "Exception in a DAL transaction.");
             }
          }
       }

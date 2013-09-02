@@ -23,6 +23,6 @@ public class BddExceptionTest {
   public void testMessage() {
      ClusterManagerException ex = ClusterManagerException.ALREADY_STARTED_ERROR("newCluster");
      String message = ex.getMessage();
-     Assert.assertEquals(message, "Cluster newCluster is already running");
+     Assert.assertEquals(message, "Cluster newCluster is already running.");
   }
 }

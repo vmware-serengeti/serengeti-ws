@@ -93,6 +93,12 @@ public class ClusterManagerException extends BddException {
             clusterName, reason);
    }
 
+   public static ClusterManagerException FAILED_TO_SET_AUTO_ELASTICITY_ERROR(
+		String clusterName, String reason) {
+	  return new ClusterManagerException(null,
+			"FAILED_TO_SET_AUTO_ELASTICITY", clusterName, reason);
+   }
+
    public static ClusterManagerException PRIORITIZE_CLUSTER_NOT_ALLOWED_ERROR(
          String clusterName, String reason) {
       return new ClusterManagerException(null, "CANNOT_PRIORITIZE_CLUSTER",

@@ -29,7 +29,8 @@ public class ProvisionTasklet extends TrackableTasklet {
 
    private void randomlyFail(double p) throws Exception {
       if (RandomUtils.nextDouble() > 1 - p) {
-         throw BddException.INTERNAL(new Exception(), "randomly fail");
+         throw BddException.INTERNAL(new Exception(),
+               "Undefined random failure.");
       }
    }
 

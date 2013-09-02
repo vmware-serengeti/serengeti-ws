@@ -60,7 +60,7 @@ public class SetManualElasticityStep extends TrackableTasklet {
 
       if (vhmAction == LimitInstruction.actionWaitForManual) {
          if (!diableAutoEalsticity(clusterName)) {
-            throw TaskException.EXECUTION_FAILED("failed to disable auto elasticity for cluster " + clusterName + " before wait for manual");
+            throw TaskException.EXECUTION_FAILED("timed out while changing elasticity mode from AUTO to MANUAL for cluster " + clusterName);
          }
       }
 

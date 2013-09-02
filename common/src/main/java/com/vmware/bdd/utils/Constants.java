@@ -64,38 +64,38 @@ public class Constants {
    public static final String VC_DATASTORE_NAME_PATTERN =
          "[a-zA-Z0-9_\\-\\s\\?\\*\\.\\(\\)]+";
    public static final String MULTI_INPUTS_CHECK =
-         " cannot be empty, please check it.";
+         " cannot be empty.";
    public static final String WRONG_NUM_OF_JOBTRACKER =
-         "the number of jobtrackers is more than 1";
+         "The number of JobTrackers cannot exceed one.";
    public static final String WRONG_NUM_OF_RESOURCEMANAGER =
-         "the number of resourcemanagers is more than 1";
+         "The number of ResourceManagers cannot exceed one.";
    public static final String WRONG_NUM_OF_ZOOKEEPER =
-         "the number of zookeepers is less than 3";
+         "The number of ZooKeepers cannot be less than three.";
    public static final String ODD_NUM_OF_ZOOKEEPER =
-         "the number of zookeeper nodes is better to be odd numbers";
+         "The number of ZooKeepers is recommended to be an odd number.";
    public static final String WORKER_CLIENT_HA_FLAG =
-         "the worker or client node group has HA enabled";
+         "The worker or client node group has vSphere High Availability enabled.";
    public static final String REGISONSERVER_DATANODE_SEPERATION =
-         "RegionServer and Datanode are separated, which will impact performance";
+         "RegionServer and DataNode are separated, which might degrade performance.";
    public static final String NOT_DEFINED_ROLE =
-         "Some roles are not identified";
+         "Some roles are unidentified.";
    public static final String WRONG_NUM_OF_JOURNALNODE =
-         "the number of journal nodes is less than 3 for namenode HA. It should be at least 3";
+         "The number of journal nodes must be three or more.";
    public static final String ODD_NUM_OF_JOURNALNODE =
-         "the number of journal nodes is better to be odd numbers";
+         "The number of journal nodes is recommended to be an odd number.";
    public static final String NAMENODE_AUTO_FAILOVER_ZOOKEEPER =
-         "please configure a zookeeper group in order to support name node HA";
+         "To support vSphere High Availability on name nodes, you must configure a ZooKeeper group.";
    public static final String NO_NAMENODE_HA =
-         "no namenode HA, but journal nodes appear";
+         "vSphere High Availability is not enabled for NameNode, but journal nodes appear.";
    public static final String WRONG_NUM_OF_NODEGROUPS =
-         "the node groups including jobtracker, zookeeper or hmaster is larger than 1";
-   public static final String WRONG_NUM_OF_WORKERNODES = "no worker exists";
+         "Only one node group can include JobTracker, ZooKeeper or HMaster.";
+   public static final String WRONG_NUM_OF_WORKERNODES = "No worker exists.";
    public static final String DATA_CLIENT_NODE_JOURNALNODE_COEXIST =
-         "journal nodes are not allowed to be on data nodes or client nodes";
+         "Journal nodes cannot be on data nodes or client nodes.";
    public static final String STORAGE_TYPE_ALLOWED =
-         "The allowed storage types include SHARED, LOCAL, and TEMPFS";
+         "Valid storage types are SHARED, LOCAL, and TEMPFS.";
    public static final String TEMPFS_NOT_ALLOWED =
-         "the storage type of TEMPFS can only be set on compute nodes with strict association to data nodes";
+         "TEMPFS storage can be set only on compute nodes with strict association to data nodes.";
    public static final String DEFAULT_VENDOR = "Apache";
    public static final String CDH_VENDOR = "CDH";
    public static final String GPHD_VENDOR = "GPHD";
@@ -103,7 +103,7 @@ public class Constants {
    public static final String MAPR_VENDOR = "MAPR";
    public static final String PHD_VENDOR = "PHD";
    public static final String CURRENT_DISTRO_CAN_NOT_SUPPORT_HDFS2 =
-         "HA and federation feature can not be supported in current distro";
+         "The current Hadoop distribution does not support HDFS2 High Availability or federation.";
    public static final String CDH4_PATTERN = "4\\.[1-9]([0-9]){0,1}(\\.\\d){0,2}";
    public static final String IP_PATTERN = 
          "\\b((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\b";
@@ -135,8 +135,8 @@ public class Constants {
 
    public static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE =
          "elastic_runtime.automation.enable";
-   public static final String MUST_CONFIGURE_FQDN = "CDH 4.2.1+ cluster deployed in a network without FQDN/IP resolution won't work.";
-   public static final String CONVERTED_MEMORY_DIVISIBLE_BY_4 = "VM's memory must be divisible by 4. ";
+   public static final String MUST_CONFIGURE_FQDN = "You cannot deploy a CDH 4.2.1+ cluster in a network without FQDN/IP.";
+   public static final String CONVERTED_MEMORY_DIVISIBLE_BY_4 = "The size of the virtual machine memory must be evenly divisible by 4. ";
    
    public static final String ROOT_SNAPSTHOT_NAME = "serengeti-snapshot";
    public static final String ROOT_SNAPSTHOT_DESC = "Serengeti template Root Snapshot";

@@ -211,7 +211,7 @@ public class CommonClusterExpandPolicy {
       } else {
          if ((sharedPattern == null || sharedPattern.isEmpty()) 
                && (ngEntity.getStorageType().equals(DatastoreType.SHARED))) {
-            String msg = "Group " + ngEntity.getName() + "'s  type is SHARED, but no shared datastore in serengeti.";
+            String msg = "Group " + ngEntity.getName() + " is type SHARED, but there are no shared datastore in Serengeti.";
             logger.error(msg);
             throw ClusterConfigException.CLUSTER_CONFIG_DATASTORE_TYPE_NONEXISTENT(msg);
          }

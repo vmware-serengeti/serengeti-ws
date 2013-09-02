@@ -43,24 +43,25 @@ public class RackInfoManager {
       this.rackDao = rackDao;
    }
 
-   private void validateRaskInfoList(final List<RackInfo> racksInfo) {
-      Set<String> racks = new TreeSet<String>();
-      Set<String> hosts = new TreeSet<String>();
+	private void validateRaskInfoList(final List<RackInfo> racksInfo) {
+		Set<String> racks = new TreeSet<String>();
+		Set<String> hosts = new TreeSet<String>();
 
-      for (RackInfo rack : racksInfo) {
-         if (racks.contains(rack.getName())) {
-            throw BddException.INVALID_PARAMETER("duplicated rack",
-                  rack.getName());
-         }
-         racks.add(rack.getName());
-         for (String host : rack.getHosts()) {
-            if (hosts.contains(host)) {
-               throw BddException.INVALID_PARAMETER("duplicated host", host);
-            }
-            hosts.add(host);
-         }
-      }
-   }
+		for (RackInfo rack : racksInfo) {
+			if (racks.contains(rack.getName())) {
+				throw BddException.INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(
+						"duplicated rack ", rack.getName());
+			}
+			racks.add(rack.getName());
+			for (String host : rack.getHosts()) {
+				if (hosts.contains(host)) {
+					throw BddException.INVALID_PARAMETER("duplicated host",
+							host);
+				}
+				hosts.add(host);
+			}
+		}
+	}
 
    @Transactional
    public void importRackInfo(final List<RackInfo> racksInfo) {

@@ -164,7 +164,7 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
       clusterEntity.setAutomationEnable(value);
       clusterEntityMgr.update(clusterEntity);
       if (!clusteringService.setAutoElasticity(clusterName, false)) {
-         throw TaskException.EXECUTION_FAILED("failed to update auto flag for cluster: " + clusterName);
+         throw TaskException.EXECUTION_FAILED("failed to update auto flag for cluster " + clusterName);
       }
    }
 

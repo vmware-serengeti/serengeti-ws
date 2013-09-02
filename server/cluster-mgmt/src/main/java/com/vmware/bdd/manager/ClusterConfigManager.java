@@ -178,7 +178,7 @@ public class ClusterConfigManager {
          if (entity != null) {
             logger.info("can not create cluster " + name
                   + ", which is already existed.");
-            throw BddException.ALREADY_EXISTS("cluster", name);
+            throw BddException.ALREADY_EXISTS("Cluster", name);
          }
 
          // persist cluster config
@@ -216,7 +216,7 @@ public class ClusterConfigManager {
             List<NetworkEntity> nets = networkMgr.getAllNetworkEntities();
             if (nets.isEmpty() || nets.size() > 1) {
                throw ClusterConfigException.NETWORK_IS_NOT_SPECIFIED(
-                     nets.size(), name);
+            		   name, nets.size());
             } else {
                networkEntity = nets.get(0);
             }
@@ -274,7 +274,7 @@ public class ClusterConfigManager {
             if (!hveSupported) {
                throw ClusterConfigException.INVALID_TOPOLOGY_POLICY(
                      clusterEntity.getTopologyPolicy(),
-                     "current distro does not support HVE");
+                     "current Hadoop distribution does not support HVE.");
             }
          }
 
@@ -284,7 +284,7 @@ public class ClusterConfigManager {
       } catch (UniqueConstraintViolationException ex) {
          logger.info("can not create cluster " + name
                + ", which is already existed.");
-         throw BddException.ALREADY_EXISTS(ex, "cluster", name);
+         throw BddException.ALREADY_EXISTS(ex, "Cluster", name);
       }
    }
 
@@ -413,12 +413,12 @@ public class ClusterConfigManager {
                      && ngc.calculateHostNum() > intersecHostNum) {
                   valid = false;
                   throw ClusterConfigException.LACK_PHYSICAL_HOSTS(
-                        ngc.getName(), ngc.calculateHostNum(), intersecHostNum);
+                        ngc.calculateHostNum(), ngc.getName(), intersecHostNum);
                } else if (rackType.equals(GroupRacksType.SAMERACK)
                      && ngc.calculateHostNum() > maxIntersecHostNum) {
                   valid = false;
                   throw ClusterConfigException.LACK_PHYSICAL_HOSTS(
-                        ngc.getName(), ngc.calculateHostNum(),
+                        ngc.calculateHostNum(), ngc.getName(),
                         maxIntersecHostNum);
                }
             }
@@ -707,7 +707,7 @@ public class ClusterConfigManager {
             && hostToRackMap.isEmpty()) {
          logger.error("trying to use host-rack topology which is absent");
          throw ClusterConfigException.INVALID_TOPOLOGY_POLICY(
-               clusterConfig.getTopologyPolicy(), "no rack information");
+               clusterConfig.getTopologyPolicy(), "no rack information.");
       }
       clusterConfig.setHostToRackMap(hostToRackMap);
 
@@ -1067,7 +1067,7 @@ public class ClusterConfigManager {
 
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
+         throw BddException.NOT_FOUND("Cluster", clusterName);
       }
       transformHDFSUrl(clusterCreate);
       Map<String, Object> clusterLevelConfig = clusterCreate.getConfiguration();
