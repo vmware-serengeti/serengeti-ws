@@ -396,7 +396,7 @@ public class NetworkCommands implements CommandMarker {
 
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                networkName, Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.INVALID_VALUE + " " + "maks=" + mask + errorMessage.toString());
+               Constants.INVALID_VALUE + " " + "mask=" + mask + errorMessage.toString());
          return false;
       } else
          return true;
