@@ -298,7 +298,7 @@ public class JobManager {
    public TaskRead getJobExecutionStatus(long jobExecutionId) {
       JobExecution jobExecution = jobExplorer.getJobExecution(jobExecutionId);
       if (jobExecution == null) {
-         throw BddException.NOT_FOUND("task", Long.toString(jobExecutionId));
+         throw BddException.NOT_FOUND("Task", Long.toString(jobExecutionId));
       }
 
       TaskRead jobStatus = new TaskRead();

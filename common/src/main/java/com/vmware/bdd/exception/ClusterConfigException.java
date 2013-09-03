@@ -37,8 +37,8 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException UNSUPPORTED_HADOOP_ROLE(String roleName, String distro) {
       return new ClusterConfigException(null, "UNSUPPORTED_HADOOP_ROLE", roleName, distro);
    }
-   public static ClusterConfigException MISSING_HADOOP_ROLE(String roleName, String distro) {
-      return new ClusterConfigException(null, "MISSING_HADOOP_ROLE", roleName, distro);
+   public static ClusterConfigException MISSING_HADOOP_ROLE(String distro, String roleName) {
+      return new ClusterConfigException(null, "MISSING_HADOOP_ROLE", distro, roleName);
    }
    public static ClusterConfigException NO_HADOOP_ROLE_SPECIFIED(String group) {
       return new ClusterConfigException(null, "NO_HADOOP_ROLE_SPECIFIED", group);
@@ -46,8 +46,8 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException MORE_THAN_ONE_MASTER_NODE(String clusterName) {
       return new ClusterConfigException(null, "MORE_THAN_ONE_MASTER_NODE", clusterName);
    }
-   public static ClusterConfigException NETWORK_IS_NOT_SPECIFIED(int size, String clusterName) {
-      return new ClusterConfigException(null, "NETWORK_IS_NOT_SPECIFIED", size, clusterName);
+   public static ClusterConfigException NETWORK_IS_NOT_SPECIFIED(String clusterName, int size ) {
+      return new ClusterConfigException(null, "NETWORK_IS_NOT_SPECIFIED", clusterName, size);
    }
    public static ClusterConfigException NETWORK_IS_NOT_FOUND(String networkName, String clusterName) {
       return new ClusterConfigException(null, "NETWORK_IS_NOT_FOUND", networkName, clusterName);
@@ -61,8 +61,8 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException NO_SHARED_DATASTORE() {
       return new ClusterConfigException(null, "NO_SHARED_DATASTORE");
    }
-   public static ClusterConfigException INVALID_INSTANCE_NUMBER(int num, String clusterName, String groupName) {
-      return new ClusterConfigException(null, "INVALID_INSTANCE_NUMBER", num, clusterName, groupName);
+   public static ClusterConfigException INVALID_INSTANCE_NUMBER(int num, String groupName, String clusterName) {
+      return new ClusterConfigException(null, "INVALID_INSTANCE_NUMBER", num, groupName, clusterName);
    }
    public static ClusterConfigException MORE_THAN_ONE_NAMENODE_GROUP(String clusterName) {
       return new ClusterConfigException(null, "MORE_THAN_ONE_NAMENODE_GROUP", clusterName);

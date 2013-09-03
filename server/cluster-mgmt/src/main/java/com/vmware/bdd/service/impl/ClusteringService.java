@@ -102,7 +102,6 @@ import com.vmware.bdd.service.sp.QueryIpAddress;
 import com.vmware.bdd.service.sp.SetAutoElasticitySP;
 import com.vmware.bdd.service.sp.StartVmSP;
 import com.vmware.bdd.service.sp.StopVmSP;
-import com.vmware.bdd.service.sp.TakeSnapshotSP;
 import com.vmware.bdd.service.sp.UpdateVmProgressCallback;
 import com.vmware.bdd.service.sp.VcEventProcessor;
 import com.vmware.bdd.service.utils.VcResourceUtils;
@@ -458,7 +457,7 @@ public class ClusteringService implements IClusteringService {
             channel.connect();
             if (!canChannelConnect(channel)) {
                errorMsg =
-                     "Get active Jobtracker ip: SSH channel is not connected !";
+                     "Cannot determine IP address of active JobTracker. No SSH channel connection.";
                logger.error(errorMsg);
                throw BddException.INTERNAL(null, errorMsg);
             }
@@ -867,7 +866,8 @@ public class ClusteringService implements IClusteringService {
             VcCluster vcCluster = VcResourceUtils.findVcCluster(vcClusterName);
             if (vcCluster == null) {
                String errorMsg =
-                     "Can not find vc cluster '" + vcClusterName + "'.";
+                     "Cannot find the vCenter Server cluster " + vcClusterName
+                           + ".";
                logger.error(errorMsg);
                throw BddException.INTERNAL(null, errorMsg);
             }
@@ -878,8 +878,8 @@ public class ClusteringService implements IClusteringService {
                            resourcePoolName);
                if (parentVcResourcePool == null) {
                   String errorMsg =
-                        "Can not find vc resource pool '" + resourcePoolName
-                              + "'.";
+                        "Cannot find the vCenter Server resource pool "
+                              + resourcePoolName + ".";
                   logger.error(errorMsg);
                   throw BddException.INTERNAL(null, errorMsg);
                }
@@ -907,7 +907,8 @@ public class ClusteringService implements IClusteringService {
             VcCluster vcCluster = VcResourceUtils.findVcCluster(vcClusterName);
             if (vcCluster == null) {
                String errorMsg =
-                     "Can not find vc cluster '" + vcClusterName + "'.";
+                     "Cannot find the vCenter Server cluster " + vcClusterName
+                           + ".";
                logger.error(errorMsg);
                throw BddException.INTERNAL(null, errorMsg);
             }
@@ -924,12 +925,11 @@ public class ClusteringService implements IClusteringService {
                      VcResourceUtils.findRPInVCCluster(vcClusterName, vcRPName);
                if (parentVcResourcePool == null) {
                   String errorMsg =
-                        "Can not find vc resource pool '"
+                        "Cannot find the vCenter Server resource pool "
                               + vcRPName
-                              + "' "
                               + (CommonUtil.isBlank(resourcePoolName) ? ""
-                                    : " in the vc resource pool '"
-                                          + resourcePoolName + "'") + ".";
+                                    : " in the vCenter Server resource pool "
+                                          + resourcePoolName) + ".";
                   logger.error(errorMsg);
                   throw BddException.INTERNAL(null, errorMsg);
                }

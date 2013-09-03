@@ -99,13 +99,13 @@ public class ResourceScale {
 
    public String toString(){
       StringBuilder strBuilder = new StringBuilder();
-      strBuilder.append("clusterName:");
+      strBuilder.append("clusterName=");
       strBuilder.append(clusterName);
-      strBuilder.append(",nodeGroup:");
+      strBuilder.append(",nodeGroup=");
       strBuilder.append(nodeGroupName);
-      strBuilder.append(",cpuNumber:");
+      strBuilder.append(",cpuNumber=");
       strBuilder.append(cpuNumber);
-      strBuilder.append(",memory:");
+      strBuilder.append(",memory=");
       strBuilder.append(memory);
       return strBuilder.toString();
    }

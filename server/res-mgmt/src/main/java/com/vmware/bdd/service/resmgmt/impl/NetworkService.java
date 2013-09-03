@@ -113,7 +113,7 @@ public class NetworkService implements Serializable, INetworkService {
          return network;
       } catch (UniqueConstraintViolationException ex) {
          logger.error("can not add a network with duplicated name");
-         throw BddException.ALREADY_EXISTS(ex, "network", name);
+         throw BddException.ALREADY_EXISTS(ex, "Network", name);
       }
    }
 
@@ -154,7 +154,7 @@ public class NetworkService implements Serializable, INetworkService {
          return network;
       } catch (UniqueConstraintViolationException ex) {
          logger.error("can not add a network with duplicated name");
-         throw BddException.ALREADY_EXISTS(ex, "network", name);
+         throw BddException.ALREADY_EXISTS(ex, "Network", name);
       }
    }
 
@@ -309,7 +309,7 @@ public class NetworkService implements Serializable, INetworkService {
       if (net != null) {
          removeNetwork(net);
       } else {
-         throw BddException.NOT_FOUND("network", networkName);
+         throw BddException.NOT_FOUND("Network", networkName);
       }
    }
 

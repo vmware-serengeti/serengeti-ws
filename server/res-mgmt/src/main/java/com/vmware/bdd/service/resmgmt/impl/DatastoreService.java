@@ -310,7 +310,7 @@ public class DatastoreService implements IDatastoreService {
    private void addDatastoreEntity(final DatastoreType type,
          final List<String> datastores, final String name) {
       if (dsDao.nameExisted(name)) {
-         throw BddException.ALREADY_EXISTS("datastore", name);
+         throw BddException.ALREADY_EXISTS("Datastore", name);
       }
       resService.refreshDatastore();
       for (String ds : datastores) {

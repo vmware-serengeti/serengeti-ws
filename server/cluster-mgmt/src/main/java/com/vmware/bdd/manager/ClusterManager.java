@@ -213,7 +213,7 @@ public class ClusterManager {
       } catch (IOException ex) {
          logger.error(ex.getMessage()
                + "\n failed to write cluster manifest to file " + file);
-         throw BddException.INTERNAL(ex, "failed to write cluster manifest");
+         throw BddException.INTERNAL(ex, "Failed to write cluster manifest.");
       } finally {
          if (fileStream != null) {
             try {
@@ -295,7 +295,7 @@ public class ClusterManager {
    public ClusterRead getClusterByName(String clusterName, boolean realTime) {
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       if (cluster == null) {
-         throw BddException.NOT_FOUND("cluster", clusterName);
+         throw BddException.NOT_FOUND("Cluster", clusterName);
       }
 
       // return the latest data from db
@@ -437,8 +437,8 @@ public class ClusterManager {
          List<NetworkRead> nets =
                clusterConfigMgr.getNetworkMgr().getAllNetworks(false);
          if (nets.isEmpty() || nets.size() > 1) {
-            throw ClusterConfigException.NETWORK_IS_NOT_SPECIFIED(nets.size(),
-                  clusterName);
+				throw ClusterConfigException.NETWORK_IS_NOT_SPECIFIED(
+						clusterName, nets.size());
          } else {
             networkName = nets.get(0).getName();
          }
@@ -522,7 +522,7 @@ public class ClusterManager {
 
       if ((cluster = clusterEntityMgr.findByName(clusterName)) == null) {
          logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
+         throw BddException.NOT_FOUND("Cluster", clusterName);
       }
 
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
@@ -530,7 +530,7 @@ public class ClusterManager {
          logger.error("can not config cluster: " + clusterName + ", "
                + cluster.getStatus());
          throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
-               "it should be in RUNNING status");
+               "To update a cluster, its status must be RUNNING");
       }
       clusterConfigMgr.updateAppConfig(clusterName, createSpec);
 
@@ -563,14 +563,14 @@ public class ClusterManager {
 
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
+         throw BddException.NOT_FOUND("Cluster", clusterName);
       }
 
       if (cluster.getStatus() != ClusterStatus.PROVISION_ERROR) {
          logger.error("can not resume creation of cluster: " + clusterName
                + ", " + cluster.getStatus());
          throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
-               "it should be in PROVISION_ERROR status");
+               "To update a cluster, its status must be PROVISION_ERROR");
       }
       List<String> dsNames = getUsedDS(cluster.getVcDatastoreNameList());
       if (dsNames.isEmpty()) {
@@ -614,7 +614,7 @@ public class ClusterManager {
 
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
+         throw BddException.NOT_FOUND("Cluster", clusterName);
       }
 
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
@@ -626,7 +626,7 @@ public class ClusterManager {
                + " cannot be deleted, it is in " + cluster.getStatus()
                + " status");
          throw ClusterManagerException.DELETION_NOT_ALLOWED_ERROR(clusterName,
-               "it should be in RUNNING/STOPPED/ERROR/PROVISION_ERROR status");
+               "To delete a cluster, its status must be RUNNING, STOPPED, ERROR, or PROVISION_ERROR");
       }
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
@@ -656,7 +656,7 @@ public class ClusterManager {
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
+         throw BddException.NOT_FOUND("Cluster", clusterName);
       }
 
       if (ClusterStatus.RUNNING.equals(cluster.getStatus())) {
@@ -670,7 +670,7 @@ public class ClusterManager {
                + " cannot be started, it is in " + cluster.getStatus()
                + " status");
          throw ClusterManagerException.START_NOT_ALLOWED_ERROR(clusterName,
-               "it should be in STOPPED status");
+               "To start a cluster, its status must be STOPPED");
       }
 
       cluster.setVhmTargetNum(-1);
@@ -702,7 +702,7 @@ public class ClusterManager {
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
+         throw BddException.NOT_FOUND("Cluster", clusterName);
       }
 
       if (ClusterStatus.STOPPED.equals(cluster.getStatus())) {
@@ -716,7 +716,7 @@ public class ClusterManager {
                + " cannot be stopped, it is in " + cluster.getStatus()
                + " status");
          throw ClusterManagerException.STOP_NOT_ALLOWED_ERROR(clusterName,
-               "it should be in RUNNING status");
+               "To stop a cluster, its status must be RUNNING");
       }
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
@@ -747,7 +747,7 @@ public class ClusterManager {
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
+         throw BddException.NOT_FOUND("Cluster", clusterName);
       }
 
       List<String> dsNames = getUsedDS(cluster.getVcDatastoreNameList());
@@ -796,7 +796,7 @@ public class ClusterManager {
                + " can be resized only in RUNNING status, it is now in "
                + cluster.getStatus() + " status");
          throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
-               "it should be in RUNNING status");
+               "To update a cluster, its status must be RUNNING");
       }
 
       if (instanceNum <= group.getDefineInstanceNum()) {
@@ -809,10 +809,14 @@ public class ClusterManager {
 
       Integer instancePerHost = group.getInstancePerHost();
       if (instancePerHost != null && instanceNum % instancePerHost != 0) {
-         throw BddException.INVALID_PARAMETER(
-               "instance number",
-               new StringBuilder(100).append(instanceNum)
-                     .append(": not divisiable by instancePerHost").toString());
+         throw BddException
+               .INVALID_PARAMETER(
+                     "instance number",
+                     new StringBuilder(100)
+                           .append(instanceNum)
+                           .append(
+                                 ".instanceNum must be evenly divisible by instancePerHost")
+                           .toString());
       }
 
       ValidationUtils.validHostNumber(clusterEntityMgr, group, instanceNum);
@@ -875,7 +879,7 @@ public class ClusterManager {
       ClusterRead clusterRead = getClusterByName(clusterName, false);
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
+         throw BddException.NOT_FOUND("Cluster", clusterName);
       }
 
       //update vm ioshares
@@ -918,14 +922,14 @@ public class ClusterManager {
          logger.error("Cannot change elasticity mode, when cluster "
                + clusterName + " is in " + cluster.getStatus() + " status");
          throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
-               clusterName, "it should be in RUNNING status");
+               clusterName, "The cluster's status must be RUNNING");
       }
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
             && !ClusterStatus.STOPPED.equals(cluster.getStatus())) {
          logger.error("Cannot change elasticity parameters, when cluster "
                + clusterName + " is in " + cluster.getStatus() + " status");
          throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
-               clusterName, "it should be in RUNNING or STOPPED status");
+               clusterName, "The cluster's status must be RUNNING or STOPPED");
       }
 
       clusterEntityMgr.update(cluster);
@@ -935,8 +939,9 @@ public class ClusterManager {
          boolean success =
                clusteringService.setAutoElasticity(clusterName, false);
          if (!success) {
-            throw ClusterManagerException
-                  .SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(clusterName, "failed");
+				throw ClusterManagerException
+						.FAILED_TO_SET_AUTO_ELASTICITY_ERROR(clusterName,
+								"Could not update elasticity configuration file");
          }
       }
 
@@ -968,7 +973,7 @@ public class ClusterManager {
       ClusterRead cluster = getClusterByName(clusterName, false);
       // cluster must be running status
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
-         String msg = "Cluster is not running.";
+         String msg = "Cluster "+ clusterName +" is not running.";
          logger.error(msg);
          throw ClusterManagerException
                .SET_MANUAL_ELASTICITY_NOT_ALLOWED_ERROR(msg);
@@ -1018,7 +1023,7 @@ public class ClusterManager {
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
+         throw BddException.NOT_FOUND("Cluster", clusterName);
       }
 
       if (ioShares.equals(cluster.getIoShares())) {
@@ -1031,7 +1036,7 @@ public class ClusterManager {
       // cluster must be in RUNNING or STOPPEED status
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
             && !ClusterStatus.STOPPED.equals(cluster.getStatus())) {
-         String msg = "Cluster is not in RUNNING or STOPPED status.";
+         String msg = "The cluster's status must be RUNNING or STOPPED";
          logger.error(msg);
          throw ClusterManagerException.PRIORITIZE_CLUSTER_NOT_ALLOWED_ERROR(
                clusterName, msg);
@@ -1043,7 +1048,7 @@ public class ClusterManager {
 
       if (targetNodes.isEmpty()) {
          throw ClusterManagerException.PRIORITIZE_CLUSTER_NOT_ALLOWED_ERROR(
-               clusterName, " target node set is empty");
+               clusterName, "Target node set is empty");
       }
 
       // call clustering service to set the io shares
@@ -1068,7 +1073,7 @@ public class ClusterManager {
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
+         throw BddException.NOT_FOUND("Cluster", clusterName);
       }
 
       ClusterStatus oldStatus = cluster.getStatus();

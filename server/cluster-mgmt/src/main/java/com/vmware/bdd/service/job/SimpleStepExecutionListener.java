@@ -63,7 +63,7 @@ public class SimpleStepExecutionListener implements StepExecutionListener {
       try {
          job = (AbstractJob) jobRegistry.getJob(je.getJobInstance().getJobName());
       } catch (NoSuchJobException ex) {
-         throw BddException.INTERNAL(ex, "illegal state");
+         throw BddException.INTERNAL(ex, "Illegal state.");
       }
 
       Collection<String> stepNames = job.getStepNames();

@@ -178,7 +178,7 @@ public class ClusterConfigManager {
          if (entity != null) {
             logger.info("can not create cluster " + name
                   + ", which is already existed.");
-            throw BddException.ALREADY_EXISTS("cluster", name);
+            throw BddException.ALREADY_EXISTS("Cluster", name);
          }
 
          // persist cluster config
@@ -216,7 +216,7 @@ public class ClusterConfigManager {
             List<NetworkEntity> nets = networkMgr.getAllNetworkEntities();
             if (nets.isEmpty() || nets.size() > 1) {
                throw ClusterConfigException.NETWORK_IS_NOT_SPECIFIED(
-                     nets.size(), name);
+            		   name, nets.size());
             } else {
                networkEntity = nets.get(0);
             }
@@ -284,7 +284,7 @@ public class ClusterConfigManager {
       } catch (UniqueConstraintViolationException ex) {
          logger.info("can not create cluster " + name
                + ", which is already existed.");
-         throw BddException.ALREADY_EXISTS(ex, "cluster", name);
+         throw BddException.ALREADY_EXISTS(ex, "Cluster", name);
       }
    }
 
@@ -1067,7 +1067,7 @@ public class ClusterConfigManager {
 
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("cluster", clusterName);
+         throw BddException.NOT_FOUND("Cluster", clusterName);
       }
       transformHDFSUrl(clusterCreate);
       Map<String, Object> clusterLevelConfig = clusterCreate.getConfiguration();

@@ -125,7 +125,7 @@ public class Container implements IContainer {
          this.dc.addCluster(abstractCluster);
       } catch (Exception e) {
          logger.error("Internal Error " + e.getMessage());
-         throw BddException.INTERNAL(e, "failed to list VC Hosts");
+         throw BddException.INTERNAL(e, "Cannot list vCenter Server machines.");
       }
    }
 

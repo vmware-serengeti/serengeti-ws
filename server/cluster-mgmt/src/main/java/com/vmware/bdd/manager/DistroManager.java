@@ -251,12 +251,12 @@ public class DistroManager {
             }
          } catch (JsonSyntaxException e) {
             logger.error("failed to parse manifest: " + distrosManifestUrl, e);
-            throw BddException.INTERNAL(e, "failed to parse manifest: "
-                  + distrosManifestUrl);
+            throw BddException.INTERNAL(e, "Cannot parse manifest "
+                  + distrosManifestUrl + ".");
          } catch (Exception e) {
             logger.error("failed to read manifest: " + distrosManifestUrl, e);
-            throw BddException
-                  .INTERNAL(e, "failed to read manifest: " + distrosManifestUrl);
+            throw BddException.INTERNAL(e, "Cannot read manifest "
+                  + distrosManifestUrl + ".");
          }
          distros = distrosLoading;
       }
@@ -323,10 +323,15 @@ public class DistroManager {
       }
       StringBuffer errorMsg = new StringBuffer();
       if (!errorVendors.isEmpty()) {
-         errorMsg.append(" At present, we only allow vendor [").append(vendorStr).append("], ");
          String errorVendorsStr = errorVendors.toString();
-         errorMsg.append("You can configure ").append(errorVendorsStr).append("to \"serengeti.distro_vendor\"" +
-                        " property in the serengeti.properties file, to support new distro vendor.");
+         errorMsg
+               .append(errorVendorsStr)
+               .append(" not configured. To configure ")
+               .append(errorVendorsStr)
+               .append(", add ")
+               .append(errorVendorsStr)
+               .append(
+                     " to the serengeti.distro_vendor property in the serengeti.properties file.");
       }
       if(errorMsg.length() > 0) {
          throw BddException.INTERNAL(null, errorMsg.toString());

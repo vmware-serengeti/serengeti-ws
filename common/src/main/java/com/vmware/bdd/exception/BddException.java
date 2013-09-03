@@ -117,9 +117,20 @@ public class BddException extends RuntimeException {
       return new BddException(ex, "BDD", "INVALID_PARAMETER", field, value);
    }
 
+	public static BddException INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(
+			Throwable ex, String field, Object value) {
+		return new BddException(ex, "BDD",
+				"INVALID_PARAMETER_WITHOUT_EQUALS_SIGN", field, value);
+	}
+
    public static BddException INVALID_PARAMETER(String field, Object value) {
       return INVALID_PARAMETER(null, field, value);
    }
+
+	public static BddException INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(
+			String field, Object value) {
+		return INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(null, field, value);
+	}
 
    public static BddException BAD_REST_CALL(Throwable ex, String reason) {
       return new BddException(ex, "BDD", "BAD_REST_CALL", reason);
