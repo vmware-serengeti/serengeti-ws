@@ -165,7 +165,7 @@ public class Constants {
    public static final String PARAM_NOT_CONTAIN_HORIZONTAL_LINE = " cannot contain '-'.";
    public static final String PARAM_NOT_CONTAIN_BLANK_SPACE = " cannot contain blank space.";
    public static final String PARAM_SHOULD_SPECIFY_DISK = "You should specify --disk .";
-   public static final String PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP = "The cluster must have compute only node group(s), and set/resetParam is only applicable to compute only node groups.";
+   public static final String PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP = "If the cluster is MRv1, then it must have compute only node group(s), and set/resetParam is only applicable to compute only node groups. On the other hand, we do not support elasticity on MRv2 (YARN) clusters yet.";
 
    public static final int FORMAT_COLUMN_DISTANCE = 2;
    public static final String FORMAT_TABLE_COLUMN_NAME = "NAME";
