@@ -46,7 +46,7 @@ public class DatastoreCommands implements CommandMarker {
    public void addDatastore(
          @CliOption(key = { "name" }, mandatory = true, help = "The datastore name.") final String name,
          @CliOption(key = { "spec" }, mandatory = true, help = "The datastore name(s) in vsphere: use \",\" among names.") final String spec,
-         @CliOption(key = { "type" }, mandatory = false, unspecifiedDefaultValue = "SHARED", help = "Please specify the type for storage: "
+         @CliOption(key = { "type" }, mandatory = false, unspecifiedDefaultValue = "SHARED", help = "You must specify the type for storage: "
                + "SHARED or LOCAL") final String type) {
 
       //build DatastoreAdd object

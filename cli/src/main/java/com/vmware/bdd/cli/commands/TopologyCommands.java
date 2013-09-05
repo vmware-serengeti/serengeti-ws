@@ -73,7 +73,7 @@ public class TopologyCommands implements CommandMarker {
       for (RackInfo rack: racks) {
          if (checkRack.contains(rack.getName())) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, null, Constants.OUTPUT_OP_UPLOAD,
-                  Constants.OUTPUT_OP_RESULT_FAIL, "please remove duplicated racks.");
+                  Constants.OUTPUT_OP_RESULT_FAIL, "Racks cannot be duplicated.");
             return true;
          }
          checkRack.add(rack.getName());
@@ -81,7 +81,7 @@ public class TopologyCommands implements CommandMarker {
          for (String hostName: rack.getHosts()) {
             if (checkHosts.contains(hostName)) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, null, Constants.OUTPUT_OP_UPLOAD,
-                     Constants.OUTPUT_OP_RESULT_FAIL, "please remove duplicated hosts.");
+                     Constants.OUTPUT_OP_RESULT_FAIL, "Remove duplicated hosts.");
                return true;
             }
             checkHosts.add(hostName);

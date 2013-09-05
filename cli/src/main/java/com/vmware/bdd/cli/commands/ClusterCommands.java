@@ -92,7 +92,7 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
          @CliOption(key = { "networkName" }, mandatory = false, help = "Network Name") final String networkName,
-         @CliOption(key = { "topology" }, mandatory = false, help = "Please specify the topology type: HVE or RACK_AS_RACK or HOST_AS_RACK") final String topology,
+         @CliOption(key = { "topology" }, mandatory = false, help = "You must specify the topology type: HVE or RACK_AS_RACK or HOST_AS_RACK") final String topology,
          @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume,
          @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation,
          @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes) {
@@ -240,7 +240,7 @@ public class ClusterCommands implements CommandMarker {
       if (networkNames.isEmpty()) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.PARAM_NETWORK_NAME + Constants.PARAM_NOT_EXISTED);
+               Constants.PARAM_CANNOT_FIND_NETWORK);
          return;
       } else {
          if (networkName != null) {
@@ -514,7 +514,7 @@ public class ClusterCommands implements CommandMarker {
                         name,
                         Constants.OUTPUT_OP_RESIZE,
                         Constants.OUTPUT_OP_RESULT_FAIL,
-                        "Please specify at least a postive value for instanceNum/cpuNumPerNode/memCapacityPerNode");
+                        "You must specify at least one positive value for instanceNum, cpuNumPerNode, or memCapacityPerNode");
 
          } else {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
@@ -746,7 +746,7 @@ public class ClusterCommands implements CommandMarker {
             if ((fsUrl == null || fsUrl.length() == 0)
                   && (jtUrl == null || jtUrl.length() == 0)) {
                System.out
-                     .println("There is no targeted cluster. Please use \"cluster target --name\" to target first");
+                     .println("There is no targeted cluster. Run \"cluster target --name\" command first.");
                return;
             }
             if (targetClusterName != null && targetClusterName.length() > 0) {

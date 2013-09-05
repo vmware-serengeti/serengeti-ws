@@ -109,7 +109,6 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_FIX = "fixed";
    public static final String OUTPUT_OP_NODEGROUP_MISSING = "must specify nodegroup name when node name is specified";
    public static final String OUTPUT_UNKNOWN_HOST = "unknown host";
-   public static final String OUTPUT_HOST_REFUSE = "Connection refused. Please check the port number.";
    public static final String OUTPUT_HOST_TIMEOUT = "connection timeout";
    public static final String OUTPUT_LOG_INFO = "You can find task failure details in serengeti server logs: ";
    public static final String COMMON_LOG_FILE_PATH = "/opt/serengeti/logs/serengeti.log /opt/serengeti/logs/ironfan.log";
@@ -160,7 +159,7 @@ public class Constants {
    public static final String PARAM_MODE_MANUAL = "manual";
    public static final String PARAM_NETWORK_NAME = "network name";
    public static final String PARAM_NOT_SPECIFIED = " is not specified.";
-   public static final String PARAM_NOT_EXISTED = " cannot be found. Please add it first.";
+   public static final String PARAM_CANNOT_FIND_NETWORK = "Cannot find the specified network.";
    public static final String PARAM__NO_DEFAULT_DISTRO = "no default distro. Install a distribution and/or specify the distribution with the --distro parameter.";
    public static final String PARAM_NOT_CONTAIN_HORIZONTAL_LINE = " cannot contain '-'.";
    public static final String PARAM_NOT_CONTAIN_BLANK_SPACE = " cannot contain blank space.";
@@ -208,7 +207,6 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_TASK = "TASK";
    public static final String FORMAT_TABLE_COLUMN_HOSTS = "HOSTS";
    public static final String DEFAULT_DISTRO = "apache";
-   public static final String PARAM_NO_DISTRO_AVAILABLE = "no distro available,please upload one distro";
    public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure you want to continue (Y/N)? ";
    public static final String PARAM_PROMPT_ADD_CERTIFICATE_MESSAGE = "Are you sure you want to add this certificate (Y/N)? ";
    public static final String PARAM_CLUSTER_IN_BLACK_LIST_WARNING =
@@ -227,11 +225,11 @@ public class Constants {
    public static final String CONNECT_PASSWORD = "The password";
    public static final String CONNECT_CAN_NOT_BE_NULL = " cannot be null.";
    public static final String CONNECT_PORT_IS_WRONG = "The port is wrong.";
-   public static final String CONNECT_ENTER_USER_NAME = "Please enter the username: ";
-   public static final String CONNECT_ENTER_PASSWORD = "Please enter the password: ";
+   public static final String CONNECT_ENTER_USER_NAME = "Enter the username: ";
+   public static final String CONNECT_ENTER_PASSWORD = "Enter the password: ";
    public static final String CONNECT_CHECK_LOGIN = "You are not logged in. Run the connect command to log in.";
    public static final String CONNECT_SESSION_TIME_OUT = "The session timed out. Run the connect command to restart the session.";
    public static final String OUTPUT_OBJECT_CONNECT = "connect";
    public static final String NODE_RUNNING_STATUS = "Service Ready";
-   public static final String AT_LEAST_ONE_OPTION = "Please use at least one option.";
+   public static final String AT_LEAST_ONE_OPTION = "You must use at least one option.";
 }

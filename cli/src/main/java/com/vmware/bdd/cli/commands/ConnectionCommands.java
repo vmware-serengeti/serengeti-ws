@@ -136,7 +136,7 @@ public class ConnectionCommands implements CommandMarker {
       String cliVersion = com.vmware.bdd.utils.Constants.VERSION;
       if (!cliVersion.equals(serverVersion)) {
          System.out.println("Warning: CLI version "+ cliVersion + " does not match with management server version " + serverVersion + ".");
-         System.out.println("Please use the same version for CLI and management server. Otherwise, some commands may not be compatible");
+         System.out.println("You must use the same version for CLI and management server. Otherwise, some commands may not be compatible.");
       }
    }
 
