@@ -128,7 +128,7 @@ public class Constants {
    public static final String MULTI_INPUTS_CHECK = " cannot be empty.";
    public static final String INPUT_INSTANCE_NUM_PARAM = "\"instanceNum\"";
    public static final String INTEGER_INPUTS_CHECK = " should be larger than existed.";
-   public static final String INVALID_VALUE = "invalid value";
+   public static final String INVALID_VALUE = "Invalid value";
    public static final String INPUT_TOPOLOGY_INVALID_VALUE = "invalid topology value. The valid value is HVE or RACK_AS_RACK or HOST_AS RACK";
    public static final String TOPLOGY_FORMAT = "Accepted topology file format: for each line, rackname1: hostname1, hostname2,...";
    public static final String OVERWRITE_TOPOLOGY = "WARNING: you will overwrite the existing topology. Existing Hadoop clusters may be impacted and cannot work well if you remove some hosts these clusters are using.";
