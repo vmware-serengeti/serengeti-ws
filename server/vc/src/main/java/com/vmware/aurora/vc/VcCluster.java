@@ -405,6 +405,8 @@ class VcClusterImpl extends VcObjectImpl implements VcCluster {
       }
       for (HostSystem h : hostList) {
          DatastoreInfo[] info = h.queryConnectionInfo().getDatastore();
+         if (info == null)
+            continue;
          if (candidateList == null) {
             candidateList = info;
          }
@@ -420,9 +422,11 @@ class VcClusterImpl extends VcObjectImpl implements VcCluster {
       }
 
       // collect those in the map with as many counts as the number of hosts
-      for (DatastoreInfo n : candidateList) {
-         if (map.get(n.getSummary().getName()).equals(hostList.size())) {
-            results.add(n.getSummary().getDatastore());
+      if (candidateList != null) {
+         for (DatastoreInfo n : candidateList) {
+            if (map.get(n.getSummary().getName()).equals(hostList.size())) {
+               results.add(n.getSummary().getDatastore());
+            }
          }
       }
       return results;
