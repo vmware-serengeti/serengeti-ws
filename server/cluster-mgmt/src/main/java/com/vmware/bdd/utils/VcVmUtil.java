@@ -37,6 +37,7 @@ import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcCluster;
 import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcResourcePool;
+import com.vmware.aurora.vc.VcSnapshot;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.VmConfigUtil;
 import com.vmware.aurora.vc.vcservice.VcContext;
@@ -639,4 +640,29 @@ public class VcVmUtil {
       }
    }
 
+   public static void checkAndCreateSnapshot(final VmSchema vmSchema) {
+      VcContext.inVcSessionDo(new VcSession<Void>() {
+         @Override
+         protected boolean isTaskSession() {
+            return true;
+         }
+
+         @Override
+         protected Void body() throws Exception {
+            final VcVirtualMachine template =
+                  VcCache.get(vmSchema.diskSchema.getParent());
+            VcSnapshot snap =
+                  template.getSnapshotByName(vmSchema.diskSchema
+                        .getParentSnap());
+            if (snap == null) {
+               // this is a blocking call
+               snap =
+                     template.createSnapshot(
+                           vmSchema.diskSchema.getParentSnap(),
+                           "Serengeti template Root Snapshot");
+            }
+            return null;
+         }
+      });
+   }
 }

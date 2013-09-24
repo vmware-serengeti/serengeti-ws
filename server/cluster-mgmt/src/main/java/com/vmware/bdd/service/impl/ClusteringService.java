@@ -171,7 +171,8 @@ public class ClusteringService implements IClusteringService {
    }
 
    @Autowired
-   public void setClusterInitializerService(IClusterInitializerService clusterInitializerService) {
+   public void setClusterInitializerService(
+         IClusterInitializerService clusterInitializerService) {
       this.clusterInitializerService = clusterInitializerService;
    }
 
@@ -249,7 +250,8 @@ public class ClusteringService implements IClusteringService {
          snapshotTemplateVM();
          loadTemplateNetworkLable();
          convertTemplateVm();
-         clusterInitializerService.transformClusterStatus(ClusterStatus.PROVISIONING, ClusterStatus.PROVISION_ERROR);
+         clusterInitializerService.transformClusterStatus(
+               ClusterStatus.PROVISIONING, ClusterStatus.PROVISION_ERROR);
          initialized = true;
       }
    }
@@ -342,7 +344,7 @@ public class ClusteringService implements IClusteringService {
          @Override
          protected Boolean body() throws Exception {
             VcSnapshot snapshot =
-               templateVM.getSnapshotByName(Constants.ROOT_SNAPSTHOT_NAME);
+                  templateVM.getSnapshotByName(Constants.ROOT_SNAPSTHOT_NAME);
             if (snapshot != null) {
                snapshot.remove();
             }
@@ -1020,8 +1022,12 @@ public class ClusteringService implements IClusteringService {
                new UpdateVmProgressCallback(clusterEntityMgr, statusUpdator,
                      vNodes.get(0).getClusterName());
 
-         // call fast clone service to copy templates
          logger.info("ClusteringService, start to clone template.");
+         AuAssert.check(specs.size() > 0);
+         VmSchema vmSchema = specs.get(0).getSchema();
+         VcVmUtil.checkAndCreateSnapshot(vmSchema);
+
+         // call clone service to copy templates
          List<VmCreateSpec> results =
                cloneService.createCopies(sourceSpec, cloneConcurrency, specs,
                      callback);
