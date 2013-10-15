@@ -2,10 +2,10 @@ Gem::Specification.new do |s|
   s.name = "software-management"
   s.version = File.exist?('VERSION') ? File.read('VERSION') : ""
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["VMware Serengeti team (Jarred Li)"]
-  s.date = "2013-08-27"
-  s.description = "Expose Thrift service for software management. Serengete web service is the client"
-  s.email = "hadoop-bj@vmware.com"
+  s.authors = ["VMware Serengeti Team"]
+  s.date = "2013-10-14"
+  s.description = "Expose Thrift Interface for Ironfan. Serengete Web Service is the client."
+  s.email = "serengeti-dev@googlegroups.com"
   s.extra_rdoc_files = [
     "LICENSE",
     "README.rdoc"
@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://serengeti.cloudfoundry.org"
   s.licenses = ["apachev2"]
   s.summary = "Expose Thrift service for software management"
-  s.require_path = ["lib"]
-  s.rubygems_version = "1.8.15"
+  s.require_paths = ["lib"]
   s.add_dependency(%q<thrift>,["~> 0.9.0"])
+  s.add_dependency(%q<thin>,["~> 1.3.0"])
 end
