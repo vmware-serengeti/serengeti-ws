@@ -1,8 +1,10 @@
 /*
  * Schema for Serengeti.
  */
-DROP DATABASE serengeti;
-DROP ROLE serengeti;
+
+DROP DATABASE IF EXISTS serengeti;
+
+DROP ROLE IF EXISTS serengeti;
 
 CREATE ROLE serengeti WITH LOGIN PASSWORD 'password';
 
