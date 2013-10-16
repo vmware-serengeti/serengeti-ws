@@ -15,13 +15,6 @@
 
 require 'thrift'
 require 'chef'
-require 'chef/knife'
-require 'chef/knife/cluster_show.rb'
-require 'chef/knife/cluster_create.rb'
-require 'chef/knife/cluster_start.rb'
-require 'chef/knife/cluster_stop.rb'
-require 'chef/knife/cluster_kill.rb'
-require 'chef/knife/cluster_bootstrap.rb'
 require 'ironfan'
 require 'ironfan/monitor'
 require 'software_management'
@@ -33,7 +26,6 @@ module Software
     module Thrift
       class SoftwareManagementHandler
         include Ironfan::Monitor
-	include Ironfan::KnifeCommon
         include ProgressMonitor
 
         attr_reader :serengetiHome, :configFile
@@ -49,83 +41,49 @@ module Software
         end
 
         def runClusterOperation(clusterOperation)
-          log.info("start:==============================================================================")
-          log.info("cluster action: #{clusterOperation.action}")
-          log.info("target name: #{clusterOperation.targetName}")
-
-          Chef::Config[:distro] = 'centos5-vmware'
-          optionStr = ""
-          unless clusterOperation.specFileName.nil?
-            optionStr = "-f #{clusterOperation.specFileName} --yes --bootstrap"
-          end
+          option = ""
+          name = clusterOperation.targetName
 
           case clusterOperation.action
           when ClusterAction::QUERY
-            operation = createQueryOperation
-            optionStr = "-f #{clusterOperation.specFileName}"
-          when ClusterAction::CREATE
-            operation = createCreateOperation
-          when ClusterAction::UPDATE
-            operation = createUpdateOperation
+            action = "show"
+            option = "-f #{clusterOperation.specFileName}" 
+          when ClusterAction::CREATE, ClusterAction::UPDATE
+            action = "create"
+            option = "-f #{clusterOperation.specFileName} --yes --bootstrap"
           when ClusterAction::START
-            operation = createStartOperation
+            action = "start"
+            option = "-f #{clusterOperation.specFileName} --yes --bootstrap"
           when ClusterAction::STOP
-            operation = createStopOperation
-            optionStr = "-f #{clusterOperation.specFileName} --yes"
+            action = "stop"
+            option = "-f #{clusterOperation.specFileName} --yes"
           when ClusterAction::DESTROY
-            clusterName = clusterOperation.targetName.split('-')[0]
+            clusterName = name.split('-')[0]
             clusterFile = "#{@serengetiHome}/tmp/.ironfan-clusters/#{clusterName}.rb"
             if File::exist?(clusterFile)
-              operation = createDestroyOperation
-              optionStr = "--no-cloud --yes"
+              action = "kill"
+              option = "--no-cloud --yes"
             else
               log.info("cluster #{clusterName} does not exist")
               return 0
             end
           when ClusterAction::CONFIGURE
-            operation = createConfigureOperation
-            optionStr = "-f #{clusterOperation.specFileName} --yes"
+            action = "bootstrap"
+            option = "-f #{clusterOperation.specFileName} --yes"
           else
-            log.info("invalid operation")
+            log.info("Invalid cluster operation")
+            return 1
           end
-
-          log.debug("option : #{optionStr}")
 
           Dir.chdir("#{@serengetiHome}")
-
-          #clear cache in the Ironfan.          
-          Ironfan.clear_clusters
-          
-          operation.class.load_deps
-          operation.class.chef_config_dir
-          operation.config[:config_file]=@configFile
-          operation.config[:verbosity] = 0
-          if clusterOperation.logLevel
-            if clusterOperation.logLevel == "-V"
-              operation.config[:verbosity] = 1
-            elsif clusterOperation.logLevel == "-VV"
-              operation.config[:verbosity] = 2
-            end
-          end
-          operation.configure_chef
-          options = optionStr.split
-          operation.parse_options(options)
-          operation.name_args = [clusterOperation.targetName]
-          exitCode = 0
-          begin
-            operation.run
-          rescue SystemExit => e
-            log.info("Ironfan exited with status code #{e.status}")
-            exitCode = e.status
-          rescue Exception => e
-            log.error("Exception was thrown during calling ironfan cluster APIs. Ironfan error message: #{e.message}")
-            stackTrace = e.backtrace.join("\n")
-            log.error(" Stack trace: #{stackTrace}")
-            exitCode = 1
-            error = ClusterOperationException.new("Exception was thrown during calling ironfan cluster APIs. Ironfan error message: #{e.message}")
-            raise error
-          end
-          log.info("end:================================================================================")
+          knifeCmd = "knife cluster #{action} #{name} #{option} #{clusterOperation.logLevel}"
+          log.info("============= Invoking Ironfan Knife CLI =============")
+          log.info(knifeCmd)
+          system(knifeCmd + " 2>&1 1>>#{@serengetiHome}/logs/ironfan.log")
+          exitCode = $?.exitstatus
+          # system returns true if the command gives zero exit status, false for
+          # non zero exit status. Returns nil if command execution fails.
+          log.info("============= Ironfan Knife CLI exited with status code #{exitCode} =============")
           exitCode
         end
 
@@ -144,7 +102,7 @@ module Software
           status
         end
 
-	def resetNodeProvisionAttribute(targetName)
+        def resetNodeProvisionAttribute(targetName)
           begin
             clusterName = fetchClusterName(targetName)
             nodes = []
@@ -167,34 +125,6 @@ module Software
             error = ClusterOperationException.new("Exception was thrown during reseting Chef node's attribute, error message: #{e.message}")
             raise error
           end
-        end
-
-        def createQueryOperation
-          clusterShowObject = Chef::Knife::ClusterShow.new
-        end
-
-        def createCreateOperation
-          clusterCreateObject = Chef::Knife::ClusterCreate.new
-        end
-
-        def createUpdateOperation
-       	  clusterCreateObject = Chef::Knife::ClusterCreate.new
-        end
-
-        def createStartOperation
-          clusterStartObject = Chef::Knife::ClusterStart.new
-        end
-
-        def createStopOperation
-          clusterStopObject = Chef::Knife::ClusterStop.new
-        end
-
-        def createDestroyOperation
-          clusterDestroyObject = Chef::Knife::ClusterKill.new
-        end
-
-        def createConfigureOperation
-          clusterConfigureObject = Chef::Knife::ClusterBootstrap.new
         end
       end
     end

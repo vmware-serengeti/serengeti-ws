@@ -26,7 +26,7 @@ module Software
         end
 
         def run(serengetiHome,configFile,listenHost,listenPort)
-          handler = Software::Mgmt::Thrift::SoftwareManagementHandler.new(serengetiHome,configFile)
+          handler = Software::Mgmt::Thrift::SoftwareManagementHandler.new(serengetiHome, configFile)
           processor = Software::Mgmt::Thrift::SoftwareManagement::Processor.new(handler)
           transport = ::Thrift::ServerSocket.new(listenHost,listenPort)
           transportFactory = ::Thrift::BufferedTransportFactory.new()
