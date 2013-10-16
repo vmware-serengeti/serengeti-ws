@@ -103,7 +103,7 @@ import com.vmware.bdd.service.sp.SetAutoElasticitySP;
 import com.vmware.bdd.service.sp.StartVmSP;
 import com.vmware.bdd.service.sp.StopVmSP;
 import com.vmware.bdd.service.sp.UpdateVmProgressCallback;
-import com.vmware.bdd.service.sp.VcEventProcessor;
+import com.vmware.bdd.service.sp.VmEventProcessor;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.HadoopRole;
@@ -137,6 +137,7 @@ public class ClusteringService implements IClusteringService {
    private String templateNetworkLabel;
    private static boolean initialized = false;
    private int cloneConcurrency;
+   private VmEventProcessor processor;
 
    private IClusterCloneService cloneService;
 
@@ -225,7 +226,9 @@ public class ClusteringService implements IClusteringService {
             logger.warn("interupted during sleep " + e.getMessage());
          }
          // add event handler for Serengeti after VC event handler is registered.
-         new VcEventProcessor(getClusterEntityMgr());
+         processor = new VmEventProcessor(getClusterEntityMgr());
+         processor.installEventHandler();
+         processor.start();
          String poolSize =
                Configuration.getNonEmptyString("serengeti.scheduler.poolsize");
 
@@ -258,6 +261,7 @@ public class ClusteringService implements IClusteringService {
 
    synchronized public void destroy() {
       Scheduler.shutdown(true);
+      processor.shutdown();
    }
 
    private void convertTemplateVm() {

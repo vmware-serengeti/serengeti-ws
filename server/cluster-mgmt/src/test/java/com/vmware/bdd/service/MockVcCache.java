@@ -25,6 +25,7 @@ import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcObject;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 
 @MockClass(realClass = VcCache.class)
 public class MockVcCache {
@@ -44,8 +45,11 @@ public class MockVcCache {
             Mockito.when(rp.getVcCluster()).thenReturn(cluster);
             Mockito.when(cluster.getName()).thenReturn("cluster-ws");
             return (T)vm;
+         } else {
+            VcVirtualMachine vm = Mockito.mock(VcVirtualMachine.class);
+            Mockito.when(vm.getName()).thenReturn(id);
+            return (T)vm;
          }
-         return (T) Mockito.mock(VcVirtualMachine.class);
       } else {
          return null;
       }
@@ -54,4 +58,15 @@ public class MockVcCache {
       getFlag = flag;
    }
 
+   @Mock
+   static public <T extends VcObject> T getIgnoreMissing(ManagedObjectReference moRef) {
+      if (getFlag) {
+         VcVirtualMachine vm = Mockito.mock(VcVirtualMachine.class);
+         String vmName = moRef.getValue();
+         Mockito.when(vm.getName()).thenReturn(vmName);
+         return (T)vm;
+      } else {
+         return null;
+      }
+   }
 }
