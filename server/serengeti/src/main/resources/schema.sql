@@ -8,7 +8,7 @@ DROP ROLE IF EXISTS serengeti;
 
 CREATE ROLE serengeti WITH LOGIN PASSWORD 'password';
 
-CREATE DATABASE serengeti WITH OWNER = serengeti ENCODING = 'UTF8';
+CREATE DATABASE serengeti WITH OWNER = serengeti ENCODING = 'UTF-8' TEMPLATE template0;
 
 \c serengeti;
 \c - serengeti;
