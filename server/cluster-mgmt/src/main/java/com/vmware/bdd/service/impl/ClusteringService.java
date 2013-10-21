@@ -405,7 +405,7 @@ public class ClusteringService implements IClusteringService {
     * allocation the network contains all allocated ip address to this cluster,
     * so some of them may already be occupied by existing node. So we need to
     * detect if that ip is allocated, before assign that one to one node
-    * 
+    *
     * @param networkAdd
     * @param vNodes
     * @param occupiedIps
@@ -849,7 +849,7 @@ public class ClusteringService implements IClusteringService {
 
       /*
        * prepare resource pool names and node group per resource pool for creating cluster
-       * resource pools and node group resource pool(s). 
+       * resource pools and node group resource pool(s).
        */
       Map<String, List<String>> vcClusterRpNamesMap =
             new HashMap<String, List<String>>();
@@ -1056,7 +1056,18 @@ public class ClusteringService implements IClusteringService {
       }
    }
 
+   private void setPersistentDiskMode(BaseNode vNode) {
+      DiskSchema diskSchema = vNode.getVmSchema().diskSchema;
+      if (diskSchema.getDisks() != null) {
+         for (Disk disk : diskSchema.getDisks()) {
+            disk.mode = DiskMode.persistent;
+         }
+      }
+   }
+
    private CreateVmPrePowerOn getPrePowerOnFunc(BaseNode vNode) {
+      boolean persistentDiskMode = false;
+
       String haFlag = vNode.getNodeGroup().getHaFlag();
       boolean ha = false;
       boolean ft = false;
@@ -1074,12 +1085,19 @@ public class ClusteringService implements IClusteringService {
          logger.debug("ft is enabled is for VM " + vNode.getVmName());
          logger.debug("set disk mode to persistent for VM " + vNode.getVmName());
          // change disk mode to persistent, instead of independent_persistent, since FT requires this
-         DiskSchema diskSchema = vNode.getVmSchema().diskSchema;
-         if (diskSchema.getDisks() != null) {
-            for (Disk disk : diskSchema.getDisks()) {
-               disk.mode = DiskMode.persistent;
-            }
-         }
+         persistentDiskMode = true;
+      }
+
+      List<String> roles = vNode.getNodeGroup().getRoles();
+      if (roles != null && HadoopRole.hasMgmtRole(roles)) {
+         logger.debug(vNode.getVmName() + " is a master node");
+         logger.debug("set disk mode to persistent for VM " + vNode.getVmName());
+         // change disk mode to persistent, instead of independent_persistent, to allow snapshot and clone on VM
+         persistentDiskMode = true;
+      }
+
+      if (persistentDiskMode) {
+         setPersistentDiskMode(vNode);
       }
 
       ClusterEntity clusterEntity =
@@ -1477,7 +1495,7 @@ public class ClusteringService implements IClusteringService {
    /**
     * this method will delete the cluster root folder, if there is any VM
     * existed and powered on in the folder, the folder deletion will fail.
-    * 
+    *
     * @param folderNames
     */
    private void deleteFolders(BaseNode node) throws BddException {
