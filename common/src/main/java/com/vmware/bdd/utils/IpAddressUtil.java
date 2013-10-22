@@ -16,6 +16,10 @@ package com.vmware.bdd.utils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
+
+import com.vmware.bdd.apitypes.IpBlock;
+import com.vmware.bdd.exception.BddException;
 
 public class IpAddressUtil {
    public static boolean isValidIp(long addr) {
@@ -178,4 +182,18 @@ public class IpAddressUtil {
    public static boolean networkContains(long network, long netmask, long ip) {
       return network == (netmask & ip);
    }
+
+   public static void verifyIPBlocks(List<IpBlock> ipBlocks, final long netmask) {
+      AuAssert.check(ipBlocks != null, "Spring should guarantee this");
+      for (IpBlock blk : ipBlocks) {
+         Long begin = getAddressAsLong(blk.getBeginIp());
+         Long end = getAddressAsLong(blk.getEndIp());
+         if (begin == null || end == null || begin > end
+               || !isValidIp(netmask, begin) || !isValidIp(netmask, end)) {
+            throw BddException.INVALID_PARAMETER("IP block",
+                  "[" + blk.getBeginIp() + ", " + blk.getEndIp() + "]");
+         }
+      }
+   }
+
 }

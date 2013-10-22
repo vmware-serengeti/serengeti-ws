@@ -30,9 +30,11 @@ import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.dal.INetworkDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.IpBlockEntity;
+import com.vmware.bdd.entity.IpBlockEntity.BlockType;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NetworkEntity.AllocType;
 import com.vmware.bdd.service.resmgmt.IResourceService;
+import com.vmware.bdd.utils.IpAddressUtil;
 
 public class NetworkServiceTest {
    @Mocked
@@ -158,20 +160,39 @@ public class NetworkServiceTest {
    }
 
    @Test(groups = { "res-mgmt" })
-   public void testUpdateNetwork() {
-      tempEntity = new NetworkEntity();
-      tempEntity.setName("defaultNet");
-      tempEntity.setAllocType(AllocType.DHCP);
-      tempEntity.setPortGroup("network1");
-      tempEntity.setClusters(new ArrayList<ClusterEntity>());
-      tempEntity.setIpBlocks(new ArrayList<IpBlockEntity>());
-
-      networkSvc.updateNetwork(tempEntity, AllocType.IP_POOL, "255.255.255.0", "192.168.1.1", "10.10.10.10", "5.5.5.5");
-      new Verifications() {
+   public void increaseIPs() {
+      final NetworkEntity network = new NetworkEntity();
+      network.setName("staticNetwork");
+      network.setPortGroup("portGroup1");
+      network.setAllocType(AllocType.IP_POOL);
+      network.setNetmask("255.255.255.0");
+      network.setGateway("192.168.1.1");
+      network.setDns1("10.1.1.2");
+      network.setDns2("10.1.1.3");
+      List<IpBlock> ipBlocks = new ArrayList<IpBlock>();
+      ipBlocks.add(new IpBlock("192.168.1.11", "192.168.1.12"));
+      final List<IpBlockEntity> blocks =
+            new ArrayList<IpBlockEntity>(ipBlocks.size());
+      for (IpBlock ib : ipBlocks) {
+         IpBlockEntity blk =
+               new IpBlockEntity(network, IpBlockEntity.FREE_BLOCK_OWNER_ID,
+                     BlockType.FREE, IpAddressUtil.getAddressAsLong(ib
+                           .getBeginIp()), IpAddressUtil.getAddressAsLong(ib
+                           .getEndIp()));
+         blocks.add(blk);
+      }
+      network.setIpBlocks(blocks);
+      networkSvc.setNetworkDao(networkDao);
+      new Expectations() {
          {
-            networkDao.update(withAny(tempEntity));
+            networkSvc.getNetworkEntityByName(anyString);
+            result = network;
+         }
+         {
+            networkDao.addIpBlocks(network, network.getIpBlocks());
          }
       };
+      networkSvc.increaseIPs("staticNetwork", ipBlocks);
    }
 
    @Test(groups = { "res-mgmt" })

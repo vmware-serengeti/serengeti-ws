@@ -19,6 +19,7 @@ import static com.vmware.bdd.utils.IpAddressUtil.getNetworkPrefixBits;
 import static com.vmware.bdd.utils.IpAddressUtil.isValidIp;
 import static com.vmware.bdd.utils.IpAddressUtil.isValidNetmask;
 import static com.vmware.bdd.utils.IpAddressUtil.networkContains;
+import static com.vmware.bdd.utils.IpAddressUtil.verifyIPBlocks;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertNull;
@@ -26,11 +27,17 @@ import static org.testng.AssertJUnit.assertTrue;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.mchange.util.AssertException;
+import com.vmware.bdd.apitypes.IpBlock;
+import com.vmware.bdd.exception.BddException;
 
 public class TestIpAddressUtil {
    @BeforeMethod
@@ -128,4 +135,37 @@ public class TestIpAddressUtil {
       assertFalse(isValidIp("255.0.0.0", "10.0.0.0"));
       assertFalse(isValidIp("255.0.0.0", "10.255.255.255"));
    }
+
+   @Test
+   public void testVerifyIPBlocks() {
+      long netmask = IpAddressUtil.getAddressAsLong("255.255.254.0");
+      List<IpBlock> ipBlocks = new ArrayList<IpBlock>();
+      ipBlocks.add(new IpBlock("192.168.1.11", "192.168.1.12"));
+      verifyIPBlocks(ipBlocks, netmask);
+      ipBlocks.clear();
+      ipBlocks.add(new IpBlock("", "192.168.1.12"));
+      try {
+         verifyIPBlocks(ipBlocks, netmask);
+      } catch (BddException e) {
+         assertEquals(e.getMessage(),
+               "Invalid value: IP block=[, 192.168.1.12].");
+      }
+      ipBlocks.clear();
+      ipBlocks.add(new IpBlock("192.168.1.11", ""));
+      try {
+         verifyIPBlocks(ipBlocks, netmask);
+      } catch (BddException e) {
+         assertEquals(e.getMessage(),
+               "Invalid value: IP block=[192.168.1.11, ].");
+      }
+      ipBlocks.clear();
+      ipBlocks.add(new IpBlock("192.168.1.12", "192.168.1.11"));
+      try {
+         verifyIPBlocks(ipBlocks, netmask);
+      } catch (BddException e) {
+         assertEquals(e.getMessage(),
+               "Invalid value: IP block=[192.168.1.12, 192.168.1.11].");
+      }
+   }
+
 }

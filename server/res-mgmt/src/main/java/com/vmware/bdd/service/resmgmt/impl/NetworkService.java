@@ -238,43 +238,33 @@ public class NetworkService implements Serializable, INetworkService {
     * (non-Javadoc)
     *
     * @see
-    * com.vmware.bdd.manager.INetworkService#updateNetwork(com.vmware.bdd.entity
-    * .NetworkEntity, com.vmware.bdd.entity.NetworkEntity.AllocType,
-    * java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    * com.vmware.bdd.manager.INetworkService#increaseIPs(java.lang.String, 
+    * java.util.List<com.vmware.bdd.apitypes.IpBlock>)
     */
    @Override
    @Transactional
-   public synchronized void updateNetwork(NetworkEntity network,
-         AllocType allocType, String netmask, String gateway, String dns1,
-         String dns2) {
-      assertNetworkNotUsed(network);
-
-      switch (allocType) {
-      case DHCP:
-         if (network.getAllocType() == AllocType.IP_POOL) {
-            network.setAllocType(AllocType.DHCP);
-            network.setNetmask(null);
-            network.setGateway(null);
-            network.setDns1(null);
-            network.setDns2(null);
-            for (IpBlockEntity block : network.getIpBlocks()) {
-               ipBlockDao.delete(block);
-            }
-            network.setIpBlocks(new ArrayList<IpBlockEntity>(0));
-         }
-         break;
-      case IP_POOL:
-         network.setAllocType(AllocType.IP_POOL);
-         network.setNetmask(netmask);
-         network.setGateway(gateway);
-         network.setDns1(dns1);
-         network.setDns2(dns2);
-
-         break;
-      default:
-         AuAssert.unreachable();
+   public synchronized void increaseIPs(String networkName,
+         List<IpBlock> ipBlocks) {
+      NetworkEntity network = getNetworkEntityByName(networkName);
+      if (network == null) {
+         throw NetworkException.NOT_FOUND("Network", networkName);
       }
-      networkDao.update(network);
+      if (network.getAllocType().equals(AllocType.DHCP)) {
+         throw NetworkException.IP_CONFIG_NOT_USED_FOR_DHCP();
+      }
+      long netmask = IpAddressUtil.getAddressAsLong(network.getNetmask());
+      IpAddressUtil.verifyIPBlocks(ipBlocks, netmask);
+      List<IpBlockEntity> blocks =
+            new ArrayList<IpBlockEntity>(ipBlocks.size());
+      for (IpBlock ib : ipBlocks) {
+         IpBlockEntity blk =
+               new IpBlockEntity(network, IpBlockEntity.FREE_BLOCK_OWNER_ID,
+                     BlockType.FREE, IpAddressUtil.getAddressAsLong(ib
+                           .getBeginIp()), IpAddressUtil.getAddressAsLong(ib
+                           .getEndIp()));
+         blocks.add(blk);
+      }
+      networkDao.addIpBlocks(network, blocks);
       network.validate();
    }
 

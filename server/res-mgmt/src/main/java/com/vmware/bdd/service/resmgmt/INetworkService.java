@@ -20,7 +20,6 @@ import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.entity.IpBlockEntity;
 import com.vmware.bdd.entity.NetworkEntity;
-import com.vmware.bdd.entity.NetworkEntity.AllocType;
 
 public interface INetworkService {
 
@@ -38,8 +37,7 @@ public interface INetworkService {
 
    List<NetworkRead> getAllNetworks(final boolean withDetails);
 
-   void updateNetwork(NetworkEntity network, AllocType allocType,
-         String netmask, String gateway, String dns1, String dns2);
+   void increaseIPs(String networkName, List<IpBlock> ipBlocks);
 
    void removeNetwork(NetworkEntity network);
 

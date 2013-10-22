@@ -43,6 +43,18 @@ public class NetworkRestClient {
    }
 
    /**
+    * Modify function of network command.
+    * 
+    * @param networkAdd
+    */
+   public void increaseIPs(NetworkAdd networkAdd) {
+      String networkName = networkAdd.getName();
+      final String path = Constants.REST_PATH_NETWORK + "/" + networkName;
+      final HttpMethod httpverb = HttpMethod.PUT;
+      restClient.update(networkAdd, path, httpverb);
+   }
+
+   /**
     * Delete function of network command.
     * 
     * @param name

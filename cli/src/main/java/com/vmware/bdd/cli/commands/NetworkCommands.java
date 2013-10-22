@@ -178,6 +178,27 @@ public class NetworkCommands implements CommandMarker {
       }
    }
 
+   @CliCommand(value = "network modify", help = "Modify a network from Serengeti by name")
+   public void modifyNetwork(
+         @CliOption(key = { "name" }, mandatory = true, help = "Customize the network's name") final String name,
+         @CliOption(key = { "addIP" }, mandatory = true, help = "The ip information") final String ip) {
+      if (!validateIP(ip, Constants.OUTPUT_OP_MODIFY)) {
+         return;
+      }
+      NetworkAdd networkAdd = new NetworkAdd();
+      networkAdd.setName(name);
+      try {
+         networkAdd.setIp(transferIpInfo(ip));
+         networkRestClient.increaseIPs(networkAdd);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NETWORK, name,
+               Constants.OUTPUT_OP_RESULT_MODIFY);
+      } catch (Exception e) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK, name,
+               Constants.OUTPUT_OP_RESULT_MODIFY,
+               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+      }
+   }
+
    private void addNetwork(NetworkType operType, final String name,
          final String portGroup, final String ip, final boolean dhcp,
          final String dns, final String sedDNS, final String gateway,
@@ -293,7 +314,7 @@ public class NetworkCommands implements CommandMarker {
          final String dns, final String sedDNS, final String gateway,
          final String mask) {
       
-      if (!validateIP(ip)) {
+      if (!validateIP(ip, Constants.OUTPUT_OP_ADD)) {
          return false;
       }
       if (!validateDNS(dns)) {
@@ -311,8 +332,7 @@ public class NetworkCommands implements CommandMarker {
       return true;
    }
 
-
-   private boolean validateIP(final String ip) {
+   private boolean validateIP(final String ip, final String type) {
 
       Pattern ipPattern = Pattern.compile(PatternType.IP);
       Pattern ipSegPattern = Pattern.compile(PatternType.IPSEG);
@@ -323,7 +343,7 @@ public class NetworkCommands implements CommandMarker {
          StringBuilder errorMessage = new StringBuilder().append(Constants.PARAMS_NETWORK_ADD_FORMAT_ERROR);
 
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
-               networkName, Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+               networkName, type, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.INVALID_VALUE + " " + "ip=" + ipPrarams + errorMessage.toString());
 
          return false;
@@ -336,7 +356,7 @@ public class NetworkCommands implements CommandMarker {
             StringBuilder errorMessage = new StringBuilder().append(Constants.PARAMS_NETWORK_ADD_FORMAT_ERROR);
 
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
-                  networkName, Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                  networkName, type, Constants.OUTPUT_OP_RESULT_FAIL,
                   Constants.INVALID_VALUE + " " + "ip=" + ipPrarams + errorMessage.toString());
 
             return false;
@@ -344,7 +364,6 @@ public class NetworkCommands implements CommandMarker {
       }
       return true;
    }
-
 
    private boolean validateDNS(final String dns) {
 

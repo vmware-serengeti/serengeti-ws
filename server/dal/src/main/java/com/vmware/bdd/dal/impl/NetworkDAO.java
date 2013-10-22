@@ -150,7 +150,7 @@ public class NetworkDAO extends BaseDAO<NetworkEntity> implements INetworkDAO {
       ipBlocks = iIpBlockDao.merge(ipBlocks, false, false, true);
       ipBlocks.addAll(entity.getIpBlocks());
       // do not allow overlapped input with the pool
-      ipBlocks = iIpBlockDao.merge(ipBlocks, false, false, false);
+      ipBlocks = iIpBlockDao.merge(ipBlocks, false, false, true);
 
       entity.setIpBlocks(ipBlocks);
    }

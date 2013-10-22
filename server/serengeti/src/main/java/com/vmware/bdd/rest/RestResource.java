@@ -36,15 +36,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.vmware.bdd.apitypes.ElasticityRequestBody;
 import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.DatastoreAdd;
 import com.vmware.bdd.apitypes.DatastoreRead;
 import com.vmware.bdd.apitypes.DistroRead;
+import com.vmware.bdd.apitypes.ElasticityRequestBody;
 import com.vmware.bdd.apitypes.FixDiskRequestBody;
-import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.RackInfo;
@@ -54,6 +53,8 @@ import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Type;
+import com.vmware.bdd.entity.NetworkEntity;
+import com.vmware.bdd.entity.NetworkEntity.AllocType;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
 import com.vmware.bdd.manager.ClusterManager;
@@ -64,7 +65,6 @@ import com.vmware.bdd.manager.ScaleManager;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
-import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.IpAddressUtil;
@@ -534,24 +534,23 @@ public class RestResource {
          if (na.getDns2() != null && !IpAddressUtil.isValidIp(na.getDns2())) {
             throw BddException.INVALID_PARAMETER("secondary DNS", na.getDns2());
          }
-
-         AuAssert.check(na.getIp() != null, "Spring should guarantee this");
-         for (IpBlock blk : na.getIp()) {
-            Long begin = IpAddressUtil.getAddressAsLong(blk.getBeginIp());
-            Long end = IpAddressUtil.getAddressAsLong(blk.getEndIp());
-
-            if (begin == null || end == null || begin > end
-                  || !IpAddressUtil.isValidIp(netmask, begin)
-                  || !IpAddressUtil.isValidIp(netmask, end)) {
-               throw BddException.INVALID_PARAMETER("IP block",
-                     "[" + blk.getBeginIp() + ", " + blk.getEndIp() + "]");
-            }
-         }
-
+         IpAddressUtil.verifyIPBlocks(na.getIp(), netmask);
          networkSvc.addIpPoolNetwork(na.getName(), na.getPortGroup(),
                na.getNetmask(), na.getGateway(), na.getDns1(), na.getDns2(),
                na.getIp());
       }
+   }
+
+   @RequestMapping(value = "/network/{networkName}", method = RequestMethod.PUT, consumes = "application/json")
+   @ResponseStatus(HttpStatus.OK)
+   public void increaseIPs(@PathVariable("networkName") String networkName,
+         @RequestBody NetworkAdd network, HttpServletRequest request,
+         HttpServletResponse response) {
+      if (CommonUtil.isBlank(networkName)
+            || !CommonUtil.validateName(networkName)) {
+         throw BddException.INVALID_PARAMETER("network name", networkName);
+      }
+      networkSvc.increaseIPs(networkName, network.getIp());
    }
 
    @RequestMapping(value = "/racks", method = RequestMethod.PUT)

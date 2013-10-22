@@ -54,4 +54,9 @@ public class NetworkException extends BddException {
       return new NetworkException(null, "IP_BLOCK_CONTAINS_GATEWAY",
             blk.getBeginAddress(), blk.getEndAddress());
    }
+
+   public static NetworkException IP_CONFIG_NOT_USED_FOR_DHCP() {
+      return new NetworkException(null, "IP_CONFIG_NOT_USED_FOR_DHCP");
+   }
+
 }

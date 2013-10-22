@@ -61,13 +61,15 @@ public class MockVcVmUtil {
 
       return true;
    }
-   
+
    @Mock
    public static void updateVm(String vmId) {
-	   
+
    }
 
    @Mock
    public static void checkAndCreateSnapshot(final VmSchema vmSchema) {
+
    }
+
 }

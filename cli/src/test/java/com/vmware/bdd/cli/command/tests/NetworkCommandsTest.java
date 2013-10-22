@@ -162,6 +162,16 @@ public class NetworkCommandsTest extends MockRestServer {
    }
 
    @Test
+   public void testModifyNetwork() throws Exception {
+      CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+      buildReqRespWithoutReqBody(
+            "https://127.0.0.1:8443/serengeti/api/network/staticNetwork", HttpMethod.PUT,
+            HttpStatus.NO_CONTENT, "");
+      networkCommands.modifyNetwork("staticNetwork","192.168.0.2-100");
+      CookieCache.clear();
+   }
+
+   @Test
    public void testDeleteNetwork() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody(
