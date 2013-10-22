@@ -139,15 +139,27 @@ public class Constants {
    public static final String HA_FLAG_ON = "on";
    public static final String HA_FLAG_FT = "ft";
 
-   public static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE =
-         "elastic_runtime.automation.enable";
-   public static final String MUST_CONFIGURE_FQDN = "You cannot deploy a CDH 4.2.1+ cluster in a network without FQDN/IP.";
-   public static final String CONVERTED_MEMORY_DIVISIBLE_BY_4 = "The size of the virtual machine memory must be evenly divisible by 4. ";
-   
+   public static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE = "elastic_runtime.automation.enable";
+   public static final String MUST_CONFIGURE_FQDN =
+         "You cannot deploy a CDH 4.2.1+ cluster in a network without FQDN/IP.";
+   public static final String CONVERTED_MEMORY_DIVISIBLE_BY_4 =
+         "The size of the virtual machine memory must be evenly divisible by 4. ";
+
    public static final String ROOT_SNAPSTHOT_NAME = "serengeti-snapshot";
    public static final String ROOT_SNAPSTHOT_DESC = "Serengeti template Root Snapshot";
-   
+
    public static final int DEFAULT_SCHEDULER_POOL_SIZE = 1024;
    public static final int MIN_MEM_SIZE = 1024;
    public static final String VERSION = "1.0.0";
+
+   public static final String SSH_PRIVATE_KEY_FILE_NAME = "/home/serengeti/.ssh/id_rsa";
+   public static final String SSH_PRIVATE_KEY_CONFIG_NAME = "serengeti.ssh.private.key.file";
+   public static final int SSH_PORT = 22;
+   public static final int SSH_SESSION_TIMEOUT = 15000;
+   public static final String SET_PASSWORD_SCRIPT_CONFIG_NAME = "serengeti.set.password.script";
+   public static final String SSH_USER_CONFIG_NAME = "serengeti.ssh.user";
+   public static final String DEFAULT_SSH_USER_NAME = "serengeti";
+   public static final String SSH_PORT_CONFIG_NAME = "serengeti.ssh.port";
+   public static final int DEFAULT_SSH_PORT = 22;
+   public static final String DEFAULT_SET_PASSWORD_SCRIPT = "/usr/sbin/serengeti-password";
 }

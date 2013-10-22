@@ -93,6 +93,14 @@
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 		<beans:property name="refreshAllNodes" value="false" />
 	</beans:bean>
+	<beans:bean name="setPasswordService" class="com.vmware.bdd.service.impl.SetPasswordService">
+	</beans:bean>
+	<beans:bean name="setPasswordForAllNodesTasklet"
+		class="com.vmware.bdd.service.job.SetPasswordForAllNodesStep">
+		<beans:property name="configMgr" ref="clusterConfigMgr" />
+		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
+		<beans:property name="setPasswordService" ref="setPasswordService"/>
+	</beans:bean>
 	<beans:bean name="clusterNodeSyncupTasklet"
 		class="com.vmware.bdd.service.job.ClusterNodeSyncupStep">
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />

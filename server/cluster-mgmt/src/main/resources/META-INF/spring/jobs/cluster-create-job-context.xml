@@ -19,6 +19,13 @@
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 	</beans:bean>
 
+	<beans:bean name="setPasswordForAllNodesTasklet"
+		class="com.vmware.bdd.service.job.SetPasswordForAllNodesStep">
+		<beans:property name="clusteringService" ref="clusteringService" />
+		<beans:property name="configMgr" ref="clusterConfigMgr" />
+		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
+	</beans:bean>
+
 	<job id="createClusterJob" job-repository="jobRepository">
 		<step id="createClusterPlanStep" next="updateClusterDataStep1">
 			<tasklet ref="createClusterPlanTasklet" />
@@ -50,8 +57,14 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="softwareCreateClusterStep" next="setAutoElasticityStep">
+		<step id="softwareCreateClusterStep" next="setPasswordForAllNodesStep">
 			<tasklet ref="softwareCreateClusterTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="setPasswordForAllNodesStep" next="setAutoElasticityStep">
+			<tasklet ref="setPasswordForAllNodesTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

@@ -137,6 +137,9 @@ public class ClusterSpecFactory {
          newSpec.setName(spec.getName());
       }
 
+      //--password
+      newSpec.setPassword(spec.getPassword());
+
       // --distro
       if (spec.getDistro() != null) {
          newSpec.setDistro(spec.getDistro());

@@ -19,7 +19,6 @@ import java.util.UUID;
 
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
-
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.placement.entity.BaseNode;

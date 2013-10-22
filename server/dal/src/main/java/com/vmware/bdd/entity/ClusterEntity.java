@@ -80,6 +80,8 @@ public class ClusterEntity extends EntityBase {
    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
    private Set<NodeGroupEntity> nodeGroups;
 
+   @Column(name = "password")
+   private String password;
    /*
     * cluster definition field. VCResourcePool inside this array may not be used
     * by this cluster, so we should avoid setting up the ManyToMany mapping.
@@ -382,4 +384,13 @@ public class ClusterEntity extends EntityBase {
       this.vhmJobTrackerPort = vhmJobTrackerPort;
    }
 
+   public String getPassword() {
+      //TODO(qjin):need to unencrypt the password before return
+      return password;
+   }
+
+   public void setPassword(String password) {
+      //TODO(qjin):need to encrypt the password before assignment
+      this.password = password;
+   }
 }

@@ -71,6 +71,7 @@ create sequence cluster_seq;
 create table cluster (
    id                  bigint       not null unique DEFAULT nextval('cluster_seq'::regclass),
    name                varchar(255) not null unique,
+   password            varchar(2048),
    distro              varchar(255),
    distro_vendor       varchar(255),
    distro_version      varchar(255),

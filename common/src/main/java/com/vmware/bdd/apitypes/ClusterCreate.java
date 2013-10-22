@@ -119,6 +119,8 @@ public class ClusterCreate implements Serializable {
 
    private boolean specFile;
 
+   private String password;
+
    public ClusterCreate() {
    }
 
@@ -140,6 +142,7 @@ public class ClusterCreate implements Serializable {
       this.validateConfig = cluster.validateConfig;
       this.topologyPolicy = cluster.topologyPolicy;
       this.hostToRackMap = cluster.hostToRackMap;
+      this.password = cluster.password;
    }
 
    public Map<String, Object> getConfiguration() {
@@ -988,5 +991,14 @@ public class ClusterCreate implements Serializable {
          }
       }
       return 0;
+   }
+
+   public String getPassword() {
+      return password;
+   }
+
+   public void setPassword(String password) {
+      this.password = password;
+
    }
 }

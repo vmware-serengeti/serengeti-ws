@@ -14,6 +14,7 @@
  ****************************************************************************/
 package com.vmware.bdd.cli.commands;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,7 +26,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import jline.ConsoleReader;
+
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.hadoop.impala.hive.HiveCommands;
@@ -35,6 +37,7 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
@@ -100,7 +103,8 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "topology" }, mandatory = false, help = "You must specify the topology type: HVE or RACK_AS_RACK or HOST_AS_RACK") final String topology,
          @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume,
          @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation,
-         @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes) {
+         @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes,
+         @CliOption(key = { "password" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Answer 'yes' to set password for all VMs in this cluster.") final boolean setClusterPassword) {
       // validate the name
       if (name.indexOf("-") != -1) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
@@ -125,7 +129,18 @@ public class ClusterCommands implements CommandMarker {
       ClusterCreate clusterCreate = new ClusterCreate();
       clusterCreate.setName(name);
 
-      if (type != null) {
+      if (setClusterPassword) {
+         String password = getPassword();
+         //user would like to set password, but failed to enter
+         //a valid one, quit cluster create
+         if (password == null) {
+            return;
+         } else {
+            clusterCreate.setPassword(password);
+         }
+      }
+
+     if (type != null) {
          ClusterType clusterType = ClusterType.getByDescription(type);
          if (clusterType == null) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
@@ -357,6 +372,54 @@ public class ClusterCommands implements CommandMarker {
             .append(hdfsNetwork).append(" for hdfs traffic, and ")
             .append(mapredNetwork).append(" for mapreduce traffic");
       warningMsgList.add(netsUsage.toString());
+   }
+
+   private String getPassword() {
+      String firstPassword = getInputedPassword(Constants.ENTER_PASSWORD);
+      if (firstPassword == null) {
+         return null;
+      }
+
+      String secondPassword = getInputedPassword(Constants.CONFIRM_PASSWORD);
+      if (secondPassword == null) {
+         return null;
+      }
+
+      if (!firstPassword.equals(secondPassword)) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, null,
+               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.PASSWORD_CONFIRMATION_FAILED);
+         return null;
+      }
+
+      return firstPassword;
+   }
+
+   private String getInputedPassword(String promptMsg) {
+      try {
+         ConsoleReader reader = new ConsoleReader();
+         reader.setDefaultPrompt(promptMsg);
+         String password = "";
+         password = reader.readLine(Character.valueOf('*'));
+         if (isValidPassword(password)) {
+            return password;
+         } else {
+            return null;
+         }
+      } catch (IOException e) {
+         return null;
+      }
+   }
+
+   private boolean isValidPassword(String password) {
+      if (password.length() < Constants.PASSWORD_MIN_LENGTH
+            || password.length() > Constants.PASSWORD_MAX_LENGTH) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, null,
+               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.PASSWORD_LENGTH_INVALID);
+         return false;
+      }
+      return true;
    }
 
    private List<String> findDistroRoles(ClusterCreate clusterCreate) {
