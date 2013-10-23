@@ -15,10 +15,12 @@
 package com.vmware.bdd.service.job;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import com.vmware.bdd.utils.Constants;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
@@ -58,7 +60,7 @@ public class ResizeClusterRemoveBadNodeStep extends TrackableTasklet {
       List<BaseNode> deletedNodes = new ArrayList<BaseNode>();
       removeExcessiveOrWrongStatusNodes(existingNodes, 
             deletedNodes, groupName, newInstanceNum, oldInstanceNum);
-      Set<String> occupiedIps = new HashSet<String>();
+      Map<String, Set<String>> occupiedIps = new HashMap<String, Set<String>>();
       JobUtils.removeNonExistNodes(existingNodes, deletedNodes, occupiedIps);
       verifyExistingSuccessNodes(existingNodes, 
             groupName, oldInstanceNum, clusterSpec);
@@ -70,9 +72,9 @@ public class ResizeClusterRemoveBadNodeStep extends TrackableTasklet {
             JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, existingNodes);
       putIntoJobExecutionContext(chunkContext, 
             JobConstants.CLUSTER_SPEC_JOB_PARAM, clusterSpec);
-      putIntoJobExecutionContext(chunkContext, 
-            JobConstants.CLUSTER_USED_IP_JOB_PARAM, occupiedIps);
-      putIntoJobExecutionContext(chunkContext, 
+      putIntoJobExecutionContext(chunkContext,
+      JobConstants.CLUSTER_USED_IP_JOB_PARAM, occupiedIps);
+      putIntoJobExecutionContext(chunkContext,
             JobConstants.CLUSTER_DELETED_NODES_JOB_PARAM, deletedNodes);
       putIntoJobExecutionContext(chunkContext, 
             JobConstants.CLUSTER_DELETE_VM_OPERATION_SUCCESS, deleted);
@@ -122,9 +124,10 @@ public class ResizeClusterRemoveBadNodeStep extends TrackableTasklet {
                   continue;
                }
                VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getVmMobId());
-               if (vm == null 
+               Set<String> ips = VcVmUtil.getAllIpAddresses(vm, node.fetchAllPortGroups(), false);
+               if (vm == null
                      || (!vm.isPoweredOn())
-                     || (VcVmUtil.getIpAddress(vm, false) == null)) {
+                     || ips.contains(Constants.NULL_IP)) {
                   deletedNodes.add(node);
                   continue;
                }

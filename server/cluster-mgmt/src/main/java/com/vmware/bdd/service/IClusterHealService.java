@@ -88,10 +88,12 @@ public interface IClusterHealService {
 
    /**
     * power on the specified vm
-    * 
+    *
+    * @param nodeName
     * @param vmId
+    * @param clusterName
     */
-   public void startVm(String nodeName, String vmId);
+   public void startVm(String nodeName, String vmId, String clusterName);
 
    /**
     * update vm and disk info from the new vm

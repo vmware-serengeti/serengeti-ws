@@ -108,6 +108,11 @@ public class BddException extends RuntimeException {
       return new BddException(ex, "BDD", "ALREADY_EXISTS", object, objectName);
    }
 
+   public static BddException PG_REFERENCED_MULTI_TIMES(String object,
+         String objectName) {
+      return new BddException(null, "BDD", "PG_REFERENCED_MULTI_TIMES", object, objectName);
+   }
+
    public static BddException ALREADY_EXISTS(String object, String objectName) {
       return ALREADY_EXISTS(null, object, objectName);
    }

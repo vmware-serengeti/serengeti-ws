@@ -19,8 +19,10 @@ import static org.testng.AssertJUnit.assertEquals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -32,6 +34,7 @@ import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.ServiceType;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 
 public class ClusterCreateTest {
 
@@ -309,6 +312,19 @@ public class ClusterCreateTest {
    public void testValidateClusterCreate() {
       ClusterCreate cluster = new ClusterCreate();
       cluster.setDistroVendor(Constants.DEFAULT_VENDOR);
+
+      Map<NetTrafficType, List<String>> networkConfig = new HashMap<NetTrafficType, List<String>>();
+
+      List<String> mgtnets = new ArrayList<String>();
+      mgtnets.add("nw1");
+      networkConfig.put(NetTrafficType.MGT_NETWORK, mgtnets);
+
+      List<String> hadpnets = new ArrayList<String>();
+      hadpnets.add("nw2");
+      networkConfig.put(NetTrafficType.HDFS_NETWORK, hadpnets);
+
+      cluster.setNetworkConfig(networkConfig);
+
       NodeGroupCreate master = new NodeGroupCreate();
       master.setName("master");
       master.setMemCapacityMB(7501);

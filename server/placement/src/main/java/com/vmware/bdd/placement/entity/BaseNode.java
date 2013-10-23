@@ -17,7 +17,11 @@ package com.vmware.bdd.placement.entity;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.vmware.aurora.composition.DiskSchema;
 import com.vmware.aurora.composition.DiskSchema.Disk;
@@ -27,6 +31,9 @@ import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.IpConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
@@ -34,8 +41,10 @@ import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.util.PlacementUtil;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.Constants;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
+import org.apache.log4j.Logger;
 
 public class BaseNode {
 
@@ -63,7 +72,9 @@ public class BaseNode {
    private String vmFolder;
 
    private VmSchema vmSchema;
-   private String ipAddress;
+
+   private Map<NetTrafficType, List<IpConfigInfo>> ipConfigs;
+
    private boolean success = false;
    private boolean finished = false;
    private String vmMobId;
@@ -93,8 +104,8 @@ public class BaseNode {
       this.vmName = vmName;
       this.nodeGroup = nodeGroup;
       this.cluster = cluster;
-
       this.vmSchema = new VmSchema();
+      initIpConfigs(cluster);
    }
 
    public NodeStatus getNodeStatus() {
@@ -137,12 +148,12 @@ public class BaseNode {
       this.vmMobId = vmMobId;
    }
 
-   public String getIpAddress() {
-      return ipAddress;
+   public Map<NetTrafficType, List<IpConfigInfo>> getIpConfigs() {
+      return ipConfigs;
    }
 
-   public void setIpAddress(String ipAddress) {
-      this.ipAddress = ipAddress;
+   public void setIpConfigs(Map<NetTrafficType, List<IpConfigInfo>> ipConfigs) {
+      this.ipConfigs = ipConfigs;
    }
 
    public boolean isSuccess() {
@@ -298,6 +309,103 @@ public class BaseNode {
 
       AuAssert.check(found);
       return size;
+   }
+
+   public void initIpConfigs(ClusterCreate cluster) {
+      ipConfigs = new HashMap<NetTrafficType, List<IpConfigInfo>>();
+      Map<NetTrafficType, List<String>> clusterNetConfig = cluster.getNetworkConfig();
+      if (clusterNetConfig == null || clusterNetConfig.isEmpty()) {
+         return;
+      }
+
+      Map<String, String> netName2Port = new HashMap<String, String>();
+      // cluster.getNetworkConfig() does not has portgroup info, but portgroup info
+      // is necessary to check ip, we have to fetch it from cluster.getNetworking()
+      for (NetworkAdd networkAdd : cluster.getNetworkings()) {
+         netName2Port.put(networkAdd.getName(), networkAdd.getPortGroup());
+      }
+
+      for (NetTrafficType type : clusterNetConfig.keySet()) {
+         if (!ipConfigs.containsKey(type)) {
+            ipConfigs.put(type, new ArrayList<IpConfigInfo>());
+         }
+         for (String netName : clusterNetConfig.get(type)) {
+            String netPg = netName2Port.get(netName);
+            IpConfigInfo info = new IpConfigInfo(type, netName, netPg, Constants.NULL_IP);
+            ipConfigs.get(type).add(info);
+         }
+      }
+   }
+
+   public void updateIpAddressOfPortGroup(String portGroupName, String ipAddress) {
+      if (ipConfigs != null && !ipConfigs.isEmpty()) {
+         for (List<IpConfigInfo> ipConfigList : ipConfigs.values()) {
+            for (IpConfigInfo config : ipConfigList) {
+               if (config.getPortGroupName().equals(portGroupName)) {
+                  config.setIpAddress(ipAddress);
+               }
+            }
+         }
+      }
+   }
+
+   public String fetchIpAddressOfPortGroup(String portGroupName) {
+      if (ipConfigs != null && !ipConfigs.isEmpty()) {
+         for (List<IpConfigInfo> ipConfigList : ipConfigs.values()) {
+            for (IpConfigInfo config : ipConfigList) {
+               if (config.getPortGroupName().equals(portGroupName)) {
+                  return config.getIpAddress();
+               }
+            }
+         }
+      }
+      return Constants.NULL_IP;
+   }
+
+   public Set<String> fetchAllPortGroups() {
+      Set<String> portGroups = new HashSet<String>();
+      if (ipConfigs != null && !ipConfigs.isEmpty()) {
+         for (List<IpConfigInfo> ipConfigList : ipConfigs.values()) {
+            for (IpConfigInfo config : ipConfigList) {
+               portGroups.add(config.getPortGroupName());
+            }
+         }
+      }
+      return portGroups;
+   }
+
+   public Map<String, String> fetchPortGroupToIpMap() {
+      Map<String, String> ipInfo = new HashMap<String, String>();
+      if (ipConfigs != null && !ipConfigs.isEmpty()) {
+         for (List<IpConfigInfo> ipConfigList : ipConfigs.values()) {
+            for (IpConfigInfo config : ipConfigList) {
+               ipInfo.put(config.getPortGroupName(), config.getIpAddress());
+            }
+         }
+      }
+      return ipInfo;
+   }
+
+   public boolean ipsReady() {
+      if (ipConfigs == null) {
+         return false;
+      }
+      for (List<IpConfigInfo> configs : ipConfigs.values()) {
+         for (IpConfigInfo config : configs) {
+            if (config.getIpAddress() == null || config.getIpAddress().equals(Constants.NULL_IP)) {
+               return false;
+            }
+         }
+      }
+      return true;
+   }
+
+   public void resetIps() {
+      for (List<IpConfigInfo> configs : ipConfigs.values()) {
+         for (IpConfigInfo config : configs) {
+            config.setIpAddress(Constants.NULL_IP);
+         }
+      }
    }
 
    /**

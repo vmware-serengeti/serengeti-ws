@@ -15,8 +15,10 @@
 package com.vmware.bdd.entity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -31,6 +33,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.google.gson.reflect.TypeToken;
+import com.vmware.bdd.apitypes.IpConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import org.hibernate.annotations.Type;
+
+import com.google.gson.Gson;
+import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.apitypes.NodeRead;
@@ -75,8 +84,9 @@ public class NodeEntity extends EntityBase {
    @Column(name = "action")
    private String action;
 
-   @Column(name = "ip_address")
-   private String ipAddress;
+   @Column(name = "ip_configs")
+   @Type(type = "text")
+   private String ipConfigs;
 
    @Column(name = "guest_host_name")
    private String guestHostName;
@@ -103,13 +113,13 @@ public class NodeEntity extends EntityBase {
    }
 
    public NodeEntity(String vmName, String rack, String hostName,
-         NodeStatus status, String ipAddress) {
+         NodeStatus status, String ipConfigs) {
       super();
       this.vmName = vmName;
       this.rack = rack;
       this.hostName = hostName;
       this.status = status;
-      this.ipAddress = ipAddress;
+      this.ipConfigs = ipConfigs;
       this.disks = new HashSet<DiskEntity>();
    }
 
@@ -227,12 +237,48 @@ public class NodeEntity extends EntityBase {
       }
    }
 
-   public String getIpAddress() {
-      return ipAddress;
+   @SuppressWarnings("unchecked")
+   public Set<String> getIpAddressSet() {
+      Set<String> ipAddresses = new HashSet<String>();
+      Map<NetTrafficType, List<IpConfigInfo>> ipConfigs = getIpConfigsInfo();
+      if (ipConfigs != null) {
+         for (List<IpConfigInfo> configs: getIpConfigsInfo().values()) {
+            for (IpConfigInfo config : configs) {
+               ipAddresses.add(config.getIpAddress());
+            }
+         }
+      }
+      return ipAddresses;
    }
 
-   public void setIpAddress(String ipAddress) {
-      this.ipAddress = ipAddress;
+   public String getIpConfigs() {
+      return ipConfigs;
+   }
+
+   @SuppressWarnings("unchecked")
+   public Map<NetTrafficType, List<IpConfigInfo>> getIpConfigsInfo() {
+      if (ipConfigs == null) {
+         return null;
+      }
+      return (new Gson()).fromJson(ipConfigs,
+            new TypeToken<HashMap<NetTrafficType, List<IpConfigInfo>>>() {}.getType());
+   }
+
+   public void setIpConfigs(String ipConfigs) {
+      this.ipConfigs = ipConfigs;
+   }
+
+   public void setIpConfigs(Map<NetTrafficType, List<IpConfigInfo>> ipConfigs) {
+      this.ipConfigs = (new Gson()).toJson(ipConfigs);
+   }
+
+   public String getMgtIp() {
+      Map<NetTrafficType, List<IpConfigInfo>> ipConfigs = getIpConfigsInfo();
+      if (ipConfigs == null || !ipConfigs.containsKey(NetTrafficType.MGT_NETWORK)
+            || ipConfigs.get(NetTrafficType.MGT_NETWORK).isEmpty()) {
+         return null;
+      }
+      return ipConfigs.get(NetTrafficType.MGT_NETWORK).get(0).getIpAddress();
    }
 
    /**
@@ -298,7 +344,7 @@ public class NodeEntity extends EntityBase {
    }
 
    public void copy(NodeEntity newNode) {
-      this.ipAddress = newNode.getIpAddress();
+      this.ipConfigs = newNode.getIpConfigs();
       this.status = newNode.getStatus();
       this.action = newNode.getAction();
       this.memorySize = newNode.getMemorySize();
@@ -327,6 +373,71 @@ public class NodeEntity extends EntityBase {
             this.disks.add(clone);
          }
       }
+   }
+
+   public void updateIpAddressOfPortGroup(String portGroupName, String ipAddress) {
+      Map<NetTrafficType, List<IpConfigInfo>> ipConfigsInfo = getIpConfigsInfo();
+      for (List<IpConfigInfo> ipConfigList : ipConfigsInfo.values()) {
+         for (IpConfigInfo config : ipConfigList) {
+            if (config.getPortGroupName().equals(portGroupName)) {
+               config.setIpAddress(ipAddress);
+            }
+         }
+      }
+      setIpConfigs(ipConfigsInfo);
+   }
+
+   public String fetchIpAddressOfPortGroup(String portGroupName) {
+      Map<String, String> ipInfo = fetchPortGroupToIpMap();
+      if (ipInfo.containsKey(portGroupName)) {
+         return ipInfo.get(portGroupName);
+      }
+      return Constants.NULL_IP;
+   }
+
+   public Set<String> fetchAllPortGroups() {
+      return fetchPortGroupToIpMap().keySet();
+   }
+
+   public Map<String, String> fetchPortGroupToIpMap() {
+      Map<String, String> ipInfo = new HashMap<String, String>();
+      Map<NetTrafficType, List<IpConfigInfo>> ipConfigsInfo = getIpConfigsInfo();
+      if (ipConfigsInfo != null && !ipConfigsInfo.isEmpty()) {
+         for (List<IpConfigInfo> ipConfigList : ipConfigsInfo.values()) {
+            for (IpConfigInfo config : ipConfigList) {
+               ipInfo.put(config.getPortGroupName(), config.getIpAddress());
+            }
+         }
+      }
+      return ipInfo;
+   }
+
+   public boolean ipsReady() {
+      Map<NetTrafficType, List<IpConfigInfo>> ipConfigsInfo = getIpConfigsInfo();
+      if (ipConfigsInfo == null) {
+         return false;
+      }
+      for (List<IpConfigInfo> configs : ipConfigsInfo.values()) {
+         for (IpConfigInfo config : configs) {
+            if (config.getIpAddress() == null || config.getIpAddress().equals(Constants.NULL_IP)) {
+               return false;
+            }
+         }
+      }
+      return true;
+   }
+
+   public void resetIps() {
+      Map<NetTrafficType, List<IpConfigInfo>> ipConfigsInfo = getIpConfigsInfo();
+      if (ipConfigsInfo == null) {
+         return;
+      }
+      for (List<IpConfigInfo> configs : ipConfigsInfo.values()) {
+         for (IpConfigInfo config : configs) {
+            config.setIpAddress(Constants.NULL_IP);
+         }
+      }
+      setIpConfigs(ipConfigsInfo);
    }
 
    public DiskEntity findDisk(String diskName) {
@@ -365,12 +476,23 @@ public class NodeEntity extends EntityBase {
       }
    }
 
+   public String getIpOfNetworkName(String networkName) {
+      for (List<IpConfigInfo> configs : getIpConfigsInfo().values()) {
+         for (IpConfigInfo config : configs) {
+            if (config.getNetworkName().equals(networkName)) {
+               return config.getIpAddress();
+            }
+         }
+      }
+      return null;
+   }
+
    // if includeVolumes is true, this method must be called inside a transaction
    public NodeRead toNodeRead(boolean includeVolumes) {
       NodeRead node = new NodeRead();
       node.setRack(this.rack);
       node.setHostName(this.hostName);
-      node.setIp(this.ipAddress);
+      node.setIpConfigs(this.getIpConfigsInfo());
       node.setName(this.vmName);
       node.setMoId(this.moId);
       node.setStatus(this.status != null ? this.status.toString() : null);

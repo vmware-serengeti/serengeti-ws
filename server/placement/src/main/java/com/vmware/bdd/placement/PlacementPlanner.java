@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.bdd.apitypes.NetworkAdd;
 import org.apache.log4j.Logger;
 
 import com.google.gson.internal.Pair;
@@ -228,9 +229,14 @@ public class PlacementPlanner implements IPlacementPlanner {
 
       ArrayList<Network> networks = new ArrayList<Network>();
       netSchema.networks = networks;
-      Network network = new Network();
-      network.vcNetwork = cluster.getNetworking().get(0).getPortGroup();
-      networks.add(network);
+
+      // TODO: enhance this logic to support nodegroup level networks
+      for (NetworkAdd networkAdd : cluster.getNetworkings()) {
+         Network network = new Network();
+         network.vcNetwork = networkAdd.getPortGroup();
+         networks.add(network);
+      }
+
       node.getVmSchema().networkSchema = netSchema;
 
       // resource schema

@@ -110,7 +110,7 @@ public class TestClusteringService {
 
    @Test(groups = { "TestClusteringService" }, dependsOnMethods = { "testReserveResource" })
    public void testCreateDhcpVmFolderFailed() {
-      NetworkAdd networkAdd = createNetworkAdd();
+      List<NetworkAdd> networkAdds = createNetworkAdd();
       List<BaseNode> vNodes = new ArrayList<BaseNode>();
       BaseNode node = new BaseNode("test-master-0");
       ClusterCreate spec = createClusterSpec();
@@ -120,7 +120,7 @@ public class TestClusteringService {
       vNodes.add(node);
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, false);
       try {
-         service.createVcVms(networkAdd, vNodes, null, null);
+         service.createVcVms(networkAdds, vNodes, null, null);
          Assert.assertTrue(false, "should throw exception but not.");
       } catch (Exception e) {
          logger.info(e.getMessage(), e);
@@ -130,7 +130,7 @@ public class TestClusteringService {
 
    @Test(groups = { "TestClusteringService" }, dependsOnMethods = { "testCreateDhcpVmFolderFailed" })
    public void testCreateDhcpVmNullResult() {
-      NetworkAdd networkAdd = createNetworkAdd();
+      List<NetworkAdd> networkAdds = createNetworkAdd();
       List<BaseNode> vNodes = new ArrayList<BaseNode>();
       BaseNode node = new BaseNode("test-master-0");
       ClusterCreate spec = createClusterSpec();
@@ -140,7 +140,7 @@ public class TestClusteringService {
       vNodes.add(node);
       MockTmScheduler.setResultIsNull(true);
       try {
-         service.createVcVms(networkAdd, vNodes, null, null);
+         service.createVcVms(networkAdds, vNodes, null, null);
          Assert.assertTrue(false, "should throw exception but not.");
       } catch (Exception e) {
          logger.info(e.getMessage(), e);
@@ -150,7 +150,7 @@ public class TestClusteringService {
 
    @Test(groups = { "TestClusteringService" }, dependsOnMethods = { "testCreateDhcpVmNullResult" })
    public void testCreateDhcpVmCreateVmFail() throws Exception {
-      NetworkAdd networkAdd = createNetworkAdd();
+      List<NetworkAdd> networkAdds = createNetworkAdd();
       List<BaseNode> vNodes = new ArrayList<BaseNode>();
       BaseNode node = new BaseNode("test-master-0");
       // create cluster spec
@@ -189,18 +189,20 @@ public class TestClusteringService {
             new ArrayList<VmCreateSpec>());
       service.setCloneService(cloneService);
 
-      boolean success = service.createVcVms(networkAdd, vNodes, null, null);
+      boolean success = service.createVcVms(networkAdds, vNodes, null, null);
       Assert.assertTrue(!success, "should get create vm failed.");
       MockVcCache.setGetFlag(true);
-      success = service.createVcVms(networkAdd, vNodes, null, null);
+      success = service.createVcVms(networkAdds, vNodes, null, null);
       Assert.assertTrue(!success, "should get create vm failed.");
    }
 
-   private NetworkAdd createNetworkAdd() {
+   private List<NetworkAdd> createNetworkAdd() {
+      List<NetworkAdd> networkAdds = new ArrayList<NetworkAdd>();
       NetworkAdd networkAdd = new NetworkAdd();
       networkAdd.setDhcp(true);
       networkAdd.setPortGroup("testGroup");
-      return networkAdd;
+      networkAdds.add(networkAdd);
+      return networkAdds;
    }
 
    private VmSchema createVmSchema() {
@@ -226,7 +228,7 @@ public class TestClusteringService {
 
    @Test(groups = { "TestClusteringService" }, dependsOnMethods = { "testCreateDhcpVmCreateVmFail" })
    public void testCreateDhcpVmCreateVmPass() throws Exception {
-      NetworkAdd networkAdd = createNetworkAdd();
+      List<NetworkAdd> networkAdds = createNetworkAdd();
       List<BaseNode> vNodes = new ArrayList<BaseNode>();
       BaseNode node = new BaseNode("test-master-0");
       ClusterCreate spec = createClusterSpec();
@@ -271,7 +273,7 @@ public class TestClusteringService {
                   Mockito.<ProgressCallback> any())).thenReturn(nodes);
       service.setCloneService(cloneService);
 
-      boolean success = service.createVcVms(networkAdd, vNodes, null, null);
+      boolean success = service.createVcVms(networkAdds, vNodes, null, null);
       Assert.assertTrue(success, "should get create vm success.");
    }
 

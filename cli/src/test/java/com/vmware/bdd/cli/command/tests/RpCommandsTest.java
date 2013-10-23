@@ -15,8 +15,12 @@
 package com.vmware.bdd.cli.command.tests;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.vmware.bdd.apitypes.IpConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import org.testng.annotations.Test;
@@ -36,6 +40,15 @@ import com.vmware.bdd.cli.commands.ResourcePoolCommands;
 public class RpCommandsTest extends MockRestServer {
    @Autowired
    private ResourcePoolCommands rpCommands;
+
+   private Map<NetTrafficType, List<IpConfigInfo>> createIpConfigs(String ip) {
+      Map<NetTrafficType, List<IpConfigInfo>> ipconfigs = new HashMap<NetTrafficType, List<IpConfigInfo>>();
+      List<IpConfigInfo> ips = new ArrayList<IpConfigInfo>();
+      ips.add(new IpConfigInfo(NetTrafficType.MGT_NETWORK, "nw1", "pg1", ip));
+      ipconfigs.put(NetTrafficType.MGT_NETWORK, ips);
+      return ipconfigs;
+   }
+
 
    @Test
    public void testCreateRp() throws Exception {
@@ -101,7 +114,7 @@ public class RpCommandsTest extends MockRestServer {
 
       NodeRead node01 = new NodeRead();
       node01.setName("node01");
-      node01.setIp("192.168.1.2");
+      node01.setIpConfigs(createIpConfigs("192.168.1.2"));
       List<String> roles01 = new ArrayList<String>();
       roles01.add("NameNode");
       roles01.add("JobTracker");
@@ -110,7 +123,7 @@ public class RpCommandsTest extends MockRestServer {
       node01.setRoles(roles01);
       NodeRead node02 = new NodeRead();
       node02.setName("node02");
-      node02.setIp("192.168.1.3");
+      node02.setIpConfigs(createIpConfigs("192.168.1.3"));
       List<String> roles02 = new ArrayList<String>();
       roles02.add("NameNode");
       roles02.add("JobTracker");
@@ -133,7 +146,7 @@ public class RpCommandsTest extends MockRestServer {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       NodeRead node01 = new NodeRead();
       node01.setName("node01");
-      node01.setIp("192.168.1.2");
+      node01.setIpConfigs(createIpConfigs("192.168.1.2"));
       List<String> roles01 = new ArrayList<String>();
       roles01.add("NameNode");
       roles01.add("JobTracker");
@@ -142,7 +155,7 @@ public class RpCommandsTest extends MockRestServer {
       node01.setRoles(roles01);
       NodeRead node02 = new NodeRead();
       node02.setName("node02");
-      node02.setIp("192.168.1.3");
+      node02.setIpConfigs(createIpConfigs("102.168.1.3"));
       List<String> roles02 = new ArrayList<String>();
       roles02.add("NameNode");
       roles02.add("JobTracker");

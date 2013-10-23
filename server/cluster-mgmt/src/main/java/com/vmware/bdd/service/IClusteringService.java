@@ -15,6 +15,7 @@
 package com.vmware.bdd.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -97,26 +98,27 @@ public interface IClusteringService {
     * @param cluster
     * @param existingNodes
     * @param deletedNodes
-    * @param occupiedIps
+    * @param occupiedIpSets
     * @return
     */
    public boolean removeBadNodes(ClusterCreate cluster, List<BaseNode> existingNodes,
-         List<BaseNode> deletedNodes, Set<String> occupiedIps, StatusUpdater statusUpdator);
+         List<BaseNode> deletedNodes, Map<String, Set<String>> occupiedIpSets,
+         StatusUpdater statusUpdator);
 
    public List<BaseNode> getBadNodes(ClusterCreate cluster, List<BaseNode> existingNodes);
 
    public boolean syncDeleteVMs(List<BaseNode> badNodes, StatusUpdater statusUpdator);
 
    /**
-    * @param networkAdd
+    *
+    * @param networkAdds
     * @param vNodes
-    * @param statusUpdator
-    * @param occupiedIps
+    * @param occupiedMgrIps
+    * @param statusUpdater
     * @return
     */
-   public boolean createVcVms(NetworkAdd networkAdd,
-         List<BaseNode> vNodes, StatusUpdater statusUpdator,
-         Set<String> occupiedIps);
+   public boolean createVcVms(List<NetworkAdd> networkAdds,
+         List<BaseNode> vNodes, Map<String, Set<String>> occupiedMgrIps, StatusUpdater statusUpdater);
 
    /**
     * Initialize clustering service
@@ -140,7 +142,7 @@ public interface IClusteringService {
     * adjust disk io shares to specified level, NORMAL, HIGH or LOW
     * 
     * @param clusterName
-    * @param nodeGroupName
+    * @param targetNodes
     * @param ioShares
     * @return
     */

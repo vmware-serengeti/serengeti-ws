@@ -15,11 +15,15 @@
 package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.apitypes.IpConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import mockit.Mockit;
 
 import org.apache.log4j.Logger;
@@ -248,6 +252,14 @@ public class TestClusterConfigManager {
       System.out.println("sub string: " + s1.substring(i));
    }
 
+   private Map<NetTrafficType, List<String>> createNetConfigs() {
+      Map<NetTrafficType, List<String>> netConfigs = new HashMap<NetTrafficType, List<String>>();
+      List<String> netConfig = new ArrayList<String>();
+      netConfig.add("dhcpNet1");
+      netConfigs.put(NetTrafficType.MGT_NETWORK, netConfig);
+      return netConfigs;
+   }
+
    @Test(groups = { "TestClusterConfigManager" })
    public void testClusterConfig() throws Exception {
       ClusterCreate spec = new ClusterCreate();
@@ -255,7 +267,7 @@ public class TestClusterConfigManager {
       List<String> rps = new ArrayList<String>();
       rps.add("myRp1");
       spec.setRpNames(rps);
-      spec.setNetworkName("dhcpNet1");
+      spec.setNetworkConfig(createNetConfigs());
       spec.setDistro("apache");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       spec.setType(ClusterType.HDFS_MAPRED);
@@ -288,7 +300,7 @@ public class TestClusterConfigManager {
       List<String> rps = new ArrayList<String>();
       rps.add("myRp1");
       spec.setRpNames(rps);
-      spec.setNetworkName("dhcpNet1");
+      spec.setNetworkConfig(createNetConfigs());
       spec.setDistro("apache");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       spec.setExternalHDFS(hdfsArray[0]);
@@ -382,7 +394,7 @@ public class TestClusterConfigManager {
       List<String> rps = new ArrayList<String>();
       rps.add("myRp1");
       spec.setRpNames(rps);
-      spec.setNetworkName("dhcpNet1");
+      spec.setNetworkConfig(createNetConfigs());
       spec.setDistro("apache");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       String clusterConfigJson =
@@ -474,7 +486,7 @@ public class TestClusterConfigManager {
       List<String> rps = new ArrayList<String>();
       rps.add("myRp1");
       spec.setRpNames(rps);
-      spec.setNetworkName("dhcpNet1");
+      spec.setNetworkConfig(createNetConfigs());
       spec.setDistro("apache");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
 
@@ -554,7 +566,7 @@ public class TestClusterConfigManager {
    public void testClusterConfigWithGroupSlave() {
       ClusterCreate spec = new ClusterCreate();
       spec.setName("my-cluster1");
-      spec.setNetworkName("ipPool1");
+      spec.setNetworkConfig(createNetConfigs());
       List<String> rps = new ArrayList<String>();
       rps.add("myRp2");
       rps.add("myRp3");
@@ -596,7 +608,7 @@ public class TestClusterConfigManager {
    public void testClusterConfigWithGroupSlave2() {
       ClusterCreate spec = new ClusterCreate();
       spec.setName("my-cluster-slave2");
-      spec.setNetworkName("dhcpNet1");
+      spec.setNetworkConfig(createNetConfigs());
       List<String> rps = new ArrayList<String>();
       rps.add("myRp2");
       rps.add("myRp3");
@@ -638,7 +650,7 @@ public class TestClusterConfigManager {
 
    public void testClusterCreateWithGroupMaster() {
       ClusterCreate spec = new ClusterCreate();
-      spec.setNetworkName("dhcpNet1");
+      spec.setNetworkConfig(createNetConfigs());
       spec.setName("my-cluster2");
       List<String> rps = new ArrayList<String>();
       rps.add("myRp2");
@@ -681,7 +693,7 @@ public class TestClusterConfigManager {
 
    public void testClusterConfigWithGroupMasterNeg() {
       ClusterCreate spec = new ClusterCreate();
-      spec.setNetworkName("dhcpNet1");
+      spec.setNetworkConfig(createNetConfigs());
       spec.setName("my-cluster3");
       List<String> rps = new ArrayList<String>();
       rps.add("myRp2");
@@ -718,7 +730,7 @@ public class TestClusterConfigManager {
 
    public void testClusterConfigWithGroupMasterNeg1() {
       ClusterCreate spec = new ClusterCreate();
-      spec.setNetworkName("dhcpNet1");
+      spec.setNetworkConfig(createNetConfigs());
       spec.setName("my-cluster3");
       List<String> rps = new ArrayList<String>();
       rps.add("myRp2");
@@ -771,7 +783,7 @@ public class TestClusterConfigManager {
    public void testClusterConfigWithClusterStorage() throws Exception {
       ClusterCreate spec = new ClusterCreate();
       spec.setName("my-cluster4");
-      spec.setNetworkName("dhcpNet1");
+      spec.setNetworkConfig(createNetConfigs());
       List<String> rps = new ArrayList<String>();
       rps.add("myRp1");
       spec.setRpNames(rps);
@@ -804,7 +816,7 @@ public class TestClusterConfigManager {
 
    public void testClusterConfigWithGroupStorage() {
       ClusterCreate spec = new ClusterCreate();
-      spec.setNetworkName("dhcpNet1");
+      spec.setNetworkConfig(createNetConfigs());
       spec.setName("my-cluster5");
       List<String> rps = new ArrayList<String>();
       rps.add("myRp2");
@@ -850,7 +862,7 @@ public class TestClusterConfigManager {
 
    public void testClusterConfigWithGroupStoragePattern() {
       ClusterCreate spec = new ClusterCreate();
-      spec.setNetworkName("dhcpNet1");
+      spec.setNetworkConfig(createNetConfigs());
       spec.setName("my-cluster6");
       List<String> rps = new ArrayList<String>();
       rps.add("myRp2");
@@ -899,7 +911,7 @@ public class TestClusterConfigManager {
 
    public void testClusterConfigWithNoSlave() {
       ClusterCreate spec = new ClusterCreate();
-      spec.setNetworkName("dhcpNet1");
+      spec.setNetworkConfig(createNetConfigs());
       spec.setName("my-cluster7");
       List<String> rps = new ArrayList<String>();
       rps.add("myRp2");
@@ -948,7 +960,7 @@ public class TestClusterConfigManager {
       List<String> rps = new ArrayList<String>();
       rps.add("myRp1");
       spec.setRpNames(rps);
-      spec.setNetworkName("dhcpNet1");
+      spec.setNetworkConfig(createNetConfigs());
       spec.setType(ClusterType.HDFS_MAPRED);
       spec.setDistro("apache");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
@@ -984,7 +996,8 @@ public class TestClusterConfigManager {
    @SuppressWarnings({ "rawtypes", "unchecked" })
    public void testGroupMasterWithGroupAppConfig() {
       ClusterCreate spec = new ClusterCreate();
-      spec.setNetworkName("dhcpNet1");
+      spec.setNetworkConfig(createNetConfigs());
+
       spec.setName("my-cluster9");
       List<String> rps = new ArrayList<String>();
       rps.add("myRp2");

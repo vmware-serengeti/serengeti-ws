@@ -231,7 +231,7 @@ public class ClusterRestClient {
                      Constants.FORMAT_TABLE_COLUMN_NAME,
                      Arrays.asList("getName"));
                columnNamesWithGetMethodNames.put(
-                     Constants.FORMAT_TABLE_COLUMN_IP, Arrays.asList("getIp"));
+                     Constants.FORMAT_TABLE_COLUMN_IP, Arrays.asList("fetchMgtIp"));
                columnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_STATUS,
                      Arrays.asList("getStatus"));

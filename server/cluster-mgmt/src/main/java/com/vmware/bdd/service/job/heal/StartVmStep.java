@@ -43,6 +43,9 @@ public class StartVmStep extends TrackableTasklet {
       String newVmId =
             getFromJobExecutionContext(chunkContext,
                   JobConstants.REPLACE_VM_ID, String.class);
+      String clusterName =
+            getJobParameters(chunkContext).getString(
+                  JobConstants.CLUSTER_NAME_JOB_PARAM);
       
       // if the replacement vm is not created, should exit in last step
       AuAssert.check(newVmId != null);
@@ -50,7 +53,7 @@ public class StartVmStep extends TrackableTasklet {
       logger.debug("power on the replacement vm " + targetNode);
 
       try {
-         healService.startVm(targetNode, newVmId);
+         healService.startVm(targetNode, newVmId, clusterName);
       } catch (Exception e) {
          putIntoJobExecutionContext(chunkContext,
                JobConstants.CURRENT_ERROR_MESSAGE, e.getMessage());

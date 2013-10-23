@@ -31,6 +31,7 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -373,30 +374,17 @@ public class ClusteringService implements IClusteringService {
       });
    }
 
-   public static Map<String, String> getNetworkGuestVariable(
-         NetworkAdd networkAdd, String ipAddress, String guestHostName) {
-      Map<String, String> networkJson = new HashMap<String, String>();
-      networkJson
-            .put(Constants.GUEST_VARIABLE_POLICY_KEY, networkAdd.getType());
-      networkJson.put(Constants.GUEST_VARIABLE_IP_KEY, ipAddress);
-      networkJson.put(Constants.GUEST_VARIABLE_NETMASK_KEY,
-            networkAdd.getNetmask());
-      networkJson.put(Constants.GUEST_VARIABLE_GATEWAY_KEY,
-            networkAdd.getGateway());
-      networkJson.put(Constants.GUEST_VARIABLE_HOSTNAME_KEY, guestHostName);
-      networkJson.put(Constants.GUEST_VARIABLE_DNS_KEY_0, networkAdd.getDns1());
-      networkJson.put(Constants.GUEST_VARIABLE_DNS_KEY_1, networkAdd.getDns2());
-      return networkJson;
-   }
-
-   private void setNetworkSchema(List<BaseNode> vNodes) {
+   private void updateNicLabels(List<BaseNode> vNodes) {
       logger.info("Start to set network schema for template nic.");
       for (BaseNode node : vNodes) {
          List<Network> networks = node.getVmSchema().networkSchema.networks;
          if (!networks.isEmpty()) {
-            // reset the first network label since template vm contains one nic by default
             networks.get(0).nicLabel = templateNetworkLabel;
+            for (int i = 1; i < networks.size(); i++) {
+               networks.get(i).nicLabel = VcVmUtil.NIC_LABEL_PREFIX + (i+1);
+            }
          }
+         logger.info(node.getVmSchema());
       }
    }
 
@@ -406,26 +394,38 @@ public class ClusteringService implements IClusteringService {
     * so some of them may already be occupied by existing node. So we need to
     * detect if that ip is allocated, before assign that one to one node
     *
-    * @param networkAdd
     * @param vNodes
-    * @param occupiedIps
+    * @param networkAdds
+    * @param occupiedIpSets
     */
-   private void allocateStaticIp(NetworkAdd networkAdd, List<BaseNode> vNodes,
-         Set<String> occupiedIps) {
-      if (networkAdd.isDhcp()) {
-         // no need to allocate ip for dhcp
-         logger.info("using dhcp network.");
-         return;
+   private void allocateStaticIp(List<BaseNode> vNodes, List<NetworkAdd> networkAdds,
+         Map<String, Set<String>> occupiedIpSets) {
+      int i, j;
+      for (i = 0; i < networkAdds.size(); i++) {
+         NetworkAdd networkAdd = networkAdds.get(i);
+         String portGroupName = networkAdd.getPortGroup();
+         Set<String> usedIps = null;
+         if (occupiedIpSets != null && !occupiedIpSets.isEmpty()) {
+            usedIps = occupiedIpSets.get(portGroupName);
+         }
+
+         if (networkAdd.isDhcp()) {
+            // no need to allocate ip for dhcp
+            logger.info("using dhcp for network: " + portGroupName);
+         } else {
+            logger.info("Start to allocate static ip address for each VM's " + i + "th network.");
+            List<String> availableIps =
+                  IpBlock.getIpAddressFromIpBlock(networkAdd.getIp());
+            if (usedIps != null && !usedIps.isEmpty()) {
+               availableIps.removeAll(usedIps);
+            }
+            AuAssert.check(availableIps.size() == vNodes.size());
+            for (j = 0; j < availableIps.size(); j++) {
+               vNodes.get(j).updateIpAddressOfPortGroup(portGroupName, availableIps.get(j));
+            }
+            logger.info("Finished to allocate static ip address for VM's mgr network.");
+         }
       }
-      logger.info("Start to allocate static ip address for each VM.");
-      List<String> availableIps =
-            IpBlock.getIpAddressFromIpBlock(networkAdd.getIp());
-      availableIps.removeAll(occupiedIps);
-      AuAssert.check(availableIps.size() == vNodes.size());
-      for (int i = 0; i < availableIps.size(); i++) {
-         vNodes.get(i).setIpAddress(availableIps.get(i));
-      }
-      logger.info("Finished to allocate static ip address for VM.");
    }
 
    private String getMaprActiveJobTrackerIp(final String maprNodeIP,
@@ -539,7 +539,7 @@ public class ClusteringService implements IClusteringService {
                if (cluster.getDistro().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
                   if (roles
                         .contains(HadoopRole.MAPR_JOBTRACKER_ROLE.toString())) {
-                     String thisJtIp = node.getIpAddress();
+                     String thisJtIp = node.getMgtIp();
                      String activeJtIp;
                      try {
                         activeJtIp =
@@ -549,10 +549,14 @@ public class ClusteringService implements IClusteringService {
                         continue;
                      }
 
+                     /*
+                      * TODO: in multiple NICs env, if portgroups are isolated,
+                      * may not able to retrieve active IP.
+                      */
                      AuAssert.check(!CommonUtil.isBlank(thisJtIp),
                            "falied to query active JobTracker Ip");
                      for (NodeEntity jt : nodes) {
-                        if (jt.getIpAddress().equals(activeJtIp)) {
+                        if (jt.getIpAddressSet().contains(activeJtIp)) {
                            cluster.setVhmMasterMoid(jt.getMoId());
                            break;
                         }
@@ -972,14 +976,14 @@ public class ClusteringService implements IClusteringService {
 
    @SuppressWarnings("unchecked")
    @Override
-   public boolean createVcVms(NetworkAdd networkAdd, List<BaseNode> vNodes,
-         StatusUpdater statusUpdator, Set<String> occupiedIps) {
+   public boolean createVcVms(List<NetworkAdd> networkAdds, List<BaseNode> vNodes,
+         Map<String, Set<String>> occupiedIpSets, StatusUpdater statusUpdator) {
       if (vNodes.isEmpty()) {
          logger.info("No vm to be created.");
          return true;
       }
-      setNetworkSchema(vNodes);
-      allocateStaticIp(networkAdd, vNodes, occupiedIps);
+      updateNicLabels(vNodes);
+      allocateStaticIp(vNodes, networkAdds, occupiedIpSets);
       Map<String, Folder> folders = createVcFolders(vNodes.get(0).getCluster());
       String clusterRpName = createVcResourcePools(vNodes);
       logger.info("syncCreateVMs, start to create VMs.");
@@ -1003,13 +1007,13 @@ public class ClusteringService implements IClusteringService {
          VmCreateSpec spec = new VmCreateSpec();
          VmSchema createSchema = getVmSchema(vNode);
          spec.setSchema(createSchema);
-         Map<String, String> guestVariable =
-               getNetworkGuestVariable(networkAdd, vNode.getIpAddress(),
-                     vNode.getGuestHostName());
-         spec.setBootupConfigs(guestVariable);
+         GuestMachineIdSpec machineIdSpec = new GuestMachineIdSpec(
+               networkAdds, vNode.fetchPortGroupToIpMap(), vNode.getGuestHostName());
+         logger.info("machine id of vm " + vNode.getVmName() + ":\n" + machineIdSpec.toString());
+         spec.setBootupConfigs(machineIdSpec.toGuestVarialbe());
          // timeout is 10 mintues
          QueryIpAddress query =
-               new QueryIpAddress(Constants.VM_POWER_ON_WAITING_SEC);
+               new QueryIpAddress(vNode.fetchAllPortGroups(), Constants.VM_POWER_ON_WAITING_SEC);
          spec.setPostPowerOn(query);
          spec.setPrePowerOn(getPrePowerOnFunc(vNode));
          spec.setLinkedClone(false);
@@ -1232,7 +1236,7 @@ public class ClusteringService implements IClusteringService {
             continue;
          }
 
-         QueryIpAddress query = new QueryIpAddress(600);
+         QueryIpAddress query = new QueryIpAddress(node.fetchAllPortGroups(), Constants.VM_POWER_ON_WAITING_SEC);
          VcHost host = null;
          if (node.getHostName() != null) {
             host = VcResourceUtils.findHost(node.getHostName());
@@ -1271,7 +1275,7 @@ public class ClusteringService implements IClusteringService {
             } else if (result[i].throwable != null) {
                StartVmSP sp = (StartVmSP) storeProceduresArray[i];
                VcVirtualMachine vm = sp.getVcVm();
-               if (vm != null && VcVmUtil.getIpAddress(vm, false) != null) {
+               if (vm != null && VcVmUtil.checkIpAddresses(vm)) {
                   ++total;
                } else {
                   logger.error(
@@ -1360,7 +1364,7 @@ public class ClusteringService implements IClusteringService {
 
    public boolean removeBadNodes(ClusterCreate cluster,
          List<BaseNode> existingNodes, List<BaseNode> deletedNodes,
-         Set<String> occupiedIps, StatusUpdater statusUpdator) {
+         Map<String, Set<String>> occupiedIpSets, StatusUpdater statusUpdator) {
       logger.info("Start to remove node violate placement policy "
             + "or in wrong status in cluster: " + cluster.getName());
       // call tm to remove bad nodes
@@ -1378,7 +1382,7 @@ public class ClusteringService implements IClusteringService {
 
       if (badNodes != null && badNodes.size() > 0) {
          boolean deleted = syncDeleteVMs(badNodes, statusUpdator);
-         afterBadVcVmDelete(existingNodes, deletedNodes, badNodes, occupiedIps);
+         afterBadVcVmDelete(existingNodes, deletedNodes, badNodes, occupiedIpSets);
          return deleted;
       }
       return true;
@@ -1391,7 +1395,7 @@ public class ClusteringService implements IClusteringService {
 
    private void afterBadVcVmDelete(List<BaseNode> existingNodes,
          List<BaseNode> deletedNodes, List<BaseNode> vcDeletedNodes,
-         Set<String> occupiedIps) {
+         Map<String, Set<String>> occupiedIpSets) {
       // clean up in memory node list
       deletedNodes.addAll(vcDeletedNodes);
       Set<String> deletedNodeNames = new HashSet<String>();
@@ -1401,7 +1405,7 @@ public class ClusteringService implements IClusteringService {
       for (Iterator<BaseNode> ite = existingNodes.iterator(); ite.hasNext();) {
          BaseNode vNode = ite.next();
          if (deletedNodeNames.contains(vNode.getVmName())) {
-            occupiedIps.remove(vNode.getIpAddress());
+            JobUtils.adjustOccupiedIpSets(occupiedIpSets, vNode, false);
             ite.remove();
          }
       }
@@ -1495,8 +1499,14 @@ public class ClusteringService implements IClusteringService {
    /**
     * this method will delete the cluster root folder, if there is any VM
     * existed and powered on in the folder, the folder deletion will fail.
+<<<<<<< HEAD
     *
     * @param folderNames
+=======
+    * 
+    * @param node
+    * @throws BddException
+>>>>>>> enable configuring multiple NICs
     */
    private void deleteFolders(BaseNode node) throws BddException {
       String path = node.getVmFolder();
@@ -1672,7 +1682,7 @@ public class ClusteringService implements IClusteringService {
    public boolean startSingleVM(String clusterName, String nodeName,
          StatusUpdater statusUpdator) {
       NodeEntity node = this.clusterEntityMgr.findNodeByName(nodeName);
-      QueryIpAddress query = new QueryIpAddress(600);
+      QueryIpAddress query = new QueryIpAddress(node.fetchAllPortGroups(), Constants.VM_POWER_ON_WAITING_SEC);
 
       VcHost host = null;
       if (node.getHostName() != null) {

@@ -16,8 +16,11 @@ package com.vmware.bdd.entity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -26,13 +29,15 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.google.gson.reflect.TypeToken;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.Priority;
+import org.apache.log4j.Logger;
 import org.hibernate.annotations.Type;
 
 import com.google.gson.Gson;
@@ -93,10 +98,9 @@ public class ClusterEntity extends EntityBase {
    @Type(type = "text")
    private String vcDatastoreNames;
 
-   // OneToMany mapping with Network table
-   @ManyToOne
-   @JoinColumn(name = "network_id")
-   private NetworkEntity network;
+   @Column(name = "network_config")
+   @Type(type = "text")
+   private String networkConfig;
 
    @Column(name = "configuration")
    @Type(type = "text")
@@ -125,6 +129,8 @@ public class ClusterEntity extends EntityBase {
    @Column(name = "vhm_jobtracker_port")
    private String vhmJobTrackerPort;
 
+   static final Logger logger = Logger.getLogger(ClusterEntity.class);
+
    ClusterEntity() {
       this.ioShares = Priority.NORMAL;
    }
@@ -134,14 +140,7 @@ public class ClusterEntity extends EntityBase {
       this.name = name;
       this.status = ClusterStatus.NA;
       this.ioShares = Priority.NORMAL;
-   }
 
-   public NetworkEntity getNetwork() {
-      return network;
-   }
-
-   public void setNetwork(NetworkEntity network) {
-      this.network = network;
    }
 
    public String getName() {
@@ -234,6 +233,36 @@ public class ClusterEntity extends EntityBase {
 
    public void setVcDatastoreNameList(List<String> vcDatastoreNameList) {
       this.vcDatastoreNames = (new Gson()).toJson(vcDatastoreNameList);
+   }
+
+   public List<String> fetchNetworkNameList() {
+      List<String> networkNames = new ArrayList<String>();
+      for (Entry<NetTrafficType, List<NetConfigInfo>> netConfig : getNetworkConfigInfo().entrySet()) {
+         for (NetConfigInfo net : netConfig.getValue()) {
+            if (!networkNames.contains(net.getNetworkName())) {
+               networkNames.add(net.getNetworkName());
+            }
+         }
+      }
+      return networkNames;
+   }
+
+   public String getNetworkConfig() {
+      return networkConfig;
+   }
+
+   @SuppressWarnings("unchecked")
+   public Map<NetTrafficType, List<NetConfigInfo>> getNetworkConfigInfo() {
+      return (new Gson()).fromJson(networkConfig,
+            new TypeToken<HashMap<NetTrafficType, List<NetConfigInfo>>>() {}.getType());
+   }
+
+   public void setNetworkConfig(String networkConfig) {
+      this.networkConfig = networkConfig;
+   }
+
+   public void setNetworkConfig(Map<NetTrafficType, List<NetConfigInfo>> networkConfig) {
+      this.networkConfig = (new Gson()).toJson(networkConfig);
    }
 
    public int getRealInstanceNum() {

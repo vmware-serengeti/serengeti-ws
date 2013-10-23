@@ -15,11 +15,16 @@
 package com.vmware.bdd.apitypes;
 
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
+
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 
 import com.google.gson.Gson;
 
@@ -110,7 +115,12 @@ public class BeanToJsonTest {
       List<NodeRead> nameNodes = new ArrayList<NodeRead>();
       NodeRead nameNodeRead = new NodeRead();
       nameNodeRead.setHostName("bjNN");
-      nameNodeRead.setIp("10.112.113.121");
+      Map<NetTrafficType, List<IpConfigInfo>> ipConfigs = new HashMap<NetTrafficType, List<IpConfigInfo>>();
+      IpConfigInfo ipConfigInfo1 = new IpConfigInfo(NetTrafficType.MGT_NETWORK, "nw1", "portgroup1", "192.168.1.100");
+      List<IpConfigInfo> ipConfigInfos = new ArrayList<IpConfigInfo>();
+      ipConfigInfos.add(ipConfigInfo1);
+      ipConfigs.put(NetTrafficType.MGT_NETWORK, ipConfigInfos);
+      nameNodeRead.setIpConfigs(ipConfigs);
 
       nameNodes.add(nameNodeRead);
       nameNodeGroup.setInstances(nameNodes);
@@ -127,12 +137,18 @@ public class BeanToJsonTest {
       List<NodeRead> mixNodes = new ArrayList<NodeRead>();
       NodeRead mixNodeRead1 = new NodeRead();
       mixNodeRead1.setHostName("bjDataComputeNode1");
-      mixNodeRead1.setIp("10.112.113.122");
+
+      Map<NetTrafficType, List<IpConfigInfo>> ipConfigs2 = new HashMap<NetTrafficType, List<IpConfigInfo>>();
+      IpConfigInfo ipConfigInfo2 = new IpConfigInfo(NetTrafficType.HDFS_NETWORK, "nw2", "portgroup2", "192.168.2.100");
+      IpConfigInfo ipConfigInfo3 = new IpConfigInfo(NetTrafficType.HDFS_NETWORK, "nw3", "portgroup3", "192.168.3.100");
+      List<IpConfigInfo> ipConfigInfos2 = new ArrayList<IpConfigInfo>();
+      ipConfigInfos2.add(ipConfigInfo2);
+      ipConfigInfos2.add(ipConfigInfo3);
+      ipConfigs2.put(NetTrafficType.HDFS_NETWORK, ipConfigInfos2);
+      mixNodeRead1.setIpConfigs(ipConfigs2);
 
       NodeRead mixNodeRead2 = new NodeRead();
       mixNodeRead2.setHostName("bjDataComputeNode2");
-      mixNodeRead2.setIp("10.112.113.123");
-
       mixNodes.add(mixNodeRead1);
       mixNodes.add(mixNodeRead2);
 
@@ -161,7 +177,22 @@ public class BeanToJsonTest {
       NodeRead nodeRead = new NodeRead();
 
       nodeRead.setHostName("hadoop-bj-adsf");
-      nodeRead.setIp("10.1.1.1");
+
+      Map<NetTrafficType, List<IpConfigInfo>> ipConfigs = new HashMap<NetTrafficType, List<IpConfigInfo>>();
+      IpConfigInfo ipConfigInfo1 = new IpConfigInfo(NetTrafficType.MGT_NETWORK, "nw1", "portgroup1", "192.168.1.100");
+      List<IpConfigInfo> ipConfigInfos1 = new ArrayList<IpConfigInfo>();
+      ipConfigInfos1.add(ipConfigInfo1);
+
+      IpConfigInfo ipConfigInfo2 = new IpConfigInfo(NetTrafficType.HDFS_NETWORK, "nw2", "portgroup2", "192.168.2.100");
+      IpConfigInfo ipConfigInfo3 = new IpConfigInfo(NetTrafficType.HDFS_NETWORK, "nw3", "portgroup3", "192.168.3.100");
+      List<IpConfigInfo> ipConfigInfos2 = new ArrayList<IpConfigInfo>();
+      ipConfigInfos2.add(ipConfigInfo2);
+      ipConfigInfos2.add(ipConfigInfo3);
+
+      ipConfigs.put(NetTrafficType.MGT_NETWORK, ipConfigInfos1);
+      ipConfigs.put(NetTrafficType.HDFS_NETWORK, ipConfigInfos2);
+      nodeRead.setIpConfigs(ipConfigs);
+
 
       //convert from bean to json
       String jsonString = gson.toJson(nodeRead);
@@ -170,6 +201,7 @@ public class BeanToJsonTest {
 
       //convert from json to bean
       nodeRead = gson.fromJson(jsonString, NodeRead.class);
-      assertEquals(nodeRead.getIp(), "10.1.1.1");
+      assertEquals(nodeRead.getIpConfigs().get(NetTrafficType.MGT_NETWORK).size(), 1);
+      assertEquals(nodeRead.getIpConfigs().get(NetTrafficType.HDFS_NETWORK).size(), 2);
    }
 }

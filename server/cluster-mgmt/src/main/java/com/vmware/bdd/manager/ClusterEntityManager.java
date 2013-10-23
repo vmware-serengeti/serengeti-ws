@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.bdd.dal.INetworkDAO;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +60,8 @@ public class ClusterEntityManager {
 
    private INodeDAO nodeDao;
 
+   private INetworkDAO networkDAO;
+
    public IClusterDAO getClusterDao() {
       return clusterDao;
    }
@@ -84,6 +87,15 @@ public class ClusterEntityManager {
    @Autowired
    public void setNodeDao(INodeDAO nodeDao) {
       this.nodeDao = nodeDao;
+   }
+
+   public INetworkDAO getNetworkDAO() {
+      return networkDAO;
+   }
+
+   @Autowired
+   public void setNetworkDAO(INetworkDAO networkDAO) {
+      this.networkDAO = networkDAO;
    }
 
    public ClusterEntity findClusterById(Long id) {
@@ -260,7 +272,7 @@ public class ClusterEntityManager {
       logger.debug("vm " + node.getVmName()
             + " does not exist. Update node status to NOT_EXIST.");
       node.setStatus(NodeStatus.NOT_EXIST);
-      node.setIpAddress(null);
+      node.resetIps();
       node.setHostName(null);
       node.setMoId(null);
       if (node.getAction() != null
@@ -288,6 +300,16 @@ public class ClusterEntityManager {
       }
    }
 
+   @Transactional
+   public List<String> getPortGroupNames(String clusterName) {
+      ClusterEntity clusterEntity = clusterDao.findByName(clusterName);
+      List<String> portGroups = new ArrayList<String>();
+      for (String networkName : clusterEntity.fetchNetworkNameList()) {
+         portGroups.add(networkDAO.findNetworkByName(networkName).getPortGroup());
+      }
+      return portGroups;
+   }
+
    private void refreshNodeStatus(NodeEntity node, boolean inSession) {
       String mobId = node.getMoId();
       if (mobId == null) {
@@ -303,7 +325,7 @@ public class ClusterEntityManager {
       // TODO: consider more status
       if (!vcVm.isPoweredOn()) {
          node.setStatus(NodeStatus.POWERED_OFF);
-         node.setIpAddress(null);
+         node.resetIps();
       } else {
          node.setStatus(NodeStatus.POWERED_ON);
       }
@@ -311,10 +333,12 @@ public class ClusterEntityManager {
       if (node.isPowerStatusChanged()) {
          if (vcVm.isPoweredOn()) {
             //update ip address
-            String ipAddress = VcVmUtil.getIpAddress(vcVm, inSession);
-            if (ipAddress != null) {
+            for (String portGroup : node.fetchAllPortGroups()) {
+               String ip = VcVmUtil.getIpAddressOfPortGroup(vcVm, portGroup, inSession);
+               node.updateIpAddressOfPortGroup(portGroup, ip);
+            }
+            if (node.ipsReady()) {
                node.setStatus(NodeStatus.VM_READY);
-               node.setIpAddress(ipAddress);
                if (node.getAction() != null
                      && node.getAction().equals(
                            Constants.NODE_ACTION_WAITING_IP)) {

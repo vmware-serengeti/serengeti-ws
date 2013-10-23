@@ -15,11 +15,15 @@
 package com.vmware.bdd.utils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.apitypes.NetworkAdd;
+import com.vmware.vim.binding.vim.net.IpConfigInfo.IpAddress;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.DiskSchema;
@@ -66,6 +70,7 @@ import com.vmware.vim.binding.vim.VirtualMachine.FaultToleranceState;
 import com.vmware.vim.binding.vim.cluster.DasVmSettings.RestartPriority;
 import com.vmware.vim.binding.vim.vm.FaultToleranceConfigInfo;
 import com.vmware.vim.binding.vim.vm.GuestInfo;
+import com.vmware.vim.binding.vim.vm.GuestInfo.NicInfo;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
 import com.vmware.vim.binding.vim.vm.device.VirtualDeviceSpec;
 import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
@@ -78,24 +83,113 @@ import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
 public class VcVmUtil {
    private static final Logger logger = Logger.getLogger(VcVmUtil.class);
 
-   private static final String DEFAULT_NIC_1_LABEL = "Network adapter 1";
+   public static final String NIC_LABEL_PREFIX = "Network adapter ";
 
-   public static String getIpAddress(final VcVirtualMachine vcVm,
-         boolean inSession) {
+   /**
+    * some callers are not very convenient to provide portGroups,
+    * we provide this function to check if all NICs are ready,
+    */
+   public static boolean checkIpAddresses(final VcVirtualMachine vcVm) {
       try {
-         if (inSession) {
-            return vcVm.queryGuest().getIpAddress();
-         }
-         String ip = VcContext.inVcSessionDo(new VcSession<String>() {
+         Boolean ready = VcContext.inVcSessionDo(new VcSession<Boolean>() {
             @Override
             protected boolean isTaskSession() {
                return true;
             }
 
             @Override
+            public Boolean body() throws Exception {
+               GuestInfo guestInfo = vcVm.queryGuest();
+               NicInfo[] nicInfos = guestInfo.getNet();
+
+               if (nicInfos == null || nicInfos.length == 0) {
+                  return false;
+               }
+
+               for (NicInfo nicInfo : nicInfos) {
+                  if (nicInfo.getNetwork() == null || nicInfo.getIpConfig() == null
+                        ||nicInfo.getIpConfig().getIpAddress() == null
+                        || nicInfo.getIpConfig().getIpAddress().length == 0) {
+                     return  false;
+                  }
+
+                  boolean foundIpV4Address = false;
+                  for (IpAddress info : nicInfo.getIpConfig().getIpAddress()) {
+                     if (info.getIpAddress() != null && IpAddressUtil.isIpV4(info.getIpAddress())) {
+                        foundIpV4Address = true;
+                        break;
+                     }
+                  }
+                  if (!foundIpV4Address) {
+                     return false;
+                  }
+               }
+               return true;
+            }
+         });
+         return ready;
+      } catch (Exception e) {
+         throw BddException.wrapIfNeeded(e, e.getLocalizedMessage());
+      }
+   }
+
+   public static Set<String> getAllIpAddresses(final VcVirtualMachine vcVm,
+         final Set<String> portGroups, boolean inSession) {
+      Set<String> allIpAddresses = new HashSet<String>();
+      for (String portGroup : portGroups) {
+         allIpAddresses.add(getIpAddressOfPortGroup(vcVm, portGroup, inSession));
+      }
+      return allIpAddresses;
+   }
+
+   private static String getIpAddressOfPortGroupWithoutSession(final VcVirtualMachine vcVm,
+         final String portGroup) throws Exception {
+      GuestInfo guestInfo = vcVm.queryGuest();
+      NicInfo[] nicInfos = guestInfo.getNet();
+
+      /*
+       * We do not know when VC can retrieve vm's guestinfo from vmtools, so it's better
+       * to do enough validation to avoid Null Point Exception
+       */
+      if (nicInfos == null || nicInfos.length == 0) {
+         return Constants.NULL_IP;
+      }
+
+      for (NicInfo nicInfo : nicInfos) {
+         if (nicInfo.getNetwork() == null || !nicInfo.getNetwork().equals(portGroup)) {
+            continue;
+         }
+
+         if (nicInfo.getIpConfig() == null || nicInfo.getIpConfig().getIpAddress() == null
+               || nicInfo.getIpConfig().getIpAddress().length == 0) {
+            continue;
+         }
+
+         for (IpAddress info : nicInfo.getIpConfig().getIpAddress()) {
+            if (info.getIpAddress() != null && IpAddressUtil.isIpV4(info.getIpAddress())) {
+               return info.getIpAddress();
+            }
+         }
+      }
+
+      return Constants.NULL_IP;
+   }
+
+   public static String getIpAddressOfPortGroup(final VcVirtualMachine vcVm,
+         final String portGroup, boolean inSession) {
+      try {
+         if (inSession) {
+            return VcVmUtil.getIpAddressOfPortGroupWithoutSession(vcVm, portGroup);
+         }
+
+         String ip = VcContext.inVcSessionDo(new VcSession<String>() {
+            @Override
+            protected boolean isTaskSession() {
+               return true;
+            }
+            @Override
             public String body() throws Exception {
-               GuestInfo guest = vcVm.queryGuest();
-               return guest.getIpAddress();
+               return VcVmUtil.getIpAddressOfPortGroupWithoutSession(vcVm, portGroup);
             }
          });
          return ip;
@@ -136,13 +230,14 @@ public class VcVmUtil {
          logger.info("vm " + vmName
                + "is created, and then removed afterwards.");
       }
-      String ip = null;
       if (vm != null) {
-         ip = VcVmUtil.getIpAddress(vm, false);
+         for (String portGroup : vNode.fetchAllPortGroups()) {
+            String ip = VcVmUtil.getIpAddressOfPortGroup(vm, portGroup, false);
+            vNode.updateIpAddressOfPortGroup(portGroup, ip);
+         }
       }
-      if (ip != null) {
+      if (vNode.ipsReady()) {
          vNode.setSuccess(true);
-         vNode.setIpAddress(ip);
          vNode.setGuestHostName(VcVmUtil.getGuestHostName(vm, false));
          vNode.setTargetHost(vm.getHost().getName());
          vNode.setVmMobId(vm.getId());
@@ -157,7 +252,7 @@ public class VcVmUtil {
          vNode.setSuccess(false);
          // in static ip case, vNode contains the allocated address,
          // here reset the value in case the ip is unavailable from vc
-         vNode.setIpAddress(null);
+         vNode.resetIps();
          if (vm != null) {
             vNode.setVmMobId(vm.getId());
             if (vm.isPoweredOn()) {
@@ -458,11 +553,17 @@ public class VcVmUtil {
       schema.diskSchema = diskSchema;
 
       // prepare network schema
-      Network network = new Network();
-      network.vcNetwork = spec.getNetworking().get(0).getPortGroup();
-      network.nicLabel = DEFAULT_NIC_1_LABEL;
+
       ArrayList<Network> networks = new ArrayList<Network>();
-      networks.add(network);
+      List<NetworkAdd> networkAdds = spec.getNetworkings();
+      int labelIndex = 1;
+      for (NetworkAdd networkAdd : networkAdds) {
+         Network network = new Network();
+         network.vcNetwork = networkAdd.getPortGroup();
+         network.nicLabel = NIC_LABEL_PREFIX + labelIndex;
+         labelIndex++;
+         networks.add(network);
+      }
 
       NetworkSchema networkSchema = new NetworkSchema();
       networkSchema.name = "Network Schema";

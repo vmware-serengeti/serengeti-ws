@@ -15,8 +15,10 @@
 package com.vmware.bdd.service.job;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -41,13 +43,14 @@ public class ResumeClusterRemoveBadNodeStep extends TrackableTasklet {
       ClusterCreate clusterSpec = configMgr.getClusterConfig(clusterName);
       List<BaseNode> existingNodes = JobUtils.getExistingNodes(clusterSpec, getClusterEntityMgr());
       List<BaseNode> deletedNodes = new ArrayList<BaseNode>();
-      Set<String> occupiedIps = new HashSet<String>();
-      JobUtils.separateVcUnreachableNodes(existingNodes, deletedNodes, occupiedIps);
+      // portgroupName -> Set<ipAddress>
+      Map<String, Set<String>> occupiedIpSets = new HashMap<String, Set<String>>();
+      JobUtils.separateVcUnreachableNodes(existingNodes, deletedNodes, occupiedIpSets);
 
-      boolean deleted = clusteringService.removeBadNodes(clusterSpec, existingNodes, deletedNodes, occupiedIps, statusUpdator);
+      boolean deleted = clusteringService.removeBadNodes(clusterSpec, existingNodes, deletedNodes, occupiedIpSets, statusUpdator);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, existingNodes);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_SPEC_JOB_PARAM, clusterSpec);
-      putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_USED_IP_JOB_PARAM, occupiedIps);
+      putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_USED_IP_JOB_PARAM, occupiedIpSets);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_DELETED_NODES_JOB_PARAM, deletedNodes);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_DELETE_VM_OPERATION_SUCCESS, deleted);
       return RepeatStatus.FINISHED;

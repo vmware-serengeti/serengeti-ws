@@ -50,6 +50,12 @@ public class Constants {
    public static final String GUEST_VARIABLE_IP_KEY = "ipaddr";
    public static final String GUEST_VARIABLE_POLICY_KEY = "bootproto";
    public static final String GUEST_VARIABLE_BOOTUP_UUID = "bootupUUID";
+   public static final String GUEST_VARIABLE_PORT_GROUP = "portgroup";
+   public static final String GUEST_VARIABLE_NIC_DEVICES = "nics";
+
+   public static final String NULL_IP = "0.0.0.0";
+   public static final String IP_V4_PATTERN = "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}";
+
    public static final String NODE_ACTION_CLONING_VM = "Cloning VM";
    public static final String NODE_ACTION_CLONING_FAILED = "Cloning VM failed";
    public static final String NODE_ACTION_WAITING_IP = "Waiting for ip";

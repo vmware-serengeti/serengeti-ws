@@ -70,8 +70,6 @@ public class NetworkEntity extends EntityBase implements Comparable<NetworkEntit
     * cluster list exactly matches the list contained in IpBlockEntity list
     * (though the cluster class should guarantee the correctness).
     */
-   @OneToMany(mappedBy = "network", fetch = FetchType.LAZY)
-   private List<ClusterEntity> clusters;
 
    @Enumerated(EnumType.STRING)
    @Column(name = "alloc_type", nullable = false)
@@ -141,6 +139,7 @@ public class NetworkEntity extends EntityBase implements Comparable<NetworkEntit
       this.ipBlocks = ipBlocks;
    }
 
+   /*
    public List<ClusterEntity> getClusters() {
       return clusters;
    }
@@ -148,6 +147,7 @@ public class NetworkEntity extends EntityBase implements Comparable<NetworkEntit
    public void setClusters(List<ClusterEntity> clusters) {
       this.clusters = clusters;
    }
+   */
 
    public AllocType getAllocType() {
       return allocType;

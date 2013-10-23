@@ -15,6 +15,8 @@
 
 package com.vmware.bdd.service.sp;
 
+import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.VcVmUtil;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.IPrePostPowerOn;
@@ -22,8 +24,8 @@ import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
-import com.vmware.vim.binding.vim.vm.GuestInfo;
-import com.vmware.vim.binding.vim.vm.GuestInfo.ToolsRunningStatus;
+
+import java.util.Set;
 
 public class QueryIpAddress implements IPrePostPowerOn {
    private static final Logger logger = Logger.getLogger(QueryIpAddress.class);
@@ -31,21 +33,20 @@ public class QueryIpAddress implements IPrePostPowerOn {
 
    private String vmId;
    private VcVirtualMachine vm;
-   private GuestInfo guestInfo;
    private long timeout;
+   private Set<String> portGroups;
 
    /**
     * After a VM is powered on, wait for the guest information to be
     * available at most for <tt>timeout</tt> in seconds, and retrieve the
     * guest information.
-    * @param timeout
+    *
+    * @param portGroups
+    * @param timeoutInSeconds
     */
-   public QueryIpAddress(int timeoutInSeconds) {
+   public QueryIpAddress(Set<String> portGroups, int timeoutInSeconds) {
+      this.portGroups = portGroups;
       this.timeout = timeoutInSeconds * 1000L;
-   }
-
-   public String getIpAddress() {
-      return guestInfo.getIpAddress();
    }
 
    @Override
@@ -57,7 +58,6 @@ public class QueryIpAddress implements IPrePostPowerOn {
             protected Boolean body() throws Exception {
                VcVirtualMachine vm = VcCache.getIgnoreMissing(vmId);
                if (vm != null && vm.isPoweredOn()) {
-                  guestInfo = vm.queryGuest();
                   return false;
                } else {
                   // stop waiting, since vm is not found
@@ -68,11 +68,20 @@ public class QueryIpAddress implements IPrePostPowerOn {
             }
          });
 
-         if (guestInfo != null && guestInfo.getToolsRunningStatus()
-               .equals(ToolsRunningStatus.guestToolsRunning.toString())
-               && guestInfo.getIpAddress() != null) {
+         // check if all ipaddresses for portGroups are valid
+         int found = 0;
+         for (String pgName : portGroups) {
+            String ip = VcVmUtil.getIpAddressOfPortGroup(vm, pgName, false);
+            if (!ip.equals(Constants.NULL_IP)) {
+               logger.info("got one ip, vm: " + vmId + ", portgroup: " + pgName + ", ip: " + ip);
+               found += 1;
+            }
+         }
+
+         if (found == portGroups.size()) {
             break;
          }
+
          if (stop) {
             break;
          }

@@ -162,9 +162,9 @@ public class ClusterSpecFactory {
          newSpec.setRpNames(spec.getRpNames());
       }
 
-      // --networkName
-      if (spec.getNetworkName() != null) {
-         newSpec.setNetworkName(spec.getNetworkName());
+      // --networkConfig
+      if (spec.getNetworkConfig() != null) {
+         newSpec.setNetworkConfig(spec.getNetworkConfig());
       }
 
       // --topology

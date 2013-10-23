@@ -68,7 +68,7 @@
     }
   ],
   "templateId": "vm-10786",
-  "networking": [
+  "networkings": [
     {
       "portGroup": "wdc-vhadp-pub2",
       "type": "dhcp"

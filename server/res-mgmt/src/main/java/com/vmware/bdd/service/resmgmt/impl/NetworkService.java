@@ -18,6 +18,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vmware.bdd.dal.IClusterDAO;
+import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,6 +57,8 @@ public class NetworkService implements Serializable, INetworkService {
 
    private IIpBlockDAO ipBlockDao;
 
+   private IClusterDAO clusterDAO;
+
    private INodeGroupDAO nodeGroupDao;
 
    private INodeDAO nodeDao;
@@ -73,6 +77,11 @@ public class NetworkService implements Serializable, INetworkService {
    @Autowired
    public void setIpBlockDao(IIpBlockDAO ipBlockDao) {
       this.ipBlockDao = ipBlockDao;
+   }
+
+   @Autowired
+   public void setClusterDAO(IClusterDAO clusterDAO) {
+      this.clusterDAO = clusterDAO;
    }
 
    @Autowired
@@ -189,6 +198,16 @@ public class NetworkService implements Serializable, INetworkService {
       return null;
    }
 
+   @Override
+   @Transactional
+   public List<String> getPortGroupsByNames(final List<String> names) {
+      List<String> portGroups = new ArrayList<String>();
+      for (String name : names) {
+         portGroups.add(getNetworkEntityByName(name).getPortGroup());
+      }
+      return portGroups;
+   }
+
    /*
     * (non-Javadoc)
     *
@@ -214,12 +233,23 @@ public class NetworkService implements Serializable, INetworkService {
       return networks;
    }
 
+   @Transactional
+   public List<String> getAllNetworkNames() {
+      List<NetworkEntity> entities = getAllNetworkEntities();
+      List<String> networkNames = new ArrayList<String>();
+      for (NetworkEntity entity : entities) {
+         networkNames.add(entity.getName());
+      }
+      return networkNames;
+   }
+
    protected void assertNetworkNotUsed(NetworkEntity network)
          throws NetworkException {
-      if (!network.getClusters().isEmpty()) {
+      List<ClusterEntity> relevantClusters = findRelevantClusters(network);
+      if (!relevantClusters.isEmpty()) {
          logger.error("can not change network, network re");
          List<String> clusterNames = new ArrayList<String>();
-         for (ClusterEntity entity : network.getClusters()) {
+         for (ClusterEntity entity : relevantClusters) {
             clusterNames.add(entity.getName());
          }
          throw NetworkException.NETWORK_IN_USE(clusterNames);
@@ -227,7 +257,7 @@ public class NetworkService implements Serializable, INetworkService {
 
       if (ConfigInfo.isDebugEnabled()) {
          if (network.getAllocType() == AllocType.IP_POOL
-               && network.getClusters().isEmpty()) {
+               && relevantClusters.isEmpty()) {
             AuAssert.check(network.getTotal() == network.getFree(), "total = "
                   + network.getTotal() + ", free = " + network.getFree());
          }
@@ -385,6 +415,17 @@ public class NetworkService implements Serializable, INetworkService {
    }
 
    @Transactional(readOnly = true)
+   private List<ClusterEntity> findRelevantClusters(NetworkEntity net){
+      List<ClusterEntity> relevantClusters = new ArrayList<ClusterEntity>();
+      for (ClusterEntity clusterEntity : clusterDAO.findAll()) {
+         if (clusterEntity.fetchNetworkNameList().contains(net.getName())) {
+            relevantClusters.add(clusterEntity);
+         }
+      }
+      return relevantClusters;
+   }
+
+   @Transactional(readOnly = true)
    private NetworkRead convert(NetworkEntity net, boolean withDetails) {
       NetworkRead nr = new NetworkRead();
       nr.setName(net.getName());
@@ -431,11 +472,11 @@ public class NetworkService implements Serializable, INetworkService {
          List<IpAllocEntryRead> ipAllocEntries =
                new ArrayList<IpAllocEntryRead>();
          List<NodeEntity> nodes =
-               nodeDao.findByNodeGroups(nodeGroupDao.findAllByClusters(net
-                     .getClusters()));
+               nodeDao.findByNodeGroups(nodeGroupDao.findAllByClusters(findRelevantClusters(net)));
 
          for (NodeEntity node : nodes) {
-            if (node.getIpAddress() == null || node.getIpAddress().isEmpty()) {
+            String ip = node.getIpOfNetworkName(net.getName());
+            if (ip.equals(Constants.NULL_IP)) {
                // in case of errors during node creation (if possible)
                continue;
             }
@@ -447,7 +488,7 @@ public class NetworkService implements Serializable, INetworkService {
             e.setNodeGroupName(node.getNodeGroup().getName());
             e.setNodeId(node.getId());
             e.setNodeName(node.getVmName());
-            e.setIpAddress(node.getIpAddress());
+            e.setIpAddress(ip);
 
             ipAllocEntries.add(e);
          }

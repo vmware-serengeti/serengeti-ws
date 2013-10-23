@@ -19,11 +19,15 @@ import static org.testng.AssertJUnit.assertTrue;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import com.vmware.bdd.apitypes.NetConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -312,13 +316,21 @@ public class TestClusteringJobs extends
       clusterSvc.destroy();
    }
 
+   private Map<NetTrafficType, List<String>> createNetConfig(String networkName, String portGroupName) {
+      Map<NetTrafficType, List<String>> netConfigs = new HashMap<NetTrafficType, List<String>>();
+      List<String> netList = new ArrayList<String>();
+      netList.add(networkName);
+      netConfigs.put(NetTrafficType.MGT_NETWORK, netList);
+      return netConfigs;
+   }
+
    @Test(groups = { "TestClusteringJobs" })
    @Transactional(propagation = Propagation.NEVER)
    public void testCreateCluster() throws Exception {
       ClusterCreate createSpec = new ClusterCreate();
       createSpec.setName(TEST_STATIC_IP_CLUSTER_NAME);
       createSpec.setType(ClusterType.HDFS_MAPRED);
-      createSpec.setNetworkName(TEST_STATIC_NETWORK_NAME);
+      createSpec.setNetworkConfig(createNetConfig(TEST_STATIC_NETWORK_NAME, staticPortgroup));
       createSpec.setDistro("apache");
       createSpec.setDistroVendor(Constants.DEFAULT_VENDOR);
       long jobExecutionId = clusterMgr.createCluster(createSpec);
@@ -389,7 +401,8 @@ public class TestClusteringJobs extends
       List<String> ipAddresses = IpBlock.getIpAddressFromIpBlock(ipBlocks);
       for (NodeGroupRead group : groups) {
          for (NodeRead node : group.getInstances()) {
-            String nodeIp = node.getIp();
+            // TODO: enhance here
+            String nodeIp = node.fetchMgtIp();
             Assert.assertTrue(ipAddresses.contains(nodeIp), "Ip address "
                   + nodeIp + " for node " + node.getName()
                   + " should be in the test ip range.");
@@ -497,7 +510,7 @@ public class TestClusteringJobs extends
             ClusterSpecFactory.createDefaultSpec(ClusterType.HDFS_MAPRED,
                   Constants.DEFAULT_VENDOR);
       createSpec.setName(TEST_DHCP_CLUSTER_NAME);
-      createSpec.setNetworkName(TEST_DHCP_NETWORK_NAME);
+      createSpec.setNetworkConfig(createNetConfig(TEST_DHCP_NETWORK_NAME, dhcpPortgroup));
       createSpec.setDistro("apache");
       NodeGroupCreate worker = createSpec.getNodeGroup("worker");
       worker.setInstanceNum(1);

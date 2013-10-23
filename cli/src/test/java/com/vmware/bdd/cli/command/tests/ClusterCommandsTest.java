@@ -15,9 +15,14 @@
 package com.vmware.bdd.cli.command.tests;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import com.vmware.bdd.apitypes.IpConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -49,6 +54,14 @@ import com.vmware.bdd.spectypes.HadoopRole;
 public class ClusterCommandsTest extends MockRestServer {
     @Autowired
     private ClusterCommands clusterCommands;
+
+   private Map<NetTrafficType, List<IpConfigInfo>> createIpConfigs(String ip) {
+      Map<NetTrafficType, List<IpConfigInfo>> ipconfigs = new HashMap<NetTrafficType, List<IpConfigInfo>>();
+      List<IpConfigInfo> ips = new ArrayList<IpConfigInfo>();
+      ips.add(new IpConfigInfo(NetTrafficType.MGT_NETWORK, "nw1", "pg1", ip));
+      ipconfigs.put(NetTrafficType.MGT_NETWORK, ips);
+      return ipconfigs;
+   }
     
     @Test
     public void testClusterResize() throws Exception {
@@ -62,22 +75,19 @@ public class ClusterCommandsTest extends MockRestServer {
         sr2.setSizeGB(200);
         NodeRead nr1 = new NodeRead();
         nr1.setHostName("test1.vmware.com");
-        nr1.setIp("192.168.0.1");
+        nr1.setIpConfigs(createIpConfigs("192.168.1.100"));
         nr1.setName("node1");
         nr1.setStatus("running");
         NodeRead nr2 = new NodeRead();
         nr2.setHostName("test2.vmware.com");
-        nr2.setIp("192.168.0.2");
         nr2.setName("node2");
         nr2.setStatus("running");
         NodeRead nr3 = new NodeRead();
         nr3.setHostName("test3.vmware.com");
-        nr3.setIp("192.168.0.3");
         nr3.setName("node3");
         nr3.setStatus("running");
         NodeRead nr4 = new NodeRead();
         nr4.setHostName("test4.vmware.com");
-        nr4.setIp("192.168.0.4");
         nr4.setName("node4");
         nr4.setStatus("create");
         List<NodeRead> instances1 = new LinkedList<NodeRead>();
@@ -151,22 +161,22 @@ public class ClusterCommandsTest extends MockRestServer {
         sr2.setSizeGB(200);
         NodeRead nr1 = new NodeRead();
         nr1.setHostName("test1.vmware.com");
-        nr1.setIp("192.168.0.1");
+        nr1.setIpConfigs(createIpConfigs("192.168.0.1"));
         nr1.setName("node1");
         nr1.setStatus("running");
         NodeRead nr2 = new NodeRead();
         nr2.setHostName("test2.vmware.com");
-        nr2.setIp("192.168.0.2");
+        nr2.setIpConfigs(createIpConfigs("192.168.0.2"));
         nr2.setName("node2");
         nr2.setStatus("running");
         NodeRead nr3 = new NodeRead();
         nr3.setHostName("test3.vmware.com");
-        nr3.setIp("192.168.0.3");
+        nr3.setIpConfigs(createIpConfigs("192.168.0.3"));
         nr3.setName("node3");
         nr3.setStatus("running");
         NodeRead nr4 = new NodeRead();
         nr4.setHostName("test4.vmware.com");
-        nr4.setIp("192.168.0.4");
+        nr4.setIpConfigs(createIpConfigs("192.168.0.4"));
         nr4.setName("node4");
         nr4.setStatus("create");
         List<NodeRead> instances1 = new LinkedList<NodeRead>();
@@ -283,7 +293,7 @@ public class ClusterCommandsTest extends MockRestServer {
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST,
              HttpStatus.NO_CONTENT, "");
 
-       clusterCommands.createCluster("cluster1", "HADOOP", null, null, null, null, null, null, false, false, false);
+       clusterCommands.createCluster("cluster1", "HADOOP", null, null, null, null, null, null, null, null, false, false, true);
 
        CookieCache.clear();
     }
@@ -316,7 +326,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
 
-        clusterCommands.createCluster("cluster1", "HADOOP", null, null, null, null, null, null, false, false, false);
+        clusterCommands.createCluster("cluster1", "HADOOP", null, null, null, null, null, null, null, null, false, false, true);
         CookieCache.clear();
     }
 
@@ -363,7 +373,7 @@ public class ClusterCommandsTest extends MockRestServer {
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST,
              HttpStatus.NO_CONTENT, "");
 
-       clusterCommands.createCluster("cluster1WithHadoopSpec", null, null, "src/test/resources/hadoop_cluster.json", null, null, null, null, false, false, true);
+       clusterCommands.createCluster("cluster1WithHadoopSpec", null, null, "src/test/resources/hadoop_cluster.json", null, null, null, null, null, null, false, false, true);
 
        setup();
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
@@ -376,7 +386,7 @@ public class ClusterCommandsTest extends MockRestServer {
              mapper.writeValueAsString(distro));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST,
              HttpStatus.NO_CONTENT, "");
-       clusterCommands.createCluster("cluster1WithHBaseSpec", null, null, "src/test/resources/hbase_cluster.json", null, null, null, null, false, false, true);
+       clusterCommands.createCluster("cluster1WithHBaseSpec", null, null, "src/test/resources/hbase_cluster.json", null, null, null, null, null, null, false, false, true);
 
        setup();
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
@@ -389,7 +399,7 @@ public class ClusterCommandsTest extends MockRestServer {
              mapper.writeValueAsString(distro));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST,
              HttpStatus.NO_CONTENT, "");
-       clusterCommands.createCluster("cluster1WithDCSeperationSpec", null, null, "src/test/resources/data_compute_separation_cluster.json", null, null, null, null, false, false, true);
+       clusterCommands.createCluster("cluster1WithDCSeperationSpec", null, null, "src/test/resources/data_compute_separation_cluster.json", null, null, null, null, null, null, false, false, true);
 
        setup();
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/distros", HttpMethod.GET, HttpStatus.OK,
@@ -402,7 +412,7 @@ public class ClusterCommandsTest extends MockRestServer {
              mapper.writeValueAsString(distro));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST,
              HttpStatus.NO_CONTENT, "");
-       clusterCommands.createCluster("cluster1WithNameNodeHASpec", null, null, "src/test/resources/namenode_ha_cluster.json", null, null, null, null, false, false, true);
+       clusterCommands.createCluster("cluster1WithNameNodeHASpec", null, null, "src/test/resources/namenode_ha_cluster.json", null, null, null, null, null, null, false, false, true);
        CookieCache.clear();
     }
 
@@ -411,7 +421,7 @@ public class ClusterCommandsTest extends MockRestServer {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1?state=resume",
             HttpMethod.PUT, HttpStatus.NO_CONTENT, "");
-      clusterCommands.createCluster("cluster1", null, null, null, null, null, null, null, true, false, false);
+      clusterCommands.createCluster("cluster1", null, null, null, null, null, null, null, null, null, true, false, true);
       CookieCache.clear();
    }
 
@@ -424,7 +434,7 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1?state=resume",
                 HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
-        clusterCommands.createCluster("cluster1", "HADOOP", null, null, null, null, null, null, true, false, false);
+        clusterCommands.createCluster("cluster1", "HADOOP", null, null, null, null, null, null, null, null, true, false, true);
         CookieCache.clear();
     }
 
@@ -486,12 +496,12 @@ public class ClusterCommandsTest extends MockRestServer {
                 mapper.writeValueAsString(task));
 
         instance1.setStatus("Service Running");
-        instance1.setIp("1.2.3.4");
+        instance1.setIpConfigs(createIpConfigs("1.2.3.4"));
         instance1.setAction(null);
         buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET,
                 HttpStatus.OK, mapper.writeValueAsString(cluster));
 
-        clusterCommands.createCluster("cluster1", "HADOOP", null, null, null, null, null, null, false, false, false);
+        clusterCommands.createCluster("cluster1", "HADOOP", null, null, null, null, null, null, null, null, false, false, true);
         CookieCache.clear();
     }
 
@@ -507,25 +517,25 @@ public class ClusterCommandsTest extends MockRestServer {
         sr2.setSizeGB(200);
         NodeRead nr1 = new NodeRead();
         nr1.setHostName("test1.vmware.com");
-        nr1.setIp("10.1.1.99");
+        nr1.setIpConfigs(createIpConfigs("10.1.1.99"));
         nr1.setName("node1");
         nr1.setStatus("running");
         nr1.setRack("rack1");
         NodeRead nr2 = new NodeRead();
         nr2.setHostName("test2.vmware.com");
-        nr2.setIp("10.1.1.100");
+        nr2.setIpConfigs(createIpConfigs("10.1.1.100"));
         nr2.setName("node2");
         nr2.setStatus("running");
         nr2.setRack("rack1");
         NodeRead nr3 = new NodeRead();
         nr3.setHostName("test3.vmware.com");
-        nr3.setIp("10.1.1.101");
+        nr3.setIpConfigs(createIpConfigs("10.1.1.101"));
         nr3.setName("node3");
         nr3.setStatus("running");
         nr3.setRack("rack1");
         NodeRead nr4 = new NodeRead();
         nr4.setHostName("test4.vmware.com");
-        nr4.setIp("10.1.1.102");
+        nr4.setIpConfigs(createIpConfigs("10.1.1.102"));
         nr4.setName("node4");
         nr4.setStatus("create");
         nr4.setRack("rack1");
@@ -621,7 +631,7 @@ public class ClusterCommandsTest extends MockRestServer {
       sr1.setSizeGB(100);
       NodeRead nr1 = new NodeRead();
       nr1.setHostName("test1.domain.com");
-      nr1.setIp("192.1.1.99");
+      nr1.setIpConfigs(createIpConfigs("192.1.1.99"));
       nr1.setName("node1");
       nr1.setStatus("running");
       List<NodeRead> instances1 = new LinkedList<NodeRead>();
@@ -680,7 +690,7 @@ public class ClusterCommandsTest extends MockRestServer {
       sr1.setSizeGB(100);
       NodeRead nr1 = new NodeRead();
       nr1.setHostName("test1.domain.com");
-      nr1.setIp("192.1.1.99");
+      nr1.setIpConfigs(createIpConfigs("192.1.1.99"));
       nr1.setName("node1");
       nr1.setStatus("running");
       List<NodeRead> instances1 = new LinkedList<NodeRead>();

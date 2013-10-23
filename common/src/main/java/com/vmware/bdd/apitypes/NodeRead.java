@@ -15,9 +15,12 @@
 package com.vmware.bdd.apitypes;
 
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 
 /**
  * Node get output
@@ -39,8 +42,8 @@ public class NodeRead {
    private String hostName;
 
    @Expose
-   @SerializedName("ip_address")
-   private String ip;
+   @SerializedName("ip_configs")
+   private Map<NetTrafficType, List<IpConfigInfo>> ipConfigs;
 
    @Expose
    private String status;
@@ -100,12 +103,20 @@ public class NodeRead {
       this.hostName = hostName;
    }
 
-   public String getIp() {
-      return ip;
+   public Map<NetTrafficType, List<IpConfigInfo>> getIpConfigs() {
+      return ipConfigs;
    }
 
-   public void setIp(String ip) {
-      this.ip = ip;
+   public void setIpConfigs(Map<NetTrafficType, List<IpConfigInfo>> ipConfigs) {
+      this.ipConfigs = ipConfigs;
+   }
+
+   public String fetchMgtIp() {
+      if (ipConfigs != null && ipConfigs.containsKey(NetTrafficType.MGT_NETWORK)
+            && !ipConfigs.get(NetTrafficType.MGT_NETWORK).get(0).getIpAddress().equals(Constants.NULL_IP)) {
+         return ipConfigs.get(NetTrafficType.MGT_NETWORK).get(0).getIpAddress();
+      }
+      return null;
    }
 
    public String getStatus() {

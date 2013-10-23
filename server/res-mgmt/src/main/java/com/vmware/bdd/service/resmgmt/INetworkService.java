@@ -33,6 +33,8 @@ public interface INetworkService {
 
    NetworkRead getNetworkByName(final String name, final boolean withDetails);
 
+   List<String> getPortGroupsByNames(final List<String> names);
+
    List<NetworkEntity> getAllNetworkEntities();
 
    List<NetworkRead> getAllNetworks(final boolean withDetails);

@@ -14,11 +14,14 @@
  ***************************************************************************/
 package com.vmware.bdd.service.sp;
 
+import com.vmware.bdd.entity.NodeEntity;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.util.CmsWorker.SimpleRequest;
 import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.utils.Constants;
+
+import java.util.List;
 
 public class NodePowerOnRequest extends SimpleRequest {
    private static final Logger logger = Logger.getLogger(NodePowerOnRequest.class);
@@ -34,8 +37,9 @@ public class NodePowerOnRequest extends SimpleRequest {
    protected boolean execute() {
       logger.info("Start to waiting for VM " + vmId +
       		" post power on status");
+      NodeEntity nodeEntity = entityMgr.getNodeByMobId(vmId);
       QueryIpAddress query =
-         new QueryIpAddress(Constants.VM_POWER_ON_WAITING_SEC);
+         new QueryIpAddress(nodeEntity.fetchAllPortGroups(), Constants.VM_POWER_ON_WAITING_SEC);
       query.setVmId(vmId);
       try {
          query.call();

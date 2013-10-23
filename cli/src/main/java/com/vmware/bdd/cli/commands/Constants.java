@@ -157,8 +157,6 @@ public class Constants {
    public static final String PARAM_CLUSTER_FAILED_INSTANCE_NUM_NEGATIVE = "instanceNum cannot be negative";
    public static final String PARAM_CLUSTER = "cluster name";
    public static final String PARAM_DISTRO = "distro name";
-   public static final String PARAM_MODE_AUTO = "auto";
-   public static final String PARAM_MODE_MANUAL = "manual";
    public static final String PARAM_NETWORK_NAME = "network name";
    public static final String PARAM_NOT_SPECIFIED = " is not specified.";
    public static final String PARAM_CANNOT_FIND_NETWORK = "Cannot find the specified network.";

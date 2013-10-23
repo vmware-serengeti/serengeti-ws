@@ -349,7 +349,6 @@ public class DistroManager {
             logger.error("discard invalid distro: " + distro);
          }
       }
-
       return dr;
    }
 

@@ -96,9 +96,9 @@ public class CommandsUtils {
    public static <T> T getObjectByJsonString(Class<T> entityType, String jsonString) throws JsonParseException,
          JsonMappingException, IOException {
       ObjectMapper mapper = getMapper();
-      T NodeGroupsCreate = null;
-      NodeGroupsCreate = mapper.readValue(jsonString, entityType);
-      return NodeGroupsCreate;
+      T mappedObject = null;
+      mappedObject = mapper.readValue(jsonString, entityType);
+      return mappedObject;
    }
 
    public static void prettyJsonOutput(Object object, String fileName)

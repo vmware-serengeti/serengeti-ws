@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
+import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.service.resmgmt.INetworkService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -77,6 +80,8 @@ public class ClusterHealService implements IClusterHealService {
 
    private IClusteringService clusteringService;
 
+   private INetworkService networkMgr;
+
    public ClusterEntityManager getClusterEntityMgr() {
       return clusterEntityMgr;
    }
@@ -102,6 +107,15 @@ public class ClusterHealService implements IClusterHealService {
    @Autowired
    public void setClusteringService(IClusteringService clusteringService) {
       this.clusteringService = clusteringService;
+   }
+
+   public INetworkService getNetworkMgr() {
+      return networkMgr;
+   }
+
+   @Autowired
+   public void setNetworkMgr(INetworkService networkMgr) {
+      this.networkMgr = networkMgr;
    }
 
    @Override
@@ -320,10 +334,14 @@ public class ClusterHealService implements IClusterHealService {
                   clusteringService.getTemplateVmId(),
                   Constants.ROOT_SNAPSTHOT_NAME);
 
-      NetworkAdd networkAdd = clusterSpec.getNetworking().get(0);
-      Map<String, String> guestVariable =
-            ClusteringService.getNetworkGuestVariable(networkAdd,
-                  node.getIpAddress(), node.getGuestHostName());
+      List<NetworkAdd> networkAdds = clusterSpec.getNetworkings();
+
+      GuestMachineIdSpec machineIdSpec = new GuestMachineIdSpec(networkAdds,
+            node.fetchPortGroupToIpMap(), node.getGuestHostName());
+      logger.info("machine id of vm " + node.getVmName() + ":\n" + machineIdSpec.toString());
+      Map<String, String> guestVariable = machineIdSpec.toGuestVarialbe();
+
+      // TODO: rafactor this function
       VcVmUtil.addBootupUUID(guestVariable);
 
       String haFlag = clusterSpec.getNodeGroup(groupName).getHaFlag();
@@ -448,9 +466,11 @@ public class ClusterHealService implements IClusterHealService {
    }
 
    @Override
-   public void startVm(String nodeName, String vmId) {
+   public void startVm(String nodeName, String vmId, String clusterName) {
+      NodeEntity nodeEntity = clusterEntityMgr.findNodeByName(nodeName);
       QueryIpAddress query =
-            new QueryIpAddress(Constants.VM_POWER_ON_WAITING_SEC);
+            new QueryIpAddress(nodeEntity.fetchAllPortGroups(),
+                  Constants.VM_POWER_ON_WAITING_SEC);
 
       VcVirtualMachine vcVm = VcCache.getIgnoreMissing(vmId);
 

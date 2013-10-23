@@ -17,12 +17,16 @@ package com.vmware.bdd.cli.commands;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.apitypes.NetConfigInfo;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.hadoop.impala.hive.HiveCommands;
@@ -91,7 +95,9 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath,
          @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
-         @CliOption(key = { "networkName" }, mandatory = false, help = "Network Name") final String networkName,
+         @CliOption(key = { "mgtNetworkName" }, mandatory = false, help = "Network Name used for management") final String mgtNetworkName,
+         @CliOption(key = { "hdfsNetworkName" }, mandatory = false, help = "Network Name for HDFS traffic.") final String hdfsNetworkName,
+         @CliOption(key = { "mapredNetworkName" }, mandatory = false, help = "Network Name for MapReduce traffic") final String mapredNetworkName,
          @CliOption(key = { "topology" }, mandatory = false, help = "You must specify the topology type: HVE or RACK_AS_RACK or HOST_AS_RACK") final String topology,
          @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume,
          @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation,
@@ -209,7 +215,7 @@ public class ClusterCommands implements CommandMarker {
       }
       List<String> failedMsgList = new ArrayList<String>();
       List<String> warningMsgList = new ArrayList<String>();
-      List<String> networkNames = null;
+      Set<String> allNetworkNames = new HashSet<String>();
       try {
          if (specFilePath != null) {
             ClusterCreate clusterSpec =
@@ -229,7 +235,7 @@ public class ClusterCommands implements CommandMarker {
                return;
             }
          }
-         networkNames = getNetworkNames();
+         allNetworkNames = getAllNetworkNames();
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
@@ -237,36 +243,53 @@ public class ClusterCommands implements CommandMarker {
          return;
       }
 
-      if (networkNames.isEmpty()) {
+      if (allNetworkNames.isEmpty()) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.PARAM_CANNOT_FIND_NETWORK);
          return;
-      } else {
-         if (networkName != null) {
-            if (validName(networkName, networkNames)) {
-               clusterCreate.setNetworkName(networkName);
-            } else {
-               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                     name, Constants.OUTPUT_OP_CREATE,
-                     Constants.OUTPUT_OP_RESULT_FAIL,
-                     Constants.PARAM_NETWORK_NAME
-                           + Constants.PARAM_NOT_SUPPORTED + networkNames);
-               return;
-            }
+      }
+
+      Map<NetTrafficType, List<String>> networkConfig = new HashMap<NetTrafficType, List<String>>();
+      if (mgtNetworkName == null) {
+         if (allNetworkNames.size() == 1) {
+            networkConfig.put(NetTrafficType.MGT_NETWORK, new ArrayList<String>());
+            networkConfig.get(NetTrafficType.MGT_NETWORK).addAll(allNetworkNames);
          } else {
-            if (networkNames.size() == 1) {
-               clusterCreate.setNetworkName(networkNames.get(0));
-            } else {
-               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                     name, Constants.OUTPUT_OP_CREATE,
-                     Constants.OUTPUT_OP_RESULT_FAIL,
-                     Constants.PARAM_NETWORK_NAME
-                           + Constants.PARAM_NOT_SPECIFIED);
-               return;
-            }
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  name, Constants.OUTPUT_OP_CREATE,
+                  Constants.OUTPUT_OP_RESULT_FAIL,
+                  Constants.PARAM_NETWORK_NAME
+                        + Constants.PARAM_NOT_SPECIFIED);
+            return;
+         }
+      } else {
+         if (!allNetworkNames.contains(mgtNetworkName)
+               || (hdfsNetworkName != null && !allNetworkNames.contains(hdfsNetworkName))
+               || (mapredNetworkName != null && !allNetworkNames.contains(mapredNetworkName))) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  name, Constants.OUTPUT_OP_CREATE,
+                  Constants.OUTPUT_OP_RESULT_FAIL,
+                  Constants.PARAM_NETWORK_NAME
+                        + Constants.PARAM_NOT_SUPPORTED + allNetworkNames.toString());
+            return;
+         }
+
+         networkConfig.put(NetTrafficType.MGT_NETWORK, new ArrayList<String>());
+         networkConfig.get(NetTrafficType.MGT_NETWORK).add(mgtNetworkName);
+
+         if (hdfsNetworkName != null) {
+            networkConfig.put(NetTrafficType.HDFS_NETWORK, new ArrayList<String>());
+            networkConfig.get(NetTrafficType.HDFS_NETWORK).add(hdfsNetworkName);
+         }
+
+         if (mapredNetworkName != null) {
+            networkConfig.put(NetTrafficType.MAPRED_NETWORK, new ArrayList<String>());
+            networkConfig.get(NetTrafficType.MAPRED_NETWORK).add(mapredNetworkName);
          }
       }
+      notifyNetsUsage(networkConfig, warningMsgList);
+      clusterCreate.setNetworkConfig(networkConfig);
 
       clusterCreate.validateCDHVersion(warningMsgList);
       // Validate that the specified file is correct json format and proper
@@ -300,10 +323,41 @@ public class ClusterCommands implements CommandMarker {
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_RESULT_CREAT);
       } catch (CliRestException e) {
+         System.out.print(e.getStackTrace());
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                CommandsUtils.getExceptionMessage(e));
       }
+   }
+
+   /**
+    * notify user which network Serengeti will pick up for mgt/hdfs/mapred
+    * @param networkConfig
+    * @param warningMsgList
+    */
+   private void notifyNetsUsage(Map<NetTrafficType, List<String>> networkConfig,
+         List<String> warningMsgList) {
+      if (!networkConfig.containsKey(NetTrafficType.HDFS_NETWORK)
+            && !networkConfig.containsKey(NetTrafficType.MAPRED_NETWORK)) {
+         return;
+      }
+      String mgtNetwork = networkConfig.get(NetTrafficType.MGT_NETWORK).get(0);
+      String hdfsNetwork = mgtNetwork;
+      String mapredNetwork = mgtNetwork;
+      if (networkConfig.containsKey(NetTrafficType.HDFS_NETWORK)
+            && !networkConfig.get(NetTrafficType.HDFS_NETWORK).isEmpty()) {
+         hdfsNetwork = networkConfig.get(NetTrafficType.HDFS_NETWORK).get(0);
+      }
+      if (networkConfig.containsKey(NetTrafficType.MAPRED_NETWORK)
+            && !networkConfig.get(NetTrafficType.MAPRED_NETWORK).isEmpty()) {
+         mapredNetwork = networkConfig.get(NetTrafficType.MAPRED_NETWORK).get(0);
+      }
+
+      StringBuffer netsUsage = new StringBuffer().append("Hadoop will use network ")
+            .append(mgtNetwork).append(" for management, ")
+            .append(hdfsNetwork).append(" for hdfs traffic, and ")
+            .append(mapredNetwork).append(" for mapreduce traffic");
+      warningMsgList.add(netsUsage.toString());
    }
 
    private List<String> findDistroRoles(ClusterCreate clusterCreate) {
@@ -537,7 +591,7 @@ public class ClusterCommands implements CommandMarker {
       setNodeStatusInfo(failedNodes, nodeGroups);
       LinkedHashMap<String, List<String>> columnNamesWithGetMethodNames =
             new LinkedHashMap<String, List<String>>();
-      columnNamesWithGetMethodNames.put("IP", Arrays.asList("getIp"));
+      columnNamesWithGetMethodNames.put("IP", Arrays.asList("fetchMgtIp"));
       columnNamesWithGetMethodNames.put("NAME", Arrays.asList("getNodeName"));
       columnNamesWithGetMethodNames.put("CPU", Arrays.asList("getCpuNumber"));
       columnNamesWithGetMethodNames.put("MEM(MB)", Arrays.asList("getMemory"));
@@ -563,7 +617,8 @@ public class ClusterCommands implements CommandMarker {
       for (NodeStatus nodeStatus : nodes) {
          NodeRead node = getNodeRead(nodeStatus.getNodeName(), nodeGroups);
          if (node != null) {
-            nodeStatus.setIp(node.getIp());
+            // only show the management Ip currently
+            nodeStatus.setIp(node.fetchMgtIp());
             nodeStatus.setStatus(node.getStatus());
             nodeStatus.setCpuNumber(node.getCpuNumber());
             nodeStatus.setMemory(node.getMemory());
@@ -793,7 +848,7 @@ public class ClusterCommands implements CommandMarker {
                      if (role.equals("hadoop_namenode")) {
                         List<NodeRead> nodes = nodeGroup.getInstances();
                         if (nodes != null && nodes.size() > 0) {
-                           String nameNodeIP = nodes.get(0).getIp();
+                           String nameNodeIP = nodes.get(0).fetchMgtIp();
                            setNameNode(nameNodeIP);
                            hasHDFS = true;
                         } else {
@@ -803,7 +858,7 @@ public class ClusterCommands implements CommandMarker {
                      if (role.equals("hadoop_jobtracker")) {
                         List<NodeRead> nodes = nodeGroup.getInstances();
                         if (nodes != null && nodes.size() > 0) {
-                           String jobTrackerIP = nodes.get(0).getIp();
+                           String jobTrackerIP = nodes.get(0).fetchMgtIp();
                            setJobTracker(jobTrackerIP);
                         } else {
                            throw new CliRestException(
@@ -813,7 +868,7 @@ public class ClusterCommands implements CommandMarker {
                      if (role.equals("hive_server")) {
                         List<NodeRead> nodes = nodeGroup.getInstances();
                         if (nodes != null && nodes.size() > 0) {
-                           String hiveServerIP = nodes.get(0).getIp();
+                           String hiveServerIP = nodes.get(0).fetchMgtIp();
                            setHiveServerAddress(hiveServerIP);
                            hasHiveServer = true;
                         } else {
@@ -970,7 +1025,7 @@ public class ClusterCommands implements CommandMarker {
       System.out.println("The fixed nodes: " + succeedNodes.size());
       LinkedHashMap<String, List<String>> columnNamesWithGetMethodNames =
             new LinkedHashMap<String, List<String>>();
-      columnNamesWithGetMethodNames.put("IP", Arrays.asList("getIp"));
+      columnNamesWithGetMethodNames.put("IP", Arrays.asList("fetchMgtIp"));
       columnNamesWithGetMethodNames.put("NAME", Arrays.asList("getNodeName"));
       columnNamesWithGetMethodNames.put("STATUS", Arrays.asList("getStatus"));
       CommandsUtils.printInTableFormat(columnNamesWithGetMethodNames,
@@ -1011,17 +1066,15 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   private List<String> getNetworkNames() {
-
-      List<String> networkNames = new ArrayList<String>(0);
-
+   private Set<String> getAllNetworkNames() {
+      Set<String> allNetworks = new HashSet<String>();
       NetworkRead[] networks = networkRestClient.getAll(false);
-
       if (networks != null) {
-         for (NetworkRead network : networks)
-            networkNames.add(network.getName());
+         for (NetworkRead network : networks) {
+            allNetworks.add(network.getName());
+         }
       }
-      return networkNames;
+      return allNetworks;
    }
 
    private List<String> getDistroNames() {
@@ -1167,7 +1220,7 @@ public class ClusterCommands implements CommandMarker {
                         Arrays.asList("getRack"));
                }
                nColumnNamesWithGetMethodNames.put(
-                     Constants.FORMAT_TABLE_COLUMN_IP, Arrays.asList("getIp"));
+                     Constants.FORMAT_TABLE_COLUMN_IP, Arrays.asList("fetchMgtIp"));
                nColumnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_STATUS,
                      Arrays.asList("getStatus"));

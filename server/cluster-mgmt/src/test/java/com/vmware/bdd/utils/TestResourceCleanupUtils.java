@@ -68,8 +68,11 @@ public class TestResourceCleanupUtils {
    public void releaseIp(ClusterEntity cluster) {
       logger.info("Free ip adderss of cluster: " + cluster.getName());
       try {
-         if (cluster.getNetwork().getAllocType() == NetworkEntity.AllocType.IP_POOL) {
-            netSvc.free(cluster.getNetwork(), cluster.getId());
+         for (String networkName : cluster.fetchNetworkNameList()) {
+            NetworkEntity networkEntity = netSvc.getNetworkEntityByName(networkName);
+            if (networkEntity.getAllocType() == NetworkEntity.AllocType.IP_POOL) {
+               netSvc.free(networkEntity, cluster.getId());
+            }
          }
       } catch (Exception e) {
          logger.error("Ignore failure of free ip address for cluster "

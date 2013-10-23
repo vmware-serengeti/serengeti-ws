@@ -16,6 +16,7 @@ package com.vmware.bdd.utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -97,7 +98,7 @@ public class JobUtils {
       node.setVmMobId(entity.getMoId());
       node.setVmFolder(entity.getNodeGroup().getVmFolderPath());
       if (vcVm != null) {
-         node.setIpAddress(entity.getIpAddress());
+         node.setIpConfigs(entity.getIpConfigsInfo());
          node.setGuestHostName(entity.getGuestHostName());
       }
       return node;
@@ -110,18 +111,45 @@ public class JobUtils {
     * 
     * @param existingNodes
     * @param deletedNodes
-    * @param occupiedIps
+    * @param occupiedIpSets
     */
    public static void removeNonExistNodes(List<BaseNode> existingNodes,
-         List<BaseNode> deletedNodes, Set<String> occupiedIps) {
+         List<BaseNode> deletedNodes, Map<String, Set<String>> occupiedIpSets) {
       for (BaseNode node : existingNodes) {
          if (node.getVmMobId() == null) {
             deletedNodes.add(node);
          } else {
-            occupiedIps.add(node.getIpAddress());
+            adjustOccupiedIpSets(occupiedIpSets, node, true);
          }
       }
       existingNodes.removeAll(deletedNodes);
+   }
+
+   /**
+    *
+    * @param occupiedIpSets
+    * @param node
+    * @param add true to add, false to remove
+    */
+   public static void adjustOccupiedIpSets(Map<String, Set<String>> occupiedIpSets, BaseNode node, boolean add) {
+      if (!add && occupiedIpSets.isEmpty()) {
+         return;
+      }
+
+      for (String portGroup : node.fetchAllPortGroups()) {
+         if (!occupiedIpSets.containsKey(portGroup)) {
+            Set<String> ipSet = new HashSet<String>();
+            occupiedIpSets.put(portGroup, ipSet);
+         }
+
+         String ip = node.fetchIpAddressOfPortGroup(portGroup);
+         Set<String> ips = occupiedIpSets.get(portGroup);
+         if (add) {
+            ips.add(ip);
+         } else {
+            ips.remove(ip);
+         }
+      }
    }
 
    /**
@@ -131,10 +159,10 @@ public class JobUtils {
     * 
     * @param existingNodes
     * @param deletedNodes
-    * @param occupiedIps
+    * @param occupiedIpSets
     */
    public static void separateVcUnreachableNodes(List<BaseNode> existingNodes,
-         List<BaseNode> deletedNodes, Set<String> occupiedIps) {
+         List<BaseNode> deletedNodes, Map<String, Set<String>> occupiedIpSets) {
       for (BaseNode node : existingNodes) {
          if (node.getVmMobId() == null) {
             deletedNodes.add(node);
@@ -142,7 +170,7 @@ public class JobUtils {
          }
          VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getVmMobId());
          if (vm == null || (!vm.isPoweredOn())
-               || (VcVmUtil.getIpAddress(vm, false) == null)) {
+               || !VcVmUtil.checkIpAddresses(vm)) {
             deletedNodes.add(node);
             continue;
          }
@@ -157,7 +185,7 @@ public class JobUtils {
                continue;
             }
          }
-         occupiedIps.add(node.getIpAddress());
+         adjustOccupiedIpSets(occupiedIpSets, node, true);
       }
       existingNodes.removeAll(deletedNodes);
    }
@@ -171,8 +199,10 @@ public class JobUtils {
          if (expectedStatus == NodeStatus.VM_READY) {
             // verify from VC 
             VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
+
+
             if (vm == null || (!vm.isPoweredOn())
-                  || (VcVmUtil.getIpAddress(vm, false) == null)) {
+                  || !VcVmUtil.checkIpAddresses(vm)) {
                throw ClusteringServiceException.VM_STATUS_ERROR(
                      node.getVmName(), node.getStatus().toString(),
                      expectedStatus.toString());

@@ -17,6 +17,7 @@ package com.vmware.bdd.service.resmgmt.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vmware.bdd.dal.IClusterDAO;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.Verifications;
@@ -41,6 +42,8 @@ public class NetworkServiceTest {
    private INetworkDAO networkDao;
    @Mocked
    private IResourceService resService;
+   @Mocked
+   private IClusterDAO clusterDAO;
 
    private NetworkService networkSvc;
 
@@ -112,6 +115,7 @@ public class NetworkServiceTest {
       };
       networkSvc.setResService(resService);
       networkSvc.setNetworkDao(networkDao);
+      networkSvc.setClusterDAO(clusterDAO);
       networkSvc.addDhcpNetwork("defaultNetwork3", "network3");
       new Verifications() {
          {
@@ -122,7 +126,6 @@ public class NetworkServiceTest {
       new Expectations() {
          {
             NetworkEntity network = new NetworkEntity();
-            network.setClusters(new ArrayList<ClusterEntity>());
             network.setIpBlocks(new ArrayList<IpBlockEntity>());
             networkDao.findNetworkByName(anyString);
             result = network;

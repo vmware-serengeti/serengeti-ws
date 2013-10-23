@@ -78,7 +78,6 @@ create table cluster (
    status              varchar(255) not null,
    vc_datastore_names  text,
    vc_rp_names         text,
-   network_id          bigint,
    start_after_deploy  boolean,
    automation_enable   boolean,
    vhm_min_num         integer,
@@ -87,9 +86,9 @@ create table cluster (
    latest_task_id      bigint,
    vhm_master_moid     varchar(255),
    vhm_jobtracker_port varchar(255),
+   network_config      text,
    configuration       text,
-   primary key (id),
-   foreign key(network_id) references network(id) ON DELETE CASCADE
+   primary key (id)
 );
 
 create sequence node_group_seq;
@@ -139,12 +138,12 @@ create table node (
    power_status_changed       boolean,
    vc_datastores text,
    volumes       text,
-   ip_address   varchar(255),
    guest_host_name  varchar(255),
    node_group_id bigint,
    vc_rp_id     bigint,
    cpu_number             integer,
    memory                 bigint,
+   ip_configs    text,
    primary key (id),
    foreign key(node_group_id) references node_group(id) ON DELETE CASCADE,
    foreign key(vc_rp_id) references vc_resource_pool(id) ON DELETE CASCADE

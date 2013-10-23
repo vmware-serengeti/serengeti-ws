@@ -22,8 +22,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import com.vmware.bdd.utils.Constants;
@@ -40,7 +42,6 @@ import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.LimitInstruction;
-import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
@@ -317,10 +318,10 @@ public class ClusterManager {
       spec.setDistroMap(null);
       spec.setSharedDatastorePattern(null);
       spec.setLocalDatastorePattern(null);
-      spec.setNetworking(null);
+      spec.setNetworkings(null);
       spec.setRpNames(null);
       spec.setDsNames(null);
-      spec.setNetworkName(null);
+      spec.setNetworkConfig(null);
       spec.setName(null);
       spec.setDistro(null);
       spec.setValidateConfig(null);
@@ -399,8 +400,7 @@ public class ClusterManager {
       }
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
-      validateNetworkAccessibility(name, createSpec.getNetworkName(),
-            vcClusters);
+      validateNetworkAccessibility(createSpec.getNetworkNames(), vcClusters);
       //save configuration into meta-db, and extend configuration using default spec
       clusterConfigMgr.createClusterConfig(clusterSpec);
       clusterEntityMgr.updateClusterStatus(name, ClusterStatus.PROVISIONING);
@@ -431,32 +431,22 @@ public class ClusterManager {
       createSpec.setRpNames(rpNames);
    }
 
-   private void validateNetworkAccessibility(String clusterName,
-         String networkName, List<VcCluster> clusters) {
-      if (networkName == null || networkName.isEmpty()) {
-         List<NetworkRead> nets =
-               clusterConfigMgr.getNetworkMgr().getAllNetworks(false);
-         if (nets.isEmpty() || nets.size() > 1) {
-				throw ClusterConfigException.NETWORK_IS_NOT_SPECIFIED(
-						clusterName, nets.size());
-         } else {
-            networkName = nets.get(0).getName();
-         }
-      }
+   private void validateNetworkAccessibility(List<String> networkList,
+         List<VcCluster> clusters) {
+      AuAssert.check(networkList != null && !networkList.isEmpty());
+      Set<String> networkNames = new HashSet<String>();
+      networkNames.addAll(networkList);
 
       logger.info("start to validate network accessibility.");
-      boolean shared = true;
       VcCluster cluster = null;
-      for (VcCluster vcCluster : clusters) {
-         if (!resMgr.isNetworkSharedInCluster(networkName, vcCluster.getName())) {
-            cluster = vcCluster;
-            shared = false;
-            break;
+      for (String networkName : networkNames) {
+         for (VcCluster vcCluster : clusters) {
+            if (!resMgr.isNetworkSharedInCluster(networkName, vcCluster.getName())) {
+               cluster = vcCluster;
+               throw ClusterConfigException.NETWORK_UNACCESSIBLE(networkName,
+                     cluster.getName());
+            }
          }
-      }
-      if (!shared) {
-         throw ClusterConfigException.NETWORK_UNACCESSIBLE(networkName,
-               cluster.getName());
       }
    }
 
@@ -582,8 +572,7 @@ public class ClusterManager {
       }
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
-      validateNetworkAccessibility(clusterName, cluster.getNetwork().getName(),
-            vcClusters);
+      validateNetworkAccessibility(cluster.fetchNetworkNameList(), vcClusters);
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
             clusterName));
@@ -762,8 +751,7 @@ public class ClusterManager {
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
-      validateNetworkAccessibility(clusterName, cluster.getNetwork().getName(),
-            vcClusters);
+      validateNetworkAccessibility(cluster.fetchNetworkNameList(), vcClusters);
 
       NodeGroupEntity group =
             clusterEntityMgr.findByName(cluster, nodeGroupName);
@@ -866,8 +854,9 @@ public class ClusterManager {
     * @param clusterName
     * @param activeComputeNodeNum
     * @param minComputeNodeNum
-    * @param mode
+    * @param enableAuto
     * @param ioPriority
+    * @return
     * @throws Exception
     */
    @SuppressWarnings("unchecked")
@@ -958,8 +947,10 @@ public class ClusterManager {
     * set cluster parameters asynchronously
     * 
     * @param clusterName
-    * @param enableManualElasticity
     * @param activeComputeNodeNum
+    * @param minComputeNodeNum
+    * @param enableAuto
+    * @param ioPriority
     * @return
     * @throws Exception
     */

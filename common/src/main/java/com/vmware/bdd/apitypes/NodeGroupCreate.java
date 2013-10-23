@@ -215,10 +215,6 @@ public class NodeGroupCreate {
       return vcClusters;
    }
 
-   //   public List<VcCluster> getVcClusters() {
-   //      return vcClusters;
-   //   }
-
    public void setVcClusters(List<VcCluster> vcClusters) {
       this.vcClusters = vcClusters;
    }

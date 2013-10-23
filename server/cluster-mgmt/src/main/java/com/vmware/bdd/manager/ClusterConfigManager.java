@@ -29,6 +29,8 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.apitypes.NetConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -160,6 +162,10 @@ public class ClusterConfigManager {
          throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
       }
       if (!cluster.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
+         List<String> allNetworkNames = new ArrayList<String>();
+         for (NetworkEntity entity : networkMgr.getAllNetworkEntities()) {
+            allNetworkNames.add(entity.getName());
+         }
          cluster.validateClusterCreate(failedMsgList, warningMsgList, distroMgr
                .getDistroByName(cluster.getDistro()).getRoles());
       }
@@ -210,25 +216,8 @@ public class ClusterConfigManager {
          } else {
             logger.debug("no datastore name specified, use global configuration.");
          }
-         String networkName = cluster.getNetworkName();
-         NetworkEntity networkEntity = null;
-         if (networkName == null || networkName.isEmpty()) {
-            List<NetworkEntity> nets = networkMgr.getAllNetworkEntities();
-            if (nets.isEmpty() || nets.size() > 1) {
-               throw ClusterConfigException.NETWORK_IS_NOT_SPECIFIED(
-            		   name, nets.size());
-            } else {
-               networkEntity = nets.get(0);
-            }
-         } else {
-            networkEntity = networkMgr.getNetworkEntityByName(networkName);
-         }
 
-         if (networkEntity == null) {
-            throw ClusterConfigException
-                  .NETWORK_IS_NOT_FOUND(networkName, name);
-         }
-         clusterEntity.setNetwork(networkEntity);
+         clusterEntity.setNetworkConfig(convertNetNamesToNetConfigs(cluster.getNetworkConfig()));
          clusterEntity.setVhmJobTrackerPort("50030");
          if (cluster.getConfiguration() != null
                && cluster.getConfiguration().size() > 0) {
@@ -286,6 +275,47 @@ public class ClusterConfigManager {
                + ", which is already existed.");
          throw BddException.ALREADY_EXISTS(ex, "Cluster", name);
       }
+   }
+
+   private Map<NetTrafficType, List<NetConfigInfo>> convertNetNamesToNetConfigs(
+         Map<NetTrafficType, List<String>> netNamesInfo) {
+      Map<NetTrafficType, List<NetConfigInfo>> netConfigs = new HashMap<NetTrafficType, List<NetConfigInfo>>();
+      Map<String, Set<String>> port2names = new HashMap<String, Set<String>>();
+
+      for (NetTrafficType type : netNamesInfo.keySet()) {
+         netConfigs.put(type, new ArrayList<NetConfigInfo>());
+         for (String name : netNamesInfo.get(type)) {
+            String pg = networkMgr.getNetworkEntityByName(name).getPortGroup();
+            NetConfigInfo netConfig = new NetConfigInfo(type, name, pg);
+            netConfigs.get(type).add(netConfig);
+
+            if (!port2names.containsKey(pg)) {
+               port2names.put(pg, new HashSet<String>());
+            }
+            port2names.get(pg).add(name);
+         }
+      }
+
+      // if nw1,nw2 are both refer to pg1, should not use them in one cluster
+      for (String pg : port2names.keySet()) {
+         if (port2names.get(pg).size() > 1) {
+            throw BddException.PG_REFERENCED_MULTI_TIMES(pg, port2names.get(pg).toString());
+         }
+      }
+
+      return netConfigs;
+   }
+
+   private Map<NetTrafficType, List<String>> convertNetConfigsToNetNames(
+         Map<NetTrafficType, List<NetConfigInfo>> netConfigs) {
+      Map<NetTrafficType, List<String>> netNamesInfo = new HashMap<NetTrafficType, List<String>>();
+      for (NetTrafficType type : netConfigs.keySet()) {
+         netNamesInfo.put(type, new ArrayList<String>());
+         for (NetConfigInfo config : netConfigs.get(type)) {
+            netNamesInfo.get(type).add(config.getNetworkName());
+         }
+      }
+      return netNamesInfo;
    }
 
    private void validateMemorySize(Set<NodeGroupEntity> nodeGroups,
@@ -578,6 +608,13 @@ public class ClusterConfigManager {
       if (group.getRpNames() != null && group.getRpNames().size() > 0) {
          groupEntity.setVcRpNameList(group.getRpNames());
       }
+
+      /*
+       * do not support node group level networks temporarilly
+      if (group.getNetworkNames() != null && group.getNetworkNames().size() > 0) {
+         groupEntity.setVcNetworkNames(group.getNetworkNames());
+      }
+      */
       convertStorage(group, groupEntity, roles);
 
       roles.addAll(group.getRoles());
@@ -763,49 +800,64 @@ public class ClusterConfigManager {
       sortGroups(nodeGroups);
       clusterConfig.setNodeGroups(nodeGroups
             .toArray(new NodeGroupCreate[nodeGroups.size()]));
-      NetworkEntity networkEntity = clusterEntity.getNetwork();
-      List<NetworkAdd> networking = new ArrayList<NetworkAdd>();
-      if (needAllocIp) {
-         NetworkAdd network = new NetworkAdd();
-         network.setPortGroup(networkEntity.getPortGroup());
-         network
-               .setDhcp(networkEntity.getAllocType() == NetworkEntity.AllocType.DHCP);
-         if (!network.isDhcp()) {
-            logger.debug("using static ip.");
-            List<IpBlockEntity> ipBlockEntities =
-                  networkMgr.getAllocatedIpBlocks(networkEntity,
-                        clusterEntity.getId());
-            long allocatedIpNum = IpBlockEntity.count(ipBlockEntities);
-            if (allocatedIpNum < instanceNum) {
-               long newNum = instanceNum - allocatedIpNum;
-               List<IpBlockEntity> newIpBlockEntities =
-                     networkMgr.alloc(networkEntity, clusterEntity.getId(),
-                           newNum);
-               ipBlockEntities.addAll(newIpBlockEntities);
-            }
-            network.setDns1(networkEntity.getDns1());
-            network.setDns2(networkEntity.getDns2());
-            network.setGateway(networkEntity.getGateway());
-            network.setNetmask(networkEntity.getNetmask());
-            List<IpBlock> ips = new ArrayList<IpBlock>();
-            for (IpBlockEntity ipBlockEntity : ipBlockEntities) {
-               IpBlock ip = new IpBlock();
-               ip.setBeginIp(ipBlockEntity.getBeginAddress());
-               ip.setEndIp(ipBlockEntity.getEndAddress());
-               ips.add(ip);
-            }
-            network.setIp(ips);
-         }
-         networking.add(network);
-      }
-      clusterConfig.setNetworking(networking);
-      clusterConfig.setNetworkName(networkEntity.getName());
+
+      List<String> networkNames = clusterEntity.fetchNetworkNameList();
+
+      // TODO: refactor this function to support nodeGroup level networks
+      List<NetworkAdd> networkingAdds = allocatNetworkIp(networkNames, clusterEntity, instanceNum, needAllocIp);
+      clusterConfig.setNetworkings(networkingAdds);
+      clusterConfig.setNetworkConfig(convertNetConfigsToNetNames(clusterEntity.getNetworkConfigInfo()));
+
       if (clusterEntity.getHadoopConfig() != null) {
          Map<String, Object> hadoopConfig =
                (new Gson())
                      .fromJson(clusterEntity.getHadoopConfig(), Map.class);
          clusterConfig.setConfiguration(hadoopConfig);
       }
+   }
+
+   private List<NetworkAdd> allocatNetworkIp(List<String> networkNames,
+         ClusterEntity clusterEntity, long instanceNum, boolean needAllocIp) {
+      List<NetworkAdd> networkings = new ArrayList<NetworkAdd>();
+
+      for (String networkName : networkNames) {
+         NetworkEntity networkEntity = networkMgr.getNetworkEntityByName(networkName);
+
+         if (needAllocIp) {
+            NetworkAdd network = new NetworkAdd();
+            network.setPortGroup(networkEntity.getPortGroup());
+            network.setName(networkName);
+            network.setDhcp(networkEntity.getAllocType() == NetworkEntity.AllocType.DHCP);
+            if (!network.isDhcp()) {
+               logger.debug("using static ip.");
+               List<IpBlockEntity> ipBlockEntities =
+                     networkMgr.getAllocatedIpBlocks(networkEntity,
+                           clusterEntity.getId());
+               long allocatedIpNum = IpBlockEntity.count(ipBlockEntities);
+               if (allocatedIpNum < instanceNum) {
+                  long newNum = instanceNum - allocatedIpNum;
+                  List<IpBlockEntity> newIpBlockEntities =
+                        networkMgr.alloc(networkEntity, clusterEntity.getId(),
+                              newNum);
+                  ipBlockEntities.addAll(newIpBlockEntities);
+               }
+               network.setDns1(networkEntity.getDns1());
+               network.setDns2(networkEntity.getDns2());
+               network.setGateway(networkEntity.getGateway());
+               network.setNetmask(networkEntity.getNetmask());
+               List<IpBlock> ips = new ArrayList<IpBlock>();
+               for (IpBlockEntity ipBlockEntity : ipBlockEntities) {
+                  IpBlock ip = new IpBlock();
+                  ip.setBeginIp(ipBlockEntity.getBeginAddress());
+                  ip.setEndIp(ipBlockEntity.getEndAddress());
+                  ips.add(ip);
+               }
+               network.setIp(ips);
+            }
+            networkings.add(network);
+         }
+      }
+      return networkings;
    }
 
    private void sortGroups(List<NodeGroupCreate> nodeGroups) {

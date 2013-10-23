@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.service;
 
+import com.vmware.aurora.composition.VmSchema;
+import com.vmware.bdd.utils.Constants;
 import mockit.Mock;
 import mockit.MockClass;
 
@@ -22,20 +24,42 @@ import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.utils.VcVmUtil;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @MockClass(realClass = VcVmUtil.class)
 public class MockVcVmUtil {
    private static boolean flag = true;
    private static int i = 0;
 
    @Mock
-   public static String getIpAddress(final VcVirtualMachine vcVm,
-         boolean inSession) {
+   public static String getIpAddressOfPortGroup(final VcVirtualMachine vcVm,
+         final String portgroup, boolean inSession) {
       if (flag) {
          i++;
          return "10.1.1." + i;
       } else {
-         return null;
+         return Constants.NULL_IP;
       }
+   }
+
+   @Mock
+   public static Set<String> getAllIpAddresses(final VcVirtualMachine vcVm,
+         final Set<String> portgroups, boolean inSession) {
+      Set<String> ips = new HashSet<String>();
+      for (String portgroup : portgroups) {
+         ips.add(getIpAddressOfPortGroup(vcVm, portgroup, inSession));
+      }
+      return ips;
+   }
+
+   @Mock
+   public static boolean checkIpAddresses(final VcVirtualMachine vcVm) {
+      return flag;
+   }
+
+   @Mock
+   public static void checkAndCreateSnapshot(final VmSchema vmSchema) {
    }
 
    @Mock
@@ -66,10 +90,4 @@ public class MockVcVmUtil {
    public static void updateVm(String vmId) {
 
    }
-
-   @Mock
-   public static void checkAndCreateSnapshot(final VmSchema vmSchema) {
-
-   }
-
 }

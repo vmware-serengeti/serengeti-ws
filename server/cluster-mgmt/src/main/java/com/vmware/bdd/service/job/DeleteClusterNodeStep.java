@@ -68,8 +68,11 @@ public class DeleteClusterNodeStep extends TrackableTasklet {
    private void releaseIp(ClusterEntity cluster) {
       logger.info("Free ip adderss of cluster: " + cluster.getName());
       try {
-         if (cluster.getNetwork().getAllocType() == NetworkEntity.AllocType.IP_POOL) {
-            networkMgr.free(cluster.getNetwork(), cluster.getId());
+         for (String networkName : cluster.fetchNetworkNameList()) {
+            NetworkEntity networkEntity = networkMgr.getNetworkEntityByName(networkName);
+            if (networkEntity.getAllocType() == NetworkEntity.AllocType.IP_POOL) {
+               networkMgr.free(networkEntity, cluster.getId());
+            }
          }
       } catch (Exception e) {
          logger.error("Ignore failure of free ip address for cluster "

@@ -176,7 +176,7 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          nodeEntity.setMoId(vNode.getVmMobId());
          nodeEntity.setRack(vNode.getTargetRack());
          nodeEntity.setHostName(vNode.getTargetHost());
-         nodeEntity.setIpAddress(vNode.getIpAddress());
+         nodeEntity.setIpConfigs(vNode.getIpConfigs());
          nodeEntity.setGuestHostName(vNode.getGuestHostName());
          nodeEntity.setCpuNum(vNode.getCpu());
          nodeEntity.setMemorySize((long) vNode.getMem());
