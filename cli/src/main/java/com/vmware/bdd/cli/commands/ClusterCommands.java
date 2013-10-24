@@ -26,7 +26,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
-import com.vmware.bdd.apitypes.NetConfigInfo;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.hadoop.impala.hive.HiveCommands;
@@ -95,7 +94,7 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath,
          @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
-         @CliOption(key = { "mgtNetworkName" }, mandatory = false, help = "Network Name used for management") final String mgtNetworkName,
+         @CliOption(key = { "networkName" }, mandatory = false, help = "Network Name used for management") final String networkName,
          @CliOption(key = { "hdfsNetworkName" }, mandatory = false, help = "Network Name for HDFS traffic.") final String hdfsNetworkName,
          @CliOption(key = { "mapredNetworkName" }, mandatory = false, help = "Network Name for MapReduce traffic") final String mapredNetworkName,
          @CliOption(key = { "topology" }, mandatory = false, help = "You must specify the topology type: HVE or RACK_AS_RACK or HOST_AS_RACK") final String topology,
@@ -251,7 +250,7 @@ public class ClusterCommands implements CommandMarker {
       }
 
       Map<NetTrafficType, List<String>> networkConfig = new HashMap<NetTrafficType, List<String>>();
-      if (mgtNetworkName == null) {
+      if (networkName == null) {
          if (allNetworkNames.size() == 1) {
             networkConfig.put(NetTrafficType.MGT_NETWORK, new ArrayList<String>());
             networkConfig.get(NetTrafficType.MGT_NETWORK).addAll(allNetworkNames);
@@ -264,7 +263,7 @@ public class ClusterCommands implements CommandMarker {
             return;
          }
       } else {
-         if (!allNetworkNames.contains(mgtNetworkName)
+         if (!allNetworkNames.contains(networkName)
                || (hdfsNetworkName != null && !allNetworkNames.contains(hdfsNetworkName))
                || (mapredNetworkName != null && !allNetworkNames.contains(mapredNetworkName))) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
@@ -276,7 +275,7 @@ public class ClusterCommands implements CommandMarker {
          }
 
          networkConfig.put(NetTrafficType.MGT_NETWORK, new ArrayList<String>());
-         networkConfig.get(NetTrafficType.MGT_NETWORK).add(mgtNetworkName);
+         networkConfig.get(NetTrafficType.MGT_NETWORK).add(networkName);
 
          if (hdfsNetworkName != null) {
             networkConfig.put(NetTrafficType.HDFS_NETWORK, new ArrayList<String>());
