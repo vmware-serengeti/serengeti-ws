@@ -328,7 +328,8 @@ public class NodeGroupCreate {
                valid = false;
                failedMsgList.add(new StringBuilder().append(getName())
                      .append(".placementPolicies.instancePerHost=")
-                     .append(policies.getInstancePerHost()).toString());
+                     .append(policies.getInstancePerHost()).append(".")
+                     .toString());
             } else if (calculateHostNum() < 0) {
                valid = false;
                failedMsgList.add(new StringBuilder().append(getName())

@@ -539,9 +539,9 @@ public class ClusterCreate implements Serializable {
             for (ServiceType service : serviceTypes) {
                EnumSet<ServiceType> dependency = service.depend(isYarn);
                if (dependency != null && !serviceTypes.containsAll(dependency)) {
-                  failedMsgList.add("some dependent services " + dependency
+                  failedMsgList.add("Some dependent services " + dependency
                         + " " + service
-                        + " relies on cannot be found in the spec file");
+                        + " relies on cannot be found in the spec file.");
                   valid = false;
                }
             }
@@ -805,7 +805,7 @@ public class ClusterCreate implements Serializable {
          List<String> failedMsgList) {
       failedMsgList.add(new StringBuilder().append(nodeGroup.getName())
             .append(".").append("instanceNum=")
-            .append(nodeGroup.getInstanceNum()).toString());
+            .append(nodeGroup.getInstanceNum()).append(".").toString());
    }
 
    private boolean checkNodeGroupRoles(NodeGroupCreate nodeGroup,

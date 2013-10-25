@@ -241,9 +241,9 @@ public class ClusterCreateTest {
       cluster.setNodeGroups(new NodeGroupCreate[] { master, compute });
       assertEquals(false, cluster.validateNodeGroupRoles(failedMsgList));
       assertEquals(1, failedMsgList.size());
-      assertEquals("some dependent services " + EnumSet.of(ServiceType.HDFS)
+      assertEquals("Some dependent services " + EnumSet.of(ServiceType.HDFS)
             + " " + ServiceType.MAPRED
-            + " relies on cannot be found in the spec file",
+            + " relies on cannot be found in the spec file.",
             failedMsgList.get(0));
    }
 
@@ -355,7 +355,7 @@ public class ClusterCreateTest {
       assertEquals(3, failedMsgList.size());
       assertEquals("The 'swapRatio' must be greater than 0 in group master.",
             failedMsgList.get(0));
-      assertEquals("worker.instanceNum=0", failedMsgList.get(1));
+      assertEquals("worker.instanceNum=0.", failedMsgList.get(1));
       assertEquals("client.roles=hive_server,hive.", failedMsgList.get(2));
       assertEquals(1, warningMsgList.size());
       assertEquals(
