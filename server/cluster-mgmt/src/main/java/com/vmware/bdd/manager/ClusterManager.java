@@ -54,6 +54,7 @@ import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.exception.ClusterHealServiceException;
 import com.vmware.bdd.exception.ClusterManagerException;
+import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.IExecutionService;
@@ -490,9 +491,21 @@ public class ClusterManager {
          clusters = clusterConfigMgr.getRpMgr().getAllVcResourcePool();
       } else {
          clusters = new ArrayList<VcCluster>();
+         StringBuffer nonexistentRpNames = new StringBuffer();
          for (String rpName : rpNames) {
-            clusters.addAll(clusterConfigMgr.getRpMgr()
-                  .getVcResourcePoolByName(rpName));
+            List<VcCluster> vcClusters =
+                  clusterConfigMgr.getRpMgr().getVcResourcePoolByName(rpName);
+
+            if (vcClusters == null) {
+               nonexistentRpNames.append(rpName).append(",");
+            } else {
+               clusters.addAll(vcClusters);
+            }
+         }
+         if (nonexistentRpNames.length() > 0) {
+            nonexistentRpNames.delete(nonexistentRpNames.length()-1, nonexistentRpNames.length());
+            throw VcProviderException
+                  .RESOURCE_POOL_NOT_FOUND(nonexistentRpNames.toString());
          }
       }
       return clusters;
