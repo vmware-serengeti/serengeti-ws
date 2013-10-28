@@ -172,6 +172,8 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_NODE_NAME = "NODE NAME";
    public static final String FORMAT_TABLE_COLUMN_STATUS = "STATUS";
    public static final String FORMAT_TABLE_COLUMN_IP = "IP";
+   public static final String FORMAT_TABLE_COLUMN_HDFS_IP = "HDFS IP";
+   public static final String FORMAT_TABLE_COLUMN_MAPRED_IP = "MAPRED IP";
    public static final String FORMAT_TABLE_COLUMN_VENDOR = "VENDOR";
    public static final String FORMAT_TABLE_COLUMN_VERSION = "VERSION";
    public static final String FORMAT_TABLE_COLUMN_HVE = "HVE";

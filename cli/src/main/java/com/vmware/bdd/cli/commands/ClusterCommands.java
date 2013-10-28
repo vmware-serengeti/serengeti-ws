@@ -1221,6 +1221,10 @@ public class ClusterCommands implements CommandMarker {
                nColumnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_IP, Arrays.asList("fetchMgtIp"));
                nColumnNamesWithGetMethodNames.put(
+                     Constants.FORMAT_TABLE_COLUMN_HDFS_IP, Arrays.asList("fetchHdfsIp"));
+               nColumnNamesWithGetMethodNames.put(
+                     Constants.FORMAT_TABLE_COLUMN_MAPRED_IP, Arrays.asList("fetchMapredIp"));
+               nColumnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_STATUS,
                      Arrays.asList("getStatus"));
 
@@ -1231,9 +1235,19 @@ public class ClusterCommands implements CommandMarker {
                         Constants.OUTPUT_INDENT);
                   List<NodeRead> nodes = nodegroup.getInstances();
                   if (nodes != null) {
+                     LinkedHashMap<String, List<String>> nColumnNamesWithGetMethodNamesClone =
+                           (LinkedHashMap<String, List<String>>) nColumnNamesWithGetMethodNames.clone();
+                     if (!nodes.isEmpty()) {
+                        if (!nodes.get(0).getIpConfigs().containsKey(NetTrafficType.HDFS_NETWORK)) {
+                           nColumnNamesWithGetMethodNamesClone.remove(Constants.FORMAT_TABLE_COLUMN_HDFS_IP);
+                        }
+                        if (!nodes.get(0).getIpConfigs().containsKey(NetTrafficType.MAPRED_NETWORK)) {
+                           nColumnNamesWithGetMethodNamesClone.remove(Constants.FORMAT_TABLE_COLUMN_MAPRED_IP);
+                        }
+                     }
                      System.out.println();
                      CommandsUtils.printInTableFormat(
-                           nColumnNamesWithGetMethodNames, nodes.toArray(),
+                           nColumnNamesWithGetMethodNamesClone, nodes.toArray(),
                            new StringBuilder().append(Constants.OUTPUT_INDENT)
                                  .append(Constants.OUTPUT_INDENT).toString());
                   }

@@ -112,9 +112,21 @@ public class NodeRead {
    }
 
    public String fetchMgtIp() {
-      if (ipConfigs != null && ipConfigs.containsKey(NetTrafficType.MGT_NETWORK)
-            && !ipConfigs.get(NetTrafficType.MGT_NETWORK).get(0).getIpAddress().equals(Constants.NULL_IP)) {
-         return ipConfigs.get(NetTrafficType.MGT_NETWORK).get(0).getIpAddress();
+      return fetchIpOf(NetTrafficType.MGT_NETWORK);
+   }
+
+   public String fetchHdfsIp() {
+      return fetchIpOf(NetTrafficType.HDFS_NETWORK);
+   }
+
+   public String fetchMapredIp() {
+      return fetchIpOf(NetTrafficType.MAPRED_NETWORK);
+   }
+
+   private String fetchIpOf(NetTrafficType type) {
+      if (ipConfigs != null && ipConfigs.containsKey(type)
+            && !ipConfigs.get(type).get(0).getIpAddress().equals(Constants.NULL_IP)) {
+         return ipConfigs.get(type).get(0).getIpAddress();
       }
       return null;
    }
