@@ -1227,6 +1227,9 @@ public class ClusterCommands implements CommandMarker {
                nColumnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_STATUS,
                      Arrays.asList("getStatus"));
+               nColumnNamesWithGetMethodNames.put(
+                     Constants.FORMAT_TABLE_COLUMN_TASK,
+                     Arrays.asList("getAction"));
 
                for (NodeGroupRead nodegroup : nodegroups) {
                   CommandsUtils.printInTableFormat(

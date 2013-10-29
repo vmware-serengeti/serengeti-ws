@@ -193,9 +193,20 @@ public class VcEventHandlers {
       DasHostFailedEvent (EventEx.class,
             "com.vmware.vc.HA.DasHostFailedEvent"),
       DasHostIsolatedEvent (EventEx.class,
-            "com.vmware.vc.HA.DasHostIsolatedEvent");
+            "com.vmware.vc.HA.DasHostIsolatedEvent"),
       // TODO: Should we capture com.vmware.vc.HA.HostStateChangeEvent too
       // to indicate Host is now ok?
+
+      // VHM events
+      VhmError (EventEx.class,
+            "com.vmware.vhadoop.vhm.vc.events.error"),
+      VhmWarning (EventEx.class,
+            "com.vmware.vhadoop.vhm.vc.events.warning"),
+      VhmInfo (EventEx.class,
+            "com.vmware.vhadoop.vhm.vc.events.info"),
+      VhmUser (EventEx.class,
+            "com.vmwre.vhadoop.vhm.vc.events.user");
+
 
       private static String eventTypeIds[] = null;
       private final Class<? extends Event> eventClass;

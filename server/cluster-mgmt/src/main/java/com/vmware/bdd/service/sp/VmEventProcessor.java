@@ -47,7 +47,7 @@ public class VmEventProcessor extends Thread {
          VcEventType.VmConnected,
          VcEventType.VmCreated,
          VcEventType.VmDasBeingReset,
-         VcEventType.VmDasResetFailed, 
+         VcEventType.VmDasResetFailed,
          VcEventType.VmDisconnected,
          VcEventType.VmMessage,
          VcEventType.VmMessageError,
@@ -66,7 +66,11 @@ public class VmEventProcessor extends Thread {
          VcEventType.NotEnoughResourcesToStartVmEvent,
          VcEventType.VmMaxRestartCountReached,
          VcEventType.VmFailoverFailed,
-         VcEventType.VmCloned);
+         VcEventType.VmCloned,
+         VcEventType.VhmError,
+         VcEventType.VhmWarning,
+         VcEventType.VhmInfo,
+         VcEventType.VhmUser);
 
    private static final Logger logger = Logger
          .getLogger(VmEventProcessor.class);
@@ -232,6 +236,26 @@ public class VmEventProcessor extends Thread {
                      + vm.getName());
                clusterEntityMgr.refreshNodeByVmName(moId, vm.getName(), null,
                      true);
+            }
+            break;
+         }
+         case VhmError:
+         case VhmWarning:
+         case VhmInfo:
+         case VhmUser: {
+            EventEx event = (EventEx) e;
+            VcVirtualMachine vm =
+                  VcCache.getIgnoreMissing(event.getVm().getVm());
+            if (vm == null) {
+               break;
+            }
+            vm.updateRuntime();
+            if (clusterEntityMgr.getNodeByVmName(vm.getName()) != null) {
+               logger.info("received internal vhm event " + event.getDynamicType()
+                     + "for vm " + vm.getName() + ": "
+                     + event.getMessage());
+               clusterEntityMgr.refreshNodeByVmName(moId, vm.getName(),
+                     event.getMessage(), true);
             }
             break;
          }

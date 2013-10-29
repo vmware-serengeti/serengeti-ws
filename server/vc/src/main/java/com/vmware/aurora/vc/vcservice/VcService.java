@@ -27,6 +27,7 @@ import java.net.URLConnection;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,11 +51,14 @@ import com.vmware.aurora.util.AuAssert;
 import com.vmware.aurora.util.HttpsConnectionUtil;
 import com.vmware.aurora.vc.vcservice.VcService.MyThreadPoolExecutor.MyBlockingQueue;
 import com.vmware.vim.binding.impl.vim.DescriptionImpl;
+import com.vmware.vim.binding.impl.vim.ExtensionImpl;
+import com.vmware.vim.binding.impl.vim.KeyValueImpl;
 import com.vmware.vim.binding.impl.vim.ext.ManagedEntityInfoImpl;
 import com.vmware.vim.binding.vim.Description;
 import com.vmware.vim.binding.vim.Extension;
 import com.vmware.vim.binding.vim.ExtensionManager;
 import com.vmware.vim.binding.vim.FileManager;
+import com.vmware.vim.binding.vim.KeyValue;
 import com.vmware.vim.binding.vim.OvfManager;
 import com.vmware.vim.binding.vim.PerformanceManager;
 import com.vmware.vim.binding.vim.ServiceInstance;
@@ -62,6 +66,8 @@ import com.vmware.vim.binding.vim.ServiceInstanceContent;
 import com.vmware.vim.binding.vim.SessionManager;
 import com.vmware.vim.binding.vim.TaskManager;
 import com.vmware.vim.binding.vim.VirtualDiskManager;
+import com.vmware.vim.binding.vim.event.Event;
+import com.vmware.vim.binding.vim.event.Event.EventSeverity;
 import com.vmware.vim.binding.vim.ext.ManagedEntityInfo;
 import com.vmware.vim.binding.vim.option.OptionManager;
 import com.vmware.vim.binding.vim.option.OptionValue;
@@ -673,6 +679,58 @@ public class VcService {
       ManagedEntityInfo[] infos = new ManagedEntityInfo[1];
       infos[0] = info;
       us.setManagedEntityInfo(infos);
+
+      // Generate ResourceInfo
+      Extension.ResourceInfo extensionResourceInfo = new ExtensionImpl.ResourceInfoImpl();
+      extensionResourceInfo.setLocale("en");
+      extensionResourceInfo.setModule("extension");
+
+      KeyValue localizedExt[] = new KeyValue[2];
+      localizedExt[0] = new KeyValueImpl();
+      localizedExt[0].setKey(us.getKey() + ".label");
+      localizedExt[0].setValue(us.getDescription().getLabel());
+
+      localizedExt[1] = new KeyValueImpl();
+      localizedExt[1].setKey(us.getKey() + ".summary");
+      localizedExt[1].setValue(us.getDescription().getSummary());
+
+      extensionResourceInfo.setData(localizedExt);
+
+      // Generate event type specifications
+      Extension.ResourceInfo eventResourceInfo = new ExtensionImpl.ResourceInfoImpl();
+      eventResourceInfo.setLocale("en");
+      eventResourceInfo.setModule("event");
+
+      class KeyValueList extends ArrayList<KeyValue> {
+         public void add(String key, String value) {
+            KeyValue pair = new KeyValueImpl();
+            pair.setKey(key);
+            pair.setValue(value);
+            super.add(pair);
+         }
+      };
+
+      KeyValueList resourceInfo = new KeyValueList();
+      ArrayList<Extension.EventTypeInfo> eventTypes = new ArrayList<Extension.EventTypeInfo>();
+
+      for (EventSeverity severity : Event.EventSeverity.values()) {
+         resourceInfo.add("com.vmware.vhadoop.vhm.vc.events."+severity.name()+".label", "BDE notification");
+         resourceInfo.add("com.vmware.vhadoop.vhm.vc.events."+severity.name()+".summary", "BDE notification");
+         resourceInfo.add("com.vmware.vhadoop.vhm.vc.events."+severity.name()+".category", severity.name());
+         resourceInfo.add("com.vmware.vhadoop.vhm.vc.events."+severity.name()+".fullFormat", "{message}");
+         resourceInfo.add("com.vmware.vhadoop.vhm.vc.events."+severity.name()+".formatOnVm", "BDE notification");
+
+         Extension.EventTypeInfo event = new ExtensionImpl.EventTypeInfoImpl();
+         event.setEventID("com.vmware.vhadoop.vhm.vc.events."+severity.name());
+         event.setEventTypeSchema("<EventType><eventTypeID>com.vmware.vhadoop.vhm.vc.events."+severity.name()+"</eventTypeID><description>Status update for a Big Data Extensions compute VM</description><arguments/></EventType>");
+         eventTypes.add(event);
+      }
+
+      eventResourceInfo.setData(resourceInfo.toArray(new KeyValue[0]));
+
+      us.setResourceList(new Extension.ResourceInfo[] {extensionResourceInfo, eventResourceInfo});
+      us.setEventList(eventTypes.toArray(new Extension.EventTypeInfo[0]));
+      us.setShownInSolutionManager(true);
 
       // Push this info into VC
       em.updateExtension(us);
