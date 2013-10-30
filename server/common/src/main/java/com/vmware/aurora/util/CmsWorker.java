@@ -106,12 +106,12 @@ public class CmsWorker {
     */
    public enum WorkQueue {
       // No delay VC query queue.
-      VC_QUERY_NO_DELAY(new DelayedReqQueue(0, 1000, 1000)),
+      VC_QUERY_NO_DELAY(new DelayedReqQueue(0, 1000, Integer.MAX_VALUE)),
       // Execute every 10 seconds, up to 1000 requests per interval.
       VC_QUERY_TEN_SEC_DELAY(new DelayedReqQueue(10, 1000, Integer.MAX_VALUE)),
 
       // Highest priority queue, execution without delay & threshold (limit capacity).
-      VC_SYNC_NO_DELAY(new DelayedReqQueue(0, 1000, 1000)),
+      VC_SYNC_NO_DELAY(new DelayedReqQueue(0, 1000, Integer.MAX_VALUE)),
       // Execute every 10 seconds, up to 1000 requests per interval.
       VC_SYNC_TEN_SEC_DELAY(new DelayedReqQueue(10, 1000, Integer.MAX_VALUE)),
       // Execute every 1 minute, up to 10 requests per interval.
@@ -119,14 +119,14 @@ public class CmsWorker {
 
 
       // Highest priority queue, execution without delay & threshold (limit capacity).
-      VC_CACHE_NO_DELAY(new DelayedReqQueue(0, 1000, 1000)),
+      VC_CACHE_NO_DELAY(new DelayedReqQueue(0, 1000, Integer.MAX_VALUE)),
       // Execute every 2 minutes, up to 100 requests per interval.
       VC_CACHE_TWO_MIN_DELAY(new DelayedReqQueue(2 * 60, 100, Integer.MAX_VALUE)),
       // Execute every 5 minutes, up to 1000 requests per interval.
       VC_CACHE_FIVE_MIN_DELAY(new DelayedReqQueue(5 * 60, 1000, Integer.MAX_VALUE)),
 
       // No delay VC task queue.
-      VC_TASK_NO_DELAY(new DelayedReqQueue(0, 1000, 1000)),
+      VC_TASK_NO_DELAY(new DelayedReqQueue(0, 1000, Integer.MAX_VALUE)),
       // Execute every 10 seconds, up to 100 requests per interval.
       VC_TASK_TEN_SEC_DELAY(new DelayedReqQueue(10, 100, Integer.MAX_VALUE)),
       // Execute every 5 minute, up to 100 requests per interval.
@@ -135,12 +135,12 @@ public class CmsWorker {
       VC_TASK_ONE_HOUR_DELAY(new DelayedReqQueue(60 * 60, 10, Integer.MAX_VALUE)),
 
       // Highest priority queue, execution without delay & threshold (limit capacity).
-      VCD_SYNC_NO_DELAY(new DelayedReqQueue(0, 1000, 1000)),
+      VCD_SYNC_NO_DELAY(new DelayedReqQueue(0, 1000, Integer.MAX_VALUE)),
       // Execute every 10 minutes, up to 1000 requests per interval.
       VCD_SYNC_TEN_MIN_DELAY(new DelayedReqQueue(10 * 60, 1000, Integer.MAX_VALUE)),
 
       // Highest priority queue, execution without delay & threshold (limit capacity).
-      BASE_VM_SYNC_NO_DELAY(new DelayedReqQueue(0, 1000, 1000)),
+      BASE_VM_SYNC_NO_DELAY(new DelayedReqQueue(0, 1000, Integer.MAX_VALUE)),
       // Execute every 5 minutes, up to 1000 requests per interval.
       BASE_VM_FIVE_MIN_DELAY(new DelayedReqQueue(5 * 60, 1000, Integer.MAX_VALUE));
 
@@ -495,7 +495,9 @@ public class CmsWorker {
     * @param req
     */
    static public void addRequest(WorkQueue queue, Request req) {
-      queue.getQ().add(req);
+      if (!queue.getQ().offer(req)) {
+         logger.warn("Queue " + queue.name() + " is full with a size of " + queue.getQ().size());
+      }
    }
 
    /**
