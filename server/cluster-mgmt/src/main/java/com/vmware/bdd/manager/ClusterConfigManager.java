@@ -195,6 +195,7 @@ public class ClusterConfigManager {
          clusterEntity.setDistroVendor(cluster.getDistroVendor());
          clusterEntity.setDistroVersion(cluster.getDistroVersion());
          clusterEntity.setStartAfterDeploy(true);
+         clusterEntity.setPassword(cluster.getPassword());
 
          if (cluster.containsComputeOnlyNodeGroups()) {
             clusterEntity.setAutomationEnable(automationEnable);
@@ -279,7 +280,8 @@ public class ClusterConfigManager {
 
    private Map<NetTrafficType, List<NetConfigInfo>> convertNetNamesToNetConfigs(
          Map<NetTrafficType, List<String>> netNamesInfo) {
-      Map<NetTrafficType, List<NetConfigInfo>> netConfigs = new HashMap<NetTrafficType, List<NetConfigInfo>>();
+      Map<NetTrafficType, List<NetConfigInfo>> netConfigs =
+            new HashMap<NetTrafficType, List<NetConfigInfo>>();
       Map<String, Set<String>> port2names = new HashMap<String, Set<String>>();
 
       for (NetTrafficType type : netNamesInfo.keySet()) {
@@ -333,7 +335,7 @@ public class ClusterConfigManager {
          invalidNodeGroupNames.delete(invalidNodeGroupNames.length() - 1,
                invalidNodeGroupNames.length());
          failedMsgList.add(errorMsgBuff
-               .append("'memCapacityMB' cannot be less than " + Constants.MIN_MEM_SIZE + " in group ")
+               .append("'memCapacityMB' cannot be less than "+ Constants.MIN_MEM_SIZE + " in group ")
                .append(invalidNodeGroupNames.toString())
                .append(" in order for nodes to run normally").toString());
       }
@@ -714,7 +716,6 @@ public class ClusterConfigManager {
       }
       ClusterCreate clusterConfig = new ClusterCreate();
       clusterConfig.setName(clusterEntity.getName());
-
       convertClusterConfig(clusterEntity, clusterConfig, needAllocIp);
 
       Gson gson =
@@ -737,6 +738,7 @@ public class ClusterConfigManager {
       clusterConfig.setHttpProxy(httpProxy);
       clusterConfig.setNoProxy(noProxy);
       clusterConfig.setTopologyPolicy(clusterEntity.getTopologyPolicy());
+      clusterConfig.setPassword(clusterEntity.getPassword());
 
       Map<String, String> hostToRackMap = rackInfoMgr.exportHostRackMap();
       if ((clusterConfig.getTopologyPolicy() == TopologyType.RACK_AS_RACK || clusterConfig
@@ -804,14 +806,13 @@ public class ClusterConfigManager {
       List<String> networkNames = clusterEntity.fetchNetworkNameList();
 
       // TODO: refactor this function to support nodeGroup level networks
-      List<NetworkAdd> networkingAdds = allocatNetworkIp(networkNames, clusterEntity, instanceNum, needAllocIp);
+      List<NetworkAdd> networkingAdds = allocatNetworkIp(networkNames, clusterEntity, instanceNum,
+                  needAllocIp);
       clusterConfig.setNetworkings(networkingAdds);
       clusterConfig.setNetworkConfig(convertNetConfigsToNetNames(clusterEntity.getNetworkConfigInfo()));
 
       if (clusterEntity.getHadoopConfig() != null) {
-         Map<String, Object> hadoopConfig =
-               (new Gson())
-                     .fromJson(clusterEntity.getHadoopConfig(), Map.class);
+         Map<String, Object> hadoopConfig = (new Gson()).fromJson(clusterEntity.getHadoopConfig(), Map.class);
          clusterConfig.setConfiguration(hadoopConfig);
       }
    }
@@ -837,8 +838,7 @@ public class ClusterConfigManager {
                if (allocatedIpNum < instanceNum) {
                   long newNum = instanceNum - allocatedIpNum;
                   List<IpBlockEntity> newIpBlockEntities =
-                        networkMgr.alloc(networkEntity, clusterEntity.getId(),
-                              newNum);
+                        networkMgr.alloc(networkEntity, clusterEntity.getId(),newNum);
                   ipBlockEntities.addAll(newIpBlockEntities);
                }
                network.setDns1(networkEntity.getDns1());

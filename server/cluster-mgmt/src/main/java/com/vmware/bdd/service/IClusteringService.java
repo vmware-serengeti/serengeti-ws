@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -138,9 +139,10 @@ public interface IClusteringService {
     */
    public boolean setAutoElasticity(String clusterName, boolean refreshAllNodes);
 
+
    /**
     * adjust disk io shares to specified level, NORMAL, HIGH or LOW
-    * 
+    *
     * @param clusterName
     * @param targetNodes
     * @param ioShares
@@ -150,7 +152,7 @@ public interface IClusteringService {
 
    /**
     * start a node in the cluster
-    * 
+    *
     * @param clusterName
     * @param nodeName
     * @return

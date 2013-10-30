@@ -165,7 +165,6 @@ public class Constants {
    public static final String PARAM_NOT_CONTAIN_BLANK_SPACE = " cannot contain blank space.";
    public static final String PARAM_SHOULD_SPECIFY_DISK = "You should specify --disk .";
    public static final String PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP = "If the cluster is MRv1, then it must have compute only node group(s), and set/resetParam is only applicable to compute only node groups. On the other hand, we do not support elasticity on MRv2 (YARN) clusters yet.";
-
    public static final int FORMAT_COLUMN_DISTANCE = 2;
    public static final String FORMAT_TABLE_COLUMN_NAME = "NAME";
    public static final String FORMAT_TABLE_COLUMN_GROUP_NAME = "GROUP NAME";
@@ -234,4 +233,10 @@ public class Constants {
    public static final String OUTPUT_OBJECT_CONNECT = "connect";
    public static final String NODE_RUNNING_STATUS = "Service Ready";
    public static final String AT_LEAST_ONE_OPTION = "You must use at least one option.";
+   public static final String PASSWORD_LENGTH_INVALID = "Password length cannot be less than 8 and greater than 256.";
+   public static final String ENTER_PASSWORD = "Enter the password: ";
+   public static final String CONFIRM_PASSWORD = "Confirm the password: ";
+   public static final int PASSWORD_MIN_LENGTH = 8;
+   public static final int PASSWORD_MAX_LENGTH = 128;
+   public static final String PASSWORD_CONFIRMATION_FAILED = "Password confirmation failed.";
 }
