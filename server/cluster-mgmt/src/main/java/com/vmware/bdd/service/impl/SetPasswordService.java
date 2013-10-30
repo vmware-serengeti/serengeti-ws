@@ -21,7 +21,7 @@ public class SetPasswordService implements ISetPasswordService {
       ArrayList<String> failedIPs = null;
       try {
          for (String nodeIP : ipsOfNodes) {
-            boolean succeed = setPasswordForNode(nodeIP, password);
+            boolean succeed = setPasswordForNode(clusterName, nodeIP, password);
             logger.info("set password for " + nodeIP + " result: " + succeed);
             if (!succeed) {
                if (failedIPs == null) {
@@ -37,8 +37,9 @@ public class SetPasswordService implements ISetPasswordService {
       return failedIPs;
    }
 
-   public boolean setPasswordForNode(String nodeIP, String password) {
-      logger.info("setting password of " + nodeIP);
+   @Override
+   public boolean setPasswordForNode(String clusterName, String nodeIP, String password) {
+      logger.info("setting password of " + nodeIP + " in cluster " + clusterName);
 
       String privateKeyFile =
             Configuration.getString(Constants.SSH_PRIVATE_KEY_CONFIG_NAME, Constants.SSH_PRIVATE_KEY_FILE_NAME);

@@ -12,4 +12,13 @@ public interface ISetPasswordService {
     * @return failed nodes list
     */
    public ArrayList<String> setPasswordForNodes(String clusterName, ArrayList<String> ipsOfNodes, String password);
+
+   /**
+    * Set password for node in cluster
+	* @param clusterName
+	* @param fixedNodeIP
+	* @param newPassword
+	* @return success or not
+	*/
+   public boolean setPasswordForNode(String clusterName, String fixedNodeIP, String newPassword);
 }
