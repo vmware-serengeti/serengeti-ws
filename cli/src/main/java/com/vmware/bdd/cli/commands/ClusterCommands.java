@@ -322,7 +322,6 @@ public class ClusterCommands implements CommandMarker {
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_RESULT_CREAT);
       } catch (CliRestException e) {
-         System.out.print(e.getStackTrace());
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                CommandsUtils.getExceptionMessage(e));
