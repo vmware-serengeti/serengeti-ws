@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.hadoop.impala.hive.HiveCommands;
@@ -43,6 +42,7 @@ import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.ElasticityRequestBody;
 import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityMode;
 import com.vmware.bdd.apitypes.FixDiskRequestBody;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;

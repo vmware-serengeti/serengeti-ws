@@ -53,8 +53,6 @@ import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Type;
-import com.vmware.bdd.entity.NetworkEntity;
-import com.vmware.bdd.entity.NetworkEntity.AllocType;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
 import com.vmware.bdd.manager.ClusterManager;

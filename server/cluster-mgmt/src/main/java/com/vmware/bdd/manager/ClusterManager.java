@@ -378,6 +378,7 @@ public class ClusterManager {
       createAutoRps(createSpec);
       ClusterCreate clusterSpec =
             ClusterSpecFactory.getCustomizedSpec(createSpec);
+      clusterSpec.validateNodeGroupNames();
       //Check the cpu, memory max configuration according vm hardware version
       if (clusterSpec != null && clusterSpec.getNodeGroups() != null) {
          for (NodeGroupCreate ng : clusterSpec.getNodeGroups()) {
