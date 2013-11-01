@@ -37,9 +37,9 @@ import com.vmware.vim.binding.vim.vm.device.VirtualEthernetCard;
 
 /**
  * Utility Class for the NetworkSchema
- * 
+ *
  * @author sridharr
- * 
+ *
  */
 public class NetworkSchemaUtil {
    private static final Logger logger = Logger
@@ -59,7 +59,10 @@ public class NetworkSchemaUtil {
 
       for (NetworkSchema.Network network : networkSchema.networks) {
          VcNetwork vN = cluster.getNetwork(network.vcNetwork);
-         AuAssert.check(vN != null);
+         if (vN == null) {
+            logger.error("Network " + network.vcNetwork + " is not defined on cluster " + cluster.getName());
+            throw new Exception("Network " + network.vcNetwork + " is not defined on cluster " + cluster.getName());
+         }
          VirtualDevice nic = null;
          if (network.nicLabel != null) {
             nic = vcVm.getDeviceByLabel(network.nicLabel);
