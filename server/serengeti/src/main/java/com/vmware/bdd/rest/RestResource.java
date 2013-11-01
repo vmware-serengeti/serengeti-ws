@@ -153,6 +153,7 @@ public class RestResource {
       if (!CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
+      createSpec.validateNodeGroupNames();
       long jobExecutionId = clusterMgr.createCluster(createSpec);
       redirectRequest(jobExecutionId, request, response);
    }

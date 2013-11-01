@@ -74,6 +74,10 @@ public class CommonUtilTest {
       assertEquals(CommonUtil.validateNodeGroupName("nodeGroup Name8"), false);
       assertEquals(CommonUtil.validateNodeGroupName("nodeGroup_Name9"), false);
       assertEquals(CommonUtil.validateNodeGroupName("_nodeGroupName10"), false);
+      assertEquals(
+            CommonUtil
+                  .validateNodeGroupName("nodeGroupName1234567890123456789012345678901234567890123456789012345678901234567890"),
+            false);
    }
 
    @Test

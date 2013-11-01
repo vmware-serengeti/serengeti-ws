@@ -226,6 +226,7 @@ public class ClusterCommands implements CommandMarker {
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
             validateConfiguration(clusterCreate, skipConfigValidation,
                   warningMsgList);
+            clusterCreate.validateNodeGroupNames();
             if (!validateHAInfo(clusterCreate.getNodeGroups())) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                      name, Constants.OUTPUT_OP_CREATE,

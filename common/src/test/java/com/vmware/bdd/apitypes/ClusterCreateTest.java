@@ -35,6 +35,7 @@ import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupA
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.ServiceType;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.exception.ClusterConfigException;
 
 public class ClusterCreateTest {
 
@@ -363,4 +364,43 @@ public class ClusterCreateTest {
             warningMsgList.get(0));
    }
 
+   @Test
+   public void testValidateNodeGroupNames() {
+      ClusterCreate cluster = new ClusterCreate();
+      NodeGroupCreate worker1 = new NodeGroupCreate();
+      worker1.setName("test-1");
+      cluster.setNodeGroups(new NodeGroupCreate[] { worker1 });
+      try {
+         cluster.validateNodeGroupNames();
+      } catch (ClusterConfigException e) {
+         assertEquals(
+               "Invalid node group name 'test-1'. Revise the cluster specification file.",
+               e.getMessage());
+      }
+      NodeGroupCreate worker2 = new NodeGroupCreate();
+      worker2
+            .setName("test12345678901234567890123456789012345678901234567890123456789012345678901234567890");
+      cluster.setNodeGroups(new NodeGroupCreate[] { worker2 });
+      try {
+         cluster.validateNodeGroupNames();
+      } catch (ClusterConfigException e) {
+         assertEquals(
+               "Invalid node group name 'test12345678901234567890123456789012345678901234567890123456789012345678901234567890'. Revise the cluster specification file.",
+               e.getMessage());
+      }
+      NodeGroupCreate worker3 = new NodeGroupCreate();
+      worker3.setName("");
+      cluster.setNodeGroups(new NodeGroupCreate[] { worker3 });
+      try {
+         cluster.validateNodeGroupNames();
+      } catch (ClusterConfigException e) {
+         assertEquals(
+               "Invalid node group name ''. Revise the cluster specification file.",
+               e.getMessage());
+      }
+      NodeGroupCreate worker4 = new NodeGroupCreate();
+      worker4.setName("test4");
+      cluster.setNodeGroups(new NodeGroupCreate[] { worker4 });
+      cluster.validateNodeGroupNames();
+   }
 }

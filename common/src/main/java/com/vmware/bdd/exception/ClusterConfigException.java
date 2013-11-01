@@ -30,7 +30,12 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException CLUSTER_NAME_MISSING() {
       return new ClusterConfigException(null, "CLUSTER_NAME_MISSING");
    }
-
+   public static ClusterConfigException NODE_GROUP_NAME_IS_INVALID(String invalidNodeGroupNames) {
+      return new ClusterConfigException(null, "NODE_GROUP_NAME_IS_INVALID", invalidNodeGroupNames);
+   }
+   public static ClusterConfigException NODE_GROUP_NOT_EXISTING() {
+      return new ClusterConfigException(null, "NODE_GROUP_NOT_EXISTING");
+   }
    public static ClusterConfigException CLUSTER_CONFIG_NOT_FOUND(String clusterName) {
       return new ClusterConfigException(null, "CLUSTER_CONFIG_NOT_FOUND", clusterName);
    }
