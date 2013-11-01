@@ -139,7 +139,7 @@ public class Constants {
 
    public static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE = "elastic_runtime.automation.enable";
    public static final String MUST_CONFIGURE_FQDN =
-         "You cannot deploy a CDH 4.2.1+ cluster in a network without FQDN/IP.";
+         "The CDH 4.2.1+ cluster deployed in a network without FQDN/IP forward and reverse resolution will not work properly.";
    public static final String CONVERTED_MEMORY_DIVISIBLE_BY_4 =
          "The size of the virtual machine memory must be evenly divisible by 4. ";
 
