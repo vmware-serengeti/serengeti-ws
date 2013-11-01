@@ -785,7 +785,7 @@ public class ClusteringService implements IClusteringService {
    }
 
    private Map<String, Integer> collectResourcePoolInfo(List<BaseNode> vNodes,
-         Map<String, List<String>> vcClusterRpNamesMap,
+         final String uuid, Map<String, List<String>> vcClusterRpNamesMap,
          Map<Long, List<NodeGroupCreate>> rpNodeGroupsMap) {
       List<String> resourcePoolNames = null;
       List<NodeGroupCreate> nodeGroups = null;
@@ -807,7 +807,8 @@ public class ClusteringService implements IClusteringService {
             resourcePoolNames = vcClusterRpNamesMap.get(vcCluster);
          }
          String vcRp = baseNode.getTargetRp();
-         long rpHashCode = vcCluster.hashCode() ^ (vcCluster + vcRp).hashCode();
+         String rpPath = "/" + vcCluster + "/" + vcRp + "/" + uuid;
+         long rpHashCode = rpPath.hashCode();
          if (!rpNodeGroupsMap.containsKey(rpHashCode)) {
             nodeGroups = new ArrayList<NodeGroupCreate>();
          } else {
@@ -825,6 +826,7 @@ public class ClusteringService implements IClusteringService {
             resourcePoolNameCount++;
          }
       }
+
       Map<String, Integer> countResult = new HashMap<String, Integer>();
       countResult.put("resourcePoolNameCount", resourcePoolNameCount);
       countResult.put("nodeGroupNameCount", nodeGroupNameCount);
@@ -860,7 +862,7 @@ public class ClusteringService implements IClusteringService {
       Map<Long, List<NodeGroupCreate>> rpNodeGroupsMap =
             new HashMap<Long, List<NodeGroupCreate>>();
       Map<String, Integer> countResult =
-            collectResourcePoolInfo(vNodes, vcClusterRpNamesMap,
+            collectResourcePoolInfo(vNodes, uuid, vcClusterRpNamesMap,
                   rpNodeGroupsMap);
 
       try {
@@ -943,9 +945,9 @@ public class ClusteringService implements IClusteringService {
                   logger.error(errorMsg);
                   throw BddException.INTERNAL(null, errorMsg);
                }
-               long rpHashCode =
-                     vcClusterName.hashCode()
-                           ^ (vcClusterName + resourcePoolName).hashCode();
+               String rpPath =
+                     "/" + vcClusterName + "/" + resourcePoolName + "/" + uuid;
+               long rpHashCode = rpPath.hashCode();
                for (NodeGroupCreate nodeGroup : rpNodeGroupsMap.get(rpHashCode)) {
                   AuAssert
                         .check(nodeGroup != null,
