@@ -119,8 +119,14 @@ public class ClusterCommands implements CommandMarker {
                      + Constants.PARAM_NOT_CONTAIN_BLANK_SPACE);
          return;
       }
+
       // process resume
-      if (resume) {
+      if (resume && setClusterPassword) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+            name, Constants.OUTPUT_OP_CREATE,
+            Constants.OUTPUT_OP_RESULT_FAIL, Constants.RESUME_DONOT_NEED_SET_PASSWORD);
+         return;
+      } else if (resume) {
          resumeCreateCluster(name);
          return;
       }

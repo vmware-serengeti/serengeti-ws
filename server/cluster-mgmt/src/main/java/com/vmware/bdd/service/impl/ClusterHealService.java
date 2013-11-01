@@ -518,7 +518,7 @@ public class ClusterHealService implements IClusterHealService {
       String recoverVmName = node.getVmName() + RECOVERY_VM_NAME_POSTFIX;
       if (node.getMoId() != null) {
          VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
-         // the vm id is null iff the vm is removed
+         // the vm id is null if the vm is removed
          if (vm == null) {
             throw ClusterHealServiceException.ERROR_STATUS(nodeName,
                   "Serengeti and VC are inconsistent as vm " + nodeName

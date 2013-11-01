@@ -14,22 +14,19 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.ClusterEntityManager;
-import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.service.ISetPasswordService;
-import com.vmware.bdd.utils.AuAssert;
 
-public class SetPasswordForAllNodesStep extends TrackableTasklet {
+public class SetPasswordForDiskFixStep extends TrackableTasklet {
    private ISetPasswordService setPasswordService;
    private ClusterConfigManager configMgr;
    private ClusterEntityManager clusterEntityMgr;
@@ -37,47 +34,31 @@ public class SetPasswordForAllNodesStep extends TrackableTasklet {
 
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext, JobExecutionStatusHolder jobExecutionStatusHolder) {
+      logger.info("set password for disk fix");
 
       String clusterName = getJobParameters(chunkContext).getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
       ClusterCreate clusterSpec = configMgr.getClusterConfig(clusterName);
 
       String newPassword = clusterSpec.getPassword();
-      //if user didn't set password, return directly
+      // if user didn't set password, return directly
       if (newPassword == null) {
          logger.info("User didn't set password.");
          return RepeatStatus.FINISHED;
       }
 
-      ArrayList<String> ipOfAllNodes = getAllNodeIPs(clusterName);
-      if (ipOfAllNodes.isEmpty()) {
-         return RepeatStatus.FINISHED;
+      String targetNode = getJobParameters(chunkContext).getString(JobConstants.SUB_JOB_NODE_NAME);
+      NodeEntity nodeEntity = clusterEntityMgr.findNodeByName(targetNode);
+      String fixedNodeIP = nodeEntity.getMgtIp();
+      if (fixedNodeIP == null) {
+         throw TaskException.EXECUTION_FAILED("No fixed node need to set password for.");
       }
 
-      ArrayList<String> failedNodes = setPasswordService.setPasswordForNodes(clusterName, ipOfAllNodes, newPassword);
-      boolean success = false;
-      if (failedNodes == null) {
-         success = true;
-      } else {
-    	  logger.info("failed to set password for " + failedNodes.toString());
-      }
-
+      boolean success = setPasswordService.setPasswordForNode(clusterName, fixedNodeIP, newPassword);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, success);
       if (!success) {
-         throw TaskException.EXECUTION_FAILED("failed to set password for cluster " + clusterName);
+         throw TaskException.EXECUTION_FAILED("In disk fix, failed to set password for node " + targetNode);
       }
       return RepeatStatus.FINISHED;
-   }
-
-   private ArrayList<String> getAllNodeIPs(String clusterName) {
-      clusterEntityMgr = getClusterEntityMgr();
-      AuAssert.check(clusterEntityMgr != null);
-      ArrayList<String> nodeIPs = new ArrayList<String>();
-      List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(clusterName);
-      for (NodeEntity node : nodes) {
-         nodeIPs.add(node.getMgtIp());
-      }
-
-      return nodeIPs;
    }
 
    public ClusterConfigManager getConfigMgr() {
