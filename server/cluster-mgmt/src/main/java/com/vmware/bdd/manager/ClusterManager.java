@@ -333,6 +333,7 @@ public class ClusterManager {
       spec.setNoProxy(null);
       spec.setDistroVendor(null);
       spec.setDistroVersion(null);
+      spec.setPassword(null);
       NodeGroupCreate[] groups = spec.getNodeGroups();
       if (groups != null) {
          for (NodeGroupCreate group : groups) {
