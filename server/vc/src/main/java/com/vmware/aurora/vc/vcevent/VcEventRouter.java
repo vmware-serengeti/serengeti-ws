@@ -83,6 +83,7 @@ public class VcEventRouter {
                   return false;
                }
                vm.update();
+               break;
             }
             case VmResourcePoolMoved: {
                VmResourcePoolMovedEvent event = (VmResourcePoolMovedEvent) e;

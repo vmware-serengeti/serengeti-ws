@@ -52,7 +52,7 @@ import com.vmware.bdd.utils.VcVmUtil;
 @Transactional(readOnly = true)
 public class ClusterEntityManager {
    private static final Logger logger = Logger
-         .getLogger(ClusterEntityManager.class);
+   .getLogger(ClusterEntityManager.class);
 
    private IClusterDAO clusterDao;
 
@@ -284,11 +284,24 @@ public class ClusterEntityManager {
    }
 
    @Transactional
-   synchronized public void syncUp(String clusterName) {
+   synchronized public void syncUp(String clusterName, 
+         boolean updateClusterStatus) {
       List<NodeEntity> nodes = findAllNodes(clusterName);
 
+      boolean allNodesDown = true;
       for (NodeEntity node : nodes) {
          refreshNodeStatus(node, false);
+         if (node.getStatus().ordinal() >= NodeStatus.POWERED_ON.ordinal()) {
+            allNodesDown = false;
+         }
+      }
+
+      if (updateClusterStatus && allNodesDown) {
+         ClusterEntity cluster = findByName(clusterName);
+         if (cluster.getStatus() == ClusterStatus.RUNNING) {
+            logger.info("All nodes are powered off, switch cluster status to stopped.");
+            cluster.setStatus(ClusterStatus.STOPPED);
+         }
       }
    }
 

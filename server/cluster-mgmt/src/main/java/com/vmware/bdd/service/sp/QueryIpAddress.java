@@ -52,11 +52,11 @@ public class QueryIpAddress implements IPrePostPowerOn {
    @Override
    public Void call() throws Exception {
       long start = System.currentTimeMillis();
+      vm = VcCache.getIgnoreMissing(vmId);
       while (System.currentTimeMillis() - start < timeout) {
          boolean stop = VcContext.inVcSessionDo(new VcSession<Boolean>() {
             @Override
             protected Boolean body() throws Exception {
-               VcVirtualMachine vm = VcCache.getIgnoreMissing(vmId);
                if (vm != null && vm.isPoweredOn()) {
                   return false;
                } else {

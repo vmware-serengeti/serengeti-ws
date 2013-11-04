@@ -44,7 +44,7 @@ public class NodePowerOnRequest extends SimpleRequest {
       try {
          query.call();
       } catch (Exception e) {
-         logger.error("Failed to query ip address of vm: " + vmId);
+         logger.error("Failed to query ip address of vm: " + vmId, e);
       }
       entityMgr.refreshNodeByMobId(vmId, false);
       return true;

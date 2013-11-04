@@ -41,6 +41,6 @@ public class ClusterNodeUpdator extends PeriodicRequest {
    }
 
    public void syncUp(String clusterName) {
-      entityMgr.syncUp(clusterName);
+      entityMgr.syncUp(clusterName, true);
    }
 }

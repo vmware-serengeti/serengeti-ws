@@ -33,6 +33,6 @@ public class UpdateVmProgressCallback extends BaseProgressCallback {
    @Override
    public void progressUpdate(Callable<Void> sp, ExecutionResult result, boolean compensate, int total) {
       super.progressUpdate(sp, result, compensate, total);
-      clusterEntityMgr.syncUp(clusterName);
+      clusterEntityMgr.syncUp(clusterName, false);
    }
 }
