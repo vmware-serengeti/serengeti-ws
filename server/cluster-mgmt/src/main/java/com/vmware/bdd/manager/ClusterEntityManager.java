@@ -343,28 +343,26 @@ public class ClusterEntityManager {
          node.setStatus(NodeStatus.POWERED_ON);
       }
 
-      if (node.isPowerStatusChanged()) {
-         if (vcVm.isPoweredOn()) {
-            //update ip address
-            for (String portGroup : node.fetchAllPortGroups()) {
-               String ip = VcVmUtil.getIpAddressOfPortGroup(vcVm, portGroup, inSession);
-               node.updateIpAddressOfPortGroup(portGroup, ip);
-            }
-            if (node.ipsReady()) {
-               node.setStatus(NodeStatus.VM_READY);
-               if (node.getAction() != null
-                     && node.getAction().equals(
-                           Constants.NODE_ACTION_WAITING_IP)) {
-                  node.setAction(null);
-               }
-            }
-            String guestHostName = VcVmUtil.getGuestHostName(vcVm, inSession);
-            if (guestHostName != null) {
-               node.setGuestHostName(guestHostName);
+      if (vcVm.isPoweredOn()) {
+         //update ip address
+         for (String portGroup : node.fetchAllPortGroups()) {
+            String ip = VcVmUtil.getIpAddressOfPortGroup(vcVm, portGroup, inSession);
+            node.updateIpAddressOfPortGroup(portGroup, ip);
+         }
+         if (node.ipsReady()) {
+            node.setStatus(NodeStatus.VM_READY);
+            if (node.getAction() != null
+                  && node.getAction().equals(
+                        Constants.NODE_ACTION_WAITING_IP)) {
+               node.setAction(null);
             }
          }
-         node.setHostName(vcVm.getHost().getName());
+         String guestHostName = VcVmUtil.getGuestHostName(vcVm, inSession);
+         if (guestHostName != null) {
+            node.setGuestHostName(guestHostName);
+         }
       }
+      node.setHostName(vcVm.getHost().getName());
       update(node);
    }
 
@@ -445,8 +443,8 @@ public class ClusterEntityManager {
          boolean inSession) {
       NodeEntity node = nodeDao.findByMobId(vmId);
       if (node != null) {
-         refreshNodeStatus(node, inSession);
          node.setAction(action);
+         refreshNodeStatus(node, inSession);
       }
    }
 
@@ -474,8 +472,8 @@ public class ClusterEntityManager {
       NodeEntity node = nodeDao.findByName(vmName);
       if (node != null) {
          node.setMoId(vmId);
-         refreshNodeStatus(node, inSession);
          node.setAction(nodeAction);
+         refreshNodeStatus(node, inSession);
       }
    }
 

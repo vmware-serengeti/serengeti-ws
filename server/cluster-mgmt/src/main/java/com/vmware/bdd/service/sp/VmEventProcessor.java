@@ -201,6 +201,11 @@ public class VmEventProcessor extends Thread {
             }
             break;
          }
+         case VmDisconnected: {
+            refreshNodeWithAction(e, null, true,
+                  null, "Disconnected");
+            break;
+         }
          case VmPoweredOn: {
             refreshNodeWithAction(e, moId, true,
                   Constants.NODE_ACTION_WAITING_IP, "Powered On");
