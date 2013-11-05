@@ -194,7 +194,7 @@ public class NetworkCommands implements CommandMarker {
                Constants.OUTPUT_OP_RESULT_MODIFY);
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK, name,
-               Constants.OUTPUT_OP_RESULT_MODIFY,
+               Constants.OUTPUT_OP_MODIFY,
                Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }

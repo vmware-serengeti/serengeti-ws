@@ -18,16 +18,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vmware.bdd.dal.IClusterDAO;
-import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vmware.bdd.aop.annotation.RetryTransaction;
 import com.vmware.bdd.apitypes.IpAllocEntryRead;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkRead;
+import com.vmware.bdd.dal.IClusterDAO;
 import com.vmware.bdd.dal.IIpBlockDAO;
 import com.vmware.bdd.dal.INetworkDAO;
 import com.vmware.bdd.dal.INodeDAO;
@@ -46,6 +46,7 @@ import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ConfigInfo;
+import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.IpAddressUtil;
 
 @Service
@@ -110,6 +111,7 @@ public class NetworkService implements Serializable, INetworkService {
    @Transactional
    public synchronized NetworkEntity addDhcpNetwork(final String name,
          final String portGroup) {
+      validateNetworkName(name);
       if (!resService.isNetworkExistInVc(portGroup)) {
          throw VcProviderException.NETWORK_NOT_FOUND(portGroup);
       }
@@ -140,6 +142,7 @@ public class NetworkService implements Serializable, INetworkService {
          final String portGroup, final String netmask, final String gateway,
          final String dns1, final String dns2, final List<IpBlock> ipBlocks) {
       try {
+         validateNetworkName(name);
          if (!resService.isNetworkExistInVc(portGroup)) {
             throw VcProviderException.NETWORK_NOT_FOUND(portGroup);
          }
@@ -516,4 +519,13 @@ public class NetworkService implements Serializable, INetworkService {
       ipBlocks.add(block);
       networkDao.free(network, clusterId, ipBlocks);
    }
+
+   private void validateNetworkName(final String name) {
+      NetworkEntity networkEntity = networkDao.findNetworkByName(name);
+      if (networkEntity != null) {
+         logger.error("can not add a network with duplicated name");
+         throw BddException.ALREADY_EXISTS("Network", name);
+      }
+   }
+
 }
