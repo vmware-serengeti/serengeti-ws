@@ -49,7 +49,7 @@ public class CmsKeyStore {
    static private String vcExtPswd;
 
    private static final String CMS_KEYSTORE = "cms.keystore";
-   private static final String CMS_KEYSTORE_PSWD = "cms.keystore_pswd";
+   public static final String CMS_KEYSTORE_PSWD = "cms.keystore_pswd";
 
    static final public String VC_EXT_KEY = "vc_ext";
 
