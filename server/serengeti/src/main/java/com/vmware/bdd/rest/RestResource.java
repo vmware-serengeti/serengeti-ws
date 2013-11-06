@@ -241,7 +241,7 @@ public class RestResource {
             clusterMgr.resizeCluster(clusterName, groupName, instanceNum);
       redirectRequest(taskId, request, response);
    }
-   
+
    @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}/scale", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void scale(@PathVariable("clusterName") String clusterName,
@@ -284,19 +284,21 @@ public class RestResource {
             clusterMgr.asyncSetParam(clusterName,
                   requestBody.getActiveComputeNodeNum(),
                   requestBody.getMinComputeNodeNum(),
+                  requestBody.getMaxComputeNodeNum(),
                   requestBody.getEnableAuto(), requestBody.getIoPriority());
       redirectRequest(taskId, request, response);
    }
-   
+
    @RequestMapping(value = "/cluster/{clusterName}/param", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.OK)
    public void syncSetParam(@PathVariable("clusterName") String clusterName, @RequestBody ElasticityRequestBody requestBody, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
       validateInput(clusterName, requestBody);
 
-      clusterMgr.syncSetParam(clusterName, 
+      clusterMgr.syncSetParam(clusterName,
             requestBody.getActiveComputeNodeNum(),
-            requestBody.getMinComputeNodeNum(), 
+            requestBody.getMinComputeNodeNum(),
+            requestBody.getMaxComputeNodeNum(),
             requestBody.getEnableAuto(),
             requestBody.getIoPriority());
    }
@@ -307,8 +309,13 @@ public class RestResource {
       }
 
       Integer minComputeNodeNum = requestBody.getMinComputeNodeNum();
-      if (minComputeNodeNum != null && minComputeNodeNum < 0) {
+      if (minComputeNodeNum != null && minComputeNodeNum < -1) {
          throw BddException.INVALID_PARAMETER("min compute node num", minComputeNodeNum.toString());
+      }
+
+      Integer maxComputeNodeNum = requestBody.getMaxComputeNodeNum();
+      if (maxComputeNodeNum != null && maxComputeNodeNum < -1) {
+         throw BddException.INVALID_PARAMETER("max compute node num", maxComputeNodeNum.toString());
       }
 
       Integer activeComputeNodeNum = requestBody.getActiveComputeNodeNum();

@@ -145,4 +145,12 @@ public class BddException extends RuntimeException {
       return new ClusteringServiceException(null, "BDD",
             "VM_NAME_VIOLATE_NAME_PATTERN", vmName);
    }
+
+   public static BddException NOT_GREATER_THAN_COMPUTE_NODES(String param1, String param2) {
+      return new BddException(null, "BDD", "NOT_GREATER_THAN_COMPUTE_NODES", param1, param2);
+   }
+
+   public static BddException NOT_LARGER_THAN(String param1, String param2) {
+      return new BddException(null, "BDD", "NOT_LARGER_THAN", param1, param2);
+   }
 }

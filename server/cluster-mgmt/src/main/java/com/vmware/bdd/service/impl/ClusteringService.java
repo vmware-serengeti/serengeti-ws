@@ -32,6 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -81,6 +82,7 @@ import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.ElasticityScheduleManager;
 import com.vmware.bdd.placement.Container;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
@@ -132,6 +134,7 @@ public class ClusteringService implements IClusteringService {
    private IResourceService resMgr;
    private IPlacementService placementService;
    private IClusterInitializerService clusterInitializerService;
+   private ElasticityScheduleManager elasticityScheduleMgr;
 
    private VcVirtualMachine templateVm;
    private BaseNode templateNode;
@@ -209,6 +212,15 @@ public class ClusteringService implements IClusteringService {
       this.cloneService = cloneService;
    }
 
+   public ElasticityScheduleManager getElasticityScheduleManager() {
+      return elasticityScheduleMgr;
+   }
+
+   @Autowired
+   public void setElasticityScheduleManager(ElasticityScheduleManager elasticityScheduleMgr) {
+      this.elasticityScheduleMgr = elasticityScheduleMgr;
+   }
+
    public synchronized void init() {
       if (!initialized) {
          // XXX hack to approve bootstrap instance id, should be moved out of Configuration
@@ -256,6 +268,7 @@ public class ClusteringService implements IClusteringService {
          convertTemplateVm();
          clusterInitializerService.transformClusterStatus(
                ClusterStatus.PROVISIONING, ClusterStatus.PROVISION_ERROR);
+         elasticityScheduleMgr.start();
          initialized = true;
       }
    }
@@ -263,6 +276,7 @@ public class ClusteringService implements IClusteringService {
    synchronized public void destroy() {
       Scheduler.shutdown(true);
       processor.shutdown();
+      elasticityScheduleMgr.shutdown();
    }
 
    private void convertTemplateVm() {
@@ -603,6 +617,7 @@ public class ClusteringService implements IClusteringService {
 
       String serengetiUUID = ConfigInfo.getSerengetiRootFolder();
       int minComputeNodeNum = cluster.getVhmMinNum();
+      int maxComputeNodeNum = cluster.getVhmMaxNum();
       String jobTrackerPort = cluster.getVhmJobTrackerPort();
 
       VcVirtualMachine vcVm = VcCache.getIgnoreMissing(masterMoId);
@@ -631,7 +646,7 @@ public class ClusteringService implements IClusteringService {
                CommonUtil.isComputeOnly(roles, distroVendor);
          SetAutoElasticitySP sp =
                new SetAutoElasticitySP(vm, serengetiUUID, masterMoId,
-                     masterUUID, enableAutoElasticity, minComputeNodeNum,
+                     masterUUID, enableAutoElasticity, minComputeNodeNum, maxComputeNodeNum,
                      jobTrackerPort, isComputeOnlyNode);
          storeProcedures[i] = sp;
          i++;
@@ -1501,14 +1516,9 @@ public class ClusteringService implements IClusteringService {
    /**
     * this method will delete the cluster root folder, if there is any VM
     * existed and powered on in the folder, the folder deletion will fail.
-<<<<<<< HEAD
     *
-    * @param folderNames
-=======
-    * 
     * @param node
     * @throws BddException
->>>>>>> enable configuring multiple NICs
     */
    private void deleteFolders(BaseNode node) throws BddException {
       String path = node.getVmFolder();

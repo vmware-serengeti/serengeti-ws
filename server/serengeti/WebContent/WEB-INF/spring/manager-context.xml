@@ -81,6 +81,11 @@
 			<ref bean="clusterEntityManager" />
 		</property>
 	</bean>
+	<bean id="elasticityScheduleManager" class="com.vmware.bdd.manager.ElasticityScheduleManager">
+		<property name="clusterManager">
+			<ref bean="clusterManager" />
+		</property>
+	</bean>
 	<bean id="clusteringService" class="com.vmware.bdd.service.impl.ClusteringService">
 		<property name="configMgr">
 			<ref bean="clusterConfigMgr" />

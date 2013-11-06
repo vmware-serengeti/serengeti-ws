@@ -82,6 +82,7 @@ create table cluster (
    start_after_deploy  boolean,
    automation_enable   boolean,
    vhm_min_num         integer,
+   vhm_max_num         integer,
    vhm_target_num      integer,
    ioshare_type        varchar(16),
    latest_task_id      bigint,

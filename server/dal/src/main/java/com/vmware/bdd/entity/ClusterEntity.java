@@ -47,7 +47,7 @@ import com.vmware.bdd.utils.ConfigInfo;
 
 /**
  * Cluster Entity
- * 
+ *
  */
 @Entity
 @SequenceGenerator(name = "IdSequence", sequenceName = "cluster_seq", allocationSize = 1)
@@ -114,13 +114,16 @@ public class ClusterEntity extends EntityBase {
    @Column(name = "vhm_min_num")
    private int vhmMinNum;
 
+   @Column(name = "vhm_max_num")
+   private int vhmMaxNum;
+
    @Enumerated(EnumType.STRING)
    @Column(name = "ioshare_type")
    private Priority ioShares;
 
    @Column(name = "vhm_target_num")
    private Integer vhmTargetNum;
-   
+
    // records the latest job id the cluster executes
    @Column(name = "latest_task_id")
    private Long latestTaskId;
@@ -351,11 +354,19 @@ public class ClusterEntity extends EntityBase {
    public void setVhmMinNum(int vhmMinNum) {
       this.vhmMinNum = vhmMinNum;
    }
-   
+
+   public int getVhmMaxNum() {
+      return vhmMaxNum;
+   }
+
+   public void setVhmMaxNum(int vhmMaxNum) {
+      this.vhmMaxNum = vhmMaxNum;
+   }
+
    public Integer getVhmTargetNum() {
       return vhmTargetNum;
    }
-   
+
    public void setVhmTargetNum(Integer vhmTargetNum) {
       this.vhmTargetNum = vhmTargetNum;
    }

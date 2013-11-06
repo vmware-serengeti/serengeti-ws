@@ -202,6 +202,8 @@ public class ClusterConfigManager {
          } else {
             clusterEntity.setAutomationEnable(null);
          }
+         clusterEntity.setVhmMinNum(-1);
+         clusterEntity.setVhmMaxNum(-1);
 
          if (cluster.getRpNames() != null && cluster.getRpNames().size() > 0) {
             logger.debug("resource pool " + cluster.getRpNames()

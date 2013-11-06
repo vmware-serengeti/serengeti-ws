@@ -866,10 +866,11 @@ public class ClusterManager {
 
    /**
     * set cluster parameters synchronously
-    * 
+    *
     * @param clusterName
     * @param activeComputeNodeNum
     * @param minComputeNodeNum
+    * @param maxComputeNodeNum
     * @param enableAuto
     * @param ioPriority
     * @return
@@ -877,7 +878,7 @@ public class ClusterManager {
     */
    @SuppressWarnings("unchecked")
    public List<String> syncSetParam(String clusterName,
-         Integer activeComputeNodeNum, Integer minComputeNodeNum,
+         Integer activeComputeNodeNum, Integer minComputeNodeNum, Integer maxComputeNodeNum,
          Boolean enableAuto, Priority ioPriority) throws Exception {
 
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
@@ -892,7 +893,7 @@ public class ClusterManager {
          prioritizeCluster(clusterName, ioPriority);
       }
 
-      // as  prioritizeCluster will update clusterEntity, here we need to refresh to avoid overriding
+      // as prioritizeCluster will update clusterEntity, here we need to refresh to avoid overriding
       cluster = clusterEntityMgr.findByName(clusterName);
 
       if (enableAuto != null && enableAuto != cluster.getAutomationEnable()) {
@@ -908,8 +909,13 @@ public class ClusterManager {
          cluster.setVhmMinNum(minComputeNodeNum);
       }
 
+      if (maxComputeNodeNum != null
+            && maxComputeNodeNum != cluster.getVhmMaxNum()) {
+         cluster.setVhmMaxNum(maxComputeNodeNum);
+      }
+
       List<String> nodeGroupNames = new ArrayList<String>();
-      if ((enableAuto != null || minComputeNodeNum != null || activeComputeNodeNum != null)
+      if ((enableAuto != null || minComputeNodeNum != null || maxComputeNodeNum != null || activeComputeNodeNum != null)
             && !clusterRead.validateSetManualElasticity(nodeGroupNames)) {
          throw BddException.INVALID_PARAMETER("cluster", clusterName);
       }
@@ -920,8 +926,8 @@ public class ClusterManager {
          }
       }
 
-      //enableAuto is only set during cluster running status and 
-      //other elasticity attributes are only set during cluster running/stop status 
+      //enableAuto is only set during cluster running status and
+      //other elasticity attributes are only set during cluster running/stop status
       if ((enableAuto != null)
             && !ClusterStatus.RUNNING.equals(cluster.getStatus())) {
          logger.error("Cannot change elasticity mode, when cluster "
@@ -940,7 +946,7 @@ public class ClusterManager {
       clusterEntityMgr.update(cluster);
 
       //update vhm extra config file
-      if (enableAuto != null || minComputeNodeNum != null) {
+      if (enableAuto != null || minComputeNodeNum != null || maxComputeNodeNum != null) {
          boolean success =
                clusteringService.setAutoElasticity(clusterName, false);
          if (!success) {
@@ -961,20 +967,22 @@ public class ClusterManager {
 
    /**
     * set cluster parameters asynchronously
-    * 
+    *
     * @param clusterName
     * @param activeComputeNodeNum
     * @param minComputeNodeNum
+    * @param maxComputeNodeNum
     * @param enableAuto
     * @param ioPriority
     * @return
     * @throws Exception
     */
    public Long asyncSetParam(String clusterName, Integer activeComputeNodeNum,
-         Integer minComputeNodeNum, Boolean enableAuto, Priority ioPriority)
+         Integer minComputeNodeNum, Integer maxComputeNodeNum, Boolean enableAuto,
+         Priority ioPriority)
          throws Exception {
 
-      syncSetParam(clusterName, activeComputeNodeNum, minComputeNodeNum,
+      syncSetParam(clusterName, activeComputeNodeNum, minComputeNodeNum, maxComputeNodeNum,
             enableAuto, ioPriority);
 
       ClusterRead cluster = getClusterByName(clusterName, false);
@@ -1023,7 +1031,7 @@ public class ClusterManager {
    }
 
    /*
-    * Change the disk I/O priority of the cluster or a node group   
+    * Change the disk I/O priority of the cluster or a node group
     */
    public void prioritizeCluster(String clusterName, Priority ioShares)
          throws Exception {

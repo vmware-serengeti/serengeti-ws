@@ -385,6 +385,7 @@ public class ClusterEntityManager {
       clusterRead.setTopologyPolicy(cluster.getTopologyPolicy());
       clusterRead.setAutomationEnable(cluster.getAutomationEnable());
       clusterRead.setVhmMinNum(cluster.getVhmMinNum());
+      clusterRead.setVhmMaxNum(cluster.getVhmMaxNum());
       clusterRead.setVhmTargetNum(cluster.getVhmTargetNum());
       clusterRead.setIoShares(cluster.getIoShares());
 

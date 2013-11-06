@@ -59,7 +59,7 @@ public class SetManualElasticityStep extends TrackableTasklet {
       }
 
       if (vhmAction == LimitInstruction.actionWaitForManual) {
-         if (!diableAutoEalsticity(clusterName)) {
+         if (!disableAutoElasticity(clusterName)) {
             throw TaskException.EXECUTION_FAILED("timed out while changing elasticity mode from AUTO to MANUAL for cluster " + clusterName);
          }
       }
@@ -92,7 +92,7 @@ public class SetManualElasticityStep extends TrackableTasklet {
       return RepeatStatus.FINISHED;
    }
 
-   private boolean diableAutoEalsticity(String clusterName) {
+   private boolean disableAutoElasticity(String clusterName) {
       AuAssert.check(clusteringService != null);
       AuAssert.check(clusterEntityManager != null);
       ClusterEntity clusterEntity = clusterEntityManager.findByName(clusterName);

@@ -5,7 +5,7 @@
  *   You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *   Unless required by applicable law or agreed to in writing, software
  *   distributed under the License is distributed on an "AS IS" BASIS,
  *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -62,7 +62,7 @@ public class ClusterCommandsTest extends MockRestServer {
       ipconfigs.put(NetTrafficType.MGT_NETWORK, ips);
       return ipconfigs;
    }
-    
+
     @Test
     public void testClusterResize() throws Exception {
         CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
@@ -135,7 +135,7 @@ public class ClusterCommandsTest extends MockRestServer {
 
         //normal case
         clusterCommands.resizeCluster("cluster1", "NodeGroup1", 5,0,0);
-        
+
         //zookeeper resize case
         setup();
         this.buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
@@ -445,7 +445,7 @@ public class ClusterCommandsTest extends MockRestServer {
         DistroRead distro = new DistroRead();
         distro.setName(Constants.DEFAULT_DISTRO);
         distros[0] = distro;
-        
+
         NetworkRead[] networks = new NetworkRead[1];
         NetworkRead network = new NetworkRead();
         network.setName("dhcp");
@@ -726,74 +726,94 @@ public class ClusterCommandsTest extends MockRestServer {
       nodeGroupRead.add(ngr2);
       cr1.setNodeGroups(nodeGroupRead);
       cr1.setAutomationEnable(false);
-      
-      
+
+
       //setParam tests
+      //set elasticityMode to MANUAL
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
             mapper.writeValueAsString(cr1));
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/param", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
-      clusterCommands.setParam("cluster1", "MANUAL", null, null, "HIGH");
+      clusterCommands.setParam("cluster1", "MANUAL", null, null, null, "HIGH");
 
+      //set elasticityMode to AUTO with targetComputeNodeNum=2
       setup();
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
             mapper.writeValueAsString(cr1));
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/param", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
-      clusterCommands.setParam("cluster1", "AUTO", null, 2, "HIGH");
+      clusterCommands.setParam("cluster1", "AUTO", null, null, 2, "HIGH");
 
+      //set elasticityMode to MANUAL with targetComputeNodeNum=2
       setup();
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
             mapper.writeValueAsString(cr1));
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/param_wait_for_result", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
-      clusterCommands.setParam("cluster1", "MANUAL", null, 2, "HIGH");
+      clusterCommands.setParam("cluster1", "MANUAL", null, null, 2, "HIGH");
 
+      //set minComputeNodeNum=2 and targetComputeNodeNum=2
       setup();
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
             mapper.writeValueAsString(cr1));
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/param_wait_for_result", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
-      clusterCommands.setParam("cluster1", null, 2, 2, "HIGH");
+      clusterCommands.setParam("cluster1", null, 2, null, 2, "HIGH");
 
+      //set elasticityMode to AUTO with minComputeNodeNum=maxComputeNodeNum=2
       setup();
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
             mapper.writeValueAsString(cr1));
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/param", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
-      clusterCommands.setParam("cluster1", null, null, null, "HIGH");
+      clusterCommands.setParam("cluster1", "AUTO", 2, 2, null, "HIGH");
+
+      //only set ioShares to HIGH
+      setup();
+      buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
+            mapper.writeValueAsString(cr1));
+      buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/param", HttpMethod.PUT,
+            HttpStatus.NO_CONTENT, "");
+      clusterCommands.setParam("cluster1", null, null, null, null, "HIGH");
 
       //reset Param tests
+      //reset all
       setup();
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
             mapper.writeValueAsString(cr1));
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/param_wait_for_result", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
-      clusterCommands.resetParam("cluster1", true, false, false, false, false);
+      clusterCommands.resetParam("cluster1", true, false, false, false, false, false);
 
+      //set vhmTargetNum to -1
+      //then reset elasticityMode
       setup();
       cr1.setVhmTargetNum(-1);
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
             mapper.writeValueAsString(cr1));
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/param_wait_for_result", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
-      clusterCommands.resetParam("cluster1", false, true, false, false, false);
+      clusterCommands.resetParam("cluster1", false, true, false, false, false, false);
 
+      //set automationEnable to true
+      //then reset minComputeNodeNum, maxComputeNodeNum, targetComputeNodeNum and ioShares
       setup();
       cr1.setAutomationEnable(true);
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
             mapper.writeValueAsString(cr1));
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/param", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
-      clusterCommands.resetParam("cluster1", false, false, true, true, true);
+      clusterCommands.resetParam("cluster1", false, false, true, true, true, true);
 
+      //set automationEnable to true
+      //then only reset ioShares
       setup();
       cr1.setAutomationEnable(true);
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
             mapper.writeValueAsString(cr1));
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/param", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
-      clusterCommands.resetParam("cluster1", false, false, false, false, true);
+      clusterCommands.resetParam("cluster1", false, false, false, false, false, true);
       CookieCache.clear();
    }
 }

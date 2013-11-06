@@ -42,17 +42,19 @@ public class SetAutoElasticitySP implements Callable<Void> {
    private final String masterUUID;
    private final Boolean enableAutoElasticity;
    private final int minComputeNodeNum;
+   private final int maxComputeNodeNum;
    private final String jobTrackerPort;
    private final boolean isComputeOnlyNode;
 
    public SetAutoElasticitySP(VcVirtualMachine vcVm, String serengetiUUID, String masterMoId, String masterUUID, Boolean enableAutoElasticity,
-         int minComputeNodeNum, String jobTrackerPort, boolean isComputeOnlyNode) {
+         int minComputeNodeNum, int maxComputeNodeNum, String jobTrackerPort, boolean isComputeOnlyNode) {
       this.vcVm = vcVm;
       this.serengetiUUID = serengetiUUID;
       this.masterMoId = masterMoId;
       this.masterUUID = masterUUID;
       this.enableAutoElasticity = enableAutoElasticity;
       this.minComputeNodeNum = minComputeNodeNum;
+      this.maxComputeNodeNum = maxComputeNodeNum;
       this.jobTrackerPort = jobTrackerPort;
       this.isComputeOnlyNode = isComputeOnlyNode;
    }
@@ -74,7 +76,8 @@ public class SetAutoElasticitySP implements Callable<Void> {
             List<OptionValue> options = new ArrayList<OptionValue>();
             if (vm.getId().equalsIgnoreCase(masterMoId)) {
                options.add(new OptionValueImpl(VHMConstants.VHM_ENABLE, enableAutoElasticity.toString()));
-               options.add(new OptionValueImpl(VHMConstants.VHM_MIN_COMPUTENODE_NUM, (new Integer(minComputeNodeNum)).toString()));
+               options.add(new OptionValueImpl(VHMConstants.VHM_INSTANCERANGE_COMPUTENODE_NUM,
+                     (new Integer(minComputeNodeNum)).toString() + ":" + (new Integer(maxComputeNodeNum)).toString()));
                options.add(new OptionValueImpl(VHMConstants.VHM_JOBTRACKER_PORT, jobTrackerPort));
             }
 
@@ -88,7 +91,7 @@ public class SetAutoElasticitySP implements Callable<Void> {
             spec.setExtraConfig(optionValues);
             vm.reconfigure(spec);
             logger.info("set autoElasticity, masterMoId=" + masterMoId + ", masterUUID=" + masterUUID + ", isComputeOnlyNode=" + isComputeOnlyNode + ", enable="
-                  + enableAutoElasticity + ", jobTrackerPort=" + jobTrackerPort + ", minComputeNodeNum=" + minComputeNodeNum);
+                  + enableAutoElasticity + ", jobTrackerPort=" + jobTrackerPort + ", minComputeNodeNum=" + minComputeNodeNum + ", maxComputeNodeNum=" + maxComputeNodeNum);
             return null;
          }
          protected boolean isTaskSession() {

@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
 import com.vmware.bdd.utils.CommonUtil;
@@ -62,9 +63,11 @@ public class ClusterRead implements Comparable<ClusterRead> {
    private List<ResourcePoolRead> resourcePools;
 
    private Boolean automationEnable;
-   
+
    private int vhmMinNum;
-   
+
+   private int vhmMaxNum;
+
    private Integer vhmTargetNum;
 
    @Expose
@@ -72,7 +75,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
    private Priority ioShares;
 
    private boolean nodeGroupSorted;
-   
+
    private boolean dcSeperation;
 
    public ClusterRead() {
@@ -157,7 +160,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
          return null;
       }
       NodeGroupReadComparactor comparactor = new NodeGroupReadComparactor();
-      //Note: if node groups will be modified by server, please consider collections.unmodifiedList() first. 
+      //Note: if node groups will be modified by server, please consider collections.unmodifiedList() first.
       if (!nodeGroupSorted) {
          Collections.sort(nodeGroups, comparactor);
          nodeGroupSorted = true;
@@ -191,7 +194,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
    /*
     * Validate the manual elastic parameters, make sure the specified node group is a compute only node group.
-    * If user have not specified the node group name,the cluster must contain compute only node.   
+    * If user have not specified the node group name, the cluster must contain compute only node.
     */
    public boolean validateSetManualElasticity(List<String>... nodeGroupNames) {
       List<NodeGroupRead> nodeGroups = getNodeGroups();
@@ -215,6 +218,20 @@ public class ClusterRead implements Comparable<ClusterRead> {
       return true;
    }
 
+   public int retrieveComputeNodeNum() {
+      List<NodeGroupRead> nodeGroups = getNodeGroups();
+      int count = 0;
+
+      if (nodeGroups != null && !nodeGroups.isEmpty()) {
+         for (NodeGroupRead nodeGroup : getNodeGroups()) {
+            if (CommonUtil.isComputeOnly(nodeGroup.getRoles(), distroVendor)) {
+               count = count + nodeGroup.getInstanceNum();
+            }
+         }
+      }
+      return count;
+   }
+
    private NodeGroupRead matchNodeGroupByName(List<NodeGroupRead> nodeGroups,
          String nodeGroupName) {
       NodeGroupRead nodeGoupRead = null;
@@ -229,8 +246,8 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
    /**
     * Compare the order of node groups according to their roles
-    * 
-    * 
+    *
+    *
     */
    private class NodeGroupReadComparactor implements Comparator<NodeGroupRead> {
       @Override
@@ -295,6 +312,14 @@ public class ClusterRead implements Comparable<ClusterRead> {
       this.automationEnable = automationEnable;
    }
 
+   public String retrieveVhmMinNum() {
+      if (vhmMinNum == -1) {
+         return "Unset";
+      } else {
+         return Integer.toString(vhmMinNum);
+      }
+   }
+
    public int getVhmMinNum() {
       return vhmMinNum;
    }
@@ -302,7 +327,23 @@ public class ClusterRead implements Comparable<ClusterRead> {
    public void setVhmMinNum(int vhmMinNum) {
       this.vhmMinNum = vhmMinNum;
    }
-   
+
+   public String retrieveVhmMaxNum() {
+      if (vhmMaxNum == -1) {
+         return "Unset";
+      } else {
+         return Integer.toString(vhmMaxNum);
+      }
+   }
+
+   public int getVhmMaxNum() {
+      return vhmMaxNum;
+   }
+
+   public void setVhmMaxNum(int vhmMaxNum) {
+      this.vhmMaxNum = vhmMaxNum;
+   }
+
    public String retrieveVhmTargetNum() {
       if (vhmTargetNum == null || vhmTargetNum == -1) {
          return "N/A";
@@ -310,7 +351,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
          return vhmTargetNum.toString();
       }
    }
-   
+
    public Integer getVhmTargetNum() {
       return vhmTargetNum;
    }
@@ -321,7 +362,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
    /*
     * Check if invoke sync or async rest apis: if manual is set and targetNum is not empty;
-    * or current elasticity mode is manual and targetNum is not empty, we need to use async 
+    * or current elasticity mode is manual and targetNum is not empty, we need to use async
     * rest api since start/stop vms will take some time to complete.
     */
    public boolean needAsyncUpdateParam(ElasticityRequestBody requestBody) {
@@ -352,5 +393,47 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
    public void setDcSeperation(boolean dcSeperation) {
       this.dcSeperation = dcSeperation;
+   }
+
+   public boolean validateSetParamParameters(Integer targetComputeNodeNum,
+         Integer minComputeNodeNum, Integer maxComputeNodeNum,
+         Boolean enableAuto) {
+      //validate the input of minComputeNodeNum
+      if (minComputeNodeNum != null && minComputeNodeNum < -1) {
+         throw BddException.INVALID_PARAMETER("minComputeNodeNum", minComputeNodeNum);
+      }
+
+      //validate the input of maxComputeNodeNum
+      if (maxComputeNodeNum != null && maxComputeNodeNum < -1) {
+         throw BddException.INVALID_PARAMETER("maxComputeNodeNum", maxComputeNodeNum);
+      }
+
+      //validate the input of targetComputeNodeNum
+      if (targetComputeNodeNum != null && targetComputeNodeNum < 0) {
+         throw BddException.INVALID_PARAMETER("targetComputeNodeNum", targetComputeNodeNum);
+      }
+
+      int computeNodeNum = retrieveComputeNodeNum();
+      //validate min, max, targetComputeNodeNum should be less than deployed computeNodeNum
+      if (minComputeNodeNum != null && minComputeNodeNum > computeNodeNum) {
+         throw BddException.NOT_GREATER_THAN_COMPUTE_NODES("minComputeNodeNum", Integer.toString(computeNodeNum));
+      }
+      if (maxComputeNodeNum != null && maxComputeNodeNum > computeNodeNum) {
+         throw BddException.NOT_GREATER_THAN_COMPUTE_NODES("maxComputeNodeNum", Integer.toString(computeNodeNum));
+      }
+      if (targetComputeNodeNum != null && targetComputeNodeNum > computeNodeNum) {
+         throw BddException.NOT_GREATER_THAN_COMPUTE_NODES("targetComputeNodeNum", Integer.toString(computeNodeNum));
+      }
+
+      //validate minComputeNode <= maxComputeNode
+      if ((minComputeNodeNum != null && minComputeNodeNum != -1 && maxComputeNodeNum != null &&
+            maxComputeNodeNum != -1 && minComputeNodeNum > maxComputeNodeNum) ||
+          (minComputeNodeNum != null && minComputeNodeNum != -1 && maxComputeNodeNum == null &&
+            getVhmMaxNum() != -1 && minComputeNodeNum > getVhmMaxNum() ||
+          (minComputeNodeNum == null && maxComputeNodeNum != null &&
+            getVhmMinNum() > maxComputeNodeNum))) {
+         throw BddException.NOT_LARGER_THAN("minComputeNodeNum", "maxComputeNodeNum");
+      }
+      return true;
    }
 }
