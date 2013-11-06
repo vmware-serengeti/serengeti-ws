@@ -42,6 +42,7 @@ import com.vmware.bdd.spectypes.ServiceType;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 
 /**
@@ -1016,6 +1017,47 @@ public class ClusterCreate implements Serializable {
 
    public void setPassword(String password) {
       this.password = password;
-
    }
+
+   public void verifyClusterNameLength() {
+      final int MAX_VC_OBJECT_NAME_LENGTH = 80;
+      final int MAX_VM_INDEX_LENGTH = 4;
+      final int VM_LINK_SYMBOL_LENGTH = 2;
+      final int RP_LINK_SYMBOL_LENGTH = 1;
+      int clusterNameLength = getName().length();
+      int maxNodeGroupNameLength = 0;
+      if (getNodeGroups() == null || getNodeGroups().length == 0) {
+         maxNodeGroupNameLength = 6;
+      } else {
+         int nodeGroupNameLength = 0;
+         for (NodeGroupCreate nodeGroup : this.getNodeGroups()) {
+            nodeGroupNameLength = nodeGroup.getName().length();
+            if (maxNodeGroupNameLength < nodeGroupNameLength) {
+               maxNodeGroupNameLength = nodeGroupNameLength;
+            }
+         }
+      }
+      int rpNeedLength =
+            MAX_VC_OBJECT_NAME_LENGTH - ConfigInfo.getSerengetiUUID().length()
+                  - RP_LINK_SYMBOL_LENGTH;
+      if (rpNeedLength <= 0) {
+         throw ClusterConfigException.UUID_TOO_LONG(MAX_VC_OBJECT_NAME_LENGTH
+               - RP_LINK_SYMBOL_LENGTH);
+      }
+      int vmNeedLength =
+            MAX_VC_OBJECT_NAME_LENGTH - MAX_VM_INDEX_LENGTH
+                  - VM_LINK_SYMBOL_LENGTH - maxNodeGroupNameLength;
+      if (vmNeedLength <= 0) {
+         throw ClusterConfigException
+               .NODE_GROUP_NAME_TOO_LONG(MAX_VC_OBJECT_NAME_LENGTH
+                     - MAX_VM_INDEX_LENGTH - VM_LINK_SYMBOL_LENGTH);
+      }
+      int clusterNameMaxLength =
+            vmNeedLength - rpNeedLength > 0 ? rpNeedLength : vmNeedLength;
+      if (clusterNameMaxLength < clusterNameLength) {
+         throw ClusterConfigException
+               .CLUSTER_NAME_TOO_LONG(clusterNameMaxLength);
+      }
+   }
+
 }

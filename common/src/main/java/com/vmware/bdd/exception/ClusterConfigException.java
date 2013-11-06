@@ -27,6 +27,18 @@ public class ClusterConfigException extends BddException {
       super(cause, "CLUSTER_CONFIG", errorId, detail);
    }
 
+   public static ClusterConfigException UUID_TOO_LONG(int uuidMaxLimitLength) {
+      return new ClusterConfigException(null, "UUID_TOO_LONG", uuidMaxLimitLength);
+   }
+
+   public static ClusterConfigException CLUSTER_NAME_TOO_LONG(int clusterNameMaxLimitLength) {
+      return new ClusterConfigException(null, "CLUSTER_NAME_TOO_LONG", clusterNameMaxLimitLength);
+   }
+
+   public static ClusterConfigException NODE_GROUP_NAME_TOO_LONG(int nodeGroupNameMaxLimitLength) {
+      return new ClusterConfigException(null, "NODE_GROUP_NAME_TOO_LONG", nodeGroupNameMaxLimitLength);
+   }
+
    public static ClusterConfigException CLUSTER_NAME_MISSING() {
       return new ClusterConfigException(null, "CLUSTER_NAME_MISSING");
    }
@@ -130,4 +142,5 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException LOCAL_STORAGE_USED_FOR_FT_GROUP(String group) {
       return new ClusterConfigException(null, "LOCAL_STORAGE_USED_FOR_FT_GROUP", group);
    }
+
 }

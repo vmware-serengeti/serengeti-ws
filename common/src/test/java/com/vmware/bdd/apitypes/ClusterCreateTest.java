@@ -15,6 +15,7 @@
 package com.vmware.bdd.apitypes;
 
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,7 @@ import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
@@ -402,5 +404,71 @@ public class ClusterCreateTest {
       worker4.setName("test4");
       cluster.setNodeGroups(new NodeGroupCreate[] { worker4 });
       cluster.validateNodeGroupNames();
+   }
+
+   @Test
+   public void testVerifyClusterNameLength() {
+      boolean failed = false;
+      ClusterCreate cluster = new ClusterCreate();
+      cluster.setName("Test");
+      cluster.verifyClusterNameLength();
+      ConfigInfo.setSerengetiUUID("Serengeti.uuid");
+      cluster
+            .setName("Test1234567890123456789012345678901234567890123456789012345678901234");
+      try {
+         cluster.verifyClusterNameLength();
+      } catch (ClusterConfigException e) {
+         assertEquals(e.getMessage(),
+               "The length of the cluster name must be equal or less than 65.");
+         failed = true;
+      }
+      assertTrue(failed);
+      failed = false;
+      cluster
+            .setName("Test1234567890123456789012345678901234567890123456789012345678901234");
+      NodeGroupCreate resourceManager = new NodeGroupCreate();
+      resourceManager.setName("resourceManager");
+      NodeGroupCreate zookeeper = new NodeGroupCreate();
+      zookeeper.setName("zookeeper");
+      cluster
+            .setNodeGroups(new NodeGroupCreate[] { resourceManager, zookeeper });
+      try {
+         cluster.verifyClusterNameLength();
+      } catch (ClusterConfigException e) {
+         assertEquals(e.getMessage(),
+               "The length of the cluster name must be equal or less than 59.");
+         failed = true;
+      }
+      assertTrue(failed);
+      failed = false;
+      NodeGroupCreate otherNodeGroup = new NodeGroupCreate();
+      otherNodeGroup
+            .setName("NodeGroup12345678901234567890123456789012345678901234567890123456789012345");
+      cluster.setNodeGroups(new NodeGroupCreate[] { otherNodeGroup });
+      try {
+         cluster.verifyClusterNameLength();
+      } catch (ClusterConfigException e) {
+         assertEquals(e.getMessage(),
+               "The length of the node group name must be less than 74.");
+         failed = true;
+      }
+      assertTrue(failed);
+   }
+
+   @Test
+   public void testVerifyClusterNameLengthWhenUUIDTooLong() {
+      boolean failed = false;
+      ClusterCreate cluster = new ClusterCreate();
+      cluster.setName("Test");
+      ConfigInfo
+            .setSerengetiUUID("Test123456789012345678901234567890123456789012345678901234567890123456789012345");
+      try {
+         cluster.verifyClusterNameLength();
+      } catch (ClusterConfigException e) {
+         failed = true;
+         assertEquals(e.getMessage(),
+               "The length of the UUID must be less than 79.");
+      }
+      assertTrue(failed);
    }
 }
