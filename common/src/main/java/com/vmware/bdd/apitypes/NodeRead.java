@@ -124,11 +124,21 @@ public class NodeRead {
    }
 
    private String fetchIpOf(NetTrafficType type) {
-      if (ipConfigs != null && ipConfigs.containsKey(type)
-            && !ipConfigs.get(type).get(0).getIpAddress().equals(Constants.NULL_IP)) {
-         return ipConfigs.get(type).get(0).getIpAddress();
+      if (ipConfigs == null) {
+         return null;
       }
-      return null;
+      if (!ipConfigs.containsKey(type)) {
+         if (type.equals(NetTrafficType.MGT_NETWORK)) {
+            return null;
+         } else {
+            // in this case, by default use MGT_NETWORK
+            return fetchIpOf(NetTrafficType.MGT_NETWORK);
+         }
+      }
+      if (ipConfigs.get(type).get(0).getIpAddress().equals(Constants.NULL_IP)) {
+         return null;
+      }
+      return ipConfigs.get(type).get(0).getIpAddress();
    }
 
    public String getStatus() {

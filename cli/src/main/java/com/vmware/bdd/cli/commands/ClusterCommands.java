@@ -1320,13 +1320,12 @@ public class ClusterCommands implements CommandMarker {
                   if (nodes != null) {
                      LinkedHashMap<String, List<String>> nColumnNamesWithGetMethodNamesClone =
                            (LinkedHashMap<String, List<String>>) nColumnNamesWithGetMethodNames.clone();
-                     if (!nodes.isEmpty()) {
-                        if (!nodes.get(0).getIpConfigs().containsKey(NetTrafficType.HDFS_NETWORK)) {
-                           nColumnNamesWithGetMethodNamesClone.remove(Constants.FORMAT_TABLE_COLUMN_HDFS_IP);
-                        }
-                        if (!nodes.get(0).getIpConfigs().containsKey(NetTrafficType.MAPRED_NETWORK)) {
-                           nColumnNamesWithGetMethodNamesClone.remove(Constants.FORMAT_TABLE_COLUMN_MAPRED_IP);
-                        }
+                     if (!nodes.isEmpty() &&
+                           (nodes.get(0).getIpConfigs() == null
+                                 || (!nodes.get(0).getIpConfigs().containsKey(NetTrafficType.HDFS_NETWORK)
+                                 && !nodes.get(0).getIpConfigs().containsKey(NetTrafficType.MAPRED_NETWORK)))) {
+                        nColumnNamesWithGetMethodNamesClone.remove(Constants.FORMAT_TABLE_COLUMN_HDFS_IP);
+                        nColumnNamesWithGetMethodNamesClone.remove(Constants.FORMAT_TABLE_COLUMN_MAPRED_IP);
                      }
                      System.out.println();
                      CommandsUtils.printInTableFormat(

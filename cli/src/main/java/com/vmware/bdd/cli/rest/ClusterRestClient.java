@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.bdd.apitypes.NetConfigInfo;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -232,6 +233,14 @@ public class ClusterRestClient {
                      Arrays.asList("getName"));
                columnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_IP, Arrays.asList("fetchMgtIp"));
+               if (nodes.get(0).getIpConfigs() != null
+                     && (nodes.get(0).getIpConfigs().containsKey(NetConfigInfo.NetTrafficType.HDFS_NETWORK)
+                     || nodes.get(0).getIpConfigs().containsKey(NetConfigInfo.NetTrafficType.MAPRED_NETWORK))) {
+                  columnNamesWithGetMethodNames.put(
+                        Constants.FORMAT_TABLE_COLUMN_HDFS_IP, Arrays.asList("fetchHdfsIp"));
+                  columnNamesWithGetMethodNames.put(
+                        Constants.FORMAT_TABLE_COLUMN_MAPRED_IP, Arrays.asList("fetchMapredIp"));
+               }
                columnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_STATUS,
                      Arrays.asList("getStatus"));
