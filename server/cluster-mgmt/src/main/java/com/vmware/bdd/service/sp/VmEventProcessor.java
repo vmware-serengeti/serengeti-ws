@@ -240,7 +240,6 @@ public class VmEventProcessor extends Thread {
             if (vm == null) {
                break;
             }
-            vm.updateRuntime();
             if (clusterEntityMgr.getNodeByVmName(vm.getName()) != null) {
                logger.info("received vhm event " + e.getDynamicType()
                      + "for vm " + vm.getName() + ": "
@@ -267,7 +266,6 @@ public class VmEventProcessor extends Thread {
       if (vm == null) {
          return;
       }
-      vm.updateRuntime();
       if (clusterEntityMgr.getNodeByVmName(vm.getName()) != null) {
          logger.info("received vm " + eventName
                + " event for vm: " + vm.getName());

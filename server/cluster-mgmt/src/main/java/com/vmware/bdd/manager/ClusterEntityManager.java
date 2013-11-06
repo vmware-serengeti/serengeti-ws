@@ -52,7 +52,7 @@ import com.vmware.bdd.utils.VcVmUtil;
 @Transactional(readOnly = true)
 public class ClusterEntityManager {
    private static final Logger logger = Logger
-   .getLogger(ClusterEntityManager.class);
+         .getLogger(ClusterEntityManager.class);
 
    private IClusterDAO clusterDao;
 
@@ -226,7 +226,7 @@ public class ClusterEntityManager {
    }
 
    @Transactional
-   public boolean handleOperationStatus(String clusterName,
+   synchronized public boolean handleOperationStatus(String clusterName,
          OperationStatusWithDetail status) {
       logger.info("handle operation status: " + status.getOperationStatus());
       boolean finished = status.getOperationStatus().isFinished();
@@ -284,7 +284,7 @@ public class ClusterEntityManager {
    }
 
    @Transactional
-   synchronized public void syncUp(String clusterName, 
+   synchronized public void syncUp(String clusterName,
          boolean updateClusterStatus) {
       List<NodeEntity> nodes = findAllNodes(clusterName);
 
@@ -318,7 +318,8 @@ public class ClusterEntityManager {
       ClusterEntity clusterEntity = clusterDao.findByName(clusterName);
       List<String> portGroups = new ArrayList<String>();
       for (String networkName : clusterEntity.fetchNetworkNameList()) {
-         portGroups.add(networkDAO.findNetworkByName(networkName).getPortGroup());
+         portGroups.add(networkDAO.findNetworkByName(networkName)
+               .getPortGroup());
       }
       return portGroups;
    }
@@ -343,17 +344,19 @@ public class ClusterEntityManager {
          node.setStatus(NodeStatus.POWERED_ON);
       }
 
-      if (vcVm.isPoweredOn()) {
+      if (vcVm.isPoweredOn() && node.isPowerStatusChanged()) {
          //update ip address
          for (String portGroup : node.fetchAllPortGroups()) {
-            String ip = VcVmUtil.getIpAddressOfPortGroup(vcVm, portGroup, inSession);
+            String ip =
+                  VcVmUtil.getIpAddressOfPortGroup(vcVm, portGroup, inSession);
             node.updateIpAddressOfPortGroup(portGroup, ip);
          }
          if (node.ipsReady()) {
             node.setStatus(NodeStatus.VM_READY);
             if (node.getAction() != null
-                  && node.getAction().equals(
-                        Constants.NODE_ACTION_WAITING_IP)) {
+                  && (node.getAction().equals(Constants.NODE_ACTION_WAITING_IP)
+                        || node.getAction().equals(
+                              Constants.NODE_ACTION_RECONFIGURE))) {
                node.setAction(null);
             }
          }
@@ -371,11 +374,13 @@ public class ClusterEntityManager {
    }
 
    @SuppressWarnings("rawtypes")
-   public ClusterRead toClusterRead(String clusterName, boolean ignoreObsoleteNode) {
+   public ClusterRead toClusterRead(String clusterName,
+         boolean ignoreObsoleteNode) {
       ClusterEntity cluster = findByName(clusterName);
       ClusterStatus clusterStatus = cluster.getStatus();
       ClusterRead clusterRead = new ClusterRead();
-      clusterRead.setInstanceNum(cluster.getRealInstanceNum(ignoreObsoleteNode));
+      clusterRead
+            .setInstanceNum(cluster.getRealInstanceNum(ignoreObsoleteNode));
       clusterRead.setName(cluster.getName());
       clusterRead.setStatus(clusterStatus);
       clusterRead.setDistro(cluster.getDistro());
@@ -415,7 +420,8 @@ public class ClusterEntityManager {
       }
 
       Set<VcResourcePoolEntity> rps = cluster.getUsedRps();
-      List<ResourcePoolRead> rpReads = new ArrayList<ResourcePoolRead>(rps.size());
+      List<ResourcePoolRead> rpReads =
+            new ArrayList<ResourcePoolRead>(rps.size());
       for (VcResourcePoolEntity rp : rps) {
          ResourcePoolRead rpRead = rp.toRest();
          rpRead.setNodes(null);
@@ -423,7 +429,8 @@ public class ClusterEntityManager {
       }
       clusterRead.setResourcePools(rpReads);
 
-      if (clusterStatus == ClusterStatus.RUNNING || clusterStatus == ClusterStatus.STOPPED) {
+      if (clusterStatus == ClusterStatus.RUNNING
+            || clusterStatus == ClusterStatus.STOPPED) {
          clusterRead.setDcSeperation(clusterRead.validateSetManualElasticity());
       }
 

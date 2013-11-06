@@ -119,7 +119,9 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
 
       for (BaseNode vNode : addedNodes) {
          deletedNodeNames.remove(vNode.getVmName());
-         replaceNodeEntity(vNode);
+         synchronized (getClusterEntityMgr()) {
+            replaceNodeEntity(vNode);
+         }
       }
    }
 
