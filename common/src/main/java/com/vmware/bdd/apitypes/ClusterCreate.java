@@ -26,8 +26,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
@@ -119,7 +117,7 @@ public class ClusterCreate implements Serializable {
 
    private Boolean validateConfig = true;
 
-   private boolean specFile;
+   private Boolean specFile = false;
 
    private String password;
 
@@ -360,12 +358,11 @@ public class ClusterCreate implements Serializable {
       this.deployPolicy = deployPolicy;
    }
 
-   @JsonIgnore
-   public boolean isSpecFile() {
+   public Boolean isSpecFile() {
       return specFile;
    }
 
-   public void setSpecFile(boolean specFile) {
+   public void setSpecFile(Boolean specFile) {
       this.specFile = specFile;
    }
 

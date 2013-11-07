@@ -326,6 +326,7 @@ public class ClusterManager {
       spec.setName(null);
       spec.setDistro(null);
       spec.setValidateConfig(null);
+      spec.setSpecFile(null);
       spec.setTopologyPolicy(null);
       spec.setHostToRackMap(null);
       spec.setHttpProxy(null);
