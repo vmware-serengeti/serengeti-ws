@@ -90,7 +90,7 @@ public class Constants {
    public static final String NAMENODE_AUTO_FAILOVER_ZOOKEEPER =
          "To support vSphere High Availability on name nodes, you must configure a ZooKeeper group.";
    public static final String NO_NAMENODE_HA =
-         "vSphere High Availability is not enabled for NameNode, but journal nodes appear.";
+         "NameNode High Availability is not enabled, but journal nodes appear.";
    public static final String WRONG_NUM_OF_NODEGROUPS =
          "Only one node group can include JobTracker, ZooKeeper or HMaster.";
    public static final String WRONG_NUM_OF_WORKERNODES = "No worker exists.";
@@ -148,7 +148,7 @@ public class Constants {
 
    public static final int DEFAULT_SCHEDULER_POOL_SIZE = 1024;
    public static final int MIN_MEM_SIZE = 1024;
-   public static final String VERSION = "1.0.0";
+   public static final String VERSION = "1.1.0";
 
    public static final String SSH_PRIVATE_KEY_FILE_NAME = "/home/serengeti/.ssh/id_rsa";
    public static final String SSH_PRIVATE_KEY_CONFIG_NAME = "serengeti.ssh.private.key.file";
