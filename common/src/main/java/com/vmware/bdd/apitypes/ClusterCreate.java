@@ -772,6 +772,17 @@ public class ClusterCreate implements Serializable {
       }
    }
 
+   /**
+    * Validate nodeGroupCreates member formats and values in the ClusterCreate of Mapr.
+    */
+   public void validateClusterCreateOfMapr(List<String> failedMsgList,
+         final List<String> distroRoles) {
+      NodeGroupCreate[] nodeGroupCreates = getNodeGroups();
+      for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
+         checkNodeGroupRoles(nodeGroupCreate, distroRoles, failedMsgList);
+      }
+   }
+
    private void makeVmMemoryDivisibleBy4(NodeGroupCreate nodeGroup,
          List<String> warningMsgList) {
       int memoryNum = nodeGroup.getMemCapacityMB();

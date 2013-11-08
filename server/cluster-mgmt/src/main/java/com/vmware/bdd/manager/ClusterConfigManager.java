@@ -157,8 +157,8 @@ public class ClusterConfigManager {
       List<String> failedMsgList = new ArrayList<String>();
       List<String> warningMsgList = new ArrayList<String>();
 
-      if (cluster.getDistro() == null
-            || distroMgr.getDistroByName(cluster.getDistro()) == null) {
+      DistroRead distro = distroMgr.getDistroByName(cluster.getDistro());
+      if (cluster.getDistro() == null || distro == null) {
          throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
       }
       if (!cluster.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
@@ -166,8 +166,10 @@ public class ClusterConfigManager {
          for (NetworkEntity entity : networkMgr.getAllNetworkEntities()) {
             allNetworkNames.add(entity.getName());
          }
-         cluster.validateClusterCreate(failedMsgList, warningMsgList, distroMgr
-               .getDistroByName(cluster.getDistro()).getRoles());
+         cluster.validateClusterCreate(failedMsgList, warningMsgList,
+               distro.getRoles());
+      } else {
+         cluster.validateClusterCreateOfMapr(failedMsgList, distro.getRoles());
       }
       if (!failedMsgList.isEmpty()) {
          throw ClusterConfigException.INVALID_SPEC(failedMsgList);
@@ -220,7 +222,8 @@ public class ClusterConfigManager {
             logger.debug("no datastore name specified, use global configuration.");
          }
 
-         clusterEntity.setNetworkConfig(convertNetNamesToNetConfigs(cluster.getNetworkConfig()));
+         clusterEntity.setNetworkConfig(convertNetNamesToNetConfigs(cluster
+               .getNetworkConfig()));
          clusterEntity.setVhmJobTrackerPort("50030");
          if (cluster.getConfiguration() != null
                && cluster.getConfiguration().size() > 0) {

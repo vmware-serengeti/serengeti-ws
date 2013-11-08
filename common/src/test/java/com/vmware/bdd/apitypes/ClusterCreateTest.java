@@ -367,6 +367,34 @@ public class ClusterCreateTest {
    }
 
    @Test
+   public void testValidateClusterCreateOfMapr() {
+      ClusterCreate cluster = new ClusterCreate();
+      cluster.setDistroVendor(Constants.MAPR_VENDOR);
+      NodeGroupCreate master = new NodeGroupCreate();
+      master.setName("master");
+      master.setMemCapacityMB(7680);
+      master.setSwapRatio(0F);
+      master.setRoles(Arrays.asList(HadoopRole.HADOOP_NAMENODE_ROLE.toString(),
+            HadoopRole.HADOOP_JOBTRACKER_ROLE.toString()));
+      NodeGroupCreate worker = new NodeGroupCreate();
+      worker.setName("worker");
+      worker.setRoles(Arrays.asList(HadoopRole.MAPR_NFS_ROLE.toString(),
+            HadoopRole.MAPR_FILESERVER_ROLE.toString(),
+            HadoopRole.MAPR_TASKTRACKER_ROLE.toString()));
+      worker.setMemCapacityMB(3748);
+      List<String> distroRoles =
+            Arrays.asList("mapr_zookeeper", "mapr_cldb", "mapr_jobtracker",
+                  "mapr_tasktracker", "mapr_fileserver", "mapr_nfs",
+                  "mapr_webserver");
+      cluster.setNodeGroups(new NodeGroupCreate[] { master, worker });
+      List<String> failedMsgList = new ArrayList<String>();
+      cluster.validateClusterCreateOfMapr(failedMsgList, distroRoles);
+      assertEquals(1, failedMsgList.size());
+      assertEquals("master.roles=hadoop_namenode,hadoop_jobtracker.",
+            failedMsgList.get(0));
+   }
+
+   @Test
    public void testValidateNodeGroupNames() {
       ClusterCreate cluster = new ClusterCreate();
       NodeGroupCreate worker1 = new NodeGroupCreate();
