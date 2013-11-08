@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.entity;
 
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -43,6 +45,7 @@ import org.hibernate.annotations.Type;
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.TopologyType;
+import com.vmware.bdd.security.EncryptionGuard;
 import com.vmware.bdd.utils.ConfigInfo;
 
 /**
@@ -396,12 +399,33 @@ public class ClusterEntity extends EntityBase {
    }
 
    public String getPassword() {
-      //TODO(qjin):need to unencrypt the password before return
+      if (this.password == null) {
+         return null;
+      }
+      
+      String password = null;
+      try {
+         password = EncryptionGuard.decode(this.password);
+      } catch (UnsupportedEncodingException e) {
+         //TODO(qjin): need to handle this two exceptions more carefully
+         e.printStackTrace();
+      } catch (GeneralSecurityException e) {
+         e.printStackTrace();
+      }
       return password;
    }
 
    public void setPassword(String password) {
-      //TODO(qjin):need to encrypt the password before assignment
-      this.password = password;
+      if (password == null) {
+         this.password = null;
+      }
+      try {
+         this.password = EncryptionGuard.encode(password);
+      } catch (UnsupportedEncodingException e) {
+         //TODO(qjin): need to handle this two exceptions more carefully
+         e.printStackTrace();
+      } catch (GeneralSecurityException e) {
+         e.printStackTrace();
+      }
    }
 }
