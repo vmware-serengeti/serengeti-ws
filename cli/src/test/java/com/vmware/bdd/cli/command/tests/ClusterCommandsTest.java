@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.vmware.bdd.apitypes.IpConfigInfo;
-import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -702,7 +701,7 @@ public class ClusterCommandsTest extends MockRestServer {
       ngr1.setCpuNum(6);
       ngr1.setMemCapacityMB(2048);
       ngr1.setStorage(sr1);
-      ngr1.setInstanceNum(1);
+      ngr1.setInstanceNum(2);
       ngr1.setInstances(instances1);
       ngr1.setRoles(roles1);
       ClusterRead cr1 = new ClusterRead();
@@ -710,6 +709,8 @@ public class ClusterCommandsTest extends MockRestServer {
       cr1.setDistroVendor("Apache");
       cr1.setDistro("distro1");
       cr1.setInstanceNum(10);
+      cr1.setVhmMinNum(-1);
+      cr1.setVhmMaxNum(-1);
       cr1.setStatus(ClusterRead.ClusterStatus.RUNNING);
       List<NodeGroupRead> nodeGroupRead = new LinkedList<NodeGroupRead>();
       nodeGroupRead.add(ngr1);
