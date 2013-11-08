@@ -138,6 +138,6 @@ public class NetworkRead {
       this.ipAllocEntries = ipAllocEntries;
    }
    public String findDhcpOrIp(){
-      return isDhcp() ? "dhcp" : "ip";
+      return isDhcp() ? "dhcp" : "static ip";
    }
 }

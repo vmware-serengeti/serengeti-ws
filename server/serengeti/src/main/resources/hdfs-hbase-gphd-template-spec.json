@@ -1,5 +1,5 @@
 {
-  "distro":"apache",
+  "distro":"gphd",
   "groups":[
     {
       "name":"zookeeper",
@@ -26,7 +26,7 @@
         "hadoop_datanode",
         "hbase_regionserver"
       ],
-      "instance_type":SMALL,
+      "instance_type":MEDIUM,
       "instance_num":3,
       "ha":"off"
     },
@@ -36,7 +36,7 @@
         "hadoop_client",
         "hbase_client"
       ],
-      "instance_type":SMALL,
+      "instance_type":MEDIUM,
       "instance_num":1,
       "ha":"off"
     }
