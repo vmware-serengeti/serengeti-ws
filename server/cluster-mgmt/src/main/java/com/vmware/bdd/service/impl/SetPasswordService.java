@@ -10,6 +10,7 @@ import com.vmware.bdd.service.ISetPasswordService;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.SSHUtil;
 
+
 public class SetPasswordService implements ISetPasswordService {
 
    private static final Logger logger = Logger.getLogger(ClusteringService.class);
@@ -47,16 +48,35 @@ public class SetPasswordService implements ISetPasswordService {
       int sshPort = Configuration.getInt(Constants.SSH_PORT_CONFIG_NAME, Constants.DEFAULT_SSH_PORT);
 
       String[] cmds = generateSetPasswdCommand(Constants.SET_PASSWORD_SCRIPT_CONFIG_NAME, password);
-      boolean succeed = false;
-      for (String cmd : cmds) {
-         succeed = SSHUtil.execCmd(sshUser, privateKeyFile, nodeIP, sshPort, cmd);
-         if (succeed) {
-            logger.info("execute command" + " on " + nodeIP + " succeed.");
+
+      boolean setPasswordSucceed = false;
+      for (int i = 0; i < Constants.SET_PASSWORD_MAX_RETRY_TIMES; i++) {
+         boolean commandSucceed = false;
+         for (String cmd : cmds) {
+            commandSucceed = SSHUtil.execCmd(sshUser, privateKeyFile, nodeIP, sshPort, cmd);
+            if (commandSucceed) {
+               logger.info("execute command" + " on " + nodeIP + " succeed.");
+            } else {
+               logger.info("execute command" + " on " + nodeIP + " failed.");
+               break;
+            }
+         }
+
+         if (commandSucceed) {
+            //when reach here, all commands have succeed
+            setPasswordSucceed = true;
+            break;
          } else {
-            logger.info("execute command" + " on " + nodeIP + " failed.");
+            logger.info("Set password for " + nodeIP + " failed for " + (i + 1) + " times. Retrying after 2 seconds....");
+            try {
+               Thread.sleep(2000);
+            } catch (InterruptedException e) {
+               logger.info("Sleep interrupted, retrying immediately");
+            }
          }
       }
-      if (succeed) {
+
+      if (setPasswordSucceed) {
          logger.info("set password for " + nodeIP + " succeed");
          return true;
       } else {
