@@ -647,7 +647,7 @@ public class ClusterCreate implements Serializable {
       for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
          // check node group's instanceNum
          checkInstanceNum(nodeGroupCreate, failedMsgList);
-         checkCPUAndMemory(nodeGroupCreate, failedMsgList, warningMsgList);
+         //checkCPUAndMemory(nodeGroupCreate, failedMsgList, warningMsgList);
          // check node group's roles
          checkNodeGroupRoles(nodeGroupCreate, distroRoles, failedMsgList);
 
