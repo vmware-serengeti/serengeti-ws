@@ -330,6 +330,7 @@ public class ClusterCreateTest {
 
       NodeGroupCreate master = new NodeGroupCreate();
       master.setName("master");
+      master.setCpuNum(2);
       master.setMemCapacityMB(7501);
       master.setSwapRatio(0F);
       master.setInstanceNum(1);
@@ -339,10 +340,12 @@ public class ClusterCreateTest {
       worker.setName("worker");
       worker.setRoles(Arrays.asList(HadoopRole.HADOOP_DATANODE.toString(),
             HadoopRole.HADOOP_TASKTRACKER.toString()));
+      worker.setCpuNum(2);
       worker.setMemCapacityMB(3748);
       worker.setInstanceNum(0);
       NodeGroupCreate client = new NodeGroupCreate();
       client.setName("client");
+      client.setCpuNum(2);
       client.setMemCapacityMB(3748);
       client.setInstanceNum(0);
       client.setRoles(Arrays.asList(HadoopRole.HADOOP_CLIENT_ROLE.toString(),

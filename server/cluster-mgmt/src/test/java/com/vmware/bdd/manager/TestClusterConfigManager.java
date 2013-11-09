@@ -21,9 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import com.vmware.bdd.apitypes.IpConfigInfo;
-import com.vmware.bdd.apitypes.NetConfigInfo;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import mockit.Mockit;
 
 import org.apache.log4j.Logger;
@@ -44,6 +41,7 @@ import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpBlock;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
@@ -272,6 +270,10 @@ public class TestClusterConfigManager {
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       spec.setType(ClusterType.HDFS_MAPRED);
       spec = ClusterSpecFactory.getCustomizedSpec(spec);
+      for (NodeGroupCreate nodeGroup : spec.getNodeGroups()) {
+         nodeGroup.setCpuNum(2);
+         nodeGroup.setMemCapacityMB(7500);
+      }
       clusterConfigMgr.createClusterConfig(spec);
 
       ClusterEntity cluster = clusterEntityMgr.findClusterById(1l);
@@ -317,6 +319,8 @@ public class TestClusterConfigManager {
       ng0.setRoles(jobtrackerRole);
       ng0.setName("jobtracker");
       ng0.setInstanceNum(1);
+      ng0.setCpuNum(2);
+      ng0.setMemCapacityMB(7500);
       ng0.setInstanceType(InstanceType.LARGE);
       String ng0ConfigJson =
             "{\"configuration\":{\"hadoop\":{\"core-site.xml\":{\"fs.default.name\":\""
@@ -331,6 +335,8 @@ public class TestClusterConfigManager {
       ng1.setRoles(computeRoles);
       ng1.setName("compute1");
       ng1.setInstanceNum(4);
+      ng1.setCpuNum(2);
+      ng1.setMemCapacityMB(7500);
       ng1.setInstanceType(InstanceType.MEDIUM);
       StorageRead storage = new StorageRead();
       storage.setType("LOCAL");
@@ -346,6 +352,8 @@ public class TestClusterConfigManager {
       ng2.setRoles(computeRoles);
       ng2.setName("compute2");
       ng2.setInstanceNum(2);
+      ng2.setCpuNum(2);
+      ng2.setMemCapacityMB(7500);
       ng2.setInstanceType(InstanceType.MEDIUM);
       StorageRead storageCompute = new StorageRead();
       storageCompute.setType("LOCAL");
@@ -411,6 +419,8 @@ public class TestClusterConfigManager {
       ng0.setRoles(masterRole);
       ng0.setName("jobtracker");
       ng0.setInstanceNum(1);
+      ng0.setCpuNum(2);
+      ng0.setMemCapacityMB(7500);
       ng0.setInstanceType(InstanceType.LARGE);
       String ng0ConfigJson =
             "{\"configuration\":{\"hadoop\":{\"core-site.xml\":{\"fs.default.name\":\""
@@ -425,6 +435,8 @@ public class TestClusterConfigManager {
       ng1.setRoles(computeRoles);
       ng1.setName("compute1");
       ng1.setInstanceNum(4);
+      ng1.setCpuNum(2);
+      ng1.setMemCapacityMB(7500);
       ng1.setInstanceType(InstanceType.MEDIUM);
       StorageRead storage = new StorageRead();
       storage.setType("LOCAL");
@@ -442,6 +454,8 @@ public class TestClusterConfigManager {
       ng2.setRoles(dataRoles);
       ng2.setName("data1");
       ng2.setInstanceNum(2);
+      ng2.setCpuNum(2);
+      ng2.setMemCapacityMB(7500);
       ng2.setInstanceType(InstanceType.MEDIUM);
       StorageRead storageCompute = new StorageRead();
       storageCompute.setType("LOCAL");
@@ -500,6 +514,8 @@ public class TestClusterConfigManager {
       ngs[0].setRoles(masterRoles);
       ngs[0].setName("master");
       ngs[0].setInstanceNum(1);
+      ngs[0].setCpuNum(2);
+      ngs[0].setMemCapacityMB(7500);
       ngs[0].setInstanceType(InstanceType.LARGE);
 
       NodeGroupCreate ng1 = new NodeGroupCreate();
@@ -509,6 +525,8 @@ public class TestClusterConfigManager {
       ngs[1].setRoles(dataNodeRoles);
       ngs[1].setName("data");
       ngs[1].setInstanceNum(4);
+      ngs[1].setCpuNum(2);
+      ngs[1].setMemCapacityMB(7500);
       ngs[1].setInstanceType(InstanceType.MEDIUM);
       StorageRead storage = new StorageRead();
       storage.setType("LOCAL");
@@ -522,6 +540,8 @@ public class TestClusterConfigManager {
       ngs[2].setRoles(computeNodeRoles);
       ngs[2].setName("compute");
       ngs[2].setInstanceNum(8);
+      ngs[2].setCpuNum(2);
+      ngs[2].setMemCapacityMB(7500);
       ngs[2].setInstanceType(InstanceType.MEDIUM);
       StorageRead storageCompute = new StorageRead();
       storageCompute.setType("TEMPFS");
@@ -579,6 +599,8 @@ public class TestClusterConfigManager {
       nodegroups[0] = group;
       group.setCpuNum(3);
       group.setInstanceNum(10);
+      group.setCpuNum(2);
+      group.setMemCapacityMB(7500);
       group.setInstanceType(InstanceType.SMALL);
       group.setHaFlag("off");
       group.setName("slave");
@@ -795,6 +817,10 @@ public class TestClusterConfigManager {
       spec.setDistro("apache");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       spec = ClusterSpecFactory.getCustomizedSpec(spec);
+      for (NodeGroupCreate nodeGroup : spec.getNodeGroups()) {
+         nodeGroup.setCpuNum(2);
+         nodeGroup.setMemCapacityMB(7500);
+      }
       clusterConfigMgr.createClusterConfig(spec);
 
       ClusterEntity cluster = clusterEntityMgr.findClusterById(1l);
@@ -965,6 +991,10 @@ public class TestClusterConfigManager {
       spec.setDistro("apache");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       spec = ClusterSpecFactory.getCustomizedSpec(spec);
+      for (NodeGroupCreate nodeGroup : spec.getNodeGroups()) {
+         nodeGroup.setCpuNum(2);
+         nodeGroup.setMemCapacityMB(7500);
+      }
       spec.setType(null);
       String configJson =
             "{\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.security.group.mapping\":\"xyz\",\"hadoop.security.authorization\":true}}}}";
