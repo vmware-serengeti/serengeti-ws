@@ -94,8 +94,12 @@ public class SSHUtil {
       } catch (JSchException e) {
          e.printStackTrace();
       } finally {
-         channel.disconnect();
-         session.disconnect();
+         if (channel != null) {
+            channel.disconnect();
+         }
+         if (session != null) {
+            session.disconnect();
+         }
       }
       return false;
    }

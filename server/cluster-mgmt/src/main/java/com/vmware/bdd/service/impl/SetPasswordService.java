@@ -57,10 +57,10 @@ public class SetPasswordService implements ISetPasswordService {
          }
       }
       if (succeed) {
-         logger.info("set password for " + nodeIP + "succeed");
+         logger.info("set password for " + nodeIP + " succeed");
          return true;
       } else {
-         logger.info("set password for " + nodeIP + "failed");
+         logger.info("set password for " + nodeIP + " failed");
          return false;
       }
    }
