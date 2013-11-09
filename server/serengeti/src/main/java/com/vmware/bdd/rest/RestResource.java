@@ -134,7 +134,9 @@ public class RestResource {
 
       // TODO add exception handling
       TaskRead task = jobManager.getJobExecutionStatus(taskId);
-
+      if (task.getStatus() == TaskRead.Status.COMPLETED) {
+         task.setProgress(1.0);
+      }
       if (task.getType() == null) {
          task.setType(Type.INNER); // XXX just keep the interface now
       }

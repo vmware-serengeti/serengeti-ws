@@ -408,6 +408,9 @@ public class JobManager {
             continue;
          TaskRead task = getJobExecutionStatus(id);
          task.setType(Type.INNER);
+         if (task.getStatus() == TaskRead.Status.COMPLETED) {
+            task.setProgress(1.0);
+         }
          taskReads.add(task);
       }
 
