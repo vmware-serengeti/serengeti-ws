@@ -1113,7 +1113,7 @@ public class ClusterCommands implements CommandMarker {
       System.out.println("The fixed nodes: " + succeedNodes.size());
       LinkedHashMap<String, List<String>> columnNamesWithGetMethodNames =
             new LinkedHashMap<String, List<String>>();
-      columnNamesWithGetMethodNames.put("IP", Arrays.asList("fetchMgtIp"));
+      columnNamesWithGetMethodNames.put("IP", Arrays.asList("getIp"));
       columnNamesWithGetMethodNames.put("NAME", Arrays.asList("getNodeName"));
       columnNamesWithGetMethodNames.put("STATUS", Arrays.asList("getStatus"));
       CommandsUtils.printInTableFormat(columnNamesWithGetMethodNames,
