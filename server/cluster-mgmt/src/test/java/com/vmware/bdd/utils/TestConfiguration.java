@@ -34,4 +34,22 @@ public class TestConfiguration {
 //      proxy = Configuration.getStrings("serengeti.svn_proxy", "127.0.0.1");
 //      assertEquals(proxy,"127.0.0.1");
    }
+
+   @Test
+   public void testSetStrings () {
+      int vcPort = Configuration.getInt("vim.port");
+      assertEquals(vcPort, 443);
+
+      String mobid = Configuration.getString("vim.cms_moref");
+      assertEquals(mobid, "VirtualMachine:001");
+      Configuration.setString("vim.cms_moref", "VirtualMachine:002");
+      mobid = Configuration.getString("vim.cms_moref");
+
+      assertEquals(mobid, "VirtualMachine:002");
+      Configuration.setString("serengeti.http_proxy", "127.0.0.2");
+      String proxy = Configuration.getString("serengeti.http_proxy", "127.0.0.1");
+      assertEquals(proxy, "127.0.0.2");
+      //manually check if vc.properties will not be saved and included into serengeti.properties
+      Configuration.save();
+   }
 }

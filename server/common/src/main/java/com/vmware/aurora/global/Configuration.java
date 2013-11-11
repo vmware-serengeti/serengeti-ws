@@ -45,9 +45,15 @@ import com.vmware.aurora.util.StringUtil;
 public class Configuration {
    private static Logger logger = Logger.getLogger(Configuration.class);
    private static String configFileName;
-   private static PropertiesConfiguration _config = init();
+   private static PropertiesConfiguration config = init();
+   private static PropertiesConfiguration serengetiCfg;
+   private static PropertiesConfiguration vcCfg;
    private static String storedCmsInstanceId;
 
+   /**
+    * 
+    * @return a memory view of all properties inside serengeti.properties and vc.properties
+    */
    private static PropertiesConfiguration init() {
       PropertiesConfiguration config = null;
 
@@ -63,7 +69,8 @@ public class Configuration {
 
       try {
          logger.info("Reading properties file serengeti.properties");
-         config = new PropertiesConfiguration(configFileName);
+         serengetiCfg = new PropertiesConfiguration(configFileName);
+         config = (PropertiesConfiguration) serengetiCfg.clone();
       } catch (ConfigurationException ex) {
          logger.info("Failed to load serengeti.properties file.");
       }
@@ -74,8 +81,7 @@ public class Configuration {
 
       try {
          logger.info("Reading properties file " + propertyFileName);
-         PropertiesConfiguration vcCfg =
-               new PropertiesConfiguration(propertyFileName);
+         vcCfg = new PropertiesConfiguration(propertyFileName);
          Iterator<?> keys = vcCfg.getKeys();
          while (keys.hasNext()) {
             String key = (String) keys.next();
@@ -110,7 +116,7 @@ public class Configuration {
     * @return The property value.
     */
    public static int getInt(String key) {
-      return _config.getInt(key);
+      return config.getInt(key);
    }
 
    /**
@@ -124,7 +130,7 @@ public class Configuration {
     * @return The property value.
     */
    public static int getInt(String key, int defaultValue) {
-      return _config.getInt(key, defaultValue);
+      return config.getInt(key, defaultValue);
    }
 
    /**
@@ -136,7 +142,7 @@ public class Configuration {
     * @return The property value.
     */
    public static Boolean getBoolean(String key) {
-      return _config.getBoolean(key);
+      return config.getBoolean(key);
    }
 
    /**
@@ -150,7 +156,7 @@ public class Configuration {
     * @return The property value.
     */
    public static Boolean getBoolean(String key, Boolean defaultValue) {
-      return _config.getBoolean(key, defaultValue);
+      return config.getBoolean(key, defaultValue);
    }
 
    /**
@@ -162,7 +168,7 @@ public class Configuration {
     * @return The property value.
     */
    public static String getString(String key) {
-      return _config.getString(key);
+      return config.getString(key);
    }
 
    /**
@@ -176,7 +182,7 @@ public class Configuration {
     * @return The property value.
     */
    public static String getString(String key, String defaultValue) {
-      return _config.getString(key, defaultValue);
+      return config.getString(key, defaultValue);
    }
 
    /**
@@ -200,7 +206,7 @@ public class Configuration {
     * @return The property value.
     */
    public static Double getDouble(String key) {
-      return _config.getDouble(key);
+      return config.getDouble(key);
    }
 
    /**
@@ -214,7 +220,7 @@ public class Configuration {
     * @return The property value.
     */
    public static Double getDouble(String key, Double defaultValue) {
-      return _config.getDouble(key, defaultValue);
+      return config.getDouble(key, defaultValue);
    }
 
    /**
@@ -226,7 +232,7 @@ public class Configuration {
     * @return The property value.
     */
    public static long getLong(String key) {
-      return _config.getLong(key);
+      return config.getLong(key);
    }
 
    /**
@@ -240,7 +246,7 @@ public class Configuration {
     * @return The property value.
     */
    public static long getLong(String key, long defaultValue) {
-      return _config.getLong(key, defaultValue);
+      return config.getLong(key, defaultValue);
    }
 
    /**
@@ -251,7 +257,7 @@ public class Configuration {
     * @return true if key exists.
     */
    public static boolean containsKey(String key) {
-      return _config.containsKey(key);
+      return config.containsKey(key);
    }
 
    /**
@@ -413,7 +419,7 @@ public class Configuration {
     * @return The property value.
     */
    public static String getStrings(String key, String defautValue) {
-      String[] values = _config.getStringArray(key);
+      String[] values = config.getStringArray(key);
       if (values != null && values.length > 0) {
          StringBuffer buffer = new StringBuffer();
          for (String value : values) {
@@ -433,18 +439,29 @@ public class Configuration {
     * @param value
     */
    public static void setBoolean(String key, Boolean value) {
-      _config.setProperty(key, value);
+      config.setProperty(key, value);
+      if (vcCfg.containsKey(key)) {
+         vcCfg.setProperty(key, value);
+      } else if (serengetiCfg.containsKey(key)) {
+         serengetiCfg.setProperty(key, value);
+      }
    }
 
    public static void setString(String key, String value) {
-      _config.setProperty(key, value);
+      config.setProperty(key, value);
+      if (vcCfg.containsKey(key)) {
+         vcCfg.setProperty(key, value);
+      } else if (serengetiCfg.containsKey(key)) {
+         serengetiCfg.setProperty(key, value);
+      }
    }
 
    public static void save() {
       OutputStream out = null;
       try {
-         out = new FileOutputStream(new File(_config.getPath()));
-         _config.save(out);
+         // we only have reqs to save serengeti.properties currently
+         out = new FileOutputStream(new File(serengetiCfg.getPath()));
+         serengetiCfg.save(out);
       } catch (Exception ex) {
          // error out if the configuration file is not there
          String message =
@@ -463,7 +480,7 @@ public class Configuration {
    }
 
    public static String getConfigFilePath() {
-      return _config.getPath();
+      return config.getPath();
    }
 
 }
