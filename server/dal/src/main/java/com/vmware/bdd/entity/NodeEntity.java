@@ -222,6 +222,8 @@ public class NodeEntity extends EntityBase {
       if (validation) {
          setStatus(status);
       } else {
+         logger.debug("Set node " + getVmName() + " status to" + status
+         		+ " without validation");
          this.status = status;
       }
    }

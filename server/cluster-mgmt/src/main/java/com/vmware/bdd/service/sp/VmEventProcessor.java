@@ -180,7 +180,8 @@ public class VmEventProcessor extends Thread {
       AuAssert.check(e instanceof VmEvent || e instanceof EventEx);
       ManagedObjectReference moRef = e.getVm().getVm();
       String moId = MoUtil.morefToString(moRef);
-      logger.debug("processed vm event: " + e);
+      String externalStr = external ? " external" : "";
+      logger.debug("processed" + externalStr + " vm event: " + e);
       if (external) {
          if (processExternalEvent(type, e, moId)) {
             processEvent(type, e, moId, true);
@@ -234,7 +235,6 @@ public class VmEventProcessor extends Thread {
          case VhmInfo:
          case VhmUser: {
             EventEx event = (EventEx) e;
-            refreshNodeWithAction(e, moId, true, null, "Powered Off");
             VcVirtualMachine vm =
                VcCache.getIgnoreMissing(event.getVm().getVm());
             if (vm == null) {

@@ -1538,6 +1538,9 @@ public class ClusteringService implements IClusteringService {
          logger.error("error in deleting folders", e);
          throw BddException.INTERNAL(e, e.getMessage());
       }
+      if (folder == null) {
+         logger.info("No folder to delete.");
+      }
       String clusterFolderName = folderNames[0] + "/" + folderNames[1];
       logger.info("find cluster root folder: " + clusterFolderName);
       List<Folder> folders = new ArrayList<Folder>();

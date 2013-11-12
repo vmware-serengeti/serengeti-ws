@@ -344,7 +344,7 @@ public class ClusterEntityManager {
          node.setStatus(NodeStatus.POWERED_ON);
       }
 
-      if (vcVm.isPoweredOn() && node.isPowerStatusChanged()) {
+      if (vcVm.isPoweredOn()) {
          //update ip address
          for (String portGroup : node.fetchAllPortGroups()) {
             String ip =
