@@ -396,43 +396,74 @@ public class ClusterRead implements Comparable<ClusterRead> {
    }
 
    public boolean validateSetParamParameters(Integer targetComputeNodeNum,
-         Integer minComputeNodeNum, Integer maxComputeNodeNum,
-         Boolean enableAuto) {
+         Integer minComputeNodeNum, Integer maxComputeNodeNum) {
+
+      int deployedComputeNodeNum = retrieveComputeNodeNum();
+      int vhmMinNum = getVhmMinNum();
+      int vhmMaxNum = getVhmMaxNum();
+
+      String minComputeNodeNumStr = "";
+      if (minComputeNodeNum == null) {
+         if (vhmMinNum != -1) {
+            minComputeNodeNumStr = " (" + vhmMinNum + ")";
+         }
+      } else if (minComputeNodeNum != -1) {
+         minComputeNodeNumStr = " (" + minComputeNodeNum + ")";
+      }
+
+      String maxComputeNodeNumStr = "";
+      if (maxComputeNodeNum == null) {
+         if (vhmMaxNum != -1) {
+            maxComputeNodeNumStr = " (" + vhmMaxNum+ ")";
+         }
+      } else if (maxComputeNodeNum != -1) {
+         maxComputeNodeNumStr = " (" + maxComputeNodeNum + ")";
+      }
+
       //validate the input of minComputeNodeNum
       if (minComputeNodeNum != null && minComputeNodeNum < -1) {
-         throw BddException.INVALID_PARAMETER("minComputeNodeNum", minComputeNodeNum);
+         throw BddException.INVALID_MIN_COMPUTE_NODE_NUM(minComputeNodeNum.toString(),
+               Integer.toString(deployedComputeNodeNum), maxComputeNodeNumStr);
       }
 
       //validate the input of maxComputeNodeNum
       if (maxComputeNodeNum != null && maxComputeNodeNum < -1) {
-         throw BddException.INVALID_PARAMETER("maxComputeNodeNum", maxComputeNodeNum);
+         throw BddException.INVALID_MAX_COMPUTE_NODE_NUM(maxComputeNodeNum.toString(),
+               Integer.toString(deployedComputeNodeNum), minComputeNodeNumStr);
       }
 
       //validate the input of targetComputeNodeNum
       if (targetComputeNodeNum != null && targetComputeNodeNum < 0) {
-         throw BddException.INVALID_PARAMETER("targetComputeNodeNum", targetComputeNodeNum);
+         throw BddException.INVALID_TARGET_COMPUTE_NODE_NUM(targetComputeNodeNum.toString(),
+               Integer.toString(deployedComputeNodeNum));
       }
 
-      int computeNodeNum = retrieveComputeNodeNum();
       //validate min, max, targetComputeNodeNum should be less than deployed computeNodeNum
-      if (minComputeNodeNum != null && minComputeNodeNum > computeNodeNum) {
-         throw BddException.NOT_GREATER_THAN_COMPUTE_NODES("minComputeNodeNum", Integer.toString(computeNodeNum));
+      if (minComputeNodeNum != null && minComputeNodeNum > deployedComputeNodeNum) {
+         throw BddException.INVALID_MIN_COMPUTE_NODE_NUM(minComputeNodeNum.toString(),
+               Integer.toString(deployedComputeNodeNum), maxComputeNodeNumStr);
       }
-      if (maxComputeNodeNum != null && maxComputeNodeNum > computeNodeNum) {
-         throw BddException.NOT_GREATER_THAN_COMPUTE_NODES("maxComputeNodeNum", Integer.toString(computeNodeNum));
+      if (maxComputeNodeNum != null && maxComputeNodeNum > deployedComputeNodeNum) {
+         throw BddException.INVALID_MAX_COMPUTE_NODE_NUM(maxComputeNodeNum.toString(),
+               Integer.toString(deployedComputeNodeNum), minComputeNodeNumStr);
       }
-      if (targetComputeNodeNum != null && targetComputeNodeNum > computeNodeNum) {
-         throw BddException.NOT_GREATER_THAN_COMPUTE_NODES("targetComputeNodeNum", Integer.toString(computeNodeNum));
+      if (targetComputeNodeNum != null && targetComputeNodeNum > deployedComputeNodeNum) {
+         throw BddException.INVALID_TARGET_COMPUTE_NODE_NUM(targetComputeNodeNum.toString(),
+               Integer.toString(deployedComputeNodeNum));
       }
 
       //validate minComputeNode <= maxComputeNode
-      if ((minComputeNodeNum != null && minComputeNodeNum != -1 && maxComputeNodeNum != null &&
-            maxComputeNodeNum != -1 && minComputeNodeNum > maxComputeNodeNum) ||
-          (minComputeNodeNum != null && minComputeNodeNum != -1 && maxComputeNodeNum == null &&
-            getVhmMaxNum() != -1 && minComputeNodeNum > getVhmMaxNum() ||
-          (minComputeNodeNum == null && maxComputeNodeNum != null &&
-            getVhmMinNum() > maxComputeNodeNum))) {
-         throw BddException.NOT_LARGER_THAN("minComputeNodeNum", "maxComputeNodeNum");
+      if ((minComputeNodeNum != null && minComputeNodeNum != -1 && maxComputeNodeNum != null && maxComputeNodeNum != -1 && minComputeNodeNum > maxComputeNodeNum) ||
+          (minComputeNodeNum != null && minComputeNodeNum != -1 && maxComputeNodeNum == null && vhmMaxNum != -1         && minComputeNodeNum > vhmMaxNum) ||
+          (minComputeNodeNum == null && vhmMinNum != -1         && maxComputeNodeNum != null && maxComputeNodeNum != -1 && vhmMinNum > maxComputeNodeNum)) {
+         if (minComputeNodeNum != null && minComputeNodeNum != -1) {
+            throw BddException.INVALID_MIN_COMPUTE_NODE_NUM(minComputeNodeNum.toString(),
+                  Integer.toString(deployedComputeNodeNum), maxComputeNodeNumStr);
+         } else {
+            throw BddException.INVALID_MAX_COMPUTE_NODE_NUM(maxComputeNodeNum.toString(),
+                  Integer.toString(deployedComputeNodeNum), minComputeNodeNumStr);
+         }
+
       }
       return true;
    }

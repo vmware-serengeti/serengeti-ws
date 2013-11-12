@@ -747,7 +747,7 @@ public class ClusterCommands implements CommandMarker {
 
          //validate the input parameters
          if (!cluster.validateSetParamParameters(targetComputeNodeNum,
-               minComputeNodeNum, maxComputeNodeNum, enableAuto)) {
+               minComputeNodeNum, maxComputeNodeNum)) {
             return;
          }
 
@@ -789,11 +789,11 @@ public class ClusterCommands implements CommandMarker {
          if (mode != null) {
             if (mode == ElasticityMode.AUTO) {
               if (targetComputeNodeNum != null) {
-                 System.out.println("For AUTO scaling mode, targetComputeNodeNum will be ignored.");
+                 System.out.println("\'targetComputeNodeNum\' ignored. Parameter is not applicable to AUTO elasticity mode.");
               }
             } else {
                if (minComputeNodeNum != null || maxComputeNodeNum != null) {
-                  System.out.println("For MANUAL scaling mode, minComputeNodeNum and maxComputeNodeNum will be ignored.");
+                  System.out.println("\'minComputeNodeNum\' and \'maxComputeNodeNum\' ignored. Parameters are not applicable to MANUAL elasticity mode.");
                }
             }
          }

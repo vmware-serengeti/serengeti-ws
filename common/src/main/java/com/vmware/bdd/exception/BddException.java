@@ -122,20 +122,20 @@ public class BddException extends RuntimeException {
       return new BddException(ex, "BDD", "INVALID_PARAMETER", field, value);
    }
 
-	public static BddException INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(
-			Throwable ex, String field, Object value) {
-		return new BddException(ex, "BDD",
-				"INVALID_PARAMETER_WITHOUT_EQUALS_SIGN", field, value);
-	}
+   public static BddException INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(Throwable ex,
+         String field, Object value) {
+      return new BddException(ex, "BDD",
+            "INVALID_PARAMETER_WITHOUT_EQUALS_SIGN", field, value);
+   }
 
    public static BddException INVALID_PARAMETER(String field, Object value) {
       return INVALID_PARAMETER(null, field, value);
    }
 
-	public static BddException INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(
-			String field, Object value) {
-		return INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(null, field, value);
-	}
+   public static BddException INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(
+         String field, Object value) {
+      return INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(null, field, value);
+   }
 
    public static BddException BAD_REST_CALL(Throwable ex, String reason) {
       return new BddException(ex, "BDD", "BAD_REST_CALL", reason);
@@ -146,11 +146,22 @@ public class BddException extends RuntimeException {
             "VM_NAME_VIOLATE_NAME_PATTERN", vmName);
    }
 
-   public static BddException NOT_GREATER_THAN_COMPUTE_NODES(String param1, String param2) {
-      return new BddException(null, "BDD", "NOT_GREATER_THAN_COMPUTE_NODES", param1, param2);
+   public static BddException INVALID_MIN_COMPUTE_NODE_NUM(String minComputeNodeNum,
+         String deployedComputeNodeNum, String maxComputeNodeNum) {
+      return new BddException(null, "BDD", "INVALID_MIN_COMPUTE_NODE_NUM", minComputeNodeNum,
+            deployedComputeNodeNum, maxComputeNodeNum);
    }
 
-   public static BddException NOT_LARGER_THAN(String param1, String param2) {
-      return new BddException(null, "BDD", "NOT_LARGER_THAN", param1, param2);
+   public static BddException INVALID_MAX_COMPUTE_NODE_NUM(String maxComputeNodeNum,
+         String deployedComputeNodeNum, String minComputeNodeNum) {
+      return new BddException(null, "BDD", "INVALID_MAX_COMPUTE_NODE_NUM", maxComputeNodeNum,
+            deployedComputeNodeNum, minComputeNodeNum);
    }
+
+   public static BddException INVALID_TARGET_COMPUTE_NODE_NUM(String targetComputeNodeNum,
+         String deployedComputeNodeNum) {
+      return new BddException(null, "BDD", "INVALID_TARGET_COMPUTE_NODE_NUM", targetComputeNodeNum,
+            deployedComputeNodeNum);
+   }
+
 }
