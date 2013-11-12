@@ -15,6 +15,7 @@
 package com.vmware.bdd.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,9 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import com.vmware.bdd.apitypes.NetworkAdd;
+import com.vmware.vim.binding.impl.vim.vApp.VmConfigSpecImpl;
 import com.vmware.vim.binding.vim.net.IpConfigInfo.IpAddress;
+import com.vmware.vim.binding.vim.vApp.VmConfigSpec;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.DiskSchema;
@@ -739,6 +742,39 @@ public class VcVmUtil {
       } catch (Exception e) {
          throw ClusteringServiceException.ENABLE_DISK_UUID_FAILED(e, vm.getName());
       }
+   }
+
+   /**
+    * check and set vApp Options -> vmware tools flag
+    * @param vm
+    * @return true if vm reconfigured, in this case need remove snapshots
+    */
+   public static boolean enableOvfEnvTransport(final VcVirtualMachine vm) {
+      return VcContext.inVcSessionDo(new VcSession<Boolean>() {
+         @Override
+         protected Boolean body() throws Exception {
+            boolean needConfig = false;
+            String vmToolEnableItem = "com.vmware.guestInfo";
+
+            if (vm.getConfig().getVAppConfig() == null
+                  || vm.getConfig().getVAppConfig().getOvfEnvironmentTransport() == null
+                  || !Arrays.asList(vm.getConfig().getVAppConfig().getOvfEnvironmentTransport()).contains(vmToolEnableItem)) {
+               String[] ovfEnvTransport = new String[] {vmToolEnableItem};
+               VmConfigSpec vmConfigSpec = new VmConfigSpecImpl();
+               vmConfigSpec.setOvfEnvironmentTransport(ovfEnvTransport);
+               ConfigSpec configSpec = new ConfigSpecImpl();
+               configSpec.setVAppConfig(vmConfigSpec);
+               vm.reconfigure(configSpec);
+               logger.info("configured ovf env transport");
+               return true;
+            }
+            return false;
+         }
+
+         protected boolean isTaskSession() {
+            return true;
+         }
+      });
    }
 
    public static void checkAndCreateSnapshot(final VmSchema vmSchema) {

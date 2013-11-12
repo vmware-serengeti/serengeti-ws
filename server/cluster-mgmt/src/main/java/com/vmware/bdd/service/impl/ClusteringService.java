@@ -341,7 +341,7 @@ public class ClusteringService implements IClusteringService {
       }
 
       try {
-         if (ConfigInfo.isJustUpgraded()) {
+         if (ConfigInfo.isJustUpgraded() || VcVmUtil.enableOvfEnvTransport(templateVM)) {
             removeRootSnapshot(templateVM);
             ConfigInfo.setJustUpgraded(false);
             ConfigInfo.save();
