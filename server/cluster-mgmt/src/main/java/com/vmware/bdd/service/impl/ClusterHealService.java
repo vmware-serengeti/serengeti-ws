@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.service.resmgmt.INetworkService;
@@ -336,8 +337,9 @@ public class ClusterHealService implements IClusterHealService {
 
       List<NetworkAdd> networkAdds = clusterSpec.getNetworkings();
 
+      // this getRepalcementVmSP() is not called by any UT, so no need to check NPE for node.getIpConfigsInfo()
       GuestMachineIdSpec machineIdSpec = new GuestMachineIdSpec(networkAdds,
-            node.fetchPortGroupToIpMap(), node.getGuestHostName());
+            node.fetchPortGroupToIpMap(), node.getIpConfigsInfo().get(NetConfigInfo.NetTrafficType.MGT_NETWORK).get(0).getPortGroupName());
       logger.info("machine id of vm " + node.getVmName() + ":\n" + machineIdSpec.toString());
       Map<String, String> guestVariable = machineIdSpec.toGuestVarialbe();
 

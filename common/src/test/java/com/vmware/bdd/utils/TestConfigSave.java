@@ -14,7 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
-import org.apache.commons.configuration.PropertiesConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -28,10 +27,9 @@ public class TestConfigSave {
       ConfigInfo.setSerengetiUUID("testvAppName");
       ConfigInfo.setInitUUID(false);
       ConfigInfo.save();
-      PropertiesConfiguration config = new PropertiesConfiguration(Configuration.getConfigFilePath());
-      config.load();
-      Assert.assertEquals(config.getString("serengeti.uuid"), "testvAppName", "should get correct uuid");
-      Assert.assertEquals(config.getBoolean("serengeti.initialize.uuid"), false, "should not init uuid again");
+      
+      Assert.assertEquals(Configuration.getString("serengeti.uuid"), "testvAppName", "should get correct uuid");
+      Assert.assertEquals(Configuration.getBoolean("serengeti.initialize.uuid"), Boolean.FALSE, "should not init uuid again");
    }
 
    @AfterClass

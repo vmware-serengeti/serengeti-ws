@@ -16,6 +16,7 @@ package com.vmware.bdd.utils;
 
 import static org.testng.AssertJUnit.assertEquals;
 
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import com.vmware.aurora.global.Configuration;
@@ -51,5 +52,11 @@ public class TestConfiguration {
       assertEquals(proxy, "127.0.0.2");
       //manually check if vc.properties will not be saved and included into serengeti.properties
       Configuration.save();
+   }
+
+   @AfterClass
+   public static void tearDown() {
+      Configuration.setString("serengeti.http_proxy", "proxy.domain.com:3128");
+      ConfigInfo.save();
    }
 }

@@ -160,4 +160,5 @@ public class Constants {
    public static final String SSH_PORT_CONFIG_NAME = "serengeti.ssh.port";
    public static final int DEFAULT_SSH_PORT = 22;
    public static final String DEFAULT_SET_PASSWORD_SCRIPT = "/usr/sbin/serengeti-password";
+   public static final int SET_PASSWORD_MAX_RETRY_TIMES = 3;
 }
