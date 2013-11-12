@@ -31,6 +31,7 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 
 import org.apache.log4j.Logger;
@@ -1025,7 +1026,8 @@ public class ClusteringService implements IClusteringService {
          VmSchema createSchema = getVmSchema(vNode);
          spec.setSchema(createSchema);
          GuestMachineIdSpec machineIdSpec = new GuestMachineIdSpec(
-               networkAdds, vNode.fetchPortGroupToIpMap(), vNode.getGuestHostName());
+               networkAdds, vNode.fetchPortGroupToIpMap(),
+               vNode.getIpConfigs().get(NetConfigInfo.NetTrafficType.MGT_NETWORK).get(0).getPortGroupName());
          logger.info("machine id of vm " + vNode.getVmName() + ":\n" + machineIdSpec.toString());
          spec.setBootupConfigs(machineIdSpec.toGuestVarialbe());
          // timeout is 10 mintues

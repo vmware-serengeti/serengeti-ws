@@ -18,7 +18,6 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.NetworkAdd;
-import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Constants;
 
@@ -40,30 +39,20 @@ public class GuestMachineIdSpec {
    @SerializedName("nics")
    private NicDeviceConfigSpec[] nics;
 
-   /*
-    * The following 7 attributes are used to be compatible with BDE 1.0.0;
-    * If user upgrade from BDE 1.0.0 to latest version, the cluster nodes deployed before
-    * are still using old version setup-ip.py, so we should be compatible with old machine id format.
-    */
-
-   @Expose
-   @SerializedName("hostname")
-   private String hostname;
+   private String defaultPg;
 
    public GuestMachineIdSpec() {}
 
    public GuestMachineIdSpec(List<NetworkAdd> networkAdds,
-         Map<String, String> ipInfo, String hostname) {
+         Map<String, String> ipInfo, String defaultPg) {
       int nicNumber = networkAdds.size();
       this.nics = new NicDeviceConfigSpec[nicNumber];
       for (int i = 0; i < nicNumber; i++) {
          this.nics[i] = new NicDeviceConfigSpec(networkAdds.get(i), ipInfo);
       }
 
+      this.defaultPg = defaultPg;
       this.bootupUuid = null;
-
-      // to be compatible with BDE 1.0.0
-      this.hostname = hostname;
    }
 
    public Map<String, String> toGuestVarialbe() {
@@ -71,17 +60,25 @@ public class GuestMachineIdSpec {
       Gson gson = new Gson();
       guestVarialbe.put(Constants.GUEST_VARIABLE_NIC_DEVICES, gson.toJson(nics));
 
-      NicDeviceConfigSpec defaultNic = nics[0];
+      NicDeviceConfigSpec defaultNic = null;
+      for (NicDeviceConfigSpec nic : nics) {
+         if (nic.getPortGroupName().equals(defaultPg)) {
+            defaultNic = nic;
+            break;
+         }
+      }
+
+      AuAssert.check(defaultNic != null);
       /*
        * The following 7 attributes are used to be compatible with BDE 1.0.0;
        * If user upgrade from BDE 1.0.0 to latest version, the cluster nodes deployed before
        * are still using old version setup-ip.py, so we should be compatible with old machine id format.
        */
-      guestVarialbe.put(Constants.GUEST_VARIABLE_HOSTNAME_KEY, hostname);
       guestVarialbe.put(Constants.GUEST_VARIABLE_POLICY_KEY, defaultNic.getBootProto());
+      guestVarialbe.put(Constants.GUEST_VARIABLE_PORT_GROUP, defaultNic.getPortGroupName());
       guestVarialbe.put(Constants.GUEST_VARIABLE_IP_KEY, defaultNic.getIpAddress());
       guestVarialbe.put(Constants.GUEST_VARIABLE_GATEWAY_KEY, defaultNic.getGateway());
-      guestVarialbe.put(Constants.GUEST_VARIABLE_NETMASK_KEY, defaultNic.getGateway());
+      guestVarialbe.put(Constants.GUEST_VARIABLE_NETMASK_KEY, defaultNic.getNetmask());
       guestVarialbe.put(Constants.GUEST_VARIABLE_DNS_KEY_0, defaultNic.getDnsServer0());
       guestVarialbe.put(Constants.GUEST_VARIABLE_DNS_KEY_1, defaultNic.getDnsServer1());
 
