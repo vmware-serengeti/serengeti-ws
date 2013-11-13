@@ -61,10 +61,14 @@ public class GuestMachineIdSpec {
       guestVarialbe.put(Constants.GUEST_VARIABLE_NIC_DEVICES, gson.toJson(nics));
 
       NicDeviceConfigSpec defaultNic = null;
-      for (NicDeviceConfigSpec nic : nics) {
-         if (nic.getPortGroupName().equals(defaultPg)) {
-            defaultNic = nic;
-            break;
+      if (defaultPg == null) {
+         defaultNic = nics[0];
+      } else {
+         for (NicDeviceConfigSpec nic : nics) {
+            if (nic.getPortGroupName().equals(defaultPg)) {
+               defaultNic = nic;
+               break;
+            }
          }
       }
 

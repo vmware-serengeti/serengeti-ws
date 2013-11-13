@@ -1025,9 +1025,13 @@ public class ClusteringService implements IClusteringService {
          VmCreateSpec spec = new VmCreateSpec();
          VmSchema createSchema = getVmSchema(vNode);
          spec.setSchema(createSchema);
+         String defaultPgName = null;
+         if (vNode.getIpConfigs() != null && vNode.getIpConfigs().containsKey(NetConfigInfo.NetTrafficType.MGT_NETWORK)
+               && !vNode.getIpConfigs().get(NetConfigInfo.NetTrafficType.MGT_NETWORK).isEmpty()) {
+            defaultPgName = vNode.getIpConfigs().get(NetConfigInfo.NetTrafficType.MGT_NETWORK).get(0).getPortGroupName();
+         }
          GuestMachineIdSpec machineIdSpec = new GuestMachineIdSpec(
-               networkAdds, vNode.fetchPortGroupToIpMap(),
-               vNode.getIpConfigs().get(NetConfigInfo.NetTrafficType.MGT_NETWORK).get(0).getPortGroupName());
+               networkAdds, vNode.fetchPortGroupToIpMap(), defaultPgName);
          logger.info("machine id of vm " + vNode.getVmName() + ":\n" + machineIdSpec.toString());
          spec.setBootupConfigs(machineIdSpec.toGuestVarialbe());
          // timeout is 10 mintues
