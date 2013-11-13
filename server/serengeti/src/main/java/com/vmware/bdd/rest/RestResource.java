@@ -531,7 +531,7 @@ public class RestResource {
             throw BddException.INVALID_PARAMETER("netmask", na.getNetmask());
          }
          long netmask = IpAddressUtil.getAddressAsLong(na.getNetmask());
-         if (!IpAddressUtil.isValidIp(netmask,
+         if (na.getGateway() != null && !IpAddressUtil.isValidIp(netmask,
                IpAddressUtil.getAddressAsLong(na.getGateway()))) {
             throw BddException.INVALID_PARAMETER("gateway", na.getGateway());
          }

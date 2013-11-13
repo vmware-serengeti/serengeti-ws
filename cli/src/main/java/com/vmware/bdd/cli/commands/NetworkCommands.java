@@ -386,21 +386,17 @@ public class NetworkCommands implements CommandMarker {
       Pattern ipPattern = Pattern.compile(PatternType.IP);
 
       if (CommandsUtils.isBlank(gateway)) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
-               networkName, Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.PARAMS_NETWORK_ADD_GATEWAY + Constants.MULTI_INPUTS_CHECK);
-
-         return false;
-      } else if (!ipPattern.matcher(gateway).matches()) {
+         return true;
+      }
+      if (!ipPattern.matcher(gateway).matches()) {
          StringBuilder errorMessage = new StringBuilder().append(Constants.PARAMS_NETWORK_ADD_IP_ERROR);
 
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                networkName, Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.INVALID_VALUE + " " + "gateway=" + gateway + errorMessage.toString());
-
          return false;
-      } else
-         return true;
+      }
+      return true;
    }
 
    private boolean validateMask(final String mask) {

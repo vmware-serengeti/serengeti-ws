@@ -217,11 +217,12 @@ public class NetworkEntity extends EntityBase implements Comparable<NetworkEntit
             AuAssert.check(getDns2() == null);
          } else {
             AuAssert.check(getNetmask() != null);
-            AuAssert.check(getGateway() != null);
 
             try {
                InetAddress.getByName(getNetmask());
-               InetAddress.getByName(getGateway());
+               if (getGateway() != null) {
+                  InetAddress.getByName(getGateway());
+               }
                InetAddress.getByName(getDns1());
                InetAddress.getByName(getDns2());
             } catch (UnknownHostException e) {
@@ -230,7 +231,7 @@ public class NetworkEntity extends EntityBase implements Comparable<NetworkEntit
          }
       }
 
-      if (getAllocType() == AllocType.IP_POOL) {
+      if (getAllocType() == AllocType.IP_POOL && getGateway() != null) {
          long netmask = IpAddressUtil.getAddressAsLong(this.getNetmask());
          long gateway = IpAddressUtil.getAddressAsLong(this.getGateway());
 
