@@ -677,6 +677,22 @@ public class PlacementPlanner implements IPlacementPlanner {
       return result;
    }
 
+   private int getDiskSize(List<DiskSpec> disks) {
+      int size = 0;
+      for (DiskSpec disk : disks) {
+         size += disk.getSize();
+      }
+      return size;
+   }
+
+   private int getDsFree(List<AbstractDatastore> datastores) {
+      int size = 0;
+      for (AbstractDatastore ds : datastores) {
+         size += ds.getFreeSpace();
+      }
+      return size;
+   }
+
    // try to place disk onto a host, inject the disk placement plans into BaseNode.disks field
    private boolean placeDisk(VirtualNode vNode, AbstractHost host) {
       AbstractHost clonedHost = AbstractHost.clone(host);
@@ -696,7 +712,7 @@ public class PlacementPlanner implements IPlacementPlanner {
          // system and swap disk
          List<DiskSpec> systemDisks = new ArrayList<DiskSpec>();
          // un-separable disks
-         List<DiskSpec> unseprable = new ArrayList<DiskSpec>();
+         List<DiskSpec> unseparable = new ArrayList<DiskSpec>();
          // separable disks
          List<DiskSpec> separable = new ArrayList<DiskSpec>();
 
@@ -706,11 +722,11 @@ public class PlacementPlanner implements IPlacementPlanner {
             if (disk.getSplitPolicy() != null
                   && DiskSplitPolicy.BI_SECTOR.equals(disk.getSplitPolicy())) {
                int half = disk.getSize() / 2;
-               unseprable.add(new DiskSpec(disk.getName().split("\\.")[0]
+               unseparable.add(new DiskSpec(disk.getName().split("\\.")[0]
                      + "0.vmdk", half, node.getVmName(), false, disk
                      .getDiskType(), disk.getController(), null, disk
                      .getAllocType(), null, null, null));
-               unseprable.add(new DiskSpec(disk.getName().split("\\.")[0]
+               unseparable.add(new DiskSpec(disk.getName().split("\\.")[0]
                      + "1.vmdk", disk.getSize() - half, node.getVmName(),
                      false, disk.getDiskType(), disk.getController(), null,
                      disk.getAllocType(), null, null, null));
@@ -725,7 +741,7 @@ public class PlacementPlanner implements IPlacementPlanner {
                if (disk.isSeparable()) {
                   separable.add(disk);
                } else {
-                  unseprable.add(disk);
+                  unseparable.add(disk);
                }
             } else {
                systemDisks.add(disk);
@@ -734,22 +750,35 @@ public class PlacementPlanner implements IPlacementPlanner {
 
          // place system disks first
          disks = placeUnSeparableDisks(systemDisks, imagestores);
+         if (disks == null) {
+            logger.info("Can not place " + getDiskSize(systemDisks)
+                  + " GB system disk on datastore with " + getDsFree(imagestores) + " GB free space.");
+            return false;
+         }
 
          // place un-separable disks
-         List<DiskSpec> subDisks =
-               placeUnSeparableDisks(unseprable, diskstores);
-         if (disks == null) {
-            return false;
-         } else {
-            disks.addAll(subDisks);
+         List<DiskSpec> subDisks = null;
+         if (unseparable != null && unseparable.size() != 0) {
+            subDisks = placeUnSeparableDisks(unseparable, diskstores);
+            if (subDisks == null) {
+               logger.info("Can not place " + getDiskSize(unseparable)
+                     + " GB unseparable disk on datastore with " + getDsFree(diskstores) + " GB free space.");
+               return false;
+            } else {
+               disks.addAll(subDisks);
+            }
          }
 
          // place separable disks
-         subDisks = placeSeparableDisks(separable, diskstores);
-         if (subDisks == null) {
-            return false;
-         } else {
-            disks.addAll(subDisks);
+         if (separable != null && separable.size() != 0) {
+            subDisks = placeSeparableDisks(separable, diskstores);
+            if (subDisks == null) {
+               logger.info("Can not place " + getDiskSize(separable)
+                     + " GB separable disk on datastore with " + getDsFree(diskstores) + " GB free space.");
+               return false;
+            } else {
+               disks.addAll(subDisks);
+            }
          }
 
          result.put(node, disks);
