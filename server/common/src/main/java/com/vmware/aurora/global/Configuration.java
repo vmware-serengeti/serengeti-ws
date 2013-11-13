@@ -478,9 +478,4 @@ public class Configuration {
          }
       }
    }
-
-   public static String getConfigFilePath() {
-      return config.getPath();
-   }
-
 }
