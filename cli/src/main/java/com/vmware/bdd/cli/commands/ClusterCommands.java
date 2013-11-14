@@ -27,7 +27,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import jline.ConsoleReader;
-
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.hadoop.impala.hive.HiveCommands;
@@ -643,12 +643,20 @@ public class ClusterCommands implements CommandMarker {
                         "You must specify at least one positive value for instanceNum, cpuNumPerNode, or memCapacityPerNode");
 
          } else {
+            List<String> invalidParams = new ArrayList<String>();
+            if (instanceNum < 0) {
+               invalidParams.add("instanceNum=" + instanceNum);
+            }
+            if (cpuNumber < 0) {
+               invalidParams.add("cpuNumPerNode=" + cpuNumber);
+            }
+            if (memory < 0) {
+               invalidParams.add("memCapacityMbPerNode=" + memory);
+            }
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   name, Constants.OUTPUT_OP_RESIZE,
                   Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
-                        + (instanceNum < 0 ? " instanceNum=" + instanceNum + "," : "")
-                        + (cpuNumber < 0 ? " cpuNumPerNode=" + cpuNumber + "," : "")
-                        + (memory < 0 ? " memCapacityMbPerNode=" + memory : ""));
+                        + " " + StringUtils.join(invalidParams, ", "));
          }
       }
    }
