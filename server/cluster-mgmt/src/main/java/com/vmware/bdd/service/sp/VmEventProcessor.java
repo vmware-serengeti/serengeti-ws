@@ -115,7 +115,7 @@ public class VmEventProcessor extends Thread {
       while (!isTerminate) {
          Event event = null;
          try {
-            final EventWrapper wrapper = queue.poll(1, TimeUnit.SECONDS);
+            final EventWrapper wrapper = queue.poll(1, TimeUnit.MINUTES);
             if (wrapper != null) {
                event = wrapper.event;
                VcContext.inVcSessionDo(new VcSession<Void>() {

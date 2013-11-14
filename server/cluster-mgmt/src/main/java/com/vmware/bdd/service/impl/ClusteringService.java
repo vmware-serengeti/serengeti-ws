@@ -239,10 +239,7 @@ public class ClusteringService implements IClusteringService {
          } catch (InterruptedException e) {
             logger.warn("interupted during sleep " + e.getMessage());
          }
-         // add event handler for Serengeti after VC event handler is registered.
-         processor = new VmEventProcessor(getClusterEntityMgr());
-         processor.installEventHandler();
-         processor.start();
+         startVMEventProcessor();
          String poolSize =
                Configuration.getNonEmptyString("serengeti.scheduler.poolsize");
 
@@ -272,6 +269,16 @@ public class ClusteringService implements IClusteringService {
          elasticityScheduleMgr.start();
          initialized = true;
       }
+   }
+
+   private void startVMEventProcessor() {
+      // add event handler for Serengeti after VC event handler is registered.
+      processor = new VmEventProcessor(getClusterEntityMgr());
+      processor.installEventHandler();
+      processor.setDaemon(true);
+      processor.setName("VM Event Processor");
+      processor.setPriority(Thread.MAX_PRIORITY);
+      processor.start();
    }
 
    synchronized public void destroy() {
