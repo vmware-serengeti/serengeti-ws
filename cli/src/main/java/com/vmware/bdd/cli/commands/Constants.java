@@ -236,7 +236,7 @@ public class Constants {
    public static final String OUTPUT_OBJECT_CONNECT = "connect";
    public static final String NODE_RUNNING_STATUS = "Service Ready";
    public static final String AT_LEAST_ONE_OPTION = "You must use at least one option.";
-   public static final String PASSWORD_LENGTH_INVALID = "Password length cannot be less than 8 and greater than 256.";
+   public static final String PASSWORD_LENGTH_INVALID = "Password must be from 8 to 128 characters.";
    public static final String ENTER_PASSWORD = "Enter the password: ";
    public static final String CONFIRM_PASSWORD = "Confirm the password: ";
    public static final int PASSWORD_MIN_LENGTH = 8;
