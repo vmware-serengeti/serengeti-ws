@@ -26,15 +26,19 @@ import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.IpConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.ISetPasswordService;
+import com.vmware.bdd.service.job.software.ManagementOperation;
 
 public class SetPasswordForNewNodesStep extends TrackableTasklet {
    private ISetPasswordService setPasswordService;
    private ClusterConfigManager configMgr;
+   private ClusterEntityManager entityMgr;
+   private ManagementOperation managementOperation;
    private static final Logger logger = Logger.getLogger(SetPasswordForNewNodesStep.class);
 
    @Override
@@ -50,15 +54,24 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
          return RepeatStatus.FINISHED;
       }
 
-      List<BaseNode> addedNodes =
-            getFromJobExecutionContext(chunkContext, JobConstants.CLUSTER_ADDED_NODES_JOB_PARAM,
-                  new TypeToken<List<BaseNode>>() {}.getType());
-      ArrayList<String> ipOfAddedNodes = getAddedNodeIPs(addedNodes);
-      if (ipOfAddedNodes.isEmpty()) {
+      ArrayList<String> nodeIPs = null;
+      if (managementOperation == ManagementOperation.CREATE || managementOperation == ManagementOperation.RESIZE) {
+         List<BaseNode> addedNodes =
+               getFromJobExecutionContext(chunkContext, JobConstants.CLUSTER_ADDED_NODES_JOB_PARAM,
+                     new TypeToken<List<BaseNode>>() {
+                     }.getType());
+         nodeIPs = getAddedNodeIPs(addedNodes);
+      } else if (managementOperation == ManagementOperation.RESUME) {
+         nodeIPs = getAllNodeIPsFromEntitys(entityMgr.findAllNodes(clusterName));
+      } else {
+         throw TaskException.EXECUTION_FAILED("Unknown operation type.");
+      }
+
+      if (nodeIPs == null) {
          throw TaskException.EXECUTION_FAILED("No nodes needed to set password for.");
       }
 
-      ArrayList<String> failedNodes = setPasswordService.setPasswordForNodes(clusterName, ipOfAddedNodes, newPassword);
+      ArrayList<String> failedNodes = setPasswordService.setPasswordForNodes(clusterName, nodeIPs, newPassword);
       boolean success = false;
       if (failedNodes == null) {
          success = true;
@@ -74,9 +87,31 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
       return RepeatStatus.FINISHED;
    }
 
-   private ArrayList<String> getAddedNodeIPs(List<BaseNode> addedNodes) {
-      ArrayList<String> nodeIPs = null;
+   private ArrayList<String> getAllNodeIPsFromEntitys(List<NodeEntity> nodes) {
+      if (nodes == null) {
+         return null;
+      }
 
+      ArrayList<String> nodeIPs = null;
+      for (NodeEntity node : nodes) {
+         String ip = node.getMgtIp();
+         if (ip != null) {
+            if (nodeIPs == null) {
+               nodeIPs = new ArrayList<String>();
+            }
+            nodeIPs.add(ip);
+         }
+      }
+
+      return nodeIPs;
+   }
+
+   private ArrayList<String> getAddedNodeIPs(List<BaseNode> addedNodes) {
+      if (addedNodes == null) {
+         return null;
+      }
+
+      ArrayList<String> nodeIPs = null;
       for (BaseNode node : addedNodes) {
          Map<NetTrafficType, List<IpConfigInfo>> ipConfigs = node.getIpConfigs();
          if (!ipConfigs.containsKey(NetTrafficType.MGT_NETWORK)) {
@@ -107,5 +142,23 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
    @Autowired
    public void setSetPasswordService(ISetPasswordService setPasswordService) {
       this.setPasswordService = setPasswordService;
+   }
+
+   public ClusterEntityManager getEntityMgr() {
+      return entityMgr;
+   }
+
+   @Autowired
+   public void setEntityMgr(ClusterEntityManager entityMgr) {
+      this.entityMgr = entityMgr;
+   }
+
+   public ManagementOperation getManagementOperation() {
+      return managementOperation;
+   }
+
+   @Autowired
+   public void setManagementOperation(ManagementOperation managementOperation) {
+      this.managementOperation = managementOperation;
    }
 }

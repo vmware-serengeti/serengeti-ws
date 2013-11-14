@@ -27,11 +27,12 @@
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 	</beans:bean>
 
-	<beans:bean name="setPasswordForNewNodesStep"
+	<beans:bean name="setPasswordForClusterResizeTasklet"
 		class="com.vmware.bdd.service.job.SetPasswordForNewNodesStep">
 		<beans:property name="configMgr" ref="clusterConfigMgr" />
-		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
+		<beans:property name="entityMgr" ref="clusterEntityManager" />
 		<beans:property name="setPasswordService" ref="setPasswordService"/>
+		<beans:property name="managementOperation" value="RESIZE" />
 	</beans:bean>
 
 	<job id="resizeClusterJob" job-repository="jobRepository">
@@ -98,14 +99,14 @@
 			</listeners>
 		</step>
 		<step id="setPasswordForClusterResizeAndFailStep" >
-			<tasklet ref="setPasswordForNewNodesStep" />
+			<tasklet ref="setPasswordForClusterResizeTasklet" />
 			<fail on="*" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
 		<step id="setPasswordForClusterResizeStep" >
-			<tasklet ref="setPasswordForNewNodesStep" />
+			<tasklet ref="setPasswordForClusterResizeTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

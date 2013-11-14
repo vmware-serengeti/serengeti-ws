@@ -18,7 +18,7 @@ package com.vmware.bdd.service.job.software;
  * @author Jarred Li
  * @version 0.8
  * @since 0.8
- * 
+ *
  */
 public enum ManagementOperation {
 
@@ -28,6 +28,8 @@ public enum ManagementOperation {
    START,
    STOP,
    DESTROY,
-   CONFIGURE
-   
+   CONFIGURE,
+   RESUME,
+   RESIZE
+
 }

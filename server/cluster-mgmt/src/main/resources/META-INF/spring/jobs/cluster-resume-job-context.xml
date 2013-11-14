@@ -18,6 +18,13 @@
 		<beans:property name="configMgr" ref="clusterConfigMgr" />
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 	</beans:bean>
+	<beans:bean name="setPasswordForClusterResumeTasklet"
+		class="com.vmware.bdd.service.job.SetPasswordForNewNodesStep">
+		<beans:property name="configMgr" ref="clusterConfigMgr" />
+		<beans:property name="entityMgr" ref="clusterEntityManager" />
+		<beans:property name="setPasswordService" ref="setPasswordService"/>
+		<beans:property name="managementOperation" value="RESUME" />
+	</beans:bean>
 
 	<job id="resumeClusterJob" job-repository="jobRepository">
 		<step id="removeBadNodeStep" next="updateResumeClusterDataStep1">
@@ -77,14 +84,14 @@
 			</listeners>
 		</step>
 		<step id="setPasswordForAllNodesAndFailStep">
-			<tasklet ref="setPasswordForNewNodesStep" />
+			<tasklet ref="setPasswordForClusterResumeTasklet" />
 			<fail on="*" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
 		<step id="setPasswordForAllNodesStep" next="setAutoElasticityResumeStep">
-			<tasklet ref="setPasswordForNewNodesStep" />
+			<tasklet ref="setPasswordForClusterResumeTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
