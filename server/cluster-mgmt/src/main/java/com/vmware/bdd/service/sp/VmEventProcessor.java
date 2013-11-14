@@ -230,6 +230,12 @@ public class VmEventProcessor extends Thread {
             refreshNodeWithAction(e, moId, true, null, "Powered Off");
             break;
          }
+         case VmConnected: 
+         case VmMigrated:
+         case VmRelocated: {
+            refreshNodeWithAction(e, moId, false, null, type.name());
+            break;
+         }
          case VhmError:
          case VhmWarning:
          case VhmInfo:
@@ -250,7 +256,6 @@ public class VmEventProcessor extends Thread {
             break;
          }
          default: {
-            refreshNodeWithAction(e, moId, false, null, type.name());
             break;
          }
          }

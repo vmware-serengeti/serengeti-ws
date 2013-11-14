@@ -95,8 +95,10 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
             deletedNodeNames.add(node.getVmName());
          }
       }
-      addNodeToMetaData(clusterName, addedNodes, deletedNodeNames);
-      removeDeletedNode(clusterName, deletedNodeNames);
+      synchronized (getClusterEntityMgr()) {
+         addNodeToMetaData(clusterName, addedNodes, deletedNodeNames);
+         removeDeletedNode(clusterName, deletedNodeNames);
+      }
       return RepeatStatus.FINISHED;
    }
 
@@ -119,9 +121,7 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
 
       for (BaseNode vNode : addedNodes) {
          deletedNodeNames.remove(vNode.getVmName());
-         synchronized (getClusterEntityMgr()) {
-            replaceNodeEntity(vNode);
-         }
+         replaceNodeEntity(vNode);
       }
    }
 
