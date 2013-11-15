@@ -15,10 +15,12 @@ public interface ISetPasswordService {
 
    /**
     * Set password for node in cluster
-	* @param clusterName
-	* @param fixedNodeIP
-	* @param newPassword
-	* @return success or not
-	*/
-   public boolean setPasswordForNode(String clusterName, String fixedNodeIP, String newPassword);
+    *
+    * @param clusterName
+    * @param fixedNodeIP
+    * @param newPassword
+    * @return success or not
+    * @throws Exception
+    */
+   public boolean setPasswordForNode(String clusterName, String fixedNodeIP, String newPassword) throws Exception;
 }

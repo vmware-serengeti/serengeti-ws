@@ -30,7 +30,7 @@ public class SetPasswordForDiskFixStep extends TrackableTasklet {
    private ISetPasswordService setPasswordService;
    private ClusterConfigManager configMgr;
    private ClusterEntityManager clusterEntityMgr;
-   private static final Logger logger = Logger.getLogger(ClusterUpdateDataStep.class);
+   private static final Logger logger = Logger.getLogger(SetPasswordForDiskFixStep.class);
 
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext, JobExecutionStatusHolder jobExecutionStatusHolder) {
@@ -53,8 +53,13 @@ public class SetPasswordForDiskFixStep extends TrackableTasklet {
          throw TaskException.EXECUTION_FAILED("No fixed node need to set password for.");
       }
 
-      boolean success = setPasswordService.setPasswordForNode(clusterName, fixedNodeIP, newPassword);
-      putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, success);
+      boolean success = false;
+      try {
+         success = setPasswordService.setPasswordForNode(clusterName, fixedNodeIP, newPassword);
+         putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, success);
+      } catch (Exception e) {
+         throw TaskException.EXECUTION_FAILED("In disk fix, failed to set password for node " + targetNode);
+      }
       if (!success) {
          throw TaskException.EXECUTION_FAILED("In disk fix, failed to set password for node " + targetNode);
       }
