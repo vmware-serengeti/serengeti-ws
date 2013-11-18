@@ -15,11 +15,11 @@ import com.vmware.bdd.utils.AuAssert;
 
 
 public class SSHUtil {
-   private static JSch jsch;
-   private static Session session;
-   private static final Logger logger = Logger.getLogger(JobUtils.class);
+   private JSch jsch;
+   private Session session;
+   private final Logger logger = Logger.getLogger(SSHUtil.class);
 
-   private static void connect(String user, String privateKeyFile,
+   private void connect(String user, String privateKeyFile,
          String hostIP, int sshPort) {
       jsch = new JSch();
 
@@ -37,7 +37,7 @@ public class SSHUtil {
       }
    }
 
-   public static boolean execCmd(String user, String privateKeyFile,
+   public boolean execCmd(String user, String privateKeyFile,
          String hostIP, int sshPort, String command) {
       AuAssert.check(command != null);
 

@@ -8,13 +8,10 @@ import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
-import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.service.ISetPasswordService;
 import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
 import com.vmware.bdd.service.sp.SetVMPasswordSP;
-import com.vmware.bdd.utils.Constants;
-import com.vmware.bdd.utils.SSHUtil;
 import com.vmware.bdd.utils.AuAssert;
 
 public class SetPasswordService implements ISetPasswordService {
@@ -30,7 +27,7 @@ public class SetPasswordService implements ISetPasswordService {
       ArrayList<String> failedIPs = null;
       List<Callable<Void>> storeProcedures = new ArrayList<Callable<Void>>();
       for (String nodeIP : ipsOfNodes) {
-         SetVMPasswordSP setVMPasswordSP = new SetVMPasswordSP(clusterName, nodeIP, password);
+         SetVMPasswordSP setVMPasswordSP = new SetVMPasswordSP(nodeIP, password);
          storeProcedures.add(setVMPasswordSP);
       }
       AuAssert.check(!storeProcedures.isEmpty());
@@ -53,7 +50,7 @@ public class SetPasswordService implements ISetPasswordService {
             }
          }
       } catch (Exception e) {
-         logger.error("error in setPassword for " + clusterName);
+         logger.error("Error in setting password for " + clusterName);
          throw BddException.INTERNAL(e, "Failed to set password for nodes in cluster " + clusterName);
       }
       return failedIPs;
@@ -61,64 +58,25 @@ public class SetPasswordService implements ISetPasswordService {
 
    @Override
    public boolean setPasswordForNode(String clusterName, String nodeIP, String password) throws Exception {
-      logger.info("setting password of " + nodeIP + " in cluster " + clusterName);
+      AuAssert.check(clusterName != null && nodeIP != null && password != null );
 
-      String privateKeyFile =
-            Configuration.getString(Constants.SSH_PRIVATE_KEY_CONFIG_NAME, Constants.SSH_PRIVATE_KEY_FILE_NAME);
-      String sshUser = Configuration.getString(Constants.SSH_USER_CONFIG_NAME, Constants.DEFAULT_SSH_USER_NAME);
-      int sshPort = Configuration.getInt(Constants.SSH_PORT_CONFIG_NAME, Constants.DEFAULT_SSH_PORT);
+      List<Callable<Void>> storeProcedures = new ArrayList<Callable<Void>>();
+      SetVMPasswordSP setVMPasswordSP = new SetVMPasswordSP(nodeIP, password);
+      storeProcedures.add(setVMPasswordSP);
+      AuAssert.check(!storeProcedures.isEmpty());
+      try {
+         Callable<Void>[] storeProceduresArray = storeProcedures.toArray(new Callable[0]);
+         NoProgressUpdateCallback callback = new NoProgressUpdateCallback();
+         ExecutionResult[] result =
+               Scheduler.executeStoredProcedures(com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
+                     storeProceduresArray, callback);
 
-      String[] cmds = generateSetPasswdCommand(Constants.SET_PASSWORD_SCRIPT_CONFIG_NAME, password);
-
-      boolean setPasswordSucceed = false;
-      for (int i = 0; i < Constants.SET_PASSWORD_MAX_RETRY_TIMES; i++) {
-         boolean commandSucceed = false;
-         for (String cmd : cmds) {
-            commandSucceed = SSHUtil.execCmd(sshUser, privateKeyFile, nodeIP, sshPort, cmd);
-            if (commandSucceed) {
-               logger.info("execute command" + " on " + nodeIP + " succeed.");
-            } else {
-               logger.info("execute command" + " on " + nodeIP + " failed.");
-               break;
-            }
+         if (result[0].finished && result[0].throwable == null) {
+            return true;
          }
-
-         if (commandSucceed) {
-            //when reach here, all commands have succeed
-            setPasswordSucceed = true;
-            break;
-         } else {
-            logger.info("Set password for " + nodeIP + " failed for " + (i + 1) + " times. Retrying after 2 seconds....");
-            try {
-               Thread.sleep(2000);
-            } catch (InterruptedException e) {
-               logger.info("Sleep interrupted, retrying immediately");
-            }
-         }
+         return false;
+      } catch (Exception e) {
+         throw BddException.INTERNAL(e, "Failed to set password for " + nodeIP + " in " + clusterName);
       }
-
-      if (setPasswordSucceed) {
-         logger.info("set password for " + nodeIP + " succeed");
-         return true;
-      } else {
-         logger.info("set password for " + nodeIP + " failed");
-         throw new Exception(Constants.CHECK_WHETHER_SSH_ACCESS_AVAILABLE);
-      }
-   }
-
-   private String[] generateSetPasswdCommand(String setPasswdScriptConfig, String password) {
-      String scriptFileName = Configuration.getString(setPasswdScriptConfig, Constants.DEFAULT_SET_PASSWORD_SCRIPT);
-
-      String[] commands = new String[8];
-      String tmpScript = "setPasswd.sh";
-      commands[0] = "touch " + tmpScript;
-      commands[1] = "echo \'" + scriptFileName + " -u <<EOF" + "\' >" + tmpScript;
-      commands[2] = "echo " + password + " >> " + tmpScript;
-      commands[3] = commands[2];
-      commands[4] = "echo EOF >>" + tmpScript;
-      commands[5] = "chmod +x " + tmpScript;
-      commands[6] = "sudo ./" + tmpScript;
-      commands[7] = "rm -f " + tmpScript;
-      return commands;
    }
 }
