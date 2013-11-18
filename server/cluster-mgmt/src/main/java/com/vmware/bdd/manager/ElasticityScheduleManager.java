@@ -88,7 +88,7 @@ public class ElasticityScheduleManager extends Thread {
 
                ClusterRead cluster = null;
                try {
-                  cluster = clusterMgr.getClusterByName(clusterName, true);
+                  cluster = clusterMgr.getClusterByName(clusterName, false);
                } catch (BddException e) {
                   logger.error("Caught BDD Exception during scheduling VHM.", e);
                   file.delete();
