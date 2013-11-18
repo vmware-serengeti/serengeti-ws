@@ -241,6 +241,6 @@ public class Constants {
    public static final String CONFIRM_PASSWORD = "Confirm the password: ";
    public static final int PASSWORD_MIN_LENGTH = 8;
    public static final int PASSWORD_MAX_LENGTH = 128;
-   public static final String PASSWORD_CONFIRMATION_FAILED = "Password confirmation failed.";
-   public static final String RESUME_DONOT_NEED_SET_PASSWORD = "When resume cluster creation, do not need to set password again.";
+   public static final String PASSWORD_CONFIRMATION_FAILED = "Password confirmation failed. The passwords must match.";
+   public static final String RESUME_DONOT_NEED_SET_PASSWORD = "Run the 'cluster create --resume' command, but do not include the '--password' parameter.";
 }
