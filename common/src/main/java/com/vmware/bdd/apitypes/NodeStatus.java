@@ -19,6 +19,7 @@ public enum NodeStatus {
     * Note: The statusChanged field rely on status sequence defined in this type
     */
    NOT_EXIST ( "Not Exist" ),
+   DISCONNECTED ( "Unavailable" ),
    POWERED_OFF ( "Powered Off" ),
    POWERED_ON ( "Powered On" ),
    VM_READY ( "VM Ready" ),

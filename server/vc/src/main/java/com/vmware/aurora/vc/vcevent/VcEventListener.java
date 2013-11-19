@@ -59,6 +59,7 @@ import com.vmware.vim.binding.vim.event.EventHistoryCollector;
 import com.vmware.vim.binding.vim.event.EventManager;
 import com.vmware.vim.binding.vim.fault.InvalidLogin;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
+import com.vmware.vim.binding.vmodl.fault.ManagedObjectNotFound;
 import com.vmware.vim.binding.vmodl.query.InvalidProperty;
 import com.vmware.vim.binding.vmodl.query.PropertyCollector;
 import com.vmware.vim.binding.vmodl.query.PropertyCollector.Change;
@@ -461,6 +462,11 @@ public class VcEventListener extends Thread {
             updateSet = waitForUpdates();
             dispatchUpdates(updateSet);
             resetRetryDelay();
+         } catch (ManagedObjectNotFound e) {
+            /*
+             * Managed object is not found, do not need to break session.
+             */
+            continue;
          } catch (InternalException e) {
             /*
              * VLSI fun: deal with unchecked internal exceptions. Here we try

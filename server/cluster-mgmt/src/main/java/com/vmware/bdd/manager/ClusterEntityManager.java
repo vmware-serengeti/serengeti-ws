@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.vmware.bdd.dal.INetworkDAO;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +33,7 @@ import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.dal.IClusterDAO;
+import com.vmware.bdd.dal.INetworkDAO;
 import com.vmware.bdd.dal.INodeDAO;
 import com.vmware.bdd.dal.INodeGroupDAO;
 import com.vmware.bdd.entity.ClusterEntity;
@@ -251,11 +251,16 @@ public class ClusterEntityManager {
                         oldNode.setAction(serverData.getAction());
                         logger.debug("node status: "
                               + NodeStatus.fromString(serverData.getStatus()));
-                        oldNode.setStatus(
-                              NodeStatus.fromString(serverData.getStatus()),
-                              false);
-                        logger.debug("new node:" + oldNode.getVmName()
-                              + ", status: " + oldNode.getStatus());
+                        if (!oldNode.isDisconnected()) {
+                           oldNode.setStatus(
+                                 NodeStatus.fromString(serverData.getStatus()),
+                                 false);
+                           logger.debug("new node:" + oldNode.getVmName()
+                                 + ", status: " + oldNode.getStatus());
+                        } else {
+                           logger.debug("do not override node status for disconnected node.");
+                        }
+
                         update(oldNode);
                         break;
                      }
@@ -306,6 +311,14 @@ public class ClusterEntityManager {
    }
 
    @Transactional
+   synchronized public void removeVmReference(String vmId) {
+      NodeEntity node = nodeDao.findByMobId(vmId);
+      if (node != null) {
+         setNotExist(node);
+      }
+   }
+
+   @Transactional
    synchronized public void syncUpNode(String clusterName, String nodeName) {
       NodeEntity node = findNodeByName(nodeName);
       if (node != null) {
@@ -336,6 +349,10 @@ public class ClusterEntityManager {
          setNotExist(node);
          return;
       }
+      if (!vcVm.isConnected() || vcVm.getHost().isUnavailbleForManagement()) {
+         node.setUnavailableConnection();
+         return;
+      }
       // TODO: consider more status
       if (!vcVm.isPoweredOn()) {
          node.setStatus(NodeStatus.POWERED_OFF);
@@ -354,9 +371,8 @@ public class ClusterEntityManager {
          if (node.ipsReady()) {
             node.setStatus(NodeStatus.VM_READY);
             if (node.getAction() != null
-                  && (node.getAction().equals(Constants.NODE_ACTION_WAITING_IP)
-                        || node.getAction().equals(
-                              Constants.NODE_ACTION_RECONFIGURE))) {
+                  && (node.getAction().equals(Constants.NODE_ACTION_WAITING_IP) || node
+                        .getAction().equals(Constants.NODE_ACTION_RECONFIGURE))) {
                node.setAction(null);
             }
          }
@@ -446,6 +462,14 @@ public class ClusterEntityManager {
    }
 
    @Transactional
+   synchronized public void setNodeConnectionState(String vmName) {
+      NodeEntity node = nodeDao.findByName(vmName);
+      if (node != null) {
+         node.setUnavailableConnection();
+      }
+   }
+
+   @Transactional
    synchronized public void refreshNodeByMobId(String vmId, String action,
          boolean inSession) {
       NodeEntity node = nodeDao.findByMobId(vmId);
@@ -461,6 +485,10 @@ public class ClusterEntityManager {
 
    public NodeEntity getNodeByVmName(String vmName) {
       return nodeDao.findByName(vmName);
+   }
+
+   public List<NodeEntity> getNodesByHost(String hostName) {
+      return nodeDao.findByHostName(hostName);
    }
 
    @Transactional

@@ -68,7 +68,7 @@ public class StartVmSP implements Callable<Void> {
          protected Void body() throws Exception {
             Map<String, String> bootupConfigs = vcVm.getGuestConfigs();
             AuAssert.check(bootupConfigs != null);
-            
+
             /* serengeti operation flag - a random generated uuid
             * a script inside the vm compares this uuid with its stored value, if they are
             * different, this VM decides it's started by Serengeti, otherwise, it's started

@@ -1349,6 +1349,13 @@ public class ClusteringService implements IClusteringService {
                if (vm != null && VcVmUtil.checkIpAddresses(vm)) {
                   ++total;
                } else {
+                  if (!vm.isConnected() || vm.getHost().isUnavailbleForManagement()) {
+                     logger.error("Cannot start VM " + vm.getName()
+                           + " in connection state " + vm.getConnectionState()
+                           + " or in maintenance mode. "
+                           + "Ignore this VM and continue cluster operations.");
+                     continue;
+                  }
                   logger.error(
                         "Failed to start VM " + nodes.get(i).getVmName(),
                         result[i].throwable);
@@ -1419,6 +1426,13 @@ public class ClusteringService implements IClusteringService {
                if (vm == null || vm.isPoweredOff()) {
                   ++total;
                } else {
+                  if (!vm.isConnected() || vm.getHost().isUnavailbleForManagement()) {
+                     logger.error("Cannot stop VM " + vm.getName()
+                           + " in connection state " + vm.getConnectionState()
+                           + " or in maintenance mode. "
+                           + "Ignore this VM and continue cluster operations.");
+                     continue;
+                  }
                   logger.error("Failed to stop VM " + nodes.get(i).getVmName(),
                         result[i].throwable);
                   success = false;
@@ -1452,7 +1466,7 @@ public class ClusteringService implements IClusteringService {
       }
 
       if (badNodes != null && badNodes.size() > 0) {
-         boolean deleted = syncDeleteVMs(badNodes, statusUpdator);
+         boolean deleted = syncDeleteVMs(badNodes, statusUpdator, false);
          afterBadVcVmDelete(existingNodes, deletedNodes, badNodes, occupiedIpSets);
          return deleted;
       }
@@ -1487,7 +1501,7 @@ public class ClusteringService implements IClusteringService {
       logger.info("Start to delete cluster: " + name);
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(name);
       List<BaseNode> vNodes = JobUtils.convertNodeEntities(null, null, nodes);
-      boolean deleted = syncDeleteVMs(vNodes, statusUpdator);
+      boolean deleted = syncDeleteVMs(vNodes, statusUpdator, true);
       if (nodes.size() > 0) {
          try {
             deleteChildRps(name, vNodes);
@@ -1625,7 +1639,7 @@ public class ClusteringService implements IClusteringService {
 
    @SuppressWarnings("unchecked")
    public boolean syncDeleteVMs(List<BaseNode> badNodes,
-         StatusUpdater statusUpdator) {
+         StatusUpdater statusUpdator, boolean ignoreUnavailableNodes) {
       logger.info("syncDeleteVMs, start to create store procedures.");
       List<Callable<Void>> storeProcedures = new ArrayList<Callable<Void>>();
       for (int i = 0; i < badNodes.size(); i++) {
@@ -1668,6 +1682,17 @@ public class ClusteringService implements IClusteringService {
                vNode.setVmMobId(null);
                ++total;
             } else if (result[i].throwable != null) {
+               if (ignoreUnavailableNodes) {
+                  DeleteVmByIdSP sp = (DeleteVmByIdSP) storeProceduresArray[i];
+                  VcVirtualMachine vcVm = sp.getVcVm();
+                  if (!vcVm.isConnected() || vcVm.getHost().isUnavailbleForManagement()) {
+                     logger.error("Failed to delete VM " + vcVm.getName()
+                           + " in connection state " + vcVm.getConnectionState()
+                           + "  or in maintenance mode.");
+                     logger.error("Ignore this failure and continue cluster operations.");
+                     continue;
+                  }
+               }
                logger.error("Failed to delete VM " + vNode.getVmName(),
                      result[i].throwable);
                vNode.setSuccess(false);

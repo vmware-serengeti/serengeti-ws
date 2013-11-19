@@ -61,13 +61,14 @@ public class ResizeClusterRemoveBadNodeStep extends TrackableTasklet {
       removeExcessiveOrWrongStatusNodes(existingNodes, 
             deletedNodes, groupName, newInstanceNum, oldInstanceNum);
       Map<String, Set<String>> occupiedIps = new HashMap<String, Set<String>>();
-      JobUtils.removeNonExistNodes(existingNodes, deletedNodes, occupiedIps);
+      JobUtils.removeNonExistNodes(existingNodes, occupiedIps);
       verifyExistingSuccessNodes(existingNodes, 
             groupName, oldInstanceNum, clusterSpec);
       StatusUpdater statusUpdator = new DefaultStatusUpdater(
             jobExecutionStatusHolder, getJobExecutionId(chunkContext));
 
-      boolean deleted = clusteringService.syncDeleteVMs(deletedNodes, statusUpdator);
+      boolean deleted = clusteringService.syncDeleteVMs(deletedNodes, 
+            statusUpdator, false);
       putIntoJobExecutionContext(chunkContext, 
             JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, existingNodes);
       putIntoJobExecutionContext(chunkContext, 

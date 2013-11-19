@@ -54,6 +54,8 @@ import com.vmware.vim.binding.vim.event.ExitMaintenanceModeEvent;
 import com.vmware.vim.binding.vim.event.ExtendedEvent;
 import com.vmware.vim.binding.vim.event.GeneralUserEvent;
 import com.vmware.vim.binding.vim.event.HostAddedEvent;
+import com.vmware.vim.binding.vim.event.HostConnectedEvent;
+import com.vmware.vim.binding.vim.event.HostDisconnectedEvent;
 import com.vmware.vim.binding.vim.event.HostRemovedEvent;
 import com.vmware.vim.binding.vim.event.HostShutdownEvent;
 import com.vmware.vim.binding.vim.event.NotEnoughResourcesToStartVmEvent;
@@ -80,6 +82,7 @@ import com.vmware.vim.binding.vim.event.VmOrphanedEvent;
 import com.vmware.vim.binding.vim.event.VmPoweredOffEvent;
 import com.vmware.vim.binding.vim.event.VmPoweredOnEvent;
 import com.vmware.vim.binding.vim.event.VmReconfiguredEvent;
+import com.vmware.vim.binding.vim.event.VmRegisteredEvent;
 import com.vmware.vim.binding.vim.event.VmRelocatedEvent;
 import com.vmware.vim.binding.vim.event.VmRemovedEvent;
 import com.vmware.vim.binding.vim.event.VmRenamedEvent;
@@ -156,6 +159,7 @@ public class VcEventHandlers {
       VmPoweredOn (VmPoweredOnEvent.class),
       VmPoweredOff (VmPoweredOffEvent.class),
       VmReconfigured (VmReconfiguredEvent.class),
+      VmRegistered (VmRegisteredEvent.class),
       VmRelocated (VmRelocatedEvent.class),
       VmRemoved (VmRemovedEvent.class),
       VmRenamed (VmRenamedEvent.class),
@@ -181,6 +185,8 @@ public class VcEventHandlers {
       HostAdded (HostAddedEvent.class),
       HostRemoved (HostRemovedEvent.class),
       HostShutdown (HostShutdownEvent.class),
+      HostConnected (HostConnectedEvent.class),
+      HostDisconnected (HostDisconnectedEvent.class),
 
       // Used by junit tests
       GeneralUser (GeneralUserEvent.class),

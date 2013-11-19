@@ -33,4 +33,6 @@ public interface INodeDAO extends IBaseDAO<NodeEntity> {
    NodeEntity findByName(NodeGroupEntity group, String name);
    NodeEntity findByMobId(String vmId);
    NodeEntity findByName(String name);
+
+   List<NodeEntity> findByHostName(String hostName);
 }

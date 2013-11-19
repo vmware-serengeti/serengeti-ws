@@ -63,4 +63,9 @@ public class NodeDAO extends BaseDAO<NodeEntity> implements INodeDAO {
    public NodeEntity findByName(String name) {
       return findUniqueByCriteria(Restrictions.eq("vmName", name));
    }
+
+   @Override
+   public List<NodeEntity> findByHostName(String hostName) {
+      return findByCriteria(Restrictions.eq("hostName", hostName));
+   }
 }

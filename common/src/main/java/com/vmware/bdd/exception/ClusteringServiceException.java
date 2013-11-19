@@ -147,4 +147,8 @@ public class ClusteringServiceException extends BddException {
    public static ClusteringServiceException GROUP_NAME_TOO_LONG(String groupName) {
       return new ClusteringServiceException(null, "GROUP_NAME_TOO_LONG", groupName);
    }
+
+   public static ClusteringServiceException VM_UNAVAILABLE(String vmName) {
+      return new ClusteringServiceException(null, "VM_UNAVAILABLE", vmName);
+   }
 }

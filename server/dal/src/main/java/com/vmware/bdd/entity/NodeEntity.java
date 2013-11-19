@@ -185,6 +185,14 @@ public class NodeEntity extends EntityBase {
       return status;
    }
 
+   public void setUnavailableConnection() {
+      this.status = NodeStatus.DISCONNECTED;
+      logger.debug("node " + getVmName() + " status changed to " + status);
+   }
+
+   public boolean isDisconnected() {
+      return (this.status == NodeStatus.DISCONNECTED);
+   }
 
    /*
     * This method will compare the setting status with existing status.

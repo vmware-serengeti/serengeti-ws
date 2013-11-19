@@ -94,7 +94,7 @@ public class Container implements IContainer {
       try {
          // add hosts
          for (VcHost host : cluster.getHosts()) {
-            if (host.isConnected() && !host.isInMaintenanceMode() 
+            if (host.isConnected() && !host.isUnavailbleForManagement() 
                   && host.getDatastores() != null && host.getDatastores().size() > 0) {
                AbstractHost abstractHost = new AbstractHost(host.getName());
                for (VcDatastore datastore : host.getDatastores()) {

@@ -17,6 +17,8 @@ package com.vmware.aurora.vc.vcevent;
 
 import java.util.EnumSet;
 
+import org.apache.log4j.Logger;
+
 import com.vmware.aurora.util.AuAssert;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
@@ -26,12 +28,12 @@ import com.vmware.vim.binding.vim.event.Event;
 import com.vmware.vim.binding.vim.event.EventEx;
 import com.vmware.vim.binding.vim.event.ResourcePoolEvent;
 import com.vmware.vim.binding.vim.event.VmCreatedEvent;
-import com.vmware.vim.binding.vim.event.VmDisconnectedEvent;
 import com.vmware.vim.binding.vim.event.VmEvent;
 import com.vmware.vim.binding.vim.event.VmResourcePoolMovedEvent;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 
 public class VcEventRouter {
+   private static final Logger logger = Logger.getLogger(VcEventRouter.class);
    private static final EnumSet<VcEventType> vmEvents = EnumSet.of(
          VcEventType.VmConfigMissing, VcEventType.VmConnected,
          VcEventType.VmCreated, VcEventType.VmDasBeingReset,
@@ -96,6 +98,9 @@ public class VcEventRouter {
                VcVirtualMachine vm = VcCache.get(event.getVm().getVm());
                vm.refreshRP();
                break;
+            }
+            case HostRemoved: {
+               logger.info("Host removed event received" + e);
             }
             }
             VcCache.refreshAll(moRef);

@@ -38,14 +38,18 @@ import com.vmware.vim.binding.vmodl.fault.ManagedObjectNotFound;
 public class DeleteVmByIdSP implements Callable<Void> {
    private static final Logger logger = Logger.getLogger(DeleteVmByIdSP.class);
    private String vmId;
-
+   private VcVirtualMachine vcVm;
    public DeleteVmByIdSP(String vmId) {
       this.vmId = vmId;
    }
 
+   public VcVirtualMachine getVcVm() {
+      return vcVm;
+   }
+
    @Override
    public Void call() throws Exception {
-      final VcVirtualMachine vcVm = VcCache.getIgnoreMissing(vmId);
+      vcVm = VcCache.getIgnoreMissing(vmId);
       if (vcVm == null) {
          logger.info("vm " + vmId + " is not found in VC, ignore this delete.");
          return null;

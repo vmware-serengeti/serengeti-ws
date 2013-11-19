@@ -625,6 +625,7 @@ public interface VcVirtualMachine extends VcVmBase {
    abstract boolean isPoweredOff();
 
    abstract ConnectionState getConnectionState();
+   abstract boolean isConnected();
 
    abstract FaultToleranceState getFTState();
 
@@ -2088,6 +2089,10 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
 
    public ConnectionState getConnectionState() {
       return runtime.getConnectionState();
+   }
+
+   public boolean isConnected() {
+      return (runtime.getConnectionState() == ConnectionState.connected);
    }
 
    public FaultToleranceState getFTState() {

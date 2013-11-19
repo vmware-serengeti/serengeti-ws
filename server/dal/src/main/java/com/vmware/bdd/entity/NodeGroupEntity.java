@@ -459,7 +459,8 @@ public class NodeGroupEntity extends EntityBase {
 
       List<NodeRead> nodeList = new ArrayList<NodeRead>();
       for (NodeEntity node : this.nodes) {
-         if (ignoreObsoleteNode && node.isObsoleteNode()) {
+         if (ignoreObsoleteNode && (node.isObsoleteNode() 
+               || node.isDisconnected())) {
             continue;
          }
          nodeList.add(node.toNodeRead(true));

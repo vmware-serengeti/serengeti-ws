@@ -108,7 +108,8 @@ public interface IClusteringService {
 
    public List<BaseNode> getBadNodes(ClusterCreate cluster, List<BaseNode> existingNodes);
 
-   public boolean syncDeleteVMs(List<BaseNode> badNodes, StatusUpdater statusUpdator);
+   public boolean syncDeleteVMs(List<BaseNode> badNodes, StatusUpdater statusUpdator,
+         boolean ignoreUnavailableNodes);
 
    /**
     *

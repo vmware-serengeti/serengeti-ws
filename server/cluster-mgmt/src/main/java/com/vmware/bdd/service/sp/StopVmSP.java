@@ -61,7 +61,8 @@ public class StopVmSP implements Callable<Void> {
             if (vmPoweroff) {
                vcVm.powerOff();
             } else {
-               if (!vcVm.shutdownGuest(Constants.VM_SHUTDOWN_WAITING_SEC * 1000)) {
+               if (!vcVm
+                     .shutdownGuest(Constants.VM_SHUTDOWN_WAITING_SEC * 1000)) {
                   logger.info("shutdown guest OS failed, power off directly");
                   vcVm.powerOff();
                }

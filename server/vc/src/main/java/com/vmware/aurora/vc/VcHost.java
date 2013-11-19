@@ -57,6 +57,7 @@ public interface VcHost extends VcObject {
 
    abstract boolean isConnected();
    abstract boolean isInMaintenanceMode();
+   abstract boolean isUnavailbleForManagement();
 }
 
 @SuppressWarnings("serial")
@@ -147,4 +148,8 @@ class VcHostImpl extends VcObjectImpl implements VcHost {
       return runtime.isInMaintenanceMode();
    }
 
+   @Override
+   public boolean isUnavailbleForManagement() {
+      return (runtime.isInMaintenanceMode() || !isConnected());
+   }
 }
