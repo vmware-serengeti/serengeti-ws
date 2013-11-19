@@ -385,6 +385,7 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private String getPassword() {
+      System.out.println("Hint: " + Constants.PASSWORD_LENGTH_REQUIREMENT);
       String firstPassword = getInputedPassword(Constants.ENTER_PASSWORD);
       if (firstPassword == null) {
          return null;
@@ -426,7 +427,7 @@ public class ClusterCommands implements CommandMarker {
             || password.length() > Constants.PASSWORD_MAX_LENGTH) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, null,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.PASSWORD_LENGTH_INVALID);
+               Constants.PASSWORD_LENGTH_REQUIREMENT);
          return false;
       }
       return true;
