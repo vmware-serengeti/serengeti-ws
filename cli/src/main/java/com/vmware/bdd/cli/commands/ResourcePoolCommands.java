@@ -134,7 +134,7 @@ public class ResourcePoolCommands implements CommandMarker {
                      Arrays.asList("getName"));
                nodeColumnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_IP,
-                     Arrays.asList("getIp"));
+                     Arrays.asList("fetchMgtIp"));
                nodeColumnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_ROLES,
                      Arrays.asList("getRoles"));
