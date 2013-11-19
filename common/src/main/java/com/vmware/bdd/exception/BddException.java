@@ -108,9 +108,12 @@ public class BddException extends RuntimeException {
       return new BddException(ex, "BDD", "ALREADY_EXISTS", object, objectName);
    }
 
-   public static BddException PG_REFERENCED_MULTI_TIMES(String object,
-         String objectName) {
-      return new BddException(null, "BDD", "PG_REFERENCED_MULTI_TIMES", object, objectName);
+   public static BddException PG_REFERENCED_MULTI_TIMES() {
+      return new BddException(null, "BDD", "PG_REFERENCED_MULTI_TIMES");
+   }
+
+   public static BddException MULTI_NETWORKS_FOR_MAPR_DISTRO() {
+      return new BddException(null, "BDD", "MULTI_NETWORKS_FOR_MAPR_DISTRO");
    }
 
    public static BddException ALREADY_EXISTS(String object, String objectName) {

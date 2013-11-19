@@ -377,10 +377,10 @@ public class ClusterCommands implements CommandMarker {
          mapredNetwork = networkConfig.get(NetTrafficType.MAPRED_NETWORK).get(0);
       }
 
-      StringBuffer netsUsage = new StringBuffer().append("Hadoop will use network ")
+      StringBuffer netsUsage = new StringBuffer().append("The cluster will use network ")
             .append(mgtNetwork).append(" for management, ")
-            .append(hdfsNetwork).append(" for hdfs traffic, and ")
-            .append(mapredNetwork).append(" for mapreduce traffic");
+            .append(hdfsNetwork).append(" for HDFS traffic, and ")
+            .append(mapredNetwork).append(" for MapReduce traffic.");
       warningMsgList.add(netsUsage.toString());
    }
 

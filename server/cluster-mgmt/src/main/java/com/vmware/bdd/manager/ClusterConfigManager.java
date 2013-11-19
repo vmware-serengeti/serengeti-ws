@@ -222,8 +222,8 @@ public class ClusterConfigManager {
             logger.debug("no datastore name specified, use global configuration.");
          }
 
-         clusterEntity.setNetworkConfig(convertNetNamesToNetConfigs(cluster
-               .getNetworkConfig()));
+         clusterEntity.setNetworkConfig(validateAndConvertNetNamesToNetConfigs(cluster
+               .getNetworkConfig(), cluster.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR)));
          clusterEntity.setVhmJobTrackerPort("50030");
          if (cluster.getConfiguration() != null
                && cluster.getConfiguration().size() > 0) {
@@ -283,8 +283,8 @@ public class ClusterConfigManager {
       }
    }
 
-   private Map<NetTrafficType, List<NetConfigInfo>> convertNetNamesToNetConfigs(
-         Map<NetTrafficType, List<String>> netNamesInfo) {
+   private Map<NetTrafficType, List<NetConfigInfo>> validateAndConvertNetNamesToNetConfigs(
+         Map<NetTrafficType, List<String>> netNamesInfo, boolean isMaprDistro) {
       Map<NetTrafficType, List<NetConfigInfo>> netConfigs =
             new HashMap<NetTrafficType, List<NetConfigInfo>>();
       Map<String, Set<String>> port2names = new HashMap<String, Set<String>>();
@@ -303,10 +303,14 @@ public class ClusterConfigManager {
          }
       }
 
+      if (isMaprDistro && port2names.size() > 1) {
+         throw BddException.MULTI_NETWORKS_FOR_MAPR_DISTRO();
+      }
+
       // if nw1,nw2 are both refer to pg1, should not use them in one cluster
       for (String pg : port2names.keySet()) {
          if (port2names.get(pg).size() > 1) {
-            throw BddException.PG_REFERENCED_MULTI_TIMES(pg, port2names.get(pg).toString());
+            throw BddException.PG_REFERENCED_MULTI_TIMES();
          }
       }
 
