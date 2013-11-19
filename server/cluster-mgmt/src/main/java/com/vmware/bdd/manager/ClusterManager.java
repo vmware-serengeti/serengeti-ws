@@ -999,19 +999,21 @@ public class ClusterManager {
       param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
             clusterName));
-      if (activeComputeNodeNum == null) {
-         activeComputeNodeNum = cluster.getVhmTargetNum();
-      }
       // TODO: transfer SET_TARGET/UNLIMIT from CLI directly
-      if (activeComputeNodeNum == -1) {
+      if (activeComputeNodeNum == null) {
+         param.put(JobConstants.VHM_ACTION_JOB_PARAM, new JobParameter(
+               LimitInstruction.actionWaitForManual));
+      } else if (activeComputeNodeNum == -1) {
          param.put(JobConstants.VHM_ACTION_JOB_PARAM, new JobParameter(
                LimitInstruction.actionUnlimit));
       } else {
          param.put(JobConstants.VHM_ACTION_JOB_PARAM, new JobParameter(
                LimitInstruction.actionSetTarget));
       }
-      param.put(JobConstants.ACTIVE_COMPUTE_NODE_NUMBER_JOB_PARAM,
-            new JobParameter(Long.valueOf(activeComputeNodeNum)));
+      if (activeComputeNodeNum != null) {
+         param.put(JobConstants.ACTIVE_COMPUTE_NODE_NUMBER_JOB_PARAM,
+               new JobParameter(Long.valueOf(activeComputeNodeNum)));
+      }
       param.put(JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM,
             new JobParameter(ClusterStatus.RUNNING.name()));
       param.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM,

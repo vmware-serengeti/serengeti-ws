@@ -58,12 +58,6 @@ public class SetManualElasticityStep extends TrackableTasklet {
          vhmAction = action;
       }
 
-      if (vhmAction == LimitInstruction.actionWaitForManual) {
-         if (!disableAutoElasticity(clusterName)) {
-            throw TaskException.EXECUTION_FAILED("timed out while changing elasticity mode from AUTO to MANUAL for cluster " + clusterName);
-         }
-      }
-
       // submit a MQ task
       MessageHandler listener = null;
       if (vhmAction == LimitInstruction.actionSetTarget || vhmAction == LimitInstruction.actionUnlimit) {
