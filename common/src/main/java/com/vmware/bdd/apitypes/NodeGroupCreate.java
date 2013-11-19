@@ -57,10 +57,10 @@ public class NodeGroupCreate {
    private StorageRead storage;
    @Expose
    @SerializedName("cpu")
-   private int cpuNum;
+   private Integer cpuNum;
    @Expose
    @SerializedName("memory")
-   private int memCapacityMB;
+   private Integer memCapacityMB;
    @Expose
    @SerializedName("swap_ratio")
    private Float swapRatio = 1F;
@@ -152,19 +152,19 @@ public class NodeGroupCreate {
       this.placementPolicies = placementPolicies;
    }
 
-   public int getCpuNum() {
+   public Integer getCpuNum() {
       return cpuNum;
    }
 
-   public void setCpuNum(int cpuNum) {
+   public void setCpuNum(Integer cpuNum) {
       this.cpuNum = cpuNum;
    }
 
-   public int getMemCapacityMB() {
+   public Integer getMemCapacityMB() {
       return memCapacityMB;
    }
 
-   public void setMemCapacityMB(int memCapacityMB) {
+   public void setMemCapacityMB(Integer memCapacityMB) {
       this.memCapacityMB = memCapacityMB;
    }
 

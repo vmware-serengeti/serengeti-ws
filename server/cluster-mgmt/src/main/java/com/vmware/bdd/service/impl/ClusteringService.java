@@ -1111,7 +1111,9 @@ public class ClusteringService implements IClusteringService {
       if (haFlag != null && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
          ha = true;
          ft = true;
-         if (vNode.getNodeGroup().getCpuNum() > 1) {
+         Integer cpuNum = vNode.getNodeGroup().getCpuNum();
+         cpuNum = (cpuNum == null) ? 0 : cpuNum; 
+         if (cpuNum > 1) {
             throw ClusteringServiceException.CPU_NUMBER_MORE_THAN_ONE(vNode
                   .getVmName());
          }

@@ -525,8 +525,11 @@ public class VcVmUtil {
       resourceSchema.name = "Resource Schema";
       resourceSchema.cpuReservationMHz = 0;
       resourceSchema.memReservationSize = 0;
-      resourceSchema.numCPUs = groupSpec.getCpuNum();
-      resourceSchema.memSize = groupSpec.getMemCapacityMB();
+      resourceSchema.numCPUs =
+            (groupSpec.getCpuNum() == null) ? 0 : groupSpec.getCpuNum();
+      resourceSchema.memSize =
+            (groupSpec.getMemCapacityMB() == null) ? 0 : groupSpec
+                  .getMemCapacityMB();
       resourceSchema.priority =
             com.vmware.aurora.interfaces.model.IDatabaseConfig.Priority.Normal;
       schema.resourceSchema = resourceSchema;

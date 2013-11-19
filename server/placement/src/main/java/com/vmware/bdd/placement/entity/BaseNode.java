@@ -197,11 +197,12 @@ public class BaseNode {
    }
 
    public int getCpu() {
-      return nodeGroup.getCpuNum();
+      return nodeGroup.getCpuNum() == null ? 0 : nodeGroup.getCpuNum();
    }
 
    public int getMem() {
-      return nodeGroup.getMemCapacityMB();
+      return nodeGroup.getMemCapacityMB() == null ? 0 : nodeGroup
+            .getMemCapacityMB();
    }
 
    public String getTargetVcCluster() {

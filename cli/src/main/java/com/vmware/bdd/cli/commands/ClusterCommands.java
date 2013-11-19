@@ -1392,7 +1392,7 @@ public class ClusterCommands implements CommandMarker {
       failedMsg.append(" ");
       StringBuilder tmpMsg = new StringBuilder();
       for (String msg : failedMsgList) {
-         tmpMsg.append(msg);
+         tmpMsg.append(msg).append(" ");
       }
       failedMsg.append(tmpMsg);
       CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,

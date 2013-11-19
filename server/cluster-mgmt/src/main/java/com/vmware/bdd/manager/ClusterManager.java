@@ -388,7 +388,8 @@ public class ClusterManager {
             String templateVmId = clusteringService.getTemplateVmId();
             if (templateVmId != null) {
                VcResourceUtils.checkVmMaxConfiguration(templateVmId,
-                     ng.getCpuNum(), ng.getMemCapacityMB());
+                     ng.getCpuNum() == null ? 0 : ng.getCpuNum(),
+                     ng.getMemCapacityMB() == null ? 0 : ng.getMemCapacityMB());
             }
          }
       }

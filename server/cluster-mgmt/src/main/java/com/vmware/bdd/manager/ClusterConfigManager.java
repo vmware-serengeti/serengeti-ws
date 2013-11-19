@@ -580,9 +580,10 @@ public class ClusterConfigManager {
       Set<String> roles = new HashSet<String>();
 
       groupEntity.setCluster(clusterEntity);
-      groupEntity.setCpuNum(group.getCpuNum());
+      groupEntity.setCpuNum(group.getCpuNum() == null ? 0 : group.getCpuNum());
       groupEntity.setDefineInstanceNum(group.getInstanceNum());
-      groupEntity.setMemorySize(group.getMemCapacityMB());
+      groupEntity.setMemorySize(group.getMemCapacityMB() == null ? 0 : group
+            .getMemCapacityMB());
       groupEntity.setSwapRatio(group.getSwapRatio());
       groupEntity.setName(group.getName());
       groupEntity.setNodeType(group.getInstanceType());

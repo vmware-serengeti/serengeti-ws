@@ -184,11 +184,11 @@ public class CommonClusterExpandPolicy {
       logger.debug("instance type is " + instanceType.toString());
 
       int memory = ngEntity.getMemorySize();
-      if (memory <= 0) {
+      if (memory == 0) {
          ngEntity.setMemorySize(instanceType.getMemoryMB());
       }
       int cpu = ngEntity.getCpuNum();
-      if (cpu <= 0) {
+      if (cpu == 0) {
          ngEntity.setCpuNum(instanceType.getCpuNum());
       }
 

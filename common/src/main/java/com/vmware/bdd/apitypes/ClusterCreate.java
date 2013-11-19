@@ -647,8 +647,8 @@ public class ClusterCreate implements Serializable {
       for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
          // check node group's instanceNum
          checkInstanceNum(nodeGroupCreate, failedMsgList);
-         // make VM memory value devisible by 4
-         makeVmMemoryDivisibleBy4(nodeGroupCreate, warningMsgList);        
+         // check CPU number and memory capacity
+         checkCPUAndMemory(nodeGroupCreate, failedMsgList, warningMsgList);
          // check node group's roles
          checkNodeGroupRoles(nodeGroupCreate, distroRoles, failedMsgList);
 
@@ -783,18 +783,38 @@ public class ClusterCreate implements Serializable {
       }
    }
 
+   private void checkCPUAndMemory(NodeGroupCreate nodeGroup,
+         List<String> failedMsgList, List<String> warningMsgList) {
+      Integer cpuNum = nodeGroup.getCpuNum();
+      Integer memCap = nodeGroup.getMemCapacityMB();
+      if (cpuNum != null && cpuNum <= 0) {
+         failedMsgList.add(new StringBuilder().append(nodeGroup.getName())
+               .append(".").append("cpuNum=").append(cpuNum).append(".")
+               .toString());
+      }
+      if (memCap != null) {
+         if (memCap <= 0) {
+            failedMsgList.add(new StringBuilder().append(nodeGroup.getName())
+                  .append(".").append("memCapacityMB=").append(memCap)
+                  .append(".").toString());
+         } else {
+            // make VM memory value devisible by 4
+            makeVmMemoryDivisibleBy4(nodeGroup, warningMsgList);
+         }
+      }
+   }
+
    private void makeVmMemoryDivisibleBy4(NodeGroupCreate nodeGroup,
          List<String> warningMsgList) {
-      int memoryNum = nodeGroup.getMemCapacityMB();
-      if (memoryNum > 0) {
+      int memoryCap = nodeGroup.getMemCapacityMB();
+      if (memoryCap > 0) {
          //VM's memory must be divisible by 4, otherwise VM can not be started
-         long converted = CommonUtil.makeVmMemoryDivisibleBy4(memoryNum);
-         if (converted < memoryNum) {
+         long converted = CommonUtil.makeVmMemoryDivisibleBy4(memoryCap);
+         if (converted < memoryCap) {
             nodeGroup.setMemCapacityMB((int) converted);
             warningMsgList.add(Constants.CONVERTED_MEMORY_DIVISIBLE_BY_4
-                  + "For group " + nodeGroup.getName() + ", "
-                  + converted + " replaces " + memoryNum
-                  + " for the memCapacityMB value.");
+                  + "For group " + nodeGroup.getName() + ", " + converted
+                  + " replaces " + memoryCap + " for the memCapacityMB value.");
          }
       }
    }

@@ -186,8 +186,9 @@ public class PlacementPlanner implements IPlacementPlanner {
        * TRICK: here we count the size of vswp file into the system disk size, as the
        * vswp file will be put together with system disk.
        */
-      systemDisk.setSize(systemDisk.getSize()
-            + (nodeGroup.getMemCapacityMB() + 1023) / 1024);
+      Integer memCapa = nodeGroup.getMemCapacityMB();
+      memCapa = (memCapa == null) ? 0 : memCapa;
+      systemDisk.setSize(systemDisk.getSize() + (memCapa + 1023) / 1024);
 
       systemDisk.setDiskType(DiskType.SYSTEM_DISK);
       systemDisk.setSeparable(false);
