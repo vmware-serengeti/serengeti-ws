@@ -726,12 +726,16 @@ public class ClusterCommands implements CommandMarker {
          }
 
          //validate the node group type for elasticity params
-         if ((elasticityMode != null || minComputeNodeNum != null || maxComputeNodeNum != null || targetComputeNodeNum != null)
-               && !cluster.validateSetManualElasticity()) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_SET_PARAM,
-                  Constants.OUTPUT_OP_RESULT_FAIL,
-                  Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
+         if (elasticityMode != null || minComputeNodeNum != null || maxComputeNodeNum != null || targetComputeNodeNum != null) {
+            if (!cluster.validateSetManualElasticity()) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                     clusterName, Constants.OUTPUT_OP_SET_PARAM,
+                     Constants.OUTPUT_OP_RESULT_FAIL,
+                     Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
+               return;
+            }
+         } else if (ioShares == null) {
+            // in this case, no parameter is specified excpet "cluster name", return directly
             return;
          }
 
