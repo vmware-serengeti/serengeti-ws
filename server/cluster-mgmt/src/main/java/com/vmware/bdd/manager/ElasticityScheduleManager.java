@@ -51,7 +51,6 @@ public class ElasticityScheduleManager extends Thread {
    }
 
    public void run() {
-      File currentFile = null;
       while (!isTerminate) {
          try {
             File directory = new File("/opt/serengeti/tmp/");
@@ -70,7 +69,6 @@ public class ElasticityScheduleManager extends Thread {
                }
             });
             for (File file : files) {
-               currentFile = file;
                String filename = file.getName();
                logger.info("Start to schedule " + filename + ".");
 
@@ -80,7 +78,6 @@ public class ElasticityScheduleManager extends Thread {
                   logger.error("Filename " + filename
                         + " is not valid. Should be " + filenamePrefix
                         + "<clusterName>.<nodeCount>");
-                  file.delete();
                   continue;
                }
                String clusterName = strs[0];
@@ -90,13 +87,11 @@ public class ElasticityScheduleManager extends Thread {
                try {
                   cluster = clusterMgr.getClusterByName(clusterName, false);
                } catch (BddException e) {
-                  logger.error("Caught BDD Exception during scheduling VHM.", e);
-                  file.delete();
+                  logger.error("Caught BDD Exception during getting cluster.", e);
                   continue;
                }
                if (cluster == null) {
                   logger.error("Cluster " + clusterName + " does not exist.");
-                  file.delete();
                   continue;
                }
 
@@ -104,7 +99,6 @@ public class ElasticityScheduleManager extends Thread {
                if (!cluster.validateSetManualElasticity()) {
                   logger.error("Cluster " + clusterName
                         + " does not have compute only node group(s).");
-                  file.delete();
                   continue;
                }
 
@@ -113,42 +107,33 @@ public class ElasticityScheduleManager extends Thread {
                   nodeCount = Integer.valueOf(nodeCountStr);
                } catch (NumberFormatException e) {
                   logger.error(nodeCountStr + " is not a valid number.");
-                  file.delete();
                   continue;
                }
                if (nodeCount < -1) {
                   logger.error("Node count " + nodeCountStr + " is not valid.");
-                  file.delete();
                   continue;
                }
                int computeNodeNum = cluster.retrieveComputeNodeNum();
                if (nodeCount > computeNodeNum) {
                   logger.error("minComputeNodeNum and maxComputeNodeNum should be less than or equal to deployed compute only nodes:"
                         + computeNodeNum);
-                  file.delete();
                   continue;
                }
 
-               // check if need to notify VHM
-               if (cluster.getAutomationEnable() == true
-                     && cluster.getVhmMinNum() == nodeCount
-                     && cluster.getVhmMaxNum() == nodeCount) {
-                  logger.info("VHM is already running at the scheduled mode.");
-               } else {
-                  try {
-                     List<String> nodeGroupNames =
-                           clusterMgr.syncSetParam(clusterName, null,
-                                 Integer.valueOf(nodeCount),
-                                 Integer.valueOf(nodeCount), true, null);
-                     logger.info(nodeGroupNames
-                           + " has been set to auto elasticity with min and max set to "
-                           + nodeCount);
-                  } catch (BddException e) {
-                     logger.error(
-                           "Caught BDD Exception during scheduling VHM.", e);
-                  }
+
+               try {
+                  List<String> nodeGroupNames =
+                        clusterMgr.syncSetParam(clusterName, null,
+                              Integer.valueOf(nodeCount),
+                              Integer.valueOf(nodeCount), true, null);
+                  logger.info(nodeGroupNames
+                        + " has been set to auto elasticity with min and max set to "
+                        + nodeCount);
+                  file.delete();
+               } catch (BddException e) {
+                  logger.error(
+                        "Caught BDD Exception during scheduling VHM.", e);
                }
-               file.delete();
             }
 
             Thread.sleep(1000);
@@ -157,10 +142,6 @@ public class ElasticityScheduleManager extends Thread {
             isTerminate = true;
          } catch (Exception e) {
             logger.error("Caught an Exception.", e);
-         } finally {
-            if (currentFile != null && currentFile.exists()) {
-               currentFile.delete();
-            }
          }
       }
    }
