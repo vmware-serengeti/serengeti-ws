@@ -163,9 +163,9 @@ public class VmEventProcessor extends Thread {
             return false;
          }
          logger.debug("Event received for VM not managed by Serengeti");
-         if (clusterEntityMgr.getNodeByVmName(vm.getName()) != null && 
+         if (clusterEntityMgr.getNodeByVmName(vm.getName()) != null &&
                VcResourceUtils.insidedRootFolder(vm)) {
-            logger.info("VM " + vm.getName() + 
+            logger.info("VM " + vm.getName() +
                   " is Serengeti created VM, add it into meta-db");
             return true;
          }
@@ -230,16 +230,14 @@ public class VmEventProcessor extends Thread {
             refreshNodeWithAction(e, moId, true, null, "Powered Off");
             break;
          }
-         case VmConnected: 
+         case VmConnected:
          case VmMigrated:
          case VmRelocated: {
             refreshNodeWithAction(e, moId, false, null, type.name());
             break;
          }
          case VhmError:
-         case VhmWarning:
-         case VhmInfo:
-         case VhmUser: {
+         case VhmWarning: {
             EventEx event = (EventEx) e;
             VcVirtualMachine vm =
                VcCache.getIgnoreMissing(event.getVm().getVm());
@@ -247,11 +245,27 @@ public class VmEventProcessor extends Thread {
                break;
             }
             if (clusterEntityMgr.getNodeByVmName(vm.getName()) != null) {
-               logger.info("received vhm event " + e.getDynamicType()
-                     + "for vm " + vm.getName() + ": "
+               logger.info("received vhm event " + event.getEventTypeId()
+                     + " for vm " + vm.getName() + ": "
                      + event.getMessage());
                clusterEntityMgr.refreshNodeByVmName(moId, vm.getName(),
                      event.getMessage(), true);
+            }
+            break;
+         }
+         case VhmInfo: {
+            EventEx event = (EventEx) e;
+            VcVirtualMachine vm =
+               VcCache.getIgnoreMissing(event.getVm().getVm());
+            if (vm == null) {
+               break;
+            }
+            if (clusterEntityMgr.getNodeByVmName(vm.getName()) != null) {
+               logger.info("received vhm event " + event.getEventTypeId()
+                     + " for vm " + vm.getName() + ": "
+                     + event.getMessage());
+               clusterEntityMgr.refreshNodeByVmName(moId, vm.getName(),
+                     "", true);
             }
             break;
          }
