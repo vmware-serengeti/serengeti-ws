@@ -82,7 +82,7 @@ public class NetworkDAO extends BaseDAO<NetworkEntity> implements INetworkDAO {
             "should not be called when IP pool is not used");
 
       return iIpBlockDao
-            .merge(IpBlockEntity.dup(entity.getIpBlocks()), true, true, false);
+            .merge(IpBlockEntity.dup(entity.getIpBlocks()), true, true, true);
    }
 
    @Override
