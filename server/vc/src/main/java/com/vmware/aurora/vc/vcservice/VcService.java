@@ -66,6 +66,7 @@ import com.vmware.vim.binding.vim.ServiceInstanceContent;
 import com.vmware.vim.binding.vim.SessionManager;
 import com.vmware.vim.binding.vim.TaskManager;
 import com.vmware.vim.binding.vim.VirtualDiskManager;
+import com.vmware.vim.binding.vim.alarm.AlarmManager;
 import com.vmware.vim.binding.vim.event.Event;
 import com.vmware.vim.binding.vim.event.Event.EventSeverity;
 import com.vmware.vim.binding.vim.ext.ManagedEntityInfo;
@@ -203,6 +204,7 @@ public class VcService {
       private OptionManager optionManager = null;
       private PropertyCollector propertyCollector = null;
       private ExtensionManager extensionManager = null;
+      private AlarmManager alarmManager = null;
 
       /*
        * A map that caches all managed object proxy objects.
@@ -257,6 +259,7 @@ public class VcService {
             optionManager = getManagedObject(instanceContent.getSetting());
             propertyCollector = getManagedObject(instanceContent.getPropertyCollector());
             extensionManager = getManagedObject(instanceContent.getExtensionManager());
+            alarmManager = getManagedObject(instanceContent.getAlarmManager());
 
             logger.info("VC login on behalf of {" + Thread.currentThread().getName() +
                   ":" + serviceName + "{" + genCount + "}} " +
@@ -736,6 +739,7 @@ public class VcService {
       em.updateExtension(us);
    }
 
+
    /**
     * Synchronized creation of new VC session.
     * @return the VC service object.
@@ -895,6 +899,10 @@ public class VcService {
 
    public PerformanceManager getPerfManager() throws VcException {
       return getServiceContents().perfManager;
+   }
+
+   public AlarmManager getAlarmManager() throws VcException {
+      return getServiceContents().alarmManager;
    }
 
    public int getInstanceId() {

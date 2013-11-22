@@ -24,9 +24,28 @@ import com.vmware.aurora.util.CommonUtil;
 import com.vmware.aurora.vc.VcTask.TaskType;
 import com.vmware.aurora.vc.VcTaskMgr.IVcTaskBody;
 import com.vmware.aurora.vc.vcservice.VcContext;
+import com.vmware.vim.binding.impl.vim.alarm.AlarmSettingImpl;
+import com.vmware.vim.binding.impl.vim.alarm.AlarmSpecImpl;
+import com.vmware.vim.binding.impl.vim.alarm.AlarmTriggeringActionImpl;
+import com.vmware.vim.binding.impl.vim.alarm.EventAlarmExpressionImpl;
+import com.vmware.vim.binding.impl.vim.alarm.OrAlarmExpressionImpl;
+import com.vmware.vim.binding.impl.vmodl.TypeNameImpl;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.HostSystem;
+import com.vmware.vim.binding.vim.ManagedEntity;
 import com.vmware.vim.binding.vim.ResourceAllocationInfo;
+import com.vmware.vim.binding.vim.ManagedEntity.Status;
+import com.vmware.vim.binding.vim.alarm.Alarm;
+import com.vmware.vim.binding.vim.alarm.AlarmExpression;
+import com.vmware.vim.binding.vim.alarm.AlarmManager;
+import com.vmware.vim.binding.vim.alarm.AlarmSetting;
+import com.vmware.vim.binding.vim.alarm.AlarmSpec;
+import com.vmware.vim.binding.vim.alarm.AlarmTriggeringAction;
+import com.vmware.vim.binding.vim.alarm.EventAlarmExpression;
+import com.vmware.vim.binding.vim.alarm.OrAlarmExpression;
+import com.vmware.vim.binding.vim.alarm.AlarmTriggeringAction.TransitionSpec;
+import com.vmware.vim.binding.vim.fault.DuplicateName;
+import com.vmware.vim.binding.vim.fault.InvalidName;
 import com.vmware.vim.binding.vim.vm.ConfigSpec;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import com.vmware.vim.binding.vmodl.fault.ManagedObjectNotFound;
@@ -35,9 +54,11 @@ import com.vmware.vim.binding.vmodl.fault.ManagedObjectNotFound;
  * VC related static functions.
  */
 public class VcUtil {
+   private static final Logger logger = Logger.getLogger(VcUtil.class);
+   
    /**
     * Checks if the allocation info is valid for a resource bundle RP.
-    * 
+    *
     * @param cpu
     *           The cpu alloc info.
     * @param mem
@@ -143,4 +164,88 @@ public class VcUtil {
          throw e;
       }
    }
+
+   public static void configureAlarm(Folder rootFolder) throws Exception {
+      AlarmManager alarmManager = VcContext.getService().getAlarmManager();
+
+      // Create the alarm for VHM
+      String SERENGETI_UUID = rootFolder.getName(); /* should be the name of the folder clusters get deployed into */
+
+      String ALARM_CLEARED_MSG = "all health issues previously reported by Big Data Extensions are in remission";
+      EventAlarmExpression raiseExpression = new EventAlarmExpressionImpl();
+      raiseExpression.setEventType(new TypeNameImpl("vim.event.EventEx"));
+      raiseExpression.setEventTypeId("com.vmware.vhadoop.vhm.vc.events.warning");
+      raiseExpression.setStatus(ManagedEntity.Status.yellow);
+
+      EventAlarmExpression clearExpression = new EventAlarmExpressionImpl();
+      clearExpression.setEventType(new TypeNameImpl("vim.event.EventEx"));
+      clearExpression.setEventTypeId("com.vmware.vhadoop.vhm.vc.events.info");
+      clearExpression.setComparisons(new EventAlarmExpressionImpl.ComparisonImpl[] {
+            new EventAlarmExpressionImpl.ComparisonImpl("message", "endsWith", ALARM_CLEARED_MSG)
+            });
+      clearExpression.setStatus(ManagedEntity.Status.green);
+
+      OrAlarmExpression or = new OrAlarmExpressionImpl();
+      or.setExpression(new AlarmExpression[] {raiseExpression, clearExpression});
+
+      AlarmTriggeringAction alarmAction = new AlarmTriggeringActionImpl();
+      alarmAction.setAction(null);
+      TransitionSpec tSpec = new AlarmTriggeringActionImpl.TransitionSpecImpl();
+      tSpec.setRepeats(false);
+      tSpec.setStartState(Status.green);
+      tSpec.setFinalState(Status.yellow);
+      alarmAction.setTransitionSpecs(new TransitionSpec[] { tSpec });
+      alarmAction.setGreen2yellow(true);
+
+      AlarmSpec spec = new AlarmSpecImpl();
+      spec.setActionFrequency(0);
+      spec.setExpression(or);
+
+      /* the name has to be unique, but we need a way to find any matching
+      alarms later so we use a known prefix */
+      String alarmName = "Big Data Extensions - compute VM health " + SERENGETI_UUID;
+      spec.setName(alarmName);
+      spec.setSystemName(null);
+      spec.setDescription("Indicates a health issue with a compute VM managed by Big Data Extensions. The specific health issue is detailed in a warning event in the event log.");
+      spec.setEnabled(true);
+
+      AlarmSetting as = new AlarmSettingImpl();
+      as.setReportingFrequency(0);
+      as.setToleranceRange(0);
+
+      spec.setSetting(as);
+
+      ManagedObjectReference[] existingAlarms = alarmManager.getAlarm(rootFolder._getRef());
+      Alarm existing = null;
+      try {
+         if (existingAlarms != null) {
+            for (ManagedObjectReference m : existingAlarms) {
+               Alarm a = MoUtil.getManagedObject(m);
+               //Alarm a = getServiceContents().vmomiClient.createStub(Alarm.class, m);
+               if (a.getInfo().getName().equals(alarmName)) {
+                  existing = a;
+                  break;
+               }
+            }
+         }
+      } catch (NullPointerException e) {
+         // this just saves a lot of null checks
+         logger.error("Got NullPointerException when querying alarms", e);
+      }
+
+      try {
+         if (existing != null) {
+            existing.reconfigure(spec);
+            logger.info("Alarm " + alarmName + " exists");
+         } else {
+            ManagedObjectReference alarmMoref = alarmManager.create(rootFolder._getRef(), spec);
+            logger.info("Create " + alarmMoref.getValue() + " " + alarmName);
+         }
+      } catch (InvalidName e) {
+         logger.error("Invalid alarm name", e);
+      } catch (DuplicateName e) {
+         logger.error("Duplicate alarm name", e);
+      }
+   }
+
 }

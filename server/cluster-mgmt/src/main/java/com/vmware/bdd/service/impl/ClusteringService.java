@@ -61,6 +61,7 @@ import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcInventory;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcSnapshot;
+import com.vmware.aurora.vc.VcUtil;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcevent.VcEventRouter;
 import com.vmware.aurora.vc.vcservice.VcContext;
@@ -267,6 +268,7 @@ public class ClusteringService implements IClusteringService {
          clusterInitializerService.transformClusterStatus(
                ClusterStatus.PROVISIONING, ClusterStatus.PROVISION_ERROR);
          elasticityScheduleMgr.start();
+         configureAlarm();
          initialized = true;
       }
    }
@@ -279,6 +281,41 @@ public class ClusteringService implements IClusteringService {
       processor.setName("VM Event Processor");
       processor.setPriority(Thread.MAX_PRIORITY);
       processor.start();
+   }
+
+   private void configureAlarm() {
+      List<String> folderList = new ArrayList<String>(1);
+      String serengetiUUID = ConfigInfo.getSerengetiRootFolder();
+      folderList.add(serengetiUUID);
+      Folder rootFolder = VcResourceUtils.findFolderByNameList(templateVm.getDatacenter(), folderList);
+
+      if (rootFolder == null) {
+         CreateVMFolderSP sp =
+               new CreateVMFolderSP(templateVm.getDatacenter(), null,
+                     folderList);
+         Callable<Void>[] storeProcedures = new Callable[1];
+         storeProcedures[0] = sp;
+         Map<String, Folder> folders =
+               executeFolderCreationProcedures(null, storeProcedures);
+         AuAssert.check(folders.size() == 1);
+         rootFolder = folders.get(serengetiUUID);
+         AuAssert.check(rootFolder != null);
+      }
+
+      final Folder root = rootFolder;
+      VcContext.inVcSessionDo(new VcSession<Boolean>() {
+         @Override
+         protected boolean isTaskSession() {
+            return true;
+         }
+
+         @Override
+         protected Boolean body() throws Exception {
+            VcUtil.configureAlarm(root);
+            return true;
+         }
+      });
+
    }
 
    synchronized public void destroy() {
@@ -742,7 +779,8 @@ public class ClusteringService implements IClusteringService {
                            storeProcedures, callback);
          if (result == null) {
             logger.error("No folder is created.");
-            throw ClusteringServiceException.CREATE_FOLDER_FAILED(cluster
+            if (cluster != null)
+               throw ClusteringServiceException.CREATE_FOLDER_FAILED(cluster
                   .getName());
          }
 
@@ -762,7 +800,8 @@ public class ClusteringService implements IClusteringService {
          }
          logger.info(total + " Folders are created.");
          if (!success) {
-            throw ClusteringServiceException.CREATE_FOLDER_FAILED(cluster
+            if (cluster != null)
+               throw ClusteringServiceException.CREATE_FOLDER_FAILED(cluster
                   .getName());
          }
          return folders;
@@ -1112,7 +1151,7 @@ public class ClusteringService implements IClusteringService {
          ha = true;
          ft = true;
          Integer cpuNum = vNode.getNodeGroup().getCpuNum();
-         cpuNum = (cpuNum == null) ? 0 : cpuNum; 
+         cpuNum = (cpuNum == null) ? 0 : cpuNum;
          if (cpuNum > 1) {
             throw ClusteringServiceException.CPU_NUMBER_MORE_THAN_ONE(vNode
                   .getVmName());
