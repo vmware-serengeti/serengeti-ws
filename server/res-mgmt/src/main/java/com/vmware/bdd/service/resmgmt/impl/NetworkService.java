@@ -479,7 +479,7 @@ public class NetworkService implements Serializable, INetworkService {
 
          for (NodeEntity node : nodes) {
             String ip = node.getIpOfNetworkName(net.getName());
-            if (ip.equals(Constants.NULL_IP)) {
+            if (ip == null || ip.equals(Constants.NULL_IP)) {
                // in case of errors during node creation (if possible)
                continue;
             }

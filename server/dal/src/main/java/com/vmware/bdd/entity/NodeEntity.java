@@ -487,6 +487,10 @@ public class NodeEntity extends EntityBase {
    }
 
    public String getIpOfNetworkName(String networkName) {
+      if (getIpConfigsInfo() == null || getIpConfigsInfo().isEmpty()) {
+         return Constants.NULL_IP;
+      }
+
       for (List<IpConfigInfo> configs : getIpConfigsInfo().values()) {
          for (IpConfigInfo config : configs) {
             if (config.getNetworkName().equals(networkName)) {
@@ -494,7 +498,7 @@ public class NodeEntity extends EntityBase {
             }
          }
       }
-      return null;
+      return Constants.NULL_IP;
    }
 
    // if includeVolumes is true, this method must be called inside a transaction
