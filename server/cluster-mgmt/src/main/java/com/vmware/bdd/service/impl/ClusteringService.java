@@ -678,7 +678,7 @@ public class ClusteringService implements IClusteringService {
          VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
          if (vm == null) {
             logger.error("cannot find node: " + node.getVmName());
-            return false;
+            continue;
          }
          if (!refreshAllNodes && !vm.getId().equalsIgnoreCase(masterMoId)) {
             continue;

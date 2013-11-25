@@ -80,6 +80,9 @@ public class MoUtil {
     * string has incorrect format.
     */
    public static ManagedObjectReference stringToMoref(String str) {
+      if (str == null) {
+         return null;
+      }
       String[] comps = str.split(":");
 
       if (comps.length != 2 && comps.length != 3) {
