@@ -55,7 +55,7 @@ import com.vmware.vim.binding.vmodl.fault.ManagedObjectNotFound;
  */
 public class VcUtil {
    private static final Logger logger = Logger.getLogger(VcUtil.class);
-   
+
    /**
     * Checks if the allocation info is valid for a resource bundle RP.
     *
@@ -203,7 +203,10 @@ public class VcUtil {
 
       /* the name has to be unique, but we need a way to find any matching
       alarms later so we use a known prefix */
-      String alarmName = "Big Data Extensions - compute VM health " + SERENGETI_UUID;
+      String alarmName = "BDE Health " + SERENGETI_UUID;
+      if (alarmName.length() > 80) {
+         alarmName = alarmName.substring(0, 80);
+      }
       spec.setName(alarmName);
       spec.setSystemName(null);
       spec.setDescription("Indicates a health issue with a compute VM managed by Big Data Extensions. The specific health issue is detailed in a warning event in the event log.");
@@ -221,7 +224,6 @@ public class VcUtil {
          if (existingAlarms != null) {
             for (ManagedObjectReference m : existingAlarms) {
                Alarm a = MoUtil.getManagedObject(m);
-               //Alarm a = getServiceContents().vmomiClient.createStub(Alarm.class, m);
                if (a.getInfo().getName().equals(alarmName)) {
                   existing = a;
                   break;
