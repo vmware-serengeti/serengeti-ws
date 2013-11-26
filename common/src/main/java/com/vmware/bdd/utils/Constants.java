@@ -162,4 +162,5 @@ public class Constants {
    public static final String DEFAULT_SET_PASSWORD_SCRIPT = "/usr/sbin/serengeti-password";
    public static final int SET_PASSWORD_MAX_RETRY_TIMES = 10;
    public static final String CHECK_WHETHER_SSH_ACCESS_AVAILABLE = "Check whether you can ssh to the target node from serengeti server.";
+   public static final String NEW_LINE = "\n";
 }
