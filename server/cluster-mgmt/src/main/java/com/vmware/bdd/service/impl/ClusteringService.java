@@ -690,7 +690,7 @@ public class ClusteringService implements IClusteringService {
          boolean isComputeOnlyNode =
                CommonUtil.isComputeOnly(roles, distroVendor);
          SetAutoElasticitySP sp =
-               new SetAutoElasticitySP(vm, serengetiUUID, masterMoId,
+               new SetAutoElasticitySP(clusterName, vm, serengetiUUID, masterMoId,
                      masterUUID, enableAutoElasticity, minComputeNodeNum, maxComputeNodeNum,
                      jobTrackerPort, isComputeOnlyNode);
          storeProcedures[i] = sp;

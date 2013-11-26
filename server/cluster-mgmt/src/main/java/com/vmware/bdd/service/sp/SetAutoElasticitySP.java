@@ -36,6 +36,7 @@ import com.vmware.vim.binding.vim.vm.ConfigSpec;
  */
 public class SetAutoElasticitySP implements Callable<Void> {
    private static final Logger logger = Logger.getLogger(SetAutoElasticitySP.class);
+   private final String clusterName;
    private final VcVirtualMachine vcVm;
    private final String serengetiUUID;
    private final String masterMoId;
@@ -46,8 +47,9 @@ public class SetAutoElasticitySP implements Callable<Void> {
    private final String jobTrackerPort;
    private final boolean isComputeOnlyNode;
 
-   public SetAutoElasticitySP(VcVirtualMachine vcVm, String serengetiUUID, String masterMoId, String masterUUID, Boolean enableAutoElasticity,
+   public SetAutoElasticitySP(String clusterName, VcVirtualMachine vcVm, String serengetiUUID, String masterMoId, String masterUUID, Boolean enableAutoElasticity,
          int minComputeNodeNum, int maxComputeNodeNum, String jobTrackerPort, boolean isComputeOnlyNode) {
+      this.clusterName = clusterName;
       this.vcVm = vcVm;
       this.serengetiUUID = serengetiUUID;
       this.masterMoId = masterMoId;
@@ -79,6 +81,7 @@ public class SetAutoElasticitySP implements Callable<Void> {
                options.add(new OptionValueImpl(VHMConstants.VHM_INSTANCERANGE_COMPUTENODE_NUM,
                      (new Integer(minComputeNodeNum)).toString() + ":" + (new Integer(maxComputeNodeNum)).toString()));
                options.add(new OptionValueImpl(VHMConstants.VHM_JOBTRACKER_PORT, jobTrackerPort));
+               options.add(new OptionValueImpl(VHMConstants.VHM_CLUSTER_NAME, clusterName));
             }
 
             options.add(new OptionValueImpl(VHMConstants.VHM_MASTER_MOID, masterMoId.split(":")[2]));

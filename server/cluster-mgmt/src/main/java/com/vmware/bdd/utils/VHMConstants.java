@@ -19,6 +19,7 @@ public class VHMConstants {
    public static String VHM_ENABLE = VHM_INFO_PREFIX + ".vhm.enable";
    public static String VHM_INSTANCERANGE_COMPUTENODE_NUM = VHM_INFO_PREFIX + ".instanceRange.computeNodeNum";
    public static String VHM_JOBTRACKER_PORT = VHM_INFO_PREFIX + ".jobtracker.port";
+   public static String VHM_CLUSTER_NAME = VHM_INFO_PREFIX + "masterVM.clusterName";
    public static String VHM_MASTER_MOID = VHM_INFO_PREFIX + ".masterVM.moid";
    public static String VHM_MASTER_UUID = VHM_INFO_PREFIX + ".masterVM.uuid";
    public static String VHM_SERENGETI_UUID = VHM_INFO_PREFIX + ".serengeti.uuid";
