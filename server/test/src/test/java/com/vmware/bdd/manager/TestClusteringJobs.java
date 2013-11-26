@@ -41,6 +41,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.gson.Gson;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcResourcePool;
@@ -111,6 +115,7 @@ public class TestClusteringJobs extends
    private static final String TEST_RP_NAME = "clusteringJobs-rp1";
    private static final String TEST_STATIC_IP_CLUSTER_NAME = "testClusterJobs";
    private static final String TEST_DHCP_CLUSTER_NAME = "testDhcpClusterJobs";
+   private static final String password = "212_adsfa";
 
    private static String staticDns2;
    private static String staticDns1;
@@ -333,6 +338,7 @@ public class TestClusteringJobs extends
       createSpec.setNetworkConfig(createNetConfig(TEST_STATIC_NETWORK_NAME, staticPortgroup));
       createSpec.setDistro("apache");
       createSpec.setDistroVendor(Constants.DEFAULT_VENDOR);
+      createSpec.setPassword(password);
       long jobExecutionId = clusterMgr.createCluster(createSpec);
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
@@ -353,6 +359,59 @@ public class TestClusteringJobs extends
       checkVcResourePools(cluster, ConfigInfo.getSerengetiUUID() + "-"
             + TEST_STATIC_IP_CLUSTER_NAME);
       checkDiskLayout(cluster);
+      checkPassword(cluster, password);
+   }
+
+   private void checkPassword(ClusterRead cluster, String password) {
+      List<NodeGroupRead> groups = cluster.getNodeGroups();
+      for (NodeGroupRead group : groups) {
+         for (NodeRead node : group.getInstances()) {
+            String nodeIP = node.fetchMgtIp();
+            Assert.assertTrue(isPasswordValid(nodeIP, password),"password should work for " + nodeIP + ", but it doesn't.");
+         }
+      }
+   }
+
+   private boolean isPasswordValid(String nodeIP, String password) {
+      Session session = null;
+      Channel channel = null;
+      int exitStatus = 1;
+      try{
+         JSch jsch=new JSch();
+         String user = "root";
+         java.util.Properties config = new java.util.Properties();
+         config.put("StrictHostKeyChecking", "no");
+         session = jsch.getSession(user, nodeIP, 22);
+         session.setConfig(config);
+         session.setTimeout(15000);
+         session.setPassword(password);
+         session.connect();
+
+         channel=session.openChannel("exec");
+         ((ChannelExec)channel).setCommand("hostname");
+         channel.connect();
+         while(true){
+            if (channel.isClosed()){
+               exitStatus = channel.getExitStatus();
+               break;
+            }
+            Thread.sleep(1000);
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+      }finally {
+         if (channel != null) {
+            channel.disconnect();
+         }
+         if (session != null) {
+            session.disconnect();
+         }
+      }
+      if (exitStatus == 0) {
+         return true;
+      } else {
+         return false;
+      }
    }
 
    private void checkVcFolders(final String folderName) {
@@ -512,6 +571,7 @@ public class TestClusteringJobs extends
       createSpec.setName(TEST_DHCP_CLUSTER_NAME);
       createSpec.setNetworkConfig(createNetConfig(TEST_DHCP_NETWORK_NAME, dhcpPortgroup));
       createSpec.setDistro("apache");
+      createSpec.setPassword(password);
       NodeGroupCreate worker = createSpec.getNodeGroup("worker");
       worker.setInstanceNum(1);
       long jobExecutionId = clusterMgr.createCluster(createSpec);
@@ -555,6 +615,7 @@ public class TestClusteringJobs extends
                   + cluster.getInstanceNum());
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.RUNNING,
             "Cluster status should be RUNNING, but got " + cluster.getStatus());
+      checkPassword(cluster, password);
    }
 
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testClusterResume" })
@@ -615,6 +676,7 @@ public class TestClusteringJobs extends
       cluster = clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.RUNNING,
             "Cluster status should be RUNNING, but got " + cluster.getStatus());
+      checkPassword(cluster, password);
    }
 
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testCreateCluster" })
