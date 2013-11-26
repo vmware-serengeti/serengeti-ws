@@ -24,6 +24,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Set;
 
 import jline.ConsoleReader;
@@ -385,7 +387,7 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private String getPassword() {
-      System.out.println("Hint: " + Constants.PASSWORD_LENGTH_REQUIREMENT);
+      System.out.println("Hint: " + Constants.PASSWORD_HINT);
       String firstPassword = getInputedPassword(Constants.ENTER_PASSWORD);
       if (firstPassword == null) {
          return null;
@@ -428,6 +430,21 @@ public class ClusterCommands implements CommandMarker {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, null,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.PASSWORD_LENGTH_REQUIREMENT);
+         return false;
+      }
+      if (containInvalidCharacter(password)) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, null,
+               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.PASSWORD_CHARACTER_REQUIREMENT);
+         return false;
+      }
+      return true;
+   }
+
+   private boolean containInvalidCharacter(String password) {
+      Pattern pattern = Pattern.compile("[0-9a-zA-Z_]+");
+      Matcher matcher = pattern.matcher(password);
+      if (matcher.matches()) {
          return false;
       }
       return true;

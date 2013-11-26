@@ -84,7 +84,7 @@ public class SetVMPasswordSP implements Callable<Void> {
       String tmpScript = "setPasswd.sh";
       commands[0] = "touch " + tmpScript;
       commands[1] = "echo \'" + scriptFileName + " -u <<EOF" + "\' >" + tmpScript;
-      commands[2] = "echo " + password + " >> " + tmpScript;
+      commands[2] = "echo \'" + password + "\' >> " + tmpScript;
       commands[3] = commands[2];
       commands[4] = "echo EOF >>" + tmpScript;
       commands[5] = "chmod +x " + tmpScript;
