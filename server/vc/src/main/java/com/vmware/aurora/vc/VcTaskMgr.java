@@ -70,8 +70,8 @@ import com.vmware.vim.binding.vim.event.VmEvent;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 
 public class VcTaskMgr {
-   private static final int MaxRetryNum = 5;
-   private static final long waitInterval = 20000;
+   private static final int maxRetryNum = 5;
+   private static final long waitInterval = 1000;
 
    /**
     * <code>IVcTaskBody</code> must be implemented by all vc tasks - this is
@@ -235,14 +235,15 @@ public class VcTaskMgr {
     */
    public VcTask execute(IVcTaskBody taskObj) throws Exception {
       Exception catchedException = null;
-      for (int i = 0; i < MaxRetryNum; i++) {
+      for (int i = 0; i < maxRetryNum; i++) {
          try {
             return executeInternal(taskObj);
          } catch (Exception e) {
             catchedException = e;
-            if (VcUtil.isRecoverableException(e)) {
-               logger.debug("Got recoverable exception to execute task" + taskObj, e);
+            if (VcUtil.isRecoverableException(e) && (i < maxRetryNum - 1)) {
+               logger.debug("Got recoverable exception when executing task " + taskObj.body().getId(), e);
                wait(waitInterval);
+               logger.info("Retry task " + taskObj.body().getId() + " the " + (i + 1) + " times.");
                continue;
             }
             throw e;
@@ -390,14 +391,15 @@ public class VcTaskMgr {
          VcEventType eventType, ManagedObjectReference moRef,
          IVcPseudoTaskBody obj) throws Exception {
       Exception catchedException = null;
-      for (int i = 0; i < MaxRetryNum; i++) {
+      for (int i = 0; i < maxRetryNum; i++) {
          try {
             return execPseudoTaskInternal(name, eventType, moRef, obj);
          } catch (Exception e) {
             catchedException = e;
-            if (VcUtil.isRecoverableException(e)) {
-               logger.debug("Got recoverable exception to execute  pseudo task" + obj, e);
+            if (VcUtil.isRecoverableException(e) && (i < maxRetryNum - 1)) {
+               logger.debug("Got recoverable exception when executing pseudo task " + name, e);
                wait(waitInterval);
+               logger.info("Retry pseudo task " + name + " the " + (i + 1) + " times.");
                continue;
             }
             throw e;

@@ -15,7 +15,6 @@
 
 package com.vmware.aurora.vc;
 
-import java.net.SocketTimeoutException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Level;
@@ -352,7 +351,7 @@ public class VcTask extends VcObjectImpl {
          } catch (Exception e) {
             catchedException = e;
             if (VcUtil.isRecoverableException(e)) {
-               wait(TimeUnit.NANOSECONDS.toMillis(getWaitIntervalNanos()));
+               wait(TimeUnit.NANOSECONDS.toMillis(badTaskWaitIntervalNanos));
                continue;
             }
             throw e;

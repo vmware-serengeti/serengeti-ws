@@ -36,21 +36,22 @@ import com.vmware.vim.binding.impl.vmodl.TypeNameImpl;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.HostSystem;
 import com.vmware.vim.binding.vim.ManagedEntity;
-import com.vmware.vim.binding.vim.ResourceAllocationInfo;
 import com.vmware.vim.binding.vim.ManagedEntity.Status;
+import com.vmware.vim.binding.vim.ResourceAllocationInfo;
 import com.vmware.vim.binding.vim.alarm.Alarm;
 import com.vmware.vim.binding.vim.alarm.AlarmExpression;
 import com.vmware.vim.binding.vim.alarm.AlarmManager;
 import com.vmware.vim.binding.vim.alarm.AlarmSetting;
 import com.vmware.vim.binding.vim.alarm.AlarmSpec;
 import com.vmware.vim.binding.vim.alarm.AlarmTriggeringAction;
+import com.vmware.vim.binding.vim.alarm.AlarmTriggeringAction.TransitionSpec;
 import com.vmware.vim.binding.vim.alarm.EventAlarmExpression;
 import com.vmware.vim.binding.vim.alarm.OrAlarmExpression;
-import com.vmware.vim.binding.vim.alarm.AlarmTriggeringAction.TransitionSpec;
 import com.vmware.vim.binding.vim.fault.DuplicateName;
 import com.vmware.vim.binding.vim.fault.InvalidName;
 import com.vmware.vim.binding.vim.vm.ConfigSpec;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
+import com.vmware.vim.binding.vmodl.fault.HostCommunication;
 import com.vmware.vim.binding.vmodl.fault.ManagedObjectNotFound;
 
 /**
@@ -256,6 +257,8 @@ public class VcUtil {
    }
 
    public static boolean isRecoverableException(Throwable e) {
-      return (e instanceof SSLPeerUnverifiedException || e instanceof SocketTimeoutException);
+      return (e instanceof SSLPeerUnverifiedException 
+            || e instanceof SocketTimeoutException
+            || e instanceof HostCommunication);
    }
 }
