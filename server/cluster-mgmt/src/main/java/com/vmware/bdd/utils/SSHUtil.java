@@ -2,7 +2,9 @@ package com.vmware.bdd.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 
 import org.apache.log4j.Logger;
 
@@ -36,7 +38,7 @@ public class SSHUtil {
    }
 
    public boolean execCmd(String user, String privateKeyFile,
-         String hostIP, int sshPort, String command) {
+         String hostIP, int sshPort, String command, InputStream in, OutputStream out) {
       AuAssert.check(command != null);
 
       connect(user, privateKeyFile, hostIP, sshPort);
@@ -44,6 +46,7 @@ public class SSHUtil {
       ChannelExec channel = null;
       BufferedReader in = null;
       logger.info("going to exec command");
+      BufferedReader bufferedReader = null;
       try {
          channel = (ChannelExec) session.openChannel("exec");
 
@@ -51,10 +54,10 @@ public class SSHUtil {
             logger.debug("SSH channel is opened!");
             channel.setPty(true); // to enable sudo
             channel.setCommand(command);
+            channel.setInputStream(in);
+            channel.setOutputStream(out);
 
-            in =
-                  new BufferedReader(new InputStreamReader(
-                        channel.getInputStream()));
+            bufferedReader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
             channel.connect();
             if (!channel.isConnected()) {
                logger.error("Cannot setup SSH channel connection.");
@@ -62,7 +65,7 @@ public class SSHUtil {
 
             StringBuilder buff = new StringBuilder();
             while (true) {
-               String line = in.readLine();
+               String line = bufferedReader.readLine();
                buff.append(line);
 
                if (channel.isClosed()) {
@@ -94,17 +97,14 @@ public class SSHUtil {
          if (channel != null && channel.isConnected()) {
             channel.disconnect();
          }
-         if (session != null && session.isConnected()) {
+
+         if (session != null && channel.isConnected()) {
             session.disconnect();
          }
-
-         if (in != null) {
-            try {
-               in.close();
-            } catch (IOException e) {
-               String errorMsg = "Failed to release buffer: " + e.getMessage();
-               logger.error(errorMsg);
-            }
+         try {
+            bufferedReader.close();
+         } catch (IOException e) {
+            logger.error("bufferedReader close failed: " + e.getMessage());
          }
       }
       return false;

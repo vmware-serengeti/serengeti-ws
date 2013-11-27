@@ -14,6 +14,9 @@
  ***************************************************************************/
 package com.vmware.bdd.service.sp;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
@@ -51,54 +54,49 @@ public class SetVMPasswordSP implements Callable<Void> {
 
       String cmd = generateSetPasswdCommand(Constants.SET_PASSWORD_SCRIPT_CONFIG_NAME, password);
 
-      boolean setPasswordSucceed = false;
-      for (int i = 0; i < Constants.SET_PASSWORD_MAX_RETRY_TIMES; i++) {
-         SSHUtil sshUtil = new SSHUtil();
-         setPasswordSucceed = sshUtil.execCmd(sshUser, privateKeyFile, nodeIP, sshPort, cmd);
-         if (setPasswordSucceed) {
-            break;
-         } else {
-            logger.info("Set password for " + nodeIP + " failed for " + (i + 1)
-                  + " times. Retrying after 2 seconds....");
-            try {
-               Thread.sleep(2000);
-            } catch (InterruptedException e) {
-               logger.info("Sleep interrupted, retrying immediately");
+      InputStream in = null;
+      try {
+         in = parseInputStream(new String(password + Constants.NEW_LINE + password + Constants.NEW_LINE));
+         boolean setPasswordSucceed = false;
+         for (int i = 0; i < Constants.SET_PASSWORD_MAX_RETRY_TIMES; i++) {
+            SSHUtil sshUtil = new SSHUtil();
+            setPasswordSucceed = sshUtil.execCmd(sshUser, privateKeyFile, nodeIP, sshPort, cmd, in, null);
+            if (setPasswordSucceed) {
+               break;
+            } else {
+               logger.info("Set password for " + nodeIP + " failed for " + (i + 1)
+                     + " times. Retrying after 2 seconds....");
+               try {
+                  Thread.sleep(2000);
+               } catch (InterruptedException e) {
+                  logger.info("Sleep interrupted, retrying immediately");
+               }
             }
          }
-      }
 
-      if (setPasswordSucceed) {
-         logger.info("set password for " + nodeIP + " succeed");
-         return true;
-      } else {
-         logger.info("set password for " + nodeIP + " failed");
-         throw new Exception(Constants.CHECK_WHETHER_SSH_ACCESS_AVAILABLE);
+         if (setPasswordSucceed) {
+            logger.info("set password for " + nodeIP + " succeed");
+            return true;
+         } else {
+            logger.info("set password for " + nodeIP + " failed");
+            throw new Exception(Constants.CHECK_WHETHER_SSH_ACCESS_AVAILABLE);
+         }
+      } finally {
+         if (in != null) {
+            in.close();
+         }
       }
+   }
+
+   public ByteArrayInputStream parseInputStream(String in)throws Exception
+   {
+       ByteArrayInputStream input=new ByteArrayInputStream(in.getBytes());
+       return input;
    }
 
    private String generateSetPasswdCommand(String setPasswdScriptConfig, String password) {
       String scriptFileName = Configuration.getString(setPasswdScriptConfig, Constants.DEFAULT_SET_PASSWORD_SCRIPT);
-
-      String[] commands = new String[8];
-      String tmpScript = "setPasswd.sh";
-      commands[0] = "touch " + tmpScript;
-      commands[1] = "echo \'" + scriptFileName + " -u <<EOF" + "\' >" + tmpScript;
-      commands[2] = "echo \'" + password + "\' >> " + tmpScript;
-      commands[3] = commands[2];
-      commands[4] = "echo EOF >>" + tmpScript;
-      commands[5] = "chmod +x " + tmpScript;
-      commands[6] = "sudo ./" + tmpScript;
-      commands[7] = "rm -f " + tmpScript;
-      StringBuilder sb = new StringBuilder().append(commands[0]).append(" && ").
-                                             append(commands[1]).append(" && ").
-                                             append(commands[2]).append(" && ").
-                                             append(commands[3]).append(" && ").
-                                             append(commands[4]).append(" && ").
-                                             append(commands[5]).append(" && ").
-                                             append(commands[6]).append(" && ").
-                                             append(commands[7]);
-      return sb.toString();
+      return "sudo " + scriptFileName + " -u";
    }
 
    public String getNodeIP() {

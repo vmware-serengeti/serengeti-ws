@@ -245,4 +245,5 @@ public class Constants {
    public static final String RESUME_DONOT_NEED_SET_PASSWORD = "Run the 'cluster create --resume' command, but do not include the '--password' paramter.";
    public static final String PASSWORD_CHARACTER_REQUIREMENT = "Password can only contain digits[0-9], characters[a-zA-Z] or _.";
    public static final String PASSWORD_HINT = "Password must be from " + PASSWORD_MIN_LENGTH + " to " + PASSWORD_MAX_LENGTH + " characters and can only contain digits[0-9], characters[a-zA-Z] or _.";
+   public static final CharSequence NEW_LINE = "\n";
 }
