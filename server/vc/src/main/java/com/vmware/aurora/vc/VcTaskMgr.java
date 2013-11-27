@@ -70,6 +70,9 @@ import com.vmware.vim.binding.vim.event.VmEvent;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 
 public class VcTaskMgr {
+   private static final int MaxRetryNum = 5;
+   private static final long waitInterval = 20000;
+
    /**
     * <code>IVcTaskBody</code> must be implemented by all vc tasks - this is
     * the only way to safely specify a task action.
@@ -231,6 +234,24 @@ public class VcTaskMgr {
     * @throws Exception
     */
    public VcTask execute(IVcTaskBody taskObj) throws Exception {
+      Exception catchedException = null;
+      for (int i = 0; i < MaxRetryNum; i++) {
+         try {
+            return executeInternal(taskObj);
+         } catch (Exception e) {
+            catchedException = e;
+            if (VcUtil.isRecoverableException(e)) {
+               logger.debug("Got recoverable exception to execute task" + taskObj, e);
+               wait(waitInterval);
+               continue;
+            }
+            throw e;
+         }
+      }
+      throw catchedException;
+   }
+
+   private VcTask executeInternal(IVcTaskBody taskObj) throws Exception {
       AuAssert.check(VcContext.isInTaskSession());
       VcTask task = null;
       rwLock.readLock().lock();
@@ -366,6 +387,26 @@ public class VcTaskMgr {
     * @throws Exception
     */
    public ManagedObjectReference execPseudoTask(String name,
+         VcEventType eventType, ManagedObjectReference moRef,
+         IVcPseudoTaskBody obj) throws Exception {
+      Exception catchedException = null;
+      for (int i = 0; i < MaxRetryNum; i++) {
+         try {
+            return execPseudoTaskInternal(name, eventType, moRef, obj);
+         } catch (Exception e) {
+            catchedException = e;
+            if (VcUtil.isRecoverableException(e)) {
+               logger.debug("Got recoverable exception to execute  pseudo task" + obj, e);
+               wait(waitInterval);
+               continue;
+            }
+            throw e;
+         }
+      }
+      throw catchedException;
+   }
+
+   private ManagedObjectReference execPseudoTaskInternal(String name,
          VcEventType eventType, ManagedObjectReference moRef,
          IVcPseudoTaskBody obj) throws Exception {
       AuAssert.check(eventType != null);

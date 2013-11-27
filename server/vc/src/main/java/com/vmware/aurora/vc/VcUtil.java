@@ -14,8 +14,11 @@
  ***************************************************************************/
 package com.vmware.aurora.vc;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.SSLPeerUnverifiedException;
 
 import org.apache.log4j.Logger;
 
@@ -252,4 +255,7 @@ public class VcUtil {
       }
    }
 
+   public static boolean isRecoverableException(Throwable e) {
+      return (e instanceof SSLPeerUnverifiedException || e instanceof SocketTimeoutException);
+   }
 }

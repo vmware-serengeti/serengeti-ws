@@ -15,6 +15,7 @@
 
 package com.vmware.aurora.vc;
 
+import java.net.SocketTimeoutException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Level;
@@ -91,6 +92,7 @@ public class VcTask extends VcObjectImpl {
    /* Keep an eye on VC PC notifications - wake up periodically. */
    private static final long defaultWaitIntervalNanos = TimeUnit.SECONDS.toNanos(20);
    private static final long badTaskWaitIntervalNanos = TimeUnit.SECONDS.toNanos(1);
+   private static final int maxRetryNum = 5;
 
    private long lastWaitTimeNanos;      // Time taken by last iteration of wait.
    private long totalWaitTimeNanos;     // Total task wait time.
@@ -342,13 +344,30 @@ public class VcTask extends VcObjectImpl {
     * @exception on failure
     */
    public synchronized VcObject waitForCompletion() throws Exception {
+      totalWaitTimeNanos = 0;
+      Exception catchedException = null;
+      for (int i = 0; i < maxRetryNum; i++) {
+         try {
+            return waitForCompletionIntenal();
+         } catch (Exception e) {
+            catchedException = e;
+            if (VcUtil.isRecoverableException(e)) {
+               wait(TimeUnit.NANOSECONDS.toMillis(getWaitIntervalNanos()));
+               continue;
+            }
+            throw e;
+         }
+      }
+      throw catchedException;
+   }
+
+   private VcObject waitForCompletionIntenal() throws Exception {
       Task task = getManagedObject();
       StatsType oldSrc = Profiler.pushInc(StatsType.VC_TASK_WAIT, getType());
       long lastWaitStartedNanos ;
       long waitFinishedNanos = System.nanoTime();
 
       state = task.getInfo().getState();
-      totalWaitTimeNanos = 0;
       while (state != State.success) {
          boolean normalWaitCompletion = false; // wait() not interrupted.
 
