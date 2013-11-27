@@ -44,7 +44,6 @@ public class SSHUtil {
       connect(user, privateKeyFile, hostIP, sshPort);
 
       ChannelExec channel = null;
-      BufferedReader in = null;
       logger.info("going to exec command");
       BufferedReader bufferedReader = null;
       try {
