@@ -17,17 +17,26 @@ package com.vmware.bdd.service.job;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.exception.ClusteringServiceException;
+import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
+import com.vmware.bdd.service.sp.VmEventProcessor;
 import com.vmware.bdd.utils.AuAssert;
 
 public class DeleteClusterNodeStep extends TrackableTasklet {
    private static final Logger logger = Logger
          .getLogger(DeleteClusterNodeStep.class);
    private INetworkService networkMgr;
+   private IClusteringService clusteringService;
+
+   @Autowired
+   public void setClusteringService(IClusteringService clusteringService) {
+      this.clusteringService = clusteringService;
+   }
 
    public INetworkService getNetworkMgr() {
       return networkMgr;
@@ -61,7 +70,11 @@ public class DeleteClusterNodeStep extends TrackableTasklet {
       AuAssert.check(cluster != null);
       if (success) {
          releaseIp(cluster);
-         getClusterEntityMgr().delete(cluster);
+         synchronized (getClusterEntityMgr()) {
+            VmEventProcessor processor = clusteringService.getEventProcessor();
+            processor.trySuspend();
+            getClusterEntityMgr().delete(cluster);
+         }
       }
    }
 

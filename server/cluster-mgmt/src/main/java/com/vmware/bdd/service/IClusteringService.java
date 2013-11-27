@@ -14,7 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +26,7 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.job.StatusUpdater;
+import com.vmware.bdd.service.sp.VmEventProcessor;
 
 public interface IClusteringService {
 
@@ -175,4 +175,6 @@ public interface IClusteringService {
     * @return
     */
    public String getTemplateVmId();
+
+   public VmEventProcessor getEventProcessor();
 }

@@ -1813,5 +1813,7 @@ public class ClusteringService implements IClusteringService {
       }
       return VcVmUtil.runSPOnSingleVM(node, stopVMSP);
    }
-
+   public VmEventProcessor getEventProcessor() {
+      return this.processor;
+   }
 }
