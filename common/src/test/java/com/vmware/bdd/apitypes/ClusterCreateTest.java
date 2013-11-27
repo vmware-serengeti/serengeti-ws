@@ -48,12 +48,6 @@ public class ClusterCreateTest {
       cluster.setDistroVersion("1.0.1");
       assertEquals(false, cluster.supportedWithHdfs2());
       cluster.setDistroVendor(Constants.CDH_VENDOR);
-      cluster.setDistroVersion("1.0.0");
-      assertEquals(false, cluster.supportedWithHdfs2());
-      cluster.setDistroVersion("3u3");
-      assertEquals(false, cluster.supportedWithHdfs2());
-      cluster.setDistroVersion("4.0.1");
-      assertEquals(false, cluster.supportedWithHdfs2());
       cluster.setDistroVersion("4.1.2");
       assertEquals(true, cluster.supportedWithHdfs2());
       cluster.setDistroVersion("4.1");
@@ -66,11 +60,11 @@ public class ClusterCreateTest {
       assertEquals(true, cluster.supportedWithHdfs2());
       cluster.setDistroVersion("4.15.0.1");
       assertEquals(true, cluster.supportedWithHdfs2());
-      cluster.setDistroVersion("4.100.0.1");
+      cluster.setDistroVendor(Constants.GPHD_VENDOR);
+      cluster.setDistroVersion("1.2");
       assertEquals(false, cluster.supportedWithHdfs2());
-      cluster.setDistroVersion("4.1.0.2.3");
-      assertEquals(false, cluster.supportedWithHdfs2());
-      cluster.setDistroVersion("4.2.0.2.3");
+      cluster.setDistroVendor(Constants.MAPR_VENDOR);
+      cluster.setDistroVersion("2.0");
       assertEquals(false, cluster.supportedWithHdfs2());
       cluster.setDistroVendor(Constants.PHD_VENDOR);
       assertEquals(true, cluster.supportedWithHdfs2());
