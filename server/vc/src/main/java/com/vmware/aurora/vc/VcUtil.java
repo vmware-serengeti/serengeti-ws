@@ -176,6 +176,7 @@ public class VcUtil {
       raiseExpression.setEventType(new TypeNameImpl("vim.event.EventEx"));
       raiseExpression.setEventTypeId("com.vmware.vhadoop.vhm.vc.events.warning");
       raiseExpression.setStatus(ManagedEntity.Status.yellow);
+      raiseExpression.setObjectType(new TypeNameImpl("vim.VirtualMachine"));
 
       EventAlarmExpression clearExpression = new EventAlarmExpressionImpl();
       clearExpression.setEventType(new TypeNameImpl("vim.event.EventEx"));
@@ -184,6 +185,7 @@ public class VcUtil {
             new EventAlarmExpressionImpl.ComparisonImpl("message", "endsWith", ALARM_CLEARED_MSG)
             });
       clearExpression.setStatus(ManagedEntity.Status.green);
+      clearExpression.setObjectType(new TypeNameImpl("vim.VirtualMachine"));
 
       OrAlarmExpression or = new OrAlarmExpressionImpl();
       or.setExpression(new AlarmExpression[] {raiseExpression, clearExpression});
