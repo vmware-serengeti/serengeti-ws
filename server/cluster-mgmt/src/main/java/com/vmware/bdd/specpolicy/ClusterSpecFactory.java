@@ -17,6 +17,7 @@ package com.vmware.bdd.specpolicy;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 
@@ -80,9 +81,20 @@ public class ClusterSpecFactory {
     * @return cluster spec
     */
    public static ClusterCreate loadFromFile(File file) throws FileNotFoundException {
-      Reader fileReader = new FileReader(file);
-      Gson gson = new Gson();
-      return gson.fromJson(fileReader, ClusterCreate.class);
+      Reader fileReader = null;
+      try {
+         fileReader = new FileReader(file);
+         Gson gson = new Gson();
+         return gson.fromJson(fileReader, ClusterCreate.class);
+      } finally {
+         if (fileReader != null) {
+            try {
+               fileReader.close();
+            } catch (IOException e) {
+               logger.error("Failed to release buffer: " + e.getMessage());
+            }
+         }
+      }
    }
 
    /**

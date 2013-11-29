@@ -497,9 +497,11 @@ public class ClusteringService implements IClusteringService {
       String prvKeyFile =
             Configuration.getString("serengeti.ssh.private.key.file",
                   "/home/serengeti/.ssh/id_rsa");
+      Session session = null;
       ChannelExec channel = null;
+      BufferedReader in = null;
       try {
-         Session session = jsch.getSession(sshUser, maprNodeIP, sshPort);
+         session = jsch.getSession(sshUser, maprNodeIP, sshPort);
          jsch.addIdentity(prvKeyFile);
          java.util.Properties config = new java.util.Properties();
          config.put("StrictHostKeyChecking", "no");
@@ -516,7 +518,7 @@ public class ClusteringService implements IClusteringService {
             logger.debug("exec command is: " + cmd);
             channel.setPty(true); //to enable sudo
             channel.setCommand("sudo " + cmd);
-            BufferedReader in =
+            in =
                   new BufferedReader(new InputStreamReader(
                         channel.getInputStream()));
             channel.connect();
@@ -536,7 +538,6 @@ public class ClusteringService implements IClusteringService {
                   break;
                }
             }
-            in.close();
             Pattern ipPattern = Pattern.compile(Constants.IP_PATTERN);
             Matcher matcher = ipPattern.matcher(buff.toString());
             if (matcher.find()) {
@@ -561,7 +562,20 @@ public class ClusteringService implements IClusteringService {
          logger.error(errorMsg);
          throw BddException.INTERNAL(null, errorMsg);
       } finally {
-         channel.disconnect();
+         if (channel != null && channel.isConnected()) {
+            channel.disconnect();
+         }
+         if (session != null && session.isConnected()) {
+            session.disconnect();
+         }
+         if (in != null) {
+            try {
+               in.close();
+            } catch (IOException e) {
+               errorMsg = "Failed to release buffer while retrieving MapR JobTracker Port: " + e.getMessage();
+               logger.error(errorMsg);
+            }
+         }
       }
       return activeJobTrackerIp;
    }

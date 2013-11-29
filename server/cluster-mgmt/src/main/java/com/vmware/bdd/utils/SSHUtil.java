@@ -11,8 +11,6 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-import com.vmware.bdd.utils.AuAssert;
-
 
 public class SSHUtil {
    private JSch jsch;
@@ -44,6 +42,7 @@ public class SSHUtil {
       connect(user, privateKeyFile, hostIP, sshPort);
 
       ChannelExec channel = null;
+      BufferedReader in = null;
       logger.info("going to exec command");
       try {
          channel = (ChannelExec) session.openChannel("exec");
@@ -53,7 +52,7 @@ public class SSHUtil {
             channel.setPty(true); // to enable sudo
             channel.setCommand(command);
 
-            BufferedReader in =
+            in =
                   new BufferedReader(new InputStreamReader(
                         channel.getInputStream()));
             channel.connect();
@@ -71,12 +70,10 @@ public class SSHUtil {
                   logger.debug("Exit status from exec is: " + exitStatus);
                   logger.debug("command result: " + buff.toString());
 
-                  in.close();
                   if (exitStatus == 0) {
                      return true;
-                  } else {
-                     return false;
                   }
+                  return false;
                }
 
                //to avoid CPU busy
@@ -94,11 +91,20 @@ public class SSHUtil {
       } catch (JSchException e) {
          e.printStackTrace();
       } finally {
-         if (channel != null) {
+         if (channel != null && channel.isConnected()) {
             channel.disconnect();
          }
-         if (session != null) {
+         if (session != null && session.isConnected()) {
             session.disconnect();
+         }
+
+         if (in != null) {
+            try {
+               in.close();
+            } catch (IOException e) {
+               String errorMsg = "Failed to release buffer: " + e.getMessage();
+               logger.error(errorMsg);
+            }
          }
       }
       return false;
