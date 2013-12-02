@@ -62,6 +62,9 @@ public class ElasticityScheduleManager extends Thread {
                      return false;
                }
             });
+            if (files == null) {
+               files = new File[0];
+            }
             Arrays.sort(files, new Comparator<File>() {
                public int compare(File f1, File f2) {
                   return Long.valueOf(f1.lastModified()).compareTo(
@@ -135,13 +138,14 @@ public class ElasticityScheduleManager extends Thread {
                         "Caught BDD Exception during scheduling VHM.", e);
                }
             }
-
+         } catch (Exception e) {
+            logger.error("Caught an Exception.", e);
+         }
+         try {
             Thread.sleep(1000);
          } catch (InterruptedException e) {
             logger.warn("Thread interrupt exception received, exit.");
             isTerminate = true;
-         } catch (Exception e) {
-            logger.error("Caught an Exception.", e);
          }
       }
    }
