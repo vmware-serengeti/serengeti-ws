@@ -1,5 +1,6 @@
 package com.vmware.bdd.service.sp;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -9,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.exception.AuroraException;
+import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.util.CmsWorker;
 import com.vmware.aurora.util.CmsWorker.WorkQueue;
 import com.vmware.aurora.vc.MoUtil;
@@ -25,11 +27,14 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.event.Event;
 import com.vmware.vim.binding.vim.event.EventEx;
 import com.vmware.vim.binding.vim.event.HostEvent;
 import com.vmware.vim.binding.vim.event.VmEvent;
+import com.vmware.vim.binding.vim.vm.FaultToleranceSecondaryConfigInfo;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import com.vmware.vim.binding.vmodl.fault.ManagedObjectNotFound;
 
@@ -61,10 +66,11 @@ public class VmEventProcessor extends Thread {
          VcEventType.NotEnoughResourcesToStartVmEvent,
          VcEventType.VmMaxRestartCountReached, VcEventType.VmFailoverFailed,
          VcEventType.VmCloned, VcEventType.VhmError, VcEventType.VhmWarning,
-         VcEventType.VhmInfo, VcEventType.VhmUser,
+         VcEventType.VhmInfo,
+         VcEventType.VhmUser,
 
          // host event set
-         VcEventType.HostConnected, VcEventType.HostRemoved, 
+         VcEventType.HostConnected, VcEventType.HostRemoved,
          VcEventType.EnteredMaintenanceMode, VcEventType.ExitMaintenanceMode,
          VcEventType.HostDisconnected);
 
@@ -75,10 +81,27 @@ public class VmEventProcessor extends Thread {
    private boolean isTerminate = false;
    private ClusterEntityManager clusterEntityMgr;
    private boolean isSuspended;
+   private Folder rootSerengetiFolder = null;
 
    public VmEventProcessor(ClusterEntityManager clusterEntityMgr) {
       super();
       this.clusterEntityMgr = clusterEntityMgr;
+   }
+
+   private void initRootFolder() {
+      String serverMobId =
+            Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
+      VcVirtualMachine serverVm = VcCache.get(serverMobId);
+      String root = ConfigInfo.getSerengetiRootFolder();
+      List<String> folderNames = new ArrayList<String>();
+      folderNames.add(root);
+      this.rootSerengetiFolder =
+            VcResourceUtils.findFolderByNameList(serverVm.getDatacenter(),
+                  folderNames);
+      if (rootSerengetiFolder == null) {
+         logger.info("VM root folder" + root
+               + " is not created yet. Ignore external VM event.");
+      }
    }
 
    public void installEventHandler() {
@@ -159,8 +182,14 @@ public class VmEventProcessor extends Thread {
             return false;
          }
          logger.debug("Event received for VM not managed by Serengeti");
+         if (rootSerengetiFolder == null) {
+            initRootFolder();
+         }
+         if (rootSerengetiFolder == null) {
+            return false;
+         }
          if (clusterEntityMgr.getNodeByVmName(vm.getName()) != null
-               && VcResourceUtils.insidedRootFolder(vm)) {
+               && VcResourceUtils.insidedRootFolder(rootSerengetiFolder, vm)) {
             logger.info("VM " + vm.getName()
                   + " is Serengeti created VM, add it into meta-db");
             return true;
@@ -171,11 +200,11 @@ public class VmEventProcessor extends Thread {
 
    private void processHostEvent(VcEventType type, Event e) throws Exception {
       logger.info("Received host event " + e);
-      HostEvent he = (HostEvent)e;
+      HostEvent he = (HostEvent) e;
       String hostName = he.getHost().getName();
       List<NodeEntity> nodes = clusterEntityMgr.getNodesByHost(hostName);
       switch (type) {
-      case HostConnected: 
+      case HostConnected:
       case EnteredMaintenanceMode:
       case ExitMaintenanceMode:
       case HostDisconnected: {
@@ -194,15 +223,18 @@ public class VmEventProcessor extends Thread {
             logger.info("Process VM " + vm.getName()
                   + " for received host event " + type + " of " + hostName);
             if (logger.isDebugEnabled()) {
-               logger.debug("host availability: " + !vm.getHost().isUnavailbleForManagement());
+               logger.debug("host availability: "
+                     + !vm.getHost().isUnavailbleForManagement());
                logger.debug("host connection: " + vm.getHost().isConnected());
-               logger.debug("host maintenance: " + vm.getHost().isInMaintenanceMode());
+               logger.debug("host maintenance: "
+                     + vm.getHost().isInMaintenanceMode());
                logger.debug("vm connection: " + vm.isConnected());
             }
             try {
                vm.updateRuntime();
                clusterEntityMgr.refreshNodeByVmName(moId, vm.getName(), true);
-               if ((!vm.isConnected()) || vm.getHost().isUnavailbleForManagement()) {
+               if ((!vm.isConnected())
+                     || vm.getHost().isUnavailbleForManagement()) {
                   logConnectionChangeEvent(vm.getName());
                }
             } catch (ManagedObjectNotFound me) {
@@ -217,7 +249,8 @@ public class VmEventProcessor extends Thread {
             if (moId == null) {
                continue;
             }
-            logger.debug("Remove node " + node.getVmName() + " for host is removed from VC.");
+            logger.debug("Remove node " + node.getVmName()
+                  + " for host is removed from VC.");
             clusterEntityMgr.removeVmReference(moId);
          }
          break;
@@ -250,7 +283,9 @@ public class VmEventProcessor extends Thread {
       logger.debug("processed" + externalStr + " vm event: " + e);
       if (external) {
          if (processExternalEvent(type, e, moId)) {
-            processEvent(type, e, moId, true);
+            VcVirtualMachine vm = VcCache.getIgnoreMissing(e.getVm().getVm());
+            String newId = switchMobId(moId, vm);
+            processEvent(type, e, newId, true);
          }
       } else {
          processEvent(type, e, moId, false);
@@ -269,7 +304,7 @@ public class VmEventProcessor extends Thread {
             break;
          }
          case VmDisconnected: {
-            VcVirtualMachine vm = VcCache.getIgnoreMissing(e.getVm().getVm());
+            VcVirtualMachine vm = VcCache.getIgnoreMissing(moId);
             if (vm == null) {
                if (clusterEntityMgr.getNodeByMobId(moId) != null) {
                   logger.debug("vm " + moId + " is already removed");
@@ -279,7 +314,8 @@ public class VmEventProcessor extends Thread {
             }
             if (clusterEntityMgr.getNodeByVmName(vm.getName()) != null) {
                vm.updateRuntime();
-               if ((!vm.isConnected()) || vm.getHost().isUnavailbleForManagement()) {
+               if ((!vm.isConnected())
+                     || vm.getHost().isUnavailbleForManagement()) {
                   clusterEntityMgr.setNodeConnectionState(vm.getName());
                   logConnectionChangeEvent(vm.getName());
                }
@@ -287,7 +323,7 @@ public class VmEventProcessor extends Thread {
             break;
          }
          case VmPoweredOn: {
-            refreshNodeWithAction(e, moId, true,
+            refreshNodeWithAction(moId, true,
                   Constants.NODE_ACTION_WAITING_IP, "Powered On");
             if (external) {
                NodePowerOnRequest request =
@@ -297,21 +333,21 @@ public class VmEventProcessor extends Thread {
             break;
          }
          case VmCloned: {
-            refreshNodeWithAction(e, moId, true,
+            refreshNodeWithAction(moId, true,
                   Constants.NODE_ACTION_RECONFIGURE, "Cloned");
             break;
          }
          case VmSuspended: {
-            refreshNodeWithAction(e, moId, true, null, "Suspended");
+            refreshNodeWithAction(moId, true, null, "Suspended");
             break;
          }
          case VmPoweredOff: {
-            refreshNodeWithAction(e, moId, true, null, "Powered Off");
+            refreshNodeWithAction(moId, true, null, "Powered Off");
             break;
          }
          case VmConnected: {
             try {
-               refreshNodeWithAction(e, moId, false, null, type.name());
+               refreshNodeWithAction(moId, false, null, type.name());
             } catch (AuroraException ex) {
                // vm is not able to be accessed immediately after it's created, 
                // ignore the exception here to continue other event processing
@@ -334,8 +370,7 @@ public class VmEventProcessor extends Thread {
             }
             if (clusterEntityMgr.getNodeByVmName(vm.getName()) != null) {
                logger.info("received vhm event " + event.getEventTypeId()
-                     + " for vm " + vm.getName() + ": "
-                     + event.getMessage());
+                     + " for vm " + vm.getName() + ": " + event.getMessage());
                vm.updateRuntime();
                clusterEntityMgr.refreshNodeByVmName(moId, vm.getName(),
                      event.getMessage(), true);
@@ -345,17 +380,16 @@ public class VmEventProcessor extends Thread {
          case VhmInfo: {
             EventEx event = (EventEx) e;
             VcVirtualMachine vm =
-               VcCache.getIgnoreMissing(event.getVm().getVm());
+                  VcCache.getIgnoreMissing(event.getVm().getVm());
             if (vm == null) {
                break;
             }
             if (clusterEntityMgr.getNodeByVmName(vm.getName()) != null) {
                logger.info("received vhm event " + event.getEventTypeId()
-                     + " for vm " + vm.getName() + ": "
-                     + event.getMessage());
+                     + " for vm " + vm.getName() + ": " + event.getMessage());
                vm.updateRuntime();
-               clusterEntityMgr.refreshNodeByVmName(moId, vm.getName(),
-                     "", true);
+               clusterEntityMgr.refreshNodeByVmName(moId, vm.getName(), "",
+                     true);
             }
             break;
          }
@@ -375,9 +409,9 @@ public class VmEventProcessor extends Thread {
       }
    }
 
-   private void refreshNodeWithAction(Event e, String moId, boolean setAction,
+   private void refreshNodeWithAction(String moId, boolean setAction,
          String action, String eventName) throws Exception {
-      VcVirtualMachine vm = VcCache.getIgnoreMissing(e.getVm().getVm());
+      VcVirtualMachine vm = VcCache.getIgnoreMissing(moId);
       if (vm == null) {
          return;
       }
@@ -385,6 +419,7 @@ public class VmEventProcessor extends Thread {
          logger.info("received vm " + eventName + " event for vm: "
                + vm.getName());
          vm.updateRuntime();
+
          if (setAction) {
             clusterEntityMgr.refreshNodeByVmName(moId, vm.getName(), action,
                   true);
@@ -393,6 +428,24 @@ public class VmEventProcessor extends Thread {
          }
       }
       return;
+   }
+
+   private String switchMobId(String moId, VcVirtualMachine vm)
+         throws Exception {
+      // check if ft enabled
+      if (vm.getConfig().getFtInfo() != null) {
+         // ft enabled
+         vm.update();
+         if (vm.getConfig().getFtInfo().getRole() != 1) {
+            // not primary VM
+            FaultToleranceSecondaryConfigInfo ftInfo =
+                  (FaultToleranceSecondaryConfigInfo) vm.getConfig().getFtInfo();
+            moId = MoUtil.morefToString(ftInfo.getPrimaryVM());
+            logger.info("Received secondary VM event, switch to primary VM "
+                  + moId);
+         }
+      }
+      return moId;
    }
 
    public void shutdown() {
@@ -405,7 +458,7 @@ public class VmEventProcessor extends Thread {
             isSuspended = false;
             super.resume();
             logger.debug("Resumed event listerner thread");
-         } catch(Exception e) {
+         } catch (Exception e) {
             //ingore the exception
             logger.debug("Got exception while resume event listener"
                   + e.getMessage());

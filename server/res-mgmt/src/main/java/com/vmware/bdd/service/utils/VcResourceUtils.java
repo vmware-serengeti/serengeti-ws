@@ -425,28 +425,52 @@ public class VcResourceUtils {
       });
    }
 
-   public static boolean insidedRootFolder(VcVirtualMachine vm) {
-      String root = ConfigInfo.getSerengetiRootFolder();
-      List<String> folderNames = new ArrayList<String>();
-      folderNames.add(root);
+   public static boolean insidedRootFolder(final Folder rootFolder, 
+         final VcVirtualMachine vm) {
       String[] split = vm.getName().split("-");
       // Serengeti VM name follow format: <clusterName>-<groupName>-<index>
-      AuAssert.check(split != null && split.length == 3);
-      folderNames.add(split[0]);
-      folderNames.add(split[1]);
-      Folder folder = null;
-      try {
-         folder =
-               VcResourceUtils.findFolderByNameList(vm.getDatacenter(),
-                     folderNames);
-      } catch (Exception e) {
-         logger.debug("Failed to find vm folder in root folder.", e);
-      }
-      if (folder != null) {
-         return VcResourceUtils.isObjectInFolder(folder, vm.getId());
-      } else {
+      if (split == null || split.length != 3) {
+         logger.debug("VM name does not follow the name format: <clusterName>-<groupName>-<index>, not Serengeti managed VM.");
          return false;
       }
+      final String groupFolderName = split[1];
+      final String clusterFolderName = split[0];
+      return VcContext.inVcSessionDo(new VcSession<Boolean>() {
+         @Override
+         protected Boolean body() throws Exception {
+            try {
+               Folder groupFolder = vm.getParentFolder();
+               if (groupFolder == null || groupFolder.getName() == null
+                     || !groupFolder.getName().equals(groupFolderName)) {
+                  logger.debug("VM group folder name mismatch, not Serengeti managed VM.");
+                  return false;
+               }
+               ManagedObjectReference mo = groupFolder.getParent();
+               if (mo == null) {
+                  logger.debug("VM cluster folder is empty, not Serengeti managed VM.");
+                  return false;
+               }
+               Folder clusterFolder = MoUtil.getManagedObject(mo);
+               if (clusterFolder == null || clusterFolder.getName() == null
+                     || !clusterFolder.getName().equals(clusterFolderName)) {
+                  logger.debug("VM cluster folder name mismatch, not Serengeti managed VM.");
+                  return false;
+               }
+               mo = clusterFolder.getParent();
+               if (mo == null) {
+                  logger.debug("VM root folder is empty, not Serengeti managed VM.");
+                  return false;
+               }
+               if (MoUtil.morefToString(mo).equals(
+                     MoUtil.morefToString(rootFolder._getRef()))) {
+                  return true;
+               }
+            } catch (Exception e) {
+               logger.info("Failed to find vm folder in root folder.", e);
+            }
+            return false;
+         }
+      });
    }
 
    public static void checkVmFTAndCpuNumber(final String vmId,

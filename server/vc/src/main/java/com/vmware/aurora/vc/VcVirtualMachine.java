@@ -1176,6 +1176,8 @@ public interface VcVirtualMachine extends VcVmBase {
     * @param addDisks    disks to be added
     */
    public void changeDisks(final DeviceId[] removeDisks, final DiskCreateSpec[] addDisks) throws Exception;
+
+   public Folder getParentFolder();
 }
 
 @SuppressWarnings("serial")
@@ -3543,5 +3545,15 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
 
       configSpec.setDeviceChange(devChanges.toArray(new VirtualDeviceSpec[devChanges.size()]));
       reconfigure(configSpec);
+   }
+
+   public Folder getParentFolder() {
+      VirtualMachine vm = this.getManagedObject();
+      ManagedObjectReference mo = vm.getParent();
+      if (mo != null) {
+         return MoUtil.getManagedObject(mo);
+      } else {
+         return null;
+      }
    }
 }
