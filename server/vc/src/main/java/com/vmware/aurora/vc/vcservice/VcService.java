@@ -16,6 +16,7 @@
 package com.vmware.aurora.vc.vcservice;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -616,6 +617,8 @@ public class VcService {
          return;
       }
       logger.debug("Register extension vService at: " + evsURL + " token=" + evsToken);
+      Writer output = null;
+      BufferedReader input = null;
       try {
          Certificate cert = CmsKeyStore.getCertificate(CmsKeyStore.VC_EXT_KEY);
          URL url = new URL(evsURL);
@@ -624,7 +627,7 @@ public class VcService {
          connection.setDoInput(true);
          connection.setDoOutput(true); // POST
          connection.setUseCaches(false);
-         Writer output = new OutputStreamWriter(connection.getOutputStream());
+         output = new OutputStreamWriter(connection.getOutputStream());
          String evsSchema = "http://www.vmware.com/schema/vservice/ExtensionVService";
          String payload =
             "<RegisterExtension xmlns=\"" + evsSchema + "\">\n" +
@@ -645,17 +648,30 @@ public class VcService {
             }
          }
          // Read response
-         BufferedReader input = new BufferedReader(
+         input = new BufferedReader(
                new InputStreamReader(connection.getInputStream()));
          for (String str = input.readLine(); str != null; str = input.readLine()) {
             logger.debug("Response: " + str);
          }
-         input.close();
-         output.close();
          vcExtensionRegistered = true;
          logger.debug("Extension registration request sent successfully");
       } catch (Exception e) {
          logger.error("Failed Extension registration to " + evsURL, e);
+      } finally {
+         if (output != null) {
+            try {
+               output.close();
+            } catch (IOException e) {
+               logger.error("Failed to close output Writer", e);
+            }
+         }
+         if (input != null) {
+            try {
+               input.close();
+            } catch (IOException e) {
+               logger.error("Failed to close input Reader", e);
+            }
+         }
       }
    }
 
