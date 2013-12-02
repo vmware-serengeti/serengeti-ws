@@ -313,15 +313,9 @@ public class ClusterHealService implements IClusterHealService {
       throw ClusteringServiceException.TARGET_VC_DATASTORE_NOT_FOUND(datastore);
    }
 
-   private Folder getTargetFolder(NodeEntity node, NodeGroupCreate nodeGroup) {
+   private Folder getTargetFolder(NodeEntity node) {
       VcVirtualMachine vm = VcCache.get(node.getMoId());
-
-      String folderPath = nodeGroup.getVmFolderPath();
-      List<String> folderNames = Arrays.asList(folderPath.split("/"));
-      AuAssert.check(!folderNames.isEmpty());
-
-      return VcResourceUtils.findFolderByNameList(vm.getDatacenter(),
-            folderNames);
+      return vm.getParentFolder();
    }
 
    private VcHost getTargetHost(NodeEntity node) {
@@ -366,8 +360,8 @@ public class ClusterHealService implements IClusterHealService {
       return new CreateVmSP(node.getVmName() + RECOVERY_VM_NAME_POSTFIX,
             createSchema, VcVmUtil.getTargetRp(clusterSpec.getName(),
                   groupName, node), getTargetDatastore(fullDiskSet),
-            prePowerOn, null, guestVariable, false, getTargetFolder(node,
-                  clusterSpec.getNodeGroup(groupName)), getTargetHost(node));
+            prePowerOn, null, guestVariable, false, getTargetFolder(node),
+            getTargetHost(node));
    }
 
    @Override
