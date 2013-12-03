@@ -81,6 +81,20 @@ public class CommonUtilTest {
    }
 
    @Test
+   public void testValidatePathInfo() {
+      assertEquals(CommonUtil.validataPathInfo("/clusters"), true); // delete|stop|start cluster
+      assertEquals(CommonUtil.validataPathInfo("/cluster/test01/fix/disk"), true); // fixCluster
+      assertEquals(CommonUtil.validataPathInfo("/cluster/test_01/fix/disk"), true);
+      assertEquals(CommonUtil.validataPathInfo("/cluster//test_01/fix///disk//"), true);
+      assertEquals(CommonUtil.validataPathInfo("/cluster/test01/param_wait_for_result"), true); // asyncSetParam
+      assertEquals(CommonUtil.validataPathInfo("/cluster/test01/nodegroup/data/scale"), true); // scaleCluster
+      assertEquals(CommonUtil.validataPathInfo("/cluster/test01/config"), true); // configCluster
+      assertEquals(CommonUtil.validataPathInfo("/cluster/test01/nodegroup/data/instancenum"), true); // resizeCluster
+
+      assertEquals(CommonUtil.validataPathInfo("/clusters/\r\nHTTP/1.1 200 OK\r\n location: index.html"), false);
+   }
+
+   @Test
    public void testValidateVcDataStoreNames() {
       List<String> vcDataStoreNames = new ArrayList<String>();
       vcDataStoreNames.add("vcDataStore_Name1");

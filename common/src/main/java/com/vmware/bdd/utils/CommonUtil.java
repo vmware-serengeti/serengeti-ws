@@ -96,6 +96,10 @@ public class CommonUtil {
       return match(input, Constants.NODE_GROUP_NAME_PATTERN);
    }
 
+   public static boolean validataPathInfo(final String input) {
+      return match(input, Constants.REST_REQUEST_PATH_INFO_PATTERN);
+   }
+
    public static boolean validateVcDataStoreNames(List<String> names) {
       if (names == null || names.isEmpty()) {
          return false;

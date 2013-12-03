@@ -173,7 +173,11 @@ public class RestResource {
    private void redirectRequest(long taskId, HttpServletRequest request,
          HttpServletResponse response) {
       StringBuffer url = request.getRequestURL();
-      int subLength = url.length() - request.getPathInfo().length();
+      String pathInfo = request.getPathInfo();
+      if (!CommonUtil.validataPathInfo(pathInfo)) {
+         throw BddException.INVALID_PARAMETER("requested path info", pathInfo);
+      }
+      int subLength = url.length() - pathInfo.length();
       url.setLength(subLength);
       url.append("/task/").append(Long.toString(taskId));
       response.setHeader("Location", url.toString());

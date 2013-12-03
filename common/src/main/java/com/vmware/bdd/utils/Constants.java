@@ -40,6 +40,7 @@ public class Constants {
    public static final String SET_MANUAL_ELASTICITY_INFO_ACTION = "action";
    public static final String CLUSTER_NAME_PATTERN = "[a-zA-Z0-9_]+";
    public static final String NODE_GROUP_NAME_PATTERN = "[[a-zA-Z0-9]+]{1,80}";
+   public static final String REST_REQUEST_PATH_INFO_PATTERN = "[/[a-zA-Z0-9_]*]+";
    public static final String NAME_PATTERN = "[a-zA-Z0-9_\\-\\s]+";
    public static final String SERENGETI_SERVER_VM_MOBID = "vim.cms_moref";
    public static final String GUEST_VARIABLE_DNS_KEY_1 = "dnsserver1";
