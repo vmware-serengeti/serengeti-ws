@@ -804,6 +804,8 @@ public class RestClient {
           * load key store file 
           */
          char[] pwd = "changeit".toCharArray();
+         InputStream in = null;
+         OutputStream out = null;
          try {
             File file = new File("serengeti.keystore");
             if (file.isFile() == false) {
@@ -816,11 +818,8 @@ public class RestClient {
                   file = new File(dir, "cacerts");
                }
             }
-            InputStream in = new FileInputStream(file);
+            in = new FileInputStream(file);
             keyStore.load(in, pwd);
-            if (in != null) {
-               in.close();
-            }
             /*
              * show certificate informations
              */
@@ -843,13 +842,16 @@ public class RestClient {
                   }
                }
                System.out.println("Certificate");
-               System.out.println("================================================================");
+               System.out
+                     .println("================================================================");
                System.out.println("Subject:  " + cert.getSubjectDN());
                System.out.println("Issuer:  " + cert.getIssuerDN());
                System.out.println("SHA Fingerprint:  " + sha1Fingerprint);
                System.out.println("MD5 Fingerprint:  " + md5Fingerprint);
-               System.out.println("Issued on:  " + dateFormate.format(cert.getNotBefore()));
-               System.out.println("Expires on:  " + dateFormate.format(cert.getNotAfter()));
+               System.out.println("Issued on:  "
+                     + dateFormate.format(cert.getNotBefore()));
+               System.out.println("Expires on:  "
+                     + dateFormate.format(cert.getNotAfter()));
                System.out.println("Signature:  " + cert.getSignature());
                System.out.println();
 
@@ -859,14 +861,15 @@ public class RestClient {
                // Read user input
                String readMsg = "";
                if (RunWayConfig.getRunType().equals(RunType.MANUAL)) {
-                  readMsg = reader.readLine();              
+                  readMsg = reader.readLine();
                } else {
                   readMsg = "yes";
                }
                if (!readMsg.trim().equalsIgnoreCase("yes")
                      && !readMsg.trim().equalsIgnoreCase("y")) {
                   if (i == chain.length - 1) {
-                     throw new CertificateException("Not find a valid certificate.");
+                     throw new CertificateException(
+                           "Not find a valid certificate.");
                   } else {
                      continue;
                   }
@@ -875,11 +878,8 @@ public class RestClient {
                 *  add new certificate into key store file.
                 */
                keyStore.setCertificateEntry(md5Fingerprint, cert);
-               OutputStream out = new FileOutputStream("serengeti.keystore");
+               out = new FileOutputStream("serengeti.keystore");
                keyStore.store(out, pwd);
-               if (out != null) {
-                  out.close();
-               }
             }
 
          } catch (FileNotFoundException e) {
@@ -894,6 +894,20 @@ public class RestClient {
             if (!CommandsUtils.isBlank(errorMsg)) {
                System.out.println(errorMsg);
                logger.error(errorMsg);
+            }
+            if (in != null) {
+               try {
+                  in.close();
+               } catch (IOException e) {
+                  logger.warn("Input stream of serengeti.keystore close failed.");
+               }
+            }
+            if (out != null) {
+               try {
+                  out.close();
+               } catch (IOException e) {
+                  logger.warn("Output stream of serengeti.keystore close failed.");
+               }
             }
          }
       }
