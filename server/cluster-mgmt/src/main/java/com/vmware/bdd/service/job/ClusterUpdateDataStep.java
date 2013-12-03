@@ -98,6 +98,13 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
       synchronized (getClusterEntityMgr()) {
          addNodeToMetaData(clusterName, addedNodes, deletedNodeNames);
          removeDeletedNode(clusterName, deletedNodeNames);
+         /*
+          * If Tomcat crashes before IPs retrieved when creating cluster, ipconfigs field would
+          * be "0.0.0.0", then in resume we should refresh it initiative.
+          */
+         if (chunkContext.getStepContext().getJobName().equals(JobConstants.RESUME_CLUSTER_JOB_NAME)) {
+            clusterEntityMgr.syncUp(clusterName, false);
+         }
       }
       return RepeatStatus.FINISHED;
    }
@@ -173,12 +180,13 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
       //set vc resource pool entity
       nodeEntity.setVcRp(rpDao.findByClusterAndRp(vNode.getTargetVcCluster(),
             vNode.getTargetRp()));
-
+      // set ipconfigs field even IPs are not yet retrieved, otherwise if
+      // Tomcat crashes, we will lost the ipconfigs template
+      nodeEntity.setIpConfigs(vNode.getIpConfigs());
       if (vNode.getVmMobId() != null) {
          nodeEntity.setMoId(vNode.getVmMobId());
          nodeEntity.setRack(vNode.getTargetRack());
          nodeEntity.setHostName(vNode.getTargetHost());
-         nodeEntity.setIpConfigs(vNode.getIpConfigs());
          nodeEntity.setGuestHostName(vNode.getGuestHostName());
          nodeEntity.setCpuNum(vNode.getCpu());
          nodeEntity.setMemorySize((long) vNode.getMem());
