@@ -16,6 +16,8 @@ package com.vmware.bdd.exception;
 
 import java.util.List;
 
+import com.vmware.bdd.utils.CommonUtil;
+
 public class ClusteringServiceException extends BddException {
    private static final long serialVersionUID = 1l;
 
@@ -79,6 +81,33 @@ public class ClusteringServiceException extends BddException {
          String clusterName) {
       return new ClusteringServiceException(null,
             "CREATE_RESOURCE_POOL_FAILED", clusterName);
+   }
+
+   public static ClusteringServiceException CREATE_RESOURCE_POOL_ERROR(
+         String errorMsg) {
+      return new ClusteringServiceException(null, "CREATE_RESOURCE_POOL_ERROR",
+            errorMsg);
+   }
+
+   public static ClusteringServiceException CANNOT_FIND_VC_CLUSTER(
+         String vcClusterName) {
+      return new ClusteringServiceException(null, "CANNOT_FIND_VC_CLUSTER",
+            vcClusterName);
+   }
+
+   public static ClusteringServiceException CANNOT_FIND_VC_RESOURCE_POOL(
+         String vcRp) {
+      return new ClusteringServiceException(null,
+            "CANNOT_FIND_VC_RESOURCE_POOL", vcRp);
+   }
+
+   public static ClusteringServiceException CANNOT_FIND_SUB_VC_RESOURCE_POOL(
+         String subVcRp, String vcRp) {
+      String vcRpMsg =
+            CommonUtil.isBlank(vcRp) ? ""
+                  : "in the vCenter Server resource pool " + vcRp;
+      return new ClusteringServiceException(null,
+            "CANNOT_FIND_SUB_VC_RESOURCE_POOL", subVcRp, vcRpMsg);
    }
 
    public static ClusteringServiceException SET_AUTO_ELASTICITY_FAILED(

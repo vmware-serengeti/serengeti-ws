@@ -957,7 +957,8 @@ public class ClusteringService implements IClusteringService {
                      "Cannot find the vCenter Server cluster " + vcClusterName
                            + ".";
                logger.error(errorMsg);
-               throw BddException.INTERNAL(null, errorMsg);
+               throw ClusteringServiceException
+                     .CANNOT_FIND_VC_CLUSTER(vcClusterName);
             }
             List<String> resourcePoolNames = vcClusterRpNamesEntry.getValue();
             for (String resourcePoolName : resourcePoolNames) {
@@ -969,7 +970,8 @@ public class ClusteringService implements IClusteringService {
                         "Cannot find the vCenter Server resource pool "
                               + resourcePoolName + ".";
                   logger.error(errorMsg);
-                  throw BddException.INTERNAL(null, errorMsg);
+                  throw ClusteringServiceException
+                        .CANNOT_FIND_VC_RESOURCE_POOL(resourcePoolName);
                }
                CreateResourcePoolSP clusterSP =
                      new CreateResourcePoolSP(parentVcResourcePool,
@@ -998,7 +1000,8 @@ public class ClusteringService implements IClusteringService {
                      "Cannot find the vCenter Server cluster " + vcClusterName
                            + ".";
                logger.error(errorMsg);
-               throw BddException.INTERNAL(null, errorMsg);
+               throw ClusteringServiceException
+                     .CANNOT_FIND_VC_CLUSTER(vcClusterName);
             }
             if (!vcCluster.getConfig().getDRSEnabled()) {
                continue;
@@ -1019,7 +1022,9 @@ public class ClusteringService implements IClusteringService {
                                     : " in the vCenter Server resource pool "
                                           + resourcePoolName) + ".";
                   logger.error(errorMsg);
-                  throw BddException.INTERNAL(null, errorMsg);
+                  throw ClusteringServiceException
+                        .CANNOT_FIND_SUB_VC_RESOURCE_POOL(vcRPName,
+                              resourcePoolName);
                }
                String rpPath =
                      "/" + vcClusterName + "/" + resourcePoolName + "/" + uuid;
@@ -1047,7 +1052,8 @@ public class ClusteringService implements IClusteringService {
                clusterName);
       } catch (Exception e) {
          logger.error("error in creating VC ResourcePool(s)", e);
-         throw BddException.INTERNAL(e, e.getMessage());
+         throw ClusteringServiceException.CREATE_RESOURCE_POOL_ERROR(e
+               .getMessage());
       }
       return clusterRpName;
    }
