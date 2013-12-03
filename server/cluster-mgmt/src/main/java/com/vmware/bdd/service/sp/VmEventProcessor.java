@@ -356,6 +356,10 @@ public class VmEventProcessor extends Thread {
             }
             break;
          }
+         case VmMigrated: {
+            refreshNodeWithAction(moId, false, null, type.name());
+            break;
+         }
          case VhmError:
          case VhmWarning: {
             EventEx event = (EventEx) e;
