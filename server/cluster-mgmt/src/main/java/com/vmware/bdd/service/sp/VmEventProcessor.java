@@ -321,7 +321,7 @@ public class VmEventProcessor extends Thread {
             break;
          }
          case VmMigrated: {
-            refreshNodeWithAction(moId, false, null, type.name());
+            refreshNodeWithAction(e, moId, false, null, type.name());
             break;
          }
          case VhmError:
