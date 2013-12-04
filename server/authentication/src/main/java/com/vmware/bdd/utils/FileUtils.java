@@ -14,12 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 
 import org.apache.commons.configuration.ConfigurationUtils;
@@ -64,19 +59,6 @@ public class FileUtils {
       }
 
       return specFile;
-   }
-
-   public static String obtainStringFromFile(File file) throws IOException {
-      InputStream inputStream = new FileInputStream(file);
-      BufferedReader bufferedReader =
-            new BufferedReader(new InputStreamReader(inputStream));
-      StringBuilder buff = new StringBuilder();
-      String temp = "";
-      while ((temp = bufferedReader.readLine()) != null) {
-         buff.append(temp);
-      }
-      bufferedReader.close();
-      return buff.toString();
    }
 
 }
