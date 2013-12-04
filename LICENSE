@@ -1,4 +1,4 @@
-               Apache License
+				 Apache License
            Version 2.0, January 2004
         http://www.apache.org/licenses/
 
@@ -203,9 +203,9 @@
 
 =======================================================================
 
-Serengeti 1.0.0:
+Serengeti 1.1.0:
 
-Serengeti 1.0.0: includes a number of subcomponents with
+Serengeti 1.1.0: includes a number of subcomponents with
 separate copyright notices and license terms.  The product that 
 includes this file does not necessarily use all the open source 
 subcomponents referred to below. Your use of the source
@@ -213,12 +213,9 @@ code for the these subcomponents is subject to the terms and
 conditions of the following licenses.
 
 
-
 SECTION 1: BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES
 
    >>> jquery-1.7.2
-   >>> jquery-ui-1.8.22
-   >>> rubygem-fog-1.3.1
 
 
 
@@ -259,78 +256,6 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
->>> jquery-ui-1.8.22
-
-[PLEASE NOTE:  VMWARE, INC. ELECTS TO USE AND DISTRIBUTE THIS COMPONENT UNDER THE TERMS OF THE MIT LICENSE.PLEASE SEE BELOW FOR THE FULL TEXT OF THE MIT LICENSE.THE ORIGINAL LICENSE TERMS ARE REPRODUCED BELOW ONLY AS A REFERENCE.] 
-
-
-Copyright 2011, John Resig
-Dual licensed under the MIT or GPL Version 2 licenses.
-http://jquery.org/license
-
-Includes Sizzle.js
-http://sizzlejs.com/
-Copyright 2011, The Dojo Foundation
-Released under the MIT, BSD, and GPL Licenses.
-
-Date: Wed Mar 21 12:46:34 2012 -0700
-
-
-Copyright (c) 2012 Paul Bakaus, http://jqueryui.com/
-
-This software consists of voluntary contributions made by many
-individuals (AUTHORS.txt, http://jqueryui.com/about) For exact
-contribution history, see the revision history and logs, available
-at http://jquery-ui.googlecode.com/svn/
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
->>> rubygem-fog-1.3.1
-
-== Copyright
-
-(The MIT License)
-
-Copyright (c) 2010 {geemus (Wesley Beary)}[http://github.com/geemus]
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 --------------- SECTION 2: Apache License, V2.0 ----------
@@ -403,14 +328,14 @@ available (as would be noted above), you may obtain a copy of
 the source code corresponding to the binaries for such open
 source components and modifications thereto, if any, (the
 "Source Files"), by downloading the Source Files from VMware's website at
-http://www.vmware.com/download/open_source.html, or by sending a request, with
-your name and address to: VMware, Inc., 3401 Hillview Avenue,
-Palo Alto, CA 94304,United States of America. All such
+http://www.vmware.com/download/open_source.html, or by sending a request, 
+with your name and address to: VMware, Inc., 3401 Hillview Avenue,
+Palo Alto, CA 94304,United States of America. All such 
 requests should clearly specify: OPEN SOURCE FILES REQUEST,
 Attention General Counsel. VMware shall mail a copy of the
 Source Files to you on a CD or equivalent physical medium. This
 offer to obtain a copy of the Source Files is valid for three
-years from the date you acquired this Software product. Alternatively,
+years from the date you acquired this Software product. Alternatively, 
 the Source Files may accompany the VMware product.
 
-[SERENGETIENT100AV082913]
+[SERENGETIENT110NV120313]

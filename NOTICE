@@ -1,4 +1,4 @@
-Serengeti 1.0.0
+Serengeti 1.1.0
 
 Copyright (c) 2013 VMware, Inc. All Rights Reserved.
 
