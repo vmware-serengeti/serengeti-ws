@@ -33,7 +33,6 @@ import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.CommonUtil;
 
 /**
  * Cluster creation parameters
@@ -491,10 +490,6 @@ public class NodeGroupCreate {
          return getDiskstoreNamePattern(clusterSpec, nodeGroupSpec);
       }
 
-      for (int i = 0; i < patterns.length; i++) {
-         patterns[i] = CommonUtil.getDatastoreJavaPattern(patterns[i]);
-      }
-
       return patterns;
    }
 
@@ -535,10 +530,6 @@ public class NodeGroupCreate {
                         new String[clusterSpec.getSharedDatastorePattern()
                               .size()]);
          }
-      }
-
-      for (int i = 0; i < patterns.length; i++) {
-         patterns[i] = CommonUtil.getDatastoreJavaPattern(patterns[i]);
       }
 
       return patterns;

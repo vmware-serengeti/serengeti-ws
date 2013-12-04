@@ -34,6 +34,8 @@ public class DatastoreRead {
    private double totalSpaceGB;
    //free space
    private double freeSpaceGB;
+   //whether use regular expression
+   private String regex;
    //detail of the DatastoreRead
    private List<DatastoreReadDetail> datastoreReadDetails =
          new ArrayList<DatastoreReadDetail>();
@@ -71,6 +73,18 @@ public class DatastoreRead {
       this.freeSpaceGB = freeSpaceGB;
    }
 
+   public String getRegex() {
+      return regex;
+   }
+
+   public void setRegex(Boolean regex) {
+      if (regex != null && regex) {
+         this.regex = "TRUE";
+      } else {
+         this.regex = "FALSE";
+      }
+   }
+
 
    public List<DatastoreReadDetail> getDatastoreReadDetails() {
       return datastoreReadDetails;
@@ -87,6 +101,7 @@ public class DatastoreRead {
             .append(this.name).append(",type:").append(this.type)
             .append(",totalSpace:").append(this.totalSpaceGB)
             .append(",freeSpace:").append(this.freeSpaceGB)
+            .append(",regex:").append(this.regex)
             .append(",datastoreReadDetails:").append(this.datastoreReadDetails)
             .toString();
    }

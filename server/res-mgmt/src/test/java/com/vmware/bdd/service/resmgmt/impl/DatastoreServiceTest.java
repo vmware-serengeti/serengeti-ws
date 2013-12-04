@@ -104,7 +104,7 @@ public class DatastoreServiceTest extends BaseResourceTest {
       datastoreSvc.setResService(resService);
       List<String> dsSpec = new ArrayList<String>();
       dsSpec.add("datastore");
-      datastoreSvc.addDatastores("testDS", DatastoreType.SHARED, dsSpec);
+      datastoreSvc.addDatastores("testDS", DatastoreType.SHARED, dsSpec, false);
 
       new Verifications() {
          {

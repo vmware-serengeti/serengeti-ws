@@ -51,8 +51,8 @@
       "storage": {
         "type": "local",
         "sizeGB": 50,
-        "imagestoreNamePattern" : ["tli*"],
-        "diskstoreNamePattern" : ["local*"],
+        "imagestoreNamePattern" : ["tli.*"],
+        "diskstoreNamePattern" : ["local.*"],
         "splitPolicy" : "EVEN_SPLIT"
       },
       "placementPolicies" : {
@@ -117,10 +117,10 @@
   "topologyPolicy": "NONE",
   "hostToRackMap": {},
   "sharedDatastorePattern": [
-    "share*"
+    "share.*"
   ],
   "localDatastorePattern": [
-   "local*"
+   "local.*"
   ],
   "configuration" : {
   }

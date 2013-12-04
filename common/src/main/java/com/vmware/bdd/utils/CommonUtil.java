@@ -123,8 +123,7 @@ public class CommonUtil {
 
    public static boolean matchDatastorePattern(Set<String> patterns, Set<String> datastores) {
       for (String pattern : patterns) {
-         // the datastore pattern is defined as wildcard
-         pattern = getDatastoreJavaPattern(pattern);
+         // the datastore pattern should be converted to Java Regular Expression already
          for (String datastore : datastores) {
             try {
                if (datastore.matches(pattern)) {

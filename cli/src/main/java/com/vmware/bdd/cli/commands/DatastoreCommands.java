@@ -47,7 +47,9 @@ public class DatastoreCommands implements CommandMarker {
          @CliOption(key = { "name" }, mandatory = true, help = "The datastore name.") final String name,
          @CliOption(key = { "spec" }, mandatory = true, help = "The datastore name(s) in vsphere: use \",\" among names.") final String spec,
          @CliOption(key = { "type" }, mandatory = false, unspecifiedDefaultValue = "SHARED", help = "You must specify the type for storage: "
-               + "SHARED or LOCAL") final String type) {
+               + "SHARED or LOCAL") final String type,
+         @CliOption(key = { "regex" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false",
+               help = "Whether use regular expression for the datastore name(s) in vsphere") final boolean regex) {
 
       //build DatastoreAdd object
       try {
@@ -62,6 +64,9 @@ public class DatastoreCommands implements CommandMarker {
          } else {
             datastoreAdd.setSpec(CommandsUtils.inputsConvert(spec));
             datastoreAdd.setType(DatastoreType.valueOf(type.toUpperCase()));
+            if (regex) {
+               datastoreAdd.setRegex(true);
+            }
 
             restClient.add(datastoreAdd);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_DATASTORE,
@@ -98,7 +103,7 @@ public class DatastoreCommands implements CommandMarker {
     * Display datastore list. eg. datastore list -name ds1 ,datastore list
     * --detail
     * </p>
-    * 
+    *
     * @param name
     *           The datastore name
     * @param detail
@@ -137,6 +142,8 @@ public class DatastoreCommands implements CommandMarker {
                Constants.FORMAT_TABLE_COLUMN_NAME, Arrays.asList("getName"));
          datastoreColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_TYPE, Arrays.asList("getType"));
+         datastoreColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_REGEX, Arrays.asList("getRegex"));
          //TODO when backend support it, we can remove the comment.
          //         datastoreColumnNamesWithGetMethodNames.put(
          //               Constants.FORMAT_TABLE_COLUMN_SPACE,

@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.StepExecution;
@@ -206,7 +205,7 @@ public class TestClusteringJobs extends
          specs.add(dsSpec);
       }
       try {
-         dsSvc.addDatastores(TEST_DATASTORE_NAME, datastoreType, specs);
+         dsSvc.addDatastores(TEST_DATASTORE_NAME, datastoreType, specs, false);
       } catch (Exception e) {
          logger.error("ignore create datastore exception. ", e);
       }
@@ -247,9 +246,9 @@ public class TestClusteringJobs extends
                   folders.add("line");
                   VcVirtualMachine.CreateSpec vmSpec =
                      new VcVirtualMachine.CreateSpec("test-line2", snap,
-                           VcResourceUtils.findRPInVCCluster("dev-1", "line"), 
+                           VcResourceUtils.findRPInVCCluster("dev-1", "line"),
                            VcResourceUtils.findDSInVcByName("datastore1 (4)"),
-                           VcResourceUtils.findFolderByNameList(vm.getDatacenter(), folders), 
+                           VcResourceUtils.findFolderByNameList(vm.getDatacenter(), folders),
                            false,
                            configSpec);
                   // Clone from the template
@@ -483,7 +482,7 @@ public class TestClusteringJobs extends
       }
    }
 
-   private void stopVmAfterStarted(final String rpPath, final String vmName, 
+   private void stopVmAfterStarted(final String rpPath, final String vmName,
          long jobExecutionId) throws InterruptedException, Exception {
       int retry = 0;
       while (retry <= 0) {

@@ -44,9 +44,9 @@ public class TestVcResourceUtils {
 
    @Test
    public void testFindDSInVCByPattern() {
-      Collection<VcDatastore> dss = VcResourceUtils.findDSInVCByPattern("line*");
+      Collection<VcDatastore> dss = VcResourceUtils.findDSInVCByPattern("line.*");
       Assert.assertNotNull(dss);
-      dss = VcResourceUtils.findDSInVCByPattern("test*");
+      dss = VcResourceUtils.findDSInVCByPattern("test.*");
       Assert.assertEquals(dss.size(), 1);
    }
 

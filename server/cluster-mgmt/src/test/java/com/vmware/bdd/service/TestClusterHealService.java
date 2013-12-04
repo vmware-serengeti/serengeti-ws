@@ -57,7 +57,7 @@ public class TestClusterHealService {
    private static final String CLUSTER_NAME = "bj";
    private static final String NODE_GROUP_NAME = "worker";
    private static final String HOST_NAME = "bj-dc-01";
-   private static final String LOCAL_STORE_PATTERN = "local-datastore-*";
+   private static final String LOCAL_STORE_PATTERN = "local-datastore-.*";
 
    @MockClass(realClass = VcResourceUtils.class)
    public static class MockVcResourceUtilsForHeal {
@@ -79,7 +79,7 @@ public class TestClusterHealService {
          }
          VcHost host = Mockito.mock(VcHost.class);
          Mockito.when(host.getDatastores()).thenReturn(datastores);
-         
+
          Mockito.when(host.getName()).thenReturn(HOST_NAME);
 
          return host;

@@ -26,7 +26,7 @@ import com.vmware.bdd.apitypes.DatastoreRead;
  * @author Jarred Li
  * @since 0.8
  * @version 0.8
- * 
+ *
  */
 public interface IDatastoreService {
 
@@ -53,7 +53,7 @@ public interface IDatastoreService {
 
    void addDatastores(DatastoreAdd datastore);
 
-   void addDatastores(String name, DatastoreType type, List<String> spec);
+   void addDatastores(String name, DatastoreType type, List<String> spec, boolean regex);
 
    void deleteDatastore(String name);
 }

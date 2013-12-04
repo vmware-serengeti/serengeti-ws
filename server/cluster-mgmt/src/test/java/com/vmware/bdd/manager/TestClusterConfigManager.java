@@ -189,7 +189,7 @@ public class TestClusterConfigManager {
       sharedStores.add("share2");
       try {
          clusterConfigMgr.getDatastoreMgr().addDatastores("testSharedStore",
-               DatastoreType.SHARED, sharedStores);
+               DatastoreType.SHARED, sharedStores, false);
       } catch (Exception e) {
          logger.error("ignore create datastore testSharedStore exception. ", e);
       }
@@ -198,7 +198,7 @@ public class TestClusterConfigManager {
       localStores.add("vmfs*");
       try {
          clusterConfigMgr.getDatastoreMgr().addDatastores("testLocalStore",
-               DatastoreType.LOCAL, localStores);
+               DatastoreType.LOCAL, localStores, false);
       } catch (Exception e) {
          logger.error("ignore create datastore testLocalStore exception. ", e);
       }

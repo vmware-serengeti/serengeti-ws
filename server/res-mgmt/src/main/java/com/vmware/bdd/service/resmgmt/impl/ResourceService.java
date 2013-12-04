@@ -46,13 +46,14 @@ import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
 /**
  * @author Jarred Li
  * @since 0.8
  * @version 0.8
- * 
+ *
  */
 @Service
 public class ResourceService implements IResourceService {
@@ -445,8 +446,13 @@ public class ResourceService implements IResourceService {
          return result;
       }
       for (VcDatastoreEntity dsEntity : datastores) {
-         Collection<VcDatastore> vcDS =
-               VcResourceUtils.findDSInVCByPattern(dsEntity.getVcDatastore());
+         Collection<VcDatastore> vcDS;
+         if (dsEntity.getRegex() != null && dsEntity.getRegex()) {
+            vcDS = VcResourceUtils.findDSInVCByPattern(dsEntity.getVcDatastore());
+         } else {
+            vcDS = VcResourceUtils.findDSInVCByPattern(
+                  CommonUtil.getDatastoreJavaPattern(dsEntity.getVcDatastore()));
+         }
          if (vcDS != null) {
             result.addAll(vcDS);
          } else {

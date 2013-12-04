@@ -210,6 +210,7 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_CPU_MHZ = "CPU(MHZ)";
    public static final String FORMAT_TABLE_COLUMN_TASK = "TASK";
    public static final String FORMAT_TABLE_COLUMN_HOSTS = "HOSTS";
+   public static final String FORMAT_TABLE_COLUMN_REGEX = "REG EX";
    public static final String DEFAULT_DISTRO = "apache";
    public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure you want to continue (Y/N)? ";
    public static final String PARAM_PROMPT_ADD_CERTIFICATE_MESSAGE = "Are you sure you want to add this certificate (Y/N)? ";

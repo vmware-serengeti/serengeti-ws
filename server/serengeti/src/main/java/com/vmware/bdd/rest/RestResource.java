@@ -445,7 +445,7 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("datestore name",
                dsSpec.getName());
       }
-      if (!CommonUtil.validateVcDataStoreNames(dsSpec.getSpec())) {
+      if (!dsSpec.getRegex() && !CommonUtil.validateVcDataStoreNames(dsSpec.getSpec())) {
          throw BddException.INVALID_PARAMETER("vCenter Server datastore name",
                dsSpec.getSpec().toString());
       }

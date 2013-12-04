@@ -105,9 +105,9 @@ public class NodeGroupCreateTest {
       storage.setImagestoreNamePattern(Arrays.asList("st_imagestore"));
       worker.setStorage(storage);
       Set<String> sharedDatastorePattern = new HashSet<String>();
-      sharedDatastorePattern.add("cluster_shared*");
+      sharedDatastorePattern.add("cluster_shared.*");
       Set<String> localDatastorePattern = new HashSet<String>();
-      localDatastorePattern.add("cluster_local*");
+      localDatastorePattern.add("cluster_local.*");
       cluster.setSharedDatastorePattern(sharedDatastorePattern);
       cluster.setLocalDatastorePattern(localDatastorePattern);
       cluster.setNodeGroups(new NodeGroupCreate[] { worker });

@@ -198,11 +198,12 @@ public class ResourceInitializerServiceTest extends BaseResourceTest{
       }.getMockInstance();
       dsSvc = new MockUp<IDatastoreService>() {
          @Mock
-         void addDatastores(String name, DatastoreType type, List<String> spec) {
+         void addDatastores(String name, DatastoreType type, List<String> spec, boolean regex) {
             logger.info("mock datastore service to add ds");
             Assert.assertEquals(name, "defaultDSShared");
             Assert.assertEquals(type, DatastoreType.SHARED);
             Assert.assertEquals(spec.size(), 1);
+            Assert.assertEquals(regex, false);
          }
       }.getMockInstance();
       networkSvc = new MockUp<INetworkService>() {

@@ -28,6 +28,7 @@ create table vc_datastore (
    name         varchar(255) not null,
    type         varchar(255) not null,
    vc_datastore varchar(255) not null,
+   regex        boolean,
    primary key (id)
 );
 

@@ -50,7 +50,7 @@ import com.vmware.vim.binding.vmodl.ManagedObjectReference;
  * @author Jarred Li
  * @since 0.8
  * @version 0.8
- * 
+ *
  */
 @Service
 public class ResourceInitializerService implements IResourceInitializerService {
@@ -178,10 +178,10 @@ public class ResourceInitializerService implements IResourceInitializerService {
 
       if (!dsNames.get(DatastoreType.SHARED).isEmpty()) {
          dsSvc.addDatastores(DEFAULT_DS_SHARED, DatastoreType.SHARED,
-               dsNames.get(DatastoreType.SHARED));
+               dsNames.get(DatastoreType.SHARED), false);
       } else if (!dsNames.get(DatastoreType.LOCAL).isEmpty()) {
          dsSvc.addDatastores(DEFAULT_DS_LOCAL, DatastoreType.LOCAL,
-               dsNames.get(DatastoreType.LOCAL));
+               dsNames.get(DatastoreType.LOCAL), false);
       }
       logger.info("added datastore. " + dsNames);
 

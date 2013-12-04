@@ -28,6 +28,7 @@ public class DatastoreAdd {
    private String name;
    private List<String> spec;
    private DatastoreType type = DatastoreType.SHARED;
+   private boolean regex = false;
 
    public List<String> getSpec() {
       return spec;
@@ -51,6 +52,14 @@ public class DatastoreAdd {
 
    public void setName(String name) {
       this.name = name;
+   }
+
+   public boolean getRegex() {
+      return regex;
+   }
+
+   public void setRegex(boolean regex) {
+      this.regex = regex;
    }
 
    public String toString() {

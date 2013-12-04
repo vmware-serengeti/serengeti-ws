@@ -35,6 +35,7 @@ import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
+import com.vmware.bdd.utils.CommonUtil;
 
 @Service
 public class DatastoreService implements IDatastoreService {
@@ -161,7 +162,7 @@ public class DatastoreService implements IDatastoreService {
    @Transactional
    public void addDatastores(DatastoreAdd datastore) {
       addDatastoreEntity(datastore.getType(), datastore.getSpec(),
-            datastore.getName());
+            datastore.getName(), datastore.getRegex());
    }
 
    /* (non-Javadoc)
@@ -169,8 +170,8 @@ public class DatastoreService implements IDatastoreService {
     */
    @Override
    @Transactional
-   public void addDatastores(String name, DatastoreType type, List<String> spec) {
-      addDatastoreEntity(type, spec, name);
+   public void addDatastores(String name, DatastoreType type, List<String> spec, boolean regex) {
+      addDatastoreEntity(type, spec, name, regex);
    }
 
    /* (non-Javadoc)
@@ -202,6 +203,7 @@ public class DatastoreService implements IDatastoreService {
       DatastoreRead read = new DatastoreRead();
       read.setName(name);
       read.setType(entities.get(0).getType());
+      read.setRegex(entities.get(0).getRegex());
       read.setDatastoreReadDetails(new ArrayList<DatastoreReadDetail>());
       for (VcDatastoreEntity entity : entities) {
          DatastoreReadDetail detail = new DatastoreReadDetail();
@@ -228,6 +230,7 @@ public class DatastoreService implements IDatastoreService {
       DatastoreRead read = new DatastoreRead();
       read.setName(entities.get(0).getName());
       read.setType(entities.get(0).getType());
+      read.setRegex(entities.get(0).getRegex());
       read.setDatastoreReadDetails(new ArrayList<DatastoreReadDetail>());
       result.add(read);
       for (VcDatastoreEntity entity : entities) {
@@ -236,6 +239,7 @@ public class DatastoreService implements IDatastoreService {
             read = new DatastoreRead();
             read.setName(entity.getName());
             read.setType(entity.getType());
+            read.setRegex(entity.getRegex());
             read.setDatastoreReadDetails(new ArrayList<DatastoreReadDetail>());
             result.add(read);
          }
@@ -261,7 +265,11 @@ public class DatastoreService implements IDatastoreService {
 
       final Set<String> patterns = new HashSet<String>();
       for (VcDatastoreEntity entity : entities) {
-         patterns.add(entity.getVcDatastore());
+         if (entity.getRegex() != null && entity.getRegex()) {
+            patterns.add(entity.getVcDatastore());
+         } else {
+            patterns.add(CommonUtil.getDatastoreJavaPattern(entity.getVcDatastore()));
+         }
       }
       List<String> clusterNames =
             getClusterDao().findClustersByUsedDatastores(patterns);
@@ -302,19 +310,29 @@ public class DatastoreService implements IDatastoreService {
    private Set<String> getDatastorePattern(List<VcDatastoreEntity> datastores) {
       Set<String> result = new HashSet<String>();
       for (VcDatastoreEntity store : datastores) {
-         result.add(store.getVcDatastore());
+         logger.info("vc datastores " + store.getName() + " " + store.getVcDatastore() + " " + store.getRegex());
+         if (store.getRegex() != null && store.getRegex()) {
+            result.add(store.getVcDatastore());
+         } else {
+            result.add(CommonUtil.getDatastoreJavaPattern(store.getVcDatastore()));
+         }
       }
+      logger.info("getDatastorePattern " + result);
       return result;
    }
 
    private void addDatastoreEntity(final DatastoreType type,
-         final List<String> datastores, final String name) {
+         final List<String> datastores, final String name, final boolean regex) {
       if (dsDao.nameExisted(name)) {
          throw BddException.ALREADY_EXISTS("Datastore", name);
       }
       resService.refreshDatastore();
       for (String ds : datastores) {
-         if (!resService.isDatastoreExistInVC(ds)) {
+         String dsPattern = ds;
+         if (!regex) {
+            dsPattern = CommonUtil.getDatastoreJavaPattern(ds);
+         }
+         if (!resService.isDatastoreExistInVC(dsPattern)) {
             throw VcProviderException.DATASTORE_NOT_FOUND(ds);
          }
          VcDatastoreEntity entity = new VcDatastoreEntity();
@@ -322,6 +340,7 @@ public class DatastoreService implements IDatastoreService {
 
          entity.setName(name);
          entity.setVcDatastore(ds);
+         entity.setRegex(regex);
          dsDao.insert(entity);
          logger.info("add shared datastore " + ds);
       }

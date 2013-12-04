@@ -41,7 +41,10 @@ public class VcDatastoreEntity extends EntityBase {
    @Enumerated(EnumType.STRING)
    @Column(name = "type", nullable = false)
    private DatastoreType type;
-   
+
+   @Column(name = "regex")
+   private Boolean regex;
+
    public DatastoreType getType() {
       return type;
    }
@@ -64,5 +67,13 @@ public class VcDatastoreEntity extends EntityBase {
 
    public void setVcDatastore(String vcDatastore) {
       this.vcDatastore = vcDatastore;
+   }
+
+   public Boolean getRegex() {
+      return regex;
+   }
+
+   public void setRegex(Boolean regex) {
+      this.regex = regex;
    }
 }

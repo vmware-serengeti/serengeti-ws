@@ -100,10 +100,10 @@
     "10.1.2.1" : "rack1"
   },
   "sharedDatastorePattern": [
-    "share*"
+    "share.*"
   ],
   "localDatastorePattern": [
-  	"local*"
+  	"local.*"
   ],
   "configuration" : {
   }

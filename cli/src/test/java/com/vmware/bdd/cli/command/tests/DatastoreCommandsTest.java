@@ -49,13 +49,13 @@ public class DatastoreCommandsTest extends MockRestServer {
             HttpStatus.NO_CONTENT, "");
 
       //invalid type
-      datastoreCommands.addDatastore("ds01", "ds*", "ANY");
+      datastoreCommands.addDatastore("ds01", "ds*", "ANY", false);
 
       //normal case
-      datastoreCommands.addDatastore("ds01", "ds*", "SHARED");
+      datastoreCommands.addDatastore("ds01", "ds*", "SHARED", false);
       CookieCache.clear();
    }
-   
+
    @Test
    public void testCreateDatastoreFailure() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
@@ -67,7 +67,7 @@ public class DatastoreCommandsTest extends MockRestServer {
             "https://127.0.0.1:8443/serengeti/api/datastores", HttpMethod.POST,
             HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
 
-      datastoreCommands.addDatastore("ds01", "ds*", "SHARED");
+      datastoreCommands.addDatastore("ds01", "ds*", "SHARED", false);
       CookieCache.clear();
    }
 
@@ -81,7 +81,7 @@ public class DatastoreCommandsTest extends MockRestServer {
       datastoreCommands.deleteDatastore("ds01");
       CookieCache.clear();
    }
-   
+
    @Test
    public void testDeleteDatastoreFailure() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
@@ -135,7 +135,7 @@ public class DatastoreCommandsTest extends MockRestServer {
       dr2Detail1.setFreeSpaceGB(15.00);
       datastoreReadDetails2.add(dr2Detail1);
       rd2.setDatastoreReadDetails(datastoreReadDetails2);
-      
+
       ObjectMapper mapper = new ObjectMapper();
       testListDatastore(mapper, new DatastoreRead[] { rd1, rd2 });
       CookieCache.clear();

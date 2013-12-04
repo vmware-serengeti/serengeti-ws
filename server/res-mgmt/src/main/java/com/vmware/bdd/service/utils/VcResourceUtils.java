@@ -72,9 +72,7 @@ public class VcResourceUtils {
                   List<VcCluster> vcClusters = VcInventory.getClusters();
                   for (VcCluster vcCluster : vcClusters) {
                      for (VcDatastore vcDS : vcCluster.getAllDatastores()) {
-                        String pattern =
-                              CommonUtil
-                                    .getDatastoreJavaPattern(vcDSNamePattern);
+                        String pattern = vcDSNamePattern;
                         if (vcDS.getName().matches(pattern)) {
                            dsMap.put(vcDS.getName(), vcDS);
                         }
