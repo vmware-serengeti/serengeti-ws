@@ -14,14 +14,13 @@
  ******************************************************************************/
 package com.vmware.bdd.cli.command.tests;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.vmware.bdd.apitypes.IpConfigInfo;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -34,6 +33,8 @@ import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.DistroRead;
+import com.vmware.bdd.apitypes.IpConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
@@ -605,6 +606,18 @@ public class ClusterCommandsTest extends MockRestServer {
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/hadoop/spec", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(clusterSpec));
        clusterCommands.exportClusterSpec("hadoop", null);
+
+       setup();
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/hadoop/spec", HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(clusterSpec));
+       clusterCommands.exportClusterSpec("hadoop", "exportedSpec.json");
+       clusterSpec = CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile("exportedSpec.json"));
+       Assert.assertEquals(clusterSpec.getNodeGroups().length, 3);
+       File exportedFile = new File("exportedSpec.json");
+       if (exportedFile.exists()) {
+          Assert.assertEquals(exportedFile.delete(), true);
+       }
+
        CookieCache.clear();
     }
 

@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -104,26 +105,32 @@ public class CommandsUtils {
    public static void prettyJsonOutput(Object object, String fileName)
          throws JsonParseException, JsonMappingException, IOException {
       OutputStream out = null;
-      if (fileName != null) {
-         out = new FileOutputStream(fileName);
-      } else {
-         out = System.out;
-      }
-      JsonFactory factory = new JsonFactory();
-      JsonGenerator generator = factory.createJsonGenerator(out);
-      ObjectMapper mapper = getMapper();
-      mapper.setSerializationInclusion(Inclusion.NON_NULL);
-      generator.setCodec(mapper);
-      DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
-      Indenter indenter = new Lf2SpacesIndenter();
-      prettyPrinter.indentArraysWith(indenter);
-      generator.setPrettyPrinter(prettyPrinter);
-      generator.writeObject(object);
-      if (fileName == null) {
-         System.out.println();
-      } else {
-         File file = new File(fileName);
-         System.out.println("Exported to file " + file.getAbsolutePath());
+      try {
+         if (fileName != null) {
+            out = new FileOutputStream(fileName);
+         } else {
+            out = System.out;
+         }
+         JsonFactory factory = new JsonFactory();
+         JsonGenerator generator = factory.createJsonGenerator(out);
+         ObjectMapper mapper = getMapper();
+         mapper.setSerializationInclusion(Inclusion.NON_NULL);
+         generator.setCodec(mapper);
+         DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+         Indenter indenter = new Lf2SpacesIndenter();
+         prettyPrinter.indentArraysWith(indenter);
+         generator.setPrettyPrinter(prettyPrinter);
+         generator.writeObject(object);
+         if (fileName == null) {
+            System.out.println();
+         } else {
+            File file = new File(fileName);
+            System.out.println("Exported to file " + file.getAbsolutePath());
+         }
+      } finally {
+         if (out != null && !(out instanceof PrintStream)) {
+            out.close();
+         }
       }
    }
 
