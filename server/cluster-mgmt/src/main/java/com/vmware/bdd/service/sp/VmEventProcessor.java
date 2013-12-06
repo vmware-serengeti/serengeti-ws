@@ -433,7 +433,7 @@ public class VmEventProcessor extends Thread {
    private String switchMobId(String moId, VcVirtualMachine vm)
          throws Exception {
       // check if ft enabled
-      if (vm.getConfig().getFtInfo() != null) {
+      if (vm.getConfig() != null && vm.getConfig().getFtInfo() != null) {
          // ft enabled
          vm.update();
          if (vm.getConfig().getFtInfo().getRole() != 1) {

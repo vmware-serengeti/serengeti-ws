@@ -15,17 +15,12 @@
 package com.vmware.bdd.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import com.vmware.bdd.apitypes.NetConfigInfo;
-import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
-import com.vmware.bdd.entity.ClusterEntity;
-import com.vmware.bdd.service.resmgmt.INetworkService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,7 +36,10 @@ import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.aurora.vc.vcservice.VcContext;
+import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
@@ -56,11 +54,13 @@ import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractDatastore;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
+import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
 import com.vmware.bdd.service.sp.QueryIpAddress;
 import com.vmware.bdd.service.sp.ReplaceVmPrePowerOn;
 import com.vmware.bdd.service.sp.StartVmSP;
 import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Constants;
@@ -313,9 +313,14 @@ public class ClusterHealService implements IClusterHealService {
       throw ClusteringServiceException.TARGET_VC_DATASTORE_NOT_FOUND(datastore);
    }
 
-   private Folder getTargetFolder(NodeEntity node) {
-      VcVirtualMachine vm = VcCache.get(node.getMoId());
-      return vm.getParentFolder();
+   private Folder getTargetFolder(final NodeEntity node) {
+      return VcContext.inVcSessionDo(new VcSession<Folder>() {
+         @Override
+         protected Folder body() throws Exception {
+            VcVirtualMachine vm = VcCache.get(node.getMoId());
+            return vm.getParentFolder();
+         }
+      });
    }
 
    private VcHost getTargetHost(NodeEntity node) {

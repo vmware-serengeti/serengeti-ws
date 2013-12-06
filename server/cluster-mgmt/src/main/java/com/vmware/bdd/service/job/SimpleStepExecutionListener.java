@@ -46,8 +46,10 @@ public class SimpleStepExecutionListener implements StepExecutionListener {
    @Override
    public ExitStatus afterStep(StepExecution se) {
       logger.info("step finished: " + se.getStepName());
-      VmEventProcessor processor = clusteringService.getEventProcessor();
-      processor.tryResume();
+      if (clusteringService != null) {
+         VmEventProcessor processor = clusteringService.getEventProcessor();
+         processor.tryResume();
+      }
       ExecutionContext jec = se.getJobExecution().getExecutionContext();
       if (se.getStatus().equals(BatchStatus.COMPLETED)) {
          jec.put(se.getStepName() + ".COMPLETED", true);
