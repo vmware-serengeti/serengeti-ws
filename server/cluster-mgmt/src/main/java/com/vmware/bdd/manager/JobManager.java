@@ -308,6 +308,8 @@ public class JobManager {
       String jobName = jobExecution.getJobInstance().getJobName();
       if (jobName.equals(JobConstants.SET_MANUAL_ELASTICITY_JOB_NAME)) {
          jobStatus.setType(Type.VHM);
+      } else if (jobName.equals(JobConstants.DELETE_CLUSTER_JOB_NAME)) {
+         jobStatus.setType(Type.DELETE);
       }
 
       JobParameters jobParameters =
@@ -407,7 +409,9 @@ public class JobManager {
          if (id == null)
             continue;
          TaskRead task = getJobExecutionStatus(id);
-         task.setType(Type.INNER);
+         if (task.getType() == null) {
+            task.setType(Type.INNER);
+         }
          if (task.getStatus() == TaskRead.Status.COMPLETED) {
             task.setProgress(1.0);
          }

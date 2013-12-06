@@ -399,6 +399,14 @@ public class RestClient {
             progress = (int) (taskRead.getProgress() * 100);
             taskStatus = taskRead.getStatus();
 
+            //fix cluster deletion exception
+            Type taskType = taskRead.getType();
+            if ((taskType == Type.DELETE) && (taskStatus == TaskRead.Status.COMPLETED)) {
+               clearScreen();
+               System.out.println(taskStatus + " " + progress + "%\n");
+               break;
+            }
+
             if ((prettyOutput != null && prettyOutput.length > 0 && (taskRead.getType() == Type.VHM ? prettyOutput[0]
                   .isRefresh(true) : prettyOutput[0].isRefresh(false)))
                   || oldTaskStatus != taskStatus
@@ -433,10 +441,10 @@ public class RestClient {
             } catch (InterruptedException ex) {
                //ignore
             }
-         } while (taskRead.getStatus() != TaskRead.Status.COMPLETED
-               && taskRead.getStatus() != TaskRead.Status.FAILED
-               && taskRead.getStatus() != TaskRead.Status.ABANDONED
-               && taskRead.getStatus() != TaskRead.Status.STOPPED);
+         } while (taskStatus != TaskRead.Status.COMPLETED
+               && taskStatus != TaskRead.Status.FAILED
+               && taskStatus != TaskRead.Status.ABANDONED
+               && taskStatus != TaskRead.Status.STOPPED);
 
          String errorMsg = taskRead.getErrorMessage();
          if (!taskRead.getStatus().equals(TaskRead.Status.COMPLETED)) {
