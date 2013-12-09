@@ -25,8 +25,10 @@ import java.util.concurrent.Callable;
 
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.vim.binding.impl.vim.vApp.VmConfigSpecImpl;
+import com.vmware.vim.binding.impl.vim.vm.ToolsConfigInfoImpl;
 import com.vmware.vim.binding.vim.net.IpConfigInfo.IpAddress;
 import com.vmware.vim.binding.vim.vApp.VmConfigSpec;
+import com.vmware.vim.binding.vim.vm.ToolsConfigInfo;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.DiskSchema;
@@ -756,10 +758,9 @@ public class VcVmUtil {
       return VcContext.inVcSessionDo(new VcSession<Boolean>() {
          @Override
          protected Boolean body() throws Exception {
-            boolean needConfig = false;
             String vmToolEnableItem = "com.vmware.guestInfo";
 
-            if (vm.getConfig().getVAppConfig() == null
+            if (vm.getConfig() == null || vm.getConfig().getVAppConfig() == null
                   || vm.getConfig().getVAppConfig().getOvfEnvironmentTransport() == null
                   || !Arrays.asList(vm.getConfig().getVAppConfig().getOvfEnvironmentTransport()).contains(vmToolEnableItem)) {
                String[] ovfEnvTransport = new String[] {vmToolEnableItem};
@@ -769,6 +770,31 @@ public class VcVmUtil {
                configSpec.setVAppConfig(vmConfigSpec);
                vm.reconfigure(configSpec);
                logger.info("configured ovf env transport");
+               return true;
+            }
+            return false;
+         }
+
+         protected boolean isTaskSession() {
+            return true;
+         }
+      });
+   }
+
+
+    public static boolean enableSyncTimeWithHost(final VcVirtualMachine vm) {
+      return VcContext.inVcSessionDo(new VcSession<Boolean>() {
+         @Override
+         protected Boolean body() throws Exception {
+            if (vm.getConfig() == null || vm.getConfig().getTools() == null
+                  || vm.getConfig().getTools().getSyncTimeWithHost() == null
+                  || !vm.getConfig().getTools().getSyncTimeWithHost()) {
+               ToolsConfigInfo toolsConfigInfo = new ToolsConfigInfoImpl();
+               toolsConfigInfo.setSyncTimeWithHost(true);
+               ConfigSpec configSpec = new ConfigSpecImpl();
+               configSpec.setTools(toolsConfigInfo);
+               vm.reconfigure(configSpec);
+               logger.info("enabled sync time with host");
                return true;
             }
             return false;

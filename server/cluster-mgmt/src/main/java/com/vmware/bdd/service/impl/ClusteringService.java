@@ -262,7 +262,7 @@ public class ClusteringService implements IClusteringService {
          }
 
          CmsWorker.addPeriodic(new ClusterNodeUpdator(getClusterEntityMgr()));
-         snapshotTemplateVM();
+         prepareTemplateVM();
          loadTemplateNetworkLable();
          convertTemplateVm();
          clusterInitializerService.transformClusterStatus(
@@ -377,7 +377,7 @@ public class ClusteringService implements IClusteringService {
       }
    }
 
-   private void snapshotTemplateVM() {
+   private void prepareTemplateVM() {
       final VcVirtualMachine templateVM = getTemplateVm();
 
       if (templateVM == null) {
@@ -385,16 +385,29 @@ public class ClusteringService implements IClusteringService {
       }
 
       try {
-         if (ConfigInfo.isJustUpgraded() || VcVmUtil.enableOvfEnvTransport(templateVM)) {
-            removeRootSnapshot(templateVM);
+         boolean needRemoveSnapshots = false;
+         if (ConfigInfo.isJustUpgraded()) {
+            needRemoveSnapshots = true;
             ConfigInfo.setJustUpgraded(false);
             ConfigInfo.save();
          }
+
+         if (VcVmUtil.enableOvfEnvTransport(templateVM)) {
+            needRemoveSnapshots = true;
+         }
+
+         if (VcVmUtil.enableSyncTimeWithHost(templateVM)) {
+            needRemoveSnapshots = true;
+         }
+
+         if (needRemoveSnapshots) {
+            removeRootSnapshot(templateVM);
+         }
          this.templateVm = templateVM;
       } catch (Exception e) {
-         logger.error("Clustering service initialization error.");
+         logger.error("Prepare template VM error: " + e.getMessage());
          throw BddException.INTERNAL(e,
-               "Clustering service initialization error.");
+               "Prepare template VM error.");
       }
    }
 
