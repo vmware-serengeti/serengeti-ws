@@ -752,6 +752,7 @@ public class ClusterCommands implements CommandMarker {
             }
          } else if (ioShares == null) {
             // in this case, no parameter is specified excpet "cluster name", return directly
+            System.out.println("There is nothing to adjust, please specify more parameters.");
             return;
          }
 
