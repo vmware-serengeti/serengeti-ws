@@ -330,9 +330,11 @@ class VcClusterImpl extends VcObjectImpl implements VcCluster {
       }
 
       // collect those in the map with as many counts as the number of hosts
-      for (ManagedObjectReference mo : candidateList) {
-         if (map.get(mo).equals(hostList.size())) {
-            results.add(mo);
+      if (candidateList != null) {
+         for (ManagedObjectReference mo : candidateList) {
+            if (map.get(mo).equals(hostList.size())) {
+               results.add(mo);
+            }
          }
       }
       return results;

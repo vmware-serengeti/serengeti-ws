@@ -243,7 +243,7 @@ public class VcCache {
          CmsWorker.addRequest(WorkQueue.VC_QUERY_NO_DELAY, req);
       }
 
-      if (waitForRequest) {
+      if (waitForRequest && req != null) {
          // block to get result
          return req.getResult();
       } else {
