@@ -24,8 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.Set;
 
 import jline.ConsoleReader;
@@ -775,8 +773,15 @@ public class ClusterCommands implements CommandMarker {
          }
 
          //validate the input parameters
-         if (!cluster.validateSetParamParameters(targetComputeNodeNum,
-               minComputeNodeNum, maxComputeNodeNum)) {
+         try {
+            if (!cluster.validateSetParamParameters(targetComputeNodeNum,
+                  minComputeNodeNum, maxComputeNodeNum)) {
+               return;
+            }
+         } catch (Exception e) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  clusterName, Constants.OUTPUT_OP_SET_PARAM,
+                  Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
             return;
          }
 
