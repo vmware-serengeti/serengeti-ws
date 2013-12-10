@@ -51,7 +51,8 @@ public class SoftwareManagementClient implements SoftwareManagement.Iface {
       try {
          transport =
                new TSocket(Configuration.getString("management.thrift.server"),
-                     Configuration.getInt("management.thrift.port"));
+                     Configuration.getInt("management.thrift.port"),
+                     Configuration.getInt("management.thrift.timeout", 0));
          transport.open();
          TProtocol protocol = new TBinaryProtocol(transport);
          managementClient = new SoftwareManagement.Client(protocol);
