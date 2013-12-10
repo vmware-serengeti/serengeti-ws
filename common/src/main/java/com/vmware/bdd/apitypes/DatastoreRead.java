@@ -77,7 +77,11 @@ public class DatastoreRead {
       return regex;
    }
 
-   public void setRegex(Boolean regex) {
+   public void setRegex(String regex) {
+      this.regex = regex;
+   }
+
+   public void setRegexByBoolean(Boolean regex) {
       if (regex != null && regex) {
          this.regex = "TRUE";
       } else {

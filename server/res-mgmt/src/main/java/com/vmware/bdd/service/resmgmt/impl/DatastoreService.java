@@ -203,7 +203,7 @@ public class DatastoreService implements IDatastoreService {
       DatastoreRead read = new DatastoreRead();
       read.setName(name);
       read.setType(entities.get(0).getType());
-      read.setRegex(entities.get(0).getRegex());
+      read.setRegexByBoolean(entities.get(0).getRegex());
       read.setDatastoreReadDetails(new ArrayList<DatastoreReadDetail>());
       for (VcDatastoreEntity entity : entities) {
          DatastoreReadDetail detail = new DatastoreReadDetail();
@@ -230,7 +230,7 @@ public class DatastoreService implements IDatastoreService {
       DatastoreRead read = new DatastoreRead();
       read.setName(entities.get(0).getName());
       read.setType(entities.get(0).getType());
-      read.setRegex(entities.get(0).getRegex());
+      read.setRegexByBoolean(entities.get(0).getRegex());
       read.setDatastoreReadDetails(new ArrayList<DatastoreReadDetail>());
       result.add(read);
       for (VcDatastoreEntity entity : entities) {
@@ -239,7 +239,7 @@ public class DatastoreService implements IDatastoreService {
             read = new DatastoreRead();
             read.setName(entity.getName());
             read.setType(entity.getType());
-            read.setRegex(entity.getRegex());
+            read.setRegexByBoolean(entity.getRegex());
             read.setDatastoreReadDetails(new ArrayList<DatastoreReadDetail>());
             result.add(read);
          }
