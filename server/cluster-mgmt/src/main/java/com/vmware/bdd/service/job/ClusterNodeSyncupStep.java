@@ -18,22 +18,13 @@ import java.util.List;
 
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.ClusteringServiceException;
-import com.vmware.bdd.service.IClusteringService;
-import com.vmware.bdd.service.sp.VmEventProcessor;
 import com.vmware.bdd.utils.JobUtils;
 
 public class ClusterNodeSyncupStep extends TrackableTasklet {
-   private IClusteringService clusteringService;
-
-   @Autowired
-   public void setClusteringService(IClusteringService clusteringService) {
-      this.clusteringService = clusteringService;
-   }
 
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,
@@ -46,11 +37,7 @@ public class ClusterNodeSyncupStep extends TrackableTasklet {
                getJobParameters(chunkContext).getString(
                      JobConstants.TARGET_NAME_JOB_PARAM).split("-")[0];
       }
-      synchronized (getClusterEntityMgr()) {
-         VmEventProcessor processor = clusteringService.getEventProcessor();
-         processor.trySuspend();
-         getClusterEntityMgr().syncUp(clusterName, false);
-      }
+      getClusterEntityMgr().syncUp(clusterName, false);
       Boolean success =
             getFromJobExecutionContext(chunkContext,
                   JobConstants.CLUSTER_OPERATION_SUCCESS, Boolean.class);

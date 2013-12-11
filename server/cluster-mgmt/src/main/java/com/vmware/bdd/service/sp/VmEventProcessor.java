@@ -80,7 +80,6 @@ public class VmEventProcessor extends Thread {
          new LinkedBlockingQueue<EventWrapper>();
    private boolean isTerminate = false;
    private ClusterEntityManager clusterEntityMgr;
-   private boolean isSuspended;
    private Folder rootSerengetiFolder = null;
 
    public VmEventProcessor(ClusterEntityManager clusterEntityMgr) {
@@ -450,31 +449,5 @@ public class VmEventProcessor extends Thread {
 
    public void shutdown() {
       this.interrupt();
-   }
-
-   public synchronized void tryResume() {
-      if (isAlive() && isSuspended) {
-         try {
-            isSuspended = false;
-            super.resume();
-            logger.debug("Resumed event listerner thread");
-         } catch (Exception e) {
-            //ingore the exception
-            logger.debug("Got exception while resume event listener"
-                  + e.getMessage());
-         }
-      }
-   }
-
-   public synchronized void trySuspend() {
-      if (isAlive() && !isSuspended) {
-         try {
-            isSuspended = true;
-            super.suspend();
-            logger.debug("Suspended event listerner thread");
-         } catch (Exception e) {
-            logger.warn("Failed to suspend event listener thread.", e);
-         }
-      }
    }
 }

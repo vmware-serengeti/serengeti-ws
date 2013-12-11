@@ -35,9 +35,7 @@ import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.placement.entity.BaseNode;
-import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
-import com.vmware.bdd.service.sp.VmEventProcessor;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.VcVmUtil;
 
@@ -49,7 +47,6 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
    private INetworkService networkMgr;
 
    private IResourcePoolDAO rpDao;
-   private IClusteringService clusteringService;
 
    public INetworkService getNetworkMgr() {
       return networkMgr;
@@ -58,11 +55,6 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
    @Autowired
    public void setNetworkMgr(INetworkService networkMgr) {
       this.networkMgr = networkMgr;
-   }
-
-   @Autowired
-   public void setClusteringService(IClusteringService clusteringService) {
-      this.clusteringService = clusteringService;
    }
 
    /**
@@ -104,8 +96,6 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          }
       }
       synchronized (getClusterEntityMgr()) {
-         VmEventProcessor processor = clusteringService.getEventProcessor();
-         processor.trySuspend();
          addNodeToMetaData(clusterName, addedNodes, deletedNodeNames);
          removeDeletedNode(clusterName, deletedNodeNames);
       }

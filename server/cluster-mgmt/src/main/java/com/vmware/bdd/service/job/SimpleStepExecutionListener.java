@@ -26,30 +26,17 @@ import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.job.AbstractJob;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.service.IClusteringService;
-import com.vmware.bdd.service.sp.VmEventProcessor;
 
 public class SimpleStepExecutionListener implements StepExecutionListener {
    static final Logger logger = Logger.getLogger(SimpleStepExecutionListener.class);
    JobRegistry jobRegistry;
    JobExecutionStatusHolder jobExecutionStatusHolder;
-   private IClusteringService clusteringService;
-
-   @Autowired
-   public void setClusteringService(IClusteringService clusteringService) {
-      this.clusteringService = clusteringService;
-   }
 
    @Override
    public ExitStatus afterStep(StepExecution se) {
       logger.info("step finished: " + se.getStepName());
-      if (clusteringService != null) {
-         VmEventProcessor processor = clusteringService.getEventProcessor();
-         processor.tryResume();
-      }
       ExecutionContext jec = se.getJobExecution().getExecutionContext();
       if (se.getStatus().equals(BatchStatus.COMPLETED)) {
          jec.put(se.getStepName() + ".COMPLETED", true);
