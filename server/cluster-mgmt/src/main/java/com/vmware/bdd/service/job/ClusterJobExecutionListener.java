@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.exception.TaskException;
-import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.IExecutionService;
 import com.vmware.bdd.utils.JobUtils;
@@ -35,7 +35,7 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
          .getLogger(ClusterJobExecutionListener.class);
    private IClusteringService clusteringService;
    private IExecutionService executionService;
-   private ClusterEntityManager clusterEntityMgr;
+   private IClusterEntityManager clusterEntityMgr;
    private Boolean recoverAutoFlagAfterJob;
    private boolean subJob = false;
    private Boolean preAutoFlag;
@@ -57,12 +57,12 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
       this.executionService = executionService;
    }
 
-   public ClusterEntityManager getClusterEntityMgr() {
+   public IClusterEntityManager getClusterEntityMgr() {
       return clusterEntityMgr;
    }
 
    @Autowired
-   public void setClusterEntityMgr(ClusterEntityManager clusterEntityMgr) {
+   public void setClusterEntityMgr(IClusterEntityManager clusterEntityMgr) {
       this.clusterEntityMgr = clusterEntityMgr;
    }
 

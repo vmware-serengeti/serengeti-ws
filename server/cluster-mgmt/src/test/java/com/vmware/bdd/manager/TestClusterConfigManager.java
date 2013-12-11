@@ -51,6 +51,7 @@ import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.manager.DistroManager.PackagesExistStatus;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
@@ -65,7 +66,7 @@ public class TestClusterConfigManager {
    private static ClusterConfigManager clusterConfigMgr;
 
    private static TestResourceCleanupUtils cleanUpUtils;
-   private static ClusterEntityManager clusterEntityMgr;
+   private static IClusterEntityManager clusterEntityMgr;
 
    private static Gson gson = new GsonBuilder()
          .excludeFieldsWithoutExposeAnnotation().create();
@@ -100,7 +101,7 @@ public class TestClusterConfigManager {
       DistroManager distroMgr = Mockito.mock(DistroManager.class);
       clusterConfigMgr.setDistroMgr(distroMgr);
       clusterEntityMgr =
-            context.getBean("clusterEntityManager", ClusterEntityManager.class);
+            context.getBean("clusterEntityManager", IClusterEntityManager.class);
       DistroRead distro = new DistroRead();
       List<String> roles = new ArrayList<String>();
       roles.add("hadoop_namenode");

@@ -22,21 +22,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.exception.ClusteringServiceException;
-import com.vmware.bdd.service.IClusteringService;
+import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
 import com.vmware.bdd.service.resmgmt.INetworkService;
-import com.vmware.bdd.service.sp.VmEventProcessor;
 import com.vmware.bdd.utils.AuAssert;
 
 public class DeleteClusterNodeStep extends TrackableTasklet {
    private static final Logger logger = Logger
          .getLogger(DeleteClusterNodeStep.class);
    private INetworkService networkMgr;
-   private IClusteringService clusteringService;
-
-   @Autowired
-   public void setClusteringService(IClusteringService clusteringService) {
-      this.clusteringService = clusteringService;
-   }
+   private IExclusiveLockedClusterEntityManager lockClusterEntityMgr;
 
    public INetworkService getNetworkMgr() {
       return networkMgr;
@@ -44,6 +38,16 @@ public class DeleteClusterNodeStep extends TrackableTasklet {
 
    public void setNetworkMgr(INetworkService networkMgr) {
       this.networkMgr = networkMgr;
+   }
+
+   public IExclusiveLockedClusterEntityManager getLockClusterEntityMgr() {
+      return lockClusterEntityMgr;
+   }
+
+   @Autowired
+   public void setLockClusterEntityMgr(
+         IExclusiveLockedClusterEntityManager lockClusterEntityMgr) {
+      this.lockClusterEntityMgr = lockClusterEntityMgr;
    }
 
    @Override
@@ -56,7 +60,7 @@ public class DeleteClusterNodeStep extends TrackableTasklet {
             getFromJobExecutionContext(chunkContext,
                   JobConstants.CLUSTER_DELETE_VM_OPERATION_SUCCESS,
                   Boolean.class);
-      deleteClusterNodes(clusterName, deleted);
+      deleteClusterNodes(chunkContext, clusterName, deleted);
       if (!deleted) {
          // vm deleting is finished, and with error happens, throw exception
          logger.error("Failed to delete nodes.");
@@ -65,16 +69,16 @@ public class DeleteClusterNodeStep extends TrackableTasklet {
       return RepeatStatus.FINISHED;
    }
 
-   private void deleteClusterNodes(String clusterName, boolean success) {
+   private void deleteClusterNodes(ChunkContext chunkContext,
+         String clusterName, boolean success) {
       ClusterEntity cluster = getClusterEntityMgr().findByName(clusterName);
       AuAssert.check(cluster != null);
       if (success) {
          releaseIp(cluster);
-         synchronized (getClusterEntityMgr()) {
-            VmEventProcessor processor = clusteringService.getEventProcessor();
-            processor.trySuspend();
-            getClusterEntityMgr().delete(cluster);
-         }
+         lockClusterEntityMgr.getLock(clusterName).lock();
+         putIntoJobExecutionContext(chunkContext,
+               JobConstants.CLUSTER_EXCLUSIVE_WRITE_LOCKED, true);
+         getClusterEntityMgr().delete(cluster);
       }
    }
 
@@ -82,7 +86,8 @@ public class DeleteClusterNodeStep extends TrackableTasklet {
       logger.info("Free ip adderss of cluster: " + cluster.getName());
       try {
          for (String networkName : cluster.fetchNetworkNameList()) {
-            NetworkEntity networkEntity = networkMgr.getNetworkEntityByName(networkName);
+            NetworkEntity networkEntity =
+                  networkMgr.getNetworkEntityByName(networkName);
             if (networkEntity.getAllocType() == NetworkEntity.AllocType.IP_POOL) {
                networkMgr.free(networkEntity, cluster.getId());
             }

@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -55,6 +54,8 @@ import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.exception.ClusterHealServiceException;
 import com.vmware.bdd.exception.ClusterManagerException;
 import com.vmware.bdd.exception.VcProviderException;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.IExecutionService;
@@ -67,6 +68,7 @@ import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.ValidationUtils;
 
@@ -82,7 +84,7 @@ public class ClusterManager {
 
    private IResourceService resMgr;
 
-   private ClusterEntityManager clusterEntityMgr;
+   private IClusterEntityManager clusterEntityMgr;
 
    private RackInfoManager rackInfoMgr;
 
@@ -125,12 +127,12 @@ public class ClusterManager {
       this.resMgr = resMgr;
    }
 
-   public ClusterEntityManager getClusterEntityMgr() {
+   public IClusterEntityManager getClusterEntityMgr() {
       return clusterEntityMgr;
    }
 
    @Autowired
-   public void setClusterEntityMgr(ClusterEntityManager clusterEntityMgr) {
+   public void setClusterEntityMgr(IClusterEntityManager clusterEntityMgr) {
       this.clusterEntityMgr = clusterEntityMgr;
    }
 

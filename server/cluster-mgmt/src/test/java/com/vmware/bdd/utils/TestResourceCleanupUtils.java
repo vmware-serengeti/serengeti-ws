@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NetworkEntity;
-import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
@@ -45,7 +45,7 @@ public class TestResourceCleanupUtils {
       this.netSvc = netSvc;
    }
 
-   public void removeCluster(ClusterEntityManager entityMgr, String clusterName) {
+   public void removeCluster(IClusterEntityManager entityMgr, String clusterName) {
       List<ClusterEntity> clusters = entityMgr.findAllClusters();
       for (ClusterEntity cluster : clusters) {
          if (cluster.getName().equals(clusterName)) {
@@ -55,7 +55,7 @@ public class TestResourceCleanupUtils {
       }
    }
 
-   public void removeClusters(ClusterEntityManager entityMgr, String namePattern) {
+   public void removeClusters(IClusterEntityManager entityMgr, String namePattern) {
       List<ClusterEntity> clusters = entityMgr.findAllClusters();
       for (ClusterEntity cluster : clusters) {
          if (cluster.getName().matches(namePattern)) {

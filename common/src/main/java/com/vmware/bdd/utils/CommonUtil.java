@@ -176,11 +176,13 @@ public class CommonUtil {
       return false;
    }
 
+   public static String getClusterName(String vmName) throws BddException {
+      String[] split = splitVmName(vmName);
+      return split[0];
+   }
+
    public static long getVmIndex(String vmName) throws BddException {
-      String[] split = vmName.split("-");
-      if (split.length < 3) {
-         throw BddException.VM_NAME_VIOLATE_NAME_PATTERN(vmName);
-      }
+      String[] split = splitVmName(vmName);
       try {
          return Long.valueOf(split[2]);
       } catch (Exception e) {
@@ -188,6 +190,14 @@ public class CommonUtil {
                + " violate serengeti vm name definition.");
          throw BddException.VM_NAME_VIOLATE_NAME_PATTERN(vmName);
       }
+   }
+
+   private static String[] splitVmName(String vmName) {
+      String[] split = vmName.split("-");
+      if (split.length < 3) {
+         throw BddException.VM_NAME_VIOLATE_NAME_PATTERN(vmName);
+      }
+      return split;
    }
 
 }

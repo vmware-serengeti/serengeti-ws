@@ -38,6 +38,7 @@ import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 
 @ContextConfiguration(locations = { "classpath:/spring/*-context.xml" })
 public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
@@ -53,7 +54,7 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
    private static final String HOST_IP = "10.1.1.1";
 
    @Autowired
-   private ClusterEntityManager clusterEntityMgr;
+   private IClusterEntityManager clusterEntityMgr;
 
    @BeforeClass
    public static void setup() {
@@ -65,7 +66,7 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
 
    }
 
-   private ClusterEntity assembleClusterEntity(String clusterName) {
+   private static ClusterEntity assembleClusterEntity(String clusterName) {
       ClusterEntity cluster = new ClusterEntity(clusterName);
       cluster.setDistro("apache");
       cluster.setTopologyPolicy(TopologyType.NONE);

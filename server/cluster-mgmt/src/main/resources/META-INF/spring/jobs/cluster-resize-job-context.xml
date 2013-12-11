@@ -30,7 +30,6 @@
 	<beans:bean name="setPasswordForClusterResizeTasklet"
 		class="com.vmware.bdd.service.job.SetPasswordForNewNodesStep">
 		<beans:property name="configMgr" ref="clusterConfigMgr" />
-		<beans:property name="entityMgr" ref="clusterEntityManager" />
 		<beans:property name="setPasswordService" ref="setPasswordService"/>
 		<beans:property name="managementOperation" value="RESIZE" />
 	</beans:bean>

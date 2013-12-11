@@ -31,9 +31,6 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.vmware.bdd.apitypes.NetConfigInfo;
-import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -69,6 +66,7 @@ import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.IpBlock;
+import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.Priority;
@@ -83,8 +81,9 @@ import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.manager.ClusterConfigManager;
-import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.manager.ElasticityScheduleManager;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
 import com.vmware.bdd.placement.Container;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
@@ -110,6 +109,7 @@ import com.vmware.bdd.service.sp.StopVmSP;
 import com.vmware.bdd.service.sp.UpdateVmProgressCallback;
 import com.vmware.bdd.service.sp.VmEventProcessor;
 import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
@@ -130,7 +130,8 @@ public class ClusteringService implements IClusteringService {
          .getLogger(ClusteringService.class);
    private ClusterConfigManager configMgr;
 
-   private ClusterEntityManager clusterEntityMgr;
+   private IClusterEntityManager clusterEntityMgr;
+   private IConcurrentLockedClusterEntityManager lockClusterEntityMgr;
    private IResourcePoolDAO rpDao;
    private INetworkService networkMgr;
    private IResourceService resMgr;
@@ -183,13 +184,23 @@ public class ClusteringService implements IClusteringService {
       this.clusterInitializerService = clusterInitializerService;
    }
 
-   public ClusterEntityManager getClusterEntityMgr() {
+   public IClusterEntityManager getClusterEntityMgr() {
       return clusterEntityMgr;
    }
 
    @Autowired
-   public void setClusterEntityMgr(ClusterEntityManager clusterEntityMgr) {
+   public void setClusterEntityMgr(IClusterEntityManager clusterEntityMgr) {
       this.clusterEntityMgr = clusterEntityMgr;
+   }
+
+   public IConcurrentLockedClusterEntityManager getLockClusterEntityMgr() {
+      return lockClusterEntityMgr;
+   }
+
+   @Autowired
+   public void setLockClusterEntityMgr(
+         IConcurrentLockedClusterEntityManager lockClusterEntityMgr) {
+      this.lockClusterEntityMgr = lockClusterEntityMgr;
    }
 
    public IResourcePoolDAO getRpDao() {
@@ -261,7 +272,7 @@ public class ClusteringService implements IClusteringService {
             cloneConcurrency = 1;
          }
 
-         CmsWorker.addPeriodic(new ClusterNodeUpdator(getClusterEntityMgr()));
+         CmsWorker.addPeriodic(new ClusterNodeUpdator(getLockClusterEntityMgr()));
          prepareTemplateVM();
          loadTemplateNetworkLable();
          convertTemplateVm();
@@ -275,7 +286,7 @@ public class ClusteringService implements IClusteringService {
 
    private void startVMEventProcessor() {
       // add event handler for Serengeti after VC event handler is registered.
-      processor = new VmEventProcessor(getClusterEntityMgr());
+      processor = new VmEventProcessor(lockClusterEntityMgr);
       processor.installEventHandler();
       processor.setDaemon(true);
       processor.setName("VM Event Processor");
@@ -1129,7 +1140,7 @@ public class ClusteringService implements IClusteringService {
 
       try {
          UpdateVmProgressCallback callback =
-               new UpdateVmProgressCallback(clusterEntityMgr, statusUpdator,
+               new UpdateVmProgressCallback(getLockClusterEntityMgr(), statusUpdator,
                      vNodes.get(0).getClusterName());
 
          logger.info("ClusteringService, start to clone template.");
@@ -1359,7 +1370,7 @@ public class ClusteringService implements IClusteringService {
          // execute store procedures to start VMs
          logger.info("ClusteringService, start to start vms.");
          UpdateVmProgressCallback callback =
-               new UpdateVmProgressCallback(clusterEntityMgr, statusUpdator,
+               new UpdateVmProgressCallback(lockClusterEntityMgr, statusUpdator,
                      name);
          ExecutionResult[] result =
                Scheduler
@@ -1436,7 +1447,7 @@ public class ClusteringService implements IClusteringService {
          // execute store procedures to start VMs
          logger.info("ClusteringService, start to stop vms.");
          UpdateVmProgressCallback callback =
-               new UpdateVmProgressCallback(clusterEntityMgr, statusUpdator,
+               new UpdateVmProgressCallback(lockClusterEntityMgr, statusUpdator,
                      name);
          ExecutionResult[] result =
                Scheduler

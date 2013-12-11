@@ -50,7 +50,7 @@ import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterHealServiceException;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.manager.ClusterConfigManager;
-import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractDatastore;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
@@ -75,7 +75,7 @@ public class ClusterHealService implements IClusterHealService {
 
    private static final String RECOVERY_VM_NAME_POSTFIX = "-recovery";
 
-   private ClusterEntityManager clusterEntityMgr;
+   private IClusterEntityManager clusterEntityMgr;
 
    private ClusterConfigManager configMgr;
 
@@ -83,12 +83,12 @@ public class ClusterHealService implements IClusterHealService {
 
    private INetworkService networkMgr;
 
-   public ClusterEntityManager getClusterEntityMgr() {
+   public IClusterEntityManager getClusterEntityMgr() {
       return clusterEntityMgr;
    }
 
    @Autowired
-   public void setClusterEntityMgr(ClusterEntityManager clusterEntityMgr) {
+   public void setClusterEntityMgr(IClusterEntityManager clusterEntityMgr) {
       this.clusterEntityMgr = clusterEntityMgr;
    }
 

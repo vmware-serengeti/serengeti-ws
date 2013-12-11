@@ -34,7 +34,7 @@ public class MockVcVmUtil {
 
    @Mock
    public static String getIpAddressOfPortGroup(final VcVirtualMachine vcVm,
-         final String portgroup, boolean inSession) {
+         final String portgroup) {
       if (flag) {
          i++;
          return "10.1.1." + i;
@@ -48,7 +48,7 @@ public class MockVcVmUtil {
          final Set<String> portgroups, boolean inSession) {
       Set<String> ips = new HashSet<String>();
       for (String portgroup : portgroups) {
-         ips.add(getIpAddressOfPortGroup(vcVm, portgroup, inSession));
+         ips.add(getIpAddressOfPortGroup(vcVm, portgroup));
       }
       return ips;
    }

@@ -14,39 +14,58 @@
  ***************************************************************************/
 package com.vmware.bdd.service.sp;
 
-import com.vmware.bdd.entity.NodeEntity;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.aurora.util.CmsWorker.SimpleRequest;
-import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.entity.NodeEntity;
+import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
-import java.util.List;
-
 public class NodePowerOnRequest extends SimpleRequest {
-   private static final Logger logger = Logger.getLogger(NodePowerOnRequest.class);
-   private ClusterEntityManager entityMgr;
+   private static final Logger logger = Logger
+         .getLogger(NodePowerOnRequest.class);
+   private IConcurrentLockedClusterEntityManager lockClusterEntityMgr;
    private String vmId;
 
-   public NodePowerOnRequest(ClusterEntityManager entityMgr, String vmId) {
-      this.entityMgr = entityMgr;
+   public IConcurrentLockedClusterEntityManager getLockClusterEntityMgr() {
+      return lockClusterEntityMgr;
+   }
+
+   @Autowired
+   public void setLockClusterEntityMgr(
+         IConcurrentLockedClusterEntityManager lockClusterEntityMgr) {
+      this.lockClusterEntityMgr = lockClusterEntityMgr;
+   }
+
+   public NodePowerOnRequest(
+         IConcurrentLockedClusterEntityManager lockClusterEntityMgr,
+         String vmId) {
+      this.lockClusterEntityMgr = lockClusterEntityMgr;
       this.vmId = vmId;
    }
 
    @Override
    protected boolean execute() {
-      logger.info("Start to waiting for VM " + vmId +
-      		" post power on status");
-      NodeEntity nodeEntity = entityMgr.getNodeByMobId(vmId);
+      logger.info("Start to waiting for VM " + vmId + " post power on status");
+      NodeEntity nodeEntity =
+            lockClusterEntityMgr.getClusterEntityMgr().getNodeByMobId(vmId);
+      if (nodeEntity == null) {
+         logger.info("Node " + nodeEntity.getVmName() + " is deleted.");
+      }
       QueryIpAddress query =
-         new QueryIpAddress(nodeEntity.fetchAllPortGroups(), Constants.VM_POWER_ON_WAITING_SEC);
+            new QueryIpAddress(nodeEntity.fetchAllPortGroups(),
+                  Constants.VM_POWER_ON_WAITING_SEC);
       query.setVmId(vmId);
       try {
          query.call();
       } catch (Exception e) {
          logger.error("Failed to query ip address of vm: " + vmId, e);
       }
-      entityMgr.refreshNodeByMobId(vmId, false);
+      String clusterName = CommonUtil.getClusterName(nodeEntity.getVmName());
+      lockClusterEntityMgr
+            .refreshNodeByMobId(clusterName, vmId, false);
       return true;
    }
 }

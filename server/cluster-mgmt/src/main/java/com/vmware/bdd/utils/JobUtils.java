@@ -35,7 +35,7 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.exception.TaskException;
-import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IExecutionService;
 import com.vmware.bdd.service.job.JobConstants;
@@ -50,7 +50,7 @@ public class JobUtils {
     * @return
     */
    public static List<BaseNode> getExistingNodes(ClusterCreate cluster,
-         ClusterEntityManager entityMgr) {
+         IClusterEntityManager entityMgr) {
 
       List<BaseNode> existingNodes = new ArrayList<BaseNode>();
       ClusterEntity clusterEntity = entityMgr.findByName(cluster.getName());

@@ -40,7 +40,7 @@ import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.manager.ClusterConfigManager;
-import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.impl.ClusterHealService;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.spectypes.DiskSpec;
@@ -104,7 +104,7 @@ public class TestClusterHealService {
       service = new ClusterHealService();
 
       // mock cluster entity manager
-      ClusterEntityManager entityMgr = Mockito.mock(ClusterEntityManager.class);
+      IClusterEntityManager entityMgr = Mockito.mock(IClusterEntityManager.class);
 
       // mock getDisks
       List<DiskEntity> disks = new ArrayList<DiskEntity>();

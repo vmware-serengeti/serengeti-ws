@@ -23,13 +23,11 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterConfigManager;
-import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.service.ISetPasswordService;
 
 public class SetPasswordForDiskFixStep extends TrackableTasklet {
    private ISetPasswordService setPasswordService;
    private ClusterConfigManager configMgr;
-   private ClusterEntityManager clusterEntityMgr;
    private static final Logger logger = Logger.getLogger(SetPasswordForDiskFixStep.class);
 
    @Override
@@ -72,15 +70,6 @@ public class SetPasswordForDiskFixStep extends TrackableTasklet {
 
    public void setConfigMgr(ClusterConfigManager configMgr) {
       this.configMgr = configMgr;
-   }
-
-   public ClusterEntityManager getClusterEntityManager() {
-      return clusterEntityMgr;
-   }
-
-   @Autowired
-   public void setClusterEntityManager(ClusterEntityManager clusterEntityManager) {
-      this.clusterEntityMgr = clusterEntityManager;
    }
 
    public ISetPasswordService getSetPasswordService() {

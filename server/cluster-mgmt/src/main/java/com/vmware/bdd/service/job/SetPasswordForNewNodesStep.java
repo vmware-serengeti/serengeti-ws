@@ -17,6 +17,7 @@ package com.vmware.bdd.service.job;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -29,7 +30,6 @@ import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterConfigManager;
-import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.ISetPasswordService;
 import com.vmware.bdd.service.job.software.ManagementOperation;
@@ -37,7 +37,6 @@ import com.vmware.bdd.service.job.software.ManagementOperation;
 public class SetPasswordForNewNodesStep extends TrackableTasklet {
    private ISetPasswordService setPasswordService;
    private ClusterConfigManager configMgr;
-   private ClusterEntityManager entityMgr;
    private ManagementOperation managementOperation;
    private static final Logger logger = Logger.getLogger(SetPasswordForNewNodesStep.class);
 
@@ -62,7 +61,7 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
                      }.getType());
          nodeIPs = getAddedNodeIPs(addedNodes);
       } else if (managementOperation == ManagementOperation.RESUME) {
-         nodeIPs = getAllNodeIPsFromEntitys(entityMgr.findAllNodes(clusterName));
+         nodeIPs = getAllNodeIPsFromEntitys(getClusterEntityMgr().findAllNodes(clusterName));
       } else {
          throw TaskException.EXECUTION_FAILED("Unknown operation type.");
       }
@@ -142,15 +141,6 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
    @Autowired
    public void setSetPasswordService(ISetPasswordService setPasswordService) {
       this.setPasswordService = setPasswordService;
-   }
-
-   public ClusterEntityManager getEntityMgr() {
-      return entityMgr;
-   }
-
-   @Autowired
-   public void setEntityMgr(ClusterEntityManager entityMgr) {
-      this.entityMgr = entityMgr;
    }
 
    public ManagementOperation getManagementOperation() {

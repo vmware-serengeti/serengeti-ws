@@ -14,25 +14,26 @@
  ***************************************************************************/
 package com.vmware.bdd.service.impl;
 
-import com.vmware.bdd.service.IClusterInitializerService;
+import java.util.List;
+
 import org.apache.log4j.Logger;
+
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.entity.ClusterEntity;
-import com.vmware.bdd.manager.ClusterEntityManager;
-
-import java.util.List;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.service.IClusterInitializerService;
 
 public class ClusterInitializerService implements IClusterInitializerService {
 
    private static final Logger logger = Logger.getLogger(ClusterInitializerService.class);
 
-   private ClusterEntityManager clusterEntityManager;
+   private IClusterEntityManager clusterEntityManager;
 
-   public ClusterEntityManager getClusterEntityManager() {
+   public IClusterEntityManager getClusterEntityManager() {
       return clusterEntityManager;
    }
 
-   public void setClusterEntityManager(ClusterEntityManager clusterEntityManager) {
+   public void setClusterEntityManager(IClusterEntityManager clusterEntityManager) {
       this.clusterEntityManager = clusterEntityManager;
    }
 

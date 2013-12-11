@@ -31,13 +31,13 @@ import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterConfigException;
-import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.manager.RackInfoManager;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 
 public class ValidationUtils {
 
    public static void hasEnoughHost(RackInfoManager rackInfoMgr,
-         ClusterEntityManager clusterEntityMgr, NodeGroupEntity nodeGroup,
+         IClusterEntityManager clusterEntityMgr, NodeGroupEntity nodeGroup,
          int instanceNum) {
       if (nodeGroup.getInstancePerHost() != null) {
          // assume this value is already validated
@@ -89,7 +89,7 @@ public class ValidationUtils {
       }
    }
 
-   public static void validHostNumber(ClusterEntityManager clusterEntityMgr,
+   public static void validHostNumber(IClusterEntityManager clusterEntityMgr,
          NodeGroupEntity nodeGroup, int instanceNum) {
       Set<NodeGroupAssociation> associations = nodeGroup.getGroupAssociations();
       if (associations != null && !associations.isEmpty()) {

@@ -9,6 +9,7 @@
 	<context:property-placeholder location="classpath*:jdbc.properties" />
 	<tx:annotation-driven />
 	<context:component-scan base-package="com.vmware.bdd.service.impl"></context:component-scan>
+	<context:component-scan base-package="com.vmware.bdd.manager"></context:component-scan>
 
 	<bean id="dataSource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
@@ -27,6 +28,8 @@
 
 	<bean id="retryTransaction" class="com.vmware.bdd.aop.tx.RetryTransactionAdvice"></bean>
 	<bean id="loggingAspectBean" class="com.vmware.bdd.aop.logging.ExceptionHandlerAspect"></bean>
+	<bean id="readLock" class="com.vmware.bdd.aop.lock.ClusterEntityConcurentWriteLockAdvice"></bean>
+	<bean id="writeLock" class="com.vmware.bdd.aop.lock.ClusterEntityExclusiveWriteLockAdvice"></bean>
 
 	<aop:config>
 		<aop:pointcut id="rertryTransactionOperation"
@@ -42,6 +45,21 @@
 		<aop:aspect id="log" ref="loggingAspectBean">
 			<aop:after-throwing method="logException"
 				throwing="t" pointcut-ref="logExceptionPointcut" />
+		</aop:aspect>
+	</aop:config>
+	<aop:config>
+		<aop:pointcut id="readLockClusterEntityLock"
+			expression="execution(* com.vmware.bdd.manager..*.*(..)) and @annotation(com.vmware.bdd.aop.annotation.ClusterEntityConcurrentWriteLock)" />
+		<aop:aspect id="readLockAspect" ref="readLock">
+			<aop:around method="lock" pointcut-ref="readLockClusterEntityLock" />
+		</aop:aspect>
+	</aop:config>
+
+	<aop:config>
+		<aop:pointcut id="writeLockClusterEntityLock"
+			expression="execution(* com.vmware.bdd.manager..*.*(..)) and @annotation(com.vmware.bdd.aop.annotation.ClusterEntityExclusiveWriteLock)" />
+		<aop:aspect id="writeLockAspect" ref="writeLock">
+			<aop:around method="lock" pointcut-ref="writeLockClusterEntityLock" />
 		</aop:aspect>
 	</aop:config>
 

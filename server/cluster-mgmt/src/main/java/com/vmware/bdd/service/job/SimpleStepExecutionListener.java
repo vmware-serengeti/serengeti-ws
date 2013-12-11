@@ -29,31 +29,51 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.service.IClusteringService;
-import com.vmware.bdd.service.sp.VmEventProcessor;
+import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
 
 public class SimpleStepExecutionListener implements StepExecutionListener {
-   static final Logger logger = Logger.getLogger(SimpleStepExecutionListener.class);
+   static final Logger logger = Logger
+         .getLogger(SimpleStepExecutionListener.class);
    JobRegistry jobRegistry;
    JobExecutionStatusHolder jobExecutionStatusHolder;
-   private IClusteringService clusteringService;
+   private IExclusiveLockedClusterEntityManager lockClusterEntityMgr;
+
+   public IExclusiveLockedClusterEntityManager getLockClusterEntityMgr() {
+      return lockClusterEntityMgr;
+   }
 
    @Autowired
-   public void setClusteringService(IClusteringService clusteringService) {
-      this.clusteringService = clusteringService;
+   public void setLockClusterEntityMgr(
+         IExclusiveLockedClusterEntityManager lockClusterEntityMgr) {
+      this.lockClusterEntityMgr = lockClusterEntityMgr;
    }
 
    @Override
    public ExitStatus afterStep(StepExecution se) {
       logger.info("step finished: " + se.getStepName());
-      if (clusteringService != null) {
-         VmEventProcessor processor = clusteringService.getEventProcessor();
-         processor.tryResume();
-      }
       ExecutionContext jec = se.getJobExecution().getExecutionContext();
+      Boolean locked =
+            TrackableTasklet.getFromJobExecutionContext(jec,
+                  JobConstants.CLUSTER_EXCLUSIVE_WRITE_LOCKED, Boolean.class);
+      String clusterName =
+            se.getJobParameters()
+                  .getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
+      if (locked != null && locked && lockClusterEntityMgr != null) {
+         try {
+            lockClusterEntityMgr.getLock(clusterName).unlock();
+         } catch (Exception e) {
+            logger.error(
+                  "Got exception while release exclusive write lock, ingore it.",
+                  e);
+         }
+         TrackableTasklet.putIntoJobExecutionContext(jec,
+               JobConstants.CLUSTER_EXCLUSIVE_WRITE_LOCKED, false);
+      }
+
       if (se.getStatus().equals(BatchStatus.COMPLETED)) {
          jec.put(se.getStepName() + ".COMPLETED", true);
-         jobExecutionStatusHolder.setCurrentStepProgress(se.getJobExecution().getId(), 1);
+         jobExecutionStatusHolder.setCurrentStepProgress(se.getJobExecution()
+               .getId(), 1);
       } else {
          for (Throwable t : se.getFailureExceptions()) {
             String msg = t.getMessage();
@@ -74,7 +94,9 @@ public class SimpleStepExecutionListener implements StepExecutionListener {
       JobExecution je = se.getJobExecution();
       AbstractJob job = null;
       try {
-         job = (AbstractJob) jobRegistry.getJob(je.getJobInstance().getJobName());
+         job =
+               (AbstractJob) jobRegistry.getJob(je.getJobInstance()
+                     .getJobName());
       } catch (NoSuchJobException ex) {
          throw BddException.INTERNAL(ex, "Illegal state.");
       }
@@ -91,9 +113,10 @@ public class SimpleStepExecutionListener implements StepExecutionListener {
             ++done;
          }
       }
-      double progress = done/steps;
-      jobExecutionStatusHolder.setCurrentStepWeight(je.getId(), 1.0/steps);
-      jobExecutionStatusHolder.setCurrentProgressBeforeStepStart(je.getId(), progress);
+      double progress = done / steps;
+      jobExecutionStatusHolder.setCurrentStepWeight(je.getId(), 1.0 / steps);
+      jobExecutionStatusHolder.setCurrentProgressBeforeStepStart(je.getId(),
+            progress);
    }
 
    public JobExecutionStatusHolder getJobExecutionStatusHolder() {

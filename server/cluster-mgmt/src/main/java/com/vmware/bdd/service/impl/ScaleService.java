@@ -27,7 +27,7 @@ import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.ScaleServiceException;
 import com.vmware.bdd.manager.ClusterConfigManager;
-import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.IScaleService;
 import com.vmware.bdd.service.sp.ScaleVMSP;
 import com.vmware.bdd.service.utils.VcResourceUtils;
@@ -42,7 +42,7 @@ import com.vmware.bdd.utils.VcVmUtil;
 public class ScaleService implements IScaleService {
    private static final Logger logger = Logger.getLogger(ScaleService.class);
 
-   private ClusterEntityManager clusterEntityMgr;
+   private IClusterEntityManager clusterEntityMgr;
 
    private ClusterConfigManager clusterConfigMgr;
 
@@ -50,7 +50,7 @@ public class ScaleService implements IScaleService {
    /**
     * @return the clusterEntityMgr
     */
-   public ClusterEntityManager getClusterEntityMgr() {
+   public IClusterEntityManager getClusterEntityMgr() {
       return clusterEntityMgr;
    }
 
@@ -59,7 +59,7 @@ public class ScaleService implements IScaleService {
     * @param clusterEntityMgr
     *           the clusterEntityMgr to set
     */
-   public void setClusterEntityMgr(ClusterEntityManager clusterEntityMgr) {
+   public void setClusterEntityMgr(IClusterEntityManager clusterEntityMgr) {
       this.clusterEntityMgr = clusterEntityMgr;
    }
 

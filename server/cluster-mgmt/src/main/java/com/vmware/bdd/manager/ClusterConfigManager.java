@@ -29,8 +29,6 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.vmware.bdd.apitypes.NetConfigInfo;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +41,8 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpBlock;
+import com.vmware.bdd.apitypes.NetConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
@@ -62,6 +62,8 @@ import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.exception.UniqueConstraintViolationException;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
@@ -83,7 +85,7 @@ public class ClusterConfigManager {
    private DistroManager distroMgr;
    private RackInfoManager rackInfoMgr;
    private IDatastoreService datastoreMgr;
-   private ClusterEntityManager clusterEntityMgr;
+   private IClusterEntityManager clusterEntityMgr;
 
    private static final String TEMPLATE_ID = "template_id";
    private static final String HTTP_PROXY = "serengeti.http_proxy";
@@ -138,12 +140,12 @@ public class ClusterConfigManager {
       this.networkMgr = networkMgr;
    }
 
-   public ClusterEntityManager getClusterEntityMgr() {
+   public IClusterEntityManager getClusterEntityMgr() {
       return clusterEntityMgr;
    }
 
    @Autowired
-   public void setClusterEntityMgr(ClusterEntityManager clusterEntityMgr) {
+   public void setClusterEntityMgr(IClusterEntityManager clusterEntityMgr) {
       this.clusterEntityMgr = clusterEntityMgr;
    }
 

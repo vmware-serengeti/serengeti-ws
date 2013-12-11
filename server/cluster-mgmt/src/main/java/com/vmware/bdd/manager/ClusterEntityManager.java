@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.gson.Gson;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.bdd.aop.annotation.RetryTransaction;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.NodeGroupRead;
@@ -41,6 +42,7 @@ import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.software.mgmt.thrift.GroupData;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
@@ -50,7 +52,7 @@ import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
 
 @Transactional(readOnly = true)
-public class ClusterEntityManager {
+public class ClusterEntityManager implements IClusterEntityManager {
    private static final Logger logger = Logger
          .getLogger(ClusterEntityManager.class);
 
@@ -158,18 +160,21 @@ public class ClusterEntityManager {
    }
 
    @Transactional
+   @RetryTransaction
    public void insert(ClusterEntity cluster) {
       AuAssert.check(cluster != null);
       clusterDao.insert(cluster);
    }
 
    @Transactional
+   @RetryTransaction
    public void insert(NodeEntity node) {
       AuAssert.check(node != null);
       nodeDao.insert(node);
    }
 
    @Transactional
+   @RetryTransaction
    public void delete(NodeEntity node) {
       AuAssert.check(node != null);
       // remove from parent's collection by cascading
@@ -179,32 +184,38 @@ public class ClusterEntityManager {
    }
 
    @Transactional
+   @RetryTransaction
    public void delete(ClusterEntity cluster) {
       AuAssert.check(cluster != null);
       clusterDao.delete(cluster);
    }
 
    @Transactional
+   @RetryTransaction
    public void updateClusterStatus(String clusterName, ClusterStatus status) {
       clusterDao.updateStatus(clusterName, status);
    }
 
    @Transactional
+   @RetryTransaction
    public void update(ClusterEntity clusterEntity) {
       clusterDao.update(clusterEntity);
    }
 
    @Transactional
+   @RetryTransaction
    public void update(NodeGroupEntity group) {
       nodeGroupDao.update(group);
    }
 
    @Transactional
+   @RetryTransaction
    public void update(NodeEntity node) {
       nodeDao.update(node);
    }
 
    @Transactional
+   @RetryTransaction
    public void updateDisks(String nodeName, List<DiskEntity> diskSets) {
       NodeEntity node = findNodeByName(nodeName);
       for (DiskEntity disk : diskSets) {
@@ -226,7 +237,8 @@ public class ClusterEntityManager {
    }
 
    @Transactional
-   synchronized public boolean handleOperationStatus(String clusterName,
+   @RetryTransaction
+   public boolean handleOperationStatus(String clusterName,
          OperationStatusWithDetail status) {
       logger.info("handle operation status: " + status.getOperationStatus());
       boolean finished = status.getOperationStatus().isFinished();
@@ -289,8 +301,8 @@ public class ClusterEntityManager {
    }
 
    @Transactional
-   synchronized public void syncUp(String clusterName,
-         boolean updateClusterStatus) {
+   @RetryTransaction
+   public void syncUp(String clusterName, boolean updateClusterStatus) {
       List<NodeEntity> nodes = findAllNodes(clusterName);
 
       boolean allNodesDown = true;
@@ -311,7 +323,8 @@ public class ClusterEntityManager {
    }
 
    @Transactional
-   synchronized public void removeVmReference(String vmId) {
+   @RetryTransaction
+   public void removeVmReference(String vmId) {
       NodeEntity node = nodeDao.findByMobId(vmId);
       if (node != null) {
          setNotExist(node);
@@ -319,7 +332,8 @@ public class ClusterEntityManager {
    }
 
    @Transactional
-   synchronized public void syncUpNode(String clusterName, String nodeName) {
+   @RetryTransaction
+   public void syncUpNode(String clusterName, String nodeName) {
       NodeEntity node = findNodeByName(nodeName);
       if (node != null) {
          refreshNodeStatus(node, false);
@@ -327,6 +341,7 @@ public class ClusterEntityManager {
    }
 
    @Transactional
+   @RetryTransaction
    public List<String> getPortGroupNames(String clusterName) {
       ClusterEntity clusterEntity = clusterDao.findByName(clusterName);
       List<String> portGroups = new ArrayList<String>();
@@ -365,7 +380,7 @@ public class ClusterEntityManager {
          //update ip address
          for (String portGroup : node.fetchAllPortGroups()) {
             String ip =
-                  VcVmUtil.getIpAddressOfPortGroup(vcVm, portGroup, inSession);
+                  VcVmUtil.getIpAddressOfPortGroup(vcVm, portGroup);
             node.updateIpAddressOfPortGroup(portGroup, ip);
          }
          if (node.ipsReady()) {
@@ -454,7 +469,8 @@ public class ClusterEntityManager {
    }
 
    @Transactional
-   synchronized public void refreshNodeByMobId(String vmId, boolean inSession) {
+   @RetryTransaction
+   public void refreshNodeByMobId(String vmId, boolean inSession) {
       NodeEntity node = nodeDao.findByMobId(vmId);
       if (node != null) {
          refreshNodeStatus(node, inSession);
@@ -462,7 +478,8 @@ public class ClusterEntityManager {
    }
 
    @Transactional
-   synchronized public void setNodeConnectionState(String vmName) {
+   @RetryTransaction
+   public void setNodeConnectionState(String vmName) {
       NodeEntity node = nodeDao.findByName(vmName);
       if (node != null) {
          node.setUnavailableConnection();
@@ -470,8 +487,8 @@ public class ClusterEntityManager {
    }
 
    @Transactional
-   synchronized public void refreshNodeByMobId(String vmId, String action,
-         boolean inSession) {
+   @RetryTransaction
+   public void refreshNodeByMobId(String vmId, String action, boolean inSession) {
       NodeEntity node = nodeDao.findByMobId(vmId);
       if (node != null) {
          node.setAction(action);
@@ -492,8 +509,8 @@ public class ClusterEntityManager {
    }
 
    @Transactional
-   synchronized public void refreshNodeByVmName(String vmId, String vmName,
-         boolean inSession) {
+   @RetryTransaction
+   public void refreshNodeByVmName(String vmId, String vmName, boolean inSession) {
       NodeEntity node = nodeDao.findByName(vmName);
       if (node != null) {
          node.setMoId(vmId);
@@ -502,7 +519,8 @@ public class ClusterEntityManager {
    }
 
    @Transactional
-   synchronized public void refreshNodeByVmName(String vmId, String vmName,
+   @RetryTransaction
+   public void refreshNodeByVmName(String vmId, String vmName,
          String nodeAction, boolean inSession) {
       NodeEntity node = nodeDao.findByName(vmName);
       if (node != null) {
@@ -513,6 +531,7 @@ public class ClusterEntityManager {
    }
 
    @Transactional
+   @RetryTransaction
    public void updateClusterTaskId(String clusterName, Long taskId) {
       ClusterEntity cluster = clusterDao.findByName(clusterName);
       cluster.setLatestTaskId(taskId);

@@ -28,6 +28,7 @@ import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.ScaleServiceException;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.utils.VcVmUtil;
@@ -41,7 +42,7 @@ import com.vmware.bdd.utils.VcVmUtil;
 public class ScaleManager {
    private static final Logger logger = Logger.getLogger(ScaleManager.class);
 
-   private ClusterEntityManager clusterEntityMgr;
+   private IClusterEntityManager clusterEntityMgr;
    private JobManager jobManager;
 
 
@@ -165,7 +166,7 @@ public class ScaleManager {
    /**
     * @return the clusterEntityMgr
     */
-   public ClusterEntityManager getClusterEntityMgr() {
+   public IClusterEntityManager getClusterEntityMgr() {
       return clusterEntityMgr;
    }
 
@@ -173,7 +174,7 @@ public class ScaleManager {
     * @param clusterEntityMgr
     *           the clusterEntityMgr to set
     */
-   public void setClusterEntityMgr(ClusterEntityManager clusterEntityMgr) {
+   public void setClusterEntityMgr(IClusterEntityManager clusterEntityMgr) {
       this.clusterEntityMgr = clusterEntityMgr;
    }
 

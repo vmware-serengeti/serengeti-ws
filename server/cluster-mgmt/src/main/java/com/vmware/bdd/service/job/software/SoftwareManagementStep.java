@@ -20,10 +20,12 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.bdd.command.CommandUtil;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterManager;
+import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
 import com.vmware.bdd.service.job.DefaultStatusUpdater;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
@@ -35,13 +37,24 @@ public class SoftwareManagementStep extends TrackableTasklet {
          .getLogger(SoftwareManagementStep.class);
    private ClusterManager clusterManager;
    private ManagementOperation managementOperation;
+   private IExclusiveLockedClusterEntityManager lockClusterEntityMgr;
+
+   public IExclusiveLockedClusterEntityManager getLockClusterEntityMgr() {
+      return lockClusterEntityMgr;
+   }
+
+   @Autowired
+   public void setLockClusterEntityMgr(
+         IExclusiveLockedClusterEntityManager lockClusterEntityMgr) {
+      this.lockClusterEntityMgr = lockClusterEntityMgr;
+   }
 
 
    public ISoftwareManagementTask createCommandTask(String clusterName,
          String specFileName, StatusUpdater statusUpdater) {
       return SoftwareManagementTaskFactory.createCommandTask(clusterName,
             specFileName, statusUpdater, managementOperation,
-            getClusterEntityMgr());
+            lockClusterEntityMgr);
    }
 
    @Override

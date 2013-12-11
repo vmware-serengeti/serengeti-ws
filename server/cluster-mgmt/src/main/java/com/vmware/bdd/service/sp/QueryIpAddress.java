@@ -71,7 +71,7 @@ public class QueryIpAddress implements IPrePostPowerOn {
          // check if all ipaddresses for portGroups are valid
          int found = 0;
          for (String pgName : portGroups) {
-            String ip = VcVmUtil.getIpAddressOfPortGroup(vm, pgName, false);
+            String ip = VcVmUtil.getIpAddressOfPortGroup(vm, pgName);
             if (!ip.equals(Constants.NULL_IP)) {
                logger.info("got one ip, vm: " + vmId + ", portgroup: " + pgName + ", ip: " + ip);
                found += 1;

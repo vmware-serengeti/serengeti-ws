@@ -5,6 +5,7 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
 	<context:component-scan base-package="com.vmware.bdd.service.impl"></context:component-scan>
+	<context:component-scan base-package="com.vmware.bdd.manager"></context:component-scan>
 
 	<bean id="clusterConfigMgr" class="com.vmware.bdd.manager.ClusterConfigManager">
 		<property name="rpMgr">

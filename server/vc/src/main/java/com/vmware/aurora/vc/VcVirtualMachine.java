@@ -1491,10 +1491,15 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
       }
    }
 
-   protected VcVirtualMachineImpl(VirtualMachine vm) throws Exception {
+   protected VcVirtualMachineImpl(final VirtualMachine vm) throws Exception {
       super(vm);
-      update(vm);
-      updateRuntime(vm);
+      safeExecVmOp(new VmOp<Void>() {
+         public Void exec() throws Exception {
+            update(vm);
+            updateRuntime(vm);
+            return null;
+         }
+      });
       // key is used in ConfigSpec when updating multiple aspects, such as devices
       // The key we specify does not matter, and will get reassigned, so we start with -1
       // and go lower (the system assigned keys are positive).

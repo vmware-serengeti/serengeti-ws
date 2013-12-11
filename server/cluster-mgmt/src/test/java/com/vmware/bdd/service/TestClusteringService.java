@@ -46,8 +46,8 @@ import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.VcProviderException;
-import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.manager.MockResourceManager;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.MockTmScheduler.VmOperation;
 import com.vmware.bdd.service.impl.ClusteringService;
@@ -138,6 +138,7 @@ public class TestClusteringService {
       VmSchema vmSchema = createVmSchema();
       node.setVmSchema(vmSchema);
       vNodes.add(node);
+      MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, true);
       MockTmScheduler.setResultIsNull(true);
       try {
          service.createVcVms(networkAdds, vNodes, null, null);
@@ -167,7 +168,7 @@ public class TestClusteringService {
       // mock a clusterEntityMgr and node group entity
       ClusterEntity clusterEntity = Mockito.mock(ClusterEntity.class);
       Mockito.when(clusterEntity.getIoShares()).thenReturn(Priority.HIGH);
-      ClusterEntityManager entityMgr = Mockito.mock(ClusterEntityManager.class);
+      IClusterEntityManager entityMgr = Mockito.mock(IClusterEntityManager.class);
       NodeGroupEntity nodeGroup = Mockito.mock(NodeGroupEntity.class);
       Mockito.when(entityMgr.findByName("test", "master"))
             .thenReturn(nodeGroup);
@@ -245,7 +246,7 @@ public class TestClusteringService {
       ClusterEntity clusterEntity = Mockito.mock(ClusterEntity.class);
       Mockito.when(clusterEntity.getIoShares()).thenReturn(Priority.HIGH);
 
-      ClusterEntityManager entityMgr = Mockito.mock(ClusterEntityManager.class);
+      IClusterEntityManager entityMgr = Mockito.mock(IClusterEntityManager.class);
       Mockito.when(entityMgr.findByName("test", "master"))
             .thenReturn(nodeGroup);
       Mockito.when(entityMgr.findByName("test")).thenReturn(clusterEntity);

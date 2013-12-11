@@ -23,16 +23,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.ClusteringServiceException;
-import com.vmware.bdd.service.IClusteringService;
-import com.vmware.bdd.service.sp.VmEventProcessor;
+import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
 import com.vmware.bdd.utils.JobUtils;
 
 public class ClusterNodeSyncupStep extends TrackableTasklet {
-   private IClusteringService clusteringService;
+   private IConcurrentLockedClusterEntityManager lockClusterEntityMgr;
+
+   public IConcurrentLockedClusterEntityManager getLockClusterEntityMgr() {
+      return lockClusterEntityMgr;
+   }
 
    @Autowired
-   public void setClusteringService(IClusteringService clusteringService) {
-      this.clusteringService = clusteringService;
+   public void setLockClusterEntityMgr(
+         IConcurrentLockedClusterEntityManager lockClusterEntityMgr) {
+      this.lockClusterEntityMgr = lockClusterEntityMgr;
    }
 
    @Override
@@ -46,11 +50,8 @@ public class ClusterNodeSyncupStep extends TrackableTasklet {
                getJobParameters(chunkContext).getString(
                      JobConstants.TARGET_NAME_JOB_PARAM).split("-")[0];
       }
-      synchronized (getClusterEntityMgr()) {
-         VmEventProcessor processor = clusteringService.getEventProcessor();
-         processor.trySuspend();
-         getClusterEntityMgr().syncUp(clusterName, false);
-      }
+      lockClusterEntityMgr.syncUp(clusterName, false);
+
       Boolean success =
             getFromJobExecutionContext(chunkContext,
                   JobConstants.CLUSTER_OPERATION_SUCCESS, Boolean.class);
@@ -58,11 +59,13 @@ public class ClusterNodeSyncupStep extends TrackableTasklet {
          // vm option is finished, and with error happens, throw exception here to stop following steps
          throw ClusteringServiceException.CLUSTER_OPERATION_FAILED(clusterName);
       }
-      NodeStatus expectedStatus = getFromJobExecutionContext(chunkContext,
-            JobConstants.EXPECTED_NODE_STATUS, NodeStatus.class);
+      NodeStatus expectedStatus =
+            getFromJobExecutionContext(chunkContext,
+                  JobConstants.EXPECTED_NODE_STATUS, NodeStatus.class);
       if (expectedStatus != null) {
          logger.info("all node should be in status " + expectedStatus);
-         List<NodeEntity> nodes = getClusterEntityMgr().findAllNodes(clusterName);
+         List<NodeEntity> nodes =
+               getClusterEntityMgr().findAllNodes(clusterName);
          JobUtils.verifyNodesStatus(nodes, expectedStatus, true);
       }
       return RepeatStatus.FINISHED;

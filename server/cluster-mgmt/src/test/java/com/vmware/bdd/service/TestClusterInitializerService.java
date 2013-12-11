@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.entity.ClusterEntity;
-import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.impl.ClusterInitializerService;
 
 /**
@@ -34,7 +34,7 @@ public class TestClusterInitializerService {
       cluster01.setStatus(ClusterStatus.PROVISION_ERROR);
       clusters.add(cluster01);
 
-      ClusterEntityManager clusterEntityManager = Mockito.mock(ClusterEntityManager.class);
+      IClusterEntityManager clusterEntityManager = Mockito.mock(IClusterEntityManager.class);
       Mockito.when(clusterEntityManager.findAllClusters()).thenReturn(clusters);
       Mockito.doNothing().when(clusterEntityManager).update(cluster01);
       adjustDbService.setClusterEntityManager(clusterEntityManager);

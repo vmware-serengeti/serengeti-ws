@@ -26,7 +26,6 @@ import com.vmware.bdd.command.MessageHandler;
 import com.vmware.bdd.command.VHMMessageTask;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.exception.TaskException;
-import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.manager.task.VHMReceiveListener;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.IExecutionService;
@@ -37,7 +36,6 @@ import com.vmware.bdd.utils.Constants;
 public class SetManualElasticityStep extends TrackableTasklet {
    IExecutionService executionService;
    IClusteringService clusteringService;
-   ClusterEntityManager clusterEntityManager;
    String vhmAction;
 
    @Override
@@ -88,13 +86,13 @@ public class SetManualElasticityStep extends TrackableTasklet {
 
    private boolean disableAutoElasticity(String clusterName) {
       AuAssert.check(clusteringService != null);
-      AuAssert.check(clusterEntityManager != null);
-      ClusterEntity clusterEntity = clusterEntityManager.findByName(clusterName);
+      AuAssert.check(getClusterEntityMgr() != null);
+      ClusterEntity clusterEntity = getClusterEntityMgr().findByName(clusterName);
       if (clusterEntity.getAutomationEnable() == null || !clusterEntity.getAutomationEnable()) {
          return true;
       }
       clusterEntity.setAutomationEnable(false);
-      clusterEntityManager.update(clusterEntity);
+      getClusterEntityMgr().update(clusterEntity);
       return clusteringService.setAutoElasticity(clusterName, false);
    }
 
@@ -104,14 +102,6 @@ public class SetManualElasticityStep extends TrackableTasklet {
 
    public void setExecutionService(IExecutionService executionService) {
       this.executionService = executionService;
-   }
-
-   public ClusterEntityManager getClusterEntityManager() {
-      return clusterEntityManager;
-   }
-
-   public void setClusterEntityManager(ClusterEntityManager clusterEntityManager) {
-      this.clusterEntityManager = clusterEntityManager;
    }
 
    public String getVhmAction() {

@@ -19,15 +19,18 @@ import java.util.List;
 import com.vmware.aurora.util.CmsWorker.PeriodicRequest;
 import com.vmware.aurora.util.CmsWorker.WorkQueue;
 import com.vmware.bdd.entity.ClusterEntity;
-import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
 
 public class ClusterNodeUpdator extends PeriodicRequest {
    
-   private ClusterEntityManager entityMgr;
+   private IClusterEntityManager entityMgr;
+   private IConcurrentLockedClusterEntityManager lockMgr;
    
-   public ClusterNodeUpdator(ClusterEntityManager entityMgr) {
+   public ClusterNodeUpdator(IConcurrentLockedClusterEntityManager lockMgr) {
       super(WorkQueue.VC_TASK_FIVE_MIN_DELAY);
-      this.entityMgr = entityMgr;
+      this.lockMgr = lockMgr;
+      this.entityMgr = lockMgr.getClusterEntityMgr();
    }
 
    protected boolean executeOnce() {
@@ -41,6 +44,6 @@ public class ClusterNodeUpdator extends PeriodicRequest {
    }
 
    public void syncUp(String clusterName) {
-      entityMgr.syncUp(clusterName, true);
+      lockMgr.syncUp(clusterName, true);
    }
 }

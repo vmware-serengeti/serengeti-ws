@@ -15,7 +15,7 @@
 package com.vmware.bdd.service.job.software;
 
 import com.vmware.bdd.command.ClusterCmdUtil;
-import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.software.ironfan.IronfanSoftwareManagementTask;
 import com.vmware.bdd.software.mgmt.thrift.ClusterAction;
@@ -32,7 +32,7 @@ public class SoftwareManagementTaskFactory {
    public static ISoftwareManagementTask createCommandTask(String targetName,
          String specFileName, StatusUpdater statusUpdater,
          ManagementOperation managementOperation,
-         ClusterEntityManager clusterEntityManager) {
+         IExclusiveLockedClusterEntityManager lockClusterEntityMgr) {
       ClusterOperation clusterOperation = new ClusterOperation();
       switch (managementOperation) {
       case CREATE:
@@ -64,7 +64,7 @@ public class SoftwareManagementTaskFactory {
       clusterOperation.setLogLevel(ClusterCmdUtil.getLogLevel());
       IronfanSoftwareManagementTask task =
             new IronfanSoftwareManagementTask(clusterOperation, statusUpdater,
-                  clusterEntityManager);
+                  lockClusterEntityMgr);
       return task;
    }
 

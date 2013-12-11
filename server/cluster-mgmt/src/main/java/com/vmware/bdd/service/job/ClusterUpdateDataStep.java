@@ -34,14 +34,24 @@ import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
 import com.vmware.bdd.placement.entity.BaseNode;
-import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
-import com.vmware.bdd.service.sp.VmEventProcessor;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.VcVmUtil;
 
 public class ClusterUpdateDataStep extends TrackableTasklet {
+   private IExclusiveLockedClusterEntityManager lockClusterEntityMgr;
+
+   public IExclusiveLockedClusterEntityManager getLockClusterEntityMgr() {
+      return lockClusterEntityMgr;
+   }
+
+   @Autowired
+   public void setLockClusterEntityMgr(
+         IExclusiveLockedClusterEntityManager lockClusterEntityMgr) {
+      this.lockClusterEntityMgr = lockClusterEntityMgr;
+   }
 
    private static final Logger logger = Logger
          .getLogger(ClusterUpdateDataStep.class);
@@ -49,7 +59,6 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
    private INetworkService networkMgr;
 
    private IResourcePoolDAO rpDao;
-   private IClusteringService clusteringService;
 
    public INetworkService getNetworkMgr() {
       return networkMgr;
@@ -58,11 +67,6 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
    @Autowired
    public void setNetworkMgr(INetworkService networkMgr) {
       this.networkMgr = networkMgr;
-   }
-
-   @Autowired
-   public void setClusteringService(IClusteringService clusteringService) {
-      this.clusteringService = clusteringService;
    }
 
    /**
@@ -103,18 +107,19 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
             deletedNodeNames.add(node.getVmName());
          }
       }
-      synchronized (getClusterEntityMgr()) {
-         VmEventProcessor processor = clusteringService.getEventProcessor();
-         processor.trySuspend();
-         addNodeToMetaData(clusterName, addedNodes, deletedNodeNames);
-         removeDeletedNode(clusterName, deletedNodeNames);
-         /*
-          * If Tomcat crashes before IPs retrieved when creating cluster, ipconfigs field would
-          * be "0.0.0.0", then in resume we should refresh it initiative.
-          */
-         if (chunkContext.getStepContext().getJobName().equals(JobConstants.RESUME_CLUSTER_JOB_NAME)) {
-            clusterEntityMgr.syncUp(clusterName, false);
-         }
+      lockClusterEntityMgr.getLock(clusterName).lock();
+      putIntoJobExecutionContext(chunkContext,
+            JobConstants.CLUSTER_EXCLUSIVE_WRITE_LOCKED, true);
+
+      addNodeToMetaData(clusterName, addedNodes, deletedNodeNames);
+      removeDeletedNode(clusterName, deletedNodeNames);
+      /*
+       * If Tomcat crashes before IPs retrieved when creating cluster, ipconfigs field would
+       * be "0.0.0.0", then in resume we should refresh it initiative.
+       */
+      if (chunkContext.getStepContext().getJobName()
+            .equals(JobConstants.RESUME_CLUSTER_JOB_NAME)) {
+         clusterEntityMgr.syncUp(clusterName, false);
       }
       return RepeatStatus.FINISHED;
    }

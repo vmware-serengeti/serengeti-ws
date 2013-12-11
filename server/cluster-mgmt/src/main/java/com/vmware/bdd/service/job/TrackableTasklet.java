@@ -26,20 +26,20 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
-import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 
 public abstract class TrackableTasklet implements Tasklet {
    static final Logger logger = Logger.getLogger(TrackableTasklet.class);
    JobExecutionStatusHolder jobExecutionStatusHolder;
    
-   ClusterEntityManager clusterEntityMgr;
+   IClusterEntityManager clusterEntityMgr;
    
-   public ClusterEntityManager getClusterEntityMgr() {
+   public IClusterEntityManager getClusterEntityMgr() {
       return clusterEntityMgr;
    }
 
    @Autowired
-   public void setClusterEntityMgr(ClusterEntityManager clusterEntityMgr) {
+   public void setClusterEntityMgr(IClusterEntityManager clusterEntityMgr) {
       this.clusterEntityMgr = clusterEntityMgr;
    }
 

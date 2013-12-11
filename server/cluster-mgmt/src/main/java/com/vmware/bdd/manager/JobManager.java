@@ -47,6 +47,7 @@ import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.apitypes.TaskRead.Type;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.TaskException;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
 import com.vmware.bdd.service.job.SimpleStepExecutionListener;
@@ -69,7 +70,7 @@ public class JobManager {
    private JobExecutionListener mainJobExecutionListener;
 
    @Autowired
-   private ClusterEntityManager clusterEntityMgr;
+   private IClusterEntityManager clusterEntityMgr;
 
    /**
     * Run a new job
@@ -533,11 +534,11 @@ public class JobManager {
       this.mainJobExecutionStatusHolder = subJobExecutionStatusHolder;
    }
 
-   public ClusterEntityManager getClusterEntityMgr() {
+   public IClusterEntityManager getClusterEntityMgr() {
       return clusterEntityMgr;
    }
 
-   public void setClusterEntityMgr(ClusterEntityManager clusterEntityMgr) {
+   public void setClusterEntityMgr(IClusterEntityManager clusterEntityMgr) {
       this.clusterEntityMgr = clusterEntityMgr;
    }
 

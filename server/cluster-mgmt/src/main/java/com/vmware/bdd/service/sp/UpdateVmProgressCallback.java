@@ -17,22 +17,25 @@ package com.vmware.bdd.service.sp;
 import java.util.concurrent.Callable;
 
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
-import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
 import com.vmware.bdd.service.job.StatusUpdater;
 
 public class UpdateVmProgressCallback extends BaseProgressCallback {
-   private ClusterEntityManager clusterEntityMgr;
+   private IConcurrentLockedClusterEntityManager lockMgr;
    private String clusterName;
-   public UpdateVmProgressCallback(ClusterEntityManager clusterEntityMgr,
+
+   public UpdateVmProgressCallback(
+         IConcurrentLockedClusterEntityManager lockMgr,
          StatusUpdater statusUpdator, String clusterName) {
       super(statusUpdator);
-      this.clusterEntityMgr = clusterEntityMgr;
       this.clusterName = clusterName;
+      this.lockMgr = lockMgr;
    }
 
    @Override
-   public void progressUpdate(Callable<Void> sp, ExecutionResult result, boolean compensate, int total) {
+   public void progressUpdate(Callable<Void> sp, ExecutionResult result,
+         boolean compensate, int total) {
       super.progressUpdate(sp, result, compensate, total);
-      clusterEntityMgr.syncUp(clusterName, false);
+      lockMgr.syncUp(clusterName, false);
    }
 }

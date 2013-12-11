@@ -142,7 +142,7 @@ public class VcVmUtil {
          final Set<String> portGroups, boolean inSession) {
       Set<String> allIpAddresses = new HashSet<String>();
       for (String portGroup : portGroups) {
-         allIpAddresses.add(getIpAddressOfPortGroup(vcVm, portGroup, inSession));
+         allIpAddresses.add(getIpAddressOfPortGroup(vcVm, portGroup));
       }
       return allIpAddresses;
    }
@@ -181,12 +181,8 @@ public class VcVmUtil {
    }
 
    public static String getIpAddressOfPortGroup(final VcVirtualMachine vcVm,
-         final String portGroup, boolean inSession) {
+         final String portGroup) {
       try {
-         if (inSession) {
-            return VcVmUtil.getIpAddressOfPortGroupWithoutSession(vcVm, portGroup);
-         }
-
          String ip = VcContext.inVcSessionDo(new VcSession<String>() {
             @Override
             protected boolean isTaskSession() {
@@ -237,7 +233,7 @@ public class VcVmUtil {
       }
       if (vm != null) {
          for (String portGroup : vNode.fetchAllPortGroups()) {
-            String ip = VcVmUtil.getIpAddressOfPortGroup(vm, portGroup, false);
+            String ip = VcVmUtil.getIpAddressOfPortGroup(vm, portGroup);
             vNode.updateIpAddressOfPortGroup(portGroup, ip);
          }
       }

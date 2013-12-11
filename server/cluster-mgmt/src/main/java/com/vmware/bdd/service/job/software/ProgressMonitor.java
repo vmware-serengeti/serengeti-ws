@@ -16,7 +16,7 @@ package com.vmware.bdd.service.job.software;
 
 import org.apache.log4j.Logger;
 
-import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.software.mgmt.impl.SoftwareManagementClient;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
@@ -39,11 +39,11 @@ public class ProgressMonitor extends TracedRunnable {
    private StatusUpdater statusUpdater;
    private String lastErrorMsg = null;
    private long queryInterval = QUERY_INTERVAL_DEFAULT;
-   private ClusterEntityManager clusterEntityMgr;
+   private IExclusiveLockedClusterEntityManager clusterEntityMgr;
    private volatile boolean stop;
 
    public ProgressMonitor(String targetName, StatusUpdater statusUpdater,
-         ClusterEntityManager clusterEntityMgr) {
+         IExclusiveLockedClusterEntityManager clusterEntityMgr) {
       this.targetName = targetName;
       this.statusUpdater = statusUpdater;
       this.clusterEntityMgr = clusterEntityMgr;
