@@ -71,7 +71,7 @@ public class ScaleManager {
          if (scale.getCpuNumber() > 1) {
             //cpu number check for vm with FT enabled
             for (NodeEntity nodeEntity : nodes) {
-               VcResourceUtils.checkVmFTAndCpuNumber(nodeEntity.getMoId(),
+               VcResourceUtils.checkVmFTAndCpuNumber(nodeEntity.getMoId(), nodeEntity.getVmName(),
                      scale.getCpuNumber());
             }
          }

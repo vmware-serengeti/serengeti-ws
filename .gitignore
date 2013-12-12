@@ -1,6 +1,8 @@
 .classpath
 .project
 *.iml
+*.eml
+*.userlibraries
 .idea/*
 *.ipr
 *.iws

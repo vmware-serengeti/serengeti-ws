@@ -471,7 +471,7 @@ public class VcResourceUtils {
       });
    }
 
-   public static void checkVmFTAndCpuNumber(final String vmId,
+   public static void checkVmFTAndCpuNumber(final String vmId, final String vmName,
          final int cpuNumber) {
       Boolean ftEnabled = VcContext.inVcSessionDo(new VcSession<Boolean>() {
          @Override
@@ -491,7 +491,7 @@ public class VcResourceUtils {
       });
       if (ftEnabled) {
          if (cpuNumber > 1) {
-            throw VcProviderException.CPU_EXCEED_ONE(vmId);
+            throw VcProviderException.CPU_EXCEED_ONE(vmName);
          }
       }
    }
