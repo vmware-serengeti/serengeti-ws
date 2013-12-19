@@ -46,7 +46,7 @@ public class SetPasswordForDiskFixStep extends TrackableTasklet {
 
       String targetNode = getJobParameters(chunkContext).getString(JobConstants.SUB_JOB_NODE_NAME);
       NodeEntity nodeEntity = clusterEntityMgr.findNodeByName(targetNode);
-      String fixedNodeIP = nodeEntity.getMgtIp();
+      String fixedNodeIP = nodeEntity.getPrimaryMgtIpV4();
       if (fixedNodeIP == null) {
          throw TaskException.EXECUTION_FAILED("No fixed node need to set password for.");
       }

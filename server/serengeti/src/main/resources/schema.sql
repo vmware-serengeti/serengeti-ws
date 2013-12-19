@@ -146,7 +146,6 @@ create table node (
    vc_rp_id     bigint,
    cpu_number             integer,
    memory                 bigint,
-   ip_configs    text,
    primary key (id),
    foreign key(node_group_id) references node_group(id) ON DELETE CASCADE,
    foreign key(vc_rp_id) references vc_resource_pool(id) ON DELETE CASCADE
@@ -167,6 +166,21 @@ create table disk (
    node_id        bigint,
    primary key (id),
    foreign key(node_id) references node(id) ON DELETE CASCADE
+);
+
+create sequence nic_seq;
+create table nic (
+   id             bigint       not null unique DEFAULT nextval('nic_seq'::regclass),
+   ipv4_address   varchar(255),
+   ipv6_address   varchar(255),
+   mac_address    varchar(255),
+   connected      boolean,
+   net_traffic_definition  text,
+   node_id        bigint,
+   network_id     bigint,
+   primary key (id),
+   foreign key(node_id) references node(id) ON DELETE CASCADE,
+   foreign key(network_id) references network(id)
 );
 
 create sequence rack_seq;

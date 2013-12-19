@@ -18,6 +18,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,14 +31,12 @@ import javax.persistence.Table;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
-
-
 import com.vmware.bdd.dal.impl.IpBlockDAO.EqualBlockTypePredicate;
 import com.vmware.bdd.exception.NetworkException;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.IpAddressUtil;
+import org.hibernate.annotations.CascadeType;
 
 @Entity
 @SequenceGenerator(name = "IdSequence", sequenceName = "network_seq", allocationSize = 1)
@@ -62,6 +61,9 @@ public class NetworkEntity extends EntityBase implements Comparable<NetworkEntit
    @OneToMany(mappedBy = "network", fetch = FetchType.LAZY)
    @Cascade({ CascadeType.SAVE_UPDATE, CascadeType.REMOVE })
    private List<IpBlockEntity> ipBlocks;
+
+   @OneToMany(mappedBy = "networkEntity", fetch = FetchType.LAZY)
+   private Set<NicEntity> nics;
 
    /**
     * Related clusters which have assigned IPs, the relationship is only used
@@ -187,6 +189,14 @@ public class NetworkEntity extends EntityBase implements Comparable<NetworkEntit
 
    public void setDns2(String dns2) {
       this.dns2 = dns2;
+   }
+
+   public Set<NicEntity> getNics() {
+      return nics;
+   }
+
+   public void setNics(Set<NicEntity> nics) {
+      this.nics = nics;
    }
 
    @Override

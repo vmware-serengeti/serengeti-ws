@@ -28,19 +28,20 @@
 		</property>
 		<property name="annotatedClasses">
 			<list>
-				<value>com.vmware.bdd.entity.VcResourcePoolEntity</value>
-				<value>com.vmware.bdd.entity.VcDatastoreEntity</value>
-				<value>com.vmware.bdd.entity.NetworkEntity</value>
-				<value>com.vmware.bdd.entity.IpBlockEntity</value>
-				<value>com.vmware.bdd.entity.ClusterEntity</value>
-				<value>com.vmware.bdd.entity.NodeGroupEntity</value>
-				<value>com.vmware.bdd.entity.NodeGroupAssociation</value>
-				<value>com.vmware.bdd.entity.NodeEntity</value>
-            <value>com.vmware.bdd.entity.DiskEntity</value>
-				<value>com.vmware.bdd.entity.RackEntity</value>
-				<value>com.vmware.bdd.entity.PhysicalHostEntity</value>
-				<value>com.vmware.bdd.entity.ServerInfoEntity</value>
-			</list>
-		</property>
+                <value>com.vmware.bdd.entity.VcResourcePoolEntity</value>
+                <value>com.vmware.bdd.entity.VcDatastoreEntity</value>
+                <value>com.vmware.bdd.entity.NetworkEntity</value>
+                <value>com.vmware.bdd.entity.IpBlockEntity</value>
+                <value>com.vmware.bdd.entity.ClusterEntity</value>
+                <value>com.vmware.bdd.entity.NodeGroupEntity</value>
+                <value>com.vmware.bdd.entity.NodeGroupAssociation</value>
+                <value>com.vmware.bdd.entity.NodeEntity</value>
+                <value>com.vmware.bdd.entity.DiskEntity</value>
+                <value>com.vmware.bdd.entity.NicEntity</value>
+                <value>com.vmware.bdd.entity.RackEntity</value>
+                <value>com.vmware.bdd.entity.PhysicalHostEntity</value>
+                <value>com.vmware.bdd.entity.ServerInfoEntity</value>
+            </list>
+        </property>
 	</bean>
 </beans>

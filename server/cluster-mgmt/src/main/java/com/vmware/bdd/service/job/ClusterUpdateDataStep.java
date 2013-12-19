@@ -19,6 +19,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.vmware.bdd.entity.NetworkEntity;
+import com.vmware.bdd.entity.NicEntity;
+import com.vmware.bdd.spectypes.NicSpec;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -195,9 +198,27 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
       //set vc resource pool entity
       nodeEntity.setVcRp(rpDao.findByClusterAndRp(vNode.getTargetVcCluster(),
             vNode.getTargetRp()));
+
       // set ipconfigs field even IPs are not yet retrieved, otherwise if
       // Tomcat crashes, we will lost the ipconfigs template
-      nodeEntity.setIpConfigs(vNode.getIpConfigs());
+      for (NicSpec nicSpec : vNode.getNics().values()) {
+         NetworkEntity networkEntity = networkMgr.getNetworkEntityByName(nicSpec.getNetworkName());
+         NicEntity nicEntity = nodeEntity.findNic(networkEntity);
+         if (nicEntity == null) {
+            nicEntity = new NicEntity();
+            nodeEntity.getNics().add(nicEntity);
+         }
+         nicEntity.setIpv4Address(nicSpec.getIpv4Address());
+         nicEntity.setIpv6Address(nicSpec.getIpv6Address());
+         nicEntity.setMacAddress(nicSpec.getMacAddress());
+         nicEntity.setNetTrafficDefs(nicSpec.getNetTrafficDefinitionSet());
+         nicEntity.setNetworkEntity(networkEntity);
+         nicEntity.setNodeEntity(nodeEntity);
+         if (vNode.getVmMobId() != null) {
+            VcVmUtil.populateNicInfo(nicEntity, vNode.getVmMobId(), networkEntity.getPortGroup());
+         }
+      }
+
       if (vNode.getVmMobId() != null) {
          nodeEntity.setMoId(vNode.getVmMobId());
          nodeEntity.setRack(vNode.getTargetRack());

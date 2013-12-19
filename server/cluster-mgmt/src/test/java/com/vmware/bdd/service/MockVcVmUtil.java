@@ -19,7 +19,6 @@ import com.vmware.bdd.utils.Constants;
 import mockit.Mock;
 import mockit.MockClass;
 
-import com.vmware.aurora.composition.VmSchema;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.utils.VcVmUtil;
@@ -34,12 +33,12 @@ public class MockVcVmUtil {
 
    @Mock
    public static String getIpAddressOfPortGroup(final VcVirtualMachine vcVm,
-         final String portgroup) {
+         final String portgroup, boolean inSession) {
       if (flag) {
          i++;
          return "10.1.1." + i;
       } else {
-         return Constants.NULL_IP;
+         return Constants.NULL_IPV4_ADDRESS;
       }
    }
 
@@ -48,7 +47,7 @@ public class MockVcVmUtil {
          final Set<String> portgroups, boolean inSession) {
       Set<String> ips = new HashSet<String>();
       for (String portgroup : portgroups) {
-         ips.add(getIpAddressOfPortGroup(vcVm, portgroup));
+         ips.add(getIpAddressOfPortGroup(vcVm, portgroup, inSession));
       }
       return ips;
    }

@@ -338,7 +338,7 @@ public class ClusterHealService implements IClusterHealService {
 
       // this getRepalcementVmSP() is not called by any UT, so no need to check NPE for node.getIpConfigsInfo()
       GuestMachineIdSpec machineIdSpec = new GuestMachineIdSpec(networkAdds,
-            node.fetchPortGroupToIpMap(), node.getIpConfigsInfo().get(NetConfigInfo.NetTrafficType.MGT_NETWORK).get(0).getPortGroupName());
+            node.fetchPortGroupToIpMap(), node.getPrimaryMgtNic().getNetworkEntity().getPortGroup());
       logger.info("machine id of vm " + node.getVmName() + ":\n" + machineIdSpec.toString());
       Map<String, String> guestVariable = machineIdSpec.toGuestVarialbe();
 

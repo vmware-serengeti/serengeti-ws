@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.bdd.entity.NicEntity;
+import com.vmware.bdd.spectypes.NicSpec;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.vc.VcCache;
@@ -98,10 +100,27 @@ public class JobUtils {
       node.setVmMobId(entity.getMoId());
       node.setVmFolder(entity.getNodeGroup().getVmFolderPath());
       if (vcVm != null) {
-         node.setIpConfigs(entity.getIpConfigsInfo());
+         node.setNics(convertNics(entity.getNics()));
          node.setGuestHostName(entity.getGuestHostName());
       }
       return node;
+   }
+
+   private static Map<String, NicSpec> convertNics(Set<NicEntity> nicEntities) {
+      Map<String, NicSpec> nicSpecMap = new HashMap<String, NicSpec>();
+      if (nicEntities != null) {
+         for (NicEntity nicEntity : nicEntities) {
+            String pgName = nicEntity.getNetworkEntity().getPortGroup();
+            NicSpec nicSpec = new NicSpec();
+            nicSpec.setIpv4Address(nicEntity.getIpv4Address());
+            nicSpec.setIpv6Address(nicEntity.getIpv6Address());
+            nicSpec.setMacAddress(nicEntity.getMacAddress());
+            nicSpec.setNetworkName(nicEntity.getNetworkEntity().getName());
+            nicSpec.setNetTrafficDefinitionSet(nicEntity.getNetTrafficDefs());
+            nicSpecMap.put(pgName, nicSpec);
+         }
+      }
+      return nicSpecMap;
    }
 
    /**
@@ -137,7 +156,7 @@ public class JobUtils {
          return;
       }
 
-      for (String portGroup : node.fetchAllPortGroups()) {
+      for (String portGroup : node.getNics().keySet()) {
          if (!occupiedIpSets.containsKey(portGroup)) {
             Set<String> ipSet = new HashSet<String>();
             occupiedIpSets.put(portGroup, ipSet);

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -93,7 +94,7 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
 
       ArrayList<String> nodeIPs = null;
       for (NodeEntity node : nodes) {
-         String ip = node.getMgtIp();
+         String ip = node.getPrimaryMgtIpV4();
          if (ip != null) {
             if (nodeIPs == null) {
                nodeIPs = new ArrayList<String>();
@@ -110,17 +111,14 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
          return null;
       }
 
-      ArrayList<String> nodeIPs = null;
+      ArrayList<String> nodeIPs = new ArrayList<String>();
       for (BaseNode node : addedNodes) {
-         Map<NetTrafficType, List<IpConfigInfo>> ipConfigs = node.getIpConfigs();
-         if (!ipConfigs.containsKey(NetTrafficType.MGT_NETWORK)) {
+         String mgtIp = node.getPrimaryMgtIpV4();
+         if (mgtIp.equals(Constants.NULL_IPV4_ADDRESS)) {
             logger.error("Failed to get ip for added nodes");
             return nodeIPs;
          }
-         if (nodeIPs == null) {
-            nodeIPs = new ArrayList<String>();
-         }
-         nodeIPs.add(ipConfigs.get(NetTrafficType.MGT_NETWORK).get(0).getIpAddress());
+         nodeIPs.add(mgtIp);
       }
 
       return nodeIPs;

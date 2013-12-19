@@ -135,7 +135,7 @@ public class NodeRead {
             return fetchIpOf(NetTrafficType.MGT_NETWORK);
          }
       }
-      if (ipConfigs.get(type).get(0).getIpAddress().equals(Constants.NULL_IP)) {
+      if (ipConfigs.get(type).get(0).getIpAddress().equals(Constants.NULL_IPV4_ADDRESS)) {
          return null;
       }
       return ipConfigs.get(type).get(0).getIpAddress();

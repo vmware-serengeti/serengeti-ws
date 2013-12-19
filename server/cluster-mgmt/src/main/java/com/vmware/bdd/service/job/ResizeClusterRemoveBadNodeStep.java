@@ -125,10 +125,10 @@ public class ResizeClusterRemoveBadNodeStep extends TrackableTasklet {
                   continue;
                }
                VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getVmMobId());
-               Set<String> ips = VcVmUtil.getAllIpAddresses(vm, node.fetchAllPortGroups(), false);
+               Set<String> ips = VcVmUtil.getAllIpAddresses(vm, node.getNics().keySet(), false);
                if (vm == null
                      || (!vm.isPoweredOn())
-                     || ips.contains(Constants.NULL_IP)) {
+                     || ips.contains(Constants.NULL_IPV4_ADDRESS)) {
                   deletedNodes.add(node);
                   continue;
                }

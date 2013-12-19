@@ -40,6 +40,7 @@ import com.vmware.bdd.dal.INodeGroupDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
+import com.vmware.bdd.entity.NicEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
@@ -289,7 +290,7 @@ public class ClusterEntityManager implements IClusterEntityManager {
       logger.debug("vm " + node.getVmName()
             + " does not exist. Update node status to NOT_EXIST.");
       node.setStatus(NodeStatus.NOT_EXIST);
-      node.resetIps();
+      node.resetNicsInfo();
       node.setHostName(null);
       node.setMoId(null);
       if (node.getAction() != null
@@ -371,19 +372,18 @@ public class ClusterEntityManager implements IClusterEntityManager {
       // TODO: consider more status
       if (!vcVm.isPoweredOn()) {
          node.setStatus(NodeStatus.POWERED_OFF);
-         node.resetIps();
+         node.resetNicsInfo();
       } else {
          node.setStatus(NodeStatus.POWERED_ON);
       }
 
       if (vcVm.isPoweredOn()) {
          //update ip address
-         for (String portGroup : node.fetchAllPortGroups()) {
-            String ip =
-                  VcVmUtil.getIpAddressOfPortGroup(vcVm, portGroup);
-            node.updateIpAddressOfPortGroup(portGroup, ip);
+         for (NicEntity nicEntity : node.getNics()) {
+            VcVmUtil.populateNicInfo(nicEntity, node.getMoId(), nicEntity.getNetworkEntity().getPortGroup());
          }
-         if (node.ipsReady()) {
+
+         if (node.nicsReady()) {
             node.setStatus(NodeStatus.VM_READY);
             if (node.getAction() != null
                   && (node.getAction().equals(Constants.NODE_ACTION_WAITING_IP) || node

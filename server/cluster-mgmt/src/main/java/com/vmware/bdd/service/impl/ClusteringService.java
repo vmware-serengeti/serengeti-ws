@@ -32,6 +32,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.vmware.bdd.service.event.VmEventManager;
+import com.vmware.bdd.entity.NicEntity;
+import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -109,7 +111,6 @@ import com.vmware.bdd.service.sp.StartVmSP;
 import com.vmware.bdd.service.sp.StopVmSP;
 import com.vmware.bdd.service.sp.UpdateVmProgressCallback;
 import com.vmware.bdd.service.utils.VcResourceUtils;
-import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
@@ -504,7 +505,7 @@ public class ClusteringService implements IClusteringService {
             }
             AuAssert.check(availableIps.size() == vNodes.size());
             for (j = 0; j < availableIps.size(); j++) {
-               vNodes.get(j).updateIpAddressOfPortGroup(portGroupName, availableIps.get(j));
+               vNodes.get(j).updateNicOfPortGroup(portGroupName, availableIps.get(j), null, null);
             }
             logger.info("Finished to allocate static ip address for VM's mgr network.");
          }
@@ -636,7 +637,7 @@ public class ClusteringService implements IClusteringService {
                if (cluster.getDistro().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
                   if (roles
                         .contains(HadoopRole.MAPR_JOBTRACKER_ROLE.toString())) {
-                     String thisJtIp = node.getMgtIp();
+                     String thisJtIp = node.getPrimaryMgtIpV4();
                      String activeJtIp;
                      try {
                         activeJtIp =
@@ -653,7 +654,15 @@ public class ClusteringService implements IClusteringService {
                      AuAssert.check(!CommonUtil.isBlank(thisJtIp),
                            "falied to query active JobTracker Ip");
                      for (NodeEntity jt : nodes) {
-                        if (jt.getIpAddressSet().contains(activeJtIp)) {
+                        boolean isActiveJt = false;
+                        for (NicEntity nicEntity : jt.getNics()) {
+                           if (nicEntity.getIpv4Address() != null && activeJtIp.equals(nicEntity.getIpv4Address())) {
+                              isActiveJt = true;
+                              break;
+                           }
+                        }
+
+                        if (isActiveJt) {
                            cluster.setVhmMasterMoid(jt.getMoId());
                            break;
                         }
@@ -1116,17 +1125,13 @@ public class ClusteringService implements IClusteringService {
          VmSchema createSchema = getVmSchema(vNode);
          spec.setSchema(createSchema);
          String defaultPgName = null;
-         if (vNode.getIpConfigs() != null && vNode.getIpConfigs().containsKey(NetConfigInfo.NetTrafficType.MGT_NETWORK)
-               && !vNode.getIpConfigs().get(NetConfigInfo.NetTrafficType.MGT_NETWORK).isEmpty()) {
-            defaultPgName = vNode.getIpConfigs().get(NetConfigInfo.NetTrafficType.MGT_NETWORK).get(0).getPortGroupName();
-         }
          GuestMachineIdSpec machineIdSpec = new GuestMachineIdSpec(
-               networkAdds, vNode.fetchPortGroupToIpMap(), defaultPgName);
+               networkAdds, vNode.fetchPortGroupToIpV4Map(), vNode.getPrimaryMgtPgName());
          logger.info("machine id of vm " + vNode.getVmName() + ":\n" + machineIdSpec.toString());
          spec.setBootupConfigs(machineIdSpec.toGuestVarialbe());
          // timeout is 10 mintues
          QueryIpAddress query =
-               new QueryIpAddress(vNode.fetchAllPortGroups(), Constants.VM_POWER_ON_WAITING_SEC);
+               new QueryIpAddress(vNode.getNics().keySet(), Constants.VM_POWER_ON_WAITING_SEC);
          spec.setPostPowerOn(query);
          spec.setPrePowerOn(getPrePowerOnFunc(vNode));
          spec.setLinkedClone(false);

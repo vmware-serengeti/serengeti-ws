@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import com.vmware.bdd.apitypes.NetworkAdd;
+import com.vmware.bdd.entity.NicEntity;
 import com.vmware.vim.binding.impl.vim.vApp.VmConfigSpecImpl;
 import com.vmware.vim.binding.impl.vim.vm.ToolsConfigInfoImpl;
 import com.vmware.vim.binding.vim.VirtualMachine;
@@ -122,7 +123,8 @@ public class VcVmUtil {
 
                   boolean foundIpV4Address = false;
                   for (IpAddress info : nicInfo.getIpConfig().getIpAddress()) {
-                     if (info.getIpAddress() != null && IpAddressUtil.isIpV4(info.getIpAddress())) {
+                     if (info.getIpAddress() != null
+                           && sun.net.util.IPAddressUtil.isIPv4LiteralAddress(info.getIpAddress())) {
                         foundIpV4Address = true;
                         break;
                      }
@@ -144,22 +146,31 @@ public class VcVmUtil {
          final Set<String> portGroups, boolean inSession) {
       Set<String> allIpAddresses = new HashSet<String>();
       for (String portGroup : portGroups) {
-         allIpAddresses.add(getIpAddressOfPortGroup(vcVm, portGroup));
+         allIpAddresses.add(getIpAddressOfPortGroup(vcVm, portGroup, inSession));
       }
       return allIpAddresses;
    }
 
-   private static String getIpAddressOfPortGroupWithoutSession(final VcVirtualMachine vcVm,
-         final String portGroup) throws Exception {
+   /**
+    *
+    * @param vcVm
+    * @param portGroup
+    * @param nicEntity update nicEntity if it is not null
+    * @return IPv4 address this nic
+    * @throws Exception
+    */
+   private static String inspectNicInfoWithoutSession(final VcVirtualMachine vcVm,
+         final String portGroup, final NicEntity nicEntity) throws Exception {
       GuestInfo guestInfo = vcVm.queryGuest();
       NicInfo[] nicInfos = guestInfo.getNet();
 
+      String ipaddress = Constants.NULL_IPV4_ADDRESS;
       /*
        * We do not know when VC can retrieve vm's guestinfo from vmtools, so it's better
        * to do enough validation to avoid Null Point Exception
        */
       if (nicInfos == null || nicInfos.length == 0) {
-         return Constants.NULL_IP;
+         return ipaddress;
       }
 
       for (NicInfo nicInfo : nicInfos) {
@@ -172,19 +183,40 @@ public class VcVmUtil {
             continue;
          }
 
+         /*
+         update nicEntity's macAddress/connected/ipV4Address/ipV6address,
+         assume at most 1 ipV4 and ipV6 addresses are configured for each nic
+         */
+         if (nicEntity != null) {
+            nicEntity.setMacAddress(nicInfo.getMacAddress());
+            nicEntity.setConnected(nicInfo.isConnected());
+         }
          for (IpAddress info : nicInfo.getIpConfig().getIpAddress()) {
-            if (info.getIpAddress() != null && IpAddressUtil.isIpV4(info.getIpAddress())) {
-               return info.getIpAddress();
+            if (info.getIpAddress() != null
+                  && sun.net.util.IPAddressUtil.isIPv4LiteralAddress(info.getIpAddress())) {
+               ipaddress = info.getIpAddress();
+               if (nicEntity != null) {
+                  nicEntity.setIpv4Address(ipaddress);
+               }
+            }
+            if (info.getIpAddress() != null
+                  && sun.net.util.IPAddressUtil.isIPv6LiteralAddress(info.getIpAddress())) {
+               if (nicEntity != null) {
+                  nicEntity.setIpv6Address(info.getIpAddress());
+               }
             }
          }
       }
 
-      return Constants.NULL_IP;
+      return ipaddress;
    }
 
    public static String getIpAddressOfPortGroup(final VcVirtualMachine vcVm,
-         final String portGroup) {
+         final String portGroup, boolean inSession) {
       try {
+         if (inSession) {
+            return VcVmUtil.inspectNicInfoWithoutSession(vcVm, portGroup, null);
+         }
          String ip = VcContext.inVcSessionDo(new VcSession<String>() {
             @Override
             protected boolean isTaskSession() {
@@ -192,10 +224,35 @@ public class VcVmUtil {
             }
             @Override
             public String body() throws Exception {
-               return VcVmUtil.getIpAddressOfPortGroupWithoutSession(vcVm, portGroup);
+               return VcVmUtil.inspectNicInfoWithoutSession(vcVm, portGroup, null);
             }
          });
          return ip;
+      } catch (Exception e) {
+         throw BddException.wrapIfNeeded(e, e.getLocalizedMessage());
+      }
+   }
+
+   public static void populateNicInfo(final NicEntity nicEntity, final String moid, final String pgName) {
+      try {
+         VcContext.inVcSessionDo(new VcSession<Void>() {
+            @Override
+            protected boolean isTaskSession() {
+               return true;
+            }
+
+            @Override
+            public Void body() throws Exception {
+               VcVirtualMachine vm = VcCache.getIgnoreMissing(moid);
+               if (vm == null) {
+                  logger.error("failed to get vm: " + moid);
+                  return null;
+               }
+               VcVmUtil.inspectNicInfoWithoutSession(vm, pgName, nicEntity);
+               logger.info("nic updated: " + nicEntity.toString());
+               return null;
+            }
+         });
       } catch (Exception e) {
          throw BddException.wrapIfNeeded(e, e.getLocalizedMessage());
       }
@@ -234,12 +291,14 @@ public class VcVmUtil {
                + "is created, and then removed afterwards.");
       }
       if (vm != null) {
-         for (String portGroup : vNode.fetchAllPortGroups()) {
-            String ip = VcVmUtil.getIpAddressOfPortGroup(vm, portGroup);
-            vNode.updateIpAddressOfPortGroup(portGroup, ip);
+         for (String portGroup : vNode.getNics().keySet()) {
+            String ipv4Address = VcVmUtil.getIpAddressOfPortGroup(vm, portGroup, false);
+
+            // currently only care  ipv4 address
+            vNode.updateNicOfPortGroup(portGroup, ipv4Address, null, null);
          }
       }
-      if (vNode.ipsReady()) {
+      if (vNode.ipsReadyV4()) {
          vNode.setSuccess(true);
          vNode.setGuestHostName(VcVmUtil.getGuestHostName(vm, false));
          vNode.setTargetHost(vm.getHost().getName());
@@ -255,7 +314,7 @@ public class VcVmUtil {
          vNode.setSuccess(false);
          // in static ip case, vNode contains the allocated address,
          // here reset the value in case the ip is unavailable from vc
-         vNode.resetIps();
+         vNode.resetIpsV4();
          if (vm != null) {
             vNode.setVmMobId(vm.getId());
             if (vm.isPoweredOn()) {

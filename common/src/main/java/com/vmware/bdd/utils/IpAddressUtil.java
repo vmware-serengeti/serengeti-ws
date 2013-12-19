@@ -24,17 +24,10 @@ import java.util.regex.Pattern;
 
 public class IpAddressUtil {
 
-   public static final String IP_V4_PATTERN = "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}";
-
    public static boolean isValidIp(long addr) {
       InetAddress ip = getAddressFromLong(addr);
 
       return !ip.isLoopbackAddress() && !ip.isMulticastAddress();
-   }
-
-   public static boolean isIpV4(String ipAddr) {
-      Pattern pattern = Pattern.compile(IP_V4_PATTERN);
-      return pattern.matcher(ipAddr).matches();
    }
 
    public static boolean isValidIp(String ipAddr) {

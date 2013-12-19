@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vmware.bdd.aop.annotation.RetryTransaction;
 import com.vmware.bdd.apitypes.IpAllocEntryRead;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkRead;
@@ -478,8 +477,8 @@ public class NetworkService implements Serializable, INetworkService {
                nodeDao.findByNodeGroups(nodeGroupDao.findAllByClusters(findRelevantClusters(net)));
 
          for (NodeEntity node : nodes) {
-            String ip = node.getIpOfNetworkName(net.getName());
-            if (ip == null || ip.equals(Constants.NULL_IP)) {
+            String ip = node.findNic(net).getIpv4Address();
+            if (ip == null || ip.equals(Constants.NULL_IPV4_ADDRESS)) {
                // in case of errors during node creation (if possible)
                continue;
             }

@@ -18,10 +18,8 @@ package com.vmware.bdd.placement.entity;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.vmware.aurora.composition.DiskSchema;
 import com.vmware.aurora.composition.DiskSchema.Disk;
@@ -31,7 +29,6 @@ import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.IpConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
@@ -40,11 +37,11 @@ import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.util.PlacementUtil;
 import com.vmware.bdd.spectypes.DiskSpec;
+import com.vmware.bdd.spectypes.NicSpec;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
-import org.apache.log4j.Logger;
 
 public class BaseNode {
 
@@ -73,7 +70,7 @@ public class BaseNode {
 
    private VmSchema vmSchema;
 
-   private Map<NetTrafficType, List<IpConfigInfo>> ipConfigs;
+   private Map<String, NicSpec> nics; // map portGroupName to nic entity
 
    private boolean success = false;
    private boolean finished = false;
@@ -91,11 +88,13 @@ public class BaseNode {
 
    public BaseNode() {
       super();
+      initNics(null);
    }
 
    public BaseNode(String vmName) {
       super();
       this.vmName = vmName;
+      initNics(null);
    }
 
    public BaseNode(String vmName, NodeGroupCreate nodeGroup,
@@ -105,7 +104,7 @@ public class BaseNode {
       this.nodeGroup = nodeGroup;
       this.cluster = cluster;
       this.vmSchema = new VmSchema();
-      initIpConfigs(cluster);
+      initNics(cluster);
    }
 
    public NodeStatus getNodeStatus() {
@@ -146,14 +145,6 @@ public class BaseNode {
 
    public void setVmMobId(String vmMobId) {
       this.vmMobId = vmMobId;
-   }
-
-   public Map<NetTrafficType, List<IpConfigInfo>> getIpConfigs() {
-      return ipConfigs;
-   }
-
-   public void setIpConfigs(Map<NetTrafficType, List<IpConfigInfo>> ipConfigs) {
-      this.ipConfigs = ipConfigs;
    }
 
    public boolean isSuccess() {
@@ -312,101 +303,140 @@ public class BaseNode {
       return size;
    }
 
-   public void initIpConfigs(ClusterCreate cluster) {
-      ipConfigs = new HashMap<NetTrafficType, List<IpConfigInfo>>();
+   /**
+    * initialize base node's nics info
+    * @param cluster
+    */
+   public void initNics(ClusterCreate cluster) {
+      nics = new HashMap<String, NicSpec>();
+      if (cluster == null) {
+         return;
+      }
       Map<NetTrafficType, List<String>> clusterNetConfig = cluster.getNetworkConfig();
       if (clusterNetConfig == null || clusterNetConfig.isEmpty()) {
          return;
       }
 
-      Map<String, String> netName2Port = new HashMap<String, String>();
+      Map<String, String> netName2PgName = new HashMap<String, String>();
       // cluster.getNetworkConfig() does not has portgroup info, but portgroup info
       // is necessary to check ip, we have to fetch it from cluster.getNetworking()
       for (NetworkAdd networkAdd : cluster.getNetworkings()) {
-         netName2Port.put(networkAdd.getName(), networkAdd.getPortGroup());
+         netName2PgName.put(networkAdd.getName(), networkAdd.getPortGroup());
       }
 
       for (NetTrafficType type : clusterNetConfig.keySet()) {
-         if (!ipConfigs.containsKey(type)) {
-            ipConfigs.put(type, new ArrayList<IpConfigInfo>());
-         }
+         int index = 0;
          for (String netName : clusterNetConfig.get(type)) {
-            String netPg = netName2Port.get(netName);
-            IpConfigInfo info = new IpConfigInfo(type, netName, netPg, Constants.NULL_IP);
-            ipConfigs.get(type).add(info);
-         }
-      }
-   }
-
-   public void updateIpAddressOfPortGroup(String portGroupName, String ipAddress) {
-      if (ipConfigs != null && !ipConfigs.isEmpty()) {
-         for (List<IpConfigInfo> ipConfigList : ipConfigs.values()) {
-            for (IpConfigInfo config : ipConfigList) {
-               if (config.getPortGroupName().equals(portGroupName)) {
-                  config.setIpAddress(ipAddress);
-               }
+            String pgName = netName2PgName.get(netName);
+            NicSpec nicSpec = nics.get(pgName);
+            if (nicSpec == null) {
+               nicSpec = new NicSpec();
+               nicSpec.setIpv4Address(Constants.NULL_IPV4_ADDRESS);
+               nicSpec.setIpv6Address(Constants.NULL_IPV6_ADDRESS);
+               nicSpec.setPortGroupName(pgName);
+               nicSpec.addToNetDefs(type, index);
+               nicSpec.setNetworkName(netName);
+               nics.put(pgName, nicSpec);
+            } else {
+               nicSpec.addToNetDefs(type, index);
             }
+            index++;
          }
       }
    }
 
-   public String fetchIpAddressOfPortGroup(String portGroupName) {
-      if (ipConfigs != null && !ipConfigs.isEmpty()) {
-         for (List<IpConfigInfo> ipConfigList : ipConfigs.values()) {
-            for (IpConfigInfo config : ipConfigList) {
-               if (config.getPortGroupName().equals(portGroupName)) {
-                  return config.getIpAddress();
-               }
-            }
-         }
+   public String fetchIpAddressOfPortGroup(String pgName) {
+      if (nics == null || !nics.containsKey(pgName)) {
+         return Constants.NULL_IPV4_ADDRESS;
       }
-      return Constants.NULL_IP;
+      return nics.get(pgName).getIpv4Address();
    }
 
-   public Set<String> fetchAllPortGroups() {
-      Set<String> portGroups = new HashSet<String>();
-      if (ipConfigs != null && !ipConfigs.isEmpty()) {
-         for (List<IpConfigInfo> ipConfigList : ipConfigs.values()) {
-            for (IpConfigInfo config : ipConfigList) {
-               portGroups.add(config.getPortGroupName());
-            }
-         }
+
+   /**
+    * update nic info of portgroup pgName
+    * @param pgName
+    * @param ipv4Address only update when not null
+    * @param ipv6Address only update when not null
+    * @param macAddress only update when not null
+    * @return true/false if nic of portgroup exist/no-exist
+    */
+   public boolean updateNicOfPortGroup(String pgName, String ipv4Address,
+         String ipv6Address, String macAddress) {
+      if (nics == null || nics.isEmpty() || !nics.containsKey(pgName)) {
+         return false;
       }
-      return portGroups;
+      NicSpec nicSpec = nics.get(pgName);
+      if (ipv4Address != null) {
+         nicSpec.setIpv4Address(ipv4Address);
+      }
+      if (ipv6Address != null) {
+         nicSpec.setIpv6Address(ipv6Address);
+      }
+      if (macAddress != null) {
+         nicSpec.setMacAddress(macAddress);
+      }
+      return true;
    }
 
-   public Map<String, String> fetchPortGroupToIpMap() {
+   public Map<String, String> fetchPortGroupToIpV4Map() {
       Map<String, String> ipInfo = new HashMap<String, String>();
-      if (ipConfigs != null && !ipConfigs.isEmpty()) {
-         for (List<IpConfigInfo> ipConfigList : ipConfigs.values()) {
-            for (IpConfigInfo config : ipConfigList) {
-               ipInfo.put(config.getPortGroupName(), config.getIpAddress());
-            }
+      if (nics != null) {
+         for (String pgName : nics.keySet()) {
+            ipInfo.put(pgName, nics.get(pgName).getIpv4Address());
          }
       }
       return ipInfo;
    }
 
-   public boolean ipsReady() {
-      if (ipConfigs == null) {
+   public boolean ipsReadyV4() {
+      if (nics == null) {
          return false;
       }
-      for (List<IpConfigInfo> configs : ipConfigs.values()) {
-         for (IpConfigInfo config : configs) {
-            if (config.getIpAddress() == null || config.getIpAddress().equals(Constants.NULL_IP)) {
-               return false;
-            }
+      for (NicSpec nicSpec : nics.values()) {
+         if (nicSpec.getIpv4Address() == null || nicSpec.getIpv4Address().equals(Constants.NULL_IPV4_ADDRESS)) {
+            return false;
          }
       }
       return true;
    }
 
-   public void resetIps() {
-      for (List<IpConfigInfo> configs : ipConfigs.values()) {
-         for (IpConfigInfo config : configs) {
-            config.setIpAddress(Constants.NULL_IP);
+   public void resetIpsV4() {
+      if (nics == null) {
+         return;
+      }
+      for (NicSpec nicSpec : nics.values()) {
+         nicSpec.setIpv4Address(Constants.NULL_IPV4_ADDRESS);
+      }
+   }
+
+   public String getPrimaryMgtPgName() {
+      if (nics != null) {
+         for (String pgName : nics.keySet()) {
+            if (nics.get(pgName).isPrimaryMgtNetwork()) {
+               return pgName;
+            }
          }
       }
+      return null;
+   }
+
+   public String getPrimaryMgtIpV4() {
+      for (String pgName : nics.keySet()) {
+         if (nics.get(pgName).isPrimaryMgtNetwork()) {
+            return nics.get(pgName).getIpv4Address();
+         }
+      }
+      return Constants.NULL_IPV4_ADDRESS;
+   }
+
+
+   public Map<String, NicSpec> getNics() {
+      return nics;
+   }
+
+   public void setNics(Map<String, NicSpec> nics) {
+      this.nics = nics;
    }
 
    /**
