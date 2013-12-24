@@ -17,6 +17,7 @@ package com.vmware.bdd.manager;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vmware.bdd.exception.VcProviderException;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -44,7 +45,6 @@ public class ScaleManager {
 
    private IClusterEntityManager clusterEntityMgr;
    private JobManager jobManager;
-
 
    public long scaleNodeGroupResource(ResourceScale scale) throws Exception {
       String clusterName = scale.getClusterName();
@@ -74,6 +74,10 @@ public class ScaleManager {
             for (NodeEntity nodeEntity : nodes) {
                VcResourceUtils.checkVmFTAndCpuNumber(nodeEntity.getMoId(), nodeEntity.getVmName(),
                      scale.getCpuNumber());
+               if (!VcVmUtil.validateCPU(nodeEntity.getMoId(), scale.getCpuNumber())) {
+                  throw VcProviderException.CPU_NUM_NOT_MULTIPLE_OF_CORES_PER_SOCKET(scale.getNodeGroupName(),
+                        nodeEntity.getVmName());
+               }
             }
          }
       }

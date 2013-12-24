@@ -90,4 +90,9 @@ public class MockVcVmUtil {
    public static void updateVm(String vmId) {
 
    }
+
+   @Mock
+   public static boolean validateCPU(final String vmId, final int cpuNum) {
+      return true;
+   }
 }

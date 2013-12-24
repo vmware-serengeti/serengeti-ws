@@ -26,7 +26,9 @@ import java.util.concurrent.Callable;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.vim.binding.impl.vim.vApp.VmConfigSpecImpl;
 import com.vmware.vim.binding.impl.vim.vm.ToolsConfigInfoImpl;
+import com.vmware.vim.binding.vim.VirtualMachine;
 import com.vmware.vim.binding.vim.net.IpConfigInfo.IpAddress;
+import com.vmware.vim.binding.vim.option.OptionValue;
 import com.vmware.vim.binding.vim.vApp.VmConfigSpec;
 import com.vmware.vim.binding.vim.vm.ToolsConfigInfo;
 import org.apache.log4j.Logger;
@@ -777,6 +779,36 @@ public class VcVmUtil {
       });
    }
 
+   /**
+    * check if number of vCPUs is a multiple of the number of cores per socket configured in the VM
+    * @param vmId
+    * @param cpuNum
+    * @return
+    */
+   public static boolean validateCPU(final String vmId, final int cpuNum) {
+      if (cpuNum <= 0) {
+         return false;
+      }
+
+      VcVirtualMachine vm = VcCache.getIgnoreMissing(vmId);
+      if (vm == null) {
+         logger.error("cannot found vm of id: " + vmId);
+         return false;
+      }
+
+      String coresPerSocketKey = "cpuid.coresPerSocket";
+      if (vm.getConfig() != null && vm.getConfig().getExtraConfig() != null) {
+         for (OptionValue optionValue : vm.getConfig().getExtraConfig())
+            if (coresPerSocketKey.equals(optionValue.getKey())) {
+               int coresPerSocket = Integer.parseInt((String) optionValue.getValue());
+               if (cpuNum % coresPerSocket == 0) {
+                  return true;
+               }
+               return false;
+            }
+      }
+      return false;
+   }
 
     public static boolean enableSyncTimeWithHost(final VcVirtualMachine vm) {
       return VcContext.inVcSessionDo(new VcSession<Boolean>() {

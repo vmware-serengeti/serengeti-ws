@@ -216,6 +216,10 @@ public class ClusteringService implements IClusteringService {
       return templateVm.getId();
    }
 
+   public String getTemplateVmName() {
+      return templateVm.getName();
+   }
+
    public IClusterCloneService getCloneService() {
       return cloneService;
    }

@@ -142,5 +142,4 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException LOCAL_STORAGE_USED_FOR_FT_GROUP(String group) {
       return new ClusterConfigException(null, "LOCAL_STORAGE_USED_FOR_FT_GROUP", group);
    }
-
 }

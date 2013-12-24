@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.service.MockVcVmUtil;
+import com.vmware.bdd.service.impl.ClusteringService;
 import mockit.Mockit;
 
 import org.apache.log4j.Logger;
@@ -79,6 +81,7 @@ public class TestClusterConfigManager {
    @BeforeMethod(groups = { "TestClusterConfigManager" })
    public void setMockup() {
       Mockit.setUpMock(MockResourceManager.class);
+      Mockit.setUpMock(MockVcVmUtil.class);
    }
 
    @AfterClass(groups = { "TestClusterConfigManager" })
@@ -98,8 +101,11 @@ public class TestClusterConfigManager {
                   "../serengeti/WebContent/WEB-INF/spring/serengeti-jobs-context.xml",
                   "../serengeti/WebContent/WEB-INF/spring/manager-context.xml");
       clusterConfigMgr = context.getBean(ClusterConfigManager.class);
+
       DistroManager distroMgr = Mockito.mock(DistroManager.class);
+      ClusteringService clusteringService = Mockito.mock(ClusteringService.class);
       clusterConfigMgr.setDistroMgr(distroMgr);
+      clusterConfigMgr.setClusteringService(clusteringService);
       clusterEntityMgr =
             context.getBean("clusterEntityManager", IClusterEntityManager.class);
       DistroRead distro = new DistroRead();
@@ -113,6 +119,8 @@ public class TestClusterConfigManager {
       roles.add("hive_server");
       roles.add("pig");
       distro.setRoles(roles);
+      Mockito.when(clusteringService.getTemplateVmId()).thenReturn("vm-1234");
+      Mockito.when(clusteringService.getTemplateVmName()).thenReturn("hadoop-template");
       Mockito.when(distroMgr.getDistroByName("apache")).thenReturn(distro);
       Mockito.when(distroMgr.checkPackagesExistStatus("apache")).thenReturn(
             PackagesExistStatus.TARBALL);

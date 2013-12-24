@@ -92,6 +92,10 @@ public class VcProviderException extends BddException {
             maxMemory, vmName);
    }
 
+   public static VcProviderException CPU_NUM_NOT_MULTIPLE_OF_CORES_PER_SOCKET(String groupName, String vmName) {
+      return new VcProviderException(null, "CPU_NUM_NOT_MULTIPLE_OF_CORES_PER_SOCKET", groupName, vmName);
+   }
+
    public static VcProviderException START_VM_ERROR(String vmName) {
       return new VcProviderException(null, "START_VM_ERROR", vmName);
    }

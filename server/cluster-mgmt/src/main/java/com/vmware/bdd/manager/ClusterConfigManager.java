@@ -29,6 +29,9 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.exception.VcProviderException;
+import com.vmware.bdd.service.IClusteringService;
+import com.vmware.bdd.utils.VcVmUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,6 +89,7 @@ public class ClusterConfigManager {
    private RackInfoManager rackInfoMgr;
    private IDatastoreService datastoreMgr;
    private IClusterEntityManager clusterEntityMgr;
+   private IClusteringService clusteringService;
 
    private static final String TEMPLATE_ID = "template_id";
    private static final String HTTP_PROXY = "serengeti.http_proxy";
@@ -147,6 +151,15 @@ public class ClusterConfigManager {
    @Autowired
    public void setClusterEntityMgr(IClusterEntityManager clusterEntityMgr) {
       this.clusterEntityMgr = clusterEntityMgr;
+   }
+
+   public IClusteringService getClusteringService() {
+      return clusteringService;
+   }
+
+   @Autowired
+   public void setClusteringService(IClusteringService clusteringService) {
+      this.clusteringService = clusteringService;
    }
 
    @Transactional
@@ -586,7 +599,13 @@ public class ClusterConfigManager {
       Set<String> roles = new HashSet<String>();
 
       groupEntity.setCluster(clusterEntity);
-      groupEntity.setCpuNum(group.getCpuNum() == null ? 0 : group.getCpuNum());
+      int cpuNum = group.getCpuNum() == null ? 0 : group.getCpuNum();
+      if (!VcVmUtil.validateCPU(clusteringService.getTemplateVmId(), cpuNum)) {
+         throw VcProviderException.CPU_NUM_NOT_MULTIPLE_OF_CORES_PER_SOCKET(group.getName(),
+               clusteringService.getTemplateVmName());
+      }
+
+      groupEntity.setCpuNum(cpuNum);
       groupEntity.setDefineInstanceNum(group.getInstanceNum());
       groupEntity.setMemorySize(group.getMemCapacityMB() == null ? 0 : group
             .getMemCapacityMB());

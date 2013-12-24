@@ -176,5 +176,11 @@ public interface IClusteringService {
     */
    public String getTemplateVmId();
 
+   /**
+    * get the vm name of template vm
+    * @return
+    */
+   public String getTemplateVmName();
+
    public VmEventProcessor getEventProcessor();
 }
