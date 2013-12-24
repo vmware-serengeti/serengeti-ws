@@ -20,6 +20,7 @@ import java.util.EnumSet;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 
 public enum GroupType {
+   DEFAULT_GROUP("default"),
    ZOOKEEPER_GROUP("zookeeper"),
    JOURNALNODE_GROUP("journalnode"),
    MASTER_GROUP("master"),
@@ -95,8 +96,10 @@ public enum GroupType {
          return MAPR_MYSQL_SERVER_GROUP;
       } else if (roles.contains(HadoopRole.MAPR_ZOOKEEPER_ROLE)) {
          return MAPR_ZOOKEEPER_GROUP;
-      } else {
+      } else if (roles.contains(HadoopRole.MAPR_CLIENT_ROLE)) {
          return MAPR_CLIENT_GROUP;
+      } else {
+         return DEFAULT_GROUP;
       }
    }
 }

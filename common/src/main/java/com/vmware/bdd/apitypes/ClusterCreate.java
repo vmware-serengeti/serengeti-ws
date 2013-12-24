@@ -836,6 +836,7 @@ public class ClusterCreate implements Serializable {
             .append(nodeGroup.getInstanceNum()).append(".").toString());
    }
 
+   // check whether the group roles are listed in distro manifest
    private boolean checkNodeGroupRoles(NodeGroupCreate nodeGroup,
          List<String> distroRoles, List<String> failedMsgList) {
       List<String> roles = nodeGroup.getRoles();
@@ -843,7 +844,7 @@ public class ClusterCreate implements Serializable {
       StringBuilder rolesMsg = new StringBuilder();
       if (roles != null) {
          for (String role : roles) {
-            if (!distroRoles.contains(role)) {
+            if (!distroRoles.contains(role) && !HadoopRole.isCustomizedRole(role)) {
                validated = false;
                rolesMsg.append(",").append(role);
             }
