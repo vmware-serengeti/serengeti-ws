@@ -63,7 +63,12 @@ public enum HadoopRole {
    MAPR_MYSQL_CLIENT_ROLE("mapr_mysql_client"),
    // yarn
    HADOOP_NODEMANAGER_ROLE("hadoop_nodemanager"),
-   HADOOP_RESOURCEMANAGER_ROLE("hadoop_resourcemanager");
+   HADOOP_RESOURCEMANAGER_ROLE("hadoop_resourcemanager"),
+
+   // put other predefined roles here or above
+
+   // the last role is the user customized role
+   CUSTOMIZED_ROLE("customized_role");
 
    private String description;
 
@@ -91,15 +96,20 @@ public enum HadoopRole {
                return b;
             }
          }
+         return HadoopRole.CUSTOMIZED_ROLE;
       }
       return null;
+   }
+
+   public static boolean isCustomizedRole(String role) {
+      return HadoopRole.fromString(role) == HadoopRole.CUSTOMIZED_ROLE;
    }
 
    /**
     * Compare the order of roles according to their dependencies(the enum ordial
     * is very important here)
-    * 
-    * 
+    *
+    *
     */
    public static class RoleComparactor implements Comparator<String> {
       @Override
