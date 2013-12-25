@@ -786,7 +786,7 @@ public class VcVmUtil {
     * @return
     */
    public static boolean validateCPU(final String vmId, final int cpuNum) {
-      if (cpuNum <= 0) {
+      if (cpuNum < 0) {
          return false;
       }
 
