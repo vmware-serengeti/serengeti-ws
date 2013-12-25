@@ -798,7 +798,7 @@ public class VcVmUtil {
 
       String coresPerSocketKey = "cpuid.coresPerSocket";
       if (vm.getConfig() != null && vm.getConfig().getExtraConfig() != null) {
-         for (OptionValue optionValue : vm.getConfig().getExtraConfig())
+         for (OptionValue optionValue : vm.getConfig().getExtraConfig()) {
             if (coresPerSocketKey.equals(optionValue.getKey())) {
                int coresPerSocket = Integer.parseInt((String) optionValue.getValue());
                if (cpuNum % coresPerSocket == 0) {
@@ -806,11 +806,12 @@ public class VcVmUtil {
                }
                return false;
             }
+         }
       }
-      return false;
+      return true;
    }
 
-    public static boolean enableSyncTimeWithHost(final VcVirtualMachine vm) {
+   public static boolean enableSyncTimeWithHost(final VcVirtualMachine vm) {
       return VcContext.inVcSessionDo(new VcSession<Boolean>() {
          @Override
          protected Boolean body() throws Exception {
