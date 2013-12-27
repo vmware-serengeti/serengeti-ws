@@ -443,13 +443,6 @@ public class VcFileManager {
       uploadFileWork(url, false, file, vcContentType, sessionString, progress);
    }
 
-   public static String dropDsFromPath(String dsPath) throws Exception {
-      Pattern pattern = Pattern.compile(DS_PATH_PATTERN);
-      Matcher match = pattern.matcher(dsPath);
-      AuAssert.check(match.matches());
-      return match.group(2);
-   }
-
    public static String getDsFromPath(String dsPath) throws Exception {
       Pattern pattern = Pattern.compile(DS_PATH_PATTERN);
       Matcher match = pattern.matcher(dsPath);
@@ -493,7 +486,7 @@ public class VcFileManager {
          return getDsPath(vm, name);
       } else {
          try {
-            return String.format("[%s] %s/%s", ds.getURLName(), dropDsFromPath(vm.getPathName()).trim(), name);
+            return String.format("[%s]", ds.getName());
          }
          catch (Exception ex) {
             throw BaseVMException.INVALID_FILE_PATH(ex, vm.getPathName());
