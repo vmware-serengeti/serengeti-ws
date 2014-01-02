@@ -54,7 +54,9 @@ import com.vmware.aurora.vc.vcservice.VcService.MyThreadPoolExecutor.MyBlockingQ
 import com.vmware.vim.binding.impl.vim.DescriptionImpl;
 import com.vmware.vim.binding.impl.vim.ExtensionImpl;
 import com.vmware.vim.binding.impl.vim.KeyValueImpl;
+import com.vmware.vim.binding.impl.vim.ext.ExtendedProductInfoImpl;
 import com.vmware.vim.binding.impl.vim.ext.ManagedEntityInfoImpl;
+import com.vmware.vim.binding.impl.vim.ext.SolutionManagerInfoImpl;
 import com.vmware.vim.binding.vim.Description;
 import com.vmware.vim.binding.vim.Extension;
 import com.vmware.vim.binding.vim.ExtensionManager;
@@ -70,7 +72,9 @@ import com.vmware.vim.binding.vim.VirtualDiskManager;
 import com.vmware.vim.binding.vim.alarm.AlarmManager;
 import com.vmware.vim.binding.vim.event.Event;
 import com.vmware.vim.binding.vim.event.Event.EventSeverity;
+import com.vmware.vim.binding.vim.ext.ExtendedProductInfo;
 import com.vmware.vim.binding.vim.ext.ManagedEntityInfo;
+import com.vmware.vim.binding.vim.ext.SolutionManagerInfo;
 import com.vmware.vim.binding.vim.option.OptionManager;
 import com.vmware.vim.binding.vim.option.OptionValue;
 import com.vmware.vim.binding.vim.version.version8;
@@ -91,6 +95,7 @@ import com.vmware.vim.vmomi.core.types.VmodlTypeMap;
  */
 public class VcService {
    private static final Logger logger = Logger.getLogger(VcService.class);
+   private static final String SERENGETI_EXTENSION_REGISTERED = "serengeti.extension.registered";
 
    private static final Class<?> version = version8.class;
    private static final int SESSION_TIME_OUT = Configuration.getInt(
@@ -468,6 +473,8 @@ public class VcService {
        */
       extKey = "com.vmware.aurora.vcext.instance-" + Configuration.getCmsInstanceId();
 
+      // represent if extension service is already registered
+      vcExtensionRegistered = Configuration.getBoolean(SERENGETI_EXTENSION_REGISTERED, false);
       /*
        * The following are not set in config files by default.
        * They can be hard coded manually.
@@ -654,6 +661,8 @@ public class VcService {
             logger.debug("Response: " + str);
          }
          vcExtensionRegistered = true;
+         Configuration.setBoolean(SERENGETI_EXTENSION_REGISTERED, true);
+         Configuration.save();
          logger.debug("Extension registration request sent successfully");
       } catch (Exception e) {
          logger.error("Failed Extension registration to " + evsURL, e);
@@ -688,6 +697,9 @@ public class VcService {
       us.setDescription(desc);
       us.setCompany("VMware, Inc.");
       us.setShownInSolutionManager(true);
+      ExtendedProductInfo extInfo = new ExtendedProductInfoImpl();
+      extInfo.setCompanyUrl("http://www.vmware.com");
+      us.setExtendedProductInfo(extInfo);
       // XXX: Set health info, any other fields?
 
       // Describe the entities we manage (DBVM)
@@ -751,6 +763,10 @@ public class VcService {
       us.setEventList(eventTypes.toArray(new Extension.EventTypeInfo[0]));
       us.setShownInSolutionManager(true);
 
+      SolutionManagerInfo sm = new SolutionManagerInfoImpl();
+      sm.setSmallIconUrl("http://www.vmware.com");
+      us.setSolutionManagerInfo(sm);
+      
       // Push this info into VC
       em.updateExtension(us);
    }

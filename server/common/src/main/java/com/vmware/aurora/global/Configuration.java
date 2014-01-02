@@ -442,7 +442,7 @@ public class Configuration {
       config.setProperty(key, value);
       if (vcCfg.containsKey(key)) {
          vcCfg.setProperty(key, value);
-      } else if (serengetiCfg.containsKey(key)) {
+      } else {
          serengetiCfg.setProperty(key, value);
       }
    }
@@ -451,7 +451,7 @@ public class Configuration {
       config.setProperty(key, value);
       if (vcCfg.containsKey(key)) {
          vcCfg.setProperty(key, value);
-      } else if (serengetiCfg.containsKey(key)) {
+      } else {
          serengetiCfg.setProperty(key, value);
       }
    }
