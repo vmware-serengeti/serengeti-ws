@@ -79,7 +79,7 @@ public class LockAnnotationTest {
       mgr.competitiveLock(LOCKED_CLUSTER_NAME, 0);
       long end = System.currentTimeMillis();
       System.out.println("Lock takes " + (end - start) + "ms.");
-      Assert.assertTrue((end - start) < 20);
+      Assert.assertTrue((end - start) < 150);
       t.join();
    }
 
@@ -131,7 +131,7 @@ public class LockAnnotationTest {
       mgr.exclusiveLock(UNLOCKED_CLUSTER_NAME, 0);
       long end = System.currentTimeMillis();
       System.out.println("Lock takes " + (end - start) + "ms.");
-      Assert.assertTrue((end - start) < 20);
+      Assert.assertTrue((end - start) < 150);
       t.join();
    }
 

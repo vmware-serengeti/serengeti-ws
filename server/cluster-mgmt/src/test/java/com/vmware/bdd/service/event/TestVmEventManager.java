@@ -12,8 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.service.sp;
+package com.vmware.bdd.service.event;
 
+import com.vmware.bdd.service.event.VmEventManager;
+import com.vmware.bdd.service.sp.MockConcurrentClusterEntityManager;
+import com.vmware.bdd.service.sp.MockVcContext;
+import com.vmware.bdd.service.sp.MockVcEventListener;
 import junit.framework.Assert;
 import mockit.Mockit;
 
@@ -37,15 +41,15 @@ import com.vmware.vim.binding.vim.event.VmRemovedEvent;
 import com.vmware.vim.binding.vim.event.VmSuspendedEvent;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 
-public class TestVmEventProcessor {
-   private static VmEventProcessor processor;
+public class TestVmEventManager {
+   private static VmEventManager eventManager;
    private static ConcurrentWriteLockedClusterEntityManager entityMgr;
 
    @AfterClass
    public static void tearDown() throws Exception {
       Mockit.tearDownMocks();
    }
-   
+
    @BeforeClass
    public static void setUp() throws Exception {
       Mockit.setUpMock(MockVcCache.class);
@@ -53,9 +57,8 @@ public class TestVmEventProcessor {
       Mockit.setUpMock(MockVcContext.class);
       Mockit.setUpMock(MockVcEventListener.class);
       entityMgr = new MockConcurrentClusterEntityManager();
-      processor = new VmEventProcessor(entityMgr);
-      processor.installEventHandler();
-      processor.start();
+      eventManager = new VmEventManager(entityMgr);
+      eventManager.start();
    }
 
    private <T extends VmEvent> T getVmEvent(final String id, Class<T> eventClass) {
@@ -83,23 +86,6 @@ public class TestVmEventProcessor {
       sendEvents(100, 20);
    }
 
-   @Test
-   public void testInterrupt() throws Exception {
-      processor.interrupt();
-      Thread.sleep(100);
-      Assert.assertTrue("the executing thread is not stopped.", processor.isTerminate());
-
-      processor = new VmEventProcessor(entityMgr);
-      processor.installEventHandler();
-      processor.start();
-
-      sendEvents(500, 0);
-      Thread.sleep(20);
-      processor.interrupt();
-      Thread.sleep(100);
-      Assert.assertTrue("the executing thread is not stopped.", processor.isTerminate());
-   }
-
    private void sendEvents(int number, int sleepMS) throws Exception {
       for (int i = 0; i < number; i ++) {
          Event e = getVmEvent(Integer.toString(i), VmRemovedEvent.class);
@@ -118,5 +104,4 @@ public class TestVmEventProcessor {
       }
       System.out.println("Finished " + number + " events sent.");
    }
-
 }

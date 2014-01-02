@@ -85,7 +85,7 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       competitiveLockedMgr.removeVmReference(LOCKED_CLUSTER_NAME, "");
       long end = System.currentTimeMillis();
       System.out.println("Lock takes " + (end - start) + "ms.");
-      Assert.assertTrue((end - start) < 20);
+      Assert.assertTrue((end - start) < 150);
       t.join();
    }
 
@@ -137,7 +137,7 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       exclusiveLockedMgr.removeVmReference(UNLOCKED_CLUSTER_NAME, "");
       long end = System.currentTimeMillis();
       System.out.println("Lock takes " + (end - start) + "ms.");
-      Assert.assertTrue((end - start) < 20);
+      Assert.assertTrue((end - start) < 150);
       t.join();
    }
 

@@ -25,8 +25,8 @@ import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.placement.entity.BaseNode;
+import com.vmware.bdd.service.event.VmEventManager;
 import com.vmware.bdd.service.job.StatusUpdater;
-import com.vmware.bdd.service.sp.VmEventProcessor;
 
 public interface IClusteringService {
 
@@ -182,5 +182,5 @@ public interface IClusteringService {
     */
    public String getTemplateVmName();
 
-   public VmEventProcessor getEventProcessor();
+   public VmEventManager getEventProcessor();
 }

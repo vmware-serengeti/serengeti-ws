@@ -1,12 +1,25 @@
-package com.vmware.bdd.service.sp;
+/***************************************************************************
+ * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
+package com.vmware.bdd.service.event;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
+import com.vmware.bdd.service.sp.NodePowerOnRequest;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.exception.AuroraException;
@@ -40,20 +53,37 @@ import com.vmware.vim.binding.vim.vm.FaultToleranceSecondaryConfigInfo;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import com.vmware.vim.binding.vmodl.fault.ManagedObjectNotFound;
 
-public class VmEventProcessor extends Thread {
-   private static class EventWrapper {
+public class VmEventManager implements IEventProcessor {
+
+   public static class VcEventWrapper implements IEventWrapper{
       private VcEventType type;
       private Event event;
       private boolean external;
 
-      public EventWrapper(VcEventType type, Event event, boolean external) {
+      public VcEventWrapper(VcEventType type, Event event, boolean external) {
          this.type = type;
          this.event = event;
          this.external = external;
       }
+
+      @Override
+      public String getPrimaryKey() {
+
+         if (event instanceof HostEvent) {
+            HostEvent he = (HostEvent) event;
+            return MoUtil.morefToString(event.getHost().getHost());
+         }
+         AuAssert.check(event instanceof VmEvent || event instanceof EventEx);
+         return MoUtil.morefToString(event.getVm().getVm());
+      }
+
+      @Override
+      public String toString() {
+         return "{moid=" + getPrimaryKey() + ", event=" + type.toString() + "}";
+      }
    }
 
-   private static final EnumSet<VcEventType> vmEvents = EnumSet.of(
+   public static final EnumSet<VcEventType> vmEvents = EnumSet.of(
          VcEventType.VmDasBeingResetWithScreenshot, VcEventType.VmDrsPoweredOn,
          VcEventType.VmMigrated, VcEventType.VmConnected,
          VcEventType.VmCreated, VcEventType.VmDasBeingReset,
@@ -77,18 +107,25 @@ public class VmEventProcessor extends Thread {
          VcEventType.HostDisconnected);
 
    private static final Logger logger = Logger
-         .getLogger(VmEventProcessor.class);
-   private BlockingQueue<EventWrapper> queue =
-         new LinkedBlockingQueue<EventWrapper>();
-   private boolean isTerminate = false;
+         .getLogger(VmEventManager.class);
    private IConcurrentLockedClusterEntityManager lockMgr;
    private IClusterEntityManager clusterEntityMgr;
    private Folder rootSerengetiFolder = null;
+   private EventScheduler eventScheduler = null;
 
-   public VmEventProcessor(IConcurrentLockedClusterEntityManager lockMgr) {
+   public VmEventManager(IConcurrentLockedClusterEntityManager lockMgr) {
       super();
       this.lockMgr = lockMgr;
       this.clusterEntityMgr = lockMgr.getClusterEntityMgr();
+      this.eventScheduler = new EventScheduler(this);
+   }
+
+   public synchronized void start() {
+      this.eventScheduler.start();
+   }
+
+   public synchronized void stop() {
+      this.eventScheduler.stop();
    }
 
    private void initRootFolder() {
@@ -107,13 +144,18 @@ public class VmEventProcessor extends Thread {
       }
    }
 
-   public void installEventHandler() {
+   /**
+    *
+    * @param produceQueue
+    */
+   @Override
+   public void produceEvent(final BlockingQueue<IEventWrapper> produceQueue) {
       VcEventListener.installExtEventHandler(vmEvents, new IVcEventHandler() {
          @Override
          public boolean eventHandler(VcEventType type, Event e)
                throws Exception {
             logger.debug("Received external VM event " + e);
-            add(type, e, true);
+            add(type, e, true, produceQueue);
             return false;
          }
       });
@@ -122,24 +164,29 @@ public class VmEventProcessor extends Thread {
          public boolean eventHandler(VcEventType type, Event e)
                throws Exception {
             logger.debug("Received internal VM event " + e);
-            add(type, e, false);
+            add(type, e, false, produceQueue);
             return false;
          }
       });
    }
 
-   public void add(VcEventType type, Event event, boolean external) {
-      EventWrapper wrapper = new EventWrapper(type, event, external);
-      queue.add(wrapper);
+   private void add(VcEventType type, Event event, boolean external, BlockingQueue<IEventWrapper> produceQueue) {
+      VcEventWrapper wrapper = new VcEventWrapper(type, event, external);
+      try {
+         produceQueue.put(wrapper);
+      } catch (InterruptedException e) {
+         logger.info("caught " + e);
+      }
    }
 
-   public void run() {
-      while (!isTerminate) {
+   @Override
+   public void consumeEvent(List<IEventWrapper> toProcessEvents) {
+      for (IEventWrapper wrapper : toProcessEvents) {
+         final VcEventWrapper eventWrapper = (VcEventWrapper) wrapper;
          Event event = null;
          try {
-            final EventWrapper wrapper = queue.poll(1, TimeUnit.MINUTES);
-            if (wrapper != null) {
-               event = wrapper.event;
+            if (eventWrapper != null) {
+               event = eventWrapper.event;
                VcContext.inVcSessionDo(new VcSession<Void>() {
                   @Override
                   protected boolean isTaskSession() {
@@ -148,14 +195,11 @@ public class VmEventProcessor extends Thread {
 
                   @Override
                   protected Void body() throws Exception {
-                     processEvent(wrapper.type, wrapper.event, wrapper.external);
+                     processEvent(eventWrapper.type, eventWrapper.event, eventWrapper.external);
                      return null;
                   }
                });
             }
-         } catch (InterruptedException e) {
-            logger.warn("Thread interrupt exception received, exit.");
-            isTerminate = true;
          } catch (Exception e) {
             if (event != null) {
                logger.error("Failed to process event: " + event, e);
@@ -164,14 +208,6 @@ public class VmEventProcessor extends Thread {
             }
          }
       }
-   }
-
-   public boolean isTerminate() {
-      return isTerminate;
-   }
-
-   public void setTerminate(boolean isTerminate) {
-      this.isTerminate = isTerminate;
    }
 
    private boolean processExternalEvent(VcEventType type, Event e, String moId)
@@ -211,7 +247,7 @@ public class VmEventProcessor extends Thread {
       case EnteredMaintenanceMode:
       case ExitMaintenanceMode:
       case HostDisconnected: {
-         sleep(2000);
+         Thread.sleep(2000);
          VcHost host = VcCache.getIgnoreMissing(he.getHost().getHost());
          host.update();
          for (NodeEntity node : nodes) {
@@ -274,7 +310,7 @@ public class VmEventProcessor extends Thread {
       logger.warn(message);
    }
 
-   public void processEvent(VcEventType type, Event e, boolean external)
+   private void processEvent(VcEventType type, Event e, boolean external)
          throws Exception {
       if (e instanceof HostEvent) {
          processHostEvent(type, e);
@@ -463,9 +499,5 @@ public class VmEventProcessor extends Thread {
          }
       }
       return moId;
-   }
-
-   public void shutdown() {
-      this.interrupt();
    }
 }

@@ -31,6 +31,7 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.service.event.VmEventManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -107,7 +108,6 @@ import com.vmware.bdd.service.sp.SetAutoElasticitySP;
 import com.vmware.bdd.service.sp.StartVmSP;
 import com.vmware.bdd.service.sp.StopVmSP;
 import com.vmware.bdd.service.sp.UpdateVmProgressCallback;
-import com.vmware.bdd.service.sp.VmEventProcessor;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import com.vmware.bdd.spectypes.DiskSpec;
@@ -144,7 +144,7 @@ public class ClusteringService implements IClusteringService {
    private String templateNetworkLabel;
    private static boolean initialized = false;
    private int cloneConcurrency;
-   private VmEventProcessor processor;
+   private VmEventManager processor;
 
    private IClusterCloneService cloneService;
 
@@ -290,11 +290,7 @@ public class ClusteringService implements IClusteringService {
 
    private void startVMEventProcessor() {
       // add event handler for Serengeti after VC event handler is registered.
-      processor = new VmEventProcessor(lockClusterEntityMgr);
-      processor.installEventHandler();
-      processor.setDaemon(true);
-      processor.setName("VM Event Processor");
-      processor.setPriority(Thread.MAX_PRIORITY);
+      processor = new VmEventManager(lockClusterEntityMgr);
       processor.start();
    }
 
@@ -335,7 +331,7 @@ public class ClusteringService implements IClusteringService {
 
    synchronized public void destroy() {
       Scheduler.shutdown(true);
-      processor.shutdown();
+      processor.stop();
       elasticityScheduleMgr.shutdown();
    }
 
@@ -1861,7 +1857,7 @@ public class ClusteringService implements IClusteringService {
       }
       return VcVmUtil.runSPOnSingleVM(node, stopVMSP);
    }
-   public VmEventProcessor getEventProcessor() {
+   public VmEventManager getEventProcessor() {
       return this.processor;
    }
 }
