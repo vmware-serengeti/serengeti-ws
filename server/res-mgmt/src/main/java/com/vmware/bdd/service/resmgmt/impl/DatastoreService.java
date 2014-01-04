@@ -342,7 +342,7 @@ public class DatastoreService implements IDatastoreService {
          entity.setVcDatastore(ds);
          entity.setRegex(regex);
          dsDao.insert(entity);
-         logger.info("add shared datastore " + ds);
+         logger.info("add " + type + " datastore " + ds);
       }
    }
 }
