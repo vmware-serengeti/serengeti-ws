@@ -1,9 +1,6 @@
 package com.vmware.bdd.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 import org.apache.log4j.Logger;
@@ -45,7 +42,6 @@ public class SSHUtil {
 
       ChannelExec channel = null;
       logger.info("going to exec command");
-      BufferedReader bufferedReader = null;
       try {
          channel = (ChannelExec) session.openChannel("exec");
 
@@ -56,21 +52,15 @@ public class SSHUtil {
             channel.setInputStream(in);
             channel.setOutputStream(out);
 
-            bufferedReader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
             channel.connect();
             if (!channel.isConnected()) {
                logger.error("Cannot setup SSH channel connection.");
             }
 
-            StringBuilder buff = new StringBuilder();
             while (true) {
-               String line = bufferedReader.readLine();
-               buff.append(line);
-
                if (channel.isClosed()) {
                   int exitStatus = channel.getExitStatus();
                   logger.debug("Exit status from exec is: " + exitStatus);
-                  logger.debug("command result: " + buff.toString());
 
                   if (exitStatus == 0) {
                      return true;
@@ -88,8 +78,6 @@ public class SSHUtil {
             logger.error("Cannot open SSH channel to " + hostIP + ".");
             return false;
          }
-      } catch (IOException e) {
-         e.printStackTrace();
       } catch (JSchException e) {
          e.printStackTrace();
       } finally {
@@ -99,11 +87,6 @@ public class SSHUtil {
 
          if (session != null && channel.isConnected()) {
             session.disconnect();
-         }
-         try {
-            bufferedReader.close();
-         } catch (IOException e) {
-            logger.error("bufferedReader close failed: " + e.getMessage());
          }
       }
       return false;
