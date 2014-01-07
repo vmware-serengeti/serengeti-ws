@@ -951,18 +951,14 @@ public class ClusterCreate implements Serializable {
       return false;
    }
 
-   // For HDFS2, at present, serengeti support cdh4 of Cloudera, and PHD.
+   // For HDFS2, apache, mapr, and gphd distros do not have hdfs2 features.
    public boolean supportedWithHdfs2() {
-      if (this.getDistroVendor().equalsIgnoreCase(Constants.CDH_VENDOR)) {
-         Pattern pattern = Pattern.compile(Constants.CDH4_PATTERN);
-         if (pattern.matcher(this.getDistroVersion()).matches()) {
-            return true;
-         }
+      if (this.getDistroVendor().equalsIgnoreCase(Constants.DEFAULT_VENDOR)
+            || this.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR)
+            || this.getDistroVendor().equalsIgnoreCase(Constants.GPHD_VENDOR)){
+         return false;
       }
-      if (this.getDistroVendor().equalsIgnoreCase(Constants.PHD_VENDOR)) {
-         return true;
-      }
-      return false;
+      return true;
    }
 
    public String getDefaultDistroName(DistroRead[] distros) {
