@@ -155,7 +155,7 @@
       "mapred-queue-acls.xml": {
         // check for all settings at http://hadoop.apache.org/docs/stable/cluster_setup.html#Configuring+the+Hadoop+Daemons
         // "mapred.queue.queue-name.acl-submit-job": "",
-        // "mapred.queue.queue-name.acl-administer-jobs", ""
+        // "mapred.queue.queue-name.acl-administer-jobs": ""
       }
     }
   }
