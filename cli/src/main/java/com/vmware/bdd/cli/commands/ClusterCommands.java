@@ -440,7 +440,7 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private boolean containInvalidCharacter(String password) {
-      if (password.contains(Constants.NEW_LINE)) {
+      if (password.contains(Constants.ESCAPE_CHAR)) {
          return true;
       }
       return false;
