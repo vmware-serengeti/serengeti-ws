@@ -138,6 +138,8 @@ create table node (
    host_name    varchar(255),
    status       varchar(255),
    action       varchar(255),
+   action_failed              boolean,
+   error_message  text,
    power_status_changed       boolean,
    vc_datastores text,
    volumes       text,

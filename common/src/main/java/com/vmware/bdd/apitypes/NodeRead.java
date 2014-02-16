@@ -19,8 +19,8 @@ import java.util.Map;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.utils.Constants;
 
 /**
  * Node get output
@@ -62,6 +62,10 @@ public class NodeRead {
 
    @Expose
    private int cpuNumber;
+
+   private boolean actionFailed;
+
+   private String errMessage;
 
    public List<String> getVolumes() {
       return volumes;
@@ -181,4 +185,19 @@ public class NodeRead {
       this.cpuNumber = cpu;
    }
 
+   public boolean isActionFailed() {
+      return actionFailed;
+   }
+
+   public void setActionFailed(boolean actionFailed) {
+      this.actionFailed = actionFailed;
+   }
+
+   public String getErrMessage() {
+      return errMessage;
+   }
+
+   public void setErrMessage(String errMessage) {
+      this.errMessage = errMessage;
+   }
 }

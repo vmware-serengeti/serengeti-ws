@@ -33,22 +33,18 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.google.gson.reflect.TypeToken;
-import com.vmware.bdd.apitypes.IpConfigInfo;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
-import com.vmware.bdd.spectypes.NicSpec;
-import org.hibernate.annotations.Type;
-
-import com.google.gson.Gson;
-import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 
+import com.vmware.bdd.apitypes.IpConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.spectypes.NicSpec;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.Constants;
 
 /**
  * Hadoop Node Entity class: describes hadoop node info
@@ -84,6 +80,12 @@ public class NodeEntity extends EntityBase {
 
    @Column(name = "action")
    private String action;
+
+   @Column(name = "action_failed")
+   private boolean actionFailed;
+
+   @Column(name = "error_message")
+   private String errMessage;
 
    @Column(name = "guest_host_name")
    private String guestHostName;
@@ -470,6 +472,12 @@ public class NodeEntity extends EntityBase {
       node.setRoles(roleNames);
       if (includeVolumes)
          node.setVolumes(this.getVolumns());
+      if (actionFailed) {
+         node.setActionFailed(true);
+      }
+      if (errMessage != null && !errMessage.isEmpty()) {
+         node.setErrMessage(errMessage);
+      }
       return node;
    }
 
@@ -523,11 +531,32 @@ public class NodeEntity extends EntityBase {
       return false;
    }
 
+   public void cleanupErrorMessage() {
+      this.actionFailed = false;
+      this.errMessage = null;
+   }
+
    public Set<NicEntity> getNics() {
       return nics;
    }
 
    public void setNics(Set<NicEntity> nics) {
       this.nics = nics;
+   }
+
+   public boolean isActionFailed() {
+      return actionFailed;
+   }
+
+   public void setActionFailed(boolean actionFailed) {
+      this.actionFailed = actionFailed;
+   }
+
+   public String getErrMessage() {
+      return errMessage;
+   }
+
+   public void setErrMessage(String errMessage) {
+      this.errMessage = errMessage;
    }
 }

@@ -554,4 +554,10 @@ public class ClusterEntityManager implements IClusterEntityManager {
       return new ArrayList<DiskEntity>(node.getDisks());
    }
 
+   public void cleanupActionError(String clusterName) {
+      List<NodeEntity> nodes = findAllNodes(clusterName);
+      for (NodeEntity node : nodes) {
+         node.cleanupErrorMessage();
+      }
+   }
 }
