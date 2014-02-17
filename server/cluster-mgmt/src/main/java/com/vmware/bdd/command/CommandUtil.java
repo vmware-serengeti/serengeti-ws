@@ -55,10 +55,12 @@ public class CommandUtil {
 
       String dirs[] = path.list();
       long lastCmdId = 0;
-      for (String dir : dirs) {
-         long cmdId = Long.parseLong(dir);
-         if (lastCmdId < cmdId) {
-            lastCmdId = cmdId;
+      if (dirs != null) {
+         for (String dir : dirs) {
+            long cmdId = Long.parseLong(dir);
+            if (lastCmdId < cmdId) {
+               lastCmdId = cmdId;
+            }
          }
       }
       Long nextCmdId = lastCmdId + 1;
