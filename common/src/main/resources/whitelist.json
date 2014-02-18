@@ -1782,6 +1782,76 @@
            "name": "HADOOP_LOG_DIR"
         }
       ],
+      "hadoop-metrics.properties": [
+        {
+          "name": "dfs.class"
+        },
+        {
+          "name": "dfs.period"
+        },
+        {
+          "name": "dfs.fileName"
+        },
+        {
+          "name": "dfs.servers"
+        },
+        {
+          "name": "mapred.class"
+        },
+        {
+          "name": "mapred.period"
+        },
+        {
+          "name": "mapred.fileName"
+        },
+        {
+          "name": "mapred.servers"
+        },
+        {
+          "name": "jvm.class"
+        },
+        {
+          "name": "jvm.period"
+        },
+        {
+          "name": "jvm.fileName"
+        },
+        {
+          "name": "jvm.servers"
+        },
+        {
+          "name": "rpc.class"
+        },
+        {
+          "name": "rpc.period"
+        },
+        {
+          "name": "rpc.fileName"
+        },
+        {
+          "name": "rpc.servers"
+        },
+        {
+          "name": "ugi.class"
+        },
+        {
+          "name": "ugi.period"
+        },
+        {
+          "name": "ugi.fileName"
+        },
+        {
+          "name": "ugi.servers"
+        },
+      ],
+      "hadoop-metrics2.properties": [
+        {
+          "name": "*.sink.file.class"
+        },
+        {
+          "name": "*.period"
+        }
+      ],
       "log4j.properties": [
         {
           "name": "hadoop.root.logger"
@@ -2150,6 +2220,59 @@
         {
           "name": "HBASE_SLAVE_SLEEP"
         }
+      ],
+      "hadoop-metrics.properties": [
+        {
+          "name": "hbase.class"
+        },
+        {
+          "name": "hbase.period"
+        },
+        {
+          "name": "hbase.fileName"
+        },
+        {
+          "name": "hbase.servers"
+        },
+        {
+          "name": "hbase.extendedperiod"
+        },
+        {
+          "name": "jvm.class"
+        },
+        {
+          "name": "jvm.period"
+        },
+        {
+          "name": "jvm.fileName"
+        },
+        {
+          "name": "jvm.servers"
+        },
+        {
+          "name": "rpc.class"
+        },
+        {
+          "name": "rpc.period"
+        },
+        {
+          "name": "rpc.fileName"
+        },
+        {
+          "name": "rpc.servers"
+        },
+        {
+          "name": "rest.class"
+        },
+        {
+          "name": "rest.period"
+        },
+        {
+          "name": "rest.fileName"
+        },
+        {
+          "name": "rest.servers"
+        },
       ],
       "log4j.properties": [
         {
