@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.math.BigDecimal;
@@ -70,28 +71,31 @@ public class CommandsUtils {
 
    public static String dataFromFile(String filePath) throws IOException,
          FileNotFoundException {
-
-      StringBuffer dataStringsb = new StringBuffer();
-      FileReader fileReader = null;
-      BufferedReader reader = null;
+      StringBuffer dataStringBuffer = new StringBuffer();
+      FileInputStream fis = null;
+      InputStreamReader inputStreamReader = null;
+      BufferedReader bufferedReader = null;
       try {
-         File f = new File(filePath);
-         fileReader = new FileReader(f);
-         reader = new BufferedReader(fileReader);
+         fis = new FileInputStream(filePath);
+         inputStreamReader = new InputStreamReader(fis, "UTF-8");
+         bufferedReader = new BufferedReader(inputStreamReader);
          String line = "";
-         while ((line = reader.readLine()) != null) {
-            dataStringsb.append(line);
-            dataStringsb.append("\n");
+         while ((line = bufferedReader.readLine()) != null) {
+            dataStringBuffer.append(line);
+            dataStringBuffer.append("\n");
          }
       } finally {
-         if (reader != null) {
-            reader.close();
+         if (fis != null) {
+            fis.close();
          }
-         if (fileReader != null) {
-            fileReader.close();
+         if (inputStreamReader != null) {
+            inputStreamReader.close();
+         }
+         if (bufferedReader != null) {
+            bufferedReader.close();
          }
       }
-      return dataStringsb.toString();
+      return dataStringBuffer.toString();
    }
 
    public static <T> T getObjectByJsonString(Class<T> entityType, String jsonString) throws JsonParseException,

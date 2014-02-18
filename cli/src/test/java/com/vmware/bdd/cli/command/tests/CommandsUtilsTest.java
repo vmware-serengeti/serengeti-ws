@@ -16,6 +16,7 @@ package com.vmware.bdd.cli.command.tests;
 
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertFalse;
+import static org.testng.AssertJUnit.assertTrue;
 import static org.testng.AssertJUnit.assertNotNull;
 
 import java.io.File;
@@ -110,6 +111,45 @@ public class CommandsUtilsTest {
 
    }
 
+   @Test
+   public void testDataFromFileWithUTF8() throws Exception {
+      final String specFilePath = "src/test/resources/hadoop_cluster_cn.json";
+      try {
+         ClusterCreate clusterSpec =
+               CommandsUtils.getObjectByJsonString(ClusterCreate.class,
+                     CommandsUtils.dataFromFile(specFilePath));
+         NodeGroupCreate[] nodeGroups = clusterSpec.getNodeGroups();
+         assertEquals(nodeGroups.length, 3);
+         assertEquals(nodeGroups[0].getName(), "主节点");
+         assertEquals(nodeGroups[1].getName(), "协作节点");
+         assertEquals(nodeGroups[2].getName(), "客户端");
+      } catch (Exception ex) {
+         System.out.println(ex.getMessage());
+         assert (true);
+      }
+   }
+
+   @Test
+   public void testPrettyJsonOutputWithUTF8() throws Exception {
+      final String specFilePath = "src/test/resources/hadoop_cluster_cn.json";
+      final String exportFilePath =
+            "src/test/resources/hadoop_cluster_cn_export.json";
+      ClusterCreate clusterSpec =
+            CommandsUtils.getObjectByJsonString(ClusterCreate.class,
+                  CommandsUtils.dataFromFile(specFilePath));
+      CommandsUtils.prettyJsonOutput(clusterSpec, exportFilePath);
+      File exportFile = new File(exportFilePath);
+      assertTrue(exportFile.exists());
+      ClusterCreate exportClusterSpec =
+            CommandsUtils.getObjectByJsonString(ClusterCreate.class,
+                  CommandsUtils.dataFromFile(exportFilePath));
+      NodeGroupCreate[] nodeGroups = exportClusterSpec.getNodeGroups();
+      assertEquals(nodeGroups.length, 3);
+      assertEquals(nodeGroups[0].getName(), "主节点");
+      assertEquals(nodeGroups[1].getName(), "协作节点");
+      assertEquals(nodeGroups[2].getName(), "客户端");
+      exportFile.delete();
+   }
 
    @Test
    public void testIsBank() {

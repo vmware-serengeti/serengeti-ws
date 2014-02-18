@@ -16,9 +16,11 @@ package com.vmware.bdd.cli.commands;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -94,17 +96,18 @@ public class TopologyCommands implements CommandMarker {
     */
    private List<RackInfo> readRackInfoFromFile(String filePath) throws IOException,
    FileNotFoundException, CliException {
-      FileReader fileReader = null;
-      BufferedReader reader = null;
+      FileInputStream fis = null;
+      InputStreamReader inputStreamReader = null;
+      BufferedReader bufferedReader = null;
       List<RackInfo> racksInfo = new ArrayList<RackInfo>();
 
       try {
-         File f = new File(filePath);
-         fileReader = new FileReader(f);
-         reader = new BufferedReader(fileReader);
+         fis = new FileInputStream(filePath);
+         inputStreamReader = new InputStreamReader(fis, "UTF-8");
+         bufferedReader = new BufferedReader(inputStreamReader);
          String line = "";
          int lineNum = 1;
-         while ((line = reader.readLine()) != null) {
+         while ((line = bufferedReader.readLine()) != null) {
             line = line.trim();
             if (line.isEmpty()) {
                lineNum++;
@@ -134,11 +137,14 @@ public class TopologyCommands implements CommandMarker {
             }
          }
       } finally {
-         if (reader != null) {
-            reader.close();
+         if (fis != null) {
+            fis.close();
          }
-         if (fileReader != null) {
-            fileReader.close();
+         if (inputStreamReader != null) {
+            inputStreamReader.close();
+         }
+         if (bufferedReader != null) {
+            bufferedReader.close();
          }
       }
       return racksInfo;
