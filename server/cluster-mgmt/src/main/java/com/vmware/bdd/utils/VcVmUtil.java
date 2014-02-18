@@ -282,21 +282,24 @@ public class VcVmUtil {
       }
    }
 
-   public static boolean setBaseNodeForVm(BaseNode vNode, VcVirtualMachine vm) {
-      boolean success = true;
-      String vmName = vm.getName();
-      vm = VcCache.getIgnoreMissing(vm.getId()); //reload vm in case vm is changed from vc
-      if (vm == null) {
-         logger.info("vm " + vmName
-               + "is created, and then removed afterwards.");
+   public static boolean setBaseNodeForVm(BaseNode vNode, String vmId) {
+      if (vmId == null) {
+         vNode.setNodeAction(Constants.NODE_ACTION_CLONING_FAILED);
+         return false;
       }
-      if (vm != null) {
-         for (String portGroup : vNode.getNics().keySet()) {
-            String ipv4Address = VcVmUtil.getIpAddressOfPortGroup(vm, portGroup, false);
+      VcVirtualMachine vm = VcCache.getIgnoreMissing(vmId);
+      if (vm == null) {
+         logger.info("vm " + vmId
+               + " is created, and then removed afterwards.");
+         vNode.setNodeAction(Constants.NODE_ACTION_CLONING_FAILED);
+         return false;
+      }
+      boolean success = true;
+      for (String portGroup : vNode.getNics().keySet()) {
+         String ipv4Address = VcVmUtil.getIpAddressOfPortGroup(vm, portGroup, false);
 
-            // currently only care  ipv4 address
-            vNode.updateNicOfPortGroup(portGroup, ipv4Address, null, null);
-         }
+         // currently only care  ipv4 address
+         vNode.updateNicOfPortGroup(portGroup, ipv4Address, null, null);
       }
       if (vNode.ipsReadyV4()) {
          vNode.setSuccess(true);
@@ -331,12 +334,14 @@ public class VcVmUtil {
       if (success) {
          String haFlag = vNode.getNodeGroup().getHaFlag();
          if (haFlag != null
-               && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
-            // ha is enabled, need to check if secondary VM is ready either
+               && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())
+               && !verifyFTState(vm)) {
+            // FT is enabled and ft status is incorrect
             logger.error("Failed to power on FT secondary VM for node "
                   + vm.getName() + ", " + "FT state " + vm.getFTState()
                   + " is unexpected.");
-            return verifyFTState(vm);
+            vNode.setNodeAction(Constants.NODE_ACTION_WRONG_FT_STATUS);
+            return false;
          }
       }
       return success;

@@ -31,9 +31,6 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.vmware.bdd.service.event.VmEventManager;
-import com.vmware.bdd.entity.NicEntity;
-import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -69,15 +66,16 @@ import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.IpBlock;
-import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
+import com.vmware.bdd.clone.spec.VmCreateResult;
 import com.vmware.bdd.clone.spec.VmCreateSpec;
 import com.vmware.bdd.dal.IResourcePoolDAO;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.NicEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.resmgmt.ResourceReservation;
 import com.vmware.bdd.exception.BddException;
@@ -94,6 +92,7 @@ import com.vmware.bdd.placement.exception.PlacementException;
 import com.vmware.bdd.placement.interfaces.IPlacementService;
 import com.vmware.bdd.service.IClusterInitializerService;
 import com.vmware.bdd.service.IClusteringService;
+import com.vmware.bdd.service.event.VmEventManager;
 import com.vmware.bdd.service.job.ClusterNodeUpdator;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.resmgmt.INetworkService;
@@ -111,6 +110,7 @@ import com.vmware.bdd.service.sp.StartVmSP;
 import com.vmware.bdd.service.sp.StopVmSP;
 import com.vmware.bdd.service.sp.UpdateVmProgressCallback;
 import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
@@ -766,7 +766,7 @@ public class ClusteringService implements IClusteringService {
             }
          }
          return success;
-      } catch (Exception e) {
+      } catch (InterruptedException e) {
          logger.error("error in setting auto elasticity", e);
          throw BddException.INTERNAL(e, e.getMessage());
       }
@@ -852,7 +852,7 @@ public class ClusteringService implements IClusteringService {
                   .getName());
          }
          return folders;
-      } catch (Exception e) {
+      } catch (InterruptedException e) {
          logger.error("error in creating VC folders", e);
          throw BddException.INTERNAL(e, e.getMessage());
       }
@@ -1083,7 +1083,7 @@ public class ClusteringService implements IClusteringService {
          logger.info("ClusteringService, start to create node group resource pool(s).");
          executeResourcePoolStoreProcedures(nodeGroupSPs, "node group",
                clusterName);
-      } catch (Exception e) {
+      } catch (InterruptedException e) {
          logger.error("error in creating VC ResourcePool(s)", e);
          throw ClusteringServiceException.CREATE_RESOURCE_POOL_ERROR(e
                .getMessage());
@@ -1131,7 +1131,7 @@ public class ClusteringService implements IClusteringService {
          spec.setBootupConfigs(machineIdSpec.toGuestVarialbe());
          // timeout is 10 mintues
          QueryIpAddress query =
-               new QueryIpAddress(vNode.getNics().keySet(), Constants.VM_POWER_ON_WAITING_SEC);
+            new QueryIpAddress(vNode.getNics().keySet(), Constants.VM_POWER_ON_WAITING_SEC);
          spec.setPostPowerOn(query);
          spec.setPrePowerOn(getPrePowerOnFunc(vNode));
          spec.setLinkedClone(false);
@@ -1143,39 +1143,45 @@ public class ClusteringService implements IClusteringService {
          specs.add(spec);
       }
 
-      try {
-         UpdateVmProgressCallback callback =
-               new UpdateVmProgressCallback(getLockClusterEntityMgr(), statusUpdator,
-                     vNodes.get(0).getClusterName());
+      UpdateVmProgressCallback callback =
+         new UpdateVmProgressCallback(getLockClusterEntityMgr(), statusUpdator,
+               vNodes.get(0).getClusterName());
 
-         logger.info("ClusteringService, start to clone template.");
-         AuAssert.check(specs.size() > 0);
-         VmSchema vmSchema = specs.get(0).getSchema();
-         VcVmUtil.checkAndCreateSnapshot(vmSchema);
+      logger.info("ClusteringService, start to clone template.");
+      AuAssert.check(specs.size() > 0);
+      VmSchema vmSchema = specs.get(0).getSchema();
+      VcVmUtil.checkAndCreateSnapshot(vmSchema);
 
-         // call clone service to copy templates
-         List<VmCreateSpec> results =
-               cloneService.createCopies(sourceSpec, cloneConcurrency, specs,
-                     callback);
-         logger.info(results.size() + " VMs are created.");
-         boolean success = (specs.size() == results.size());
-         for (VmCreateSpec spec : results) {
+      // call clone service to copy templates
+      List<VmCreateResult<?>> results =
+         cloneService.createCopies(sourceSpec, cloneConcurrency, specs,
+               callback);
+      if (results == null || results.isEmpty()) {
+         for (VmCreateSpec spec : specs) {
             BaseNode node = nodeMap.get(spec.getVmName());
-            node.setVmMobId(spec.getVmId());
-            VcVirtualMachine vm = VcCache.getIgnoreMissing(spec.getVmId());
-            if (vm != null) {
-               boolean vmSucc = VcVmUtil.setBaseNodeForVm(node, vm);
-               if (!vmSucc) {
-                  success = false;
-               }
-            }
-            node.setSuccess(success);
+            node.setFinished(true);
+            node.setSuccess(false);
          }
-         return success;
-      } catch (Exception e) {
-         logger.error("error in cloning VMs", e);
-         throw BddException.INTERNAL(e, e.getMessage());
+         return false;
       }
+      boolean success = true;
+      int total = 0;
+      for (VmCreateResult<?> result : results) {
+         VmCreateSpec spec = (VmCreateSpec)result.getSpec();
+         BaseNode node = nodeMap.get(spec.getVmName());
+         node.setVmMobId(spec.getVmId());
+         node.setSuccess(true);
+         boolean vmSucc = VcVmUtil.setBaseNodeForVm(node, spec.getVmId());
+         if (!vmSucc || !result.isSuccess()) {
+            success = false;
+            node.setSuccess(false);
+            node.setErrMessage(result.getErrMessage());
+         } else {
+            total ++;
+         }
+      }
+      logger.info(total + " VMs are successfully created.");
+      return success;
    }
 
    private void setPersistentDiskMode(BaseNode vNode) {
@@ -1414,7 +1420,7 @@ public class ClusteringService implements IClusteringService {
          }
          logger.info(total + " VMs are started.");
          return success;
-      } catch (Exception e) {
+      } catch (InterruptedException e) {
          logger.error("error in staring VMs", e);
          throw BddException.INTERNAL(e, e.getMessage());
       }
@@ -1490,7 +1496,7 @@ public class ClusteringService implements IClusteringService {
          }
          logger.info(total + " VMs are stoped.");
          return success;
-      } catch (Exception e) {
+      } catch (InterruptedException e) {
          logger.error("error in stoping VMs", e);
          throw BddException.INTERNAL(e, e.getMessage());
       }
@@ -1624,7 +1630,7 @@ public class ClusteringService implements IClusteringService {
                total++;
             }
          }
-      } catch (Exception e) {
+      } catch (InterruptedException e) {
          logger.error("error in deleting resource pools", e);
          throw BddException.INTERNAL(e, e.getMessage());
       }
@@ -1680,7 +1686,7 @@ public class ClusteringService implements IClusteringService {
             logger.info("Failed to delete cluster folder " + clusterFolderName,
                   result[0].throwable);
          }
-      } catch (Exception e) {
+      } catch (InterruptedException e) {
          logger.error("error in deleting folders", e);
          throw BddException.INTERNAL(e, e.getMessage());
       }
@@ -1751,7 +1757,7 @@ public class ClusteringService implements IClusteringService {
          }
          logger.info(total + " VMs are deleted.");
          return !failed;
-      } catch (Exception e) {
+      } catch (InterruptedException e) {
          logger.error("error in deleting VMs", e);
          throw BddException.INTERNAL(e, e.getMessage());
       }
@@ -1815,7 +1821,7 @@ public class ClusteringService implements IClusteringService {
                   .RECONFIGURE_IO_SHARE_FAILED(clusterName);
          }
          return total;
-      } catch (Exception e) {
+      } catch (InterruptedException e) {
          logger.error("error in reconfiguring vm io shares", e);
          throw BddException.INTERNAL(e, e.getMessage());
       }

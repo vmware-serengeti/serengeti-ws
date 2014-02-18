@@ -72,7 +72,7 @@ public class MockVcVmUtil {
    }
 
    @Mock
-   public static boolean setBaseNodeForVm(BaseNode vNode, VcVirtualMachine vm) {
+   public static boolean setBaseNodeForVm(BaseNode vNode, String vmId) {
       return true;
    }
 

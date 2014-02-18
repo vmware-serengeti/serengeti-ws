@@ -24,6 +24,7 @@ import java.util.Set;
 import com.vmware.bdd.entity.NicEntity;
 import com.vmware.bdd.spectypes.NicSpec;
 import org.apache.log4j.Logger;
+import org.springframework.batch.repeat.RepeatStatus;
 
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
@@ -146,12 +147,14 @@ public class JobUtils {
    }
 
    /**
-    *
+    * 
     * @param occupiedIpSets
     * @param node
-    * @param add true to add, false to remove
+    * @param add
+    *           true to add, false to remove
     */
-   public static void adjustOccupiedIpSets(Map<String, Set<String>> occupiedIpSets, BaseNode node, boolean add) {
+   public static void adjustOccupiedIpSets(
+         Map<String, Set<String>> occupiedIpSets, BaseNode node, boolean add) {
       if (!add && occupiedIpSets.isEmpty()) {
          return;
       }
@@ -213,15 +216,18 @@ public class JobUtils {
    public static void verifyNodeStatus(NodeEntity node,
          NodeStatus expectedStatus, boolean ignoreMissing) {
       if (node.getStatus() != expectedStatus) {
-         if (ignoreMissing && (node.getStatus() == NodeStatus.NOT_EXIST
-               || node.isDisconnected())) {
+         if (ignoreMissing
+               && (node.getStatus() == NodeStatus.NOT_EXIST || node
+                     .isDisconnected())) {
             return;
          }
          if (expectedStatus == NodeStatus.VM_READY) {
             if (node.isDisconnected()) {
-               logger.info("Node " + node.getVmName() + 
-                     " cannot be controlled through VC. Remove it from VC manually, and then repeat the operarion.");
-               throw ClusteringServiceException.VM_UNAVAILABLE(node.getVmName()); 
+               logger.info("Node "
+                     + node.getVmName()
+                     + " cannot be controlled through VC. Remove it from VC manually, and then repeat the operarion.");
+               throw ClusteringServiceException
+                     .VM_UNAVAILABLE(node.getVmName());
             }
             // verify from VC 
             VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
@@ -249,11 +255,19 @@ public class JobUtils {
       }
    }
 
-   public static void verifyNodesStatus(List<NodeEntity> nodes,
+   public static boolean verifyNodesStatus(List<NodeEntity> nodes,
          NodeStatus expectedStatus, boolean ignoreMissing) {
+      boolean success = true;
       for (NodeEntity node : nodes) {
-         verifyNodeStatus(node, expectedStatus, ignoreMissing);
+         try {
+            verifyNodeStatus(node, expectedStatus, ignoreMissing);
+         } catch (Exception e) {
+            node.setActionFailed(true);
+            node.setErrMessage(e.getMessage());
+            success = false;
+         }
       }
+      return success;
    }
 
    public static String getSubJobParameterPrefixKey(int stepNumber,
@@ -292,5 +306,46 @@ public class JobUtils {
          logger.error("failed to notify VHM switching to manual mode for cluster: "
                + clusterName);
       }
+   }
+
+   public static boolean VerifyClusterNodes(String clusterName,
+         String verifyScope, String groupName, long oldInstanceNum,
+         IClusterEntityManager clusterEntityMgr) {
+
+      // only when node is created, we need to verify node status
+      if (verifyScope != null
+            && verifyScope.equals(JobConstants.GROUP_NODE_SCOPE_VALUE)) {
+         return verifyGroupVmReady(clusterName, groupName, oldInstanceNum,
+               clusterEntityMgr);
+      } else {
+         return verifyAllVmReady(clusterName, clusterEntityMgr);
+      }
+   }
+
+   private static boolean verifyGroupVmReady(String clusterName,
+         String groupName, long oldInstanceNum,
+         IClusterEntityManager clusterEntityMgr) {
+      if (groupName == null) {
+         logger.info("No group name specified, ignore node status verification.");
+         return true;
+      }
+      List<NodeEntity> nodes =
+            clusterEntityMgr.findAllNodes(clusterName, groupName);
+      List<NodeEntity> toBeVerified = new ArrayList<NodeEntity>();
+      for (NodeEntity node : nodes) {
+         long index = CommonUtil.getVmIndex(node.getVmName());
+         if (index < oldInstanceNum) {
+            // do not verify existing nodes from last successful deployment
+            continue;
+         }
+         toBeVerified.add(node);
+      }
+      return verifyNodesStatus(toBeVerified, NodeStatus.VM_READY, false);
+   }
+
+   private static boolean verifyAllVmReady(String clusterName,
+         IClusterEntityManager clusterEntityMgr) {
+      List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(clusterName);
+      return verifyNodesStatus(nodes, NodeStatus.VM_READY, false);
    }
 }

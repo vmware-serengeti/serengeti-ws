@@ -41,6 +41,7 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.clone.spec.VmCreateResult;
 import com.vmware.bdd.clone.spec.VmCreateSpec;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
@@ -187,7 +188,7 @@ public class TestClusteringService {
             cloneService.createCopies(Mockito.<VmCreateSpec> any(),
                   Mockito.anyInt(), Mockito.anyList(),
                   Mockito.<ProgressCallback> any())).thenReturn(
-            new ArrayList<VmCreateSpec>());
+            new ArrayList<VmCreateResult<?>>());
       service.setCloneService(cloneService);
 
       boolean success = service.createVcVms(networkAdds, vNodes, null, null);
@@ -260,11 +261,13 @@ public class TestClusteringService {
 
       // mock clone service
       int i = 0;
-      List<VmCreateSpec> nodes = new ArrayList<VmCreateSpec>();
+      List<VmCreateResult<?>> nodes = new ArrayList<VmCreateResult<?>>();
       for (BaseNode n : vNodes) {
-         VmCreateSpec s = new VmCreateSpec();
-         s.setVmName(n.getVmName());
-         s.setVmId("vm" + i);
+         VmCreateResult<VmCreateSpec> s = new VmCreateResult<VmCreateSpec>();
+         s.setSpec(new VmCreateSpec());
+         s.getSpec().setVmName(n.getVmName());
+         s.getSpec().setVmId("vm" + i);
+         s.setSuccess(true);
          nodes.add(s);
       }
       IClusterCloneService cloneService = Mockito.mock(IClusterCloneService.class);

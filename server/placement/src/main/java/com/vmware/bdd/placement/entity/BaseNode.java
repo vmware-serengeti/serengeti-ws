@@ -74,6 +74,7 @@ public class BaseNode {
 
    private boolean success = false;
    private boolean finished = false;
+   private String errMessage;
    private String vmMobId;
    private String guestHostName;
    private NodeStatus nodeStatus;
@@ -544,6 +545,14 @@ public class BaseNode {
 
    public void setTargetVcFoler(Folder targetVcFolder) {
       this.targetVcFolder = targetVcFolder;
+   }
+
+   public String getErrMessage() {
+      return errMessage;
+   }
+
+   public void setErrMessage(String errMessage) {
+      this.errMessage = errMessage;
    }
 
    @Override

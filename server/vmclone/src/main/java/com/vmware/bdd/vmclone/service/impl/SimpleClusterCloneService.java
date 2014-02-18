@@ -27,6 +27,7 @@ import com.vmware.aurora.composition.compensation.CompensateCreateVmSP;
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.composition.concurrent.Scheduler.ProgressCallback;
+import com.vmware.bdd.clone.spec.VmCreateResult;
 import com.vmware.bdd.clone.spec.VmCreateSpec;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.vmclone.service.intf.IClusterCloneService;
@@ -44,7 +45,7 @@ public class SimpleClusterCloneService implements IClusterCloneService {
          .getLogger(SimpleClusterCloneService.class);
 
    @Override
-   public List<VmCreateSpec> createCopies(VmCreateSpec resource,
+   public List<VmCreateResult<?>> createCopies(VmCreateSpec resource,
          int maxConcurrentCopy, List<VmCreateSpec> consumers,
          ProgressCallback callback) {
       Pair<Callable<Void>, Callable<Void>>[] storeProcedures =
@@ -77,33 +78,40 @@ public class SimpleClusterCloneService implements IClusterCloneService {
          }
 
          int total = 0;
-         List<VmCreateSpec> cloned = new ArrayList<VmCreateSpec>();
+         List<VmCreateResult<?>> cloned = new ArrayList<VmCreateResult<?>>();
          for (int i = 0; i < storeProcedures.length; i++) {
             Pair<ExecutionResult, ExecutionResult> pair = result[i];
+            VmCreateResult<VmCreateSpec> createResult = new VmCreateResult<VmCreateSpec>();
             VmCreateSpec node = consumers.get(i);
+            createResult.setSpec(node);
             CreateVmSP sp = (CreateVmSP) storeProcedures[i].first;
-            node.setVmId(sp.getVM().getId());
+            if (sp.getVM() != null) {
+               node.setVmId(sp.getVM().getId());
+            }
             if (pair.first.finished && pair.first.throwable == null
                   && pair.second.finished == false) {
                ++total;
-               cloned.add(node);
+               createResult.setSuccess(true);
             } else if (pair.first.throwable != null) {
-               processException(pair.first.throwable);
+               createResult.setSuccess(false);
+               processException(createResult, pair.first.throwable);
                logger.error("Failed to create VM " + node.getVmName(),
                      pair.first.throwable);
             }
+            cloned.add(createResult);
          }
-         logger.info(total + " VMs are created.");
+         logger.info(total + " VMs are successfully created.");
          return cloned;
-      } catch (Exception e) {
+      } catch (InterruptedException e) {
          logger.error("error in creating VMs", e);
          throw BddException.INTERNAL(e, e.getMessage());
       }
    }
 
-   private void processException(Throwable throwable) {
+   private void processException(VmCreateResult<VmCreateSpec> node, Throwable throwable) {
       while (throwable.getCause() != null) {
          throwable = throwable.getCause();
+         node.setErrMessage(throwable.getMessage());
          if (throwable instanceof VmFaultToleranceOpIssuesList) {
             logger.error("Got FT operation error: "
                   + throwable.getLocalizedMessage());
@@ -124,5 +132,4 @@ public class SimpleClusterCloneService implements IClusterCloneService {
          }
       }
    }
-
 }

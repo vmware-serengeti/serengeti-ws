@@ -69,11 +69,7 @@ public class SingleNodeSyncupStep extends TrackableTasklet {
                   JobConstants.EXPECTED_NODE_STATUS, NodeStatus.class);
       if (expectedStatus != null) {
          logger.info("the node should be in status " + expectedStatus);
-         List<NodeEntity> nodes = new ArrayList<NodeEntity>();
-         if (node != null) {
-            nodes.add(node);
-            JobUtils.verifyNodesStatus(nodes, expectedStatus, true);
-         }
+         JobUtils.verifyNodeStatus(node, expectedStatus, true);
       }
       String cpuNumberStr =
             getJobParameters(chunkContext).getString(

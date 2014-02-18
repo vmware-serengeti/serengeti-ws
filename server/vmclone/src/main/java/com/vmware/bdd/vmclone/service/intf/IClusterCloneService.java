@@ -17,6 +17,7 @@ package com.vmware.bdd.vmclone.service.intf;
 import java.util.List;
 
 import com.vmware.aurora.composition.concurrent.Scheduler.ProgressCallback;
+import com.vmware.bdd.clone.spec.VmCreateResult;
 import com.vmware.bdd.clone.spec.VmCreateSpec;
 
 /**
@@ -40,7 +41,7 @@ public interface IClusterCloneService {
     * @param callback
     * @return
     */
-   public List<VmCreateSpec> createCopies(VmCreateSpec resource, int maxConcurrentCopy,
+   public List<VmCreateResult<?>> createCopies(VmCreateSpec resource, int maxConcurrentCopy,
          List<VmCreateSpec> consumer, ProgressCallback callback);
 
 }

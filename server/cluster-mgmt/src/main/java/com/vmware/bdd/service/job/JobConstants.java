@@ -50,6 +50,7 @@ public interface JobConstants {
    public static final String VERIFY_NODE_STATUS_SCOPE_PARAM = "verifyNodeScope";
    public static final String GROUP_NODE_SCOPE_VALUE = "group";
    public static final String CLUSTER_NODE_SCOPE_VALUE = "cluster";
+   public static final String VERIFY_NODE_STATUS_RESULT_PARAM = "verifyNodeResult";
    public static final String CURRENT_COMMAND_WORK_DIR = "currentCommandWorkDir";
    public static final String CURRENT_ERROR_MESSAGE= "currentErrorMessage";
    public static final String CLUSTER_RESOURCE_RESERVATION_ID_JOB_PARAM = "ResourceReservationId";

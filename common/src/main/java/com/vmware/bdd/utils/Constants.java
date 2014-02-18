@@ -64,6 +64,7 @@ public class Constants {
    public static final String NODE_ACTION_RECONFIGURE = "Reconfiguring VM";
    public static final String NODE_ACTION_GET_IP_FAILED =
          "Failed to get VM ip address";
+   public static final String NODE_ACTION_WRONG_FT_STATUS = "Wrong FT status";
    public static final int VM_POWER_ON_WAITING_SEC = 600;
    public static final int VM_SHUTDOWN_WAITING_SEC = 600;
    public static final int VM_FAST_SHUTDOWN_WAITING_SEC = 180;

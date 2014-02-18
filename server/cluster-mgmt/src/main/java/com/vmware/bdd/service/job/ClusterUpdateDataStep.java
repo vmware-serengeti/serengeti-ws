@@ -41,6 +41,7 @@ import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.VcVmUtil;
 
 public class ClusterUpdateDataStep extends TrackableTasklet {
@@ -116,6 +117,12 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
 
       addNodeToMetaData(clusterName, addedNodes, deletedNodeNames);
       removeDeletedNode(clusterName, deletedNodeNames);
+
+      /*
+       * Verify node status and update error message
+       * As we need to update db value, we cannot keep this verification in step will throw exception
+       */
+      verifyCreatedNodes(chunkContext, clusterName);
       /*
        * If Tomcat crashes before IPs retrieved when creating cluster, ipconfigs field would
        * be "0.0.0.0", then in resume we should refresh it initiative.
@@ -125,6 +132,34 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          clusterEntityMgr.syncUp(clusterName, false);
       }
       return RepeatStatus.FINISHED;
+   }
+
+   private void verifyCreatedNodes(ChunkContext chunkContext, String clusterName) {
+      Boolean created =
+            getFromJobExecutionContext(chunkContext,
+                  JobConstants.CLUSTER_CREATE_VM_OPERATION_SUCCESS,
+                  Boolean.class);
+      String verifyScope =
+            getJobParameters(chunkContext).getString(
+                  JobConstants.VERIFY_NODE_STATUS_SCOPE_PARAM);
+      String groupName = null;
+      long oldInstanceNum = 0;
+      if (verifyScope != null
+            && verifyScope.equals(JobConstants.GROUP_NODE_SCOPE_VALUE)) {
+         groupName =
+               getJobParameters(chunkContext).getString(
+                     JobConstants.GROUP_NAME_JOB_PARAM);
+         oldInstanceNum =
+               getJobParameters(chunkContext).getLong(
+                     JobConstants.GROUP_INSTANCE_OLD_NUMBER_JOB_PARAM);
+      }
+      if (created != null && created) {
+         boolean success =
+               JobUtils.VerifyClusterNodes(clusterName, verifyScope, groupName,
+                     oldInstanceNum, getClusterEntityMgr());
+         putIntoJobExecutionContext(chunkContext,
+               JobConstants.VERIFY_NODE_STATUS_RESULT_PARAM, success);
+      }
    }
 
    /**
@@ -202,7 +237,8 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
       // set ipconfigs field even IPs are not yet retrieved, otherwise if
       // Tomcat crashes, we will lost the ipconfigs template
       for (NicSpec nicSpec : vNode.getNics().values()) {
-         NetworkEntity networkEntity = networkMgr.getNetworkEntityByName(nicSpec.getNetworkName());
+         NetworkEntity networkEntity =
+               networkMgr.getNetworkEntityByName(nicSpec.getNetworkName());
          NicEntity nicEntity = nodeEntity.findNic(networkEntity);
          if (nicEntity == null) {
             nicEntity = new NicEntity();
@@ -215,10 +251,13 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          nicEntity.setNetworkEntity(networkEntity);
          nicEntity.setNodeEntity(nodeEntity);
          if (vNode.getVmMobId() != null) {
-            VcVmUtil.populateNicInfo(nicEntity, vNode.getVmMobId(), networkEntity.getPortGroup());
+            VcVmUtil.populateNicInfo(nicEntity, vNode.getVmMobId(),
+                  networkEntity.getPortGroup());
          }
       }
 
+      nodeEntity.setActionFailed(vNode.isSuccess());
+      nodeEntity.setErrMessage(vNode.getErrMessage());
       if (vNode.getVmMobId() != null) {
          nodeEntity.setMoId(vNode.getVmMobId());
          nodeEntity.setRack(vNode.getTargetRack());
