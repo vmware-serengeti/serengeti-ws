@@ -16,12 +16,14 @@ package com.vmware.bdd.manager;
 
 import static org.testng.Assert.assertTrue;
 
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,7 @@ import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+
 
 public class TestClusterManager {
 
@@ -63,6 +66,7 @@ public class TestClusterManager {
       clusterManager.writeClusterSpecFile("클러스터-主节点-01", dir, false);
       File file = new File(filePath);
       assertTrue(file.exists());
+
       String clusterJson = readJsonFromFile(filePath);
       assertTrue(clusterJson.indexOf("마스터 노드") != -1);
       assertTrue(clusterJson.indexOf("协作节点") != -1);
@@ -98,5 +102,4 @@ public class TestClusterManager {
       }
       return buff.toString();
    }
-
 }
