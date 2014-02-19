@@ -16,6 +16,7 @@ package com.vmware.bdd.utils;
 
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.AssertJUnit.assertFalse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,27 +27,29 @@ import org.testng.annotations.Test;
 public class CommonUtilTest {
 
    @Test
-   public void testValidateName() {
-      assertEquals(CommonUtil.validateName("name1"), true);
-      assertEquals(CommonUtil.validateName("Name2"), true);
-      assertEquals(CommonUtil.validateName("name3_"), true);
-      assertEquals(CommonUtil.validateName("name4 "), true);
-      assertEquals(CommonUtil.validateName("name-5"), true);
-      assertEquals(CommonUtil.validateName("name6-"), true);
-      assertEquals(CommonUtil.validateName("-name7-"), true);
+   public void testValidateResourceName() {
+      assertFalse(CommonUtil.validateResourceName(""));
+      assertTrue(CommonUtil.validateResourceName("the你好學習こんにちは안녕하세요schönenuntrèsbon_t- aux.3210"));
+      assertFalse(CommonUtil.validateResourceName("the你好學習こんにちは안녕하세요schönenuntrèsbon_t- aux$"));
+      assertFalse(CommonUtil.validateResourceName("%&*$#@!\\\\/:*?\"<>|;'"));
+      assertFalse(CommonUtil.validateResourceName("()+,=[]^`{}~"));
+      assertTrue(CommonUtil.validateResourceName("resource name"));
+      assertTrue(CommonUtil.validateResourceName("192.168.0.1"));
+      assertTrue(CommonUtil.validateResourceName("VM network192.168.0.1"));
+      assertTrue(CommonUtil.validateResourceName("-------- ------"));
    }
 
    @Test
-   public void validatePortGroupName() {
-      assertEquals(CommonUtil.validatePortGroupName("name1"), true);
-      assertEquals(CommonUtil.validatePortGroupName("Name2"), true);
-      assertEquals(CommonUtil.validatePortGroupName("name3_"), true);
-      assertEquals(CommonUtil.validatePortGroupName("name4 "), true);
-      assertEquals(CommonUtil.validatePortGroupName("name-5"), true);
-      assertEquals(CommonUtil.validatePortGroupName("name6-"), true);
-      assertEquals(CommonUtil.validatePortGroupName("-name7-"), true);
-      assertEquals(CommonUtil.validatePortGroupName("VM network192.168.0.1"), true);
-      assertEquals(CommonUtil.validatePortGroupName("192.168.0.2VM network"), true);
+   public void testValidateDistroName() {
+      assertEquals(CommonUtil.validateDistroName("name1"), true);
+      assertEquals(CommonUtil.validateDistroName("Name2"), true);
+      assertEquals(CommonUtil.validateDistroName("name3_"), true);
+      assertEquals(CommonUtil.validateDistroName("name4 "), true);
+      assertEquals(CommonUtil.validateDistroName("name-5"), true);
+      assertEquals(CommonUtil.validateDistroName("name6-"), true);
+      assertEquals(CommonUtil.validateDistroName("-name7-"), true);
+      assertFalse(CommonUtil.validateDistroName("%&*$#@!\\\\/:*?\"<>|;'"));
+      assertFalse(CommonUtil.validateDistroName("()+,=[]^`{}~"));
    }
 
    @Test
@@ -104,6 +107,7 @@ public class CommonUtilTest {
       vcDataStoreNames.add("vcDataStoreName3-");
       vcDataStoreNames.add("vcDataStoreName192.168.0.1");
       vcDataStoreNames.add("vcDataStoreName(192.168.0.1)");
+      vcDataStoreNames.add("vc本地存储(192.168.0.1)");
       assertEquals(CommonUtil.validateVcDataStoreNames(vcDataStoreNames), true);
 
       List<String> errorVcDataStoreNames1 = new ArrayList<String>();

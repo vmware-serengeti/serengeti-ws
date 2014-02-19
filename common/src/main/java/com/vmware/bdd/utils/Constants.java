@@ -41,7 +41,8 @@ public class Constants {
    public static final String CLUSTER_NAME_PATTERN = "[a-zA-Z0-9_]+";
    public static final String NODE_GROUP_NAME_PATTERN = "[[a-zA-Z0-9]+]{1,80}";
    public static final String REST_REQUEST_PATH_INFO_PATTERN = "[/[a-zA-Z0-9_]*]+";
-   public static final String NAME_PATTERN = "[a-zA-Z0-9_\\-\\s]+";
+   public static final String RESOURCE_NAME_PATTERN = "(\\p{L}|\\p{N}|_|-|\\s|\\.)+";
+   public static final String DISTRO_NAME_PATTERN = "[a-zA-Z0-9_\\-\\s]+";
    public static final String SERENGETI_SERVER_VM_MOBID = "vim.cms_moref";
    public static final String GUEST_VARIABLE_DNS_KEY_1 = "dnsserver1";
    public static final String GUEST_VARIABLE_DNS_KEY_0 = "dnsserver0";
@@ -66,10 +67,8 @@ public class Constants {
    public static final int VM_POWER_ON_WAITING_SEC = 600;
    public static final int VM_SHUTDOWN_WAITING_SEC = 600;
    public static final int VM_FAST_SHUTDOWN_WAITING_SEC = 180;
-   public static final String PORT_GROUP_NAME_PATTERN =
-         "[a-zA-Z0-9_\\-\\s\\.]+";
    public static final String VC_DATASTORE_NAME_PATTERN =
-         "[a-zA-Z0-9_\\-\\s\\?\\*\\.\\(\\)]+";
+         "(\\p{L}|\\p{N}|_|-|\\s|\\?|\\*|\\.|\\(|\\))+";
    public static final String WRONG_NUM_OF_JOBTRACKER =
          "The number of JobTrackers cannot exceed one.";
    public static final String WRONG_NUM_OF_RESOURCEMANAGER =

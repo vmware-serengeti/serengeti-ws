@@ -80,12 +80,12 @@ public class CommonUtil {
       return str == null ? desStr : str;
    }
 
-   public static boolean validateName(final String input) {
-      return match(input, Constants.NAME_PATTERN);
+   public static boolean validateResourceName(final String input) {
+      return match(input, Constants.RESOURCE_NAME_PATTERN);
    }
 
-   public static boolean validatePortGroupName(final String input) {
-      return match(input, Constants.PORT_GROUP_NAME_PATTERN);
+   public static boolean validateDistroName(final String input) {
+      return match(input, Constants.DISTRO_NAME_PATTERN);
    }
 
    public static boolean validateClusterName(final String input) {

@@ -16,9 +16,11 @@
 
 package com.vmware.bdd.manager;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -55,7 +57,6 @@ import com.vmware.bdd.exception.ClusterHealServiceException;
 import com.vmware.bdd.exception.ClusterManagerException;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
-import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.IExecutionService;
@@ -208,22 +209,22 @@ public class ClusterManager {
       AuAssert.check(jsonStr != null);
       logger.info("writing cluster manifest in json " + jsonStr + " to file "
             + file);
-
-      FileWriter fileStream = null;
-
+      BufferedWriter out = null;
       try {
-         fileStream = new FileWriter(file);
-         fileStream.write(jsonStr);
+         out =
+               new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                     file), "UTF-8"));
+         out.write(jsonStr);
       } catch (IOException ex) {
          logger.error(ex.getMessage()
                + "\n failed to write cluster manifest to file " + file);
          throw BddException.INTERNAL(ex, "Failed to write cluster manifest.");
       } finally {
-         if (fileStream != null) {
+         if (out != null) {
             try {
-               fileStream.close();
+               out.close();
             } catch (IOException e) {
-               logger.error("falied to close output stream " + fileStream, e);
+               logger.error("falied to close writer" + out, e);
             }
          }
       }
