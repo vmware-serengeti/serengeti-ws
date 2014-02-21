@@ -592,7 +592,7 @@ public class RestResource {
    public DistroRead getDistroByName(
          @PathVariable("distroName") String distroName) {
       if (CommonUtil.isBlank(distroName)
-            || !CommonUtil.validateResourceName(distroName)) {
+            || !CommonUtil.validateDistroName(distroName)) {
          throw BddException.INVALID_PARAMETER("distro name", distroName);
       }
       DistroRead distro = distroManager.getDistroByName(distroName);
