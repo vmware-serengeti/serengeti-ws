@@ -39,7 +39,7 @@ public enum HadoopRole {
    //4 dependencies
    HADOOP_CLIENT_ROLE("hadoop_client"),
    HBASE_CLIENT_ROLE("hbase_client"),
-   PIG_ROLE("pig"), 
+   PIG_ROLE("pig"),
    HIVE_ROLE("hive"),
    HIVE_SERVER_ROLE("hive_server"),
    // mapr
@@ -139,7 +139,7 @@ public enum HadoopRole {
          }
       }
    }
-   
+
    private static Set<String> mgmtRoleDesc;
 
    static {
@@ -164,6 +164,28 @@ public enum HadoopRole {
             return true;
       }
 
+      return false;
+   }
+
+   private static Set<String> hbaseRoleDesc;
+
+   static {
+      HadoopRole[] hbaseRoles =
+            new HadoopRole[] { HBASE_MASTER_ROLE, HBASE_REGIONSERVER_ROLE, HBASE_CLIENT_ROLE,
+                               MAPR_HBASE_MASTER_ROLE, MAPR_HBASE_REGIONSERVER_ROLE, MAPR_HBASE_CLIENT_ROLE };
+
+      hbaseRoleDesc = new HashSet<String>(hbaseRoles.length);
+
+      for (HadoopRole role : hbaseRoles) {
+         hbaseRoleDesc.add(role.description);
+      }
+   }
+
+   public static boolean hasHBaseRole(List<String> roles) {
+      for (String role : roles) {
+         if (hbaseRoleDesc.contains(role))
+            return true;
+      }
       return false;
    }
 }

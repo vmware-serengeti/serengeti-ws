@@ -127,6 +127,8 @@ import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 public class ClusteringService implements IClusteringService {
    private static final int VC_RP_MAX_NAME_LENGTH = 80;
+   private static final int MAX_TIME_DIFF_IN_SEC = 240;
+   private static final int MAX_TIME_DIFF_IN_SEC_HBASE = 20;
    private static final Logger logger = Logger
          .getLogger(ClusteringService.class);
    private ClusterConfigManager configMgr;
@@ -1295,6 +1297,7 @@ public class ClusteringService implements IClusteringService {
    @Override
    public List<BaseNode> getPlacementPlan(ClusterCreate clusterSpec,
          List<BaseNode> existedNodes) {
+
       logger.info("Begin to calculate provision plan.");
 
       logger.info("Calling resource manager to get available vc hosts");
@@ -1306,6 +1309,24 @@ public class ClusteringService implements IClusteringService {
          VcResourceUtils.refreshDatastore(cl);
          container.addResource(cl);
       }
+
+      // check time on hosts
+      int maxTimeDiffInSec = MAX_TIME_DIFF_IN_SEC;
+      if (clusterSpec.checkHBase())
+         maxTimeDiffInSec = MAX_TIME_DIFF_IN_SEC_HBASE;
+
+      List<AbstractHost> outOfSyncHosts = new ArrayList<AbstractHost>();
+      for (AbstractHost host : container.getAllHosts()) {
+         int hostTimeDiffInSec = VcResourceUtils.getHostTimeDiffInSec(host.getName());
+         if (Math.abs(hostTimeDiffInSec) > maxTimeDiffInSec) {
+            logger.info("Host " + host.getName() + " has a time difference of " + hostTimeDiffInSec + " seconds and is dropped from placement.");
+            outOfSyncHosts.add(host);
+         }
+      }
+      for (AbstractHost host : outOfSyncHosts) {
+         container.removeHost(host);
+      }
+
       container.SetTemplateNode(templateNode);
       if (clusterSpec.getHostToRackMap() != null
             && clusterSpec.getHostToRackMap().size() != 0) {
@@ -1333,7 +1354,7 @@ public class ClusteringService implements IClusteringService {
 
       List<BaseNode> baseNodes =
             placementService.getPlacementPlan(container, clusterSpec,
-                  existedNodes);
+                  existedNodes, outOfSyncHosts);
       for (BaseNode baseNode : baseNodes) {
          baseNode.setNodeAction(Constants.NODE_ACTION_CLONING_VM);
       }

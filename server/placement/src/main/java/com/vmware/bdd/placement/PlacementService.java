@@ -43,9 +43,9 @@ import com.vmware.bdd.utils.AuAssert;
 /**
  * supported placement policies are: instance_per_host, group association, rack
  * association
- * 
+ *
  * @author tli
- * 
+ *
  */
 @Service
 public class PlacementService implements IPlacementService {
@@ -53,7 +53,7 @@ public class PlacementService implements IPlacementService {
 
    private void placeVirtualGroup(IContainer container, ClusterCreate cluster,
          IPlacementPlanner planner, VirtualGroup vGroup,
-         List<BaseNode> placedNodes) {
+         List<BaseNode> placedNodes, List<AbstractHost> outOfSyncHosts) {
       String targetRack = null;
       if (vGroup.getGroupRacks() != null
             && GroupRacksType.SAMERACK.equals(vGroup.getGroupRacks().getType())) {
@@ -71,8 +71,10 @@ public class PlacementService implements IPlacementService {
          if (candidates == null || candidates.size() == 0) {
             logger.error("cannot find candidate hosts from the container "
                   + "to place the virtual node " + vNode.getBaseNodeNames());
-            throw PlacementException.OUT_OF_VC_HOST(PlacementUtil
-                  .getBaseNodeNames(vNode));
+            if (outOfSyncHosts.size() == 0)
+               throw PlacementException.OUT_OF_VC_HOST(PlacementUtil.getBaseNodeNames(vNode));
+            else
+               throw PlacementException.OUT_OF_VC_HOST_WITH_FILTERING(PlacementUtil.getBaseNodeNames(vNode), outOfSyncHosts);
          }
 
          // select host
@@ -83,8 +85,10 @@ public class PlacementService implements IPlacementService {
                   + candidates + " for the virtual node "
                   + vNode.getBaseNodeNames());
             // TODO different exception for policy violation
-            throw PlacementException.OUT_OF_VC_HOST(PlacementUtil
-                  .getBaseNodeNames(vNode));
+            if (outOfSyncHosts.size() == 0)
+               throw PlacementException.OUT_OF_VC_HOST(PlacementUtil.getBaseNodeNames(vNode));
+            else
+               throw PlacementException.OUT_OF_VC_HOST_WITH_FILTERING(PlacementUtil.getBaseNodeNames(vNode), outOfSyncHosts);
          }
 
          // generate placement topology
@@ -109,10 +113,10 @@ public class PlacementService implements IPlacementService {
 
    private void placeVirtualGroupWithSnapshot(IContainer container,
          ClusterCreate cluster, IPlacementPlanner planner, VirtualGroup vGroup,
-         List<BaseNode> placedNodes) {
+         List<BaseNode> placedNodes, List<AbstractHost> outOfSyncHosts) {
       // snap shot environment on placement exceptions
       try {
-         placeVirtualGroup(container, cluster, planner, vGroup, placedNodes);
+         placeVirtualGroup(container, cluster, planner, vGroup, placedNodes, outOfSyncHosts);
       } catch (PlacementException e) {
          logger.error("Place cluster " + cluster.getName()
                + " failed. PlacementException: " + e.getMessage());
@@ -141,13 +145,13 @@ public class PlacementService implements IPlacementService {
 
    @Override
    public List<BaseNode> getPlacementPlan(IContainer container,
-         ClusterCreate cluster, List<BaseNode> existedNodes) {
+         ClusterCreate cluster, List<BaseNode> existedNodes, List<AbstractHost> outOfSyncHosts) {
       IPlacementPlanner planner = new PlacementPlanner();
 
       /*
        *  assert the getBadNodes method is called before this method and bad nodes
        *  have been removed
-       *  
+       *
        *  TODO: handle the case when nodes are vMotioned between host before a resize operation
        */
       List<BaseNode> badNodes = planner.getBadNodes(cluster, existedNodes);
@@ -159,7 +163,7 @@ public class PlacementService implements IPlacementService {
             existedNodes, ((Container) container).getRackMap());
 
       /*
-       * pre-process the cluster and split them into virtual groups, by 
+       * pre-process the cluster and split them into virtual groups, by
        * analyzing the instance_per_host and group association policy
        */
       List<VirtualGroup> vGroups = planner.getVirtualGroups(existedNodes);
@@ -179,14 +183,14 @@ public class PlacementService implements IPlacementService {
       Collections.sort(referredGroups, Collections.reverseOrder());
       for (VirtualGroup vGroup : referredGroups) {
          placeVirtualGroupWithSnapshot(container, cluster, planner, vGroup,
-               placedNodes);
+               placedNodes, outOfSyncHosts);
       }
 
       // bin pack: place vGroups that have larger storage requirement first
       Collections.sort(normalGroups, Collections.reverseOrder());
       for (VirtualGroup vGroup : normalGroups) {
          placeVirtualGroupWithSnapshot(container, cluster, planner, vGroup,
-               placedNodes);
+               placedNodes, outOfSyncHosts);
       }
 
       // ensure the number of nodes is correct

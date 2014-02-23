@@ -49,6 +49,7 @@ import com.vmware.vim.binding.vim.alarm.EventAlarmExpression;
 import com.vmware.vim.binding.vim.alarm.OrAlarmExpression;
 import com.vmware.vim.binding.vim.fault.DuplicateName;
 import com.vmware.vim.binding.vim.fault.InvalidName;
+import com.vmware.vim.binding.vim.host.DateTimeSystem;
 import com.vmware.vim.binding.vim.vm.ConfigSpec;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import com.vmware.vim.binding.vmodl.fault.HostCommunication;
@@ -257,8 +258,17 @@ public class VcUtil {
    }
 
    public static boolean isRecoverableException(Throwable e) {
-      return (e instanceof SSLPeerUnverifiedException 
+      return (e instanceof SSLPeerUnverifiedException
             || e instanceof SocketTimeoutException
             || e instanceof HostCommunication);
    }
+
+   public static int getHostTimeDiffInSec(VcHost vcHost) throws Exception {
+      HostSystem hostSystem = (HostSystem) vcHost.getManagedObject();
+      ManagedObjectReference ref = hostSystem.getConfigManager().getDateTimeSystem();
+      DateTimeSystem dateTimeSystem = MoUtil.getManagedObject(ref);
+
+      return (int)(dateTimeSystem.queryDateTime().getTimeInMillis() - System.currentTimeMillis())/1000;
+   }
+
 }

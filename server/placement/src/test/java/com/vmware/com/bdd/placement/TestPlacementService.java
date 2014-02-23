@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.com.bdd.placement;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,9 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.placement.Container;
 import com.vmware.bdd.placement.PlacementService;
 import com.vmware.bdd.placement.entity.AbstractDatacenter;
+import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
+import com.vmware.bdd.placement.exception.PlacementException;
 
 public class TestPlacementService {
 
@@ -43,7 +46,7 @@ public class TestPlacementService {
 
       PlacementService service = new PlacementService();
 
-      List<BaseNode> nodes = service.getPlacementPlan(container, spec, null);
+      List<BaseNode> nodes = service.getPlacementPlan(container, spec, null, null);
 
       TestPlacementUtil.validate(spec, nodes, false);
    }
@@ -62,7 +65,7 @@ public class TestPlacementService {
 
       PlacementService service = new PlacementService();
 
-      List<BaseNode> nodes = service.getPlacementPlan(container, spec, null);
+      List<BaseNode> nodes = service.getPlacementPlan(container, spec, null, null);
 
       TestPlacementUtil.validate(spec, nodes, false);
    }
@@ -112,7 +115,7 @@ public class TestPlacementService {
       existedNodes.removeAll(bads);
 
       List<BaseNode> nodes =
-            service.getPlacementPlan(container, cluster, existedNodes);
+            service.getPlacementPlan(container, cluster, existedNodes, null);
 
       Assert.assertEquals(nodes.size(), 6);
 
@@ -148,7 +151,7 @@ public class TestPlacementService {
       Assert.assertEquals(bads.size(), 0);
 
       List<BaseNode> nodes =
-            service.getPlacementPlan(container, cluster, existedNodes);
+            service.getPlacementPlan(container, cluster, existedNodes, null);
 
       Assert.assertEquals(nodes.size(), 1);
 
@@ -158,7 +161,7 @@ public class TestPlacementService {
       // increase compute group's instance by 2
       cluster.getNodeGroup("compute").setInstanceNum(
             cluster.getNodeGroup("compute").getInstanceNum() + 2);
-      nodes = service.getPlacementPlan(container, cluster, existedNodes);
+      nodes = service.getPlacementPlan(container, cluster, existedNodes, null);
 
       Assert.assertEquals(nodes.size(), 2);
 
@@ -181,7 +184,7 @@ public class TestPlacementService {
 
       PlacementService service = new PlacementService();
 
-      List<BaseNode> nodes = service.getPlacementPlan(container, cluster, null);
+      List<BaseNode> nodes = service.getPlacementPlan(container, cluster, null, null);
 
       TestPlacementUtil.validate(cluster, nodes, false);
 
@@ -216,7 +219,7 @@ public class TestPlacementService {
 
       PlacementService service = new PlacementService();
 
-      List<BaseNode> nodes = service.getPlacementPlan(container, cluster, null);
+      List<BaseNode> nodes = service.getPlacementPlan(container, cluster, null, null);
 
       TestPlacementUtil.validate(cluster, nodes, false);
 
@@ -233,5 +236,31 @@ public class TestPlacementService {
 
       // assure only one rack is used
       Assert.assertTrue(rackUsage.size() == 1);
+   }
+
+   @Test
+   public void testOutOfSyncHosts() throws Exception {
+      ClusterCreate spec =
+            TestPlacementUtil
+                  .getSimpleClusterSpec(TestPlacementUtil.SIMPLE_CLUSTER_SPEC);
+      AbstractDatacenter dc =
+            TestPlacementUtil
+                  .getAbstractDatacenter(TestPlacementUtil.DATACENTER_SPEC);
+
+      Container container = new Container(dc);
+      container.SetTemplateNode(TestPlacementUtil.getTemplateNode());
+      List<AbstractHost> allHosts = container.getAllHosts();
+      AbstractHost host = allHosts.get(0);
+      container.removeHost(host);
+      List<AbstractHost> outOfSyncHosts = new ArrayList<AbstractHost>();
+      outOfSyncHosts.add(host);
+
+      PlacementService service = new PlacementService();
+
+      try {
+         List<BaseNode> nodes = service.getPlacementPlan(container, spec, null, outOfSyncHosts);
+      } catch (PlacementException e) {
+         Assert.assertEquals(e.getMessage(), "Cannot find a host with enough storage to place base nodes [hadoop-worker-4, hadoop-worker-5]. The following hosts are filtered out due to time out of sync: 10.1.1.1.");
+      }
    }
 }

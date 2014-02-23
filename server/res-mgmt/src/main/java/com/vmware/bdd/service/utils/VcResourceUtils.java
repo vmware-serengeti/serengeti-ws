@@ -31,13 +31,12 @@ import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcInventory;
 import com.vmware.aurora.vc.VcNetwork;
 import com.vmware.aurora.vc.VcResourcePool;
+import com.vmware.aurora.vc.VcUtil;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.exception.VcProviderException;
-import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.vim.binding.vim.EnvironmentBrowser;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.VirtualMachine;
@@ -423,7 +422,7 @@ public class VcResourceUtils {
       });
    }
 
-   public static boolean insidedRootFolder(final Folder rootFolder, 
+   public static boolean insidedRootFolder(final Folder rootFolder,
          final VcVirtualMachine vm) {
       String[] split = vm.getName().split("-");
       // Serengeti VM name follow format: <clusterName>-<groupName>-<index>
@@ -565,5 +564,26 @@ public class VcResourceUtils {
                   HARDWARE_VERSION_9_MAX_MEMORY, vcVmName);
          }
       }
+   }
+
+   public static int getHostTimeDiffInSec(final String hostName) {
+      return VcContext.inVcSessionDo(new VcSession<Integer>() {
+
+         @Override
+         protected Integer body() throws Exception {
+            VcHost vcHost = null;
+            List<VcCluster> vcClusters = VcInventory.getClusters();
+            for (VcCluster vcCluster : vcClusters) {
+               List<VcHost> hosts = vcCluster.getHosts();
+               for (VcHost host : hosts) {
+                  if (hostName.equals(host.getName())) {
+                     vcHost = host;
+                     break;
+                  }
+               }
+            }
+            return VcUtil.getHostTimeDiffInSec(vcHost);
+         }
+      });
    }
 }

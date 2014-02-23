@@ -27,26 +27,26 @@ public interface IContainer {
 
    /**
     * set the template node info
-    * 
+    *
     * all nodes clone the system disk from the template node, thus we need to
     * know the size of system disk and count it in during the disk placement
     * process
-    * 
+    *
     * @param template
     */
    public void SetTemplateNode(BaseNode template);
 
    /**
     * add resource into the container
-    * 
+    *
     * the container combines all available (user added) vc clusters as a pool.
     * The placement planner executes its algorithm and deduct resources (the
     * storage space) from each host by invoking the allocate method.
-    * 
+    *
     * VC resource pools are considered only as a vm directory in Serengeti, we
     * don't really check cpu/mem availability for them and ignore them in the
     * placement algorithm
-    * 
+    *
     * @param cluster
     *           vc cluster
     */
@@ -54,9 +54,9 @@ public interface IContainer {
 
    /**
     * filter out abstract hosts that have enough resource for a virtual node
-    * 
+    *
     * only consider storage space
-    * 
+    *
     * @param vNode
     *           virtual node
     * @param rack
@@ -68,7 +68,7 @@ public interface IContainer {
 
    /**
     * allocate resource for the virtual node
-    * 
+    *
     * @param vNode
     * @param host
     */
@@ -76,7 +76,7 @@ public interface IContainer {
 
    /**
     * free the resource for allocated for this virtual node
-    * 
+    *
     * @param vNode
     * @param host
     */
@@ -84,14 +84,14 @@ public interface IContainer {
 
    /**
     * add rack map into the container
-    * 
+    *
     * @param hostToRackMap
     */
    public void addRackMap(Map<String, String> hostToRackMap);
 
    /**
     * get the rack name for the input host
-    * 
+    *
     * @param host
     * @return
     */
@@ -99,22 +99,29 @@ public interface IContainer {
 
    /**
     * get all racks
-    * 
+    *
     * @return
     */
    public List<String> getRacks();
 
    /**
     * get all hosts
-    * 
+    *
     * @return
     */
    public List<AbstractHost> getAllHosts();
 
    /**
     * get host to rack map
-    * 
+    *
     * @return
     */
    public Map<String, String> getRackMap();
+
+   /**
+    * remove a host
+    *
+    * @param host
+    */
+   public void removeHost(AbstractHost host);
 }

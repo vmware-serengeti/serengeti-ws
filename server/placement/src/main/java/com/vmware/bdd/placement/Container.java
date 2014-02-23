@@ -17,6 +17,7 @@ package com.vmware.bdd.placement;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,9 +73,9 @@ public class Container implements IContainer {
 
       // translate datastores
       for (VcDatastore datastore : cluster.getAllDatastores()) {
-         if (!datastore.isAccessible() 
+         if (!datastore.isAccessible()
                || !datastore.isInNormalMode()) {
-            logger.info("datastore " + datastore.getName() 
+            logger.info("datastore " + datastore.getName()
                   + " is inaccessible or in maintanence mode. Ignore it.");
             continue;
          }
@@ -94,7 +95,7 @@ public class Container implements IContainer {
       try {
          // add hosts
          for (VcHost host : cluster.getHosts()) {
-            if (host.isConnected() && !host.isUnavailbleForManagement() 
+            if (host.isConnected() && !host.isUnavailbleForManagement()
                   && host.getDatastores() != null && host.getDatastores().size() > 0) {
                AbstractHost abstractHost = new AbstractHost(host.getName());
                for (VcDatastore datastore : host.getDatastores()) {
@@ -227,5 +228,21 @@ public class Container implements IContainer {
    @Override
    public Map<String, String> getRackMap() {
       return this.hostToRackMap;
+   }
+
+   @Override
+   public void removeHost(AbstractHost host) {
+      for (AbstractCluster cluster : this.dc.getClusters()) {
+         List<AbstractHost> hosts = cluster.getHosts();
+         Iterator<AbstractHost> it = hosts.iterator();
+         while ( it.hasNext() ) {
+            AbstractHost h = it.next();
+            if (h.getName().equals(host.getName())) {
+               hosts.remove(h);
+               logger.info("remove " + host.getName() + " from cluster " + cluster.getName());
+               return;
+            }
+         }
+      }
    }
 }

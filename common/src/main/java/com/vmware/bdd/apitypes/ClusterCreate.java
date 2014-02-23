@@ -453,7 +453,7 @@ public class ClusterCreate implements Serializable {
 
    /*
     * Validate 2 cases. Case 1: compute node group with external hdfs node group.
-    * Case 2: The dependency check of HDFS, MapReduce, HBase, Zookeeper, Hadoop 
+    * Case 2: The dependency check of HDFS, MapReduce, HBase, Zookeeper, Hadoop
     * Client(Pig, Hive, Hadoop Client), and HBase Client Combinations. The rules are below:
     * - HDFS includes roles of "haddop_namenode" and "hadoop_datanode";
     * - MapReduce includes roles of "haddop_jobtracker" and "hadoop_takstracker";
@@ -466,7 +466,7 @@ public class ClusterCreate implements Serializable {
     * - Hive Server includes roles of "hive_server";
     * - MapReduce depends on HDFS, HBase depends on HDFS and Zookeeper;
     * - Pig, Hive, Hive Server depends on MapReduce, HBase Client depends on HBase;
-    * - Hadoop Client depends on HDFS.   
+    * - Hadoop Client depends on HDFS.
     */
    public boolean validateNodeGroupRoles(List<String> failedMsgList) {
       boolean valid = true;
@@ -636,8 +636,8 @@ public class ClusterCreate implements Serializable {
 
       validateNodeGroupRoles(failedMsgList);
 
-      // check supported storage type: LOCAL/SHARED/TEMPFS For tempfs relationship: if a compute node has 
-      // strict association with a data node, its disk type can be set to "TEMPFS". Otherwise, it is not 
+      // check supported storage type: LOCAL/SHARED/TEMPFS For tempfs relationship: if a compute node has
+      // strict association with a data node, its disk type can be set to "TEMPFS". Otherwise, it is not
       // allowed to use tempfs as the disk type.
       validateStorageType(failedMsgList);
 
@@ -1083,6 +1083,15 @@ public class ClusterCreate implements Serializable {
          throw ClusterConfigException
                .CLUSTER_NAME_TOO_LONG(clusterNameMaxLength);
       }
+   }
+
+   public boolean checkHBase() {
+      for (NodeGroupCreate ngc : nodeGroups) {
+         List<String> roles = ngc.getRoles();
+         if (HadoopRole.hasHBaseRole(roles))
+            return true;
+      }
+      return false;
    }
 
 }

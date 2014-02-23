@@ -15,9 +15,11 @@
 
 package com.vmware.bdd.placement.exception;
 
+import java.util.Iterator;
 import java.util.List;
 
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 
 public class PlacementException extends BddException {
 
@@ -43,6 +45,19 @@ public class PlacementException extends BddException {
             baseNodeNames.toString());
    }
 
+   public static PlacementException OUT_OF_VC_HOST_WITH_FILTERING(List<String> baseNodeNames,
+         List<AbstractHost> outOfSyncHosts) {
+      StringBuilder str = new StringBuilder();
+      Iterator<AbstractHost> it = outOfSyncHosts.iterator();
+      str.append(it.next().getName());
+      while (it.hasNext()) {
+         str.append(",");
+         str.append(it.next().getName());
+      }
+      return new PlacementException(null, "OUT_OF_HOST_WITH_FILTERING",
+            baseNodeNames.toString(), str.toString());
+   }
+
    public static PlacementException DO_NOT_HAVE_SHARED_VC_CLUSTER(
          List<String> nodeGroupNames) {
       return new PlacementException(null, "DO_NOT_HAVE_SHARED_VC_CLUSTER",
@@ -58,7 +73,7 @@ public class PlacementException extends BddException {
       return new PlacementException(null, "INVALID_RACK_INFO", cluster,
             nodeGroup);
    }
-   
+
    public static PlacementException VC_CLUSTER_NOT_FOUND(String vcCluster) {
       return new PlacementException(null, "VC_CLUSTER_NOT_FOUND", vcCluster);
    }

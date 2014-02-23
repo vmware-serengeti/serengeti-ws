@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.spectypes.DiskSpec;
 
@@ -30,10 +31,11 @@ public interface IPlacementService {
     * 
     * @param container
     * @param cluster
+    * @param outOfSyncHots TODO
     * @return list of base node that have detailed provision attributes
     */
    public List<BaseNode> getPlacementPlan(IContainer container,
-         ClusterCreate cluster, List<BaseNode> existedNodes);
+         ClusterCreate cluster, List<BaseNode> existedNodes, List<AbstractHost> outOfSyncHots);
 
    /**
     * examine the existing nodes and find out bad nodes that violate placement
