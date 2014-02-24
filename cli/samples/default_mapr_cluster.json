@@ -29,7 +29,7 @@
         "sizeGB" : 20
       },
       "cpuNum" : 1,
-      "memCapacityMB" : 2048,
+      "memCapacityMB" : 5120,
       "swapRatio" : 2,
       "haFlag" : "on"
     },
@@ -70,7 +70,7 @@
         "sizeGB" : 50
       },
       "cpuNum" : 2,
-      "memCapacityMB" : 4096,
+      "memCapacityMB" : 5120,
       "swapRatio" : 2,
       "haFlag" : "off"
     },
@@ -87,7 +87,7 @@
         "sizeGB" : 50
       },
       "cpuNum" : 2,
-      "memCapacityMB" : 4096,
+      "memCapacityMB" : 5120,
       "swapRatio" : 2,
       "haFlag" : "off"
     }

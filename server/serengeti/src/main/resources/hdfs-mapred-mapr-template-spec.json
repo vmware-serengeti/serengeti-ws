@@ -28,7 +28,7 @@
         "mapr_tasktracker"
       ],
       "cpu":2,
-      "memory":4096,
+      "memory":5120,
       "storage" : {
         "size": 50
       },
@@ -43,7 +43,7 @@
         "mapr_hive"
       ],
       "cpu":2,
-      "memory":4096,
+      "memory":5120,
       "storage" : {
         "size": 50
       },
@@ -56,7 +56,7 @@
         "mapr_zookeeper"
       ],
       "cpu":1,
-      "memory":2048,
+      "memory":5120,
       "storage" : {
         "size": 20
       },
