@@ -448,12 +448,7 @@ public class RestClient {
 
          String errorMsg = taskRead.getErrorMessage();
          if (!taskRead.getStatus().equals(TaskRead.Status.COMPLETED)) {
-            String outputErrorInfo =
-                  Constants.OUTPUT_LOG_INFO + Constants.COMMON_LOG_FILE_PATH;
-            if (errorMsg != null) {
-               outputErrorInfo = errorMsg + " " + outputErrorInfo;
-            }
-            throw new CliRestException(outputErrorInfo);
+            throw new CliRestException(errorMsg);
          } else { //completed
             if (taskRead.getType().equals(Type.VHM)) {
                logger.info("task type is vhm");

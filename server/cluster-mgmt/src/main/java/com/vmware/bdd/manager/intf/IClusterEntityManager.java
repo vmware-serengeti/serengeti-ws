@@ -108,4 +108,6 @@ public interface IClusterEntityManager {
    public List<Long> getLatestTaskIds();
 
    public List<DiskEntity> getDisks(String nodeName);
+
+   public void cleanupActionError(String clusterName);
 }

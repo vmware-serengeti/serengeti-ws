@@ -1325,57 +1325,9 @@ public class ClusterCommands implements CommandMarker {
 
          try {
             if (detail) {
-               LinkedHashMap<String, List<String>> nColumnNamesWithGetMethodNames =
-                     new LinkedHashMap<String, List<String>>();
-               nColumnNamesWithGetMethodNames.put(
-                     Constants.FORMAT_TABLE_COLUMN_NODE_NAME,
-                     Arrays.asList("getName"));
-               nColumnNamesWithGetMethodNames.put(
-                     Constants.FORMAT_TABLE_COLUMN_HOST,
-                     Arrays.asList("getHostName"));
-               if (topology == TopologyType.RACK_AS_RACK
-                     || topology == TopologyType.HVE) {
-                  nColumnNamesWithGetMethodNames.put(
-                        Constants.FORMAT_TABLE_COLUMN_RACK,
-                        Arrays.asList("getRack"));
-               }
-               nColumnNamesWithGetMethodNames.put(
-                     Constants.FORMAT_TABLE_COLUMN_IP, Arrays.asList("fetchMgtIp"));
-               nColumnNamesWithGetMethodNames.put(
-                     Constants.FORMAT_TABLE_COLUMN_HDFS_IP, Arrays.asList("fetchHdfsIp"));
-               nColumnNamesWithGetMethodNames.put(
-                     Constants.FORMAT_TABLE_COLUMN_MAPRED_IP, Arrays.asList("fetchMapredIp"));
-               nColumnNamesWithGetMethodNames.put(
-                     Constants.FORMAT_TABLE_COLUMN_STATUS,
-                     Arrays.asList("getStatus"));
-               nColumnNamesWithGetMethodNames.put(
-                     Constants.FORMAT_TABLE_COLUMN_TASK,
-                     Arrays.asList("getAction"));
+               prettyOutputDetailNodegroups(topology,
+                     ngColumnNamesWithGetMethodNames, nodegroups);
 
-               for (NodeGroupRead nodegroup : nodegroups) {
-                  CommandsUtils.printInTableFormat(
-                        ngColumnNamesWithGetMethodNames,
-                        new NodeGroupRead[] { nodegroup },
-                        Constants.OUTPUT_INDENT);
-                  List<NodeRead> nodes = nodegroup.getInstances();
-                  if (nodes != null) {
-                     LinkedHashMap<String, List<String>> nColumnNamesWithGetMethodNamesClone =
-                           (LinkedHashMap<String, List<String>>) nColumnNamesWithGetMethodNames.clone();
-                     if (!nodes.isEmpty() &&
-                           (nodes.get(0).getIpConfigs() == null
-                                 || (!nodes.get(0).getIpConfigs().containsKey(NetTrafficType.HDFS_NETWORK)
-                                 && !nodes.get(0).getIpConfigs().containsKey(NetTrafficType.MAPRED_NETWORK)))) {
-                        nColumnNamesWithGetMethodNamesClone.remove(Constants.FORMAT_TABLE_COLUMN_HDFS_IP);
-                        nColumnNamesWithGetMethodNamesClone.remove(Constants.FORMAT_TABLE_COLUMN_MAPRED_IP);
-                     }
-                     System.out.println();
-                     CommandsUtils.printInTableFormat(
-                           nColumnNamesWithGetMethodNamesClone, nodes.toArray(),
-                           new StringBuilder().append(Constants.OUTPUT_INDENT)
-                                 .append(Constants.OUTPUT_INDENT).toString());
-                  }
-                  System.out.println();
-               }
             } else
                CommandsUtils.printInTableFormat(
                      ngColumnNamesWithGetMethodNames, nodegroups.toArray(),
@@ -1385,6 +1337,98 @@ public class ClusterCommands implements CommandMarker {
                   cluster.getName(), Constants.OUTPUT_OP_LIST,
                   Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          }
+      }
+   }
+
+   private void prettyOutputDetailNodegroups(TopologyType topology,
+         LinkedHashMap<String, List<String>> ngColumnNamesWithGetMethodNames,
+         List<NodeGroupRead> nodegroups) throws Exception {
+      LinkedHashMap<String, List<String>> nColumnNamesWithGetMethodNames =
+            new LinkedHashMap<String, List<String>>();
+      nColumnNamesWithGetMethodNames.put(
+            Constants.FORMAT_TABLE_COLUMN_NODE_NAME,
+            Arrays.asList("getName"));
+      nColumnNamesWithGetMethodNames.put(
+            Constants.FORMAT_TABLE_COLUMN_HOST,
+            Arrays.asList("getHostName"));
+      if (topology == TopologyType.RACK_AS_RACK
+            || topology == TopologyType.HVE) {
+         nColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_RACK,
+               Arrays.asList("getRack"));
+      }
+      nColumnNamesWithGetMethodNames.put(
+            Constants.FORMAT_TABLE_COLUMN_IP, Arrays.asList("fetchMgtIp"));
+      nColumnNamesWithGetMethodNames.put(
+            Constants.FORMAT_TABLE_COLUMN_HDFS_IP, Arrays.asList("fetchHdfsIp"));
+      nColumnNamesWithGetMethodNames.put(
+            Constants.FORMAT_TABLE_COLUMN_MAPRED_IP, Arrays.asList("fetchMapredIp"));
+      nColumnNamesWithGetMethodNames.put(
+            Constants.FORMAT_TABLE_COLUMN_STATUS,
+            Arrays.asList("getStatus"));
+      nColumnNamesWithGetMethodNames.put(
+            Constants.FORMAT_TABLE_COLUMN_TASK,
+            Arrays.asList("getAction"));
+
+      for (NodeGroupRead nodegroup : nodegroups) {
+         CommandsUtils.printInTableFormat(
+               ngColumnNamesWithGetMethodNames,
+               new NodeGroupRead[] { nodegroup },
+               Constants.OUTPUT_INDENT);
+         List<NodeRead> nodes = nodegroup.getInstances();
+         if (nodes != null) {
+            LinkedHashMap<String, List<String>> nColumnNamesWithGetMethodNamesClone =
+                  (LinkedHashMap<String, List<String>>) nColumnNamesWithGetMethodNames.clone();
+            if (!nodes.isEmpty() &&
+                  (nodes.get(0).getIpConfigs() == null
+                        || (!nodes.get(0).getIpConfigs().containsKey(NetTrafficType.HDFS_NETWORK)
+                        && !nodes.get(0).getIpConfigs().containsKey(NetTrafficType.MAPRED_NETWORK)))) {
+               nColumnNamesWithGetMethodNamesClone.remove(Constants.FORMAT_TABLE_COLUMN_HDFS_IP);
+               nColumnNamesWithGetMethodNamesClone.remove(Constants.FORMAT_TABLE_COLUMN_MAPRED_IP);
+            }
+            System.out.println();
+            CommandsUtils.printInTableFormat(
+                  nColumnNamesWithGetMethodNamesClone, nodes.toArray(),
+                  new StringBuilder().append(Constants.OUTPUT_INDENT)
+                        .append(Constants.OUTPUT_INDENT).toString());
+         }
+         System.out.println();
+      }
+
+      prettyOutputErrorNode(nodegroups);
+   }
+
+   private void prettyOutputErrorNode(List<NodeGroupRead> nodegroups)
+         throws Exception {
+      List<NodeRead> failedNodes = new ArrayList<NodeRead>();
+      for (NodeGroupRead nodegroup : nodegroups) {
+         List<NodeRead> nodes = nodegroup.getInstances();
+         if (nodes != null) {
+            for (NodeRead node : nodes) {
+               if (node.isActionFailed()) {
+                  failedNodes.add(node);
+               }
+            }
+         }
+      }
+
+      if (!failedNodes.isEmpty()) {
+         System.out
+               .println(Constants.FAILED_NODES_MESSAGE + failedNodes.size());
+         LinkedHashMap<String, List<String>> columnNamesWithGetMethodNames =
+               new LinkedHashMap<String, List<String>>();
+         columnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_NODE_NAME,
+               Arrays.asList("getName"));
+         columnNamesWithGetMethodNames
+               .put(Constants.FORMAT_TABLE_COLUMN_STATUS,
+                     Arrays.asList("getStatus"));
+         columnNamesWithGetMethodNames.put(Constants.FORMAT_TABLE_COLUMN_ERROR,
+               Arrays.asList("getErrMessage"));
+         CommandsUtils.printInTableFormat(columnNamesWithGetMethodNames,
+               failedNodes.toArray(), Constants.OUTPUT_INDENT);
+
+         System.out.println();
       }
    }
 

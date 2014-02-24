@@ -21,10 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.vmware.bdd.entity.NicEntity;
-import com.vmware.bdd.spectypes.NicSpec;
 import org.apache.log4j.Logger;
-import org.springframework.batch.repeat.RepeatStatus;
 
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
@@ -34,6 +31,7 @@ import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.command.VHMMessageTask;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.NicEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.ClusteringServiceException;
@@ -42,6 +40,7 @@ import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IExecutionService;
 import com.vmware.bdd.service.job.JobConstants;
+import com.vmware.bdd.spectypes.NicSpec;
 
 public class JobUtils {
    private static final Logger logger = Logger.getLogger(JobUtils.class);
@@ -235,9 +234,8 @@ public class JobUtils {
 
             if (vm == null || (!vm.isPoweredOn())
                   || !VcVmUtil.checkIpAddresses(vm)) {
-               throw ClusteringServiceException.VM_STATUS_ERROR(
-                     node.getVmName(), node.getStatus().toString(),
-                     expectedStatus.toString());
+               throw ClusteringServiceException.VM_STATUS_ERROR(node
+                     .getStatus().toString(), expectedStatus.toString());
             }
 
             String haFlag = node.getNodeGroup().getHaFlag();

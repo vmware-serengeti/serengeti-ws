@@ -1121,7 +1121,7 @@ public class ClusteringService implements IClusteringService {
          // prepare for cloning result
          nodeMap.put(vNode.getVmName(), vNode);
          vNode.setSuccess(false);
-         vNode.setFinished(true);
+         vNode.setFinished(false);
          // generate create spec for fast clone
          VmCreateSpec spec = new VmCreateSpec();
          VmSchema createSchema = getVmSchema(vNode);
@@ -1173,6 +1173,7 @@ public class ClusteringService implements IClusteringService {
          BaseNode node = nodeMap.get(spec.getVmName());
          node.setVmMobId(spec.getVmId());
          node.setSuccess(true);
+         node.setFinished(true);
          boolean vmSucc = VcVmUtil.setBaseNodeForVm(node, spec.getVmId());
          if (!vmSucc || !result.isSuccess()) {
             success = false;

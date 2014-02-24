@@ -165,8 +165,8 @@ public class ClusteringServiceException extends BddException {
             "VM_VIOLATE_PLACEMENT_POLICY", vmNames);
    }
 
-   public static ClusteringServiceException VM_STATUS_ERROR(String vmName, String actual, String expected) {
-      return new ClusteringServiceException(null, "VM_STATUS_ERROR", vmName, actual, expected);
+   public static ClusteringServiceException VM_STATUS_ERROR(String actual, String expected) {
+      return new ClusteringServiceException(null, "VM_STATUS_ERROR", actual, expected);
    }
 
    public static ClusteringServiceException CLUSTER_NAME_TOO_LONG(String clusterName) {

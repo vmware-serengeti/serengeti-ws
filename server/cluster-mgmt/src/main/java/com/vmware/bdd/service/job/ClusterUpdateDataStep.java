@@ -256,8 +256,11 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          }
       }
 
-      nodeEntity.setActionFailed(vNode.isSuccess());
-      nodeEntity.setErrMessage(vNode.getErrMessage());
+      if (vNode.isFinished()) {
+         nodeEntity.setActionFailed(!vNode.isSuccess());
+         nodeEntity.setErrMessage(vNode.getErrMessage());
+      }
+
       if (vNode.getVmMobId() != null) {
          nodeEntity.setMoId(vNode.getVmMobId());
          nodeEntity.setRack(vNode.getTargetRack());

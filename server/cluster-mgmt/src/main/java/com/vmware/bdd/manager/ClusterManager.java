@@ -605,6 +605,7 @@ public class ClusterManager {
       JobParameters jobParameters = new JobParameters(param);
       clusterEntityMgr.updateClusterStatus(clusterName,
             ClusterStatus.PROVISIONING);
+      clusterEntityMgr.cleanupActionError(clusterName);
       try {
          return jobManager.runJob(JobConstants.RESUME_CLUSTER_JOB_NAME,
                jobParameters);
@@ -646,6 +647,7 @@ public class ClusterManager {
             new JobParameter(ClusterStatus.ERROR.name()));
       JobParameters jobParameters = new JobParameters(param);
       clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.DELETING);
+      clusterEntityMgr.cleanupActionError(clusterName);
       try {
          return jobManager.runJob(JobConstants.DELETE_CLUSTER_JOB_NAME,
                jobParameters);
@@ -685,7 +687,7 @@ public class ClusterManager {
 
       cluster.setVhmTargetNum(-1);
       clusterEntityMgr.update(cluster);
-
+      clusterEntityMgr.cleanupActionError(clusterName);
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
             clusterName));
@@ -738,6 +740,7 @@ public class ClusterManager {
             new JobParameter(ClusterStatus.ERROR.name()));
       JobParameters jobParameters = new JobParameters(param);
       clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.STOPPING);
+      clusterEntityMgr.cleanupActionError(clusterName);
       try {
          return jobManager.runJob(JobConstants.STOP_CLUSTER_JOB_NAME,
                jobParameters);
@@ -836,7 +839,7 @@ public class ClusterManager {
       group.setDefineInstanceNum(instanceNum);
 
       clusterEntityMgr.update(group);
-
+      clusterEntityMgr.cleanupActionError(clusterName);
       // create job
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
