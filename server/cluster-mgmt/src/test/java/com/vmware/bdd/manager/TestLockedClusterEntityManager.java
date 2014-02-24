@@ -32,6 +32,7 @@ import com.vmware.bdd.service.sp.MockClusterEntityManager;
 @ContextConfiguration(locations = { "classpath:/spring/*-context.xml", "classpath:/spring/aop.xml" })
 public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextTests {
 
+   private static boolean threadStarted = false;
    private static class LockTestThread extends Thread {
       private ILockedClusterEntityManager clusterEntityMgr;
 
@@ -40,8 +41,17 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       }
 
       public void run() {
+         setThreadStarted(true);
          clusterEntityMgr.syncUp(LOCKED_CLUSTER_NAME, false);
       }
+   }
+
+   private synchronized static boolean isThreadStarted() {
+      return threadStarted;
+   }
+
+   private synchronized static void setThreadStarted(boolean started) {
+      threadStarted = started;
    }
 
    private static final String LOCKED_CLUSTER_NAME = "LockedClusterEntity";
@@ -78,9 +88,12 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
 
    @Test
    public void testConcurrencyInTwoThread() throws Exception {
+      setThreadStarted(false);
       LockTestThread t = new LockTestThread(competitiveLockedMgr);
       t.start();
-      Thread.sleep(20);
+      while (!isThreadStarted()) {
+         Thread.sleep(10);
+      }
       long start = System.currentTimeMillis();
       competitiveLockedMgr.removeVmReference(LOCKED_CLUSTER_NAME, "");
       long end = System.currentTimeMillis();
@@ -91,9 +104,12 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
 
    @Test
    public void testExclusiveInTwoThread() throws Exception {
+      setThreadStarted(false);
       LockTestThread t = new LockTestThread(exclusiveLockedMgr);
       t.start();
-      Thread.sleep(20);
+      while (!isThreadStarted()) {
+         Thread.sleep(10);
+      }
       long start = System.currentTimeMillis();
       exclusiveLockedMgr.removeVmReference(LOCKED_CLUSTER_NAME, "");
       long end = System.currentTimeMillis();
@@ -104,9 +120,12 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
 
    @Test
    public void testExclusiveCompetitiveInTwoThread() throws Exception {
+      setThreadStarted(false);
       LockTestThread t = new LockTestThread(exclusiveLockedMgr);
       t.start();
-      Thread.sleep(20);
+      while (!isThreadStarted()) {
+         Thread.sleep(10);
+      }
       long start = System.currentTimeMillis();
       exclusiveLockedMgr.removeVmReference(LOCKED_CLUSTER_NAME, "");
       long end = System.currentTimeMillis();
@@ -117,9 +136,12 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
 
    @Test
    public void testReverseInTwoThread() throws Exception {
+      setThreadStarted(false);
       LockTestThread t = new LockTestThread(competitiveLockedMgr);
       t.start();
-      Thread.sleep(20);
+      while (!isThreadStarted()) {
+         Thread.sleep(10);
+      }
       long start = System.currentTimeMillis();
       exclusiveLockedMgr.removeVmReference(LOCKED_CLUSTER_NAME, "");
       long end = System.currentTimeMillis();
@@ -130,9 +152,12 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
 
    @Test
    public void testCompetitiveInTwoThreadForTwoClusters() throws Exception {
+      setThreadStarted(false);
       LockTestThread t = new LockTestThread(exclusiveLockedMgr);
       t.start();
-      Thread.sleep(20);
+      while (!isThreadStarted()) {
+         Thread.sleep(10);
+      }
       long start = System.currentTimeMillis();
       exclusiveLockedMgr.removeVmReference(UNLOCKED_CLUSTER_NAME, "");
       long end = System.currentTimeMillis();
@@ -143,6 +168,7 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
 
    @Test
    public void testReleaseDelayed() throws Exception {
+      setThreadStarted(false);
       long start = System.currentTimeMillis();
       LockFactory.getClusterLock(LOCKED_CLUSTER_NAME).writeLock().lock();
       System.out.println("Lock exlusively for " + LOCKED_CLUSTER_NAME

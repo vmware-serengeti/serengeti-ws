@@ -28,6 +28,7 @@ public class LockAnnotationTest {
       }
 
       public void run() {
+         setThreadStarted(true);
          try {
             if (!failMethod) {
                if (concurrent) {
@@ -53,6 +54,15 @@ public class LockAnnotationTest {
 
    private ApplicationContext ctx;
    private TestManager mgr;
+   private static boolean threadStarted = false;
+
+   private synchronized static boolean isThreadStarted() {
+      return threadStarted;
+   }
+
+   private synchronized static void setThreadStarted(boolean started) {
+      threadStarted = started;
+   }
 
    @BeforeTest
    public void beforeTest() {
@@ -72,9 +82,12 @@ public class LockAnnotationTest {
 
    @Test
    public void testConcurrencyInTwoThread() throws Exception {
+      setThreadStarted(false);
       LockTestThread t = new LockTestThread(true, mgr);
       t.start();
-      Thread.sleep(20);
+      while (!isThreadStarted()) {
+         Thread.sleep(10);
+      }
       long start = System.currentTimeMillis();
       mgr.competitiveLock(LOCKED_CLUSTER_NAME, 0);
       long end = System.currentTimeMillis();
@@ -85,9 +98,12 @@ public class LockAnnotationTest {
 
    @Test
    public void testExclusiveInTwoThread() throws Exception {
+      setThreadStarted(false);
       LockTestThread t = new LockTestThread(false, mgr);
       t.start();
-      Thread.sleep(20);
+      while (!isThreadStarted()) {
+         Thread.sleep(10);
+      }
       long start = System.currentTimeMillis();
       mgr.exclusiveLock(LOCKED_CLUSTER_NAME, 0);
       long end = System.currentTimeMillis();
@@ -98,9 +114,12 @@ public class LockAnnotationTest {
 
    @Test
    public void testExclusiveCompetitiveInTwoThread() throws Exception {
+      setThreadStarted(false);
       LockTestThread t = new LockTestThread(false, mgr);
       t.start();
-      Thread.sleep(20);
+      while (!isThreadStarted()) {
+         Thread.sleep(10);
+      }
       long start = System.currentTimeMillis();
       mgr.competitiveLock(LOCKED_CLUSTER_NAME, 0);
       long end = System.currentTimeMillis();
@@ -111,9 +130,12 @@ public class LockAnnotationTest {
 
    @Test
    public void testReverseInTwoThread() throws Exception {
+      setThreadStarted(false);
       LockTestThread t = new LockTestThread(true, mgr);
       t.start();
-      Thread.sleep(20);
+      while (!isThreadStarted()) {
+         Thread.sleep(10);
+      }
       long start = System.currentTimeMillis();
       mgr.exclusiveLock(LOCKED_CLUSTER_NAME, 0);
       long end = System.currentTimeMillis();
@@ -124,9 +146,12 @@ public class LockAnnotationTest {
 
    @Test
    public void testCompetitiveInTwoThreadForTwoClusters() throws Exception {
+      setThreadStarted(false);
       LockTestThread t = new LockTestThread(false, mgr);
       t.start();
-      Thread.sleep(20);
+      while (!isThreadStarted()) {
+         Thread.sleep(10);
+      }
       long start = System.currentTimeMillis();
       mgr.exclusiveLock(UNLOCKED_CLUSTER_NAME, 0);
       long end = System.currentTimeMillis();
@@ -153,9 +178,12 @@ public class LockAnnotationTest {
 
    @Test
    public void testExclusiveFailedInTwoThread() throws Exception {
+      setThreadStarted(false);
       LockTestThread t = new LockTestThread(false, mgr, true);
       t.start();
-      Thread.sleep(20);
+      while (!isThreadStarted()) {
+         Thread.sleep(10);
+      }
       long start = System.currentTimeMillis();
       try {
          mgr.exclusiveLockFailedOperation(LOCKED_CLUSTER_NAME, 0);
