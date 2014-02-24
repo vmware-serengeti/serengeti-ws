@@ -66,7 +66,6 @@ import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.exception.UniqueConstraintViolationException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
-import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
@@ -176,15 +175,17 @@ public class ClusterConfigManager {
       if (cluster.getDistro() == null || distro == null) {
          throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
       }
+      // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
+      checkClusterRoles(cluster, distro.getRoles(), failedMsgList);
+
       if (!cluster.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
          List<String> allNetworkNames = new ArrayList<String>();
          for (NetworkEntity entity : networkMgr.getAllNetworkEntities()) {
             allNetworkNames.add(entity.getName());
          }
-         cluster.validateClusterCreate(failedMsgList, warningMsgList,
-               distro.getRoles());
+         cluster.validateClusterCreate(failedMsgList, warningMsgList);
       } else {
-         cluster.validateClusterCreateOfMapr(failedMsgList, distro.getRoles());
+         cluster.validateClusterCreateOfMapr(failedMsgList, warningMsgList);
       }
       if (!failedMsgList.isEmpty()) {
          throw ClusterConfigException.INVALID_SPEC(failedMsgList);
@@ -1204,4 +1205,31 @@ public class ClusterConfigManager {
          entity.setHadoopConfig(null);
       }
    }
+
+   /**
+    * Check whether the roles used in the cluster exist in distro manifest and Chef Server.
+    *
+    */
+   private void checkClusterRoles(ClusterCreate cluster, List<String> distroRoles, List<String> failedMsgList) {
+      NodeGroupCreate[] nodeGroupCreates = cluster.getNodeGroups();
+      AuAssert.check(nodeGroupCreates != null && nodeGroupCreates.length > 0);
+
+      for (NodeGroupCreate nodeGroup : nodeGroupCreates) {
+         List<String> roles = nodeGroup.getRoles();
+         if (roles != null) {
+            for (String role : roles) {
+               StringBuilder rolesMsg = new StringBuilder();
+               if (!ChefServerManager.isValidRole(role)) {
+                  rolesMsg.append("role ").append(role).append(" doesn't exist");
+               } else if (!distroRoles.contains(role) && !HadoopRole.isCustomizedRole(role)) {
+                  rolesMsg.append("role ").append(role).append(" is not supported by distro ").append(cluster.getDistro());
+               }
+               if (rolesMsg.length() > 0) {
+                  failedMsgList.add(rolesMsg.toString());
+               }
+            }
+         }
+      }
+   }
+
 }

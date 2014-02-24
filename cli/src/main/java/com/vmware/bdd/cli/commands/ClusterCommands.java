@@ -313,17 +313,14 @@ public class ClusterCommands implements CommandMarker {
       clusterCreate.setNetworkConfig(networkConfig);
 
       clusterCreate.validateCDHVersion(warningMsgList);
-      // Validate that the specified file is correct json format and proper
-      // value.
+
+      // Validate that the specified file is correct json format and proper value.
       if (specFilePath != null) {
-         List<String> distroRoles = findDistroRoles(clusterCreate);
          if (!clusterCreate.getDistro().equalsIgnoreCase(
                com.vmware.bdd.utils.Constants.MAPR_VENDOR)) {
-            clusterCreate.validateClusterCreate(failedMsgList, warningMsgList,
-                  distroRoles);
+            clusterCreate.validateClusterCreate(failedMsgList, warningMsgList);
          } else {
-            clusterCreate.validateClusterCreateOfMapr(failedMsgList,
-                  distroRoles);
+            clusterCreate.validateClusterCreateOfMapr(failedMsgList, warningMsgList);
          }
       }
 

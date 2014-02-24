@@ -344,48 +344,16 @@ public class ClusterCreateTest {
             HadoopRole.HIVE_ROLE.toString()));
       List<String> failedMsgList = new ArrayList<String>();
       List<String> warningMsgList = new ArrayList<String>();
-      List<String> distroRoles =
-            Arrays.asList("hadoop_namenode", "hadoop_jobtracker",
-                  "hadoop_tasktracker", "hadoop_datanode", "hadoop_client");
       cluster.setNodeGroups(new NodeGroupCreate[] { master, worker, client });
-      cluster.validateClusterCreate(failedMsgList, warningMsgList, distroRoles);
-      assertEquals(3, failedMsgList.size());
+      cluster.validateClusterCreate(failedMsgList, warningMsgList);
+      assertEquals(2, failedMsgList.size());
       assertEquals("The 'swapRatio' must be greater than 0 in group master.",
             failedMsgList.get(0));
       assertEquals("worker.instanceNum=0.", failedMsgList.get(1));
-      assertEquals("client.roles=hive_server,hive.", failedMsgList.get(2));
       assertEquals(1, warningMsgList.size());
       assertEquals(
             "Warning: The size of the virtual machine memory must be evenly divisible by 4. For group master, 7500 replaces 7501 for the memCapacityMB value.",
             warningMsgList.get(0));
-   }
-
-   @Test
-   public void testValidateClusterCreateOfMapr() {
-      ClusterCreate cluster = new ClusterCreate();
-      cluster.setDistroVendor(Constants.MAPR_VENDOR);
-      NodeGroupCreate master = new NodeGroupCreate();
-      master.setName("master");
-      master.setMemCapacityMB(7680);
-      master.setSwapRatio(0F);
-      master.setRoles(Arrays.asList(HadoopRole.HADOOP_NAMENODE_ROLE.toString(),
-            HadoopRole.HADOOP_JOBTRACKER_ROLE.toString()));
-      NodeGroupCreate worker = new NodeGroupCreate();
-      worker.setName("worker");
-      worker.setRoles(Arrays.asList(HadoopRole.MAPR_NFS_ROLE.toString(),
-            HadoopRole.MAPR_FILESERVER_ROLE.toString(),
-            HadoopRole.MAPR_TASKTRACKER_ROLE.toString()));
-      worker.setMemCapacityMB(3748);
-      List<String> distroRoles =
-            Arrays.asList("mapr_zookeeper", "mapr_cldb", "mapr_jobtracker",
-                  "mapr_tasktracker", "mapr_fileserver", "mapr_nfs",
-                  "mapr_webserver");
-      cluster.setNodeGroups(new NodeGroupCreate[] { master, worker });
-      List<String> failedMsgList = new ArrayList<String>();
-      cluster.validateClusterCreateOfMapr(failedMsgList, distroRoles);
-      assertEquals(1, failedMsgList.size());
-      assertEquals("master.roles=hadoop_namenode,hadoop_jobtracker.",
-            failedMsgList.get(0));
    }
 
    @Test

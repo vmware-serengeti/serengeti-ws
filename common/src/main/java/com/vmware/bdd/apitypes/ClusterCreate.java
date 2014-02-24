@@ -452,9 +452,10 @@ public class ClusterCreate implements Serializable {
    }
 
    /*
-    * Validate 2 cases. Case 1: compute node group with external hdfs node group.
-    * Case 2: The dependency check of HDFS, MapReduce, HBase, Zookeeper, Hadoop
-    * Client(Pig, Hive, Hadoop Client), and HBase Client Combinations. The rules are below:
+    * Validate role dependency:
+    * Case 1: compute node group with external hdfs node group.
+    * Case 2: The dependency check of HDFS, MapReduce, HBase, Zookeeper,
+    * Hadoop Client(Pig, Hive, Hadoop Client), and HBase Client Combinations. The rules are below:
     * - HDFS includes roles of "haddop_namenode" and "hadoop_datanode";
     * - MapReduce includes roles of "haddop_jobtracker" and "hadoop_takstracker";
     * - HBase includes roles of "hbase_master" and "hbase_regionserver;
@@ -610,8 +611,7 @@ public class ClusterCreate implements Serializable {
    /**
     * Validate nodeGroupCreates member formats and values in the ClusterCreate.
     */
-   public void validateClusterCreate(List<String> failedMsgList,
-         List<String> warningMsgList, final List<String> distroRoles) {
+   public void validateClusterCreate(List<String> failedMsgList, List<String> warningMsgList) {
       // if hadoop2 namenode ha is enabled
       boolean namenodeHACheck = false;
       //role count
@@ -649,8 +649,6 @@ public class ClusterCreate implements Serializable {
          checkInstanceNum(nodeGroupCreate, failedMsgList);
          // check CPU number and memory capacity
          checkCPUAndMemory(nodeGroupCreate, failedMsgList, warningMsgList);
-         // check node group's roles
-         checkNodeGroupRoles(nodeGroupCreate, distroRoles, failedMsgList);
 
          // get node group role.
          List<NodeGroupRole> groupRoles = getNodeGroupRoles(nodeGroupCreate);
@@ -733,11 +731,11 @@ public class ClusterCreate implements Serializable {
                   if (isHAFlag(nodeGroupCreate)) {
                      warningMsgList.add(Constants.WORKER_CLIENT_HA_FLAG);
                   }
-                  break;
                case NONE:
-                  warningMsgList.add(Constants.NOT_DEFINED_ROLE);
+                  // server side will validate whether the roles of this group exist
                   break;
                default:
+                  break;
                }
             }
          }
@@ -772,15 +770,8 @@ public class ClusterCreate implements Serializable {
       }
    }
 
-   /**
-    * Validate nodeGroupCreates member formats and values in the ClusterCreate of Mapr.
-    */
-   public void validateClusterCreateOfMapr(List<String> failedMsgList,
-         final List<String> distroRoles) {
-      NodeGroupCreate[] nodeGroupCreates = getNodeGroups();
-      for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
-         checkNodeGroupRoles(nodeGroupCreate, distroRoles, failedMsgList);
-      }
+   public void validateClusterCreateOfMapr(List<String> failedMsgList, List<String> warningMsgList) {
+      // TODO: add validation for MapR.
    }
 
    private void checkCPUAndMemory(NodeGroupCreate nodeGroup,
@@ -835,30 +826,6 @@ public class ClusterCreate implements Serializable {
             .append(".").append("instanceNum=")
             .append(nodeGroup.getInstanceNum()).append(".").toString());
    }
-
-   // check whether the group roles are listed in distro manifest
-   private boolean checkNodeGroupRoles(NodeGroupCreate nodeGroup,
-         List<String> distroRoles, List<String> failedMsgList) {
-      List<String> roles = nodeGroup.getRoles();
-      boolean validated = true;
-      StringBuilder rolesMsg = new StringBuilder();
-      if (roles != null) {
-         for (String role : roles) {
-            if (!distroRoles.contains(role) && !HadoopRole.isCustomizedRole(role)) {
-               validated = false;
-               rolesMsg.append(",").append(role);
-            }
-         }
-      }
-      if (!validated) {
-         rolesMsg.replace(0, 1, "");
-         failedMsgList.add(new StringBuilder().append(nodeGroup.getName())
-               .append(".").append("roles=")
-               .append(rolesMsg.toString()).append(".").toString());
-      }
-      return validated;
-   }
-
 
 
    //define role of the node group .
@@ -947,6 +914,10 @@ public class ClusterCreate implements Serializable {
             } else {
                return false;
             }
+         case NONE:
+            break;
+         default:
+            break;
       }
       return false;
    }

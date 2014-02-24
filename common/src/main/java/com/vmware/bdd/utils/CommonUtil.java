@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -200,4 +201,19 @@ public class CommonUtil {
       return split;
    }
 
+   public static Process execCommand(String cmd) {
+      if (cmd == null || cmd.isEmpty()) {
+         return null;
+      }
+
+      Process p = null;
+      try {
+         p = new ProcessBuilder(Arrays.asList(cmd.split(" "))).start();
+         p.waitFor();
+      } catch (Exception e) {
+         logger.error("Executing command " + cmd + " failed: " + e.getMessage());
+      }
+
+      return p;
+   }
 }
