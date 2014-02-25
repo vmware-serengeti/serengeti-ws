@@ -17,6 +17,11 @@
 		<beans:property name="clusteringService" ref="clusteringService" />
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 	</beans:bean>
+	<beans:bean name="startClusterNodeStatusVerifyTasklet"
+		class="com.vmware.bdd.service.job.ClusterNodeStatusVerifyStep">
+		<beans:property name="managementOperation" value="START" />
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+	</beans:bean>
 
 	<job id="startClusterJob" job-repository="jobRepository">
 		<step id="startClusterVM" next="startClusterNodeSyncup">
@@ -25,8 +30,14 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="startClusterNodeSyncup" next="softwareBootstrapClusterStep">
+		<step id="startClusterNodeSyncup" next="startClusterVerifyNodeStatus">
 			<tasklet ref="clusterNodeSyncupTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="startClusterVerifyNodeStatus" next="softwareBootstrapClusterStep">
+			<tasklet ref="startClusterNodeStatusVerifyTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

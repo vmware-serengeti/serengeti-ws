@@ -32,15 +32,18 @@ public class StopVmSP implements Callable<Void> {
    private static final Logger logger = Logger.getLogger(StopVmSP.class);
    private final String vmId;
    private final boolean vmPoweroff;
+   private String vmName;
 
    public StopVmSP(VcVirtualMachine vcVm) {
       this.vmId = vcVm.getId();
       this.vmPoweroff = false;
+      this.vmName = vcVm.getName();
    }
 
    public StopVmSP(VcVirtualMachine vcVm, boolean vmShutdown) {
       this.vmId = vcVm.getId();
       this.vmPoweroff = vmShutdown;
+      this.vmName = vcVm.getName();
    }
 
    @Override
@@ -79,5 +82,9 @@ public class StopVmSP implements Callable<Void> {
 
    public VcVirtualMachine getVcVm() {
       return VcCache.getIgnoreMissing(vmId);
+   }
+
+   public String getVmName() {
+      return vmName;
    }
 }

@@ -20,17 +20,17 @@ package com.vmware.bdd.service.job;
  * @since 0.9
  * 
  */
-public class SubJobStatus {
+public class NodeOperationStatus {
 
    private String nodeName;
    private boolean succeed = true;
    private String errorMessage;
 
-   public SubJobStatus(String nodeName) {
+   public NodeOperationStatus(String nodeName) {
       this.nodeName = nodeName;
    }
 
-   public SubJobStatus(String nodeName, boolean succeed, String errorMessage) {
+   public NodeOperationStatus(String nodeName, boolean succeed, String errorMessage) {
       this(nodeName);
       this.succeed = succeed;
       this.errorMessage = errorMessage;

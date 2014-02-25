@@ -51,7 +51,7 @@ import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
 import com.vmware.bdd.service.job.SimpleStepExecutionListener;
-import com.vmware.bdd.service.job.SubJobStatus;
+import com.vmware.bdd.service.job.NodeOperationStatus;
 import com.vmware.bdd.service.job.SubJobStep;
 import com.vmware.bdd.service.job.TrackableTasklet;
 import com.vmware.bdd.utils.JobUtils;
@@ -355,11 +355,11 @@ public class JobManager {
       }
       jobStatus.setStatus(status);
       if (subJobEnabled == 1) {
-         List<SubJobStatus> succeedNodes =
-               (ArrayList<SubJobStatus>) jobExecution.getExecutionContext()
+         List<NodeOperationStatus> succeedNodes =
+               (ArrayList<NodeOperationStatus>) jobExecution.getExecutionContext()
                      .get(JobConstants.SUB_JOB_NODES_SUCCEED);
-         List<SubJobStatus> failNodes =
-               (ArrayList<SubJobStatus>) jobExecution.getExecutionContext()
+         List<NodeOperationStatus> failNodes =
+               (ArrayList<NodeOperationStatus>) jobExecution.getExecutionContext()
                      .get(JobConstants.SUB_JOB_NODES_FAIL);
          if (succeedNodes != null) {
             jobStatus.setSucceedNodes(convert(succeedNodes));
@@ -385,9 +385,9 @@ public class JobManager {
       return jobStatus;
    }
 
-   private List<TaskRead.NodeStatus> convert(List<SubJobStatus> subJobStatus) {
+   private List<TaskRead.NodeStatus> convert(List<NodeOperationStatus> subJobStatus) {
       List<TaskRead.NodeStatus> result = new ArrayList<TaskRead.NodeStatus>();
-      for (SubJobStatus status : subJobStatus) {
+      for (NodeOperationStatus status : subJobStatus) {
          TaskRead.NodeStatus nodeStatus =
                new TaskRead.NodeStatus(status.getNodeName(),
                      status.isSucceed(), status.getErrorMessage());

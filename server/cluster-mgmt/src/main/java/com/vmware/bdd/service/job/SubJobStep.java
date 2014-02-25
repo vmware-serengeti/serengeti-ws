@@ -198,27 +198,27 @@ public class SubJobStep extends AbstractStep {
                      JobConstants.CURRENT_ERROR_MESSAGE);
          Object failedObj =
                mainJobExecutionContext.get(JobConstants.SUB_JOB_NODES_FAIL);
-         List<SubJobStatus> failedNodes = null;
+         List<NodeOperationStatus> failedNodes = null;
          if (failedObj == null) {
-            failedNodes = new ArrayList<SubJobStatus>();
+            failedNodes = new ArrayList<NodeOperationStatus>();
          } else {
-            failedNodes = (ArrayList<SubJobStatus>) failedObj;
+            failedNodes = (ArrayList<NodeOperationStatus>) failedObj;
          }
-         SubJobStatus failedSubJob =
-               new SubJobStatus(nodeName, false, errorMessage);
+         NodeOperationStatus failedSubJob =
+               new NodeOperationStatus(nodeName, false, errorMessage);
          failedNodes.add(failedSubJob);
          mainJobExecutionContext.put(JobConstants.SUB_JOB_NODES_FAIL,
                failedNodes);
       } else {
          Object succeededObj =
                mainJobExecutionContext.get(JobConstants.SUB_JOB_NODES_SUCCEED);
-         List<SubJobStatus> succeededNodes = null;
+         List<NodeOperationStatus> succeededNodes = null;
          if (succeededObj == null) {
-            succeededNodes = new ArrayList<SubJobStatus>();
+            succeededNodes = new ArrayList<NodeOperationStatus>();
          } else {
-            succeededNodes = (ArrayList<SubJobStatus>) succeededObj;
+            succeededNodes = (ArrayList<NodeOperationStatus>) succeededObj;
          }
-         SubJobStatus succeededSubJob = new SubJobStatus(nodeName);
+         NodeOperationStatus succeededSubJob = new NodeOperationStatus(nodeName);
          succeededNodes.add(succeededSubJob);
          mainJobExecutionContext.put(JobConstants.SUB_JOB_NODES_SUCCEED,
                succeededNodes);

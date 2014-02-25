@@ -14,6 +14,9 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
@@ -31,10 +34,12 @@ public class StartClusterVMStep extends TrackableTasklet {
 
       StatusUpdater statusUpdator = new DefaultStatusUpdater(jobExecutionStatusHolder,
             getJobExecutionId(chunkContext));
-      boolean success = clusteringService.startCluster(clusterName, statusUpdator);
+      List<NodeOperationStatus> failedNodes = new ArrayList<NodeOperationStatus>();
+      boolean success = clusteringService.startCluster(clusterName, failedNodes, statusUpdator);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_OPERATION_SUCCESS, success);
       putIntoJobExecutionContext(chunkContext, 
             JobConstants.EXPECTED_NODE_STATUS, NodeStatus.VM_READY);
+      putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_NODES_STATUS, failedNodes);
       return RepeatStatus.FINISHED;
    }
 

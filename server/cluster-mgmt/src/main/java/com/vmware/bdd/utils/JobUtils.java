@@ -220,17 +220,17 @@ public class JobUtils {
                      .isDisconnected())) {
             return;
          }
-         if (expectedStatus == NodeStatus.VM_READY) {
-            if (node.isDisconnected()) {
-               logger.info("Node "
-                     + node.getVmName()
-                     + " cannot be controlled through VC. Remove it from VC manually, and then repeat the operarion.");
-               throw ClusteringServiceException
-                     .VM_UNAVAILABLE(node.getVmName());
-            }
-            // verify from VC 
-            VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
+         if (node.isDisconnected()) {
+            logger.info("Node "
+                  + node.getVmName()
+                  + " cannot be controlled through VC. Remove it from VC manually, and then repeat the operarion.");
+            throw ClusteringServiceException
+            .VM_UNAVAILABLE(node.getVmName());
+         }
+         // verify from VC 
+         VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
 
+         if (expectedStatus == NodeStatus.VM_READY) {
 
             if (vm == null || (!vm.isPoweredOn())
                   || !VcVmUtil.checkIpAddresses(vm)) {
@@ -248,6 +248,11 @@ public class JobUtils {
                   throw ClusteringServiceException.ENABLE_FT_FAILED(null,
                         node.getVmName());
                }
+            }
+         } else {
+            if (vm == null || (!vm.isPoweredOff())) {
+               throw ClusteringServiceException.VM_STATUS_ERROR(node
+                     .getStatus().toString(), expectedStatus.toString());
             }
          }
       }

@@ -95,6 +95,7 @@ import com.vmware.bdd.service.IClusterInitializerService;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.event.VmEventManager;
 import com.vmware.bdd.service.job.ClusterNodeUpdator;
+import com.vmware.bdd.service.job.NodeOperationStatus;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
@@ -238,7 +239,8 @@ public class ClusteringService implements IClusteringService {
    }
 
    @Autowired
-   public void setElasticityScheduleManager(ElasticityScheduleManager elasticityScheduleMgr) {
+   public void setElasticityScheduleManager(
+         ElasticityScheduleManager elasticityScheduleMgr) {
       this.elasticityScheduleMgr = elasticityScheduleMgr;
    }
 
@@ -280,7 +282,8 @@ public class ClusteringService implements IClusteringService {
             cloneConcurrency = 1;
          }
 
-         CmsWorker.addPeriodic(new ClusterNodeUpdator(getLockClusterEntityMgr()));
+         CmsWorker
+               .addPeriodic(new ClusterNodeUpdator(getLockClusterEntityMgr()));
          prepareTemplateVM();
          loadTemplateNetworkLable();
          convertTemplateVm();
@@ -302,7 +305,9 @@ public class ClusteringService implements IClusteringService {
       List<String> folderList = new ArrayList<String>(1);
       String serengetiUUID = ConfigInfo.getSerengetiRootFolder();
       folderList.add(serengetiUUID);
-      Folder rootFolder = VcResourceUtils.findFolderByNameList(templateVm.getDatacenter(), folderList);
+      Folder rootFolder =
+            VcResourceUtils.findFolderByNameList(templateVm.getDatacenter(),
+                  folderList);
 
       if (rootFolder == null) {
          CreateVMFolderSP sp =
@@ -421,8 +426,7 @@ public class ClusteringService implements IClusteringService {
          this.templateVm = templateVM;
       } catch (Exception e) {
          logger.error("Prepare template VM error: " + e.getMessage());
-         throw BddException.INTERNAL(e,
-               "Prepare template VM error.");
+         throw BddException.INTERNAL(e, "Prepare template VM error.");
       }
    }
 
@@ -468,7 +472,7 @@ public class ClusteringService implements IClusteringService {
          if (!networks.isEmpty()) {
             networks.get(0).nicLabel = templateNetworkLabel;
             for (int i = 1; i < networks.size(); i++) {
-               networks.get(i).nicLabel = VcVmUtil.NIC_LABEL_PREFIX + (i+1);
+               networks.get(i).nicLabel = VcVmUtil.NIC_LABEL_PREFIX + (i + 1);
             }
          }
          logger.info(node.getVmSchema());
@@ -480,13 +484,13 @@ public class ClusteringService implements IClusteringService {
     * allocation the network contains all allocated ip address to this cluster,
     * so some of them may already be occupied by existing node. So we need to
     * detect if that ip is allocated, before assign that one to one node
-    *
+    * 
     * @param vNodes
     * @param networkAdds
     * @param occupiedIpSets
     */
-   private void allocateStaticIp(List<BaseNode> vNodes, List<NetworkAdd> networkAdds,
-         Map<String, Set<String>> occupiedIpSets) {
+   private void allocateStaticIp(List<BaseNode> vNodes,
+         List<NetworkAdd> networkAdds, Map<String, Set<String>> occupiedIpSets) {
       int i, j;
       for (i = 0; i < networkAdds.size(); i++) {
          NetworkAdd networkAdd = networkAdds.get(i);
@@ -500,7 +504,8 @@ public class ClusteringService implements IClusteringService {
             // no need to allocate ip for dhcp
             logger.info("using dhcp for network: " + portGroupName);
          } else {
-            logger.info("Start to allocate static ip address for each VM's " + i + "th network.");
+            logger.info("Start to allocate static ip address for each VM's "
+                  + i + "th network.");
             List<String> availableIps =
                   IpBlock.getIpAddressFromIpBlock(networkAdd.getIp());
             if (usedIps != null && !usedIps.isEmpty()) {
@@ -508,7 +513,8 @@ public class ClusteringService implements IClusteringService {
             }
             AuAssert.check(availableIps.size() == vNodes.size());
             for (j = 0; j < availableIps.size(); j++) {
-               vNodes.get(j).updateNicOfPortGroup(portGroupName, availableIps.get(j), null, null);
+               vNodes.get(j).updateNicOfPortGroup(portGroupName,
+                     availableIps.get(j), null, null);
             }
             logger.info("Finished to allocate static ip address for VM's mgr network.");
          }
@@ -600,7 +606,9 @@ public class ClusteringService implements IClusteringService {
             try {
                in.close();
             } catch (IOException e) {
-               errorMsg = "Failed to release buffer while retrieving MapR JobTracker Port: " + e.getMessage();
+               errorMsg =
+                     "Failed to release buffer while retrieving MapR JobTracker Port: "
+                           + e.getMessage();
                logger.error(errorMsg);
             }
          }
@@ -659,7 +667,9 @@ public class ClusteringService implements IClusteringService {
                      for (NodeEntity jt : nodes) {
                         boolean isActiveJt = false;
                         for (NicEntity nicEntity : jt.getNics()) {
-                           if (nicEntity.getIpv4Address() != null && activeJtIp.equals(nicEntity.getIpv4Address())) {
+                           if (nicEntity.getIpv4Address() != null
+                                 && activeJtIp.equals(nicEntity
+                                       .getIpv4Address())) {
                               isActiveJt = true;
                               break;
                            }
@@ -740,9 +750,10 @@ public class ClusteringService implements IClusteringService {
          boolean isComputeOnlyNode =
                CommonUtil.isComputeOnly(roles, distroVendor);
          SetAutoElasticitySP sp =
-               new SetAutoElasticitySP(clusterName, vm, serengetiUUID, masterMoId,
-                     masterUUID, enableAutoElasticity, minComputeNodeNum, maxComputeNodeNum,
-                     jobTrackerPort, isComputeOnlyNode);
+               new SetAutoElasticitySP(clusterName, vm, serengetiUUID,
+                     masterMoId, masterUUID, enableAutoElasticity,
+                     minComputeNodeNum, maxComputeNodeNum, jobTrackerPort,
+                     isComputeOnlyNode);
          storeProcedures[i] = sp;
          i++;
       }
@@ -831,7 +842,7 @@ public class ClusteringService implements IClusteringService {
             logger.error("No folder is created.");
             if (cluster != null)
                throw ClusteringServiceException.CREATE_FOLDER_FAILED(cluster
-                  .getName());
+                     .getName());
          }
 
          int total = 0;
@@ -852,7 +863,7 @@ public class ClusteringService implements IClusteringService {
          if (!success) {
             if (cluster != null)
                throw ClusteringServiceException.CREATE_FOLDER_FAILED(cluster
-                  .getName());
+                     .getName());
          }
          return folders;
       } catch (InterruptedException e) {
@@ -1096,8 +1107,9 @@ public class ClusteringService implements IClusteringService {
 
    @SuppressWarnings("unchecked")
    @Override
-   public boolean createVcVms(List<NetworkAdd> networkAdds, List<BaseNode> vNodes,
-         Map<String, Set<String>> occupiedIpSets, StatusUpdater statusUpdator) {
+   public boolean createVcVms(List<NetworkAdd> networkAdds,
+         List<BaseNode> vNodes, Map<String, Set<String>> occupiedIpSets,
+         StatusUpdater statusUpdator) {
       if (vNodes.isEmpty()) {
          logger.info("No vm to be created.");
          return true;
@@ -1128,13 +1140,17 @@ public class ClusteringService implements IClusteringService {
          VmSchema createSchema = getVmSchema(vNode);
          spec.setSchema(createSchema);
          String defaultPgName = null;
-         GuestMachineIdSpec machineIdSpec = new GuestMachineIdSpec(
-               networkAdds, vNode.fetchPortGroupToIpV4Map(), vNode.getPrimaryMgtPgName());
-         logger.info("machine id of vm " + vNode.getVmName() + ":\n" + machineIdSpec.toString());
+         GuestMachineIdSpec machineIdSpec =
+               new GuestMachineIdSpec(networkAdds,
+                     vNode.fetchPortGroupToIpV4Map(),
+                     vNode.getPrimaryMgtPgName());
+         logger.info("machine id of vm " + vNode.getVmName() + ":\n"
+               + machineIdSpec.toString());
          spec.setBootupConfigs(machineIdSpec.toGuestVarialbe());
          // timeout is 10 mintues
          QueryIpAddress query =
-            new QueryIpAddress(vNode.getNics().keySet(), Constants.VM_POWER_ON_WAITING_SEC);
+               new QueryIpAddress(vNode.getNics().keySet(),
+                     Constants.VM_POWER_ON_WAITING_SEC);
          spec.setPostPowerOn(query);
          spec.setPrePowerOn(getPrePowerOnFunc(vNode));
          spec.setLinkedClone(false);
@@ -1147,8 +1163,8 @@ public class ClusteringService implements IClusteringService {
       }
 
       UpdateVmProgressCallback callback =
-         new UpdateVmProgressCallback(getLockClusterEntityMgr(), statusUpdator,
-               vNodes.get(0).getClusterName());
+            new UpdateVmProgressCallback(getLockClusterEntityMgr(),
+                  statusUpdator, vNodes.get(0).getClusterName());
 
       logger.info("ClusteringService, start to clone template.");
       AuAssert.check(specs.size() > 0);
@@ -1157,8 +1173,8 @@ public class ClusteringService implements IClusteringService {
 
       // call clone service to copy templates
       List<VmCreateResult<?>> results =
-         cloneService.createCopies(sourceSpec, cloneConcurrency, specs,
-               callback);
+            cloneService.createCopies(sourceSpec, cloneConcurrency, specs,
+                  callback);
       if (results == null || results.isEmpty()) {
          for (VmCreateSpec spec : specs) {
             BaseNode node = nodeMap.get(spec.getVmName());
@@ -1170,7 +1186,7 @@ public class ClusteringService implements IClusteringService {
       boolean success = true;
       int total = 0;
       for (VmCreateResult<?> result : results) {
-         VmCreateSpec spec = (VmCreateSpec)result.getSpec();
+         VmCreateSpec spec = (VmCreateSpec) result.getSpec();
          BaseNode node = nodeMap.get(spec.getVmName());
          node.setVmMobId(spec.getVmId());
          node.setSuccess(true);
@@ -1181,7 +1197,7 @@ public class ClusteringService implements IClusteringService {
             node.setSuccess(false);
             node.setErrMessage(result.getErrMessage());
          } else {
-            total ++;
+            total++;
          }
       }
       logger.info(total + " VMs are successfully created.");
@@ -1319,9 +1335,12 @@ public class ClusteringService implements IClusteringService {
 
       List<String> outOfSyncHosts = new ArrayList<String>();
       for (AbstractHost host : container.getAllHosts()) {
-         int hostTimeDiffInSec = VcResourceUtils.getHostTimeDiffInSec(host.getName());
+         int hostTimeDiffInSec =
+               VcResourceUtils.getHostTimeDiffInSec(host.getName());
          if (Math.abs(hostTimeDiffInSec) > maxTimeDiffInSec) {
-            logger.info("Host " + host.getName() + " has a time difference of " + hostTimeDiffInSec + " seconds and is dropped from placement.");
+            logger.info("Host " + host.getName() + " has a time difference of " 
+                  + hostTimeDiffInSec 
+                  + " seconds and is dropped from placement.");
             outOfSyncHosts.add(host.getName());
          }
       }
@@ -1379,12 +1398,15 @@ public class ClusteringService implements IClusteringService {
    }
 
    @Override
-   public boolean startCluster(final String name, StatusUpdater statusUpdator) {
+   public boolean startCluster(final String name,
+         List<NodeOperationStatus> failedNodes, StatusUpdater statusUpdator) {
       logger.info("startCluster, start.");
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(name);
       logger.info("startCluster, start to create store procedures.");
       List<Callable<Void>> storeProcedures = new ArrayList<Callable<Void>>();
 
+      Map<String, NodeOperationStatus> nodesStatus =
+            new HashMap<String, NodeOperationStatus>();
       for (int i = 0; i < nodes.size(); i++) {
          NodeEntity node = nodes.get(i);
          if (node.getMoId() == null) {
@@ -1398,13 +1420,17 @@ public class ClusteringService implements IClusteringService {
             continue;
          }
 
-         QueryIpAddress query = new QueryIpAddress(node.fetchAllPortGroups(), Constants.VM_POWER_ON_WAITING_SEC);
+         QueryIpAddress query =
+               new QueryIpAddress(node.fetchAllPortGroups(),
+                     Constants.VM_POWER_ON_WAITING_SEC);
          VcHost host = null;
          if (node.getHostName() != null) {
             host = VcResourceUtils.findHost(node.getHostName());
          }
          StartVmSP startSp = new StartVmSP(vcVm, query, host);
          storeProcedures.add(startSp);
+         nodesStatus.put(node.getVmName(),
+               new NodeOperationStatus(node.getVmName()));
       }
 
       try {
@@ -1417,30 +1443,40 @@ public class ClusteringService implements IClusteringService {
          // execute store procedures to start VMs
          logger.info("ClusteringService, start to start vms.");
          UpdateVmProgressCallback callback =
-               new UpdateVmProgressCallback(lockClusterEntityMgr, statusUpdator,
-                     name);
+               new UpdateVmProgressCallback(lockClusterEntityMgr,
+                     statusUpdator, name);
          ExecutionResult[] result =
                Scheduler
                      .executeStoredProcedures(
                            com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
                            storeProceduresArray, callback);
          if (result == null) {
+            for (NodeOperationStatus status : nodesStatus.values()) {
+               status.setSucceed(false);
+            }
             logger.error("No VM is started.");
+            failedNodes.addAll(nodesStatus.values());
             return false;
          }
 
          boolean success = true;
          int total = 0;
          for (int i = 0; i < storeProceduresArray.length; i++) {
+            StartVmSP sp = (StartVmSP) storeProceduresArray[i];
+            NodeOperationStatus status = nodesStatus.get(sp.getVmName());
             if (result[i].finished && result[i].throwable == null) {
                ++total;
+               nodesStatus.remove(status.getNodeName()); // do not return success node
             } else if (result[i].throwable != null) {
-               StartVmSP sp = (StartVmSP) storeProceduresArray[i];
+               status.setSucceed(false);
+               status.setErrorMessage(getErrorMessage(result[i].throwable));
                VcVirtualMachine vm = sp.getVcVm();
                if (vm != null && VcVmUtil.checkIpAddresses(vm)) {
                   ++total;
+                  nodesStatus.remove(status.getNodeName()); // do not return success node status
                } else {
-                  if (!vm.isConnected() || vm.getHost().isUnavailbleForManagement()) {
+                  if (!vm.isConnected()
+                        || vm.getHost().isUnavailbleForManagement()) {
                      logger.error("Cannot start VM " + vm.getName()
                            + " in connection state " + vm.getConnectionState()
                            + " or in maintenance mode. "
@@ -1455,6 +1491,7 @@ public class ClusteringService implements IClusteringService {
             }
          }
          logger.info(total + " VMs are started.");
+         failedNodes.addAll(nodesStatus.values());
          return success;
       } catch (InterruptedException e) {
          logger.error("error in staring VMs", e);
@@ -1463,11 +1500,14 @@ public class ClusteringService implements IClusteringService {
    }
 
    @Override
-   public boolean stopCluster(final String name, StatusUpdater statusUpdator) {
+   public boolean stopCluster(final String name,
+         List<NodeOperationStatus> failedNodes, StatusUpdater statusUpdator) {
       logger.info("stopCluster, start.");
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(name);
       logger.info("stopCluster, start to create store procedures.");
       List<Callable<Void>> storeProcedures = new ArrayList<Callable<Void>>();
+      Map<String, NodeOperationStatus> nodesStatus =
+            new HashMap<String, NodeOperationStatus>();
       for (int i = 0; i < nodes.size(); i++) {
          NodeEntity node = nodes.get(i);
          if (node.getMoId() == null) {
@@ -1482,6 +1522,8 @@ public class ClusteringService implements IClusteringService {
          }
          StopVmSP stopSp = new StopVmSP(vcVm);
          storeProcedures.add(stopSp);
+         nodesStatus.put(node.getVmName(),
+               new NodeOperationStatus(node.getVmName()));
       }
 
       try {
@@ -1494,8 +1536,8 @@ public class ClusteringService implements IClusteringService {
          // execute store procedures to start VMs
          logger.info("ClusteringService, start to stop vms.");
          UpdateVmProgressCallback callback =
-               new UpdateVmProgressCallback(lockClusterEntityMgr, statusUpdator,
-                     name);
+               new UpdateVmProgressCallback(lockClusterEntityMgr,
+                     statusUpdator, name);
          ExecutionResult[] result =
                Scheduler
                      .executeStoredProcedures(
@@ -1503,21 +1545,31 @@ public class ClusteringService implements IClusteringService {
                            storeProceduresArray, callback);
          if (result == null) {
             logger.error("No VM is stoped.");
+            for (NodeOperationStatus status : nodesStatus.values()) {
+               status.setSucceed(false);
+            }
+            failedNodes.addAll(nodesStatus.values());
             return false;
          }
 
          boolean success = true;
          int total = 0;
          for (int i = 0; i < storeProceduresArray.length; i++) {
+            StopVmSP sp = (StopVmSP) storeProceduresArray[i];
+            NodeOperationStatus status = nodesStatus.get(sp.getVmName());
             if (result[i].finished && result[i].throwable == null) {
                ++total;
+               nodesStatus.remove(status.getNodeName()); // do not return success node
             } else if (result[i].throwable != null) {
-               StopVmSP sp = (StopVmSP) storeProceduresArray[i];
+               status.setSucceed(false);
+               status.setErrorMessage(getErrorMessage(result[i].throwable));
                VcVirtualMachine vm = sp.getVcVm();
                if (vm == null || vm.isPoweredOff()) {
                   ++total;
+                  nodesStatus.remove(status.getNodeName()); // do not return success node
                } else {
-                  if (!vm.isConnected() || vm.getHost().isUnavailbleForManagement()) {
+                  if (!vm.isConnected()
+                        || vm.getHost().isUnavailbleForManagement()) {
                      logger.error("Cannot stop VM " + vm.getName()
                            + " in connection state " + vm.getConnectionState()
                            + " or in maintenance mode. "
@@ -1536,6 +1588,19 @@ public class ClusteringService implements IClusteringService {
          logger.error("error in stoping VMs", e);
          throw BddException.INTERNAL(e, e.getMessage());
       }
+   }
+
+   private String getErrorMessage(Throwable throwable) {
+      if (throwable == null) {
+         return null;
+      }
+      String errMsg = null;
+      if (throwable.getCause() != null) {
+         errMsg = throwable.getCause().getMessage();
+      } else {
+         errMsg = throwable.getMessage();
+      }
+      return errMsg;
    }
 
    public boolean removeBadNodes(ClusterCreate cluster,
@@ -1558,7 +1623,8 @@ public class ClusteringService implements IClusteringService {
 
       if (badNodes != null && badNodes.size() > 0) {
          boolean deleted = syncDeleteVMs(badNodes, statusUpdator, false);
-         afterBadVcVmDelete(existingNodes, deletedNodes, badNodes, occupiedIpSets);
+         afterBadVcVmDelete(existingNodes, deletedNodes, badNodes,
+               occupiedIpSets);
          return deleted;
       }
       return true;
@@ -1588,12 +1654,10 @@ public class ClusteringService implements IClusteringService {
    }
 
    @Override
-   public boolean deleteCluster(final String name, StatusUpdater statusUpdator) {
-      logger.info("Start to delete cluster: " + name);
-      List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(name);
-      List<BaseNode> vNodes = JobUtils.convertNodeEntities(null, null, nodes);
+   public boolean deleteCluster(String name, List<BaseNode> vNodes,
+         StatusUpdater statusUpdator) {
       boolean deleted = syncDeleteVMs(vNodes, statusUpdator, true);
-      if (nodes.size() > 0) {
+      if (vNodes.size() > 0) {
          try {
             deleteChildRps(name, vNodes);
          } catch (Exception e) {
@@ -1675,7 +1739,7 @@ public class ClusteringService implements IClusteringService {
    /**
     * this method will delete the cluster root folder, if there is any VM
     * existed and powered on in the folder, the folder deletion will fail.
-    *
+    * 
     * @param node
     * @throws BddException
     */
@@ -1768,17 +1832,22 @@ public class ClusteringService implements IClusteringService {
          boolean failed = false;
          for (int i = 0; i < storeProceduresArray.length; i++) {
             BaseNode vNode = badNodes.get(i);
+            vNode.setFinished(true);
             if (result[i].finished && result[i].throwable == null) {
                vNode.setSuccess(true);
                vNode.setVmMobId(null);
                ++total;
             } else if (result[i].throwable != null) {
+               vNode.setSuccess(false);
+               vNode.setErrMessage(getErrorMessage(result[i].throwable));
                if (ignoreUnavailableNodes) {
                   DeleteVmByIdSP sp = (DeleteVmByIdSP) storeProceduresArray[i];
                   VcVirtualMachine vcVm = sp.getVcVm();
-                  if (!vcVm.isConnected() || vcVm.getHost().isUnavailbleForManagement()) {
+                  if (!vcVm.isConnected()
+                        || vcVm.getHost().isUnavailbleForManagement()) {
                      logger.error("Failed to delete VM " + vcVm.getName()
-                           + " in connection state " + vcVm.getConnectionState()
+                           + " in connection state "
+                           + vcVm.getConnectionState()
                            + "  or in maintenance mode.");
                      logger.error("Ignore this failure and continue cluster operations.");
                      continue;
@@ -1786,7 +1855,6 @@ public class ClusteringService implements IClusteringService {
                }
                logger.error("Failed to delete VM " + vNode.getVmName(),
                      result[i].throwable);
-               vNode.setSuccess(false);
                failed = true;
             }
             vNode.setFinished(true);
@@ -1867,7 +1935,9 @@ public class ClusteringService implements IClusteringService {
    public boolean startSingleVM(String clusterName, String nodeName,
          StatusUpdater statusUpdator) {
       NodeEntity node = this.clusterEntityMgr.findNodeByName(nodeName);
-      QueryIpAddress query = new QueryIpAddress(node.fetchAllPortGroups(), Constants.VM_POWER_ON_WAITING_SEC);
+      QueryIpAddress query =
+            new QueryIpAddress(node.fetchAllPortGroups(),
+                  Constants.VM_POWER_ON_WAITING_SEC);
 
       VcHost host = null;
       if (node.getHostName() != null) {
@@ -1904,6 +1974,7 @@ public class ClusteringService implements IClusteringService {
       }
       return VcVmUtil.runSPOnSingleVM(node, stopVMSP);
    }
+
    public VmEventManager getEventProcessor() {
       return this.processor;
    }

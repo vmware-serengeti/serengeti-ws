@@ -37,12 +37,14 @@ public class StartVmSP implements Callable<Void> {
    private String vmId;
    private final IPrePostPowerOn postPowerOn;
    private VcHost host;
+   private String vmName;
 
    public StartVmSP(VcVirtualMachine vcVm, IPrePostPowerOn postPowerOn,
          VcHost host) {
       this.vmId = vcVm.getId();
       this.postPowerOn = postPowerOn;
       this.host = host;
+      this.vmName = vcVm.getName();
    }
 
    @Override
@@ -97,5 +99,9 @@ public class StartVmSP implements Callable<Void> {
 
    public VcVirtualMachine getVcVm() {
       return VcCache.getIgnoreMissing(vmId);
+   }
+
+   public String getVmName() {
+      return vmName;
    }
 }

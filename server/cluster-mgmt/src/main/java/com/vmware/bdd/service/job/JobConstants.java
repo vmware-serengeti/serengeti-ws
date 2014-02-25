@@ -39,6 +39,7 @@ public interface JobConstants {
    public static final String ACTIVE_COMPUTE_NODE_NUMBER_JOB_PARAM = "activeComputeNodeNumber";
    public static final String VHM_ACTION_JOB_PARAM = "vhmAction";
    public static final String TIMESTAMP_JOB_PARAM = "timeStamp";
+   public static final String CLUSTER_NODES_STATUS = "clusterNodesStatus";
    public static final String CLUSTER_OPERATION_SUCCESS = "cluster.isSuccess";
    public static final String NODE_OPERATION_SUCCESS = "node.isSuccess";
    public static final String CLUSTER_DELETE_VM_OPERATION_SUCCESS = "cluster.isDeleted";

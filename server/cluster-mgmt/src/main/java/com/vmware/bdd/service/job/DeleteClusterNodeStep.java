@@ -14,15 +14,20 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job;
 
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NetworkEntity;
+import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
+import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.utils.AuAssert;
 
@@ -60,26 +65,42 @@ public class DeleteClusterNodeStep extends TrackableTasklet {
             getFromJobExecutionContext(chunkContext,
                   JobConstants.CLUSTER_DELETE_VM_OPERATION_SUCCESS,
                   Boolean.class);
-      deleteClusterNodes(chunkContext, clusterName, deleted);
-      if (!deleted) {
+      if (deleted) {
+         deleteClusterNodes(chunkContext, clusterName);
+      } else {
          // vm deleting is finished, and with error happens, throw exception
-         logger.error("Failed to delete nodes.");
-         throw ClusteringServiceException.DELETE_CLUSTER_VM_FAILED(clusterName);
+         updateNodeErrorMessage(chunkContext);
       }
       return RepeatStatus.FINISHED;
    }
 
-   private void deleteClusterNodes(ChunkContext chunkContext,
-         String clusterName, boolean success) {
+   private void updateNodeErrorMessage(ChunkContext chunkContext) {
+      logger.error("Failed to delete nodes.");
+      List<BaseNode> nodes =
+         getFromJobExecutionContext(chunkContext,
+               JobConstants.CLUSTER_DELETED_NODES_JOB_PARAM,
+               new TypeToken<List<BaseNode>>() {
+               }.getType());
+
+      if (nodes != null) {
+         for (BaseNode node : nodes) {
+            if (!node.isSuccess()) {
+               NodeEntity entity = getClusterEntityMgr().findNodeByName(node.getVmName());
+               entity.setActionFailed(true);
+               entity.setErrMessage(node.getErrMessage());
+            }
+         }
+      }
+   }
+
+   private void deleteClusterNodes(ChunkContext chunkContext, String clusterName) {
       ClusterEntity cluster = getClusterEntityMgr().findByName(clusterName);
       AuAssert.check(cluster != null);
-      if (success) {
-         releaseIp(cluster);
-         lockClusterEntityMgr.getLock(clusterName).lock();
-         putIntoJobExecutionContext(chunkContext,
-               JobConstants.CLUSTER_EXCLUSIVE_WRITE_LOCKED, true);
-         getClusterEntityMgr().delete(cluster);
-      }
+      releaseIp(cluster);
+      lockClusterEntityMgr.getLock(clusterName).lock();
+      putIntoJobExecutionContext(chunkContext,
+            JobConstants.CLUSTER_EXCLUSIVE_WRITE_LOCKED, true);
+      getClusterEntityMgr().delete(cluster);
    }
 
    private void releaseIp(ClusterEntity cluster) {

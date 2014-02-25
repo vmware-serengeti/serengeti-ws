@@ -18,8 +18,10 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
 import com.vmware.bdd.exception.ClusteringServiceException;
+import com.vmware.bdd.service.job.software.ManagementOperation;
 
 public class ClusterNodeStatusVerifyStep extends TrackableTasklet {
+   private ManagementOperation managementOperation;
 
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,
@@ -43,16 +45,32 @@ public class ClusterNodeStatusVerifyStep extends TrackableTasklet {
          // vm creation is finished, and with error happens, throw exception here to stop following steps
          throw ClusteringServiceException.VM_CREATION_FAILED(clusterName);
       }
-      if (created != null) {
+      Boolean verifyStatus =
+         getFromJobExecutionContext(chunkContext,
+               JobConstants.VERIFY_NODE_STATUS_RESULT_PARAM,
+               Boolean.class);
+      if (created != null && (verifyStatus == null || !verifyStatus)) {
+         // throw creation exception here, and query detail node error message from node entity
+         throw ClusteringServiceException.VM_CREATION_FAILED(clusterName);
+      }
+      if (managementOperation != null) {
          Boolean success =
-               getFromJobExecutionContext(chunkContext,
-                     JobConstants.VERIFY_NODE_STATUS_RESULT_PARAM,
-                     Boolean.class);
-         if (success == null || !success) {
+            getFromJobExecutionContext(chunkContext,
+                  JobConstants.CLUSTER_OPERATION_SUCCESS, Boolean.class);
+         if ((success != null && !success)
+               || (verifyStatus == null || !verifyStatus)) {
             // throw creation exception here, and query detail node error message from node entity
-            throw ClusteringServiceException.VM_CREATION_FAILED(clusterName);
+            throw ClusteringServiceException.CLUSTER_OPERATION_FAILED(clusterName);
          }
       }
       return RepeatStatus.FINISHED;
+   }
+
+   public ManagementOperation getManagementOperation() {
+      return managementOperation;
+   }
+
+   public void setManagementOperation(ManagementOperation managementOperation) {
+      this.managementOperation = managementOperation;
    }
 }

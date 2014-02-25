@@ -20,9 +20,9 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.entity.NodeEntity;
-import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
 import com.vmware.bdd.utils.JobUtils;
 
@@ -52,12 +52,24 @@ public class ClusterNodeSyncupStep extends TrackableTasklet {
       }
       lockClusterEntityMgr.syncUp(clusterName, false);
 
+      List<NodeOperationStatus> nodesStatus =
+            getFromJobExecutionContext(chunkContext,
+                  JobConstants.CLUSTER_NODES_STATUS,
+                  new TypeToken<List<NodeOperationStatus>>() {
+                  }.getType());
+      if (nodesStatus != null) {
+         for (NodeOperationStatus node : nodesStatus) {
+            NodeEntity entity = getClusterEntityMgr().findNodeByName(node.getNodeName());
+            entity.setActionFailed(!node.isSucceed());
+            entity.setErrMessage(node.getErrorMessage());
+         }
+      }
       Boolean success =
             getFromJobExecutionContext(chunkContext,
                   JobConstants.CLUSTER_OPERATION_SUCCESS, Boolean.class);
       if (success != null && !success) {
-         // vm option is finished, and with error happens, throw exception here to stop following steps
-         throw ClusteringServiceException.CLUSTER_OPERATION_FAILED(clusterName);
+         // wait next step to throw exception
+         return RepeatStatus.FINISHED;
       }
       NodeStatus expectedStatus =
             getFromJobExecutionContext(chunkContext,
@@ -67,9 +79,8 @@ public class ClusterNodeSyncupStep extends TrackableTasklet {
          List<NodeEntity> nodes =
                getClusterEntityMgr().findAllNodes(clusterName);
          success = JobUtils.verifyNodesStatus(nodes, expectedStatus, true);
-         if (!success) {
-            throw ClusteringServiceException.CLUSTER_OPERATION_FAILED(clusterName);
-         }
+         putIntoJobExecutionContext(chunkContext,
+               JobConstants.VERIFY_NODE_STATUS_RESULT_PARAM, success);
       }
       return RepeatStatus.FINISHED;
    }

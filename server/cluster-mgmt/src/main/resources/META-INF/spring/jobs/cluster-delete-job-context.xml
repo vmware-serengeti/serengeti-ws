@@ -37,8 +37,14 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="softwareDeleteClusterStep" next="deleteClusterData">
+		<step id="softwareDeleteClusterStep" next="nodeStatusVerifyStep">
 			<tasklet ref="softwareDeleteClusterTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="nodeStatusVerifyStep" next="deleteClusterData">
+			<tasklet ref="clusterNodeStatusVerifyTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
