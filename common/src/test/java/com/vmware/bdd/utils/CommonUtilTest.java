@@ -27,16 +27,31 @@ import org.testng.annotations.Test;
 public class CommonUtilTest {
 
    @Test
+   public void testValidateVcResourceName() {
+      assertFalse(CommonUtil.validateVcResourceName(""));
+      assertTrue(CommonUtil
+            .validateVcResourceName("the你好學習こんにちは안녕하세요schönenuntrèsbon_t- aux.3210"));
+      assertFalse(CommonUtil
+            .validateVcResourceName("the你好學習こんにちは안녕하세요schönenuntrèsbon_t- aux$"));
+      assertFalse(CommonUtil.validateVcResourceName("%&*$#@!\\\\/:*?\"<>|;'"));
+      assertFalse(CommonUtil.validateVcResourceName("()+,=[]^`{}~"));
+      assertTrue(CommonUtil.validateVcResourceName("resource name"));
+      assertTrue(CommonUtil.validateVcResourceName("192.168.0.1"));
+      assertTrue(CommonUtil.validateVcResourceName("VM network192.168.0.1"));
+      assertTrue(CommonUtil.validateVcResourceName("-------- ------"));
+   }
+
+   @Test
    public void testValidateResourceName() {
-      assertFalse(CommonUtil.validateResourceName(""));
-      assertTrue(CommonUtil.validateResourceName("the你好學習こんにちは안녕하세요schönenuntrèsbon_t- aux.3210"));
-      assertFalse(CommonUtil.validateResourceName("the你好學習こんにちは안녕하세요schönenuntrèsbon_t- aux$"));
-      assertFalse(CommonUtil.validateResourceName("%&*$#@!\\\\/:*?\"<>|;'"));
-      assertFalse(CommonUtil.validateResourceName("()+,=[]^`{}~"));
-      assertTrue(CommonUtil.validateResourceName("resource name"));
-      assertTrue(CommonUtil.validateResourceName("192.168.0.1"));
-      assertTrue(CommonUtil.validateResourceName("VM network192.168.0.1"));
-      assertTrue(CommonUtil.validateResourceName("-------- ------"));
+      assertEquals(CommonUtil.validateDistroName("name1"), true);
+      assertEquals(CommonUtil.validateDistroName("Name2"), true);
+      assertEquals(CommonUtil.validateDistroName("name3_"), true);
+      assertEquals(CommonUtil.validateDistroName("name4 "), true);
+      assertEquals(CommonUtil.validateDistroName("name-5"), true);
+      assertEquals(CommonUtil.validateDistroName("name6-"), true);
+      assertEquals(CommonUtil.validateDistroName("-name7-"), true);
+      assertFalse(CommonUtil.validateDistroName("%&*$#@!\\\\/:*?\"<>|;'"));
+      assertFalse(CommonUtil.validateDistroName("()+,=[]^`{}~"));
    }
 
    @Test
@@ -152,4 +167,21 @@ public class CommonUtilTest {
       max = CommonUtil.makeVmMemoryDivisibleBy4(max);
       assertTrue(max > 0);
    }
+
+   @Test
+   public void testDecode() {
+      assertEquals(CommonUtil.decode("datastore1"), "datastore1");
+      assertEquals(CommonUtil.decode(CommonUtil.encode("데이터저장소1")), "데이터저장소1");
+      assertEquals(CommonUtil.decode(CommonUtil.encode("数据存储1")), "数据存储1");
+   }
+
+   @Test
+   public void testEncode() {
+      assertEquals(CommonUtil.encode("datastore1"), "datastore1");
+      assertEquals(CommonUtil.encode("데이터저장소1"),
+            "%EB%8D%B0%EC%9D%B4%ED%84%B0%EC%A0%80%EC%9E%A5%EC%86%8C1");
+      assertEquals(CommonUtil.encode("数据存储1"),
+            "%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A81");
+   }
+
 }

@@ -19,7 +19,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -79,6 +82,10 @@ public class CommonUtil {
 
    public static String notNull(final String str, final String desStr) {
       return str == null ? desStr : str;
+   }
+
+   public static boolean validateVcResourceName(final String input) {
+      return match(input, Constants.VC_RESOURCE_NAME_PATTERN);
    }
 
    public static boolean validateResourceName(final String input) {
@@ -216,4 +223,23 @@ public class CommonUtil {
 
       return p;
    }
+
+   public static String decode(final String paramName) {
+      try {
+         return URLDecoder.decode(paramName, "UTF-8");
+      } catch (UnsupportedEncodingException e) {
+         logger.error(e.getMessage(), e);
+         return paramName;
+      }
+   }
+
+   public static String encode(final String paramName) {
+      try {
+         return URLEncoder.encode(paramName, "UTF-8");
+      } catch (UnsupportedEncodingException e) {
+         logger.error(e.getMessage(), e);
+         return paramName;
+      }
+   }
+
 }

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import com.vmware.bdd.apitypes.DatastoreAdd;
 import com.vmware.bdd.apitypes.DatastoreRead;
 import com.vmware.bdd.cli.commands.Constants;
+import com.vmware.bdd.utils.CommonUtil;
 
 @Component
 public class DatastoreRestClient {
@@ -35,6 +36,7 @@ public class DatastoreRestClient {
    }
 
    public void delete(String id) {
+      id = CommonUtil.encode(id);
       final String path = Constants.REST_PATH_DATASTORE;
       final HttpMethod httpverb = HttpMethod.DELETE;
 
@@ -42,6 +44,7 @@ public class DatastoreRestClient {
    }
    
    public DatastoreRead get(String name) {
+      name = CommonUtil.encode(name);
       final String path = Constants.REST_PATH_DATASTORE;
       final HttpMethod httpverb = HttpMethod.GET;
 

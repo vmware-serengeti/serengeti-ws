@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.cli.commands.Constants;
+import com.vmware.bdd.utils.CommonUtil;
 
 @Component
 public class NetworkRestClient {
@@ -48,7 +49,7 @@ public class NetworkRestClient {
     * @param networkAdd
     */
    public void increaseIPs(NetworkAdd networkAdd) {
-      String networkName = networkAdd.getName();
+      String networkName = CommonUtil.encode(networkAdd.getName());
       final String path = Constants.REST_PATH_NETWORK + "/" + networkName;
       final HttpMethod httpverb = HttpMethod.PUT;
       restClient.update(networkAdd, path, httpverb);
@@ -60,6 +61,7 @@ public class NetworkRestClient {
     * @param name
     */
    public void delete(String name) {
+      name = CommonUtil.encode(name);
       final String path = Constants.REST_PATH_NETWORK;
       final HttpMethod httpverb = HttpMethod.DELETE;
       restClient.deleteObject(name, path, httpverb);
@@ -80,6 +82,7 @@ public class NetworkRestClient {
     * @return a network information
     */
    public NetworkRead get(String name, boolean detail) {
+      name = CommonUtil.encode(name);
       final String path = Constants.REST_PATH_NETWORK;
       final HttpMethod httpverb = HttpMethod.GET;
 

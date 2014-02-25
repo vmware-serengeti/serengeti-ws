@@ -388,14 +388,14 @@ public class RestResource {
                rpSpec.getName());
       }
       if (CommonUtil.isBlank(rpSpec.getVcClusterName())
-            || !CommonUtil.validateResourceName(rpSpec.getVcClusterName())) {
+            || !CommonUtil.validateVcResourceName(rpSpec.getVcClusterName())) {
          throw BddException.INVALID_PARAMETER("vCenter Server cluster name",
                rpSpec.getVcClusterName());
       }
       rpSpec.setResourcePoolName(CommonUtil.notNull(
             rpSpec.getResourcePoolName(), ""));
       if (!CommonUtil.isBlank(rpSpec.getResourcePoolName())
-            && !CommonUtil.validateResourceName(rpSpec.getResourcePoolName())) {
+            && !CommonUtil.validateVcResourceName(rpSpec.getResourcePoolName())) {
          throw BddException.INVALID_PARAMETER(
                "vCenter Server resource pool name",
                rpSpec.getResourcePoolName());
@@ -413,9 +413,10 @@ public class RestResource {
 
    @RequestMapping(value = "/resourcepool/{rpName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   public ResourcePoolRead getResourcePool(
-         @PathVariable("rpName") final String rpName) {
-      if (CommonUtil.isBlank(rpName) || !CommonUtil.validateResourceName(rpName)) {
+   public ResourcePoolRead getResourcePool(@PathVariable("rpName") String rpName) {
+      rpName = CommonUtil.decode(rpName);
+      if (CommonUtil.isBlank(rpName)
+            || !CommonUtil.validateResourceName(rpName)) {
          throw BddException.INVALID_PARAMETER("resource pool name", rpName);
       }
       ResourcePoolRead read = vcRpSvc.getResourcePoolForRest(rpName);
@@ -427,8 +428,10 @@ public class RestResource {
 
    @RequestMapping(value = "/resourcepool/{rpName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
-   public void deleteResourcePool(@PathVariable("rpName") final String rpName) {
-      if (CommonUtil.isBlank(rpName) || !CommonUtil.validateResourceName(rpName)) {
+   public void deleteResourcePool(@PathVariable("rpName") String rpName) {
+      rpName = CommonUtil.decode(rpName);
+      if (CommonUtil.isBlank(rpName)
+            || !CommonUtil.validateResourceName(rpName)) {
          throw BddException.INVALID_PARAMETER("resource pool name", rpName);
       }
       vcRpSvc.deleteResourcePool(rpName);
@@ -454,8 +457,10 @@ public class RestResource {
 
    @RequestMapping(value = "/datastore/{dsName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   public DatastoreRead getDatastore(@PathVariable("dsName") final String dsName) {
-      if (CommonUtil.isBlank(dsName) || !CommonUtil.validateResourceName(dsName)) {
+   public DatastoreRead getDatastore(@PathVariable("dsName") String dsName) {
+      dsName = CommonUtil.decode(dsName);
+      if (CommonUtil.isBlank(dsName)
+            || !CommonUtil.validateResourceName(dsName)) {
          throw BddException.INVALID_PARAMETER("datestore name", dsName);
       }
       DatastoreRead read = datastoreSvc.getDatastoreRead(dsName);
@@ -474,7 +479,9 @@ public class RestResource {
    @RequestMapping(value = "/datastore/{dsName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
    public void deleteDatastore(@PathVariable("dsName") String dsName) {
-      if (CommonUtil.isBlank(dsName) || !CommonUtil.validateResourceName(dsName)) {
+      dsName = CommonUtil.decode(dsName);
+      if (CommonUtil.isBlank(dsName)
+            || !CommonUtil.validateResourceName(dsName)) {
          throw BddException.INVALID_PARAMETER("date store name", dsName);
       }
       datastoreSvc.deleteDatastore(dsName);
@@ -483,7 +490,8 @@ public class RestResource {
    @RequestMapping(value = "/network/{networkName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
    public void deleteNetworkByName(
-         @PathVariable("networkName") final String networkName) {
+         @PathVariable("networkName") String networkName) {
+      networkName = CommonUtil.decode(networkName);
       if (CommonUtil.isBlank(networkName)
             || !CommonUtil.validateResourceName(networkName)) {
          throw BddException.INVALID_PARAMETER("network name", networkName);
@@ -494,8 +502,9 @@ public class RestResource {
    @RequestMapping(value = "/network/{networkName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public NetworkRead getNetworkByName(
-         @PathVariable("networkName") final String networkName,
+         @PathVariable("networkName") String networkName,
          @RequestParam(value = "details", required = false, defaultValue = "false") final Boolean details) {
+      networkName = CommonUtil.decode(networkName);
       if (CommonUtil.isBlank(networkName)
             || !CommonUtil.validateResourceName(networkName)) {
          throw BddException.INVALID_PARAMETER("network name", networkName);
@@ -524,7 +533,7 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("name", na.getName());
       }
       if (CommonUtil.isBlank(na.getPortGroup())
-            || !CommonUtil.validateResourceName(na.getPortGroup())) {
+            || !CommonUtil.validateVcResourceName(na.getPortGroup())) {
          throw BddException.INVALID_PARAMETER("port group", na.getPortGroup());
       }
 
@@ -557,6 +566,7 @@ public class RestResource {
    public void increaseIPs(@PathVariable("networkName") String networkName,
          @RequestBody NetworkAdd network, HttpServletRequest request,
          HttpServletResponse response) {
+      networkName = CommonUtil.decode(networkName);
       if (CommonUtil.isBlank(networkName)
             || !CommonUtil.validateResourceName(networkName)) {
          throw BddException.INVALID_PARAMETER("network name", networkName);
@@ -628,4 +638,5 @@ public class RestResource {
       }
       return msg;
    }
+
 }

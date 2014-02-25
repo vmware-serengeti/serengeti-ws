@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import com.vmware.bdd.apitypes.ResourcePoolAdd;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.cli.commands.Constants;
+import com.vmware.bdd.utils.CommonUtil;
 
 @Component
 public class ResourcePoolRestClient {
@@ -35,6 +36,7 @@ public class ResourcePoolRestClient {
    }
 
    public void delete(String id) {
+      id = CommonUtil.encode(id);
       final String path = Constants.REST_PATH_RESOURCEPOOL;
       final HttpMethod httpverb = HttpMethod.DELETE;
 
@@ -42,6 +44,7 @@ public class ResourcePoolRestClient {
    }
 
    public ResourcePoolRead get(String id) {
+      id = CommonUtil.encode(id);
       final String path = Constants.REST_PATH_RESOURCEPOOL;
       final HttpMethod httpverb = HttpMethod.GET;
 
