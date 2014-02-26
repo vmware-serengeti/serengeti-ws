@@ -77,6 +77,7 @@ import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.TestResourceCleanupUtils;
+import com.vmware.bdd.utils.TestSuiteUtils;
 import com.vmware.vim.binding.vim.Folder;
 
 @ContextConfiguration(locations = {
@@ -177,6 +178,9 @@ public class TestClusteringJobs extends
       datastoreSpec = testProperty.getProperty(TEST_VC_DATASTORE_SPEC);
       vcRP = testProperty.getProperty(TEST_VC_RESOURCEPOOL);
       vcCluster = testProperty.getProperty(TEST_VC_CLUSTER);
+
+      // mock chef server roles
+      TestSuiteUtils.mockChefServerRoles();
 
       // init vc context
       clusterSvc.init();
