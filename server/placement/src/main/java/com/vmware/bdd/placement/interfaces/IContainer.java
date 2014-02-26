@@ -121,7 +121,7 @@ public interface IContainer {
    /**
     * remove a host
     *
-    * @param host
+    * @param hostname
     */
-   public void removeHost(AbstractHost host);
+   public void removeHost(String hostname);
 }

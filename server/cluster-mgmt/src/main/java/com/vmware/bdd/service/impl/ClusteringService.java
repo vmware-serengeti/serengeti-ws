@@ -90,6 +90,7 @@ import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.placement.exception.PlacementException;
 import com.vmware.bdd.placement.interfaces.IPlacementService;
+import com.vmware.bdd.placement.util.PlacementUtil;
 import com.vmware.bdd.service.IClusterInitializerService;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.event.VmEventManager;
@@ -1316,17 +1317,30 @@ public class ClusteringService implements IClusteringService {
       if (clusterSpec.checkHBase())
          maxTimeDiffInSec = MAX_TIME_DIFF_IN_SEC_HBASE;
 
-      List<AbstractHost> outOfSyncHosts = new ArrayList<AbstractHost>();
+      List<String> outOfSyncHosts = new ArrayList<String>();
       for (AbstractHost host : container.getAllHosts()) {
          int hostTimeDiffInSec = VcResourceUtils.getHostTimeDiffInSec(host.getName());
          if (Math.abs(hostTimeDiffInSec) > maxTimeDiffInSec) {
             logger.info("Host " + host.getName() + " has a time difference of " + hostTimeDiffInSec + " seconds and is dropped from placement.");
-            outOfSyncHosts.add(host);
+            outOfSyncHosts.add(host.getName());
          }
       }
-      for (AbstractHost host : outOfSyncHosts) {
+      for (String host : outOfSyncHosts) {
          container.removeHost(host);
       }
+
+      // filter hosts by networks
+      List<com.vmware.bdd.spectypes.VcCluster> usedClusters = clusterSpec.getVcClusters();
+      List<String> noNetworkHosts = new ArrayList<String>();
+      noNetworkHosts = resMgr.filterHostsByNetwork(clusterSpec.getNetworkNames(), usedClusters);
+
+      for (String host : noNetworkHosts) {
+         container.removeHost(host);
+      }
+
+      Map<String, List<String>> filteredHosts =new HashMap<String, List<String>>();
+      if (!outOfSyncHosts.isEmpty()) filteredHosts.put(PlacementUtil.OUT_OF_SYNC_HOSTS, outOfSyncHosts);
+      if (!noNetworkHosts.isEmpty()) filteredHosts.put(PlacementUtil.NO_NETWORKS_HOSTS, noNetworkHosts);
 
       container.SetTemplateNode(templateNode);
       if (clusterSpec.getHostToRackMap() != null
@@ -1355,7 +1369,7 @@ public class ClusteringService implements IClusteringService {
 
       List<BaseNode> baseNodes =
             placementService.getPlacementPlan(container, clusterSpec,
-                  existedNodes, outOfSyncHosts);
+                  existedNodes, filteredHosts);
       for (BaseNode baseNode : baseNodes) {
          baseNode.setNodeAction(Constants.NODE_ACTION_CLONING_VM);
       }

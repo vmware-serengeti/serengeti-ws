@@ -18,8 +18,10 @@ package com.vmware.bdd.service.resmgmt.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
@@ -472,6 +474,79 @@ public class ResourceService implements IResourceService {
       attr.put(Constants.CLOUD_PROVIDER_TYPE_FIELD,
             Constants.VSPHERE_PROVIDER_TYPE);
       return attr;
+   }
+
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.service.resmgmt.IResourceService#filterHostsByNetwork(java.util.List, java.util.List)
+    */
+   @Override
+   public List<String> filterHostsByNetwork(List<String> networkList,
+         List<com.vmware.bdd.spectypes.VcCluster> clusters) {
+      refreshNetwork();
+      Set<String> networkNames = new HashSet<String>();
+      networkNames.addAll(networkList);
+      Set<String> portGroupNames = new HashSet<String>();
+      for (String networkName : networkNames) {
+         VcNetwork vcNetwork = getNetworkByName(networkName);
+         if (vcNetwork == null) {
+            throw VcProviderException.NETWORK_NOT_FOUND(networkName);
+         }
+         portGroupNames.add(vcNetwork.getName());
+      }
+
+      List<String> noNetworkHosts = new ArrayList<String>();
+      for (com.vmware.bdd.spectypes.VcCluster cluster : clusters) {
+         List<VcHost> hosts = getHostsByClusterName(cluster.getName());
+         for (VcHost vcHost : hosts) {
+            // check each host has all the networks
+            List<VcNetwork> vcNetworks = vcHost.getNetworks();
+            List<String> hostNetworkNames = new ArrayList<String>();
+            for (VcNetwork vcNetwork : vcNetworks) {
+               hostNetworkNames.add(vcNetwork.getName());
+            }
+            if (!hostNetworkNames.containsAll(portGroupNames)) {
+               logger.info("host" + vcHost.getName() + " has networks " + vcNetworks
+                     + " does not have target network " + portGroupNames);
+               noNetworkHosts.add(vcHost.getName());
+            }
+         }
+      }
+      return noNetworkHosts;
+   }
+
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.service.resmgmt.IResourceService#isNetworkAccessibleByCluster(java.util.List, java.util.List)
+    */
+   @Override
+   public boolean isNetworkAccessibleByCluster(List<String> networkList,
+         List<com.vmware.bdd.spectypes.VcCluster> clusters) {
+      refreshNetwork();
+
+      Set<String> portGroupNames = new HashSet<String>();
+      for (String networkName : networkList) {
+         VcNetwork vcNetwork = getNetworkByName(networkName);
+         if (vcNetwork == null) {
+            throw VcProviderException.NETWORK_NOT_FOUND(networkName);
+         }
+         portGroupNames.add(vcNetwork.getName());
+      }
+
+      for (com.vmware.bdd.spectypes.VcCluster cluster : clusters) {
+         List<VcHost> hosts = getHostsByClusterName(cluster.getName());
+         for (VcHost vcHost : hosts) {
+            List<VcNetwork> vcNetworks = vcHost.getNetworks();
+            List<String> hostNetworkNames = new ArrayList<String>();
+            for (VcNetwork vcNetwork : vcNetworks) {
+               hostNetworkNames.add(vcNetwork.getName());
+            }
+            if (hostNetworkNames.containsAll(portGroupNames)) {
+               return true;
+            }
+         }
+      }
+      return false;
    }
 
 }

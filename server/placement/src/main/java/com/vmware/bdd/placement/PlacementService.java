@@ -53,7 +53,7 @@ public class PlacementService implements IPlacementService {
 
    private void placeVirtualGroup(IContainer container, ClusterCreate cluster,
          IPlacementPlanner planner, VirtualGroup vGroup,
-         List<BaseNode> placedNodes, List<AbstractHost> outOfSyncHosts) {
+         List<BaseNode> placedNodes, Map<String, List<String>> filteredHosts) {
       String targetRack = null;
       if (vGroup.getGroupRacks() != null
             && GroupRacksType.SAMERACK.equals(vGroup.getGroupRacks().getType())) {
@@ -71,10 +71,10 @@ public class PlacementService implements IPlacementService {
          if (candidates == null || candidates.size() == 0) {
             logger.error("cannot find candidate hosts from the container "
                   + "to place the virtual node " + vNode.getBaseNodeNames());
-            if (outOfSyncHosts.size() == 0)
+            if (filteredHosts.isEmpty())
                throw PlacementException.OUT_OF_VC_HOST(PlacementUtil.getBaseNodeNames(vNode));
             else
-               throw PlacementException.OUT_OF_VC_HOST_WITH_FILTERING(PlacementUtil.getBaseNodeNames(vNode), outOfSyncHosts);
+               throw PlacementException.OUT_OF_VC_HOST_WITH_FILTERING(PlacementUtil.getBaseNodeNames(vNode), filteredHosts);
          }
 
          // select host
@@ -85,10 +85,10 @@ public class PlacementService implements IPlacementService {
                   + candidates + " for the virtual node "
                   + vNode.getBaseNodeNames());
             // TODO different exception for policy violation
-            if (outOfSyncHosts.size() == 0)
+            if (filteredHosts.isEmpty())
                throw PlacementException.OUT_OF_VC_HOST(PlacementUtil.getBaseNodeNames(vNode));
             else
-               throw PlacementException.OUT_OF_VC_HOST_WITH_FILTERING(PlacementUtil.getBaseNodeNames(vNode), outOfSyncHosts);
+               throw PlacementException.OUT_OF_VC_HOST_WITH_FILTERING(PlacementUtil.getBaseNodeNames(vNode), filteredHosts);
          }
 
          // generate placement topology
@@ -113,10 +113,10 @@ public class PlacementService implements IPlacementService {
 
    private void placeVirtualGroupWithSnapshot(IContainer container,
          ClusterCreate cluster, IPlacementPlanner planner, VirtualGroup vGroup,
-         List<BaseNode> placedNodes, List<AbstractHost> outOfSyncHosts) {
+         List<BaseNode> placedNodes, Map<String, List<String>> filteredHosts) {
       // snap shot environment on placement exceptions
       try {
-         placeVirtualGroup(container, cluster, planner, vGroup, placedNodes, outOfSyncHosts);
+         placeVirtualGroup(container, cluster, planner, vGroup, placedNodes, filteredHosts);
       } catch (PlacementException e) {
          logger.error("Place cluster " + cluster.getName()
                + " failed. PlacementException: " + e.getMessage());
@@ -145,7 +145,7 @@ public class PlacementService implements IPlacementService {
 
    @Override
    public List<BaseNode> getPlacementPlan(IContainer container,
-         ClusterCreate cluster, List<BaseNode> existedNodes, List<AbstractHost> outOfSyncHosts) {
+         ClusterCreate cluster, List<BaseNode> existedNodes, Map<String, List<String>> filteredHosts) {
       IPlacementPlanner planner = new PlacementPlanner();
 
       /*
@@ -183,14 +183,14 @@ public class PlacementService implements IPlacementService {
       Collections.sort(referredGroups, Collections.reverseOrder());
       for (VirtualGroup vGroup : referredGroups) {
          placeVirtualGroupWithSnapshot(container, cluster, planner, vGroup,
-               placedNodes, outOfSyncHosts);
+               placedNodes, filteredHosts);
       }
 
       // bin pack: place vGroups that have larger storage requirement first
       Collections.sort(normalGroups, Collections.reverseOrder());
       for (VirtualGroup vGroup : normalGroups) {
          placeVirtualGroupWithSnapshot(container, cluster, planner, vGroup,
-               placedNodes, outOfSyncHosts);
+               placedNodes, filteredHosts);
       }
 
       // ensure the number of nodes is correct

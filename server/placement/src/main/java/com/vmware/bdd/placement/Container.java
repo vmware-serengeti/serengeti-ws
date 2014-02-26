@@ -231,15 +231,15 @@ public class Container implements IContainer {
    }
 
    @Override
-   public void removeHost(AbstractHost host) {
+   public void removeHost(String hostname) {
       for (AbstractCluster cluster : this.dc.getClusters()) {
          List<AbstractHost> hosts = cluster.getHosts();
          Iterator<AbstractHost> it = hosts.iterator();
          while ( it.hasNext() ) {
             AbstractHost h = it.next();
-            if (h.getName().equals(host.getName())) {
+            if (h.getName().equals(hostname)) {
                hosts.remove(h);
-               logger.info("remove " + host.getName() + " from cluster " + cluster.getName());
+               logger.info("remove " + hostname + " from cluster " + cluster.getName());
                return;
             }
          }

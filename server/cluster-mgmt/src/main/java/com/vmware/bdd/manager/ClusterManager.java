@@ -447,15 +447,13 @@ public class ClusterManager {
       networkNames.addAll(networkList);
 
       logger.info("start to validate network accessibility.");
-      VcCluster cluster = null;
-      for (String networkName : networkNames) {
-         for (VcCluster vcCluster : clusters) {
-            if (!resMgr.isNetworkSharedInCluster(networkName, vcCluster.getName())) {
-               cluster = vcCluster;
-               throw ClusterConfigException.NETWORK_UNACCESSIBLE(networkName,
-                     cluster.getName());
-            }
+      if (!resMgr.isNetworkAccessibleByCluster(networkList, clusters)) {
+         List<String> clusterNames = new ArrayList<String>();
+         for (VcCluster cluster : clusters) {
+            clusterNames.add(cluster.getName());
          }
+         throw ClusterConfigException.NETWORK_UNACCESSIBLE(networkList,
+               clusterNames);
       }
    }
 

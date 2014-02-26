@@ -205,11 +205,28 @@ public interface IResourceService {
     * @throws VcProviderException
     */
    void cancleReservation(UUID reservationId) throws VcProviderException;
-   
+
    /**
     * get the attributes of the underlying cloud provider, in map
     * @return
     */
    Map<String, String> getCloudProviderAttributes();
 
+   /**
+    * Filter the hosts in the clusters by networks
+    * @param networkList
+    * @param clusters
+    * @return
+    */
+   List<String> filterHostsByNetwork(List<String> networkList,
+         List<com.vmware.bdd.spectypes.VcCluster> clusters);
+
+   /**
+    * Whether there is host with networks in clusters
+    * @param networkList
+    * @param clusters
+    * @return
+    */
+   boolean isNetworkAccessibleByCluster(List<String> networkList,
+         List<com.vmware.bdd.spectypes.VcCluster> clusters);
 }

@@ -54,6 +54,11 @@ public class BddException extends RuntimeException {
       return String.format(msg, args);
    }
 
+   protected static String getErrorMessage(final String errorId, Object... args) {
+      String msg = messageSource.getMessage(errorId, args, Locale.getDefault());
+      return msg;
+   }
+
    public BddException() {
       super();
    }

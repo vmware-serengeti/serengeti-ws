@@ -148,7 +148,7 @@ public class MockResourceManager implements IResourceService {
    @Override
    public void cancleReservation(UUID reservationId) throws VcProviderException {
       // TODO Auto-generated method stub
-      
+
    }
 
    @Override
@@ -164,6 +164,20 @@ public class MockResourceManager implements IResourceService {
 
    @Override
    public void refreshNetwork() {
- 
+
+   }
+
+   @Override
+   public List<String> filterHostsByNetwork(List<String> networkList,
+         List<com.vmware.bdd.spectypes.VcCluster> clusters) {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public boolean isNetworkAccessibleByCluster(List<String> networkList,
+         List<com.vmware.bdd.spectypes.VcCluster> clusters) {
+      // TODO Auto-generated method stub
+      return false;
    }
 }

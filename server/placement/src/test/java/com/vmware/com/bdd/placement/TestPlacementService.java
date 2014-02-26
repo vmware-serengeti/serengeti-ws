@@ -29,6 +29,7 @@ import com.vmware.bdd.placement.entity.AbstractDatacenter;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.placement.exception.PlacementException;
+import com.vmware.bdd.placement.util.PlacementUtil;
 
 public class TestPlacementService {
 
@@ -251,16 +252,22 @@ public class TestPlacementService {
       container.SetTemplateNode(TestPlacementUtil.getTemplateNode());
       List<AbstractHost> allHosts = container.getAllHosts();
       AbstractHost host = allHosts.get(0);
-      container.removeHost(host);
-      List<AbstractHost> outOfSyncHosts = new ArrayList<AbstractHost>();
-      outOfSyncHosts.add(host);
+      container.removeHost(host.getName());
+      List<String> outOfSyncHosts = new ArrayList<String>();
+      outOfSyncHosts.add(host.getName());
+      List<String> noNetworkHosts = new ArrayList<String>();
+      noNetworkHosts.add(host.getName());
+      Map<String, List<String>> filteredHosts = new HashMap<String, List<String>>();
+      filteredHosts.put(PlacementUtil.OUT_OF_SYNC_HOSTS, outOfSyncHosts);
+      filteredHosts.put(PlacementUtil.NO_NETWORKS_HOSTS, noNetworkHosts);
 
       PlacementService service = new PlacementService();
 
       try {
-         List<BaseNode> nodes = service.getPlacementPlan(container, spec, null, outOfSyncHosts);
+         List<BaseNode> nodes = service.getPlacementPlan(container, spec, null, filteredHosts);
       } catch (PlacementException e) {
-         Assert.assertEquals(e.getMessage(), "Cannot find a host with enough storage to place base nodes [hadoop-worker-4, hadoop-worker-5]. The following hosts are filtered out due to time out of sync: 10.1.1.1.");
+         Assert.assertEquals(e.getMessage(),
+               "Cannot find a host with enough storage to place base nodes [hadoop-worker-4, hadoop-worker-5]. The following hosts are filtered out due to time out of sync: [10.1.1.1]. The following hosts are filtered out due to lack of networks: [10.1.1.1].");
       }
    }
 }

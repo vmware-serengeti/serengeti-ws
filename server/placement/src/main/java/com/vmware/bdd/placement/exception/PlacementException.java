@@ -15,11 +15,11 @@
 
 package com.vmware.bdd.placement.exception;
 
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
+import com.vmware.bdd.placement.util.PlacementUtil;
 
 public class PlacementException extends BddException {
 
@@ -46,13 +46,16 @@ public class PlacementException extends BddException {
    }
 
    public static PlacementException OUT_OF_VC_HOST_WITH_FILTERING(List<String> baseNodeNames,
-         List<AbstractHost> outOfSyncHosts) {
+         Map<String, List<String>> filteredHosts) {
       StringBuilder str = new StringBuilder();
-      Iterator<AbstractHost> it = outOfSyncHosts.iterator();
-      str.append(it.next().getName());
-      while (it.hasNext()) {
-         str.append(",");
-         str.append(it.next().getName());
+      List<String> outOfSyncHosts = filteredHosts.get(PlacementUtil.OUT_OF_SYNC_HOSTS);
+      if (null != outOfSyncHosts) {
+         str.append(BddException.getErrorMessage("PLACEMENT.OUT_OF_SYNC_HOSTS", outOfSyncHosts.toString()));
+      }
+      List<String> noNetworkHosts = filteredHosts.get(PlacementUtil.NO_NETWORKS_HOSTS);
+      if (null != noNetworkHosts) {
+         if (null != outOfSyncHosts) str.append(" ");
+         str.append(BddException.getErrorMessage("PLACEMENT.NO_NETWORK_HOSTS", noNetworkHosts.toString()));
       }
       return new PlacementException(null, "OUT_OF_HOST_WITH_FILTERING",
             baseNodeNames.toString(), str.toString());

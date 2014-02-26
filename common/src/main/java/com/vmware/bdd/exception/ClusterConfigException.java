@@ -124,7 +124,7 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException DATASTORE_UNACCESSIBLE(List<String> clusters, List<String> dsNames) {
       return new ClusterConfigException(null, "DATASTORE_UNACCESSIBLE", clusters, dsNames);
    }
-   public static ClusterConfigException NETWORK_UNACCESSIBLE(String netName, String cluster) {
+   public static ClusterConfigException NETWORK_UNACCESSIBLE(List<String> netName, List<String> cluster) {
       return new ClusterConfigException(null, "NETWORK_UNACCESSIBLE", netName, cluster);
    }
    public static ClusterConfigException MUST_DEFINE_ONE_RACK(String groupName) {

@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.spectypes.DiskSpec;
 
@@ -28,22 +27,22 @@ public interface IPlacementService {
 
    /**
     * execute the placement planning with given resource container
-    * 
+    *
     * @param container
     * @param cluster
     * @param outOfSyncHots TODO
     * @return list of base node that have detailed provision attributes
     */
    public List<BaseNode> getPlacementPlan(IContainer container,
-         ClusterCreate cluster, List<BaseNode> existedNodes, List<AbstractHost> outOfSyncHots);
+         ClusterCreate cluster, List<BaseNode> existedNodes, Map<String, List<String>> filteredHots);
 
    /**
     * examine the existing nodes and find out bad nodes that violate placement
     * policies
-    * 
+    *
     * to resume from previous cluster creation failure, and get the new
     * placement plan, the cluster should be cleaned to remove bad nodes first
-    * 
+    *
     * @param cluster
     * @param existedNodes
     *           existed VMs
@@ -55,7 +54,7 @@ public interface IPlacementService {
    /**
     * badDisks are disks that are placed on unaccessible datastores. Find replacement
     * disks for them on the target host, given the cluster spec and resource container
-    * 
+    *
     * @param container
     * @param spec
     * @param groupName

@@ -41,6 +41,9 @@ public class PlacementUtil {
       "ParaVirtualSCSIController:3:"
    };
 
+   public static final String OUT_OF_SYNC_HOSTS = "outOfSyncHosts";
+   public static final String NO_NETWORKS_HOSTS = "noNetworkHosts";
+
    public static String getVmName(String clusterName, String groupName,
          int index) {
       return clusterName + "-" + groupName + "-" + index;
@@ -73,20 +76,20 @@ public class PlacementUtil {
 
    public static int getNextValidParaVirtualScsiIndex(int paraVirtualScsiIndex) {
       paraVirtualScsiIndex ++;
-      int diskIndex = paraVirtualScsiIndex / 
+      int diskIndex = paraVirtualScsiIndex /
          PARA_VIRTUAL_SCSI_EXTERNAL_ADDRESS_PREFIXES.length;
       // controller reserved channel, *:7, cannot be used by custom disk
       if (diskIndex == CONTROLLER_RESERVED_CHANNEL) {
-         paraVirtualScsiIndex += 
+         paraVirtualScsiIndex +=
             PlacementUtil.PARA_VIRTUAL_SCSI_EXTERNAL_ADDRESS_PREFIXES.length;
       }
       return paraVirtualScsiIndex;
    }
 
    public static String getParaVirtualAddress(int paraVirtualScsiIndex) {
-      int arrayIndex = paraVirtualScsiIndex % 
+      int arrayIndex = paraVirtualScsiIndex %
          PARA_VIRTUAL_SCSI_EXTERNAL_ADDRESS_PREFIXES.length;
-      int diskIndex = paraVirtualScsiIndex / 
+      int diskIndex = paraVirtualScsiIndex /
          PARA_VIRTUAL_SCSI_EXTERNAL_ADDRESS_PREFIXES.length;
       return PARA_VIRTUAL_SCSI_EXTERNAL_ADDRESS_PREFIXES[arrayIndex] + diskIndex;
    }
