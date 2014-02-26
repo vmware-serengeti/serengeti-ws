@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
+import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ScaleServiceException;
 import com.vmware.bdd.service.IScaleService;
 import com.vmware.bdd.service.job.JobConstants;
@@ -43,14 +44,14 @@ public class ScaleSingleVMStep extends TrackableTasklet {
          JobExecutionStatusHolder jobExecutionStatusHolder) throws Exception {
 
       String nodeName =
-            getJobParameters(chunkContext).getString(
-                  JobConstants.SUB_JOB_NODE_NAME);
+         getJobParameters(chunkContext).getString(
+               JobConstants.SUB_JOB_NODE_NAME);
       String cpuNumberStr =
-            getJobParameters(chunkContext).getString(
-                  JobConstants.NODE_SCALE_CPU_NUMBER);
+         getJobParameters(chunkContext).getString(
+               JobConstants.NODE_SCALE_CPU_NUMBER);
       String memorySizeStr =
-            getJobParameters(chunkContext).getString(
-                  JobConstants.NODE_SCALE_MEMORY_SIZE);
+         getJobParameters(chunkContext).getString(
+               JobConstants.NODE_SCALE_MEMORY_SIZE);
       int cpuNumber = Integer.parseInt(cpuNumberStr);
       long memory = Long.parseLong(memorySizeStr);
       putIntoJobExecutionContext(chunkContext,
@@ -62,23 +63,24 @@ public class ScaleSingleVMStep extends TrackableTasklet {
          putIntoJobExecutionContext(chunkContext,
                JobConstants.NODE_SCALE_ROLLBACK, true);
          chunkContext.getStepContext().getStepExecution().getJobExecution()
-               .getExecutionContext()
-               .putString(JobConstants.SUB_JOB_FAIL_FLAG, "true");
-         chunkContext
-               .getStepContext()
-               .getStepExecution()
-               .getJobExecution()
-               .getExecutionContext()
-               .putString(JobConstants.CURRENT_ERROR_MESSAGE,
-                     "node scale was rollbacked");
+         .getExecutionContext()
+         .putString(JobConstants.SUB_JOB_FAIL_FLAG, "true");
+//         chunkContext
+//         .getStepContext()
+//         .getStepExecution()
+//         .getJobExecution()
+//         .getExecutionContext()
+//         .putString(JobConstants.CURRENT_ERROR_MESSAGE,
+//               "node scale was rollbacked");
       }
       boolean success =
-            scaleService.scaleNodeResource(nodeName, cpuNumber, memory);
+         scaleService.scaleNodeResource(nodeName, cpuNumber, memory);
       putIntoJobExecutionContext(chunkContext,
             JobConstants.CLUSTER_OPERATION_SUCCESS, success);
       if (!success) {
          throw ScaleServiceException.COMMON_SCALE_ERROR(nodeName);
       }
+
       return RepeatStatus.FINISHED;
    }
 

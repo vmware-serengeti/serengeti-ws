@@ -94,8 +94,7 @@ public class ScaleService implements IScaleService {
       ScaleVMSP scaleVMSP =
             new ScaleVMSP(node.getMoId(), cpuNumber, memory, targetDs,
                   swapDisk, newSwapSizeInMB);
-      boolean vmResult = VcVmUtil.runSPOnSingleVM(node, scaleVMSP);
-      return vmResult;
+      return VcVmUtil.runSPOnSingleVM(node, scaleVMSP);
    }
 
    public DiskEntity findSwapDisk(NodeEntity node) {
@@ -132,7 +131,7 @@ public class ScaleService implements IScaleService {
 
       // else find a valid datastore with largest free space
       VcHost locateHost = VcResourceUtils.findHost(node.getHostName());
-      
+
       // swap disk should use image store pattern
       String[] dsNamePatterns =
             NodeGroupCreate.getImagestoreNamePattern(clusterSpec, ngSpec);

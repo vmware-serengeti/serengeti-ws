@@ -17,6 +17,7 @@ package com.vmware.bdd.service;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import mockit.Mockit;
@@ -293,7 +294,7 @@ public class TestClusteringService {
       node1.setMoId("vm-1102");
       targetNodes.add(node2);
       MockTmScheduler.setFlag(VmOperation.RECONFIGURE_VM, true);
-      int done = service.configIOShares("cluster", targetNodes, Priority.HIGH);
-      Assert.assertTrue(done == 2, "2 nodes been configured IO share level");
+      Map<String, String> done = service.configIOShares("cluster", targetNodes, Priority.HIGH);
+      Assert.assertTrue(done.isEmpty(), "2 nodes been configured IO share level");
    }
 }

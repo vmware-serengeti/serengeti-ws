@@ -23,15 +23,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
-import com.vmware.bdd.apitypes.NetworkAdd;
-import com.vmware.bdd.entity.NicEntity;
-import com.vmware.vim.binding.impl.vim.vApp.VmConfigSpecImpl;
-import com.vmware.vim.binding.impl.vim.vm.ToolsConfigInfoImpl;
-import com.vmware.vim.binding.vim.VirtualMachine;
-import com.vmware.vim.binding.vim.net.IpConfigInfo.IpAddress;
-import com.vmware.vim.binding.vim.option.OptionValue;
-import com.vmware.vim.binding.vim.vApp.VmConfigSpec;
-import com.vmware.vim.binding.vim.vm.ToolsConfigInfo;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.DiskSchema;
@@ -55,10 +46,12 @@ import com.vmware.aurora.vc.VmConfigUtil;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.entity.DiskEntity;
+import com.vmware.bdd.entity.NicEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.exception.BddException;
@@ -69,6 +62,10 @@ import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.vim.binding.impl.vim.SharesInfoImpl;
 import com.vmware.vim.binding.impl.vim.StorageResourceManager_Impl.IOAllocationInfoImpl;
+import com.vmware.vim.binding.impl.vim.vApp.VmConfigSpecImpl;
+import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
+import com.vmware.vim.binding.impl.vim.vm.FlagInfoImpl;
+import com.vmware.vim.binding.impl.vim.vm.ToolsConfigInfoImpl;
 import com.vmware.vim.binding.impl.vim.vm.device.VirtualDeviceSpecImpl;
 import com.vmware.vim.binding.vim.Datastore;
 import com.vmware.vim.binding.vim.SharesInfo;
@@ -76,17 +73,19 @@ import com.vmware.vim.binding.vim.SharesInfo.Level;
 import com.vmware.vim.binding.vim.StorageResourceManager.IOAllocationInfo;
 import com.vmware.vim.binding.vim.VirtualMachine.FaultToleranceState;
 import com.vmware.vim.binding.vim.cluster.DasVmSettings.RestartPriority;
+import com.vmware.vim.binding.vim.net.IpConfigInfo.IpAddress;
+import com.vmware.vim.binding.vim.option.OptionValue;
+import com.vmware.vim.binding.vim.vApp.VmConfigSpec;
+import com.vmware.vim.binding.vim.vm.ConfigSpec;
 import com.vmware.vim.binding.vim.vm.FaultToleranceConfigInfo;
+import com.vmware.vim.binding.vim.vm.FlagInfo;
 import com.vmware.vim.binding.vim.vm.GuestInfo;
 import com.vmware.vim.binding.vim.vm.GuestInfo.NicInfo;
+import com.vmware.vim.binding.vim.vm.ToolsConfigInfo;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
 import com.vmware.vim.binding.vim.vm.device.VirtualDeviceSpec;
 import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
-import com.vmware.vim.binding.vim.vm.FlagInfo;
-import com.vmware.vim.binding.impl.vim.vm.FlagInfoImpl;
-import com.vmware.vim.binding.vim.vm.ConfigSpec;
-import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
 
 public class VcVmUtil {
    private static final Logger logger = Logger.getLogger(VcVmUtil.class);
@@ -94,8 +93,8 @@ public class VcVmUtil {
    public static final String NIC_LABEL_PREFIX = "Network adapter ";
 
    /**
-    * some callers are not very convenient to provide portGroups,
-    * we provide this function to check if all NICs are ready,
+    * some callers are not very convenient to provide portGroups, we provide
+    * this function to check if all NICs are ready,
     */
    public static boolean checkIpAddresses(final VcVirtualMachine vcVm) {
       try {
@@ -115,16 +114,18 @@ public class VcVmUtil {
                }
 
                for (NicInfo nicInfo : nicInfos) {
-                  if (nicInfo.getNetwork() == null || nicInfo.getIpConfig() == null
-                        ||nicInfo.getIpConfig().getIpAddress() == null
+                  if (nicInfo.getNetwork() == null
+                        || nicInfo.getIpConfig() == null
+                        || nicInfo.getIpConfig().getIpAddress() == null
                         || nicInfo.getIpConfig().getIpAddress().length == 0) {
-                     return  false;
+                     return false;
                   }
 
                   boolean foundIpV4Address = false;
                   for (IpAddress info : nicInfo.getIpConfig().getIpAddress()) {
                      if (info.getIpAddress() != null
-                           && sun.net.util.IPAddressUtil.isIPv4LiteralAddress(info.getIpAddress())) {
+                           && sun.net.util.IPAddressUtil
+                                 .isIPv4LiteralAddress(info.getIpAddress())) {
                         foundIpV4Address = true;
                         break;
                      }
@@ -146,21 +147,24 @@ public class VcVmUtil {
          final Set<String> portGroups, boolean inSession) {
       Set<String> allIpAddresses = new HashSet<String>();
       for (String portGroup : portGroups) {
-         allIpAddresses.add(getIpAddressOfPortGroup(vcVm, portGroup, inSession));
+         allIpAddresses
+               .add(getIpAddressOfPortGroup(vcVm, portGroup, inSession));
       }
       return allIpAddresses;
    }
 
    /**
-    *
+    * 
     * @param vcVm
     * @param portGroup
-    * @param nicEntity update nicEntity if it is not null
+    * @param nicEntity
+    *           update nicEntity if it is not null
     * @return IPv4 address this nic
     * @throws Exception
     */
-   private static String inspectNicInfoWithoutSession(final VcVirtualMachine vcVm,
-         final String portGroup, final NicEntity nicEntity) throws Exception {
+   private static String inspectNicInfoWithoutSession(
+         final VcVirtualMachine vcVm, final String portGroup,
+         final NicEntity nicEntity) throws Exception {
       GuestInfo guestInfo = vcVm.queryGuest();
       NicInfo[] nicInfos = guestInfo.getNet();
 
@@ -174,11 +178,13 @@ public class VcVmUtil {
       }
 
       for (NicInfo nicInfo : nicInfos) {
-         if (nicInfo.getNetwork() == null || !nicInfo.getNetwork().equals(portGroup)) {
+         if (nicInfo.getNetwork() == null
+               || !nicInfo.getNetwork().equals(portGroup)) {
             continue;
          }
 
-         if (nicInfo.getIpConfig() == null || nicInfo.getIpConfig().getIpAddress() == null
+         if (nicInfo.getIpConfig() == null
+               || nicInfo.getIpConfig().getIpAddress() == null
                || nicInfo.getIpConfig().getIpAddress().length == 0) {
             continue;
          }
@@ -193,14 +199,16 @@ public class VcVmUtil {
          }
          for (IpAddress info : nicInfo.getIpConfig().getIpAddress()) {
             if (info.getIpAddress() != null
-                  && sun.net.util.IPAddressUtil.isIPv4LiteralAddress(info.getIpAddress())) {
+                  && sun.net.util.IPAddressUtil.isIPv4LiteralAddress(info
+                        .getIpAddress())) {
                ipaddress = info.getIpAddress();
                if (nicEntity != null) {
                   nicEntity.setIpv4Address(ipaddress);
                }
             }
             if (info.getIpAddress() != null
-                  && sun.net.util.IPAddressUtil.isIPv6LiteralAddress(info.getIpAddress())) {
+                  && sun.net.util.IPAddressUtil.isIPv6LiteralAddress(info
+                        .getIpAddress())) {
                if (nicEntity != null) {
                   nicEntity.setIpv6Address(info.getIpAddress());
                }
@@ -222,9 +230,11 @@ public class VcVmUtil {
             protected boolean isTaskSession() {
                return true;
             }
+
             @Override
             public String body() throws Exception {
-               return VcVmUtil.inspectNicInfoWithoutSession(vcVm, portGroup, null);
+               return VcVmUtil.inspectNicInfoWithoutSession(vcVm, portGroup,
+                     null);
             }
          });
          return ip;
@@ -233,7 +243,8 @@ public class VcVmUtil {
       }
    }
 
-   public static void populateNicInfo(final NicEntity nicEntity, final String moid, final String pgName) {
+   public static void populateNicInfo(final NicEntity nicEntity,
+         final String moid, final String pgName) {
       try {
          VcContext.inVcSessionDo(new VcSession<Void>() {
             @Override
@@ -289,14 +300,14 @@ public class VcVmUtil {
       }
       VcVirtualMachine vm = VcCache.getIgnoreMissing(vmId);
       if (vm == null) {
-         logger.info("vm " + vmId
-               + " is created, and then removed afterwards.");
+         logger.info("vm " + vmId + " is created, and then removed afterwards.");
          vNode.setNodeAction(Constants.NODE_ACTION_CLONING_FAILED);
          return false;
       }
       boolean success = true;
       for (String portGroup : vNode.getNics().keySet()) {
-         String ipv4Address = VcVmUtil.getIpAddressOfPortGroup(vm, portGroup, false);
+         String ipv4Address =
+               VcVmUtil.getIpAddressOfPortGroup(vm, portGroup, false);
 
          // currently only care  ipv4 address
          vNode.updateNicOfPortGroup(portGroup, ipv4Address, null, null);
@@ -495,7 +506,6 @@ public class VcVmUtil {
    }
 
    public static boolean runSPOnSingleVM(NodeEntity node, Callable<Void> call) {
-      boolean operationResult = true;
       if (node.getMoId() == null) {
          logger.info("VC vm does not exist for node: " + node.getVmName());
          return false;
@@ -521,21 +531,23 @@ public class VcVmUtil {
             return false;
          } else {
             if (result[0].finished && result[0].throwable == null) {
-               operationResult = true;
                logger.info("successfully run operation on vm for node: "
                      + node.getVmName());
+               return true;
             } else {
-               operationResult = false;
-               logger.error(
-                     "failed in run operation on vm for node: "
-                           + node.getVmName(), result[0].throwable);
+               String message = null;
+               if (result[0].throwable.getCause() != null) {
+                  message = result[0].throwable.getCause().getMessage();
+               }
+               throw BddException.VC_EXCEPTION(result[0].throwable.getCause(),
+                     message);
             }
          }
-      } catch (Exception e) {
-         operationResult = false;
-         logger.error("error in run operation on vm.", e);
+      } catch (InterruptedException e) {
+         logger.error("error in executing store procedure on single node "
+               + node.getVmName(), e);
+         throw BddException.INTERNAL(e, e.getMessage());
       }
-      return operationResult;
    }
 
    // get the parent vc resource pool of the node
@@ -789,7 +801,8 @@ public class VcVmUtil {
       }
    }
 
-   public static void enableDiskUUID(final VcVirtualMachine vm) throws Exception {
+   public static void enableDiskUUID(final VcVirtualMachine vm)
+         throws Exception {
       try {
          VcContext.inVcSessionDo(new VcSession<Void>() {
             @Override
@@ -807,12 +820,14 @@ public class VcVmUtil {
             }
          });
       } catch (Exception e) {
-         throw ClusteringServiceException.ENABLE_DISK_UUID_FAILED(e, vm.getName());
+         throw ClusteringServiceException.ENABLE_DISK_UUID_FAILED(e,
+               vm.getName());
       }
    }
 
    /**
     * check and set vApp Options -> vmware tools flag
+    * 
     * @param vm
     * @return true if vm reconfigured, in this case need remove snapshots
     */
@@ -822,10 +837,15 @@ public class VcVmUtil {
          protected Boolean body() throws Exception {
             String vmToolEnableItem = "com.vmware.guestInfo";
 
-            if (vm.getConfig() == null || vm.getConfig().getVAppConfig() == null
-                  || vm.getConfig().getVAppConfig().getOvfEnvironmentTransport() == null
-                  || !Arrays.asList(vm.getConfig().getVAppConfig().getOvfEnvironmentTransport()).contains(vmToolEnableItem)) {
-               String[] ovfEnvTransport = new String[] {vmToolEnableItem};
+            if (vm.getConfig() == null
+                  || vm.getConfig().getVAppConfig() == null
+                  || vm.getConfig().getVAppConfig()
+                        .getOvfEnvironmentTransport() == null
+                  || !Arrays.asList(
+                        vm.getConfig().getVAppConfig()
+                              .getOvfEnvironmentTransport()).contains(
+                        vmToolEnableItem)) {
+               String[] ovfEnvTransport = new String[] { vmToolEnableItem };
                VmConfigSpec vmConfigSpec = new VmConfigSpecImpl();
                vmConfigSpec.setOvfEnvironmentTransport(ovfEnvTransport);
                ConfigSpec configSpec = new ConfigSpecImpl();
@@ -844,7 +864,9 @@ public class VcVmUtil {
    }
 
    /**
-    * check if number of vCPUs is a multiple of the number of cores per socket configured in the VM
+    * check if number of vCPUs is a multiple of the number of cores per socket
+    * configured in the VM
+    * 
     * @param vmId
     * @param cpuNum
     * @return
@@ -864,7 +886,8 @@ public class VcVmUtil {
       if (vm.getConfig() != null && vm.getConfig().getExtraConfig() != null) {
          for (OptionValue optionValue : vm.getConfig().getExtraConfig()) {
             if (coresPerSocketKey.equals(optionValue.getKey())) {
-               int coresPerSocket = Integer.parseInt((String) optionValue.getValue());
+               int coresPerSocket =
+                     Integer.parseInt((String) optionValue.getValue());
                if (cpuNum % coresPerSocket == 0) {
                   return true;
                }

@@ -1880,7 +1880,7 @@ public class ClusteringService implements IClusteringService {
    }
 
    @Override
-   public int configIOShares(String clusterName, List<NodeEntity> targetNodes,
+   public Map<String, String> configIOShares(String clusterName, List<NodeEntity> targetNodes,
          Priority ioShares) {
       AuAssert.check(clusterName != null && targetNodes != null
             && !targetNodes.isEmpty());
@@ -1910,21 +1910,22 @@ public class ClusteringService implements IClusteringService {
          }
 
          int total = 0;
-         boolean success = true;
+         Map<String, String> failedNodes = new HashMap<String, String>();
          for (i = 0; i < storeProcedures.length; i++) {
             if (result[i].finished && result[i].throwable == null) {
                ++total;
             } else if (result[i].throwable != null) {
                logger.error("Failed to reconfigure vm", result[i].throwable);
-               success = false;
+               String nodeName = targetNodes.get(i).getVmName();
+               String message = null;
+               if (result[i].throwable.getCause() != null) {
+                  message = result[i].throwable.getCause().getMessage();
+               }
+               failedNodes.put(nodeName, message);
             }
          }
          logger.info(total + " vms are reconfigured.");
-         if (!success) {
-            throw ClusteringServiceException
-                  .RECONFIGURE_IO_SHARE_FAILED(clusterName);
-         }
-         return total;
+         return failedNodes;
       } catch (InterruptedException e) {
          logger.error("error in reconfiguring vm io shares", e);
          throw BddException.INTERNAL(e, e.getMessage());

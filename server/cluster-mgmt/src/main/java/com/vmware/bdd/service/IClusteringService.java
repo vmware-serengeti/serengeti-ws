@@ -159,7 +159,7 @@ public interface IClusteringService {
     * @param ioShares
     * @return
     */
-   public int configIOShares(String clusterName, List<NodeEntity> targetNodes,
+   public  Map<String, String> configIOShares(String clusterName, List<NodeEntity> targetNodes,
          Priority ioShares);
 
    /**

@@ -1074,16 +1074,24 @@ public class ClusterManager {
                clusterName, "Target node set is empty");
       }
 
+      clusterEntityMgr.cleanupActionError(clusterName);
       // call clustering service to set the io shares
-      int count =
+      Map<String, String> failedNodes =
             clusteringService
                   .configIOShares(clusterName, targetNodes, ioShares);
-      logger.info("configured " + count + " nodes' IO share level to "
-            + ioShares.toString());
-
-      if (targetNodes.size() != count) {
+      if (failedNodes.isEmpty()) {
+         logger.info("configured " + targetNodes.size() + " nodes' IO share level to "
+               + ioShares.toString());
+      } else {
+         // update node table
+         for (String name : failedNodes.keySet()) {
+            NodeEntity node = clusterEntityMgr.findNodeByName(name);
+            node.setActionFailed(true);
+            node.setErrMessage(failedNodes.get(name));
+            clusterEntityMgr.update(node);
+         }
          throw ClusterManagerException.PRIORITIZE_CLUSTER_FAILED(clusterName,
-               count, targetNodes.size());
+               failedNodes.size(), targetNodes.size());
       }
 
       // update io shares in db

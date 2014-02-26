@@ -82,6 +82,10 @@ public class BddException extends RuntimeException {
       return new BddException(ex, "BDD", "INTERNAL_ERROR", detail);
    }
 
+   public static BddException VC_EXCEPTION(Throwable ex, String detail) {
+      return new BddException(ex, "BDD", "VC_EXCEPTION", detail);
+   }
+
    /**
     * This exception is designed to be thrown only when initializing serengeti
     * web application. When this exception is thrown, the web container will

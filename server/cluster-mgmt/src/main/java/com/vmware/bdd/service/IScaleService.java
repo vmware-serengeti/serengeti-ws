@@ -24,11 +24,11 @@ package com.vmware.bdd.service;
 public interface IScaleService {
 
    public boolean scaleNodeResource(String nodeName, int cpuNumber, long memory);
-   
+
    public int getVmOriginalCpuNumber(String nodeName);
-   
+
    public long getVmOriginalMemory(String nodeName);
-   
+
    public void updateSwapDisk(String nodeName);
 
 }
