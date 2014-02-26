@@ -105,8 +105,8 @@ public class ConnectionCommands implements CommandMarker {
    }
 
    private static void printConnectionFailure(String message) {
-      System.out.println(Constants.OUTPUT_OBJECT_CONNECT + " " 
-            + Constants.OUTPUT_OP_RESULT_FAIL + " " + message);
+      System.out.println(Constants.OUTPUT_OBJECT_CONNECT + " "
+            + Constants.OUTPUT_OP_RESULT_FAIL + ": " + message);
    }
 
    private boolean connect(final String hostName, final Map<String, String> loginInfo, int count) throws Exception {

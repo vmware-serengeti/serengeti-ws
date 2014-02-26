@@ -173,6 +173,9 @@ public class RestClient {
             //recover old hostUri
             hostUri = oldHostUri;
             return Connect.ConnectType.UNAUTHORIZATION;
+         } else if (cliRestException.getStatus() == HttpStatus.INTERNAL_SERVER_ERROR) {
+            System.out.println(cliRestException.getMessage());
+            return Connect.ConnectType.ERROR;
          } else {
             System.out.println(Constants.CONNECT_FAILURE + ": "
                   + cliRestException.getStatus() + " "

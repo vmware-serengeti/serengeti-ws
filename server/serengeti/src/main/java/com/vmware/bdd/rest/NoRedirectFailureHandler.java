@@ -24,12 +24,24 @@ import org.apache.log4j.Logger;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
-public class NoRedirectFailureHandler implements AuthenticationFailureHandler {
-   private static final Logger logger = Logger.getLogger(NoRedirectFailureHandler.class);
-   public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-         AuthenticationException exception) throws IOException, ServletException {
+import com.vmware.bdd.security.exception.VCConnectException;
 
-      logger.debug("sending 401 Unauthorized error");
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed: " + exception.getMessage());
+public class NoRedirectFailureHandler implements AuthenticationFailureHandler {
+
+   private static final Logger logger = Logger
+         .getLogger(NoRedirectFailureHandler.class);
+
+   public void onAuthenticationFailure(HttpServletRequest request,
+         HttpServletResponse response, AuthenticationException exception)
+         throws IOException, ServletException {
+      if (exception instanceof VCConnectException) {
+         logger.debug("sending 500 internal error");
+         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+               exception.getMessage());
+      } else {
+         logger.debug("sending 401 Unauthorized error");
+         response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+               "Authentication Failed: " + exception.getMessage());
+      }
    }
 }

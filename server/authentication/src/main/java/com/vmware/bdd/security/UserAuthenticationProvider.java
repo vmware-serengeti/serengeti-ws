@@ -23,10 +23,12 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import com.vmware.bdd.security.exception.VCConnectException;
 import com.vmware.bdd.security.service.IAuthenticationService;
 import com.vmware.bdd.security.service.impl.UserAuthenticationService;
 import com.vmware.bdd.security.service.impl.UserService;
 import com.vmware.bdd.security.service.impl.VCAuthenticationAdapter;
+import com.vmware.vim.vmomi.client.exception.ConnectionException;
 
 public class UserAuthenticationProvider implements AuthenticationProvider {
    private static final Logger logger = Logger
@@ -55,8 +57,14 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
       } catch (UsernameNotFoundException userNotfoundException) {
          throw userNotfoundException;
       } catch (Exception e) {
-         logger.error("Authentication error :" + e.getMessage());
-         throw new BadCredentialsException(e.getMessage());
+         if (e instanceof ConnectionException) {
+            String errorMsg = "vCenter connect failed: " + e.getMessage();
+            logger.error(errorMsg);
+            throw new VCConnectException(errorMsg, e);
+         } else {
+            logger.error("Authentication error: " + e.getMessage());
+            throw new BadCredentialsException(e.getMessage());   
+         }
       }
 
    }
