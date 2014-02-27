@@ -56,8 +56,9 @@ public class VcResourceUtils {
    private static final int HARDWARE_VERSION_8_MAX_CPU = 32;
    private static final int HARDWARE_VERSION_8_MAX_MEMORY = 1011 * 1024; //1011 GB
    private static final int HARDWARE_VERSION_9 = 9;
-   private static final int HARDWARE_VERSION_9_MAX_CPU = 64;
-   private static final int HARDWARE_VERSION_9_MAX_MEMORY = 1011 * 1024; //1011 GB
+   private static final int HARDWARE_VERSION_10 = 10;
+   private static final int HARDWARE_VERSION_9_AND_10_MAX_CPU = 64;
+   private static final int HARDWARE_VERSION_9_AND_10_MAX_MEMORY = 1011 * 1024; //1011 GB
 
    public static Collection<VcDatastore> findDSInVCByPattern(
          final String vcDSNamePattern) {
@@ -550,18 +551,18 @@ public class VcResourceUtils {
             throw VcProviderException.MEMORY_EXCEED_LIMIT(
                   HARDWARE_VERSION_8_MAX_MEMORY, vcVmName);
          }
-      } else if (hardwareVersion == HARDWARE_VERSION_9) {
-         if (cpuNumber > HARDWARE_VERSION_9_MAX_CPU) {
+      } else if (hardwareVersion == HARDWARE_VERSION_9 || hardwareVersion == HARDWARE_VERSION_10) {
+         if (cpuNumber > HARDWARE_VERSION_9_AND_10_MAX_CPU) {
             logger.warn("cpu number is greater than :"
-                  + HARDWARE_VERSION_9_MAX_CPU);
+                  + HARDWARE_VERSION_9_AND_10_MAX_CPU);
             throw VcProviderException.CPU_EXCEED_LIMIT(cpuNumber,
-                  vcVmName, HARDWARE_VERSION_9_MAX_CPU);
+                  vcVmName, HARDWARE_VERSION_9_AND_10_MAX_CPU);
          }
-         if (memory > HARDWARE_VERSION_9_MAX_MEMORY) {
+         if (memory > HARDWARE_VERSION_9_AND_10_MAX_MEMORY) {
             logger.warn("memory is greater than : "
-                  + HARDWARE_VERSION_9_MAX_MEMORY);
+                  + HARDWARE_VERSION_9_AND_10_MAX_MEMORY);
             throw VcProviderException.MEMORY_EXCEED_LIMIT(
-                  HARDWARE_VERSION_9_MAX_MEMORY, vcVmName);
+                  HARDWARE_VERSION_9_AND_10_MAX_MEMORY, vcVmName);
          }
       }
    }

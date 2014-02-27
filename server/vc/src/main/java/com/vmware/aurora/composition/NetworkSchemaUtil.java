@@ -63,20 +63,20 @@ public class NetworkSchemaUtil {
             logger.error("Network " + network.vcNetwork + " is not defined on cluster " + cluster.getName());
             throw new Exception("Network " + network.vcNetwork + " is not defined on cluster " + cluster.getName());
          }
-         VirtualDevice nic = null;
-         if (network.nicLabel != null) {
-            nic = vcVm.getDeviceByLabel(network.nicLabel);
-            if (nic != null) {
-               // drop existing network to replace with vmxnet3 nic
-               changes.add(VmConfigUtil.removeDeviceSpec(nic));
-            }
+
+         if (network.nicLabel != null
+               && vcVm.getDeviceByLabel(network.nicLabel) != null) {
+            // Edit existing networks
+            changes.add(vcVm.reconfigNetworkSpec(network.nicLabel, vN));
+         } else {
+            // Add new networks
+            VirtualDeviceSpec deviceSpec =
+                  VmConfigUtil.createNetworkDevice(
+                        VmConfigUtil.EthernetControllerType.VMXNET3,
+                        network.nicLabel, vN);
+            changes.add(deviceSpec);
          }
-         // Add new networks
-         VirtualDeviceSpec deviceSpec =
-               VmConfigUtil.createNetworkDevice(
-                     VmConfigUtil.EthernetControllerType.VMXNET3,
-                     network.nicLabel, vN);
-         changes.add(deviceSpec);
+
       }
 
       spec.setDeviceChange(changes.toArray(new VirtualDeviceSpec[changes.size()]));
