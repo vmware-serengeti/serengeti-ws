@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import jline.ConsoleReader;
+import jline.console.ConsoleReader;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -406,7 +406,7 @@ public class ClusterCommands implements CommandMarker {
    private String getInputedPassword(String promptMsg) {
       try {
          ConsoleReader reader = new ConsoleReader();
-         reader.setDefaultPrompt(promptMsg);
+         reader.setPrompt(promptMsg);
          String password = "";
          password = reader.readLine(Character.valueOf('*'));
          if (isValidPassword(password)) {
