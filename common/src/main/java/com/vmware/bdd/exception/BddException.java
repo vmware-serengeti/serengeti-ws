@@ -176,4 +176,8 @@ public class BddException extends RuntimeException {
             deployedComputeNodeNum);
    }
 
+   public static BddException INIT_VC_FAIL() {
+      return new BddException(null, "BDD", "INIT_VC_FAIL");
+   }
+
 }

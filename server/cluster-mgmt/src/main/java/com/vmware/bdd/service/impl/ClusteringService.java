@@ -1979,4 +1979,9 @@ public class ClusteringService implements IClusteringService {
    public VmEventManager getEventProcessor() {
       return this.processor;
    }
+
+   public static boolean isInitialized() {
+      return initialized;
+   }
+
 }

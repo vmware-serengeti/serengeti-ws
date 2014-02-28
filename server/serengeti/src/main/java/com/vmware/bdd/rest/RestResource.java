@@ -60,6 +60,7 @@ import com.vmware.bdd.manager.DistroManager;
 import com.vmware.bdd.manager.JobManager;
 import com.vmware.bdd.manager.RackInfoManager;
 import com.vmware.bdd.manager.ScaleManager;
+import com.vmware.bdd.service.impl.ClusteringService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
@@ -149,6 +150,7 @@ public class RestResource {
    public void createCluster(@RequestBody ClusterCreate createSpec,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
+      verifyInitialized();
       String clusterName = createSpec.getName();
       if (!CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
@@ -163,6 +165,7 @@ public class RestResource {
    public void configCluster(@PathVariable("clusterName") String clusterName,
          @RequestBody ClusterCreate createSpec, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
+      verifyInitialized();
       if (!CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
@@ -188,6 +191,7 @@ public class RestResource {
    public void deleteCluster(@PathVariable("clusterName") String clusterName,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
+      verifyInitialized();
       // make sure cluster name is valid
       if (!CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
@@ -203,6 +207,9 @@ public class RestResource {
          @RequestParam(value = "state", required = true) String state,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
+
+      verifyInitialized();
+
       if (CommonUtil.isBlank(clusterName)
             || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
@@ -229,6 +236,9 @@ public class RestResource {
          @PathVariable("groupName") String groupName,
          @RequestBody int instanceNum, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
+
+      verifyInitialized();
+
       if (CommonUtil.isBlank(clusterName)
             || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
@@ -254,6 +264,9 @@ public class RestResource {
          @PathVariable("groupName") String groupName,
          @RequestBody ResourceScale scale, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
+
+      verifyInitialized();
+
       if (CommonUtil.isBlank(clusterName)
             || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
@@ -280,6 +293,7 @@ public class RestResource {
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void asyncSetParam(@PathVariable("clusterName") String clusterName, @RequestBody ElasticityRequestBody requestBody, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
+      verifyInitialized();
       validateInput(clusterName, requestBody);
       ClusterRead cluster = clusterMgr.getClusterByName(clusterName, false);
       if (!cluster.needAsyncUpdateParam(requestBody)) {
@@ -299,8 +313,8 @@ public class RestResource {
    @ResponseStatus(HttpStatus.OK)
    public void syncSetParam(@PathVariable("clusterName") String clusterName, @RequestBody ElasticityRequestBody requestBody, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
+      verifyInitialized();
       validateInput(clusterName, requestBody);
-
       clusterMgr.syncSetParam(clusterName,
             requestBody.getActiveComputeNodeNum(),
             requestBody.getMinComputeNodeNum(),
@@ -338,6 +352,7 @@ public class RestResource {
          @RequestBody FixDiskRequestBody requestBody,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
+      verifyInitialized();
       Long taskId =
             clusterMgr.fixDiskFailures(clusterName,
                   requestBody.getNodeGroupName());
@@ -379,6 +394,7 @@ public class RestResource {
    @RequestMapping(value = "/resourcepools", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
    public void addResourcePool(@RequestBody ResourcePoolAdd rpSpec) {
+      verifyInitialized();
       if (rpSpec == null) {
          throw BddException.INVALID_PARAMETER("rpSpec", null);
       }
@@ -429,6 +445,7 @@ public class RestResource {
    @RequestMapping(value = "/resourcepool/{rpName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
    public void deleteResourcePool(@PathVariable("rpName") String rpName) {
+      verifyInitialized();
       rpName = CommonUtil.decode(rpName);
       if (CommonUtil.isBlank(rpName)
             || !CommonUtil.validateResourceName(rpName)) {
@@ -440,6 +457,7 @@ public class RestResource {
    @RequestMapping(value = "/datastores", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
    public void addDatastore(@RequestBody DatastoreAdd dsSpec) {
+      verifyInitialized();
       if (dsSpec == null) {
          throw BddException.INVALID_PARAMETER("dsSpec", null);
       }
@@ -479,6 +497,7 @@ public class RestResource {
    @RequestMapping(value = "/datastore/{dsName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
    public void deleteDatastore(@PathVariable("dsName") String dsName) {
+      verifyInitialized();
       dsName = CommonUtil.decode(dsName);
       if (CommonUtil.isBlank(dsName)
             || !CommonUtil.validateResourceName(dsName)) {
@@ -491,6 +510,7 @@ public class RestResource {
    @ResponseStatus(HttpStatus.OK)
    public void deleteNetworkByName(
          @PathVariable("networkName") String networkName) {
+      verifyInitialized();
       networkName = CommonUtil.decode(networkName);
       if (CommonUtil.isBlank(networkName)
             || !CommonUtil.validateResourceName(networkName)) {
@@ -528,6 +548,7 @@ public class RestResource {
    @RequestMapping(value = "/networks", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
    public void addNetworks(@RequestBody final NetworkAdd na) {
+      verifyInitialized();
       if (CommonUtil.isBlank(na.getName())
             || !CommonUtil.validateResourceName(na.getName())) {
          throw BddException.INVALID_PARAMETER("name", na.getName());
@@ -566,6 +587,7 @@ public class RestResource {
    public void increaseIPs(@PathVariable("networkName") String networkName,
          @RequestBody NetworkAdd network, HttpServletRequest request,
          HttpServletResponse response) {
+      verifyInitialized();
       networkName = CommonUtil.decode(networkName);
       if (CommonUtil.isBlank(networkName)
             || !CommonUtil.validateResourceName(networkName)) {
@@ -578,6 +600,9 @@ public class RestResource {
    @ResponseStatus(HttpStatus.OK)
    public void importRacks(@RequestBody final RackInfoList racksInfo)
          throws Exception {
+
+      verifyInitialized();
+
       if (racksInfo == null || racksInfo.size() == 0) {
          throw BddException.INVALID_PARAMETER("rack list", "empty");
       }
@@ -639,4 +664,9 @@ public class RestResource {
       return msg;
    }
 
+   private void verifyInitialized() {
+      if (!ClusteringService.isInitialized()) {
+         throw BddException.INIT_VC_FAIL();
+      }
+   }
 }
