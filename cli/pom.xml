@@ -18,7 +18,7 @@
    </parent>
 
    <properties>
-      <spring.shell.version>1.1.0.BUILD-SNAPSHOT</spring.shell.version>
+      <spring.shell.version>1.0.0.RELEASE</spring.shell.version>
       <jar.mainclass>org.springframework.shell.Bootstrap</jar.mainclass>
       <antlr.version>3.4</antlr.version>
    </properties>
@@ -130,8 +130,8 @@
    </build>
    <repositories>
    	<repository>
-		<id>spring-snapshot</id>
-		<url>http://repo.springsource.org/libs-snapshot/</url>
+		<id>spring-release</id>
+		<url>http://repo.springsource.org/libs-release/</url>
 	</repository>
    </repositories>
 </project>

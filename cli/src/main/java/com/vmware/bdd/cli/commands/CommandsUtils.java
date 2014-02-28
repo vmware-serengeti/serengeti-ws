@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import jline.console.ConsoleReader;
+import jline.ConsoleReader;
 
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -412,7 +412,7 @@ public class CommandsUtils {
       try {
          ConsoleReader reader = new ConsoleReader();
          // Set prompt message
-         reader.setPrompt(promptMsg);
+         reader.setDefaultPrompt(promptMsg);
          int k = 0;
          while (continueLoop) {
             if (k >= 3) {
