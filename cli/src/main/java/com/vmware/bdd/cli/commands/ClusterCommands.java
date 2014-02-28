@@ -651,7 +651,7 @@ public class ClusterCommands implements CommandMarker {
                         name,
                         Constants.OUTPUT_OP_RESIZE,
                         Constants.OUTPUT_OP_RESULT_FAIL,
-                        "You must specify at least one positive value for instanceNum, cpuNumPerNode, or memCapacityPerNode");
+                        "You must specify at least one positive value for instanceNum, cpuNumPerNode, or memCapacityMbPerNode");
 
          } else {
             List<String> invalidParams = new ArrayList<String>();

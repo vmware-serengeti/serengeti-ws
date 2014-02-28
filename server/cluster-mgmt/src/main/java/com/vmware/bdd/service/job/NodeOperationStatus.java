@@ -26,6 +26,8 @@ public class NodeOperationStatus {
    private boolean succeed = true;
    private String errorMessage;
 
+   public NodeOperationStatus() {}
+
    public NodeOperationStatus(String nodeName) {
       this.nodeName = nodeName;
    }
