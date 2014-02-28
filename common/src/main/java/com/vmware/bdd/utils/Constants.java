@@ -187,7 +187,7 @@ public class Constants {
    public static final String NODE_UPGRADE_TARBALL_FILE_NAME = "serengeti-node-scripts.tar.gz";
    public static final String NODE_UPGRADE_SCRIPT_FILE_NAME = "serengeti-upgrade-node.sh";
    public static final String NEED_UPGRADE = "Earlier";
-   public static final String MSG_SETTING_UP_PASSWORDLESS_LOGIN = "Setting up password less login.";
+   public static final String MSG_SETTING_UP_PASSWORDLESS_LOGIN = "Setting up passwordless login to ";
    public static final String DEFAULT_PASSWORD = "password";
    public static final String SERENGETI_TTY_NAME = "serengeti.tty.name";
    public static final String SERENGETI_DEFAULT_TTY_NAME = "tty1";
@@ -196,5 +196,4 @@ public class Constants {
    public static final String DEFAULT_SERENGETI_SBIN_DIR = "/opt/serengeti/sbin";
    public static final String SERENGETI_HOME = "serengeti.home";
    public static final String DEFAULT_SERENGETI_HOME = "/home/serengeti";
-
 }

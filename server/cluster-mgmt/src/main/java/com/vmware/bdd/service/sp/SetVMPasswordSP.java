@@ -36,6 +36,7 @@ public class SetVMPasswordSP implements Callable<Void> {
    private String privateKeyFile;
    private String sshUser;
    private int sshPort;
+   private final static int SETUP_PASSWORDLESS_LOGIN_TIMEOUT = 10; //in seconds
 
    public SetVMPasswordSP(String nodeIP, String password) {
       this.nodeIP = nodeIP;
@@ -109,13 +110,15 @@ public class SetVMPasswordSP implements Callable<Void> {
    }
 
    private boolean setRandomPassword() throws Exception {
+      logger.info("Setting random password for " + nodeIP);
       String scriptFileName = Configuration.getString(Constants.SET_PASSWORD_SCRIPT_CONFIG_NAME, Constants.DEFAULT_SET_PASSWORD_SCRIPT);
       String cmd = "sudo " + scriptFileName + " -a";
       return setPassword(cmd, null);
    }
 
    private boolean setCustomizedPassword(String password) throws Exception {
-      String cmd = generateSetPasswdCommand(Constants.SET_PASSWORD_SCRIPT_CONFIG_NAME, password);
+      logger.info("Setting customized password for " + nodeIP);
+      String cmd = generateSetPasswdCommand(Constants.SET_PASSWORD_SCRIPT_CONFIG_NAME);
       InputStream in = null;
       try {
          in = parseInputStream(new String(password + Constants.NEW_LINE + password + Constants.NEW_LINE));
@@ -164,11 +167,7 @@ public class SetVMPasswordSP implements Callable<Void> {
       String user = Configuration.getString(Constants.SSH_USER_CONFIG_NAME, Constants.DEFAULT_SSH_USER_NAME);
       String password = Configuration.getString(Constants.SERENGETI_DEFAULT_PASSWORD);
       String cmd = script + " " + hostIP + " " + user + " " + password;
-      try {
-         ShellCommandExecutor.execCmd(cmd, null, null, 0, Constants.MSG_SETTING_UP_PASSWORDLESS_LOGIN);
-      } catch (Exception e) {
-         logger.error(e.getStackTrace());
-      }
+      ShellCommandExecutor.execCmd(cmd, null, null, SETUP_PASSWORDLESS_LOGIN_TIMEOUT, Constants.MSG_SETTING_UP_PASSWORDLESS_LOGIN + hostIP + ".");
    }
 
    private boolean refreshTty() {
@@ -186,7 +185,7 @@ public class SetVMPasswordSP implements Callable<Void> {
        return input;
    }
 
-   private String generateSetPasswdCommand(String setPasswdScriptConfig, String password) {
+   private String generateSetPasswdCommand(String setPasswdScriptConfig) {
       String scriptFileName = Configuration.getString(setPasswdScriptConfig, Constants.DEFAULT_SET_PASSWORD_SCRIPT);
       String script = getScriptName(scriptFileName);
       return "sudo " + script + " -u";
