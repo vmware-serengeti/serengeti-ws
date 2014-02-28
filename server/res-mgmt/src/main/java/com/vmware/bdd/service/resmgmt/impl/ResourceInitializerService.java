@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.vim.binding.vim.net.IpConfigInfo;
+import com.vmware.vim.binding.vim.vm.GuestInfo;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -185,8 +187,10 @@ public class ResourceInitializerService implements IResourceInitializerService {
       }
       logger.info("added datastore. " + dsNames);
 
-      networkSvc.addDhcpNetwork(DEFAULT_NETWORK, networkName);
-      logger.info("added network:" + networkName);
+      if (networkName != null) {
+         networkSvc.addDhcpNetwork(DEFAULT_NETWORK, networkName);
+         logger.info("added network:" + networkName);
+      }
    }
 
 
@@ -220,22 +224,36 @@ public class ResourceInitializerService implements IResourceInitializerService {
       String networkName = VcContext.inVcSessionDo(new VcSession<String>() {
          @Override
          protected String body() throws Exception {
-            VirtualMachine vm = null;
-            try {
-               vm = serverVm.getManagedObject();
-            } catch (Exception e) {
-               logger.warn("can not get virtual machine in the vc.");
-               throw VcProviderException.SERVER_NOT_FOUND(serverVm.getName());
+            GuestInfo.NicInfo[] nicInfos = serverVm.queryGuest().getNet();
+
+            if (nicInfos == null || nicInfos.length == 0) {
+               return null;
             }
-            String networkName = null;
-            ManagedObjectReference[] networks = vm.getNetwork();
-            if (networks != null && networks.length > 0) {
-               ManagedObjectReference network = networks[0];
-               logger.info("network:" + network);
-               VcNetwork vcNetwork = VcCache.get(networks[0]);
-               networkName = vcNetwork.getName();
+
+            String defaultNetwork = null;
+            for (GuestInfo.NicInfo nicInfo : nicInfos) {
+               if (nicInfo.getNetwork() == null) {
+                  continue;
+               }
+
+               if (defaultNetwork == null) {
+                  defaultNetwork = nicInfo.getNetwork();
+               }
+
+               if (nicInfo.getIpConfig() == null || nicInfo.getIpConfig().getIpAddress() == null
+                     || nicInfo.getIpConfig().getIpAddress().length == 0) {
+                  continue;
+               }
+
+               for (IpConfigInfo.IpAddress info : nicInfo.getIpConfig().getIpAddress()) {
+                  if (info.getIpAddress() != null
+                        && sun.net.util.IPAddressUtil.isIPv4LiteralAddress(info.getIpAddress())) {
+                     return nicInfo.getNetwork();
+                  }
+               }
             }
-            return networkName;
+
+            return defaultNetwork;
          }
       });
       logger.info("network name:" + networkName);
