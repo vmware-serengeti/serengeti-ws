@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -619,7 +618,7 @@ public class ClusterConfigManager {
          List<GroupAssociation> associons = policies.getGroupAssociations();
          if (associons != null) {
             Set<NodeGroupAssociation> associonEntities =
-                  new TreeSet<NodeGroupAssociation>();
+                  new HashSet<NodeGroupAssociation>();
             for (GroupAssociation a : associons) {
                NodeGroupAssociation ae = new NodeGroupAssociation();
                ae.setAssociationType(a.getType());
