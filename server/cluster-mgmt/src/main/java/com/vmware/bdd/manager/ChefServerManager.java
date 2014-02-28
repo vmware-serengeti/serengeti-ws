@@ -7,6 +7,7 @@ import java.util.HashSet;
 
 import org.apache.log4j.Logger;
 
+import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.utils.CommonUtil;
 
 public class ChefServerManager {
@@ -43,8 +44,7 @@ public class ChefServerManager {
                HashSet<String> roles = new HashSet<String>();
                Process p = CommonUtil.execCommand(GET_ROLES_CMD);
                if (p == null || p.exitValue() != 0) {
-                  logger.error("Failed to execute command " + GET_ROLES_CMD);
-                  return null;
+                  throw ClusterConfigException.CANNOT_GET_ROLES_FROM_CHEF_SERVER();
                }
 
                BufferedReader buf = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -59,6 +59,7 @@ public class ChefServerManager {
                   allRoles = roles;
                } catch (IOException e) {
                   logger.error("Failed to get all roles from Chef Server: " + e.getMessage());
+                  throw ClusterConfigException.CANNOT_GET_ROLES_FROM_CHEF_SERVER();
                }
             }
          }

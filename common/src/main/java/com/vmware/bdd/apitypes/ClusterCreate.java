@@ -731,6 +731,7 @@ public class ClusterCreate implements Serializable {
                   if (isHAFlag(nodeGroupCreate)) {
                      warningMsgList.add(Constants.WORKER_CLIENT_HA_FLAG);
                   }
+                  break;
                case NONE:
                   // server side will validate whether the roles of this group exist
                   break;

@@ -60,6 +60,9 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException NO_HADOOP_ROLE_SPECIFIED(String group) {
       return new ClusterConfigException(null, "NO_HADOOP_ROLE_SPECIFIED", group);
    }
+   public static ClusterConfigException CANNOT_GET_ROLES_FROM_CHEF_SERVER() {
+      return new ClusterConfigException(null, "CANNOT_GET_ROLES_FROM_CHEF_SERVER");
+   }
    public static ClusterConfigException MORE_THAN_ONE_MASTER_NODE(String clusterName) {
       return new ClusterConfigException(null, "MORE_THAN_ONE_MASTER_NODE", clusterName);
    }
