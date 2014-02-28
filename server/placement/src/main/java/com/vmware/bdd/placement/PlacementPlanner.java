@@ -842,7 +842,7 @@ public class PlacementPlanner implements IPlacementPlanner {
    }
 
    private AbstractHost assignHost(VirtualNode vNode,
-         List<AbstractHost> candidates) {
+         List<AbstractHost> candidates, boolean isAssociatedCandidates) {
       if (candidates == null || candidates.size() == 0)
          return null;
 
@@ -888,7 +888,10 @@ public class PlacementPlanner implements IPlacementPlanner {
             }
             if (rackIndex == candidateRacks.size()) {
                logger.warn("tried with all candidate racks, there are no host are available");
-               return null;
+               if (isAssociatedCandidates)
+                  return null;
+               else
+                  throw PlacementException.OUT_OF_RACK(candidateRacks, vNode.getBaseNodeNames());
             }
             logger.info("try hosts on Rack " + candidateRacks.get(rackIndex));
          }
@@ -931,9 +934,8 @@ public class PlacementPlanner implements IPlacementPlanner {
       if (vNode.hasInstancePerHostPolicy()) {
          candidates = instancePerHostFilter(vNode, candidates);
          if (candidates.size() == 0) {
-            logger.info("all candicates failed to pass instance_per_host filer");
-            // TODO return more detailed Exception.instance_per_host_violated
-            return null;
+            logger.info("all candidates failed to pass instance_per_host filer");
+            throw PlacementException.INSTANCE_PER_HOST_VIOLATION(vNode.getBaseNodeNames());
          }
          logger.info("candidates " + candidates
                + " passed instance_per_host filer");
@@ -946,7 +948,7 @@ public class PlacementPlanner implements IPlacementPlanner {
          logger.info("candidates " + associatedCandidates
                + " passed strict group association filter");
 
-         AbstractHost candidate = assignHost(vNode, associatedCandidates);
+         AbstractHost candidate = assignHost(vNode, associatedCandidates, true);
          if (candidate != null) {
             logger.info("found candiate host " + candidate
                   + " satisfying the group association policy");
@@ -968,7 +970,7 @@ public class PlacementPlanner implements IPlacementPlanner {
                + " passed weak association constraint");
       }
 
-      return assignHost(vNode, candidates);
+      return assignHost(vNode, candidates, false);
    }
 
    private String getLeastUsed(String vcClusterName, List<String> rps) {

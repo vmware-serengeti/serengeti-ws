@@ -53,7 +53,7 @@ public class PlacementService implements IPlacementService {
 
    private void placeVirtualGroup(IContainer container, ClusterCreate cluster,
          IPlacementPlanner planner, VirtualGroup vGroup,
-         List<BaseNode> placedNodes, Map<String, List<String>> filteredHosts) {
+         List<BaseNode> placedNodes) {
       String targetRack = null;
       if (vGroup.getGroupRacks() != null
             && GroupRacksType.SAMERACK.equals(vGroup.getGroupRacks().getType())) {
@@ -71,10 +71,7 @@ public class PlacementService implements IPlacementService {
          if (candidates == null || candidates.size() == 0) {
             logger.error("cannot find candidate hosts from the container "
                   + "to place the virtual node " + vNode.getBaseNodeNames());
-            if (filteredHosts.isEmpty())
-               throw PlacementException.OUT_OF_VC_HOST(PlacementUtil.getBaseNodeNames(vNode));
-            else
-               throw PlacementException.OUT_OF_VC_HOST_WITH_FILTERING(PlacementUtil.getBaseNodeNames(vNode), filteredHosts);
+            throw PlacementException.OUT_OF_VC_HOST(PlacementUtil.getBaseNodeNames(vNode));
          }
 
          // select host
@@ -85,10 +82,7 @@ public class PlacementService implements IPlacementService {
                   + candidates + " for the virtual node "
                   + vNode.getBaseNodeNames());
             // TODO different exception for policy violation
-            if (filteredHosts.isEmpty())
-               throw PlacementException.OUT_OF_VC_HOST(PlacementUtil.getBaseNodeNames(vNode));
-            else
-               throw PlacementException.OUT_OF_VC_HOST_WITH_FILTERING(PlacementUtil.getBaseNodeNames(vNode), filteredHosts);
+            throw PlacementException.OUT_OF_VC_HOST(PlacementUtil.getBaseNodeNames(vNode));
          }
 
          // generate placement topology
@@ -116,12 +110,12 @@ public class PlacementService implements IPlacementService {
          List<BaseNode> placedNodes, Map<String, List<String>> filteredHosts) {
       // snap shot environment on placement exceptions
       try {
-         placeVirtualGroup(container, cluster, planner, vGroup, placedNodes, filteredHosts);
+         placeVirtualGroup(container, cluster, planner, vGroup, placedNodes);
       } catch (PlacementException e) {
          logger.error("Place cluster " + cluster.getName()
                + " failed. PlacementException: " + e.getMessage());
          snapShotPlacementEnv(container, cluster, placedNodes);
-         throw e;
+         throw PlacementException.PLACEMENT_ERROR(e, placedNodes, filteredHosts);
       }
    }
 

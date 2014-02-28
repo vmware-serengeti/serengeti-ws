@@ -240,7 +240,7 @@ public class TestPlacementService {
    }
 
    @Test
-   public void testOutOfSyncHosts() throws Exception {
+   public void testFilteredHosts() throws Exception {
       ClusterCreate spec =
             TestPlacementUtil
                   .getSimpleClusterSpec(TestPlacementUtil.SIMPLE_CLUSTER_SPEC);
@@ -267,7 +267,7 @@ public class TestPlacementService {
          List<BaseNode> nodes = service.getPlacementPlan(container, spec, null, filteredHosts);
       } catch (PlacementException e) {
          Assert.assertEquals(e.getMessage(),
-               "Cannot find a host with enough storage to place base nodes [hadoop-worker-4, hadoop-worker-5]. The following hosts are filtered out due to time out of sync: [10.1.1.1]. The following hosts are filtered out due to lack of networks: [10.1.1.1].");
+               "Failed to find a host for node [hadoop-worker-4, hadoop-worker-5] that passes instance per host placement policy. Node hadoop-worker-0 placed on host 10.1.1.2. Node hadoop-worker-1 placed on host 10.1.1.2. Node hadoop-worker-2 placed on host 10.1.1.3. Node hadoop-worker-3 placed on host 10.1.1.3. The following hosts are filtered out due to time out of sync: [10.1.1.1]. The following hosts are filtered out due to lack of networks: [10.1.1.1].");
       }
    }
 }

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.placement.util.PlacementUtil;
 
 public class PlacementException extends BddException {
@@ -32,6 +33,27 @@ public class PlacementException extends BddException {
       super(cause, "PLACEMENT", errorId, detail);
    }
 
+   public static PlacementException PLACEMENT_ERROR(PlacementException cause, List<BaseNode> placedNodes,
+         Map<String, List<String>> filteredHosts) {
+      StringBuilder placedNodesStr = new StringBuilder();
+      for (BaseNode baseNode : placedNodes) {
+         placedNodesStr.append(" ");
+         placedNodesStr.append(BddException.getErrorMessage("PLACEMENT.NODE_PLACED_ON_HOST", baseNode.getVmName(), baseNode.getTargetHost()));
+      }
+      StringBuilder filteredHostsStr = new StringBuilder();
+      List<String> outOfSyncHosts = filteredHosts.get(PlacementUtil.OUT_OF_SYNC_HOSTS);
+      if (null != outOfSyncHosts) {
+         filteredHostsStr.append(" ");
+         filteredHostsStr.append(BddException.getErrorMessage("PLACEMENT.OUT_OF_SYNC_HOSTS", outOfSyncHosts.toString()));
+      }
+      List<String> noNetworkHosts = filteredHosts.get(PlacementUtil.NO_NETWORKS_HOSTS);
+      if (null != noNetworkHosts) {
+         if (null != outOfSyncHosts) filteredHostsStr.append(" ");
+         filteredHostsStr.append(BddException.getErrorMessage("PLACEMENT.NO_NETWORK_HOSTS", noNetworkHosts.toString()));
+      }
+      return new PlacementException(cause, "PLACEMENT_ERROR", cause.getMessage(), placedNodesStr.toString(), filteredHostsStr.toString());
+   }
+
    public static PlacementException OUT_OF_STORAGE_ON_HOST(String host) {
       return new PlacementException(null, "OUT_OF_STORAGE", host);
    }
@@ -43,22 +65,6 @@ public class PlacementException extends BddException {
    public static PlacementException OUT_OF_VC_HOST(List<String> baseNodeNames) {
       return new PlacementException(null, "OUT_OF_HOST",
             baseNodeNames.toString());
-   }
-
-   public static PlacementException OUT_OF_VC_HOST_WITH_FILTERING(List<String> baseNodeNames,
-         Map<String, List<String>> filteredHosts) {
-      StringBuilder str = new StringBuilder();
-      List<String> outOfSyncHosts = filteredHosts.get(PlacementUtil.OUT_OF_SYNC_HOSTS);
-      if (null != outOfSyncHosts) {
-         str.append(BddException.getErrorMessage("PLACEMENT.OUT_OF_SYNC_HOSTS", outOfSyncHosts.toString()));
-      }
-      List<String> noNetworkHosts = filteredHosts.get(PlacementUtil.NO_NETWORKS_HOSTS);
-      if (null != noNetworkHosts) {
-         if (null != outOfSyncHosts) str.append(" ");
-         str.append(BddException.getErrorMessage("PLACEMENT.NO_NETWORK_HOSTS", noNetworkHosts.toString()));
-      }
-      return new PlacementException(null, "OUT_OF_HOST_WITH_FILTERING",
-            baseNodeNames.toString(), str.toString());
    }
 
    public static PlacementException DO_NOT_HAVE_SHARED_VC_CLUSTER(
@@ -79,5 +85,13 @@ public class PlacementException extends BddException {
 
    public static PlacementException VC_CLUSTER_NOT_FOUND(String vcCluster) {
       return new PlacementException(null, "VC_CLUSTER_NOT_FOUND", vcCluster);
+   }
+
+   public static PlacementException OUT_OF_RACK(List<String> candidateRacks, List<String> baseNodeNames) {
+      return new PlacementException(null, "OUT_OF_RACK", candidateRacks.toString(), baseNodeNames.toString());
+   }
+
+   public static PlacementException INSTANCE_PER_HOST_VIOLATION(List<String> baseNodeNames) {
+      return new PlacementException(null, "INSTANCE_PER_HOST_VIOLATION", baseNodeNames.toString());
    }
 }
