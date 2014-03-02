@@ -304,6 +304,9 @@ public class TestClusteringJobs extends
    private static void removeVMs() {
       final VcResourcePool vcRp =
             VcResourceUtils.findRPInVCCluster(vcCluster, vcRP);
+      if (vcRp == null) {
+         return;
+      }
       VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
          protected boolean isTaskSession() {
