@@ -150,7 +150,7 @@ public class Constants {
 
    public static final int DEFAULT_SCHEDULER_POOL_SIZE = 1024;
    public static final int MIN_MEM_SIZE = 1024;
-   public static final String VERSION = "1.1.0";
+   public static final String VERSION = "2.0.0";
 
    public static final String SSH_PRIVATE_KEY_FILE_NAME = "/home/serengeti/.ssh/id_rsa";
    public static final String SSH_PRIVATE_KEY_CONFIG_NAME = "serengeti.ssh.private.key.file";
