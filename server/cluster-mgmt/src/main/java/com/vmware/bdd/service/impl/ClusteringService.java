@@ -287,8 +287,7 @@ public class ClusteringService implements IClusteringService {
          prepareTemplateVM();
          loadTemplateNetworkLable();
          convertTemplateVm();
-         clusterInitializerService.transformClusterStatus(
-               ClusterStatus.PROVISIONING, ClusterStatus.PROVISION_ERROR);
+         clusterInitializerService.transformClusterStatus();
          elasticityScheduleMgr.start();
          configureAlarm();
          initialized = true;

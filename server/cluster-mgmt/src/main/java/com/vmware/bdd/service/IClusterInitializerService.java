@@ -18,5 +18,5 @@ import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 
 public interface IClusterInitializerService {
 
-   public void transformClusterStatus (ClusterStatus from, ClusterStatus to);
+   public void transformClusterStatus ();
 }

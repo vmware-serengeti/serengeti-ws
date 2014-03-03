@@ -23,28 +23,39 @@ import com.vmware.bdd.service.impl.ClusterInitializerService;
 public class TestClusterInitializerService {
 
    private static final Logger logger = Logger.getLogger(TestClusterInitializerService.class);
-   private static ClusterInitializerService adjustDbService;
+   private static ClusterInitializerService clusterInitializerService;
 
    @BeforeClass(groups = { "TestClusterInitializerService" })
    public static void setup() {
-      adjustDbService = new ClusterInitializerService();
+      clusterInitializerService = new ClusterInitializerService();
 
       List<ClusterEntity> clusters = new ArrayList<ClusterEntity>();
+
       ClusterEntity cluster01 = new ClusterEntity("cluster01");
       cluster01.setStatus(ClusterStatus.PROVISION_ERROR);
       clusters.add(cluster01);
 
+      ClusterEntity cluster02 = new ClusterEntity("cluster02");
+      cluster02.setStatus(ClusterStatus.DELETING);
+      clusters.add(cluster02);
+
       IClusterEntityManager clusterEntityManager = Mockito.mock(IClusterEntityManager.class);
       Mockito.when(clusterEntityManager.findAllClusters()).thenReturn(clusters);
       Mockito.doNothing().when(clusterEntityManager).update(cluster01);
-      adjustDbService.setClusterEntityManager(clusterEntityManager);
+      clusterInitializerService.setClusterEntityManager(clusterEntityManager);
    }
 
    @Test(groups = { "TestClusterInitializerService" })
    public void testTransformClusterStatus() {
-      adjustDbService.transformClusterStatus(ClusterStatus.PROVISIONING, ClusterStatus.PROVISION_ERROR);
-      ClusterEntity cluster = adjustDbService.getClusterEntityManager().findAllClusters().get(0);
-      assertTrue(cluster.getStatus().equals(ClusterStatus.PROVISION_ERROR));
+      clusterInitializerService.transformClusterStatus();
+      List<ClusterEntity> clusters = clusterInitializerService.getClusterEntityManager().findAllClusters();
+      for (ClusterEntity clusterEntity : clusters) {
+         if (clusterEntity.getName().equals("cluster01")) {
+            assertTrue(clusterEntity.getStatus().equals(ClusterStatus.PROVISION_ERROR));
+         }
+         if (clusterEntity.getName().equals("cluster02")) {
+            assertTrue(clusterEntity.getStatus().equals(ClusterStatus.ERROR));
+         }
+      }
    }
-
 }

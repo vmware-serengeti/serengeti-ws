@@ -14,7 +14,10 @@
  ***************************************************************************/
 package com.vmware.bdd.service.impl;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -27,6 +30,22 @@ public class ClusterInitializerService implements IClusterInitializerService {
 
    private static final Logger logger = Logger.getLogger(ClusterInitializerService.class);
 
+   private static final ClusterStatus[] toProvisionError = {
+         ClusterStatus.PROVISIONING
+   };
+
+   private static final ClusterStatus[] toError = {
+         ClusterStatus.CONFIGURING,
+         ClusterStatus.DELETING,
+         ClusterStatus.STARTING,
+         ClusterStatus.STOPPING,
+         ClusterStatus.UPDATING,
+         ClusterStatus.UPGRADING,
+         ClusterStatus.VHM_RUNNING,
+         ClusterStatus.VMRECONFIGURING,
+         ClusterStatus.MAINTENANCE
+   };
+
    private IClusterEntityManager clusterEntityManager;
 
    public IClusterEntityManager getClusterEntityManager() {
@@ -38,15 +57,25 @@ public class ClusterInitializerService implements IClusterInitializerService {
    }
 
    @Override
-   public void transformClusterStatus(ClusterStatus from, ClusterStatus to) {
+   public void transformClusterStatus() {
       List<ClusterEntity> allClusters = clusterEntityManager.findAllClusters();
+      Set<ClusterStatus> toProvisonErrorSet = new HashSet<ClusterStatus>(Arrays.asList(toProvisionError));
+      Set<ClusterStatus> toErrorSet = new HashSet<ClusterStatus>(Arrays.asList(toError));
       for (ClusterEntity clusterEntity : allClusters) {
-         if (clusterEntity.getStatus().equals(from)) {
-            clusterEntity.setStatus(to);
-            clusterEntityManager.update(clusterEntity);
-            logger.info("update status from " + from.toString() + " to " + to.toString()
-                  + " for cluster: " + clusterEntity.getName());
+         ClusterStatus fromStatus = clusterEntity.getStatus();
+         ClusterStatus toStatus;
+         if (toProvisonErrorSet.contains(fromStatus)) {
+            toStatus = ClusterStatus.PROVISION_ERROR;
+         } else if (toErrorSet.contains(fromStatus)) {
+            toStatus = ClusterStatus.ERROR;
+         } else {
+            continue;
          }
+
+         clusterEntity.setStatus(toStatus);
+         clusterEntityManager.update(clusterEntity);
+         logger.info("update status from " + fromStatus.toString() + " to " + toStatus.toString()
+               + " for cluster: " + clusterEntity.getName());
       }
    }
 }
