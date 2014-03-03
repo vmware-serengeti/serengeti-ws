@@ -95,7 +95,6 @@ public class Constants {
          "NameNode High Availability is not enabled, but journal nodes appear.";
    public static final String WRONG_NUM_OF_NODEGROUPS =
          "Only one node group can include JobTracker, ZooKeeper or HMaster.";
-   public static final String WRONG_NUM_OF_WORKERNODES = "No worker exists.";
    public static final String DATA_CLIENT_NODE_JOURNALNODE_COEXIST =
          "Journal nodes cannot be on data nodes or client nodes.";
    public static final String STORAGE_TYPE_ALLOWED =

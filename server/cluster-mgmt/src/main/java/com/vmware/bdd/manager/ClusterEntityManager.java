@@ -434,6 +434,7 @@ public class ClusterEntityManager implements IClusterEntityManager {
             computeOnly = false;
          }
       }
+
       clusterRead.setNodeGroups(groupList);
 
       if (computeOnly && cluster.getHadoopConfig() != null) {

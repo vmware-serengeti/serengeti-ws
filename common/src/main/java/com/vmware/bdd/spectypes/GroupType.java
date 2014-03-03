@@ -20,12 +20,12 @@ import java.util.EnumSet;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 
 public enum GroupType {
-   DEFAULT_GROUP("default"),
    ZOOKEEPER_GROUP("zookeeper"),
    JOURNALNODE_GROUP("journalnode"),
    MASTER_GROUP("master"),
    HBASE_MASTER_GROUP("hbase_master"),
    MASTER_JOBTRACKER_GROUP("job_tracker"),
+   YARN_RESOURCEMANAGER_GROUP("resourcemanager"),
    WORKER_GROUP("worker"),
    CLIENT_GROUP("client"),
    MAPR_MASTER_GROUP("mapr_master"),
@@ -33,7 +33,7 @@ public enum GroupType {
    MAPR_CLIENT_GROUP("client"),
    MAPR_ZOOKEEPER_GROUP("mapr_zookeeper"),
    MAPR_MYSQL_SERVER_GROUP("mapr_mysql_server"),
-   YARN_RESOURCEMANAGER_GROUP("resourcemanager");
+   DEFAULT_GROUP("default");
 
    private String description;
 

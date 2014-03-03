@@ -759,9 +759,6 @@ public class ClusterCreate implements Serializable {
             || (zookeeperCount > 1) || (hbasemasterCount > 1)) {
          failedMsgList.add(Constants.WRONG_NUM_OF_NODEGROUPS);
       }
-      if (workerCount == 0) {
-         warningMsgList.add(Constants.WRONG_NUM_OF_WORKERNODES);
-      }
       if (numOfJournalNode > 0 && !namenodeHACheck) {
          failedMsgList.add(Constants.NO_NAMENODE_HA);
       }

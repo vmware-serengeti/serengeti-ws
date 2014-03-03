@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,9 +29,6 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.vmware.bdd.exception.VcProviderException;
-import com.vmware.bdd.service.IClusteringService;
-import com.vmware.bdd.utils.VcVmUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,17 +62,20 @@ import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.exception.UniqueConstraintViolationException;
+import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
 import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
 import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.VcVmUtil;
 
 public class ClusterConfigManager {
    private static final long serialVersionUID = 1L;
@@ -256,7 +257,6 @@ public class ClusterConfigManager {
             clusterEntity
                   .setNodeGroups(convertNodeGroupsToEntities(gson,
                         clusterEntity, cluster.getDistro(), groups,
-                        EnumSet.noneOf(HadoopRole.class),
                         cluster.isValidateConfig()));
 
             //make sure memory size is no less than MIN_MEM_SIZE
@@ -554,13 +554,13 @@ public class ClusterConfigManager {
 
    private Set<NodeGroupEntity> convertNodeGroupsToEntities(Gson gson,
          ClusterEntity clusterEntity, String distro, NodeGroupCreate[] groups,
-         EnumSet<HadoopRole> allRoles, boolean validateWhiteList) {
+         boolean validateWhiteList) {
       Set<NodeGroupEntity> nodeGroups;
       nodeGroups = new HashSet<NodeGroupEntity>();
       Set<String> referencedNodeGroups = new HashSet<String>();
       for (NodeGroupCreate group : groups) {
          NodeGroupEntity groupEntity =
-               convertGroup(gson, clusterEntity, allRoles, group, distro,
+               convertGroup(gson, clusterEntity, group, distro,
                      validateWhiteList);
          if (groupEntity != null) {
             nodeGroups.add(groupEntity);
@@ -590,13 +590,11 @@ public class ClusterConfigManager {
    }
 
    private NodeGroupEntity convertGroup(Gson gson, ClusterEntity clusterEntity,
-         EnumSet<HadoopRole> allRoles, NodeGroupCreate group, String distro,
-         boolean validateWhiteList) {
+         NodeGroupCreate group, String distro, boolean validateWhiteList) {
       NodeGroupEntity groupEntity = new NodeGroupEntity();
       if (group.getRoles() == null || group.getRoles().isEmpty()) {
          throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(group.getName());
       }
-      Set<String> roles = new HashSet<String>();
 
       groupEntity.setCluster(clusterEntity);
       int cpuNum = group.getCpuNum() == null ? 0 : group.getCpuNum();
@@ -648,17 +646,18 @@ public class ClusterConfigManager {
          groupEntity.setVcNetworkNames(group.getNetworkNames());
       }
       */
+
+      // We will respect the original orders as users input through LinkedHashSet after we allow 
+      // customized roles, because chef server has strict role orders in some cases.
+      Set<String> roles = new LinkedHashSet<String>();
       convertStorage(group, groupEntity, roles);
 
       roles.addAll(group.getRoles());
-      List<String> sortedRolesByDependency = new ArrayList<String>();
-      sortedRolesByDependency.addAll(roles);
-      Collections.sort(sortedRolesByDependency, new RoleComparactor());
       EnumSet<HadoopRole> enumRoles = getEnumRoles(group.getRoles(), distro);
       if (enumRoles.isEmpty()) {
          throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(group.getName());
       }
-      groupEntity.setRoles(gson.toJson(sortedRolesByDependency));
+      groupEntity.setRoles(gson.toJson(roles));
       GroupType groupType = GroupType.fromHadoopRole(enumRoles);
 
       if (groupType == GroupType.CLIENT_GROUP && group.getInstanceNum() <= 0) {
@@ -667,8 +666,6 @@ public class ClusterConfigManager {
                + ", remove the client group from cluster spec.");
          return null;
       }
-
-      allRoles.addAll(enumRoles);
 
       List<String> dsNames = groupEntity.getVcDatastoreNameList();
       if (dsNames == null) {
@@ -848,6 +845,19 @@ public class ClusterConfigManager {
       }
    }
 
+   private void sortGroups(List<NodeGroupCreate> nodeGroups) {
+	   logger.debug("begin to sort node groups.");
+	   Collections.sort(nodeGroups, new Comparator<NodeGroupCreate>() {
+		   public int compare(NodeGroupCreate arg0, NodeGroupCreate arg1) {
+			   if (arg0.getGroupType().equals(arg1.getGroupType())) {
+				   return arg0.getName().compareTo(arg1.getName());
+			   } else {
+				   return arg0.getGroupType().compareTo(arg1.getGroupType());
+			   }
+		   }
+	   });
+   }
+
    private List<NetworkAdd> allocatNetworkIp(List<String> networkNames,
          ClusterEntity clusterEntity, long instanceNum, boolean needAllocIp) {
       List<NetworkAdd> networkings = new ArrayList<NetworkAdd>();
@@ -891,35 +901,12 @@ public class ClusterConfigManager {
       return networkings;
    }
 
-   private void sortGroups(List<NodeGroupCreate> nodeGroups) {
-      logger.debug("begin to sort node groups.");
-      Collections.sort(nodeGroups, new Comparator<NodeGroupCreate>() {
-         public int compare(NodeGroupCreate arg0, NodeGroupCreate arg1) {
-            if (arg0.getGroupType().equals(arg1.getGroupType())) {
-               return arg0.getName().compareTo(arg1.getName());
-            } else {
-               return arg0.getGroupType().compareTo(arg1.getGroupType());
-            }
-         }
-      });
-   }
-
    @SuppressWarnings("unchecked")
    private NodeGroupCreate convertNodeGroups(String distro,
          NodeGroupEntity ngEntity, String clusterName) {
       Gson gson = new Gson();
       List<String> groupRoles = gson.fromJson(ngEntity.getRoles(), List.class);
-      Collections.sort(groupRoles, new Comparator<String>() {
-         public int compare(String str1, String str2) {
-            if (HadoopRole.fromString(str1).shouldRunAfterHDFS()) {
-               return 1;
-            } else if (HadoopRole.fromString(str2).shouldRunAfterHDFS()) {
-               return -1;
-            } else {
-               return 0;
-            }
-         }
-      });
+
       EnumSet<HadoopRole> enumRoles = getEnumRoles(groupRoles, distro);
       if (enumRoles.isEmpty()) {
          throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(ngEntity
