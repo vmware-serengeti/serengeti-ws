@@ -110,8 +110,8 @@ public class SimpleClusterCloneService implements IClusterCloneService {
 
    private void processException(VmCreateResult<VmCreateSpec> node, Throwable throwable) {
       while (throwable.getCause() != null) {
-         throwable = throwable.getCause();
          node.setErrMessage(throwable.getMessage());
+         throwable = throwable.getCause();
          if (throwable instanceof VmFaultToleranceOpIssuesList) {
             logger.error("Got FT operation error: "
                   + throwable.getLocalizedMessage());

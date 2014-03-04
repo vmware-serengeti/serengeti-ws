@@ -1593,13 +1593,7 @@ public class ClusteringService implements IClusteringService {
       if (throwable == null) {
          return null;
       }
-      String errMsg = null;
-      if (throwable.getCause() != null) {
-         errMsg = throwable.getCause().getMessage();
-      } else {
-         errMsg = throwable.getMessage();
-      }
-      return errMsg;
+      return throwable.getMessage();
    }
 
    public boolean removeBadNodes(ClusterCreate cluster,
@@ -1916,10 +1910,7 @@ public class ClusteringService implements IClusteringService {
             } else if (result[i].throwable != null) {
                logger.error("Failed to reconfigure vm", result[i].throwable);
                String nodeName = targetNodes.get(i).getVmName();
-               String message = null;
-               if (result[i].throwable.getCause() != null) {
-                  message = result[i].throwable.getCause().getMessage();
-               }
+               String message = result[i].throwable.getMessage();
                failedNodes.put(nodeName, message);
             }
          }

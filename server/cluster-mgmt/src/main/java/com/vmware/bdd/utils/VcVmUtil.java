@@ -535,11 +535,8 @@ public class VcVmUtil {
                      + node.getVmName());
                return true;
             } else {
-               String message = null;
-               if (result[0].throwable.getCause() != null) {
-                  message = result[0].throwable.getCause().getMessage();
-               }
-               throw BddException.VC_EXCEPTION(result[0].throwable.getCause(),
+               String message = result[0].throwable.getMessage();
+               throw BddException.VC_EXCEPTION(result[0].throwable,
                      message);
             }
          }
