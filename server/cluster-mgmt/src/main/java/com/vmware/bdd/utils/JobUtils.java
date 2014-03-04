@@ -224,8 +224,7 @@ public class JobUtils {
             logger.info("Node "
                   + node.getVmName()
                   + " cannot be controlled through VC. Remove it from VC manually, and then repeat the operarion.");
-            throw ClusteringServiceException
-            .VM_UNAVAILABLE(node.getVmName());
+            throw ClusteringServiceException.VM_UNAVAILABLE(node.getVmName());
          }
          // verify from VC 
          VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
@@ -266,7 +265,13 @@ public class JobUtils {
             verifyNodeStatus(node, expectedStatus, ignoreMissing);
          } catch (Exception e) {
             node.setActionFailed(true);
-            node.setErrMessage(e.getMessage());
+            logger.debug("Node verify failed for " + node.getVmName() + ", for "
+                  + e.getMessage());
+            if (node.getErrMessage() == null) {
+               node.setErrMessage(e.getMessage());
+               logger.debug("Set node error message for node "
+                     + node.getVmName() + " to: " + e.getMessage());
+            }
             success = false;
          }
       }

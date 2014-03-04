@@ -1194,7 +1194,11 @@ public class ClusteringService implements IClusteringService {
          if (!vmSucc || !result.isSuccess()) {
             success = false;
             node.setSuccess(false);
-            node.setErrMessage(result.getErrMessage());
+            if (result.getErrMessage() != null) {
+               node.setErrMessage(result.getErrMessage());
+            } else {
+               node.setErrMessage(node.getNodeAction());
+            }
          } else {
             total++;
          }

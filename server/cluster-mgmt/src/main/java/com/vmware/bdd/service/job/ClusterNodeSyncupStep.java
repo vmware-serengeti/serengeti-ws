@@ -19,6 +19,7 @@ import java.util.List;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.NodeStatus;
@@ -52,18 +53,7 @@ public class ClusterNodeSyncupStep extends TrackableTasklet {
       }
       lockClusterEntityMgr.syncUp(clusterName, false);
 
-      List<NodeOperationStatus> nodesStatus =
-            getFromJobExecutionContext(chunkContext,
-                  JobConstants.CLUSTER_NODES_STATUS,
-                  new TypeToken<List<NodeOperationStatus>>() {
-                  }.getType());
-      if (nodesStatus != null) {
-         for (NodeOperationStatus node : nodesStatus) {
-            NodeEntity entity = getClusterEntityMgr().findNodeByName(node.getNodeName());
-            entity.setActionFailed(!node.isSucceed());
-            entity.setErrMessage(node.getErrorMessage());
-         }
-      }
+      setNodeErrorMessages(chunkContext);
       Boolean success =
             getFromJobExecutionContext(chunkContext,
                   JobConstants.CLUSTER_OPERATION_SUCCESS, Boolean.class);
@@ -71,6 +61,13 @@ public class ClusterNodeSyncupStep extends TrackableTasklet {
          // wait next step to throw exception
          return RepeatStatus.FINISHED;
       }
+      verifyNodeStatus(chunkContext, clusterName);
+      return RepeatStatus.FINISHED;
+   }
+
+   @Transactional
+   private void verifyNodeStatus(ChunkContext chunkContext, String clusterName) {
+      Boolean success;
       NodeStatus expectedStatus =
             getFromJobExecutionContext(chunkContext,
                   JobConstants.EXPECTED_NODE_STATUS, NodeStatus.class);
@@ -82,6 +79,22 @@ public class ClusterNodeSyncupStep extends TrackableTasklet {
          putIntoJobExecutionContext(chunkContext,
                JobConstants.VERIFY_NODE_STATUS_RESULT_PARAM, success);
       }
-      return RepeatStatus.FINISHED;
+   }
+
+   @Transactional
+   private void setNodeErrorMessages(ChunkContext chunkContext) {
+      List<NodeOperationStatus> nodesStatus =
+            getFromJobExecutionContext(chunkContext,
+                  JobConstants.CLUSTER_NODES_STATUS,
+                  new TypeToken<List<NodeOperationStatus>>() {
+                  }.getType());
+      if (nodesStatus != null) {
+         for (NodeOperationStatus node : nodesStatus) {
+            NodeEntity entity =
+                  getClusterEntityMgr().findNodeByName(node.getNodeName());
+            entity.setActionFailed(!node.isSucceed());
+            entity.setErrMessage(node.getErrorMessage());
+         }
+      }
    }
 }

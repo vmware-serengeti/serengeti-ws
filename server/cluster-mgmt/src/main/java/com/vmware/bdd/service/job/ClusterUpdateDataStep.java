@@ -134,6 +134,7 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
       return RepeatStatus.FINISHED;
    }
 
+   @Transactional
    private void verifyCreatedNodes(ChunkContext chunkContext, String clusterName) {
       Boolean created =
             getFromJobExecutionContext(chunkContext,
