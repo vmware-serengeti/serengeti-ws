@@ -322,7 +322,7 @@ public class VcVmUtil {
             vNode.setNodeAction(null);
          } else {
             vNode.setNodeStatus(NodeStatus.POWERED_OFF);
-            vNode.setNodeAction(Constants.NODE_ACTION_CLONING_FAILED);
+            vNode.setNodeAction(Constants.NODE_ACTION_CREATION_FAILED);
          }
       } else {
          vNode.setSuccess(false);
@@ -336,7 +336,7 @@ public class VcVmUtil {
                vNode.setNodeAction(Constants.NODE_ACTION_GET_IP_FAILED);
             } else {
                vNode.setNodeStatus(NodeStatus.POWERED_OFF);
-               vNode.setNodeAction(Constants.NODE_ACTION_CLONING_FAILED);
+               vNode.setNodeAction(Constants.NODE_ACTION_CREATION_FAILED);
             }
          }
          success = false;

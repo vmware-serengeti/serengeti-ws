@@ -2149,11 +2149,15 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
 
    @Override
    public boolean powerOn(final VcHost host) throws Exception {
-      return safeExecVmOp(new VmOp<Boolean>() {
-         public Boolean exec() throws Exception {
-            return powerOnInt(host);
-         }
-      });
+      try {
+         return safeExecVmOp(new VmOp<Boolean>() {
+            public Boolean exec() throws Exception {
+               return powerOnInt(host);
+            }
+         });
+      } catch (Exception e) {
+         throw VcException.POWER_ON_VM_FAILED(e, getName(), e.getMessage());
+      }
    }
 
    /* (non-Javadoc)
@@ -2189,7 +2193,7 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
             setRequestedPowerState(PowerState.poweredOff);
             return true;
          } else {
-            throw e;
+            throw VcException.POWER_OFF_VM_FAILED(e, getName(), e.getMessage());
          }
       }
    }

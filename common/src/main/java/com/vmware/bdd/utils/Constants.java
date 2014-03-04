@@ -61,6 +61,7 @@ public class Constants {
 
    public static final String NODE_ACTION_CLONING_VM = "Cloning VM";
    public static final String NODE_ACTION_CLONING_FAILED = "Cloning VM failed";
+   public static final String NODE_ACTION_CREATION_FAILED = "VM creation failed";
    public static final String NODE_ACTION_WAITING_IP = "Waiting for ip";
    public static final String NODE_ACTION_RECONFIGURE = "Reconfiguring VM";
    public static final String NODE_ACTION_GET_IP_FAILED =

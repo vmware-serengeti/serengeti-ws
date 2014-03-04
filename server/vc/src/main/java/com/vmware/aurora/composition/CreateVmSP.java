@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import com.vmware.aurora.composition.DiskSchema.Disk;
+import com.vmware.aurora.exception.VcException;
 import com.vmware.aurora.global.DiskSize;
 import com.vmware.aurora.vc.DeviceId;
 import com.vmware.aurora.vc.DiskType;
@@ -182,40 +183,35 @@ public class CreateVmSP implements Callable<Void> {
    }
 
    public void callInternal() throws Exception {
-      // Find the template and template snapshot to clone from
-      final VcVirtualMachine template =
-            VcCache.get(vmSchema.diskSchema.getParent());
-      VcSnapshot snap =
-            template.getSnapshotByName(vmSchema.diskSchema.getParentSnap());
-      if (snap == null) {
-         // this is a blocking call
-         snap = template.createSnapshot(vmSchema.diskSchema.getParentSnap(), 
-               "Serengeti template Root Snapshot");
-      }
-      ConfigSpecImpl configSpec = new ConfigSpecImpl();
-
-      // Resource schema
-      ResourceSchemaUtil.setResourceSchema(configSpec, vmSchema.resourceSchema);
-
-      // Add managed-by information
-      // VmConfigUtil.addManagedByToConfigSpec(
-      //      newConfigSpec, VcContext.getService().getExtensionKey(), "dbvm");
-
-      HashMap<String, Disk.Operation> diskMap =
-            new HashMap<String, Disk.Operation>();
-      if (requireClone()) {
-         VcVirtualMachine.CreateSpec vmSpec =
-               new VcVirtualMachine.CreateSpec(newVmName, snap, targetRp,
-                     targetDs, vmFolder, host, linkedClone, configSpec);
-         // Clone from the template
-         vcVm = template.cloneVm(vmSpec, null);
-      } else {
-         // copy parent vm's version/product info/vapp options
-         copyParentVmSettings(template, configSpec);
-
-         vcVm = targetRp.createVm(configSpec, targetDs, vmFolder);
+      HashMap<String, Disk.Operation> diskMap = null;
+      try {
+         diskMap = createVm();
+      } catch (Exception e) {
+         throw VcException.CREATE_VM_FAILED(e, newVmName, e.getMessage());
       }
 
+      try {
+         configureVm(diskMap);
+      } catch (Exception e) {
+         throw VcException.CONFIG_VM_FAILED(e, newVmName, e.getMessage());
+      }
+
+      if (prePowerOn != null) {
+         prePowerOn.setVm(vcVm);
+         prePowerOn.call();
+      }
+
+      vcVm.powerOn(host);
+
+      if (postPowerOn != null) {
+         postPowerOn.setVm(vcVm);
+         postPowerOn.call();
+      }
+   }
+
+   private void configureVm(HashMap<String, Disk.Operation> diskMap)
+         throws Exception {
+      ConfigSpecImpl configSpec;
       configSpec = new ConfigSpecImpl();
       // Network changes
       NetworkSchemaUtil.setNetworkSchema(configSpec, targetRp.getVcCluster(),
@@ -281,18 +277,43 @@ public class CreateVmSP implements Callable<Void> {
       if (bootupConfigs != null) {
          vcVm.setGuestConfigs(bootupConfigs);
       }
+   }
 
-      if (prePowerOn != null) {
-         prePowerOn.setVm(vcVm);
-         prePowerOn.call();
+   private HashMap<String, Disk.Operation> createVm() throws Exception {
+      // Find the template and template snapshot to clone from
+      final VcVirtualMachine template =
+            VcCache.get(vmSchema.diskSchema.getParent());
+      VcSnapshot snap =
+            template.getSnapshotByName(vmSchema.diskSchema.getParentSnap());
+      if (snap == null) {
+         // this is a blocking call
+         snap = template.createSnapshot(vmSchema.diskSchema.getParentSnap(), 
+               "Serengeti template Root Snapshot");
       }
+      ConfigSpecImpl configSpec = new ConfigSpecImpl();
 
-      vcVm.powerOn(host);
+      // Resource schema
+      ResourceSchemaUtil.setResourceSchema(configSpec, vmSchema.resourceSchema);
 
-      if (postPowerOn != null) {
-         postPowerOn.setVm(vcVm);
-         postPowerOn.call();
+      // Add managed-by information
+      // VmConfigUtil.addManagedByToConfigSpec(
+      //      newConfigSpec, VcContext.getService().getExtensionKey(), "dbvm");
+
+      HashMap<String, Disk.Operation> diskMap =
+            new HashMap<String, Disk.Operation>();
+      if (requireClone()) {
+         VcVirtualMachine.CreateSpec vmSpec =
+               new VcVirtualMachine.CreateSpec(newVmName, snap, targetRp,
+                     targetDs, vmFolder, host, linkedClone, configSpec);
+         // Clone from the template
+         vcVm = template.cloneVm(vmSpec, null);
+      } else {
+         // copy parent vm's version/product info/vapp options
+         copyParentVmSettings(template, configSpec);
+
+         vcVm = targetRp.createVm(configSpec, targetDs, vmFolder);
       }
+      return diskMap;
    }
 
    public VcVirtualMachine getVM() {
