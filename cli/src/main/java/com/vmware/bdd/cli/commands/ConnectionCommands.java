@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import jline.ConsoleReader;
+import jline.console.ConsoleReader;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -170,7 +170,7 @@ public class ConnectionCommands implements CommandMarker {
    private String readEnter(String msg,PromptType promptType) throws Exception {
       String enter = "";
       ConsoleReader reader = new ConsoleReader();
-      reader.setDefaultPrompt(msg);
+      reader.setPrompt(msg);
       if (promptType == PromptType.USER_NAME) {
          enter = reader.readLine();
       } else if (promptType == PromptType.PASSWORD) {

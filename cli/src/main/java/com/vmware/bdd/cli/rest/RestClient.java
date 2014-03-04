@@ -48,7 +48,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import jline.ConsoleReader;
+import jline.console.ConsoleReader;
 
 import org.apache.log4j.Logger;
 import org.fusesource.jansi.AnsiConsole;
@@ -863,7 +863,7 @@ public class RestClient {
 
                ConsoleReader reader = new ConsoleReader();
                // Set prompt message
-               reader.setDefaultPrompt(Constants.PARAM_PROMPT_ADD_CERTIFICATE_MESSAGE);
+               reader.setPrompt(Constants.PARAM_PROMPT_ADD_CERTIFICATE_MESSAGE);
                // Read user input
                String readMsg = "";
                if (RunWayConfig.getRunType().equals(RunType.MANUAL)) {
