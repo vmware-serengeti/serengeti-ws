@@ -50,7 +50,7 @@ public class NodePowerOnRequest extends SimpleRequest {
    protected boolean execute() {
       logger.info("Start to waiting for VM " + vmId + " post power on status");
       NodeEntity nodeEntity =
-            lockClusterEntityMgr.getClusterEntityMgr().getNodeByMobId(vmId);
+            lockClusterEntityMgr.getClusterEntityMgr().getNodeWithNicsByMobId(vmId);
       if (nodeEntity == null) {
          logger.info("Node " + nodeEntity.getVmName() + " is deleted.");
       }

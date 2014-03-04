@@ -94,6 +94,8 @@ public interface IClusterEntityManager {
 
    public NodeEntity getNodeByMobId(String vmId);
 
+   public NodeEntity getNodeWithNicsByMobId(String vmId);
+
    public NodeEntity getNodeByVmName(String vmName);
 
    public List<NodeEntity> getNodesByHost(String hostName);

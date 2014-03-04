@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -499,6 +500,13 @@ public class ClusterEntityManager implements IClusterEntityManager {
 
    public NodeEntity getNodeByMobId(String vmId) {
       return nodeDao.findByMobId(vmId);
+   }
+
+   @Transactional
+   public NodeEntity getNodeWithNicsByMobId(String vmId) {
+      NodeEntity nodeEntity = nodeDao.findByMobId(vmId);
+      Hibernate.initialize(nodeEntity.getNics());
+      return nodeEntity;
    }
 
    public NodeEntity getNodeByVmName(String vmName) {

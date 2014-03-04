@@ -39,11 +39,8 @@ public class ClusterInitializerService implements IClusterInitializerService {
          ClusterStatus.DELETING,
          ClusterStatus.STARTING,
          ClusterStatus.STOPPING,
-         ClusterStatus.UPDATING,
-         ClusterStatus.UPGRADING,
          ClusterStatus.VHM_RUNNING,
-         ClusterStatus.VMRECONFIGURING,
-         ClusterStatus.MAINTENANCE
+         ClusterStatus.VMRECONFIGURING
    };
 
    private IClusterEntityManager clusterEntityManager;
