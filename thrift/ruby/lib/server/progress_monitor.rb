@@ -26,6 +26,8 @@ module Software
       module ProgressMonitor
         include Ironfan::Monitor
 
+        ERROR_BOOTSTRAP_FAILURE = "Bootstrapping cluster %s failed"
+
         def log
           @log ||= Logger.new(STDOUT)
         end
@@ -71,7 +73,7 @@ module Software
             clusterMain.progress /= clusterMain.total if clusterMain.total != 0
             clusterMain.finished = (clusterMain.running == 0)
             clusterMain.succeed = (clusterMain.success == clusterMain.total)
-            clusterMain.error_msg = ERROR_BOOTSTAP_FAIL if clusterMain.finished and !clusterMain.succeed
+            clusterMain.error_msg = ERROR_BOOTSTRAP_FAILURE % clusterName if clusterMain.finished and !clusterMain.succeed
 
             clusterData.groups = groups
             clusterDetail.clusterData = clusterData
