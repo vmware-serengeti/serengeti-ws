@@ -113,27 +113,33 @@ public class TopologyCommands implements CommandMarker {
                lineNum++;
                continue;
             } else {
+               String formatErrMsg = "wrong topology format at line " + lineNum + ".\n" + Constants.TOPLOGY_FORMAT;
                String[] rackHosts = line.split(":");
-               if (rackHosts.length != 2 || rackHosts[0].trim().isEmpty() || rackHosts[1].trim().isEmpty()) {
-                  throw new CliException("wrong topology format at line " + lineNum + ".\n" + Constants.TOPLOGY_FORMAT);
-               } else {
-                  String[] hosts = rackHosts[1].split(",");
-                  int numOfNonEmptyHosts = 0;
-                  for (int i = 0; i < hosts.length; i++) {
-                     hosts[i] = hosts[i].trim();
-                     if (!hosts[i].isEmpty()) {
-                        hosts[numOfNonEmptyHosts++] = hosts[i]; 
-                     }
-                  }
-                  if (numOfNonEmptyHosts == 0) {
-                     throw new CliException("wrong topology format at line " + lineNum + ".\n" + Constants.TOPLOGY_FORMAT);
-                  }
-                  lineNum++;
-                  RackInfo rackInfo = new RackInfo();
-                  rackInfo.setName(rackHosts[0].trim());
-                  rackInfo.setHosts(Arrays.asList(hosts).subList(0, numOfNonEmptyHosts));
-                  racksInfo.add(rackInfo);
+               if (rackHosts.length < 2 || rackHosts[0].trim().isEmpty()) {
+                  throw new CliException(formatErrMsg);
                }
+
+               String hostsInfo = line.substring(line.indexOf(":") + 1).trim();
+               if (hostsInfo.isEmpty()) {
+                  throw new CliException(formatErrMsg);
+               }
+
+               String[] hosts = hostsInfo.split(",");
+               int numOfNonEmptyHosts = 0;
+               for (int i = 0; i < hosts.length; i++) {
+                  hosts[i] = hosts[i].trim();
+                  if (!hosts[i].isEmpty()) {
+                     hosts[numOfNonEmptyHosts++] = hosts[i];
+                  }
+               }
+               if (numOfNonEmptyHosts == 0) {
+                  throw new CliException(formatErrMsg);
+               }
+               lineNum++;
+               RackInfo rackInfo = new RackInfo();
+               rackInfo.setName(rackHosts[0].trim());
+               rackInfo.setHosts(Arrays.asList(hosts).subList(0, numOfNonEmptyHosts));
+               racksInfo.add(rackInfo);
             }
          }
       } finally {
