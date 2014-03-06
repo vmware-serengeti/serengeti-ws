@@ -36,20 +36,22 @@ public class PlacementException extends BddException {
    public static PlacementException PLACEMENT_ERROR(PlacementException cause, List<BaseNode> placedNodes,
          Map<String, List<String>> filteredHosts) {
       StringBuilder placedNodesStr = new StringBuilder();
+      if (!placedNodes.isEmpty()) placedNodesStr.append("\n");
       for (BaseNode baseNode : placedNodes) {
-         placedNodesStr.append(" ");
          placedNodesStr.append(BddException.getErrorMessage("PLACEMENT.NODE_PLACED_ON_HOST", baseNode.getVmName(), baseNode.getTargetHost()));
+         placedNodesStr.append(" ");
       }
       StringBuilder filteredHostsStr = new StringBuilder();
       List<String> outOfSyncHosts = filteredHosts.get(PlacementUtil.OUT_OF_SYNC_HOSTS);
       if (null != outOfSyncHosts) {
-         filteredHostsStr.append(" ");
+         filteredHostsStr.append("\n");
          filteredHostsStr.append(BddException.getErrorMessage("PLACEMENT.OUT_OF_SYNC_HOSTS", outOfSyncHosts.toString()));
       }
+      List<String> networkNames = filteredHosts.get(PlacementUtil.NETWORK_NAMES);
       List<String> noNetworkHosts = filteredHosts.get(PlacementUtil.NO_NETWORKS_HOSTS);
       if (null != noNetworkHosts) {
-         if (null != outOfSyncHosts) filteredHostsStr.append(" ");
-         filteredHostsStr.append(BddException.getErrorMessage("PLACEMENT.NO_NETWORK_HOSTS", noNetworkHosts.toString()));
+         filteredHostsStr.append("\n");
+         filteredHostsStr.append(BddException.getErrorMessage("PLACEMENT.NO_NETWORK_HOSTS", networkNames.toString(), noNetworkHosts.toString()));
       }
       return new PlacementException(cause, "PLACEMENT_ERROR", cause.getMessage(), placedNodesStr.toString(), filteredHostsStr.toString());
    }

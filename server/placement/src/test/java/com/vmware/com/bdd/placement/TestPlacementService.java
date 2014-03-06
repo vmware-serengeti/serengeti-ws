@@ -15,6 +15,7 @@
 package com.vmware.com.bdd.placement;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -259,6 +260,7 @@ public class TestPlacementService {
       noNetworkHosts.add(host.getName());
       Map<String, List<String>> filteredHosts = new HashMap<String, List<String>>();
       filteredHosts.put(PlacementUtil.OUT_OF_SYNC_HOSTS, outOfSyncHosts);
+      filteredHosts.put(PlacementUtil.NETWORK_NAMES, new ArrayList<String>(Arrays.asList("VM Network")));
       filteredHosts.put(PlacementUtil.NO_NETWORKS_HOSTS, noNetworkHosts);
 
       PlacementService service = new PlacementService();
@@ -266,8 +268,12 @@ public class TestPlacementService {
       try {
          List<BaseNode> nodes = service.getPlacementPlan(container, spec, null, filteredHosts);
       } catch (PlacementException e) {
+         System.out.println(e.getMessage());
          Assert.assertEquals(e.getMessage(),
-               "Failed to find a host for node [hadoop-worker-4, hadoop-worker-5] that passes instance per host placement policy. Node hadoop-worker-0 placed on host 10.1.1.2. Node hadoop-worker-1 placed on host 10.1.1.2. Node hadoop-worker-2 placed on host 10.1.1.3. Node hadoop-worker-3 placed on host 10.1.1.3. The following hosts are filtered out due to time out of sync: [10.1.1.1], synchronize the time on these hosts with Serengeti management server to put them in use. The following hosts are filtered out due to lack of networks: [10.1.1.1], add these hosts to the target networks to put them in use.");
+               "Failed to find a host for node [hadoop-worker-4, hadoop-worker-5] that passes instance per host placement policy.\n"
+             + "Node hadoop-worker-0 placed on host 10.1.1.2. Node hadoop-worker-1 placed on host 10.1.1.2. Node hadoop-worker-2 placed on host 10.1.1.3. Node hadoop-worker-3 placed on host 10.1.1.3. \n"
+             + "The following hosts are filtered out due to time out of sync: [10.1.1.1], synchronize the time on these hosts with Serengeti management server to put them in use.\n"
+             + "The following hosts are filtered out due to lack of networks [VM Network]: [10.1.1.1], add these hosts to the target networks to put them in use.");
       }
    }
 }

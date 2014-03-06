@@ -64,7 +64,6 @@ import com.vmware.aurora.vc.vcevent.VcEventRouter;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
@@ -483,7 +482,7 @@ public class ClusteringService implements IClusteringService {
     * allocation the network contains all allocated ip address to this cluster,
     * so some of them may already be occupied by existing node. So we need to
     * detect if that ip is allocated, before assign that one to one node
-    * 
+    *
     * @param vNodes
     * @param networkAdds
     * @param occupiedIpSets
@@ -1341,8 +1340,8 @@ public class ClusteringService implements IClusteringService {
          int hostTimeDiffInSec =
                VcResourceUtils.getHostTimeDiffInSec(host.getName());
          if (Math.abs(hostTimeDiffInSec) > maxTimeDiffInSec) {
-            logger.info("Host " + host.getName() + " has a time difference of " 
-                  + hostTimeDiffInSec 
+            logger.info("Host " + host.getName() + " has a time difference of "
+                  + hostTimeDiffInSec
                   + " seconds and is dropped from placement.");
             outOfSyncHosts.add(host.getName());
          }
@@ -1362,7 +1361,10 @@ public class ClusteringService implements IClusteringService {
 
       Map<String, List<String>> filteredHosts =new HashMap<String, List<String>>();
       if (!outOfSyncHosts.isEmpty()) filteredHosts.put(PlacementUtil.OUT_OF_SYNC_HOSTS, outOfSyncHosts);
-      if (!noNetworkHosts.isEmpty()) filteredHosts.put(PlacementUtil.NO_NETWORKS_HOSTS, noNetworkHosts);
+      if (!noNetworkHosts.isEmpty()) {
+         filteredHosts.put(PlacementUtil.NO_NETWORKS_HOSTS, noNetworkHosts);
+         filteredHosts.put(PlacementUtil.NETWORK_NAMES, clusterSpec.getNetworkNames());
+      }
 
       container.SetTemplateNode(templateNode);
       if (clusterSpec.getHostToRackMap() != null
@@ -1736,7 +1738,7 @@ public class ClusteringService implements IClusteringService {
    /**
     * this method will delete the cluster root folder, if there is any VM
     * existed and powered on in the folder, the folder deletion will fail.
-    * 
+    *
     * @param node
     * @throws BddException
     */

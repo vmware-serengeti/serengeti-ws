@@ -43,6 +43,7 @@ public class PlacementUtil {
 
    public static final String OUT_OF_SYNC_HOSTS = "outOfSyncHosts";
    public static final String NO_NETWORKS_HOSTS = "noNetworkHosts";
+   public static final String NETWORK_NAMES = "networkNames";
 
    public static String getVmName(String clusterName, String groupName,
          int index) {
