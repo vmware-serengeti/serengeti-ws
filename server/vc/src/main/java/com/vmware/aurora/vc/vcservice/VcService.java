@@ -696,6 +696,7 @@ public class VcService {
       desc.setSummary("VMware Serengeti Management Server, instance " + Configuration.getCmsInstanceId());
       us.setDescription(desc);
       us.setCompany("VMware, Inc.");
+      us.setVersion(Configuration.getNonEmptyString("serengeti.version"));
       us.setShownInSolutionManager(true);
       ExtendedProductInfo extInfo = new ExtendedProductInfoImpl();
       extInfo.setCompanyUrl("http://www.vmware.com");
