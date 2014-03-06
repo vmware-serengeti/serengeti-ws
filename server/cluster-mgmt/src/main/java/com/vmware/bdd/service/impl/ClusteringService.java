@@ -1469,14 +1469,15 @@ public class ClusteringService implements IClusteringService {
          for (int i = 0; i < storeProceduresArray.length; i++) {
             StartVmSP sp = (StartVmSP) storeProceduresArray[i];
             NodeOperationStatus status = nodesStatus.get(sp.getVmName());
+            VcVirtualMachine vm = sp.getVcVm();
             if (result[i].finished && result[i].throwable == null) {
                ++total;
                nodesStatus.remove(status.getNodeName()); // do not return success node
             } else if (result[i].throwable != null) {
                status.setSucceed(false);
                status.setErrorMessage(getErrorMessage(result[i].throwable));
-               VcVirtualMachine vm = sp.getVcVm();
-               if (vm != null && VcVmUtil.checkIpAddresses(vm)) {
+               if (vm != null 
+                     && vm.isPoweredOn() && VcVmUtil.checkIpAddresses(vm)) {
                   ++total;
                   nodesStatus.remove(status.getNodeName()); // do not return success node status
                } else {
@@ -1796,6 +1797,7 @@ public class ClusteringService implements IClusteringService {
          StatusUpdater statusUpdator, boolean ignoreUnavailableNodes) {
       logger.info("syncDeleteVMs, start to create store procedures.");
       List<Callable<Void>> storeProcedures = new ArrayList<Callable<Void>>();
+      List<BaseNode> toBeDeleted = new ArrayList<BaseNode>();
       for (int i = 0; i < badNodes.size(); i++) {
          BaseNode node = badNodes.get(i);
          if (node.getVmMobId() == null) {
@@ -1804,6 +1806,7 @@ public class ClusteringService implements IClusteringService {
          }
          DeleteVmByIdSP deleteSp = new DeleteVmByIdSP(node.getVmMobId());
          storeProcedures.add(deleteSp);
+         toBeDeleted.add(node);
       }
 
       try {
@@ -1830,7 +1833,7 @@ public class ClusteringService implements IClusteringService {
          int total = 0;
          boolean failed = false;
          for (int i = 0; i < storeProceduresArray.length; i++) {
-            BaseNode vNode = badNodes.get(i);
+            BaseNode vNode = toBeDeleted.get(i);
             vNode.setFinished(true);
             if (result[i].finished && result[i].throwable == null) {
                vNode.setSuccess(true);

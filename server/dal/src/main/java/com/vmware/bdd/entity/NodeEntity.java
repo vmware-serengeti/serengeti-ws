@@ -534,6 +534,7 @@ public class NodeEntity extends EntityBase {
    public void cleanupErrorMessage() {
       this.actionFailed = false;
       this.errMessage = null;
+      this.action = null;
    }
 
    public Set<NicEntity> getNics() {

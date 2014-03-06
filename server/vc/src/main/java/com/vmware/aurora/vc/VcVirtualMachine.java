@@ -2309,15 +2309,19 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
 
    @Override
    public void destroy(final boolean removeSnapShot) throws Exception {
-      safeExecVmOp(new VmOp<Void>() {
-         public Void exec() throws Exception {
-            if (removeSnapShot) {
-               removeAllSnapshots(); // PR 878822
+      try {
+         safeExecVmOp(new VmOp<Void>() {
+            public Void exec() throws Exception {
+               if (removeSnapShot) {
+                  removeAllSnapshots(); // PR 878822
+               }
+               destroyInt();
+               return null;
             }
-            destroyInt();
-            return null;
-         }
-      });
+         });
+      } catch(Exception e) {
+         throw VcException.DELETE_VM_FAILED(e, getName(), e.getMessage());
+      }
    }
 
    @Override

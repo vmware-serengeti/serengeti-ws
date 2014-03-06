@@ -116,7 +116,7 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
             JobConstants.CLUSTER_EXCLUSIVE_WRITE_LOCKED, true);
 
       addNodeToMetaData(clusterName, addedNodes, deletedNodeNames);
-      removeDeletedNode(clusterName, deletedNodeNames);
+      removeDeletedNode(clusterName, deletedNodes);
 
       /*
        * Verify node status and update error message
@@ -186,17 +186,22 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
       }
    }
 
-   public void removeDeletedNode(final String clusterName,
-         final Set<String> deletedNodeNames) {
-      if (deletedNodeNames.isEmpty()) {
+   @Transactional
+   private void removeDeletedNode(final String clusterName,
+         final List<BaseNode> deletedNodes) {
+      if (deletedNodes == null || deletedNodes.isEmpty()) {
          return;
       }
 
-      List<NodeEntity> nodes = getClusterEntityMgr().findAllNodes(clusterName);
-      for (NodeEntity node : nodes) {
-         if (deletedNodeNames.contains(node.getVmName())) {
-            logger.info("Remove Node " + node.getVmName() + " from meta db.");
-            getClusterEntityMgr().delete(node);
+      for (BaseNode deletedNode : deletedNodes) {
+         NodeEntity node = getClusterEntityMgr().getNodeByVmName(deletedNode.getVmName());
+         if (node != null) {
+            if (deletedNode.isSuccess()) {
+               getClusterEntityMgr().delete(node);
+            } else {
+               node.setActionFailed(true);
+               node.setErrMessage(deletedNode.getErrMessage());
+            }
          }
       }
    }

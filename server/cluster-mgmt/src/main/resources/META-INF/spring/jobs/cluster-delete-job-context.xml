@@ -31,8 +31,14 @@
 	</beans:bean>
 
 	<job id="deleteClusterJob" job-repository="jobRepository">
-		<step id="deleteClusterVM" next="softwareDeleteClusterStep">
+		<step id="deleteClusterVM" next="deleteClusterUpdateDataStep">
 			<tasklet ref="deleteClusterVMTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="deleteClusterUpdateDataStep" next="softwareDeleteClusterStep">
+			<tasklet ref="updateClusterDataTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

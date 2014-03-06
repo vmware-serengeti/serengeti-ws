@@ -231,12 +231,16 @@ public class JobUtils {
 
          if (expectedStatus == NodeStatus.VM_READY) {
 
-            if (vm == null || (!vm.isPoweredOn())
-                  || !VcVmUtil.checkIpAddresses(vm)) {
+            if (vm == null || (!vm.isPoweredOn())) {
                throw ClusteringServiceException.VM_STATUS_ERROR(node
                      .getStatus().toString(), expectedStatus.toString());
             }
 
+            if (!VcVmUtil.checkIpAddresses(vm)) {
+               // throw out clear information
+               throw ClusteringServiceException.CANNOT_GET_IP_ADDRESS(node
+                     .getVmName());
+            }
             String haFlag = node.getNodeGroup().getHaFlag();
             if (haFlag != null
                   && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
@@ -265,9 +269,9 @@ public class JobUtils {
             verifyNodeStatus(node, expectedStatus, ignoreMissing);
          } catch (Exception e) {
             node.setActionFailed(true);
-            logger.debug("Node verify failed for " + node.getVmName() + ", for "
-                  + e.getMessage());
-            if (node.getErrMessage() == null) {
+            logger.debug("Node verify failed for " + node.getVmName()
+                  + ", for " + e.getMessage());
+            if (node.getErrMessage() == null || node.getErrMessage().isEmpty()) {
                node.setErrMessage(e.getMessage());
                logger.debug("Set node error message for node "
                      + node.getVmName() + " to: " + e.getMessage());

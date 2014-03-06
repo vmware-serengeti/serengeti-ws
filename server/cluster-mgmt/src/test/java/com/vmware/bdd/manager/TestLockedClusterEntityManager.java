@@ -126,11 +126,12 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       while (!isThreadStarted()) {
          Thread.sleep(10);
       }
+      Thread.sleep(40);
       long start = System.currentTimeMillis();
       exclusiveLockedMgr.removeVmReference(LOCKED_CLUSTER_NAME, "");
       long end = System.currentTimeMillis();
       System.out.println("Lock takes " + (end - start) + "ms.");
-      Assert.assertTrue((end - start) > 150);
+      Assert.assertTrue((end - start) >= 150);
       t.join();
    }
 
