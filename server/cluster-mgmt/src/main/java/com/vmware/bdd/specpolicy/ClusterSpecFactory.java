@@ -38,6 +38,7 @@ public class ClusterSpecFactory {
    private static final String HDFS_MAPRED_TEMPLATE_SPEC = "hdfs-mapred-template-spec.json";
    private static final String HDFS_HBASE_TEMPLATE_SPEC = "hdfs-hbase-template-spec.json";
    private static final String HDFS_MAPRED_MAPR_TEMPLATE_SPEC = "hdfs-mapred-mapr-template-spec.json";
+   private static final String HDFS_HBASE_MAPR_TEMPLATE_SPEC = "hdfs-hbase-mapr-template-spec.json";
    private static final String HDFS_GPHD_TEMPLATE_SPEC = "hdfs-gphd-template-spec.json";
    private static final String HDFS_MAPRED_GPHD_TEMPLATE_SPEC = "hdfs-mapred-gphd-template-spec.json";
    private static final String HDFS_HBASE_GPHD_TEMPLATE_SPEC = "hdfs-hbase-gphd-template-spec.json";
@@ -112,6 +113,8 @@ public class ClusterSpecFactory {
          switch (type) {
          case HDFS_MAPRED:
             return loadFromFile(locateSpecFile(HDFS_MAPRED_MAPR_TEMPLATE_SPEC));
+         case HDFS_HBASE:
+            return loadFromFile(locateSpecFile(HDFS_HBASE_MAPR_TEMPLATE_SPEC));
          default:
             throw BddException.INVALID_PARAMETER("cluster type", type);
          }

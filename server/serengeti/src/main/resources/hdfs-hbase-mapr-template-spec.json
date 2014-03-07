@@ -1,0 +1,88 @@
+{
+  "distro":"mapr",
+  "groups" : [
+    {
+      "name" : "mysql",
+      "roles" : [
+        "mapr_mysql_server"
+      ],
+      "instance_num":1,
+      "storage" : {
+        "type" : "SHARED",
+        "sizeGB" : 20
+      },
+      "cpu" : 1,
+      "memory" : 2048,
+      "ha":"off"
+    },
+    {
+      "name" : "zookeeper",
+      "roles" : [
+        "mapr_zookeeper"
+      ],
+      "instance_num" : 3,
+      "storage" : {
+        "type" : "SHARED",
+        "sizeGB" : 20
+      },
+      "cpu" : 1,
+      "memory" : 5120,
+      "ha" : "on"
+    },
+    {
+      "name" : "master",
+      "roles" : [
+        "mapr_cldb",
+        "mapr_nfs",
+        "mapr_fileserver",
+        "mapr_jobtracker",
+        "mapr_tasktracker",
+        "mapr_hbase_master",
+        "mapr_webserver",
+        "mapr_metrics"
+      ],
+      "instance_num" : 3,
+      "storage" : {
+        "type" : "LOCAL",
+        "sizeGB" : 50
+      },
+      "cpu" : 2,
+      "memory" : 7680,
+      "ha" : "on"
+    },
+    {
+      "name" : "worker",
+      "roles" : [
+        "mapr_nfs",
+        "mapr_fileserver",
+        "mapr_tasktracker",
+        "mapr_hbase_regionserver"
+      ],
+      "instance_num" : 3,
+      "storage" : {
+        "type" : "LOCAL",
+        "sizeGB" : 50
+      },
+      "cpu" : 2,
+      "memory" : 5120,
+      "ha" : "off"
+    },
+    {
+      "name" : "client",
+      "roles" : [
+        "mapr_client",
+        "mapr_hbase_client",
+        "mapr_pig",
+        "mapr_hive"
+      ],
+      "instance_num" : 1,
+      "storage" : {
+        "type" : "SHARED",
+        "sizeGB" : 50
+      },
+      "cpu" : 2,
+      "memory" : 5120,
+      "ha" : "off"
+    }
+  ]
+}
