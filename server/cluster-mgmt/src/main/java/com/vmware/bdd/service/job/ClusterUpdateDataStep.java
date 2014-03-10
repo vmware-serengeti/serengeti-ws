@@ -116,7 +116,7 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
             JobConstants.CLUSTER_EXCLUSIVE_WRITE_LOCKED, true);
 
       addNodeToMetaData(clusterName, addedNodes, deletedNodeNames);
-      removeDeletedNode(clusterName, deletedNodes);
+      removeDeletedNode(clusterName, deletedNodes,deletedNodeNames);
 
       /*
        * Verify node status and update error message
@@ -188,12 +188,16 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
 
    @Transactional
    private void removeDeletedNode(final String clusterName,
-         final List<BaseNode> deletedNodes) {
-      if (deletedNodes == null || deletedNodes.isEmpty()) {
+         final List<BaseNode> deletedNodes, Set<String> deletedNodeNames) {
+      if (deletedNodeNames == null || deletedNodeNames.isEmpty()) {
          return;
       }
 
       for (BaseNode deletedNode : deletedNodes) {
+         if (!deletedNodeNames.contains(deletedNode.getVmName())) {
+            // do not touch already replaced VMs
+            continue;
+         }
          NodeEntity node = getClusterEntityMgr().getNodeByVmName(deletedNode.getVmName());
          if (node != null) {
             if (deletedNode.isSuccess()) {
