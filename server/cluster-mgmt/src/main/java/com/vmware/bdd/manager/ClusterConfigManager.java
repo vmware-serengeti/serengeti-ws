@@ -73,6 +73,7 @@ import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.ChefServerUtils;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
@@ -1205,7 +1206,7 @@ public class ClusterConfigManager {
          if (roles != null) {
             for (String role : roles) {
                StringBuilder rolesMsg = new StringBuilder();
-               if (!ChefServerManager.isValidRole(role)) {
+               if (!ChefServerUtils.isValidRole(role)) {
                   rolesMsg.append("role ").append(role).append(" doesn't exist");
                } else if (!distroRoles.contains(role) && !HadoopRole.isCustomizedRole(role)) {
                   rolesMsg.append("role ").append(role).append(" is not supported by distro ").append(cluster.getDistro());

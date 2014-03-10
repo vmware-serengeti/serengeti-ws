@@ -61,6 +61,7 @@ import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
 import com.vmware.bdd.specpolicy.ClusterSpecFactory;
 import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.utils.ChefServerUtils;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.TestResourceCleanupUtils;
 
@@ -103,7 +104,7 @@ public class TestClusterConfigManager {
             "tempfs_server", "zookeeper");
       HashSet<String> roles = new HashSet<String>();
       roles.addAll(rolesList);
-      ChefServerManager.setAllRoles(roles);
+      ChefServerUtils.setAllRoles(roles);
    }
 
    @BeforeClass(groups = { "TestClusterConfigManager" }, dependsOnGroups = { "TestClusteringService" })

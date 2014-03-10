@@ -218,6 +218,7 @@ public class CommonUtil {
          p = new ProcessBuilder(Arrays.asList(cmd.split(" "))).start();
          p.waitFor();
       } catch (Exception e) {
+         p = null;
          logger.error("Failed to execute command " + cmd + " : " + e.getMessage());
       }
 
