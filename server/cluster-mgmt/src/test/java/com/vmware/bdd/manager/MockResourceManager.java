@@ -180,4 +180,10 @@ public class MockResourceManager implements IResourceService {
       // TODO Auto-generated method stub
       return false;
    }
+
+   @Mock
+   @Override
+   public void refreshResourcePool() {
+
+   }
 }

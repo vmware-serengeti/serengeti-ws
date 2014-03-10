@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import com.vmware.bdd.service.MockVcVmUtil;
-import com.vmware.bdd.service.impl.ClusteringService;
 import mockit.Mockit;
 
 import org.apache.log4j.Logger;
@@ -56,6 +54,8 @@ import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.manager.DistroManager.PackagesExistStatus;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.service.MockVcVmUtil;
+import com.vmware.bdd.service.impl.ClusteringService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;

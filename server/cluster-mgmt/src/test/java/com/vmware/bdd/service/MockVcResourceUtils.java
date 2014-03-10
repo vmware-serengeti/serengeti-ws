@@ -78,4 +78,8 @@ public class MockVcResourceUtils {
       return;
    }
 
+   @Mock
+   public static void refreshResourcePool(final VcCluster c) {
+      return;
+   }
 }

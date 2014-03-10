@@ -62,4 +62,5 @@ public interface IResourcePoolService {
 
    List<String> addAutoResourcePools(List<VcCluster> vcClusters,
          boolean ignoreDuplicate);
+
 }

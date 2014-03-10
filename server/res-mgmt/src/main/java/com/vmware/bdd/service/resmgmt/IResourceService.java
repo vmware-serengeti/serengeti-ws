@@ -74,6 +74,10 @@ public interface IResourceService {
    List<VcResourcePool> getAvailableRPs() throws VcProviderException;
 
    /**
+    * refresh resource pools of available clusters
+    */
+   void refreshResourcePool();
+   /**
     * Get the vCenter datastore by the name that user added by using add datastore API
     * @param dsName datastore name
     * @return List of vCenter datastore
@@ -229,4 +233,5 @@ public interface IResourceService {
     */
    boolean isNetworkAccessibleByCluster(List<String> networkList,
          List<com.vmware.bdd.spectypes.VcCluster> clusters);
+
 }

@@ -379,6 +379,41 @@ public class VcResourceUtils {
       });
    }
 
+   public static void refreshResourcePool(final VcCluster cl) {
+      VcContext.inVcSessionDo(new VcSession<Void>() {
+         @Override
+         protected Void body() {
+            try {
+               cl.update();
+            } catch (Exception e) {
+               logger.info("failed to update cluster " + cl.getName()
+                     + ", ignore this error.", e);
+            }
+
+            List<VcResourcePool> rps = null;
+            String rpName = "";
+            try {
+               rps = cl.getAllRPs();
+               if (rps != null) {
+                  for (VcResourcePool rp : rps) {
+                     rpName = rp.getName();
+                     rp.update();
+                  }
+               }
+            } catch (Exception e) {
+               if (CommonUtil.isBlank(rpName)) {
+                  logger.info("failed to get resource pools from cluster "
+                        + cl.getName());
+               } else {
+                  logger.info("failed to update resource pool " + rpName
+                        + ", ignore this error.", e);
+               }
+            }
+
+            return null;
+         }
+      });
+   }
 
    public static void refreshNetwork(final VcCluster cl) {
       VcContext.inVcSessionDo(new VcSession<Void>() {

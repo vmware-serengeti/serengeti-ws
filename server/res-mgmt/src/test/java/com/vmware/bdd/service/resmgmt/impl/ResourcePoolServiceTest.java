@@ -97,6 +97,7 @@ public class ResourcePoolServiceTest extends BaseResourceTest {
          {
             rpDao.isRPAdded(anyString, anyString);
             result = false;
+            resService.refreshResourcePool();
             resService.isRPExistInVc(anyString, anyString);
             result = true;
          }
@@ -129,6 +130,7 @@ public class ResourcePoolServiceTest extends BaseResourceTest {
          {
             rpDao.isRPAdded(anyString, anyString);
             result = false;
+            resService.refreshResourcePool();
             resService.isRPExistInVc(anyString, anyString);
             result = false;
          }

@@ -182,6 +182,15 @@ public class ResourceService implements IResourceService {
       return result;
    }
 
+   @Override
+   public void refreshResourcePool() {
+      List<VcCluster> vcClusters = VcInventory.getClusters();
+      AuAssert.check(vcClusters != null && vcClusters.size() != 0);
+      for (VcCluster vcCluster : vcClusters) {
+         VcResourceUtils.refreshResourcePool(vcCluster);
+      }
+   }
+
    /* (non-Javadoc)
     * @see com.vmware.bdd.service.resmgmt.ResourceManager#getDatastoreByName(java.lang.String)
     */

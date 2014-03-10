@@ -100,12 +100,12 @@ public class ResourcePoolService implements IResourcePoolService {
          throw VcProviderException
                .VC_RESOURCE_POOL_ALREADY_ADDED(vcResourcePool);
       }
+      resService.refreshResourcePool();
       if (!resService.isRPExistInVc(vcClusterName, vcResourcePool)) {
          throw VcProviderException.RESOURCE_POOL_NOT_FOUND(vcResourcePool);
       }
       rpDao.addResourcePoolEntity(rpName, vcClusterName, vcResourcePool);
    }
-
 
    /* (non-Javadoc)
     * @see com.vmware.bdd.service.impl.IResourcePoolService#getVcResourcePoolByName(java.lang.String)
