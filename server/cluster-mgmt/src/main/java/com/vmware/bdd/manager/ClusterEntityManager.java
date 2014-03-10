@@ -265,6 +265,12 @@ public class ClusterEntityManager implements IClusterEntityManager {
                         oldNode.setAction(serverData.getAction());
                         logger.debug("node status: "
                               + NodeStatus.fromString(serverData.getStatus()));
+                        String errorMsg = serverData.getError_msg();
+                        if (errorMsg != null && !errorMsg.isEmpty()) {
+                           oldNode.setActionFailed(true);
+                           oldNode.setErrMessage(errorMsg);
+                           logger.debug("error message: " + errorMsg);
+                        }
                         if (!oldNode.isDisconnected()) {
                            oldNode.setStatus(
                                  NodeStatus.fromString(serverData.getStatus()),
