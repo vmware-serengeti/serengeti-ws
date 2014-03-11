@@ -102,7 +102,7 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       t.join();
    }
 
-   @Test
+   @Test(dependsOnMethods = { "testConcurrencyInTwoThread" })
    public void testExclusiveInTwoThread() throws Exception {
       setThreadStarted(false);
       LockTestThread t = new LockTestThread(exclusiveLockedMgr);
@@ -118,7 +118,7 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       t.join();
    }
 
-   @Test
+   @Test(dependsOnMethods = { "testExclusiveInTwoThread" })
    public void testExclusiveCompetitiveInTwoThread() throws Exception {
       setThreadStarted(false);
       LockTestThread t = new LockTestThread(exclusiveLockedMgr);
@@ -136,7 +136,7 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       t.join();
    }
 
-   @Test
+   @Test(dependsOnMethods = { "testExclusiveCompetitiveInTwoThread" })
    public void testReverseInTwoThread() throws Exception {
       setThreadStarted(false);
       LockTestThread t = new LockTestThread(competitiveLockedMgr);
@@ -152,7 +152,7 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       t.join();
    }
 
-   @Test
+   @Test(dependsOnMethods = { "testReverseInTwoThread" })
    public void testCompetitiveInTwoThreadForTwoClusters() throws Exception {
       setThreadStarted(false);
       LockTestThread t = new LockTestThread(exclusiveLockedMgr);
@@ -168,7 +168,7 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       t.join();
    }
 
-   @Test
+   @Test(dependsOnMethods = { "testCompetitiveInTwoThreadForTwoClusters" })
    public void testReleaseDelayed() throws Exception {
       setThreadStarted(false);
       long start = System.currentTimeMillis();
