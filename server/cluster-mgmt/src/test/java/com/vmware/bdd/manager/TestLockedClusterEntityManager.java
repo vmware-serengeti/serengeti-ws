@@ -23,7 +23,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.aop.lock.LockFactory;
-import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
 import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
 import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
@@ -32,7 +31,7 @@ import com.vmware.bdd.service.sp.MockClusterEntityManager;
 @ContextConfiguration(locations = { "classpath:/spring/*-context.xml", "classpath:/spring/aop.xml" })
 public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextTests {
 
-   private static boolean threadStarted = false;
+   private MockClusterEntityManager mockedMgr;
    private static class LockTestThread extends Thread {
       private ILockedClusterEntityManager clusterEntityMgr;
 
@@ -41,17 +40,8 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       }
 
       public void run() {
-         setThreadStarted(true);
          clusterEntityMgr.syncUp(LOCKED_CLUSTER_NAME, false);
       }
-   }
-
-   private synchronized static boolean isThreadStarted() {
-      return threadStarted;
-   }
-
-   private synchronized static void setThreadStarted(boolean started) {
-      threadStarted = started;
    }
 
    private static final String LOCKED_CLUSTER_NAME = "LockedClusterEntity";
@@ -63,7 +53,7 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
 
    @BeforeClass
    public void setup() {
-      IClusterEntityManager mockedMgr = new MockClusterEntityManager();
+      mockedMgr = new MockClusterEntityManager();
       competitiveLockedMgr.setClusterEntityMgr(mockedMgr);
       exclusiveLockedMgr.setClusterEntityMgr(mockedMgr);
    }
@@ -88,10 +78,10 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
 
    @Test
    public void testConcurrencyInTwoThread() throws Exception {
-      setThreadStarted(false);
+      mockedMgr.setStarted(false);
       LockTestThread t = new LockTestThread(competitiveLockedMgr);
       t.start();
-      while (!isThreadStarted()) {
+      while (!mockedMgr.isStarted()) {
          Thread.sleep(10);
       }
       long start = System.currentTimeMillis();
@@ -102,12 +92,12 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       t.join();
    }
 
-   @Test(dependsOnMethods = { "testConcurrencyInTwoThread" })
+   @Test
    public void testExclusiveInTwoThread() throws Exception {
-      setThreadStarted(false);
+      mockedMgr.setStarted(false);
       LockTestThread t = new LockTestThread(exclusiveLockedMgr);
       t.start();
-      while (!isThreadStarted()) {
+      while (!mockedMgr.isStarted()) {
          Thread.sleep(10);
       }
       long start = System.currentTimeMillis();
@@ -118,12 +108,12 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       t.join();
    }
 
-   @Test(dependsOnMethods = { "testExclusiveInTwoThread" })
+   @Test
    public void testExclusiveCompetitiveInTwoThread() throws Exception {
-      setThreadStarted(false);
+      mockedMgr.setStarted(false);
       LockTestThread t = new LockTestThread(exclusiveLockedMgr);
       t.start();
-      while (!isThreadStarted()) {
+      while (!mockedMgr.isStarted()) {
          Thread.sleep(10);
       }
       Thread.sleep(40);
@@ -132,16 +122,16 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       long end = System.currentTimeMillis();
       System.out.println("Lock takes " + (end - start) + "ms.");
       // the lock time is impacted by previous test case execution.
-//      Assert.assertTrue((end - start) >= 100, "Expected bigger than 150, but got " + (end - start));
+      Assert.assertTrue((end - start) >= 100, "Expected bigger than 100, but got " + (end - start));
       t.join();
    }
 
-   @Test(dependsOnMethods = { "testExclusiveCompetitiveInTwoThread" })
+   @Test
    public void testReverseInTwoThread() throws Exception {
-      setThreadStarted(false);
+      mockedMgr.setStarted(false);
       LockTestThread t = new LockTestThread(competitiveLockedMgr);
       t.start();
-      while (!isThreadStarted()) {
+      while (!mockedMgr.isStarted()) {
          Thread.sleep(10);
       }
       long start = System.currentTimeMillis();
@@ -152,12 +142,12 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       t.join();
    }
 
-   @Test(dependsOnMethods = { "testReverseInTwoThread" })
+   @Test
    public void testCompetitiveInTwoThreadForTwoClusters() throws Exception {
-      setThreadStarted(false);
+      mockedMgr.setStarted(false);
       LockTestThread t = new LockTestThread(exclusiveLockedMgr);
       t.start();
-      while (!isThreadStarted()) {
+      while (!mockedMgr.isStarted()) {
          Thread.sleep(10);
       }
       long start = System.currentTimeMillis();
@@ -168,9 +158,9 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       t.join();
    }
 
-   @Test(dependsOnMethods = { "testCompetitiveInTwoThreadForTwoClusters" })
+   @Test
    public void testReleaseDelayed() throws Exception {
-      setThreadStarted(false);
+      mockedMgr.setStarted(false);
       long start = System.currentTimeMillis();
       LockFactory.getClusterLock(LOCKED_CLUSTER_NAME).writeLock().lock();
       System.out.println("Lock exlusively for " + LOCKED_CLUSTER_NAME

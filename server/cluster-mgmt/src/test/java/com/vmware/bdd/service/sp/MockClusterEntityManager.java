@@ -25,6 +25,15 @@ import com.vmware.bdd.manager.ClusterEntityManager;
 @MockClass(realClass = ClusterEntityManager.class)
 public class MockClusterEntityManager extends
       ClusterEntityManager {
+   private boolean started;
+
+   public synchronized boolean isStarted() {
+      return started;
+   }
+
+   public synchronized void setStarted(boolean started) {
+      this.started = started;
+   }
 
    @Mock
    public NodeEntity getNodeByMobId(String vmId) {
@@ -50,6 +59,7 @@ public class MockClusterEntityManager extends
    public void syncUp(String clusterName, boolean updateClusterStatus) {
       // TODO Auto-generated method stub
       try {
+         started = true;
          Thread.sleep(200);
          System.out.println("Sleep 200ms.");
       } catch (Exception e) {
