@@ -54,7 +54,7 @@ public class ResourceInitializer implements ServletContextListener {
                wac.getBean(IResourceInitializerService.class);
          if (!resInitializerSvc.isResourceInitialized()) {
             boolean initResource = Configuration.getBoolean("init_resource");
-            logger.info("need initializing resoruce? " + initResource);
+            logger.info("need initializing resource? " + initResource);
             if (initResource) {
                resInitializerSvc.initResource();
             }

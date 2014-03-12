@@ -399,7 +399,7 @@ public class VmEventManager implements IEventProcessor {
             } catch (AuroraException ex) {
                // vm is not able to be accessed immediately after it's created, 
                // ignore the exception here to continue other event processing
-               logger.error("Catch aurora exception " + ex.getMessage()
+               logger.warn("Catch aurora exception " + ex.getMessage()
                      + ", ignore it.");
             }
             break;
