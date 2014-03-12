@@ -156,6 +156,7 @@ public class ClusterCreate implements Serializable {
       this.configuration = configuration;
    }
 
+   @RestRequired
    public String getName() {
       return name;
    }
@@ -188,6 +189,7 @@ public class ClusterCreate implements Serializable {
       this.distro = distro;
    }
 
+   @RestIgnore
    public String getDistroVendor() {
       return distroVendor;
    }
@@ -196,6 +198,7 @@ public class ClusterCreate implements Serializable {
       this.distroVendor = distroVendor;
    }
 
+   @RestIgnore
    public String getDistroVersion() {
       return distroVersion;
    }

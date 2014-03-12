@@ -115,6 +115,10 @@ public class RestResource {
       return httpStatusCodes.getInteger(errorId, DEFAULT_HTTP_ERROR_CODE);
    }
 
+   /**
+    * Get REST api version
+    * @return REST api version
+    */
    @RequestMapping(value = "/hello", method = RequestMethod.GET)
    @ResponseStatus(HttpStatus.OK)
    @ResponseBody
@@ -123,12 +127,22 @@ public class RestResource {
    }
 
    // task API
+   /**
+    * Get all running tasks
+    * @return A list of running tasks
+    */
    @RequestMapping(value = "/tasks", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public List<TaskRead> getTasks() {
       return jobManager.getLatestTaskForExistedClusters();
    }
 
+   /**
+    * Get a specific task by its id
+    * @param taskId The identity returned as part of uri in the response(Accepted status) header of Location, such as https://hostname:8443/serengeti/api/task/taskId
+    * @return Task information
+    * @throws Exception
+    */
    @RequestMapping(value = "/task/{taskId}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public TaskRead getTaskById(@PathVariable long taskId) throws Exception {
@@ -145,6 +159,13 @@ public class RestResource {
    }
 
    // cluster API
+   /**
+    * Create a cluster
+    * @param createSpec create specification
+    * @param request
+    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @throws Exception
+    */
    @RequestMapping(value = "/clusters", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void createCluster(@RequestBody ClusterCreate createSpec,
@@ -159,7 +180,14 @@ public class RestResource {
       redirectRequest(jobExecutionId, request, response);
    }
 
-   // cluster API
+   /**
+    * Configure a hadoop or hbase cluster's properties
+    * @param clusterName
+    * @param createSpec The existing create specification plus the configuration map supported in the specification(please refer to a sample specification file)
+    * @param request
+    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @throws Exception
+    */
    @RequestMapping(value = "/cluster/{clusterName}/config", method = RequestMethod.PUT, consumes = "application/json")
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void configCluster(@PathVariable("clusterName") String clusterName,
@@ -186,6 +214,13 @@ public class RestResource {
       response.setHeader("Location", url.toString());
    }
 
+   /**
+    * Delete a cluster
+    * @param clusterName
+    * @param request
+    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @throws Exception
+    */
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void deleteCluster(@PathVariable("clusterName") String clusterName,
@@ -200,6 +235,14 @@ public class RestResource {
       redirectRequest(taskId, request, response);
    }
 
+   /**
+    * Start or stop a normal cluster, or resume a failed cluster after adjusting the resources allocated to this cluster
+    * @param clusterName
+    * @param state Can be start, stop, or resume
+    * @param request
+    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @throws Exception
+    */
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void startStopResumeCluster(
@@ -230,11 +273,20 @@ public class RestResource {
       }
    }
 
+   /**
+    * Expand the number of nodes in a node group
+    * @param clusterName
+    * @param groupName
+    * @param instanceNum The target instance number after resize. It must be larger than existing instance number in this node group
+    * @param request
+    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @throws Exception
+    */
    @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}/instancenum", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void resizeCluster(@PathVariable("clusterName") String clusterName,
          @PathVariable("groupName") String groupName,
-         @RequestBody int instanceNum, HttpServletRequest request,
+         @RequestBody Integer instanceNum, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
 
       verifyInitialized();
@@ -258,6 +310,15 @@ public class RestResource {
       redirectRequest(taskId, request, response);
    }
 
+   /**
+    * Scale up the cpue and memory of each node in a node group
+    * @param clusterName
+    * @param groupName
+    * @param scale The new cpu and memory allocated to each node in this node group. 
+    * @param request
+    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @throws Exception
+    */
    @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}/scale", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void scale(@PathVariable("clusterName") String clusterName,
@@ -289,6 +350,14 @@ public class RestResource {
       redirectRequest(taskId, request, response);
    }
 
+   /**
+    * Turn on or off some compute nodes
+    * @param clusterName
+    * @param requestBody
+    * @param request
+    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @throws Exception
+    */
    @RequestMapping(value = "/cluster/{clusterName}/param_wait_for_result", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void asyncSetParam(@PathVariable("clusterName") String clusterName, @RequestBody ElasticityRequestBody requestBody, HttpServletRequest request,
@@ -309,6 +378,13 @@ public class RestResource {
       redirectRequest(taskId, request, response);
    }
 
+   /**
+    * Change elasticity mode, IO priority, and maximum or minimum number of powered on compute nodes under auto mode 
+    * @param clusterName
+    * @param requestBody
+    * @param request
+    * @throws Exception
+    */
    @RequestMapping(value = "/cluster/{clusterName}/param", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.OK)
    public void syncSetParam(@PathVariable("clusterName") String clusterName, @RequestBody ElasticityRequestBody requestBody, HttpServletRequest request,
@@ -346,6 +422,14 @@ public class RestResource {
       }
    }
 
+   /**
+    * Replace some failed disks with new disks 
+    * @param clusterName
+    * @param requestBody
+    * @param request
+    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @throws Exception
+    */
    @RequestMapping(value = "/cluster/{clusterName}/fix/disk", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void fixCluster(@PathVariable("clusterName") String clusterName,
@@ -359,6 +443,12 @@ public class RestResource {
       redirectRequest(taskId, request, response);
    }
 
+   /**
+    * Retrieve a cluster information by it name
+    * @param clusterName
+    * @param details not used by this version
+    * @return The cluster information
+    */
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public ClusterRead getCluster(
@@ -372,6 +462,11 @@ public class RestResource {
             : details);
    }
 
+   /**
+    * Retrieve a cluster's specification by its name
+    * @param clusterName
+    * @return The cluster specification
+    */
    @RequestMapping(value = "/cluster/{clusterName}/spec", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public ClusterCreate getClusterSpec(
@@ -383,6 +478,11 @@ public class RestResource {
       return clusterMgr.getClusterSpec(clusterName);
    }
 
+   /**
+    * Get all clusters' information
+    * @param details not used by this version
+    * @return A list of cluster information
+    */
    @RequestMapping(value = "/clusters", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public List<ClusterRead> getClusters(
@@ -391,6 +491,10 @@ public class RestResource {
    }
 
    // cloud provider API
+   /**
+    * Add a VC resourcepool into BDE
+    * @param rpSpec 
+    */
    @RequestMapping(value = "/resourcepools", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
    public void addResourcePool(@RequestBody ResourcePoolAdd rpSpec) {
@@ -421,12 +525,21 @@ public class RestResource {
             rpSpec.getResourcePoolName());
    }
 
+   /**
+    * Get all BDE resource pools' information
+    * @return a list of BDE resource pool information
+    */
    @RequestMapping(value = "/resourcepools", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public List<ResourcePoolRead> getResourcePools() {
       return vcRpSvc.getAllResourcePoolForRest();
    }
 
+   /**
+    * Get a BDE resource pool's information by its name
+    * @param rpName
+    * @return The resource pool information
+    */
    @RequestMapping(value = "/resourcepool/{rpName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public ResourcePoolRead getResourcePool(@PathVariable("rpName") String rpName) {
@@ -442,6 +555,10 @@ public class RestResource {
       return read;
    }
 
+   /**
+    * Delete a BDE resource pool, and the corresponding VC resource pool will still keep there
+    * @param rpName
+    */
    @RequestMapping(value = "/resourcepool/{rpName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
    public void deleteResourcePool(@PathVariable("rpName") String rpName) {
@@ -454,6 +571,10 @@ public class RestResource {
       vcRpSvc.deleteResourcePool(rpName);
    }
 
+   /**
+    * Add a VC datastore into BDE
+    * @param dsSpec
+    */
    @RequestMapping(value = "/datastores", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
    public void addDatastore(@RequestBody DatastoreAdd dsSpec) {
@@ -473,6 +594,11 @@ public class RestResource {
       datastoreSvc.addDatastores(dsSpec);
    }
 
+   /**
+    * Get a BDE datastore information
+    * @param dsName
+    * @return The BDE datastore information
+    */
    @RequestMapping(value = "/datastore/{dsName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public DatastoreRead getDatastore(@PathVariable("dsName") String dsName) {
@@ -488,12 +614,20 @@ public class RestResource {
       return read;
    }
 
+   /**
+    * Get all BDE datastores' information
+    * @return A list of BDE datastore information
+    */
    @RequestMapping(value = "/datastores", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public List<DatastoreRead> getDatastores() {
       return datastoreSvc.getAllDatastoreReads();
    }
 
+   /**
+    * Delete a BDE datastore, and the corresponding VC datastore will still keep there
+    * @param dsName
+    */
    @RequestMapping(value = "/datastore/{dsName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
    public void deleteDatastore(@PathVariable("dsName") String dsName) {
@@ -506,6 +640,10 @@ public class RestResource {
       datastoreSvc.deleteDatastore(dsName);
    }
 
+   /**
+    * Delete a BDE network, and the corresponding VC network will still keep there
+    * @param networkName
+    */
    @RequestMapping(value = "/network/{networkName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
    public void deleteNetworkByName(
@@ -519,6 +657,12 @@ public class RestResource {
       networkSvc.removeNetwork(networkName);
    }
 
+   /**
+    * Get the BDE network information by its name
+    * @param networkName
+    * @param details true if returned information include allocated ips to cluster nodes
+    * @return The BDE network information
+    */
    @RequestMapping(value = "/network/{networkName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public NetworkRead getNetworkByName(
@@ -538,6 +682,11 @@ public class RestResource {
       return network;
    }
 
+   /**
+    * Get all BDE networks' information
+    * @param details true if returned information include allocated ips to cluster nodes
+    * @return A list of BDE network information
+    */
    @RequestMapping(value = "/networks", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public List<NetworkRead> getNetworks(
@@ -545,6 +694,10 @@ public class RestResource {
       return networkSvc.getAllNetworks(details != null ? details : false);
    }
 
+   /**
+    * Add a VC network into BDE
+    * @param na
+    */
    @RequestMapping(value = "/networks", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
    public void addNetworks(@RequestBody final NetworkAdd na) {
@@ -582,6 +735,12 @@ public class RestResource {
       }
    }
 
+   /**
+    * Increase ips into an existing BDE network
+    * @param networkName
+    * @param network
+    * @param request
+    */
    @RequestMapping(value = "/network/{networkName}", method = RequestMethod.PUT, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
    public void increaseIPs(@PathVariable("networkName") String networkName,
@@ -596,6 +755,11 @@ public class RestResource {
       networkSvc.increaseIPs(networkName, network.getIp());
    }
 
+   /**
+    * Store rack list information into BDE for rack related support, such as hadoop rack awareness and node placement policies
+    * @param racksInfo
+    * @throws Exception
+    */
    @RequestMapping(value = "/racks", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.OK)
    public void importRacks(@RequestBody final RackInfoList racksInfo)
@@ -610,18 +774,32 @@ public class RestResource {
       rackInfoManager.importRackInfo(racksInfo);
    }
 
+   /**
+    * Get the rack list
+    * @return A list of rack information
+    * @throws Exception
+    */
    @RequestMapping(value = "/racks", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public List<RackInfo> exportRacks() throws Exception {
       return rackInfoManager.exportRackInfo();
    }
 
+   /**
+    * Get available distributions information
+    * @return A list of distribution information 
+    */
    @RequestMapping(value = "/distros", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public List<DistroRead> getDistros() {
       return distroManager.getDistros();
    }
 
+   /**
+    * Get the distribution information by its name such as apache, bigtop, cdh, intel, gphd, hdp, mapr, phd,etc.
+    * @param distroName
+    * @return The distribution information
+    */
    @RequestMapping(value = "/distro/{distroName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public DistroRead getDistroByName(
