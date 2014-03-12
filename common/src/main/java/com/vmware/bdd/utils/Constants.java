@@ -73,7 +73,7 @@ public class Constants {
    public static final String VC_DATASTORE_NAME_PATTERN =
          "(\\p{L}|\\p{N}|_|-|\\s|\\?|\\*|\\.|\\(|\\))+";
    public static final String WRONG_NUM_OF_JOBTRACKER =
-         "The number of JobTrackers cannot exceed one.";
+         "The number of JobTrackers must be one.";
    public static final String WRONG_NUM_OF_RESOURCEMANAGER =
          "The number of ResourceManagers cannot exceed one.";
    public static final String WRONG_NUM_OF_ZOOKEEPER =
