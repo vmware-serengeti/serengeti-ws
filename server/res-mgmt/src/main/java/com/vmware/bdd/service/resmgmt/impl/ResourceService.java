@@ -371,7 +371,7 @@ public class ResourceService implements IResourceService {
          ResourceReservation[] reservations =
                reservedResource.values().toArray(new ResourceReservation[0]);
          String clusterName = reservations[0].getClusterName();
-         logger.error("concurrent cluster create.");
+         logger.error("concurrent resource allocation.");
          throw VcProviderException
                .CONCURRENT_CLUSTER_CREATING(clusterName != null ? clusterName
                      : "unkown cluster");
