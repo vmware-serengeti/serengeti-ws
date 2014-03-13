@@ -38,6 +38,7 @@ import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
+import com.vmware.bdd.utils.CommonUtil;
 
 @Component
 public class ClusterRestClient {
@@ -65,14 +66,15 @@ public class ClusterRestClient {
    }
 
    public ClusterRead get(String id, Boolean detail) {
+      id = CommonUtil.encode(id);
       final String path = Constants.REST_PATH_CLUSTER;
       final HttpMethod httpverb = HttpMethod.GET;
-
       return restClient
             .getObject(id, ClusterRead.class, path, httpverb, detail);
    }
 
    public ClusterCreate getSpec(String id) {
+      id = CommonUtil.encode(id);
       final String path =
             Constants.REST_PATH_CLUSTER + "/" + id + "/"
                   + Constants.REST_PATH_SPEC;

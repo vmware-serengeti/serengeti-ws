@@ -452,8 +452,9 @@ public class RestResource {
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public ClusterRead getCluster(
-         @PathVariable("clusterName") final String clusterName,
+         @PathVariable("clusterName") String clusterName,
          @RequestParam(value = "details", required = false) Boolean details) {
+      clusterName = CommonUtil.decode(clusterName);
       if (CommonUtil.isBlank(clusterName)
             || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
@@ -470,7 +471,8 @@ public class RestResource {
    @RequestMapping(value = "/cluster/{clusterName}/spec", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public ClusterCreate getClusterSpec(
-         @PathVariable("clusterName") final String clusterName) {
+         @PathVariable("clusterName") String clusterName) {
+      clusterName = CommonUtil.decode(clusterName);
       if (CommonUtil.isBlank(clusterName)
             || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
