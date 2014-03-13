@@ -211,7 +211,7 @@ public class VcEventHandlers {
       VhmInfo (EventEx.class,
             "com.vmware.vhadoop.vhm.vc.events.info"),
       VhmUser (EventEx.class,
-            "com.vmwre.vhadoop.vhm.vc.events.user");
+            "com.vmware.vhadoop.vhm.vc.events.user");
 
 
       private static String eventTypeIds[] = null;
