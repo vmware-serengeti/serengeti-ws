@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.com.bdd.placement;
+package com.vmware.bdd.placement;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -131,7 +131,7 @@ public class TestPlacementUtil {
       try {
          AbstractDatacenter dc = mapper.readValue(json, AbstractDatacenter.class);
 
-         // replace the abstract datastore objects in cluster/host with the ones 
+         // replace the abstract datastore objects in cluster/host with the ones
          // in dc.datastores
          for (AbstractCluster cluster : dc.getClusters()) {
             // replace datastores in cluster level
@@ -186,7 +186,7 @@ public class TestPlacementUtil {
    /**
     * validate cluster placement policy, including vc rp, instance_per_host and
     * strict group association
-    * 
+    *
     * @param cluster
     * @param nodes
     * @param partial
