@@ -30,9 +30,9 @@ import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
  * will be released after the method is finished. Be careful to use this class
  * inside of Spring Batch step thread, as Spring Batch step does not commit txn
  * until its own txn is committed.
- * 
+ *
  * @author line
- * 
+ *
  */
 @Component
 public class ExclusiveWriteLockedClusterEntityManager implements
@@ -51,8 +51,8 @@ public class ExclusiveWriteLockedClusterEntityManager implements
    @Override
    @ClusterEntityExclusiveWriteLock
    public boolean handleOperationStatus(String clusterName,
-         OperationStatusWithDetail status) {
-      return clusterEntityMgr.handleOperationStatus(clusterName, status);
+         OperationStatusWithDetail status, boolean lastUpdate) {
+      return clusterEntityMgr.handleOperationStatus(clusterName, status, lastUpdate);
    }
 
    @Override

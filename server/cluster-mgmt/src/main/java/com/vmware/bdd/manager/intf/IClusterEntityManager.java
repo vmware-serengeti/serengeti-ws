@@ -71,7 +71,7 @@ public interface IClusterEntityManager {
    public void updateDisks(String nodeName, List<DiskEntity> diskSets);
 
    public boolean handleOperationStatus(String clusterName,
-         OperationStatusWithDetail status);
+         OperationStatusWithDetail status, boolean lastUpdate);
 
    public void syncUp(String clusterName, boolean updateClusterStatus);
 

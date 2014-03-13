@@ -39,8 +39,8 @@ public class ConcurrentWriteLockedClusterEntityManager implements
    @Override
    @ClusterEntityConcurrentWriteLock
    public boolean handleOperationStatus(String clusterName,
-         OperationStatusWithDetail status) {
-      return clusterEntityMgr.handleOperationStatus(clusterName, status);
+         OperationStatusWithDetail status, boolean lastUpdate) {
+      return clusterEntityMgr.handleOperationStatus(clusterName, status, lastUpdate);
    }
 
    @Override

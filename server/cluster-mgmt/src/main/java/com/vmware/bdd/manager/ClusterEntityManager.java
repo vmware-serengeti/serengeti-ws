@@ -241,7 +241,7 @@ public class ClusterEntityManager implements IClusterEntityManager {
    @Transactional
    @RetryTransaction
    public boolean handleOperationStatus(String clusterName,
-         OperationStatusWithDetail status) {
+         OperationStatusWithDetail status, boolean lastUpdate) {
       logger.info("handle operation status: " + status.getOperationStatus());
       boolean finished = status.getOperationStatus().isFinished();
       final Map<String, GroupData> groups = status.getClusterData().getGroups();
@@ -266,7 +266,7 @@ public class ClusterEntityManager implements IClusterEntityManager {
                         logger.debug("node status: "
                               + NodeStatus.fromString(serverData.getStatus()));
                         String errorMsg = serverData.getError_msg();
-                        if (errorMsg != null && !errorMsg.isEmpty()) {
+                        if (lastUpdate && errorMsg != null && !errorMsg.isEmpty()) {
                            oldNode.setActionFailed(true);
                            oldNode.setErrMessage(errorMsg);
                            logger.debug("error message: " + errorMsg);

@@ -26,7 +26,7 @@ import com.vmware.bdd.utils.TracedRunnable;
  * @author Jarred Li
  * @version 0.8
  * @since 0.8
- * 
+ *
  */
 public class ProgressMonitor extends TracedRunnable {
    private static final Logger logger = Logger.getLogger(ProgressMonitor.class);
@@ -110,7 +110,7 @@ public class ProgressMonitor extends TracedRunnable {
             statusUpdater.setProgress(((double) progress) / 100);
          }
          setLastErrorMsg(detailedStatus.getOperationStatus().getErrorMsg());
-         clusterEntityMgr.handleOperationStatus(targetName.split("-")[0], detailedStatus);
+         clusterEntityMgr.handleOperationStatus(targetName.split("-")[0], detailedStatus, exit);
 
          // for large scale cluster (100+ nodes), don't need to query too frequent which will cause too much overhead on Chef Server
          if (queryInterval == QUERY_INTERVAL_DEFAULT) {
