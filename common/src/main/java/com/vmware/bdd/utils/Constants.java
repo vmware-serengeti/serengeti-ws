@@ -70,6 +70,8 @@ public class Constants {
    public static final int VM_POWER_ON_WAITING_SEC = 600;
    public static final int VM_SHUTDOWN_WAITING_SEC = 600;
    public static final int VM_FAST_SHUTDOWN_WAITING_SEC = 180;
+   public static final int MAX_TIME_DIFF_IN_SEC = 240;
+   public static final int MAX_TIME_DIFF_IN_SEC_HBASE = 20;
    public static final String VC_DATASTORE_NAME_PATTERN =
          "(\\p{L}|\\p{N}|_|-|\\s|\\?|\\*|\\.|\\(|\\))+";
    public static final String WRONG_NUM_OF_JOBTRACKER =
@@ -111,7 +113,7 @@ public class Constants {
    public static final String CURRENT_DISTRO_CAN_NOT_SUPPORT_HDFS2 =
          "The current Hadoop distribution does not support HDFS2 High Availability or federation.";
    public static final String CDH4_PATTERN = "4\\.[1-9]([0-9]){0,1}(\\.\\d){0,2}";
-   public static final String IP_PATTERN = 
+   public static final String IP_PATTERN =
          "\\b((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\b";
 
    // rabbitMQ message format

@@ -15,14 +15,20 @@
 package com.vmware.bdd.service.job.software;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.command.CommandUtil;
+import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
@@ -31,6 +37,8 @@ import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.TrackableTasklet;
+import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.utils.Constants;
 
 public class SoftwareManagementStep extends TrackableTasklet {
    private static final Logger logger = Logger
@@ -72,6 +80,41 @@ public class SoftwareManagementStep extends TrackableTasklet {
       String jobName = chunkContext.getStepContext().getJobName();
       logger.info("target : " + targetName + ", operation: "
             + managementOperation + ", jobname: " + jobName);
+
+      // Only check host time for create (create, resize, resume)
+      // and configure (config, start, disk fix, scale up) operation
+      if (ManagementOperation.CREATE.equals(managementOperation) ||
+            ManagementOperation.CONFIGURE.equals(managementOperation)) {
+         List<NodeEntity> nodes = lockClusterEntityMgr.getClusterEntityMgr().findAllNodes(targetName);
+         Set<String> hostnames = new HashSet<String>();
+         for (NodeEntity node : nodes) {
+            hostnames.add(node.getHostName());
+         }
+         ClusterCreate clusterSpec = clusterManager.getClusterSpec(targetName);
+
+         int maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC;
+         if (clusterSpec.checkHBase())
+            maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC_HBASE;
+         List<String> outOfSyncHosts = new ArrayList<String>();
+         for (String hostname : hostnames) {
+            int hostTimeDiffInSec =
+                  VcResourceUtils.getHostTimeDiffInSec(hostname);
+            if (Math.abs(hostTimeDiffInSec) > maxTimeDiffInSec) {
+               logger.info("Host " + hostname + " has a time difference of "
+                     + hostTimeDiffInSec
+                     + " seconds and is dropped from placement.");
+               outOfSyncHosts.add(hostname);
+            }
+         }
+         if (!outOfSyncHosts.isEmpty()) {
+            logger.error("Time on host " + outOfSyncHosts
+                  + "is out of sync which will lead to failure, "
+                  + "synchronize the time on these hosts with "
+                  + "Serengeti management server and try again.");
+            throw TaskException.HOST_TIME_OUT_OF_SYNC(outOfSyncHosts);
+         }
+      }
+
       StatusUpdater statusUpdater =
             new DefaultStatusUpdater(jobExecutionStatusHolder,
                   getJobExecutionId(chunkContext));

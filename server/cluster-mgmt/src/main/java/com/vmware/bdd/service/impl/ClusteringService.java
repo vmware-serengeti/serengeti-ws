@@ -128,8 +128,6 @@ import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 public class ClusteringService implements IClusteringService {
    private static final int VC_RP_MAX_NAME_LENGTH = 80;
-   private static final int MAX_TIME_DIFF_IN_SEC = 240;
-   private static final int MAX_TIME_DIFF_IN_SEC_HBASE = 20;
    private static final Logger logger = Logger
          .getLogger(ClusteringService.class);
    private ClusterConfigManager configMgr;
@@ -1331,9 +1329,9 @@ public class ClusteringService implements IClusteringService {
       }
 
       // check time on hosts
-      int maxTimeDiffInSec = MAX_TIME_DIFF_IN_SEC;
+      int maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC;
       if (clusterSpec.checkHBase())
-         maxTimeDiffInSec = MAX_TIME_DIFF_IN_SEC_HBASE;
+         maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC_HBASE;
 
       List<String> outOfSyncHosts = new ArrayList<String>();
       for (AbstractHost host : container.getAllHosts()) {
@@ -1476,7 +1474,7 @@ public class ClusteringService implements IClusteringService {
             } else if (result[i].throwable != null) {
                status.setSucceed(false);
                status.setErrorMessage(getErrorMessage(result[i].throwable));
-               if (vm != null 
+               if (vm != null
                      && vm.isPoweredOn() && VcVmUtil.checkIpAddresses(vm)) {
                   ++total;
                   nodesStatus.remove(status.getNodeName()); // do not return success node status

@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.exception;
 
+import java.util.List;
+
 public class TaskException extends BddException {
    private static final long serialVersionUID = 1L;
 
@@ -25,5 +27,9 @@ public class TaskException extends BddException {
 
    public static TaskException EXECUTION_FAILED (String errorMessage) {
       return new TaskException(null, "EXECUTION_FAILED", errorMessage);
+   }
+
+   public static TaskException HOST_TIME_OUT_OF_SYNC (List<String> outOfSyncHosts) {
+      return new TaskException(null, "HOST_TIME_OUT_OF_SYNC", outOfSyncHosts.toString());
    }
 }
