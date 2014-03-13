@@ -76,9 +76,11 @@ public class ClusterCreate implements Serializable {
    private List<VcCluster> vcClusters;
    @Expose
    @SerializedName("template_id")
+   @Deprecated
    private String templateId;
    @Expose
    @SerializedName("deploy_policy")
+   @Deprecated
    private String deployPolicy;
 
    private List<String> dsNames;
@@ -207,6 +209,7 @@ public class ClusterCreate implements Serializable {
       this.distroVersion = distroVersion;
    }
 
+   @RestIgnore
    public String getHttpProxy() {
       return httpProxy;
    }
@@ -215,6 +218,7 @@ public class ClusterCreate implements Serializable {
       this.httpProxy = httpProxy;
    }
 
+   @RestIgnore
    public String getNoProxy() {
       return noProxy;
    }
@@ -267,6 +271,7 @@ public class ClusterCreate implements Serializable {
       this.networkConfig = networkConfig;
    }
 
+   @RestIgnore
    public List<NetworkAdd> getNetworkings() {
       return networkings;
    }
@@ -275,6 +280,7 @@ public class ClusterCreate implements Serializable {
       this.networkings = networkings;
    }
 
+   @RestIgnore
    public List<VcCluster> getVcClusters() {
       return vcClusters;
    }
@@ -283,6 +289,7 @@ public class ClusterCreate implements Serializable {
       this.vcClusters = vcClusters;
    }
 
+   @RestIgnore
    public String getTemplateId() {
       return templateId;
    }
@@ -291,6 +298,7 @@ public class ClusterCreate implements Serializable {
       this.templateId = templateId;
    }
 
+   @RestIgnore
    public List<String> getPackageRepos() {
       return packageRepos;
    }
@@ -299,6 +307,7 @@ public class ClusterCreate implements Serializable {
       this.packageRepos = packageRepos;
    }
 
+   @RestIgnore
    public HadoopDistroMap getDistroMap() {
       return distroMap;
    }
@@ -315,6 +324,7 @@ public class ClusterCreate implements Serializable {
       this.topologyPolicy = topologyPolicy;
    }
 
+   @RestIgnore
    public Map<String, String> getHostToRackMap() {
       return hostToRackMap;
    }
@@ -323,6 +333,7 @@ public class ClusterCreate implements Serializable {
       this.hostToRackMap = hostToRackMap;
    }
 
+   @RestIgnore
    public Set<String> getSharedDatastorePattern() {
       return sharedDatastorePattern;
    }
@@ -331,6 +342,7 @@ public class ClusterCreate implements Serializable {
       this.sharedDatastorePattern = sharedDatastorePattern;
    }
 
+   @RestIgnore
    public Set<String> getLocalDatastorePattern() {
       return localDatastorePattern;
    }
@@ -350,6 +362,7 @@ public class ClusterCreate implements Serializable {
    /**
     * @return the deployPolicy
     */
+   @RestIgnore
    public String getDeployPolicy() {
       return deployPolicy;
    }

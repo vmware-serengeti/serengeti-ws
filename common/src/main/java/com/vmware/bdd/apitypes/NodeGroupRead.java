@@ -115,6 +115,7 @@ public class NodeGroupRead {
       this.swapRatio = swapRatio;
    }
 
+   @RestIgnore
    public NetworkRead getNetworking() {
       return networking;
    }

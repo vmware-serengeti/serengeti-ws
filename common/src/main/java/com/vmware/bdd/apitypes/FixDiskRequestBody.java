@@ -21,6 +21,7 @@ public class FixDiskRequestBody {
    private boolean parallel;
    private String nodeGroupName;
 
+   @RestIgnore
    public boolean isParallel() {
       return parallel;
    }
@@ -29,6 +30,7 @@ public class FixDiskRequestBody {
       this.parallel = parallel;
    }
 
+   @RestRequired
    public String getNodeGroupName() {
       return nodeGroupName;
    }

@@ -111,6 +111,7 @@ public class NodeGroupCreate {
       this.configuration = configuration;
    }
 
+   @RestRequired
    public String getName() {
       return name;
    }
@@ -119,6 +120,7 @@ public class NodeGroupCreate {
       this.name = name;
    }
 
+   @RestRequired
    public List<String> getRoles() {
       return roles;
    }
@@ -199,6 +201,7 @@ public class NodeGroupCreate {
       this.haFlag = haFlag;
    }
 
+   @RestIgnore
    public GroupType getGroupType() {
       return groupType;
    }
@@ -207,6 +210,7 @@ public class NodeGroupCreate {
       this.groupType = groupType;
    }
 
+   @RestIgnore
    public List<VcCluster> getVcClusters(ClusterCreate cluster) {
       if (this.vcClusters == null || this.vcClusters.size() == 0) {
          return cluster.getVcClusters();
@@ -218,6 +222,7 @@ public class NodeGroupCreate {
       this.vcClusters = vcClusters;
    }
 
+   @RestIgnore
    public String getVmFolderPath() {
       return vmFolderPath;
    }

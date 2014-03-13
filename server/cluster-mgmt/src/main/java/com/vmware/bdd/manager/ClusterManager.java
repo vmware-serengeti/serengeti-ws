@@ -342,8 +342,6 @@ public class ClusterManager {
          for (NodeGroupCreate group : groups) {
             group.setVcClusters(null);
             group.setGroupType(null);
-            group.setRpNames(null);
-            group.getStorage().setDsNames(null);
             group.getStorage().setImagestoreNamePattern(null);
             group.getStorage().setDiskstoreNamePattern(null);
             group.setVmFolderPath(null);

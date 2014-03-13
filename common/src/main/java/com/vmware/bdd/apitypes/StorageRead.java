@@ -116,6 +116,7 @@ public class StorageRead {
       this.dsNames4Data = dsNames4Data;
    }
 
+   @RestIgnore
    public List<String> getDiskstoreNamePattern() {
       return diskstoreNamePattern;
    }
@@ -124,6 +125,7 @@ public class StorageRead {
       this.diskstoreNamePattern = diskstoreNamePattern;
    }
 
+   @RestIgnore
    public List<String> getImagestoreNamePattern() {
       return imagestoreNamePattern;
    }
@@ -148,6 +150,7 @@ public class StorageRead {
       this.sizeGB = sizeGB;
    }
 
+   @RestIgnore
    public DiskSplitPolicy getSplitPolicy() {
       return splitPolicy;
    }
@@ -157,6 +160,7 @@ public class StorageRead {
    }
 
    @JsonIgnore
+   @RestIgnore
    public Priority getShares() {
       return shares;
    }
@@ -165,6 +169,7 @@ public class StorageRead {
       this.shares = shares;
    }
 
+   @RestIgnore
    public DiskScsiControllerType getControllerType() {
       return controllerType;
    }
@@ -173,6 +178,7 @@ public class StorageRead {
       this.controllerType = controllerType;
    }
 
+   @RestIgnore
    public String getAllocType() {
       return allocType;
    }

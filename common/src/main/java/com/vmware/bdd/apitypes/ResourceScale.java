@@ -40,6 +40,7 @@ public class ResourceScale {
    /**
     * @return the clusterName
     */
+   @RestRequired
    public String getClusterName() {
       return clusterName;
    }
@@ -55,6 +56,7 @@ public class ResourceScale {
    /**
     * @return the nodeGroupName
     */
+   @RestRequired
    public String getNodeGroupName() {
       return nodeGroupName;
    }

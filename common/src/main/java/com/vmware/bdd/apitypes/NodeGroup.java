@@ -106,6 +106,7 @@ public class NodeGroup {
          @SerializedName("type")
          private GroupAssociationType type;
 
+         @RestRequired
          public String getReference() {
             return reference;
          }

@@ -183,7 +183,7 @@ public class RestResource {
    /**
     * Configure a hadoop or hbase cluster's properties
     * @param clusterName
-    * @param createSpec The existing create specification plus the configuration map supported in the specification(please refer to a sample specification file)
+    * @param createSpec The existing create specification plus the configuration map supported in cluster and node group levels(please refer to a sample specification file)
     * @param request
     * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
     * @throws Exception
@@ -311,10 +311,10 @@ public class RestResource {
    }
 
    /**
-    * Scale up the cpue and memory of each node in a node group
+    * Scale up or down the cpu and memory of each node in a node group
     * @param clusterName
     * @param groupName
-    * @param scale The new cpu and memory allocated to each node in this node group. 
+    * @param scale The new cpu and memory allocated to each node in this node group
     * @param request
     * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
     * @throws Exception
@@ -425,7 +425,7 @@ public class RestResource {
    /**
     * Replace some failed disks with new disks 
     * @param clusterName
-    * @param requestBody
+    * @param fixDiskSpec 
     * @param request
     * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
     * @throws Exception
@@ -433,13 +433,13 @@ public class RestResource {
    @RequestMapping(value = "/cluster/{clusterName}/fix/disk", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void fixCluster(@PathVariable("clusterName") String clusterName,
-         @RequestBody FixDiskRequestBody requestBody,
+         @RequestBody FixDiskRequestBody fixDiskSpec,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
       verifyInitialized();
       Long taskId =
             clusterMgr.fixDiskFailures(clusterName,
-                  requestBody.getNodeGroupName());
+                  fixDiskSpec.getNodeGroupName());
       redirectRequest(taskId, request, response);
    }
 

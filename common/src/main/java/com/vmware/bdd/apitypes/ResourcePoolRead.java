@@ -50,6 +50,7 @@ public class ResourcePoolRead {
       this.rpVsphereName = rpVsphereName;
    }
 
+   @RestIgnore
    public int getTotalRAMInMB() {
       return totalRAMInMB;
    }
@@ -58,6 +59,7 @@ public class ResourcePoolRead {
       this.totalRAMInMB = totalRAMInMB;
    }
 
+   @RestIgnore
    public int getUsedRAMInMB() {
       return usedRAMInMB;
    }
@@ -66,6 +68,7 @@ public class ResourcePoolRead {
       this.usedRAMInMB = usedRAMInMB;
    }
 
+   @RestIgnore
    public int getTotalCPUInMHz() {
       return totalCPUInMHz;
    }
@@ -74,6 +77,7 @@ public class ResourcePoolRead {
       this.totalCPUInMHz = totalCPUInMHz;
    }
 
+   @RestIgnore
    public int getUsedCPUInMHz() {
       return usedCPUInMHz;
    }
@@ -82,6 +86,7 @@ public class ResourcePoolRead {
       this.usedCPUInMHz = usedCPUInMHz;
    }
 
+   @RestIgnore
    public NodeRead[] getNodes() {
       return nodes;
    }
