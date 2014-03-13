@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameter;
@@ -1192,9 +1191,7 @@ public class ClusterManager {
          throw ClusterHealServiceException.NOT_NEEDED(clusterName);
       }
 
-      UUID reservationId = null;
       try {
-         reservationId = clusteringService.reserveResource(clusterName);
          clusterEntityMgr.updateClusterStatus(clusterName,
                ClusterStatus.MAINTENANCE);
          return jobManager.runSubJobForNodes(
@@ -1203,10 +1200,6 @@ public class ClusterManager {
       } catch (Exception e) {
          logger.error("failed to fix disk failures, " + e.getMessage());
          throw e;
-      } finally {
-         if (reservationId != null) {
-            clusteringService.commitReservation(reservationId);
-         }
       }
    }
 }
