@@ -552,6 +552,7 @@ public class ClusterManager {
       JobParameters jobParameters = new JobParameters(param);
       clusterEntityMgr.updateClusterStatus(clusterName,
             ClusterStatus.CONFIGURING);
+      clusterEntityMgr.cleanupActionError(clusterName);
       try {
          return jobManager.runJob(JobConstants.CONFIG_CLUSTER_JOB_NAME,
                jobParameters);
