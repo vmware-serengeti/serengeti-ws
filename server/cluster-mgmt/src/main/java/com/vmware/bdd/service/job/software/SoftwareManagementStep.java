@@ -83,8 +83,8 @@ public class SoftwareManagementStep extends TrackableTasklet {
 
       // Only check host time for create (create, resize, resume)
       // and configure (config, start, disk fix, scale up) operation
-      if (ManagementOperation.CREATE.equals(managementOperation) ||
-            ManagementOperation.CONFIGURE.equals(managementOperation)) {
+      if (ManagementOperation.CONFIGURE.equals(managementOperation) ||
+            JobConstants.RESUME_CLUSTER_JOB_NAME.equals(jobName)) {
          List<NodeEntity> nodes = lockClusterEntityMgr.getClusterEntityMgr().findAllNodes(targetName);
          Set<String> hostnames = new HashSet<String>();
          for (NodeEntity node : nodes) {
