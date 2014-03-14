@@ -39,7 +39,7 @@ public class NetworkAdd {
    // The dns ip information
    private String dns1;
    private String dns2;
-   // The ip information
+   // The ip block information
    private List<IpBlock> ipBlocks;
    // The gateway information
    @Expose
@@ -54,6 +54,7 @@ public class NetworkAdd {
    @SerializedName("ip")
    private List<String> ipStrings;
 
+   @RestRequired
    public String getName() {
       return name;
    }
@@ -62,6 +63,7 @@ public class NetworkAdd {
       this.name = name;
    }
 
+   @RestRequired
    public String getPortGroup() {
       return portGroup;
    }
@@ -70,7 +72,7 @@ public class NetworkAdd {
       this.portGroup = portGroup;
    }
 
-   public boolean isDhcp() {
+   public boolean getIsDhcp() {
       return isDhcp;
    }
 
@@ -83,6 +85,7 @@ public class NetworkAdd {
       }
    }
 
+   @RestIgnore
    public String getType() {
       return type;
    }
@@ -119,15 +122,16 @@ public class NetworkAdd {
       setDnsList();
    }
 
+   @RestIgnore
    public List<String> getDnsList() {
       return dnsList;
    }
 
-   public List<IpBlock> getIp() {
+   public List<IpBlock> getIpBlocks() {
       return ipBlocks;
    }
 
-   public void setIp(List<IpBlock> ip) {
+   public void setIpBlocks(List<IpBlock> ip) {
       this.ipBlocks = ip;
       setIpString();
    }
@@ -166,7 +170,7 @@ public class NetworkAdd {
       StringBuffer sb = new StringBuffer();
       sb.append("name:").append(this.name).append(",").append("portGroup:")
             .append(portGroup).append(",").append("isDhcp:")
-            .append(this.isDhcp()).append(",").append("dns1:")
+            .append(this.getIsDhcp()).append(",").append("dns1:")
             .append(this.dns1).append(",").append("dns2:").append(this.dns2)
             .append(",").append("ip:").append(ipBlocks).append(",")
             .append("gateway:").append(this.gateway).append(",")

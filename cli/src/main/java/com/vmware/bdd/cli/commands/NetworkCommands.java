@@ -188,7 +188,7 @@ public class NetworkCommands implements CommandMarker {
       NetworkAdd networkAdd = new NetworkAdd();
       networkAdd.setName(name);
       try {
-         networkAdd.setIp(transferIpInfo(ip));
+         networkAdd.setIpBlocks(transferIpInfo(ip));
          networkRestClient.increaseIPs(networkAdd);
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NETWORK, name,
                Constants.OUTPUT_OP_RESULT_MODIFY);
@@ -252,7 +252,7 @@ public class NetworkCommands implements CommandMarker {
          NetworkAdd networkAdd = new NetworkAdd();
          networkAdd.setName(name);
          networkAdd.setPortGroup(portGroup);
-         networkAdd.setIp(transferIpInfo(ip));
+         networkAdd.setIpBlocks(transferIpInfo(ip));
          networkAdd.setDns1(dns);
          networkAdd.setDns2(sedDNS);
          networkAdd.setGateway(gateway);

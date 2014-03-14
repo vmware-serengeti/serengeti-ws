@@ -30,6 +30,16 @@ public class DatastoreAdd {
    private DatastoreType type = DatastoreType.SHARED;
    private boolean regex = false;
 
+   @RestRequired
+   public String getName() {
+      return name;
+   }
+
+   public void setName(String name) {
+      this.name = name;
+   }
+
+   @RestRequired
    public List<String> getSpec() {
       return spec;
    }
@@ -44,14 +54,6 @@ public class DatastoreAdd {
 
    public void setType(DatastoreType type) {
       this.type = type;
-   }
-
-   public String getName() {
-      return name;
-   }
-
-   public void setName(String name) {
-      this.name = name;
    }
 
    public boolean getRegex() {

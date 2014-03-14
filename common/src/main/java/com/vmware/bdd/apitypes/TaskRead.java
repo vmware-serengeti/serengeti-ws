@@ -58,6 +58,7 @@ public class TaskRead {
       this.target = target;
    }
 
+   @RestIgnore
    public String getProgressMessage() {
       return progressMessage;
    }
@@ -106,6 +107,7 @@ public class TaskRead {
       this.errorMessage = errorMessage;
    }
 
+   @RestIgnore
    public String getWorkDir() {
       return workDir;
    }
@@ -216,6 +218,7 @@ public class TaskRead {
          this.nodeName = nodeName;
       }
 
+      @RestIgnore
       public String getIp() {
          return ip;
       }
@@ -224,6 +227,7 @@ public class TaskRead {
          this.ip = ip;
       }
 
+      @RestIgnore
       public String getStatus() {
          return status;
       }
@@ -232,6 +236,7 @@ public class TaskRead {
          this.status = status;
       }
 
+      @RestIgnore
       public long getMemory() {
          return memory;
       }
@@ -240,6 +245,7 @@ public class TaskRead {
          this.memory = memory;
       }
 
+      @RestIgnore
       public int getCpuNumber() {
          return cpuNumber;
       }

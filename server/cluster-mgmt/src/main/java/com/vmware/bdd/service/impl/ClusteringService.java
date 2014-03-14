@@ -496,14 +496,14 @@ public class ClusteringService implements IClusteringService {
             usedIps = occupiedIpSets.get(portGroupName);
          }
 
-         if (networkAdd.isDhcp()) {
+         if (networkAdd.getIsDhcp()) {
             // no need to allocate ip for dhcp
             logger.info("using dhcp for network: " + portGroupName);
          } else {
             logger.info("Start to allocate static ip address for each VM's "
                   + i + "th network.");
             List<String> availableIps =
-                  IpBlock.getIpAddressFromIpBlock(networkAdd.getIp());
+                  IpBlock.getIpAddressFromIpBlock(networkAdd.getIpBlocks());
             if (usedIps != null && !usedIps.isEmpty()) {
                availableIps.removeAll(usedIps);
             }

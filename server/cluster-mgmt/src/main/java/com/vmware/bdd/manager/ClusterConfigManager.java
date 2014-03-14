@@ -871,7 +871,7 @@ public class ClusterConfigManager {
             network.setPortGroup(networkEntity.getPortGroup());
             network.setName(networkName);
             network.setDhcp(networkEntity.getAllocType() == NetworkEntity.AllocType.DHCP);
-            if (!network.isDhcp()) {
+            if (!network.getIsDhcp()) {
                logger.debug("using static ip.");
                List<IpBlockEntity> ipBlockEntities =
                      networkMgr.getAllocatedIpBlocks(networkEntity,
@@ -894,7 +894,7 @@ public class ClusterConfigManager {
                   ip.setEndIp(ipBlockEntity.getEndAddress());
                   ips.add(ip);
                }
-               network.setIp(ips);
+               network.setIpBlocks(ips);
             }
             networkings.add(network);
          }

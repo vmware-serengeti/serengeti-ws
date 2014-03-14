@@ -128,8 +128,8 @@ public class RestResource {
 
    // task API
    /**
-    * Get all running tasks
-    * @return A list of running tasks
+    * Get latest tasks of exiting clusters
+    * @return A list of task information
     */
    @RequestMapping(value = "/tasks", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
@@ -574,7 +574,7 @@ public class RestResource {
    }
 
    /**
-    * Add a VC datastore into BDE
+    * Add a VC datastore, or multiple VC datastores When regex is true into BDE
     * @param dsSpec
     */
    @RequestMapping(value = "/datastores", method = RequestMethod.POST, consumes = "application/json")
@@ -662,7 +662,7 @@ public class RestResource {
    /**
     * Get the BDE network information by its name
     * @param networkName
-    * @param details true if returned information include allocated ips to cluster nodes
+    * @param details true will return information about allocated ips to cluster nodes
     * @return The BDE network information
     */
    @RequestMapping(value = "/network/{networkName}", method = RequestMethod.GET, produces = "application/json")
@@ -686,7 +686,7 @@ public class RestResource {
 
    /**
     * Get all BDE networks' information
-    * @param details true if returned information include allocated ips to cluster nodes
+    * @param details true will return information about allocated ips to cluster nodes
     * @return A list of BDE network information
     */
    @RequestMapping(value = "/networks", method = RequestMethod.GET, produces = "application/json")
@@ -713,7 +713,7 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("port group", na.getPortGroup());
       }
 
-      if (na.isDhcp()) {
+      if (na.getIsDhcp()) {
          networkSvc.addDhcpNetwork(na.getName(), na.getPortGroup());
       } else {
          if (!IpAddressUtil.isValidNetmask(na.getNetmask())) {
@@ -730,15 +730,15 @@ public class RestResource {
          if (na.getDns2() != null && !IpAddressUtil.isValidIp(na.getDns2())) {
             throw BddException.INVALID_PARAMETER("secondary DNS", na.getDns2());
          }
-         IpAddressUtil.verifyIPBlocks(na.getIp(), netmask);
+         IpAddressUtil.verifyIPBlocks(na.getIpBlocks(), netmask);
          networkSvc.addIpPoolNetwork(na.getName(), na.getPortGroup(),
                na.getNetmask(), na.getGateway(), na.getDns1(), na.getDns2(),
-               na.getIp());
+               na.getIpBlocks());
       }
    }
 
    /**
-    * Increase ips into an existing BDE network
+    * Add ips into an existing BDE network
     * @param networkName
     * @param network
     * @param request
@@ -754,7 +754,7 @@ public class RestResource {
             || !CommonUtil.validateResourceName(networkName)) {
          throw BddException.INVALID_PARAMETER("network name", networkName);
       }
-      networkSvc.increaseIPs(networkName, network.getIp());
+      networkSvc.increaseIPs(networkName, network.getIpBlocks());
    }
 
    /**

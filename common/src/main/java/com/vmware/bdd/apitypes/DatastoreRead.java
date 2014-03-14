@@ -57,6 +57,7 @@ public class DatastoreRead {
       this.name = name;
    }
 
+   @RestIgnore
    public double getTotalSpaceGB() {
       return totalSpaceGB;
    }
@@ -65,6 +66,7 @@ public class DatastoreRead {
       this.totalSpaceGB = totalSpaceGB;
    }
 
+   @RestIgnore
    public double getFreeSpaceGB() {
       return freeSpaceGB;
    }

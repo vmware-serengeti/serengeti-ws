@@ -22,6 +22,15 @@ public class ResourcePoolAdd {
    private String resourcePoolName;
    private String vcClusterName;
 
+   @RestRequired
+   public String getName() {
+      return name;
+   }
+
+   public void setName(String name) {
+      this.name = name;
+   }
+
    public String getResourcePoolName() {
       return resourcePoolName;
    }
@@ -30,19 +39,12 @@ public class ResourcePoolAdd {
       this.resourcePoolName = resourcePoolName;
    }
 
+   @RestRequired
    public String getVcClusterName() {
       return vcClusterName;
    }
 
    public void setVcClusterName(String vcClusterName) {
       this.vcClusterName = vcClusterName;
-   }
-
-   public String getName() {
-      return name;
-   }
-
-   public void setName(String name) {
-      this.name = name;
    }
 }

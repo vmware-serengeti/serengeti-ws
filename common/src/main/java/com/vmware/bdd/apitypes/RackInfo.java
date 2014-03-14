@@ -24,6 +24,7 @@ public class RackInfo {
    private String name;
    private List<String> hosts;
 
+   @RestRequired
    public String getName() {
       return name;
    }
@@ -32,6 +33,7 @@ public class RackInfo {
       this.name = name;
    }
 
+   @RestRequired
    public List<String> getHosts() {
       return hosts;
    }

@@ -40,6 +40,7 @@ public class DatastoreReadDetail {
       this.vcDatastoreName = vcDatastoreName;
    }
 
+   @RestIgnore
    public String getHost() {
       return host;
    }
@@ -48,6 +49,7 @@ public class DatastoreReadDetail {
       this.host = host;
    }
 
+   @RestIgnore
    public double getTotalStorageSizeGB() {
       return totalStorageSizeGB;
    }
@@ -56,6 +58,7 @@ public class DatastoreReadDetail {
       this.totalStorageSizeGB = totalStorageSizeGB;
    }
 
+   @RestIgnore
    public double getFreeSpaceGB() {
       return freeSpaceGB;
    }
@@ -71,6 +74,4 @@ public class DatastoreReadDetail {
             .append(this.getTotalStorageSizeGB()).append(",freeSpace:")
             .append(this.freeSpaceGB).toString();
    }
-
-
 }
