@@ -110,6 +110,8 @@ public class Constants {
    public static final String HDP_VENDOR = "HDP";
    public static final String MAPR_VENDOR = "MAPR";
    public static final String PHD_VENDOR = "PHD";
+   public static final String INTEL_VENDOR = "INTEL";
+   public static final String BIGTOP_VENDOR = "BIGTOP";
    public static final String CURRENT_DISTRO_CAN_NOT_SUPPORT_HDFS2 =
          "The current Hadoop distribution does not support HDFS2 High Availability or federation.";
    public static final String CDH4_PATTERN = "4\\.[1-9]([0-9]){0,1}(\\.\\d){0,2}";

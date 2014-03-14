@@ -32,16 +32,30 @@ import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Constants;
 
 public class ClusterSpecFactory {
-   private static final Logger logger = Logger.getLogger(ClusterSpecFactory.class);
+   private enum MAPREDUCE_VERSION {
+      V1, V2
+   }
+
+   private static final Logger logger = Logger
+         .getLogger(ClusterSpecFactory.class);
 
    private static final String HDFS_TEMPLATE_SPEC = "hdfs-template-spec.json";
-   private static final String HDFS_MAPRED_TEMPLATE_SPEC = "hdfs-mapred-template-spec.json";
-   private static final String HDFS_HBASE_TEMPLATE_SPEC = "hdfs-hbase-template-spec.json";
-   private static final String HDFS_MAPRED_MAPR_TEMPLATE_SPEC = "hdfs-mapred-mapr-template-spec.json";
-   private static final String HDFS_HBASE_MAPR_TEMPLATE_SPEC = "hdfs-hbase-mapr-template-spec.json";
-   private static final String HDFS_GPHD_TEMPLATE_SPEC = "hdfs-gphd-template-spec.json";
-   private static final String HDFS_MAPRED_GPHD_TEMPLATE_SPEC = "hdfs-mapred-gphd-template-spec.json";
-   private static final String HDFS_HBASE_GPHD_TEMPLATE_SPEC = "hdfs-hbase-gphd-template-spec.json";
+   private static final String HDFS_MAPRED_TEMPLATE_SPEC =
+         "hdfs-mapred-template-spec.json";
+   private static final String HDFS_YARN_TEMPLATE_SPEC =
+      "hdfs-yarn-template-spec.json";
+   private static final String HDFS_HBASE_TEMPLATE_SPEC =
+         "hdfs-hbase-template-spec.json";
+   private static final String HDFS_MAPRED_MAPR_TEMPLATE_SPEC =
+         "hdfs-mapred-mapr-template-spec.json";
+   private static final String HDFS_HBASE_MAPR_TEMPLATE_SPEC =
+         "hdfs-hbase-mapr-template-spec.json";
+   private static final String HDFS_GPHD_TEMPLATE_SPEC =
+         "hdfs-gphd-template-spec.json";
+   private static final String HDFS_MAPRED_GPHD_TEMPLATE_SPEC =
+         "hdfs-mapred-gphd-template-spec.json";
+   private static final String HDFS_HBASE_GPHD_TEMPLATE_SPEC =
+         "hdfs-hbase-gphd-template-spec.json";
 
    private static File locateSpecFile(String filename) {
       // try to locate file directly
@@ -81,7 +95,8 @@ public class ClusterSpecFactory {
     * 
     * @return cluster spec
     */
-   public static ClusterCreate loadFromFile(File file) throws FileNotFoundException {
+   public static ClusterCreate loadFromFile(File file)
+         throws FileNotFoundException {
       Reader fileReader = null;
       try {
          fileReader = new FileReader(file);
@@ -106,8 +121,8 @@ public class ClusterSpecFactory {
     * @return default cluster spec
     * @throws FileNotFoundException
     */
-   public static ClusterCreate createDefaultSpec(ClusterType type, final String vendor)
-         throws FileNotFoundException {
+   public static ClusterCreate createDefaultSpec(ClusterType type,
+         String vendor, String distroVersion) throws FileNotFoundException {
       // loading from file each time is slow but fine
       if (vendor.trim().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
          switch (type) {
@@ -130,17 +145,73 @@ public class ClusterSpecFactory {
             throw BddException.INVALID_PARAMETER("cluster type", type);
          }
       } else {
+         MAPREDUCE_VERSION mr =
+               getDefaultMapReduceVersion(vendor, distroVersion);
          switch (type) {
          case HDFS:
             return loadFromFile(locateSpecFile(HDFS_TEMPLATE_SPEC));
          case HDFS_MAPRED:
-            return loadFromFile(locateSpecFile(HDFS_MAPRED_TEMPLATE_SPEC));
+            if (mr == MAPREDUCE_VERSION.V1) {
+               return loadFromFile(locateSpecFile(HDFS_MAPRED_TEMPLATE_SPEC));
+            } else {
+               return loadFromFile(locateSpecFile(HDFS_YARN_TEMPLATE_SPEC));
+            }
          case HDFS_HBASE:
             return loadFromFile(locateSpecFile(HDFS_HBASE_TEMPLATE_SPEC));
          default:
             throw BddException.INVALID_PARAMETER("cluster type", type);
          }
       }
+   }
+
+   private static MAPREDUCE_VERSION getDefaultMapReduceVersion(String vendor,
+         String distroVersion) {
+      if (vendor.trim().equalsIgnoreCase(Constants.DEFAULT_VENDOR)) {
+         return MAPREDUCE_VERSION.V1;
+      }
+
+      if (vendor.trim().equalsIgnoreCase(Constants.BIGTOP_VENDOR)) {
+         return MAPREDUCE_VERSION.V2;
+      }
+
+      if (vendor.trim().equalsIgnoreCase(Constants.CDH_VENDOR)) {
+         if (distroVersion.startsWith("5")) {
+            return MAPREDUCE_VERSION.V2;
+         } else {
+            return MAPREDUCE_VERSION.V1;
+         }
+      }
+
+      if (vendor.trim().equalsIgnoreCase(Constants.HDP_VENDOR)) {
+         if (distroVersion.startsWith("2")) {
+            return MAPREDUCE_VERSION.V2;
+         } else {
+            return MAPREDUCE_VERSION.V1;
+         }
+      }
+
+      if (vendor.trim().equalsIgnoreCase(Constants.INTEL_VENDOR)) {
+         if (distroVersion.startsWith("3")) {
+            return MAPREDUCE_VERSION.V2;
+         } else {
+            return MAPREDUCE_VERSION.V1;
+         }
+      }
+
+      if (vendor.trim().equalsIgnoreCase(Constants.PHD_VENDOR)) {
+         return MAPREDUCE_VERSION.V2;
+      }
+
+      if (vendor.trim().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
+         return MAPREDUCE_VERSION.V1;
+      }
+
+      if (vendor.trim().equalsIgnoreCase(Constants.GPHD_VENDOR)) {
+         return MAPREDUCE_VERSION.V1;
+      }
+
+      logger.error("Unknown distro vendor, return default map reduce version v1");
+      return MAPREDUCE_VERSION.V1;
    }
 
    /**
@@ -155,11 +226,14 @@ public class ClusterSpecFactory {
     */
    public static ClusterCreate getCustomizedSpec(ClusterCreate spec)
          throws FileNotFoundException {
-      if ((spec.getType() == null) || (spec.getType() != null && spec.isSpecFile())) {
+      if ((spec.getType() == null)
+            || (spec.getType() != null && spec.isSpecFile())) {
          return spec;
       }
 
-      ClusterCreate newSpec = createDefaultSpec(spec.getType(), spec.getDistroVendor());
+      ClusterCreate newSpec =
+            createDefaultSpec(spec.getType(), spec.getDistroVendor(),
+                  spec.getDistroVersion());
 
       // --name
       if (spec.getName() != null) {
@@ -180,7 +254,7 @@ public class ClusterSpecFactory {
       }
 
       //version
-      if(spec.getDistroVersion() != null) {
+      if (spec.getDistroVersion() != null) {
          newSpec.setDistroVersion(spec.getDistroVersion());
       }
 

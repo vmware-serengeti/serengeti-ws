@@ -93,15 +93,22 @@ public class TestClusterConfigManager {
    }
 
    public static void mockChefServerRoles() {
-      List<String> rolesList = Arrays.asList("hadoop", "hadoop_client", "hadoop_datanode", "hadoop_initial_bootstrap",
-            "hadoop_jobtracker", "hadoop_journalnode", "hadoop_master", "hadoop_namenode", "hadoop_nodemanager",
-            "hadoop_resourcemanager", "hadoop_secondarynamenode", "hadoop_tasktracker", "hadoop_worker",
-            "hawq-cluster", "hawq-master-facet", "hawq-worker-facet", "hawq_master", "hawq_worker", "hbase_client",
-            "hbase_master", "hbase_regionserver", "hive", "hive_server", "mapr", "mapr_cldb", "mapr_client",
-            "mapr_fileserver", "mapr_hbase_client", "mapr_hbase_master", "mapr_hbase_regionserver", "mapr_hive",
-            "mapr_hive_server", "mapr_jobtracker", "mapr_metrics", "mapr_mysql_server", "mapr_nfs", "mapr_pig",
-            "mapr_tasktracker", "mapr_webserver", "mapr_zookeeper", "pig", "postgresql_server", "tempfs_client",
-            "tempfs_server", "zookeeper");
+      List<String> rolesList =
+            Arrays.asList("hadoop", "hadoop_client", "hadoop_datanode",
+                  "hadoop_initial_bootstrap", "hadoop_jobtracker",
+                  "hadoop_journalnode", "hadoop_master", "hadoop_namenode",
+                  "hadoop_nodemanager", "hadoop_resourcemanager",
+                  "hadoop_secondarynamenode", "hadoop_tasktracker",
+                  "hadoop_worker", "hawq-cluster", "hawq-master-facet",
+                  "hawq-worker-facet", "hawq_master", "hawq_worker",
+                  "hbase_client", "hbase_master", "hbase_regionserver", "hive",
+                  "hive_server", "mapr", "mapr_cldb", "mapr_client",
+                  "mapr_fileserver", "mapr_hbase_client", "mapr_hbase_master",
+                  "mapr_hbase_regionserver", "mapr_hive", "mapr_hive_server",
+                  "mapr_jobtracker", "mapr_metrics", "mapr_mysql_server",
+                  "mapr_nfs", "mapr_pig", "mapr_tasktracker", "mapr_webserver",
+                  "mapr_zookeeper", "pig", "postgresql_server",
+                  "tempfs_client", "tempfs_server", "zookeeper");
       HashSet<String> roles = new HashSet<String>();
       roles.addAll(rolesList);
       ChefServerUtils.setAllRoles(roles);
@@ -120,12 +127,14 @@ public class TestClusterConfigManager {
                   "../serengeti/WebContent/WEB-INF/spring/manager-context.xml");
       clusterConfigMgr = context.getBean(ClusterConfigManager.class);
       DistroManager distroMgr = Mockito.mock(DistroManager.class);
-      ClusteringService clusteringService = Mockito.mock(ClusteringService.class);
+      ClusteringService clusteringService =
+            Mockito.mock(ClusteringService.class);
       mockChefServerRoles();
       clusterConfigMgr.setDistroMgr(distroMgr);
       clusterConfigMgr.setClusteringService(clusteringService);
       clusterEntityMgr =
-            context.getBean("clusterEntityManager", IClusterEntityManager.class);
+            context
+                  .getBean("clusterEntityManager", IClusterEntityManager.class);
       DistroRead distro = new DistroRead();
       List<String> roles = new ArrayList<String>();
       roles.add("hadoop_namenode");
@@ -138,7 +147,8 @@ public class TestClusterConfigManager {
       roles.add("pig");
       distro.setRoles(roles);
       Mockito.when(clusteringService.getTemplateVmId()).thenReturn("vm-1234");
-      Mockito.when(clusteringService.getTemplateVmName()).thenReturn("hadoop-template");
+      Mockito.when(clusteringService.getTemplateVmName()).thenReturn(
+            "hadoop-template");
       Mockito.when(distroMgr.getDistroByName("apache")).thenReturn(distro);
       Mockito.when(distroMgr.checkPackagesExistStatus("apache")).thenReturn(
             PackagesExistStatus.TARBALL);
@@ -278,7 +288,8 @@ public class TestClusterConfigManager {
    }
 
    private Map<NetTrafficType, List<String>> createNetConfigs() {
-      Map<NetTrafficType, List<String>> netConfigs = new HashMap<NetTrafficType, List<String>>();
+      Map<NetTrafficType, List<String>> netConfigs =
+            new HashMap<NetTrafficType, List<String>>();
       List<String> netConfig = new ArrayList<String>();
       netConfig.add("dhcpNet1");
       netConfigs.put(NetTrafficType.MGT_NETWORK, netConfig);
@@ -313,6 +324,119 @@ public class TestClusterConfigManager {
             "manifest should contains nodegroups");
    }
 
+   @Test(groups = { "TestClusterConfigManager" })
+   public void testCDHMapReduceV2CreateDefaultSpec() throws Exception {
+      ClusterCreate spec = new ClusterCreate();
+      spec.setName("my-cluster");
+      List<String> rps = new ArrayList<String>();
+      rps.add("myRp1");
+      spec.setRpNames(rps);
+      spec.setNetworkConfig(createNetConfigs());
+      spec.setDistro("cdh4");
+      spec.setDistroVendor(Constants.CDH_VENDOR);
+      spec.setDistroVersion("4.4.0");
+      spec.setType(ClusterType.HDFS_MAPRED);
+      ClusterCreate newSpec = ClusterSpecFactory.getCustomizedSpec(spec);
+      Assert.assertTrue(newSpec.getNodeGroups().length == 3);
+      List<String> masterRoles = newSpec.getNodeGroups()[0].getRoles();
+      Assert.assertTrue(
+            masterRoles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString()),
+            "expected role " + HadoopRole.HADOOP_JOBTRACKER_ROLE.toString()
+            + ", but got " + masterRoles);
+
+      spec.setDistro("cdh5");
+      spec.setDistroVersion("5.0.0");
+      newSpec = ClusterSpecFactory.getCustomizedSpec(spec);
+      Assert.assertTrue(newSpec.getNodeGroups().length == 3);
+      masterRoles = newSpec.getNodeGroups()[0].getRoles();
+      Assert.assertTrue(
+            masterRoles.contains(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString()),
+            "expected role " + HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString()
+            + ", but got " + masterRoles);
+   }
+
+   @Test(groups = { "TestClusterConfigManager" })
+   public void testHDPMapReduceV2CreateDefaultSpec() throws Exception {
+      ClusterCreate spec = new ClusterCreate();
+      spec.setName("my-cluster");
+      List<String> rps = new ArrayList<String>();
+      rps.add("myRp1");
+      spec.setRpNames(rps);
+      spec.setNetworkConfig(createNetConfigs());
+      spec.setDistro("hdp1");
+      spec.setDistroVendor(Constants.HDP_VENDOR);
+      spec.setDistroVersion("1.3");
+      spec.setType(ClusterType.HDFS_MAPRED);
+      ClusterCreate newSpec = ClusterSpecFactory.getCustomizedSpec(spec);
+      Assert.assertTrue(newSpec.getNodeGroups().length == 3);
+      List<String> masterRoles = newSpec.getNodeGroups()[0].getRoles();
+      Assert.assertTrue(
+            masterRoles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString()),
+            "expected role " + HadoopRole.HADOOP_JOBTRACKER_ROLE.toString()
+            + ", but got " + masterRoles);
+
+      spec.setDistro("hdp2");
+      spec.setDistroVersion("2.0");
+      newSpec = ClusterSpecFactory.getCustomizedSpec(spec);
+      Assert.assertTrue(newSpec.getNodeGroups().length == 3);
+      masterRoles = newSpec.getNodeGroups()[0].getRoles();
+      Assert.assertTrue(
+            masterRoles.contains(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString()),
+            "expected role " + HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString()
+            + ", but got " + masterRoles);
+   }
+
+   @Test(groups = { "TestClusterConfigManager" })
+   public void testBigTopMapReduceV2CreateDefaultSpec() throws Exception {
+      ClusterCreate spec = new ClusterCreate();
+      spec.setName("my-cluster");
+      List<String> rps = new ArrayList<String>();
+      rps.add("myRp1");
+      spec.setRpNames(rps);
+      spec.setNetworkConfig(createNetConfigs());
+      spec.setDistro("bigtop");
+      spec.setDistroVendor(Constants.BIGTOP_VENDOR);
+      spec.setDistroVersion("0.7");
+      spec.setType(ClusterType.HDFS_MAPRED);
+      ClusterCreate newSpec = ClusterSpecFactory.getCustomizedSpec(spec);
+      Assert.assertTrue(newSpec.getNodeGroups().length == 3);
+      List<String> masterRoles = newSpec.getNodeGroups()[0].getRoles();
+      Assert.assertTrue(
+            masterRoles.contains(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString()),
+            "expected role " + HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString()
+            + ", but got " + masterRoles);
+   }
+
+   @Test(groups = { "TestClusterConfigManager" })
+   public void testIntelMapReduceV2CreateDefaultSpec() throws Exception {
+      ClusterCreate spec = new ClusterCreate();
+      spec.setName("my-cluster");
+      List<String> rps = new ArrayList<String>();
+      rps.add("myRp1");
+      spec.setRpNames(rps);
+      spec.setNetworkConfig(createNetConfigs());
+      spec.setDistro("intel2");
+      spec.setDistroVendor(Constants.INTEL_VENDOR);
+      spec.setDistroVersion("2.6");
+      spec.setType(ClusterType.HDFS_MAPRED);
+      ClusterCreate newSpec = ClusterSpecFactory.getCustomizedSpec(spec);
+      Assert.assertTrue(newSpec.getNodeGroups().length == 3);
+      List<String> masterRoles = newSpec.getNodeGroups()[0].getRoles();
+      Assert.assertTrue(
+            masterRoles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString()),
+            "expected role " + HadoopRole.HADOOP_JOBTRACKER_ROLE.toString()
+            + ", but got " + masterRoles);
+
+      spec.setDistro("intel3");
+      spec.setDistroVersion("3.1");
+      newSpec = ClusterSpecFactory.getCustomizedSpec(spec);
+      Assert.assertTrue(newSpec.getNodeGroups().length == 3);
+      masterRoles = newSpec.getNodeGroups()[0].getRoles();
+      Assert.assertTrue(
+            masterRoles.contains(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString()),
+            "expected role " + HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString()
+            + ", but got " + masterRoles);
+   }
    @SuppressWarnings({ "unchecked", "rawtypes" })
    @Test(groups = { "TestClusterConfigManager" })
    public void testClusterConfigWithExternalHDFS() throws Exception {
