@@ -1616,6 +1616,8 @@ public class ClusteringService implements IClusteringService {
       for (BaseNode node : deletedNodes) {
          if (node.getVmMobId() != null) {
             badNodes.add(node);
+         } else {
+            node.setSuccess(true);
          }
       }
 
@@ -1800,6 +1802,7 @@ public class ClusteringService implements IClusteringService {
          BaseNode node = badNodes.get(i);
          if (node.getVmMobId() == null) {
             // vm is already deleted
+            node.setSuccess(true);
             continue;
          }
          DeleteVmByIdSP deleteSp = new DeleteVmByIdSP(node.getVmMobId());
