@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import jline.console.ConsoleReader;
 import org.apache.commons.lang.StringUtils;
@@ -437,7 +439,8 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private boolean containInvalidCharacter(String password) {
-      if (password.contains(Constants.ESCAPE_CHAR)) {
+      Pattern pattern = Pattern.compile("[a-zA-Z0-9_@#$%^&*]+");
+      if (!pattern.matcher(password).matches()) {
          return true;
       }
       return false;
