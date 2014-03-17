@@ -99,6 +99,9 @@ public class ClusterRead implements Comparable<ClusterRead> {
       this.name = name;
    }
 
+   public void setVersion(String version) {
+   }
+
    public String getVersion() {
       return "2.0.0";
    }
