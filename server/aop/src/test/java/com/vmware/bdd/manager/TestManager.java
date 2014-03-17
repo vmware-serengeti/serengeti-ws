@@ -24,16 +24,27 @@ import com.vmware.bdd.aop.annotation.ClusterEntityExclusiveWriteLock;
  * @author Jarred Li
  * @since 0.8
  * @version 0.8
- * 
+ *
  */
 @Component
 public class TestManager {
 
    private static final Logger logger = Logger.getLogger(TestManager.class);
 
+   private boolean started = false;
+
+   public void setStarted(boolean started) {
+      this.started = started;
+   }
+
+   public boolean isStarted() {
+      return started;
+   }
+
    @ClusterEntityConcurrentWriteLock
    public void competitiveLock(String clusterName, long sleep) throws Exception {
       logger.info("Competitive method for " + clusterName + " is called.");
+      started = true;
       Thread.sleep(sleep);
       System.out.println("Thread Sleep " + sleep + "ms");
    }
@@ -41,12 +52,14 @@ public class TestManager {
    @ClusterEntityExclusiveWriteLock
    public void exclusiveLock(String clusterName, long sleep) throws Exception {
       logger.info("Exclusive method for " + clusterName + " is called.");
+      started = true;
       Thread.sleep(sleep);
       System.out.println("Thread Sleep " + sleep + "ms");
    }
 
    public void noLock(String clusterName, long sleep) throws Exception {
       logger.info("No lock for " + clusterName);
+      started = true;
       Thread.sleep(sleep);
       System.out.println("Thread Sleep " + sleep + "ms");
    }
@@ -56,6 +69,7 @@ public class TestManager {
    public void competitiveLockFailedOperation(String clusterName, long sleep)
          throws Exception {
       logger.info("Competitive method for " + clusterName + " is called.");
+      started = true;
       Thread.sleep(sleep);
       System.out.println("Thread Sleep " + sleep + "ms");
       throw new RuntimeException("Faked exception");
@@ -65,6 +79,7 @@ public class TestManager {
    public void exclusiveLockFailedOperation(String clusterName, long sleep)
          throws Exception {
       logger.info("Exclusive method for " + clusterName + " is called.");
+      started = true;
       Thread.sleep(sleep);
       System.out.println("Thread Sleep " + sleep + "ms");
       throw new RuntimeException("Faked exception");

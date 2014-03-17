@@ -28,7 +28,6 @@ public class LockAnnotationTest {
       }
 
       public void run() {
-         setThreadStarted(true);
          try {
             if (!failMethod) {
                if (concurrent) {
@@ -54,15 +53,6 @@ public class LockAnnotationTest {
 
    private ApplicationContext ctx;
    private TestManager mgr;
-   private static boolean threadStarted = false;
-
-   private synchronized static boolean isThreadStarted() {
-      return threadStarted;
-   }
-
-   private synchronized static void setThreadStarted(boolean started) {
-      threadStarted = started;
-   }
 
    @BeforeTest
    public void beforeTest() {
@@ -82,10 +72,10 @@ public class LockAnnotationTest {
 
    @Test
    public void testConcurrencyInTwoThread() throws Exception {
-      setThreadStarted(false);
+      mgr.setStarted(false);
       LockTestThread t = new LockTestThread(true, mgr);
       t.start();
-      while (!isThreadStarted()) {
+      while (!mgr.isStarted()) {
          Thread.sleep(10);
       }
       long start = System.currentTimeMillis();
@@ -98,10 +88,10 @@ public class LockAnnotationTest {
 
    @Test
    public void testExclusiveInTwoThread() throws Exception {
-      setThreadStarted(false);
+      mgr.setStarted(false);
       LockTestThread t = new LockTestThread(false, mgr);
       t.start();
-      while (!isThreadStarted()) {
+      while (!mgr.isStarted()) {
          Thread.sleep(10);
       }
       long start = System.currentTimeMillis();
@@ -114,10 +104,10 @@ public class LockAnnotationTest {
 
    @Test
    public void testExclusiveCompetitiveInTwoThread() throws Exception {
-      setThreadStarted(false);
+      mgr.setStarted(false);
       LockTestThread t = new LockTestThread(false, mgr);
       t.start();
-      while (!isThreadStarted()) {
+      while (!mgr.isStarted()) {
          Thread.sleep(10);
       }
       long start = System.currentTimeMillis();
@@ -130,10 +120,10 @@ public class LockAnnotationTest {
 
    @Test
    public void testReverseInTwoThread() throws Exception {
-      setThreadStarted(false);
+      mgr.setStarted(false);
       LockTestThread t = new LockTestThread(true, mgr);
       t.start();
-      while (!isThreadStarted()) {
+      while (!mgr.isStarted()) {
          Thread.sleep(10);
       }
       long start = System.currentTimeMillis();
@@ -146,10 +136,10 @@ public class LockAnnotationTest {
 
    @Test
    public void testCompetitiveInTwoThreadForTwoClusters() throws Exception {
-      setThreadStarted(false);
+      mgr.setStarted(false);
       LockTestThread t = new LockTestThread(false, mgr);
       t.start();
-      while (!isThreadStarted()) {
+      while (!mgr.isStarted()) {
          Thread.sleep(10);
       }
       long start = System.currentTimeMillis();
@@ -178,10 +168,10 @@ public class LockAnnotationTest {
 
    @Test
    public void testExclusiveFailedInTwoThread() throws Exception {
-      setThreadStarted(false);
+      mgr.setStarted(false);
       LockTestThread t = new LockTestThread(false, mgr, true);
       t.start();
-      while (!isThreadStarted()) {
+      while (!mgr.isStarted()) {
          Thread.sleep(10);
       }
       long start = System.currentTimeMillis();
