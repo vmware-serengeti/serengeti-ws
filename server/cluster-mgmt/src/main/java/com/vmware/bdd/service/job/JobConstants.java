@@ -22,9 +22,10 @@ public interface JobConstants {
    public static final String RESUME_CLUSTER_JOB_NAME = "resumeClusterJob";
    public static final String STOP_CLUSTER_JOB_NAME = "stopClusterJob";
    public static final String CONFIG_CLUSTER_JOB_NAME = "configClusterJob";
+   public static final String UPGRADE_CLUSTER_JOB_NAME = "upgradeClusterJob";
    public static final String SET_MANUAL_ELASTICITY_JOB_NAME = "setManualElasticityJob";
    public static final String QUERY_CLUSTER_JOB_NAME = "queryClusterJob";
-   
+
    public static final String CLUSTER_SPEC_JOB_PARAM = "clusterSpec";
    public static final String CLUSTER_ADDED_NODES_JOB_PARAM = "clusterAddedNodes";
    public static final String CLUSTER_EXISTING_NODES_JOB_PARAM = "clusterExistingNodes";

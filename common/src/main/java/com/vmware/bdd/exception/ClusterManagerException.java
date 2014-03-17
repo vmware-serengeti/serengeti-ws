@@ -39,6 +39,11 @@ public class ClusterManagerException extends BddException {
             reason);
    }
 
+   public static ClusterManagerException UPGRADE_NOT_ALLOWED_ERROR(
+         String clusterName, String reason) {
+      return new ClusterManagerException(null, "CANNOT_UPGRADE", clusterName, reason);
+   }
+
    public static ClusterManagerException START_NOT_ALLOWED_ERROR(
          String clusterName, String reason) {
       return new ClusterManagerException(null, "CANNOT_START", clusterName,
@@ -109,5 +114,9 @@ public class ClusterManagerException extends BddException {
          String clusterName, int count, int expected) {
       return new ClusterManagerException(null, "PRIORITIZE_CLUSTER_FAILED",
             clusterName, expected, count);
+   }
+
+   public static ClusterManagerException ALREADY_LATEST_VERSION_ERROR(String clusterName) {
+      return new ClusterManagerException(null, "IS_THE_LATEST_VERSION", clusterName);
    }
 }

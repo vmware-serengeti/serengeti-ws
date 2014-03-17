@@ -39,6 +39,7 @@ import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.Priority;
+
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Type;
 
@@ -50,7 +51,7 @@ import com.vmware.bdd.utils.ConfigInfo;
 
 /**
  * Cluster Entity
- *
+ * 
  */
 @Entity
 @SequenceGenerator(name = "IdSequence", sequenceName = "cluster_seq", allocationSize = 1)
@@ -136,6 +137,13 @@ public class ClusterEntity extends EntityBase {
 
    @Column(name = "vhm_jobtracker_port")
    private String vhmJobTrackerPort;
+
+   @Column(name = "version")
+   private String version;
+
+   @Enumerated(EnumType.STRING)
+   @Column(name = "last_status")
+   private ClusterStatus lastStatus;
 
    static final Logger logger = Logger.getLogger(ClusterEntity.class);
 
@@ -402,7 +410,7 @@ public class ClusterEntity extends EntityBase {
       if (this.password == null) {
          return null;
       }
-      
+
       String password = null;
       try {
          password = EncryptionGuard.decode(this.password);
@@ -427,5 +435,21 @@ public class ClusterEntity extends EntityBase {
       } catch (GeneralSecurityException e) {
          e.printStackTrace();
       }
+   }
+
+   public String getVersion() {
+      return version;
+   }
+
+   public void setVersion(String version) {
+      this.version = version;
+   }
+
+   public ClusterStatus getLastStatus() {
+      return lastStatus;
+   }
+
+   public void setLastStatus(ClusterStatus lastStatus) {
+      this.lastStatus = lastStatus;
    }
 }

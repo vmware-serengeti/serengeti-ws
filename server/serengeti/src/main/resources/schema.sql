@@ -91,6 +91,8 @@ create table cluster (
    vhm_jobtracker_port varchar(255),
    network_config      text,
    configuration       text,
+   version             varchar(255),
+   last_status         varchar(255),
    primary key (id)
 );
 
@@ -148,6 +150,7 @@ create table node (
    vc_rp_id     bigint,
    cpu_number             integer,
    memory                 bigint,
+   version                varchar(255),
    primary key (id),
    foreign key(node_group_id) references node_group(id) ON DELETE CASCADE,
    foreign key(vc_rp_id) references vc_resource_pool(id) ON DELETE CASCADE

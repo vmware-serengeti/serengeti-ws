@@ -634,7 +634,7 @@ public class ClusterManager {
                + " cannot be deleted, it is in " + cluster.getStatus()
                + " status");
          throw ClusterManagerException.DELETION_NOT_ALLOWED_ERROR(clusterName,
-               "To delete a cluster, its status must be RUNNING, STOPPED, ERROR, or PROVISION_ERROR");
+               "To delete a cluster, its status must be RUNNING, STOPPED, ERROR, PROVISION_ERROR, or CONFIGURE_ERROR");
       }
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
@@ -654,6 +654,53 @@ public class ClusterManager {
          if (cluster != null) {
             clusterEntityMgr.updateClusterStatus(clusterName,
                   ClusterStatus.ERROR);
+         }
+         throw e;
+      }
+   }
+
+   public Long upgradeClusterByName(String clusterName) throws Exception {
+      logger.info("ClusterManager, upgrading cluster " + clusterName);
+
+      ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
+
+      if (cluster == null) {
+         logger.error("cluster " + clusterName + " does not exist");
+         throw BddException.NOT_FOUND("Cluster", clusterName);
+      }
+
+      if (!clusterEntityMgr.isNeedToUpgrade(clusterName)) {
+         logger.error("cluster " + clusterName + " is the latest version already");
+         throw ClusterManagerException.ALREADY_LATEST_VERSION_ERROR(clusterName);
+      }
+
+      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
+            && !ClusterStatus.STOPPED.equals(cluster.getStatus())
+            && !ClusterStatus.ERROR.equals(cluster.getStatus())
+            && !ClusterStatus.CONFIGURE_ERROR.equals(cluster.getStatus())
+            && !ClusterStatus.UPGRADE_ERROR.equals(cluster.getStatus())) {
+         logger.error("cluster: " + clusterName
+               + " cannot be upgraded, it is in " + cluster.getStatus()
+               + " status");
+         throw ClusterManagerException.UPGRADE_NOT_ALLOWED_ERROR(clusterName,
+               "To upgrade a cluster, its status must be RUNNING, STOPPED, ERROR, CONFIGURE_ERROR or UPGRADE_ERROR");
+      }
+      Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
+      param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(clusterName));
+      param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
+      param.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM, new JobParameter(ClusterStatus.UPGRADE_ERROR.name()));
+      JobParameters jobParameters = new JobParameters(param);
+      clusterEntityMgr.storeClusterLastStatus(clusterName);
+      clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.UPGRADING);
+      try {
+         return jobManager.runJob(JobConstants.UPGRADE_CLUSTER_JOB_NAME,
+               jobParameters);
+      } catch (Exception e) {
+         logger.error("Failed to upgrade cluster " + clusterName, e);
+         cluster = clusterEntityMgr.findByName(clusterName);
+         if (cluster != null) {
+            clusterEntityMgr.updateClusterStatus(clusterName,
+                  ClusterStatus.UPGRADE_ERROR);
          }
          throw e;
       }

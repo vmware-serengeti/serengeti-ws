@@ -106,4 +106,20 @@ public class ClusterDAO extends BaseDAO<ClusterEntity> implements IClusterDAO {
       return nodes;
    }
 
+   @Override
+   @Transactional
+   public ClusterStatus getStatus(String clusterName) {
+      ClusterEntity cluster = findByName(clusterName);
+      AuAssert.check(cluster != null);
+      return cluster.getStatus();
+   }
+
+   @Override
+   @Transactional
+   public void updateLastStatus(String clusterName, ClusterStatus status) {
+      ClusterEntity cluster = findByName(clusterName);
+      AuAssert.check(cluster != null);
+      cluster.setLastStatus(status);
+   }
+
 }

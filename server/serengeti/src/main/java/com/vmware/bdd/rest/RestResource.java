@@ -310,6 +310,19 @@ public class RestResource {
       redirectRequest(taskId, request, response);
    }
 
+   @RequestMapping(value = "/cluster/{clusterName}/upgrade", method = RequestMethod.PUT)
+   @ResponseStatus(HttpStatus.ACCEPTED)
+   public void upgradeCluster(@PathVariable("clusterName") String clusterName,
+         HttpServletRequest request, HttpServletResponse response)
+         throws Exception {
+      // make sure cluster name is valid
+      if (!CommonUtil.validateClusterName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+      Long taskId = clusterMgr.upgradeClusterByName(clusterName);
+      redirectRequest(taskId, request, response);
+   }
+
    /**
     * Scale up or down the cpu and memory of each node in a node group
     * @param clusterName

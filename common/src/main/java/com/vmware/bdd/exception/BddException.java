@@ -82,6 +82,15 @@ public class BddException extends RuntimeException {
       return new BddException(ex, "BDD", "INTERNAL_ERROR", detail);
    }
 
+
+   public static BddException UPGRADE(Throwable ex, String detail) {
+      return new BddException(ex, "BDD", "UPGRADE_ERROR", detail);
+   }
+
+   public static BddException ExecCommand(Throwable ex, String detail) {
+      return new BddException(ex, "BDD", "EXECUTE_COMMAND_ERROR", detail);
+   }
+
    public static BddException VC_EXCEPTION(Throwable ex, String detail) {
       return new BddException(ex, "BDD", "VC_EXCEPTION", detail);
    }

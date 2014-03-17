@@ -65,6 +65,16 @@ public class ClusterRestClient {
       restClient.update(clusterConfig, path, httpverb, outputCallBack);
    }
 
+   public void upgradeCluster(String clusterName) {
+      final String path =
+            Constants.REST_PATH_CLUSTER + "/" + clusterName + "/"
+                  + Constants.REST_PATH_UPGRADE;
+      final HttpMethod httpverb = HttpMethod.PUT;
+      PrettyOutput outputCallBack =
+            getClusterPrettyOutputCallBack(this, clusterName);
+      restClient.update(clusterName, path, httpverb, outputCallBack);
+   }
+
    public ClusterRead get(String id, Boolean detail) {
       id = CommonUtil.encode(id);
       final String path = Constants.REST_PATH_CLUSTER;

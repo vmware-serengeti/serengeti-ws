@@ -96,6 +96,9 @@ public class NodeEntity extends EntityBase {
    @Column(name = "memory")
    private Long memorySize;
 
+   @Column(name = "version")
+   private String version;
+
    @ManyToOne
    @JoinColumn(name = "node_group_id")
    private NodeGroupEntity nodeGroup;
@@ -234,7 +237,7 @@ public class NodeEntity extends EntityBase {
          setStatus(status);
       } else {
          logger.debug("Set node " + getVmName() + " status to" + status
-         		+ " without validation");
+               + " without validation");
          this.status = status;
       }
    }
@@ -262,7 +265,7 @@ public class NodeEntity extends EntityBase {
             }
          }
       }
-      return (NicEntity)nics.toArray()[0];
+      return (NicEntity) nics.toArray()[0];
    }
 
    public String getPrimaryMgtIpV4() {
@@ -483,6 +486,7 @@ public class NodeEntity extends EntityBase {
 
    /**
     * convert "nics" to NodeRead's "ipConfigInfo" field
+    *
     * @return
     */
    private Map<NetTrafficType, List<IpConfigInfo>> convertToIpConfigInfo() {
@@ -494,7 +498,7 @@ public class NodeEntity extends EntityBase {
                   ipConfigInfo.put(netDef.getTrafficType(), new ArrayList<IpConfigInfo>());
                }
                List<IpConfigInfo> ipInfo = ipConfigInfo.get(netDef.getTrafficType());
-               IpConfigInfo newIpConfig = new IpConfigInfo(netDef.getTrafficType(),
+               IpConfigInfo newIpConfig = new IpConfigInfo(netDef.getTrafficType(), 
                      nicEntity.getNetworkEntity().getName(), nicEntity.getNetworkEntity().getPortGroup(),
                      nicEntity.getIpv4Address());
                if (netDef.getIndex() + 1 > ipInfo.size()) {
@@ -560,4 +564,13 @@ public class NodeEntity extends EntityBase {
    public void setErrMessage(String errMessage) {
       this.errMessage = errMessage;
    }
+
+   public String getVersion() {
+      return version;
+   }
+
+   public void setVersion(String version) {
+      this.version = version;
+   }
+
 }

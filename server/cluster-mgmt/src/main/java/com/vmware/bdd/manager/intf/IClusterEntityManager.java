@@ -18,10 +18,12 @@ import java.util.List;
 
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 
 public interface IClusterEntityManager {
@@ -112,4 +114,12 @@ public interface IClusterEntityManager {
    public List<DiskEntity> getDisks(String nodeName);
 
    public void cleanupActionError(String clusterName);
+
+   public IServerInfoDAO getServerInfoDao();
+
+   public void storeClusterLastStatus(String clusterName);
+
+   public String getServerVersion();
+
+   public boolean isNeedToUpgrade(String clusterName);
 }

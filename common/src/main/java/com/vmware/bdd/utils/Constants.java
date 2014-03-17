@@ -64,8 +64,12 @@ public class Constants {
    public static final String NODE_ACTION_CREATION_FAILED = "VM creation failed";
    public static final String NODE_ACTION_WAITING_IP = "Waiting for ip";
    public static final String NODE_ACTION_RECONFIGURE = "Reconfiguring VM";
-   public static final String NODE_ACTION_GET_IP_FAILED =
-         "Failed to query IP address";
+   public static final String NODE_ACTION_GET_IP_FAILED = "Failed to query IP address";
+   public static final String NODE_ACTION_UPGRADING = "Upgrading";
+   public static final String NODE_ACTION_DOWNLOAD_PACKAGES = "Downloading upgrade packages";
+   public static final String NODE_ACTION_INSTALL_PACKAGES = "Installing upgrade packages";
+   public static final String NODE_ACTION_UPGRADE_FAILED = "Upgrade Failed";
+   public static final String NODE_ACTION_UPGRADE_SUCCESS = "Upgrade Success";
    public static final String NODE_ACTION_WRONG_FT_STATUS = "Wrong FT status";
    public static final int VM_POWER_ON_WAITING_SEC = 600;
    public static final int VM_SHUTDOWN_WAITING_SEC = 600;
@@ -169,4 +173,9 @@ public class Constants {
    public static final int SET_PASSWORD_MAX_RETRY_TIMES = 10;
    public static final String CHECK_WHETHER_SSH_ACCESS_AVAILABLE = "Check whether you can ssh to the target node from serengeti server.";
    public static final String NEW_LINE = "\n";
+   public static final String NODE_UPGRADE_FILE_PATH = "/opt/serengeti/www/nodeupgrade/";
+   public static final String NODE_UPGRADE_TARBALL_FILE_NAME = "serengeti-node-scripts.tar.gz";
+   public static final String NODE_UPGRADE_SCRIPT_FILE_NAME = "serengeti-upgrade-node.sh";
+   public static final String SERENGETI_LOG_FILE_PATH = "/opt/serengeti/logs/";
+
 }

@@ -38,11 +38,13 @@ import com.vmware.bdd.dal.IClusterDAO;
 import com.vmware.bdd.dal.INetworkDAO;
 import com.vmware.bdd.dal.INodeDAO;
 import com.vmware.bdd.dal.INodeGroupDAO;
+import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NicEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.software.mgmt.thrift.GroupData;
@@ -65,6 +67,17 @@ public class ClusterEntityManager implements IClusterEntityManager {
    private INodeDAO nodeDao;
 
    private INetworkDAO networkDAO;
+
+   private IServerInfoDAO serverInfoDao;
+
+   public IServerInfoDAO getServerInfoDao(){
+      return serverInfoDao;
+   }
+
+   @Autowired
+   public void setServerInfoDao(IServerInfoDAO serverInfoDao) {
+      this.serverInfoDao = serverInfoDao;
+   }
 
    public IClusterDAO getClusterDao() {
       return clusterDao;
@@ -575,6 +588,31 @@ public class ClusterEntityManager implements IClusterEntityManager {
       List<NodeEntity> nodes = findAllNodes(clusterName);
       for (NodeEntity node : nodes) {
          node.cleanupErrorMessage();
+      }
+   }
+
+   @Transactional
+   @RetryTransaction
+   public boolean isNeedToUpgrade(String clusterName) {
+      String serverVersion = getServerVersion();
+      String clusterVersion = findByName(clusterName).getVersion();
+      return !serverVersion.equals(clusterVersion);
+   }
+
+   @Transactional
+   @RetryTransaction
+   public String getServerVersion() {
+      ServerInfoEntity serverInfoEntity = getServerInfoDao().findAll().get(0);
+      String serverVersion = serverInfoEntity.getVersion();
+      return serverVersion;
+   }
+
+   @Transactional
+   @RetryTransaction
+   public void storeClusterLastStatus(String clusterName) {
+      ClusterStatus clusterStatus = clusterDao.getStatus(clusterName);
+      if (!ClusterStatus.UPGRADE_ERROR.equals(clusterStatus) && !ClusterStatus.UPGRADING.equals(clusterStatus)) {
+         clusterDao.updateLastStatus(clusterName, clusterStatus);
       }
    }
 }

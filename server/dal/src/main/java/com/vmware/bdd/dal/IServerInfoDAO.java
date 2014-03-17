@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.dal;
 
+import java.util.List;
+
 import com.vmware.bdd.entity.ServerInfoEntity;
 
 /**
@@ -23,5 +25,7 @@ import com.vmware.bdd.entity.ServerInfoEntity;
  *
  */
 public interface IServerInfoDAO extends IBaseDAO<ServerInfoEntity> {
+
+   List<ServerInfoEntity> findAll();
 
 }

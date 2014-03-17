@@ -1137,6 +1137,29 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
+   @CliCommand(value = "cluster upgrade", help = "Upgrade an old cluster")
+   public void upgradeCluster(@CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name) {
+      // validate the name
+      if (name.indexOf("-") != -1) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_UPGRADE, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.PARAM_CLUSTER
+                     + Constants.PARAM_NOT_CONTAIN_HORIZONTAL_LINE);
+         return;
+      }
+
+      // rest invocation
+      try {
+         restClient.upgradeCluster(name);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_RESULT_UPGRADE);
+      } catch (CliRestException e) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_UPGRADE, Constants.OUTPUT_OP_RESULT_FAIL,
+               e.getMessage());
+      }
+   }
+
    private void printClusterFixReport(TaskRead taskRead, String clusterName)
          throws Exception {
       ClusterRead cluster = restClient.get(clusterName, true);

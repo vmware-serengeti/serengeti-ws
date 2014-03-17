@@ -37,6 +37,7 @@ public class Constants {
    public static final String REST_PATH_DISTROS = "distros";
    public static final String REST_PATH_DISTRO = "distro";
    public static final String REST_PATH_CONFIG = "config";
+   public static final String REST_PATH_UPGRADE = "upgrade";
    public static final String REST_PATH_SYNC_PARAM = "param";
    public static final String REST_PATH_ASYNC_PARAM = "param_wait_for_result";
    public static final String REST_PATH_FIX = "fix";
@@ -96,6 +97,7 @@ public class Constants {
    public static final String OUTPUT_OP_FIX = "fix";
    public static final String OUTPUT_OP_RESULT_ADJUST = "adjusted";
    public static final String OUTPUT_OP_RESUME = "resume";
+   public static final String OUTPUT_OP_UPGRADE = "upgrade";
    public static final String OUTPUT_OP_RESULT_FAIL = "failed";
    public static final String OUTPUT_OP_RESULT_CREAT = "created";
    public static final String OUTPUT_OP_RESULT_CONFIG = "configured";
@@ -109,6 +111,7 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_UPLOAD = "uploaded";
    public static final String OUTPUT_OP_RESULT_RESET = "reset";
    public static final String OUTPUT_OP_RESULT_FIX = "fixed";
+   public static final String OUTPUT_OP_RESULT_UPGRADE = "upgraded";
    public static final String OUTPUT_OP_NODEGROUP_MISSING = "must specify nodegroup name when node name is specified";
    public static final String OUTPUT_UNKNOWN_HOST = "unknown host";
    public static final String OUTPUT_HOST_TIMEOUT = "connection timeout";
