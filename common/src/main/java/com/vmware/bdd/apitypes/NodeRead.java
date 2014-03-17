@@ -83,6 +83,10 @@ public class NodeRead {
       this.name = name;
    }
 
+   public String getVersion() {
+      return "2.0.0";
+   }
+
    public String getMoId() {
       return moId;
    }
