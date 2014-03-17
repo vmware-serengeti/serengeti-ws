@@ -72,10 +72,11 @@ public class SoftwareManagementStep extends TrackableTasklet {
       String targetName =
             getJobParameters(chunkContext).getString(
                   JobConstants.TARGET_NAME_JOB_PARAM);
+      String clusterName =
+            getJobParameters(chunkContext).getString(
+                  JobConstants.CLUSTER_NAME_JOB_PARAM);
       if (targetName == null) {
-         targetName =
-               getJobParameters(chunkContext).getString(
-                     JobConstants.CLUSTER_NAME_JOB_PARAM);
+         targetName = clusterName;
       }
       String jobName = chunkContext.getStepContext().getJobName();
       logger.info("target : " + targetName + ", operation: "
@@ -85,12 +86,12 @@ public class SoftwareManagementStep extends TrackableTasklet {
       // and configure (config, start, disk fix, scale up) operation
       if (ManagementOperation.CONFIGURE.equals(managementOperation) ||
             JobConstants.RESUME_CLUSTER_JOB_NAME.equals(jobName)) {
-         List<NodeEntity> nodes = lockClusterEntityMgr.getClusterEntityMgr().findAllNodes(targetName);
+         List<NodeEntity> nodes = lockClusterEntityMgr.getClusterEntityMgr().findAllNodes(clusterName);
          Set<String> hostnames = new HashSet<String>();
          for (NodeEntity node : nodes) {
             hostnames.add(node.getHostName());
          }
-         ClusterCreate clusterSpec = clusterManager.getClusterSpec(targetName);
+         ClusterCreate clusterSpec = clusterManager.getClusterSpec(clusterName);
 
          int maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC;
          if (clusterSpec.checkHBase())
