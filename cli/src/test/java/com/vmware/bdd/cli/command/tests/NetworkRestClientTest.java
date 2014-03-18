@@ -41,7 +41,7 @@ import com.vmware.bdd.cli.rest.NetworkRestClient;
 public class NetworkRestClientTest extends MockRestServer {
    @Autowired
    private NetworkRestClient networkRestClient;
-   
+
    @Test
    public void add() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
@@ -57,7 +57,7 @@ public class NetworkRestClientTest extends MockRestServer {
       networkRestClient.add(networkAdd);
       CookieCache.clear();
    }
-   
+
    @Test
    public void delete() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
@@ -65,7 +65,7 @@ public class NetworkRestClientTest extends MockRestServer {
       networkRestClient.delete("name1");
       CookieCache.clear();
    }
-   
+
    private void addByIP(NetworkAdd networkAdd){
       List<IpBlock> ips = new LinkedList<IpBlock>();
       IpBlock ipBlock = new IpBlock();
@@ -74,16 +74,16 @@ public class NetworkRestClientTest extends MockRestServer {
       ips.add(ipBlock);
       networkAdd.setName("name");
       networkAdd.setPortGroup("portGroup");
-      networkAdd.setIp(ips);
+      networkAdd.setIpBlocks(ips);
       networkAdd.setDns1("10.117.7.12");
       networkAdd.setGateway("10.117.7.1");
       networkAdd.setNetmask("255.255.255.0");
    }
-   
+
    private void addByDHCP(NetworkAdd networkAdd){
       networkAdd.setName("name");
       networkAdd.setPortGroup("portGroup");
-      networkAdd.setDhcp(true); 
+      networkAdd.setDhcp(true);
    }
-   
+
 }
