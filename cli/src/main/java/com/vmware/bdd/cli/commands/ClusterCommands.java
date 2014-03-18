@@ -409,7 +409,7 @@ public class ClusterCommands implements CommandMarker {
       try {
          ConsoleReader reader = new ConsoleReader();
          reader.setPrompt(promptMsg);
-         String password = "";
+         String password = null;
          password = reader.readLine(Character.valueOf('*'));
          if (isValidPassword(password)) {
             return password;
