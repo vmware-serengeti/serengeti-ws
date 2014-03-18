@@ -58,19 +58,15 @@ public final class Profiler {
     */
    public static StatsEntry getStatsEntry(StatsType type, Object... objs) {
       String key = StatsEntry.getKey(getStatsSrc(), type, objs);
-      StatsEntry val = countMap.get(key);
-      if (val == null) {
-         synchronized (countMap) {
-            // try again with the lock
-            val = countMap.get(key);
-            if (val == null) {
-               val = new StatsEntry(getStatsSrc(), type, objs);
-               countMap.put(key, val);
-               sortedSet.add(val);
-            }
+      synchronized (countMap) {
+         StatsEntry val = countMap.get(key);
+         if (val == null) {
+            val = new StatsEntry(getStatsSrc(), type, objs);
+            countMap.put(key, val);
+            sortedSet.add(val);
          }
+         return val;
       }
-      return val;
    }
 
    /**

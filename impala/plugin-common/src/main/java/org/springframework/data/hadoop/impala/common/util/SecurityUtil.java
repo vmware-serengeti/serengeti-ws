@@ -44,7 +44,7 @@ public class SecurityUtil {
 		
 	}
 
-	public void forbidSystemExitCall() {
+	final public void forbidSystemExitCall() {
 		final SecurityManager securityManager = new SecurityManager() {
 			@Override
 			public void checkPermission(Permission permission) {
