@@ -85,7 +85,7 @@ public class SSHUtil {
             channel.disconnect();
          }
 
-         if (session != null && channel.isConnected()) {
+         if (session != null && session.isConnected()) {
             session.disconnect();
          }
       }
