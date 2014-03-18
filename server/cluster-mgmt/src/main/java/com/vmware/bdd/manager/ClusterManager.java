@@ -892,7 +892,7 @@ public class ClusterManager {
          logger.error("cluster " + clusterName + " does not exist");
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
-
+      clusterEntityMgr.cleanupActionError(clusterName);
       //update vm ioshares
       if (ioPriority != null) {
          prioritizeCluster(clusterName, ioPriority);
@@ -1193,6 +1193,7 @@ public class ClusterManager {
       try {
          clusterEntityMgr.updateClusterStatus(clusterName,
                ClusterStatus.MAINTENANCE);
+         clusterEntityMgr.cleanupActionError(clusterName);
          return jobManager.runSubJobForNodes(
                JobConstants.FIX_NODE_DISK_FAILURE_JOB_NAME, jobParameterList,
                clusterName, oldStatus, oldStatus);
