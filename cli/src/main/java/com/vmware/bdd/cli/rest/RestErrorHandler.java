@@ -68,7 +68,7 @@ public class RestErrorHandler implements ResponseErrorHandler {
             errorMsg = Constants.CONNECT_SESSION_TIME_OUT;
          } else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR) {
             errorMsg =
-                  "vCenter server connect failed: "
+                  "vCenter Server connect command failed: "
                         + getVCConnectErrorMsg(response.getBody());
          } else {
             errorMsg = statusCode.getReasonPhrase();
