@@ -139,4 +139,44 @@ public class TestDiskPlacement {
       Assert.assertEquals(placedDisks.get(1).getSize(), 20);
 
    }
+
+   @Test
+   public void testEvenSpliterWithMinimumSpace() throws Exception {
+      PlacementPlanner placementPlanner = new PlacementPlanner();
+
+      DiskSpec diskSpec = new DiskSpec();
+      diskSpec.setName("diskSpec");
+      diskSpec.setSize(10);
+
+      //5 Datastores with 5G, 10G, 20G, 30G, 50G free space
+      List<AbstractDatastore> datastores = new ArrayList<AbstractDatastore>();
+      AbstractDatastore datastore = new AbstractDatastore("datastore1", 10);
+      datastores.add(datastore);
+      datastore = new AbstractDatastore("datastore2", 9);
+      datastores.add(datastore);
+      datastore = new AbstractDatastore("datastore3", 8);
+      datastores.add(datastore);
+      datastore = new AbstractDatastore("datastore4", 7);
+      datastores.add(datastore);
+      datastore = new AbstractDatastore("datastore5", 3);
+      datastores.add(datastore);
+      datastore = new AbstractDatastore("datastore6", 1);
+      datastores.add(datastore);
+      datastore = new AbstractDatastore("datastore7", 1);
+      datastores.add(datastore);
+
+      //Use reflection to invoke private method PlacementPlanner.evenSpliter()
+      Method evenSpliter = PlacementPlanner.class.getDeclaredMethod("evenSpliter", DiskSpec.class, List.class);
+      evenSpliter.setAccessible(true);
+      List<DiskSpec> placedDisks = (List<DiskSpec>) evenSpliter.invoke(placementPlanner, diskSpec, datastores);
+
+      StringBuffer output = new StringBuffer();
+      for(DiskSpec disk : placedDisks) {
+         output.append(disk.getTargetDs() + ":" + disk.getSize() + "G, ");
+      }
+
+      System.out.println(output.toString());
+      Assert.assertEquals(output.toString(),
+            "datastore5:2G, datastore4:2G, datastore3:2G, datastore2:2G, datastore1:2G, ");
+   }
 }

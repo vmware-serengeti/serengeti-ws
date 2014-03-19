@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.vmware.bdd.apitypes.NetworkAdd;
+
 import org.apache.log4j.Logger;
 
 import com.google.gson.internal.Pair;
@@ -539,8 +540,19 @@ public class PlacementPlanner implements IPlacementPlanner {
    }
 
    private List<DiskSpec> evenSpliter(DiskSpec separable,
-         List<AbstractDatastore> datastores) {
-      Collections.sort(datastores);
+         List<AbstractDatastore> originDatastores) {
+      int minDiskSize = 2;
+      int maxNumDatastores = (separable.getSize() + minDiskSize - 1) / minDiskSize;
+      Collections.sort(originDatastores);
+      List<AbstractDatastore> datastores = new ArrayList<AbstractDatastore>();
+      int numDatastores = 0;
+      for (AbstractDatastore datastore : originDatastores) {
+         if (datastore.getFreeSpace() < minDiskSize) continue;
+         datastores.add(datastore);
+         numDatastores++;
+         if (numDatastores == maxNumDatastores) break;
+      }
+
       int length = datastores.size() + 1;
       int[] free = new int[length];
       int[] partSum = new int[length];
