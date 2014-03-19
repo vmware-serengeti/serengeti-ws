@@ -46,6 +46,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
    private ClusterManager clusterManager;
    private ManagementOperation managementOperation;
    private IExclusiveLockedClusterEntityManager lockClusterEntityMgr;
+   private boolean checkVMStatus = false;
 
    public IExclusiveLockedClusterEntityManager getLockClusterEntityMgr() {
       return lockClusterEntityMgr;
@@ -81,6 +82,20 @@ public class SoftwareManagementStep extends TrackableTasklet {
       String jobName = chunkContext.getStepContext().getJobName();
       logger.info("target : " + targetName + ", operation: "
             + managementOperation + ", jobname: " + jobName);
+
+      boolean vmPowerOn = false;
+      String vmPowerOnStr =
+            getJobParameters(chunkContext).getString(
+                  JobConstants.IS_VM_POWER_ON);
+      if (vmPowerOnStr != null) {
+         logger.info("vm original status is power on? "
+               + vmPowerOnStr);
+         vmPowerOn = Boolean.parseBoolean(vmPowerOnStr);
+      }
+
+      if (checkVMStatus && targetName.split("-").length == 3 && !vmPowerOn) {
+         return RepeatStatus.FINISHED;
+      }
 
       // Only check host time for create (create, resize, resume)
       // and configure (config, start, disk fix, scale up) operation
@@ -176,6 +191,21 @@ public class SoftwareManagementStep extends TrackableTasklet {
     */
    public void setManagementOperation(ManagementOperation managementOperation) {
       this.managementOperation = managementOperation;
+   }
+
+   /**
+    * @return the checkVMStatus
+    */
+   public boolean isCheckVMStatus() {
+      return checkVMStatus;
+   }
+
+   /**
+    * @param checkVMStatus
+    *           the checkVMStatus to set
+    */
+   public void setCheckVMStatus(boolean checkVMStatus) {
+      this.checkVMStatus = checkVMStatus;
    }
 
 }

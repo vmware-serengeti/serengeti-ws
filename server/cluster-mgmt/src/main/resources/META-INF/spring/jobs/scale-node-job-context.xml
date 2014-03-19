@@ -72,14 +72,14 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="singleNodeSyncupAfterStartStep" next="softwareBootstrapSingleNodeStep">
+		<step id="singleNodeSyncupAfterStartStep" next="softwareBootstrapSingleNodeStepIfRequired">
 			<tasklet ref="singleNodeSyncupTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="softwareBootstrapSingleNodeStep" next="stopSingleVMStepIfRequired">
-			<tasklet ref="softwareBootstrapTargetTasklet" />
+		<step id="softwareBootstrapSingleNodeStepIfRequired" next="stopSingleVMStepIfRequired">
+			<tasklet ref="softwareBootstrapTargetTaskletIfRequired" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
