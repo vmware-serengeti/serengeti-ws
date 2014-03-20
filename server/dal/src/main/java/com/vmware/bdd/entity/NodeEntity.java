@@ -465,6 +465,7 @@ public class NodeEntity extends EntityBase {
       node.setMoId(this.moId);
       node.setStatus(this.status != null ? this.status.toString() : null);
       node.setAction(this.action);
+      node.setVersion(this.version);
       if (this.cpuNum != null) {
          node.setCpuNumber(this.cpuNum);
       }

@@ -216,6 +216,9 @@ public class ClusterConfigManager {
          clusterEntity.setStartAfterDeploy(true);
          clusterEntity.setPassword(cluster.getPassword());
 
+         // set cluster version
+         clusterEntity.setVersion(clusterEntityMgr.getServerVersion());
+
          if (cluster.containsComputeOnlyNodeGroups()) {
             clusterEntity.setAutomationEnable(automationEnable);
          } else {

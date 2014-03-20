@@ -27,10 +27,12 @@ import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupA
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksType;
 import com.vmware.bdd.apitypes.RackInfo;
+import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterConfigException;
+import com.vmware.bdd.exception.ClusterManagerException;
 import com.vmware.bdd.manager.RackInfoManager;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 
@@ -140,6 +142,15 @@ public class ValidationUtils {
       }
 
       return false;
+   }
+
+   public static void validateVersion(IClusterEntityManager clusterEntityMgr, String clusterName) {
+      ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
+      String serverVersion = clusterEntityMgr.getServerVersion();
+      String clusterVersion = cluster.getVersion();
+      if (clusterVersion == null || !serverVersion.equals(clusterVersion)) {
+         throw ClusterManagerException.OLD_VERSION_ERROR(clusterName);
+      }
    }
 
 }

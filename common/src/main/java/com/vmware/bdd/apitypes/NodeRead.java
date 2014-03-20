@@ -67,6 +67,8 @@ public class NodeRead {
 
    private String errMessage;
 
+   private String version;
+
    public List<String> getVolumes() {
       return volumes;
    }
@@ -84,10 +86,14 @@ public class NodeRead {
    }
 
    public void setVersion(String version) {
+      this.version = version;
    }
 
    public String getVersion() {
-      return "2.0.0";
+      if (version == null || version.isEmpty()) {
+         return Constants.NEED_UPGRADE;
+      }
+      return version;
    }
 
    public String getMoId() {

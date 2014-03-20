@@ -240,6 +240,9 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          vNode.setVmMobId(nodeEntity.getMoId());
       }
 
+      // set node version
+      nodeEntity.setVersion(cluster.getVersion());
+
       //set vc resource pool entity
       nodeEntity.setVcRp(rpDao.findByClusterAndRp(vNode.getTargetVcCluster(),
             vNode.getTargetRp()));

@@ -442,6 +442,7 @@ public class ClusterEntityManager implements IClusterEntityManager {
       clusterRead.setVhmMaxNum(cluster.getVhmMaxNum());
       clusterRead.setVhmTargetNum(cluster.getVhmTargetNum());
       clusterRead.setIoShares(cluster.getIoShares());
+      clusterRead.setVersion(cluster.getVersion());
 
       boolean computeOnly = true;
       List<NodeGroupRead> groupList = new ArrayList<NodeGroupRead>();
@@ -602,7 +603,11 @@ public class ClusterEntityManager implements IClusterEntityManager {
    @Transactional
    @RetryTransaction
    public String getServerVersion() {
-      ServerInfoEntity serverInfoEntity = getServerInfoDao().findAll().get(0);
+      List<ServerInfoEntity> serverInfoEntities = getServerInfoDao().findAll();
+      if (serverInfoEntities.isEmpty()){
+         return null;
+      }
+      ServerInfoEntity serverInfoEntity = serverInfoEntities.get(0);
       String serverVersion = serverInfoEntity.getVersion();
       return serverVersion;
    }

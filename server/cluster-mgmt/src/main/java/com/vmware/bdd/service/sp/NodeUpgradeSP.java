@@ -98,7 +98,13 @@ public class NodeUpgradeSP implements Callable<Void> {
          @Override
          protected Void body() throws Exception {
 
+            if (node.getMoId() == null) {
+               return null;
+            }
             VcVirtualMachine vcVm = VcCache.getIgnoreMissing(String.valueOf(node.getMoId()));
+            if (vcVm == null) {
+               return null;
+            }
             Map<String, String> bootupConfigs = vcVm.getGuestConfigs();
             AuAssert.check(bootupConfigs != null);
 

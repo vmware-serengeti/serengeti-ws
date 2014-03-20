@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vmware.bdd.exception.VcProviderException;
+
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -32,6 +33,7 @@ import com.vmware.bdd.exception.ScaleServiceException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.utils.ValidationUtils;
 import com.vmware.bdd.utils.VcVmUtil;
 
 /**
@@ -48,6 +50,7 @@ public class ScaleManager {
 
    public long scaleNodeGroupResource(ResourceScale scale) throws Exception {
       String clusterName = scale.getClusterName();
+      ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
       ClusterStatus originalStatus =
             clusterEntityMgr.findByName(clusterName).getStatus();
       logger.info("before scaling, cluster status is:" + originalStatus);

@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import mockit.Mock;
+import mockit.MockUp;
 import mockit.Mockit;
 
 import org.apache.log4j.Logger;
@@ -50,7 +52,9 @@ import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.StorageRead;
+import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.manager.DistroManager.PackagesExistStatus;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
@@ -59,6 +63,7 @@ import com.vmware.bdd.service.impl.ClusteringService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
+import com.vmware.bdd.service.resmgmt.impl.ResourceInitializerService;
 import com.vmware.bdd.specpolicy.ClusterSpecFactory;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.ChefServerUtils;
@@ -75,6 +80,26 @@ public class TestClusterConfigManager {
 
    private static Gson gson = new GsonBuilder()
          .excludeFieldsWithoutExposeAnnotation().create();
+
+   private ResourceInitializerService service;
+   private IServerInfoDAO serverInfoDao;
+
+   @BeforeClass
+   public void beforeClass() {
+      service = new ResourceInitializerService();
+      serverInfoDao = new MockUp<IServerInfoDAO>() {
+         @Mock
+         List<ServerInfoEntity> findAll() {
+            List<ServerInfoEntity> serverInfos =
+                  new ArrayList<ServerInfoEntity>();
+            ServerInfoEntity serverInfo = new ServerInfoEntity();
+            serverInfo.setResourceInitialized(true);
+            serverInfos.add(serverInfo);
+            return serverInfos;
+         }
+      }.getMockInstance();
+      service.setServerInfoDao(serverInfoDao);
+   }
 
    @AfterMethod(groups = { "TestClusterConfigManager" })
    public void tearDownMockup() {

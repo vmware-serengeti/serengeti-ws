@@ -119,4 +119,8 @@ public class ClusterManagerException extends BddException {
    public static ClusterManagerException ALREADY_LATEST_VERSION_ERROR(String clusterName) {
       return new ClusterManagerException(null, "IS_THE_LATEST_VERSION", clusterName);
    }
+
+   public static ClusterManagerException OLD_VERSION_ERROR(String clusterName) {
+      return new ClusterManagerException(null, "OLD_VERSION", clusterName);
+   }
 }

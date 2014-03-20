@@ -532,6 +532,8 @@ public class ClusterManager {
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
 
+      ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
+
       if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
             && !ClusterStatus.CONFIGURE_ERROR.equals(cluster.getStatus())) {
          logger.error("can not config cluster: " + clusterName + ", "
@@ -573,6 +575,8 @@ public class ClusterManager {
          logger.error("cluster " + clusterName + " does not exist");
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
+
+      ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
       if (cluster.getStatus() != ClusterStatus.PROVISION_ERROR) {
          logger.error("can not resume creation of cluster: " + clusterName
@@ -629,12 +633,13 @@ public class ClusterManager {
             && !ClusterStatus.STOPPED.equals(cluster.getStatus())
             && !ClusterStatus.ERROR.equals(cluster.getStatus())
             && !ClusterStatus.PROVISION_ERROR.equals(cluster.getStatus())
-            && !ClusterStatus.CONFIGURE_ERROR.equals(cluster.getStatus())) {
+            && !ClusterStatus.CONFIGURE_ERROR.equals(cluster.getStatus())
+            && !ClusterStatus.UPGRADE_ERROR.equals(cluster.getStatus())) {
          logger.error("cluster: " + clusterName
                + " cannot be deleted, it is in " + cluster.getStatus()
                + " status");
          throw ClusterManagerException.DELETION_NOT_ALLOWED_ERROR(clusterName,
-               "To delete a cluster, its status must be RUNNING, STOPPED, ERROR, PROVISION_ERROR, or CONFIGURE_ERROR");
+               "To delete a cluster, its status must be RUNNING, STOPPED, ERROR, PROVISION_ERROR, CONFIGURE_ERROR or UPGRADE_ERROR");
       }
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
@@ -714,6 +719,8 @@ public class ClusterManager {
          logger.error("cluster " + clusterName + " does not exist");
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
+
+      ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
       if (ClusterStatus.RUNNING.equals(cluster.getStatus())) {
          logger.error("cluster " + clusterName + " is running already");
@@ -806,6 +813,8 @@ public class ClusterManager {
          logger.error("cluster " + clusterName + " does not exist");
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
+
+      ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
       List<String> dsNames = getUsedDS(cluster.getVcDatastoreNameList());
       if (dsNames.isEmpty()) {
@@ -939,6 +948,9 @@ public class ClusterManager {
          logger.error("cluster " + clusterName + " does not exist");
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
+
+      ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
+
       clusterEntityMgr.cleanupActionError(clusterName);
       //update vm ioshares
       if (ioPriority != null) {
@@ -1033,6 +1045,8 @@ public class ClusterManager {
          Integer minComputeNodeNum, Integer maxComputeNodeNum, Boolean enableAuto,
          Priority ioPriority)
          throws Exception {
+
+      ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
       syncSetParam(clusterName, activeComputeNodeNum, minComputeNodeNum, maxComputeNodeNum,
             enableAuto, ioPriority);
@@ -1153,6 +1167,8 @@ public class ClusterManager {
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
 
+      ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
+
       ClusterStatus oldStatus = cluster.getStatus();
 
       if (ClusterStatus.RUNNING != oldStatus) {
@@ -1249,4 +1265,5 @@ public class ClusterManager {
          throw e;
       }
    }
+
 }

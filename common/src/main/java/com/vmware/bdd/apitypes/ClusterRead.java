@@ -18,6 +18,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.vmware.bdd.utils.Constants;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.exception.BddException;
@@ -70,6 +72,8 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
    private Integer vhmTargetNum;
 
+   private String version;
+
    @Expose
    @SerializedName("disk_priority")
    private Priority ioShares;
@@ -100,10 +104,14 @@ public class ClusterRead implements Comparable<ClusterRead> {
    }
 
    public void setVersion(String version) {
+      this.version = version;
    }
 
    public String getVersion() {
-      return "2.0.0";
+      if (version == null || version.isEmpty()) {
+         return Constants.NEED_UPGRADE;
+      }
+      return version;
    }
 
    public String getExternalHDFS() {

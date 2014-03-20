@@ -176,6 +176,6 @@ public class Constants {
    public static final String NODE_UPGRADE_FILE_PATH = "/opt/serengeti/www/nodeupgrade/";
    public static final String NODE_UPGRADE_TARBALL_FILE_NAME = "serengeti-node-scripts.tar.gz";
    public static final String NODE_UPGRADE_SCRIPT_FILE_NAME = "serengeti-upgrade-node.sh";
-   public static final String SERENGETI_LOG_FILE_PATH = "/opt/serengeti/logs/";
+   public static final String NEED_UPGRADE = "Need Upgrade";
 
 }

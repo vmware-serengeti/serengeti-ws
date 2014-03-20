@@ -304,6 +304,13 @@ public class RestResource {
       redirectRequest(taskId, request, response);
    }
 
+   /**
+    * Upgrade a cluster
+    * @param clusterName
+    * @param request
+    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @throws Exception
+    */
    @RequestMapping(value = "/cluster/{clusterName}/upgrade", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void upgradeCluster(@PathVariable("clusterName") String clusterName,
