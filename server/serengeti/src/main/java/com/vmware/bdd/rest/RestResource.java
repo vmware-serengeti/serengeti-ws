@@ -141,7 +141,6 @@ public class RestResource {
     * Get a specific task by its id
     * @param taskId The identity returned as part of uri in the response(Accepted status) header of Location, such as https://hostname:8443/serengeti/api/task/taskId
     * @return Task information
-    * @throws Exception
     */
    @RequestMapping(value = "/task/{taskId}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
@@ -164,7 +163,6 @@ public class RestResource {
     * @param createSpec create specification
     * @param request
     * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
-    * @throws Exception
     */
    @RequestMapping(value = "/clusters", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.ACCEPTED)
@@ -186,7 +184,6 @@ public class RestResource {
     * @param createSpec The existing create specification plus the configuration map supported in cluster and node group levels(please refer to a sample specification file)
     * @param request
     * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
-    * @throws Exception
     */
    @RequestMapping(value = "/cluster/{clusterName}/config", method = RequestMethod.PUT, consumes = "application/json")
    @ResponseStatus(HttpStatus.ACCEPTED)
@@ -219,7 +216,6 @@ public class RestResource {
     * @param clusterName
     * @param request
     * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
-    * @throws Exception
     */
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.ACCEPTED)
@@ -241,7 +237,6 @@ public class RestResource {
     * @param state Can be start, stop, or resume
     * @param request
     * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
-    * @throws Exception
     */
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
@@ -280,7 +275,6 @@ public class RestResource {
     * @param instanceNum The target instance number after resize. It must be larger than existing instance number in this node group
     * @param request
     * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
-    * @throws Exception
     */
    @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}/instancenum", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
@@ -330,7 +324,6 @@ public class RestResource {
     * @param scale The new cpu and memory allocated to each node in this node group
     * @param request
     * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
-    * @throws Exception
     */
    @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}/scale", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
@@ -369,7 +362,6 @@ public class RestResource {
     * @param requestBody
     * @param request
     * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
-    * @throws Exception
     */
    @RequestMapping(value = "/cluster/{clusterName}/param_wait_for_result", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
@@ -396,7 +388,6 @@ public class RestResource {
     * @param clusterName
     * @param requestBody
     * @param request
-    * @throws Exception
     */
    @RequestMapping(value = "/cluster/{clusterName}/param", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.OK)
@@ -441,7 +432,6 @@ public class RestResource {
     * @param fixDiskSpec 
     * @param request
     * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
-    * @throws Exception
     */
    @RequestMapping(value = "/cluster/{clusterName}/fix/disk", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
@@ -457,7 +447,7 @@ public class RestResource {
    }
 
    /**
-    * Retrieve a cluster information by it name
+    * Retrieve a cluster information by its name
     * @param clusterName
     * @param details not used by this version
     * @return The cluster information
@@ -773,7 +763,6 @@ public class RestResource {
    /**
     * Store rack list information into BDE for rack related support, such as hadoop rack awareness and node placement policies
     * @param racksInfo
-    * @throws Exception
     */
    @RequestMapping(value = "/racks", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.OK)
@@ -792,7 +781,6 @@ public class RestResource {
    /**
     * Get the rack list
     * @return A list of rack information
-    * @throws Exception
     */
    @RequestMapping(value = "/racks", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
@@ -845,10 +833,6 @@ public class RestResource {
       return new BddErrorMessage(ex.getFullErrorId(), extractErrorMessage(ex));
    }
 
-   /**
-    * @param ex
-    * @return
-    */
    private String extractErrorMessage(BddException ex) {
       String msg = ex.getMessage();
       if (ex.getCause() instanceof DataAccessException) {
