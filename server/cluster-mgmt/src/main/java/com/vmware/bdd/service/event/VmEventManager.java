@@ -19,8 +19,10 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
+import com.vmware.bdd.service.impl.ClusterUpgradeService;
 import com.vmware.bdd.service.sp.NodePowerOnRequest;
 import org.apache.log4j.Logger;
+import org.hibernate.Hibernate;
 
 import com.vmware.aurora.exception.AuroraException;
 import com.vmware.aurora.global.Configuration;
@@ -371,6 +373,7 @@ public class VmEventManager implements IEventProcessor {
             break;
          }
          case VmPoweredOn: {
+            logger.debug("vm is powered on");
             refreshNodeWithAction(moId, true, Constants.NODE_ACTION_WAITING_IP,
                   "Powered On");
             if (external) {
@@ -378,6 +381,7 @@ public class VmEventManager implements IEventProcessor {
                      new NodePowerOnRequest(lockMgr, moId);
                CmsWorker.addRequest(WorkQueue.VC_TASK_NO_DELAY, request);
             }
+
             break;
          }
          case VmCloned: {

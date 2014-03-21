@@ -19,7 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.aurora.util.CmsWorker.SimpleRequest;
 import com.vmware.bdd.entity.NodeEntity;
+import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
+import com.vmware.bdd.service.impl.ClusterUpgradeService;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
@@ -66,6 +69,13 @@ public class NodePowerOnRequest extends SimpleRequest {
       String clusterName = CommonUtil.getClusterName(nodeEntity.getVmName());
       lockClusterEntityMgr
             .refreshNodeByMobId(clusterName, vmId, false);
+
+      //upgrade node if needed
+      ClusterUpgradeService upgradeService = new ClusterUpgradeService();
+      IClusterEntityManager clusterEntityMgr = lockClusterEntityMgr.getClusterEntityMgr();
+      upgradeService.setClusterEntityMgr(clusterEntityMgr);
+      logger.debug("vm " + nodeEntity.getVmName() + "is going to upgrade");
+      upgradeService.upgradeNode(nodeEntity);
       return true;
    }
 }
