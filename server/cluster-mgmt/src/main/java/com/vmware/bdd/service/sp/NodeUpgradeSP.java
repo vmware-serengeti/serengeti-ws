@@ -97,7 +97,6 @@ public class NodeUpgradeSP implements Callable<Void> {
       VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
          protected Void body() throws Exception {
-
             if (node.getMoId() == null) {
                return null;
             }
@@ -124,5 +123,4 @@ public class NodeUpgradeSP implements Callable<Void> {
          }
       });
    }
-
 }

@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
-import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
@@ -26,6 +25,54 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
 
    private IClusterEntityManager clusterEntityMgr;
    private String serverVersion;
+
+   @Override
+   public boolean upgradeNode(NodeEntity node) {
+      //node = clusterEntityMgr.findNodeById(node.getId());
+      node = clusterEntityMgr.getNodeWithNicsByMobId(node.getMoId());
+      String nodeIP = node.getPrimaryMgtNic().getIpv4Address();
+      logger.info("Upgrading node " + node.getVmName() + "(" + nodeIP + ").");
+
+      this.serverVersion = clusterEntityMgr.getServerVersion();
+
+      List<Callable<Void>> storeNodeProcedures = new ArrayList<Callable<Void>>();
+
+      try {
+         if (NeedUpgrade(node)) {
+            setActionToUpgrading(node);
+            NodeUpgradeSP nodeUpgradeSP = new NodeUpgradeSP(node, serverVersion);
+            storeNodeProcedures.add(nodeUpgradeSP);
+         }
+
+         if (storeNodeProcedures.isEmpty()) {
+            logger.info(node.getVmName() + " doesn't need upgrade, return directly.");
+            return true;
+         }
+
+         Callable<Void>[] storeNodeProceduresArray = storeNodeProcedures.toArray(new Callable[0]);
+         NoProgressUpdateCallback callback = new NoProgressUpdateCallback();
+         ExecutionResult[] result =
+               Scheduler
+                     .executeStoredProcedures(
+                           com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
+                           storeNodeProceduresArray, callback);
+
+         if (result == null || result.length == 0) {
+            logger.warn("No node is upgraded.");
+            return false;
+         }
+         if (result[0].finished && result[0].throwable == null) {
+            updateNodeData(node);
+            logger.info("Upgrade " + node.getVmName() + " successfully.");
+            return true;
+         }
+         logger.error("Upgrade " + node.getVmName() + "(" + nodeIP + ") failed.");
+         return false;
+      } catch (InterruptedException e) {
+         logger.error("Error in upgrading " + node.getVmName() + "(" + nodeIP + ")", e);
+         throw BddException.UPGRADE(e, e.getMessage());
+      }
+   }
 
    @Override
    public boolean upgrade(final String clusterName, StatusUpdater statusUpdator) {
@@ -119,7 +166,7 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
 
    @Transactional
    private void updateNodeData(NodeEntity node, boolean upgraded, String errorMessage) {
-      node = clusterEntityMgr.findNodeById(node.getId());
+      node = clusterEntityMgr.getNodeWithNicsByMobId(node.getMoId());
       String nodeVmName = node.getVmName();
       String nodeIp = node.getPrimaryMgtIpV4();
       if (upgraded) {
@@ -129,6 +176,7 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
             node.setAction(Constants.NODE_ACTION_UPGRADE_SUCCESS);
             node.setActionFailed(false);
             node.setErrMessage(null);
+            clusterEntityMgr.update(node);
          }
       } else {
          logger.error("Failed to upgrade cluster node " + nodeVmName);
@@ -140,6 +188,7 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
          } else {
             node.setErrMessage("Upgrading node " + nodeVmName + " failed.");
          }
+         clusterEntityMgr.update(node);
       }
    }
 
