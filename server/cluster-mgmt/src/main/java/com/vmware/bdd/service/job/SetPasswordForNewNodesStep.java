@@ -48,11 +48,6 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
       ClusterCreate clusterSpec = configMgr.getClusterConfig(clusterName);
 
       String newPassword = clusterSpec.getPassword();
-      //if user didn't set password, return directly
-      if (newPassword == null) {
-         logger.info("User didn't set password.");
-         return RepeatStatus.FINISHED;
-      }
 
       ArrayList<String> nodeIPs = null;
       if (managementOperation == ManagementOperation.CREATE || managementOperation == ManagementOperation.RESIZE) {

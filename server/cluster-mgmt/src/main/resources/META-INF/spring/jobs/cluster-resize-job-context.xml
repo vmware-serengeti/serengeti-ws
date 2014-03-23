@@ -83,33 +83,25 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="setAutoElasticityResizeStep" next="softwareResizeClusterStep">
+		<step id="setAutoElasticityResizeStep" next="setPasswordForClusterResizeStep">
 			<tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="setPasswordForClusterResizeStep" next="softwareResizeClusterStep">
+			<tasklet ref="setPasswordForClusterResizeTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
 		<step id="softwareResizeClusterStep" >
 			<tasklet ref="softwareCreateClusterTasklet" />
-			<next on="FAILED" to="setPasswordForClusterResizeAndFailStep" />
-			<next on="*" to="setPasswordForClusterResizeStep" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="setPasswordForClusterResizeAndFailStep" >
-			<tasklet ref="setPasswordForClusterResizeTasklet" />
-			<fail on="*" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
-		<step id="setPasswordForClusterResizeStep" >
-			<tasklet ref="setPasswordForClusterResizeTasklet" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
+
 		<listeners>
 			<listener ref="resizeClusterJobListener" />
 		</listeners>

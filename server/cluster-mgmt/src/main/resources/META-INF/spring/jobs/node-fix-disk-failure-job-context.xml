@@ -66,33 +66,25 @@
             <listener ref="stepListener" />
          </listeners>
       </step>
-      <step id="nodeVerifyDataStep" next="softwareConfigClusterStep">
+      <step id="nodeVerifyDataStep" next="setPasswordForDiskFixStep">
          <tasklet ref="nodeVerifyDataTasklet" />
          <listeners>
             <listener ref="stepListener" />
          </listeners>
       </step>
-      <step id="softwareConfigClusterStep" >
-         <tasklet ref="softwareBootstrapTargetTasklet" />
-         <next on="FAILED" to="setPasswordAndFailStep" />
-         <next on="*" to="setPasswordForDiskFixStep" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
-      <step id="setPasswordForDiskFixStep" next="stopSingleVMStepIfRequired">
+      <step id="setPasswordForDiskFixStep" next="softwareConfigClusterStep">
          <tasklet ref="setPasswordForDiskFixTasklet" />
 	     <listeners>
 	        <listener ref="stepListener" />
 	     </listeners>
       </step>
-      <step id="setPasswordAndFailStep" >
-		 <tasklet ref="setPasswordForDiskFixTasklet" />
-		 <fail on="*" />
-		 <listeners>
+      <step id="softwareConfigClusterStep" next="stopSingleVMStepIfRequired" >
+         <tasklet ref="softwareBootstrapTargetTasklet" />
+         <listeners>
             <listener ref="stepListener" />
          </listeners>
       </step>
+
       <step id="stopSingleVMStepIfRequired">
          <tasklet ref="stopSingleVMTaskletIfRequired" />
          <listeners>

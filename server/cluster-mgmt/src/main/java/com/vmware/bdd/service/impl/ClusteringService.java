@@ -1144,7 +1144,7 @@ public class ClusteringService implements IClusteringService {
                      vNode.getPrimaryMgtPgName());
          logger.info("machine id of vm " + vNode.getVmName() + ":\n"
                + machineIdSpec.toString());
-         spec.setBootupConfigs(machineIdSpec.toGuestVarialbe());
+         spec.setBootupConfigs(machineIdSpec.toGuestVariable());
          // timeout is 10 mintues
          QueryIpAddress query =
                new QueryIpAddress(vNode.getNics().keySet(),

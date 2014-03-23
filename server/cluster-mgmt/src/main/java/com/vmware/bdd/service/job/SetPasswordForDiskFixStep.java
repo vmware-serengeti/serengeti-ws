@@ -38,11 +38,6 @@ public class SetPasswordForDiskFixStep extends TrackableTasklet {
       ClusterCreate clusterSpec = configMgr.getClusterConfig(clusterName);
 
       String newPassword = clusterSpec.getPassword();
-      // if user didn't set password, return directly
-      if (newPassword == null) {
-         logger.info("User didn't set password.");
-         return RepeatStatus.FINISHED;
-      }
 
       String targetNode = getJobParameters(chunkContext).getString(JobConstants.SUB_JOB_NODE_NAME);
       NodeEntity nodeEntity = clusterEntityMgr.findNodeByName(targetNode);

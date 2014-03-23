@@ -340,7 +340,7 @@ public class ClusterHealService implements IClusterHealService {
       GuestMachineIdSpec machineIdSpec = new GuestMachineIdSpec(networkAdds,
             node.fetchPortGroupToIpMap(), node.getPrimaryMgtNic().getNetworkEntity().getPortGroup());
       logger.info("machine id of vm " + node.getVmName() + ":\n" + machineIdSpec.toString());
-      Map<String, String> guestVariable = machineIdSpec.toGuestVarialbe();
+      Map<String, String> guestVariable = machineIdSpec.toGuestVariable();
 
       // TODO: rafactor this function
       VcVmUtil.addBootupUUID(guestVariable);

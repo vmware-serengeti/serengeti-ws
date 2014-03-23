@@ -68,29 +68,20 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="nodeStatusVerifyStep2" next="softwareResumeClusterStep">
+		<step id="nodeStatusVerifyStep2" next="setPasswordForAllNodesStep">
 			<tasklet ref="clusterNodeStatusVerifyTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="softwareResumeClusterStep" >
+		<step id="setPasswordForAllNodesStep" next="softwareResumeClusterStep">
+			<tasklet ref="setPasswordForClusterResumeTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="softwareResumeClusterStep" next="setAutoElasticityResumeStep">
 			<tasklet ref="softwareCreateClusterTasklet" />
-			<next on="FAILED" to="setPasswordForAllNodesAndFailStep" />
-			<next on="*" to="setPasswordForAllNodesStep" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
-		<step id="setPasswordForAllNodesAndFailStep">
-			<tasklet ref="setPasswordForClusterResumeTasklet" />
-			<fail on="*" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
-		<step id="setPasswordForAllNodesStep" next="setAutoElasticityResumeStep">
-			<tasklet ref="setPasswordForClusterResumeTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

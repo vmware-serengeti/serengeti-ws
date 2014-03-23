@@ -10,7 +10,6 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-
 public class SSHUtil {
    private JSch jsch;
    private Session session;

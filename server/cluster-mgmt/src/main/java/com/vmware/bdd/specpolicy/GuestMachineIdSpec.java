@@ -20,6 +20,7 @@ import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.IpAddressUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +42,10 @@ public class GuestMachineIdSpec {
 
    private String defaultPg;
 
+   @Expose
+   @SerializedName("managementServerIP")
+   private String managementServerIP;
+
    public GuestMachineIdSpec() {}
 
    public GuestMachineIdSpec(List<NetworkAdd> networkAdds,
@@ -53,13 +58,14 @@ public class GuestMachineIdSpec {
 
       this.defaultPg = defaultPg;
       this.bootupUuid = null;
+      this.managementServerIP = IpAddressUtil.getHostManagementIp();
    }
 
-   public Map<String, String> toGuestVarialbe() {
+   public Map<String, String> toGuestVariable() {
       Map<String, String> guestVarialbe = new HashMap<String, String>();
       Gson gson = new Gson();
       guestVarialbe.put(Constants.GUEST_VARIABLE_NIC_DEVICES, gson.toJson(nics));
-
+      guestVarialbe.put(Constants.MANAGEMENT_SERVER_IP, this.managementServerIP);
       NicDeviceConfigSpec defaultNic = null;
       if (defaultPg == null) {
          defaultNic = nics[0];

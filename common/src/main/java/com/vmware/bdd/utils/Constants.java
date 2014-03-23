@@ -58,6 +58,7 @@ public class Constants {
    public static final String GUEST_VARIABLE_RESERVE_RAW_DISKS = "reserveRawDisks";
    public static final String GUEST_VARIABLE_VOLUMES = "volumes";
 
+   public static final String MANAGEMENT_SERVER_IP = "managementServerIP";
    public static final String NULL_IPV4_ADDRESS = "0.0.0.0";
    public static final String NULL_IPV6_ADDRESS = "::";
 
@@ -162,7 +163,7 @@ public class Constants {
    public static final int MIN_MEM_SIZE = 1024;
    public static final String VERSION = "2.0.0";
 
-   public static final String SSH_PRIVATE_KEY_FILE_NAME = "/home/serengeti/.ssh/id_rsa";
+   public static final String SSH_PRIVATE_KEY_FILE_NAME = "id_rsa";
    public static final String SSH_PRIVATE_KEY_CONFIG_NAME = "serengeti.ssh.private.key.file";
    public static final int SSH_PORT = 22;
    public static final int SSH_SESSION_TIMEOUT = 15000;
@@ -171,13 +172,29 @@ public class Constants {
    public static final String DEFAULT_SSH_USER_NAME = "serengeti";
    public static final String SSH_PORT_CONFIG_NAME = "serengeti.ssh.port";
    public static final int DEFAULT_SSH_PORT = 22;
-   public static final String DEFAULT_SET_PASSWORD_SCRIPT = "/usr/sbin/serengeti-password";
+   public static final String DEFAULT_SET_PASSWORD_SCRIPT = "set-password";
    public static final int SET_PASSWORD_MAX_RETRY_TIMES = 10;
-   public static final String CHECK_WHETHER_SSH_ACCESS_AVAILABLE = "Check whether you can ssh to the target node from serengeti server.";
+   public static final String SET_PASSWORD_FAILED = "Failed to set password";
    public static final String NEW_LINE = "\n";
+   public static final String DEFAULT_PASSWORDLESS_LOGIN_SCRIPT = "setup-passwordless-login";
+   public static final String PASSWORDLESS_LOGIN_SCRIPT = "serengeti.passwordless.login.script";
+   public static final String SERENGETI_BUILD_TYPE = "serengeti.build.type";
+   public static final String RELEASE_BUILD = "release";
+   public static final String BETA_BUILD = "beta";
+   public static final String DEFAULT_REMOVE_SSH_LIMIT_SCRIPT = "open-ssh-access.py";
+   public static final String REMOVE_SSH_LIMIT_SCRIPT = "serengeti.remove.ssh.limit.script";
    public static final String NODE_UPGRADE_FILE_PATH = "/opt/serengeti/www/nodeupgrade/";
    public static final String NODE_UPGRADE_TARBALL_FILE_NAME = "serengeti-node-scripts.tar.gz";
    public static final String NODE_UPGRADE_SCRIPT_FILE_NAME = "serengeti-upgrade-node.sh";
    public static final String NEED_UPGRADE = "Need Upgrade";
+   public static final String MSG_SETTING_UP_PASSWORDLESS_LOGIN = "Setting up password less login.";
+   public static final String DEFAULT_PASSWORD = "password";
+   public static final String SERENGETI_TTY_NAME = "serengeti.tty.name";
+   public static final String SERENGETI_DEFAULT_TTY_NAME = "tty1";
+   public static final String SERENGETI_DEFAULT_PASSWORD = "serengeti.default.password";
+   public static final String SERENGETI_SBIN_DIR = "serengeti.sbin.dir";
+   public static final String DEFAULT_SERENGETI_SBIN_DIR = "/opt/serengeti/sbin";
+   public static final String SERENGETI_HOME = "serengeti.home";
+   public static final String DEFAULT_SERENGETI_HOME = "/home/serengeti";
 
 }

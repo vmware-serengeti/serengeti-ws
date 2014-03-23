@@ -14,8 +14,12 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 import java.util.List;
 
 import com.vmware.bdd.apitypes.IpBlock;
@@ -197,5 +201,32 @@ public class IpAddressUtil {
          }
       }
    }
+
+   /**
+    * Considering one host may have more than 1 nic(each nic may have ipv4 or ipv6 address)
+    * this function will traverse all the nics and get the first none loopback ipv4 address
+    * @return: the first none loopback address of the host
+    *          0.0.0.0 if failed
+    */
+   public static String getHostManagementIp() {
+      Enumeration<NetworkInterface> interfaces;
+      try {
+         interfaces = NetworkInterface.getNetworkInterfaces();
+         while (interfaces.hasMoreElements()) {
+            NetworkInterface i = (NetworkInterface) interfaces.nextElement();
+            for (Enumeration<InetAddress> inetAddresses = i.getInetAddresses(); inetAddresses.hasMoreElements();) {
+                InetAddress addr = (InetAddress) inetAddresses.nextElement();
+                if (!addr.isLoopbackAddress()) {
+                    if (addr instanceof Inet4Address) {
+                        return addr.getHostAddress();
+                    }
+                }
+            }
+        }
+      } catch (SocketException e) {
+         return Constants.NULL_IPV4_ADDRESS;
+      }
+      return Constants.NULL_IPV4_ADDRESS;
+  }
 
 }
