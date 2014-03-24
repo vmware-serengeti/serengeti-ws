@@ -39,7 +39,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.gson.Gson;
-
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcResourcePool;
@@ -60,9 +59,11 @@ import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.apitypes.TaskRead;
+import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.VcProviderException;
@@ -126,6 +127,8 @@ public class TestClusteringJobs extends
    private static String datastoreSpec;
    private static String vcRP;
    private static String vcCluster;
+   @Autowired
+   private IServerInfoDAO serverInfoDao;
 
    @Autowired
    private JobManager jobManager;
@@ -184,6 +187,7 @@ public class TestClusteringJobs extends
 
       // init vc context
       clusterSvc.init();
+      initServerInfo();
       testSnapshot();
       cleanUpUtils = new TestResourceCleanupUtils();
       cleanUpUtils.setDsSvc(dsSvc);
@@ -226,6 +230,24 @@ public class TestClusteringJobs extends
       } catch (Exception e) {
          logger.error("ignore create ip pool exception. ", e);
       }
+   }
+
+   @Transactional
+   private void initServerInfo() {
+      List<ServerInfoEntity> entities = serverInfoDao.findAll();
+      ServerInfoEntity entity = null;
+      if (entities != null && entities.size() == 1) {
+         entity = entities.get(0);
+         entity.setVersion(Configuration
+               .getNonEmptyString("serengeti.version"));
+         serverInfoDao.update(entity);
+      } else {
+         entity = new ServerInfoEntity();
+         entity.setVersion(Configuration
+               .getNonEmptyString("serengeti.version"));
+         serverInfoDao.insert(entity);
+      }
+      logger.info("updated server info.");
    }
 
    private void testSnapshot() {
