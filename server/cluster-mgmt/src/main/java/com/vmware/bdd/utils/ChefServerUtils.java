@@ -53,34 +53,31 @@ public class ChefServerUtils {
     * Get all Chef Roles in Chef Server.
     */
    public static HashSet<String> getAllRoles() {
-      if (allRoles == null) {
-         synchronized(ChefServerUtils.class) {
-            if (allRoles == null) {
-               HashSet<String> roles = new HashSet<String>();
-               Process p = CommonUtil.execCommand(GET_ROLES_CMD);
-               if (p == null || p.exitValue() != 0) {
-                  throw ClusterConfigException.CANNOT_GET_ROLES_FROM_CHEF_SERVER();
-               }
+      synchronized(ChefServerUtils.class) {
+         if (allRoles == null) {
+            HashSet<String> roles = new HashSet<String>();
+            Process p = CommonUtil.execCommand(GET_ROLES_CMD);
+            if (p == null || p.exitValue() != 0) {
+               throw ClusterConfigException.CANNOT_GET_ROLES_FROM_CHEF_SERVER();
+            }
 
-               try {
-                  BufferedReader buf = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                  String role;
-                  while ((role = buf.readLine()) != null) {
-                     if (!role.isEmpty()) {
-                        logger.info("Found role " + role + " in Chef Server.");
-                        roles.add(role);
-                     }
+            try {
+               BufferedReader buf = new BufferedReader(new InputStreamReader(p.getInputStream()));
+               String role;
+               while ((role = buf.readLine()) != null) {
+                  if (!role.isEmpty()) {
+                     logger.info("Found role " + role + " in Chef Server.");
+                     roles.add(role);
                   }
-                  allRoles = roles;
-               } catch (IOException e) {
-                  logger.error("Failed to get all roles from Chef Server: " + e.getMessage());
-                  throw ClusterConfigException.CANNOT_GET_ROLES_FROM_CHEF_SERVER();
                }
+               allRoles = roles;
+            } catch (IOException e) {
+               logger.error("Failed to get all roles from Chef Server: " + e.getMessage());
+               throw ClusterConfigException.CANNOT_GET_ROLES_FROM_CHEF_SERVER();
             }
          }
+         return allRoles;
       }
-
-      return allRoles;
    }
 
 }
