@@ -71,10 +71,10 @@ import com.vmware.bdd.service.resmgmt.IResourcePoolService;
 import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
 import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ChefServerUtils;
-import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
 
@@ -651,17 +651,26 @@ public class ClusterConfigManager {
       }
       */
 
-      // We will respect the original orders as users input through LinkedHashSet after we allow 
-      // customized roles, because chef server has strict role orders in some cases.
-      Set<String> roles = new LinkedHashSet<String>();
-      convertStorage(group, groupEntity, roles);
-
-      roles.addAll(group.getRoles());
       EnumSet<HadoopRole> enumRoles = getEnumRoles(group.getRoles(), distro);
       if (enumRoles.isEmpty()) {
          throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(group.getName());
       }
-      groupEntity.setRoles(gson.toJson(roles));
+
+      Set<String> roles = new LinkedHashSet<String>();
+      convertStorage(group, groupEntity, roles);
+      roles.addAll(group.getRoles());
+
+      // We will respect the original orders as users input through LinkedHashSet for group including 
+      // customized roles, because chef server has strict role orders in some cases.
+      if (enumRoles.contains(HadoopRole.CUSTOMIZED_ROLE)) {
+         groupEntity.setRoles(gson.toJson(roles));
+      } else { //we will sort the roles according to their dependencies
+         List<String> sortedRolesByDependency = new ArrayList<String>();
+         sortedRolesByDependency.addAll(roles);
+         Collections.sort(sortedRolesByDependency, new RoleComparactor());
+         groupEntity.setRoles(gson.toJson(sortedRolesByDependency));
+      }
+
       GroupType groupType = GroupType.fromHadoopRole(enumRoles);
 
       if (groupType == GroupType.CLIENT_GROUP && group.getInstanceNum() <= 0) {
