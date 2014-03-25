@@ -18,6 +18,7 @@ package org.springframework.data.hadoop.impala.provider;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.shell.plugin.HistoryFileNameProvider;
+import org.springframework.shell.plugin.support.DefaultHistoryFileNameProvider;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,7 +29,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
-public class ImpalaPluginHistoryFileNameProvider implements HistoryFileNameProvider {
+public class ImpalaPluginHistoryFileNameProvider extends DefaultHistoryFileNameProvider {
 
 	public String getHistoryFileName() {
 		return "impala-cli.log";

@@ -17,11 +17,10 @@ package org.springframework.data.hadoop.impala.provider;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.core.annotation.CliCommand;
-import org.springframework.shell.plugin.BannerProvider;
+import org.springframework.shell.plugin.support.DefaultBannerProvider;
 import org.springframework.shell.support.util.OsUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * Banner Provider to customize Spring Shell Banner
@@ -31,7 +30,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
-public class ImpalaPluginBannerProvider implements BannerProvider, CommandMarker {
+public class ImpalaPluginBannerProvider extends DefaultBannerProvider implements CommandMarker {
 
 	//@CliCommand(value = { "version" }, help = "Displays current CLI version")
 	public String getBanner() {

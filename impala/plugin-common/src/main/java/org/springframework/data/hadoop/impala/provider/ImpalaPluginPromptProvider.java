@@ -16,7 +16,7 @@ package org.springframework.data.hadoop.impala.provider;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.shell.plugin.PromptProvider;
+import org.springframework.shell.plugin.support.DefaultPromptProvider;
 import org.springframework.stereotype.Component;
 
 /**
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
-public class ImpalaPluginPromptProvider implements PromptProvider {
+public class ImpalaPluginPromptProvider extends DefaultPromptProvider {
 
 	public String getPrompt() {
 		return "Impala>";
