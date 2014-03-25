@@ -271,14 +271,14 @@ public class TestPlacementService {
          System.out.println(e.getMessage());
          String[] strs = e.getMessage().split("\n");
          Assert.assertEquals(strs[0],
-               "Failed to find a host for node [hadoop-worker-4, hadoop-worker-5] that passes instance per host placement policy.");
+               "No host available for node [hadoop-worker-4, hadoop-worker-5] that meets the placement policy requirements specified for the number of instances per host.");
          // temporarily disabled, the placement order is different soemtime on Jenkins box
          //Assert.assertEquals(strs[1],
          //      "Node hadoop-worker-0 placed on host 10.1.1.2. Node hadoop-worker-1 placed on host 10.1.1.2. Node hadoop-worker-2 placed on host 10.1.1.3. Node hadoop-worker-3 placed on host 10.1.1.3. ");
          Assert.assertEquals(strs[2],
-               "The following hosts are filtered out due to time out of sync: [10.1.1.1], synchronize the time on these hosts with Serengeti management server to put them in use.");
+               "You must synchronize the time of the following hosts [10.1.1.1] with the Serengeti Management Server to use them.");
          Assert.assertEquals(strs[3],
-               "The following hosts are filtered out due to lack of networks [VM Network]: [10.1.1.1], add these hosts to the target networks to put them in use.");
+               "You must add these hosts [10.1.1.1] to the network [VM Network] to use them.");
       }
    }
 }
