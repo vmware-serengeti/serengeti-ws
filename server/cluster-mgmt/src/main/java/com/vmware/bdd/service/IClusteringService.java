@@ -121,16 +121,17 @@ public interface IClusteringService {
          StatusUpdater statusUpdator, boolean ignoreUnavailableNodes);
 
    /**
-    * 
+    *
     * @param networkAdds
     * @param vNodes
     * @param occupiedMgrIps
+    * @param isMaprDistro
     * @param statusUpdater
     * @return
     */
    public boolean createVcVms(List<NetworkAdd> networkAdds,
          List<BaseNode> vNodes, Map<String, Set<String>> occupiedMgrIps,
-         StatusUpdater statusUpdater);
+         boolean isMaprDistro, StatusUpdater statusUpdater);
 
    /**
     * Initialize clustering service

@@ -161,7 +161,7 @@ public class TestVcVmUtil {
 
    private Callable<Void> getCallable() {
       Callable<Void> callable =
-            new StartVmSP(Mockito.mock(VcVirtualMachine.class),
+            new StartVmSP(Mockito.mock(VcVirtualMachine.class), null,
                   Mockito.mock(IPrePostPowerOn.class),
                   Mockito.mock(VcHost.class));
       return callable;

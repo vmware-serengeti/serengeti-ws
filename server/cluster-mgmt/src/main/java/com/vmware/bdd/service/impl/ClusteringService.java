@@ -31,6 +31,9 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.apitypes.StorageRead;
+import com.vmware.bdd.entity.DiskEntity;
+import com.vmware.bdd.service.sp.QueryIpAddress;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -105,7 +108,6 @@ import com.vmware.bdd.service.sp.CreateVmPrePowerOn;
 import com.vmware.bdd.service.sp.DeleteRpSp;
 import com.vmware.bdd.service.sp.DeleteVmByIdSP;
 import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
-import com.vmware.bdd.service.sp.QueryIpAddress;
 import com.vmware.bdd.service.sp.SetAutoElasticitySP;
 import com.vmware.bdd.service.sp.StartVmSP;
 import com.vmware.bdd.service.sp.StopVmSP;
@@ -1105,7 +1107,7 @@ public class ClusteringService implements IClusteringService {
    @Override
    public boolean createVcVms(List<NetworkAdd> networkAdds,
          List<BaseNode> vNodes, Map<String, Set<String>> occupiedIpSets,
-         StatusUpdater statusUpdator) {
+         boolean reserveRawDisks, StatusUpdater statusUpdator) {
       if (vNodes.isEmpty()) {
          logger.info("No vm to be created.");
          return true;
@@ -1148,7 +1150,7 @@ public class ClusteringService implements IClusteringService {
                new QueryIpAddress(vNode.getNics().keySet(),
                      Constants.VM_POWER_ON_WAITING_SEC);
          spec.setPostPowerOn(query);
-         spec.setPrePowerOn(getPrePowerOnFunc(vNode));
+         spec.setPrePowerOn(getPrePowerOnFunc(vNode, reserveRawDisks));
          spec.setLinkedClone(false);
          spec.setTargetDs(getVcDatastore(vNode));
          spec.setTargetFolder(folders.get(vNode.getGroupName()));
@@ -1213,7 +1215,7 @@ public class ClusteringService implements IClusteringService {
       }
    }
 
-   private CreateVmPrePowerOn getPrePowerOnFunc(BaseNode vNode) {
+   private CreateVmPrePowerOn getPrePowerOnFunc(BaseNode vNode, boolean reserveRawDisks) {
       boolean persistentDiskMode = false;
 
       String haFlag = vNode.getNodeGroup().getHaFlag();
@@ -1253,7 +1255,8 @@ public class ClusteringService implements IClusteringService {
       ClusterEntity clusterEntity =
             getClusterEntityMgr().findByName(vNode.getClusterName());
       CreateVmPrePowerOn prePowerOn =
-            new CreateVmPrePowerOn(ha, ft, clusterEntity.getIoShares());
+            new CreateVmPrePowerOn(reserveRawDisks, vNode.getVmSchema().diskSchema.getDisks(),
+                  ha, ft, clusterEntity.getIoShares());
 
       return prePowerOn;
    }
@@ -1404,6 +1407,7 @@ public class ClusteringService implements IClusteringService {
    public boolean startCluster(final String name,
          List<NodeOperationStatus> failedNodes, StatusUpdater statusUpdator) {
       logger.info("startCluster, start.");
+      boolean isMapDistro = clusterEntityMgr.findByName(name).getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR);
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(name);
       logger.info("startCluster, start to create store procedures.");
       List<Callable<Void>> storeProcedures = new ArrayList<Callable<Void>>();
@@ -1423,6 +1427,8 @@ public class ClusteringService implements IClusteringService {
             continue;
          }
 
+         StartVmSP.StartVmPrePowerOn prePowerOn = new StartVmSP.StartVmPrePowerOn(isMapDistro,
+               (new Gson()).toJson(node.getVolumns()));
          QueryIpAddress query =
                new QueryIpAddress(node.fetchAllPortGroups(),
                      Constants.VM_POWER_ON_WAITING_SEC);
@@ -1430,7 +1436,7 @@ public class ClusteringService implements IClusteringService {
          if (node.getHostName() != null) {
             host = VcResourceUtils.findHost(node.getHostName());
          }
-         StartVmSP startSp = new StartVmSP(vcVm, query, host);
+         StartVmSP startSp = new StartVmSP(vcVm, prePowerOn, query, host);
          storeProcedures.add(startSp);
          nodesStatus.put(node.getVmName(),
                new NodeOperationStatus(node.getVmName()));
@@ -1936,6 +1942,16 @@ public class ClusteringService implements IClusteringService {
    public boolean startSingleVM(String clusterName, String nodeName,
          StatusUpdater statusUpdator) {
       NodeEntity node = this.clusterEntityMgr.findNodeByName(nodeName);
+      boolean isMaprDistro = clusterEntityMgr.findByName(clusterName).getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR);
+      // For node scale up/down, the disk info in db is not yet updated when powering on it, need to fetch from VC
+      final List<String> volumes = new ArrayList<String>();
+      for (DiskEntity diskEntity : node.getDisks()) {
+         if (StorageRead.DiskType.DATA_DISK.getType().equals(diskEntity.getDiskType())
+               || StorageRead.DiskType.SWAP_DISK.getType().equals(diskEntity.getDiskType()))
+            volumes.add(diskEntity.getDiskType() + ":" + VcVmUtil.fetchDiskUUID(node.getMoId(), diskEntity.getExternalAddress()));
+
+      }
+      StartVmSP.StartVmPrePowerOn prePowerOn = new StartVmSP.StartVmPrePowerOn(isMaprDistro, (new Gson()).toJson(volumes));
       QueryIpAddress query =
             new QueryIpAddress(node.fetchAllPortGroups(),
                   Constants.VM_POWER_ON_WAITING_SEC);
@@ -1950,7 +1966,7 @@ public class ClusteringService implements IClusteringService {
          logger.info("VC vm does not exist for node: " + node.getVmName());
          return false;
       }
-      StartVmSP startVMSP = new StartVmSP(vcVm, query, host);
+      StartVmSP startVMSP = new StartVmSP(vcVm, prePowerOn, query, host);
       return VcVmUtil.runSPOnSingleVM(node, startVMSP);
    }
 

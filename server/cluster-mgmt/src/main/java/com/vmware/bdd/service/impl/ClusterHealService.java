@@ -359,7 +359,7 @@ public class ClusterHealService implements IClusterHealService {
       ReplaceVmPrePowerOn prePowerOn =
             new ReplaceVmPrePowerOn(node.getMoId(), node.getVmName(),
                   clusterSpec.getNodeGroup(groupName).getStorage().getShares(),
-                  createSchema.networkSchema, ha, ft);
+                  createSchema.networkSchema, createSchema.diskSchema, ha, ft);
 
       // power on the new vm, but not wait for ip address here. we have startVmStep to wait for ip
       return new CreateVmSP(node.getVmName() + RECOVERY_VM_NAME_POSTFIX,
@@ -482,7 +482,7 @@ public class ClusterHealService implements IClusterHealService {
       VcHost host = vcVm.getHost();
 
       Callable<Void>[] storeProceduresArray = new Callable[1];
-      storeProceduresArray[0] = new StartVmSP(vcVm, query, host);
+      storeProceduresArray[0] = new StartVmSP(vcVm, null, query, host);
       NoProgressUpdateCallback callback = new NoProgressUpdateCallback();
 
       try {

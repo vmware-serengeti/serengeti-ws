@@ -17,6 +17,8 @@ package com.vmware.bdd.service.sp;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.software.mgmt.thrift.SoftwareManagement;
+import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.IPrePostPowerOn;
@@ -35,16 +37,65 @@ import com.vmware.bdd.utils.VcVmUtil;
 public class StartVmSP implements Callable<Void> {
    private static final Logger logger = Logger.getLogger(StartVmSP.class);
    private String vmId;
+   private final IPrePostPowerOn prePowerOn;
    private final IPrePostPowerOn postPowerOn;
    private VcHost host;
    private String vmName;
 
-   public StartVmSP(VcVirtualMachine vcVm, IPrePostPowerOn postPowerOn,
-         VcHost host) {
+   public StartVmSP(VcVirtualMachine vcVm, IPrePostPowerOn prePowerOn,
+         IPrePostPowerOn postPowerOn, VcHost host) {
       this.vmId = vcVm.getId();
+      this.prePowerOn = prePowerOn;
       this.postPowerOn = postPowerOn;
       this.host = host;
       this.vmName = vcVm.getName();
+   }
+
+   public static class StartVmPrePowerOn implements IPrePostPowerOn {
+      private VcVirtualMachine vm;
+      private boolean reserveRawDisks;
+      private String volumes;
+
+      public StartVmPrePowerOn(boolean reserveRawDisks, String volumes) {
+         this.reserveRawDisks = reserveRawDisks;
+         this.volumes = volumes;
+      }
+
+      @Override
+      public void setVm(VcVirtualMachine vm) {
+         this.vm = vm;
+      }
+
+      @Override
+      public VcVirtualMachine getVm() {
+         return vm;
+      }
+
+      @Override
+      public Void call() throws Exception {
+         VcContext.inVcSessionDo(new VcSession<Void>() {
+            @Override
+            protected Void body() throws Exception {
+               Map<String, String> bootupConfigs = vm.getGuestConfigs();
+               AuAssert.check(bootupConfigs != null);
+               /* serengeti operation flag - a random generated uuid
+               * a script inside the vm compares this uuid with its stored value, if they are
+               * different, this VM decides it's started by Serengeti, otherwise, it's started
+               * by third parties.
+               */
+               VcVmUtil.addBootupUUID(bootupConfigs);
+               bootupConfigs.put(Constants.GUEST_VARIABLE_RESERVE_RAW_DISKS, String.valueOf(reserveRawDisks));
+               bootupConfigs.put(Constants.GUEST_VARIABLE_VOLUMES, volumes);
+               vm.setGuestConfigs(bootupConfigs);
+               return null;
+            }
+
+            protected boolean isTaskSession() {
+               return true;
+            }
+         });
+         return null;
+      }
    }
 
    @Override
@@ -65,20 +116,13 @@ public class StartVmSP implements Callable<Void> {
          executePostPowerOn(vcVm);
          return;
       }
+
+      // scale up/down its memory will replace its swap disk, in this case, we still
+      // need to add volumes info into machine id to re-mount this new swap disk.
+      executePrePowerOn(vcVm);
       VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
          protected Void body() throws Exception {
-            Map<String, String> bootupConfigs = vcVm.getGuestConfigs();
-            AuAssert.check(bootupConfigs != null);
-
-            /* serengeti operation flag - a random generated uuid
-            * a script inside the vm compares this uuid with its stored value, if they are
-            * different, this VM decides it's started by Serengeti, otherwise, it's started
-            * by third parties.
-            */
-            VcVmUtil.addBootupUUID(bootupConfigs);
-            vcVm.setGuestConfigs(bootupConfigs);
-
             vcVm.powerOn(host);
             return null;
          }
@@ -88,6 +132,13 @@ public class StartVmSP implements Callable<Void> {
          }
       });
       executePostPowerOn(vcVm);
+   }
+
+   private void executePrePowerOn(VcVirtualMachine vm) throws Exception {
+      if (prePowerOn != null) {
+         prePowerOn.setVm(vm);
+         prePowerOn.call();
+      }
    }
 
    private void executePostPowerOn(VcVirtualMachine vm) throws Exception {

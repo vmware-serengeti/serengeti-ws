@@ -14,18 +14,32 @@
  ***************************************************************************/
 package com.vmware.bdd.service.sp;
 
+import com.vmware.aurora.composition.DiskSchema;
 import com.vmware.aurora.composition.IPrePostPowerOn;
 import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.aurora.vc.vcservice.VcContext;
+import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.apitypes.StorageRead;
+import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class CreateVmPrePowerOn implements IPrePostPowerOn {
    private VcVirtualMachine vm;
+   private boolean reserveRawDisks;
+   private List<DiskSchema.Disk> disks;
    private boolean ha;
    private boolean ft;
    private Priority ioShares;
 
-   public CreateVmPrePowerOn(boolean ha, boolean ft, Priority ioShares) {
+   public CreateVmPrePowerOn(boolean reserveRawDisks, List<DiskSchema.Disk> disks, boolean ha, boolean ft, Priority ioShares) {
+      this.reserveRawDisks = reserveRawDisks;
+      this.disks = disks;
       this.ha = ha;
       this.ft = ft;
       this.ioShares = ioShares;
@@ -43,6 +57,8 @@ public class CreateVmPrePowerOn implements IPrePostPowerOn {
       // enable disk UUID
       VcVmUtil.enableDiskUUID(vm);
 
+      addVolumesToBootupConfigs(VcVmUtil.getVolumes(vm, disks));
+
       // by default, the share level is NORMAL
       if (!Priority.NORMAL.equals(ioShares)) {
          configIOShares();
@@ -52,6 +68,25 @@ public class CreateVmPrePowerOn implements IPrePostPowerOn {
 
    private void configIOShares() throws Exception {
       VcVmUtil.configIOShares(vm.getId(), ioShares);
+   }
+
+   private void addVolumesToBootupConfigs(final String volumes) throws Exception {
+      VcContext.inVcSessionDo(new VcSession<Void>() {
+         @Override
+         protected Void body() throws Exception {
+            Map<String, String> bootupConfigs = vm.getGuestConfigs();
+            AuAssert.check(bootupConfigs != null);
+
+            bootupConfigs.put(Constants.GUEST_VARIABLE_RESERVE_RAW_DISKS, String.valueOf(reserveRawDisks));
+            bootupConfigs.put(Constants.GUEST_VARIABLE_VOLUMES, volumes);
+            vm.setGuestConfigs(bootupConfigs);
+            return null;
+         }
+
+         protected boolean isTaskSession() {
+            return true;
+         }
+      });
    }
 
    @Override

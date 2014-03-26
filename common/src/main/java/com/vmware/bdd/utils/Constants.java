@@ -55,6 +55,8 @@ public class Constants {
    public static final String GUEST_VARIABLE_BOOTUP_UUID = "bootupUUID";
    public static final String GUEST_VARIABLE_PORT_GROUP = "portgroup";
    public static final String GUEST_VARIABLE_NIC_DEVICES = "nics";
+   public static final String GUEST_VARIABLE_RESERVE_RAW_DISKS = "reserveRawDisks";
+   public static final String GUEST_VARIABLE_VOLUMES = "volumes";
 
    public static final String NULL_IPV4_ADDRESS = "0.0.0.0";
    public static final String NULL_IPV6_ADDRESS = "::";

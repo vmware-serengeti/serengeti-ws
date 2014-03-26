@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.vmware.bdd.apitypes.NetworkAdd;
+import com.vmware.bdd.utils.Constants;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
@@ -43,11 +44,14 @@ public class CreateClusterVMStep extends TrackableTasklet {
       List<BaseNode> nodes = getFromJobExecutionContext(chunkContext, JobConstants.CLUSTER_ADDED_NODES_JOB_PARAM,
             new TypeToken<List<BaseNode>>() {}.getType());
       ClusterCreate clusterSpec = getFromJobExecutionContext(chunkContext,JobConstants.CLUSTER_SPEC_JOB_PARAM, ClusterCreate.class);
-      Map<String, Set<String>> usedIpSets = getFromJobExecutionContext(chunkContext, JobConstants.CLUSTER_USED_IP_JOB_PARAM, new TypeToken<Map<String, Set<String>>>() {}.getType());
+      Map<String, Set<String>> usedIpSets = getFromJobExecutionContext(chunkContext,
+            JobConstants.CLUSTER_USED_IP_JOB_PARAM,
+            new TypeToken<Map<String, Set<String>>>() {}.getType());
       if (usedIpSets == null) {
          usedIpSets = new HashMap<String, Set<String>>();
       }
-      boolean success = clusteringService.createVcVms(clusterSpec.getNetworkings(), nodes, usedIpSets, statusUpdator);
+      boolean isMaprDistro = clusterSpec.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR);
+      boolean success = clusteringService.createVcVms(clusterSpec.getNetworkings(), nodes, usedIpSets, isMaprDistro, statusUpdator);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_CREATE_VM_OPERATION_SUCCESS, success);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_ADDED_NODES_JOB_PARAM, nodes);
       UUID reservationId = getFromJobExecutionContext(chunkContext, JobConstants.CLUSTER_RESOURCE_RESERVATION_ID_JOB_PARAM, UUID.class);

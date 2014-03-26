@@ -122,7 +122,7 @@ public class TestClusteringService {
       vNodes.add(node);
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, false);
       try {
-         service.createVcVms(networkAdds, vNodes, null, null);
+         service.createVcVms(networkAdds, vNodes, null, false, null);
          Assert.assertTrue(false, "should throw exception but not.");
       } catch (Exception e) {
          logger.info(e.getMessage(), e);
@@ -143,7 +143,7 @@ public class TestClusteringService {
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, true);
       MockTmScheduler.setResultIsNull(true);
       try {
-         service.createVcVms(networkAdds, vNodes, null, null);
+         service.createVcVms(networkAdds, vNodes, null, false, null);
          Assert.assertTrue(false, "should throw exception but not.");
       } catch (Exception e) {
          logger.info(e.getMessage(), e);
@@ -192,10 +192,10 @@ public class TestClusteringService {
             new ArrayList<VmCreateResult<?>>());
       service.setCloneService(cloneService);
 
-      boolean success = service.createVcVms(networkAdds, vNodes, null, null);
+      boolean success = service.createVcVms(networkAdds, vNodes, null, false, null);
       Assert.assertTrue(!success, "should get create vm failed.");
       MockVcCache.setGetFlag(true);
-      success = service.createVcVms(networkAdds, vNodes, null, null);
+      success = service.createVcVms(networkAdds, vNodes, null, false, null);
       Assert.assertTrue(!success, "should get create vm failed.");
    }
 
@@ -278,7 +278,7 @@ public class TestClusteringService {
                   Mockito.<ProgressCallback> any())).thenReturn(nodes);
       service.setCloneService(cloneService);
 
-      boolean success = service.createVcVms(networkAdds, vNodes, null, null);
+      boolean success = service.createVcVms(networkAdds, vNodes, null, false, null);
       Assert.assertTrue(success, "should get create vm success.");
    }
 

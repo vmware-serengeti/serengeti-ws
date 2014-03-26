@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import com.google.gson.Gson;
+import com.vmware.bdd.apitypes.StorageRead;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.DiskSchema;
@@ -391,6 +393,27 @@ public class VcVmUtil {
       return (VirtualDisk) device;
    }
 
+   public static String fetchDiskUUID(final String vmMobId, final String diskExtAddress) {
+       return VcContext.inVcSessionDo(new VcSession<String>() {
+         @Override
+         protected boolean isTaskSession() {
+            return true;
+         }
+
+         @Override
+         protected String body() throws Exception {
+            VirtualDisk vDisk =
+                  findVirtualDisk(vmMobId, diskExtAddress);
+            if (vDisk == null)
+               return null;
+
+            VirtualDisk.FlatVer2BackingInfo backing =
+                  (VirtualDisk.FlatVer2BackingInfo) vDisk.getBacking();
+            return backing.getUuid();
+         }
+      });
+   }
+
    public static void populateDiskInfo(final DiskEntity diskEntity,
          final String vmMobId) {
       VcContext.inVcSessionDo(new VcSession<Void>() {
@@ -660,6 +683,18 @@ public class VcVmUtil {
       AuAssert.check(bootupConfigs != null);
       bootupConfigs.put(Constants.GUEST_VARIABLE_BOOTUP_UUID, UUID.randomUUID()
             .toString());
+   }
+
+   public static String getVolumes(VcVirtualMachine vm, List<Disk> disks) {
+      final List<String> volumes = new ArrayList<String>();
+      if (disks != null && !disks.isEmpty()) {
+         for (DiskSchema.Disk disk : disks) {
+            if (StorageRead.DiskType.DATA_DISK.getType().equals(disk.type)
+                  || StorageRead.DiskType.SWAP_DISK.getType().equals(disk.type))
+               volumes.add(disk.type + ":" + VcVmUtil.fetchDiskUUID(vm.getId(), disk.externalAddress));
+         }
+      }
+      return (new Gson()).toJson(volumes);
    }
 
    public static void destroyVm(final String vmId) throws Exception {

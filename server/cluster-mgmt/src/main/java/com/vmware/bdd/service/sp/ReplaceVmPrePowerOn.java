@@ -17,7 +17,11 @@ package com.vmware.bdd.service.sp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import com.vmware.aurora.composition.DiskSchema;
+import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.IPrePostPowerOn;
@@ -41,15 +45,17 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
    private Priority ioShares;
    private VcVirtualMachine vm;
    private NetworkSchema networkSchema;
+   private DiskSchema diskSchema;
    private boolean ha;
    private boolean ft;
 
    public ReplaceVmPrePowerOn(String vmId, String newName, Priority ioShares,
-         NetworkSchema networkSchema, boolean ha, boolean ft) {
+         NetworkSchema networkSchema, DiskSchema diskSchema, boolean ha, boolean ft) {
       this.oldVmId = vmId;
       this.newName = newName;
       this.ioShares = ioShares;
       this.networkSchema = networkSchema;
+      this.diskSchema = diskSchema;
       this.ha = ha;
       this.ft = ft;
    }
@@ -116,6 +122,16 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
                logger.info("enable ft for vm " + newName);
                VcVmUtil.enableFt(vm);
             }
+
+            // update disks to machine id
+            Map<String, String> bootupConfigs = vm.getGuestConfigs();
+            AuAssert.check(bootupConfigs != null);
+            VcVmUtil.addBootupUUID(bootupConfigs);
+
+            // disk fix does support MapR distro, just set this flag to "false"
+            bootupConfigs.put(Constants.GUEST_VARIABLE_RESERVE_RAW_DISKS, String.valueOf(false));
+            bootupConfigs.put(Constants.GUEST_VARIABLE_VOLUMES, VcVmUtil.getVolumes(vm, diskSchema.getDisks()));
+            vm.setGuestConfigs(bootupConfigs);
 
             // the following two steps should be in a transaction theoretically
 
