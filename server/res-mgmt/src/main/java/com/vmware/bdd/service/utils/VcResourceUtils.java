@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.MoUtil;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcCluster;
@@ -37,6 +38,7 @@ import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.Constants;
 import com.vmware.vim.binding.vim.EnvironmentBrowser;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.VirtualMachine;
@@ -621,5 +623,19 @@ public class VcResourceUtils {
             return VcUtil.getHostTimeDiffInSec(vcHost);
          }
       });
+   }
+
+   public static String getManagementServerHost() {
+      String serverMobId =
+            Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
+      if (serverMobId == null) {
+         logger.warn("Server MobId (" + Constants.SERENGETI_SERVER_VM_MOBID + ") is missing.");
+         return "";
+      }
+      VcVirtualMachine serverVm = VcCache.get(serverMobId);
+      if (serverVm != null)
+         return serverVm.getHost().getName();
+      else
+         return "";
    }
 }

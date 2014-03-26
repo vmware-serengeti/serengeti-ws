@@ -29,7 +29,7 @@ public class TaskException extends BddException {
       return new TaskException(null, "EXECUTION_FAILED", errorMessage);
    }
 
-   public static TaskException HOST_TIME_OUT_OF_SYNC (List<String> outOfSyncHosts) {
-      return new TaskException(null, "HOST_TIME_OUT_OF_SYNC", outOfSyncHosts.toString());
+   public static TaskException HOST_TIME_OUT_OF_SYNC (List<String> outOfSyncHosts, String managementServerHost) {
+      return new TaskException(null, "HOST_TIME_OUT_OF_SYNC", outOfSyncHosts.toString(), managementServerHost);
    }
 }

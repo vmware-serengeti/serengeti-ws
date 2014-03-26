@@ -101,6 +101,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
       // and configure (config, start, disk fix, scale up) operation
       if (ManagementOperation.CONFIGURE.equals(managementOperation) ||
             JobConstants.RESUME_CLUSTER_JOB_NAME.equals(jobName)) {
+         logger.info("Start to check host time.");
          List<NodeEntity> nodes = lockClusterEntityMgr.getClusterEntityMgr().findAllNodes(clusterName);
          Set<String> hostnames = new HashSet<String>();
          for (NodeEntity node : nodes) {
@@ -123,11 +124,12 @@ public class SoftwareManagementStep extends TrackableTasklet {
             }
          }
          if (!outOfSyncHosts.isEmpty()) {
+            String managementServerHost = VcResourceUtils.getManagementServerHost();
             logger.error("Time on host " + outOfSyncHosts
                   + "is out of sync which will lead to failure, "
                   + "synchronize the time on these hosts with "
                   + "Serengeti management server and try again.");
-            throw TaskException.HOST_TIME_OUT_OF_SYNC(outOfSyncHosts);
+            throw TaskException.HOST_TIME_OUT_OF_SYNC(outOfSyncHosts, managementServerHost);
          }
       }
 

@@ -71,7 +71,7 @@ public class Constants {
    public static final String OUTPUT_INDENT = "  ";
    public static final String OUTPUT_SPLITTER = ", ";
    public static final String OUTPUT_OBJECT_CLUSTER = "cluster";
-   public static final String OUTPUT_OBJECT_NODES_IN_CLUSTER = "nodes in cluster";
+   public static final String OUTPUT_OBJECT_NODES_IN_CLUSTER = "Nodes in cluster";
    public static final String OUTPUT_OBJECT_DATASTORE = "datastore";
    public static final String OUTPUT_OBJECT_DISTRO = "distro";
    public static final String OUTPUT_OBJECT_NETWORK = "network";
