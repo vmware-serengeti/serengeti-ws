@@ -29,12 +29,27 @@ import com.vmware.bdd.service.utils.VcResourceUtils;
 @MockClass(realClass = VcResourceUtils.class)
 public class MockVcResourceUtils {
    private static boolean flag = true;
+   private static boolean disableDRS = false;
+
+   public static boolean isDisableDRS() {
+      return disableDRS;
+   }
+
+   public static void setDisableDRS(boolean disableDRS) {
+      MockVcResourceUtils.disableDRS = disableDRS;
+   }
+   public static void cleanFlag() {
+      flag = true;
+      disableDRS = false;
+   }
 
    @Mock
    public static VcResourcePool findRPInVCCluster(final String clusterName,
          final String vcRPName) {
       if (flag) {
-         return Mockito.mock(VcResourcePool.class);
+         VcResourcePool rp = Mockito.mock(VcResourcePool.class);
+         Mockito.when(rp.getName()).thenReturn("root");
+         return rp;
       } else {
          return null;
       }
