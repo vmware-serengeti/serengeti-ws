@@ -69,7 +69,10 @@ public class Configuration {
 
       try {
          logger.info("Reading properties file serengeti.properties");
-         serengetiCfg = new PropertiesConfiguration(configFileName);
+         serengetiCfg = new PropertiesConfiguration();
+         serengetiCfg.setEncoding("UTF-8");
+         serengetiCfg.setFileName(configFileName);
+         serengetiCfg.load();
          config = (PropertiesConfiguration) serengetiCfg.clone();
       } catch (ConfigurationException ex) {
          logger.info("Failed to load serengeti.properties file.");
