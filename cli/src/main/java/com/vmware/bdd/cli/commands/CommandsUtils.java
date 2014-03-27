@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,13 +44,15 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
 import org.codehaus.jackson.util.DefaultPrettyPrinter.Lf2SpacesIndenter;
 
+import com.vmware.bdd.apitypes.NodeGroupRead;
+import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.utils.CommonUtil;
 
 
 public class CommandsUtils {
 
    public static List<String> inputsConvert(String inputs) {
-      
+
       return CommonUtil.inputsConvert(inputs);
    }
 
@@ -142,7 +145,7 @@ public class CommandsUtils {
     * <code>false</code> if the string not <code>null</code>, its length is
     * greater than 0, and it contains at least one non-whitespace character.
     * <p>
-    * 
+    *
     * <pre>
     * CommandsUtils.isBlank(null) = true
     * CommandsUtils.isBlank("") = true
@@ -150,7 +153,7 @@ public class CommandsUtils {
     * CommandsUtils.isBlank("12345") = false
     * CommandsUtils.isBlank(" 12345 ") = false
     * </pre>
-    * 
+    *
     * @param str
     *           the String to check(may be null).
     * @return the opposite of
@@ -173,7 +176,7 @@ public class CommandsUtils {
     * member. The {@code spacesBeforeStart} argument is whitespace in the front
     * of the row.
     * <p>
-    * 
+    *
     * @param columnNamesWithGetMethodNames
     *           the container of table column name and invoked method name.
     * @param entities
@@ -237,7 +240,7 @@ public class CommandsUtils {
    }
 
    private static void printTable(String[][] table, String spacesBeforeStart) {
-      // find the maximum length of a string in each column 
+      // find the maximum length of a string in each column
       int numOfColumns = table[0].length;
       int[] lengths = new int[numOfColumns];
 
@@ -263,7 +266,7 @@ public class CommandsUtils {
       // print out
       for (int i = 0; i < table.length; i++) {
          System.out.print(spacesBeforeStart);
-         //print '------' 
+         //print '------'
          if (i == 1) {
             StringBuilder outputBuffer = new StringBuilder();
             for (int l : lengths) {
@@ -304,6 +307,44 @@ public class CommandsUtils {
       }
    }
 
+   public static void prettyOutputErrorNode(List<NodeGroupRead> nodegroups)
+         throws Exception {
+      List<NodeRead> failedNodes = new ArrayList<NodeRead>();
+      for (NodeGroupRead nodegroup : nodegroups) {
+         List<NodeRead> nodes = nodegroup.getInstances();
+         if (nodes != null) {
+            for (NodeRead node : nodes) {
+               if (node.isActionFailed()) {
+                  failedNodes.add(node);
+               }
+            }
+         }
+      }
+
+      if (!failedNodes.isEmpty()) {
+         System.out.println();
+         System.out
+         .println(Constants.FAILED_NODES_MESSAGE + failedNodes.size());
+         CommandsUtils.printSeperator();
+         for (NodeRead failedNode : failedNodes) {
+            System.out.println(" [" + Constants.FORMAT_TABLE_COLUMN_NAME + "] " + failedNode.getName());
+            System.out.println(" [" + Constants.FORMAT_TABLE_COLUMN_STATUS + "] " + failedNode.getStatus());
+            System.out.println(" [" + Constants.FORMAT_TABLE_COLUMN_ERROR + "] " + failedNode.getErrMessage());
+            CommandsUtils.printSeperator();;
+         }
+         System.out.println();
+      }
+   }
+
+   private static void printSeperator() {
+      StringBuffer seperator =
+            new StringBuffer().append(Constants.OUTPUT_INDENT);
+      for (int i = 0; i < Constants.SEPERATOR_LEN; i++) {
+         seperator.append("-");
+      }
+      System.out.println(seperator.toString());
+   }
+
    /**
     * Take the accuracy of double data.
     * <p>
@@ -311,7 +352,7 @@ public class CommandsUtils {
     * A double value = 100.345678; <br>
     * The Double ret = round (value, 4, BigDecimal.ROUND_HALF_UP); <br>
     * "Ret 100.3457 <br>
-    * 
+    *
     * @param value
     *           Double data value. @param scale Precision digits (reserve of
     *           decimal digits).

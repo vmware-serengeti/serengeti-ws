@@ -26,9 +26,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 import jline.console.ConsoleReader;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1425,41 +1425,7 @@ public class ClusterCommands implements CommandMarker {
          System.out.println();
       }
 
-      prettyOutputErrorNode(nodegroups);
-   }
-
-   private void prettyOutputErrorNode(List<NodeGroupRead> nodegroups)
-         throws Exception {
-      List<NodeRead> failedNodes = new ArrayList<NodeRead>();
-      for (NodeGroupRead nodegroup : nodegroups) {
-         List<NodeRead> nodes = nodegroup.getInstances();
-         if (nodes != null) {
-            for (NodeRead node : nodes) {
-               if (node.isActionFailed()) {
-                  failedNodes.add(node);
-               }
-            }
-         }
-      }
-
-      if (!failedNodes.isEmpty()) {
-         System.out
-               .println(Constants.FAILED_NODES_MESSAGE + failedNodes.size());
-         LinkedHashMap<String, List<String>> columnNamesWithGetMethodNames =
-               new LinkedHashMap<String, List<String>>();
-         columnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_NODE_NAME,
-               Arrays.asList("getName"));
-         columnNamesWithGetMethodNames
-               .put(Constants.FORMAT_TABLE_COLUMN_STATUS,
-                     Arrays.asList("getStatus"));
-         columnNamesWithGetMethodNames.put(Constants.FORMAT_TABLE_COLUMN_ERROR,
-               Arrays.asList("getErrMessage"));
-         CommandsUtils.printInTableFormat(columnNamesWithGetMethodNames,
-               failedNodes.toArray(), Constants.OUTPUT_INDENT);
-
-         System.out.println();
-      }
+      CommandsUtils.prettyOutputErrorNode(nodegroups);
    }
 
    private void prettyOutputClustersInfo(ClusterRead[] clusters, boolean detail) {

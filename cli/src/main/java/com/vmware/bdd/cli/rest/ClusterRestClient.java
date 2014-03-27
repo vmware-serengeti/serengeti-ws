@@ -5,7 +5,7 @@
  *   You may obtain a copy of the License at
  *
  *       http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *   Unless required by applicable law or agreed to in writing, software
  *   distributed under the License is distributed on an "AS IS" BASIS,
  *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,13 +15,13 @@
 package com.vmware.bdd.cli.rest;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.vmware.bdd.apitypes.NetConfigInfo;
+
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,7 +129,7 @@ public class ClusterRestClient {
       restClient.update(Integer.valueOf(instanceNum), path, httpverb,
             outputCallBack);
    }
-   
+
    public TaskRead scale(ResourceScale scale){
       final String path =
             Constants.REST_PATH_CLUSTER + "/" + scale.getClusterName() + "/"
@@ -212,45 +212,11 @@ public class ClusterRestClient {
 
                         printNodesInfo(nodeGroup.getInstances());
                      }
-                     prettyOutputErrorNode(nodeGroups);
+                     CommandsUtils.prettyOutputErrorNode(nodeGroups);
                   }
                }
             } catch (Exception e) {
                throw e;
-            }
-         }
-
-         private void prettyOutputErrorNode(List<NodeGroupRead> nodegroups)
-         throws Exception {
-
-            List<NodeRead> failedNodes = new ArrayList<NodeRead>();
-            for (NodeGroupRead nodegroup : nodegroups) {
-               List<NodeRead> nodes = nodegroup.getInstances();
-               if (nodes != null) {
-                  for (NodeRead node : nodes) {
-                     if (node.isActionFailed()) {
-                        failedNodes.add(node);
-                     }
-                  }
-               }
-            }
-
-            if (!failedNodes.isEmpty()) {
-               System.out.println();
-               System.out
-               .println(Constants.FAILED_NODES_MESSAGE + failedNodes.size());
-               LinkedHashMap<String, List<String>> columnNamesWithGetMethodNames =
-                  new LinkedHashMap<String, List<String>>();
-               columnNamesWithGetMethodNames.put(
-                     Constants.FORMAT_TABLE_COLUMN_NODE_NAME,
-                     Arrays.asList("getName"));
-               columnNamesWithGetMethodNames
-               .put(Constants.FORMAT_TABLE_COLUMN_STATUS,
-                     Arrays.asList("getStatus"));
-               columnNamesWithGetMethodNames.put(Constants.FORMAT_TABLE_COLUMN_ERROR,
-                     Arrays.asList("getErrMessage"));
-               CommandsUtils.printInTableFormat(columnNamesWithGetMethodNames,
-                     failedNodes.toArray(), Constants.OUTPUT_INDENT);
             }
          }
 
