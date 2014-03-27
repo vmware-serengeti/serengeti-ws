@@ -84,13 +84,14 @@ public enum GroupType {
       } else if(roles.contains(HadoopRole.ZOOKEEPER_ROLE)){
          return ZOOKEEPER_GROUP;
       } else if (roles.contains(HadoopRole.HADOOP_JOURNALNODE_ROLE)) {
-         return JOURNALNODE_GROUP;   
+         return JOURNALNODE_GROUP;
       } else if (roles.contains(HadoopRole.HADOOP_CLIENT_ROLE)) {
          return CLIENT_GROUP;
       } else if (roles.contains(HadoopRole.MAPR_CLDB_ROLE)  && roles.contains(HadoopRole.MAPR_JOBTRACKER_ROLE)
             && roles.contains(HadoopRole.MAPR_WEBSERVER_ROLE) && roles.contains(HadoopRole.MAPR_METRICS_ROLE)) {
          return MAPR_MASTER_GROUP;
-      }  else if (roles.contains(HadoopRole.MAPR_TASKTRACKER_ROLE) && !roles.contains(HadoopRole.MAPR_JOBTRACKER_ROLE)) {
+      }  else if ((roles.contains(HadoopRole.MAPR_TASKTRACKER_ROLE) || roles.contains(HadoopRole.MAPR_NFS_ROLE))
+            && !roles.contains(HadoopRole.MAPR_JOBTRACKER_ROLE)) {
          return MAPR_WORKER_GROUP;
       } else if (roles.contains(HadoopRole.MAPR_MYSQL_SERVER_ROLE)) {
          return MAPR_MYSQL_SERVER_GROUP;
