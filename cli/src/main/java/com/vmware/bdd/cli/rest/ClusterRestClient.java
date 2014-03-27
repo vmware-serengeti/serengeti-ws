@@ -113,6 +113,7 @@ public class ClusterRestClient {
    }
 
    public void actionOps(String id, Map<String, String> queryStrings) {
+      id = CommonUtil.encode(id);
       actionOps(id, id, queryStrings);
    }
 
@@ -145,7 +146,7 @@ public class ClusterRestClient {
    public void delete(String id) {
       final String path = Constants.REST_PATH_CLUSTER;
       final HttpMethod httpverb = HttpMethod.DELETE;
-
+      id = CommonUtil.encode(id);
       PrettyOutput outputCallBack = getClusterPrettyOutputCallBack(this, id);
       restClient.deleteObject(id, path, httpverb, outputCallBack);
    }

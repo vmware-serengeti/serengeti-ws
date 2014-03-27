@@ -223,6 +223,7 @@ public class RestResource {
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
       verifyInitialized();
+      clusterName = CommonUtil.decode(clusterName);
       // make sure cluster name is valid
       if (!CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
@@ -247,7 +248,7 @@ public class RestResource {
          throws Exception {
 
       verifyInitialized();
-
+      clusterName = CommonUtil.decode(clusterName);
       if (CommonUtil.isBlank(clusterName)
             || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
