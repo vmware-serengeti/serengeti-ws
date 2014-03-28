@@ -68,4 +68,12 @@ public class NodeDAO extends BaseDAO<NodeEntity> implements INodeDAO {
    public List<NodeEntity> findByHostName(String hostName) {
       return findByCriteria(Restrictions.eq("hostName", hostName));
    }
+
+   @Override
+   @Transactional
+   public void updateAction(String moId, String action) {
+      NodeEntity node = findByMobId(moId);
+      AuAssert.check(node != null);
+      node.setAction(action);
+   }
 }

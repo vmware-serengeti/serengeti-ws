@@ -574,4 +574,21 @@ public class NodeEntity extends EntityBase {
       this.version = version;
    }
 
+   public boolean needUpgrade(String serverVersion) {
+      return (this.getMoId() != null && (this.getVersion() == null || !serverVersion.equals(this.getVersion())));
+   }
+
+   public boolean canBeUpgrade() {
+      String nodeIp = this.getPrimaryMgtIpV4();
+      return nodeIp != null && !Constants.NULL_IPV4_ADDRESS.equals(nodeIp);
+   }
+
+   public void cleanupErrorMessageForUpgrade() {
+      this.actionFailed = false;
+      this.errMessage = null;
+      if (!canBeUpgrade()) {
+         this.action = null;
+      }
+   }
+
 }

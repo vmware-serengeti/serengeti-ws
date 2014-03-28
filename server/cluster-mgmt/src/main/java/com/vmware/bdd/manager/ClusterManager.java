@@ -674,7 +674,7 @@ public class ClusterManager {
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
 
-      if (!clusterEntityMgr.isNeedToUpgrade(clusterName)) {
+      if (!clusterEntityMgr.needUpgrade(clusterName)) {
          logger.error("cluster " + clusterName + " is the latest version already");
          throw ClusterManagerException.ALREADY_LATEST_VERSION_ERROR(clusterName);
       }
@@ -697,6 +697,8 @@ public class ClusterManager {
       JobParameters jobParameters = new JobParameters(param);
       clusterEntityMgr.storeClusterLastStatus(clusterName);
       clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.UPGRADING);
+      clusterEntityMgr.updateNodesAction(clusterName, Constants.NODE_ACTION_UPGRADING);
+      clusterEntityMgr.cleanupErrorForClusterUpgrade(clusterName);
       try {
          return jobManager.runJob(JobConstants.UPGRADE_CLUSTER_JOB_NAME,
                jobParameters);
@@ -767,6 +769,8 @@ public class ClusterManager {
          logger.error("cluster " + clusterName + " does not exist");
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
+
+      ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
       if (ClusterStatus.STOPPED.equals(cluster.getStatus())) {
          logger.error("cluster " + clusterName + " is stopped already");

@@ -38,8 +38,7 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
       List<Callable<Void>> storeNodeProcedures = new ArrayList<Callable<Void>>();
 
       try {
-         if (NeedUpgrade(node)) {
-            setActionToUpgrading(node);
+         if (node.needUpgrade(serverVersion)) {
             NodeUpgradeSP nodeUpgradeSP = new NodeUpgradeSP(node, serverVersion);
             storeNodeProcedures.add(nodeUpgradeSP);
          }
@@ -85,8 +84,7 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
 
       try {
          for (NodeEntity node : nodes) {
-            if (NeedUpgrade(node)) {
-               setActionToUpgrading(node);
+            if (node.needUpgrade(serverVersion)) {
                NodeUpgradeSP nodeUpgradeSP = new NodeUpgradeSP(node, serverVersion);
                storeNodeProcedures.add(nodeUpgradeSP);
             }
@@ -168,9 +166,8 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
    private void updateNodeData(NodeEntity node, boolean upgraded, String errorMessage) {
       node = clusterEntityMgr.getNodeWithNicsByMobId(node.getMoId());
       String nodeVmName = node.getVmName();
-      String nodeIp = node.getPrimaryMgtIpV4();
       if (upgraded) {
-         if (nodeIp != null && !Constants.NULL_IPV4_ADDRESS.equals(nodeIp)) {
+         if (node.canBeUpgrade()) {
             logger.info("Successfully upgrade cluster node " + nodeVmName);
             node.setVersion(serverVersion);
             node.setAction(Constants.NODE_ACTION_UPGRADE_SUCCESS);
@@ -190,18 +187,6 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
          }
          clusterEntityMgr.update(node);
       }
-   }
-
-   private void setActionToUpgrading(NodeEntity node) {
-      String nodeIp = node.getPrimaryMgtIpV4();
-      if (nodeIp != null && !Constants.NULL_IPV4_ADDRESS.equals(nodeIp)) {
-         logger.info("Set node " + node.getVmName() + " action to " + Constants.NODE_ACTION_UPGRADING);
-         node.setAction(Constants.NODE_ACTION_UPGRADING);
-      }
-   }
-
-   private boolean NeedUpgrade(NodeEntity node) {
-      return (node.getMoId() != null && (node.getVersion() == null || !serverVersion.equals(node.getVersion())));
    }
 
 }

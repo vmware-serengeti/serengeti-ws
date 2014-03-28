@@ -75,6 +75,7 @@ public class NodePowerOnRequest extends SimpleRequest {
       IClusterEntityManager clusterEntityMgr = lockClusterEntityMgr.getClusterEntityMgr();
       upgradeService.setClusterEntityMgr(clusterEntityMgr);
       logger.debug("vm " + nodeEntity.getVmName() + "is going to upgrade");
+      clusterEntityMgr.updateNodeAction(nodeEntity, Constants.NODE_ACTION_UPGRADING);
       upgradeService.upgradeNode(nodeEntity);
       return true;
    }

@@ -64,6 +64,10 @@ public interface IClusterEntityManager {
 
    public void updateClusterStatus(String clusterName, ClusterStatus status);
 
+   public void updateNodesAction(String clusterName, String action);
+
+   public void updateNodeAction(NodeEntity node, String action);
+
    public void update(ClusterEntity clusterEntity);
 
    public void update(NodeGroupEntity group);
@@ -121,5 +125,7 @@ public interface IClusterEntityManager {
 
    public String getServerVersion();
 
-   public boolean isNeedToUpgrade(String clusterName);
+   public boolean needUpgrade(String clusterName);
+
+   public void cleanupErrorForClusterUpgrade(String clusterName);
 }

@@ -213,6 +213,23 @@ public class ClusterEntityManager implements IClusterEntityManager {
 
    @Transactional
    @RetryTransaction
+   public void updateNodesAction(String clusterName, String action) {
+      List<NodeEntity> nodes = clusterDao.getAllNodes(clusterName);
+      for (NodeEntity node : nodes) {
+         updateNodeAction(node, action);
+      }
+   }
+
+   @Transactional
+   @RetryTransaction
+   public void updateNodeAction(NodeEntity node, String action) {
+      if (node.needUpgrade(getServerVersion()) && node.canBeUpgrade()) {
+         nodeDao.updateAction(node.getMoId(), action);
+      }
+   }
+
+   @Transactional
+   @RetryTransaction
    public void update(ClusterEntity clusterEntity) {
       clusterDao.update(clusterEntity);
    }
@@ -594,7 +611,7 @@ public class ClusterEntityManager implements IClusterEntityManager {
 
    @Transactional
    @RetryTransaction
-   public boolean isNeedToUpgrade(String clusterName) {
+   public boolean needUpgrade(String clusterName) {
       String serverVersion = getServerVersion();
       String clusterVersion = findByName(clusterName).getVersion();
       return !serverVersion.equals(clusterVersion);
@@ -620,4 +637,14 @@ public class ClusterEntityManager implements IClusterEntityManager {
          clusterDao.updateLastStatus(clusterName, clusterStatus);
       }
    }
+
+   @Transactional
+   @RetryTransaction
+   public void cleanupErrorForClusterUpgrade(String clusterName) {
+      List<NodeEntity> nodes = findAllNodes(clusterName);
+      for (NodeEntity node : nodes) {
+         node.cleanupErrorMessageForUpgrade();
+      }
+   }
+
 }

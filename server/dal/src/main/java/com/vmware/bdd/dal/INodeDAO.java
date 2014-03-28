@@ -35,4 +35,6 @@ public interface INodeDAO extends IBaseDAO<NodeEntity> {
    NodeEntity findByName(String name);
 
    List<NodeEntity> findByHostName(String hostName);
+
+   void updateAction(String moId, String action);
 }
