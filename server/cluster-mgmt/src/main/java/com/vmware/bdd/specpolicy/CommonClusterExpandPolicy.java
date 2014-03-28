@@ -259,9 +259,9 @@ public class CommonClusterExpandPolicy {
          ValidateResult valid = AppConfigValidationUtils.validateConfig(ValidationType.WHITE_LIST, appConfigs);
          switch (valid.getType()) {
          case WHITE_LIST_INVALID_VALUE:
-            throw ClusterConfigException.INVALID_APP_CONFIG_VALUE(valid.getFailureNames());
+            throw ClusterConfigException.INVALID_APP_CONFIG_VALUE(valid.getFailureValues());
          case WHITE_LIST_INVALID_NAME:
-            logger.warn("Hadoop configurations " + valid.getFailureNames() + " not in white list.");
+            logger.warn("Hadoop configurations " + valid.getNoExistFileNames() + " " +valid.getFailureNames() + " not in white list.");
             break;
          default:
             logger.debug("Passed white list validation.");

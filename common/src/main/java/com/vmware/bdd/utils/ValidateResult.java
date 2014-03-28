@@ -24,10 +24,8 @@ import com.google.gson.Gson;
 public class ValidateResult {
 
    public enum Type {
-      WHITE_LIST_NO_EXIST_FILE_NAME,
       WHITE_LIST_INVALID_NAME,
       WHITE_LIST_INVALID_VALUE,
-      WHITE_LIST_INVALID_NAME_VALUE,
       NAME_IN_BLACK_LIST,
       VALID
    }

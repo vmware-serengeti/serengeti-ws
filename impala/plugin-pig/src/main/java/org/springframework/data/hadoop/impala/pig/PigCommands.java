@@ -14,7 +14,10 @@
  ***************************************************************************/
 package org.springframework.data.hadoop.impala.pig;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.List;
 import java.util.Properties;
 
@@ -187,11 +190,15 @@ public class PigCommands implements CommandMarker {
 			// ignore - we'll use location
 		}
 
+		ClassLoader prevCl = Thread.currentThread().getContextClassLoader();
 		try {
 			if (pigTemplate == null) {
 				init();
 			}
 
+			//pig.jar require jline 0.9.94, so load it in temporarily
+			ClassLoader cl = URLClassLoader.newInstance(new URL[] {new File("lib/jline-0.9.94.jar").toURI().toURL()}, prevCl);
+			Thread.currentThread().setContextClassLoader(cl);
 			List<ExecJob> results = pigTemplate.executeScript(new PigScript(resource));
 			ExecJob result = results.get(0);
 			Exception exception = result.getException();
@@ -203,8 +210,10 @@ public class PigCommands implements CommandMarker {
 			return "Script [" + uri + "] executed succesfully. Returned status " + sb.toString();
 		} catch (Exception ex) {
 			return "Script [" + uri + "] failed - " + ex;
+		} finally {
+			Thread.currentThread().setContextClassLoader(prevCl);
 		}
-	}	
+	}
 
 
 	private static String fixLocation(String location) {

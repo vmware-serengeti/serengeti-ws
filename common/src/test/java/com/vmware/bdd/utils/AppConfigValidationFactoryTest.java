@@ -88,13 +88,48 @@ public class AppConfigValidationFactoryTest {
       assertEquals(hadoopValidateResult.getType(),ValidateResult.Type.WHITE_LIST_INVALID_NAME);
       assertEquals(hadoopValidateResult.getFailureNames().get(0), "dfs.namenode.test.level");
       assertEquals(hadoopValidateResult.getFailureNames().get(1), "dfs.namenode.logger.level");
+
       ValidateResult zookeeperValidateResult=AppConfigValidationFactory.whiteListHandle(cluster.getNodeGroups()[1].getConfiguration());
       assertEquals(zookeeperValidateResult.getType(),ValidateResult.Type.WHITE_LIST_INVALID_NAME);
       assertEquals(zookeeperValidateResult.getFailureNames().size(), 1);
       assertEquals(zookeeperValidateResult.getFailureNames().get(0), "other");
+
       ValidateResult noExistingValidateResult=AppConfigValidationFactory.whiteListHandle(cluster.getNodeGroups()[2].getConfiguration());
-      assertEquals(noExistingValidateResult.getType(),ValidateResult.Type.WHITE_LIST_NO_EXIST_FILE_NAME);
+      assertEquals(noExistingValidateResult.getType(),ValidateResult.Type.WHITE_LIST_INVALID_NAME);
       assertEquals(noExistingValidateResult.getNoExistFileNames().get("zookeeper").size(),3);
+
+      //test wrong values
+      Map<String, Object> fairSchedulerMap = new HashMap<String,Object>();
+      fairSchedulerMap.put("text", "<?xml version=\"1.0\"?>" +
+            "<allocations> <pool name=\"sample_pool\"><minMaps>5</minMaps>" +
+            "<minReduces>5</minReduces><maxMaps>25</maxMaps><maxReduces>25</maxReduces>" +
+            "<minSharePreemptionTimeout>300</minSharePreemptionTimeout></pool>" +
+            "<user name=\"sample_user\"><maxRunningJobs>6</maxRunningJobs></user>" +
+            "<userMaxJobsDefault>3</userMaxJobsDefault><fairSharePreemptionTimeout>600k" +
+            "</fairSharePreemptionTimeout></allocations>");
+      ((Map<String, Object>)cluster.getNodeGroups()[0].getConfiguration().get("hadoop")).put("fair-scheduler.xml", fairSchedulerMap);
+      hadoopValidateResult=AppConfigValidationFactory.whiteListHandle(cluster.getNodeGroups()[0].getConfiguration());
+      assertEquals(hadoopValidateResult.getType(),ValidateResult.Type.WHITE_LIST_INVALID_VALUE);
+      assertEquals(hadoopValidateResult.getFailureValues().get(0), "600k");
+
+      //test wrong xml format
+      fairSchedulerMap.put("text",
+            "<allocations> <pool name=\"sample_pool\"><minMaps>5</minMaps>" +
+            "<minReduces>5</minReduces><maxMaps>25</maxMaps><maxReduces>25</maxReduces>" +
+            "<minSharePreemptionTimeout>300</minSharePreemptionTimeout></pool>" +
+            "<user name=\"sample_user\"><maxRunningJobs>6</maxRunningJobs></user>" +
+            "<userMaxJobsDefault>3</userMaxJobsDefault><fairSharePreemptionTimeout>600k" +
+            "</fairSharePreemptionTimeout>");
+      ((Map<String, Object>)cluster.getNodeGroups()[0].getConfiguration().get("hadoop")).put("fair-scheduler.xml", fairSchedulerMap);
+      hadoopValidateResult=AppConfigValidationFactory.whiteListHandle(cluster.getNodeGroups()[0].getConfiguration());
+      assertEquals(hadoopValidateResult.getType(),ValidateResult.Type.WHITE_LIST_INVALID_VALUE);
+      assertEquals(hadoopValidateResult.getFailureValues().get(0),
+            "<allocations> <pool name=\"sample_pool\"><minMaps>5</minMaps>" +
+                  "<minReduces>5</minReduces><maxMaps>25</maxMaps><maxReduces>25</maxReduces>" +
+                  "<minSharePreemptionTimeout>300</minSharePreemptionTimeout></pool>" +
+                  "<user name=\"sample_user\"><maxRunningJobs>6</maxRunningJobs></user>" +
+                  "<userMaxJobsDefault>3</userMaxJobsDefault><fairSharePreemptionTimeout>600k" +
+                  "</fairSharePreemptionTimeout>");
    }
 
    @Test

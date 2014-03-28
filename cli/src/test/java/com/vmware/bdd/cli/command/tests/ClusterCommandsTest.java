@@ -626,7 +626,7 @@ public class ClusterCommandsTest extends MockRestServer {
         CookieCache.clear();
     }
 
-   @Test(enabled=false)
+   @Test
    public void testConfigCluster() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       ObjectMapper mapper = new ObjectMapper();
@@ -664,7 +664,16 @@ public class ClusterCommandsTest extends MockRestServer {
 
       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/config", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
-      clusterCommands.configCluster("cluster1", "hadoop_cluster.json", false, false);
+      clusterCommands.configCluster("cluster1", "src/test/resources/hadoop_cluster.json", false, true);
+
+      //test wrong fair scheduler configuration
+      setup();
+      buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
+            mapper.writeValueAsString(cr1));
+      buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/config", HttpMethod.PUT,
+            HttpStatus.NO_CONTENT, "");
+      clusterCommands.configCluster("cluster1", "src/test/resources/wrong_fair_scheduler_config.json", false, true);
+
       CookieCache.clear();
    }
 

@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,10 +29,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
+import org.xml.sax.InputSource;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
-import com.vmware.bdd.utils.ValidateResult.Type;
 
 public class AppConfigValidationFactory {
 
@@ -76,7 +77,7 @@ public class AppConfigValidationFactory {
                   list, type, validateResult)) {
                continue;
             }
-            if (type.equals(ValidationType.WHITE_LIST) && validateResult.getType() == Type.VALID) {
+            if (type.equals(ValidationType.WHITE_LIST) && configFileName.equals(Constants.FAIR_SCHEDULER_FILE_NAME)) {
                valdiateSpecialFileFormat(configFileName, configFileEntry.getValue(), validateResult);
             }
          }
@@ -122,7 +123,7 @@ public class AppConfigValidationFactory {
             if (!listFileMap.containsKey(configFileName)) {
                if (type.equals(ValidationType.WHITE_LIST)) {
                   if (validateResult.getType().equals(ValidateResult.Type.VALID)) {
-                     validateResult.setType(ValidateResult.Type.WHITE_LIST_NO_EXIST_FILE_NAME);
+                     validateResult.setType(ValidateResult.Type.WHITE_LIST_INVALID_NAME);
                   }
                   if (!validateResult.getNoExistFileNamesByConfigType(configType).contains(configFileName)) {
                      validateResult.addNoExistFileName(configType, configFileName);
@@ -158,6 +159,9 @@ public class AppConfigValidationFactory {
           Map<String, Object> configPropertyMap = (Map<String, Object>) configProperties;
           String xmlContents = (String)configPropertyMap.get(Constants.FAIR_SCHEDULER_FILE_ATTRIBUTE);
           checkFairSchedulerXmlFormat(xmlContents, validateResult);
+          if (!validateResult.getFailureValues().isEmpty()) {
+             validateResult.setType(ValidateResult.Type.WHITE_LIST_INVALID_VALUE);
+          }
        }
    }
 
@@ -171,9 +175,10 @@ public class AppConfigValidationFactory {
       Document doc = null;
       try {
          builder = docBuilderFactory.newDocumentBuilder();
-         doc = builder.parse(xmlContents);
+         InputSource is = new InputSource(new StringReader(xmlContents));
+         doc = builder.parse(is);
       } catch (Exception e) {
-         validateResult.addFailureName(Constants.FAIR_SCHEDULER_FILE_ATTRIBUTE);
+         validateResult.addFailureValue(xmlContents);
          return;
       }
       Element root = doc.getDocumentElement();
@@ -311,7 +316,7 @@ public class AppConfigValidationFactory {
    }
 
     private static boolean validatePropertyValueFormat(final String value, final String format) {
-        //TODO
+       //TODO
         return true;
     }
 
@@ -345,26 +350,23 @@ public class AppConfigValidationFactory {
                 }
             }
         }
+
+        //we will throw failure for invalid values, and throw warning for invalid names, so
+        //invalid value has higher priority in the type.
         if (validateType == ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
-            if(!validateResult.getFailureNames().contains(configPropertyName)){
-               validateResult.addFailureName(configPropertyName);               
-            }
-            if (validateResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_VALUE
-                    || validateResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME_VALUE) {
-                validateResult.setType(ValidateResult.Type.WHITE_LIST_INVALID_NAME_VALUE);
-            } else {
-                validateResult.setType(ValidateResult.Type.WHITE_LIST_INVALID_NAME);
-            }
+           if(!validateResult.getFailureNames().contains(configPropertyName)){
+              validateResult.addFailureName(configPropertyName);
+           }
+           if (validateResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_VALUE) {
+              validateResult.setType(ValidateResult.Type.WHITE_LIST_INVALID_VALUE);
+           } else {
+              validateResult.setType(ValidateResult.Type.WHITE_LIST_INVALID_NAME);
+           }
         } else if (validateType == ValidateResult.Type.WHITE_LIST_INVALID_VALUE) {
-            if(!validateResult.getFailureValues().contains(configPropertyValue)) {
-               validateResult.addFailureValue(configPropertyValue);               
-            }
-            if (validateResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME
-                    || validateResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME_VALUE) {
-                validateResult.setType(ValidateResult.Type.WHITE_LIST_INVALID_NAME_VALUE);
-            } else {
-                validateResult.setType(ValidateResult.Type.WHITE_LIST_INVALID_VALUE);
-            }
+           if(!validateResult.getFailureValues().contains(configPropertyValue)) {
+              validateResult.addFailureValue(configPropertyValue);
+           }
+           validateResult.setType(ValidateResult.Type.WHITE_LIST_INVALID_VALUE);
         }
     }
 }

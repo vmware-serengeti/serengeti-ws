@@ -124,9 +124,9 @@ public class ClusterCommands implements CommandMarker {
 
       // process resume
       if (resume && setClusterPassword) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-            name, Constants.OUTPUT_OP_CREATE,
-            Constants.OUTPUT_OP_RESULT_FAIL, Constants.RESUME_DONOT_NEED_SET_PASSWORD);
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_CREATE,
+               Constants.OUTPUT_OP_RESULT_FAIL, Constants.RESUME_DONOT_NEED_SET_PASSWORD);
          return;
       } else if (resume) {
          resumeCreateCluster(name);
@@ -148,7 +148,7 @@ public class ClusterCommands implements CommandMarker {
          }
       }
 
-     if (type != null) {
+      if (type != null) {
          ClusterType clusterType = ClusterType.getByDescription(type);
          if (clusterType == null) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
@@ -248,7 +248,7 @@ public class ClusterCommands implements CommandMarker {
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
             validateConfiguration(clusterCreate, skipConfigValidation,
-                  warningMsgList);
+                  warningMsgList, failedMsgList);
             clusterCreate.validateNodeGroupNames();
             if (!validateHAInfo(clusterCreate.getNodeGroups())) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
@@ -294,7 +294,7 @@ public class ClusterCommands implements CommandMarker {
                   name, Constants.OUTPUT_OP_CREATE,
                   Constants.OUTPUT_OP_RESULT_FAIL,
                   Constants.PARAM_NETWORK_NAME
-                        + Constants.PARAM_NOT_SUPPORTED + allNetworkNames.toString());
+                  + Constants.PARAM_NOT_SUPPORTED + allNetworkNames.toString());
             return;
          }
 
@@ -332,7 +332,7 @@ public class ClusterCommands implements CommandMarker {
       }
 
       if (!failedMsgList.isEmpty()) {
-         showFailedMsg(clusterCreate.getName(), failedMsgList);
+         showFailedMsg(clusterCreate.getName(), Constants.OUTPUT_OP_CREATE, failedMsgList);
          return;
       }
 
@@ -355,6 +355,7 @@ public class ClusterCommands implements CommandMarker {
 
    /**
     * notify user which network Serengeti will pick up for mgt/hdfs/mapred
+    *
     * @param networkConfig
     * @param warningMsgList
     */
@@ -377,9 +378,9 @@ public class ClusterCommands implements CommandMarker {
       }
 
       StringBuffer netsUsage = new StringBuffer().append("The cluster will use network ")
-            .append(mgtNetwork).append(" for management, ")
-            .append(hdfsNetwork).append(" for HDFS traffic, and ")
-            .append(mapredNetwork).append(" for MapReduce traffic.");
+                  .append(mgtNetwork).append(" for management, ")
+                  .append(hdfsNetwork).append(" for HDFS traffic, and ")
+                  .append(mapredNetwork).append(" for MapReduce traffic.");
       warningMsgList.add(netsUsage.toString());
    }
 
@@ -740,7 +741,8 @@ public class ClusterCommands implements CommandMarker {
          }
 
          //validate the node group type for elasticity params
-         if (elasticityMode != null || minComputeNodeNum != null || maxComputeNodeNum != null || targetComputeNodeNum != null) {
+         if (elasticityMode != null || minComputeNodeNum != null
+               || maxComputeNodeNum != null || targetComputeNodeNum != null) {
             if (!cluster.validateSetManualElasticity()) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                      clusterName, Constants.OUTPUT_OP_SET_PARAM,
@@ -804,8 +806,8 @@ public class ClusterCommands implements CommandMarker {
          //print warning for ignored parameters under different mode
          if (mode != null) {
             if (mode == ElasticityMode.AUTO) {
-              requestBody.setMinComputeNodeNum(minComputeNodeNum);
-              requestBody.setMaxComputeNodeNum(maxComputeNodeNum);
+               requestBody.setMinComputeNodeNum(minComputeNodeNum);
+               requestBody.setMaxComputeNodeNum(maxComputeNodeNum);
             } else {
                requestBody.setActiveComputeNodeNum(targetComputeNodeNum);
             }
@@ -822,9 +824,9 @@ public class ClusterCommands implements CommandMarker {
          //print warning for ignored parameters under different mode
          if (mode != null) {
             if (mode == ElasticityMode.AUTO) {
-              if (targetComputeNodeNum != null) {
-                 System.out.println("\'targetComputeNodeNum\' ignored. Parameter is not applicable to AUTO elasticity mode.");
-              }
+               if (targetComputeNodeNum != null) {
+                  System.out.println("\'targetComputeNodeNum\' ignored. Parameter is not applicable to AUTO elasticity mode.");
+               }
             } else {
                if (minComputeNodeNum != null || maxComputeNodeNum != null) {
                   System.out.println("\'minComputeNodeNum\' and \'maxComputeNodeNum\' ignored. Parameters are not applicable to MANUAL elasticity mode.");
@@ -1079,8 +1081,9 @@ public class ClusterCommands implements CommandMarker {
          clusterConfig.setConfiguration(clusterSpec.getConfiguration());
          clusterConfig.setExternalHDFS(clusterSpec.getExternalHDFS());
          List<String> warningMsgList = new ArrayList<String>();
+         List<String> failedMsgList = new ArrayList<String>();
          validateConfiguration(clusterConfig, skipConfigValidation,
-               warningMsgList);
+               warningMsgList, failedMsgList);
          // add a confirm message for running job
          warningMsgList.add("Warning: "
                + Constants.PARAM_CLUSTER_CONFIG_RUNNING_JOB_WARNING);
@@ -1089,6 +1092,12 @@ public class ClusterCommands implements CommandMarker {
                warningMsgList, alwaysAnswerYes)) {
             return;
          }
+
+         if (!failedMsgList.isEmpty()) {
+            showFailedMsg(clusterConfig.getName(), Constants.OUTPUT_OP_CONFIG, failedMsgList);
+            return;
+         }
+
          restClient.configCluster(clusterConfig);
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_RESULT_CONFIG);
@@ -1381,18 +1390,20 @@ public class ClusterCommands implements CommandMarker {
       nColumnNamesWithGetMethodNames.put(
             Constants.FORMAT_TABLE_COLUMN_HOST,
             Arrays.asList("getHostName"));
-      if (topology == TopologyType.RACK_AS_RACK
-            || topology == TopologyType.HVE) {
+      if (topology == TopologyType.RACK_AS_RACK || topology == TopologyType.HVE) {
          nColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_RACK,
                Arrays.asList("getRack"));
       }
       nColumnNamesWithGetMethodNames.put(
-            Constants.FORMAT_TABLE_COLUMN_IP, Arrays.asList("fetchMgtIp"));
+            Constants.FORMAT_TABLE_COLUMN_IP,
+            Arrays.asList("fetchMgtIp"));
       nColumnNamesWithGetMethodNames.put(
-            Constants.FORMAT_TABLE_COLUMN_HDFS_IP, Arrays.asList("fetchHdfsIp"));
+            Constants.FORMAT_TABLE_COLUMN_HDFS_IP,
+            Arrays.asList("fetchHdfsIp"));
       nColumnNamesWithGetMethodNames.put(
-            Constants.FORMAT_TABLE_COLUMN_MAPRED_IP, Arrays.asList("fetchMapredIp"));
+            Constants.FORMAT_TABLE_COLUMN_MAPRED_IP,
+            Arrays.asList("fetchMapredIp"));
       nColumnNamesWithGetMethodNames.put(
             Constants.FORMAT_TABLE_COLUMN_STATUS,
             Arrays.asList("getStatus"));
@@ -1409,10 +1420,11 @@ public class ClusterCommands implements CommandMarker {
          if (nodes != null) {
             LinkedHashMap<String, List<String>> nColumnNamesWithGetMethodNamesClone =
                   (LinkedHashMap<String, List<String>>) nColumnNamesWithGetMethodNames.clone();
-            if (!nodes.isEmpty() &&
-                  (nodes.get(0).getIpConfigs() == null
-                        || (!nodes.get(0).getIpConfigs().containsKey(NetTrafficType.HDFS_NETWORK)
-                        && !nodes.get(0).getIpConfigs().containsKey(NetTrafficType.MAPRED_NETWORK)))) {
+            if (!nodes.isEmpty() && (nodes.get(0).getIpConfigs() == null || (!nodes.get(0)
+                        .getIpConfigs()
+                        .containsKey(NetTrafficType.HDFS_NETWORK) && !nodes
+                        .get(0).getIpConfigs()
+                        .containsKey(NetTrafficType.MAPRED_NETWORK)))) {
                nColumnNamesWithGetMethodNamesClone.remove(Constants.FORMAT_TABLE_COLUMN_HDFS_IP);
                nColumnNamesWithGetMethodNamesClone.remove(Constants.FORMAT_TABLE_COLUMN_MAPRED_IP);
             }
@@ -1445,7 +1457,7 @@ public class ClusterCommands implements CommandMarker {
       System.out.println();
    }
 
-   private void showFailedMsg(String name, List<String> failedMsgList) {
+   private void showFailedMsg(String name, String op, List<String> failedMsgList) {
       // cluster creation failed message.
       StringBuilder failedMsg = new StringBuilder();
       failedMsg.append(Constants.INVALID_VALUE);
@@ -1459,12 +1471,13 @@ public class ClusterCommands implements CommandMarker {
       }
       failedMsg.append(tmpMsg);
       CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
-            Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+            op, Constants.OUTPUT_OP_RESULT_FAIL,
             failedMsg.toString());
    }
 
    private void validateConfiguration(ClusterCreate cluster,
-         boolean skipConfigValidation, List<String> warningMsgList) {
+         boolean skipConfigValidation, List<String> warningMsgList,
+         List<String> failedMsgList) {
       // validate blacklist
       ValidateResult blackListResult = validateBlackList(cluster);
       if (blackListResult != null) {
@@ -1473,7 +1486,8 @@ public class ClusterCommands implements CommandMarker {
       if (!skipConfigValidation) {
          // validate whitelist
          ValidateResult whiteListResult = validateWhiteList(cluster);
-         addWhiteListWarning(cluster.getName(), whiteListResult, warningMsgList);
+         addWhiteListWarningOrFailure(cluster.getName(), whiteListResult,
+               warningMsgList, failedMsgList);
       } else {
          cluster.setValidateConfig(false);
       }
@@ -1505,14 +1519,18 @@ public class ClusterCommands implements CommandMarker {
          if (vr.getType() != ValidateResult.Type.VALID) {
             validateResult.setType(vr.getType());
             validateResult.setFailureNames(vr.getFailureNames());
+            validateResult.setFailureValues(vr.getFailureValues());
             validateResult.setNoExistFileNames(vr.getNoExistFileNames());
          }
       }
       List<String> failureNames = new LinkedList<String>();
       Map<String, List<String>> noExistingFileNamesMap =
             new HashMap<String, List<String>>();
+      List<String> failureValues = new LinkedList<String>();
       failureNames.addAll(validateResult.getFailureNames());
       noExistingFileNamesMap.putAll(validateResult.getNoExistFileNames());
+      failureValues.addAll(validateResult.getFailureValues());
+
       // validate nodegroup level Configuration
       for (NodeGroupCreate nodeGroup : cluster.getNodeGroups()) {
          if (nodeGroup.getConfiguration() != null
@@ -1521,13 +1539,24 @@ public class ClusterCommands implements CommandMarker {
                   AppConfigValidationUtils.validateConfig(validationType,
                         nodeGroup.getConfiguration());
             if (vr.getType() != ValidateResult.Type.VALID) {
-               validateResult.setType(vr.getType());
+               //invalid value will take higher priority than invalid name as it will throw failure
+               if (validateResult.getType() != ValidateResult.Type.WHITE_LIST_INVALID_VALUE) {
+                  validateResult.setType(vr.getType());
+               }
                // merge failed names between cluster level and node group level.
                for (String failureName : vr.getFailureNames()) {
                   if (!failureNames.contains(failureName)) {
                      failureNames.add(failureName);
                   }
                }
+
+               // merge failed names between cluster level and node group level.
+               for (String failureValue : vr.getFailureValues()) {
+                  if (!failureValues.contains(failureValue)) {
+                     failureValues.add(failureValue);
+                  }
+               }
+
                // merge no existing file names between cluster level and node
                // group level
                for (Entry<String, List<String>> noExistingFileNames : vr
@@ -1554,18 +1583,14 @@ public class ClusterCommands implements CommandMarker {
       }
       validateResult.setFailureNames(failureNames);
       validateResult.setNoExistFileNames(noExistingFileNamesMap);
+      validateResult.setFailureValues(failureValues);
       return validateResult;
    }
 
-   private void addWhiteListWarning(final String clusterName,
-         ValidateResult whiteListResult, List<String> warningMsgList) {
-      if (whiteListResult.getType() == ValidateResult.Type.WHITE_LIST_NO_EXIST_FILE_NAME) {
-         String noExistingWarningMsg =
-               getValidateWarningMsg(whiteListResult.getNoExistFileNames());
-         if (warningMsgList != null) {
-            warningMsgList.add(noExistingWarningMsg);
-         }
-      } else if (whiteListResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
+   private void addWhiteListWarningOrFailure(final String clusterName,
+         ValidateResult whiteListResult, List<String> warningMsgList,
+         List<String> failedMsgList) {
+      if (whiteListResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_NAME) {
          String noExistingWarningMsg =
                getValidateWarningMsg(whiteListResult.getNoExistFileNames());
          String failureNameWarningMsg =
@@ -1575,6 +1600,8 @@ public class ClusterCommands implements CommandMarker {
             warningMsgList.add(noExistingWarningMsg);
             warningMsgList.add(failureNameWarningMsg);
          }
+      } else if (whiteListResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_VALUE) {
+         failedMsgList.addAll(whiteListResult.getFailureValues());
       }
    }
 

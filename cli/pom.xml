@@ -85,6 +85,11 @@
          <artifactId>testng</artifactId>
          <scope>test</scope>
       </dependency>
+      <dependency>
+         <groupId>jline</groupId>
+         <artifactId>jline</artifactId>
+         <version>2.11</version>
+      </dependency>
    </dependencies>
 
    <build>
@@ -107,6 +112,24 @@
                      <overWriteIfNewer>true</overWriteIfNewer>
                   </configuration>
                </execution>
+               <execution><!-- solve pig jline 0.9.94 dependency-->
+	             <id>copy-model</id>
+	             <phase>prepare-package</phase>
+	             <goals>
+		           <goal>copy</goal>
+	             </goals>
+	             <configuration>
+		           <artifactItems>
+			         <artifactItem>
+				       <groupId>jline</groupId>
+				       <artifactId>jline</artifactId>
+				       <version>0.9.94</version>
+				       <type>jar</type>
+			         </artifactItem>
+		           </artifactItems>
+		           <outputDirectory>${project.build.directory}/lib</outputDirectory>
+	            </configuration>
+              </execution>
             </executions>
          </plugin>
          <plugin>
@@ -122,6 +145,8 @@
                   </manifest>
                   <manifestEntries>
                      <version>${project.version}</version>
+                     <!-- add both jline jars into classpath which 2.11 take higher priority -->
+                     <Class-Path>lib/jline-2.11.jar lib/jline-0.9.94.jar</Class-Path>
                   </manifestEntries>
                </archive>
             </configuration>
@@ -129,7 +154,7 @@
       </plugins>
    </build>
    <repositories>
-   	<repository>
+     <repository>
 		<id>spring-snapshot</id>
 		<url>http://repo.springsource.org/libs-snapshot/</url>
 	</repository>

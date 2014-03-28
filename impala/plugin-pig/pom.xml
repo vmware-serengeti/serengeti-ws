@@ -46,5 +46,11 @@
 			<artifactId>pig</artifactId>
 			<version>${pig.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>jline</groupId>
+			<artifactId>jline</artifactId>
+			<version>0.9.94</version>
+			<scope>runtime</scope>
+		</dependency>
 	</dependencies>
 </project>
