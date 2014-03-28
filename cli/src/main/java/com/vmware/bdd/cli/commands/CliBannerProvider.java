@@ -34,7 +34,7 @@ public class CliBannerProvider extends DefaultBannerProvider implements CommandM
 	/* (non-Javadoc)
 	 * @see org.springframework.shell.plugin.BannerProvider#getBanner()
 	 */
-	@CliCommand(value = { "version" }, help = "Displays current CLI version")
+	//@CliCommand(value = { "version" }, help = "Displays current CLI version")
 	public String getBanner() {
 		StringBuffer buf = new StringBuffer();
 		buf.append("=================================================" + OsUtils.LINE_SEPARATOR);
