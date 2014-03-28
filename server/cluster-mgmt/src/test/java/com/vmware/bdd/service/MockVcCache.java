@@ -25,6 +25,7 @@ import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcObject;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.vim.binding.vim.vm.ConfigInfo;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 
 @MockClass(realClass = VcCache.class)
@@ -34,7 +35,7 @@ public class MockVcCache {
    @Mock
    static public <T extends VcObject> T getIgnoreMissing(String id) {
       if (getFlag) {
-         if (id.equals("create-vm-succ")) {
+         if (id != null && id.equals("create-vm-succ")) {
             VcVirtualMachine vm = Mockito.mock(VcVirtualMachine.class);
             VcHost host = Mockito.mock(VcHost.class);
             Mockito.when(vm.getHost()).thenReturn(host);
@@ -48,6 +49,10 @@ public class MockVcCache {
          } else {
             VcVirtualMachine vm = Mockito.mock(VcVirtualMachine.class);
             Mockito.when(vm.getName()).thenReturn(id);
+            ConfigInfo config = Mockito.mock(ConfigInfo.class);
+            Mockito.when(vm.getConfig()).thenReturn(config);
+            Mockito.when(config.getUuid()).thenReturn("test-uuid");
+            Mockito.when(vm.getId()).thenReturn(id);
             return (T)vm;
          }
       } else {

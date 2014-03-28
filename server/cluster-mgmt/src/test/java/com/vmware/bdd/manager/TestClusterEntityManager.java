@@ -39,6 +39,7 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.spectypes.HadoopRole;
 
 @ContextConfiguration(locations = { "classpath:/spring/*-context.xml" })
 public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
@@ -48,9 +49,6 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
    private static final String HDFS_NODE_0 = "bddCluster-hdfs-0";
    private static final String HDFS_NODE_1 = "bddCluster-hdfs-1";
    private static final String COMPUTE_GROUP = "compute";
-   private static final String HADOOP_ROLE = "hadoop";
-   private static final String DATA_NODE_ROLE = "hadoop-datanode";
-   private static final String COMPUTE_NODE_ROLE = "hadoop-tasktracker";
    private static final String HOST_IP = "10.1.1.1";
 
    @Autowired
@@ -66,7 +64,7 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
 
    }
 
-   private static ClusterEntity assembleClusterEntity(String clusterName) {
+   static ClusterEntity assembleClusterEntity(String clusterName) {
       ClusterEntity cluster = new ClusterEntity(clusterName);
       cluster.setDistro("apache");
       cluster.setTopologyPolicy(TopologyType.NONE);
@@ -86,8 +84,7 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
       hdfsGroup.setHaFlag("on");
 
       ArrayList<String> roleStr = new ArrayList<String>();
-      roleStr.add(HADOOP_ROLE);
-      roleStr.add(DATA_NODE_ROLE);
+      roleStr.add(HadoopRole.HADOOP_DATANODE.toString());
       hdfsGroup.setRoles((new Gson()).toJson(roleStr));
 
       // add a hdfs node
@@ -118,8 +115,7 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
       computeGroup.setHaFlag("on");
 
       roleStr.clear();
-      roleStr.add(HADOOP_ROLE);
-      roleStr.add(COMPUTE_NODE_ROLE);
+      roleStr.add(HadoopRole.HADOOP_TASKTRACKER.toString());
       computeGroup.setRoles((new Gson()).toJson(roleStr));
 
       Set<NodeGroupAssociation> associations =
@@ -133,6 +129,7 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
       associations.add(association);
 
       computeGroup.setGroupAssociations(associations);
+      computeGroup.setNodes(new LinkedList<NodeEntity>());
 
       nodeGroups.add(computeGroup);
 

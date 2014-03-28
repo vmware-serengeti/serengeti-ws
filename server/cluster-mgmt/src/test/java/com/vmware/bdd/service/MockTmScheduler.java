@@ -39,6 +39,7 @@ import com.vmware.bdd.clone.spec.VmCreateSpec;
 import com.vmware.bdd.service.sp.ConfigIOShareSP;
 import com.vmware.bdd.service.sp.CreateResourcePoolSP;
 import com.vmware.bdd.service.sp.DeleteVmByIdSP;
+import com.vmware.bdd.service.sp.SetAutoElasticitySP;
 import com.vmware.bdd.service.sp.StartVmSP;
 import com.vmware.bdd.service.sp.StopVmSP;
 import com.vmware.vim.binding.vim.Folder;
@@ -54,7 +55,8 @@ public class MockTmScheduler {
       DELETE_VM,
       DELETE_FOLDER,
       RECONFIGURE_VM,
-      CREATE_RP
+      CREATE_RP,
+      AUTO_ELASTICITY
    }
 
    private static Map<VmOperation, Boolean> flag = new HashMap<VmOperation, Boolean>();
@@ -104,6 +106,8 @@ public class MockTmScheduler {
          return VmOperation.RECONFIGURE_VM;
       } else if (sp instanceof CreateResourcePoolSP) {
          return VmOperation.CREATE_RP;
+      } else if (sp instanceof SetAutoElasticitySP) {
+         return VmOperation.AUTO_ELASTICITY;
       } else {
          logger.error("unsupported vm opration: " + sp);
          return null;

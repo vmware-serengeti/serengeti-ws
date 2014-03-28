@@ -16,28 +16,73 @@ package com.vmware.bdd.manager;
 
 import static org.testng.Assert.assertTrue;
 
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import mockit.Mock;
 import mockit.MockUp;
+import mockit.Mockit;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.NodeEntity;
+import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.exception.ClusterManagerException;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.service.MockTmScheduler;
+import com.vmware.bdd.service.MockVcCache;
+import com.vmware.bdd.service.MockTmScheduler.VmOperation;
 
+@ContextConfiguration(locations = { "classpath:/spring/*-context.xml" })
+public class TestClusterManager extends AbstractTestNGSpringContextTests {
 
-public class TestClusterManager {
+   private static final String TEST_CLUSTER_NAME = "testClusterMgr";
+   @Autowired
+   private IClusterEntityManager clusterEntityMgr;
+
+   @Autowired
+   private ClusterManager clusterMgr;
+
+   @BeforeMethod
+   public void setMockup() {
+      Mockit.setUpMock(MockValidationUtils.class);
+      Mockit.setUpMock(MockTmScheduler.class);
+      Mockit.setUpMock(MockVcCache.class);
+      MockVcCache.setGetFlag(true);
+   }
+
+   @AfterMethod
+   public void tearDown() {
+      Mockit.tearDownMocks();
+      cleanUpData();
+      MockTmScheduler.cleanFlag();
+      MockVcCache.setGetFlag(false);
+   }
+
+   private void cleanUpData() {
+      ClusterEntity cluster = clusterEntityMgr.findByName(TEST_CLUSTER_NAME);
+      if (cluster != null) {
+         clusterEntityMgr.delete(cluster);
+      }
+   }
 
    @Test
    public void testWriteClusterSpecFileWithUTF8() throws Exception {
@@ -101,5 +146,78 @@ public class TestClusterManager {
          }
       }
       return buff.toString();
+   }
+
+   @Test
+   public void testAsyncSetParamIoPriorityFailed() throws Exception {
+      ClusterEntity cluster =
+            TestClusterEntityManager.assembleClusterEntity(TEST_CLUSTER_NAME);
+      cluster.setStatus(ClusterStatus.RUNNING);
+      clusterEntityMgr.insert(cluster);
+      MockTmScheduler.setFlag(VmOperation.RECONFIGURE_VM, false);
+      try {
+         clusterMgr.asyncSetParam(TEST_CLUSTER_NAME, 3, 1, 4, true,
+               Priority.HIGH);
+         assertTrue(false, "Should get exception but not.");
+      } catch (ClusterManagerException e) {
+         List<NodeEntity> nodes =
+               clusterEntityMgr.findAllNodes(TEST_CLUSTER_NAME);
+         assertTrue(nodes.get(0).isActionFailed(),
+               "Should get action failed, but got "
+                     + nodes.get(0).isActionFailed());
+         assertTrue("test failure".equals(nodes.get(0).getErrMessage()),
+               "Should get error message: test failure, but got "
+                     + nodes.get(0).getErrMessage());
+      }
+   }
+
+   @Test
+   public void testAsyncSetParamAutoElasticityFailed() throws Exception {
+      ClusterEntity cluster =
+            TestClusterEntityManager.assembleClusterEntity(TEST_CLUSTER_NAME);
+      cluster.setStatus(ClusterStatus.RUNNING);
+      cluster.setVhmMasterMoid("vm-001");
+      int i = 0;
+      Set<NodeGroupEntity> groups = cluster.getNodeGroups();
+      for (NodeGroupEntity group : groups) {
+         List<NodeEntity> nodes = group.getNodes();
+         for (NodeEntity node : nodes) {
+            i++;
+            node.setMoId("vm-00" + i);
+         }
+      }
+      clusterEntityMgr.insert(cluster);
+      MockTmScheduler.setFlag(VmOperation.RECONFIGURE_VM, true);
+      MockTmScheduler.setFlag(VmOperation.AUTO_ELASTICITY, false);
+      try {
+         clusterMgr.asyncSetParam(TEST_CLUSTER_NAME, 3, 1, 4, true,
+               Priority.HIGH);
+         assertTrue(false, "Should get exception but not.");
+      } catch (ClusterManagerException e) {
+      }
+   }
+
+
+   @Test
+   public void testAsyncSetParamAutoElasticitySuccess() throws Exception {
+      ClusterEntity cluster =
+            TestClusterEntityManager.assembleClusterEntity(TEST_CLUSTER_NAME);
+      cluster.setStatus(ClusterStatus.RUNNING);
+      cluster.setVhmMasterMoid("vm-001");
+      int i = 0;
+      Set<NodeGroupEntity> groups = cluster.getNodeGroups();
+      for (NodeGroupEntity group : groups) {
+         List<NodeEntity> nodes = group.getNodes();
+         for (NodeEntity node : nodes) {
+            i++;
+            node.setMoId("vm-00" + i);
+         }
+      }
+      clusterEntityMgr.insert(cluster);
+      MockTmScheduler.setFlag(VmOperation.RECONFIGURE_VM, true);
+      MockTmScheduler.setFlag(VmOperation.AUTO_ELASTICITY, true);
+      clusterMgr.asyncSetParam(TEST_CLUSTER_NAME, 3, 1, 4, true,
+            Priority.HIGH);
+      assertTrue(true, "Should get exception but not.");
    }
 }
