@@ -17,7 +17,6 @@ package com.vmware.bdd.cli.commands;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.plugin.support.DefaultBannerProvider;
 import org.springframework.shell.support.util.OsUtils;
 import org.springframework.stereotype.Component;
