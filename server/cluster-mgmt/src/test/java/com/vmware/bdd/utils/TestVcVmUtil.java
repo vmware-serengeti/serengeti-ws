@@ -15,9 +15,16 @@
 package com.vmware.bdd.utils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
+import com.vmware.aurora.composition.DiskSchema;
+import com.vmware.bdd.entity.DiskEntity;
+import com.vmware.bdd.service.MockVcVmUtil;
+import mockit.Mock;
+import mockit.MockUp;
 import mockit.Mockit;
 
 import org.mockito.Mockito;
@@ -207,5 +214,57 @@ public class TestVcVmUtil {
       List<DiskSpec> diskSet = new ArrayList<DiskSpec>();
       diskSet.add(disk);
       return diskSet;
+   }
+
+   @Test
+   public void testGetVolumesByDiskSchema() {
+      DiskSchema.Disk sysDisk = new Disk();
+      sysDisk.type = "OS";
+      sysDisk.externalAddress = "LSI0:0";
+      DiskSchema.Disk swapDisk = new Disk();
+      swapDisk.type = "SWAP";
+      swapDisk.externalAddress = "LSI0:1";
+      DiskSchema.Disk dataDisk0 = new Disk();
+      dataDisk0.type = "DATA";
+      dataDisk0.externalAddress = "PARA0:0";
+      DiskSchema.Disk dataDisk1 = new Disk();
+      dataDisk1.type = "DATA";
+      dataDisk1.externalAddress = "PARA1:0";
+      List<Disk> disks = new ArrayList<Disk>();
+      disks.add(sysDisk);
+      disks.add(swapDisk);
+      disks.add(dataDisk0);
+      disks.add(dataDisk1);
+      Mockit.setUpMock(MockVcVmUtil.class);
+      String volumes = VcVmUtil.getVolumes("vm-01", disks);
+      System.out.println(volumes);
+   }
+
+   @Test
+   public void testGetVolumesByDiskEntities() {
+      DiskEntity sysDisk = new DiskEntity();
+      sysDisk.setName("sys.vmdk");
+      sysDisk.setExternalAddress("LSI0:0");
+      sysDisk.setDiskType("OS");
+      DiskEntity swapDisk = new DiskEntity();
+      swapDisk.setName("swap.vmdk");
+      swapDisk.setExternalAddress("LSI0:1");
+      swapDisk.setDiskType("SWAP");
+      DiskEntity dataDisk0 = new DiskEntity();
+      dataDisk0.setName("data0.vmdk");
+      dataDisk0.setExternalAddress("PARA0:0");
+      dataDisk0.setDiskType("DATA");
+      DiskEntity dataDisk1 = new DiskEntity();
+      dataDisk1.setName("data1.vmdk");
+      dataDisk1.setExternalAddress("PARA1:0");
+      dataDisk1.setDiskType("DATA");
+      Set<DiskEntity> disks = new HashSet<DiskEntity>();
+      disks.add(sysDisk);
+      disks.add(swapDisk);
+      disks.add(dataDisk0);
+      disks.add(dataDisk1);
+      Mockit.setUpMock(MockVcVmUtil.class);
+      String volumes = VcVmUtil.getVolumes("vm-01", disks);
+      System.out.println(volumes);
    }
 }

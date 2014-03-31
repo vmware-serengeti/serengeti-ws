@@ -50,8 +50,8 @@ public class CreateClusterVMStep extends TrackableTasklet {
       if (usedIpSets == null) {
          usedIpSets = new HashMap<String, Set<String>>();
       }
-      boolean isMaprDistro = clusterSpec.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR);
-      boolean success = clusteringService.createVcVms(clusterSpec.getNetworkings(), nodes, usedIpSets, isMaprDistro, statusUpdator);
+      boolean reserveRawDisks = clusterSpec.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR);
+      boolean success = clusteringService.createVcVms(clusterSpec.getNetworkings(), nodes, usedIpSets, reserveRawDisks, statusUpdator);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_CREATE_VM_OPERATION_SUCCESS, success);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_ADDED_NODES_JOB_PARAM, nodes);
       UUID reservationId = getFromJobExecutionContext(chunkContext, JobConstants.CLUSTER_RESOURCE_RESERVATION_ID_JOB_PARAM, UUID.class);

@@ -57,7 +57,7 @@ public class CreateVmPrePowerOn implements IPrePostPowerOn {
       // enable disk UUID
       VcVmUtil.enableDiskUUID(vm);
 
-      addVolumesToBootupConfigs(VcVmUtil.getVolumes(vm, disks));
+      addVolumesToBootupConfigs(VcVmUtil.getVolumes(vm.getId(), disks));
 
       // by default, the share level is NORMAL
       if (!Priority.NORMAL.equals(ioShares)) {

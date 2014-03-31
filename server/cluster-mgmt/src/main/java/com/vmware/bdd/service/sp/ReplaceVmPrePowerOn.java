@@ -130,7 +130,7 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
 
             // disk fix does support MapR distro, just set this flag to "false"
             bootupConfigs.put(Constants.GUEST_VARIABLE_RESERVE_RAW_DISKS, String.valueOf(false));
-            bootupConfigs.put(Constants.GUEST_VARIABLE_VOLUMES, VcVmUtil.getVolumes(vm, diskSchema.getDisks()));
+            bootupConfigs.put(Constants.GUEST_VARIABLE_VOLUMES, VcVmUtil.getVolumes(vm.getId(), diskSchema.getDisks()));
             vm.setGuestConfigs(bootupConfigs);
 
             // the following two steps should be in a transaction theoretically

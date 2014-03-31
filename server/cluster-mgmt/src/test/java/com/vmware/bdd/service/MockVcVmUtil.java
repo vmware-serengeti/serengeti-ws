@@ -25,6 +25,7 @@ import com.vmware.bdd.utils.VcVmUtil;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @MockClass(realClass = VcVmUtil.class)
 public class MockVcVmUtil {
@@ -93,5 +94,10 @@ public class MockVcVmUtil {
    @Mock
    public static boolean validateCPU(final String vmId, final int cpuNum) {
       return true;
+   }
+
+   @Mock
+   public static String fetchDiskUUID(final String vmMoid, final String diskExtAddress) {
+      return UUID.randomUUID().toString();
    }
 }

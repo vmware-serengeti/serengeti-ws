@@ -125,13 +125,13 @@ public interface IClusteringService {
     * @param networkAdds
     * @param vNodes
     * @param occupiedMgrIps
-    * @param isMaprDistro
+    * @param reserveRawDisks
     * @param statusUpdater
     * @return
     */
    public boolean createVcVms(List<NetworkAdd> networkAdds,
          List<BaseNode> vNodes, Map<String, Set<String>> occupiedMgrIps,
-         boolean isMaprDistro, StatusUpdater statusUpdater);
+         boolean reserveRawDisks, StatusUpdater statusUpdater);
 
    /**
     * Initialize clustering service

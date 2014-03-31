@@ -685,14 +685,25 @@ public class VcVmUtil {
             .toString());
    }
 
-   public static String getVolumes(VcVirtualMachine vm, List<Disk> disks) {
+   public static String getVolumes(String moid, List<Disk> disks) {
       final List<String> volumes = new ArrayList<String>();
       if (disks != null && !disks.isEmpty()) {
          for (DiskSchema.Disk disk : disks) {
             if (StorageRead.DiskType.DATA_DISK.getType().equals(disk.type)
                   || StorageRead.DiskType.SWAP_DISK.getType().equals(disk.type))
-               volumes.add(disk.type + ":" + VcVmUtil.fetchDiskUUID(vm.getId(), disk.externalAddress));
+               volumes.add(disk.type + ":" + VcVmUtil.fetchDiskUUID(moid, disk.externalAddress));
          }
+      }
+      return (new Gson()).toJson(volumes);
+   }
+
+   public static String getVolumes(String moid, Set<DiskEntity> diskEntities) {
+      final List<String> volumes = new ArrayList<String>();
+      for (DiskEntity diskEntity : diskEntities) {
+         if (StorageRead.DiskType.DATA_DISK.getType().equals(diskEntity.getDiskType())
+               || StorageRead.DiskType.SWAP_DISK.getType().equals(diskEntity.getDiskType()))
+            volumes.add(diskEntity.getDiskType() + ":" + VcVmUtil.fetchDiskUUID(moid, diskEntity.getExternalAddress()));
+
       }
       return (new Gson()).toJson(volumes);
    }

@@ -1942,16 +1942,10 @@ public class ClusteringService implements IClusteringService {
    public boolean startSingleVM(String clusterName, String nodeName,
          StatusUpdater statusUpdator) {
       NodeEntity node = this.clusterEntityMgr.findNodeByName(nodeName);
-      boolean isMaprDistro = clusterEntityMgr.findByName(clusterName).getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR);
+      boolean reserveRawDisks = clusterEntityMgr.findByName(clusterName).getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR);
       // For node scale up/down, the disk info in db is not yet updated when powering on it, need to fetch from VC
-      final List<String> volumes = new ArrayList<String>();
-      for (DiskEntity diskEntity : node.getDisks()) {
-         if (StorageRead.DiskType.DATA_DISK.getType().equals(diskEntity.getDiskType())
-               || StorageRead.DiskType.SWAP_DISK.getType().equals(diskEntity.getDiskType()))
-            volumes.add(diskEntity.getDiskType() + ":" + VcVmUtil.fetchDiskUUID(node.getMoId(), diskEntity.getExternalAddress()));
-
-      }
-      StartVmSP.StartVmPrePowerOn prePowerOn = new StartVmSP.StartVmPrePowerOn(isMaprDistro, (new Gson()).toJson(volumes));
+      StartVmSP.StartVmPrePowerOn prePowerOn = new StartVmSP.StartVmPrePowerOn(reserveRawDisks,
+            VcVmUtil.getVolumes(node.getMoId(), node.getDisks()));
       QueryIpAddress query =
             new QueryIpAddress(node.fetchAllPortGroups(),
                   Constants.VM_POWER_ON_WAITING_SEC);
