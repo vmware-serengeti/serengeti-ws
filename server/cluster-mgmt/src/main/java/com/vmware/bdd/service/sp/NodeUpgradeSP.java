@@ -17,6 +17,7 @@ package com.vmware.bdd.service.sp;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.utils.ShellCommandExecutor;
 import org.apache.log4j.Logger;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.VcCache;
@@ -27,7 +28,6 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Constants;
-import com.vmware.bdd.utils.ExecCommandUtil;
 import com.vmware.bdd.utils.VcVmUtil;
 
 /**
@@ -38,6 +38,7 @@ public class NodeUpgradeSP implements Callable<Void> {
    private static final Logger logger = Logger.getLogger(NodeUpgradeSP.class);
 
    private NodeEntity node;
+   private static final int connTimeoutInSec = 600;
 
    public NodeUpgradeSP(NodeEntity node, String serverVersion) {
       this.node = node;
@@ -69,23 +70,28 @@ public class NodeUpgradeSP implements Callable<Void> {
       return node;
    }
 
-   private void upgradeNodeSteps(String nodeVmName, String nodeIp) {
+   private void upgradeNodeSteps(String nodeVmName, String nodeIp){
 
       String sshUser = Configuration.getString(Constants.SSH_USER_CONFIG_NAME, Constants.DEFAULT_SSH_USER_NAME);
 
       try {
 
          // Copy node upgrade tarball to node
-         String uploadTarballCommand = "scp " + Constants.NODE_UPGRADE_FILE_PATH + Constants.NODE_UPGRADE_TARBALL_FILE_NAME + " " + sshUser + "@" + nodeIp + ":/tmp/";
-         ExecCommandUtil.execCmd(uploadTarballCommand, Constants.NODE_ACTION_DOWNLOAD_PACKAGES);
+         String uploadTarballCommand = "scp " + Constants.NODE_UPGRADE_FILE_PATH
+               + Constants.NODE_UPGRADE_TARBALL_FILE_NAME + " " + sshUser + "@" + nodeIp + ":/tmp/";
+         ShellCommandExecutor.execCmd(uploadTarballCommand, null, null,
+               connTimeoutInSec, Constants.NODE_ACTION_DOWNLOAD_PACKAGES);
 
          // Copy node upgrade script file to node
-         String uploadScriptFileCommand = "scp " + Constants.NODE_UPGRADE_FILE_PATH + Constants.NODE_UPGRADE_SCRIPT_FILE_NAME + " " + sshUser + "@" + nodeIp + ":/tmp/";
-         ExecCommandUtil.execCmd(uploadScriptFileCommand, Constants.NODE_ACTION_DOWNLOAD_PACKAGES);
+         String uploadScriptFileCommand = "scp " + Constants.NODE_UPGRADE_FILE_PATH
+               + Constants.NODE_UPGRADE_SCRIPT_FILE_NAME + " " + sshUser + "@" + nodeIp + ":/tmp/";
+         ShellCommandExecutor.execCmd(uploadScriptFileCommand, null, null,
+               connTimeoutInSec, Constants.NODE_ACTION_DOWNLOAD_PACKAGES);
 
          // Upgrade cluster node
          String upgradeNodeCommand = "ssh -tt " + sshUser + "@" + nodeIp + " 'sudo bash /tmp/" + Constants.NODE_UPGRADE_SCRIPT_FILE_NAME + "'";
-         ExecCommandUtil.execCmd(upgradeNodeCommand, Constants.NODE_ACTION_INSTALL_PACKAGES);
+         ShellCommandExecutor.execCmd(upgradeNodeCommand, null, null,
+               0, Constants.NODE_ACTION_INSTALL_PACKAGES);
 
       } catch (Exception e) {
          logger.error("Failed to run upgrade script of cluster node " + nodeVmName);
