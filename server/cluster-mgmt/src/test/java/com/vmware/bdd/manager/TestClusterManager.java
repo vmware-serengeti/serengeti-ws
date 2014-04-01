@@ -165,7 +165,7 @@ public class TestClusterManager extends AbstractTestNGSpringContextTests {
          assertTrue(nodes.get(0).isActionFailed(),
                "Should get action failed, but got "
                      + nodes.get(0).isActionFailed());
-         assertTrue("test failure".equals(nodes.get(0).getErrMessage()),
+         assertTrue(nodes.get(0).getErrMessage().endsWith("test failure"),
                "Should get error message: test failure, but got "
                      + nodes.get(0).getErrMessage());
       }
