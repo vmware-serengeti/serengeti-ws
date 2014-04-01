@@ -30,14 +30,15 @@ import com.vmware.aurora.composition.concurrent.Scheduler.ProgressCallback;
 import com.vmware.bdd.clone.spec.VmCreateResult;
 import com.vmware.bdd.clone.spec.VmCreateSpec;
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.vmclone.service.intf.IClusterCloneService;
 import com.vmware.vim.binding.vim.fault.VmFaultToleranceOpIssuesList;
 
 /**
  * vm clone service
- * 
+ *
  * @author tli
- * 
+ *
  */
 @Service
 public class SimpleClusterCloneService implements IClusterCloneService {
@@ -110,6 +111,7 @@ public class SimpleClusterCloneService implements IClusterCloneService {
 
    private void processException(VmCreateResult<VmCreateSpec> node, Throwable throwable) {
       node.setErrMessage(throwable.getMessage());
+      node.setErrTimeStamp(CommonUtil.getCurrentTimestamp());
       while (throwable.getCause() != null) {
          throwable = throwable.getCause();
          if (throwable instanceof VmFaultToleranceOpIssuesList) {

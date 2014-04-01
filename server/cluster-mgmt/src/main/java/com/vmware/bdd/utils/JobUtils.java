@@ -47,7 +47,7 @@ public class JobUtils {
 
    /**
     * Query out existing nodes in one cluster
-    * 
+    *
     * @param cluster
     * @return
     */
@@ -127,7 +127,7 @@ public class JobUtils {
     * separate non exist node from existing node list. The condition is vcVm is
     * null. also add used ip address to a set, that will be used in later create
     * VM method.
-    * 
+    *
     * @param existingNodes
     * @param deletedNodes
     * @param occupiedIpSets
@@ -146,7 +146,7 @@ public class JobUtils {
    }
 
    /**
-    * 
+    *
     * @param occupiedIpSets
     * @param node
     * @param add
@@ -178,7 +178,7 @@ public class JobUtils {
     * separate vc unreachable node from existing node list. if the node is
     * powered off, or powered on but ip address is not accessible, remove the
     * node from good nodes
-    * 
+    *
     * @param existingNodes
     * @param deletedNodes
     * @param occupiedIpSets
@@ -226,7 +226,7 @@ public class JobUtils {
                   + " cannot be controlled through VC. Remove it from VC manually, and then repeat the operarion.");
             throw ClusteringServiceException.VM_UNAVAILABLE(node.getVmName());
          }
-         // verify from VC 
+         // verify from VC
          VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
 
          if (expectedStatus == NodeStatus.VM_READY) {
@@ -272,7 +272,7 @@ public class JobUtils {
             logger.debug("Node verify failed for " + node.getVmName()
                   + ", for " + e.getMessage());
             if (node.getErrMessage() == null || node.getErrMessage().isEmpty()) {
-               node.setErrMessage(e.getMessage());
+               node.setErrMessage(CommonUtil.getCurrentTimestamp() + " " + e.getMessage());
                logger.debug("Set node error message for node "
                      + node.getVmName() + " to: " + e.getMessage());
             }

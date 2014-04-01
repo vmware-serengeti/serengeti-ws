@@ -116,7 +116,7 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
             JobConstants.CLUSTER_EXCLUSIVE_WRITE_LOCKED, true);
 
       addNodeToMetaData(clusterName, addedNodes, deletedNodeNames);
-      removeDeletedNode(clusterName, deletedNodes,deletedNodeNames);
+      removeDeletedNode(clusterName, deletedNodes, deletedNodeNames);
 
       /*
        * Verify node status and update error message
@@ -167,7 +167,7 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
     * Add successfully created node, which information is got from vc creation.
     * If deleted any VM, or nodes during vm creation step, which may violate
     * placement policy. We'll remove the node if it's not re-created.
-    * 
+    *
     * @param clusterName
     * @param addedNodes
     * @param deletedNodeNames

@@ -1194,9 +1194,9 @@ public class ClusteringService implements IClusteringService {
             success = false;
             node.setSuccess(false);
             if (result.getErrMessage() != null) {
-               node.setErrMessage(result.getErrMessage());
+               node.setErrMessage(result.getErrTimestamp() + " " + result.getErrMessage());
             } else {
-               node.setErrMessage(node.getNodeAction());
+               node.setErrMessage(result.getErrTimestamp() + " " + node.getNodeAction());
             }
          } else {
             total++;
@@ -1604,7 +1604,7 @@ public class ClusteringService implements IClusteringService {
       if (throwable == null) {
          return null;
       }
-      return throwable.getMessage();
+      return CommonUtil.getCurrentTimestamp() + " " + throwable.getMessage();
    }
 
    public boolean removeBadNodes(ClusterCreate cluster,
@@ -1926,7 +1926,7 @@ public class ClusteringService implements IClusteringService {
             } else if (result[i].throwable != null) {
                logger.error("Failed to reconfigure vm", result[i].throwable);
                String nodeName = targetNodes.get(i).getVmName();
-               String message = result[i].throwable.getMessage();
+               String message = CommonUtil.getCurrentTimestamp() + " " + result[i].throwable.getMessage();
                failedNodes.put(nodeName, message);
             }
          }

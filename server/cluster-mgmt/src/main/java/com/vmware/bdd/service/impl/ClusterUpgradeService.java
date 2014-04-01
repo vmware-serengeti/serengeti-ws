@@ -17,6 +17,7 @@ import com.vmware.bdd.service.IClusterUpgradeService;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
 import com.vmware.bdd.service.sp.NodeUpgradeSP;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
 public class ClusterUpgradeService implements IClusterUpgradeService {
@@ -118,7 +119,7 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
                updateNodeData(node);
                ++total;
             } else if (nodeUpgradeSPException != null) {
-               updateNodeData(node, false, nodeUpgradeSPException.getMessage());
+               updateNodeData(node, false, nodeUpgradeSPException.getMessage(), CommonUtil.getCurrentTimestamp());
                logger.error("Failed to Upgrade cluster Node " + node.getVmName(), nodeUpgradeSPException);
                success = false;
             }
@@ -159,11 +160,11 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
    }
 
    private void updateNodeData(NodeEntity node) {
-      updateNodeData(node, true, null);
+      updateNodeData(node, true, null, null);
    }
 
    @Transactional
-   private void updateNodeData(NodeEntity node, boolean upgraded, String errorMessage) {
+   private void updateNodeData(NodeEntity node, boolean upgraded, String errorMessage, String errorTimestamp) {
       node = clusterEntityMgr.getNodeWithNicsByMobId(node.getMoId());
       String nodeVmName = node.getVmName();
       if (upgraded) {
@@ -181,9 +182,9 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
          node.setActionFailed(true);
          String[] messages = errorMessage.split(":");
          if (messages != null && messages.length > 0) {
-            node.setErrMessage(messages[messages.length-1]);
+            node.setErrMessage(errorTimestamp + " " + messages[messages.length-1]);
          } else {
-            node.setErrMessage("Upgrading node " + nodeVmName + " failed.");
+            node.setErrMessage(errorTimestamp + " " + "Upgrading node " + nodeVmName + " failed.");
          }
          clusterEntityMgr.update(node);
       }

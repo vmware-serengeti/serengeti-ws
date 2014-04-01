@@ -23,8 +23,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -241,6 +243,10 @@ public class CommonUtil {
          logger.error(e.getMessage(), e);
          return paramName;
       }
+   }
+
+   public static String getCurrentTimestamp() {
+      return "[" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(Calendar.getInstance().getTime()) + "]";
    }
 
 }

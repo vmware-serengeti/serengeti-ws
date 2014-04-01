@@ -17,11 +17,16 @@ package com.vmware.bdd.utils;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 import static org.testng.AssertJUnit.assertFalse;
+import static org.testng.AssertJUnit.assertNotNull;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.vmware.bdd.spectypes.HadoopRole;
+
 import org.testng.annotations.Test;
 
 public class CommonUtilTest {
@@ -160,7 +165,7 @@ public class CommonUtilTest {
       roles.add(HadoopRole.MAPR_NFS_ROLE.toString());
       assertTrue(!CommonUtil.isComputeOnly(roles, distroVendor));
    }
-   
+
    @Test
    public void testMakeVmMemoryDivisibleBy4() {
       long max = Long.MAX_VALUE;
@@ -182,6 +187,14 @@ public class CommonUtilTest {
             "%EB%8D%B0%EC%9D%B4%ED%84%B0%EC%A0%80%EC%9E%A5%EC%86%8C1");
       assertEquals(CommonUtil.encode("数据存储1"),
             "%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A81");
+   }
+
+   @Test
+   public void testGetTimestamp() throws ParseException {
+      String dateStr = CommonUtil.getCurrentTimestamp();
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+      Date date = simpleDateFormat.parse(dateStr.substring(1, dateStr.length()-1));
+      assertNotNull(date);
    }
 
 }

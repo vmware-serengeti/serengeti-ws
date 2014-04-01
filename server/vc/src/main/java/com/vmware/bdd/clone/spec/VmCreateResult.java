@@ -16,15 +16,17 @@ package com.vmware.bdd.clone.spec;
 
 /**
  * vm creation result
- * 
+ *
  * @author line
- * 
+ *
  */
 public class VmCreateResult<T extends Location> {
 
    private T spec;
 
    private String errMessage;
+
+   private String errTimestamp;
 
    private boolean success;
 
@@ -42,6 +44,14 @@ public class VmCreateResult<T extends Location> {
 
    public void setErrMessage(String errMessage) {
       this.errMessage = errMessage;
+   }
+
+   public String getErrTimestamp() {
+      return errTimestamp;
+   }
+
+   public void setErrTimeStamp(String errTimestamp) {
+      this.errTimestamp = errTimestamp;
    }
 
    public boolean isSuccess() {
