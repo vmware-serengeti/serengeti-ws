@@ -19,10 +19,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
-import com.vmware.bdd.service.impl.ClusterUpgradeService;
 import com.vmware.bdd.service.sp.NodePowerOnRequest;
 import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
 
 import com.vmware.aurora.exception.AuroraException;
 import com.vmware.aurora.global.Configuration;
@@ -54,8 +52,12 @@ import com.vmware.vim.binding.vim.event.VmEvent;
 import com.vmware.vim.binding.vim.vm.FaultToleranceSecondaryConfigInfo;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import com.vmware.vim.binding.vmodl.fault.ManagedObjectNotFound;
+import static com.vmware.vim.binding.vim.VirtualMachine.PowerState;
 
 public class VmEventManager implements IEventProcessor {
+
+   private static final int WAIT_FOR_VM_STATE_TIMEOUT_SECS = 60;
+   private static final int WAIT_FOR_VM_STATE_SLEEP_INTERVAL_SECS = 1;
 
    public static class VcEventWrapper implements IEventWrapper{
       private VcEventType type;
@@ -374,12 +376,15 @@ public class VmEventManager implements IEventProcessor {
          }
          case VmPoweredOn: {
             logger.debug("vm is powered on");
-            refreshNodeWithAction(moId, true, Constants.NODE_ACTION_WAITING_IP,
-                  "Powered On");
-            if (external) {
-               NodePowerOnRequest request =
-                     new NodePowerOnRequest(lockMgr, moId);
-               CmsWorker.addRequest(WorkQueue.VC_TASK_NO_DELAY, request);
+            // ignore this event if waitForPowerState failed
+            if (waitForPowerState(moId, PowerState.poweredOn)) {
+               refreshNodeWithAction(moId, true, Constants.NODE_ACTION_WAITING_IP,
+                     "Powered On");
+               if (external) {
+                  NodePowerOnRequest request =
+                        new NodePowerOnRequest(lockMgr, moId);
+                  CmsWorker.addRequest(WorkQueue.VC_TASK_NO_DELAY, request);
+               }
             }
 
             break;
@@ -394,7 +399,9 @@ public class VmEventManager implements IEventProcessor {
             break;
          }
          case VmPoweredOff: {
-            refreshNodeWithAction(moId, true, null, "Powered Off");
+            if (waitForPowerState(moId, PowerState.poweredOff)) {
+               refreshNodeWithAction(moId, true, null, "Powered Off");
+            }
             break;
          }
          case VmConnected: {
@@ -463,6 +470,36 @@ public class VmEventManager implements IEventProcessor {
       } catch (ManagedObjectNotFound exp) {
          VcUtil.processNotFoundException(exp, moId, logger);
       }
+   }
+
+   private boolean waitForPowerState(final String moid, final PowerState state) {
+      // only handle poweredOff or PoweredOn
+      AuAssert.check(state == PowerState.poweredOff || state == PowerState.poweredOn);
+      final VcVirtualMachine vm = VcCache.getIgnoreMissing(moid);
+      if (vm == null) {
+         return false;
+      }
+
+      int timeout = WAIT_FOR_VM_STATE_TIMEOUT_SECS;
+      try {
+         while (timeout > 0) {
+            // udpate VM's runtime state from VC
+            vm.updateRuntime();
+            // If runtime state matches the claimed power state, done.
+            if (((state == PowerState.poweredOn) && vm.isPoweredOn())
+                  || (state == PowerState.poweredOff && vm.isPoweredOff())) {
+               logger.info("synced power state " + state + " on vm: " + moid);
+               return true;
+            }
+
+            logger.debug("syncing power state " + state + " on vm: " + moid);
+            timeout -= WAIT_FOR_VM_STATE_SLEEP_INTERVAL_SECS;
+            Thread.sleep(WAIT_FOR_VM_STATE_SLEEP_INTERVAL_SECS * 1000);
+         }
+      } catch (Exception e) {
+         logger.error(e.getMessage());
+      }
+      return false;
    }
 
    private void refreshNodeWithAction(String moId, boolean setAction,
