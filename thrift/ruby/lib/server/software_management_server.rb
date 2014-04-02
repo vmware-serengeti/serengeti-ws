@@ -14,15 +14,14 @@
 #
 
 require 'server/software_management_handler'
-require 'logger'
+require 'simple_logger'
 
 module Software
   module Mgmt
     module Thrift
       class SoftwareManagementServer
-      
         def log
-          @log ||= Logger.new(STDOUT)
+          @log ||= SimpleLogger.new_logger(STDOUT)
         end
 
         def run(serengetiHome,configFile,listenHost,listenPort)

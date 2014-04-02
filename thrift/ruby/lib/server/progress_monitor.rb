@@ -18,7 +18,7 @@ require 'chef'
 require 'chef/knife'
 require 'ironfan'
 require 'ironfan/monitor'
-require 'logger'
+require 'simple_logger'
 
 module Software
   module Mgmt
@@ -29,7 +29,7 @@ module Software
         ERROR_BOOTSTRAP_FAILURE = "Bootstrapping cluster %s failed"
 
         def log
-          @log ||= Logger.new(STDOUT)
+          @log ||= SimpleLogger.new_logger(STDOUT)
         end
 
         def getClusterOperationStatus(targetName, withDetail = false)

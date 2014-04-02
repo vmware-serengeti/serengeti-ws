@@ -9,17 +9,7 @@ Gem::Specification.new do |s|
     "LICENSE",
     "README.rdoc"
   ]
-  s.files = [
-    "LICENSE",
-    "README.rdoc",
-    "software-management.gemspec",
-    "lib/server/software_management_server.rb",
-    "lib/server/software_management_handler.rb",
-    "lib/server/progress_monitor.rb",
-    "lib/software_management.rb",
-    "lib/software_management_types.rb",
-    "lib/software_management_constants.rb"
-  ]
+  s.files = `git ls-files`.split("\n")
   s.homepage = "http://serengeti.cloudfoundry.org"
   s.licenses = ["apachev2"]
   s.summary = "Expose Thrift service for software management"

@@ -19,7 +19,7 @@ require 'ironfan'
 require 'ironfan/monitor'
 require 'software_management'
 require 'server/progress_monitor'
-require 'logger'
+require 'simple_logger'
 
 module Software
   module Mgmt
@@ -31,7 +31,7 @@ module Software
         attr_reader :serengetiHome, :configFile
        
         def log
-          @log ||= Logger.new(STDOUT)
+          @log ||= SimpleLogger.new_logger(STDOUT)
         end
 
         def initialize(serengetiHome, configFile)
