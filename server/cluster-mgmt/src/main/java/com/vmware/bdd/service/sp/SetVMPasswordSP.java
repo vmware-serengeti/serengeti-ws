@@ -18,12 +18,12 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.utils.ShellCommandExecutor;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.SSHUtil;
-import com.vmware.bdd.utils.ExecCommandUtil;
 /**
  * Store Procedure of setting password for a vm
  */
@@ -165,7 +165,7 @@ public class SetVMPasswordSP implements Callable<Void> {
       String password = Configuration.getString(Constants.SERENGETI_DEFAULT_PASSWORD);
       String cmd = script + " " + hostIP + " " + user + " " + password;
       try {
-         ExecCommandUtil.execCmd(cmd, Constants.MSG_SETTING_UP_PASSWORDLESS_LOGIN);
+         ShellCommandExecutor.execCmd(cmd, null, null, 0, Constants.MSG_SETTING_UP_PASSWORDLESS_LOGIN);
       } catch (Exception e) {
          logger.error(e.getStackTrace());
       }
