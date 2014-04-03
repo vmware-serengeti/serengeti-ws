@@ -45,8 +45,29 @@ public class CommonClusterExpandPolicy {
 
    private static void initTemplateValues() {
       templateStorage = new int[GroupType.values().length][InstanceType.values().length];
-      
-      int value = setTemplateStorage("storage.mastergroup.extralarge",
+      int value;
+
+      value = setTemplateStorage("storage.defaultgroup.extralarge",
+            GroupType.DEFAULT_GROUP.ordinal(), InstanceType.EXTRA_LARGE.ordinal(), 120);
+      templateStorage[GroupType.DEFAULT_GROUP.ordinal()][InstanceType.EXTRA_LARGE.ordinal()] = value;
+      logger.debug("extra large storage of default group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.defaultgroup.large",
+            GroupType.DEFAULT_GROUP.ordinal(), InstanceType.LARGE.ordinal(), 80);
+      templateStorage[GroupType.DEFAULT_GROUP.ordinal()][InstanceType.LARGE.ordinal()] = value;
+      logger.debug("large storage of default group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.defaultgroup.medium",
+            GroupType.DEFAULT_GROUP.ordinal(), InstanceType.MEDIUM.ordinal(), 40);
+      templateStorage[GroupType.DEFAULT_GROUP.ordinal()][InstanceType.MEDIUM.ordinal()] = value;
+      logger.debug("medium storage of default group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.defaultgroup.small",
+            GroupType.DEFAULT_GROUP.ordinal(), InstanceType.SMALL.ordinal(), 20);
+      templateStorage[GroupType.DEFAULT_GROUP.ordinal()][InstanceType.SMALL.ordinal()] = value;
+      logger.debug("small storage of default group  is " + value + "GB.");
+
+      value = setTemplateStorage("storage.mastergroup.extralarge",
             GroupType.MASTER_GROUP.ordinal(), InstanceType.EXTRA_LARGE.ordinal(), 200);
       templateStorage[GroupType.MASTER_JOBTRACKER_GROUP.ordinal()][InstanceType.EXTRA_LARGE.ordinal()] = value;
       templateStorage[GroupType.YARN_RESOURCEMANAGER_GROUP.ordinal()][InstanceType.EXTRA_LARGE.ordinal()] = value;
