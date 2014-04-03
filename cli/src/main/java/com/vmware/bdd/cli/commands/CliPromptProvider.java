@@ -16,18 +16,23 @@ package com.vmware.bdd.cli.commands;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.shell.plugin.support.DefaultPromptProvider;
+import org.springframework.shell.plugin.PromptProvider;
 import org.springframework.stereotype.Component;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class CliPromptProvider extends DefaultPromptProvider {
-	/* (non-Javadoc)
-	 * @see org.springframework.shell.plugin.PromptProvider#getPromptText()
-	 */
-	@Override
-	public String getPrompt() {		
-		return "serengeti>";
-	}
+public class CliPromptProvider implements PromptProvider {
+   /* (non-Javadoc)
+    * @see org.springframework.shell.plugin.PromptProvider#getPromptText()
+    */
+   @Override
+   public String getPrompt() {		
+      return "serengeti>";
+   }
+
+   @Override
+   public String getProviderName() {
+      return "Serengeti CLI";
+   }
 
 }

@@ -17,7 +17,7 @@ package com.vmware.bdd.cli.commands;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.plugin.support.DefaultBannerProvider;
+import org.springframework.shell.plugin.BannerProvider;
 import org.springframework.shell.support.util.OsUtils;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +28,7 @@ import com.vmware.bdd.utils.Constants;
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class CliBannerProvider extends DefaultBannerProvider implements CommandMarker {
+public class CliBannerProvider implements BannerProvider, CommandMarker {
 
 	/* (non-Javadoc)
 	 * @see org.springframework.shell.plugin.BannerProvider#getBanner()
@@ -64,7 +64,7 @@ public class CliBannerProvider extends DefaultBannerProvider implements CommandM
 		return "Welcome to Serengeti CLI";
 	}
 	
-	public String name() {
+	public String getProviderName() {
 	   return "Serengeti CLI";
 	}
 }

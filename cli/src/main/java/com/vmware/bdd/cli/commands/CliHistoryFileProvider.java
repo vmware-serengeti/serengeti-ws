@@ -17,16 +17,20 @@ package com.vmware.bdd.cli.commands;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.shell.plugin.support.DefaultHistoryFileNameProvider;
+import org.springframework.shell.plugin.HistoryFileNameProvider;
 import org.springframework.stereotype.Component;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class CliHistoryFileProvider extends DefaultHistoryFileNameProvider {
+public class CliHistoryFileProvider implements HistoryFileNameProvider {
 
-	@Override
-	public String getHistoryFileName() {
-		return "cli.history";
-	}
+   @Override
+   public String getHistoryFileName() {
+      return "cli.history";
+   }
+
+   public String getProviderName() {
+      return "Serengeti CLI";
+   }
 
 }
