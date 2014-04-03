@@ -158,9 +158,11 @@ public class AppConfigValidationFactory {
        if (configFileName.equals(Constants.FAIR_SCHEDULER_FILE_NAME)) {
           Map<String, Object> configPropertyMap = (Map<String, Object>) configProperties;
           String xmlContents = (String)configPropertyMap.get(Constants.FAIR_SCHEDULER_FILE_ATTRIBUTE);
-          checkFairSchedulerXmlFormat(xmlContents, validateResult);
-          if (!validateResult.getFailureValues().isEmpty()) {
-             validateResult.setType(ValidateResult.Type.WHITE_LIST_INVALID_VALUE);
+          if (xmlContents != null) {
+             checkFairSchedulerXmlFormat(xmlContents, validateResult);
+             if (!validateResult.getFailureValues().isEmpty()) {
+                validateResult.setType(ValidateResult.Type.WHITE_LIST_INVALID_VALUE);
+             }
           }
        }
    }

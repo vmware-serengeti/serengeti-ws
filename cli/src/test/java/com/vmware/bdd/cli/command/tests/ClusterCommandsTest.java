@@ -674,6 +674,13 @@ public class ClusterCommandsTest extends MockRestServer {
             HttpStatus.NO_CONTENT, "");
       clusterCommands.configCluster("cluster1", "src/test/resources/wrong_fair_scheduler_config.json", false, true);
 
+      //test empty configuration
+      setup();
+      buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
+            mapper.writeValueAsString(cr1));
+      buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/config", HttpMethod.PUT,
+            HttpStatus.NO_CONTENT, "");
+      clusterCommands.configCluster("cluster1", "src/test/resources/empty_hadoop_config.json", false, true);
       CookieCache.clear();
    }
 

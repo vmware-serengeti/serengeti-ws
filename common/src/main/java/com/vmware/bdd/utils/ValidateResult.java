@@ -14,8 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,8 +31,8 @@ public class ValidateResult {
    }
 
    private Type type = Type.VALID;
-   private List<String> failureNames = new LinkedList<String>(); // configuration name list
-   private List<String> failureValues = new LinkedList<String>(); // configuration value list
+   private List<String> failureNames = new ArrayList<String>(); // configuration name list
+   private List<String> failureValues = new ArrayList<String>(); // configuration value list
    private Map<String, List<String>> noExistFileNames = new HashMap<String, List<String>>();
    private Map<String,List<String>> blackPropertisMap = new HashMap<String, List<String>>(); // It utilize to store propertis which it in the blacklist (key:filename,value:property name list).
 
@@ -81,7 +81,7 @@ public class ValidateResult {
       if (noExistFileNames != null) {
          List<String> fileNames = noExistFileNames.get(configType);
          if (fileNames == null) {
-            fileNames = new LinkedList<String>();
+            fileNames = new ArrayList<String>();
          }
          fileNames.add(noExistFileName);
          noExistFileNames.put(configType, fileNames);
@@ -93,7 +93,7 @@ public class ValidateResult {
       if (fileNames != null) {
          return fileNames;
       } else {
-         return new LinkedList<String>();
+         return new ArrayList<String>();
       }
    }
 
@@ -111,7 +111,7 @@ public class ValidateResult {
             List<String> propertyList = blackPropertisMap.get(fileName);
             propertyList.add(propertyName);
          } else {
-            List<String> propertyList = new LinkedList<String>();
+            List<String> propertyList = new ArrayList<String>();
             propertyList.add(propertyName);
             blackPropertisMap.put(fileName, propertyList);
          }

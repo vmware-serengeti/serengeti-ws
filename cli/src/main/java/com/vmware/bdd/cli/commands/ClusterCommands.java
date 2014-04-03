@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -1480,9 +1479,8 @@ public class ClusterCommands implements CommandMarker {
          List<String> failedMsgList) {
       // validate blacklist
       ValidateResult blackListResult = validateBlackList(cluster);
-      if (blackListResult != null) {
-         addBlackListWarning(blackListResult, warningMsgList);
-      }
+      addBlackListWarning(blackListResult, warningMsgList);
+
       if (!skipConfigValidation) {
          // validate whitelist
          ValidateResult whiteListResult = validateWhiteList(cluster);
@@ -1518,18 +1516,30 @@ public class ClusterCommands implements CommandMarker {
                      cluster.getConfiguration());
          if (vr.getType() != ValidateResult.Type.VALID) {
             validateResult.setType(vr.getType());
-            validateResult.setFailureNames(vr.getFailureNames());
-            validateResult.setFailureValues(vr.getFailureValues());
-            validateResult.setNoExistFileNames(vr.getNoExistFileNames());
+            if (!vr.getFailureNames().isEmpty()) {
+               validateResult.setFailureNames(vr.getFailureNames());
+            }
+            if (!vr.getFailureValues().isEmpty()) {
+               validateResult.setFailureValues(vr.getFailureValues());
+            }
+            if (!vr.getNoExistFileNames().isEmpty()) {
+               validateResult.setNoExistFileNames(vr.getNoExistFileNames());
+            }
          }
       }
-      List<String> failureNames = new LinkedList<String>();
+      List<String> failureNames = new ArrayList<String>();
       Map<String, List<String>> noExistingFileNamesMap =
             new HashMap<String, List<String>>();
-      List<String> failureValues = new LinkedList<String>();
-      failureNames.addAll(validateResult.getFailureNames());
-      noExistingFileNamesMap.putAll(validateResult.getNoExistFileNames());
-      failureValues.addAll(validateResult.getFailureValues());
+      List<String> failureValues = new ArrayList<String>();
+      if (!validateResult.getFailureNames().isEmpty()) {
+         failureNames.addAll(validateResult.getFailureNames());
+      }
+      if (!validateResult.getNoExistFileNames().isEmpty()) {
+         noExistingFileNamesMap.putAll(validateResult.getNoExistFileNames());
+      }
+      if (!validateResult.getFailureValues().isEmpty()) {
+         failureValues.addAll(validateResult.getFailureValues());
+      }
 
       // validate nodegroup level Configuration
       for (NodeGroupCreate nodeGroup : cluster.getNodeGroups()) {
@@ -1596,12 +1606,18 @@ public class ClusterCommands implements CommandMarker {
          String failureNameWarningMsg =
                getValidateWarningMsg(whiteListResult.getFailureNames(),
                      Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING);
-         if (warningMsgList != null) {
-            warningMsgList.add(noExistingWarningMsg);
-            warningMsgList.add(failureNameWarningMsg);
+         if (!warningMsgList.isEmpty()) {
+            if (noExistingWarningMsg != null) {
+               warningMsgList.add(noExistingWarningMsg);
+            }
+            if (failureNameWarningMsg != null) {
+               warningMsgList.add(failureNameWarningMsg);
+            }
          }
       } else if (whiteListResult.getType() == ValidateResult.Type.WHITE_LIST_INVALID_VALUE) {
-         failedMsgList.addAll(whiteListResult.getFailureValues());
+         if (!whiteListResult.getFailureValues().isEmpty()) {
+            failedMsgList.addAll(whiteListResult.getFailureValues());
+         }
       }
    }
 
@@ -1612,8 +1628,10 @@ public class ClusterCommands implements CommandMarker {
                getValidateWarningMsg(blackListResult.getFailureNames(),
                      Constants.PARAM_CLUSTER_IN_BLACK_LIST_WARNING
                            + Constants.PARAM_CLUSTER_NOT_TAKE_EFFECT);
-         if (warningList != null) {
-            warningList.add(warningMsg);
+         if (!warningList.isEmpty()) {
+            if (warningMsg != null) {
+               warningList.add(warningMsg);
+            }
          }
       }
    }
