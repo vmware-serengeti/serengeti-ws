@@ -28,9 +28,9 @@ import com.vmware.bdd.utils.AuAssert;
 
 /**
  * a virtual node combines VMs that should be on the same host
- * 
+ *
  * @author tli
- * 
+ *
  */
 public class VirtualNode {
 
@@ -127,12 +127,12 @@ public class VirtualNode {
     * implementation checks whether the free space on the input host is great
     * than the total required space (by all base nodes in this virtual node).
     * The answer should be further verified with a disk allocation plan.
-    * 
+    *
     * @param host
     *           VC Host
     * @return true is there are enough storage on this host, false otherwise
     */
-   public boolean hasEnoughStorage(AbstractHost host) {
+   public boolean hasEnoughStorage(AbstractHost host, boolean checkFilteredOut) {
       // total required storage space in this vNode
       int requiredDataDisk = 0;
       int requiredSystemDisk = 0;
@@ -161,12 +161,15 @@ public class VirtualNode {
             host.getTotalSpaceInGB(imagestoreNamePatterns
                   .toArray(new String[imagestoreNamePatterns.size()]));
 
-      return (sumSystem >= requiredSystemDisk && sumData >= requiredDataDisk);
+      if (checkFilteredOut)
+         return (sumSystem == 0 || sumData == 0);
+      else
+         return (sumSystem >= requiredSystemDisk && sumData >= requiredDataDisk);
    }
 
    /**
     * decides whether a VC Host has enough cpu for this virtual node
-    * 
+    *
     * @param host
     *           VC Host
     * @return true is there are enough storage on this host, false otherwise
@@ -177,7 +180,7 @@ public class VirtualNode {
 
    /**
     * decides whether a VC Host has enough memory for this virtual node
-    * 
+    *
     * @param host
     *           VC Host
     * @return true is there are enough storage on this host, false otherwise

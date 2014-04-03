@@ -53,13 +53,25 @@ public class PlacementService implements IPlacementService {
 
    private void placeVirtualGroup(IContainer container, ClusterCreate cluster,
          IPlacementPlanner planner, VirtualGroup vGroup,
-         List<BaseNode> placedNodes) {
+         List<BaseNode> placedNodes, Map<String, List<String>> filteredHosts) {
       String targetRack = null;
       if (vGroup.getGroupRacks() != null
             && GroupRacksType.SAMERACK.equals(vGroup.getGroupRacks().getType())) {
          AuAssert.check(vGroup.getGroupRacks().getRacks() != null
                && vGroup.getGroupRacks().getRacks().length == 1);
          targetRack = vGroup.getGroupRacks().getRacks()[0];
+      }
+
+      // find out hosts filtered out by datastores
+      if (filteredHosts.containsKey(PlacementUtil.NO_DATASTORE_HOSTS)) {
+         filteredHosts.remove(PlacementUtil.NO_DATASTORE_HOSTS);
+         filteredHosts.remove(PlacementUtil.NO_DATASTORE_HOSTS_NODE_GROUP);
+      }
+      List<String> dsFilteredOutHosts = new ArrayList<String>();
+      if (vGroup.getvNodes().size() != 0) {
+         List<String> noDatastoreHosts = container.getDsFilteredOutHosts(vGroup);
+         filteredHosts.put(PlacementUtil.NO_DATASTORE_HOSTS, noDatastoreHosts);
+         filteredHosts.put(PlacementUtil.NO_DATASTORE_HOSTS_NODE_GROUP, vGroup.getNodeGroupNames());
       }
 
       // place virtual node one by one
@@ -110,7 +122,7 @@ public class PlacementService implements IPlacementService {
          List<BaseNode> placedNodes, Map<String, List<String>> filteredHosts) {
       // snap shot environment on placement exceptions
       try {
-         placeVirtualGroup(container, cluster, planner, vGroup, placedNodes);
+         placeVirtualGroup(container, cluster, planner, vGroup, placedNodes, filteredHosts);
       } catch (PlacementException e) {
          logger.error("Place cluster " + cluster.getName()
                + " failed. PlacementException: " + e.getMessage());

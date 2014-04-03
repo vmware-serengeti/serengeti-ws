@@ -21,6 +21,7 @@ import java.util.Map;
 import com.vmware.aurora.vc.VcCluster;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
+import com.vmware.bdd.placement.entity.VirtualGroup;
 import com.vmware.bdd.placement.entity.VirtualNode;
 
 public interface IContainer {
@@ -65,6 +66,16 @@ public interface IContainer {
     * @return list of abstract hosts that have enough resource
     */
    public List<AbstractHost> getValidHosts(VirtualNode vNode, String rack);
+
+   /**
+    * get hosts that are filtered out because of datastore specified for
+    * a virtual group
+    *
+    * @param vGroup
+    *           virtual node
+    * @return list of abstract host names that have zero disk space
+    */
+   public List<String> getDsFilteredOutHosts(VirtualGroup vGroup);
 
    /**
     * allocate resource for the virtual node

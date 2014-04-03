@@ -30,9 +30,9 @@ import com.vmware.bdd.utils.AuAssert;
 /**
  * a virtual group combines node groups that both have the instance_per_host
  * constraint and are strictly associated (should stay on the same set of hosts)
- * 
+ *
  * @author tli
- * 
+ *
  */
 public class VirtualGroup implements Comparable<VirtualGroup> {
 
@@ -122,7 +122,7 @@ public class VirtualGroup implements Comparable<VirtualGroup> {
 
    /**
     * get joint abstract cluster all node groups inside this virtual group
-    * 
+    *
     * @return
     */
    public List<AbstractCluster> getJointAbstractClusters() {
@@ -169,7 +169,7 @@ public class VirtualGroup implements Comparable<VirtualGroup> {
    public GroupRacks getGroupRacks() {
       /*
        * basic rule: if group A is strictly associated with group B, then A should follow
-       * B's rack policy 
+       * B's rack policy
        */
       NodeGroupCreate primary = getPrimaryGroup();
       if (primary.getPlacementPolicies() != null) {
@@ -182,9 +182,9 @@ public class VirtualGroup implements Comparable<VirtualGroup> {
    /**
     * if any node group inside this vGroup is strictly associated with another
     * node group, return that group. Otherwise, return itself.
-    * 
+    *
     * This method is used in Rack policy process
-    * 
+    *
     * @return
     */
    public NodeGroupCreate getPrimaryGroup() {
@@ -204,7 +204,7 @@ public class VirtualGroup implements Comparable<VirtualGroup> {
 
       /*
        * the rack policy in the slave node groups will be override by the primary group,
-       * i.e., the group they strictly associated with. 
+       * i.e., the group they strictly associated with.
        */
       if (this.referToGroup != null
             && Boolean.TRUE.equals(this.strictAssociated)) {
@@ -230,5 +230,13 @@ public class VirtualGroup implements Comparable<VirtualGroup> {
          return -1;
       else
          return 0;
+   }
+
+   public List<String> getNodeGroupNames() {
+      List<String> nodeGroupNames = new ArrayList<String>(nodeGroups.size());
+      for (NodeGroupCreate nodeGroup : nodeGroups) {
+         nodeGroupNames.add(nodeGroup.getName());
+      }
+      return nodeGroupNames;
    }
 }

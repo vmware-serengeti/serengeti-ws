@@ -163,7 +163,7 @@ public class Container implements IContainer {
                continue;
             }
             if (vNode.hasEnoughCpu(host) && vNode.hasEnoughMemory(host)
-                  && vNode.hasEnoughStorage(host)) {
+                  && vNode.hasEnoughStorage(host, false)) {
 
                logger.info("host "
                      + host.getName()
@@ -244,5 +244,43 @@ public class Container implements IContainer {
             }
          }
       }
+   }
+
+   @Override
+   public List<String> getDsFilteredOutHosts(VirtualGroup vGroup) {
+      logger.info("get valid vc hosts on rack ");
+      List<String> dsFilteredOutHosts = new ArrayList<String>();
+      List<AbstractCluster> sharedClusters = vGroup.getJointAbstractClusters();
+
+      if (sharedClusters == null || sharedClusters.size() == 0)
+         return dsFilteredOutHosts;
+
+      VirtualNode vNode = vGroup.getvNodes().get(0);
+
+      for (AbstractCluster cluster : sharedClusters) {
+         /*
+          *  retrieve the cluster object, as the AbstractCluster object from getJointAbstractClusters
+          *  is made up.
+          */
+         String vcClusterName = cluster.getName();
+         cluster = this.dc.findAbstractCluster(cluster.getName());
+         if (cluster == null) {
+            logger.warn("VC Cluster " + vcClusterName
+                  + " specified in the cluster spec is not found in VC");
+            continue;
+         }
+
+         for (AbstractHost host : cluster.getHosts()) {
+            if (vNode.hasEnoughStorage(host, true)) {
+               logger.info("host "
+                     + host.getName()
+                     + " is filtered out by datastores specified to place virtual node "
+                     + vNode.getBaseNodeNames());
+               dsFilteredOutHosts.add(host.getName());
+            }
+         }
+      }
+
+      return dsFilteredOutHosts;
    }
 }

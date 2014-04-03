@@ -48,7 +48,9 @@ public class TestPlacementService {
 
       PlacementService service = new PlacementService();
 
-      List<BaseNode> nodes = service.getPlacementPlan(container, spec, null, null);
+      List<BaseNode> nodes =
+            service.getPlacementPlan(container, spec, null,
+                  new HashMap<String, List<String>>());
 
       TestPlacementUtil.validate(spec, nodes, false);
    }
@@ -67,7 +69,9 @@ public class TestPlacementService {
 
       PlacementService service = new PlacementService();
 
-      List<BaseNode> nodes = service.getPlacementPlan(container, spec, null, null);
+      List<BaseNode> nodes =
+            service.getPlacementPlan(container, spec, null,
+                  new HashMap<String, List<String>>());
 
       TestPlacementUtil.validate(spec, nodes, false);
    }
@@ -117,7 +121,8 @@ public class TestPlacementService {
       existedNodes.removeAll(bads);
 
       List<BaseNode> nodes =
-            service.getPlacementPlan(container, cluster, existedNodes, null);
+            service.getPlacementPlan(container, cluster, existedNodes,
+                  new HashMap<String, List<String>>());
 
       Assert.assertEquals(nodes.size(), 6);
 
@@ -153,7 +158,8 @@ public class TestPlacementService {
       Assert.assertEquals(bads.size(), 0);
 
       List<BaseNode> nodes =
-            service.getPlacementPlan(container, cluster, existedNodes, null);
+            service.getPlacementPlan(container, cluster, existedNodes,
+                  new HashMap<String, List<String>>());
 
       Assert.assertEquals(nodes.size(), 1);
 
@@ -163,7 +169,8 @@ public class TestPlacementService {
       // increase compute group's instance by 2
       cluster.getNodeGroup("compute").setInstanceNum(
             cluster.getNodeGroup("compute").getInstanceNum() + 2);
-      nodes = service.getPlacementPlan(container, cluster, existedNodes, null);
+      nodes = service.getPlacementPlan(container, cluster, existedNodes,
+            new HashMap<String, List<String>>());
 
       Assert.assertEquals(nodes.size(), 2);
 
@@ -186,7 +193,9 @@ public class TestPlacementService {
 
       PlacementService service = new PlacementService();
 
-      List<BaseNode> nodes = service.getPlacementPlan(container, cluster, null, null);
+      List<BaseNode> nodes =
+            service.getPlacementPlan(container, cluster, null,
+                  new HashMap<String, List<String>>());
 
       TestPlacementUtil.validate(cluster, nodes, false);
 
@@ -221,7 +230,9 @@ public class TestPlacementService {
 
       PlacementService service = new PlacementService();
 
-      List<BaseNode> nodes = service.getPlacementPlan(container, cluster, null, null);
+      List<BaseNode> nodes =
+            service.getPlacementPlan(container, cluster, null,
+                  new HashMap<String, List<String>>());
 
       TestPlacementUtil.validate(cluster, nodes, false);
 
@@ -279,6 +290,33 @@ public class TestPlacementService {
                "You must synchronize the time of the following hosts [10.1.1.1] with the Serengeti Management Server to use them.");
          Assert.assertEquals(strs[3],
                "You must add these hosts [10.1.1.1] to the network [VM Network] to use them.");
+      }
+   }
+
+   @Test
+   public void testRRRackPolicyFailure() throws Exception {
+      ClusterCreate cluster =
+            TestPlacementUtil
+                  .getSimpleClusterSpec(TestPlacementUtil.RACK_FAILURE_CLUSTER_SPEC);
+      AbstractDatacenter dc =
+            TestPlacementUtil
+                  .getAbstractDatacenter(TestPlacementUtil.RACK_FAILURE_DATACENTER_SPEC);
+
+      Container container = new Container(dc);
+      container.SetTemplateNode(TestPlacementUtil.getTemplateNode());
+      container.addRackMap(cluster.getHostToRackMap());
+
+      PlacementService service = new PlacementService();
+
+      try {
+         List<BaseNode> nodes = service.getPlacementPlan(container, cluster, null,
+               new HashMap<String, List<String>>());
+      } catch (PlacementException e) {
+         System.out.println(e.getMessage());
+         String[] strs = e.getMessage().split("\n");
+         Assert.assertEquals(strs[0],
+               "No host available on the racks [rack1] specified for the node [hadoop-data-0]. Review your topology rack-hosts mapping file and correct as necessary.");
+         Assert.assertEquals(strs[2], "You must add datastores on these hosts [10.1.1.3, 10.1.1.4] to use them for node group [data].");
       }
    }
 }

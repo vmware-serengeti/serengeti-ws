@@ -53,6 +53,12 @@ public class PlacementException extends BddException {
          filteredHostsStr.append("\n");
          filteredHostsStr.append(BddException.getErrorMessage("PLACEMENT.NO_NETWORK_HOSTS", networkNames.toString(), noNetworkHosts.toString()));
       }
+      List<String> noDatastoreHosts = filteredHosts.get(PlacementUtil.NO_DATASTORE_HOSTS);
+      List<String> noDatastoreHostsNodeGroup = filteredHosts.get(PlacementUtil.NO_DATASTORE_HOSTS_NODE_GROUP);
+      if (null != noDatastoreHosts) {
+         filteredHostsStr.append("\n");
+         filteredHostsStr.append(BddException.getErrorMessage("PLACEMENT.NO_DATASTORE_HOSTS", noDatastoreHosts, noDatastoreHostsNodeGroup));
+      }
       return new PlacementException(cause, "PLACEMENT_ERROR", cause.getMessage(), placedNodesStr.toString(), filteredHostsStr.toString());
    }
 

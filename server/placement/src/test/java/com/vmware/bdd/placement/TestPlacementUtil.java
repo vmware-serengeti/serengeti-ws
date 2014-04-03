@@ -63,6 +63,10 @@ public class TestPlacementUtil {
          "src/test/resources/cluster-with-rack.json";
    public static final String WITH_SAME_RACK_CLUSTER_SPEC =
          "src/test/resources/cluster-with-samerack.json";
+   public static final String RACK_FAILURE_DATACENTER_SPEC =
+         "src/test/resources/datacenter-4-rack-failure.json";
+   public static final String RACK_FAILURE_CLUSTER_SPEC =
+         "src/test/resources/cluster-with-rack-failure.json";
 
    public static final int SYSTEM_DISK_SIZE = 4;
 
