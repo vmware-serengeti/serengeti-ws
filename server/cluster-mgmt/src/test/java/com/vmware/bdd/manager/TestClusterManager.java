@@ -61,7 +61,7 @@ public class TestClusterManager extends AbstractTestNGSpringContextTests {
    @Autowired
    private ClusterManager clusterMgr;
 
-   @BeforeMethod
+   @BeforeMethod(groups = { "TestClusterManager" }, dependsOnGroups = { "TestVmEventManager" })
    public void setMockup() {
       Mockit.setUpMock(MockValidationUtils.class);
       Mockit.setUpMock(MockTmScheduler.class);

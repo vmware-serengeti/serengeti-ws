@@ -56,7 +56,7 @@ import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 public class TestVcVmUtil {
-   @BeforeMethod()
+   @BeforeMethod(groups = { "TestVcVmUtil" }, dependsOnGroups = { "TestClusterManager" })
    public void setMockup() {
       Mockit.setUpMock(MockVcResourceUtils.class);
       Mockit.setUpMock(MockTmScheduler.class);

@@ -45,12 +45,12 @@ public class TestVmEventManager {
    private static VmEventManager eventManager;
    private static ConcurrentWriteLockedClusterEntityManager entityMgr;
 
-   @AfterClass
+   @AfterClass(groups = { "TestVmEventManager" })
    public static void tearDown() throws Exception {
       Mockit.tearDownMocks();
    }
 
-   @BeforeClass
+   @BeforeClass(groups = { "TestVmEventManager" }, dependsOnGroups = { "TestClusterConfigManager" })
    public static void setUp() throws Exception {
       Mockit.setUpMock(MockVcCache.class);
       MockVcCache.setGetFlag(true);
