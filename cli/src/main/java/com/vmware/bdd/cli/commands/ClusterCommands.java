@@ -1313,7 +1313,7 @@ public class ClusterCommands implements CommandMarker {
       LinkedHashMap<String, String> clusterParams =
             new LinkedHashMap<String, String>();
       clusterParams.put("CLUSTER NAME", cluster.getName());
-      clusterParams.put("CLUSTER VERSION", cluster.getVersion());
+      clusterParams.put("AGENT VERSION", cluster.getVersion());
       clusterParams.put("DISTRO", cluster.getDistro());
       if (topology != null && topology != TopologyType.NONE) {
          clusterParams.put("TOPOLOGY", topology.toString());

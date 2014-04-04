@@ -186,7 +186,7 @@ public class Constants {
    public static final String NODE_UPGRADE_FILE_PATH = "/opt/serengeti/www/nodeupgrade/";
    public static final String NODE_UPGRADE_TARBALL_FILE_NAME = "serengeti-node-scripts.tar.gz";
    public static final String NODE_UPGRADE_SCRIPT_FILE_NAME = "serengeti-upgrade-node.sh";
-   public static final String NEED_UPGRADE = "Need Upgrade";
+   public static final String NEED_UPGRADE = "Earlier";
    public static final String MSG_SETTING_UP_PASSWORDLESS_LOGIN = "Setting up password less login.";
    public static final String DEFAULT_PASSWORD = "password";
    public static final String SERENGETI_TTY_NAME = "serengeti.tty.name";
