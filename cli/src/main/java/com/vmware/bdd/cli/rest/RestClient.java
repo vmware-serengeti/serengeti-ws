@@ -59,7 +59,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpMessageConverterExtractor;
+import org.springframework.web.client.RequestCallback;
+import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
 import com.vmware.bdd.apitypes.Connect;
@@ -254,11 +259,9 @@ public class RestClient {
          final String password) {
       StringBuilder uriBuff = new StringBuilder();
       uriBuff.append(hostUri).append(path);
-      if (!CommandsUtils.isBlank(username) && !CommandsUtils.isBlank(password)) {
-         uriBuff.append("?").append("j_username=").append(username)
-               .append("&j_password=").append(password);
-      }
-      return restPostByUri(uriBuff.toString(), respEntityType, false);
+
+      return restPostByUri(uriBuff.toString(), username, password,
+            respEntityType, false);
    }
 
    private <T> ResponseEntity<T> logout(final String path,
@@ -276,12 +279,26 @@ public class RestClient {
       return client.exchange(uri, HttpMethod.GET, entity, respEntityType);
    }
 
-   private <T> ResponseEntity<T> restPostByUri(String uri,
-         Class<T> respEntityType, boolean withCookie) {
-      HttpHeaders headers = buildHeaders(withCookie);
-      HttpEntity<String> entity = new HttpEntity<String>(headers);
+   private <T> ResponseEntity<T> restPostByUri(final String uri,
+         final String username, final String password, Class<T> respEntityType,
+         boolean withCookie) {
 
-      return client.exchange(uri, HttpMethod.POST, entity, respEntityType);
+      return exchange(uri, username, password, HttpMethod.POST, respEntityType);
+   }
+
+   @SuppressWarnings({ "unchecked", "rawtypes" })
+   private <T> ResponseEntity<T> exchange(final String url,
+         final String username, final String password, HttpMethod method,
+         Class<T> responseType) {
+      return client.execute(url, HttpMethod.POST, new RequestCallback() {
+         @Override
+         public void doWithRequest(ClientHttpRequest request)
+               throws IOException {
+            request.getBody().write(
+                  ("j_username=" + username + "&j_password=" + password + "")
+                        .getBytes());
+         }
+      }, new ResponseEntityResponseExtractor<T>(responseType));
    }
 
    private HttpHeaders buildHeaders(boolean withCookie) {
@@ -941,6 +958,34 @@ public class RestClient {
          sb.delete(sb.length() - 1, sb.length());
       }
       return sb.toString().toUpperCase();
+   }
+
+   private class ResponseEntityResponseExtractor<T> implements
+         ResponseExtractor<ResponseEntity<T>> {
+
+      private final HttpMessageConverterExtractor<T> delegate;
+
+      public ResponseEntityResponseExtractor(Class<T> responseType) {
+         if (responseType != null && !Void.class.equals(responseType)) {
+            this.delegate =
+                  new HttpMessageConverterExtractor<T>(responseType,
+                        client.getMessageConverters());
+         } else {
+            this.delegate = null;
+         }
+      }
+
+      public ResponseEntity<T> extractData(ClientHttpResponse response)
+            throws IOException {
+         if (this.delegate != null) {
+            T body = this.delegate.extractData(response);
+            return new ResponseEntity<T>(body, response.getHeaders(),
+                  response.getStatusCode());
+         } else {
+            return new ResponseEntity<T>(response.getHeaders(),
+                  response.getStatusCode());
+         }
+      }
    }
 
 }
