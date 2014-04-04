@@ -1,0 +1,34 @@
+// This is a sample cluster spec for creating a cluster without installing any hadoop stuff.
+// You can create a set of emtpy VMs (with OS installed and data disks mounted) using this spec or you can add your customized roles into this spec to deploy your application.
+{
+  "nodeGroups":[
+    {
+      "name": "master",
+      "roles": [
+        "basic"
+      ],
+      "instanceNum": 1,
+      "cpuNum": 2,
+      "memCapacityMB": 3768,
+      "storage": {
+        "type": "SHARED",
+        "sizeGB": 10
+      },
+      "haFlag": "on"
+    },
+    {
+      "name": "worker",
+      "roles": [
+        "basic"
+      ],
+      "instanceNum": 1,
+      "cpuNum": 2,
+      "memCapacityMB": 3768,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 10
+      },
+      "haFlag": "off"
+    }
+  ]
+}
