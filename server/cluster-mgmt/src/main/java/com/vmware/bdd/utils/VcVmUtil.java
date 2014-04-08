@@ -185,8 +185,30 @@ public class VcVmUtil {
             continue;
          }
 
-         if (nicInfo.getIpConfig() == null
-               || nicInfo.getIpConfig().getIpAddress() == null
+         if (nicEntity != null) {
+            nicEntity.setMacAddress(nicInfo.getMacAddress());
+            nicEntity.setConnected(nicInfo.isConnected());
+         }
+
+         /*
+         Some out-of-date vmtools does not report "ipConfig" field,
+         In this case try to get its "ipAddress[]" field
+          */
+         if (nicInfo.getIpConfig() == null) {
+            if (nicInfo.getIpAddress() == null || nicInfo.getIpAddress().length == 0) {
+               continue;
+            }
+            for (String addr : nicInfo.getIpAddress()) {
+               if (sun.net.util.IPAddressUtil.isIPv4LiteralAddress(addr)) {
+                  nicEntity.setIpv4Address(addr);
+               } else if(sun.net.util.IPAddressUtil.isIPv6LiteralAddress(addr)) {
+                  nicEntity.setIpv6Address(addr);
+               }
+            }
+            continue;
+         }
+
+         if (nicInfo.getIpConfig().getIpAddress() == null
                || nicInfo.getIpConfig().getIpAddress().length == 0) {
             continue;
          }
@@ -195,10 +217,6 @@ public class VcVmUtil {
          update nicEntity's macAddress/connected/ipV4Address/ipV6address,
          assume at most 1 ipV4 and ipV6 addresses are configured for each nic
          */
-         if (nicEntity != null) {
-            nicEntity.setMacAddress(nicInfo.getMacAddress());
-            nicEntity.setConnected(nicInfo.isConnected());
-         }
          for (IpAddress info : nicInfo.getIpConfig().getIpAddress()) {
             if (info.getIpAddress() != null
                   && sun.net.util.IPAddressUtil.isIPv4LiteralAddress(info
