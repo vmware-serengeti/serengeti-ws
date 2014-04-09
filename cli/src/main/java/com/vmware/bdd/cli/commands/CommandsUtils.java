@@ -22,7 +22,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +33,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import jline.WindowsTerminal;
 import jline.console.ConsoleReader;
+import jline.internal.Configuration;
 
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -43,6 +47,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
 import org.codehaus.jackson.util.DefaultPrettyPrinter.Lf2SpacesIndenter;
+import org.springframework.shell.core.JLineShell;
+import org.springframework.shell.support.util.OsUtils;
+import org.springframework.util.ClassUtils;
 
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
@@ -109,7 +116,7 @@ public class CommandsUtils {
    }
 
    public static void prettyJsonOutput(Object object, String fileName)
-         throws JsonParseException, JsonMappingException, IOException {
+         throws Exception {
       OutputStream out = null;
       try {
          if (fileName != null) {
@@ -131,13 +138,36 @@ public class CommandsUtils {
             System.out.println();
          } else {
             File file = new File(fileName);
-            System.out.println("Exported to file " + file.getAbsolutePath());
+            String filePath = file.getAbsolutePath();
+            if (isJansiAvailable()) {
+               WindowsTerminal ansiTerminal = new WindowsTerminal() {
+                  @Override
+                  public synchronized boolean isAnsiSupported() {
+                     return true;
+                  }
+               };
+               ansiTerminal.init();
+               String outEncoding =
+                     ansiTerminal.getOutputEncoding() != null ? ansiTerminal
+                           .getOutputEncoding() : Configuration.getEncoding();
+               filePath =
+                     new String(filePath.getBytes(outEncoding),
+                           Configuration.getEncoding());
+            }
+            System.out.println("Exported to file " + filePath);
          }
       } finally {
          if (out != null && !(out instanceof PrintStream)) {
             out.close();
          }
       }
+   }
+
+   private static boolean isJansiAvailable() {
+      return ClassUtils.isPresent("org.fusesource.jansi.AnsiConsole",
+            JLineShell.class.getClassLoader())
+            && OsUtils.isWindows()
+            && System.getProperty("jline.terminal") == null;
    }
 
    /**
