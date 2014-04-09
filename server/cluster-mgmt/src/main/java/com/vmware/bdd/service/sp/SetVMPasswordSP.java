@@ -71,22 +71,19 @@ public class SetVMPasswordSP implements Callable<Void> {
                logger.error("Set random password for " + nodeIP + " failed.");
                return false;
             }
-            return true;
+         } else {
+            if (setCustomizedPassword(password) == false) {
+               logger.error("Set customized password for " + nodeIP + " failed.");
+               return false;
+            }
          }
-         if (setCustomizedPassword(password) == false) {
-            logger.error("Set customized password for " + nodeIP + " failed.");
-            return false;
-         }
-         return true;
       } else if (buildType.equalsIgnoreCase(Constants.BETA_BUILD)) {
          if (this.password != null) {
             if (setCustomizedPassword(password) == false) {
                logger.error("Set customized password for " + nodeIP + " failed.");
                return false;
             }
-            return true;
          }
-         return true;
       }
 
       if (!removeSSHLimit()) {
