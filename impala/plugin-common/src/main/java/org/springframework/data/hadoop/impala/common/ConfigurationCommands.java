@@ -14,6 +14,9 @@
  ***************************************************************************/
 package org.springframework.data.hadoop.impala.common;
 
+import java.io.File;
+import java.net.MalformedURLException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.util.GenericOptionsParser;
@@ -59,7 +62,16 @@ public class ConfigurationCommands implements ApplicationEventPublisherAware, Co
 
 	@CliCommand(value = { PREFIX + "load" }, help = "Loads the Hadoop configuration from the given resource")
 	public String loadConfiguration(@CliOption(key = { "", "location" }, mandatory = true, help = "Configuration location (can be a URL)") String location) {
-		hadoopConfiguration.addResource(location);
+		try {
+			File file = new File(location);
+			if (file.exists()) {
+				hadoopConfiguration.addResource(file.toURI().toURL());
+			} else {
+				return "Cannot resolve " + location;
+			}
+		} catch (MalformedURLException e) {
+			return "Cannot resolve " + location;
+		}
 		hadoopConfiguration.size();
 
 		return listProps();
