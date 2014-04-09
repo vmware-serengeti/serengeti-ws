@@ -56,8 +56,8 @@ import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
-import com.vmware.bdd.service.sp.QueryIpAddress;
 import com.vmware.bdd.service.sp.ReplaceVmPrePowerOn;
+import com.vmware.bdd.service.sp.StartVmPostPowerOn;
 import com.vmware.bdd.service.sp.StartVmSP;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
@@ -469,9 +469,9 @@ public class ClusterHealService implements IClusterHealService {
    @Override
    public void startVm(String nodeName, String vmId, String clusterName) {
       NodeEntity nodeEntity = clusterEntityMgr.findNodeByName(nodeName);
-      QueryIpAddress query =
-            new QueryIpAddress(nodeEntity.fetchAllPortGroups(),
-                  Constants.VM_POWER_ON_WAITING_SEC);
+      StartVmPostPowerOn query =
+            new StartVmPostPowerOn(nodeEntity.fetchAllPortGroups(),
+                  Constants.VM_POWER_ON_WAITING_SEC, clusterEntityMgr);
 
       VcVirtualMachine vcVm = VcCache.getIgnoreMissing(vmId);
 

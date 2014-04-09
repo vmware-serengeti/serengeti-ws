@@ -28,53 +28,6 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
    private String serverVersion;
 
    @Override
-   public boolean upgradeNode(NodeEntity node) {
-      //node = clusterEntityMgr.findNodeById(node.getId());
-      node = clusterEntityMgr.getNodeWithNicsByMobId(node.getMoId());
-      String nodeIP = node.getPrimaryMgtNic().getIpv4Address();
-      logger.info("Upgrading node " + node.getVmName() + "(" + nodeIP + ").");
-
-      this.serverVersion = clusterEntityMgr.getServerVersion();
-
-      List<Callable<Void>> storeNodeProcedures = new ArrayList<Callable<Void>>();
-
-      try {
-         if (node.needUpgrade(serverVersion)) {
-            NodeUpgradeSP nodeUpgradeSP = new NodeUpgradeSP(node, serverVersion);
-            storeNodeProcedures.add(nodeUpgradeSP);
-         }
-
-         if (storeNodeProcedures.isEmpty()) {
-            logger.info(node.getVmName() + " doesn't need upgrade, return directly.");
-            return true;
-         }
-
-         Callable<Void>[] storeNodeProceduresArray = storeNodeProcedures.toArray(new Callable[0]);
-         NoProgressUpdateCallback callback = new NoProgressUpdateCallback();
-         ExecutionResult[] result =
-               Scheduler
-                     .executeStoredProcedures(
-                           com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
-                           storeNodeProceduresArray, callback);
-
-         if (result == null || result.length == 0) {
-            logger.warn("No node is upgraded.");
-            return false;
-         }
-         if (result[0].finished && result[0].throwable == null) {
-            updateNodeData(node);
-            logger.info("Upgrade " + node.getVmName() + " successfully.");
-            return true;
-         }
-         logger.error("Upgrade " + node.getVmName() + "(" + nodeIP + ") failed.");
-         return false;
-      } catch (InterruptedException e) {
-         logger.error("Error in upgrading " + node.getVmName() + "(" + nodeIP + ")", e);
-         throw BddException.UPGRADE(e, e.getMessage());
-      }
-   }
-
-   @Override
    public boolean upgrade(final String clusterName, StatusUpdater statusUpdator) {
       logger.info("Upgrading cluster " + clusterName + ".");
 

@@ -20,7 +20,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
-import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
+import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.software.ISoftwareManagementTask;
 import com.vmware.bdd.service.job.software.ProgressMonitor;
@@ -34,10 +34,10 @@ public class IronfanSoftwareManagementTask implements ISoftwareManagementTask {
 
    private ClusterOperation clusterOperation;
    private StatusUpdater statusUpdater;
-   private IExclusiveLockedClusterEntityManager clusterEntityMgr;
+   private ILockedClusterEntityManager clusterEntityMgr;
 
    public IronfanSoftwareManagementTask(ClusterOperation clusterOperation,
-         StatusUpdater updater, IExclusiveLockedClusterEntityManager lockClusterEntityMgr) {
+         StatusUpdater updater, ILockedClusterEntityManager lockClusterEntityMgr) {
       this.clusterOperation = clusterOperation;
       this.statusUpdater = updater;
       this.clusterEntityMgr = lockClusterEntityMgr;

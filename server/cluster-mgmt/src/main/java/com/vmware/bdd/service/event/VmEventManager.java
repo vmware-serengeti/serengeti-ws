@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 import com.vmware.bdd.service.sp.NodePowerOnRequest;
+
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.exception.AuroraException;
@@ -37,6 +38,7 @@ import com.vmware.aurora.vc.vcevent.VcEventListener;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.entity.NodeEntity;
+import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
 import com.vmware.bdd.service.utils.VcResourceUtils;
@@ -116,12 +118,17 @@ public class VmEventManager implements IEventProcessor {
    private IClusterEntityManager clusterEntityMgr;
    private Folder rootSerengetiFolder = null;
    private EventScheduler eventScheduler = null;
+   private ClusterManager clusterManager;
 
    public VmEventManager(IConcurrentLockedClusterEntityManager lockMgr) {
       super();
       this.lockMgr = lockMgr;
       this.clusterEntityMgr = lockMgr.getClusterEntityMgr();
       this.eventScheduler = new EventScheduler(this);
+   }
+
+   public void setClusterManager(ClusterManager clusterManager) {
+      this.clusterManager = clusterManager;
    }
 
    public synchronized void start() {
@@ -382,7 +389,7 @@ public class VmEventManager implements IEventProcessor {
                      "Powered On");
                if (external) {
                   NodePowerOnRequest request =
-                        new NodePowerOnRequest(lockMgr, moId);
+                        new NodePowerOnRequest(lockMgr, moId, clusterManager);
                   CmsWorker.addRequest(WorkQueue.VC_TASK_NO_DELAY, request);
                }
             }

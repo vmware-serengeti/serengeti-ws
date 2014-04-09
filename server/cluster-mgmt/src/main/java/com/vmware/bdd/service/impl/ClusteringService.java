@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 
 import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.entity.DiskEntity;
-import com.vmware.bdd.service.sp.QueryIpAddress;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -84,6 +84,7 @@ import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.manager.ClusterConfigManager;
+import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.ElasticityScheduleManager;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
@@ -109,6 +110,7 @@ import com.vmware.bdd.service.sp.DeleteRpSp;
 import com.vmware.bdd.service.sp.DeleteVmByIdSP;
 import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
 import com.vmware.bdd.service.sp.SetAutoElasticitySP;
+import com.vmware.bdd.service.sp.StartVmPostPowerOn;
 import com.vmware.bdd.service.sp.StartVmSP;
 import com.vmware.bdd.service.sp.StopVmSP;
 import com.vmware.bdd.service.sp.UpdateVmProgressCallback;
@@ -151,6 +153,17 @@ public class ClusteringService implements IClusteringService {
    private VmEventManager processor;
 
    private IClusterCloneService cloneService;
+
+   private ClusterManager clusterManager;
+
+   @Autowired
+   public void setClusterManager(ClusterManager clusterManager) {
+      this.clusterManager = clusterManager;
+   }
+
+   public ClusterManager getClusterManager() {
+      return this.clusterManager;
+   }
 
    public INetworkService getNetworkMgr() {
       return networkMgr;
@@ -296,6 +309,7 @@ public class ClusteringService implements IClusteringService {
    private void startVMEventProcessor() {
       // add event handler for Serengeti after VC event handler is registered.
       processor = new VmEventManager(lockClusterEntityMgr);
+      processor.setClusterManager(clusterManager);
       processor.start();
    }
 
@@ -1146,8 +1160,8 @@ public class ClusteringService implements IClusteringService {
                + machineIdSpec.toString());
          spec.setBootupConfigs(machineIdSpec.toGuestVariable());
          // timeout is 10 mintues
-         QueryIpAddress query =
-               new QueryIpAddress(vNode.getNics().keySet(),
+         StartVmPostPowerOn query =
+               new StartVmPostPowerOn(vNode.getNics().keySet(),
                      Constants.VM_POWER_ON_WAITING_SEC);
          spec.setPostPowerOn(query);
          spec.setPrePowerOn(getPrePowerOnFunc(vNode, reserveRawDisks));
@@ -1429,9 +1443,9 @@ public class ClusteringService implements IClusteringService {
 
          StartVmSP.StartVmPrePowerOn prePowerOn = new StartVmSP.StartVmPrePowerOn(isMapDistro,
                (new Gson()).toJson(node.getVolumns()));
-         QueryIpAddress query =
-               new QueryIpAddress(node.fetchAllPortGroups(),
-                     Constants.VM_POWER_ON_WAITING_SEC);
+         StartVmPostPowerOn query =
+               new StartVmPostPowerOn(node.fetchAllPortGroups(),
+                     Constants.VM_POWER_ON_WAITING_SEC, clusterEntityMgr);
          VcHost host = null;
          if (node.getHostName() != null) {
             host = VcResourceUtils.findHost(node.getHostName());
@@ -1946,9 +1960,9 @@ public class ClusteringService implements IClusteringService {
       // For node scale up/down, the disk info in db is not yet updated when powering on it, need to fetch from VC
       StartVmSP.StartVmPrePowerOn prePowerOn = new StartVmSP.StartVmPrePowerOn(reserveRawDisks,
             VcVmUtil.getVolumes(node.getMoId(), node.getDisks()));
-      QueryIpAddress query =
-            new QueryIpAddress(node.fetchAllPortGroups(),
-                  Constants.VM_POWER_ON_WAITING_SEC);
+      StartVmPostPowerOn query =
+            new StartVmPostPowerOn(node.fetchAllPortGroups(),
+                  Constants.VM_POWER_ON_WAITING_SEC, clusterEntityMgr);
 
       VcHost host = null;
       if (node.getHostName() != null) {

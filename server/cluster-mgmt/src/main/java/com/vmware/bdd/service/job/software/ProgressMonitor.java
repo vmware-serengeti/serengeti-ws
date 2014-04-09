@@ -16,7 +16,7 @@ package com.vmware.bdd.service.job.software;
 
 import org.apache.log4j.Logger;
 
-import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
+import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.software.mgmt.impl.SoftwareManagementClient;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
@@ -39,11 +39,11 @@ public class ProgressMonitor extends TracedRunnable {
    private StatusUpdater statusUpdater;
    private String lastErrorMsg = null;
    private long queryInterval = QUERY_INTERVAL_DEFAULT;
-   private IExclusiveLockedClusterEntityManager clusterEntityMgr;
+   private ILockedClusterEntityManager clusterEntityMgr;
    private volatile boolean stop;
 
    public ProgressMonitor(String targetName, StatusUpdater statusUpdater,
-         IExclusiveLockedClusterEntityManager clusterEntityMgr) {
+         ILockedClusterEntityManager clusterEntityMgr) {
       this.targetName = targetName;
       this.statusUpdater = statusUpdater;
       this.clusterEntityMgr = clusterEntityMgr;
@@ -107,7 +107,9 @@ public class ProgressMonitor extends TracedRunnable {
          logger.info("progress query completed");
          if (detailedStatus.getOperationStatus().getProgress() < 100) {
             int progress = detailedStatus.getOperationStatus().getProgress();
-            statusUpdater.setProgress(((double) progress) / 100);
+            if (statusUpdater != null) {
+               statusUpdater.setProgress(((double) progress) / 100);
+            }
          }
          setLastErrorMsg(detailedStatus.getOperationStatus().getErrorMsg());
          clusterEntityMgr.handleOperationStatus(targetName.split("-")[0], detailedStatus, exit);

@@ -10,8 +10,6 @@ public interface IClusterUpgradeService {
     * @param clusterName
     *
     */
-   public boolean upgradeNode(NodeEntity node);
-
    public boolean upgrade(String clusterName, StatusUpdater statusUpdator);
 
    public boolean upgradeFailed(String clusterName, StatusUpdater statusUpdator);

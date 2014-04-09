@@ -94,10 +94,13 @@
 		<property name="networkMgr">
 			<ref bean="networkService" />
 		</property>
+		<property name="clusterManager">
+			<ref bean="clusterManager" />
+		</property>
 	</bean>
 
 	<bean id="executionService" class="com.vmware.bdd.service.impl.ExecutionService" />
-	
+
 	<bean id="scaleService" class="com.vmware.bdd.service.impl.ScaleService">
 		<property name="clusterEntityMgr">
 			<ref bean="clusterEntityManager"/>
