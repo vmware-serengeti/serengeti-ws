@@ -46,17 +46,13 @@
 	</dependencyManagement>
 	<properties>
 		<spring.data.hadoop.version>1.0.0.RELEASE</spring.data.hadoop.version>
-		<spring.shell.version>1.1.0.BUILD-SNAPSHOT</spring.shell.version>
+		<spring.shell.version>1.1.0.RC1</spring.shell.version>
 		<jar.mainclass>org.springframework.shell.Bootstrap</jar.mainclass>
 	</properties>
 	<repositories>
 		<repository>
 			<id>spring-release</id>
 			<url>http://repo.springsource.org/libs-release/</url>
-		</repository>
-		<repository>
-			<id>spring-snapshot</id>
-			<url>http://repo.springsource.org/libs-snapshot/</url>
 		</repository>
 	</repositories>
 </project>
