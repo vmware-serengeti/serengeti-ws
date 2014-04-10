@@ -50,8 +50,9 @@ public class SetPasswordService implements ISetPasswordService {
             }
          }
       } catch (Exception e) {
-         logger.error("Error in setting password for " + clusterName);
-         throw BddException.INTERNAL(e, "Failed to set password for nodes in cluster " + clusterName);
+         String errMsg = " : " + e.getMessage();
+         logger.error("Error in setting password for " + clusterName + errMsg);
+         throw BddException.INTERNAL(e, "Failed to set password for nodes in cluster " + clusterName + errMsg);
       }
       return failedIPs;
    }
@@ -76,7 +77,7 @@ public class SetPasswordService implements ISetPasswordService {
          }
          return false;
       } catch (Exception e) {
-         throw BddException.INTERNAL(e, "Failed to set password for " + nodeIP + " in " + clusterName);
+         throw BddException.INTERNAL(e, "Failed to set password for " + nodeIP + " in " + clusterName + " : " + e.getMessage());
       }
    }
 }

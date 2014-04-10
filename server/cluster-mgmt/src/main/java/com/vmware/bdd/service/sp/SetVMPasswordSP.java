@@ -36,7 +36,7 @@ public class SetVMPasswordSP implements Callable<Void> {
    private String privateKeyFile;
    private String sshUser;
    private int sshPort;
-   private final static int SETUP_PASSWORDLESS_LOGIN_TIMEOUT = 10; //in seconds
+   private final static int SETUP_PASSWORDLESS_LOGIN_TIMEOUT = 60; //in seconds
 
    public SetVMPasswordSP(String nodeIP, String password) {
       this.nodeIP = nodeIP;
