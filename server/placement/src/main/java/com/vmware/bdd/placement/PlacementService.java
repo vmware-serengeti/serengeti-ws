@@ -70,8 +70,12 @@ public class PlacementService implements IPlacementService {
       List<String> dsFilteredOutHosts = new ArrayList<String>();
       if (vGroup.getvNodes().size() != 0) {
          List<String> noDatastoreHosts = container.getDsFilteredOutHosts(vGroup);
-         filteredHosts.put(PlacementUtil.NO_DATASTORE_HOSTS, noDatastoreHosts);
-         filteredHosts.put(PlacementUtil.NO_DATASTORE_HOSTS_NODE_GROUP, vGroup.getNodeGroupNames());
+         if (null != noDatastoreHosts && !noDatastoreHosts.isEmpty()) {
+            filteredHosts.put(PlacementUtil.NO_DATASTORE_HOSTS,
+                  noDatastoreHosts);
+            filteredHosts.put(PlacementUtil.NO_DATASTORE_HOSTS_NODE_GROUP,
+                  vGroup.getNodeGroupNames());
+         }
       }
 
       // place virtual node one by one
