@@ -16,7 +16,6 @@ package com.vmware.bdd.service.job;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
@@ -26,8 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.IpConfigInfo;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterConfigManager;

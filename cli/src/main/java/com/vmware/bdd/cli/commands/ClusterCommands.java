@@ -410,7 +410,18 @@ public class ClusterCommands implements CommandMarker {
          ConsoleReader reader = new ConsoleReader();
          reader.setPrompt(promptMsg);
          String password = null;
-         password = reader.readLine(Character.valueOf('*'));
+         try {
+            password = reader.readLine(Character.valueOf('*'));
+         } catch (IllegalArgumentException e) {
+            if (e.getMessage().contains("!")) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, null,
+                     Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+                     Constants.PASSWORD_CHARACTER_REQUIREMENT);
+               return null;
+            } else {
+               throw e;
+            }
+         }
          if (isValidPassword(password)) {
             return password;
          } else {
