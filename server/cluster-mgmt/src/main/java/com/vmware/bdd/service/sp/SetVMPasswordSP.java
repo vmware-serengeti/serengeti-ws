@@ -109,7 +109,8 @@ public class SetVMPasswordSP implements Callable<Void> {
    private boolean setRandomPassword() throws Exception {
       logger.info("Setting random password for " + nodeIP);
       String scriptFileName = Configuration.getString(Constants.SET_PASSWORD_SCRIPT_CONFIG_NAME, Constants.DEFAULT_SET_PASSWORD_SCRIPT);
-      String cmd = "sudo " + scriptFileName + " -a";
+      String script = getScriptName(scriptFileName);
+      String cmd = "sudo " + script + " -a";
       return setPassword(cmd, null);
    }
 
