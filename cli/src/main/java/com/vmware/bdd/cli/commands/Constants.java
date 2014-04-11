@@ -249,7 +249,7 @@ public class Constants {
    public static final int PASSWORD_MAX_LENGTH = 128;
    public static final String PASSWORD_CONFIRMATION_FAILED = "Password confirmation failed. The passwords must match.";
    public static final String RESUME_DONOT_NEED_SET_PASSWORD = "Run the 'cluster create --resume' command, but do not include the '--password' parameter.";
-   public static final String PASSWORD_CHARACTER_REQUIREMENT = "Password can only contain digits[0-9], chars[a-zA-Z] or special characters such as _, @, #, $, %, ^, &, *. NOTE: Other special characters are not allowed.";
-   public static final String PASSWORD_HINT = "Password must be from " + PASSWORD_MIN_LENGTH + " to " + PASSWORD_MAX_LENGTH + " characters and can contain digits[0-9], chars[a-zA-Z] or special characters such as _, @, #, $, %, ^, &, *.";
+   public static final String PASSWORD_CHARACTER_REQUIREMENT = "Passwords can include only alphanumeric characters ([0-9, a-z, A-Z]) and the following special characters: _, @, #, $, %, ^, &, *";
+   public static final String PASSWORD_HINT = "Password are from " + PASSWORD_MIN_LENGTH + " to " + PASSWORD_MAX_LENGTH + " characters, and can include alphanumeric characters ([0-9, a-z, A-Z]) and the following special characters: _, @, #, $, %, ^, &, *";
    public static final String FAILED_NODES_MESSAGE = "The failed nodes: ";
 }
