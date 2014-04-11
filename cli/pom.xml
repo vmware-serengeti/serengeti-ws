@@ -155,7 +155,7 @@
    </build>
    <repositories>
      <repository>
-		<id>spring-snapshot</id>
+		<id>spring-release</id>
 		<url>http://repo.springsource.org/libs-release/</url>
 	</repository>
    </repositories>
