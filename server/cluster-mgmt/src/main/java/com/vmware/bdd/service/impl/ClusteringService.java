@@ -657,7 +657,7 @@ public class ClusteringService implements IClusteringService {
                List<String> roles =
                      new Gson().fromJson(node.getNodeGroup().getRoles(),
                            List.class);
-               if (cluster.getDistro().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
+               if (cluster.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
                   if (roles
                         .contains(HadoopRole.MAPR_JOBTRACKER_ROLE.toString())) {
                      String thisJtIp = node.getPrimaryMgtIpV4();

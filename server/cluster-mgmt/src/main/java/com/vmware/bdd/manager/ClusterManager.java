@@ -965,7 +965,7 @@ public class ClusterManager {
       cluster = clusterEntityMgr.findByName(clusterName);
 
       if (enableAuto != null && enableAuto != cluster.getAutomationEnable()) {
-         if (enableAuto && cluster.getDistro().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
+         if (enableAuto && cluster.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
             logger.error("cluster " + clusterName + " is a MAPR distro, which cannot be auto scaled");
             throw BddException.NOT_ALLOWED_SCALING("cluster", clusterName);
          }
