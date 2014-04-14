@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2012-2014 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,12 +20,10 @@ import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.Priority;
-import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2012-2014 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@ package com.vmware.bdd.service.sp;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import com.vmware.bdd.software.mgmt.thrift.SoftwareManagement;
 import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 

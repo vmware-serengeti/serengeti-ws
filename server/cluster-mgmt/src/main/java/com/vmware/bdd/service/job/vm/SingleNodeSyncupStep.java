@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2012-2014 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,6 @@
  * limitations under the License.
  ***************************************************************************/
 package com.vmware.bdd.service.job.vm;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
