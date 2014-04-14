@@ -477,9 +477,7 @@
                      <excludedGroups>dependsOnVC</excludedGroups>
                      <excludes>
                         <exclude>**/TestClusteringJobs.java</exclude>
-                        <exclude>**/CommonUtilTest.java</exclude>
                         <exclude>**/SoftwareManagementClientTest.java</exclude>
-                        <exclude>**/AppConfigValidationFactoryTest.java</exclude>
                      </excludes>
                   </configuration>
                </plugin>
