@@ -40,6 +40,7 @@ import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.utils.Constants;
 
 @ContextConfiguration(locations = { "classpath:/spring/*-context.xml" })
 public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
@@ -67,6 +68,7 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
    static ClusterEntity assembleClusterEntity(String clusterName) {
       ClusterEntity cluster = new ClusterEntity(clusterName);
       cluster.setDistro("apache");
+      cluster.setDistroVendor(Constants.DEFAULT_VENDOR);
       cluster.setTopologyPolicy(TopologyType.NONE);
       cluster.setStatus(ClusterStatus.PROVISIONING);
       cluster.setAutomationEnable(false);
@@ -139,8 +141,8 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
    }
 
    /*
-    * com.vmware.bdd.utils.TestResourceCleanupUtils has a function removeClusters() which 
-    * will delete all clusters in database, and it's invoked concurrently with this unit test, 
+    * com.vmware.bdd.utils.TestResourceCleanupUtils has a function removeClusters() which
+    * will delete all clusters in database, and it's invoked concurrently with this unit test,
     * so it's necessary to guarantee the isolation of these test cases.
     * Otherwise, UT will fail sometimes.
     */
