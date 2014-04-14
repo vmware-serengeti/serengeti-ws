@@ -156,7 +156,7 @@ public class VcVmUtil {
    }
 
    /**
-    * 
+    *
     * @param vcVm
     * @param portGroup
     * @param nicEntity
@@ -316,12 +316,16 @@ public class VcVmUtil {
    public static boolean setBaseNodeForVm(BaseNode vNode, String vmId) {
       if (vmId == null) {
          vNode.setNodeAction(Constants.NODE_ACTION_CLONING_FAILED);
+         vNode.setErrMessage(CommonUtil.getCurrentTimestamp() + " "
+               + vNode.getNodeAction());
          return false;
       }
       VcVirtualMachine vm = VcCache.getIgnoreMissing(vmId);
       if (vm == null) {
          logger.info("vm " + vmId + " is created, and then removed afterwards.");
          vNode.setNodeAction(Constants.NODE_ACTION_CLONING_FAILED);
+         vNode.setErrMessage(CommonUtil.getCurrentTimestamp() + " "
+               + vNode.getNodeAction());
          return false;
       }
       boolean success = true;
@@ -343,6 +347,8 @@ public class VcVmUtil {
          } else {
             vNode.setNodeStatus(NodeStatus.POWERED_OFF);
             vNode.setNodeAction(Constants.NODE_ACTION_CREATION_FAILED);
+            vNode.setErrMessage(CommonUtil.getCurrentTimestamp() + " "
+                  + vNode.getNodeAction());
          }
       } else {
          vNode.setSuccess(false);
@@ -354,9 +360,13 @@ public class VcVmUtil {
             if (vm.isPoweredOn()) {
                vNode.setNodeStatus(NodeStatus.POWERED_ON);
                vNode.setNodeAction(Constants.NODE_ACTION_GET_IP_FAILED);
+               vNode.setErrMessage(CommonUtil.getCurrentTimestamp() + " "
+                     + vNode.getNodeAction());
             } else {
                vNode.setNodeStatus(NodeStatus.POWERED_OFF);
                vNode.setNodeAction(Constants.NODE_ACTION_CREATION_FAILED);
+               vNode.setErrMessage(CommonUtil.getCurrentTimestamp() + " "
+                     + vNode.getNodeAction());
             }
          }
          success = false;
@@ -372,6 +382,8 @@ public class VcVmUtil {
                   + vm.getName() + ", " + "FT state " + vm.getFTState()
                   + " is unexpected.");
             vNode.setNodeAction(Constants.NODE_ACTION_WRONG_FT_STATUS);
+            vNode.setErrMessage(CommonUtil.getCurrentTimestamp() + " "
+                  + vNode.getNodeAction());
             return false;
          }
       }
@@ -742,7 +754,7 @@ public class VcVmUtil {
       }
 
       /*
-       * TRICK: destroy vm with unaccessible disks will throw exceptions, ignore 
+       * TRICK: destroy vm with unaccessible disks will throw exceptions, ignore
        * it and destroy it again.
        */
       try {
@@ -888,7 +900,7 @@ public class VcVmUtil {
 
    /**
     * check and set vApp Options -> vmware tools flag
-    * 
+    *
     * @param vm
     * @return true if vm reconfigured, in this case need remove snapshots
     */
@@ -927,7 +939,7 @@ public class VcVmUtil {
    /**
     * check if number of vCPUs is a multiple of the number of cores per socket
     * configured in the VM
-    * 
+    *
     * @param vmId
     * @param cpuNum
     * @return

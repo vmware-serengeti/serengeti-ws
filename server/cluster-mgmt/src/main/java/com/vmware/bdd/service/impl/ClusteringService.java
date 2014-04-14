@@ -31,9 +31,6 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.vmware.bdd.apitypes.StorageRead;
-import com.vmware.bdd.entity.DiskEntity;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -1208,9 +1205,11 @@ public class ClusteringService implements IClusteringService {
             success = false;
             node.setSuccess(false);
             if (result.getErrMessage() != null) {
-               node.setErrMessage(result.getErrTimestamp() + " " + result.getErrMessage());
-            } else {
-               node.setErrMessage(result.getErrTimestamp() + " " + node.getNodeAction());
+               node.setErrMessage(result.getErrTimestamp() + " "
+                     + result.getErrMessage());
+            } else if (!node.getErrMessage().isEmpty()) {
+               node.setErrMessage(CommonUtil.getCurrentTimestamp() + " "
+                     + node.getNodeAction());
             }
          } else {
             total++;
