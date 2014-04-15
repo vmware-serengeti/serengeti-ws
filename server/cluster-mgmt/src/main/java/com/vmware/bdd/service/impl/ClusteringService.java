@@ -1780,6 +1780,7 @@ public class ClusteringService implements IClusteringService {
       }
       if (folder == null) {
          logger.info("No folder to delete.");
+         return;
       }
       String clusterFolderName = folderNames[0] + "/" + folderNames[1];
       logger.info("find cluster root folder: " + clusterFolderName);

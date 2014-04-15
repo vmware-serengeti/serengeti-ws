@@ -88,27 +88,27 @@ public class VcException extends AuroraException {
 
    public static VcException POWER_ON_VM_FAILED(Throwable t, String vmName,
          String message) {
-      return new VcException(null, "POWER_ON_VM_FAILED", vmName, message);
+      return new VcException(t, "POWER_ON_VM_FAILED", vmName, message);
    }
 
    public static VcException POWER_OFF_VM_FAILED(Throwable t, String vmName,
          String message) {
-      return new VcException(null, "POWER_OFF_VM_FAILED", vmName, message);
+      return new VcException(t, "POWER_OFF_VM_FAILED", vmName, message);
    }
 
    public static VcException DELETE_VM_FAILED(Throwable t, String vmName,
          String message) {
-      return new VcException(null, "DELETE_VM_FAILED", vmName, message);
+      return new VcException(t, "DELETE_VM_FAILED", vmName, message);
    }
 
    public static VcException CREATE_VM_FAILED(Throwable t, String vmName,
          String message) {
-      return new VcException(null, "CREATE_VM_FAILED", vmName, message);
+      return new VcException(t, "CREATE_VM_FAILED", vmName, message);
    }
 
    public static VcException CONFIG_VM_FAILED(Throwable t, String vmName,
          String message) {
-      return new VcException(null, "CONFIG_VM_FAILED", vmName, message);
+      return new VcException(t, "CONFIG_VM_FAILED", vmName, message);
    }
 
    public boolean isINVALID_MOREF() {
