@@ -22,9 +22,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.io.Writer;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,10 +32,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import jline.WindowsTerminal;
 import jline.console.ConsoleReader;
 import jline.internal.Configuration;
 
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonParseException;
@@ -47,6 +46,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
 import org.codehaus.jackson.util.DefaultPrettyPrinter.Lf2SpacesIndenter;
+import org.fusesource.jansi.internal.Kernel32;
 import org.springframework.shell.core.JLineShell;
 import org.springframework.shell.support.util.OsUtils;
 import org.springframework.util.ClassUtils;
@@ -57,6 +57,8 @@ import com.vmware.bdd.utils.CommonUtil;
 
 
 public class CommandsUtils {
+
+   static final Logger logger = Logger.getLogger(CommandsUtils.class);
 
    public static List<String> inputsConvert(String inputs) {
 
@@ -140,19 +142,7 @@ public class CommandsUtils {
             File file = new File(fileName);
             String filePath = file.getAbsolutePath();
             if (isJansiAvailable()) {
-               WindowsTerminal ansiTerminal = new WindowsTerminal() {
-                  @Override
-                  public synchronized boolean isAnsiSupported() {
-                     return true;
-                  }
-               };
-               ansiTerminal.init();
-               String outEncoding =
-                     ansiTerminal.getOutputEncoding() != null ? ansiTerminal
-                           .getOutputEncoding() : Configuration.getEncoding();
-               filePath =
-                     new String(filePath.getBytes(outEncoding),
-                           Configuration.getEncoding());
+               filePath = transcoding(filePath);
             }
             System.out.println("Exported to file " + filePath);
          }
@@ -163,7 +153,10 @@ public class CommandsUtils {
       }
    }
 
-   private static boolean isJansiAvailable() {
+   /*
+    * Determine if it is the window OS
+    */
+   public static boolean isJansiAvailable() {
       return ClassUtils.isPresent("org.fusesource.jansi.AnsiConsole",
             JLineShell.class.getClassLoader())
             && OsUtils.isWindows()
@@ -255,6 +248,9 @@ public class CommandsUtils {
                                              ((Double) value).doubleValue(), 2,
                                              BigDecimal.ROUND_FLOOR)) : value
                                        .toString());
+                     if (isJansiAvailable()) {
+                        table[i][j] = transcoding(table[i][j]);
+                     }
                      j++;
                   } else {
                      tempValue = value;
@@ -316,6 +312,13 @@ public class CommandsUtils {
 
    public static void printCmdSuccess(String objectType, String name,
          String result) {
+      if (isJansiAvailable()) {
+         try {
+            name = transcoding(name);
+         } catch (UnsupportedEncodingException e) {
+            logger.warn("failed to transcoding: " + e.getMessage());
+         }
+      }
       if (!isBlank(name)) {
          System.out.println(objectType + " " + name + " " + result);
       } else {
@@ -325,15 +328,21 @@ public class CommandsUtils {
 
    public static void printCmdFailure(String objectType, String name,
          String opName, String result, String message) {
+      if (isJansiAvailable()) {
+         try {
+            name = transcoding(name);
+         } catch (UnsupportedEncodingException e) {
+            logger.warn("failed to transcoding: " + e.getMessage());
+         }
+      }
       if (!isBlank(name)) {
          System.out.println(objectType + " " + name + " " + opName + " "
                + result + ": " + message);
-      } else if(!isBlank(opName)) {
+      } else if (!isBlank(opName)) {
          System.out.println(objectType + " " + opName + " " + result + ": "
                + message);
-      }else{
-         System.out.println(objectType + " " + result + ": "
-               + message);
+      } else {
+         System.out.println(objectType + " " + result + ": " + message);
       }
    }
 
@@ -530,4 +539,21 @@ public class CommandsUtils {
       return rootCause;
    }
 
+   /*
+    * Transfer terminal output encoding to system encoding.
+    * It only take effect on windows OS.
+    */
+   public static String transcoding(final String src)
+         throws UnsupportedEncodingException {
+      //      Return CMD output code page.
+      int codePage = Kernel32.GetConsoleOutputCP();
+      String outputEncoding = "";
+      if (codePage == 932) {
+         outputEncoding = "MS932";
+      } else {
+         outputEncoding = "cp" + codePage;
+      }
+      return new String(src.getBytes(outputEncoding),
+            Configuration.getEncoding());
+   }
 }
