@@ -316,7 +316,7 @@ public class TestPlacementService {
          String[] strs = e.getMessage().split("\n");
          Assert.assertEquals(strs[0],
                "No host available on the racks [rack1] specified for the node [hadoop-data-0]. Review your topology rack-hosts mapping file and correct as necessary.");
-         Assert.assertEquals(strs[2], "You must add datastores on these hosts [10.1.1.3, 10.1.1.4] to use them for node group [data].");
+         Assert.assertEquals(strs[2], "You must add datastores on these hosts [10.1.1.3, 10.1.1.4] to use them with the node group [data].");
       }
    }
 }
