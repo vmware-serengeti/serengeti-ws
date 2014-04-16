@@ -73,7 +73,7 @@ public class SetPasswordService implements ISetPasswordService {
 
    @Override
    public boolean setPasswordForNode(String clusterName, String nodeIP, String password) throws Exception {
-      AuAssert.check(clusterName != null && nodeIP != null && password != null );
+      AuAssert.check(clusterName != null && nodeIP != null);
 
       List<Callable<Void>> storeProcedures = new ArrayList<Callable<Void>>();
       SetVMPasswordSP setVMPasswordSP = new SetVMPasswordSP(nodeIP, password);
