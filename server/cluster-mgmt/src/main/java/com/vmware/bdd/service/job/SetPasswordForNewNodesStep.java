@@ -128,7 +128,6 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
       return setPasswordService;
    }
 
-   @Autowired
    public void setSetPasswordService(ISetPasswordService setPasswordService) {
       this.setPasswordService = setPasswordService;
    }
@@ -137,7 +136,6 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
       return managementOperation;
    }
 
-   @Autowired
    public void setManagementOperation(ManagementOperation managementOperation) {
       this.managementOperation = managementOperation;
    }
