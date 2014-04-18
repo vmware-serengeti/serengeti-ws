@@ -175,9 +175,11 @@ public class Constants {
    public static final String DEFAULT_SET_PASSWORD_SCRIPT = "set-password";
    public static final int SET_PASSWORD_MAX_RETRY_TIMES = 10;
    public static final String SET_PASSWORD_FAILED = "Failed to set password";
+   public static final String SET_PASSWORDLESS_LOGIN_FAILED = "Failed to set passwordless login for ";
    public static final String NEW_LINE = "\n";
    public static final String DEFAULT_PASSWORDLESS_LOGIN_SCRIPT = "setup-passwordless-login";
    public static final String PASSWORDLESS_LOGIN_SCRIPT = "serengeti.passwordless.login.script";
+   public static final String PASSWORDLESS_LOGIN_TIMEOUT = "serengeti.passwordless.login.timeout";
    public static final String SERENGETI_BUILD_TYPE = "serengeti.build.type";
    public static final String RELEASE_BUILD = "release";
    public static final String BETA_BUILD = "beta";

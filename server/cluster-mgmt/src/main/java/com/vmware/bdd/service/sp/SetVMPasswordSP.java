@@ -18,7 +18,9 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.ShellCommandExecutor;
+
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
@@ -36,7 +38,8 @@ public class SetVMPasswordSP implements Callable<Void> {
    private String privateKeyFile;
    private String sshUser;
    private int sshPort;
-   private final static int SETUP_PASSWORDLESS_LOGIN_TIMEOUT = 60; //in seconds
+   private final static int SETUP_PASSWORDLESS_LOGIN_TIMEOUT = 120; //in seconds
+   private int setupPasswordLessLoginTimeout;
 
    public SetVMPasswordSP(String nodeIP, String password) {
       this.nodeIP = nodeIP;
@@ -47,6 +50,7 @@ public class SetVMPasswordSP implements Callable<Void> {
       String keyFileName= Configuration.getString(Constants.SSH_PRIVATE_KEY_CONFIG_NAME, Constants.SSH_PRIVATE_KEY_FILE_NAME);
       String serengetiHome = Configuration.getString(Constants.SERENGETI_HOME, Constants.DEFAULT_SERENGETI_HOME);
       this.privateKeyFile = serengetiHome + "/.ssh/" + keyFileName;
+      this.setupPasswordLessLoginTimeout = Configuration.getInt(Constants.PASSWORDLESS_LOGIN_TIMEOUT, SETUP_PASSWORDLESS_LOGIN_TIMEOUT);
    }
 
    @Override
@@ -158,14 +162,24 @@ public class SetVMPasswordSP implements Callable<Void> {
       }
    }
 
-   private void setupPasswordLessLogin(String hostIP) {
+   private void setupPasswordLessLogin(String hostIP) throws Exception {
       String scriptName = Configuration.getString(Constants.PASSWORDLESS_LOGIN_SCRIPT, Constants.DEFAULT_PASSWORDLESS_LOGIN_SCRIPT);
       String script = getScriptName(scriptName);
 
       String user = Configuration.getString(Constants.SSH_USER_CONFIG_NAME, Constants.DEFAULT_SSH_USER_NAME);
       String password = Configuration.getString(Constants.SERENGETI_DEFAULT_PASSWORD);
       String cmd = script + " " + hostIP + " " + user + " " + password;
-      ShellCommandExecutor.execCmd(cmd, null, null, SETUP_PASSWORDLESS_LOGIN_TIMEOUT, Constants.MSG_SETTING_UP_PASSWORDLESS_LOGIN + hostIP + ".");
+      for (int i = 0; i < Constants.SET_PASSWORD_MAX_RETRY_TIMES; i++) {
+         try {
+            ShellCommandExecutor.execCmd(cmd, null, null, this.setupPasswordLessLoginTimeout, Constants.MSG_SETTING_UP_PASSWORDLESS_LOGIN + hostIP + ".");
+            logger.info("Set passwordless login successfully for " + hostIP);
+            return;
+         } catch (BddException e) {
+            logger.warn("Set passwordless login no. " + i + " and got exception: " + e.getMessage());
+         }
+      }
+      logger.error("Failed to set passwordless login for " + hostIP);
+      throw new Exception(Constants.SET_PASSWORDLESS_LOGIN_FAILED + hostIP);
    }
 
    private boolean refreshTty() {
