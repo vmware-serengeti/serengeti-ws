@@ -41,20 +41,22 @@ public class SetPasswordForDiskFixStep extends TrackableTasklet {
 
       String targetNode = getJobParameters(chunkContext).getString(JobConstants.SUB_JOB_NODE_NAME);
       NodeEntity nodeEntity = clusterEntityMgr.findNodeByName(targetNode);
-      String fixedNodeIP = nodeEntity.getPrimaryMgtIpV4();
-      if (fixedNodeIP == null) {
+      if (nodeEntity == null) {
          throw TaskException.EXECUTION_FAILED("No fixed node need to set password for.");
       }
 
+      String fixedNodeIP = nodeEntity.getPrimaryMgtIpV4();
       boolean success = false;
       try {
-         success = setPasswordService.setPasswordForNode(clusterName, fixedNodeIP, newPassword);
+         success = setPasswordService.setPasswordForNode(clusterName, nodeEntity, newPassword);
          putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, success);
       } catch (Exception e) {
-         throw TaskException.EXECUTION_FAILED("In disk fix, failed to set password for node " + targetNode);
+         putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, success);
+         String errMsg = (e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+         throw TaskException.EXECUTION_FAILED("In disk fix, failed to set password for node " + fixedNodeIP + "." + errMsg);
       }
       if (!success) {
-         throw TaskException.EXECUTION_FAILED("In disk fix, failed to set password for node " + targetNode);
+         throw TaskException.EXECUTION_FAILED("In disk fix, failed to set password for node " + fixedNodeIP);
       }
       return RepeatStatus.FINISHED;
    }

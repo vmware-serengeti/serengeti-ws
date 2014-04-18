@@ -170,6 +170,14 @@ public class CommonUtil {
       }
    }
 
+   public static boolean passwordContainInvalidCharacter(String password) {
+      Pattern pattern = Pattern.compile("[a-zA-Z0-9_@#$%^&*]+");
+      if (!pattern.matcher(password).matches()) {
+         return true;
+      }
+      return false;
+   }
+
    public static boolean isComputeOnly(List<String> roles, String distroVendor) {
       if (distroVendor != null && distroVendor.equalsIgnoreCase(Constants.MAPR_VENDOR)) {
          if (roles != null && roles.contains(HadoopRole.MAPR_TASKTRACKER_ROLE.toString()) &&

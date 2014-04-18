@@ -18,20 +18,25 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.concurrent.Callable;
 
+import com.jcraft.jsch.JSchException;
+import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.ShellCommandExecutor;
 
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.SSHUtil;
+import com.vmware.bdd.exception.SetPasswordException;
 /**
  * Store Procedure of setting password for a vm
  */
 public class SetVMPasswordSP implements Callable<Void> {
 
    private static final Logger logger = Logger.getLogger(SetVMPasswordSP.class);
+   private NodeEntity node;
    private String nodeIP;
    private String password;
 
@@ -41,8 +46,9 @@ public class SetVMPasswordSP implements Callable<Void> {
    private final static int SETUP_PASSWORDLESS_LOGIN_TIMEOUT = 120; //in seconds
    private int setupPasswordLessLoginTimeout;
 
-   public SetVMPasswordSP(String nodeIP, String password) {
-      this.nodeIP = nodeIP;
+   public SetVMPasswordSP(NodeEntity node, String password) {
+      this.node = node;
+      this.nodeIP = node.getPrimaryMgtIpV4();
       this.password = password;
 
       this.sshUser = Configuration.getString(Constants.SSH_USER_CONFIG_NAME, Constants.DEFAULT_SSH_USER_NAME);
@@ -59,55 +65,45 @@ public class SetVMPasswordSP implements Callable<Void> {
       return null;
    }
 
-   private boolean setPasswordForNode() throws Exception {
+   public boolean setPasswordForNode() throws Exception {
       logger.info("Setting password of " + nodeIP);
 
       setupPasswordLessLogin(nodeIP);
 
-      //Release build: if user set customized password, set the customized password for it
-      //               if user didn't set customized password, set random password for it
-      //Beta build:    if user set customized password, set the customized password for it
-      //               if user didn't set password, use default password
-      String buildType = Configuration.getString(Constants.SERENGETI_BUILD_TYPE, Constants.RELEASE_BUILD);
-      if (buildType.equalsIgnoreCase(Constants.RELEASE_BUILD)) {
-         if (this.password == null) {
-            if (setRandomPassword() == false) {
-               logger.error("Set random password for " + nodeIP + " failed.");
-               return false;
-            }
-         } else {
-            if (setCustomizedPassword(password) == false) {
-               logger.error("Set customized password for " + nodeIP + " failed.");
-               return false;
-            }
+      // if user set customized password, set the customized password for it
+      // if user didn't set customized password, set random password for it
+      if (this.password == null) {
+         setRandomPassword();
+      } else {
+         if (CommonUtil.passwordContainInvalidCharacter(password)) {
+            logger.error("Set customized password for " + nodeIP + " failed. Password contains invalid characters");
+            throw SetPasswordException.PASSWORD_CONTAIN_INVALID_CHARACTER();
          }
-      } else if (buildType.equalsIgnoreCase(Constants.BETA_BUILD)) {
-         if (this.password != null) {
-            if (setCustomizedPassword(password) == false) {
-               logger.error("Set customized password for " + nodeIP + " failed.");
-               return false;
-            }
-         }
+         setCustomizedPassword(password);
       }
-
-      if (!removeSSHLimit()) {
-         logger.error("Remove ssh limit for " + nodeIP + " failed.");
-         return false;
-      }
+      removeSSHLimit();
 
       return true;
    }
 
-   private boolean removeSSHLimit() {
+   private boolean removeSSHLimit() throws Exception {
       String scriptFileName = Configuration.getString(Constants.REMOVE_SSH_LIMIT_SCRIPT, Constants.DEFAULT_REMOVE_SSH_LIMIT_SCRIPT);
       String script = getScriptName(scriptFileName);
       String cmd = "sudo " + script;
-      boolean removeSSHLimitSucceed = false;
+      boolean succeed = false;
       SSHUtil sshUtil = new SSHUtil();
-      removeSSHLimitSucceed = sshUtil.execCmd(sshUser, privateKeyFile, nodeIP, sshPort, cmd, null, null);
-
-      logger.info("Remove ssh limit for " + nodeIP + (removeSSHLimitSucceed ? " succeed" : " failed") + ".");
-      return removeSSHLimitSucceed;
+      for (int i = 0; i < Constants.SET_PASSWORD_MAX_RETRY_TIMES; i++) {
+         try {
+            succeed = sshUtil.execCmd(sshUser, privateKeyFile, nodeIP, sshPort, cmd, null, null);
+            if (succeed) {
+               logger.info("Remove ssh limit for " + nodeIP + " succceed");
+               return true;
+            }
+         } catch (JSchException e) {
+            logger.warn("Caught exception when remove ssh limit for " + nodeIP);
+         }
+      }
+      throw SetPasswordException.FAIL_TO_REMOVE_SSH_LIMIT(nodeIP);
    }
 
    private boolean setRandomPassword() throws Exception {
@@ -134,9 +130,16 @@ public class SetVMPasswordSP implements Callable<Void> {
 
    private boolean setPassword(String cmd, InputStream in) throws Exception {
       boolean setPasswordSucceed = false;
+      int jschExceptionCount = 0;
       for (int i = 0; i < Constants.SET_PASSWORD_MAX_RETRY_TIMES; i++) {
-         SSHUtil sshUtil = new SSHUtil();
-         setPasswordSucceed = sshUtil.execCmd(sshUser, privateKeyFile, nodeIP, sshPort, cmd, in, null);
+         try {
+            SSHUtil sshUtil = new SSHUtil();
+            setPasswordSucceed = sshUtil.execCmd(sshUser, privateKeyFile, nodeIP, sshPort, cmd, in, null);
+         } catch (JSchException e) {
+            if (++jschExceptionCount == Constants.SET_PASSWORD_MAX_RETRY_TIMES) {
+               throw SetPasswordException.GOT_JSCH_EXCEPTION_WHEN_SET_PASSWORD(e, nodeIP);
+            }
+         }
          if (setPasswordSucceed) {
             //if refresh failed, user still can manually refresh tty by Ctrl+C, so don't need to check whether
             //it succeed or not
@@ -157,42 +160,55 @@ public class SetVMPasswordSP implements Callable<Void> {
          logger.info("Set password for " + nodeIP + " succeed");
          return true;
       } else {
-         logger.info("set password for " + nodeIP + " failed");
-         throw new Exception(Constants.SET_PASSWORD_FAILED + " for " + nodeIP);
+         logger.error("set password for " + nodeIP + " failed");
+         throw SetPasswordException.FAIL_TO_SET_PASSWORD(nodeIP, null);
       }
    }
 
-   private void setupPasswordLessLogin(String hostIP) throws Exception {
+   private boolean setupPasswordLessLogin(String hostIP) throws Exception {
       String scriptName = Configuration.getString(Constants.PASSWORDLESS_LOGIN_SCRIPT, Constants.DEFAULT_PASSWORDLESS_LOGIN_SCRIPT);
       String script = getScriptName(scriptName);
 
       String user = Configuration.getString(Constants.SSH_USER_CONFIG_NAME, Constants.DEFAULT_SSH_USER_NAME);
       String password = Configuration.getString(Constants.SERENGETI_DEFAULT_PASSWORD);
       String cmd = script + " " + hostIP + " " + user + " " + password;
+
+      int timeoutCount = 0;
       for (int i = 0; i < Constants.SET_PASSWORD_MAX_RETRY_TIMES; i++) {
          try {
             ShellCommandExecutor.execCmd(cmd, null, null, this.setupPasswordLessLoginTimeout, Constants.MSG_SETTING_UP_PASSWORDLESS_LOGIN + hostIP + ".");
             logger.info("Set passwordless login successfully for " + hostIP);
-            return;
+            return true;
          } catch (BddException e) {
+            if (e.getMessage().contains(Constants.EXEC_COMMAND_TIMEOUT)) {
+               timeoutCount++;
+            }
             logger.warn("Set passwordless login no. " + i + " and got exception: " + e.getMessage());
          }
       }
       logger.error("Failed to set passwordless login for " + hostIP);
-      throw new Exception(Constants.SET_PASSWORDLESS_LOGIN_FAILED + hostIP);
+      if (timeoutCount == Constants.SET_PASSWORD_MAX_RETRY_TIMES) {
+         throw SetPasswordException.SETUP_PASSWORDLESS_LOGIN_TIMEOUT(null, hostIP);
+      }
+      throw SetPasswordException.FAIL_TO_SETUP_PASSWORDLESS_LOGIN(hostIP);
    }
 
    private boolean refreshTty() {
       String ttyName = Configuration.getString(Constants.SERENGETI_TTY_NAME, Constants.SERENGETI_DEFAULT_TTY_NAME);
       String cmd = "ps aux | grep " + ttyName + " | grep -v \"grep\" | awk '{print $2}' | sudo xargs kill -9";
       SSHUtil sshUtil = new SSHUtil();
-      boolean refreshTtySucceed = sshUtil.execCmd(sshUser, privateKeyFile, nodeIP, sshPort, cmd, null, null);
-      logger.debug("Refresh " + ttyName + " on " + nodeIP + (refreshTtySucceed ? "succeed" : "failed") + ".");
-      return refreshTtySucceed;
+
+      try {
+         boolean refreshTtySucceed = sshUtil.execCmd(sshUser, privateKeyFile, nodeIP, sshPort, cmd, null, null);
+         logger.info("Refresh " + ttyName + " on " + nodeIP + (refreshTtySucceed ? "succeed" : "failed") + ".");
+         return refreshTtySucceed;
+      } catch (JSchException e) {
+         logger.error("Refresh tty on " + nodeIP + " failed.");
+         return false;
+      }
    }
 
-   public ByteArrayInputStream parseInputStream(String in)throws Exception
-   {
+   public ByteArrayInputStream parseInputStream(String in) throws Exception {
        ByteArrayInputStream input=new ByteArrayInputStream(in.getBytes());
        return input;
    }
@@ -214,5 +230,9 @@ public class SetVMPasswordSP implements Callable<Void> {
 
    public void setNodeIP(String nodeIP) {
       this.nodeIP = nodeIP;
+   }
+
+   public NodeEntity getNodeEntity() {
+      return node;
    }
 }

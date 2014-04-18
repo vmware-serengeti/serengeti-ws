@@ -263,6 +263,25 @@ public class VcVmUtil {
       }
    }
 
+   public static ArrayList<String> getNodePrimaryMgtIPV4sFromEntitys(List<NodeEntity> nodes) {
+      if (nodes == null) {
+         return null;
+      }
+
+      ArrayList<String> nodeIPs = null;
+      for (NodeEntity node : nodes) {
+         String ip = node.getPrimaryMgtIpV4();
+         if (ip != null) {
+            if (nodeIPs == null) {
+               nodeIPs = new ArrayList<String>();
+            }
+            nodeIPs.add(ip);
+         }
+      }
+
+      return nodeIPs;
+   }
+
    public static void populateNicInfo(final NicEntity nicEntity,
          final String moid, final String pgName) {
       try {

@@ -197,4 +197,13 @@ public class CommonUtilTest {
       assertNotNull(date);
    }
 
+   @Test
+   public void testPasswordContainInvalidCharacter() {
+      assertTrue(CommonUtil.passwordContainInvalidCharacter("!"));
+      assertTrue(CommonUtil.passwordContainInvalidCharacter("~"));
+      assertTrue(CommonUtil.passwordContainInvalidCharacter(" "));
+      assertTrue(CommonUtil.passwordContainInvalidCharacter("<"));
+      assertTrue(CommonUtil.passwordContainInvalidCharacter("?"));
+      assertFalse(CommonUtil.passwordContainInvalidCharacter("1a_@#$%^&*"));
+   }
 }

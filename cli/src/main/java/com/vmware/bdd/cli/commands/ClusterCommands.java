@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import jline.console.ConsoleReader;
 
@@ -63,6 +62,7 @@ import com.vmware.bdd.cli.rest.NetworkRestClient;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AppConfigValidationUtils;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ValidateResult;
 
 @Component
@@ -440,21 +440,13 @@ public class ClusterCommands implements CommandMarker {
                Constants.PASSWORD_LENGTH_REQUIREMENT);
          return false;
       }
-      if (containInvalidCharacter(password)) {
+      if (CommonUtil.passwordContainInvalidCharacter(password)) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, null,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.PASSWORD_CHARACTER_REQUIREMENT);
          return false;
       }
       return true;
-   }
-
-   private boolean containInvalidCharacter(String password) {
-      Pattern pattern = Pattern.compile("[a-zA-Z0-9_@#$%^&*]+");
-      if (!pattern.matcher(password).matches()) {
-         return true;
-      }
-      return false;
    }
 
    private List<String> findDistroRoles(ClusterCreate clusterCreate) {

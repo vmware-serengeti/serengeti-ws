@@ -17,18 +17,16 @@ package com.vmware.bdd.service.job;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.CommonUtil;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterConfigManager;
-import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.ISetPasswordService;
 import com.vmware.bdd.service.job.software.ManagementOperation;
 
@@ -36,34 +34,22 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
    private ISetPasswordService setPasswordService;
    private ClusterConfigManager configMgr;
    private ManagementOperation managementOperation;
+   private String clusterName;
    private static final Logger logger = Logger.getLogger(SetPasswordForNewNodesStep.class);
 
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext, JobExecutionStatusHolder jobExecutionStatusHolder) {
-
-      String clusterName = getJobParameters(chunkContext).getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
+      clusterName = getJobParameters(chunkContext).getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
       ClusterCreate clusterSpec = configMgr.getClusterConfig(clusterName);
-
       String newPassword = clusterSpec.getPassword();
 
-      ArrayList<String> nodeIPs = null;
-      if (managementOperation == ManagementOperation.CREATE || managementOperation == ManagementOperation.RESIZE) {
-         List<BaseNode> addedNodes =
-               getFromJobExecutionContext(chunkContext, JobConstants.CLUSTER_ADDED_NODES_JOB_PARAM,
-                     new TypeToken<List<BaseNode>>() {
-                     }.getType());
-         nodeIPs = getAddedNodeIPs(addedNodes);
-      } else if (managementOperation == ManagementOperation.RESUME) {
-         nodeIPs = getAllNodeIPsFromEntitys(getClusterEntityMgr().findAllNodes(clusterName));
-      } else {
-         throw TaskException.EXECUTION_FAILED("Unknown operation type.");
+      List<NodeEntity> nodes = getNodesToBeSetPassword(chunkContext);
+
+      if (nodes == null || nodes.isEmpty()) {
+         throw TaskException.EXECUTION_FAILED("No nodes needed to set password for");
       }
 
-      if (nodeIPs == null || nodeIPs.isEmpty()) {
-         throw TaskException.EXECUTION_FAILED("No nodes needed to set password for.");
-      }
-
-      ArrayList<String> failedNodes = setPasswordService.setPasswordForNodes(clusterName, nodeIPs, newPassword);
+      ArrayList<String> failedNodes = setPasswordService.setPasswordForNodes(clusterName, nodes, newPassword);
       boolean success = false;
       if (failedNodes == null) {
          success = true;
@@ -79,41 +65,35 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
       return RepeatStatus.FINISHED;
    }
 
-   private ArrayList<String> getAllNodeIPsFromEntitys(List<NodeEntity> nodes) {
-      if (nodes == null) {
-         return null;
-      }
+   private List<NodeEntity> getNodesToBeSetPassword (ChunkContext chunkContext) throws TaskException {
+      List<NodeEntity> toBeSetPassword = null;
+      if ((managementOperation == ManagementOperation.CREATE) || 
+            (managementOperation == ManagementOperation.RESUME)) {
+         toBeSetPassword = getClusterEntityMgr().findAllNodes(clusterName);
+         return toBeSetPassword;
+      } else if (managementOperation == ManagementOperation.RESIZE) {
+         String groupName = getJobParameters(chunkContext).getString(JobConstants.GROUP_NAME_JOB_PARAM);
+         List<NodeEntity> nodesInGroup = clusterEntityMgr.findAllNodes(clusterName, groupName);
+         long oldInstanceNum = getJobParameters(chunkContext).getLong(
+               JobConstants.GROUP_INSTANCE_OLD_NUMBER_JOB_PARAM);
 
-      ArrayList<String> nodeIPs = null;
-      for (NodeEntity node : nodes) {
-         String ip = node.getPrimaryMgtIpV4();
-         if (ip != null) {
-            if (nodeIPs == null) {
-               nodeIPs = new ArrayList<String>();
+         for (NodeEntity node : nodesInGroup) {
+            long index = CommonUtil.getVmIndex(node.getVmName());
+            if (index < oldInstanceNum) {
+               // do not verify existing nodes from last successful deployment
+               continue;
             }
-            nodeIPs.add(ip);
+            if (node.getStatus() == NodeStatus.VM_READY) {
+               if (toBeSetPassword == null) {
+                  toBeSetPassword = new ArrayList<NodeEntity>();
+               }
+               toBeSetPassword.add(node);
+            }
          }
+         return toBeSetPassword;
+      } else {
+         throw TaskException.EXECUTION_FAILED("Unknown operation type.");
       }
-
-      return nodeIPs;
-   }
-
-   private ArrayList<String> getAddedNodeIPs(List<BaseNode> addedNodes) {
-      if (addedNodes == null) {
-         return null;
-      }
-
-      ArrayList<String> nodeIPs = new ArrayList<String>();
-      for (BaseNode node : addedNodes) {
-         String mgtIp = node.getPrimaryMgtIpV4();
-         if (mgtIp.equals(Constants.NULL_IPV4_ADDRESS)) {
-            logger.error("Failed to get ip for added nodes");
-            return nodeIPs;
-         }
-         nodeIPs.add(mgtIp);
-      }
-
-      return nodeIPs;
    }
 
    public ClusterConfigManager getConfigMgr() {

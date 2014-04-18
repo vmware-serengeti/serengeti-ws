@@ -59,10 +59,10 @@ public class ShellCommandExecutor {
             logger.info(executor.getOutput());
          }
          if (executor.isTimedOut()) {
-            throw BddException.ExecCommand(null, description + " timeout.");
+            throw BddException.ExecCommand(null, description + Constants.EXEC_COMMAND_TIMEOUT);
          }
          if (!executor.isCompleted() || executor.getExitCode() != 0) {
-            throw BddException.ExecCommand(null, description + " failed.");
+            throw BddException.ExecCommand(null, description + Constants.EXEC_COMMAND_FAILED);
          }
       }
    }

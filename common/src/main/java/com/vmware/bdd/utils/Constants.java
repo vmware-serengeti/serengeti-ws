@@ -74,6 +74,8 @@ public class Constants {
    public static final String NODE_ACTION_UPGRADE_FAILED = "Upgrade Failed";
    public static final String NODE_ACTION_UPGRADE_SUCCESS = "Upgrade Success";
    public static final String NODE_ACTION_WRONG_FT_STATUS = "Wrong FT status";
+   public static final String NODE_ACTION_SET_PASSWORD_SUCCEED = "Set password succeed";
+   public static final String NODE_ACTION_SET_PASSWORD_FAILED = "Set password failed";
    public static final int VM_POWER_ON_WAITING_SEC = 600;
    public static final int VM_SHUTDOWN_WAITING_SEC = 600;
    public static final int VM_FAST_SHUTDOWN_WAITING_SEC = 180;
@@ -176,13 +178,11 @@ public class Constants {
    public static final int SET_PASSWORD_MAX_RETRY_TIMES = 10;
    public static final String SET_PASSWORD_FAILED = "Failed to set password";
    public static final String SET_PASSWORDLESS_LOGIN_FAILED = "Failed to set passwordless login for ";
+   public static final String PASSWORD_CHARACTER_REQUIREMENT = "Passwords can include only alphanumeric characters ([0-9, a-z, A-Z]) and the following special characters: _, @, #, $, %, ^, &, *";
    public static final String NEW_LINE = "\n";
    public static final String DEFAULT_PASSWORDLESS_LOGIN_SCRIPT = "setup-passwordless-login";
    public static final String PASSWORDLESS_LOGIN_SCRIPT = "serengeti.passwordless.login.script";
    public static final String PASSWORDLESS_LOGIN_TIMEOUT = "serengeti.passwordless.login.timeout";
-   public static final String SERENGETI_BUILD_TYPE = "serengeti.build.type";
-   public static final String RELEASE_BUILD = "release";
-   public static final String BETA_BUILD = "beta";
    public static final String DEFAULT_REMOVE_SSH_LIMIT_SCRIPT = "open-ssh-access.py";
    public static final String REMOVE_SSH_LIMIT_SCRIPT = "serengeti.remove.ssh.limit.script";
    public static final String NODE_UPGRADE_FILE_PATH = "/opt/serengeti/www/nodeupgrade/";
@@ -198,4 +198,6 @@ public class Constants {
    public static final String DEFAULT_SERENGETI_SBIN_DIR = "/opt/serengeti/sbin";
    public static final String SERENGETI_HOME = "serengeti.home";
    public static final String DEFAULT_SERENGETI_HOME = "/home/serengeti";
+   public static final String EXEC_COMMAND_TIMEOUT = " timeout.";
+   public static final String EXEC_COMMAND_FAILED = " failed.";
 }

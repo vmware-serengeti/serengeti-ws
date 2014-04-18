@@ -31,25 +31,21 @@ public class SSHUtil {
    private final Logger logger = Logger.getLogger(SSHUtil.class);
 
    private void connect(String user, String privateKeyFile,
-         String hostIP, int sshPort) {
+         String hostIP, int sshPort) throws JSchException {
       jsch = new JSch();
 
-      try {
-         session = jsch.getSession(user, hostIP, sshPort);
-         jsch.addIdentity(privateKeyFile);
-         java.util.Properties config = new java.util.Properties();
-         config.put("StrictHostKeyChecking", "no");
-         session.setConfig(config);
-         session.setTimeout(Constants.SSH_SESSION_TIMEOUT);
-         session.connect();
-         logger.debug("SSH session is connected!");
-      } catch (JSchException e) {
-         e.printStackTrace();
-      }
+      session = jsch.getSession(user, hostIP, sshPort);
+      jsch.addIdentity(privateKeyFile);
+      java.util.Properties config = new java.util.Properties();
+      config.put("StrictHostKeyChecking", "no");
+      session.setConfig(config);
+      session.setTimeout(Constants.SSH_SESSION_TIMEOUT);
+      session.connect();
+      logger.debug("SSH session is connected!");
    }
 
    public boolean execCmd(String user, String privateKeyFile,
-         String hostIP, int sshPort, String command, InputStream in, OutputStream out) {
+         String hostIP, int sshPort, String command, InputStream in, OutputStream out) throws JSchException{
       AuAssert.check(command != null);
 
       connect(user, privateKeyFile, hostIP, sshPort);
@@ -92,8 +88,6 @@ public class SSHUtil {
             logger.error("Cannot open SSH channel to " + hostIP + ".");
             return false;
          }
-      } catch (JSchException e) {
-         e.printStackTrace();
       } finally {
          if (channel != null && channel.isConnected()) {
             channel.disconnect();
@@ -103,6 +97,5 @@ public class SSHUtil {
             session.disconnect();
          }
       }
-      return false;
    }
 }
