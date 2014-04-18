@@ -50,13 +50,13 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="nodeStatusVerifyStep" next="setPasswordForAllNodesStep">
+		<step id="nodeStatusVerifyStep" next="setPasswordForCreateNodesStep">
 			<tasklet ref="clusterNodeStatusVerifyTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="setPasswordForAllNodesStep" next="softwareCreateClusterStep">
+		<step id="setPasswordForCreateNodesStep" next="softwareCreateClusterStep">
 			<tasklet ref="setPasswordForClusterCreateTasklet" />
 			<listeners>
 				<listener ref="stepListener" />

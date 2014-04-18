@@ -59,7 +59,7 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
          throw TaskException.EXECUTION_FAILED("Unknown operation type.");
       }
 
-      if (nodeIPs == null) {
+      if (nodeIPs == null || nodeIPs.isEmpty()) {
          throw TaskException.EXECUTION_FAILED("No nodes needed to set password for.");
       }
 
