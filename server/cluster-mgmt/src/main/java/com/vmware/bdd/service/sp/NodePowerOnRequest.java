@@ -16,13 +16,17 @@ package com.vmware.bdd.service.sp;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.aurora.util.CmsWorker.SimpleRequest;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.command.CommandUtil;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
@@ -36,6 +40,7 @@ import com.vmware.bdd.service.job.software.SoftwareManagementTaskFactory;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.SyncHostsUtils;
 
 public class NodePowerOnRequest extends SimpleRequest {
    private static final Logger logger = Logger
@@ -83,8 +88,16 @@ public class NodePowerOnRequest extends SimpleRequest {
       lockClusterEntityMgr.refreshNodeByMobId(clusterName, vmId, false);
 
       nodeEntity = clusterEntityMgr.getNodeWithNicsByMobId(vmId);
-      if (needBootstrap) {
-         bootstrapNode(nodeEntity, clusterName);
+      if (nodeEntity.isVmReady() && needBootstrap) {
+         try {
+            bootstrapNode(nodeEntity, clusterName);
+         } catch (Exception e){
+            logger.error("Bootstrapping node " + nodeEntity.getVmName() + " failed", e);
+            nodeEntity.setStatus(NodeStatus.BOOTSTRAP_FAILED);
+            nodeEntity.setActionFailed(true);
+            nodeEntity.setErrMessage("Bootstrapping node " + nodeEntity.getVmName() + " failed. Please ssh to this node and run 'sudo chef-client' to get error details.");
+            lockClusterEntityMgr.getClusterEntityMgr().update(nodeEntity);
+         }
       }
 
       return true;
@@ -96,26 +109,9 @@ public class NodePowerOnRequest extends SimpleRequest {
       logger.info("Start to check host time.");
       ClusterCreate clusterSpec = clusterManager.getClusterSpec(clusterName);
 
-      String hostname = node.getHostName();
-      int maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC;
-      if (clusterSpec.checkHBase())
-         maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC_HBASE;
-      List<String> outOfSyncHosts = new ArrayList<String>();
-      int hostTimeDiffInSec = VcResourceUtils.getHostTimeDiffInSec(hostname);
-      if (Math.abs(hostTimeDiffInSec) > maxTimeDiffInSec) {
-         logger.info("Host " + hostname + " has a time difference of "
-               + hostTimeDiffInSec + " seconds and is dropped from placement.");
-         outOfSyncHosts.add(hostname);
-      }
-      if (!outOfSyncHosts.isEmpty()) {
-         String managementServerHost = VcResourceUtils.getManagementServerHost();
-         logger.error("Time on host " + outOfSyncHosts
-               + "is out of sync which will lead to failure, "
-               + "synchronize the time on these hosts with "
-               + "Serengeti management server and try again.");
-         throw TaskException.HOST_TIME_OUT_OF_SYNC(outOfSyncHosts,
-               managementServerHost);
-      }
+      Set<String> hostnames = new HashSet<String>();
+      hostnames.add(node.getHostName());
+      SyncHostsUtils.SyncHosts(clusterSpec, hostnames);
 
       // get command work directory
       File workDir = CommandUtil.createWorkDir((int)Math.random()*1000);
@@ -136,7 +132,6 @@ public class NodePowerOnRequest extends SimpleRequest {
       } catch (Exception e) {
          throw BddException.UPGRADE(e, e.getMessage());
       }
-
    }
 
    public ISoftwareManagementTask createCommandTask(String clusterName, String specFileName) {

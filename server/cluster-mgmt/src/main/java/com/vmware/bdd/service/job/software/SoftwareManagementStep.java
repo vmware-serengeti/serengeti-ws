@@ -39,6 +39,7 @@ import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.TrackableTasklet;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.SyncHostsUtils;
 
 public class SoftwareManagementStep extends TrackableTasklet {
    private static final Logger logger = Logger
@@ -109,28 +110,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
          }
          ClusterCreate clusterSpec = clusterManager.getClusterSpec(clusterName);
 
-         int maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC;
-         if (clusterSpec.checkHBase())
-            maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC_HBASE;
-         List<String> outOfSyncHosts = new ArrayList<String>();
-         for (String hostname : hostnames) {
-            int hostTimeDiffInSec =
-                  VcResourceUtils.getHostTimeDiffInSec(hostname);
-            if (Math.abs(hostTimeDiffInSec) > maxTimeDiffInSec) {
-               logger.info("Host " + hostname + " has a time difference of "
-                     + hostTimeDiffInSec
-                     + " seconds and is dropped from placement.");
-               outOfSyncHosts.add(hostname);
-            }
-         }
-         if (!outOfSyncHosts.isEmpty()) {
-            String managementServerHost = VcResourceUtils.getManagementServerHost();
-            logger.error("Time on host " + outOfSyncHosts
-                  + "is out of sync which will lead to failure, "
-                  + "synchronize the time on these hosts with "
-                  + "Serengeti management server and try again.");
-            throw TaskException.HOST_TIME_OUT_OF_SYNC(outOfSyncHosts, managementServerHost);
-         }
+         SyncHostsUtils.SyncHosts(clusterSpec, hostnames);
       }
 
       StatusUpdater statusUpdater =

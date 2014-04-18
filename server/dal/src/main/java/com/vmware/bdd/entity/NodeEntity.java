@@ -591,4 +591,8 @@ public class NodeEntity extends EntityBase {
       }
    }
 
+   public boolean isVmReady() {
+      return NodeStatus.VM_READY.equals(this.status);
+   }
+
 }
