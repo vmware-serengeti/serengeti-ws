@@ -595,4 +595,7 @@ public class NodeEntity extends EntityBase {
       return NodeStatus.VM_READY.equals(this.status);
    }
 
+   public String getVmNameWithIP() {
+      return this.getVmName() + "(" + this.getPrimaryMgtIpV4() + ")";
+   }
 }

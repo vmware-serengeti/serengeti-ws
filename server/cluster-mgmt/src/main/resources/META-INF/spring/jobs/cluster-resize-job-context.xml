@@ -89,8 +89,14 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="setPasswordForClusterResizeStep" next="softwareResizeClusterStep">
+		<step id="setPasswordForClusterResizeStep" next="postSetPasswordForClusterResizeStep">
 			<tasklet ref="setPasswordForClusterResizeTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="postSetPasswordForClusterResizeStep" next="softwareResizeClusterStep">
+			<tasklet ref="postSetPasswordTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

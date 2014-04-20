@@ -24,6 +24,7 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.service.ISetPasswordService;
+import com.vmware.bdd.utils.CommonUtil;
 
 public class SetPasswordForDiskFixStep extends TrackableTasklet {
    private ISetPasswordService setPasswordService;
@@ -45,18 +46,13 @@ public class SetPasswordForDiskFixStep extends TrackableTasklet {
          throw TaskException.EXECUTION_FAILED("No fixed node need to set password for.");
       }
 
-      String fixedNodeIP = nodeEntity.getPrimaryMgtIpV4();
       boolean success = false;
       try {
          success = setPasswordService.setPasswordForNode(clusterName, nodeEntity, newPassword);
-         putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, success);
+         putIntoJobExecutionContext(chunkContext, JobConstants.SET_PASSWORD_SUCCEED_JOB_PARAM, success);
       } catch (Exception e) {
-         putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, success);
-         String errMsg = (e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
-         throw TaskException.EXECUTION_FAILED("In disk fix, failed to set password for node " + fixedNodeIP + "." + errMsg);
-      }
-      if (!success) {
-         throw TaskException.EXECUTION_FAILED("In disk fix, failed to set password for node " + fixedNodeIP);
+         logger.error("Failed to set password for " + nodeEntity.getVmNameWithIP(), e);
+         putIntoJobExecutionContext(chunkContext, JobConstants.SET_PASSWORD_SUCCEED_JOB_PARAM, success);
       }
       return RepeatStatus.FINISHED;
    }

@@ -72,12 +72,18 @@
             <listener ref="stepListener" />
          </listeners>
       </step>
-      <step id="setPasswordForDiskFixStep" next="softwareConfigClusterStep">
+      <step id="setPasswordForDiskFixStep" next="postSetPasswordForDiskFixStep">
          <tasklet ref="setPasswordForDiskFixTasklet" />
 	     <listeners>
 	        <listener ref="stepListener" />
 	     </listeners>
       </step>
+      <step id="postSetPasswordForDiskFixStep" next="softwareConfigClusterStep">
+			<tasklet ref="postSetPasswordTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
       <step id="softwareConfigClusterStep" next="stopSingleVMStepIfRequired" >
          <tasklet ref="softwareBootstrapTargetTasklet" />
          <listeners>

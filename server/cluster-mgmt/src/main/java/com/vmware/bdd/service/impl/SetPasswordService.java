@@ -40,14 +40,14 @@ public class SetPasswordService implements ISetPasswordService {
    private static final Logger logger = Logger.getLogger(SetPasswordService.class);
    private IClusterEntityManager clusterEntityMgr;
 
-   public ArrayList<String> setPasswordForNodes(String clusterName, List<NodeEntity> nodes, String password) {
+   public boolean setPasswordForNodes(String clusterName, List<NodeEntity> nodes, String password) {
       AuAssert.check(!nodes.isEmpty());
 
       logger.info("Setting password for " + clusterName);
       ArrayList<String> ipsOfNodes = VcVmUtil.getNodePrimaryMgtIPV4sFromEntitys(nodes);
       logger.info("Nodes needed to be set password: " + ipsOfNodes.toString());
 
-      ArrayList<String> failedIPs = null;
+      boolean succeed = true;
       List<Callable<Void>> storeProcedures = new ArrayList<Callable<Void>>();
       for (NodeEntity node : nodes) {
          SetVMPasswordSP setVMPasswordSP = new SetVMPasswordSP(node, password);
@@ -65,58 +65,59 @@ public class SetPasswordService implements ISetPasswordService {
          for (int i = 0; i < storeProceduresArray.length; i++) {
             SetVMPasswordSP sp = (SetVMPasswordSP) storeProceduresArray[i];
             NodeEntity node = sp.getNodeEntity();
+            String vmNameWithIP = node.getVmNameWithIP();
             if (result[i].finished && result[i].throwable == null) {
                updateNodeData(node, true, null, null);
+               logger.info("Set password store procedure succeed for " + vmNameWithIP);
             }
             if (!result[i].finished || result[i].throwable != null) {
-               String failedNodeIP = sp.getNodeIP();
+               succeed = false;
                if (result[i].throwable != null) {
-                  updateNodeData(node, false, result[i].throwable.getMessage(), CommonUtil.getCurrentTimestamp());
-                  failedNodeIP = failedNodeIP + ": " + result[i].throwable.getMessage();
+                  String errMsg = result[i].throwable.getMessage();
+                  updateNodeData(node, false, errMsg, CommonUtil.getCurrentTimestamp());
+                  logger.error("Set password store procedure failed for " + vmNameWithIP + ": " + errMsg);
                }
-               if (failedIPs == null) {
-                  failedIPs = new ArrayList<String>();
-               }
-               failedIPs.add(failedNodeIP);
             }
          }
       } catch (Exception e) {
+         //place holder in case of known error, in this case, we just log it and
+         //throw cli exception, we don't set node task field
          String errMsg = " : " + e.getMessage();
-         logger.error("Error in setting password for " + clusterName + errMsg);
+         logger.error("Unknown error in setting password for " + clusterName, e);
          throw SetPasswordException.FAIL_TO_SET_PASSWORD(" cluster " + clusterName, errMsg);
       }
-      return failedIPs;
+      return succeed;
    }
 
    @Override
-   public boolean setPasswordForNode(String clusterName, NodeEntity node, String password) throws Exception {
+   public boolean setPasswordForNode(String clusterName, NodeEntity node, String password) {
       AuAssert.check(clusterName != null && node != null);
 
-      List<Callable<Void>> storeProcedures = new ArrayList<Callable<Void>>();
       SetVMPasswordSP setVMPasswordSP = new SetVMPasswordSP(node, password);
+      String vmNameWithIP = node.getVmNameWithIP();
       try {
          if (setVMPasswordSP.setPasswordForNode()) {
             updateNodeData(node, true, null, null);
+            logger.info("Set password for " + vmNameWithIP + " succeed.");
             return true;
          }
-         logger.error("In SetPasswordService, should not reach here");
+         //we fail by throwing exceptions
+         logger.error("Should not reach here");
          return false;
       } catch (Exception e) {
-         String nodeIP = node.getPrimaryMgtIpV4();
          String errMsg = (e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
-         logger.error("Set password for " + nodeIP + " failed. " + errMsg);
          updateNodeData(node, false, errMsg, CommonUtil.getCurrentTimestamp());
-         throw SetPasswordException.FAIL_TO_SET_PASSWORD(nodeIP, errMsg);
+         logger.error("Set password for " + vmNameWithIP + " failed. ", e);
+         return false;
       }
    }
 
    @Transactional
-   private void updateNodeData(NodeEntity node, boolean passwordSetted, String errorMessage, String errorTimestamp) {
+   public void updateNodeData(NodeEntity node, boolean passwordSetted, String errorMessage, String errorTimestamp) {
       node = clusterEntityMgr.getNodeWithNicsByMobId(node.getMoId());
-      String nodeVmName = node.getVmName();
+      String nodeNameWithIP = node.getVmNameWithIP();
       if (passwordSetted) {
          if (node.canBeUpgrade()) {
-            logger.info("Successfully upgrade cluster node " + nodeVmName);
             node.setAction(Constants.NODE_ACTION_SET_PASSWORD_SUCCEED);
             node.setActionFailed(false);
             node.setErrMessage(null);
@@ -129,7 +130,7 @@ public class SetPasswordService implements ISetPasswordService {
          if (messages != null && messages.length > 0) {
             node.setErrMessage(errorTimestamp + " " + messages[messages.length-1]);
          } else {
-            node.setErrMessage(errorTimestamp + " " + "Setting password for node " + nodeVmName + " failed.");
+            node.setErrMessage(errorTimestamp + " " + "Setting password for " + nodeNameWithIP + " failed.");
          }
          clusterEntityMgr.update(node);
       }

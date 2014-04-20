@@ -1,6 +1,5 @@
 package com.vmware.bdd.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.vmware.bdd.entity.NodeEntity;
@@ -14,7 +13,7 @@ public interface ISetPasswordService {
     * @param password
     * @return failed nodes list
     */
-   public ArrayList<String> setPasswordForNodes(String clusterName, List<NodeEntity> nodes, String password);
+   public boolean setPasswordForNodes(String clusterName, List<NodeEntity> nodes, String password);
 
    /**
     * Set password for node in cluster
@@ -26,4 +25,6 @@ public interface ISetPasswordService {
     * @throws Exception
     */
    public boolean setPasswordForNode(String clusterName, NodeEntity node, String newPassword) throws Exception;
+
+   public void updateNodeData(NodeEntity nodeEntity, boolean b, String errMsg, String currentTimestamp);
 }

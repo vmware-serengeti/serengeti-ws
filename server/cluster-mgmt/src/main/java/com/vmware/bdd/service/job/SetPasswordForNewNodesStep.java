@@ -15,7 +15,9 @@
 package com.vmware.bdd.service.job;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.vmware.bdd.utils.CommonUtil;
 import org.apache.log4j.Logger;
@@ -49,25 +51,15 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
          throw TaskException.EXECUTION_FAILED("No nodes needed to set password for");
       }
 
-      ArrayList<String> failedNodes = setPasswordService.setPasswordForNodes(clusterName, nodes, newPassword);
-      boolean success = false;
-      if (failedNodes == null) {
-         success = true;
-      } else {
-         logger.info("Failed to set password for " + failedNodes.toString());
-      }
-
-      putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, success);
-      if (!success) {
-         throw TaskException.EXECUTION_FAILED("Failed to set password for nodes " + failedNodes.toString());
-      }
+      boolean success = setPasswordService.setPasswordForNodes(clusterName, nodes, newPassword);
+      putIntoJobExecutionContext(chunkContext, JobConstants.SET_PASSWORD_SUCCEED_JOB_PARAM, success);
 
       return RepeatStatus.FINISHED;
    }
 
    private List<NodeEntity> getNodesToBeSetPassword (ChunkContext chunkContext) throws TaskException {
       List<NodeEntity> toBeSetPassword = null;
-      if ((managementOperation == ManagementOperation.CREATE) || 
+      if ((managementOperation == ManagementOperation.CREATE) ||
             (managementOperation == ManagementOperation.RESUME)) {
          toBeSetPassword = getClusterEntityMgr().findAllNodes(clusterName);
          return toBeSetPassword;

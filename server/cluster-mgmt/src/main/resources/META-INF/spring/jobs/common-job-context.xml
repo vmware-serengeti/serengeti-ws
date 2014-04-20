@@ -137,4 +137,8 @@
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 		<beans:property name="checkVMStatus" value="true"></beans:property>
 	</beans:bean>
+	<beans:bean name="postSetPasswordTasklet"
+		class="com.vmware.bdd.service.job.PostSetPasswordStep">
+		<beans:property name="setPasswordService" ref="setPasswordService"/>
+	</beans:bean>
 </beans:beans>

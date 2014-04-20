@@ -74,8 +74,14 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="setPasswordForAllNodesStep" next="softwareResumeClusterStep">
+		<step id="setPasswordForAllNodesStep" next="postSetPasswordForAllNodesStep">
 			<tasklet ref="setPasswordForClusterResumeTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="postSetPasswordForAllNodesStep" next="softwareResumeClusterStep">
+			<tasklet ref="postSetPasswordTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
