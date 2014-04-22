@@ -614,7 +614,15 @@ public class ClusterEntityManager implements IClusterEntityManager {
    public boolean needUpgrade(String clusterName) {
       String serverVersion = getServerVersion();
       String clusterVersion = findByName(clusterName).getVersion();
-      return !serverVersion.equals(clusterVersion);
+      List<NodeEntity> nodes = findAllNodes(clusterName);
+      boolean allNodesUpgraded = true;
+      for (NodeEntity node : nodes) {
+         if (node.canBeUpgrade() && node.needUpgrade(serverVersion)) {
+            allNodesUpgraded = false;
+            break;
+         }
+      }
+      return !serverVersion.equals(clusterVersion) || !allNodesUpgraded;
    }
 
    @Transactional
