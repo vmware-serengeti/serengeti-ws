@@ -99,12 +99,12 @@ public class ConfigurationCommands implements ApplicationEventPublisherAware, Co
 	}
 
 	@CliCommand(value = { PREFIX + "fs" }, help = "Sets the Hadoop namenode - can be 'local' or <namenode:port>")
-	public void setFs(@CliOption(key = { "", "namenode" }, mandatory = true, help = "Namenode address - local|<namenode:port>") String namenode) {
+	public void setFs(@CliOption(key = { "", "namenode" }, mandatory = true, help = "Namenode address - can be 'local' or <namenode:port>") String namenode) {
 		FileSystem.setDefaultUri(hadoopConfiguration, namenode);
 	}
 
 	@CliCommand(value = { PREFIX + "jt" }, help = "Sets the Hadoop job tracker - can be 'local' or <jobtracker:port>")
-	public void setJt(@CliOption(key = { "", "jobtracker" }, mandatory = true, help = "Job tracker address - local|<jobtracker:port>") String jobtracker) {
+	public void setJt(@CliOption(key = { "", "jobtracker" }, mandatory = true, help = "Job tracker address - can be 'local' or <jobtracker:port>") String jobtracker) {
 		hadoopConfiguration.set("mapred.job.tracker", jobtracker);
 	}
 

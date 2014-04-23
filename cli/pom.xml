@@ -18,7 +18,7 @@
    </parent>
 
    <properties>
-      <spring.shell.version>1.1.0.RC1</spring.shell.version>
+      <spring.shell.version>1.1.0.RC2</spring.shell.version>
       <jar.mainclass>org.springframework.shell.Bootstrap</jar.mainclass>
       <antlr.version>3.4</antlr.version>
    </properties>
@@ -155,8 +155,8 @@
    </build>
    <repositories>
      <repository>
-		<id>spring-release</id>
-		<url>http://repo.springsource.org/libs-release/</url>
+		<id>spring-milestone</id>
+		<url>http://repo.springsource.org/libs-milestone/</url>
 	</repository>
    </repositories>
 </project>
