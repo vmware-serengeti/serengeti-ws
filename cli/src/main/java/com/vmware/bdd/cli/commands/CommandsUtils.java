@@ -141,8 +141,8 @@ public class CommandsUtils {
          } else {
             File file = new File(fileName);
             String filePath = file.getAbsolutePath();
-            if (isJansiAvailable()) {
-               filePath = transcoding(filePath);
+            if (isJansiAvailable() && !isBlank(filePath)) {
+               filePath = transferEncoding(filePath);
             }
             System.out.println("Exported to file " + filePath);
          }
@@ -248,8 +248,8 @@ public class CommandsUtils {
                                              ((Double) value).doubleValue(), 2,
                                              BigDecimal.ROUND_FLOOR)) : value
                                        .toString());
-                     if (isJansiAvailable()) {
-                        table[i][j] = transcoding(table[i][j]);
+                     if (isJansiAvailable() && !isBlank(table[i][j])) {
+                        table[i][j] = transferEncoding(table[i][j]);
                      }
                      j++;
                   } else {
@@ -312,11 +312,11 @@ public class CommandsUtils {
 
    public static void printCmdSuccess(String objectType, String name,
          String result) {
-      if (isJansiAvailable()) {
+      if (isJansiAvailable() && !isBlank(name)) {
          try {
-            name = transcoding(name);
+            name = transferEncoding(name);
          } catch (UnsupportedEncodingException e) {
-            logger.warn("failed to transcoding: " + e.getMessage());
+            logger.warn("failed to transferEncoding: " + e.getMessage());
          }
       }
       if (!isBlank(name)) {
@@ -328,11 +328,11 @@ public class CommandsUtils {
 
    public static void printCmdFailure(String objectType, String name,
          String opName, String result, String message) {
-      if (isJansiAvailable()) {
+      if (isJansiAvailable() && !isBlank(name)) {
          try {
-            name = transcoding(name);
+            name = transferEncoding(name);
          } catch (UnsupportedEncodingException e) {
-            logger.warn("failed to transcoding: " + e.getMessage());
+            logger.warn("failed to transferEncoding: " + e.getMessage());
          }
       }
       if (!isBlank(name)) {
@@ -543,7 +543,7 @@ public class CommandsUtils {
     * Transfer terminal output encoding to system encoding.
     * It only take effect on windows OS.
     */
-   public static String transcoding(final String src)
+   public static String transferEncoding(final String src)
          throws UnsupportedEncodingException {
       //      Return CMD output code page.
       int codePage = Kernel32.GetConsoleOutputCP();
