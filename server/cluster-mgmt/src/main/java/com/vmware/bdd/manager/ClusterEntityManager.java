@@ -622,7 +622,7 @@ public class ClusterEntityManager implements IClusterEntityManager {
             break;
          }
       }
-      return !serverVersion.equals(clusterVersion) || !allNodesUpgraded;
+      return clusterVersion == null || !serverVersion.equals(clusterVersion) || !allNodesUpgraded;
    }
 
    @Transactional

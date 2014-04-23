@@ -145,10 +145,7 @@ public class ValidationUtils {
    }
 
    public static void validateVersion(IClusterEntityManager clusterEntityMgr, String clusterName) {
-      ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
-      String serverVersion = clusterEntityMgr.getServerVersion();
-      String clusterVersion = cluster.getVersion();
-      if (clusterVersion == null || !serverVersion.equals(clusterVersion)) {
+      if (clusterEntityMgr.needUpgrade(clusterName)) {
          throw ClusterManagerException.OLD_VERSION_ERROR(clusterName);
       }
    }
