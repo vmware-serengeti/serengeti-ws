@@ -57,10 +57,10 @@ public class NodeUpgradeSP implements Callable<Void> {
       logger.info("Upgrading cluster node " + node.getVmName());
 
       if (node.getMoId() != null) {
-         if (nodeIp == null || Constants.NULL_IPV4_ADDRESS.equals(nodeIp)) {
-            setBootupUUID();
-         } else {
+         if (node.canBeUpgrade()) {
             upgradeNodeSteps(nodeVmName, nodeIp);
+         } else {
+            setBootupUUID();
          }
       }
 

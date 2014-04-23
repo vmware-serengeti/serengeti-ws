@@ -580,7 +580,7 @@ public class NodeEntity extends EntityBase {
 
    public boolean canBeUpgrade() {
       String nodeIp = this.getPrimaryMgtIpV4();
-      return nodeIp != null && !Constants.NULL_IPV4_ADDRESS.equals(nodeIp);
+      return this.status.ordinal() >= NodeStatus.POWERED_ON.ordinal() && nodeIp != null && !Constants.NULL_IPV4_ADDRESS.equals(nodeIp);
    }
 
    public void cleanupErrorMessageForUpgrade() {
