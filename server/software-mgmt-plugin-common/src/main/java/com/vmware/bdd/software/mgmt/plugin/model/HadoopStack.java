@@ -18,7 +18,7 @@ import java.io.Serializable;
    @Expose
    private String fullVersion;
 
-   public String getDisro() {
+   public String getDistro() {
       return distro;
    }
 

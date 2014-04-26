@@ -152,7 +152,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean validateBlueprint(ClusterBlueprint blueprint) throws SoftwareManagementPluginException {
+   public boolean validateConfiguration(ClusterBlueprint blueprint) throws SoftwareManagementPluginException {
       return false;
    }
 

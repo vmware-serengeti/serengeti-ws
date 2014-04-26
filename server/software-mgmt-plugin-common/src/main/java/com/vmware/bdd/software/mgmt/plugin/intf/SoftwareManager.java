@@ -9,6 +9,8 @@ import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 
+import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.DistroRead;
 /**
  * The software manager will be listed in BDE client with name as the UID. User
  * will pick up one software manager during cluster operation. And then all
@@ -91,7 +93,10 @@ public interface SoftwareManager {
    /**
     * 
     */
-   boolean validateBlueprint(ClusterBlueprint blueprint)
+   boolean validateConfiguration(ClusterBlueprint blueprint)
+         throws SoftwareManagementPluginException;
+
+   boolean validateRoles(ClusterCreate cluster, DistroRead distro)
          throws SoftwareManagementPluginException;
 
    /**
