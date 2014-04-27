@@ -14,7 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.spectypes;
 
-
 import java.util.EnumSet;
 
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;

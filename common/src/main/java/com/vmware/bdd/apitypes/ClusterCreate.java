@@ -638,6 +638,7 @@ public class ClusterCreate implements Serializable {
     * Validate nodeGroupCreates member formats and values in the ClusterCreate.
     */
    public void validateClusterCreate(List<String> failedMsgList, List<String> warningMsgList) {
+
       // if hadoop2 namenode ha is enabled
       boolean namenodeHACheck = false;
       //role count
@@ -659,8 +660,6 @@ public class ClusterCreate implements Serializable {
 
       // check placement policies
       validateNodeGroupPlacementPolicies(failedMsgList, warningMsgList);
-
-      validateNodeGroupRoles(failedMsgList);
 
       // check supported storage type: LOCAL/SHARED/TEMPFS For tempfs relationship: if a compute node has
       // strict association with a data node, its disk type can be set to "TEMPFS". Otherwise, it is not
@@ -792,10 +791,6 @@ public class ClusterCreate implements Serializable {
       if (!warningMsgList.isEmpty() && appendWarningStr) {
          warningMsgList.set(0, "Warning: " + warningMsgList.get(0));
       }
-   }
-
-   public void validateClusterCreateOfMapr(List<String> failedMsgList, List<String> warningMsgList) {
-      // TODO: add validation for MapR.
    }
 
    private void checkCPUAndMemory(NodeGroupCreate nodeGroup,

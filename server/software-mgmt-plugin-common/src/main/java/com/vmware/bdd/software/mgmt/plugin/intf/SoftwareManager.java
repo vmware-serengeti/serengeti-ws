@@ -9,6 +9,8 @@ import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 
+import javax.security.auth.login.Configuration;
+
 /**
  * The software manager will be listed in BDE client with name as the UID. User
  * will pick up one software manager during cluster operation. And then all
@@ -94,6 +96,11 @@ public interface SoftwareManager {
    boolean validateBlueprint(ClusterBlueprint blueprint)
          throws SoftwareManagementPluginException;
 
+   boolean validateRoles(ClusterBlueprint blueprint, List<String> roles)
+         throws SoftwareManagementPluginException;
+
+   boolean validateCliConfigurations(ClusterBlueprint blueprint)
+           throws SoftwareManagementPluginException;
    /**
     * Sync call to create hadoop software Plugin should should update
     * ClusterOperationReports to notify operation status change for this

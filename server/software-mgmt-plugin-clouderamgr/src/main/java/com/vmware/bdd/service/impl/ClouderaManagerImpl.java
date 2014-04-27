@@ -896,4 +896,15 @@ public class ClouderaManagerImpl implements SoftwareManager {
       return HealthStatus.Connected;
    }
 
+   @Override
+   public boolean validateRoles(ClusterBlueprint blueprint, List<String> roles) throws SoftwareManagementPluginException {
+       return true;
+   }
+
+    @Override
+    public boolean validateCliConfigurations(ClusterBlueprint blueprint)
+            throws SoftwareManagementPluginException {
+        return true;
+    }
+
 }

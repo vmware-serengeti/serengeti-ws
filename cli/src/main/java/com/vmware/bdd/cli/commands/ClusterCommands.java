@@ -264,8 +264,10 @@ public class ClusterCommands implements CommandMarker {
             clusterCreate.setExternalHDFS(clusterSpec.getExternalHDFS());
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
-            validateConfiguration(clusterCreate, skipConfigValidation,
-                  warningMsgList, failedMsgList);
+            if (appManager == null) {
+                validateConfiguration(clusterCreate, skipConfigValidation,
+                        warningMsgList, failedMsgList);
+            }
             clusterCreate.validateNodeGroupNames();
             if (!validateHAInfo(clusterCreate.getNodeGroups())) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
@@ -334,13 +336,10 @@ public class ClusterCommands implements CommandMarker {
       clusterCreate.validateCDHVersion(warningMsgList);
 
       // Validate that the specified file is correct json format and proper value.
+      //TODO(qjin): 1, in validateClusterCreate, implement roles check and validation
+      //            2, consider use service to validate configuration for different appManager
       if (specFilePath != null) {
-         if (!clusterCreate.getDistro().equalsIgnoreCase(
-               com.vmware.bdd.utils.Constants.MAPR_VENDOR)) {
-            clusterCreate.validateClusterCreate(failedMsgList, warningMsgList);
-         } else {
-            clusterCreate.validateClusterCreateOfMapr(failedMsgList, warningMsgList);
-         }
+         clusterCreate.validateClusterCreate(failedMsgList, warningMsgList);
       }
 
       // give a warning message if both type and specFilePath are specified

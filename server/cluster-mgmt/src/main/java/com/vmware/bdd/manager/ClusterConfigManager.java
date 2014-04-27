@@ -29,6 +29,9 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,7 +78,6 @@ import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
 import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.ChefServerUtils;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
 
@@ -92,6 +94,8 @@ public class ClusterConfigManager {
    private IAppManagerService appManagerService;
    private IClusterEntityManager clusterEntityMgr;
    private IClusteringService clusteringService;
+
+   private SoftwareManagerCollector softwareManagerCollector;
 
    private static final String TEMPLATE_ID = "template_id";
    private static final String HTTP_PROXY = "serengeti.http_proxy";
@@ -173,6 +177,11 @@ public class ClusterConfigManager {
       this.clusteringService = clusteringService;
    }
 
+   @Autowired
+   public void setSoftwareManagerCollector(SoftwareManagerCollector softwareManagerCollector) {
+        this.softwareManagerCollector = softwareManagerCollector;
+   }
+
    @Transactional
    public ClusterEntity createClusterConfig(ClusterCreate cluster) {
       String name = cluster.getName();
@@ -187,18 +196,18 @@ public class ClusterConfigManager {
       if (cluster.getDistro() == null || distro == null) {
          throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
       }
-      // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
-      checkClusterRoles(cluster, distro.getRoles(), failedMsgList);
 
-      if (!cluster.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
-         List<String> allNetworkNames = new ArrayList<String>();
-         for (NetworkEntity entity : networkMgr.getAllNetworkEntities()) {
-            allNetworkNames.add(entity.getName());
-         }
-         cluster.validateClusterCreate(failedMsgList, warningMsgList);
-      } else {
-         cluster.validateClusterCreateOfMapr(failedMsgList, warningMsgList);
+      SoftwareManager softwareManager = softwareManagerCollector.getSoftwareManager(cluster.getAppManager());
+
+      // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
+      try {
+          softwareManager.validateRoles(clusterEntityMgr.toClusterBluePrint(cluster.getName()),
+                  distro.getRoles());
+          cluster.validateClusterCreate(failedMsgList, warningMsgList);
+      } catch (SoftwareManagementPluginException e) {
+          failedMsgList.add(e.getFailedMsgList().toString());
       }
+
       if (!failedMsgList.isEmpty()) {
          throw ClusterConfigException.INVALID_SPEC(failedMsgList);
       }
@@ -1213,32 +1222,6 @@ public class ClusterConfigManager {
             continue;
          }
          entity.setHadoopConfig(null);
-      }
-   }
-
-   /**
-    * Check whether the roles used in the cluster exist in distro manifest and Chef Server.
-    *
-    */
-   private void checkClusterRoles(ClusterCreate cluster, List<String> distroRoles, List<String> failedMsgList) {
-      NodeGroupCreate[] nodeGroupCreates = cluster.getNodeGroups();
-      AuAssert.check(nodeGroupCreates != null && nodeGroupCreates.length > 0);
-
-      for (NodeGroupCreate nodeGroup : nodeGroupCreates) {
-         List<String> roles = nodeGroup.getRoles();
-         if (roles != null) {
-            for (String role : roles) {
-               StringBuilder rolesMsg = new StringBuilder();
-               if (!ChefServerUtils.isValidRole(role)) {
-                  rolesMsg.append("role ").append(role).append(" doesn't exist");
-               } else if (!distroRoles.contains(role) && !HadoopRole.isCustomizedRole(role)) {
-                  rolesMsg.append("role ").append(role).append(" is not supported by distro ").append(cluster.getDistro());
-               }
-               if (rolesMsg.length() > 0) {
-                  failedMsgList.add(rolesMsg.toString());
-               }
-            }
-         }
       }
    }
 
