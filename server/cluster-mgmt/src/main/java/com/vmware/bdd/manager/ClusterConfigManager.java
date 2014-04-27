@@ -196,10 +196,16 @@ public class ClusterConfigManager {
       if (cluster.getDistro() == null || distro == null) {
          throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
       }
-
-      SoftwareManager softwareManager = softwareManagerCollector.getSoftwareManager(cluster.getAppManager());
-
-      // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
+      String appManager = cluster.getAppManager();
+      if (appManager == null) {
+          appManager = new String("ironfan");//TODO(qjin):refactor
+      }
+      SoftwareManager softwareManager = softwareManagerCollector.getSoftwareManager(appManager);
+      if (softwareManager == null) {
+          logger.error("Failed to get softwareManger.");
+          throw new ClusterConfigException(null, "Failed to get softwareManager.");
+      }
+       // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
       try {
           softwareManager.validateRoles(clusterEntityMgr.toClusterBluePrint(cluster.getName()),
                   distro.getRoles());
