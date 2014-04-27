@@ -14,6 +14,9 @@
  ***************************************************************************/
 package com.vmware.bdd.software.mgmt.plugin.exception;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <code>SoftwareManagementPluginException</code> is the superclass of those
  * exceptions that can be thrown during the normal operation of the software
@@ -25,6 +28,8 @@ public class SoftwareManagementPluginException extends RuntimeException {
    private static final long serialVersionUID = 1L;
 
    private String errCode;
+   private List<String> failedMsgList = new ArrayList<String>();
+   private List<String> warningMsgList = new ArrayList<String>();
 
    public SoftwareManagementPluginException() {
       super();
@@ -36,6 +41,13 @@ public class SoftwareManagementPluginException extends RuntimeException {
       this.errCode = errCode;
    }
 
+   public List<String> getFailedMsgList() {
+       return failedMsgList;
+   }
+
+   public List<String> getWarningMsgList() {
+       return warningMsgList;
+   }
    public String getErrCode() {
       return errCode;
    }

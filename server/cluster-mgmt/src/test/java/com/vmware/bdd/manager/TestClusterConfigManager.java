@@ -66,7 +66,7 @@ import com.vmware.bdd.service.resmgmt.IResourcePoolService;
 import com.vmware.bdd.service.resmgmt.impl.ResourceInitializerService;
 import com.vmware.bdd.specpolicy.ClusterSpecFactory;
 import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.utils.ChefServerUtils;
+import com.vmware.bdd.software.mgmt.plugin.model.ChefServerUtils;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.TestResourceCleanupUtils;
 

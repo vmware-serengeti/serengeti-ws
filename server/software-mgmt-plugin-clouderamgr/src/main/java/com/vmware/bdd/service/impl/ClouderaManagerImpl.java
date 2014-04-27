@@ -163,7 +163,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean validateBlueprint(ClusterBlueprint blueprint) throws SoftwareManagementPluginException {
+   public boolean validateConfiguration(ClusterBlueprint blueprint) throws SoftwareManagementPluginException {
       return false;
    }
 
@@ -895,5 +895,16 @@ public class ClouderaManagerImpl implements SoftwareManager {
    public HealthStatus getStatus() {
       return HealthStatus.Connected;
    }
+
+   @Override
+   public boolean validateRoles(ClusterBlueprint blueprint, List<String> roles) throws SoftwareManagementPluginException {
+       return true;
+   }
+
+    @Override
+    public boolean validateCliConfigurations(ClusterBlueprint blueprint)
+            throws SoftwareManagementPluginException {
+        return true;
+    }
 
 }
