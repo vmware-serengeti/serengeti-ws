@@ -77,10 +77,9 @@ public class ClusteringServiceException extends BddException {
             clusterName);
    }
 
-   public static ClusteringServiceException CREATE_RESOURCE_POOL_FAILED(
-         String clusterName) {
+   public static ClusteringServiceException CREATE_RESOURCE_POOL_FAILED(String errMessage) {
       return new ClusteringServiceException(null,
-            "CREATE_RESOURCE_POOL_FAILED", clusterName);
+            "CREATE_RESOURCE_POOL_FAILED", errMessage);
    }
 
    public static ClusteringServiceException CREATE_RESOURCE_POOL_ERROR(

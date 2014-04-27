@@ -896,14 +896,19 @@ public class ClusteringService implements IClusteringService {
       if (result == null) {
          logger.error("No " + type + " resource pool is created.");
          throw ClusteringServiceException
-               .CREATE_RESOURCE_POOL_FAILED(clusterName);
+               .CREATE_RESOURCE_POOL_FAILED(Constants.NO_RESOURCE_POOL_IS_CREATED);
       }
       int total = 0;
       boolean success = true;
+      String errMessage = null;
       for (int i = 0; i < defineSPs.length; i++) {
          if (result[i].finished && result[i].throwable == null) {
             ++total;
          } else if (result[i].throwable != null) {
+            if (errMessage == null) {
+               //Generally the error message is same for all resource pools, so here we just keep the first failure message.
+               errMessage = result[i].throwable.getMessage();
+            }
             logger.error("Failed to create " + type + " resource pool(s)",
                   result[i].throwable);
             success = false;
@@ -912,7 +917,7 @@ public class ClusteringService implements IClusteringService {
       logger.info(total + " " + type + " resource pool(s) are created.");
       if (!success) {
          throw ClusteringServiceException
-               .CREATE_RESOURCE_POOL_FAILED(clusterName);
+               .CREATE_RESOURCE_POOL_FAILED(errMessage);
       }
    }
 
