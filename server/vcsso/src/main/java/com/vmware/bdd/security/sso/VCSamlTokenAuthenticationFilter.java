@@ -93,7 +93,7 @@ public class VCSamlTokenAuthenticationFilter extends
          throw new PreAuthenticatedCredentialsNotFoundException(
                "SAML token cannot be empty!");
       }
-      String samlToken = new String(org.opensaml.xml.util.Base64.decode(encodeSamlToken.trim()));
+      String samlToken = new String(org.opensaml.xml.util.Base64.decode(encodeSamlToken.trim()), "UTF-8");
       Reader reader = new CharArrayReader(samlToken.toCharArray());
       Document doc = new BasicParserPool().parse(reader);
       Element samlAssertionElement = doc.getDocumentElement();

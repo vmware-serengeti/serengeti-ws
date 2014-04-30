@@ -96,7 +96,7 @@ public class AuthenticateVcUser {
                vmomiClient.createStub(SessionManager.class,
                      instanceContent.getSessionManager());
 
-         sessionManager.login(name, password, "en");
+         sessionManager.login(name, password, sessionManager.getDefaultLocale());
          sessionManager.logout();
       } finally {
          if (vmomiClient != null) {
