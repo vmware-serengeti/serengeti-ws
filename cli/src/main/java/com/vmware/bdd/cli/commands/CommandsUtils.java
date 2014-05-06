@@ -315,7 +315,7 @@ public class CommandsUtils {
       if (isJansiAvailable() && !isBlank(name)) {
          try {
             name = transferEncoding(name);
-         } catch (UnsupportedEncodingException e) {
+         } catch (UnsupportedEncodingException|CliException e) {
             logger.warn("failed to transferEncoding: " + e.getMessage());
          }
       }
@@ -331,7 +331,7 @@ public class CommandsUtils {
       if (isJansiAvailable() && !isBlank(name)) {
          try {
             name = transferEncoding(name);
-         } catch (UnsupportedEncodingException e) {
+         } catch (UnsupportedEncodingException|CliException e) {
             logger.warn("failed to transferEncoding: " + e.getMessage());
          }
       }
@@ -544,16 +544,22 @@ public class CommandsUtils {
     * It only take effect on windows OS.
     */
    public static String transferEncoding(final String src)
-         throws UnsupportedEncodingException {
+         throws UnsupportedEncodingException, CliException {
       //      Return CMD output code page.
       int codePage = Kernel32.GetConsoleOutputCP();
-      String outputEncoding = "";
-      if (codePage == 932) {
-         outputEncoding = "MS932";
-      } else {
+      String outputEncoding = "ms" + codePage;
+      if (!java.nio.charset.Charset.isSupported(outputEncoding)) {
          outputEncoding = "cp" + codePage;
+         if (!java.nio.charset.Charset.isSupported(outputEncoding)) {
+            String errorMsg =
+                  "Cannot figure out the Java Charset of this code page ("
+                        + codePage + ")...";
+            logger.error("CommandsUtils::transferEncoding: " + errorMsg);
+            throw new CliException(errorMsg);
+         }
       }
       return new String(src.getBytes(outputEncoding),
             Configuration.getEncoding());
    }
+
 }
