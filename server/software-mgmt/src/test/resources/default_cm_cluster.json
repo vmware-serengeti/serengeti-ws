@@ -1,0 +1,61 @@
+{
+  "name": "cmCluster",
+  "displayName": "cmCluster",
+  "version": "CDH5",
+  "fullVersion": "5.0.1",
+  "isParcel": "true",
+
+  "nodes": [  // node definition
+  { // node 0
+    "nodeId": "4904d217-9ac3-491d-ab77-29922af204d2",
+    "ipAddress": "10.141.73.23",
+    "fqdn": "wdc-vhadp-pub2-dhcp-73-023.eng.vmware.com", // need fetch from node, multiple network?
+    "rackId": "/rack1",
+    "configs": [ // node configuration definition
+    //{"value": "value1"},
+    //{"value": "value2"}
+    ]
+  },
+  { // node 1
+    "nodeId": "a2487c19-9596-42d8-8ece-cdef5cb3b11c",
+    "ipAddress": "10.141.72.225",
+    "fqdn": "wdc-vhadp-pub2-dhcp-72-225.eng.vmware.com",
+    "rackId": "/rack2",
+    "configs": [ // node configuration definition
+    //{"value": "value1"},
+    //{"value": "value2"}
+    ]
+  }],
+
+  "services": [ // service definition
+  {
+    "name": "cmCluster-hdfs11",
+    "type": "HDFS",
+    "displayName": "HDFS",
+    "configs": [], //optional
+    "roleConfigGroups": [], // optional
+    "replicationSchedules": [], // optional, since API v6
+    "snapshotPolicies": [], //optional, since API v6
+    "roles": [ // role definition
+    {
+      "name": "cmCluster-master-0-hdfs-namenode11", // nodeId + service_type + role_type
+      "type": "NAMENODE",
+      "nodeRef": "4904d217-9ac3-491d-ab77-29922af204d2",
+      "configs": []
+    },
+            {
+      "name": "cmCluster-master-0-hdfs-secondary-namenode11", // nodeId + service_type + role_type
+      "type": "SECONDARYNAMENODE",
+      "nodeRef": "4904d217-9ac3-491d-ab77-29922af204d2",
+      "configs": []
+    },
+    {
+      "name": "cmCluster-worker-0-hdfs-datanode11",
+      "type": "DATANODE",
+      "nodeRef": "a2487c19-9596-42d8-8ece-cdef5cb3b11c",
+      "configs": []
+    }
+      ]
+  }
+  ]
+}
