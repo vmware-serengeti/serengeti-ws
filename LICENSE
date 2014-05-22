@@ -203,9 +203,9 @@
 
 =======================================================================
 
-Serengeti 1.1.0:
+Serengeti 2.0.0:
 
-Serengeti 1.1.0: includes a number of subcomponents with
+Serengeti 2.0.0: includes a number of subcomponents with
 separate copyright notices and license terms.  The product that 
 includes this file does not necessarily use all the open source 
 subcomponents referred to below. Your use of the source
@@ -225,9 +225,6 @@ SECTION 2: Apache License, V2.0
    >>> mapr_hbase_master-none
    >>> mapr_hbase_regionserver-none
    >>> rubygem-ironfan-3.1.4
-
-
-
 
 
 --------------- SECTION 1:  BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES ----------
@@ -318,7 +315,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-
 ===========================================================================
 
 To the extent any open source components are licensed under the
@@ -338,4 +334,4 @@ offer to obtain a copy of the Source Files is valid for three
 years from the date you acquired this Software product. Alternatively, 
 the Source Files may accompany the VMware product.
 
-[SERENGETIENT110NV120313]
+[SERENGETIENT200SS052014]
