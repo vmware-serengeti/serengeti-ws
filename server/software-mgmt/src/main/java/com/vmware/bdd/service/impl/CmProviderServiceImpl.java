@@ -631,7 +631,6 @@ public class CmProviderServiceImpl implements ICmProviderService {
    }
 
    public void configureServices(final CmClusterDef cluster) throws Exception {
-
       //final List<CmServerService> services = getServiceHosts();
       logger.info("CreateClusterServices");
       ApiServiceList serviceList = new ApiServiceList();

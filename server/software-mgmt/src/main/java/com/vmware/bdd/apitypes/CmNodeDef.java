@@ -4,7 +4,6 @@ import com.cloudera.api.model.ApiConfig;
 import com.cloudera.api.model.ApiConfigList;
 import com.cloudera.api.model.ApiHost;
 import com.google.gson.annotations.Expose;
-
 import java.io.Serializable;
 import java.util.Arrays;
 
