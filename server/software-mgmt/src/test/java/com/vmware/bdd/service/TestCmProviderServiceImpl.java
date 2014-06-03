@@ -52,7 +52,7 @@ public class TestCmProviderServiceImpl {
       String content = SerialUtils.dataFromFile("/home/balfox/github/serengeti-ws/server/software-mgmt/src/test/resources/default_cm_cluster.json");
       //String content = SerialUtils.dataFromFile("/home/balfox/github/serengeti-ws/server/software-mgmt/src/test/resources/test.json");
       CmClusterDef cmClusterDef = SerialUtils.getObjectByJsonString(CmClusterDef.class, content);
-      //System.out.println((new Gson()).toJson(cmClusterDef));
+      System.out.println((new Gson()).toJson(cmClusterDef));
 
       //System.out.println(provider.isProvisioned(cmClusterDef));
 
@@ -60,7 +60,7 @@ public class TestCmProviderServiceImpl {
 
       //provider.provisionParcels(cmClusterDef);
 
-      provider.addHosts(cmClusterDef);
+      //provider.addHosts(cmClusterDef);
 
       //provider.provisionCluster(cmClusterDef);
 

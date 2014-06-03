@@ -143,9 +143,9 @@ public class CmProviderServiceImpl implements ICmProviderService {
          provisionManagement(cluster);
          if (!isProvisioned(cluster)) {
             provisionCluster(cluster);
-            //if (cluster.getIsParcel()) {
+            if (cluster.getIsParcel()) {
                provisionParcels(cluster);
-            //}
+            }
          }
 
       } catch (Exception e) {
@@ -649,13 +649,13 @@ public class CmProviderServiceImpl implements ICmProviderService {
          // config service dependencies
          Set<CmServiceType> serviceTypes = cluster.allServiceTypes();
          switch (type) {
-            case YARN:
+            case YARN: //TODO: Compute Only
                apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType(CmServiceType.HDFS)));
                break;
-            case MAPREDUCE:
+            case MAPREDUCE: //TODO: Compute Only
                apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType(CmServiceType.HDFS)));
                break;
-            case HBASE:
+            case HBASE: //TODO: HBase only
                apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType(CmServiceType.HDFS)));
                apiServiceConfig.add(new ApiConfig("zookeeper_service", cluster.serviceNameOfType(CmServiceType.ZOOKEEPER)));
                break;

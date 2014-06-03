@@ -3,7 +3,7 @@
   "displayName": "cmCluster",
   "version": "CDH5",
   "fullVersion": "5.0.1",
-  "isParcel": "true",
+  "isParcel": true,
 
   "nodes": [  // node definition
   { // node 0

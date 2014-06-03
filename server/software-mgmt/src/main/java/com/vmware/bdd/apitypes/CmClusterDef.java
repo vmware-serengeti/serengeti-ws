@@ -1,5 +1,6 @@
 package com.vmware.bdd.apitypes;
 
+import com.cloudera.api.model.ApiCluster;
 import com.cloudera.api.model.ApiClusterVersion;
 import com.google.gson.annotations.Expose;
 
@@ -14,7 +15,7 @@ import java.util.Set;
  */
 public class CmClusterDef implements Serializable {
 
-   private static final long serialVersionUID = -7460690272330642250L;
+   private static final long serialVersionUID = -2922528263257124521L;
 
    @Expose
    private String name;
@@ -23,22 +24,19 @@ public class CmClusterDef implements Serializable {
    private String displayName;
 
    @Expose
-   private String version; // TODO: relate to ApiClusterVersion, support CDH3, CDH3u4X, CDH4, CDH5, only CDH4/CDH5 has repos
-
-   private ApiClusterVersion apiVersion;
+   private String version; // TODO: relate to ApiClusterVersion, support CDH3, CDH3u4X, CDH4, CDH5, and only CDH4/CDH5 are supported
 
    @Expose
    private String fullVersion;
 
    @Expose
-   private String isParcel;
+   private Boolean isParcel;
 
    @Expose
    private CmNodeDef[] nodes;
 
    @Expose
    private CmServiceDef[] services;
-
 
    public String getName() {
       return name;
@@ -72,11 +70,11 @@ public class CmClusterDef implements Serializable {
       this.fullVersion = fullVersion;
    }
 
-   public String getIsParcel() {
+   public Boolean getIsParcel() {
       return isParcel;
    }
 
-   public void setIsParcel(String isParcel) {
+   public void setIsParcel(Boolean isParcel) {
       this.isParcel = isParcel;
    }
 

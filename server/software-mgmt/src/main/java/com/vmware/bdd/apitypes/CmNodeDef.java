@@ -5,6 +5,7 @@ import com.cloudera.api.model.ApiConfigList;
 import com.cloudera.api.model.ApiHost;
 import com.google.gson.annotations.Expose;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
@@ -12,7 +13,9 @@ import java.util.Arrays;
  * Date: 5/23/14
  * Time: 4:50 PM
  */
-public class CmNodeDef {
+public class CmNodeDef implements Serializable {
+
+   private static final long serialVersionUID = -561299694244815038L;
 
    @Expose
    private String nodeId;
