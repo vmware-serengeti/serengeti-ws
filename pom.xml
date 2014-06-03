@@ -17,6 +17,9 @@
       <module>thrift/java</module>
       <module>server/res-mgmt</module>
       <module>server/software-mgmt</module>
+      <module>server/software-mgmt-plugin-common</module>
+      <module>server/software-mgmt-plugin-clouderamgr</module>
+      <module>server/software-mgmt-plugin-ambari</module>
       <module>server/placement</module>
       <module>server/dal</module>
       <module>server/vmclone</module>
