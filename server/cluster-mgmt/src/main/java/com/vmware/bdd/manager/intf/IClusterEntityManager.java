@@ -18,11 +18,13 @@ import java.util.List;
 
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.apitypes.SoftwareMgtProvider;
 import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.entity.PluginEntity;
 import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 

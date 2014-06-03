@@ -68,8 +68,14 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="cmCreateClusterStep">
-			<tasklet ref="cmCreateClusterTasklet" />
+		<step id="softwareCreateClusterStep" next="setAutoElasticityStep">
+			<tasklet ref="softwareCreateClusterTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="setAutoElasticityStep">
+			<tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

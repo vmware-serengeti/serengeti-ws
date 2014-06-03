@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.bdd.apitypes.SoftwareMgtProvider;
+import com.vmware.bdd.dal.IPluginDAO;
+import com.vmware.bdd.entity.PluginEntity;
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;

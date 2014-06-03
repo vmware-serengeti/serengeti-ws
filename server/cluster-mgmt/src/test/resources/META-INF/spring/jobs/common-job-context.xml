@@ -71,7 +71,14 @@
 		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
 		<beans:property name="managementOperation" value="CREATE" />
 	</beans:bean>
-	<beans:bean name="softwareBootstrapClusterTasklet"
+   <beans:bean name="cmCreateClusterTasklet"
+               class="com.vmware.bdd.service.job.CmManagementStep">
+      <beans:property name="clusterManager" ref="clusterManager" />
+      <beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+      <beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
+      <beans:property name="managementOperation" value="CREATE" />
+   </beans:bean>
+   <beans:bean name="softwareBootstrapClusterTasklet"
 		class="com.vmware.bdd.service.job.software.SoftwareManagementStep">
 		<beans:property name="clusterManager" ref="clusterManager" />
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
