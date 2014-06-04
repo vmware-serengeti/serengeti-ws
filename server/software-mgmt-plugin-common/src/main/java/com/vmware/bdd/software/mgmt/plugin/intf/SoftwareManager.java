@@ -37,59 +37,40 @@ public interface SoftwareManager {
    Set<String> getSupportedRoles();
 
    /**
-    * Supported Hadoop version, for instance "CDH 5", "HDP 2.1.1"
+    * Supported Hadoop stack, for instance "CDH 5", "HDP 2.1.1"
     * @return
     */
-   List<String> getSupportedVersions();
+   List<String> getSupportedStacks();
 
    /**
-    * Supported configuration for specified version. The returned value will be used to validate 
-    * user input configuration before actually provisioning VM
-    * @param version
-    * @return a Json string, with following format. For each single configuration, should provide
-    * property name, type, default value
-    * [
+    * Supported configuration for specified stack. The returned value can be used to config created
+    * cluster through custom cluster specification
+    * @param stack, for instance "CDH 5", "HDP 2.1.1"
+    * @return a Json string, with correct configuration format. 
+    * This format of configuration string, will be used to configure cluster.
+    * For each single configuration, should provide property name, default value
+    * For BDE software management tool, here is the sample configuration format
     *   {
     *       "hadoop": { // for hadoop configuration
     *             "core-site.xml": [  // configuration in core-site.xml file
     *                     {
-    *                               "name": "net.topology.nodegroup.aware",
-    *                               "type": "boolean",
-    *                               "default": true,
+    *                        // check for all settings at http://hadoop.apache.org/docs/stable/core-default.html
+    *                        // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample:
+    *                        // "io.file.buffer.size": "4096"
     *                     },
     *             ],
     *             "yarn-site.xml": [ // configuration in yarn-site.xml file
-    *             ],
-    *             "fair-scheduler.xml": [ // configuration in fair-scheduler xml file
-    *                     {
-    *                               "name": "text"
-    *                               "type": "String",
-    *                               "default": "",
-    *                     }
+    *                       // check for all settings at http://hadoop.apache.org/docs/stable/hdfs-default.html
     *             ]
     *   }
-    *   {
-    *       "zookeeper": {
-    *             "java.env": [ 
-    *                     {
-    *                               "name": "JVMFLAGS"
-    *                               "type": "boolean",
-    *                               "default": true,
-    *                     }
-    *             ],
-    *             "log4j.properties": [
-    *                     {
-    *                               "name": "zookeeper.root.logger"
-    *                               "type": "String",
-    *                     }
-    *            ]
-    *       }
-    *  }
     * 
     */
-   String getSupportedConfigs(String version);
+   String getSupportedConfigs(String stack);
 
-//   void validateCluster(); 
+   /**
+    * 
+    */
+   void validateBlueprint(); 
 //   To be decided: if BDE will help to validate the cluster, or leave software manager provide this function
 //   void validateScaling();
 
@@ -135,13 +116,16 @@ public interface SoftwareManager {
     * @param instances
     * @return task id
     */
-   String decomissionNodes(String clusterName, List<Instances> instances);
-   String comissionNodes(String clusterName, List<Instances> instances);
+//   String decomissionNodes(String clusterName, List<Instances> instances);
+//   String comissionNodes(String clusterName, List<Instances> instances);
    /**
     * The commission nodes method is guaranteed to be invoked before this method is called.
     * @param clusterName
     * @param instances
     * @return
     */
-   String startNodes(String clusterName, List<Instances> instances);
+//   String startNodes(String clusterName, List<Instances> instances);
+   
+   // Do we need one separate blueprint concept? Or we'd use one to one mapping between cluster and blueprint
+//   exportBlueprint(String clusterName);
 }
