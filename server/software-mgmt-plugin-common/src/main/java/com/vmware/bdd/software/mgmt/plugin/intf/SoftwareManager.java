@@ -3,6 +3,11 @@ package com.vmware.bdd.software.mgmt.plugin.intf;
 import java.util.List;
 import java.util.Set;
 
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+
 /**
  * The registered software manager will be listed in BDE client with name as the
  * UID. User will pick up one software manager during cluster operation. And
@@ -40,7 +45,7 @@ public interface SoftwareManager {
     * Supported Hadoop stack, for instance "CDH 5", "HDP 2.1.1"
     * @return
     */
-   List<String> getSupportedStacks();
+   List<HadoopStack> getSupportedStacks();
 
    /**
     * Supported configuration for specified stack. The returned value can be used to config created
@@ -65,50 +70,58 @@ public interface SoftwareManager {
     *   }
     * 
     */
-   String getSupportedConfigs(String stack);
+   String getSupportedConfigs(HadoopStack stack);
 
    /**
     * 
     */
-   void validateBlueprint(); 
+   void validateBlueprint(ClusterBlueprint blueprint); 
 //   To be decided: if BDE will help to validate the cluster, or leave software manager provide this function
 //   void validateScaling();
 
    /**
     * asynchronous method call.
-    * return task id for status query
+    * return request id for status query
     * TBD: add parameter
     */
-   String createCluster();
+   String createCluster(ClusterBlueprint clusterSpec);
 
    /**
     * Get task status
-    * @param taskId
+    * @param requestId
     * @return json string contains all node status in detail
     * TBD: define return string format, or define a status object, to avoid non-formated message
     */
-   String queryTaskStatus(String taskId);
-// TBD: define parameter
+   String queryTaskStatus(String requestId);
+
    /**
-    * After cluster is created, user is able to change hadoop cluster configuration 
-    * with this method.
+    * After cluster is created, user is able to change hadoop cluster
+    * configuration with this method.
     */
-   String reconfigCluster();
-   String scaleOutCluster(); // for resize node group instance number
-   String startCluster(); // TBD: how to make sure the hadoop service is not started while VM is started?
-   String deleteCluster();
+   String reconfigCluster(ClusterBlueprint clusterSpec); // for cluster config
+
+   String scaleOutCluster(String clusterName, NodeGroupInfo group,
+         List<NodeInfo> addedNodes); // for resize node group instance number
+
+   String startCluster(String clusterName); // TBD: how to make sure the hadoop service is not started while VM is started?
+
+   String deleteCluster(String clusterName);
+
    /**
-    * This method will be guaranteed to invoked before BDE invoke cluster stop, allowing plugin
-    * to do some clean up
+    * This method will be guaranteed to invoked before BDE invoke cluster stop,
+    * allowing plugin to do some clean up
+    * 
     * @return
     */
-   String onStopCluster();
+   String onStopCluster(String clusterName);
+
    /**
-    * This method will be guaranteed to invoked before BDE invoke cluster delete, allowing plugin
-    * to do some clean up
+    * This method will be guaranteed to invoked before BDE invoke cluster
+    * delete, allowing plugin to do some clean up
+    * 
     * @return
     */
-   String onDeleteCluster();
+   String onDeleteCluster(String clusterName);
 
    // Node level command is prepared for rolling update, e.g. disk fix, scale up cpu/memory/storage
    /**
@@ -116,16 +129,18 @@ public interface SoftwareManager {
     * @param instances
     * @return task id
     */
-//   String decomissionNodes(String clusterName, List<Instances> instances);
-//   String comissionNodes(String clusterName, List<Instances> instances);
+   String decomissionNodes(String clusterName, List<NodeInfo> nodes);
+
+   String comissionNodes(String clusterName, List<NodeInfo> nodes);
    /**
-    * The commission nodes method is guaranteed to be invoked before this method is called.
+    * The commission nodes method is guaranteed to be invoked before this method
+    * is called.
+    * 
     * @param clusterName
     * @param instances
     * @return
     */
-//   String startNodes(String clusterName, List<Instances> instances);
-   
-   // Do we need one separate blueprint concept? Or we'd use one to one mapping between cluster and blueprint
-//   exportBlueprint(String clusterName);
+      String startNodes(String clusterName, List<NodeInfo> nodes);
+
+      String exportBlueprint(String clusterName);
 }
