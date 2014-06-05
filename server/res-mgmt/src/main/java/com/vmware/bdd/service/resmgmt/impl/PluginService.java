@@ -24,7 +24,7 @@ public class PluginService implements IPluginService{
    private IPluginDAO pluginDAO;
 
    @Override
-   public void addPlugin(PluginAdd pluginAdd) {
+   public synchronized void addPlugin(PluginAdd pluginAdd) {
       // TODO: validation
       PluginEntity pluginEntity = new PluginEntity(pluginAdd);
       pluginDAO.insert(pluginEntity);
