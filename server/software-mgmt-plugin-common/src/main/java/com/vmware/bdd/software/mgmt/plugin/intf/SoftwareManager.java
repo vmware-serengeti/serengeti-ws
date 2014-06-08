@@ -9,12 +9,12 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 
 /**
- * The registered software manager will be listed in BDE client with name as the
+ * The software manager will be listed in BDE client with name as the
  * UID. User will pick up one software manager during cluster operation. And
  * then all software management requests will be sent to this instance.
  * 
- * The software manager implementation should register itself to
- * SoftwareManagerCollector during instance initialization.
+ * Annotation @BeforeClusterConfiguration should be used before cluster creation,
+ * to allow infrastructure management finish all tasks
  * 
  * @author line
  * 
@@ -33,6 +33,11 @@ public interface SoftwareManager {
     * @return
     */
    String getDescription();
+
+   /**
+    * @return the plugin type
+    */
+   String getType();
 
    /**
     * The supported role names, for instance NameNode, Secondary NameNode, etc.
@@ -90,7 +95,7 @@ public interface SoftwareManager {
     * Get task status
     * @param requestId
     * @return json string contains all node status in detail
-    * TBD: define return string format, or define a status object, to avoid non-formated message
+    * TODO: define query task object
     */
    String queryTaskStatus(String requestId);
 
@@ -140,7 +145,15 @@ public interface SoftwareManager {
     * @param instances
     * @return
     */
-      String startNodes(String clusterName, List<NodeInfo> nodes);
+   String startNodes(String clusterName, List<NodeInfo> nodes);
 
-      String exportBlueprint(String clusterName);
+   String exportBlueprint(String clusterName);
+
+   /**
+    * Get current cluster service status, including cluster status, and node status
+    * TODO: define cluster query object
+    * @param clusterName
+    * @return
+    */
+   String queryClusterStatus(ClusterBlueprint clusterSpec);
 }
