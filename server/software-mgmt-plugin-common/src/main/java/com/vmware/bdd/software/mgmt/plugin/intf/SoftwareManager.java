@@ -7,6 +7,7 @@ import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 
 /**
  * The software manager will be listed in BDE client with name as the
@@ -93,11 +94,10 @@ public interface SoftwareManager {
 
    /**
     * Get task status
-    * @param requestId
-    * @return json string contains all node status in detail
-    * TODO: define query task object
+    * @param opsId
+    * @return
     */
-   String queryTaskStatus(String requestId);
+   ClusterReport queryTaskStatus(String opsId);
 
    /**
     * After cluster is created, user is able to change hadoop cluster
