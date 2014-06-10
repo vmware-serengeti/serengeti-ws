@@ -490,7 +490,7 @@ public class NodeEntity extends EntityBase {
     *
     * @return
     */
-   private Map<NetTrafficType, List<IpConfigInfo>> convertToIpConfigInfo() {
+   public Map<NetTrafficType, List<IpConfigInfo>> convertToIpConfigInfo() {
       Map<NetTrafficType, List<IpConfigInfo>> ipConfigInfo = new HashMap<NetTrafficType, List<IpConfigInfo>>();
       if (nics != null) {
          for (NicEntity nicEntity : nics) {

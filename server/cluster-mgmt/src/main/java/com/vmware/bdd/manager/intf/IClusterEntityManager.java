@@ -26,6 +26,7 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.PluginEntity;
 import com.vmware.bdd.entity.ServerInfoEntity;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 
 public interface IClusterEntityManager {
@@ -88,6 +89,8 @@ public interface IClusterEntityManager {
    public void syncUpNode(String clusterName, String nodeName);
 
    public List<String> getPortGroupNames(String clusterName);
+
+   public ClusterBlueprint toClusterBluePrint(String clusterName);
 
    public ClusterRead toClusterRead(String clusterName);
 

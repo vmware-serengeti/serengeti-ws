@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;

@@ -21,6 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gson.Gson;
+import com.vmware.bdd.apitypes.SoftwareMgtProvider;
+import com.vmware.bdd.entity.PluginEntity;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -117,29 +121,42 @@ public class SoftwareManagementStep extends TrackableTasklet {
             new DefaultStatusUpdater(jobExecutionStatusHolder,
                   getJobExecutionId(chunkContext));
 
-      // get command work directory
-      File workDir = CommandUtil.createWorkDir(getJobExecutionId(chunkContext));
 
-      // update work directory in job context
-      putIntoJobExecutionContext(chunkContext,
-            JobConstants.CURRENT_COMMAND_WORK_DIR, workDir.getAbsolutePath());
+      PluginEntity pluginEntity = lockClusterEntityMgr.getClusterEntityMgr().findByName(clusterName).getPluginEntity();
 
-      boolean needAllocIp = true;
-      if (ManagementOperation.DESTROY.equals(managementOperation)) {
-         needAllocIp = false;
+      ISoftwareManagementTask task = null;
+      if (pluginEntity.getProvider().equals(SoftwareMgtProvider.CLOUDERA_MANAGER)
+            || pluginEntity.getProvider().equals(SoftwareMgtProvider.AMBARI)) {
+
+         ClusterBlueprint clusterBlueprint = lockClusterEntityMgr.getClusterEntityMgr().toClusterBluePrint(clusterName);
+         logger.info((new Gson()).toJson(clusterBlueprint));
+      } else {
+
+         // get command work directory
+         File workDir = CommandUtil.createWorkDir(getJobExecutionId(chunkContext));
+
+         // update work directory in job context
+         putIntoJobExecutionContext(chunkContext,
+               JobConstants.CURRENT_COMMAND_WORK_DIR, workDir.getAbsolutePath());
+
+         boolean needAllocIp = true;
+         if (ManagementOperation.DESTROY.equals(managementOperation)) {
+            needAllocIp = false;
+         }
+         String specFilePath = null;
+
+         if (managementOperation.ordinal() != ManagementOperation.DESTROY
+               .ordinal()) {
+            // write cluster spec file
+            File specFile =
+                  clusterManager.writeClusterSpecFile(targetName, workDir,
+                        needAllocIp);
+            specFilePath = specFile.getAbsolutePath();
+         }
+         task = createCommandTask(targetName, specFilePath, statusUpdater);
       }
-      String specFilePath = null;
-      if (managementOperation.ordinal() != ManagementOperation.DESTROY
-            .ordinal()) {
-         // write cluster spec file
-         File specFile =
-               clusterManager.writeClusterSpecFile(targetName, workDir,
-                     needAllocIp);
-         specFilePath = specFile.getAbsolutePath();
-      }
-      ISoftwareManagementTask task =
-            createCommandTask(targetName, specFilePath, statusUpdater);
 
+      /*
       Map<String, Object> ret = task.call();
 
       if (!(Boolean) ret.get("succeed")) {
@@ -148,6 +165,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
                JobConstants.CURRENT_ERROR_MESSAGE, errorMessage);
          throw TaskException.EXECUTION_FAILED(errorMessage);
       }
+      */
 
       return RepeatStatus.FINISHED;
    }

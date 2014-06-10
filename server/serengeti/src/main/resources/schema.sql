@@ -106,6 +106,7 @@ create table cluster (
    configuration       text,
    version             varchar(255),
    last_status         varchar(255),
+   plugin_id           bigint,
    primary key (id),
    foreign key(plugin_id) references plugin(id)
 );

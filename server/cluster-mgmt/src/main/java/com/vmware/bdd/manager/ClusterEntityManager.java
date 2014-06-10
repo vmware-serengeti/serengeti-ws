@@ -23,6 +23,11 @@ import java.util.Set;
 import com.vmware.bdd.apitypes.SoftwareMgtProvider;
 import com.vmware.bdd.dal.IPluginDAO;
 import com.vmware.bdd.entity.PluginEntity;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -438,6 +443,69 @@ public class ClusterEntityManager implements IClusterEntityManager {
       }
       node.setHostName(vcVm.getHost().getName());
       update(node);
+   }
+
+   public ClusterBlueprint toClusterBluePrint(String clusterName) {
+      ClusterEntity clusterEntity = findByName(clusterName);
+      ClusterBlueprint blueprint = new ClusterBlueprint();
+      Gson gson = new Gson();
+
+      blueprint.setName(clusterEntity.getName());
+      blueprint.setDisplayName(clusterEntity.getName());
+      blueprint.setInstanceNum(clusterEntity.getRealInstanceNum(true));
+      // TODO: topology
+      if (clusterEntity.getHadoopConfig() != null) {
+         Map<String, Object> clusterConfigs = gson.fromJson(clusterEntity.getHadoopConfig(), Map.class);
+         blueprint.setConfiguration(clusterConfigs);
+      }
+
+      // set Plugin
+      if (clusterEntity.getPluginEntity() != null) {
+         PluginEntity pluginEntity = clusterEntity.getPluginEntity();
+         PluginInfo pluginInfo = new PluginInfo();
+         pluginInfo.setName(pluginEntity.getName());
+         pluginInfo.setProvider(pluginEntity.getProvider());
+         pluginInfo.setHost(pluginEntity.getHost());
+         pluginInfo.setPort(pluginEntity.getPort());
+         pluginInfo.setPassword(pluginEntity.getPassword());
+         pluginInfo.setPrivateKey(pluginEntity.getPrivateKey());
+      }
+
+      // set HadoopStack
+      HadoopStack hadoopStack = new HadoopStack();
+      hadoopStack.setDistro(clusterEntity.getDistro());
+      hadoopStack.setFullVersion(null); // TODO
+      blueprint.setHadoopStack(hadoopStack);
+
+      // set nodes/nodegroups
+      List<NodeGroupInfo> nodeGroupInfos = new ArrayList<NodeGroupInfo>();
+      for (NodeGroupEntity group : clusterEntity.getNodeGroups()) {
+         NodeGroupInfo nodeGroupInfo = new NodeGroupInfo();
+         nodeGroupInfo.setName(group.getName());
+         nodeGroupInfo.setInstanceNum(group.getRealInstanceNum(true));
+         nodeGroupInfo.setRoles(gson.fromJson(group.getRoles(), List.class));
+         if (group.getHadoopConfig() != null) {
+            Map<String, Object> groupConfigs = gson.fromJson(group.getHadoopConfig(), Map.class);
+            nodeGroupInfo.setConfiguration(groupConfigs);
+         }
+
+         // set nodes
+         List<NodeInfo> nodeInfos = new ArrayList<NodeInfo>();
+         for (NodeEntity node : group.getNodes()) {
+            NodeInfo nodeInfo = new NodeInfo();
+            nodeInfo.setName(node.getVmName());
+            nodeInfo.setHostName(node.getHostName());
+            nodeInfo.setIpConfigs(node.convertToIpConfigInfo());
+            nodeInfo.setRack(node.getRack());
+            nodeInfo.setVolumes(node.getVolumns());
+            nodeInfos.add(nodeInfo);
+         }
+
+         nodeGroupInfo.setNodes(nodeInfos);
+         nodeGroupInfos.add(nodeGroupInfo);
+      }
+      blueprint.setNodeGroups(nodeGroupInfos);
+      return blueprint;
    }
 
    public ClusterRead toClusterRead(String clusterName) {
