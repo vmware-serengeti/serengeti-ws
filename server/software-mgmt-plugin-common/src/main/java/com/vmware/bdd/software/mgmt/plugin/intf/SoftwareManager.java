@@ -3,19 +3,19 @@ package com.vmware.bdd.software.mgmt.plugin.intf;
 import java.util.List;
 import java.util.Set;
 
+import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
-import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 
 /**
- * The software manager will be listed in BDE client with name as the
- * UID. User will pick up one software manager during cluster operation. And
- * then all software management requests will be sent to this instance.
+ * The software manager will be listed in BDE client with name as the UID. User
+ * will pick up one software manager during cluster operation. And then all
+ * software management requests will be sent to this instance.
  * 
- * Annotation @BeforeClusterConfiguration should be used before cluster creation,
- * to allow infrastructure management finish all tasks
+ * Annotation @BeforeClusterConfiguration should be used before cluster
+ * creation, to allow infrastructure management finish all tasks
  * 
  * @author line
  * 
@@ -43,12 +43,14 @@ public interface SoftwareManager {
    /**
     * The supported role names, for instance NameNode, Secondary NameNode, etc.
     * The role name will be used to validate user input in cluster spec
+    * 
     * @return
     */
    Set<String> getSupportedRoles();
 
    /**
     * Supported Hadoop stack, for instance "CDH 5", "HDP 2.1.1"
+    * 
     * @return
     */
    List<HadoopStack> getSupportedStacks();
@@ -81,78 +83,127 @@ public interface SoftwareManager {
    /**
     * 
     */
-   void validateBlueprint(ClusterBlueprint blueprint); 
-//   To be decided: if BDE will help to validate the cluster, or leave software manager provide this function
-//   void validateScaling();
+   boolean validateBlueprint(ClusterBlueprint blueprint)
+         throws SoftwareManagementPluginException;
 
    /**
-    * asynchronous method call.
-    * return request id for status query
-    * TBD: add parameter
-    */
-   String createCluster(ClusterBlueprint clusterSpec);
-
-   /**
-    * Get task status
-    * @param opsId
+    * Sync call to create hadoop software Plugin should invoke
+    * SoftwareOperationMonitor to update operation status for this cluster,
+    * otherwise, client cannot get information in this long operation time
+    * 
+    * @param clusterSpec
     * @return
     */
-   ClusterReport queryTaskStatus(String opsId);
+   boolean createCluster(ClusterBlueprint clusterSpec);
 
    /**
     * After cluster is created, user is able to change hadoop cluster
-    * configuration with this method.
+    * configuration with this method. Sync call Plugin should invoke
+    * SoftwareOperationMonitor to update operation status for this cluster,
+    * otherwise, client cannot get information in this long operation time
     */
-   String reconfigCluster(ClusterBlueprint clusterSpec); // for cluster config
-
-   String scaleOutCluster(String clusterName, NodeGroupInfo group,
-         List<NodeInfo> addedNodes); // for resize node group instance number
-
-   String startCluster(String clusterName); // TBD: how to make sure the hadoop service is not started while VM is started?
-
-   String deleteCluster(String clusterName);
+   boolean reconfigCluster(ClusterBlueprint clusterSpec); // for cluster config
 
    /**
-    * This method will be guaranteed to invoked before BDE invoke cluster stop,
-    * allowing plugin to do some clean up
+    * Sync call to add more nodes into cluster Plugin should invoke
+    * SoftwareOperationMonitor to update operation status for this cluster,
+    * otherwise, client cannot get information in this long operation time
+    */
+   boolean scaleOutCluster(String clusterName, NodeGroupInfo group,
+         List<NodeInfo> addedNodes); // for resize node group instance number
+
+   /**
+    * Sync call to start cluster Plugin should invoke SoftwareOperationMonitor
+    * to update operation status for this cluster, otherwise, client cannot get
+    * information in this long operation time
+    */
+   boolean startCluster(String clusterName); // TBD: how to make sure the hadoop service is not started while VM is started?
+
+   /**
+    * Sync call to delete cluster Plugin should invoke SoftwareOperationMonitor
+    * to update operation status for this cluster, otherwise, client cannot get
+    * information in this long operation time
+    */
+   boolean deleteCluster(String clusterName);
+
+   /**
+    * This method will be guaranteed to be invoked before BDE invoke cluster
+    * stop, allowing plugin to do some clean up
+    * 
+    * Sync call Plugin should invoke SoftwareOperationMonitor to update
+    * operation status for this cluster, otherwise, client cannot get
+    * information in this long operation time
     * 
     * @return
     */
-   String onStopCluster(String clusterName);
+   boolean onStopCluster(String clusterName);
 
    /**
     * This method will be guaranteed to invoked before BDE invoke cluster
     * delete, allowing plugin to do some clean up
     * 
+    * Sync call Plugin should invoke SoftwareOperationMonitor to update
+    * operation status for this cluster, otherwise, client cannot get
+    * information in this long operation time
+    * 
     * @return
     */
-   String onDeleteCluster(String clusterName);
+   boolean onDeleteCluster(String clusterName);
 
    // Node level command is prepared for rolling update, e.g. disk fix, scale up cpu/memory/storage
    /**
+    * Sync call Plugin should invoke SoftwareOperationMonitor to update
+    * operation status for this cluster, otherwise, client cannot get
+    * information in this long operation time
+    * 
     * @param clusterName
     * @param instances
     * @return task id
     */
-   String decomissionNodes(String clusterName, List<NodeInfo> nodes);
+   boolean decomissionNodes(String clusterName, List<NodeInfo> nodes);
 
-   String comissionNodes(String clusterName, List<NodeInfo> nodes);
+   /**
+    * Sync call Plugin should invoke SoftwareOperationMonitor to update
+    * operation status for this cluster, otherwise, client cannot get
+    * information in this long operation time
+    * 
+    * @param clusterName
+    * @param nodes
+    * @return
+    */
+   boolean comissionNodes(String clusterName, List<NodeInfo> nodes);
+
    /**
     * The commission nodes method is guaranteed to be invoked before this method
     * is called.
+    * 
+    * Sync call Plugin should invoke SoftwareOperationMonitor to update
+    * operation status for this cluster, otherwise, client cannot get
+    * information in this long operation time
     * 
     * @param clusterName
     * @param instances
     * @return
     */
-   String startNodes(String clusterName, List<NodeInfo> nodes);
-   String stopNodes(String clusterName, List<NodeInfo> nodes);
+   boolean startNodes(String clusterName, List<NodeInfo> nodes);
+
+   /**
+    * Sync call Plugin should invoke SoftwareOperationMonitor to update
+    * operation status for this cluster, otherwise, client cannot get
+    * information in this long operation time
+    * 
+    * @param clusterName
+    * @param nodes
+    * @return
+    */
+   boolean stopNodes(String clusterName, List<NodeInfo> nodes);
 
    String exportBlueprint(String clusterName);
 
    /**
-    * Get current cluster service status, including cluster status, and node status
-    * TODO: define cluster query object
+    * Get current cluster service status, including cluster status, and node
+    * status TODO: define cluster query object
+    * 
     * @param clusterName
     * @return
     */
