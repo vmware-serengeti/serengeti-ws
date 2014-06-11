@@ -8,6 +8,11 @@ import com.google.gson.annotations.Expose;
 import com.vmware.bdd.apitypes.IpConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 
+/**
+ * Node information, for instance, node ip, roles running on this node, data disks, etc.
+ * @author line
+ *
+ */
 public class NodeInfo implements Serializable {
 
    private static final long serialVersionUID = -6527422807735089543L;

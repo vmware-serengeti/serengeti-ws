@@ -146,6 +146,7 @@ public interface SoftwareManager {
     * @return
     */
    String startNodes(String clusterName, List<NodeInfo> nodes);
+   String stopNodes(String clusterName, List<NodeInfo> nodes);
 
    String exportBlueprint(String clusterName);
 

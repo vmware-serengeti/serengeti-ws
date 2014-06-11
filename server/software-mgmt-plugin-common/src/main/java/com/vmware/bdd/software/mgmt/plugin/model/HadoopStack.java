@@ -4,7 +4,11 @@ import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
 
-public class HadoopStack implements Serializable{
+/**
+ * Hadoop distribution information, for instance CDH5 5.0.1
+ * @author line
+ *
+ */public class HadoopStack implements Serializable{
 
    private static final long serialVersionUID = -4032296997440707531L;
 

@@ -1,5 +1,10 @@
 package com.vmware.bdd.software.mgmt.plugin.model;
 
+/**
+ * Hadoop configuration information
+ * @author line
+ *
+ */
 public class ServiceConfiguration {
    public enum ValidationState{
       OK,

@@ -6,6 +6,11 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Node group creation specification
+ * @author line
+ *
+ */
 public class NodeGroupInfo implements Serializable{
 
    private static final long serialVersionUID = 4443680719513071084L;
