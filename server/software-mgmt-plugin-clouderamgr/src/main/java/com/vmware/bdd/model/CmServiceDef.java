@@ -1,4 +1,4 @@
-package com.vmware.bdd.apitypes;
+package com.vmware.bdd.model;
 
 import com.google.gson.annotations.Expose;
 
@@ -13,7 +13,7 @@ public class CmServiceDef {
    private String name;
 
    @Expose
-   private String type; // TODO: relate to CmServiceType
+   private String type; // TODO: relate to CmServiceRoleType
 
    @Expose
    private String displayName;

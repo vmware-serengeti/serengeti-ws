@@ -1,6 +1,5 @@
-package com.vmware.bdd.apitypes;
+package com.vmware.bdd.model;
 
-import com.cloudera.api.model.ApiConfig;
 import com.cloudera.api.model.ApiConfigList;
 import com.cloudera.api.model.ApiHost;
 import com.google.gson.annotations.Expose;

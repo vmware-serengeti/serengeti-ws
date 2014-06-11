@@ -1,9 +1,7 @@
-package com.vmware.bdd.software.mgmt.plugin;
+package com.vmware.bdd.software.mgmt.plugin.backup;
 
-import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import org.apache.log4j.Logger;
 
-import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Map;
 

@@ -1,7 +1,5 @@
-package com.vmware.bdd.apitypes;
+package com.vmware.bdd.model;
 
-import com.cloudera.api.model.ApiCluster;
-import com.cloudera.api.model.ApiClusterVersion;
 import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
@@ -102,17 +100,17 @@ public class CmClusterDef implements Serializable {
       return allServiceNames;
    }
 
-   public Set<CmServiceType> allServiceTypes() {
-      Set<CmServiceType> allServiceTypes = new HashSet<CmServiceType>();
+   public Set<CmServiceRoleType> allServiceTypes() {
+      Set<CmServiceRoleType> allServiceTypes = new HashSet<CmServiceRoleType>();
       for (CmServiceDef serviceDef : this.services) {
-         allServiceTypes.add(CmServiceType.valueOf(serviceDef.getType()));
+         allServiceTypes.add(CmServiceRoleType.valueOf(serviceDef.getType()));
       }
       return allServiceTypes;
    }
 
-   public String serviceNameOfType(CmServiceType type) {
+   public String serviceNameOfType(CmServiceRoleType type) {
       for (CmServiceDef serviceDef : this.services) {
-         if (type.equals(CmServiceType.valueOf(serviceDef.getType()))) {
+         if (type.equals(CmServiceRoleType.valueOf(serviceDef.getType()))) {
             return serviceDef.getName();
          }
       }

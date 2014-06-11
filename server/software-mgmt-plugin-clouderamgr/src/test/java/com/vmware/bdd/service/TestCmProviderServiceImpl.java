@@ -1,7 +1,7 @@
 package com.vmware.bdd.service;
 
 import com.google.gson.Gson;
-import com.vmware.bdd.apitypes.CmClusterDef;
+import com.vmware.bdd.model.CmClusterDef;
 import com.vmware.bdd.service.impl.CmProviderServiceImpl;
 import com.vmware.bdd.utils.SerialUtils;
 import org.apache.log4j.Logger;
@@ -49,7 +49,7 @@ public class TestCmProviderServiceImpl {
 
       //System.out.println(provider.isProvisioned(cmClusterDef));
 
-      provider.provisionCluster(cmClusterDef);
+      //provider.provisionCluster(cmClusterDef);
 
       //provider.provisionParcels(cmClusterDef);
 

@@ -6,7 +6,7 @@ package com.vmware.bdd.apitypes;
  * Time: 1:44 PM
  */
 public enum SoftwareMgtProvider {
-   CHEF("Chef", false, 9090),
+   IRONFAN("Ironfan", false, 9090),
    CLOUDERA_MANAGER("ClouderaManager", true, 7180),
    AMBARI("Ambrari", true, 8080);
 

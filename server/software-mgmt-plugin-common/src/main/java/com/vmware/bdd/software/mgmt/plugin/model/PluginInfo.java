@@ -90,4 +90,14 @@ public class PluginInfo implements Serializable{
    public void setPrivateKey(String privateKey) {
       this.privateKey = privateKey;
    }
+
+   @Override
+   public boolean equals(Object o) {
+      return false;
+   }
+
+   @Override
+   public int hashCode() {
+      return 0;
+   }
 }

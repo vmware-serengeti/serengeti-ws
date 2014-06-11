@@ -9,6 +9,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
 import org.apache.log4j.Logger;
 
 /**
@@ -126,5 +128,17 @@ public class PluginEntity extends EntityBase {
 
    public void setPrivateKey(String privateKey) {
       this.privateKey = privateKey;
+   }
+
+   public PluginInfo toPluginInfo() {
+      PluginInfo pluginInfo = new PluginInfo();
+      pluginInfo.setName(this.name);
+      pluginInfo.setProvider(this.provider);
+      pluginInfo.setHost(this.host);
+      pluginInfo.setPort(this.port);
+      pluginInfo.setUsername(this.username);
+      pluginInfo.setPassword(this.password);
+      pluginInfo.setPrivateKey(this.privateKey);
+      return pluginInfo;
    }
 }

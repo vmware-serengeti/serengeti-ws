@@ -15,9 +15,7 @@
 package com.vmware.bdd.service.sp;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,14 +28,12 @@ import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.command.CommandUtil;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
 import com.vmware.bdd.service.job.software.ISoftwareManagementTask;
 import com.vmware.bdd.service.job.software.ManagementOperation;
 import com.vmware.bdd.service.job.software.SoftwareManagementTaskFactory;
-import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.SyncHostsUtils;
@@ -134,8 +130,9 @@ public class NodePowerOnRequest extends SimpleRequest {
       }
    }
 
+   // TODO: CM and Ambari
    public ISoftwareManagementTask createCommandTask(String clusterName, String specFileName) {
-      return SoftwareManagementTaskFactory.createCommandTask(clusterName, specFileName, null, ManagementOperation.CONFIGURE, lockClusterEntityMgr);
+      return SoftwareManagementTaskFactory.createIronfanTask(clusterName, specFileName, null, ManagementOperation.CONFIGURE, lockClusterEntityMgr);
    }
 
 }

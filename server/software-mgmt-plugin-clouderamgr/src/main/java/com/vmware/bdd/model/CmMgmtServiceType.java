@@ -1,4 +1,4 @@
-package com.vmware.bdd.apitypes;
+package com.vmware.bdd.model;
 
 import com.vmware.bdd.utils.Constants;
 

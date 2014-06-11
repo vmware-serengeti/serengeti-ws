@@ -222,7 +222,9 @@ public class ClusterConfigManager {
          logger.debug("begin to add cluster config for " + name);
          Gson gson = new Gson();
          ClusterEntity clusterEntity = new ClusterEntity(name);
-         clusterEntity.setPluginEntity(pluginService.findPluginByName(cluster.getPlugin())); // TODO
+         if (cluster.getPlugin() != null) {
+            clusterEntity.setPluginEntity(pluginService.findPluginByName(cluster.getPlugin())); // TODO
+         }
          clusterEntity.setDistro(cluster.getDistro());
          clusterEntity.setDistroVendor(cluster.getDistroVendor());
          clusterEntity.setDistroVersion(cluster.getDistroVersion());

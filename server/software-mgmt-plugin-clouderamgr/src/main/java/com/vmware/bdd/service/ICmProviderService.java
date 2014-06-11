@@ -1,6 +1,6 @@
 package com.vmware.bdd.service;
 
-import com.vmware.bdd.apitypes.CmClusterDef;
+import com.vmware.bdd.model.CmClusterDef;
 import com.vmware.bdd.exception.CmException;
 
 import java.io.File;

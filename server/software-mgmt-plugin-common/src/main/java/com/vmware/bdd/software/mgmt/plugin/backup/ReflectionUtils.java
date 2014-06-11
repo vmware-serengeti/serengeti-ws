@@ -1,4 +1,4 @@
-package com.vmware.bdd.software.mgmt.plugin;
+package com.vmware.bdd.software.mgmt.plugin.backup;
 
 import java.lang.reflect.Constructor;
 import java.util.Map;

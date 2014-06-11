@@ -1,0 +1,9 @@
+{
+  "name": "CLUSTER",
+  "repository": "CDH",
+  "versionApiMin": 3,
+  "versionApiMax": -1,
+  "versionCdhMin": 4,
+  "versionCdhMax": -1,
+  "availableConfigurations" : []
+}

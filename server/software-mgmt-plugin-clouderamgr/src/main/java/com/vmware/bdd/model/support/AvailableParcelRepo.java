@@ -1,4 +1,4 @@
-package com.vmware.bdd.apitypes;
+package com.vmware.bdd.model.support;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -8,7 +8,7 @@ import com.google.common.collect.ImmutableMap;
  * Time: 3:32 PM
  */
 
-public enum CmServiceTypeRepo {
+public enum AvailableParcelRepo {
 
   CDH, IMPALA, SOLR, SPARK;
 

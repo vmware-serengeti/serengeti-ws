@@ -36,13 +36,17 @@ import com.vmware.bdd.model.CmRoleDef;
 import com.vmware.bdd.model.CmServiceDef;
 import com.vmware.bdd.model.CmServiceRoleType;
 import com.vmware.bdd.exception.CmException;
-import com.vmware.bdd.service.ICmProviderService;
+import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.utils.Constants;
 import org.apache.commons.lang.WordUtils;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,14 +60,14 @@ import java.util.TreeSet;
 
 /**
  * Author: Xiaoding Bian
- * Date: 5/21/14
- * Time: 1:03 PM
+ * Date: 6/11/14
+ * Time: 5:57 PM
  */
-public class CmProviderServiceImpl implements ICmProviderService {
-   private static final Logger logger = Logger.getLogger(CmProviderServiceImpl.class);
+public class ClouderaManagerImpl implements SoftwareManager {
+
+   private static final Logger logger = Logger.getLogger(ClouderaManagerImpl.class);
 
    public static String[][] CM_VERSION_MATRIX = new String[][] { { "cm5.0.0", "v6", "cdh5" }, { "cm5.0.0", "v6", "cdh4" } };
-
 
    public enum CmServerServiceTypeRepo {
       CDH, IMPALA, SOLR, SPARK;
@@ -103,7 +107,7 @@ public class CmProviderServiceImpl implements ICmProviderService {
 
    private static int API_POLL_PERIOD_MS = 500;
 
-   public CmProviderServiceImpl(String version, int versionApi, int versionCdh, String cmServerHost, int port,
+   public ClouderaManagerImpl(String version, int versionApi, int versionCdh, String cmServerHost, int port,
          String user, String password) throws CmException {
       this.version = version;
       this.versionApi = versionApi;
@@ -116,6 +120,121 @@ public class CmProviderServiceImpl implements ICmProviderService {
       this.apiResourceRootV6 = this.versionApi >= 6 ? apiRootResource.getRootV6() : null;
    }
 
+   @Override
+   public String getName() {
+      return null;
+   }
+
+   @Override
+   public String getDescription() {
+      return null;
+   }
+
+   @Override
+   public String getType() {
+      return null;
+   }
+
+   @Override
+   public Set<String> getSupportedRoles() {
+      return null;
+   }
+
+   @Override
+   public List<HadoopStack> getSupportedStacks() {
+      return null;
+   }
+
+   @Override
+   public String getSupportedConfigs(HadoopStack stack) {
+      return null;
+   }
+
+   @Override
+   public boolean validateBlueprint(ClusterBlueprint blueprint) throws SoftwareManagementPluginException {
+      return false;
+   }
+
+   @Override
+   public boolean createCluster(ClusterBlueprint blueprint) throws Exception{
+      boolean success = false;
+      try {
+         provisionManagement();
+         if (!isProvisioned(null)) {
+            provisionCluster(null);
+            provisionParcels(null);
+         }
+         configureServices(null);
+
+      } catch (Exception e) {
+         throw CmException.PROVISION_FAILED(blueprint.getName());
+      }
+
+      return success;
+   }
+
+   @Override
+   public boolean reconfigCluster(ClusterBlueprint blueprint) {
+      return false;
+   }
+
+   @Override
+   public boolean scaleOutCluster(String clusterName, NodeGroupInfo group, List<NodeInfo> addedNodes) {
+      return false;
+   }
+
+   @Override
+   public boolean startCluster(String clusterName) {
+      return false;
+   }
+
+   @Override
+   public boolean deleteCluster(String clusterName) {
+      return false;
+   }
+
+   @Override
+   public boolean onStopCluster(String clusterName) {
+      return false;
+   }
+
+   @Override
+   public boolean onDeleteCluster(String clusterName) {
+      return false;
+   }
+
+   @Override
+   public boolean decomissionNodes(String clusterName, List<NodeInfo> nodes) {
+      return false;
+   }
+
+   @Override
+   public boolean comissionNodes(String clusterName, List<NodeInfo> nodes) {
+      return false;
+   }
+
+   @Override
+   public boolean startNodes(String clusterName, List<NodeInfo> nodes) {
+      return false;
+   }
+
+   @Override
+   public boolean stopNodes(String clusterName, List<NodeInfo> nodes) {
+      return false;
+   }
+
+   @Override
+   public String exportBlueprint(String clusterName) {
+      return null;
+   }
+
+   @Override
+   public String queryClusterStatus(ClusterBlueprint blueprint) {
+      return null;
+   }
+
+
+   /*
    @Override
    public String getVersion() {
       return version;
@@ -130,30 +249,8 @@ public class CmProviderServiceImpl implements ICmProviderService {
    public int getVersionCdh() {
       return versionCdh;
    }
+   */
 
-   @Override
-   public boolean provision(CmClusterDef cluster) {
-
-      boolean success = false;
-
-      try {
-         provisionManagement(cluster);
-         if (!isProvisioned(cluster)) {
-            provisionCluster(cluster);
-            if (cluster.getIsParcel()) {
-               provisionParcels(cluster);
-            }
-         }
-
-      } catch (Exception e) {
-         throw CmException.PROVISION_FAILED(cluster.getName());
-
-      }
-
-      return success;
-   }
-
-   @Override
    public boolean unprovision(CmClusterDef cluster) throws CmException {
       try {
          if (!cluster.isEmpty()) {
@@ -167,7 +264,6 @@ public class CmProviderServiceImpl implements ICmProviderService {
       return true;
    }
 
-   @Override
    public boolean isProvisioned(CmClusterDef cluster) throws CmException {
       try {
          //apiResourceRootV6.getClustersResource().readCluster(clusterName);
@@ -182,12 +278,6 @@ public class CmProviderServiceImpl implements ICmProviderService {
       return false;
    }
 
-   @Override
-   public boolean start(CmClusterDef cluster) throws CmException {
-      return false;
-   }
-
-   @Override
    public boolean isStarted(CmClusterDef cluster) throws CmException {
       final Set<String> servicesNotStarted = new HashSet<String>();
       try {
@@ -218,7 +308,6 @@ public class CmProviderServiceImpl implements ICmProviderService {
       return servicesNotStarted.isEmpty();
    }
 
-   @Override
    public boolean stop(CmClusterDef cluster) throws CmException {
       try {
          if (!cluster.isEmpty()) {
@@ -232,7 +321,6 @@ public class CmProviderServiceImpl implements ICmProviderService {
       return true;
    }
 
-   @Override
    public boolean isStopped(CmClusterDef cluster) throws CmException {
       final Set<String> servicesNotStopped = cluster.allServiceNames();
       try {
@@ -255,31 +343,6 @@ public class CmProviderServiceImpl implements ICmProviderService {
       return servicesNotStopped.isEmpty();
    }
 
-   @Override
-   public boolean configure(CmClusterDef cluster) throws CmException {
-      boolean executed = false;
-      try {
-         logger.info("Start Configure cluster: " + cluster.getName());
-         if (!cluster.isEmpty()) {
-            if (!isProvisioned(cluster)) {
-               provision(cluster);
-            }
-            if (!isConfigured(cluster)) {
-               configureServices(cluster);
-               isFirstStartRequired = true;
-               executed = true;
-            }
-         }
-         logger.info("Successfully configure cluster: " + cluster.getName());
-      } catch (Exception e) {
-         logger.info("Configure cluster failed: " + cluster.getName());
-         throw new CmException("Failed to configure cluster");
-      }
-
-      return executed;
-   }
-
-   @Override
    public boolean isConfigured(CmClusterDef cluster) throws CmException {
       boolean executed = false;
       final Set<String> servicesNotConfigured = new HashSet<String>();
@@ -306,12 +369,6 @@ public class CmProviderServiceImpl implements ICmProviderService {
       return executed && servicesNotConfigured.size() == 0;
    }
 
-   @Override
-   public boolean unconfigure(CmClusterDef cluster) throws CmException {
-      return false;
-   }
-
-   @Override
    public boolean initialize(CmClusterDef cluster) throws CmException {
       boolean executed = false;
       try {
@@ -356,12 +413,7 @@ public class CmProviderServiceImpl implements ICmProviderService {
 
    }
 
-   @Override
-   public boolean getServiceConfigs(CmClusterDef cluster, File path) throws CmException {
-      return false;
-   }
-
-   public void provisionManagement(final CmClusterDef cluster) {
+   public void provisionManagement() {
 
       boolean cmsProvisionRequired = false;
       try {
@@ -466,7 +518,7 @@ public class CmProviderServiceImpl implements ICmProviderService {
       }
    }
 
-   public void provisionCluster(final CmClusterDef cluster) throws Exception {
+   private void provisionCluster(final CmClusterDef cluster) throws Exception {
 
       execute(apiResourceRootV6.getClouderaManagerResource().inspectHostsCommand());
 
@@ -595,7 +647,7 @@ public class CmProviderServiceImpl implements ICmProviderService {
 
    public void configureServices2(final CmClusterDef cluster) throws Exception {
 
-       ApiServiceList serviceList = new ApiServiceList();
+      ApiServiceList serviceList = new ApiServiceList();
 
       for (CmServiceDef serviceDef : cluster.getServices()) {
          CmServiceRoleType type = CmServiceRoleType.valueOf(serviceDef.getType());

@@ -1,4 +1,4 @@
-package com.vmware.bdd.software.mgmt.plugin;
+package com.vmware.bdd.software.mgmt.plugin.backup;
 
 /**
  * Author: Xiaoding Bian

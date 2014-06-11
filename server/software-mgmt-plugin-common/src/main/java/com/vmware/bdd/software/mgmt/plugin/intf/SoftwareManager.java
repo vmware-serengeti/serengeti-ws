@@ -95,7 +95,7 @@ public interface SoftwareManager {
     * @param clusterSpec
     * @return
     */
-   boolean createCluster(ClusterBlueprint clusterSpec);
+   boolean createCluster(ClusterBlueprint blueprint) throws Exception;
 
    /**
     * After cluster is created, user is able to change hadoop cluster
@@ -104,7 +104,7 @@ public interface SoftwareManager {
     * cluster, otherwise, client cannot get information in this long operation
     * time
     */
-   boolean reconfigCluster(ClusterBlueprint clusterSpec); // for cluster config
+   boolean reconfigCluster(ClusterBlueprint blueprint); // for cluster config
 
    /**
     * Sync call to add more nodes into cluster Plugin should update
@@ -210,5 +210,5 @@ public interface SoftwareManager {
     * @param clusterName
     * @return
     */
-   String queryClusterStatus(ClusterBlueprint clusterSpec);
+   String queryClusterStatus(ClusterBlueprint blueprint);
 }
