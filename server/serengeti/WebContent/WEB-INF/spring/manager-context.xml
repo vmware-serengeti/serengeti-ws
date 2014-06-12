@@ -116,4 +116,6 @@
         </property>
     </bean>
 
+    <bean id="softwareManagerCollector" class="com.vmware.bdd.manager.SoftwareManagerCollector"/>
+
 </beans>

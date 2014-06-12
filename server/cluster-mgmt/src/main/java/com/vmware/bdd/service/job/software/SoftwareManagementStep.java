@@ -15,12 +15,17 @@
 package com.vmware.bdd.service.job.software;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gson.Gson;
+import com.vmware.bdd.apitypes.SoftwareMgtProvider;
+import com.vmware.bdd.entity.PluginEntity;
+import com.vmware.bdd.exception.TaskException;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -29,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.command.CommandUtil;
 import com.vmware.bdd.entity.NodeEntity;
-import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
 import com.vmware.bdd.service.job.DefaultStatusUpdater;
@@ -37,8 +41,6 @@ import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.TrackableTasklet;
-import com.vmware.bdd.service.utils.VcResourceUtils;
-import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.SyncHostsUtils;
 
 public class SoftwareManagementStep extends TrackableTasklet {
@@ -57,14 +59,6 @@ public class SoftwareManagementStep extends TrackableTasklet {
    public void setLockClusterEntityMgr(
          IExclusiveLockedClusterEntityManager lockClusterEntityMgr) {
       this.lockClusterEntityMgr = lockClusterEntityMgr;
-   }
-
-
-   public ISoftwareManagementTask createCommandTask(String clusterName,
-         String specFileName, StatusUpdater statusUpdater) {
-      return SoftwareManagementTaskFactory.createCommandTask(clusterName,
-            specFileName, statusUpdater, managementOperation,
-            lockClusterEntityMgr);
    }
 
    @Override
@@ -117,28 +111,49 @@ public class SoftwareManagementStep extends TrackableTasklet {
             new DefaultStatusUpdater(jobExecutionStatusHolder,
                   getJobExecutionId(chunkContext));
 
-      // get command work directory
-      File workDir = CommandUtil.createWorkDir(getJobExecutionId(chunkContext));
 
-      // update work directory in job context
-      putIntoJobExecutionContext(chunkContext,
-            JobConstants.CURRENT_COMMAND_WORK_DIR, workDir.getAbsolutePath());
+      PluginEntity pluginEntity = lockClusterEntityMgr.getClusterEntityMgr().findByName(clusterName).getPluginEntity();
 
-      boolean needAllocIp = true;
-      if (ManagementOperation.DESTROY.equals(managementOperation)) {
-         needAllocIp = false;
+      ISoftwareManagementTask task = null;
+
+      if (pluginEntity != null && (pluginEntity.getProvider().equals(SoftwareMgtProvider.CLOUDERA_MANAGER)
+            || pluginEntity.getProvider().equals(SoftwareMgtProvider.AMBARI))) {
+
+         ClusterBlueprint clusterBlueprint = lockClusterEntityMgr.getClusterEntityMgr().toClusterBluePrint(clusterName);
+         PluginInfo pluginInfo = pluginEntity.toPluginInfo();
+
+         task = SoftwareManagementTaskFactory.createExternalMgtTask(targetName, managementOperation, clusterBlueprint,
+               pluginInfo, statusUpdater, lockClusterEntityMgr);
+
+         logger.info((new Gson()).toJson(clusterBlueprint));
+      } else {
+
+         // get command work directory
+         File workDir = CommandUtil.createWorkDir(getJobExecutionId(chunkContext));
+
+         // update work directory in job context
+         putIntoJobExecutionContext(chunkContext,
+               JobConstants.CURRENT_COMMAND_WORK_DIR, workDir.getAbsolutePath());
+
+         boolean needAllocIp = true;
+         if (ManagementOperation.DESTROY.equals(managementOperation)) {
+            needAllocIp = false;
+         }
+         String specFilePath = null;
+
+         if (managementOperation.ordinal() != ManagementOperation.DESTROY
+               .ordinal()) {
+            // write cluster spec file
+            File specFile =
+                  clusterManager.writeClusterSpecFile(targetName, workDir,
+                        needAllocIp);
+            specFilePath = specFile.getAbsolutePath();
+         }
+
+         task = SoftwareManagementTaskFactory.createIronfanTask(targetName,
+            specFilePath, statusUpdater, managementOperation,
+            lockClusterEntityMgr);
       }
-      String specFilePath = null;
-      if (managementOperation.ordinal() != ManagementOperation.DESTROY
-            .ordinal()) {
-         // write cluster spec file
-         File specFile =
-               clusterManager.writeClusterSpecFile(targetName, workDir,
-                     needAllocIp);
-         specFilePath = specFile.getAbsolutePath();
-      }
-      ISoftwareManagementTask task =
-            createCommandTask(targetName, specFilePath, statusUpdater);
 
       Map<String, Object> ret = task.call();
 

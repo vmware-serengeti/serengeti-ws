@@ -23,6 +23,10 @@
          <artifactId>vc</artifactId>
       </dependency>
       <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>software-mgmt-plugin-common</artifactId>
+      </dependency>
+      <dependency>
          <groupId>org.hibernate</groupId>
          <artifactId>hibernate-core</artifactId>
       </dependency>

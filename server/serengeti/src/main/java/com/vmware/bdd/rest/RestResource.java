@@ -19,6 +19,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.vmware.bdd.apitypes.PluginAdd;
+import com.vmware.bdd.service.resmgmt.IPluginService;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
@@ -86,6 +88,8 @@ public class RestResource {
    private DistroManager distroManager;
    @Autowired
    private IDatastoreService datastoreSvc;
+   @Autowired
+   private IPluginService pluginService;
    @Autowired
    private ScaleManager scaleMgr;
 
@@ -766,6 +770,12 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("network name", networkName);
       }
       networkSvc.increaseIPs(networkName, network.getIpBlocks());
+   }
+
+   @RequestMapping(value = "/plugins", method = RequestMethod.POST, consumes = "application/json")
+   @ResponseStatus(HttpStatus.OK)
+   public void addPlugin(@RequestBody final PluginAdd pluginAdd) {
+      pluginService.addPlugin(pluginAdd);
    }
 
    /**

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+   http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/batch
+   http://www.springframework.org/schema/batch/spring-batch.xsd
+   http://www.springframework.org/schema/aop
+   http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<beans:import resource="classpath*:/META-INF/spring/jobs/common-job-context.xml" />
+
+	<beans:bean name="createClusterPlanTasklet"
+		class="com.vmware.bdd.service.job.CreateClusterPlanStep">
+		<beans:property name="clusteringService" ref="clusteringService" />
+		<beans:property name="configMgr" ref="clusterConfigMgr" />
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+	</beans:bean>
+	<beans:bean name="setPasswordForClusterCreateTasklet"
+		class="com.vmware.bdd.service.job.SetPasswordForNewNodesStep">
+		<beans:property name="configMgr" ref="clusterConfigMgr" />
+		<beans:property name="setPasswordService" ref="setPasswordService"/>
+		<beans:property name="managementOperation" value="CREATE" />
+	</beans:bean>
+
+	<job id="createClusterJob" job-repository="jobRepository">
+		<step id="createClusterPlanStep" next="updateClusterDataStep1">
+			<tasklet ref="createClusterPlanTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="updateClusterDataStep1" next="createVMStep">
+			<tasklet ref="updateClusterDataTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="createVMStep" next="updateClusterDataStep2">
+			<tasklet ref="createClusterVMTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="updateClusterDataStep2" next="nodeStatusVerifyStep">
+			<tasklet ref="updateClusterDataTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="nodeStatusVerifyStep" next="setPasswordForCreateNodesStep">
+			<tasklet ref="clusterNodeStatusVerifyTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="setPasswordForCreateNodesStep" next="postSetPasswordForCreateNodesStep">
+			<tasklet ref="setPasswordForClusterCreateTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="postSetPasswordForCreateNodesStep" next="softwareCreateClusterStep">
+			<tasklet ref="postSetPasswordTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="softwareCreateClusterStep" next="setAutoElasticityStep">
+			<tasklet ref="softwareCreateClusterTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="setAutoElasticityStep">
+			<tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<listeners>
+			<listener ref="createClusterJobListener" />
+		</listeners>
+	</job>
+
+</beans:beans>

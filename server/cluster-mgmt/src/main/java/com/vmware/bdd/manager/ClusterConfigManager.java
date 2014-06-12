@@ -29,6 +29,8 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.entity.PluginEntity;
+import com.vmware.bdd.service.resmgmt.IPluginService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,6 +90,7 @@ public class ClusterConfigManager {
    private DistroManager distroMgr;
    private RackInfoManager rackInfoMgr;
    private IDatastoreService datastoreMgr;
+   private IPluginService pluginService;
    private IClusterEntityManager clusterEntityMgr;
    private IClusteringService clusteringService;
 
@@ -142,6 +145,15 @@ public class ClusterConfigManager {
 
    public void setNetworkMgr(INetworkService networkMgr) {
       this.networkMgr = networkMgr;
+   }
+
+   public IPluginService getPluginService() {
+      return pluginService;
+   }
+
+   @Autowired
+   public void setPluginService(IPluginService pluginService) {
+      this.pluginService = pluginService;
    }
 
    public IClusterEntityManager getClusterEntityMgr() {
@@ -210,6 +222,9 @@ public class ClusterConfigManager {
          logger.debug("begin to add cluster config for " + name);
          Gson gson = new Gson();
          ClusterEntity clusterEntity = new ClusterEntity(name);
+         if (cluster.getPlugin() != null) {
+            clusterEntity.setPluginEntity(pluginService.findPluginByName(cluster.getPlugin())); // TODO
+         }
          clusterEntity.setDistro(cluster.getDistro());
          clusterEntity.setDistroVendor(cluster.getDistroVendor());
          clusterEntity.setDistroVersion(cluster.getDistroVersion());

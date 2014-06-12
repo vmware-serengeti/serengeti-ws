@@ -93,6 +93,7 @@ public class ClusterCommands implements CommandMarker {
    @CliCommand(value = "cluster create", help = "Create a hadoop cluster")
    public void createCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
+         @CliOption(key = { "plugin" }, mandatory = false, help = "The plugin name") final String plugin,
          @CliOption(key = { "type" }, mandatory = false, help = "The cluster type is Hadoop or HBase") final String type,
          @CliOption(key = { "distro" }, mandatory = false, help = "A hadoop distro name") final String distro,
          @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath,
@@ -135,6 +136,8 @@ public class ClusterCommands implements CommandMarker {
       // build ClusterCreate object
       ClusterCreate clusterCreate = new ClusterCreate();
       clusterCreate.setName(name);
+
+      clusterCreate.setPlugin(plugin); // TODO
 
       if (setClusterPassword) {
          String password = getPassword();

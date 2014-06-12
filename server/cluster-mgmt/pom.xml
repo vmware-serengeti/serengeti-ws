@@ -47,6 +47,10 @@
          <artifactId>software-management</artifactId>
       </dependency>
       <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>software-mgmt-plugin-common</artifactId>
+      </dependency>
+      <dependency>
          <groupId>postgresql</groupId>
          <artifactId>postgresql</artifactId>
       </dependency>

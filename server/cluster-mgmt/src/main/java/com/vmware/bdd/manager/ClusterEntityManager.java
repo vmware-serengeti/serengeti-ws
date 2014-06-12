@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -41,12 +43,18 @@ import com.vmware.bdd.dal.INodeGroupDAO;
 import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.DiskEntity;
-import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NicEntity;
+import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.entity.PluginEntity;
 import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
 import com.vmware.bdd.software.mgmt.thrift.GroupData;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
@@ -56,7 +64,7 @@ import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
 
 @Transactional(readOnly = true)
-public class ClusterEntityManager implements IClusterEntityManager {
+public class ClusterEntityManager implements IClusterEntityManager, Observer {
    private static final Logger logger = Logger
          .getLogger(ClusterEntityManager.class);
 
@@ -437,6 +445,69 @@ public class ClusterEntityManager implements IClusterEntityManager {
       update(node);
    }
 
+   public ClusterBlueprint toClusterBluePrint(String clusterName) {
+      ClusterEntity clusterEntity = findByName(clusterName);
+      ClusterBlueprint blueprint = new ClusterBlueprint();
+      Gson gson = new Gson();
+
+      blueprint.setName(clusterEntity.getName());
+      blueprint.setDisplayName(clusterEntity.getName());
+      blueprint.setInstanceNum(clusterEntity.getRealInstanceNum(true));
+      // TODO: topology
+      if (clusterEntity.getHadoopConfig() != null) {
+         Map<String, Object> clusterConfigs = gson.fromJson(clusterEntity.getHadoopConfig(), Map.class);
+         blueprint.setConfiguration(clusterConfigs);
+      }
+
+      // set Plugin
+      if (clusterEntity.getPluginEntity() != null) {
+         PluginEntity pluginEntity = clusterEntity.getPluginEntity();
+         PluginInfo pluginInfo = new PluginInfo();
+         pluginInfo.setName(pluginEntity.getName());
+         pluginInfo.setProvider(pluginEntity.getProvider());
+         pluginInfo.setHost(pluginEntity.getHost());
+         pluginInfo.setPort(pluginEntity.getPort());
+         pluginInfo.setPassword(pluginEntity.getPassword());
+         pluginInfo.setPrivateKey(pluginEntity.getPrivateKey());
+      }
+
+      // set HadoopStack
+      HadoopStack hadoopStack = new HadoopStack();
+      hadoopStack.setDistro(clusterEntity.getDistro());
+      hadoopStack.setFullVersion(null); // TODO
+      blueprint.setHadoopStack(hadoopStack);
+
+      // set nodes/nodegroups
+      List<NodeGroupInfo> nodeGroupInfos = new ArrayList<NodeGroupInfo>();
+      for (NodeGroupEntity group : clusterEntity.getNodeGroups()) {
+         NodeGroupInfo nodeGroupInfo = new NodeGroupInfo();
+         nodeGroupInfo.setName(group.getName());
+         nodeGroupInfo.setInstanceNum(group.getRealInstanceNum(true));
+         nodeGroupInfo.setRoles(gson.fromJson(group.getRoles(), List.class));
+         if (group.getHadoopConfig() != null) {
+            Map<String, Object> groupConfigs = gson.fromJson(group.getHadoopConfig(), Map.class);
+            nodeGroupInfo.setConfiguration(groupConfigs);
+         }
+
+         // set nodes
+         List<NodeInfo> nodeInfos = new ArrayList<NodeInfo>();
+         for (NodeEntity node : group.getNodes()) {
+            NodeInfo nodeInfo = new NodeInfo();
+            nodeInfo.setName(node.getVmName());
+            nodeInfo.setHostName(node.getHostName());
+            nodeInfo.setIpConfigs(node.convertToIpConfigInfo());
+            nodeInfo.setRack(node.getRack());
+            nodeInfo.setVolumes(node.getVolumns());
+            nodeInfos.add(nodeInfo);
+         }
+
+         nodeGroupInfo.setNodes(nodeInfos);
+         nodeGroupInfos.add(nodeGroupInfo);
+      }
+      blueprint.setNodeGroups(nodeGroupInfos);
+      return blueprint;
+   }
+
    public ClusterRead toClusterRead(String clusterName) {
       return toClusterRead(clusterName, false);
    }
@@ -653,6 +724,9 @@ public class ClusterEntityManager implements IClusterEntityManager {
       for (NodeEntity node : nodes) {
          node.cleanupErrorMessageForUpgrade();
       }
+   }
+   public void update(Observable o, Object arg) {
+      // TODO
    }
 
 }

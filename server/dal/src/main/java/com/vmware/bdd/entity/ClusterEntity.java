@@ -31,6 +31,8 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -60,6 +62,10 @@ public class ClusterEntity extends EntityBase {
 
    @Column(name = "name", unique = true, nullable = false)
    private String name;
+
+   @ManyToOne
+   @JoinColumn(name = "plugin_id")
+   private PluginEntity pluginEntity;
 
    @Enumerated(EnumType.STRING)
    @Column(name = "status", nullable = false)
@@ -156,7 +162,6 @@ public class ClusterEntity extends EntityBase {
       this.name = name;
       this.status = ClusterStatus.NA;
       this.ioShares = Priority.NORMAL;
-
    }
 
    public String getName() {
@@ -165,6 +170,14 @@ public class ClusterEntity extends EntityBase {
 
    public void setName(String name) {
       this.name = name;
+   }
+
+   public PluginEntity getPluginEntity() {
+      return pluginEntity;
+   }
+
+   public void setPluginEntity(PluginEntity pluginEntity) {
+      this.pluginEntity = pluginEntity;
    }
 
    public TopologyType getTopologyPolicy() {

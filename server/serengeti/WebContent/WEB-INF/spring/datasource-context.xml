@@ -32,6 +32,7 @@
             <value>com.vmware.bdd.entity.VcDatastoreEntity</value>
             <value>com.vmware.bdd.entity.NetworkEntity</value>
             <value>com.vmware.bdd.entity.IpBlockEntity</value>
+            <value>com.vmware.bdd.entity.PluginEntity</value>
             <value>com.vmware.bdd.entity.ClusterEntity</value>
             <value>com.vmware.bdd.entity.NodeGroupEntity</value>
             <value>com.vmware.bdd.entity.NodeGroupAssociation</value>

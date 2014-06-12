@@ -16,6 +16,9 @@
       <module>common</module>
       <module>thrift/java</module>
       <module>server/res-mgmt</module>
+      <module>server/software-mgmt-plugin-common</module>
+      <module>server/software-mgmt-plugin-clouderamgr</module>
+      <module>server/software-mgmt-plugin-ambari</module>
       <module>server/placement</module>
       <module>server/dal</module>
       <module>server/vmclone</module>
@@ -28,8 +31,21 @@
       <module>frontend</module>
    </modules>
 
+   <repositories>
+       <repository>
+           <id>cdh.repo</id>
+           <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
+           <name>Cloudera Repository</name>
+       </repository>
+   </repositories>
+
    <dependencyManagement>
       <dependencies>
+         <dependency>
+            <groupId>com.cloudera.api</groupId>
+            <artifactId>cloudera-manager-api</artifactId>
+            <version>${cm.version}</version>
+         </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>commons-serengeti</artifactId>
@@ -379,6 +395,11 @@
          </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
+            <artifactId>software-mgmt</artifactId>
+            <version>${serengeti.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
             <artifactId>software-management</artifactId>
             <version>${serengeti.version}</version>
          </dependency>
@@ -392,6 +413,11 @@
             <artifactId>commons-aurora</artifactId>
             <version>${serengeti.version}</version>
          </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>software-mgmt-plugin-common</artifactId>
+            <version>${serengeti.version}</version>
+         </dependency>
       </dependencies>
    </dependencyManagement>
    <properties>
@@ -401,6 +427,7 @@
       <spring.version>3.2.3.RELEASE</spring.version>
       <spring.security.version>3.1.4.RELEASE</spring.security.version>
       <hadoop.version>1.2.1</hadoop.version>
+      <cm.version>5.0.1</cm.version>
       <vmware.vlsi.version>1.0.8</vmware.vlsi.version>
       <bdd.skipTests>true</bdd.skipTests>
    </properties>
