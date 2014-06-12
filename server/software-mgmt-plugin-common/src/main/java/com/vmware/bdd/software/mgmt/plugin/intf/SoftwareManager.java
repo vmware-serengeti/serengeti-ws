@@ -87,9 +87,10 @@ public interface SoftwareManager {
          throws SoftwareManagementPluginException;
 
    /**
-    * Sync call to create hadoop software Plugin should invoke
-    * SoftwareOperationMonitor to update operation status for this cluster,
-    * otherwise, client cannot get information in this long operation time
+    * Sync call to create hadoop software Plugin should should update
+    * ClusterOperationReports to notify operation status change for this
+    * cluster, otherwise, client cannot get information in this long operation
+    * time
     * 
     * @param clusterSpec
     * @return
@@ -98,30 +99,32 @@ public interface SoftwareManager {
 
    /**
     * After cluster is created, user is able to change hadoop cluster
-    * configuration with this method. Sync call Plugin should invoke
-    * SoftwareOperationMonitor to update operation status for this cluster,
-    * otherwise, client cannot get information in this long operation time
+    * configuration with this method. Sync call Plugin should update
+    * ClusterOperationReports to notify operation status change for this
+    * cluster, otherwise, client cannot get information in this long operation
+    * time
     */
    boolean reconfigCluster(ClusterBlueprint clusterSpec); // for cluster config
 
    /**
-    * Sync call to add more nodes into cluster Plugin should invoke
-    * SoftwareOperationMonitor to update operation status for this cluster,
-    * otherwise, client cannot get information in this long operation time
+    * Sync call to add more nodes into cluster Plugin should update
+    * ClusterOperationReports to notify operation status change for this
+    * cluster, otherwise, client cannot get information in this long operation
+    * time
     */
    boolean scaleOutCluster(String clusterName, NodeGroupInfo group,
          List<NodeInfo> addedNodes); // for resize node group instance number
 
    /**
-    * Sync call to start cluster Plugin should invoke SoftwareOperationMonitor
-    * to update operation status for this cluster, otherwise, client cannot get
+    * Sync call to start cluster Plugin should update ClusterOperationReports to notify
+    * operation status change for this cluster, otherwise, client cannot get
     * information in this long operation time
     */
    boolean startCluster(String clusterName); // TBD: how to make sure the hadoop service is not started while VM is started?
 
    /**
-    * Sync call to delete cluster Plugin should invoke SoftwareOperationMonitor
-    * to update operation status for this cluster, otherwise, client cannot get
+    * Sync call to delete cluster Plugin should update ClusterOperationReports to notify
+    * operation status change for this cluster, otherwise, client cannot get
     * information in this long operation time
     */
    boolean deleteCluster(String clusterName);
@@ -130,8 +133,8 @@ public interface SoftwareManager {
     * This method will be guaranteed to be invoked before BDE invoke cluster
     * stop, allowing plugin to do some clean up
     * 
-    * Sync call Plugin should invoke SoftwareOperationMonitor to update
-    * operation status for this cluster, otherwise, client cannot get
+    * Sync call Plugin should should update ClusterOperationReports to notify
+    * operation status change for this cluster, otherwise, client cannot get
     * information in this long operation time
     * 
     * @return
@@ -142,8 +145,8 @@ public interface SoftwareManager {
     * This method will be guaranteed to invoked before BDE invoke cluster
     * delete, allowing plugin to do some clean up
     * 
-    * Sync call Plugin should invoke SoftwareOperationMonitor to update
-    * operation status for this cluster, otherwise, client cannot get
+    * Sync call Plugin should update ClusterOperationReports to notify
+    * operation status change for this cluster, otherwise, client cannot get
     * information in this long operation time
     * 
     * @return
@@ -152,8 +155,8 @@ public interface SoftwareManager {
 
    // Node level command is prepared for rolling update, e.g. disk fix, scale up cpu/memory/storage
    /**
-    * Sync call Plugin should invoke SoftwareOperationMonitor to update
-    * operation status for this cluster, otherwise, client cannot get
+    * Sync call Plugin should update ClusterOperationReports to notify
+    * operation status change for this cluster, otherwise, client cannot get
     * information in this long operation time
     * 
     * @param clusterName
@@ -163,8 +166,8 @@ public interface SoftwareManager {
    boolean decomissionNodes(String clusterName, List<NodeInfo> nodes);
 
    /**
-    * Sync call Plugin should invoke SoftwareOperationMonitor to update
-    * operation status for this cluster, otherwise, client cannot get
+    * Sync call Plugin should update ClusterOperationReports to notify
+    * operation status change for this cluster, otherwise, client cannot get
     * information in this long operation time
     * 
     * @param clusterName
@@ -177,8 +180,8 @@ public interface SoftwareManager {
     * The commission nodes method is guaranteed to be invoked before this method
     * is called.
     * 
-    * Sync call Plugin should invoke SoftwareOperationMonitor to update
-    * operation status for this cluster, otherwise, client cannot get
+    * Sync call Plugin should update ClusterOperationReports to notify
+    * operation status change for this cluster, otherwise, client cannot get
     * information in this long operation time
     * 
     * @param clusterName
@@ -188,8 +191,8 @@ public interface SoftwareManager {
    boolean startNodes(String clusterName, List<NodeInfo> nodes);
 
    /**
-    * Sync call Plugin should invoke SoftwareOperationMonitor to update
-    * operation status for this cluster, otherwise, client cannot get
+    * Sync call Plugin should update ClusterOperationReports to notify
+    * operation status change for this cluster, otherwise, client cannot get
     * information in this long operation time
     * 
     * @param clusterName

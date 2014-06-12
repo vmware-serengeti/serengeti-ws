@@ -3,17 +3,16 @@ package com.vmware.bdd.software.mgmt.plugin.monitor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
 
 /**
+ * For all 
  * Author: Xiaoding Bian
  * Date: 6/10/14
  * Time: 7:50 PM
  */
 
-/**
- * Should be singleton
- */
-public class SoftwareOperationMonitor {
+public class ClusterOperationReports extends Observable {
 
    private final int CLEAN_INTERVAL = 12 * 60 * 60 * 1000; // 12 hours
 

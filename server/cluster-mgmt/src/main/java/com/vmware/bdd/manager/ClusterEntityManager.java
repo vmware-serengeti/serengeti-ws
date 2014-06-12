@@ -18,16 +18,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 
-import com.vmware.bdd.apitypes.SoftwareMgtProvider;
-import com.vmware.bdd.dal.IPluginDAO;
-import com.vmware.bdd.entity.PluginEntity;
-import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
-import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
-import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
-import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
-import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,12 +43,18 @@ import com.vmware.bdd.dal.INodeGroupDAO;
 import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.DiskEntity;
-import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NicEntity;
+import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.entity.PluginEntity;
 import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
 import com.vmware.bdd.software.mgmt.thrift.GroupData;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
@@ -64,7 +64,7 @@ import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
 
 @Transactional(readOnly = true)
-public class ClusterEntityManager implements IClusterEntityManager {
+public class ClusterEntityManager implements IClusterEntityManager, Observer {
    private static final Logger logger = Logger
          .getLogger(ClusterEntityManager.class);
 
@@ -724,6 +724,9 @@ public class ClusterEntityManager implements IClusterEntityManager {
       for (NodeEntity node : nodes) {
          node.cleanupErrorMessageForUpgrade();
       }
+   }
+   public void update(Observable o, Object arg) {
+      // TODO
    }
 
 }
