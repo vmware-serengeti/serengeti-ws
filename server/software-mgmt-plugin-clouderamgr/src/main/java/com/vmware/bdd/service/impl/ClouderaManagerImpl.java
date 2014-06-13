@@ -38,6 +38,7 @@ import com.vmware.bdd.model.CmServiceRoleType;
 import com.vmware.bdd.exception.CmException;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager.HealthStatus;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
@@ -874,4 +875,13 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private static abstract class Callback {
       public abstract boolean poll();
    }
+
+   //TODO: impl
+   public void echo() {
+   }
+
+   public HealthStatus getStatus() {
+      return HealthStatus.Connected;
+   }
+
 }

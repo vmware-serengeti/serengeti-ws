@@ -44,7 +44,7 @@ public interface SoftwareManager {
     * @return the plugin type
     */
    String getType();
-   String echo();
+   void echo();
 
    HealthStatus getStatus();
 
