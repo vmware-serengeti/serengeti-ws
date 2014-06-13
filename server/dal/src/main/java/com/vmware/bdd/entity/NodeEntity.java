@@ -139,6 +139,16 @@ public class NodeEntity extends EntityBase {
       return volumns;
    }
 
+   public List<String> getDataVolumnsMountPoint() {
+      List<String> mountPoints = new ArrayList<String>();
+      for (DiskEntity disk : disks) {
+         if (DiskType.DATA_DISK.getType().equals(disk.getDiskType())) {
+            mountPoints.add("/mnt/scsi-3" + disk.getHardwareUUID().toLowerCase().replace("-", "") + "-part1");
+         }
+      }
+      return mountPoints;
+   }
+
    public String getGuestHostName() {
       return guestHostName;
    }

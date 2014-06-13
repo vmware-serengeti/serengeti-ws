@@ -1,9 +1,33 @@
+/***************************************************************************
+ * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
 package com.vmware.bdd.model;
 
 import com.google.gson.annotations.Expose;
+import com.vmware.aurora.util.StringUtil;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+import org.apache.commons.lang.StringUtils;
 
+import javax.management.relation.RoleInfo;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -31,10 +55,93 @@ public class CmClusterDef implements Serializable {
    private Boolean isParcel;
 
    @Expose
-   private CmNodeDef[] nodes;
+   private List<CmNodeDef> nodes;
 
    @Expose
-   private CmServiceDef[] services;
+   private List<CmServiceDef> services;
+
+   private static String NAME_SEPARATOR = "_";
+
+   public CmClusterDef() {}
+
+   public CmClusterDef(ClusterBlueprint blueprint) {
+      this.name = blueprint.getName();
+      this.displayName = blueprint.getName();
+      this.version = blueprint.getHadoopStack().getDisro();
+      this.fullVersion = blueprint.getHadoopStack().getFullVersion();
+      this.isParcel = true;
+      this.nodes = new ArrayList<CmNodeDef>();
+      this.services = new ArrayList<CmServiceDef>();
+      for (NodeGroupInfo group : blueprint.getNodeGroups()) {
+         for (NodeInfo node : group.getNodes()) {
+            CmNodeDef nodeDef = new CmNodeDef();
+            nodeDef.setIpAddress(node.getMgtIpAddress());
+            nodeDef.setFqdn(node.getMgtIpAddress());
+            nodeDef.setRackId(node.getRack());
+            nodeDef.setNodeId(node.getName()); // temp id, will be updated when installed.
+            nodeDef.setConfigs(null);
+            this.nodes.add(nodeDef);
+
+            for (String roleType : group.getRoles()) {
+               CmServiceDef service = serviceDefOfRole(roleType);
+               CmRoleDef roleDef = new CmRoleDef();
+               roleDef.setName(node.getName() + NAME_SEPARATOR + service.getType() + NAME_SEPARATOR + roleType); // temp name
+               roleDef.setType(roleType);
+               roleDef.setNodeRef(nodeDef.getNodeId());
+               switch (CmServiceRoleType.valueOfId(roleType)) {
+                  case HDFS_NAMENODE:
+                     roleDef.addConfig("dfs_name_dir_list", dataDirs(node.getVolumes(), "/dfs/nn"));
+                     break;
+                  case HDFS_DATANODE:
+                     roleDef.addConfig("dfs_data_dir_list", dataDirs(node.getVolumes(), "/dfs/dn"));
+                     break;
+                  case HDFS_SECONDARY_NAMENODE:
+                     roleDef.addConfig("fs_checkpoint_dir_list", dataDirs(node.getVolumes(), "/dfs/snn"));
+                     break;
+                  case YARN_NODE_MANAGER:
+                     roleDef.addConfig("yarn_nodemanager_local_dirs", dataDirs(node.getVolumes(), "/yarn/nm"));
+                     break;
+                  default:
+                     break;
+               }
+               service.addRole(roleDef);
+               // TODO: service/role configs
+            }
+         }
+      }
+   }
+
+   private String dataDirs(List<String> volumes, String postFix) {
+      List<String> dirList = new ArrayList<String>();
+      for (String volume : volumes) {
+         dirList.add(volume + postFix);
+      }
+      return StringUtils.join(dirList, ",");
+   }
+
+   /**
+    * get the ServiceDef of given roleName, init it if not exist
+    * @param roleType
+    * @return
+    */
+   private synchronized CmServiceDef serviceDefOfRole(String roleType) {
+      String serviceType = CmServiceRoleType.serviceOfRole(roleType); // assume roleName is already validated
+      if (this.services == null) {
+         this.services = new ArrayList<CmServiceDef>();
+      }
+      for (CmServiceDef service : this.services) {
+         if (service.getType().equals(serviceType)) {
+            return service;
+         }
+      }
+      CmServiceDef service = new CmServiceDef();
+      service.setName(this.name + NAME_SEPARATOR + serviceType);
+      service.setDisplayName(service.getName());
+      service.setType(serviceType);
+      this.services.add(service);
+      return service;
+   }
+
 
    public String getName() {
       return name;
@@ -76,19 +183,19 @@ public class CmClusterDef implements Serializable {
       this.isParcel = isParcel;
    }
 
-   public CmNodeDef[] getNodes() {
+   public List<CmNodeDef> getNodes() {
       return nodes;
    }
 
-   public void setNodes(CmNodeDef[] nodes) {
+   public void setNodes(List<CmNodeDef> nodes) {
       this.nodes = nodes;
    }
 
-   public CmServiceDef[] getServices() {
+   public List<CmServiceDef> getServices() {
       return services;
    }
 
-   public void setServices(CmServiceDef[] services) {
+   public void setServices(List<CmServiceDef> services) {
       this.services = services;
    }
 
@@ -108,6 +215,11 @@ public class CmClusterDef implements Serializable {
       return allServiceTypes;
    }
 
+   /**
+    * A cluster should has only one service for a givin service type
+    * @param type
+    * @return
+    */
    public String serviceNameOfType(CmServiceRoleType type) {
       for (CmServiceDef serviceDef : this.services) {
          if (type.equals(CmServiceRoleType.valueOf(serviceDef.getType()))) {
@@ -118,6 +230,51 @@ public class CmClusterDef implements Serializable {
    }
 
    public boolean isEmpty() {
-      return nodes == null || nodes.length == 0 || services == null || services.length == 0;
+      return nodes == null || nodes.isEmpty() || services == null || services.isEmpty();
    }
+
+   public Map<String, CmNodeDef> ipToNode() {
+      Map<String, CmNodeDef> ipToNodeMap = new HashMap<String, CmNodeDef>();
+      for(CmNodeDef node : nodes) {
+         ipToNodeMap.put(node.getIpAddress(), node);
+      }
+      return ipToNodeMap;
+   }
+
+   public Map<String, List<CmRoleDef>> ipToRoles() {
+
+      Map<String, CmNodeDef> idToNodeMap = new HashMap<String, CmNodeDef>();
+      for(CmNodeDef node : nodes) {
+         idToNodeMap.put(node.getNodeId(), node);
+      }
+
+      Map<String, List<CmRoleDef>> ipToRolesMap = new HashMap<String, List<CmRoleDef>>();
+      for (CmServiceDef service : services) {
+         for (CmRoleDef role : service.getRoles()) {
+            CmNodeDef nodeRef = idToNodeMap.get(role.getNodeRef());
+            if (!ipToRolesMap.containsKey(nodeRef.getIpAddress())) {
+               ipToRolesMap.put(nodeRef.getIpAddress(), new ArrayList<CmRoleDef>());
+            }
+            ipToRolesMap.get(nodeRef.getIpAddress()).add(role);
+         }
+      }
+
+      return ipToRolesMap;
+   }
+
+   public Map<String, List<CmRoleDef>> nodeRefToRoles() {
+
+      Map<String, List<CmRoleDef>> nodeRefToRolesMap = new HashMap<String, List<CmRoleDef>>();
+      for (CmServiceDef service : services) {
+         for (CmRoleDef role : service.getRoles()) {
+            if (!nodeRefToRolesMap.containsKey(role.getNodeRef())) {
+               nodeRefToRolesMap.put(role.getNodeRef(), new ArrayList<CmRoleDef>());
+            }
+            nodeRefToRolesMap.get(role.getNodeRef()).add(role);
+         }
+      }
+
+      return nodeRefToRolesMap;
+   }
+
 }

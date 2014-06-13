@@ -14,9 +14,6 @@ public class ClusterBlueprint implements Serializable{
    private String name;
 
    @Expose
-   private String displayName;
-
-   @Expose
    private int instanceNum;
 
    @Expose
@@ -34,14 +31,6 @@ public class ClusterBlueprint implements Serializable{
 
    public void setName(String name) {
       this.name = name;
-   }
-
-   public String getDisplayName() {
-      return displayName;
-   }
-
-   public void setDisplayName(String displayName) {
-      this.displayName = displayName;
    }
 
    public int getInstanceNum() {

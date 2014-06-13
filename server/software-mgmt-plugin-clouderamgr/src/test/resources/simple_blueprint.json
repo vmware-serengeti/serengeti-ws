@@ -1,0 +1,142 @@
+{
+    "name": "cluster01",
+    "instanceNum": 5,
+    "hadoopStack": {
+        "distro": "CDH5",
+        "fullVersion": "5.0.1"
+    },
+    "nodeGroups":[
+        {
+            "name": "master",
+            "roles": [
+                "NAMENODE",
+                "RESOURCEMANAGER"
+            ],
+            "instanceNum": 1,
+            "configuration": {
+                "NAMENODE": {
+                    "namenode_java_heapsize": "2048000000"
+                }
+            }
+            ,
+            "nodes": [
+                {
+                    "name": "cluster01-master-0",
+                    "rack": "rack1",
+                    "hostname": "host01",
+                    "ipConfigs": {
+                        "MGT_NETWORK": [
+                            {
+                                "ipAddress": "192.168.0.1",
+                                "portGroupName": "pub1-10g",
+                                "networkName": "defaultNetwork",
+                                "trafficType": "MGT_NETWORK"
+                            }
+                        ]
+                    },
+                    "volumes": ["sdc1", "sdc2"]
+                }
+            ]
+        },
+        {
+            "name": "worker",
+            "roles": [
+                "DATANODE",
+                "NODEMANAGER"
+            ],
+            "instanceNum": 3,
+            "configuration": {
+                "DATANODE" : {
+                    "datanode_java_heapsize": "2048000000"
+                }
+            },
+            "nodes": [
+                {
+                    "name": "cluster01-worker-0",
+                    "rack": "rack2",
+                    "hostname": "host02",
+                    "ipConfigs": {
+                        "MGT_NETWORK": [
+                            {
+                                "ipAddress": "192.168.0.2",
+                                "portGroupName": "pub1-10g",
+                                "networkName": "defaultNetwork",
+                                "trafficType": "MGT_NETWORK"
+                            }
+                        ]
+                    },
+                    "volumes": ["sdc1"]
+                },
+                {
+                    "name": "cluster01-worker-1",
+                    "rack": "rack2",
+                    "hostname": "host02",
+                    "ipConfigs": {
+                        "MGT_NETWORK": [
+                            {
+                                "ipAddress": "192.168.0.3", // TODO: deserialize name
+                                "portGroupName": "pub1-10g",
+                                "networkName": "defaultNetwork",
+                                "trafficType": "MGT_NETWORK"
+                            }
+                        ]
+                    },
+                    "volumes": ["sdc1", "sdd1"]
+                }
+            ]
+        },
+        {
+            "name": "backup",
+            "roles": [
+                "SECONDARYNAMENODE"
+            ],
+            "instanceNum": 1,
+            "nodes": [
+                {
+                    "name": "cluster01-backup-0",
+                    "rack": "rack3",
+                    "hostname": "host03",
+                    "ipConfigs": {
+                        "MGT_NETWORK": [
+                            {
+                                "ipAddress": "192.168.0.4",
+                                "portGroupName": "pub1-10g",
+                                "networkName": "defaultNetwork",
+                                "trafficType": "MGT_NETWORK"
+                            }
+                        ]
+                    },
+                    "volumes": ["sdc1", "sdd1", "sde1"]
+                }
+            ]
+        }
+    ],
+    "configuration": {
+        "HDFS": { // service level
+            "hdfs_namenode_health_enabled": "true",
+            "hdfs_active_namenode_detection_window": "true",
+            "dfs_encrypt_data_transfer_algorithm": "rc4"
+        },
+        "SECONDARYNAMENODE": {
+            "secondarynamenode_scm_health_enabled": "true",
+            "secondarynamenode_java_opts": "-XX:+UseParNewGC",
+            "secondarynamenode_fd_thresholds": "{\"critical\":\"70.0\",\"warning\":\"50.0\"}"
+        },
+        "DATANODE": {
+            "dfs_datanode_du_reserved": "1024000000",
+            "dfs_datanode_failed_volumes_tolerated": "2"
+        },
+        "YARN": { // service
+            "admin_application_list_settings": "ALL",
+            "yarn_scheduler_fair_allow_undeclared_pools": "true"
+        },
+        "RESOURCEMANAGER": {
+            "yarn_scheduler_maximum_allocation_mb": "1024000",
+            "resource_manager_java_heapsize": "2048000000"
+        },
+        "NODEMANAGER": {
+            "yarn_nodemanager_heartbeat_interval_ms": "1000",
+            "yarn_nodemanager_resource_cpu_vcores": "8"
+        }
+    }
+}

@@ -1,4 +1,18 @@
-package com.vmware.bdd.model;
+/***************************************************************************
+ * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
+package com.vmware.bdd.model.support;
 
 import com.vmware.bdd.utils.Constants;
 
@@ -11,7 +25,7 @@ import com.vmware.bdd.utils.Constants;
 // Cloudera Manager Service is only available in the Enterprise Edition, the Management Service
 // provides monitoring, diagnostic and reporting features for your Hadoop clusters. The operation
 // of this service is similar to other Hadoop services, except that the Management Service does not belong to a cluster.
-public enum CmMgmtServiceType {
+public enum AvailableManagementService {
 
      // Management
   CM(null, "CM", false),
@@ -43,17 +57,17 @@ public enum CmMgmtServiceType {
   // Navigator Meta Server
   NAVIGATORMETASERVER(MANAGEMENT, "NAVIGATORMETASERVER", true);
 
-  private CmMgmtServiceType parent;
+  private AvailableManagementService parent;
   private String id;
   private boolean requireEnterprise;
 
-  private CmMgmtServiceType(CmMgmtServiceType parent, String id, boolean requireEnterprise) {
+  private AvailableManagementService(AvailableManagementService parent, String id, boolean requireEnterprise) {
     this.parent = parent;
     this.id = id;
     this.requireEnterprise = requireEnterprise;
   }
 
-  public CmMgmtServiceType getParent() {
+  public AvailableManagementService getParent() {
     return parent;
   }
 

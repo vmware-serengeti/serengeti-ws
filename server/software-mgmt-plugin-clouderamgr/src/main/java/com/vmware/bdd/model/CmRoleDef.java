@@ -1,6 +1,25 @@
+/***************************************************************************
+ * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
 package com.vmware.bdd.model;
 
 import com.google.gson.annotations.Expose;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Author: Xiaoding Bian
@@ -18,13 +37,13 @@ public class CmRoleDef {
    private String nodeRef; // TODO, relate to node.nodeId
 
    @Expose
-   private CmConfigDef[] configs;
+   private Map<String, String> configs;
 
-   public CmConfigDef[] getConfigs() {
+   public Map<String, String> getConfigs() {
       return configs;
    }
 
-   public void setConfigs(CmConfigDef[] configs) {
+   public void setConfigs(Map<String, String> configs) {
       this.configs = configs;
    }
 
@@ -52,4 +71,10 @@ public class CmRoleDef {
       this.nodeRef = nodeRef;
    }
 
+   public void addConfig(String key, String value) {
+      if (configs == null) {
+         configs = new HashMap<String, String>();
+      }
+      configs.put(key, value);
+   }
 }

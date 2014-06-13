@@ -24,7 +24,7 @@ public class NodeInfo implements Serializable {
    private String rack;
 
    @Expose
-   private String hostName;
+   private String hostname;
 
    @Expose
    private Map<NetTrafficType, List<IpConfigInfo>> ipConfigs;
@@ -48,12 +48,12 @@ public class NodeInfo implements Serializable {
       this.rack = rack;
    }
 
-   public String getHostName() {
-      return hostName;
+   public String getHostname() {
+      return hostname;
    }
 
-   public void setHostName(String hostName) {
-      this.hostName = hostName;
+   public void setHostname(String hostname) {
+      this.hostname = hostname;
    }
 
    public Map<NetTrafficType, List<IpConfigInfo>> getIpConfigs() {
@@ -62,6 +62,14 @@ public class NodeInfo implements Serializable {
 
    public void setIpConfigs(Map<NetTrafficType, List<IpConfigInfo>> ipConfigs) {
       this.ipConfigs = ipConfigs;
+   }
+
+   public String getMgtIpAddress() {
+      try {
+         return ipConfigs.get(NetTrafficType.MGT_NETWORK).get(0).getIpAddress();
+      } catch (Exception e) {
+         return null;
+      }
    }
 
    public List<String> getVolumes() {

@@ -449,7 +449,6 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       Gson gson = new Gson();
 
       blueprint.setName(clusterEntity.getName());
-      blueprint.setDisplayName(clusterEntity.getName());
       blueprint.setInstanceNum(clusterEntity.getRealInstanceNum(true));
       // TODO: topology
       if (clusterEntity.getHadoopConfig() != null) {
@@ -480,10 +479,9 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
          for (NodeEntity node : group.getNodes()) {
             NodeInfo nodeInfo = new NodeInfo();
             nodeInfo.setName(node.getVmName());
-            nodeInfo.setHostName(node.getHostName());
             nodeInfo.setIpConfigs(node.convertToIpConfigInfo());
             nodeInfo.setRack(node.getRack());
-            nodeInfo.setVolumes(node.getVolumns());
+            nodeInfo.setVolumes(node.getDataVolumnsMountPoint());
             nodeInfos.add(nodeInfo);
          }
 

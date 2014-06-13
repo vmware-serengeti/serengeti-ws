@@ -1,7 +1,22 @@
+/***************************************************************************
+ * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
 package com.vmware.bdd.model.support;
 
 import com.google.gson.annotations.Expose;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -12,11 +27,12 @@ import java.util.List;
 public class AvailableServiceRole {
 
    public static final int VERSION_UNBOUNDED = -1;
+   public static final String ROOT_SERVICE = "CLUSTER";
 
    @Expose
    private String name;
 
-   @Expose
+   @Expose(serialize = false)
    private AvailableServiceRole parent;
 
    @Expose
@@ -35,7 +51,7 @@ public class AvailableServiceRole {
    private int versionCdhMax;
 
    @Expose
-   private List<AvailableConfiguration> availableConfigurations;
+   private List<AvailableConfiguration> availableConfigurations; // TODO: use map instead
 
    public String getName() {
       return name;
@@ -49,8 +65,26 @@ public class AvailableServiceRole {
       return parent;
    }
 
-   public void setParent(AvailableServiceRole parent) {
+   public void setParentObject(AvailableServiceRole parent) {
       this.parent = parent;
+   }
+
+   public String getParentName() {
+      if (parent != null) {
+         return parent.getName();
+      }
+      return null;
+   }
+
+   public void setParent(String parent) {
+      try {
+         this.parent = null;
+         if (parent != null) {
+            this.parent = AvailableServiceRoleLoader.getServiceRole(parent);
+         }
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
    }
 
    public AvailableParcelRepo getRepository() {
@@ -101,4 +135,11 @@ public class AvailableServiceRole {
       this.availableConfigurations = availableConfigurations;
    }
 
+   public boolean isService() {
+      return getParentName().equalsIgnoreCase(ROOT_SERVICE);
+   }
+
+   public boolean isRole() {
+      return getParent() != null && getParent().isService();
+   }
 }
