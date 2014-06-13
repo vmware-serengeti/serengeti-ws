@@ -21,6 +21,11 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
  * 
  */
 public interface SoftwareManager {
+   public enum HealthStatus {
+      Connected,
+      Disconnected,
+      Unknown
+   }
    /**
     * Plugin name, which should be unique in BDE scope
     * 
@@ -39,6 +44,9 @@ public interface SoftwareManager {
     * @return the plugin type
     */
    String getType();
+   String echo();
+
+   HealthStatus getStatus();
 
    /**
     * The supported role names, for instance NameNode, Secondary NameNode, etc.
