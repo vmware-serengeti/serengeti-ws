@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vmware.bdd.apitypes.DatastoreAdd;
 import com.vmware.bdd.apitypes.DatastoreRead;
 import com.vmware.bdd.apitypes.DatastoreReadDetail;
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.dal.IClusterDAO;
 import com.vmware.bdd.dal.IDatastoreDAO;
 import com.vmware.bdd.entity.VcDatastoreEntity;
@@ -34,7 +35,6 @@ import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
-import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
 import com.vmware.bdd.utils.CommonUtil;
 
 @Service

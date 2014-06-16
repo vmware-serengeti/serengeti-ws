@@ -21,8 +21,8 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.software.mgmt.plugin.model.HadoopRole;
-import com.vmware.bdd.software.mgmt.plugin.model.HadoopRole.RoleComparactor;
+import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 

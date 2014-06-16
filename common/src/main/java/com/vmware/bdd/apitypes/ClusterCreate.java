@@ -28,12 +28,12 @@ import java.util.regex.Pattern;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.exception.ClusterConfigException;
-import com.vmware.bdd.software.mgmt.plugin.model.HadoopRole;
-import com.vmware.bdd.software.mgmt.plugin.model.ServiceType;
-import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
-import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.spectypes.HadoopDistroMap;
+import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.spectypes.ServiceType;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;

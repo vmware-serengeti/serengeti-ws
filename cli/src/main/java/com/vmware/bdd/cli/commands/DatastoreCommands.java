@@ -28,9 +28,9 @@ import org.springframework.stereotype.Component;
 import com.vmware.bdd.apitypes.DatastoreAdd;
 import com.vmware.bdd.apitypes.DatastoreRead;
 import com.vmware.bdd.apitypes.DatastoreReadDetail;
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.DatastoreRestClient;
-import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
 
 @Component
 public class DatastoreCommands implements CommandMarker {

@@ -22,9 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.reflect.TypeToken;
+import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
-import com.vmware.bdd.software.mgmt.plugin.monitor.NodeStatus;
 import com.vmware.bdd.utils.JobUtils;
 
 public class ClusterNodeSyncupStep extends TrackableTasklet {

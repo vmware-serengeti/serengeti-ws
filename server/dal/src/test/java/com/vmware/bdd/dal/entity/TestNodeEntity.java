@@ -15,14 +15,14 @@
 package com.vmware.bdd.dal.entity;
 
 import com.google.gson.Gson;
+import com.vmware.bdd.apitypes.NetConfigInfo;
+import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.dal.INodeDAO;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NicEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
-import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo;
-import com.vmware.bdd.software.mgmt.plugin.monitor.NodeStatus;
 import com.vmware.bdd.spectypes.NicSpec;
 import junit.framework.Assert;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -25,8 +25,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.vmware.bdd.apitypes.Datastore;
 import com.vmware.bdd.entity.VcDatastoreEntity;
-import com.vmware.bdd.software.mgmt.plugin.model.Datastore;
 
 /**
  * Author: Xiaoding Bian

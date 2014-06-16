@@ -22,15 +22,15 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksType;
-import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
-import com.vmware.bdd.software.mgmt.plugin.model.GroupType;
-import com.vmware.bdd.software.mgmt.plugin.model.HadoopRole;
+import com.vmware.bdd.spectypes.GroupType;
+import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 

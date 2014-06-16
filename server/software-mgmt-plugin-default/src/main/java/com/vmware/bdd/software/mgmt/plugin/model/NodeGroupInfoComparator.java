@@ -3,8 +3,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
-import com.vmware.bdd.software.mgmt.plugin.model.HadoopRole.RoleComparactor;
+import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
 
 
 public class NodeGroupInfoComparator implements Comparator<NodeGroupInfo> {

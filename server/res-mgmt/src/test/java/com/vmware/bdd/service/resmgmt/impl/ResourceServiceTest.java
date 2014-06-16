@@ -33,6 +33,7 @@ import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcNetwork;
 import com.vmware.aurora.vc.VcResourcePool;
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.dal.IDatastoreDAO;
 import com.vmware.bdd.dal.INetworkDAO;
 import com.vmware.bdd.dal.IResourcePoolDAO;
@@ -41,7 +42,6 @@ import com.vmware.bdd.entity.VcDatastoreEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.entity.resmgmt.ResourceReservation;
 import com.vmware.bdd.exception.VcProviderException;
-import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
 
 /**
  * @author Jarred Li

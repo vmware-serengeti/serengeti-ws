@@ -14,7 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.spetypes;
 
-import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.spectypes.NicSpec;
 import org.testng.annotations.Test;
 

@@ -1,5 +1,7 @@
 package com.vmware.bdd.software.mgmt.plugin.monitor;
 
+import com.vmware.bdd.apitypes.NodeStatus;
+
 /**
  * Author: Xiaoding Bian
  * Date: 6/10/14

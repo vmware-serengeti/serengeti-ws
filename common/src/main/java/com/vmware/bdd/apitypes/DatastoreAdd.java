@@ -17,7 +17,7 @@ package com.vmware.bdd.apitypes;
 import java.util.List;
 
 import com.google.gson.Gson;
-import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 
 /**
  * Datastore add parameters

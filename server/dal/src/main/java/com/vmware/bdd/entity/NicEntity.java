@@ -17,7 +17,7 @@ package com.vmware.bdd.entity;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.spectypes.NicSpec;
 import com.vmware.bdd.utils.Constants;
 import org.hibernate.annotations.Type;

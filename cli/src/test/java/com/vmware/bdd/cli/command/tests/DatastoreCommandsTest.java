@@ -29,9 +29,9 @@ import org.springframework.test.context.ContextConfiguration;
 import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.DatastoreRead;
 import com.vmware.bdd.apitypes.DatastoreReadDetail;
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.cli.commands.CookieCache;
 import com.vmware.bdd.cli.commands.DatastoreCommands;
-import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
 
 /**
  * This class is the test of Datastore command.

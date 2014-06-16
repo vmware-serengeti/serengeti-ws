@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.vmware.bdd.software.mgmt.plugin.model.IpConfigInfo;
-import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo.NetTrafficType;
+
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 
 import com.google.gson.Gson;
 

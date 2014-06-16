@@ -16,8 +16,8 @@ package com.vmware.bdd.dal;
 
 import java.util.List;
 
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.entity.VcDatastoreEntity;
-import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
 
 /**
  * @author Jarred Li

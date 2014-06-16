@@ -21,7 +21,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 
 /**
  * Work as a message queue

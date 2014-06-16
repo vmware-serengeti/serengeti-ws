@@ -20,8 +20,8 @@ import java.util.List;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
+import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.service.IClusteringService;
-import com.vmware.bdd.software.mgmt.plugin.monitor.NodeStatus;
 
 public class StopClusterVMStep extends TrackableTasklet {
    IClusteringService clusteringService;

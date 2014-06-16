@@ -38,6 +38,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.google.gson.reflect.TypeToken;
+import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.Priority;
 
 import org.apache.log4j.Logger;
@@ -45,10 +46,9 @@ import org.hibernate.annotations.Type;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.security.EncryptionGuard;
-import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo;
-import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.utils.ConfigInfo;
 
 /**

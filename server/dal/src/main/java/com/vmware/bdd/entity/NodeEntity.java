@@ -35,12 +35,12 @@ import javax.persistence.Table;
 
 import org.apache.log4j.Logger;
 
+import com.vmware.bdd.apitypes.IpConfigInfo;
 import com.vmware.bdd.apitypes.NodeRead;
+import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.software.mgmt.plugin.model.IpConfigInfo;
-import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo.NetTrafficType;
-import com.vmware.bdd.software.mgmt.plugin.monitor.NodeStatus;
 import com.vmware.bdd.spectypes.NicSpec;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;

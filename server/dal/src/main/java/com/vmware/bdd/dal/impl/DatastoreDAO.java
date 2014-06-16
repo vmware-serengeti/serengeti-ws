@@ -24,9 +24,9 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.dal.IDatastoreDAO;
 import com.vmware.bdd.entity.VcDatastoreEntity;
-import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
 
 /**
  * @author Jarred Li

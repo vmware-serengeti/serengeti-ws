@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.software.mgmt.plugin.model;
+package com.vmware.bdd.apitypes;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 
 /**
  * Author: Xiaoding Bian

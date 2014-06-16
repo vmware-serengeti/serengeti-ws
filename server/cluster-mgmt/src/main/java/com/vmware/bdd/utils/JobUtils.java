@@ -28,6 +28,7 @@ import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.LimitInstruction;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.command.VHMMessageTask;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NicEntity;
@@ -39,7 +40,6 @@ import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IExecutionService;
 import com.vmware.bdd.service.job.JobConstants;
-import com.vmware.bdd.software.mgmt.plugin.monitor.NodeStatus;
 import com.vmware.bdd.spectypes.NicSpec;
 
 public class JobUtils {

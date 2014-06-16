@@ -31,13 +31,13 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ElasticityRequestBody;
 import com.vmware.bdd.apitypes.FixDiskRequestBody;
+import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
-import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo;
 import com.vmware.bdd.utils.CommonUtil;
 
 @Component

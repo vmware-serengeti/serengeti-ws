@@ -12,11 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.software.mgmt.plugin.model;
+package com.vmware.bdd.spectypes;
 
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
+
 
 public enum ServiceType {
    HDFS(EnumSet.of(HadoopRole.HADOOP_NAMENODE_ROLE, HadoopRole.HADOOP_DATANODE)),

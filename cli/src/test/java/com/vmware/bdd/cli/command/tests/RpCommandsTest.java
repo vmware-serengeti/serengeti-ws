@@ -29,12 +29,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 
 import com.vmware.bdd.apitypes.BddErrorMessage;
+import com.vmware.bdd.apitypes.IpConfigInfo;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.cli.commands.CookieCache;
 import com.vmware.bdd.cli.commands.ResourcePoolCommands;
-import com.vmware.bdd.software.mgmt.plugin.model.IpConfigInfo;
-import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo.NetTrafficType;
 
 @ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
 public class RpCommandsTest extends MockRestServer {

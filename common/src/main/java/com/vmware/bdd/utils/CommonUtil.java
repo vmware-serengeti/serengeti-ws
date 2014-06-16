@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.software.mgmt.plugin.model.HadoopRole;
+import com.vmware.bdd.spectypes.HadoopRole;
 
 public class CommonUtil {
 

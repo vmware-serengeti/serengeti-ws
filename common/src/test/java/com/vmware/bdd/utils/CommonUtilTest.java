@@ -27,7 +27,7 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
-import com.vmware.bdd.software.mgmt.plugin.model.HadoopRole;
+import com.vmware.bdd.spectypes.HadoopRole;
 
 public class CommonUtilTest {
 

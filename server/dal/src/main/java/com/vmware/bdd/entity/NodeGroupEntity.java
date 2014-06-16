@@ -37,6 +37,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 
 import com.google.gson.Gson;
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
@@ -44,8 +45,7 @@ import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.StorageRead;
-import com.vmware.bdd.software.mgmt.plugin.model.HadoopRole;
-import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
+import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
 
 /**
