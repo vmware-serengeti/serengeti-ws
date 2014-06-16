@@ -25,7 +25,6 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
-import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
@@ -33,6 +32,7 @@ import com.vmware.bdd.exception.ScaleServiceException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.software.mgmt.plugin.monitor.NodeStatus;
 import com.vmware.bdd.utils.ValidationUtils;
 import com.vmware.bdd.utils.VcVmUtil;
 

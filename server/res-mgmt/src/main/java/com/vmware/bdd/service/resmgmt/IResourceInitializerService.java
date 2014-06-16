@@ -17,7 +17,7 @@ package com.vmware.bdd.service.resmgmt;
 import java.util.List;
 import java.util.Map;
 
-import com.vmware.bdd.apitypes.Datastore.DatastoreType;
+import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
 
 /**
  * @author Jarred Li

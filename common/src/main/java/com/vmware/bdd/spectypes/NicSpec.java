@@ -15,7 +15,7 @@
 package com.vmware.bdd.spectypes;
 
 import com.google.gson.Gson;
-import com.vmware.bdd.apitypes.NetConfigInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo;
 
 import java.util.HashSet;
 import java.util.Set;

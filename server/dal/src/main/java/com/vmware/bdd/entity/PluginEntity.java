@@ -1,8 +1,5 @@
 package com.vmware.bdd.entity;
 
-import com.vmware.bdd.apitypes.PluginAdd;
-import com.vmware.bdd.apitypes.SoftwareMgtProvider;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,8 +7,10 @@ import javax.persistence.Enumerated;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
 import org.apache.log4j.Logger;
+
+import com.vmware.bdd.apitypes.PluginAdd;
+import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
 
 /**
  * Author: Xiaoding Bian
@@ -26,10 +25,6 @@ public class PluginEntity extends EntityBase {
 
    @Column(name = "name", unique = true, nullable = false)
    private String name;
-
-   @Enumerated(EnumType.STRING)
-   @Column(name = "provider", nullable = false)
-   private SoftwareMgtProvider provider;
 
    @Column(name = "host")
    private String host;
@@ -51,9 +46,8 @@ public class PluginEntity extends EntityBase {
    public PluginEntity() {
    }
 
-   public PluginEntity(String name, SoftwareMgtProvider provider, String host, int port, String username, String password, String privateKey) {
+   public PluginEntity(String name, String host, int port, String username, String password, String privateKey) {
       this.name = name;
-      this.provider = provider;
       this.host = host;
       this.port = port;
       this.username = username;
@@ -63,9 +57,8 @@ public class PluginEntity extends EntityBase {
 
    public PluginEntity(PluginAdd pluginAdd) {
       this.name = pluginAdd.getName();
-      this.provider = SoftwareMgtProvider.fromName(pluginAdd.getProvider()); // TODO
       this.host = pluginAdd.getHost();
-      this.port = this.provider.getDefaultPort();
+//      this.port = this.provider.getDefaultPort();
       if (pluginAdd.getPort() != -1) {
          this.port = pluginAdd.getPort();
       }
@@ -80,14 +73,6 @@ public class PluginEntity extends EntityBase {
 
    public void setName(String name) {
       this.name = name;
-   }
-
-   public SoftwareMgtProvider getProvider() {
-      return provider;
-   }
-
-   public void setVendor(SoftwareMgtProvider provider) {
-      this.provider = provider;
    }
 
    public String getHost() {
@@ -133,7 +118,6 @@ public class PluginEntity extends EntityBase {
    public PluginInfo toPluginInfo() {
       PluginInfo pluginInfo = new PluginInfo();
       pluginInfo.setName(this.name);
-      pluginInfo.setProvider(this.provider);
       pluginInfo.setHost(this.host);
       pluginInfo.setPort(this.port);
       pluginInfo.setUsername(this.username);

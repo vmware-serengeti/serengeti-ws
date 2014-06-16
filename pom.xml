@@ -9,6 +9,8 @@
    <name>Serengeti Master project POM</name>
 
    <modules>
+      <module>server/software-mgmt-plugin-common</module>
+      <module>server/software-mgmt-plugin-default</module>
       <module>impala</module>
       <module>lib/vlsi</module>
       <module>server/common</module>
@@ -16,8 +18,6 @@
       <module>common</module>
       <module>thrift/java</module>
       <module>server/res-mgmt</module>
-      <module>server/software-mgmt-plugin-common</module>
-      <module>server/software-mgmt-plugin-default</module>
       <module>server/software-mgmt-plugin-clouderamgr</module>
       <module>server/software-mgmt-plugin-ambari</module>
       <module>server/placement</module>
@@ -417,6 +417,11 @@
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>software-mgmt-plugin-common</artifactId>
+            <version>${serengeti.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>software-mgmt-plugin-default</artifactId>
             <version>${serengeti.version}</version>
          </dependency>
       </dependencies>

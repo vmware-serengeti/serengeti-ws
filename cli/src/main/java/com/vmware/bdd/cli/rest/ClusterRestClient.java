@@ -20,7 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vmware.bdd.apitypes.NetConfigInfo;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -38,6 +37,7 @@ import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
+import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo;
 import com.vmware.bdd.utils.CommonUtil;
 
 @Component

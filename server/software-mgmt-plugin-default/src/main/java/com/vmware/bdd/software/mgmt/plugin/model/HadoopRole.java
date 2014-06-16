@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.spectypes;
+package com.vmware.bdd.software.mgmt.plugin.model;
 
 import java.util.Comparator;
 import java.util.HashSet;

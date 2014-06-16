@@ -1,9 +1,6 @@
 package com.vmware.bdd.dal;
 
-import com.vmware.bdd.apitypes.SoftwareMgtProvider;
 import com.vmware.bdd.entity.PluginEntity;
-
-import java.util.List;
 
 /**
  * Author: Xiaoding Bian
@@ -13,8 +10,6 @@ import java.util.List;
 public interface IPluginDAO {
 
    PluginEntity findByName(String name);
-
-   List<PluginEntity> findByProvider(SoftwareMgtProvider provider);
 
    void insert(PluginEntity pluginEntity);
 }

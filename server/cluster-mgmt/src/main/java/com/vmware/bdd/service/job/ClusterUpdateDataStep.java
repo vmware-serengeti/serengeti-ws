@@ -21,6 +21,7 @@ import java.util.Set;
 
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NicEntity;
+import com.vmware.bdd.software.mgmt.plugin.monitor.NodeStatus;
 import com.vmware.bdd.spectypes.NicSpec;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -30,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.reflect.TypeToken;
 import com.vmware.aurora.composition.DiskSchema.Disk;
-import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.dal.IResourcePoolDAO;
 import com.vmware.bdd.entity.ClusterEntity;

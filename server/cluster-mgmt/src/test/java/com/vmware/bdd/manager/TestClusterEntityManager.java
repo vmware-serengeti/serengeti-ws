@@ -31,7 +31,6 @@ import org.testng.annotations.Test;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
-import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.entity.ClusterEntity;
@@ -39,7 +38,8 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
-import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopRole;
 import com.vmware.bdd.utils.Constants;
 
 @ContextConfiguration(locations = { "classpath:/spring/*-context.xml" })

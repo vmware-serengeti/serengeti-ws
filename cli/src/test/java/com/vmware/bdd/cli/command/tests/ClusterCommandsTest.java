@@ -33,8 +33,6 @@ import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.DistroRead;
-import com.vmware.bdd.apitypes.IpConfigInfo;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
@@ -47,7 +45,9 @@ import com.vmware.bdd.cli.commands.ClusterCommands;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 import com.vmware.bdd.cli.commands.CookieCache;
-import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopRole;
+import com.vmware.bdd.software.mgmt.plugin.model.IpConfigInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo.NetTrafficType;
 
 @Test
 @ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })

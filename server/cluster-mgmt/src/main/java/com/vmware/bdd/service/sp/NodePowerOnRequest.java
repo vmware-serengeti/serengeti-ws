@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.aurora.util.CmsWorker.SimpleRequest;
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.command.CommandUtil;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
@@ -34,6 +33,7 @@ import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
 import com.vmware.bdd.service.job.software.ISoftwareManagementTask;
 import com.vmware.bdd.service.job.software.ManagementOperation;
 import com.vmware.bdd.service.job.software.SoftwareManagementTaskFactory;
+import com.vmware.bdd.software.mgmt.plugin.monitor.NodeStatus;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.SyncHostsUtils;

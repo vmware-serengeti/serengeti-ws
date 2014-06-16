@@ -23,12 +23,12 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.service.ISetPasswordService;
 import com.vmware.bdd.service.job.software.ManagementOperation;
+import com.vmware.bdd.software.mgmt.plugin.monitor.NodeStatus;
 
 public class SetPasswordForNewNodesStep extends TrackableTasklet {
    private ISetPasswordService setPasswordService;

@@ -28,16 +28,16 @@ import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.vmware.bdd.utils.ConfigInfo;
-import com.vmware.bdd.utils.Constants;
-import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
-import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.spectypes.ServiceType;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.exception.ClusterConfigException;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopRole;
+import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
+import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.software.mgmt.plugin.model.ServiceType;
+import com.vmware.bdd.utils.ConfigInfo;
+import com.vmware.bdd.utils.Constants;
 
 public class ClusterCreateTest {
 

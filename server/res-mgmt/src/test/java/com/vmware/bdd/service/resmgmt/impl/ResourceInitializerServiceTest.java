@@ -28,7 +28,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.dal.IDatastoreDAO;
 import com.vmware.bdd.dal.INetworkDAO;
 import com.vmware.bdd.dal.IResourcePoolDAO;
@@ -41,6 +40,7 @@ import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceInitializerService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
+import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
 
 /**
  * @author Jarred Li

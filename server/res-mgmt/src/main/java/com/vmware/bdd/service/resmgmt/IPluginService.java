@@ -1,10 +1,7 @@
 package com.vmware.bdd.service.resmgmt;
 
 import com.vmware.bdd.apitypes.PluginAdd;
-import com.vmware.bdd.apitypes.SoftwareMgtProvider;
 import com.vmware.bdd.entity.PluginEntity;
-
-import java.util.List;
 
 /**
  * Author: Xiaoding Bian
@@ -16,6 +13,4 @@ public interface IPluginService {
    void addPlugin(PluginAdd pluginAdd);
 
    public PluginEntity findPluginByName(String name);
-
-   public List<PluginEntity> findPluginsByProvider(SoftwareMgtProvider provider);
 }

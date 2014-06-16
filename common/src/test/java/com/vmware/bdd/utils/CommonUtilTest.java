@@ -15,9 +15,9 @@
 package com.vmware.bdd.utils;
 
 import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
 import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,9 +25,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.vmware.bdd.spectypes.HadoopRole;
-
 import org.testng.annotations.Test;
+
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopRole;
 
 public class CommonUtilTest {
 

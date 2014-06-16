@@ -17,7 +17,7 @@ package com.vmware.bdd.apitypes;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vmware.bdd.apitypes.Datastore.DatastoreType;
+import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
 
 /**
  * <p>

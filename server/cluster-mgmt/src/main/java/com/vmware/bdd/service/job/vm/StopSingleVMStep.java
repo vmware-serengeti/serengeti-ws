@@ -18,7 +18,6 @@ import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
-import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.job.DefaultStatusUpdater;
@@ -26,6 +25,7 @@ import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.TrackableTasklet;
+import com.vmware.bdd.software.mgmt.plugin.monitor.NodeStatus;
 
 /**
  * @author Jarred Li

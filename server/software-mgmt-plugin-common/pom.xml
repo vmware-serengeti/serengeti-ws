@@ -15,10 +15,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.vmware.bdd</groupId>
-            <artifactId>commons-serengeti</artifactId>
-        </dependency>
-        <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
         </dependency>

@@ -22,15 +22,15 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksType;
-import com.vmware.bdd.spectypes.GroupType;
-import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
+import com.vmware.bdd.software.mgmt.plugin.model.GroupType;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 
@@ -278,16 +278,6 @@ public class NodeGroupCreate {
    }
 
    @JsonIgnore
-   private boolean isWorkerGroup() {
-      List<String> roles = getRoles();
-      if (roles.contains(HadoopRole.HADOOP_DATANODE.toString())
-            || roles.contains(HadoopRole.HADOOP_TASKTRACKER.toString())) {
-         return true;
-      }
-      return false;
-   }
-
-   @JsonIgnore
    public boolean isComputeOnlyGroup() {
       List<String> roles = getRoles();
       if (roles != null
@@ -312,7 +302,7 @@ public class NodeGroupCreate {
       TopologyType topologyType = cluster.getTopologyPolicy();
       if (topologyType != null
             && (topologyType.equals(TopologyType.HVE) || topologyType
-                  .equals(TopologyType.RACK_AS_RACK)) && isWorkerGroup()) {
+                  .equals(TopologyType.RACK_AS_RACK))) {
          if (getPlacementPolicies() == null) {
             setPlacementPolicies(new PlacementPolicy());
          }

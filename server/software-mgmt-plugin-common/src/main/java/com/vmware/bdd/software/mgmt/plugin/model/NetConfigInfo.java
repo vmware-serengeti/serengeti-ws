@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.apitypes;
+package com.vmware.bdd.software.mgmt.plugin.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

@@ -19,7 +19,8 @@ import java.util.Map;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.software.mgmt.plugin.model.IpConfigInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.utils.Constants;
 
 /**

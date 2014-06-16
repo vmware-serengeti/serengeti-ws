@@ -1,16 +1,14 @@
 package com.vmware.bdd.service.resmgmt.impl;
 
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.PluginAdd;
-import com.vmware.bdd.apitypes.SoftwareMgtProvider;
 import com.vmware.bdd.dal.IPluginDAO;
 import com.vmware.bdd.entity.PluginEntity;
 import com.vmware.bdd.service.resmgmt.IPluginService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.apache.log4j.Logger;
-
-import java.util.List;
 
 
 /**
@@ -36,11 +34,6 @@ public class PluginService implements IPluginService{
    @Override
    public PluginEntity findPluginByName(String name) {
       return pluginDAO.findByName(name);
-   }
-
-   @Override
-   public List<PluginEntity> findPluginsByProvider(SoftwareMgtProvider provider) {
-      return pluginDAO.findByProvider(provider);
    }
 
    public IPluginDAO getPluginDAO() {

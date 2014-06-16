@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.Gson;
-import com.vmware.bdd.apitypes.SoftwareMgtProvider;
 import com.vmware.bdd.entity.PluginEntity;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
@@ -116,9 +115,9 @@ public class SoftwareManagementStep extends TrackableTasklet {
 
       ISoftwareManagementTask task = null;
 
-      if (pluginEntity != null && (pluginEntity.getProvider().equals(SoftwareMgtProvider.CLOUDERA_MANAGER)
-            || pluginEntity.getProvider().equals(SoftwareMgtProvider.AMBARI))) {
-
+//      if (pluginEntity != null && (pluginEntity.getProvider().equals(SoftwareMgtProvider.CLOUDERA_MANAGER)
+//            || pluginEntity.getProvider().equals(SoftwareMgtProvider.AMBARI))) {
+         if (pluginEntity != null) {
          ClusterBlueprint clusterBlueprint = lockClusterEntityMgr.getClusterEntityMgr().toClusterBluePrint(clusterName);
          PluginInfo pluginInfo = pluginEntity.toPluginInfo();
 

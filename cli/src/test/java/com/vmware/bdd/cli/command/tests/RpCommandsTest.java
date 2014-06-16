@@ -19,8 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vmware.bdd.apitypes.IpConfigInfo;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import org.testng.annotations.Test;
@@ -35,6 +33,8 @@ import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.cli.commands.CookieCache;
 import com.vmware.bdd.cli.commands.ResourcePoolCommands;
+import com.vmware.bdd.software.mgmt.plugin.model.IpConfigInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo.NetTrafficType;
 
 @ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
 public class RpCommandsTest extends MockRestServer {

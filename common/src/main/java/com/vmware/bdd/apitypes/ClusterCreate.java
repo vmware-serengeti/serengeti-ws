@@ -28,15 +28,12 @@ import java.util.regex.Pattern;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.apitypes.Datastore.DatastoreType;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.exception.ClusterConfigException;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopRole;
+import com.vmware.bdd.software.mgmt.plugin.model.ServiceType;
+import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
+import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.spectypes.HadoopDistroMap;
-import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.spectypes.ServiceType;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
@@ -434,24 +431,25 @@ public class ClusterCreate implements Serializable {
                   failedMsgList.add("Invalid storage type " + storageType
                         + ". " + Constants.STORAGE_TYPE_ALLOWED);
                } else if (storageType.equals(DatastoreType.TEMPFS.toString())) {//tempfs disk type
-                  if (nodeGroupCreate.getRoles().contains(
-                        HadoopRole.HADOOP_TASKTRACKER.toString())) {//compute node
-                     PlacementPolicy placementPolicy =
-                           nodeGroupCreate.getPlacementPolicies();
-                     if (placementPolicy != null) {
-                        List<GroupAssociation> groupAssociations =
-                              placementPolicy.getGroupAssociations();
-                        if (groupAssociations != null) {
-                           GroupAssociationType associationType =
-                                 groupAssociations.get(0).getType();
-                           if (associationType != null
-                                 && associationType == GroupAssociationType.STRICT) {
-                              continue;
-                           }
-                        }
-                     }
-                  }
+//                  if (nodeGroupCreate.getRoles().contains(
+//                        HadoopRole.HADOOP_TASKTRACKER.toString())) {//compute node
+//                     PlacementPolicy placementPolicy =
+//                           nodeGroupCreate.getPlacementPolicies();
+//                     if (placementPolicy != null) {
+//                        List<GroupAssociation> groupAssociations =
+//                              placementPolicy.getGroupAssociations();
+//                        if (groupAssociations != null) {
+//                           GroupAssociationType associationType =
+//                                 groupAssociations.get(0).getType();
+//                           if (associationType != null
+//                                 && associationType == GroupAssociationType.STRICT) {
+//                              continue;
+//                           }
+//                        }
+//                     }
+//                  }
                   failedMsgList.add(Constants.TEMPFS_NOT_ALLOWED);
+                  // TEMPFS is a temporary feature, so comment off it to remove role dependency
                }
             }
          }

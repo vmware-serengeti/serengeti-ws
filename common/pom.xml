@@ -16,6 +16,10 @@
 
    <dependencies>
       <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>software-mgmt-plugin-default</artifactId>
+      </dependency>
+      <dependency>
          <groupId>com.google.code.gson</groupId>
          <artifactId>gson</artifactId>
       </dependency>

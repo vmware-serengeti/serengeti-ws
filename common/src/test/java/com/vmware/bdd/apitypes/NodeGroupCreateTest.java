@@ -25,7 +25,7 @@ import org.testng.annotations.Test;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
-import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopRole;
 
 public class NodeGroupCreateTest {
 

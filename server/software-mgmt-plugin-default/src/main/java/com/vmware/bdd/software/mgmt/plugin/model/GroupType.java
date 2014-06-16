@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.spectypes;
+package com.vmware.bdd.software.mgmt.plugin.model;
 
 
 import java.util.EnumSet;
 
-import com.vmware.bdd.apitypes.Datastore.DatastoreType;
+import com.vmware.bdd.software.mgmt.plugin.model.Datastore.DatastoreType;
 
 public enum GroupType {
    ZOOKEEPER_GROUP("zookeeper"),

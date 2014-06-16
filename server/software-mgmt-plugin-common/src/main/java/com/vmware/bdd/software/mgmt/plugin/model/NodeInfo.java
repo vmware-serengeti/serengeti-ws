@@ -5,8 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.annotations.Expose;
-import com.vmware.bdd.apitypes.IpConfigInfo;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.software.mgmt.plugin.model.NetConfigInfo.NetTrafficType;
 
 /**
  * Node information, for instance, node ip, roles running on this node, data disks, etc.

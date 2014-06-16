@@ -1,9 +1,8 @@
 package com.vmware.bdd.software.mgmt.plugin.model;
 
-import com.google.gson.annotations.Expose;
-import com.vmware.bdd.apitypes.SoftwareMgtProvider;
-
 import java.io.Serializable;
+
+import com.google.gson.annotations.Expose;
 
 /**
  * Author: Xiaoding Bian
@@ -16,9 +15,6 @@ public class PluginInfo implements Serializable{
 
    @Expose
    private String name;
-
-   @Expose
-   private SoftwareMgtProvider provider;
 
    @Expose
    private String host;
@@ -41,14 +37,6 @@ public class PluginInfo implements Serializable{
 
    public void setName(String name) {
       this.name = name;
-   }
-
-   public SoftwareMgtProvider getProvider() {
-      return provider;
-   }
-
-   public void setProvider(SoftwareMgtProvider provider) {
-      this.provider = provider;
    }
 
    public String getHost() {
