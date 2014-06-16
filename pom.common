@@ -9,6 +9,8 @@
    <name>Serengeti Master project POM</name>
 
    <modules>
+      <module>server/software-mgmt-plugin-common</module>
+      <module>server/software-mgmt-plugin-default</module>
       <module>server/common</module>
       <module>common</module>
    </modules>
