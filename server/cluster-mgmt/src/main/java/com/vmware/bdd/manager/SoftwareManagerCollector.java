@@ -2,7 +2,6 @@ package com.vmware.bdd.manager;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;

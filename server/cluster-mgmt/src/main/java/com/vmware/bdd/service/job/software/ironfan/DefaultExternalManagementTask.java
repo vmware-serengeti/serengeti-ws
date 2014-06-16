@@ -1,18 +1,18 @@
 package com.vmware.bdd.service.job.software.ironfan;
 
-import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
-import com.vmware.bdd.service.job.StatusUpdater;
-import com.vmware.bdd.service.job.software.ISoftwareManagementTask;
-
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
+import com.vmware.bdd.manager.SoftwareManagerCollector;
+import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
+import com.vmware.bdd.service.job.StatusUpdater;
+import com.vmware.bdd.service.job.software.ISoftwareManagementTask;
 import com.vmware.bdd.service.job.software.ManagementOperation;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
-import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManagerFactory;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
-import org.apache.log4j.Logger;
 
 /**
  * Author: Xiaoding Bian
@@ -28,23 +28,26 @@ public class DefaultExternalManagementTask implements ISoftwareManagementTask{
    private PluginInfo pluginInfo;
    private StatusUpdater statusUpdater;
    private ILockedClusterEntityManager lockedClusterEntityManager;
+   private SoftwareManagerCollector softwareManagerCollector;
 
    public DefaultExternalManagementTask(String targetName, ManagementOperation managementOperation,
          ClusterBlueprint clusterBlueprint, PluginInfo pluginInfo, StatusUpdater statusUpdater,
-         ILockedClusterEntityManager lockedClusterEntityManager) {
+         ILockedClusterEntityManager lockedClusterEntityManager, SoftwareManagerCollector softwareManagerCollector) {
       this.targetName = targetName;
       this.managementOperation = managementOperation;
       this.clusterBlueprint = clusterBlueprint;
       this.pluginInfo = pluginInfo;
       this.statusUpdater = statusUpdater;
       this.lockedClusterEntityManager = lockedClusterEntityManager;
+      this.softwareManagerCollector = softwareManagerCollector;
    }
 
    @Override
    public Map<String, Object> call() throws Exception {
 
       Map<String, Object> result = new HashMap<String, Object>();
-      SoftwareManager softwareManager = SoftwareManagerFactory.getSoftwareManager(pluginInfo);
+      SoftwareManager softwareManager =
+            softwareManagerCollector.getSoftwareManager(pluginInfo.getName());
 
       // TODO: start software operation monitor
 

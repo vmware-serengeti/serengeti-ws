@@ -1,5 +1,20 @@
 package com.vmware.bdd.service.impl;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.apache.commons.lang.WordUtils;
+import org.apache.log4j.Logger;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+
 import com.cloudera.api.ApiRootResource;
 import com.cloudera.api.ClouderaManagerClientBuilder;
 import com.cloudera.api.DataView;
@@ -28,6 +43,7 @@ import com.cloudera.api.v5.RootResourceV5;
 import com.cloudera.api.v6.RootResourceV6;
 import com.cloudera.api.v6.ServicesResourceV6;
 import com.google.common.collect.ImmutableMap;
+import com.vmware.bdd.exception.CmException;
 import com.vmware.bdd.model.CmClusterDef;
 import com.vmware.bdd.model.CmMgmtServiceType;
 import com.vmware.bdd.model.CmNodeDef;
@@ -35,29 +51,13 @@ import com.vmware.bdd.model.CmParcelStage;
 import com.vmware.bdd.model.CmRoleDef;
 import com.vmware.bdd.model.CmServiceDef;
 import com.vmware.bdd.model.CmServiceRoleType;
-import com.vmware.bdd.exception.CmException;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
-import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager.HealthStatus;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.utils.Constants;
-import org.apache.commons.lang.WordUtils;
-import org.apache.log4j.Logger;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Author: Xiaoding Bian
@@ -119,6 +119,17 @@ public class ClouderaManagerImpl implements SoftwareManager {
       this.apiResourceRootV4 = this.versionApi >= 4 ? apiRootResource.getRootV4() : null;
       this.apiResourceRootV5 = this.versionApi >= 5 ? apiRootResource.getRootV5() : null;
       this.apiResourceRootV6 = this.versionApi >= 6 ? apiRootResource.getRootV6() : null;
+   }
+
+   public ClouderaManagerImpl(String cmServerHost, int port, String user,
+         String password, String certificate) throws CmException {
+      ApiRootResource apiRootResource = new ClouderaManagerClientBuilder().withHost(cmServerHost)
+                  .withPort(port).withUsernamePassword(user, password).build();
+      this.apiResourceRootV3 = apiRootResource.getRootV3();
+      this.apiResourceRootV4 = this.versionApi >= 4 ? apiRootResource.getRootV4() : null;
+      this.apiResourceRootV5 = this.versionApi >= 5 ? apiRootResource.getRootV5() : null;
+      this.apiResourceRootV6 = this.versionApi >= 6 ? apiRootResource.getRootV6() : null;
+      
    }
 
    @Override

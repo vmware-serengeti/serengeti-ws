@@ -80,12 +80,55 @@ public class PluginInfo implements Serializable{
    }
 
    @Override
-   public boolean equals(Object o) {
-      return false;
+   public boolean equals(Object obj) {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      PluginInfo other = (PluginInfo) obj;
+      if (host == null) {
+         if (other.host != null)
+            return false;
+      } else if (!host.equals(other.host))
+         return false;
+      if (name == null) {
+         if (other.name != null)
+            return false;
+      } else if (!name.equals(other.name))
+         return false;
+      if (password == null) {
+         if (other.password != null)
+            return false;
+      } else if (!password.equals(other.password))
+         return false;
+      if (port != other.port)
+         return false;
+      if (privateKey == null) {
+         if (other.privateKey != null)
+            return false;
+      } else if (!privateKey.equals(other.privateKey))
+         return false;
+      if (username == null) {
+         if (other.username != null)
+            return false;
+      } else if (!username.equals(other.username))
+         return false;
+      return true;
    }
 
    @Override
    public int hashCode() {
-      return 0;
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((host == null) ? 0 : host.hashCode());
+      result = prime * result + ((name == null) ? 0 : name.hashCode());
+      result = prime * result + ((password == null) ? 0 : password.hashCode());
+      result = prime * result + port;
+      result =
+            prime * result + ((privateKey == null) ? 0 : privateKey.hashCode());
+      result = prime * result + ((username == null) ? 0 : username.hashCode());
+      return result;
    }
 }
