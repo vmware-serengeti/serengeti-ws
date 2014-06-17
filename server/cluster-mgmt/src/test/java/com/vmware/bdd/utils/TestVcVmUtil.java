@@ -23,8 +23,6 @@ import java.util.concurrent.Callable;
 import com.vmware.aurora.composition.DiskSchema;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.service.MockVcVmUtil;
-import mockit.Mock;
-import mockit.MockUp;
 import mockit.Mockit;
 
 import org.mockito.Mockito;
@@ -149,7 +147,7 @@ public class TestVcVmUtil {
             "Should get root rp, but got " + rp.getName());
    }
 
-   @Test
+   @Test(enabled = false)
    public void testRunSPOnSingleVMNoVM() {
       NodeEntity node = new NodeEntity();
       Callable<Void> callable = getCallable();

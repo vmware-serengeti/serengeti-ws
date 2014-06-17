@@ -42,7 +42,7 @@ public class TestCmProviderServiceImpl {
 
    @Test(groups = { "TestCmProviderServiceImpl" })
    public void testInitializeCluster() throws Exception {
-      String content = SerialUtils.dataFromFile("/home/balfox/github/serengeti-ws/server/software-mgmt/src/test/resources/default_cm_cluster.json");
+      String content = SerialUtils.dataFromFile("src/test/resources/default_cm_cluster.json");
       //String content = SerialUtils.dataFromFile("/home/balfox/github/serengeti-ws/server/software-mgmt/src/test/resources/test.json");
       CmClusterDef cmClusterDef = SerialUtils.getObjectByJsonString(CmClusterDef.class, content);
       System.out.println((new Gson()).toJson(cmClusterDef));

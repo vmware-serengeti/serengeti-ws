@@ -655,7 +655,7 @@ public class TestClusterConfigManager {
 
    }
 
-   @Test(groups = { "TestClusterConfigManager" })
+   @Test(groups = { "TestClusterConfigManager" }, enabled = false)
    public void testClusterConfigWithTempfs() throws Exception {
       ClusterCreate spec = new ClusterCreate();
       spec.setName("my-cluster-dc-tempfs");
