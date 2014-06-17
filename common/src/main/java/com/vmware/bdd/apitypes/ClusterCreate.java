@@ -49,8 +49,8 @@ public class ClusterCreate implements Serializable {
    @Expose
    private String name;
    @Expose
-   @SerializedName("plugin")
-   private String plugin;
+   @SerializedName("appManager")
+   private String appManager;
    private ClusterType type;
    private String externalHDFS;
    @Expose
@@ -130,7 +130,7 @@ public class ClusterCreate implements Serializable {
       this.deployPolicy = cluster.deployPolicy;
       this.distro = cluster.distro;
       this.name = cluster.name;
-      this.plugin = cluster.plugin;
+      this.appManager = cluster.appManager;
       this.type = cluster.type;
       this.distroVendor = cluster.distroVendor;
       this.distroVersion = cluster.distroVersion;
@@ -166,14 +166,14 @@ public class ClusterCreate implements Serializable {
 
    public void setName(String name) {
       this.name = name;
+   }   
+
+   public String getAppManager() {
+      return appManager;
    }
 
-   public String getPlugin() {
-      return plugin;
-   }
-
-   public void setPlugin(String plugin) {
-      this.plugin = plugin;
+   public void setAppManager(String appManager) {
+      this.appManager = appManager;
    }
 
    public ClusterType getType() {

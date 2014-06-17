@@ -76,6 +76,9 @@ public class ClusterCommands implements CommandMarker {
    @Autowired
    private ClusterRestClient restClient;
 
+//   @Autowired
+//   private AppManagerClient appManagerClient;
+
    @Autowired
    private Configuration hadoopConfiguration;
 
@@ -93,7 +96,7 @@ public class ClusterCommands implements CommandMarker {
    @CliCommand(value = "cluster create", help = "Create a hadoop cluster")
    public void createCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
-         @CliOption(key = { "plugin" }, mandatory = false, help = "The plugin name") final String plugin,
+         @CliOption(key = { "appManager" }, mandatory = false, help = "The application manager name") final String appManager,
          @CliOption(key = { "type" }, mandatory = false, help = "The cluster type is Hadoop or HBase") final String type,
          @CliOption(key = { "distro" }, mandatory = false, help = "A hadoop distro name") final String distro,
          @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath,
@@ -137,7 +140,19 @@ public class ClusterCommands implements CommandMarker {
       ClusterCreate clusterCreate = new ClusterCreate();
       clusterCreate.setName(name);
 
-      clusterCreate.setPlugin(plugin); // TODO
+      /*if (CommandsUtils.isBlank(appManager)) {
+         appManager = appManagerClient.getNamebyType("Ironfan")[0];
+      } else {
+         ApplicationManager applicationManager = appManagerClient.get(appManager);
+         if (applicationManager == null) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  name, Constants.OUTPUT_OP_CREATE,
+                  Constants.OUTPUT_OP_RESULT_FAIL, appManager + " cannot be found in the list of application manager list.");
+            return;
+         }
+      }*/
+      
+      clusterCreate.setAppManager(appManager);
 
       if (setClusterPassword) {
          String password = getPassword();

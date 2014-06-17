@@ -182,6 +182,14 @@ public class RestResource {
       if (!CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
+      /* if (!CommonUtil.isBlank(createSpec.getAppManager())) {
+         createSpec.setAppManager(appManagerService.getNameByType("Ironfan")[0]);
+      } else {
+         ApplicationManager applicationManager = appManagerService.findPluginByName(createSpec.getAppManager());
+         if (applicationManager == null) {
+            throw BddException.NOT_FOUND("application manager", createSpec.getAppManager());
+         }
+      } */
       long jobExecutionId = clusterMgr.createCluster(createSpec);
       redirectRequest(jobExecutionId, request, response);
    }
