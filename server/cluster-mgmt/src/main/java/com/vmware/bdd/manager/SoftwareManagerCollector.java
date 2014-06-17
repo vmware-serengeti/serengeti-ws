@@ -23,9 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vmware.aurora.global.Configuration;
-import com.vmware.bdd.apitypes.PluginAdd;
+import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
-import com.vmware.bdd.service.resmgmt.IPluginService;
+import com.vmware.bdd.service.resmgmt.IAppManagerService;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManagerFactory;
 import com.vmware.bdd.utils.CommonUtil;
@@ -37,7 +37,7 @@ public class SoftwareManagerCollector {
          .getLogger(SoftwareManagerCollector.class);
 
    @Autowired
-   private IPluginService pluginService;
+   private IAppManagerService pluginService;
 
    private Map<String, SoftwareManager> cache =
          new HashMap<String, SoftwareManager>();
@@ -50,9 +50,9 @@ public class SoftwareManagerCollector {
     *
     * @param pluginAdd
     */
-   public synchronized void createSoftwareManager(PluginAdd pluginAdd) {
+   public synchronized void createSoftwareManager(AppManagerAdd pluginAdd) {
 
-      if (pluginService.findPluginByName(configurationPrefix + pluginAdd.getName()) != null) {
+      if (pluginService.findAppManagerByName(configurationPrefix + pluginAdd.getName()) != null) {
          logger.error("Name " + pluginAdd.getName() + " already exists.");
          throw SoftwareManagerCollectorException.DUPLICATE_NAME(pluginAdd
                .getName());
@@ -103,7 +103,7 @@ public class SoftwareManagerCollector {
       }
 
       // add to meta-db through PluginService
-      pluginService.addPlugin(pluginAdd);
+      pluginService.addAppManager(pluginAdd);
       cache.put(pluginAdd.getName(), softwareManager);
    }
 

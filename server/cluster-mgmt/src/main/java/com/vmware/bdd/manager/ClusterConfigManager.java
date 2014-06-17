@@ -67,7 +67,7 @@ import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
-import com.vmware.bdd.service.resmgmt.IPluginService;
+import com.vmware.bdd.service.resmgmt.IAppManagerService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
 import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
 import com.vmware.bdd.spectypes.GroupType;
@@ -89,7 +89,7 @@ public class ClusterConfigManager {
    private DistroManager distroMgr;
    private RackInfoManager rackInfoMgr;
    private IDatastoreService datastoreMgr;
-   private IPluginService pluginService;
+   private IAppManagerService pluginService;
    private IClusterEntityManager clusterEntityMgr;
    private IClusteringService clusteringService;
 
@@ -146,12 +146,12 @@ public class ClusterConfigManager {
       this.networkMgr = networkMgr;
    }
 
-   public IPluginService getPluginService() {
+   public IAppManagerService getPluginService() {
       return pluginService;
    }
 
    @Autowired
-   public void setPluginService(IPluginService pluginService) {
+   public void setPluginService(IAppManagerService pluginService) {
       this.pluginService = pluginService;
    }
 
@@ -221,9 +221,6 @@ public class ClusterConfigManager {
          logger.debug("begin to add cluster config for " + name);
          Gson gson = new Gson();
          ClusterEntity clusterEntity = new ClusterEntity(name);
-         if (cluster.getAppManager() != null) {
-            clusterEntity.setPluginEntity(pluginService.findPluginByName(cluster.getAppManager())); // TODO
-         }
          clusterEntity.setDistro(cluster.getDistro());
          clusterEntity.setDistroVendor(cluster.getDistroVendor());
          clusterEntity.setDistroVersion(cluster.getDistroVersion());
@@ -674,7 +671,7 @@ public class ClusterConfigManager {
       convertStorage(group, groupEntity, roles);
       roles.addAll(group.getRoles());
 
-      // We will respect the original orders as users input through LinkedHashSet for group including 
+      // We will respect the original orders as users input through LinkedHashSet for group including
       // customized roles, because chef server has strict role orders in some cases.
       if (enumRoles.contains(HadoopRole.CUSTOMIZED_ROLE)) {
          groupEntity.setRoles(gson.toJson(roles));

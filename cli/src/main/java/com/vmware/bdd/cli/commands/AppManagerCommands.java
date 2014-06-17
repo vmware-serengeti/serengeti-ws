@@ -1,8 +1,22 @@
+/***************************************************************************
+ * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
+
 package com.vmware.bdd.cli.commands;
 
-import com.vmware.bdd.apitypes.PluginAdd;
-import com.vmware.bdd.cli.rest.CliRestException;
-import com.vmware.bdd.cli.rest.PluginRestClient;
+import com.vmware.bdd.apitypes.AppManagerAdd;
+import com.vmware.bdd.cli.rest.AppManagerRestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -10,19 +24,16 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 /**
  * Author: Xiaoding Bian
  * Date: 6/4/14
  * Time: 5:18 PM
  */
 @Component
-public class PluginCommands implements CommandMarker {
+public class AppManagerCommands implements CommandMarker {
 
    @Autowired
-   private PluginRestClient pluginRestClient;
+   private AppManagerRestClient pluginRestClient;
 
    @CliAvailabilityIndicator({ "plugin help" })
    public boolean isCommandAvailable() {
@@ -41,7 +52,7 @@ public class PluginCommands implements CommandMarker {
 
       // rest invocation
       try {
-         PluginAdd pluginAdd = new PluginAdd();
+         AppManagerAdd pluginAdd = new AppManagerAdd();
          pluginAdd.setName(name);
          pluginAdd.setProvider(provider);
          pluginAdd.setHost(host);

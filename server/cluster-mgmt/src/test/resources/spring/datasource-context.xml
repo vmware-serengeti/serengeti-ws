@@ -41,7 +41,7 @@
                 <value>com.vmware.bdd.entity.RackEntity</value>
                 <value>com.vmware.bdd.entity.PhysicalHostEntity</value>
                 <value>com.vmware.bdd.entity.ServerInfoEntity</value>
-                <value>com.vmware.bdd.entity.PluginEntity</value>
+                <value>com.vmware.bdd.entity.AppManagerEntity</value>
             </list>
         </property>
 	</bean>

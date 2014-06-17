@@ -21,10 +21,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.Gson;
-import com.vmware.bdd.entity.PluginEntity;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
-import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -40,6 +38,7 @@ import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.TrackableTasklet;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.SyncHostsUtils;
 
 public class SoftwareManagementStep extends TrackableTasklet {
@@ -110,19 +109,21 @@ public class SoftwareManagementStep extends TrackableTasklet {
             new DefaultStatusUpdater(jobExecutionStatusHolder,
                   getJobExecutionId(chunkContext));
 
-
-      PluginEntity pluginEntity = lockClusterEntityMgr.getClusterEntityMgr().findByName(clusterName).getPluginEntity();
+      String appManager = lockClusterEntityMgr.getClusterEntityMgr().findByName(clusterName).getAppManager();
 
       ISoftwareManagementTask task = null;
 
 //      if (pluginEntity != null && (pluginEntity.getProvider().equals(SoftwareMgtProvider.CLOUDERA_MANAGER)
 //            || pluginEntity.getProvider().equals(SoftwareMgtProvider.AMBARI))) {
-         if (pluginEntity != null) {
-         ClusterBlueprint clusterBlueprint = lockClusterEntityMgr.getClusterEntityMgr().toClusterBluePrint(clusterName);
-         PluginInfo pluginInfo = pluginEntity.toPluginInfo();
+      if (!CommonUtil.isBlank(appManager)) {
+         ClusterBlueprint clusterBlueprint =
+               lockClusterEntityMgr.getClusterEntityMgr().toClusterBluePrint(
+                     clusterName);
 
-         task = SoftwareManagementTaskFactory.createExternalMgtTask(targetName, managementOperation, clusterBlueprint,
-               pluginInfo, statusUpdater, lockClusterEntityMgr);
+         task =
+               SoftwareManagementTaskFactory.createExternalMgtTask(targetName,
+                     managementOperation, clusterBlueprint, appManager,
+                     statusUpdater, lockClusterEntityMgr);
 
          logger.info((new Gson()).toJson(clusterBlueprint));
       } else {

@@ -1,15 +1,28 @@
+/***************************************************************************
+ * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
+
 package com.vmware.bdd.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.apache.log4j.Logger;
 
-import com.vmware.bdd.apitypes.PluginAdd;
+import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
 
 /**
@@ -21,7 +34,7 @@ import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
 @Entity
 @SequenceGenerator(name = "IdSequence", sequenceName = "plugin_seq", allocationSize = 1)
 @Table(name = "plugin")
-public class PluginEntity extends EntityBase {
+public class AppManagerEntity extends EntityBase {
 
    @Column(name = "name", unique = true, nullable = false)
    private String name;
@@ -43,10 +56,10 @@ public class PluginEntity extends EntityBase {
 
    static final Logger logger = Logger.getLogger(ClusterEntity.class);
 
-   public PluginEntity() {
+   public AppManagerEntity() {
    }
 
-   public PluginEntity(String name, String host, int port, String username, String password, String privateKey) {
+   public AppManagerEntity(String name, String host, int port, String username, String password, String privateKey) {
       this.name = name;
       this.host = host;
       this.port = port;
@@ -55,16 +68,16 @@ public class PluginEntity extends EntityBase {
       this.privateKey = privateKey;
    }
 
-   public PluginEntity(PluginAdd pluginAdd) {
-      this.name = pluginAdd.getName();
-      this.host = pluginAdd.getHost();
+   public AppManagerEntity(AppManagerAdd appManagerAdd) {
+      this.name = appManagerAdd.getName();
+      this.host = appManagerAdd.getHost();
 //      this.port = this.provider.getDefaultPort();
-      if (pluginAdd.getPort() != -1) {
-         this.port = pluginAdd.getPort();
+      if (appManagerAdd.getPort() != -1) {
+         this.port = appManagerAdd.getPort();
       }
-      this.username = pluginAdd.getUsername();
-      this.password = pluginAdd.getPassword();
-      this.privateKey = pluginAdd.getPrivateKey();
+      this.username = appManagerAdd.getUsername();
+      this.password = appManagerAdd.getPassword();
+      this.privateKey = appManagerAdd.getPrivateKey();
    }
 
    public String getName() {

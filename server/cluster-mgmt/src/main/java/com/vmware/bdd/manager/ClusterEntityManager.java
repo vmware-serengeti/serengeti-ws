@@ -46,7 +46,6 @@ import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NicEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
-import com.vmware.bdd.entity.PluginEntity;
 import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
@@ -54,7 +53,6 @@ import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
-import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
 import com.vmware.bdd.software.mgmt.thrift.GroupData;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
@@ -457,17 +455,6 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       if (clusterEntity.getHadoopConfig() != null) {
          Map<String, Object> clusterConfigs = gson.fromJson(clusterEntity.getHadoopConfig(), Map.class);
          blueprint.setConfiguration(clusterConfigs);
-      }
-
-      // set Plugin
-      if (clusterEntity.getPluginEntity() != null) {
-         PluginEntity pluginEntity = clusterEntity.getPluginEntity();
-         PluginInfo pluginInfo = new PluginInfo();
-         pluginInfo.setName(pluginEntity.getName());
-         pluginInfo.setHost(pluginEntity.getHost());
-         pluginInfo.setPort(pluginEntity.getPort());
-         pluginInfo.setPassword(pluginEntity.getPassword());
-         pluginInfo.setPrivateKey(pluginEntity.getPrivateKey());
       }
 
       // set HadoopStack

@@ -19,8 +19,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.vmware.bdd.apitypes.PluginAdd;
-import com.vmware.bdd.service.resmgmt.IPluginService;
+import com.vmware.bdd.apitypes.AppManagerAdd;
+import com.vmware.bdd.service.resmgmt.IAppManagerService;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -91,7 +91,7 @@ public class RestResource {
    @Autowired
    private IDatastoreService datastoreSvc;
    @Autowired
-   private IPluginService pluginService;
+   private IAppManagerService pluginService;
    @Autowired
    private ScaleManager scaleMgr;
    @Autowired
@@ -784,19 +784,19 @@ public class RestResource {
       networkSvc.increaseIPs(networkName, network.getIpBlocks());
    }
 
-   @RequestMapping(value = "/plugins", method = RequestMethod.POST, consumes = "application/json")
+   @RequestMapping(value = "/appmanagers", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
-   public void addPlugin(@RequestBody final PluginAdd pluginAdd) {
+   public void addPlugin(@RequestBody final AppManagerAdd appManagerAdd) {
       //does it?
       verifyInitialized();
-      if (pluginAdd == null) {
-         throw BddException.INVALID_PARAMETER("pluginAdd", null);
+      if (appManagerAdd == null) {
+         throw BddException.INVALID_PARAMETER("appManagerAdd", null);
       }
-      if (CommonUtil.isBlank(pluginAdd.getName())) {
-         throw BddException.INVALID_PARAMETER("Plugin instance name",
-               pluginAdd.getName());
+      if (CommonUtil.isBlank(appManagerAdd.getName())) {
+         throw BddException.INVALID_PARAMETER("App Manager instance name",
+               appManagerAdd.getName());
       }
-      softwareManagerCollector.createSoftwareManager(pluginAdd);
+      softwareManagerCollector.createSoftwareManager(appManagerAdd);
       //pluginService.addPlugin(pluginAdd);
    }
 

@@ -19,7 +19,6 @@ import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.software.ironfan.IronfanSoftwareManagementTask;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
-import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
 import com.vmware.bdd.software.mgmt.thrift.ClusterAction;
 import com.vmware.bdd.software.mgmt.thrift.ClusterOperation;
 
@@ -27,7 +26,7 @@ import com.vmware.bdd.software.mgmt.thrift.ClusterOperation;
  * @author Jarred Li
  * @version 0.8
  * @since 0.8
- * 
+ *
  */
 public class SoftwareManagementTaskFactory {
 
@@ -72,7 +71,7 @@ public class SoftwareManagementTaskFactory {
 
    public static ISoftwareManagementTask createExternalMgtTask(String targetName,
          ManagementOperation managementOperation, ClusterBlueprint clusterBlueprint,
-         PluginInfo pluginInfo, StatusUpdater statusUpdater,
+         String appManager, StatusUpdater statusUpdater,
          ILockedClusterEntityManager lockedClusterEntityManager) {
       return null;
    }

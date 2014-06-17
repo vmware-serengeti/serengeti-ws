@@ -31,8 +31,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -53,7 +51,7 @@ import com.vmware.bdd.utils.ConfigInfo;
 
 /**
  * Cluster Entity
- * 
+ *
  */
 @Entity
 @SequenceGenerator(name = "IdSequence", sequenceName = "cluster_seq", allocationSize = 1)
@@ -63,9 +61,8 @@ public class ClusterEntity extends EntityBase {
    @Column(name = "name", unique = true, nullable = false)
    private String name;
 
-   @ManyToOne
-   @JoinColumn(name = "plugin_id")
-   private PluginEntity pluginEntity;
+   @Column(name = "appmanager")
+   private String appmanager;
 
    @Enumerated(EnumType.STRING)
    @Column(name = "status", nullable = false)
@@ -172,12 +169,12 @@ public class ClusterEntity extends EntityBase {
       this.name = name;
    }
 
-   public PluginEntity getPluginEntity() {
-      return pluginEntity;
+   public String getAppManager() {
+      return appmanager;
    }
 
-   public void setPluginEntity(PluginEntity pluginEntity) {
-      this.pluginEntity = pluginEntity;
+   public void setPluginEntity(String appmanager) {
+      this.appmanager = appmanager;
    }
 
    public TopologyType getTopologyPolicy() {

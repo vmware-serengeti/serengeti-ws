@@ -68,9 +68,9 @@ create table ip_block (
    foreign key(network_id) references network(id) ON DELETE CASCADE
 );
 
-create sequence plugin_seq;
-create table plugin (
-   id           bigint       not null unique DEFAULT nextval('plugin_seq'::regclass),
+create sequence appmanager_seq;
+create table appmanager (
+   id           bigint       not null unique DEFAULT nextval('appmanager_seq'::regclass),
    name         varchar(255) not null unique,
    provider     varchar(255) not null,
    host         varchar(255) not null,
@@ -106,7 +106,7 @@ create table cluster (
    configuration       text,
    version             varchar(255),
    last_status         varchar(255),
-   appManager          varchar(255),
+   appmanager          varchar(255),
    primary key (id)
 );
 
