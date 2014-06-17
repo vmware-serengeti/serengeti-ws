@@ -31,9 +31,10 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public void echo() {
+   public boolean echo() {
       // TODO Auto-generated method stub
-      
+      return true;
+
    }
 
    @Override

@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.vmware.bdd.apitypes.PluginAdd;
 import com.vmware.bdd.service.resmgmt.IPluginService;
+
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
@@ -62,6 +63,7 @@ import com.vmware.bdd.manager.DistroManager;
 import com.vmware.bdd.manager.JobManager;
 import com.vmware.bdd.manager.RackInfoManager;
 import com.vmware.bdd.manager.ScaleManager;
+import com.vmware.bdd.manager.SoftwareManagerCollector;
 import com.vmware.bdd.service.impl.ClusteringService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
@@ -92,6 +94,8 @@ public class RestResource {
    private IPluginService pluginService;
    @Autowired
    private ScaleManager scaleMgr;
+   @Autowired
+   private SoftwareManagerCollector softwareManagerCollector;
 
    private static final String ERR_CODE_FILE = "serengeti-errcode.properties";
    private static final int DEFAULT_HTTP_ERROR_CODE = 500;
@@ -396,7 +400,7 @@ public class RestResource {
    }
 
    /**
-    * Change elasticity mode, IO priority, and maximum or minimum number of powered on compute nodes under auto mode 
+    * Change elasticity mode, IO priority, and maximum or minimum number of powered on compute nodes under auto mode
     * @param clusterName
     * @param requestBody
     * @param request
@@ -439,9 +443,9 @@ public class RestResource {
    }
 
    /**
-    * Replace some failed disks with new disks 
+    * Replace some failed disks with new disks
     * @param clusterName
-    * @param fixDiskSpec 
+    * @param fixDiskSpec
     * @param request
     * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
     */
@@ -510,7 +514,7 @@ public class RestResource {
    // cloud provider API
    /**
     * Add a VC resourcepool into BDE
-    * @param rpSpec 
+    * @param rpSpec
     */
    @RequestMapping(value = "/resourcepools", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
@@ -775,7 +779,17 @@ public class RestResource {
    @RequestMapping(value = "/plugins", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
    public void addPlugin(@RequestBody final PluginAdd pluginAdd) {
-      pluginService.addPlugin(pluginAdd);
+      //does it?
+      verifyInitialized();
+      if (pluginAdd == null) {
+         throw BddException.INVALID_PARAMETER("pluginAdd", null);
+      }
+      if (CommonUtil.isBlank(pluginAdd.getName())) {
+         throw BddException.INVALID_PARAMETER("Plugin instance name",
+               pluginAdd.getName());
+      }
+      softwareManagerCollector.createSoftwareManager(pluginAdd);
+      //pluginService.addPlugin(pluginAdd);
    }
 
    /**
@@ -808,7 +822,7 @@ public class RestResource {
 
    /**
     * Get available distributions information
-    * @return A list of distribution information 
+    * @return A list of distribution information
     */
    @RequestMapping(value = "/distros", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody

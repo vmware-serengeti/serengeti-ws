@@ -13,12 +13,12 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
  * The software manager will be listed in BDE client with name as the UID. User
  * will pick up one software manager during cluster operation. And then all
  * software management requests will be sent to this instance.
- * 
+ *
  * Annotation @BeforeClusterConfiguration should be used before cluster
  * creation, to allow infrastructure management finish all tasks
- * 
+ *
  * @author line
- * 
+ *
  */
 public interface SoftwareManager {
    public enum HealthStatus {
@@ -28,14 +28,14 @@ public interface SoftwareManager {
    }
    /**
     * Plugin name, which should be unique in BDE scope
-    * 
+    *
     * @return
     */
    String getName();
 
    /**
     * Plugin description, which will be shown through BDE CLI/UI.
-    * 
+    *
     * @return
     */
    String getDescription();
@@ -44,21 +44,21 @@ public interface SoftwareManager {
     * @return the plugin type
     */
    String getType();
-   void echo();
+   boolean echo();
 
    HealthStatus getStatus();
 
    /**
     * The supported role names, for instance NameNode, Secondary NameNode, etc.
     * The role name will be used to validate user input in cluster spec
-    * 
+    *
     * @return
     */
    Set<String> getSupportedRoles();
 
    /**
     * Supported Hadoop stack, for instance "CDH 5", "HDP 2.1.1"
-    * 
+    *
     * @return
     */
    List<HadoopStack> getSupportedStacks();
@@ -67,7 +67,7 @@ public interface SoftwareManager {
     * Supported configuration for specified stack. The returned value can be used to config created
     * cluster through custom cluster specification
     * @param stack, for instance "CDH 5", "HDP 2.1.1"
-    * @return a Json string, with correct configuration format. 
+    * @return a Json string, with correct configuration format.
     * This format of configuration string, will be used to configure cluster.
     * For each single configuration, should provide property name, default value
     * For BDE software management tool, here is the sample configuration format
@@ -84,12 +84,12 @@ public interface SoftwareManager {
     *                       // check for all settings at http://hadoop.apache.org/docs/stable/hdfs-default.html
     *             ]
     *   }
-    * 
+    *
     */
    String getSupportedConfigs(HadoopStack stack);
 
    /**
-    * 
+    *
     */
    boolean validateBlueprint(ClusterBlueprint blueprint)
          throws SoftwareManagementPluginException;
@@ -99,7 +99,7 @@ public interface SoftwareManager {
     * ClusterOperationReports to notify operation status change for this
     * cluster, otherwise, client cannot get information in this long operation
     * time
-    * 
+    *
     * @param clusterSpec
     * @return
     */
@@ -140,11 +140,11 @@ public interface SoftwareManager {
    /**
     * This method will be guaranteed to be invoked before BDE invoke cluster
     * stop, allowing plugin to do some clean up
-    * 
+    *
     * Sync call Plugin should should update ClusterOperationReports to notify
     * operation status change for this cluster, otherwise, client cannot get
     * information in this long operation time
-    * 
+    *
     * @return
     */
    boolean onStopCluster(String clusterName);
@@ -152,11 +152,11 @@ public interface SoftwareManager {
    /**
     * This method will be guaranteed to invoked before BDE invoke cluster
     * delete, allowing plugin to do some clean up
-    * 
+    *
     * Sync call Plugin should update ClusterOperationReports to notify
     * operation status change for this cluster, otherwise, client cannot get
     * information in this long operation time
-    * 
+    *
     * @return
     */
    boolean onDeleteCluster(String clusterName);
@@ -166,7 +166,7 @@ public interface SoftwareManager {
     * Sync call Plugin should update ClusterOperationReports to notify
     * operation status change for this cluster, otherwise, client cannot get
     * information in this long operation time
-    * 
+    *
     * @param clusterName
     * @param instances
     * @return task id
@@ -177,7 +177,7 @@ public interface SoftwareManager {
     * Sync call Plugin should update ClusterOperationReports to notify
     * operation status change for this cluster, otherwise, client cannot get
     * information in this long operation time
-    * 
+    *
     * @param clusterName
     * @param nodes
     * @return
@@ -187,11 +187,11 @@ public interface SoftwareManager {
    /**
     * The commission nodes method is guaranteed to be invoked before this method
     * is called.
-    * 
+    *
     * Sync call Plugin should update ClusterOperationReports to notify
     * operation status change for this cluster, otherwise, client cannot get
     * information in this long operation time
-    * 
+    *
     * @param clusterName
     * @param instances
     * @return
@@ -202,7 +202,7 @@ public interface SoftwareManager {
     * Sync call Plugin should update ClusterOperationReports to notify
     * operation status change for this cluster, otherwise, client cannot get
     * information in this long operation time
-    * 
+    *
     * @param clusterName
     * @param nodes
     * @return
@@ -214,7 +214,7 @@ public interface SoftwareManager {
    /**
     * Get current cluster service status, including cluster status, and node
     * status TODO: define cluster query object
-    * 
+    *
     * @param clusterName
     * @return
     */

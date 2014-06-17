@@ -888,7 +888,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    //TODO: impl
-   public void echo() {
+   public boolean echo() {
+      return true;
    }
 
    public HealthStatus getStatus() {
