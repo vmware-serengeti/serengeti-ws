@@ -20,24 +20,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gson.Gson;
-import com.vmware.bdd.exception.TaskException;
-import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.command.CommandUtil;
 import com.vmware.bdd.entity.NodeEntity;
+import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterManager;
+import com.vmware.bdd.manager.SoftwareManagerCollector;
 import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
 import com.vmware.bdd.service.job.DefaultStatusUpdater;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.TrackableTasklet;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.SyncHostsUtils;
 
@@ -47,6 +49,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
    private ClusterManager clusterManager;
    private ManagementOperation managementOperation;
    private IExclusiveLockedClusterEntityManager lockClusterEntityMgr;
+   private SoftwareManagerCollector softwareMgrs;
    private boolean checkVMStatus = false;
 
    public IExclusiveLockedClusterEntityManager getLockClusterEntityMgr() {
@@ -57,6 +60,15 @@ public class SoftwareManagementStep extends TrackableTasklet {
    public void setLockClusterEntityMgr(
          IExclusiveLockedClusterEntityManager lockClusterEntityMgr) {
       this.lockClusterEntityMgr = lockClusterEntityMgr;
+   }
+
+   public SoftwareManagerCollector getSoftwareMgrs() {
+      return softwareMgrs;
+   }
+
+   @Autowired
+   public void setSoftwareMgrs(SoftwareManagerCollector softwareMgrs) {
+      this.softwareMgrs = softwareMgrs;
    }
 
    @Override
@@ -81,8 +93,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
             getJobParameters(chunkContext).getString(
                   JobConstants.IS_VM_POWER_ON);
       if (vmPowerOnStr != null) {
-         logger.info("vm original status is power on? "
-               + vmPowerOnStr);
+         logger.info("vm original status is power on? " + vmPowerOnStr);
          vmPowerOn = Boolean.parseBoolean(vmPowerOnStr);
       }
 
@@ -92,16 +103,17 @@ public class SoftwareManagementStep extends TrackableTasklet {
 
       // Only check host time for configure (config, start, disk fix, scale up)
       // operation and create (resume only) operation
-      if (ManagementOperation.CONFIGURE.equals(managementOperation) ||
-            JobConstants.RESUME_CLUSTER_JOB_NAME.equals(jobName)) {
+      ClusterCreate clusterSpec = clusterManager.getClusterSpec(clusterName);
+      if (ManagementOperation.CONFIGURE.equals(managementOperation)
+            || JobConstants.RESUME_CLUSTER_JOB_NAME.equals(jobName)) {
          logger.info("Start to check host time.");
-         List<NodeEntity> nodes = lockClusterEntityMgr.getClusterEntityMgr().findAllNodes(clusterName);
+         List<NodeEntity> nodes =
+               lockClusterEntityMgr.getClusterEntityMgr().findAllNodes(
+                     clusterName);
          Set<String> hostnames = new HashSet<String>();
          for (NodeEntity node : nodes) {
             hostnames.add(node.getHostName());
          }
-         ClusterCreate clusterSpec = clusterManager.getClusterSpec(clusterName);
-
          SyncHostsUtils.SyncHosts(clusterSpec, hostnames);
       }
 
@@ -109,27 +121,23 @@ public class SoftwareManagementStep extends TrackableTasklet {
             new DefaultStatusUpdater(jobExecutionStatusHolder,
                   getJobExecutionId(chunkContext));
 
-      String appManager = lockClusterEntityMgr.getClusterEntityMgr().findByName(clusterName).getAppManager();
-
       ISoftwareManagementTask task = null;
-
-//      if (pluginEntity != null && (pluginEntity.getProvider().equals(SoftwareMgtProvider.CLOUDERA_MANAGER)
-//            || pluginEntity.getProvider().equals(SoftwareMgtProvider.AMBARI))) {
-      if (!CommonUtil.isBlank(appManager)) {
+      if (!CommonUtil.isBlank(clusterSpec.getAppManager())) {
+         SoftwareManager softwareMgr =
+               softwareMgrs.getSoftwareManager(clusterSpec.getAppManager());
          ClusterBlueprint clusterBlueprint =
                lockClusterEntityMgr.getClusterEntityMgr().toClusterBluePrint(
                      clusterName);
-
          task =
                SoftwareManagementTaskFactory.createExternalMgtTask(targetName,
-                     managementOperation, clusterBlueprint, appManager,
-                     statusUpdater, lockClusterEntityMgr);
-
+                     managementOperation, clusterBlueprint, statusUpdater,
+                     lockClusterEntityMgr, softwareMgr);
          logger.info((new Gson()).toJson(clusterBlueprint));
       } else {
 
          // get command work directory
-         File workDir = CommandUtil.createWorkDir(getJobExecutionId(chunkContext));
+         File workDir =
+               CommandUtil.createWorkDir(getJobExecutionId(chunkContext));
 
          // update work directory in job context
          putIntoJobExecutionContext(chunkContext,
@@ -150,9 +158,10 @@ public class SoftwareManagementStep extends TrackableTasklet {
             specFilePath = specFile.getAbsolutePath();
          }
 
-         task = SoftwareManagementTaskFactory.createIronfanTask(targetName,
-            specFilePath, statusUpdater, managementOperation,
-            lockClusterEntityMgr);
+         task =
+               SoftwareManagementTaskFactory.createIronfanTask(targetName,
+                     specFilePath, statusUpdater, managementOperation,
+                     lockClusterEntityMgr);
       }
 
       Map<String, Object> ret = task.call();
