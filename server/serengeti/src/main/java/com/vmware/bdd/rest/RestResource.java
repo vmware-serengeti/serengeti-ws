@@ -91,7 +91,7 @@ public class RestResource {
    @Autowired
    private IDatastoreService datastoreSvc;
    @Autowired
-   private IAppManagerService pluginService;
+   private IAppManagerService appManagerService;
    @Autowired
    private ScaleManager scaleMgr;
    @Autowired
@@ -786,7 +786,7 @@ public class RestResource {
 
    @RequestMapping(value = "/appmanagers", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
-   public void addPlugin(@RequestBody final AppManagerAdd appManagerAdd) {
+   public void addAppManager(@RequestBody final AppManagerAdd appManagerAdd) {
       //does it?
       verifyInitialized();
       if (appManagerAdd == null) {

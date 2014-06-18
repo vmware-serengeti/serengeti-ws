@@ -56,7 +56,7 @@ public class AppManagerService implements IAppManagerService{
    }
 
    @Autowired
-   public void setPluginDAO(IAppManagerDAO pluginDAO) {
-      this.appManagerDAO = pluginDAO;
+   public void setAppManagerDAO(IAppManagerDAO appManagerDAO) {
+      this.appManagerDAO = appManagerDAO;
    }
 }

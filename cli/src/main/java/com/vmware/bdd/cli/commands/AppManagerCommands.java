@@ -33,15 +33,15 @@ import org.springframework.stereotype.Component;
 public class AppManagerCommands implements CommandMarker {
 
    @Autowired
-   private AppManagerRestClient pluginRestClient;
+   private AppManagerRestClient appManagerRestClient;
 
-   @CliAvailabilityIndicator({ "plugin help" })
+   @CliAvailabilityIndicator({ "appmanager help" })
    public boolean isCommandAvailable() {
       return true;
    }
 
-   @CliCommand(value = "plugin add", help = "add a vendor instance")
-   public void addPlugin(
+   @CliCommand(value = "appmanager add", help = "add a vendor instance")
+   public void addAppManager(
          @CliOption(key = { "name" }, mandatory = true, help = "The instance name") final String name,
          @CliOption(key = { "provider" }, mandatory = true, help = "The provider type, ClouderaManager or Ambari") final String provider,
          @CliOption(key = { "host" }, mandatory = true, help = "The host address") final String host,
@@ -52,17 +52,17 @@ public class AppManagerCommands implements CommandMarker {
 
       // rest invocation
       try {
-         AppManagerAdd pluginAdd = new AppManagerAdd();
-         pluginAdd.setName(name);
-         pluginAdd.setProvider(provider);
-         pluginAdd.setHost(host);
-         pluginAdd.setPort(port);
-         pluginAdd.setUsername(username);
-         pluginAdd.setPassword(password);
-         pluginAdd.setPrivateKey(CommandsUtils.dataFromFile(path));
-         pluginRestClient.add(pluginAdd);
+         AppManagerAdd appManagerAdd = new AppManagerAdd();
+         appManagerAdd.setName(name);
+         appManagerAdd.setProvider(provider);
+         appManagerAdd.setHost(host);
+         appManagerAdd.setPort(port);
+         appManagerAdd.setUsername(username);
+         appManagerAdd.setPassword(password);
+         appManagerAdd.setPrivateKey(CommandsUtils.dataFromFile(path));
+         appManagerRestClient.add(appManagerAdd);
       } catch (Exception e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_PLUGIN, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER, name,
                Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
       }

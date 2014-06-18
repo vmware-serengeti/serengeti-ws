@@ -34,7 +34,7 @@ public class Constants {
    public static final String REST_PATH_LOGOUT = "j_spring_security_logout";
    public static final String REST_PATH_NETWORK = "network";
    public static final String REST_PATH_NETWORKS = "networks";
-   public static final String REST_PATH_PLUGINS = "plugins";
+   public static final String REST_PATH_APPMANAGERS = "appmanagers";
    public static final String REST_PATH_DISTROS = "distros";
    public static final String REST_PATH_DISTRO = "distro";
    public static final String REST_PATH_CONFIG = "config";
@@ -76,7 +76,7 @@ public class Constants {
    public static final String OUTPUT_OBJECT_DATASTORE = "datastore";
    public static final String OUTPUT_OBJECT_DISTRO = "distro";
    public static final String OUTPUT_OBJECT_NETWORK = "network";
-   public static final String OUTPUT_OBJECT_PLUGIN = "plugin";
+   public static final String OUTPUT_OBJECT_APPMANAGER = "appmanager";
    public static final String OUTPUT_OBJECT_NODE_GROUP = "node group";
    public static final String OUTPUT_OBJECT_NODE = "node";
    public static final String OUTPUT_OBJECT_RESOURCEPOOL = "resourcepool";

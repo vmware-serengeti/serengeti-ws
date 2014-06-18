@@ -37,7 +37,7 @@ public class SoftwareManagerCollector {
          .getLogger(SoftwareManagerCollector.class);
 
    @Autowired
-   private IAppManagerService pluginService;
+   private IAppManagerService appManagerService;
 
    private Map<String, SoftwareManager> cache =
          new HashMap<String, SoftwareManager>();
@@ -46,25 +46,25 @@ public class SoftwareManagerCollector {
 
    /**
     * Software manager name will be unique inside of BDE. Otherwise, creation
-    * will fail. The plugin information should be persisted in meta-db
+    * will fail. The appmanager information should be persisted in meta-db
     *
-    * @param pluginAdd
+    * @param appManagerAdd
     */
-   public synchronized void createSoftwareManager(AppManagerAdd pluginAdd) {
+   public synchronized void createSoftwareManager(AppManagerAdd appManagerAdd) {
 
-      if (pluginService.findAppManagerByName(configurationPrefix + pluginAdd.getName()) != null) {
-         logger.error("Name " + pluginAdd.getName() + " already exists.");
-         throw SoftwareManagerCollectorException.DUPLICATE_NAME(pluginAdd
+      if (appManagerService.findAppManagerByName(appManagerAdd.getName()) != null) {
+         logger.error("Name " + appManagerAdd.getName() + " already exists.");
+         throw SoftwareManagerCollectorException.DUPLICATE_NAME(appManagerAdd
                .getName());
       }
 
       // Retrieve app manager factory class from serengeti.properties
       String factoryClassName =
-            Configuration.getString(pluginAdd.getProvider());
+            Configuration.getString(configurationPrefix + appManagerAdd.getProvider());
       if (CommonUtil.isBlank(factoryClassName)) {
-         logger.error("Factory class for " + pluginAdd.getProvider()
+         logger.error("Factory class for " + appManagerAdd.getProvider()
                + " is not defined in serengeti.properties");
-         throw SoftwareManagerCollectorException.CLASS_NOT_DEFINED(pluginAdd
+         throw SoftwareManagerCollectorException.CLASS_NOT_DEFINED(appManagerAdd
                .getProvider());
       }
       Class<?> factoryClass;
@@ -90,21 +90,21 @@ public class SoftwareManagerCollector {
                factoryClassName);
       }
       SoftwareManager softwareManager =
-            softwareManagerFactory.getSoftwareManager(pluginAdd.getHost(),
-                  pluginAdd.getUsername(), pluginAdd.getPassword()
-                        .toCharArray(), pluginAdd.getPrivateKey());
+            softwareManagerFactory.getSoftwareManager(appManagerAdd.getHost(),
+                  appManagerAdd.getUsername(), appManagerAdd.getPassword()
+                        .toCharArray(), appManagerAdd.getPrivateKey());
 
       // validate instance is reachable
       if (!softwareManager.echo()) {
          logger.error("Cannot connect to Software Manager "
-               + pluginAdd.getName() + ", check the connection information.");
-         throw SoftwareManagerCollectorException.ECHO_FAILURE(pluginAdd
+               + appManagerAdd.getName() + ", check the connection information.");
+         throw SoftwareManagerCollectorException.ECHO_FAILURE(appManagerAdd
                .getName());
       }
 
-      // add to meta-db through PluginService
-      pluginService.addAppManager(pluginAdd);
-      cache.put(pluginAdd.getName(), softwareManager);
+      // add to meta-db through AppManagerService
+      appManagerService.addAppManager(appManagerAdd);
+      cache.put(appManagerAdd.getName(), softwareManager);
    }
 
    /**

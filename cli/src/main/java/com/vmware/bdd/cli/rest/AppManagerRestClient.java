@@ -32,9 +32,9 @@ public class AppManagerRestClient {
    @Autowired
    private RestClient restClient;
 
-   public void add(AppManagerAdd pluginAdd) {
-      final String path = Constants.REST_PATH_PLUGINS;
+   public void add(AppManagerAdd appManagerAdd) {
+      final String path = Constants.REST_PATH_APPMANAGERS;
       final HttpMethod httpverb = HttpMethod.POST;
-      restClient.createObject(pluginAdd, path, httpverb);
+      restClient.createObject(appManagerAdd, path, httpverb);
    }
 }

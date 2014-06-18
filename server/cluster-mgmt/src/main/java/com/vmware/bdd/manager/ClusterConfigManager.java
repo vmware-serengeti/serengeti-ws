@@ -89,7 +89,7 @@ public class ClusterConfigManager {
    private DistroManager distroMgr;
    private RackInfoManager rackInfoMgr;
    private IDatastoreService datastoreMgr;
-   private IAppManagerService pluginService;
+   private IAppManagerService appManagerService;
    private IClusterEntityManager clusterEntityMgr;
    private IClusteringService clusteringService;
 
@@ -146,13 +146,13 @@ public class ClusterConfigManager {
       this.networkMgr = networkMgr;
    }
 
-   public IAppManagerService getPluginService() {
-      return pluginService;
+   public IAppManagerService getAppManagerService() {
+      return appManagerService;
    }
 
    @Autowired
-   public void setPluginService(IAppManagerService pluginService) {
-      this.pluginService = pluginService;
+   public void setAppManagerService(IAppManagerService appManagerService) {
+      this.appManagerService = appManagerService;
    }
 
    public IClusterEntityManager getClusterEntityMgr() {
