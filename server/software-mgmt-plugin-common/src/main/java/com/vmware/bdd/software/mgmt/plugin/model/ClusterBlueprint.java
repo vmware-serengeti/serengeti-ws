@@ -24,6 +24,7 @@ public class ClusterBlueprint implements Serializable{
 
    @Expose
    private HadoopStack hadoopStack;
+   private String externalHDFS;
 
    public String getName() {
       return name;

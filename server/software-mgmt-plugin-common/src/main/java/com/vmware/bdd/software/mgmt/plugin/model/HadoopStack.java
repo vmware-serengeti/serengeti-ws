@@ -3,6 +3,7 @@ package com.vmware.bdd.software.mgmt.plugin.model;
 import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Hadoop distribution information, for instance CDH5 5.0.1
@@ -17,6 +18,8 @@ import java.io.Serializable;
 
    @Expose
    private String fullVersion;
+   private boolean hveSupported;
+   private List<String> roles;
 
    public String getDistro() {
       return distro;
@@ -32,5 +35,21 @@ import java.io.Serializable;
 
    public void setFullVersion(String fullVersion) {
       this.fullVersion = fullVersion;
+   }
+
+   public boolean isHveSupported() {
+      return hveSupported;
+   }
+
+   public void setHveSupported(boolean hveSupported) {
+      this.hveSupported = hveSupported;
+   }
+
+   public List<String> getRoles() {
+      return roles;
+   }
+
+   public void setRoles(List<String> roles) {
+      this.roles = roles;
    }
 }
