@@ -1030,4 +1030,10 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private static abstract class Callback {
       public abstract boolean poll();
    }
+
+   @Override
+   public List<String> isNodeGroupExtensible(NodeGroupInfo group) {
+      // TODO Auto-generated method stub
+      return new ArrayList<String>();
+   }
 }

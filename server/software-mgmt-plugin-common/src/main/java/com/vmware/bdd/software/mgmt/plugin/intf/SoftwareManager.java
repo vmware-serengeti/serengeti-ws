@@ -226,4 +226,6 @@ public interface SoftwareManager {
     * @return
     */
    String queryClusterStatus(ClusterBlueprint blueprint);
+
+   List<String> isNodeGroupExtensible(NodeGroupInfo group);
 }

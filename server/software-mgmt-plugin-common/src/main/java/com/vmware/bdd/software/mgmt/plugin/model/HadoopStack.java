@@ -9,7 +9,7 @@ import java.util.List;
  * Hadoop distribution information, for instance CDH5 5.0.1
  * @author line
  *
- */public class HadoopStack implements Serializable{
+ */public class HadoopStack implements Serializable {
 
    private static final long serialVersionUID = -4032296997440707531L;
 

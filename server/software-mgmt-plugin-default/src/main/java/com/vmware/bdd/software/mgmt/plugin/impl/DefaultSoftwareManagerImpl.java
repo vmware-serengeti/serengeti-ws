@@ -15,11 +15,19 @@
 package com.vmware.bdd.software.mgmt.plugin.impl;
 
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
-import com.vmware.bdd.software.mgmt.plugin.model.*;
+import com.vmware.bdd.software.mgmt.plugin.model.ChefServerUtils;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.ServiceType;
 
@@ -357,4 +365,24 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
       return null;
    }
 
+   @Override
+   public List<String> isNodeGroupExtensible(NodeGroupInfo group) {
+         // resize of job tracker and name node is not supported
+         List<String> roles = group.getRoles();
+         List<String> unsupportedRoles = new ArrayList<String>();
+         if (roles.isEmpty()) {
+            // no unsupported roles
+            return new ArrayList<String>();
+         }
+         if (roles.contains(HadoopRole.HADOOP_NAMENODE_ROLE.toString())) {
+            unsupportedRoles.add(HadoopRole.HADOOP_NAMENODE_ROLE.toString());
+         }
+         if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
+            unsupportedRoles.add(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString());
+         }
+         if (roles.contains(HadoopRole.ZOOKEEPER_ROLE.toString())) {
+            unsupportedRoles.add(HadoopRole.ZOOKEEPER_ROLE.toString());
+         }
+         return unsupportedRoles;
+      }
 }

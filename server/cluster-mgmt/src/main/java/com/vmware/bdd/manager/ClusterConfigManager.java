@@ -29,9 +29,6 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
-import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
-import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,12 +38,12 @@ import com.google.gson.GsonBuilder;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.DiskSpec.AllocationType;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetConfigInfo;
-import com.vmware.bdd.apitypes.NetworkAdd;
-import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
@@ -68,15 +65,17 @@ import com.vmware.bdd.exception.UniqueConstraintViolationException;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.IClusteringService;
+import com.vmware.bdd.service.resmgmt.IAppManagerService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
-import com.vmware.bdd.service.resmgmt.IAppManagerService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
+import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
 import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
+import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
@@ -604,18 +603,20 @@ public class ClusterConfigManager {
       }
 
       //insert tempfs_server role into the referenced data node groups
-      for (String nodeGroupName : referencedNodeGroups) {
-         for (NodeGroupEntity groupEntity : nodeGroups) {
-            if (groupEntity.getName().equals(nodeGroupName)) {
-               @SuppressWarnings("unchecked")
-               List<String> sortedRoles =
+      if (clusterEntity.getAppManager() == null) {
+         //TODO emma: move to software manager
+         for (String nodeGroupName : referencedNodeGroups) {
+            for (NodeGroupEntity groupEntity : nodeGroups) {
+               if (groupEntity.getName().equals(nodeGroupName)) {
+                  @SuppressWarnings("unchecked")
+                  List<String> sortedRoles =
                      gson.fromJson(groupEntity.getRoles(), List.class);
-               sortedRoles.add(0, HadoopRole.TEMPFS_SERVER_ROLE.toString());
-               groupEntity.setRoles(gson.toJson(sortedRoles));
+                  sortedRoles.add(0, HadoopRole.TEMPFS_SERVER_ROLE.toString());
+                  groupEntity.setRoles(gson.toJson(sortedRoles));
+               }
             }
          }
       }
-
       return nodeGroups;
    }
 
@@ -677,32 +678,34 @@ public class ClusterConfigManager {
       }
       */
 
-      EnumSet<HadoopRole> enumRoles = getEnumRoles(group.getRoles(), distro);
-      if (enumRoles.isEmpty()) {
-         throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(group.getName());
-      }
-
       Set<String> roles = new LinkedHashSet<String>();
       convertStorage(group, groupEntity, roles);
       roles.addAll(group.getRoles());
 
-      // We will respect the original orders as users input through LinkedHashSet for group including
-      // customized roles, because chef server has strict role orders in some cases.
-      if (enumRoles.contains(HadoopRole.CUSTOMIZED_ROLE)) {
-         groupEntity.setRoles(gson.toJson(roles));
-      } else { //we will sort the roles according to their dependencies
-         List<String> sortedRolesByDependency = new ArrayList<String>();
-         sortedRolesByDependency.addAll(roles);
-         Collections.sort(sortedRolesByDependency, new RoleComparactor());
-         groupEntity.setRoles(gson.toJson(sortedRolesByDependency));
+      //TODO emma: move to default software manager
+      EnumSet<HadoopRole> enumRoles = null;
+      if (clusterEntity.getAppManager() == null) {
+         enumRoles = getEnumRoles(group.getRoles(), distro);
+         if (enumRoles.isEmpty()) {
+            throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(group.getName());
+         }
+
+         // We will respect the original orders as users input through LinkedHashSet for group including
+         // customized roles, because chef server has strict role orders in some cases.
+
+         if (enumRoles.contains(HadoopRole.CUSTOMIZED_ROLE)) {
+            groupEntity.setRoles(gson.toJson(roles));
+         } else { //we will sort the roles according to their dependencies
+            List<String> sortedRolesByDependency = new ArrayList<String>();
+            sortedRolesByDependency.addAll(roles);
+            Collections.sort(sortedRolesByDependency, new RoleComparactor());
+            groupEntity.setRoles(gson.toJson(sortedRolesByDependency));
+         }
       }
-
-      GroupType groupType = GroupType.fromHadoopRole(enumRoles);
-
-      if (groupType == GroupType.CLIENT_GROUP && group.getInstanceNum() <= 0) {
+      if (group.getInstanceNum() <= 0) {
          logger.warn("Zero or negative instance number for group "
                + group.getName()
-               + ", remove the client group from cluster spec.");
+               + ", remove the group from cluster spec.");
          return null;
       }
 
@@ -720,14 +723,20 @@ public class ClusterConfigManager {
          localPattern = datastoreMgr.getAllLocalDatastores();
       }
 
-      CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity, groupType,
-            sharedPattern, localPattern);
+      // TODO emma: move HadoopRole related logic to default software manager, and leave common logic here
+      if (clusterEntity.getAppManager() == null) {
+         GroupType groupType = GroupType.fromHadoopRole(enumRoles);
+         CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity, groupType,
+               sharedPattern, localPattern);
+      }
       groupEntity.setHaFlag(group.getHaFlag());
       if (group.getConfiguration() != null
             && group.getConfiguration().size() > 0) {
          // validate hadoop config
-         CommonClusterExpandPolicy.validateAppConfig(group.getConfiguration(),
-               validateWhiteList);
+         if (clusterEntity.getAppManager() == null) {
+            CommonClusterExpandPolicy.validateAppConfig(group.getConfiguration(),
+                  validateWhiteList);
+         }
          groupEntity.setHadoopConfig(gson.toJson(group.getConfiguration()));
       }
       // set vm folder path
@@ -746,7 +755,8 @@ public class ClusterConfigManager {
          if (storageType != null) {
             if (storageType.equalsIgnoreCase(DatastoreType.TEMPFS.name())) {
                groupEntity.setStorageType(DatastoreType.TEMPFS);
-               roles.add(HadoopRole.TEMPFS_CLIENT_ROLE.toString());
+               //TODO emma: disable Tempfs role temporarily
+//               roles.add(HadoopRole.TEMPFS_CLIENT_ROLE.toString());
             } else if (storageType.equalsIgnoreCase(DatastoreType.LOCAL.name())) {
                groupEntity.setStorageType(DatastoreType.LOCAL);
             } else {
@@ -861,12 +871,15 @@ public class ClusterConfigManager {
 
       for (NodeGroupEntity ngEntity : nodeGroupEntities) {
          NodeGroupCreate group =
-               convertNodeGroups(clusterEntity.getDistro(), ngEntity,
+               convertNodeGroups(clusterEntity, ngEntity,
                      clusterEntity.getName());
          nodeGroups.add(group);
          instanceNum += group.getInstanceNum();
       }
-      sortGroups(nodeGroups);
+      // TODO emma: move to default software manager
+      if (clusterEntity.getAppManager() == null) {
+         sortGroups(nodeGroups);
+      }
       clusterConfig.setNodeGroups(nodeGroups
             .toArray(new NodeGroupCreate[nodeGroups.size()]));
 
@@ -941,21 +954,26 @@ public class ClusterConfigManager {
    }
 
    @SuppressWarnings("unchecked")
-   private NodeGroupCreate convertNodeGroups(String distro,
+   private NodeGroupCreate convertNodeGroups(ClusterEntity clusterEntity, 
          NodeGroupEntity ngEntity, String clusterName) {
       Gson gson = new Gson();
       List<String> groupRoles = gson.fromJson(ngEntity.getRoles(), List.class);
-
-      EnumSet<HadoopRole> enumRoles = getEnumRoles(groupRoles, distro);
-      if (enumRoles.isEmpty()) {
-         throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(ngEntity
-               .getName());
-      }
-      GroupType groupType = GroupType.fromHadoopRole(enumRoles);
-      AuAssert.check(groupType != null);
+      String distro = clusterEntity.getDistro();
       NodeGroupCreate group = new NodeGroupCreate();
       group.setName(ngEntity.getName());
-      group.setGroupType(groupType);
+      // TODO emma: move to default software manager
+      EnumSet<HadoopRole> enumRoles = null;
+      if (clusterEntity.getAppManager() == null) {
+         enumRoles = getEnumRoles(groupRoles, distro);
+         if (enumRoles.isEmpty()) {
+            throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(ngEntity
+                  .getName());
+         }
+
+         GroupType groupType = GroupType.fromHadoopRole(enumRoles);
+         AuAssert.check(groupType != null);
+         group.setGroupType(groupType);
+      }
       group.setRoles(groupRoles);
       int cpu = ngEntity.getCpuNum();
       if (cpu > 0) {
@@ -1080,7 +1098,9 @@ public class ClusterConfigManager {
       storage.setShares(ngEntity.getCluster().getIoShares());
 
       // set storage split policy based on group roles
-      if ((enumRoles.size() == 1 || (enumRoles.size() == 2 && enumRoles
+      // TODO emma: add corresponding logic for all software managers
+      if ((ngEntity.getCluster().getAppManager() == null) &&
+            (enumRoles.size() == 1 || (enumRoles.size() == 2 && enumRoles
             .contains(HadoopRole.HADOOP_JOURNALNODE_ROLE)))
             && (enumRoles.contains(HadoopRole.ZOOKEEPER_ROLE) || enumRoles
                   .contains(HadoopRole.MAPR_ZOOKEEPER_ROLE))) {

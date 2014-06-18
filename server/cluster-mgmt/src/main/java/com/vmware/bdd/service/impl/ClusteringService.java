@@ -1273,6 +1273,7 @@ public class ClusteringService implements IClusteringService {
       }
 
       List<String> roles = vNode.getNodeGroup().getRoles();
+      //TODO emma: add corresponding functions for all software managers
       if (roles != null && HadoopRole.hasMgmtRole(roles)) {
          logger.debug(vNode.getVmName() + " is a master node");
          logger.debug("set disk mode to persistent for VM " + vNode.getVmName());

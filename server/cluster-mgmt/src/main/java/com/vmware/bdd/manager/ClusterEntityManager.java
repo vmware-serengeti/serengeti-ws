@@ -49,6 +49,7 @@ import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
@@ -58,6 +59,7 @@ import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
 
@@ -75,6 +77,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    private INetworkDAO networkDAO;
 
    private IServerInfoDAO serverInfoDao;
+   private SoftwareManagerCollector softwareManagerCollector;
 
    public IServerInfoDAO getServerInfoDao(){
       return serverInfoDao;
@@ -119,6 +122,11 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    @Autowired
    public void setNetworkDAO(INetworkDAO networkDAO) {
       this.networkDAO = networkDAO;
+   }
+
+   @Autowired
+   public void setSoftwareManagerCollector(SoftwareManagerCollector softwareManagerCollector) {
+        this.softwareManagerCollector = softwareManagerCollector;
    }
 
    public ClusterEntity findClusterById(Long id) {
@@ -465,32 +473,39 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       // set nodes/nodegroups
       List<NodeGroupInfo> nodeGroupInfos = new ArrayList<NodeGroupInfo>();
       for (NodeGroupEntity group : clusterEntity.getNodeGroups()) {
-         NodeGroupInfo nodeGroupInfo = new NodeGroupInfo();
-         nodeGroupInfo.setName(group.getName());
-         nodeGroupInfo.setInstanceNum(group.getRealInstanceNum(true));
-         nodeGroupInfo.setRoles(gson.fromJson(group.getRoles(), List.class));
-         if (group.getHadoopConfig() != null) {
-            Map<String, Object> groupConfigs = gson.fromJson(group.getHadoopConfig(), Map.class);
-            nodeGroupInfo.setConfiguration(groupConfigs);
-         }
-
-         // set nodes
-         List<NodeInfo> nodeInfos = new ArrayList<NodeInfo>();
-         for (NodeEntity node : group.getNodes()) {
-            NodeInfo nodeInfo = new NodeInfo();
-            nodeInfo.setName(node.getVmName());
-            nodeInfo.setIpConfigs(node.convertToIpConfigInfo());
-            nodeInfo.setRack(node.getRack());
-            nodeInfo.setVolumes(node.getDataVolumnsMountPoint());
-            nodeInfos.add(nodeInfo);
-         }
-
-         nodeGroupInfo.setNodes(nodeInfos);
+         NodeGroupInfo nodeGroupInfo = toNodeGroupInfo(group);
          nodeGroupInfos.add(nodeGroupInfo);
       }
       blueprint.setNodeGroups(nodeGroupInfos);
       return blueprint;
    }
+
+   public NodeGroupInfo toNodeGroupInfo(NodeGroupEntity group) {
+      Gson gson = new Gson();
+      NodeGroupInfo nodeGroupInfo = new NodeGroupInfo();
+      nodeGroupInfo.setName(group.getName());
+      nodeGroupInfo.setInstanceNum(group.getRealInstanceNum(true));
+      nodeGroupInfo.setRoles(gson.fromJson(group.getRoles(), List.class));
+      if (group.getHadoopConfig() != null) {
+         Map<String, Object> groupConfigs = gson.fromJson(group.getHadoopConfig(), Map.class);
+         nodeGroupInfo.setConfiguration(groupConfigs);
+      }
+
+      // set nodes
+      List<NodeInfo> nodeInfos = new ArrayList<NodeInfo>();
+      for (NodeEntity node : group.getNodes()) {
+         NodeInfo nodeInfo = new NodeInfo();
+         nodeInfo.setName(node.getVmName());
+         nodeInfo.setIpConfigs(node.convertToIpConfigInfo());
+         nodeInfo.setRack(node.getRack());
+         nodeInfo.setVolumes(node.getDataVolumnsMountPoint());
+         nodeInfos.add(nodeInfo);
+      }
+
+      nodeGroupInfo.setNodes(nodeInfos);
+      return nodeGroupInfo;
+   }
+
 
    public ClusterRead toClusterRead(String clusterName) {
       return toClusterRead(clusterName, false);
@@ -515,12 +530,13 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       clusterRead.setVhmTargetNum(cluster.getVhmTargetNum());
       clusterRead.setIoShares(cluster.getIoShares());
       clusterRead.setVersion(cluster.getVersion());
-
+      // TODO emma: move to default software manager
+      boolean isDefaultSoftwareManager = CommonUtil.isBlank(cluster.getAppManager());
       boolean computeOnly = true;
       List<NodeGroupRead> groupList = new ArrayList<NodeGroupRead>();
       for (NodeGroupEntity group : cluster.getNodeGroups()) {
          groupList.add(group.toNodeGroupRead(ignoreObsoleteNode));
-         if (group.getRoles() != null
+         if (isDefaultSoftwareManager && group.getRoles() != null
                && (group.getRoles().contains(
                      HadoopRole.HADOOP_NAMENODE_ROLE.toString()) || group
                      .getRoles().contains(HadoopRole.MAPR_CLDB_ROLE.toString()))) {
@@ -530,7 +546,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
 
       clusterRead.setNodeGroups(groupList);
 
-      if (computeOnly && cluster.getHadoopConfig() != null) {
+      if (isDefaultSoftwareManager && computeOnly && cluster.getHadoopConfig() != null) {
          Map conf = (new Gson()).fromJson(cluster.getHadoopConfig(), Map.class);
          Map hadoopConf = (Map) conf.get("hadoop");
          if (hadoopConf != null) {

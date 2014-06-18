@@ -64,6 +64,7 @@ import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.specpolicy.ClusterSpecFactory;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
@@ -94,6 +95,7 @@ public class ClusterManager {
    private IClusterHealService clusterHealService;
 
    private IExecutionService executionService;
+   private SoftwareManagerCollector softwareManagerCollector;
 
    public JobManager getJobManager() {
       return jobManager;
@@ -182,12 +184,19 @@ public class ClusterManager {
       this.executionService = executionService;
    }
 
+   @Autowired
+   public void setSoftwareManagerCollector(SoftwareManagerCollector softwareManagerCollector) {
+        this.softwareManagerCollector = softwareManagerCollector;
+   }
+
    public Map<String, Object> getClusterConfigManifest(String clusterName,
          List<String> targets, boolean needAllocIp) {
       ClusterCreate clusterConfig =
             clusterConfigMgr.getClusterConfig(clusterName, needAllocIp);
       Map<String, String> cloudProvider = resMgr.getCloudProviderAttributes();
+
       ClusterRead read = clusterEntityMgr.toClusterRead(clusterName, true);
+
       Map<String, Object> attrs = new HashMap<String, Object>();
       attrs.put("cloud_provider", cloudProvider);
       attrs.put("cluster_definition", clusterConfig);
@@ -842,19 +851,13 @@ public class ClusterManager {
          throw ClusterManagerException.NODEGROUP_NOT_FOUND_ERROR(nodeGroupName);
       }
 
-      // resize of job tracker and name node is not supported
-      List<String> roles = group.getRoleNameList();
-      List<String> unsupportedRoles = new ArrayList<String>();
-      AuAssert.check(!roles.isEmpty(), "roles should not be empty");
-      if (roles.contains(HadoopRole.HADOOP_NAMENODE_ROLE.toString())) {
-         unsupportedRoles.add(HadoopRole.HADOOP_NAMENODE_ROLE.toString());
-      }
-      if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
-         unsupportedRoles.add(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString());
-      }
-      if (roles.contains(HadoopRole.ZOOKEEPER_ROLE.toString())) {
-         unsupportedRoles.add(HadoopRole.ZOOKEEPER_ROLE.toString());
-      }
+      AuAssert.check(!group.getRoleNameList().isEmpty(), "roles should not be empty");
+      SoftwareManager softMgr =
+            softwareManagerCollector
+                  .getSoftwareManager(cluster.getAppManager());
+      List<String> unsupportedRoles =
+            softMgr.isNodeGroupExtensible(clusterEntityMgr
+                  .toNodeGroupInfo(group));
       if (!unsupportedRoles.isEmpty()) {
          logger.info("can not resize node group with role: " + unsupportedRoles);
          throw ClusterManagerException.ROLES_NOT_SUPPORTED(unsupportedRoles);
