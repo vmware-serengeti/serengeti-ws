@@ -141,7 +141,7 @@ public class ClusterCommands implements CommandMarker {
       clusterCreate.setName(name);
 
       /*if (CommandsUtils.isBlank(appManager)) {
-         appManager = appManagerClient.getNamebyType("Ironfan")[0];
+         appManager = appManagerClient.getNamebyType(Constants.IRONFAN)[0];
       } else {
          ApplicationManager applicationManager = appManagerClient.get(appManager);
          if (applicationManager == null) {
@@ -196,7 +196,12 @@ public class ClusterCommands implements CommandMarker {
 
       try {
          if (distro != null) {
-            List<String> distroNames = getDistroNames();
+            List<String> distroNames = null;
+            if (Constants.IRONFAN.equalsIgnoreCase(appManager) || CommandsUtils.isBlank(appManager)) {
+               distroNames = getDistroNames();
+            } else {
+               distroNames = getDistroNames(appManager);
+            }
             if (validName(distro, distroNames)) {
                clusterCreate.setDistro(distro);
             } else {
@@ -207,16 +212,20 @@ public class ClusterCommands implements CommandMarker {
                return;
             }
          } else {
-            String defaultDistroName =
-                  clusterCreate.getDefaultDistroName(distroRestClient.getAll());
-            if (CommandsUtils.isBlank(defaultDistroName)) {
-               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                     name, Constants.OUTPUT_OP_CREATE,
-                     Constants.OUTPUT_OP_RESULT_FAIL,
-                     Constants.PARAM__NO_DEFAULT_DISTRO);
-               return;
+            if (Constants.IRONFAN.equalsIgnoreCase(appManager) || CommandsUtils.isBlank(appManager)) {
+               String defaultDistroName =
+                     clusterCreate.getDefaultDistroName(distroRestClient.getAll());
+               if (CommandsUtils.isBlank(defaultDistroName)) {
+                  CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                        name, Constants.OUTPUT_OP_CREATE,
+                        Constants.OUTPUT_OP_RESULT_FAIL,
+                        Constants.PARAM__NO_DEFAULT_DISTRO);
+                  return;
+               } else {
+                  clusterCreate.setDistro(defaultDistroName);
+               }               
             } else {
-               clusterCreate.setDistro(defaultDistroName);
+               clusterCreate.setDistro(clusterCreate.getDefaultDistroName(appManager));
             }
          }
       } catch (CliRestException e) {
@@ -225,7 +234,13 @@ public class ClusterCommands implements CommandMarker {
                e.getMessage());
          return;
       }
-      DistroRead distroRead = distroRestClient.get(clusterCreate.getDistro());
+      DistroRead distroRead = null;
+      if (Constants.IRONFAN.equalsIgnoreCase(appManager) || CommandsUtils.isBlank(appManager)) {
+         distroRead = distroRestClient.get(clusterCreate.getDistro());         
+      } else {
+         distroRead = distroRestClient.get(appManager, clusterCreate.getDistro());
+      }
+      
       clusterCreate.setDistroVendor(distroRead.getVendor());
       clusterCreate.setDistroVersion(distroRead.getVersion());
       if (rpNames != null) {
@@ -1255,6 +1270,19 @@ public class ClusterCommands implements CommandMarker {
       List<String> distroNames = new ArrayList<String>(0);
 
       DistroRead[] distros = distroRestClient.getAll();
+
+      if (distros != null) {
+         for (DistroRead distro : distros)
+            distroNames.add(distro.getName());
+      }
+      return distroNames;
+   }
+
+   private List<String> getDistroNames(String appManager) {
+
+      List<String> distroNames = new ArrayList<String>(0);
+
+      DistroRead[] distros = distroRestClient.getAll(appManager);
 
       if (distros != null) {
          for (DistroRead distro : distros)

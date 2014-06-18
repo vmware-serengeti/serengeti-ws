@@ -258,4 +258,5 @@ public class Constants {
    public static final String PASSWORD_CHARACTER_REQUIREMENT = "Passwords can include only alphanumeric characters ([0-9, a-z, A-Z]) and the following special characters: _, @, #, $, %, ^, &, *";
    public static final String PASSWORD_HINT = "Password are from " + PASSWORD_MIN_LENGTH + " to " + PASSWORD_MAX_LENGTH + " characters, and can include alphanumeric characters ([0-9, a-z, A-Z]) and the following special characters: _, @, #, $, %, ^, &, *";
    public static final String FAILED_NODES_MESSAGE = "The failed nodes: ";
+   public static final String IRONFAN = "Ironfan";
 }

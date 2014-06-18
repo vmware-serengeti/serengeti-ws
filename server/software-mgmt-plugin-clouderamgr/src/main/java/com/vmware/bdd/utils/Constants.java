@@ -26,6 +26,8 @@ public interface Constants {
    public static final String CM_PASSWORD = "admin";
    public static final String CDH_REPO_PREFIX = "CDH";
 
+   public static final String DISTRO_VENDOR = "CDH";
+
    public static final String CMS_NAME_TOKEN_DELIM = "_";
 
    public static final int VERSION_UNBOUNDED = -1;

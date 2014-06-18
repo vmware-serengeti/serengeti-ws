@@ -184,7 +184,7 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
       /* if (!CommonUtil.isBlank(createSpec.getAppManager())) {
-         createSpec.setAppManager(appManagerService.getNameByType("Ironfan")[0]);
+         createSpec.setAppManager(appManagerService.getNameByType(Constants.IRONFAN)[0]);
       } else {
          ApplicationManager applicationManager = appManagerService.findPluginByName(createSpec.getAppManager());
          if (applicationManager == null) {
@@ -870,6 +870,20 @@ public class RestResource {
    }
 
    /**
+    * Get available distributions information of application manager
+    * @return A list of distribution information
+    */
+   @RequestMapping(value = "/{appManager}/distros", method = RequestMethod.GET, produces = "application/json")
+   @ResponseBody
+   public List<DistroRead> getDistros(
+         @PathVariable("appManager") String appManager) {
+      if(CommonUtil.isBlank(appManager) || Constants.IRONFAN.equalsIgnoreCase(appManager)) {
+         throw BddException.INVALID_PARAMETER("appManager", appManager);
+      }
+      return distroManager.getPluginSupportDistro(appManager);
+   }
+
+   /**
     * Get the distribution information by its name such as apache, bigtop, cdh, intel, gphd, hdp, mapr, phd,etc.
     * @param distroName
     * @return The distribution information
@@ -883,6 +897,31 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("distro name", distroName);
       }
       DistroRead distro = distroManager.getDistroByName(distroName);
+      if (distro == null) {
+         throw BddException.NOT_FOUND("Distro", distroName);
+      }
+
+      return distro;
+   }
+
+   /**
+    * Get the distribution information of application manager by its name .
+    * @param distroName
+    * @return The distribution information
+    */
+   @RequestMapping(value = "/{appManager}/distro/{distroName}", method = RequestMethod.GET, produces = "application/json")
+   @ResponseBody
+   public DistroRead getDistroByName(
+         @PathVariable("appManager") String appManager,
+         @PathVariable("distroName") String distroName) {
+      if(CommonUtil.isBlank(appManager) || Constants.IRONFAN.equalsIgnoreCase(appManager)) {
+         throw BddException.INVALID_PARAMETER("appManager", appManager);
+      }
+      if (CommonUtil.isBlank(distroName)
+            || !CommonUtil.validateDistroName(distroName)) {
+         throw BddException.INVALID_PARAMETER("distro name", distroName);
+      }
+      DistroRead distro = distroManager.getDistroByName(appManager, distroName);
       if (distro == null) {
          throw BddException.NOT_FOUND("Distro", distroName);
       }

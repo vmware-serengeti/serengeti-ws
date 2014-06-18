@@ -33,8 +33,22 @@ public class DistroRestClient {
       return restClient.getObject(id, DistroRead.class, path, httpverb, false);
    }
 
+   public DistroRead get(String appManager, String id) {
+      final String path = appManager + "/" + Constants.REST_PATH_DISTRO;
+      final HttpMethod httpverb = HttpMethod.GET;
+
+      return restClient.getObject(id, DistroRead.class, path, httpverb, false);
+   }
+
    public DistroRead[] getAll() {
       final String path = Constants.REST_PATH_DISTROS;
+      final HttpMethod httpverb = HttpMethod.GET;
+
+      return restClient.getAllObjects(DistroRead[].class, path, httpverb, false);
+   }
+
+   public DistroRead[] getAll(String appManager) {
+      final String path = appManager + "/" + Constants.REST_PATH_DISTROS;
       final HttpMethod httpverb = HttpMethod.GET;
 
       return restClient.getAllObjects(DistroRead[].class, path, httpverb, false);

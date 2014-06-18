@@ -65,7 +65,6 @@ import com.vmware.bdd.exception.UniqueConstraintViolationException;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.IClusteringService;
-import com.vmware.bdd.service.resmgmt.IAppManagerService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
@@ -77,6 +76,7 @@ import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
 
@@ -90,7 +90,6 @@ public class ClusterConfigManager {
    private DistroManager distroMgr;
    private RackInfoManager rackInfoMgr;
    private IDatastoreService datastoreMgr;
-   private IAppManagerService appManagerService;
    private IClusterEntityManager clusterEntityMgr;
    private IClusteringService clusteringService;
 
@@ -149,15 +148,6 @@ public class ClusterConfigManager {
       this.networkMgr = networkMgr;
    }
 
-   public IAppManagerService getAppManagerService() {
-      return appManagerService;
-   }
-
-   @Autowired
-   public void setAppManagerService(IAppManagerService appManagerService) {
-      this.appManagerService = appManagerService;
-   }
-
    public IClusterEntityManager getClusterEntityMgr() {
       return clusterEntityMgr;
    }
@@ -191,13 +181,18 @@ public class ClusterConfigManager {
       List<String> failedMsgList = new ArrayList<String>();
       List<String> warningMsgList = new ArrayList<String>();
 
-      DistroRead distro = distroMgr.getDistroByName(cluster.getDistro());
-      if (cluster.getDistro() == null || distro == null) {
-         throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
-      }
       String appManager = cluster.getAppManager();
       if (appManager == null) {
-          appManager = new String("Ironfan");//TODO(qjin):refactor
+         appManager = Constants.IRONFAN;//TODO(qjin):refactor
+      }
+      DistroRead distro = null;
+      if (Constants.IRONFAN.equalsIgnoreCase(appManager)) {
+         distro = distroMgr.getDistroByName(cluster.getDistro());
+      } else {
+         distro = distroMgr.getDistroByName(appManager, cluster.getDistro());
+      }
+      if (cluster.getDistro() == null || distro == null) {
+         throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
       }
       SoftwareManager softwareManager = softwareManagerCollector.getSoftwareManager(appManager);
       if (softwareManager == null) {
@@ -304,8 +299,13 @@ public class ClusterConfigManager {
          if (clusterEntity.getTopologyPolicy() == TopologyType.HVE) {
             boolean hveSupported = false;
             if (clusterEntity.getDistro() != null) {
-               DistroRead dr =
-                     distroMgr.getDistroByName(clusterEntity.getDistro());
+               
+               DistroRead dr =null;
+               if (Constants.IRONFAN.equalsIgnoreCase(appManager)) {
+                  dr = distroMgr.getDistroByName(clusterEntity.getDistro());                  
+               } else {
+                  dr = distroMgr.getDistroByName(appManager, clusterEntity.getDistro());
+               }
                if (dr != null) {
                   hveSupported = dr.isHveSupported();
                }
@@ -691,7 +691,8 @@ public class ClusterConfigManager {
                   .equalsIgnoreCase(clusterEntity.getAppManager())) {
          enumRoles = getEnumRoles(group.getRoles(), distro);
          if (enumRoles.isEmpty()) {
-            throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(group.getName());
+            throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(group
+                  .getName());
          }
 
          // We will respect the original orders as users input through LinkedHashSet for group including
@@ -735,8 +736,8 @@ public class ClusterConfigManager {
             || Constants.IRONFAN
                   .equalsIgnoreCase(clusterEntity.getAppManager())) {
          GroupType groupType = GroupType.fromHadoopRole(enumRoles);
-         CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity, groupType,
-               sharedPattern, localPattern);
+         CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity,
+               groupType, sharedPattern, localPattern);
       }
       groupEntity.setHaFlag(group.getHaFlag());
       if (group.getConfiguration() != null
@@ -818,9 +819,12 @@ public class ClusterConfigManager {
          ClusterCreate clusterConfig, boolean needAllocIp) {
       logger.debug("begin to expand config for cluster "
             + clusterEntity.getName());
-
-      CommonClusterExpandPolicy.expandDistro(clusterEntity, clusterConfig,
-            distroMgr);
+      if (CommonUtil.isBlank(clusterEntity.getAppManager())
+            || clusterEntity.getAppManager()
+                  .equalsIgnoreCase(Constants.IRONFAN)) {
+         CommonClusterExpandPolicy.expandDistro(clusterEntity, clusterConfig,
+               distroMgr);
+      }
       clusterConfig.setDistroVendor(clusterEntity.getDistroVendor());
       clusterConfig.setDistroVersion(clusterEntity.getDistroVersion());
       clusterConfig.setAppManager(clusterEntity.getAppManager());

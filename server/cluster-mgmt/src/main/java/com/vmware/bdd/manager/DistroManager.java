@@ -37,6 +37,7 @@ import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -46,6 +47,9 @@ import com.google.gson.reflect.TypeToken;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.exception.ClusterConfigException;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
@@ -175,6 +179,9 @@ public class DistroManager {
    private static String distrosManifestUrl;
    private static final Logger logger = Logger.getLogger(DistroManager.class);
 
+   @Autowired
+   private SoftwareManagerCollector softwareManagerCollector;
+
    static {
       distroRootUrl = Configuration.getString("serengeti.distro_root", distroRootUrl);
       distrosManifestUrl = distroRootUrl + "/manifest";
@@ -192,6 +199,31 @@ public class DistroManager {
       } catch (BddException ex) {
          logger.error("failed to load distro manifest");
       }
+   }
+
+   public List<DistroRead> getPluginSupportDistro(String appManager) {
+      SoftwareManager softwareManager =
+            softwareManagerCollector.getSoftwareManager(appManager);
+      if (softwareManager == null) {
+         logger.error("Failed to get softwareManger.");
+         throw new ClusterConfigException(null, "Failed to get softwareManager.");
+      }
+      if (softwareManager.getType()
+            .equalsIgnoreCase(Constants.CLOUDERA_MANAGER)) {
+         List<HadoopStack> hadoopStacks = softwareManager.getSupportedStacks();
+         if (hadoopStacks != null && hadoopStacks.size() > 0) {
+            List<DistroRead> distros = new ArrayList<DistroRead>();
+            for (HadoopStack hadoopStack : hadoopStacks) {
+               DistroRead distro = new DistroRead();
+               distro.setName(hadoopStack.getDistro());
+               distro.setVendor(hadoopStack.getVendor());
+               distro.setVersion(hadoopStack.getFullVersion());
+               distros.add(distro);
+            }
+            return distros;
+         }
+      }
+      return null;
    }
 
    private String readDistroManifest() throws Exception {
@@ -350,6 +382,18 @@ public class DistroManager {
          }
       }
       return dr;
+   }
+
+   public DistroRead getDistroByName(final String appManager, final String name) {
+      List<DistroRead> distros = this.getPluginSupportDistro(appManager);
+      if (distros != null && distros.size() > 0) {
+         for (DistroRead distro : distros) {
+            if (distro.getName().equalsIgnoreCase(name)) {
+               return distro;
+            }
+         }
+      }
+      return null;
    }
 
    public List<String> getPackageRepos(String distroName) {

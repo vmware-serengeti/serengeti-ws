@@ -29,6 +29,7 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
 public class ClusterSpecFactory {
@@ -242,6 +243,11 @@ public class ClusterSpecFactory {
 
       //--password
       newSpec.setPassword(spec.getPassword());
+
+      // --appManager
+      if(!CommonUtil.isBlank(spec.getAppManager())) {
+         newSpec.setAppManager(spec.getAppManager());
+      }
 
       // --distro
       if (spec.getDistro() != null) {

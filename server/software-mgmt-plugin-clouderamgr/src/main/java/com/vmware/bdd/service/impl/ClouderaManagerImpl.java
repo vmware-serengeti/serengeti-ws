@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.vmware.bdd.exception.CmException;
 import org.apache.commons.lang.WordUtils;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -57,13 +56,14 @@ import com.cloudera.api.v6.RootResourceV6;
 import com.cloudera.api.v6.ServicesResourceV6;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
+import com.vmware.bdd.exception.CmException;
 import com.vmware.bdd.model.CmClusterDef;
-import com.vmware.bdd.model.support.AvailableManagementService;
 import com.vmware.bdd.model.CmNodeDef;
-import com.vmware.bdd.model.support.AvailableParcelStage;
 import com.vmware.bdd.model.CmRoleDef;
 import com.vmware.bdd.model.CmServiceDef;
 import com.vmware.bdd.model.CmServiceRoleType;
+import com.vmware.bdd.model.support.AvailableManagementService;
+import com.vmware.bdd.model.support.AvailableParcelStage;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
@@ -111,7 +111,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public String getType() {
-      return null;
+      return "ClouderaManager";
    }
 
    @Override
@@ -121,7 +121,18 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public List<HadoopStack> getSupportedStacks() {
-      return null;
+      List<HadoopStack> list = new ArrayList<HadoopStack>();
+      HadoopStack cdh4 = new HadoopStack();
+      cdh4.setDistro("CDH4");
+      cdh4.setVendor("CDH");
+      cdh4.setFullVersion("CDH4");
+      list.add(cdh4);
+      HadoopStack cdh5 = new HadoopStack();
+      cdh5.setDistro("CDH5");
+      cdh5.setVendor("CDH");
+      cdh5.setFullVersion("CDH5");
+      list.add(cdh5);
+      return list;
    }
 
    @Override

@@ -20,6 +20,7 @@ import java.util.List;
    private String fullVersion;
    private boolean hveSupported;
    private List<String> roles;
+   private String vendor;
 
    public String getDistro() {
       return distro;
@@ -51,5 +52,13 @@ import java.util.List;
 
    public void setRoles(List<String> roles) {
       this.roles = roles;
+   }
+
+   public String getVendor() {
+      return vendor;
+   }
+
+   public void setVendor(String vendor) {
+      this.vendor = vendor;
    }
 }

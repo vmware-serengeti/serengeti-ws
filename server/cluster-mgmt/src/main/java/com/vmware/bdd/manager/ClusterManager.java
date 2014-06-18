@@ -383,8 +383,16 @@ public class ClusterManager {
       if (CommonUtil.isBlank(createSpec.getDistro())) {
          setDefaultDistro(createSpec);
       }
-      DistroRead distroRead =
-            getDistroManager().getDistroByName(createSpec.getDistro());
+      DistroRead distroRead = null;
+      if (CommonUtil.isBlank(createSpec.getAppManager())
+            || Constants.IRONFAN.equalsIgnoreCase(createSpec.getAppManager())) {
+         distroRead =
+               getDistroManager().getDistroByName(createSpec.getDistro());
+      } else {
+         distroRead =
+               this.getDistroManager().getDistroByName(
+                     createSpec.getAppManager(), createSpec.getDistro());
+      }
       createSpec.setDistroVendor(distroRead.getVendor());
       createSpec.setDistroVersion(distroRead.getVersion());
       // create auto rps if vc cluster/rp is specified

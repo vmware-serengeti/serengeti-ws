@@ -860,6 +860,11 @@ public class ClusterCreate implements Serializable {
       return null;
    }
 
+   public String getDefaultDistroName(String appManager) {
+
+      return Constants.CLOUDERA_MANAGER_DEFAULT_DISTRO;
+   }
+
    public void validateCDHVersion(List<String> warningMsgList) {
       // If current distro's version is greater than cdh4.2.1, the FQDN must be configured.
       if (this.getDistroVendor().equalsIgnoreCase(Constants.CDH_VENDOR)) {
