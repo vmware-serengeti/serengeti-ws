@@ -34,6 +34,11 @@ import com.vmware.bdd.utils.CommonUtil;
 @Service
 public class SoftwareManagerCollector {
 
+   /**
+    *
+    */
+   private static final String IRONFAN_SOFTWARE_MANAGER = "ironfan";
+
    private static final Logger logger = Logger
          .getLogger(SoftwareManagerCollector.class);
 
@@ -115,6 +120,9 @@ public class SoftwareManagerCollector {
     * @return null if the name does not exist
     */
    public synchronized SoftwareManager getSoftwareManager(String name) {
+      if (CommonUtil.isBlank(name)) {
+         return cache.get(IRONFAN_SOFTWARE_MANAGER);
+      }
       if (cache.containsKey(name)) {
          return cache.get(name);
       }
@@ -129,6 +137,6 @@ public class SoftwareManagerCollector {
       // Should block request until initialized
       // temporarily load ironfan software manager instance here
       SoftwareManager ironfanSoftwareManager = new DefaultSoftwareManagerImpl();
-      cache.put("ironfan", ironfanSoftwareManager);
+      cache.put(IRONFAN_SOFTWARE_MANAGER, ironfanSoftwareManager);
    }
 }
