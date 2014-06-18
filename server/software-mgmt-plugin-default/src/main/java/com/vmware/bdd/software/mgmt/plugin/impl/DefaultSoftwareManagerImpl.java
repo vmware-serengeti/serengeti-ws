@@ -108,7 +108,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
     @Override
     public boolean validateRoles(ClusterBlueprint blueprint, List<String> roles) throws SoftwareManagementPluginException {
         assert (blueprint != null && roles != null);
-        List<String> failedMsgList = new ArrayList<>();
+        List<String> failedMsgList = new ArrayList<String>();
         // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
         checkClusterRoles(blueprint, roles, failedMsgList);
         validateNodeGroupRoles(failedMsgList, blueprint);
@@ -172,7 +172,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
     */
     private boolean validateNodeGroupRoles(List<String> failedMsgList, ClusterBlueprint blueprint) {
         boolean valid = true;
-        Set<String> roles = new HashSet<>();
+        Set<String> roles = new HashSet<String>();
         List<NodeGroupInfo> nodeGroups = blueprint.getNodeGroups();
         if (nodeGroups == null) {
             return false;
