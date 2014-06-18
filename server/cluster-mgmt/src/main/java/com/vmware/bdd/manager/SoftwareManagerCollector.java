@@ -26,6 +26,7 @@ import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.service.resmgmt.IAppManagerService;
+import com.vmware.bdd.software.mgmt.plugin.impl.DefaultSoftwareManagerImpl;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManagerFactory;
 import com.vmware.bdd.utils.CommonUtil;
@@ -126,5 +127,8 @@ public class SoftwareManagerCollector {
    public synchronized void loadSoftwareManagers() {
       // TODO: load all software manager instances into memory while the Tomcat service is started
       // Should block request until initialized
+      // temporarily load ironfan software manager instance here
+      SoftwareManager ironfanSoftwareManager = new DefaultSoftwareManagerImpl();
+      cache.put("ironfan", ironfanSoftwareManager);
    }
 }

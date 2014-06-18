@@ -15,13 +15,11 @@
 package com.vmware.bdd.model;
 
 import com.google.gson.annotations.Expose;
-import com.vmware.aurora.util.StringUtil;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import org.apache.commons.lang.StringUtils;
 
-import javax.management.relation.RoleInfo;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +65,7 @@ public class CmClusterDef implements Serializable {
    public CmClusterDef(ClusterBlueprint blueprint) {
       this.name = blueprint.getName();
       this.displayName = blueprint.getName();
-      this.version = blueprint.getHadoopStack().getDisro();
+      this.version = blueprint.getHadoopStack().getDistro();
       this.fullVersion = blueprint.getHadoopStack().getFullVersion();
       this.isParcel = true;
       this.nodes = new ArrayList<CmNodeDef>();

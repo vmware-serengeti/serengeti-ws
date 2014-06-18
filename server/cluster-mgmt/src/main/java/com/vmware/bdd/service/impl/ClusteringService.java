@@ -83,6 +83,7 @@ import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.ElasticityScheduleManager;
+import com.vmware.bdd.manager.SoftwareManagerCollector;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
 import com.vmware.bdd.placement.Container;
@@ -152,6 +153,8 @@ public class ClusteringService implements IClusteringService {
    private IClusterCloneService cloneService;
 
    private ClusterManager clusterManager;
+
+   private SoftwareManagerCollector softwareManagerCollector;
 
    @Autowired
    public void setClusterManager(ClusterManager clusterManager) {
@@ -253,6 +256,16 @@ public class ClusteringService implements IClusteringService {
       this.elasticityScheduleMgr = elasticityScheduleMgr;
    }
 
+   public SoftwareManagerCollector getSoftwareManagerCollector() {
+      return softwareManagerCollector;
+   }
+
+   @Autowired
+   public void setSoftwareManagerCollector(
+         SoftwareManagerCollector softwareManagerCollector) {
+      this.softwareManagerCollector = softwareManagerCollector;
+   }
+
    public synchronized void init() {
       if (!initialized) {
          // XXX hack to approve bootstrap instance id, should be moved out of Configuration
@@ -299,6 +312,7 @@ public class ClusteringService implements IClusteringService {
          clusterInitializerService.transformClusterStatus();
          elasticityScheduleMgr.start();
          configureAlarm();
+         softwareManagerCollector.loadSoftwareManagers();
          initialized = true;
       }
    }
