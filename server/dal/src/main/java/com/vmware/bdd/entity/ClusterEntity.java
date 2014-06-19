@@ -173,7 +173,7 @@ public class ClusterEntity extends EntityBase {
       return appmanager;
    }
 
-   public void setAppManagerEntity(String appmanager) {
+   public void setAppManagerName(String appmanager) {
       this.appmanager = appmanager;
    }
 
