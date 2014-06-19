@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.AppManagerAdd;
+import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.service.resmgmt.IAppManagerService;
 import com.vmware.bdd.software.mgmt.plugin.impl.DefaultSoftwareManagerImpl;
@@ -58,6 +59,8 @@ public class SoftwareManagerCollector {
     */
    public synchronized void createSoftwareManager(AppManagerAdd appManagerAdd) {
 
+      logger.info("Start to create software manager for " + appManagerAdd);
+
       if (appManagerService.findAppManagerByName(appManagerAdd.getName()) != null) {
          logger.error("Name " + appManagerAdd.getName() + " already exists.");
          throw SoftwareManagerCollectorException.DUPLICATE_NAME(appManagerAdd
@@ -73,6 +76,8 @@ public class SoftwareManagerCollector {
          throw SoftwareManagerCollectorException.CLASS_NOT_DEFINED(appManagerAdd
                .getProvider());
       }
+      logger.info("Factory class name is " + factoryClassName);
+
       Class<?> factoryClass;
       try {
          factoryClass = Class.forName(factoryClassName);
@@ -82,6 +87,7 @@ public class SoftwareManagerCollector {
          throw SoftwareManagerCollectorException.CLASS_NOT_FOUND_ERROR(e,
                factoryClassName);
       }
+      logger.info("Factory class loaded.");
       SoftwareManagerFactory softwareManagerFactory = null;
       try {
          softwareManagerFactory =
@@ -95,11 +101,23 @@ public class SoftwareManagerCollector {
          throw SoftwareManagerCollectorException.ILLEGAL_ACCESS(e,
                factoryClassName);
       }
-      SoftwareManager softwareManager =
-            softwareManagerFactory.getSoftwareManager(appManagerAdd.getHost(),
-                  appManagerAdd.getUsername(), appManagerAdd.getPassword()
-                        .toCharArray(), appManagerAdd.getPrivateKey());
 
+      logger.info("Start to invoke software manager factory to create software manager.");
+      String url =
+            "https://" + appManagerAdd.getHost() + ":"
+                  + appManagerAdd.getPort();
+      SoftwareManager softwareManager = null;
+      try {
+         softwareManager =
+               softwareManagerFactory.getSoftwareManager(url, appManagerAdd
+                     .getUsername(), appManagerAdd.getPassword().toCharArray(),
+                     appManagerAdd.getPrivateKey());
+      } catch (Exception ex) {
+         logger.error("Create software manager failed: " + ex.getMessage());
+         throw BddException.INTERNAL(ex, "Create software manager failed.");
+      }
+
+      logger.info("Check echo() of software manager.");
       // validate instance is reachable
       if (!softwareManager.echo()) {
          logger.error("Cannot connect to Software Manager "
@@ -108,6 +126,7 @@ public class SoftwareManagerCollector {
                .getName());
       }
 
+      logger.info("Add app manager to meta-db.");
       // add to meta-db through AppManagerService
       appManagerService.addAppManager(appManagerAdd);
       cache.put(appManagerAdd.getName(), softwareManager);

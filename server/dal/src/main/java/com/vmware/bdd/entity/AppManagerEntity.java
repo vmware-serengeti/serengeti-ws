@@ -32,12 +32,15 @@ import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
  */
 
 @Entity
-@SequenceGenerator(name = "IdSequence", sequenceName = "plugin_seq", allocationSize = 1)
-@Table(name = "plugin")
+@SequenceGenerator(name = "IdSequence", sequenceName = "appmanager_seq", allocationSize = 1)
+@Table(name = "appmanager")
 public class AppManagerEntity extends EntityBase {
 
    @Column(name = "name", unique = true, nullable = false)
    private String name;
+
+   @Column(name = "provider", nullable = false)
+   private String provider;
 
    @Column(name = "host")
    private String host;
@@ -59,8 +62,9 @@ public class AppManagerEntity extends EntityBase {
    public AppManagerEntity() {
    }
 
-   public AppManagerEntity(String name, String host, int port, String username, String password, String privateKey) {
+   public AppManagerEntity(String name, String provider, String host, int port, String username, String password, String privateKey) {
       this.name = name;
+      this.provider = provider;
       this.host = host;
       this.port = port;
       this.username = username;
@@ -70,6 +74,7 @@ public class AppManagerEntity extends EntityBase {
 
    public AppManagerEntity(AppManagerAdd appManagerAdd) {
       this.name = appManagerAdd.getName();
+      this.provider = appManagerAdd.getProvider();
       this.host = appManagerAdd.getHost();
 //      this.port = this.provider.getDefaultPort();
       if (appManagerAdd.getPort() != -1) {
@@ -86,6 +91,14 @@ public class AppManagerEntity extends EntityBase {
 
    public void setName(String name) {
       this.name = name;
+   }
+
+   public String getProvider() {
+      return provider;
+   }
+
+   public void setProvider(String provider) {
+      this.provider = provider;
    }
 
    public String getHost() {

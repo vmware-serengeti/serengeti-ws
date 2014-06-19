@@ -396,11 +396,6 @@
          </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
-            <artifactId>software-mgmt</artifactId>
-            <version>${serengeti.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>com.vmware.bdd</groupId>
             <artifactId>software-management</artifactId>
             <version>${serengeti.version}</version>
          </dependency>
@@ -422,6 +417,16 @@
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>software-mgmt-plugin-default</artifactId>
+            <version>${serengeti.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>software-mgmt-plugin-clouderamgr</artifactId>
+            <version>${serengeti.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>software-mgmt-plugin-ambari</artifactId>
             <version>${serengeti.version}</version>
          </dependency>
       </dependencies>

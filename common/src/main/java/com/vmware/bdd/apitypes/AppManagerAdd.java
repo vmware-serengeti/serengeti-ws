@@ -15,6 +15,7 @@
 
 package com.vmware.bdd.apitypes;
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 
 /**
@@ -102,6 +103,6 @@ public class AppManagerAdd {
    }
 
    public String toString() {
-      return null; // TODO
+      return (new Gson()).toJson(this);
    }
 }

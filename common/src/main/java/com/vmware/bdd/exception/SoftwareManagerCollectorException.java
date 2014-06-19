@@ -27,7 +27,7 @@ public class SoftwareManagerCollectorException extends BddException {
    }
 
    public static SoftwareManagerCollectorException DUPLICATE_NAME(String name) {
-      return new SoftwareManagerCollectorException(null, "DUPLICATE_NAME");
+      return new SoftwareManagerCollectorException(null, "DUPLICATE_NAME", name);
    }
 
    public static SoftwareManagerCollectorException CLASS_NOT_FOUND_ERROR(
@@ -38,19 +38,21 @@ public class SoftwareManagerCollectorException extends BddException {
 
    public static SoftwareManagerCollectorException CAN_NOT_INSTANTIATE(
          Exception ex, String name) {
-      return new SoftwareManagerCollectorException(ex, "CAN_NOT_INSTANTIATE");
+      return new SoftwareManagerCollectorException(ex, "CAN_NOT_INSTANTIATE",
+            name);
    }
 
-   public static SoftwareManagerCollectorException ILLEGAL_ACCESS(
-         Exception ex, String name) {
-      return new SoftwareManagerCollectorException(ex, "ILLEGAL_ACCESS");
+   public static SoftwareManagerCollectorException ILLEGAL_ACCESS(Exception ex,
+         String name) {
+      return new SoftwareManagerCollectorException(ex, "ILLEGAL_ACCESS", name);
    }
 
    public static SoftwareManagerCollectorException ECHO_FAILURE(String name) {
-      return new SoftwareManagerCollectorException(null, "ECHO_FAILURE");
+      return new SoftwareManagerCollectorException(null, "ECHO_FAILURE", name);
    }
 
    public static SoftwareManagerCollectorException CLASS_NOT_DEFINED(String name) {
-      return new SoftwareManagerCollectorException(null, "CLASS_NOT_DEFINED");
+      return new SoftwareManagerCollectorException(null, "CLASS_NOT_DEFINED",
+            name);
    }
 }
