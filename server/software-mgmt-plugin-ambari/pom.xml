@@ -15,7 +15,7 @@
 
 	<properties>
 		<jackson.version>2.1.0</jackson.version>
-		<cxf.version>2.7.11</cxf.version>
+		<cxf.version>2.7.4</cxf.version>
 	</properties>
 
 	<dependencies>
