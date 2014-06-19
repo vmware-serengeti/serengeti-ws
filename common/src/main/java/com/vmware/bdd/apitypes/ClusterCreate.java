@@ -14,18 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
-import java.io.Serializable;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.regex.Pattern;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
@@ -36,12 +24,16 @@ import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.spectypes.HadoopDistroMap;
 import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.spectypes.ServiceType;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
+
+import java.io.Serializable;
+import java.net.URI;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Cluster creation spec
@@ -478,108 +470,6 @@ public class ClusterCreate implements Serializable {
                .append(invalidNodeGroupNames.toString())
                .append(".").toString());
       }
-   }
-
-   /*
-    * Validate role dependency:
-    * Case 1: compute node group with external hdfs node group.
-    * Case 2: The dependency check of HDFS, MapReduce, HBase, Zookeeper,
-    * Hadoop Client(Pig, Hive, Hadoop Client), and HBase Client Combinations. The rules are below:
-    * - HDFS includes roles of "haddop_namenode" and "hadoop_datanode";
-    * - MapReduce includes roles of "haddop_jobtracker" and "hadoop_takstracker";
-    * - HBase includes roles of "hbase_master" and "hbase_regionserver;
-    * - Zookeeper includes a single role of "zookeeper";
-    * - Hadoop Client includes roles of "hadoop_client";
-    * - HBase client includes roles of "hbase_client";
-    * - Pig includes roles of "pig";
-    * - Hive includes roles of "hive";
-    * - Hive Server includes roles of "hive_server";
-    * - MapReduce depends on HDFS, HBase depends on HDFS and Zookeeper;
-    * - Pig, Hive, Hive Server depends on MapReduce, HBase Client depends on HBase;
-    * - Hadoop Client depends on HDFS.
-    */
-   public boolean validateNodeGroupRoles(List<String> failedMsgList) {
-      boolean valid = true;
-      Set<String> roles = new HashSet<String>();
-      if (getNodeGroups() == null) {
-         return false;
-      }
-
-      for (NodeGroupCreate ngc : getNodeGroups()) {
-         List<String> nodeGroupRoles = ngc.getRoles();
-         if (nodeGroupRoles == null || nodeGroupRoles.isEmpty()) {
-            valid = false;
-            failedMsgList.add("Missing role attribute for node group "
-                  + ngc.getName() + ".");
-         } else {
-            roles.addAll(ngc.getRoles());
-         }
-      }
-
-      if (validateHDFSUrl()) {
-         if (getNodeGroups() == null) {
-            valid = false;
-            failedMsgList.add("Missing JobTracker or TaskTracker role.");
-         } else {
-            if (roles.contains("hadoop_namenode")
-                  || roles.contains("hadoop_datanode")) {
-               valid = false;
-               failedMsgList.add("Duplicate NameNode or DataNode role.");
-            }
-            if (!roles.contains("hadoop_jobtracker")
-                  && !roles.contains("hadoop_resourcemanager")) {
-               valid = false;
-               failedMsgList.add("Missing JobTracker or ResourceManager role.");
-            }
-            if (!roles.contains("hadoop_tasktracker")
-                  && !roles.contains("hadoop_nodemanager")) {
-               valid = false;
-               failedMsgList.add("Missing TaskTracker or NodeManager role.");
-            }
-         }
-      } else { //case 2
-         // get involved service types of the spec file
-         EnumSet<ServiceType> serviceTypes = EnumSet.noneOf(ServiceType.class);
-         for (ServiceType service : ServiceType.values()) {
-            //identify partially match
-            int matched = 0;
-            for (HadoopRole role : service.getRoles()) {
-               if (roles.contains(role.toString())) {
-                  matched++;
-               }
-            }
-            if (matched == service.getRoles().size()) {
-               serviceTypes.add(service);
-            } else if (matched != 0) {
-               failedMsgList
-                     .add("Cannot find one or more roles in " + service + " " + service.getRoles()
-                           + " in the cluster specification file.");
-               valid = false;
-            }
-         }
-
-         boolean isYarn = serviceTypes.contains(ServiceType.YARN);
-         if (isYarn && serviceTypes.contains(ServiceType.MAPRED)) {
-            failedMsgList.add("You cannot set " + ServiceType.MAPRED + " "
-                  + ServiceType.MAPRED.getRoles() + " and " + ServiceType.YARN
-                  + " " + ServiceType.YARN.getRoles()
-                  + " \nat the same time.");
-            valid = false;
-         }
-         //validate the relationships of services
-         if (valid == true && !serviceTypes.isEmpty()) {
-            for (ServiceType service : serviceTypes) {
-               EnumSet<ServiceType> dependency = service.depend(isYarn);
-               if (dependency != null && !serviceTypes.containsAll(dependency)) {
-                  failedMsgList.add("Some dependent services " + dependency
-                        + " " + service
-                        + " relies on cannot be found in the spec file.");
-                  valid = false;
-               }
-            }
-         }
-      }
-      return valid;
    }
 
    public boolean hasHDFSUrlConfigured() {

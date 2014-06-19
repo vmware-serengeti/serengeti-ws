@@ -14,26 +14,17 @@
  ***************************************************************************/
 package com.vmware.bdd.software.mgmt.plugin.impl;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
-import com.vmware.bdd.software.mgmt.plugin.model.ChefServerUtils;
-import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
-import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
-import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
-import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.*;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.ServiceType;
 
+import java.net.URI;
+import java.util.*;
+
 
 public class DefaultSoftwareManagerImpl implements SoftwareManager {
-
    @Override
    public String getName() {
       // TODO Auto-generated method stub
@@ -180,7 +171,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    * - Pig, Hive, Hive Server depends on MapReduce, HBase Client depends on HBase;
    * - Hadoop Client depends on HDFS.
    */
-   private boolean validateRoleDependency(List<String> failedMsgList,
+   public boolean validateRoleDependency(List<String> failedMsgList,
          ClusterBlueprint blueprint) {
       boolean valid = true;
       Set<String> roles = new HashSet<String>();

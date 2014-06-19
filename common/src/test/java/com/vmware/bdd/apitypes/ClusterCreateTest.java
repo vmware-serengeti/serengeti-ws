@@ -14,20 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
@@ -35,9 +21,15 @@ import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.spectypes.ServiceType;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import java.util.*;
+
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertTrue;
 
 public class ClusterCreateTest {
 
@@ -202,46 +194,6 @@ public class ClusterCreateTest {
       cluster.validateStorageType(failedMsgList);
       assertEquals(1, failedMsgList.size());
       assertEquals(Constants.TEMPFS_NOT_ALLOWED, failedMsgList.get(0));
-   }
-
-   @Test
-   public void testValidateNodeGroupRoles() {
-      ClusterCreate cluster = new ClusterCreate();
-      List<String> failedMsgList = new ArrayList<String>();
-      assertEquals(false, cluster.validateNodeGroupRoles(failedMsgList));
-      NodeGroupCreate compute = new NodeGroupCreate();
-      NodeGroupCreate data = new NodeGroupCreate();
-      cluster.setNodeGroups(new NodeGroupCreate[] { compute, data });
-      assertEquals(false, cluster.validateNodeGroupRoles(failedMsgList));
-      assertEquals(2, failedMsgList.size());
-      failedMsgList.clear();
-      cluster.setExternalHDFS("hdfs://192.168.0.2:9000");
-      compute.setRoles(Arrays.asList(HadoopRole.HADOOP_TASKTRACKER.toString()));
-      data.setRoles(Arrays.asList(HadoopRole.HADOOP_DATANODE.toString()));
-      assertEquals(false, cluster.validateNodeGroupRoles(failedMsgList));
-      assertEquals(2, failedMsgList.size());
-      assertEquals("Duplicate NameNode or DataNode role.", failedMsgList.get(0));
-      assertEquals("Missing JobTracker or ResourceManager role.",
-            failedMsgList.get(1));
-      failedMsgList.clear();
-      cluster.setExternalHDFS("");
-      cluster.setNodeGroups(new NodeGroupCreate[] { compute });
-      assertEquals(false, cluster.validateNodeGroupRoles(failedMsgList));
-      assertEquals(1, failedMsgList.size());
-      assertEquals("Cannot find one or more roles in " + ServiceType.MAPRED + " "
-            + ServiceType.MAPRED.getRoles()
-            + " in the cluster specification file.", failedMsgList.get(0));
-      failedMsgList.clear();
-      NodeGroupCreate master = new NodeGroupCreate();
-      master.setRoles(Arrays.asList(HadoopRole.HADOOP_JOBTRACKER_ROLE
-            .toString()));
-      cluster.setNodeGroups(new NodeGroupCreate[] { master, compute });
-      assertEquals(false, cluster.validateNodeGroupRoles(failedMsgList));
-      assertEquals(1, failedMsgList.size());
-      assertEquals("Some dependent services " + EnumSet.of(ServiceType.HDFS)
-            + " " + ServiceType.MAPRED
-            + " relies on cannot be found in the spec file.",
-            failedMsgList.get(0));
    }
 
    @Test
