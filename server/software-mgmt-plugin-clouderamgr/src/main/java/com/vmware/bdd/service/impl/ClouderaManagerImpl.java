@@ -1032,8 +1032,14 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public List<String> isNodeGroupExtensible(NodeGroupInfo group) {
+   public List<String> validateScaling(NodeGroupInfo group) {
       // TODO Auto-generated method stub
       return new ArrayList<String>();
+   }
+
+   @Override
+   public void updateInfrastructure(ClusterBlueprint blueprint) {
+      // TODO Auto-generated method stub
+      
    }
 }

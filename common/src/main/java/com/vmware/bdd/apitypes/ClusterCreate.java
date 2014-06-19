@@ -641,17 +641,6 @@ public class ClusterCreate implements Serializable {
     * Validate nodeGroupCreates member formats and values in the ClusterCreate.
     */
    public void validateClusterCreate(List<String> failedMsgList, List<String> warningMsgList) {
-
-      // if hadoop2 namenode ha is enabled
-      boolean namenodeHACheck = false;
-      //role count
-      int masterCount = 0, jobtrackerCount = 0, resourcemanagerCount = 0, hbasemasterCount =
-            0, zookeeperCount = 0, workerCount = 0, numOfJournalNode = 0;
-      boolean appendWarningStr = false;
-      if (warningMsgList != null && warningMsgList.isEmpty()) {
-         appendWarningStr = true;
-      }
-
       //Find NodeGroupCreate array from current ClusterCreate instance.
       NodeGroupCreate[] nodeGroupCreates = getNodeGroups();
       AuAssert.check(nodeGroupCreates != null && nodeGroupCreates.length > 0);
@@ -677,119 +666,140 @@ public class ClusterCreate implements Serializable {
          checkInstanceNum(nodeGroupCreate, failedMsgList);
          // check CPU number and memory capacity
          checkCPUAndMemory(nodeGroupCreate, failedMsgList, warningMsgList);
+      }
 
-         // get node group role.
-         List<NodeGroupRole> groupRoles = getNodeGroupRoles(nodeGroupCreate);
-         if (groupRoles != null) {
-            for (NodeGroupRole role : groupRoles) {
-               switch (role) {
-               case MASTER:
-                  masterCount++;
-                  int numOfInstance = nodeGroupCreate.getInstanceNum();
-                  if (numOfInstance >= 0 && numOfInstance != 1) {
-                     if (numOfInstance != 2) { //namenode ha only support 2 nodes currently
+      validateRoleWithWarning(failedMsgList, warningMsgList);
+   }
+
+   public void validateRoleWithWarning(List<String> failedMsgList,
+         List<String> warningMsgList) {
+      NodeGroupCreate[] nodeGroupCreates = getNodeGroups();
+      AuAssert.check(nodeGroupCreates != null && nodeGroupCreates.length > 0);
+      //TODO emma: refactor
+      // if hadoop2 namenode ha is enabled
+      boolean namenodeHACheck = false;
+      //role count
+      int masterCount = 0, jobtrackerCount = 0, resourcemanagerCount = 0, hbasemasterCount =
+            0, zookeeperCount = 0, workerCount = 0, numOfJournalNode = 0;
+      boolean appendWarningStr = false;
+      if (warningMsgList != null && warningMsgList.isEmpty()) {
+         appendWarningStr = true;
+      }
+      if (appManager == null) {
+      for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
+            // get node group role.
+            List<NodeGroupRole> groupRoles = getNodeGroupRoles(nodeGroupCreate);
+            if (groupRoles != null) {
+               for (NodeGroupRole role : groupRoles) {
+                  switch (role) {
+                  case MASTER:
+                     masterCount++;
+                     int numOfInstance = nodeGroupCreate.getInstanceNum();
+                     if (numOfInstance >= 0 && numOfInstance != 1) {
+                        if (numOfInstance != 2) { //namenode ha only support 2 nodes currently
+                           collectInstanceNumInvalidateMsg(nodeGroupCreate,
+                                 failedMsgList);
+                        } else {
+                           namenodeHACheck = true;
+                        }
+                     }
+                     break;
+                  case JOB_TRACKER:
+                     jobtrackerCount++;
+                     if (nodeGroupCreate.getInstanceNum() >= 0
+                           && nodeGroupCreate.getInstanceNum() != 1) {
+                        failedMsgList.add(Constants.WRONG_NUM_OF_JOBTRACKER);
+                     }
+                     break;
+                  case RESOURCEMANAGER:
+                     resourcemanagerCount++;
+                     if (nodeGroupCreate.getInstanceNum() >= 0
+                           && nodeGroupCreate.getInstanceNum() != 1) {
+                        failedMsgList.add(Constants.WRONG_NUM_OF_RESOURCEMANAGER);
+                     }
+                     break;
+                  case HBASE_MASTER:
+                     hbasemasterCount++;
+                     if (nodeGroupCreate.getInstanceNum() == 0) {
                         collectInstanceNumInvalidateMsg(nodeGroupCreate,
                               failedMsgList);
-                     } else {
-                        namenodeHACheck = true;
                      }
-                  }
-                  break;
-               case JOB_TRACKER:
-                  jobtrackerCount++;
-                  if (nodeGroupCreate.getInstanceNum() >= 0
-                        && nodeGroupCreate.getInstanceNum() != 1) {
-                     failedMsgList.add(Constants.WRONG_NUM_OF_JOBTRACKER);
-                  }
-                  break;
-               case RESOURCEMANAGER:
-                  resourcemanagerCount++;
-                  if (nodeGroupCreate.getInstanceNum() >= 0
-                        && nodeGroupCreate.getInstanceNum() != 1) {
-                     failedMsgList.add(Constants.WRONG_NUM_OF_RESOURCEMANAGER);
-                  }
-                  break;
-               case HBASE_MASTER:
-                  hbasemasterCount++;
-                  if (nodeGroupCreate.getInstanceNum() == 0) {
-                     collectInstanceNumInvalidateMsg(nodeGroupCreate,
-                           failedMsgList);
-                  }
-                  break;
-               case ZOOKEEPER:
-                  zookeeperCount++;
-                  if (nodeGroupCreate.getInstanceNum() > 0
-                        && nodeGroupCreate.getInstanceNum() < 3) {
-                     failedMsgList.add(Constants.WRONG_NUM_OF_ZOOKEEPER);
-                  } else if (nodeGroupCreate.getInstanceNum() > 0
-                        && nodeGroupCreate.getInstanceNum() % 2 == 0) {
-                     warningMsgList.add(Constants.ODD_NUM_OF_ZOOKEEPER);
-                  }
-                  break;
-               case JOURNAL_NODE:
-                  numOfJournalNode += nodeGroupCreate.getInstanceNum();
-                  if (nodeGroupCreate.getRoles().contains(
-                        HadoopRole.HADOOP_DATANODE.toString())
-                        || nodeGroupCreate.getRoles().contains(
-                              HadoopRole.HADOOP_CLIENT_ROLE.toString())) {
-                     failedMsgList
-                           .add(Constants.DATA_CLIENT_NODE_JOURNALNODE_COEXIST);
-                  }
-                  break;
-               case WORKER:
-                  workerCount++;
-                  if (nodeGroupCreate.getInstanceNum() == 0) {
-                     collectInstanceNumInvalidateMsg(nodeGroupCreate,
-                           failedMsgList);
-                  } else if (isHAFlag(nodeGroupCreate)) {
-                     warningMsgList.add(Constants.WORKER_CLIENT_HA_FLAG);
-                  }
+                     break;
+                  case ZOOKEEPER:
+                     zookeeperCount++;
+                     if (nodeGroupCreate.getInstanceNum() > 0
+                           && nodeGroupCreate.getInstanceNum() < 3) {
+                        failedMsgList.add(Constants.WRONG_NUM_OF_ZOOKEEPER);
+                     } else if (nodeGroupCreate.getInstanceNum() > 0
+                           && nodeGroupCreate.getInstanceNum() % 2 == 0) {
+                        warningMsgList.add(Constants.ODD_NUM_OF_ZOOKEEPER);
+                     }
+                     break;
+                  case JOURNAL_NODE:
+                     numOfJournalNode += nodeGroupCreate.getInstanceNum();
+                     if (nodeGroupCreate.getRoles().contains(
+                           HadoopRole.HADOOP_DATANODE.toString())
+                           || nodeGroupCreate.getRoles().contains(
+                                 HadoopRole.HADOOP_CLIENT_ROLE.toString())) {
+                        failedMsgList
+                        .add(Constants.DATA_CLIENT_NODE_JOURNALNODE_COEXIST);
+                     }
+                     break;
+                  case WORKER:
+                     workerCount++;
+                     if (nodeGroupCreate.getInstanceNum() == 0) {
+                        collectInstanceNumInvalidateMsg(nodeGroupCreate,
+                              failedMsgList);
+                     } else if (isHAFlag(nodeGroupCreate)) {
+                        warningMsgList.add(Constants.WORKER_CLIENT_HA_FLAG);
+                     }
 
-                  //check if datanode and region server are seperate
-                  List<String> roles = nodeGroupCreate.getRoles();
-                  if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE
-                        .toString())
-                        && !roles.contains(HadoopRole.HADOOP_DATANODE
-                              .toString())) {
-                     warningMsgList
-                           .add(Constants.REGISONSERVER_DATANODE_SEPERATION);
+                     //check if datanode and region server are seperate
+                     List<String> roles = nodeGroupCreate.getRoles();
+                     if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE
+                           .toString())
+                           && !roles.contains(HadoopRole.HADOOP_DATANODE
+                                 .toString())) {
+                        warningMsgList
+                        .add(Constants.REGISONSERVER_DATANODE_SEPERATION);
+                     }
+                     break;
+                  case CLIENT:
+                     if (isHAFlag(nodeGroupCreate)) {
+                        warningMsgList.add(Constants.WORKER_CLIENT_HA_FLAG);
+                     }
+                     break;
+                  case NONE:
+                     // server side will validate whether the roles of this group exist
+                     break;
+                  default:
+                     break;
                   }
-                  break;
-               case CLIENT:
-                  if (isHAFlag(nodeGroupCreate)) {
-                     warningMsgList.add(Constants.WORKER_CLIENT_HA_FLAG);
-                  }
-                  break;
-               case NONE:
-                  // server side will validate whether the roles of this group exist
-                  break;
-               default:
-                  break;
                }
             }
          }
-      }
-      if (!supportedWithHdfs2()) {
-         if (namenodeHACheck || masterCount > 1) {
-            failedMsgList.add(Constants.CURRENT_DISTRO_CAN_NOT_SUPPORT_HDFS2);
+         if (!supportedWithHdfs2()) {
+            if (namenodeHACheck || masterCount > 1) {
+               failedMsgList.add(Constants.CURRENT_DISTRO_CAN_NOT_SUPPORT_HDFS2);
+            }
+         } else if (namenodeHACheck) {
+            if (numOfJournalNode >= 0 && numOfJournalNode < 3) {
+               failedMsgList.add(Constants.WRONG_NUM_OF_JOURNALNODE);
+            } else if (numOfJournalNode > 0 && numOfJournalNode % 2 == 0) {
+               warningMsgList.add(Constants.ODD_NUM_OF_JOURNALNODE);
+            }
+            //check if zookeeper exists for automatic namenode ha failover
+            if (zookeeperCount == 0) {
+               failedMsgList.add(Constants.NAMENODE_AUTO_FAILOVER_ZOOKEEPER);
+            }
          }
-      } else if (namenodeHACheck) {
-         if (numOfJournalNode >= 0 && numOfJournalNode < 3) {
-            failedMsgList.add(Constants.WRONG_NUM_OF_JOURNALNODE);
-         } else if (numOfJournalNode > 0 && numOfJournalNode % 2 == 0) {
-            warningMsgList.add(Constants.ODD_NUM_OF_JOURNALNODE);
+         if ((jobtrackerCount > 1) || (resourcemanagerCount > 1)
+               || (zookeeperCount > 1) || (hbasemasterCount > 1)) {
+            failedMsgList.add(Constants.WRONG_NUM_OF_NODEGROUPS);
          }
-         //check if zookeeper exists for automatic namenode ha failover
-         if (zookeeperCount == 0) {
-            failedMsgList.add(Constants.NAMENODE_AUTO_FAILOVER_ZOOKEEPER);
+         if (numOfJournalNode > 0 && !namenodeHACheck) {
+            failedMsgList.add(Constants.NO_NAMENODE_HA);
          }
-      }
-      if ((jobtrackerCount > 1) || (resourcemanagerCount > 1)
-            || (zookeeperCount > 1) || (hbasemasterCount > 1)) {
-         failedMsgList.add(Constants.WRONG_NUM_OF_NODEGROUPS);
-      }
-      if (numOfJournalNode > 0 && !namenodeHACheck) {
-         failedMsgList.add(Constants.NO_NAMENODE_HA);
       }
       if (!warningMsgList.isEmpty() && appendWarningStr) {
          warningMsgList.set(0, "Warning: " + warningMsgList.get(0));

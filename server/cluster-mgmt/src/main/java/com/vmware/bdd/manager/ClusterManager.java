@@ -65,6 +65,7 @@ import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.specpolicy.ClusterSpecFactory;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
@@ -856,8 +857,8 @@ public class ClusterManager {
             softwareManagerCollector
                   .getSoftwareManager(cluster.getAppManager());
       List<String> unsupportedRoles =
-            softMgr.isNodeGroupExtensible(clusterEntityMgr
-                  .toNodeGroupInfo(group));
+            softMgr.validateScaling(clusterEntityMgr
+                  .toNodeGroupInfo(clusterName, nodeGroupName));
       if (!unsupportedRoles.isEmpty()) {
          logger.info("can not resize node group with role: " + unsupportedRoles);
          throw ClusterManagerException.ROLES_NOT_SUPPORTED(unsupportedRoles);

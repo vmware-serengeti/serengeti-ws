@@ -480,7 +480,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       return blueprint;
    }
 
-   public NodeGroupInfo toNodeGroupInfo(NodeGroupEntity group) {
+   private NodeGroupInfo toNodeGroupInfo(NodeGroupEntity group) {
       Gson gson = new Gson();
       NodeGroupInfo nodeGroupInfo = new NodeGroupInfo();
       nodeGroupInfo.setName(group.getName());
@@ -504,8 +504,13 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
 
       nodeGroupInfo.setNodes(nodeInfos);
       return nodeGroupInfo;
+   
    }
 
+   public NodeGroupInfo toNodeGroupInfo(String clusterName, String groupName) {
+      NodeGroupEntity group = findByName(clusterName, groupName);
+      return toNodeGroupInfo(group);
+   }
 
    public ClusterRead toClusterRead(String clusterName) {
       return toClusterRead(clusterName, false);

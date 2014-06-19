@@ -150,6 +150,7 @@ public class TestClusterConfigManager {
                   "../serengeti/WebContent/WEB-INF/spring/tx-context.xml",
                   "../serengeti/WebContent/WEB-INF/spring/serengeti-jobs-context.xml",
                   "../serengeti/WebContent/WEB-INF/spring/manager-context.xml");
+      context.getBean(SoftwareManagerCollector.class).loadSoftwareManagers();
       clusterConfigMgr = context.getBean(ClusterConfigManager.class);
       DistroManager distroMgr = Mockito.mock(DistroManager.class);
       ClusteringService clusteringService =

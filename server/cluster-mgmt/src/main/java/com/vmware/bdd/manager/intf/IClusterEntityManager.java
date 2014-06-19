@@ -90,7 +90,7 @@ public interface IClusterEntityManager {
 
    public ClusterBlueprint toClusterBluePrint(String clusterName);
 
-   public NodeGroupInfo toNodeGroupInfo(NodeGroupEntity group);
+   public NodeGroupInfo toNodeGroupInfo(String clusterName, String groupName);
 
    public ClusterRead toClusterRead(String clusterName);
 

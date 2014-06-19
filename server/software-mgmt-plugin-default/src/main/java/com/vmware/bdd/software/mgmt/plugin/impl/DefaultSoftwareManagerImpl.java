@@ -366,23 +366,29 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public List<String> isNodeGroupExtensible(NodeGroupInfo group) {
-         // resize of job tracker and name node is not supported
-         List<String> roles = group.getRoles();
-         List<String> unsupportedRoles = new ArrayList<String>();
-         if (roles.isEmpty()) {
-            // no unsupported roles
-            return new ArrayList<String>();
-         }
-         if (roles.contains(HadoopRole.HADOOP_NAMENODE_ROLE.toString())) {
-            unsupportedRoles.add(HadoopRole.HADOOP_NAMENODE_ROLE.toString());
-         }
-         if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
-            unsupportedRoles.add(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString());
-         }
-         if (roles.contains(HadoopRole.ZOOKEEPER_ROLE.toString())) {
-            unsupportedRoles.add(HadoopRole.ZOOKEEPER_ROLE.toString());
-         }
-         return unsupportedRoles;
+   public List<String> validateScaling(NodeGroupInfo group) {
+      // resize of job tracker and name node is not supported
+      List<String> roles = group.getRoles();
+      List<String> unsupportedRoles = new ArrayList<String>();
+      if (roles.isEmpty()) {
+         // no unsupported roles
+         return new ArrayList<String>();
       }
+      if (roles.contains(HadoopRole.HADOOP_NAMENODE_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.HADOOP_NAMENODE_ROLE.toString());
+      }
+      if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString());
+      }
+      if (roles.contains(HadoopRole.ZOOKEEPER_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.ZOOKEEPER_ROLE.toString());
+      }
+      return unsupportedRoles;
+   }
+
+   @Override
+   public void updateInfrastructure(ClusterBlueprint blueprint) {
+      // TODO Auto-generated method stub
+      
+   }
 }
