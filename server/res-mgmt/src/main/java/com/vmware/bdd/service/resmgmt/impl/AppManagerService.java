@@ -105,4 +105,12 @@ public class AppManagerService implements IAppManagerService{
       }
       return reads;
    }
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.service.resmgmt.IAppManagerService#findAll()
+    */
+   @Override
+   public List<AppManagerEntity> findAll() {
+      return appManagerDAO.findAll();
+   }
 }

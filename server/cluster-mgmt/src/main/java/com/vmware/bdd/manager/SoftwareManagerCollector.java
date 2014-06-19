@@ -16,6 +16,7 @@
 package com.vmware.bdd.manager;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.AppManagerAdd;
+import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.service.resmgmt.IAppManagerService;
@@ -38,7 +40,7 @@ public class SoftwareManagerCollector {
    /**
     *
     */
-   private static final String IRONFAN_SOFTWARE_MANAGER = "ironfan";
+   private static final String IRONFAN_SOFTWARE_MANAGER = "Ironfan";
 
    private static final Logger logger = Logger
          .getLogger(SoftwareManagerCollector.class);
@@ -59,7 +61,7 @@ public class SoftwareManagerCollector {
     */
    public synchronized void createSoftwareManager(AppManagerAdd appManagerAdd) {
 
-      logger.info("Start to create software manager for " + appManagerAdd);
+      logger.info("Start to create software manager for " + appManagerAdd.getName());
 
       if (appManagerService.findAppManagerByName(appManagerAdd.getName()) != null) {
          logger.error("Name " + appManagerAdd.getName() + " already exists.");
@@ -67,6 +69,18 @@ public class SoftwareManagerCollector {
                .getName());
       }
 
+      SoftwareManager softwareManager = loadSoftwareManager(appManagerAdd);
+
+      logger.info("Add app manager to meta-db.");
+      // add to meta-db through AppManagerService
+      appManagerService.addAppManager(appManagerAdd);
+   }
+
+   /**
+    * @param appManagerAdd
+    * @return
+    */
+   private SoftwareManager loadSoftwareManager(AppManagerAdd appManagerAdd) {
       // Retrieve app manager factory class from serengeti.properties
       String factoryClassName =
             Configuration.getString(configurationPrefix + appManagerAdd.getProvider());
@@ -126,10 +140,9 @@ public class SoftwareManagerCollector {
                .getName());
       }
 
-      logger.info("Add app manager to meta-db.");
-      // add to meta-db through AppManagerService
-      appManagerService.addAppManager(appManagerAdd);
       cache.put(appManagerAdd.getName(), softwareManager);
+
+      return softwareManager;
    }
 
    /**
@@ -155,7 +168,35 @@ public class SoftwareManagerCollector {
       // TODO: load all software manager instances into memory while the Tomcat service is started
       // Should block request until initialized
       // temporarily load ironfan software manager instance here
+      AppManagerAdd appManagerAdd;
+      if (appManagerService.findAppManagerByName(IRONFAN_SOFTWARE_MANAGER) == null) {
+         appManagerAdd = new AppManagerAdd();
+         appManagerAdd.setName(IRONFAN_SOFTWARE_MANAGER);
+         appManagerAdd.setProvider(IRONFAN_SOFTWARE_MANAGER);
+         appManagerAdd.setHost("localhost");
+         appManagerAdd.setPort(-1);
+         appManagerAdd.setUsername("n/a");
+         appManagerAdd.setPassword("n/a");
+         appManagerAdd.setPrivateKey("n/a");
+         appManagerService.addAppManager(appManagerAdd);
+      }
       SoftwareManager ironfanSoftwareManager = new DefaultSoftwareManagerImpl();
       cache.put(IRONFAN_SOFTWARE_MANAGER, ironfanSoftwareManager);
+
+      List<AppManagerEntity> appManagers = appManagerService.findAll();
+      for (AppManagerEntity appManager : appManagers) {
+         if (!appManager.getName().equals(IRONFAN_SOFTWARE_MANAGER)) {
+            appManagerAdd = new AppManagerAdd();
+            appManagerAdd.setName(appManager.getName());
+            appManagerAdd.setProvider(appManager.getProvider());
+            appManagerAdd.setHost(appManager.getHost());
+            appManagerAdd.setPort(appManager.getPort());
+            appManagerAdd.setUsername(appManager.getUsername());
+            appManagerAdd.setPassword(appManager.getPassword());
+            appManagerAdd.setPrivateKey(appManager.getPrivateKey());
+            loadSoftwareManager(appManagerAdd);
+         }
+      }
+
    }
 }

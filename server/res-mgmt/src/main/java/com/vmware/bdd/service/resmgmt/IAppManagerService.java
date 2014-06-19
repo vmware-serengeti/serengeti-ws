@@ -30,6 +30,8 @@ public interface IAppManagerService {
 
    void addAppManager(AppManagerAdd appManagerAdd);
 
+   public List<AppManagerEntity> findAll();
+
    public AppManagerEntity findAppManagerByName(String name);
 
    public AppManagerRead getAppManagerRead(String name);

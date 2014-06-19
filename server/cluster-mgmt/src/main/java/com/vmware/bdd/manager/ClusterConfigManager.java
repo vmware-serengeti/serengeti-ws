@@ -197,7 +197,7 @@ public class ClusterConfigManager {
       }
       String appManager = cluster.getAppManager();
       if (appManager == null) {
-          appManager = new String("ironfan");//TODO(qjin):refactor
+          appManager = new String("Ironfan");//TODO(qjin):refactor
       }
       SoftwareManager softwareManager = softwareManagerCollector.getSoftwareManager(appManager);
       if (softwareManager == null) {
@@ -954,7 +954,7 @@ public class ClusterConfigManager {
    }
 
    @SuppressWarnings("unchecked")
-   private NodeGroupCreate convertNodeGroups(ClusterEntity clusterEntity, 
+   private NodeGroupCreate convertNodeGroups(ClusterEntity clusterEntity,
          NodeGroupEntity ngEntity, String clusterName) {
       Gson gson = new Gson();
       List<String> groupRoles = gson.fromJson(ngEntity.getRoles(), List.class);

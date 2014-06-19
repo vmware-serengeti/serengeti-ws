@@ -11,6 +11,8 @@ import com.vmware.bdd.entity.AppManagerEntity;
  */
 public interface IAppManagerDAO {
 
+   List<AppManagerEntity> findAll();
+
    List<AppManagerEntity> findAllSortByName();
 
    AppManagerEntity findByName(String name);
