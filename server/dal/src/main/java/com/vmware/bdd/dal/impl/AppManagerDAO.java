@@ -15,6 +15,9 @@
 
 package com.vmware.bdd.dal.impl;
 
+import java.util.List;
+
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,5 +36,11 @@ public class AppManagerDAO extends BaseDAO<AppManagerEntity> implements IAppMana
    @Override
    public AppManagerEntity findByName(String name) {
       return findUniqueByCriteria(Restrictions.eq("name", name));
+   }
+
+   @Override
+   public List<AppManagerEntity> findAllSortByName() {
+      Order order = Order.asc("name");
+      return findByCriteria(new Order[] { order }, null, null);
    }
 }

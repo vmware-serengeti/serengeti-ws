@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
@@ -798,6 +799,36 @@ public class RestResource {
       }
       softwareManagerCollector.createSoftwareManager(appManagerAdd);
       //pluginService.addPlugin(pluginAdd);
+   }
+
+   /**
+    * Get a BDE appmanager information
+    * @param appManagerName
+    * @return The BDE appmanager information
+    */
+   @RequestMapping(value = "/appmanager/{appManagerName}", method = RequestMethod.GET, produces = "application/json")
+   @ResponseBody
+   public AppManagerRead getAppManager(@PathVariable("appManagerName") String appManagerName) {
+      appManagerName = CommonUtil.decode(appManagerName);
+      if (CommonUtil.isBlank(appManagerName)
+            || !CommonUtil.validateResourceName(appManagerName)) {
+         throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
+      }
+      AppManagerRead read = appManagerService.getAppManagerRead(appManagerName);
+      if (read == null) {
+         throw BddException.NOT_FOUND("App Manager", appManagerName);
+      }
+      return read;
+   }
+
+   /**
+    * Get all BDE appmanagers' information
+    * @return A list of BDE appmanager information
+    */
+   @RequestMapping(value = "/appmanagers", method = RequestMethod.GET, produces = "application/json")
+   @ResponseBody
+   public List<AppManagerRead> getAppManagers() {
+      return appManagerService.getAllAppManagerReads();
    }
 
    /**

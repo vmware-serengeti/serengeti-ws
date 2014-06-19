@@ -15,8 +15,15 @@
 
 package com.vmware.bdd.cli.commands;
 
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import com.vmware.bdd.apitypes.AppManagerAdd;
+import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.cli.rest.AppManagerRestClient;
+import com.vmware.bdd.cli.rest.CliRestException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -33,7 +40,7 @@ import org.springframework.stereotype.Component;
 public class AppManagerCommands implements CommandMarker {
 
    @Autowired
-   private AppManagerRestClient appManagerRestClient;
+   private AppManagerRestClient restClient;
 
    @CliAvailabilityIndicator({ "appmanager help" })
    public boolean isCommandAvailable() {
@@ -60,11 +67,73 @@ public class AppManagerCommands implements CommandMarker {
          appManagerAdd.setUsername(username);
          appManagerAdd.setPassword(password);
          appManagerAdd.setPrivateKey(CommandsUtils.dataFromFile(path));
-         appManagerRestClient.add(appManagerAdd);
+         restClient.add(appManagerAdd);
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER, name,
                Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
       }
+   }
+
+   /**
+    * <p>
+    * Display appmanager list. eg. appmanager list -name cm
+    * </p>
+    *
+    * @param name
+    *           The appmanager name
+    */
+   @CliCommand(value = "appmanager list", help = "Display appmanager list.")
+   public void listAppManager(
+         @CliOption(key = { "name" }, mandatory = false, help = "The appmanager name") final String name) {
+      // rest invocation
+      try {
+         if (CommandsUtils.isBlank(name)) {
+            AppManagerRead[] appmanagers = restClient.getAll();
+            if (appmanagers != null) {
+               prettyOutputAppManagerInfo(appmanagers);
+            }
+         } else {
+            AppManagerRead appmanager = restClient.get(name);
+            if (appmanager != null) {
+               prettyOutputAppManagerInfo(appmanager);
+            }
+         }
+      } catch (CliRestException e) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER, name,
+               Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
+               e.getMessage());
+      }
+   }
+
+   private void prettyOutputAppManagerInfo(AppManagerRead[] appmanagers) {
+      if (appmanagers != null) {
+         LinkedHashMap<String, List<String>> appManagerColumnNamesWithGetMethodNames =
+               new LinkedHashMap<String, List<String>>();
+         appManagerColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_NAME, Arrays.asList("getName"));
+         appManagerColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_PROVIDER, Arrays.asList("getProvider"));
+         appManagerColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_HOST, Arrays.asList("getHost"));
+         appManagerColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_PORT, Arrays.asList("getPort"));
+         appManagerColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_USERNAME, Arrays.asList("getUsername"));
+
+
+         try {
+            CommandsUtils.printInTableFormat(
+                  appManagerColumnNamesWithGetMethodNames, appmanagers,
+                  Constants.OUTPUT_INDENT);
+         } catch (Exception e) {
+            System.err.println(e.getMessage());
+         }
+      }
+   }
+
+   private void prettyOutputAppManagerInfo(AppManagerRead appmanager) {
+      if (appmanager != null)
+         prettyOutputAppManagerInfo(new AppManagerRead[] { appmanager });
    }
 }

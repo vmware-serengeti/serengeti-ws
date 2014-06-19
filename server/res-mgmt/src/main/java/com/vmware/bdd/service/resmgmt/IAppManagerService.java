@@ -15,7 +15,10 @@
 
 package com.vmware.bdd.service.resmgmt;
 
+import java.util.List;
+
 import com.vmware.bdd.apitypes.AppManagerAdd;
+import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.entity.AppManagerEntity;
 
 /**
@@ -28,4 +31,8 @@ public interface IAppManagerService {
    void addAppManager(AppManagerAdd appManagerAdd);
 
    public AppManagerEntity findAppManagerByName(String name);
+
+   public AppManagerRead getAppManagerRead(String name);
+
+   public List<AppManagerRead> getAllAppManagerReads();
 }

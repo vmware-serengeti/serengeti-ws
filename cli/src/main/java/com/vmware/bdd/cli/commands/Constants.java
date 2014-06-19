@@ -35,6 +35,7 @@ public class Constants {
    public static final String REST_PATH_NETWORK = "network";
    public static final String REST_PATH_NETWORKS = "networks";
    public static final String REST_PATH_APPMANAGERS = "appmanagers";
+   public static final String REST_PATH_APPMANAGER = "appmanager";
    public static final String REST_PATH_DISTROS = "distros";
    public static final String REST_PATH_DISTRO = "distro";
    public static final String REST_PATH_CONFIG = "config";
@@ -218,6 +219,9 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_HOSTS = "HOSTS";
    public static final String FORMAT_TABLE_COLUMN_REGEX = "REG EX";
    public static final String FORMAT_TABLE_COLUMN_ERROR = "Error Message";
+   public static final String FORMAT_TABLE_COLUMN_PROVIDER = "PROVIDER";
+   public static final String FORMAT_TABLE_COLUMN_PORT = "PORT";
+   public static final String FORMAT_TABLE_COLUMN_USERNAME = "USERNAME";
    public static final String DEFAULT_DISTRO = "apache";
    public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure you want to continue (Y/N)? ";
    public static final String PARAM_PROMPT_ADD_CERTIFICATE_MESSAGE = "Are you sure you want to add this certificate (Y/N)? ";

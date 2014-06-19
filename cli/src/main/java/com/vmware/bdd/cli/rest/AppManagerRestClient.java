@@ -16,7 +16,10 @@
 package com.vmware.bdd.cli.rest;
 
 import com.vmware.bdd.apitypes.AppManagerAdd;
+import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.cli.commands.Constants;
+import com.vmware.bdd.utils.CommonUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -36,5 +39,20 @@ public class AppManagerRestClient {
       final String path = Constants.REST_PATH_APPMANAGERS;
       final HttpMethod httpverb = HttpMethod.POST;
       restClient.createObject(appManagerAdd, path, httpverb);
+   }
+
+   public AppManagerRead get(String name) {
+      name = CommonUtil.encode(name);
+      final String path = Constants.REST_PATH_APPMANAGER;
+      final HttpMethod httpverb = HttpMethod.GET;
+
+      return restClient.getObject(name, AppManagerRead.class, path, httpverb, false);
+   }
+
+   public AppManagerRead[] getAll() {
+      final String path = Constants.REST_PATH_APPMANAGERS;
+      final HttpMethod httpverb = HttpMethod.GET;
+
+      return restClient.getAllObjects(AppManagerRead[].class, path, httpverb, false);
    }
 }

@@ -15,12 +15,17 @@
 
 package com.vmware.bdd.service.resmgmt.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.AppManagerAdd;
+import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.dal.IAppManagerDAO;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.service.resmgmt.IAppManagerService;
@@ -58,5 +63,46 @@ public class AppManagerService implements IAppManagerService{
    @Autowired
    public void setAppManagerDAO(IAppManagerDAO appManagerDAO) {
       this.appManagerDAO = appManagerDAO;
+   }
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.service.resmgmt.IAppManagerService#getAppManagerRead(java.lang.String)
+    */
+   @Override
+   @Transactional(readOnly = true)
+   public AppManagerRead getAppManagerRead(String name) {
+      AppManagerEntity entity = appManagerDAO.findByName(name);
+      if (entity == null) {
+         return null;
+      }
+
+      AppManagerRead read = new AppManagerRead();
+      read.setName(entity.getName());
+      read.setProvider(entity.getProvider());
+      read.setHost(entity.getHost());
+      read.setPort(entity.getPort());
+      read.setUsername(entity.getUsername());
+      return read;
+   }
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.service.resmgmt.IAppManagerService#getAllAppManagerReads()
+    */
+   @Override
+   @Transactional(readOnly = true)
+   public List<AppManagerRead> getAllAppManagerReads() {
+      List<AppManagerEntity> entities = appManagerDAO.findAllSortByName();
+      List<AppManagerRead> reads = new ArrayList<AppManagerRead>();
+      AppManagerRead read;
+      for (AppManagerEntity entity : entities) {
+         read = new AppManagerRead();
+         read.setName(entity.getName());
+         read.setProvider(entity.getProvider());
+         read.setHost(entity.getHost());
+         read.setPort(entity.getPort());
+         read.setUsername(entity.getUsername());
+         reads.add(read);
+      }
+      return reads;
    }
 }
