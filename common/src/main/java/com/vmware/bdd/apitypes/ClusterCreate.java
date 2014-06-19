@@ -31,6 +31,9 @@ import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.exception.ClusterConfigException;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.spectypes.HadoopDistroMap;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.ServiceType;
@@ -1084,4 +1087,27 @@ public class ClusterCreate implements Serializable {
       return false;
    }
 
+   public ClusterBlueprint toBlueprint() {
+       ClusterBlueprint blueprint = new ClusterBlueprint();
+
+       blueprint.setName(name);
+       blueprint.setInstanceNum(totalInstances()); //TODO: check
+       // TODO: topology
+       blueprint.setConfiguration(configuration);
+
+       // set HadoopStack
+       HadoopStack hadoopStack = new HadoopStack();
+       hadoopStack.setDistro(distro);
+       hadoopStack.setFullVersion(distroVersion); // TODO
+       blueprint.setHadoopStack(hadoopStack);
+
+       // set nodes/nodegroups
+       List<NodeGroupInfo> nodeGroupInfos = new ArrayList<NodeGroupInfo>();
+       for (NodeGroupCreate group : nodeGroups) {
+           NodeGroupInfo nodeGroupInfo = group.toNodeGroupInfo();
+           nodeGroupInfos.add(nodeGroupInfo);
+       }
+       blueprint.setNodeGroups(nodeGroupInfos);
+       return blueprint;
+   }
 }

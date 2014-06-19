@@ -206,8 +206,7 @@ public class ClusterConfigManager {
       }
        // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
       try {
-          softwareManager.validateRoles(clusterEntityMgr.toClusterBluePrint(cluster.getName()),
-                  distro.getRoles());
+          softwareManager.validateRoles(cluster.toBlueprint(), distro.getRoles());
           cluster.validateClusterCreate(failedMsgList, warningMsgList);
       } catch (SoftwareManagementPluginException e) {
           failedMsgList.add(e.getFailedMsgList().toString());

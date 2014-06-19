@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.google.gson.annotations.Expose;
@@ -98,6 +99,18 @@ public class NodeGroupCreate {
       this.vcClusters = group.vcClusters;
       this.configuration = group.configuration;
       this.vmFolderPath = group.vmFolderPath;
+   }
+
+   public NodeGroupInfo toNodeGroupInfo() {
+        NodeGroupInfo nodeGroupInfo = new NodeGroupInfo();
+        nodeGroupInfo.setName(name);
+        nodeGroupInfo.setInstanceNum(instanceNum);
+        nodeGroupInfo.setRoles(roles);
+        nodeGroupInfo.setConfiguration(configuration);
+
+        //TODO(qjin): fill in nodes info?
+        nodeGroupInfo.setNodes(null);
+        return nodeGroupInfo;
    }
 
    public Map<String, Object> getConfiguration() {
