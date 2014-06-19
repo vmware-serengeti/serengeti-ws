@@ -579,7 +579,6 @@ public class ClusterCreate implements Serializable {
             }
          }
       }
-
       return valid;
    }
 
@@ -681,10 +680,6 @@ public class ClusterCreate implements Serializable {
       //role count
       int masterCount = 0, jobtrackerCount = 0, resourcemanagerCount = 0, hbasemasterCount =
             0, zookeeperCount = 0, workerCount = 0, numOfJournalNode = 0;
-      boolean appendWarningStr = false;
-      if (warningMsgList != null && warningMsgList.isEmpty()) {
-         appendWarningStr = true;
-      }
       if (appManager == null) {
       for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
             // get node group role.
@@ -801,7 +796,7 @@ public class ClusterCreate implements Serializable {
             failedMsgList.add(Constants.NO_NAMENODE_HA);
          }
       }
-      if (!warningMsgList.isEmpty() && appendWarningStr) {
+      if (!warningMsgList.isEmpty() && !warningMsgList.get(0).startsWith("Warning: ")) {
          warningMsgList.set(0, "Warning: " + warningMsgList.get(0));
       }
    }
@@ -1104,6 +1099,7 @@ public class ClusterCreate implements Serializable {
        blueprint.setInstanceNum(totalInstances()); //TODO: check
        // TODO: topology
        blueprint.setConfiguration(configuration);
+       blueprint.setExternalHDFS(externalHDFS);
 
        // set HadoopStack
        HadoopStack hadoopStack = new HadoopStack();

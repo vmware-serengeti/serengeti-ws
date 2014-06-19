@@ -58,11 +58,11 @@
          <groupId>com.vmware.bdd</groupId>
          <artifactId>software-mgmt-plugin-clouderamgr</artifactId>
       </dependency>
-      <dependency>
+ <!--     <dependency>
          <groupId>com.vmware.bdd</groupId>
          <artifactId>software-mgmt-plugin-ambari</artifactId>
       </dependency>
-      <dependency>
+-->      <dependency>
          <groupId>postgresql</groupId>
          <artifactId>postgresql</artifactId>
       </dependency>

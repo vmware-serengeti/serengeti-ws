@@ -65,4 +65,12 @@ public class ClusterBlueprint implements Serializable{
    public void setHadoopStack(HadoopStack hadoopStack) {
       this.hadoopStack = hadoopStack;
    }
+
+   public String getExternalHDFS() {
+      return externalHDFS;
+   }
+
+   public void setExternalHDFS(String externalHDFS) {
+      this.externalHDFS = externalHDFS;
+   }
 }
