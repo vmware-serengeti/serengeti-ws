@@ -1656,6 +1656,11 @@
           "nameIsPattern": "true"
         }
       ],
+      "topology.data": [
+        {
+          "name": "text"
+        }
+      ],
       "fair-scheduler.xml": [
         {
           "name": "text"
