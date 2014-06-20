@@ -238,6 +238,7 @@ public class ClusterConfigManager {
          clusterEntity.setDistro(cluster.getDistro());
          clusterEntity.setDistroVendor(cluster.getDistroVendor());
          clusterEntity.setDistroVersion(cluster.getDistroVersion());
+         clusterEntity.setAppManager(cluster.getAppManager());
          clusterEntity.setStartAfterDeploy(true);
          clusterEntity.setPassword(cluster.getPassword());
 
@@ -701,7 +702,10 @@ public class ClusterConfigManager {
             Collections.sort(sortedRolesByDependency, new RoleComparactor());
             groupEntity.setRoles(gson.toJson(sortedRolesByDependency));
          }
+      } else {
+         groupEntity.setRoles(gson.toJson(roles));
       }
+
       if (group.getInstanceNum() <= 0) {
          logger.warn("Zero or negative instance number for group "
                + group.getName()
@@ -812,6 +816,7 @@ public class ClusterConfigManager {
             distroMgr);
       clusterConfig.setDistroVendor(clusterEntity.getDistroVendor());
       clusterConfig.setDistroVersion(clusterEntity.getDistroVersion());
+      clusterConfig.setAppManager(clusterEntity.getAppManager());
       clusterConfig.setHttpProxy(httpProxy);
       clusterConfig.setNoProxy(noProxy);
       clusterConfig.setTopologyPolicy(clusterEntity.getTopologyPolicy());

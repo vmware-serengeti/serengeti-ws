@@ -81,7 +81,7 @@ public class DefaultExternalManagementTask implements ISoftwareManagementTask {
          // TODO: stop monitor
       }
 
-      result.put("succeed", true);
+      result.put("succeed", success);
 
       return result;
    }

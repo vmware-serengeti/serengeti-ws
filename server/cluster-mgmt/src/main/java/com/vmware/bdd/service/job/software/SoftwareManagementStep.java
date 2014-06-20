@@ -134,7 +134,6 @@ public class SoftwareManagementStep extends TrackableTasklet {
                      lockClusterEntityMgr, softwareMgr);
          logger.info((new Gson()).toJson(clusterBlueprint));
 
-         return RepeatStatus.FINISHED;
       } else {
 
          // get command work directory
