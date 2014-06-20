@@ -21,6 +21,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 
@@ -62,4 +63,5 @@ public class TestClouderaManagerImpl {
       ClusterBlueprint blueprint = SerialUtils.getObjectByJsonString(ClusterBlueprint.class, content);
       provider.createCluster(blueprint);
    }
+
 }

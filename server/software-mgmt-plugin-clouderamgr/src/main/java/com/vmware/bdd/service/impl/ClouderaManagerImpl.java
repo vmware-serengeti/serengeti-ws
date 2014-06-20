@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.cloudera.api.model.ApiRoleConfigGroup;
 import com.vmware.bdd.exception.CmException;
 import org.apache.commons.lang.WordUtils;
 import org.apache.log4j.Logger;
@@ -85,11 +86,14 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private final String usernameForHosts = "serengeti";
    private String privateKey;
    private RootResourceV6 apiResourceRootV6;
+   private String cmServerHostId;
+   private String cmServerHost;
 
    private static final int API_POLL_PERIOD_MS = 500;
 
    public ClouderaManagerImpl(String cmServerHost, int port, String user,
          String password, String privateKey) throws CmException {
+      this.cmServerHost = cmServerHost;
       ApiRootResource apiRootResource = new ClouderaManagerClientBuilder().withHost(cmServerHost)
             .withPort(port).withUsernamePassword(user, password).build();
       this.apiResourceRootV6 = apiRootResource.getRootV6();
@@ -406,8 +410,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
       }
 
       if (cmsProvisionRequired) {
-         final ApiHostRef apiHostRef = new ApiHostRef("55b37a12-fda1-4548-b02a-37cd851057fc");
-
+         // TODO: in the first stage, configure management services on Cloudera Manager Server
+         final ApiHostRef apiHostRef = new ApiHostRef(getCmServerHostId());
          boolean licenseDeployed = false;
 
          try {
@@ -832,7 +836,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
             }
 
             // push into provision phase once OPSAPS-13194/OPSAPS-12870 is addressed
-            startManagement(cluster);
+            startManagement();
          }
       } catch (Exception e) {
          throw new CmException(e, cluster.getName());
@@ -944,7 +948,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
                   .startCommand(serviceDef.getName()));
    }
 
-   private void startManagement(final CmClusterDef cluster) throws InterruptedException {
+   private void startManagement() throws InterruptedException {
 
       try {
          if (apiResourceRootV6.getClouderaManagerResource().getMgmtServiceResource().readService(DataView.SUMMARY)
@@ -967,6 +971,20 @@ public class ClouderaManagerImpl implements SoftwareManager {
             servicesResource.deleteService(serviceName);
          }
       }
+   }
+
+   public String getCmServerHostId() {
+      if (cmServerHostId != null) {
+         return cmServerHostId;
+      }
+
+      for (ApiHost apiHost : apiResourceRootV6.getHostsResource().readHosts(DataView.SUMMARY).getHosts()) {
+         if (apiHost.getIpAddress().equals(cmServerHost) || apiHost.getHostname().equalsIgnoreCase(cmServerHost)) {
+            this.cmServerHostId = apiHost.getHostId();
+            return cmServerHostId;
+         }
+      }
+      throw new CmException("Cannot fetch the hostId of cloudera manager server");
    }
 
    private ApiCommand execute(final ApiBulkCommandList bulkCommand, boolean checkReturn) throws InterruptedException {
