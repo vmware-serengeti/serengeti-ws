@@ -234,7 +234,7 @@ public class ClusterConfigManager {
          logger.debug("begin to add cluster config for " + name);
          Gson gson = new Gson();
          ClusterEntity clusterEntity = new ClusterEntity(name);
-         clusterEntity.setAppManagerName(cluster.getAppManager());
+         clusterEntity.setAppManager(cluster.getAppManager());
          clusterEntity.setDistro(cluster.getDistro());
          clusterEntity.setDistroVendor(cluster.getDistroVendor());
          clusterEntity.setDistroVersion(cluster.getDistroVersion());
