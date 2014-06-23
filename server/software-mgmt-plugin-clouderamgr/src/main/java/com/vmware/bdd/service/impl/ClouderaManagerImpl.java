@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.cloudera.api.model.ApiRoleConfigGroup;
 import com.vmware.bdd.exception.CmException;
 import org.apache.commons.lang.WordUtils;
 import org.apache.log4j.Logger;
@@ -150,6 +149,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
          configureServices(clusterDef);
          start(clusterDef, true);
+         success = true;
       } catch (Exception e) {
          logger.error("Failed to create Cloudera cluster " + blueprint.getName() + ": " + e.getMessage());
          throw CmException.CREATE_CLUSTER_FAILED(e, blueprint.getName());
@@ -1058,6 +1058,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
    @Override
    public void updateInfrastructure(ClusterBlueprint blueprint) {
       // TODO Auto-generated method stub
-      
+
    }
 }
