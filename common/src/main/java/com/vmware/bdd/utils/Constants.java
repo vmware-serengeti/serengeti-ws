@@ -201,4 +201,5 @@ public class Constants {
    public static final String EXEC_COMMAND_TIMEOUT = " timeout.";
    public static final String EXEC_COMMAND_FAILED = " failed.";
    public static final String NO_RESOURCE_POOL_IS_CREATED = "no resource pool is created.";
+   public static final String IRONFAN = "Ironfan";
 }

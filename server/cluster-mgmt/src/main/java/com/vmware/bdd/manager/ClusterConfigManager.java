@@ -238,7 +238,6 @@ public class ClusterConfigManager {
          clusterEntity.setDistro(cluster.getDistro());
          clusterEntity.setDistroVendor(cluster.getDistroVendor());
          clusterEntity.setDistroVersion(cluster.getDistroVersion());
-         clusterEntity.setAppManager(cluster.getAppManager());
          clusterEntity.setStartAfterDeploy(true);
          clusterEntity.setPassword(cluster.getPassword());
 
@@ -604,7 +603,9 @@ public class ClusterConfigManager {
       }
 
       //insert tempfs_server role into the referenced data node groups
-      if (clusterEntity.getAppManager() == null) {
+      if (clusterEntity.getAppManager() == null
+            || Constants.IRONFAN
+                  .equalsIgnoreCase(clusterEntity.getAppManager())) {
          //TODO emma: move to software manager
          for (String nodeGroupName : referencedNodeGroups) {
             for (NodeGroupEntity groupEntity : nodeGroups) {
@@ -685,7 +686,9 @@ public class ClusterConfigManager {
 
       //TODO emma: move to default software manager
       EnumSet<HadoopRole> enumRoles = null;
-      if (clusterEntity.getAppManager() == null) {
+      if (clusterEntity.getAppManager() == null
+            || Constants.IRONFAN
+                  .equalsIgnoreCase(clusterEntity.getAppManager())) {
          enumRoles = getEnumRoles(group.getRoles(), distro);
          if (enumRoles.isEmpty()) {
             throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(group.getName());
@@ -728,7 +731,9 @@ public class ClusterConfigManager {
       }
 
       // TODO emma: move HadoopRole related logic to default software manager, and leave common logic here
-      if (clusterEntity.getAppManager() == null) {
+      if (clusterEntity.getAppManager() == null
+            || Constants.IRONFAN
+                  .equalsIgnoreCase(clusterEntity.getAppManager())) {
          GroupType groupType = GroupType.fromHadoopRole(enumRoles);
          CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity, groupType,
                sharedPattern, localPattern);
@@ -737,7 +742,9 @@ public class ClusterConfigManager {
       if (group.getConfiguration() != null
             && group.getConfiguration().size() > 0) {
          // validate hadoop config
-         if (clusterEntity.getAppManager() == null) {
+         if (clusterEntity.getAppManager() == null
+               || Constants.IRONFAN
+                     .equalsIgnoreCase(clusterEntity.getAppManager())) {
             CommonClusterExpandPolicy.validateAppConfig(group.getConfiguration(),
                   validateWhiteList);
          }
@@ -882,7 +889,9 @@ public class ClusterConfigManager {
          instanceNum += group.getInstanceNum();
       }
       // TODO emma: move to default software manager
-      if (clusterEntity.getAppManager() == null) {
+      if (clusterEntity.getAppManager() == null
+            || Constants.IRONFAN
+                  .equalsIgnoreCase(clusterEntity.getAppManager())) {
          sortGroups(nodeGroups);
       }
       clusterConfig.setNodeGroups(nodeGroups
@@ -968,7 +977,9 @@ public class ClusterConfigManager {
       group.setName(ngEntity.getName());
       // TODO emma: move to default software manager
       EnumSet<HadoopRole> enumRoles = null;
-      if (clusterEntity.getAppManager() == null) {
+      if (clusterEntity.getAppManager() == null
+            || Constants.IRONFAN
+                  .equalsIgnoreCase(clusterEntity.getAppManager())) {
          enumRoles = getEnumRoles(groupRoles, distro);
          if (enumRoles.isEmpty()) {
             throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(ngEntity
@@ -1104,9 +1115,10 @@ public class ClusterConfigManager {
 
       // set storage split policy based on group roles
       // TODO emma: add corresponding logic for all software managers
-      if ((ngEntity.getCluster().getAppManager() == null) &&
-            (enumRoles.size() == 1 || (enumRoles.size() == 2 && enumRoles
-            .contains(HadoopRole.HADOOP_JOURNALNODE_ROLE)))
+      if ((ngEntity.getCluster().getAppManager() == null || Constants.IRONFAN
+            .equalsIgnoreCase(ngEntity.getCluster().getAppManager()))
+            && (enumRoles.size() == 1 || (enumRoles.size() == 2 && enumRoles
+                  .contains(HadoopRole.HADOOP_JOURNALNODE_ROLE)))
             && (enumRoles.contains(HadoopRole.ZOOKEEPER_ROLE) || enumRoles
                   .contains(HadoopRole.MAPR_ZOOKEEPER_ROLE))) {
          // if this group contains only one zookeeper role
