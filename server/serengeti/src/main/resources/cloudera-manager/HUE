@@ -1,0 +1,364 @@
+{
+  "name": "HUE",
+  "displayName": "HUE",
+  "parent": "CLUSTER",
+  "repository": "CDH",
+  "versionApiMin": 3,
+  "versionApiMax": -1,
+  "versionCdhMin": 4,
+  "versionCdhMax": -1,
+  "availableConfigurations" : [
+  {
+    "name" : "hive_service",
+    "value" : "hive",
+    "required" : true,
+    "displayName" : "Hive Service",
+    "description" : "Name of the Hive service that this Hue service instance depends on",
+    "relatedName" : ""
+  }, {
+    "name" : "hue_webhdfs",
+    "value" : "hdfs2-NAMENODE-bdd57201a70ac20a477117b68b319d74",
+    "required" : true,
+    "displayName" : "HDFS Web Interface Role",
+    "description" : "HTTPFS role or Namenode (if webhdfs is enabled) that hue can use to communicate with HDFS.",
+    "relatedName" : "webhdfs_url",
+    "validationMessage" : "Web interface has been properly configured."
+  }, {
+    "name" : "oozie_service",
+    "value" : "oozie",
+    "required" : true,
+    "displayName" : "Oozie Service",
+    "description" : "Name of the Oozie service that this Hue service instance depends on",
+    "relatedName" : ""
+  }, {
+    "name" : "sqoop_service",
+    "value" : "sqoop",
+    "required" : false,
+    "displayName" : "Sqoop Service",
+    "description" : "Name of the Sqoop service that this Hue service instance depends on",
+    "relatedName" : ""
+  }, {
+    "name" : "zookeeper_service",
+    "value" : "zookeeper",
+    "required" : false,
+    "displayName" : "ZooKeeper Service",
+    "description" : "Name of the ZooKeeper service that this Hue service instance depends on",
+    "relatedName" : ""
+  }, {
+    "name" : "hue_service_env_safety_valve",
+    "required" : false,
+    "displayName" : "Hue Service Environment Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, key-value pairs (one on each line) to be inserted into a role's environment. Applies to configurations of all roles in this service except client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "group_name_attr",
+    "required" : false,
+    "displayName" : "LDAP Group Name Attribute",
+    "description" : "The group name attribute in the LDAP schema.",
+    "relatedName" : "group_name_attr"
+  }, {
+    "name" : "ldap_cert",
+    "required" : false,
+    "displayName" : "LDAP Certificate",
+    "description" : "LDAP certificate for authentication over TLS",
+    "relatedName" : "ldap_cert"
+  }, {
+    "name" : "hue_hbase_thrift",
+    "required" : false,
+    "displayName" : "HBase Thrift Server",
+    "description" : "Thrift server to use for HBase app.",
+    "relatedName" : ""
+  }, {
+    "name" : "database_password",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Hue Database Password",
+    "description" : "Password for Hue database. Not necessary for SQLite3.",
+    "relatedName" : "password"
+  }, {
+    "name" : "smon_derived_configs_safety_valve",
+    "required" : false,
+    "displayName" : "Service Monitor Derived Configs Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, a list of derived configuration properties that will be used by the Service Monitor instead of the default ones.",
+    "relatedName" : ""
+  }, {
+    "name" : "hue_kt_renewer_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Kerberos Ticket Renewer Role Health Test",
+    "description" : "When computing the overall HUE health, consider Kerberos Ticket Renewer's health",
+    "relatedName" : ""
+  }, {
+    "name" : "solr_service",
+    "required" : false,
+    "displayName" : "Solr Service",
+    "description" : "Name of the Solr service that this Hue service instance depends on",
+    "relatedName" : ""
+  }, {
+    "name" : "database_dir",
+    "required" : false,
+    "default" : "/var/lib/hue/desktop.db",
+    "displayName" : "Hue Database Directory",
+    "description" : "If the database is SQLite3, this is the filename of the database to use, and the directory of this file must be writable by the 'hue' user.",
+    "relatedName" : "dir"
+  }, {
+    "name" : "group_member_attr",
+    "required" : false,
+    "displayName" : "LDAP Group Membership Attribute",
+    "description" : "The attribute of the group object which identifies the members of the group.",
+    "relatedName" : "group_member_attr"
+  }, {
+    "name" : "ldap_url",
+    "required" : false,
+    "displayName" : "LDAP URL",
+    "description" : "URL of LDAP Server",
+    "relatedName" : "ldap_url"
+  }, {
+    "name" : "enable_alerts",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Service Level Health Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when the health of this service reaches the threshold specified by the EventServer setting eventserver_health_events_alert_threshold",
+    "relatedName" : ""
+  }, {
+    "name" : "usage_data_collection_enable",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Usage Data Collection",
+    "description" : "When you enable anonymous usage data collection Hue tracks anonymised pages and application versions in order to gather information about each application's usage levels. The data collected does not include any hostnames or IDs. Data collection option is available on CDH 4.4 and later deployments.",
+    "relatedName" : "collect_usage"
+  }, {
+    "name" : "whitelist",
+    "required" : false,
+    "default" : "(localhost|127\\.0\\.0\\.1):(50030|50070|50060|50075)",
+    "displayName" : "Whitelist",
+    "description" : "Comma-separated list of regular expressions, which match 'host:port' of requested proxy target.",
+    "relatedName" : "whitelist"
+  }, {
+    "name" : "service_triggers",
+    "required" : false,
+    "default" : "[]",
+    "displayName" : "Service Triggers",
+    "description" : "<p>The configured triggers for this service. This is a JSON formatted list of triggers. These triggers are evaluated as part as the health system. Every trigger expression is parsed, and if the trigger condition is met, the list of actions provided in the trigger expression is executed.</p><p>Each trigger has all of the following fields:</p><ul><li><span class='code'>triggerName</span> <strong>(mandatory)</strong> - the name of the trigger. This value must be unique for the specific service. </li><li><span class='code'>triggerExpression</span> <strong>(mandatory)</strong> - a tsquery expression representing the trigger. <li><span class='code'>streamThreshold</span> <strong>(optional)</strong> - the maximum number of streams that can satisfy a condition of a trigger before the condition fires. By default set to 0, and any stream returned will cause the condition to fire. <li><span class='code'>enabled</span> <strong> (optional)</strong> - by default set to 'true'. If set to 'false' the trigger will not be evaluated.</p><p>For example, here is a JSON formatted trigger that fires if there are more than 10 DataNodes with more than 500 file-descriptors opened:</p><p><pre>[{\"triggerName\": \"sample-trigger\",\n  \"triggerExpression\": \"IF (SELECT fd_open WHERE roleType = DataNode and last(fd_open) > 500) DO health:red\",\n  \"streamThreshold\": 10, \"enabled\": \"true\"}]</pre></p><p>Consult the trigger rules documentation for more details on how to write triggers using tsquery.</p><p>The JSON format is evolving and may change in the future and as a result backward compatibility is not guaranteed between releases at this time.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "database_name",
+    "required" : false,
+    "default" : "hue",
+    "displayName" : "Hue Database Name",
+    "description" : "Name of Hue database.",
+    "relatedName" : "name"
+  }, {
+    "name" : "ldap_username_pattern",
+    "required" : false,
+    "displayName" : "LDAP Username Pattern",
+    "description" : "LDAP Username Pattern for use with non-Active Directory LDAP implementations. Must contain the special '&ltusername&gt' string for replacement during authentication.",
+    "relatedName" : "ldap_username_pattern"
+  }, {
+    "name" : "nt_domain",
+    "required" : false,
+    "displayName" : "NT Domain",
+    "description" : "Active Directory Domain",
+    "relatedName" : "nt_domain"
+  }, {
+    "name" : "time_zone",
+    "required" : false,
+    "default" : "America/Los_Angeles",
+    "displayName" : "Time Zone",
+    "description" : "Time zone name.",
+    "relatedName" : "time_zone"
+  }, {
+    "name" : "auth_backend",
+    "required" : false,
+    "default" : "desktop.auth.backend.AllowFirstUserDjangoBackend",
+    "displayName" : "Authentication Backend",
+    "description" : "Mode of authenticating login credentials. Select desktop.auth.backend.LdapBackend to use LDAP to authenticate login credentials. LDAP requires you to also set the LDAP URL, NT Domain, and optionally LDAP certificate if you are using secure LDAP. Select desktop.auth.backend.PamBackend to use PAM to authenticate login credentials.",
+    "relatedName" : "backend"
+  }, {
+    "name" : "bind_dn",
+    "required" : false,
+    "displayName" : "LDAP Bind User",
+    "description" : "Distinguished name of the user to bind as -- not necessary if the LDAP server supports anonymous searches.",
+    "relatedName" : "bind_dn"
+  }, {
+    "name" : "hue_hue_server_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Hue Server Role Health Test",
+    "description" : "When computing the overall HUE health, consider Hue Server's health",
+    "relatedName" : ""
+  }, {
+    "name" : "blacklist",
+    "required" : false,
+    "default" : "()",
+    "displayName" : "Blacklist",
+    "description" : "Comma-separated list of regular expressions, which match any prefix of 'host:port/path' of requested proxy target. This does not support matching GET parameters.",
+    "relatedName" : "blacklist"
+  }, {
+    "name" : "database_port",
+    "required" : false,
+    "default" : "3306",
+    "displayName" : "Hue Database Port",
+    "description" : "Port on host where the Hue database is running. Not necessary for SQLite3.",
+    "relatedName" : "port"
+  }, {
+    "name" : "hue_beeswax_server_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Beeswax Server Role Health Test",
+    "description" : "When computing the overall HUE health, consider Beeswax Server's health",
+    "relatedName" : ""
+  }, {
+    "name" : "process_groupname",
+    "required" : false,
+    "default" : "hue",
+    "displayName" : "System Group",
+    "description" : "The group that this service's processes should run as.",
+    "relatedName" : ""
+  }, {
+    "name" : "bind_password",
+    "required" : false,
+    "displayName" : "LDAP Bind Password",
+    "description" : "The password of the bind user.",
+    "relatedName" : "bind_password"
+  }, {
+    "name" : "hbase_service",
+    "required" : false,
+    "displayName" : "HBase Service",
+    "description" : "Name of the HBase service that this Hue service instance depends on",
+    "relatedName" : ""
+  }, {
+    "name" : "hue_service_safety_valve",
+    "required" : false,
+    "displayName" : "Hue Service Advanced Configuration Snippet (Safety Valve) for hue_safety_valve.ini",
+    "description" : "For advanced use only, a string to be inserted into <strong>hue_safety_valve.ini</strong>. Applies to configurations of all roles in this service except client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "database_host",
+    "required" : false,
+    "default" : "localhost",
+    "displayName" : "Hue Database Hostname",
+    "description" : "Name of host where the Hue database is running. Not necessary for SQLite3.",
+    "relatedName" : "host"
+  }, {
+    "name" : "group_filter",
+    "required" : false,
+    "displayName" : "LDAP Group Filter",
+    "description" : "Base filter for searching for groups",
+    "relatedName" : "group_filter"
+  }, {
+    "name" : "use_start_tls",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Use StartTLS",
+    "description" : "Whether to use StartTLS (as opposed to ldaps) to communicate securely with the LDAP server. This is only effective when the LDAP certificate is specified.",
+    "relatedName" : "use_start_tls"
+  }, {
+    "name" : "user_augmentor",
+    "required" : false,
+    "default" : "desktop.auth.backend.DefaultUserAugmentor",
+    "displayName" : "User Augmentor",
+    "description" : "Class that defines extra accessor methods for user objects.",
+    "relatedName" : "user_augmentor"
+  }, {
+    "name" : "database_type",
+    "required" : false,
+    "default" : "sqlite3",
+    "displayName" : "Hue Database Type",
+    "description" : "Type of database used for Hue",
+    "relatedName" : "engine"
+  }, {
+    "name" : "cherrypy_server_threads",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "Hue Web Server Threads",
+    "description" : "Number of threads used by the Hue web server.",
+    "relatedName" : "cherrypy_server_threads"
+  }, {
+    "name" : "default_user_group",
+    "required" : false,
+    "displayName" : "Default User Group",
+    "description" : "The name of a default group that users will be added to at creation time.",
+    "relatedName" : "default_user_group"
+  }, {
+    "name" : "database_dump_file",
+    "required" : false,
+    "default" : "/tmp/hue_database_dump.json",
+    "displayName" : "Database Dump File",
+    "description" : "File where the database gets dumped to or loaded from.",
+    "relatedName" : ""
+  }, {
+    "name" : "hdfs_tmp_dir",
+    "required" : false,
+    "default" : "/tmp",
+    "displayName" : "HDFS Temporary Directory",
+    "description" : "HDFS directory used for storing temporary files.",
+    "relatedName" : "temp_dir"
+  }, {
+    "name" : "process_username",
+    "required" : false,
+    "default" : "hue",
+    "displayName" : "System User",
+    "description" : "The user that this service's processes should run as.",
+    "relatedName" : ""
+  }, {
+    "name" : "create_users_on_login",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Create LDAP users on login",
+    "description" : "Create users in Hue when they try to login with their LDAP credentials. For use when using LdapBackend for Hue authentication.",
+    "relatedName" : "create_users_on_login"
+  }, {
+    "name" : "default_site_encoding",
+    "required" : false,
+    "default" : "utf",
+    "displayName" : "Default Site Encoding",
+    "description" : "Default encoding for site data.",
+    "relatedName" : "default_site_encoding"
+  }, {
+    "name" : "enable_config_alerts",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Configuration Change Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when this entity's configuration changes.",
+    "relatedName" : ""
+  }, {
+    "name" : "impala_service",
+    "required" : false,
+    "displayName" : "Impala Service",
+    "description" : "Name of the Impala service that this Hue service instance depends on",
+    "relatedName" : ""
+  }, {
+    "name" : "base_dn",
+    "required" : false,
+    "displayName" : "LDAP Search Base",
+    "description" : "The distinguished name to use as a search base for finding users and groups.",
+    "relatedName" : "base_dn"
+  }, {
+    "name" : "user_name_attr",
+    "required" : false,
+    "displayName" : "LDAP Username Attribute",
+    "description" : "The username attribute in the LDAP schema.",
+    "relatedName" : "user_name_attr"
+  }, {
+    "name" : "search_bind_authentication",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Use Search Bind Authentication",
+    "description" : "Search Bind Authentication connects to the LDAP server using credentials provided in the 'bind_dn' and 'bind_password' configurations. If these configurations are not set, then an anonymous search is performed.",
+    "relatedName" : "search_bind_authentication"
+  }, {
+    "name" : "user_filter",
+    "required" : false,
+    "displayName" : "LDAP User Filter",
+    "description" : "Base filter for searching for users.",
+    "relatedName" : "user_filter"
+  }, {
+    "name" : "database_user",
+    "required" : false,
+    "default" : "hue",
+    "displayName" : "Hue Database Username",
+    "description" : "The username to use to log into the Hue database. Not necessary for SQLite3.",
+    "relatedName" : "user"
+  } ]
+}

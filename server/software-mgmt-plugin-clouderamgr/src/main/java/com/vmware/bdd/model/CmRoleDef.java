@@ -15,6 +15,7 @@
 package com.vmware.bdd.model;
 
 import com.google.gson.annotations.Expose;
+import com.vmware.bdd.model.support.AvailableServiceRole;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,10 +32,10 @@ public class CmRoleDef {
    private String name;
 
    @Expose
-   private String type;
+   private AvailableServiceRole type;
 
    @Expose
-   private String nodeRef; // TODO, relate to node.nodeId
+   private String nodeRef;
 
    @Expose
    private Map<String, String> configs;
@@ -55,11 +56,11 @@ public class CmRoleDef {
       this.name = name;
    }
 
-   public String getType() {
+   public AvailableServiceRole getType() {
       return type;
    }
 
-   public void setType(String type) {
+   public void setType(AvailableServiceRole type) {
       this.type = type;
    }
 

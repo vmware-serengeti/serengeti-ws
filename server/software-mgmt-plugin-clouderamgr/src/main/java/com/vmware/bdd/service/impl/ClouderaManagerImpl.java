@@ -25,6 +25,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.google.gson.GsonBuilder;
+import com.vmware.bdd.exception.CmException;
+import com.vmware.bdd.model.support.AvailableManagementService;
+import com.vmware.bdd.model.support.AvailableParcelStage;
+import com.vmware.bdd.model.support.AvailableServiceRole;
 import org.apache.commons.lang.WordUtils;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -61,9 +66,6 @@ import com.vmware.bdd.model.CmClusterDef;
 import com.vmware.bdd.model.CmNodeDef;
 import com.vmware.bdd.model.CmRoleDef;
 import com.vmware.bdd.model.CmServiceDef;
-import com.vmware.bdd.model.CmServiceRoleType;
-import com.vmware.bdd.model.support.AvailableManagementService;
-import com.vmware.bdd.model.support.AvailableParcelStage;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
@@ -144,8 +146,13 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean validateBlueprint(ClusterBlueprint blueprint)
-         throws SoftwareManagementPluginException {
+   public boolean validateBlueprint(ClusterBlueprint blueprint) throws SoftwareManagementPluginException {
+      /*
+      1) only a NameNode is not allowed.
+      2) for YARN, jobhistory is required;
+      3) rackId must like unix paths
+      4) HBase must depends on Zookeeper, etc.
+       */
       return true;
    }
 
@@ -195,7 +202,24 @@ public class ClouderaManagerImpl implements SoftwareManager {
    @Override
    public boolean deleteCluster(String clusterName,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      return false;
+      try {
+         if (!isProvisioned(clusterName)) {
+            return true;
+         }
+
+         ApiHostRefList hosts = apiResourceRootV6.getClustersResource().listHosts(clusterName);
+
+         apiResourceRootV6.getClustersResource().deleteCluster(clusterName);
+
+         for (ApiHostRef host : hosts.getHosts()) {
+            apiResourceRootV6.getHostsResource().deleteHost(host.getHostId());
+         }
+
+      } catch (Exception e) {
+         e.printStackTrace();
+         throw new CmException(e, clusterName);
+      }
+      return true;
    }
 
    @Override
@@ -207,7 +231,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
    @Override
    public boolean onDeleteCluster(String clusterName,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      return false;
+      // just stop this cluster
+      return stop(clusterName);
    }
 
    @Override
@@ -269,7 +294,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       } catch (Exception e) {
          throw new CmException(e, cluster.getName());
       }
-      return true;
+      return false;
    }
 
    private boolean isProvisioned(String clusterName) throws CmException {
@@ -314,38 +339,35 @@ public class ClouderaManagerImpl implements SoftwareManager {
       return servicesNotStarted.isEmpty();
    }
 
-   public boolean stop(CmClusterDef cluster) throws CmException {
+   private boolean stop(String clusterName) throws CmException {
       try {
-         if (!cluster.isEmpty()) {
-            if (isConfigured(cluster) && !isStopped(cluster)) {
-               execute(apiResourceRootV6.getClustersResource().stopCommand("cluster"));
-            }
+         if ((!isStopped(clusterName))) {
+            execute(apiResourceRootV6.getClustersResource().stopCommand(clusterName));
          }
       } catch (Exception e) {
-         throw new CmException(e, cluster.getName());
+         // if "stop" command is not allowed, just ignore
+         throw new CmException(e, clusterName);
       }
       return true;
    }
 
-   private boolean isStopped(CmClusterDef cluster) throws CmException {
-      final Set<String> servicesNotStopped = cluster.allServiceNames();
+   private boolean isStopped(String clusterName) throws CmException {
+
+      if (!isProvisioned(clusterName)) {
+         return false;
+      }
+
       try {
-         if (isConfigured(cluster)) {
-            for (ApiService apiService : apiResourceRootV6.getClustersResource()
-                  .getServicesResource(cluster.getName())
-                  .readServices(DataView.SUMMARY)) {
-               for (ApiRole apiRole : apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                     .getRolesResource(apiService.getName()).readRoles()) {
-                  if (apiRole.getRoleState().equals(ApiRoleState.STOPPED)) {
-                     servicesNotStopped.remove(apiRole.getName());
-                  }
-               }
+         for (ApiService apiService : apiResourceRootV6.getClustersResource().getServicesResource(clusterName).readServices(DataView.SUMMARY)) {
+            if (!apiService.getServiceState().equals(ApiServiceState.STOPPED)) {
+               return false;
             }
          }
       } catch (Exception e) {
-         throw new CmException(e, cluster.getName());
+         throw new CmException(e, clusterName);
       }
-      return servicesNotStopped.isEmpty();
+
+      return true;
    }
 
    private boolean isConfigured(CmClusterDef cluster) throws CmException {
@@ -508,13 +530,12 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
          // Install CM agents. TODO: show steps msg
          execute("InstallHosts", apiResourceRootV6.getClouderaManagerResource().hostInstallCommand(apiHostInstallArguments));
-
-         // TODO: set rack
       }
 
       // CM will generate a random ID for each added host, we need to retrieve them for further roles creation.
       syncHostsId(cluster);
-      logger.info("cluster spec after synced hosts Id: " + (new Gson()).toJson(cluster));
+      updateRackId(cluster);
+      logger.info("cluster spec after synced hosts Id: " + new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create().toJson(cluster));
    }
 
    private void syncHostsId(final CmClusterDef clusterDef) {
@@ -533,6 +554,18 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    /**
+    * assume host IDs are already synced
+    * @param clusterDef
+    */
+   private void updateRackId(final CmClusterDef clusterDef) {
+      for (CmNodeDef node : clusterDef.getNodes()) {
+         ApiHost host = apiResourceRootV6.getHostsResource().readHost(node.getNodeId());
+         host.setRackId(node.getRackId());
+         apiResourceRootV6.getHostsResource().updateHost(host.getHostId(), host);
+      }
+   }
+
+   /**
     * sync roles' name by role type and hostRef
     * @param clusterDef
     */
@@ -543,19 +576,11 @@ public class ClouderaManagerImpl implements SoftwareManager {
          for (ApiRole apiRole : apiResourceRootV6.getClustersResource().getServicesResource(clusterDef.getName())
                .getRolesResource(apiService.getName()).readRoles()) {
             for (CmRoleDef roleDef : nodeRefToRoles.get(apiRole.getHostRef().getHostId())) {
-               if (apiRole.getType().equalsIgnoreCase(roleDef.getType())) {
+               if (apiRole.getType().equalsIgnoreCase(roleDef.getType().getName())) {
                   roleDef.setName(apiRole.getName());
                }
             }
          }
-      }
-   }
-
-   public void deleteHosts(final CmClusterDef cluster) throws Exception {
-      ApiHostRefList hosts = apiResourceRootV6.getClustersResource().removeAllHosts(cluster.getName());
-
-      for (ApiHostRef host : hosts.getHosts()) {
-         apiResourceRootV6.getHostsResource().deleteHost(host.getHostId());
       }
    }
 
@@ -601,8 +626,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       final Set<String> repositoriesRequired = new HashSet<String>();
 
       for (CmServiceDef serviceDef : cluster.getServices()) {
-         CmServiceRoleType serviceType = CmServiceRoleType.valueOf(serviceDef.getType());
-         repositoriesRequired.add(serviceType.getRepository().toString(cluster.getVersion()));
+         repositoriesRequired.add(serviceDef.getType().getRepository().toString(cluster.getVersion()));
       }
 
       logger.info("parcel repo required: " + repositoriesRequired + " cluster: " + cluster.getName());
@@ -702,9 +726,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
       ApiServiceList serviceList = new ApiServiceList();
 
       for (CmServiceDef serviceDef : cluster.getServices()) {
-         CmServiceRoleType type = CmServiceRoleType.valueOf(serviceDef.getType());
+         String typeName = serviceDef.getType().getDisplayName();
          ApiService apiService = new ApiService();
-         apiService.setType(type.getId());
+         apiService.setType(serviceDef.getType().getName());
          apiService.setName(serviceDef.getName());
          apiService.setDisplayName(serviceDef.getDisplayName());
 
@@ -712,72 +736,72 @@ public class ClouderaManagerImpl implements SoftwareManager {
          // TODO: support user defined configs
 
          // config service dependencies
-         Set<CmServiceRoleType> serviceTypes = cluster.allServiceTypes();
-         switch (type) {
-            case YARN: //TODO: Compute Only
-               apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType(CmServiceRoleType.HDFS)));
+         Set<String> serviceTypes = cluster.allServiceTypes();
+         switch (typeName) {
+            case "YARN": //TODO: Compute Only
+               apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType("HDFS")));
                break;
-            case MAPREDUCE: //TODO: Compute Only
-               apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType(CmServiceRoleType.HDFS)));
+            case "MAPREDUCE": //TODO: Compute Only
+               apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType("HDFS")));
                break;
-            case HBASE: //TODO: HBase only
-               apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType(CmServiceRoleType.HDFS)));
-               apiServiceConfig.add(new ApiConfig("zookeeper_service", cluster.serviceNameOfType(CmServiceRoleType.ZOOKEEPER)));
+            case "HBASE": //TODO: HBase only
+               apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType("HDFS")));
+               apiServiceConfig.add(new ApiConfig("zookeeper_service", cluster.serviceNameOfType("ZOOKEEPER")));
                break;
-            case SOLR:
-               apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType(CmServiceRoleType.HDFS)));
-               apiServiceConfig.add(new ApiConfig("zookeeper_service", cluster.serviceNameOfType(CmServiceRoleType.ZOOKEEPER)));
+            case "SOLR":
+               apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType("HDFS")));
+               apiServiceConfig.add(new ApiConfig("zookeeper_service", cluster.serviceNameOfType("ZOOKEEPER")));
                break;
-            case SOLR_INDEXER:
-               apiServiceConfig.add(new ApiConfig("hbase_service", cluster.serviceNameOfType(CmServiceRoleType.HBASE)));
-               apiServiceConfig.add(new ApiConfig("solr_service", cluster.serviceNameOfType(CmServiceRoleType.SOLR)));
+            case "SOLR_INDEXER":
+               apiServiceConfig.add(new ApiConfig("hbase_service", cluster.serviceNameOfType("HBASE")));
+               apiServiceConfig.add(new ApiConfig("solr_service", cluster.serviceNameOfType("SOLR")));
                break;
-            case HUE:
-               apiServiceConfig.add(new ApiConfig("hue_webhdfs", cluster.serviceNameOfType(CmServiceRoleType.HDFS_HTTP_FS)));
-               apiServiceConfig.add(new ApiConfig("oozie_service", cluster.serviceNameOfType(CmServiceRoleType.OOZIE)));
-               apiServiceConfig.add(new ApiConfig("hive_service", cluster.serviceNameOfType(CmServiceRoleType.HIVE)));
-               if (serviceTypes.contains(CmServiceRoleType.HBASE)) {
-                  apiServiceConfig.add(new ApiConfig("hbase_service", cluster.serviceNameOfType(CmServiceRoleType.HBASE)));
+            case "HUE":
+               apiServiceConfig.add(new ApiConfig("hue_webhdfs", cluster.serviceNameOfType("HDFS_HTTP_FS")));
+               apiServiceConfig.add(new ApiConfig("oozie_service", cluster.serviceNameOfType("OOZIE")));
+               apiServiceConfig.add(new ApiConfig("hive_service", cluster.serviceNameOfType("HIVE")));
+               if (serviceTypes.contains("HBASE")) {
+                  apiServiceConfig.add(new ApiConfig("hbase_service", cluster.serviceNameOfType("HBASE")));
                }
-               if (serviceTypes.contains(CmServiceRoleType.IMPALA)) {
-                  apiServiceConfig.add(new ApiConfig("impala_service", cluster.serviceNameOfType(CmServiceRoleType.IMPALA)));
+               if (serviceTypes.contains("IMPALA")) {
+                  apiServiceConfig.add(new ApiConfig("impala_service", cluster.serviceNameOfType("IMPALA")));
                }
-               if (serviceTypes.contains(CmServiceRoleType.SOLR)) {
-                  apiServiceConfig.add(new ApiConfig("solr_service", cluster.serviceNameOfType(CmServiceRoleType.SOLR)));
+               if (serviceTypes.contains("SOLR")) {
+                  apiServiceConfig.add(new ApiConfig("solr_service", cluster.serviceNameOfType("SOLR")));
                }
-               if (serviceTypes.contains(CmServiceRoleType.SQOOP)) {
-                  apiServiceConfig.add(new ApiConfig("sqoop_service", cluster.serviceNameOfType(CmServiceRoleType.SQOOP)));
+               if (serviceTypes.contains("SQOOP")) {
+                  apiServiceConfig.add(new ApiConfig("sqoop_service", cluster.serviceNameOfType("SQOOP")));
                }
-               if (serviceTypes.contains(CmServiceRoleType.HBASE_THRIFT_SERVER)) {
+               if (serviceTypes.contains("HBASE_THRIFT_SERVER")) {
                   apiServiceConfig.add(new ApiConfig("hue_hbase_thrift", cluster
-                        .serviceNameOfType(CmServiceRoleType.HBASE_THRIFT_SERVER)));
+                        .serviceNameOfType("HBASE_THRIFT_SERVER")));
                }
                break;
-            case SQOOP:
+            case "SQOOP":
                apiServiceConfig.add(new ApiConfig("mapreduce_yarn_service", serviceTypes
-                     .contains(CmServiceRoleType.YARN) ? cluster.serviceNameOfType(CmServiceRoleType.YARN) : cluster
-                     .serviceNameOfType(CmServiceRoleType.MAPREDUCE)));
+                     .contains("YARN") ? cluster.serviceNameOfType("YARN") : cluster
+                     .serviceNameOfType("MAPREDUCE")));
                break;
-            case OOZIE:
+            case "OOZIE":
                apiServiceConfig.add(new ApiConfig("mapreduce_yarn_service", serviceTypes
-                     .contains(CmServiceRoleType.YARN) ? cluster.serviceNameOfType(CmServiceRoleType.YARN) : cluster
-                     .serviceNameOfType(CmServiceRoleType.MAPREDUCE)));
+                     .contains("YARN") ? cluster.serviceNameOfType("YARN") : cluster
+                     .serviceNameOfType("MAPREDUCE")));
                break;
-            case HIVE:
+            case "HIVE":
                apiServiceConfig.add(new ApiConfig("mapreduce_yarn_service", serviceTypes
-                     .contains(CmServiceRoleType.YARN) ? cluster.serviceNameOfType(CmServiceRoleType.YARN) : cluster
-                     .serviceNameOfType(CmServiceRoleType.MAPREDUCE)));
+                     .contains("YARN") ? cluster.serviceNameOfType("YARN") : cluster
+                     .serviceNameOfType("MAPREDUCE")));
                apiServiceConfig.add(new ApiConfig("zookeeper_service", cluster
-                     .serviceNameOfType(CmServiceRoleType.ZOOKEEPER)));
+                     .serviceNameOfType("ZOOKEEPER")));
                break;
-            case IMPALA:
-               apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType(CmServiceRoleType.HDFS)));
-               apiServiceConfig.add(new ApiConfig("hbase_service", cluster.serviceNameOfType(CmServiceRoleType.HBASE)));
-               apiServiceConfig.add(new ApiConfig("hive_service", cluster.serviceNameOfType(CmServiceRoleType.HIVE)));
+            case "IMPALA":
+               apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType("HDFS")));
+               apiServiceConfig.add(new ApiConfig("hbase_service", cluster.serviceNameOfType("HBASE")));
+               apiServiceConfig.add(new ApiConfig("hive_service", cluster.serviceNameOfType("HIVE")));
                break;
-            case FLUME:
-               apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType(CmServiceRoleType.HDFS)));
-               apiServiceConfig.add(new ApiConfig("hbase_service", cluster.serviceNameOfType(CmServiceRoleType.HBASE)));
+            case "FLUME":
+               apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType("HDFS")));
+               apiServiceConfig.add(new ApiConfig("hbase_service", cluster.serviceNameOfType("HBASE")));
             default:
                break;
          }
@@ -786,7 +810,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          List<ApiRole> apiRoles = new ArrayList<ApiRole>();
          for (CmRoleDef roleDef : serviceDef.getRoles()) {
             ApiRole apiRole = new ApiRole();
-            apiRole.setType(roleDef.getType());
+            apiRole.setType(roleDef.getType().getName());
             apiRole.setHostRef(new ApiHostRef(roleDef.getNodeRef()));
             ApiConfigList roleConfigList = new ApiConfigList();
             if (roleDef.getConfigs() != null) {
@@ -802,15 +826,14 @@ public class ClouderaManagerImpl implements SoftwareManager {
          serviceList.add(apiService);
       }
 
-      logger.info("services to create: " + (new Gson()).toJson(serviceList));
       apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).createServices(serviceList); // TODO: resume/resize
       logger.info("Finished create services");
       syncRolesId(cluster);
 
       // Necessary, since createServices a habit of kicking off async commands (eg ZkAutoInit )
-      for (CmServiceRoleType type : cluster.allServiceTypes()) {
+      for (CmServiceDef serviceDef : cluster.getServices()) {
          for (ApiCommand command : apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-               .listActiveCommands(cluster.serviceNameOfType(type), DataView.SUMMARY)) {
+               .listActiveCommands(serviceDef.getName(), DataView.SUMMARY)) {
             execute(command, false);
          }
       }
@@ -866,14 +889,14 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    private void preStartServices(final CmClusterDef cluster, CmServiceDef serviceDef) throws InterruptedException {
-      switch (CmServiceRoleType.valueOfId(serviceDef.getType())) {
-         case HIVE:
+      switch (serviceDef.getType().getDisplayName()) {
+         case "HIVE":
             execute(apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                   .createHiveWarehouseCommand(serviceDef.getName()));
             execute(apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                   .hiveCreateMetastoreDatabaseTablesCommand(serviceDef.getName()), false);
             break;
-         case OOZIE:
+         case "OOZIE":
             execute(
                   apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                         .installOozieShareLib(serviceDef.getName()), false);
@@ -881,22 +904,22 @@ public class ClouderaManagerImpl implements SoftwareManager {
                   apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                         .createOozieDb(serviceDef.getName()), false);
             break;
-         case HBASE:
+         case "HBASE":
             execute(apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                   .createHBaseRootCommand(serviceDef.getName()));
-         case ZOOKEEPER:
+         case "ZOOKEEPER":
             execute(
                   apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                         .zooKeeperInitCommand(serviceDef.getName()), false);
             break;
-         case SOLR:
+         case "SOLR":
             execute(
                   apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                         .initSolrCommand(serviceDef.getName()), false);
             execute(apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                   .createSolrHdfsHomeDirCommand(serviceDef.getName()));
             break;
-         case SQOOP:
+         case "SQOOP":
             execute(apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                   .createSqoopUserDirCommand(serviceDef.getName()));
             break;
@@ -908,23 +931,23 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private void preStartRoles(final CmClusterDef cluster, CmServiceDef serviceDef, CmRoleDef roleDef) throws IOException,
          InterruptedException {
 
-      switch (CmServiceRoleType.valueOfId(roleDef.getType())) {
-         case HDFS_NAMENODE:
+      switch (roleDef.getType().getDisplayName()) {
+         case "HDFS_NAMENODE":
             execute(
                   apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                         .getRoleCommandsResource(serviceDef.getName())
                         .formatCommand(new ApiRoleNameList(ImmutableList.<String>builder().add(roleDef.getName()).build())),
                   true);
             break;
-         case YARN_RESOURCE_MANAGER:
+         case "YARN_RESOURCE_MANAGER":
             execute(apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                   .createYarnNodeManagerRemoteAppLogDirCommand(serviceDef.getName()));
             break;
-         case YARN_JOB_HISTORY:
+         case "YARN_JOB_HISTORY":
             execute(apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                   .createYarnJobHistoryDirCommand(serviceDef.getName()));
             break;
-         case HUE_SERVER:
+         case "HUE_SERVER":
             execute(
                   apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                         .getRoleCommandsResource(serviceDef.getName())
@@ -940,7 +963,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private void postStartServices(final CmClusterDef cluster, CmServiceDef serviceDef) throws IOException,
          InterruptedException {
 
-      switch (CmServiceRoleType.valueOfId(serviceDef.getType())) {
+      switch (serviceDef.getType().getDisplayName()) {
          default:
             break;
       }
@@ -949,8 +972,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private void postStartRoles(final CmClusterDef cluster, CmServiceDef serviceDef, CmRoleDef roleDef) throws IOException,
          InterruptedException {
 
-      switch (CmServiceRoleType.valueOfId(roleDef.getType())) {
-         case HDFS_NAMENODE:
+      switch (roleDef.getType().getDisplayName()) {
+         case "HDFS_NAMENODE":
             ApiRoleNameList formatList = new ApiRoleNameList();
             formatList.add(roleDef.getName());
             execute(apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
@@ -983,8 +1006,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
 
    public void unconfigureServices(final CmClusterDef cluster) throws Exception {
-      final Set<CmServiceRoleType> types = new TreeSet<CmServiceRoleType>(Collections.reverseOrder());
-      types.addAll(cluster.allServiceTypes());
       for (String serviceName : cluster.allServiceNames()) {
          ServicesResourceV6 servicesResource = apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName());
          if (servicesResource != null) {

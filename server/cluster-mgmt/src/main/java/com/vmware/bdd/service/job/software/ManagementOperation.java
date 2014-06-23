@@ -27,6 +27,7 @@ public enum ManagementOperation {
    UPDATE,
    START,
    STOP,
+   PRE_DESTROY,
    DESTROY,
    CONFIGURE,
    RESUME,

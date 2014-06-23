@@ -1,12 +1,14 @@
 {
   "name": "HDFS",
+  "displayName": "HDFS",
   "parent": "CLUSTER",
   "repository": "CDH",
   "versionApiMin": 3,
   "versionApiMax": -1,
   "versionCdhMin": 4,
   "versionCdhMax": -1,
-  "availableConfigurations" : [ {
+  "availableConfigurations" : [
+  {
     "name" : "zookeeper_service",
     "required" : false,
     "displayName" : "ZooKeeper Service",

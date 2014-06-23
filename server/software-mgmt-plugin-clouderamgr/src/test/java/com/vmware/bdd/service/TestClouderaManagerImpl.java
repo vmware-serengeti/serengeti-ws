@@ -66,4 +66,5 @@ public class TestClouderaManagerImpl {
       provider.createCluster(blueprint, queue);
    }
 
+
 }

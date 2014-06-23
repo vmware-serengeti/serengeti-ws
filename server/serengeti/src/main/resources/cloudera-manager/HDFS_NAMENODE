@@ -1,5 +1,6 @@
 {
   "name": "NAMENODE",
+  "displayName": "HDFS_NAMENODE",
   "parent": "HDFS",
   "repository": "CDH",
   "versionApiMin": 3,

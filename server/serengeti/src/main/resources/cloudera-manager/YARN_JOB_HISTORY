@@ -1,72 +1,68 @@
 {
-  "name": "SECONDARYNAMENODE",
-  "parent": "HDFS",
+  "name": "JOBHISTORY",
+  "displayName": "YARN_JOB_HISTORY",
+  "parent": "YARN",
   "repository": "CDH",
-  "versionApiMin": 3,
+  "versionApiMin": 6,
   "versionApiMax": -1,
-  "versionCdhMin": 4,
+  "versionCdhMin": 6,
   "versionCdhMax": -1,
-  "availableConfigurations" : [ {
-    "name" : "fs_checkpoint_dir_list",
-    "required" : true,
-    "displayName" : "HDFS Checkpoint Directory",
-    "description" : "Determines where on the local file system the DFS SecondaryNameNode should store the temporary images to merge. For redundancy, enter a comma-delimited list of directories to replicate the image in all of the directories. Typical values are /data/N/dfs/snn for N = 1, 2, 3...",
-    "relatedName" : "dfs.namenode.checkpoint.dir"
-  }, {
-    "name" : "secondary_namenode_java_heapsize",
+  "availableConfigurations" : [
+  {
+    "name" : "mr2_jobhistory_java_heapsize",
     "required" : false,
     "default" : "1073741824",
-    "displayName" : "Java Heap Size of Secondary namenode in Bytes",
+    "displayName" : "Java Heap Size of JobHistory Server in Bytes",
     "description" : "Maximum size for the Java Process heap memory.  Passed to Java -Xmx.  Measured in bytes.",
     "relatedName" : ""
   }, {
-    "name" : "secondarynamenode_scm_health_enabled",
+    "name" : "yarn_jobhistory_bind_wildcard",
     "required" : false,
-    "default" : "true",
-    "displayName" : "SecondaryNameNode Process Health Test",
-    "description" : "Enables the health test that the SecondaryNameNode's process state is consistent with the role configuration",
+    "default" : "false",
+    "displayName" : "Bind JobHistory Server to Wildcard Address",
+    "description" : "If enabled, the JobHistory Server binds to the wildcard address (\"0.0.0.0\") on all of its ports.",
     "relatedName" : ""
   }, {
-    "name" : "secondarynamenode_gc_duration_window",
+    "name" : "jobhistory_web_metric_collection_thresholds",
     "required" : false,
-    "default" : "5",
-    "displayName" : "Garbage Collection Duration Monitoring Period",
-    "description" : "The period to review when computing the moving average of garbage collection time.",
+    "default" : "{\"critical\":\"never\",\"warning\":\"10000.0\"}",
+    "displayName" : "Web Metric Collection Duration",
+    "description" : "The health test thresholds on the duration of the metrics request to the web server.",
     "relatedName" : ""
   }, {
-    "name" : "secondarynamenode_checkpoint_directories_free_space_absolute_thresholds",
+    "name" : "mapreduce_jobhistory_max_age_ms",
     "required" : false,
-    "default" : "{\"critical\":\"5.36870912E9\",\"warning\":\"1.073741824E10\"}",
-    "displayName" : "Checkpoint Directories Free Space Monitoring Absolute Thresholds",
-    "description" : "The health test thresholds for monitoring of free space on the filesystems that contain this role's checkpoint directories.",
-    "relatedName" : ""
+    "default" : "604800000",
+    "displayName" : "Job History Files Maximum Age",
+    "description" : "Job history files older than this time duration will deleted when the history cleaner runs.",
+    "relatedName" : "mapreduce.jobhistory.max-age-ms"
+  }, {
+    "name" : "yarn_app_mapreduce_am_staging_dir",
+    "required" : false,
+    "default" : "/user",
+    "displayName" : "MapReduce ApplicationMaster Staging Root Directory",
+    "description" : "The root HDFS directory of the staging area for users' MR2 jobs; for example /user. The staging directories are always named after the user.",
+    "relatedName" : "yarn.app.mapreduce.am.staging-dir"
   }, {
     "name" : "log_threshold",
     "required" : false,
     "default" : "INFO",
-    "displayName" : "SecondaryNameNode Logging Threshold",
-    "description" : "The minimum log level for SecondaryNameNode logs",
+    "displayName" : "JobHistory Server Logging Threshold",
+    "description" : "The minimum log level for JobHistory Server logs",
     "relatedName" : ""
   }, {
-    "name" : "secondarynamenode_java_opts",
+    "name" : "mapreduce_jobhistory_webapp_address",
     "required" : false,
-    "default" : "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:-CMSConcurrentMTEnabled -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled",
-    "displayName" : "Java Configuration Options for Secondary NameNode",
-    "description" : "These arguments will be passed as part of the Java command line. Commonly, garbage collection flags or extra debugging flags would be passed here.",
-    "relatedName" : ""
+    "default" : "19888",
+    "displayName" : "MapReduce JobHistory Webapp Port",
+    "description" : "The port of the MapReduce JobHistory Server web application. Together with the host name of the JobHistory role forms the address.",
+    "relatedName" : "mapreduce.jobhistory.webapp.address"
   }, {
-    "name" : "fs_checkpoint_txns",
+    "name" : "jobhistory_fd_thresholds",
     "required" : false,
-    "default" : "1000000",
-    "displayName" : "Filesystem Checkpoint Transaction Threshold",
-    "description" : "The number of transactions after which the NameNode or SecondaryNameNode will create a checkpoint of the namespace, regardless of whether the checkpoint period has expired.",
-    "relatedName" : "dfs.namenode.checkpoint.txns"
-  }, {
-    "name" : "secondarynamenode_gc_duration_thresholds",
-    "required" : false,
-    "default" : "{\"critical\":\"60.0\",\"warning\":\"30.0\"}",
-    "displayName" : "Garbage Collection Duration Thresholds",
-    "description" : "The health test thresholds for the weighted average time spent in Java garbage collection. Specified as a percentage of elapsed wall clock time.",
+    "default" : "{\"critical\":\"70.0\",\"warning\":\"50.0\"}",
+    "displayName" : "File Descriptor Monitoring Thresholds",
+    "description" : "The health test thresholds of the number of file descriptors used. Specified as a percentage of file descriptor limit.",
     "relatedName" : ""
   }, {
     "name" : "oom_sigkill_enabled",
@@ -76,26 +72,6 @@
     "description" : "When set, a SIGKILL signal is sent to the role process when java.lang.OutOfMemoryError is thrown.",
     "relatedName" : ""
   }, {
-    "name" : "secondarynamenode_fd_thresholds",
-    "required" : false,
-    "default" : "{\"critical\":\"70.0\",\"warning\":\"50.0\"}",
-    "displayName" : "File Descriptor Monitoring Thresholds",
-    "description" : "The health test thresholds of the number of file descriptors used. Specified as a percentage of file descriptor limit.",
-    "relatedName" : ""
-  }, {
-    "name" : "secondarynamenode_web_metric_collection_thresholds",
-    "required" : false,
-    "default" : "{\"critical\":\"never\",\"warning\":\"10000.0\"}",
-    "displayName" : "Web Metric Collection Duration",
-    "description" : "The health test thresholds on the duration of the metrics request to the web server.",
-    "relatedName" : ""
-  }, {
-    "name" : "secondarynamenode_config_safety_valve",
-    "required" : false,
-    "displayName" : "SecondaryNameNode Advanced Configuration Snippet (Safety Valve) for hdfs-site.xml",
-    "description" : "For advanced use only, a string to be inserted into <strong>hdfs-site.xml</strong> for this role only.",
-    "relatedName" : ""
-  }, {
     "name" : "enable_alerts",
     "required" : false,
     "default" : "true",
@@ -103,12 +79,26 @@
     "description" : "When set, Cloudera Manager will send alerts when the health of this role reaches the threshold specified by the EventServer setting eventserver_health_events_alert_threshold",
     "relatedName" : ""
   }, {
+    "name" : "mapreduce_jobhistory_address",
+    "required" : false,
+    "default" : "10020",
+    "displayName" : "MapReduce JobHistory Server Port",
+    "description" : "The port of the MapReduce JobHistory Server. Together with the host name of the JobHistory role forms the address. ",
+    "relatedName" : "mapreduce.jobhistory.address"
+  }, {
     "name" : "rm_memory_hard_limit",
     "required" : false,
     "default" : "-1",
     "displayName" : "Cgroup Memory Hard Limit",
     "description" : "Hard memory limit to assign to this role, enforced by the Linux kernel. When the limit is reached, the kernel will reclaim pages charged to the process. If reclaiming fails, the kernel may kill the process. Both anonymous as well as page cache pages contribute to the limit. Use a value of -1 B to specify no limit. By default processes not managed by Cloudera Manager will have no limit.",
     "relatedName" : "memory.limit_in_bytes"
+  }, {
+    "name" : "jobhistory_gc_duration_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"60.0\",\"warning\":\"30.0\"}",
+    "displayName" : "Garbage Collection Duration Thresholds",
+    "description" : "The health test thresholds for the weighted average time spent in Java garbage collection. Specified as a percentage of elapsed wall clock time.",
+    "relatedName" : ""
   }, {
     "name" : "rm_memory_soft_limit",
     "required" : false,
@@ -133,7 +123,7 @@
   }, {
     "name" : "log_event_whitelist",
     "required" : false,
-    "default" : "{\n  \"version\": \"0\",\n  \"rules\": [\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 1, \"threshold\":\"FATAL\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\": \".* is deprecated. Instead, use .*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\": \".* is deprecated. Use .* instead\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.io.IOException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.net.SocketException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.net.SocketClosedException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.io.EOFException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.nio.channels.CancelledKeyException\"},\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 2, \"exceptiontype\": \".*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"Unknown job [^ ]+ being deleted.*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"Error executing shell command .+ No such process.+\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\".*attempt to override final parameter.+\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"[^ ]+ is a deprecated filesystem name. Use.*\"},\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 1, \"threshold\":\"WARN\"},\n    {\"alert\": false, \"rate\": 1, \"threshold\":\"INFO\", \"content\":\"Triggering checkpoint.*\"}\n  ]\n}\n",
+    "default" : "{\n  \"version\": \"0\",\n  \"rules\": [\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 1, \"threshold\":\"FATAL\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\": \".* is deprecated. Instead, use .*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\": \".* is deprecated. Use .* instead\"},\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 2, \"exceptiontype\": \".*\"},\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 1, \"threshold\":\"WARN\"}\n  ]\n}\n",
     "displayName" : "Rules to Extract Events from Log Files",
     "description" : "<p>This file contains the rules which govern how log messages are turned into events by the custom log4j appender that this role loads. It is in JSON format, and is composed of a list of rules. Every log message is evaluated against each of these rules in turn to decide whether or not to send an event for that message.</p><p>Each rule has some or all of the following fields:</p><ul><li><span class='code'>alert</span> - whether or not events generated from this rule should be promoted to alerts. A value of \"true\" will cause alerts to be generated. If not specified, the default is \"false\".</li><li><span class='code'>rate</span> <strong>(mandatory)</strong> - the maximum number of log messages matching this rule that may be sent as events every minute. If more than <tt>rate</tt> matching log messages are received in a single minute, the extra messages are ignored. If rate is less than 0, the number of messages per minute is unlimited.</li><li><span class='code'>periodminutes</span>  - the number of minutes during which the publisher will only publish <tt>rate</tt> events or fewer. If not specified, the default is <strong>one minute</strong></li><li><span class='code'>threshold</span> - apply this rule only to messages with this log4j severity level or above. An example is \"WARN\" for warning level messages or higher.</li><li><span class='code'>content</span> - match only those messages whose contents match this regular expression.</li><li><span class='code'>exceptiontype</span> - match only those messages which are part of an exception message. The exception type must match this regular expression.</li></ul><br/><p>Example:<span class='code'>{\"alert\": false, \"rate\": 10, \"exceptiontype\": \"java.lang.StringIndexOutOfBoundsException\"}</span></p><p>This rule will send events to Cloudera Manager for every <span class='code'>StringIndexOutOfBoundsException</span>, up to a maximum of 10 every minute.</p>",
     "relatedName" : ""
@@ -145,12 +135,18 @@
     "description" : "Path to directory where heap dumps are generated when java.lang.OutOfMemoryError error is thrown. This directory is automatically created if it doesn't exist. However, if this directory already exists, role user must have write access to this directory. If this directory is shared amongst multiple roles, it should have 1777 permissions. Note that the heap dump files are created with 600 permissions and are owned by the role user. The amount of free space in this directory should be greater than the maximum Java Process heap size configured for this role.",
     "relatedName" : ""
   }, {
-    "name" : "dfs_secondary_http_port",
+    "name" : "jobhistory_mapred_safety_valve",
     "required" : false,
-    "default" : "50090",
-    "displayName" : "SecondaryNameNode Web UI Port",
-    "description" : "The SecondaryNameNode HTTP port. If the port is 0, then the server starts on a free port. Combined with the SecondaryNameNode's hostname to build its HTTP address.",
-    "relatedName" : "dfs.namenode.secondary.http-address"
+    "displayName" : "JobHistory Server Advanced Configuration Snippet (Safety Valve) for mapred-site.xml",
+    "description" : "For advanced use only, a string to be inserted into <strong>mapred-site.xml</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapreduce_jobhistory_cleaner_interval",
+    "required" : false,
+    "default" : "86400000",
+    "displayName" : "Job History Files Cleaner Interval",
+    "description" : "Time interval for history cleaner to check for files to delete. Files are only deleted if they are older than mapreduce.jobhistory.max-age-ms.",
+    "relatedName" : "mapreduce.jobhistory.cleaner.interval"
   }, {
     "name" : "rm_io_weight",
     "required" : false,
@@ -159,25 +155,33 @@
     "description" : "Weight for the read I/O requests issued by this role. The greater the weight, the higher the priority of the requests when the host experiences I/O contention. Must be between 100 and 1000. Defaults to 1000 for processes not managed by Cloudera Manager.",
     "relatedName" : "blkio.weight"
   }, {
-    "name" : "secondarynamenode_host_health_enabled",
+    "name" : "mr2_jobhistory_java_opts",
+    "required" : false,
+    "default" : "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:-CMSConcurrentMTEnabled -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled",
+    "displayName" : "Java Configuration Options for JobHistory Server",
+    "description" : "These arguments will be passed as part of the Java command line. Commonly, garbage collection flags or extra debugging flags would be passed here.",
+    "relatedName" : ""
+  }, {
+    "name" : "jobhistory_scm_health_enabled",
     "required" : false,
     "default" : "true",
-    "displayName" : "SecondaryNameNode Host Health Test",
-    "description" : "When computing the overall SecondaryNameNode health, consider the host's health.",
+    "displayName" : "JobHistory Server Process Health Test",
+    "description" : "Enables the health test that the JobHistory Server's process state is consistent with the role configuration",
     "relatedName" : ""
   }, {
-    "name" : "hadoop_metrics2_safety_valve",
+    "name" : "jobhistory_web_metric_collection_enabled",
     "required" : false,
-    "displayName" : "Hadoop Metrics2 Advanced Configuration Snippet (Safety Valve)",
-    "description" : "Advanced Configuration Snippet (Safety Valve) for Hadoop Metrics2. Properties will be inserted into <strong>hadoop-metrics2.properties</strong>.",
+    "default" : "true",
+    "displayName" : "Web Metric Collection",
+    "description" : "Enables the health test that the Cloudera Manager Agent can successfully contact and gather metrics from the web server.",
     "relatedName" : ""
   }, {
-    "name" : "secondarynamenode_log_dir",
+    "name" : "history_process_groupname",
     "required" : false,
-    "default" : "/var/log/hadoop-hdfs",
-    "displayName" : "SecondaryNameNode Log Directory",
-    "description" : "Directory where SecondaryNameNode will place its log files.",
-    "relatedName" : "hadoop.log.dir"
+    "default" : "hadoop",
+    "displayName" : "System Group",
+    "description" : "The group that the JobHistory Server process should run as.",
+    "relatedName" : ""
   }, {
     "name" : "rlimit_fds",
     "required" : false,
@@ -187,15 +191,22 @@
   }, {
     "name" : "log4j_safety_valve",
     "required" : false,
-    "displayName" : "SecondaryNameNode Logging Advanced Configuration Snippet (Safety Valve)",
+    "displayName" : "JobHistory Server Logging Advanced Configuration Snippet (Safety Valve)",
     "description" : "For advanced use only, a string to be inserted into <strong>log4j.properties</strong> for this role only.",
     "relatedName" : ""
   }, {
     "name" : "max_log_size",
     "required" : false,
     "default" : "200",
-    "displayName" : "SecondaryNameNode Max Log Size",
-    "description" : "The maximum size, in megabytes, per log file for SecondaryNameNode logs.  Typically used by log4j.",
+    "displayName" : "JobHistory Server Max Log Size",
+    "description" : "The maximum size, in megabytes, per log file for JobHistory Server logs.  Typically used by log4j.",
+    "relatedName" : ""
+  }, {
+    "name" : "jobhistory_gc_duration_window",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Garbage Collection Duration Monitoring Period",
+    "description" : "The period to review when computing the moving average of garbage collection time.",
     "relatedName" : ""
   }, {
     "name" : "unexpected_exits_thresholds",
@@ -205,19 +216,18 @@
     "description" : "The health test thresholds for unexpected exits encountered within a recent period specified by the unexpected_exits_window configuration for the role.",
     "relatedName" : ""
   }, {
-    "name" : "secondarynamenode_checkpoint_directories_free_space_percentage_thresholds",
+    "name" : "jobhistory_config_safety_valve",
     "required" : false,
-    "default" : "{\"critical\":\"never\",\"warning\":\"never\"}",
-    "displayName" : "Checkpoint Directories Free Space Monitoring Percentage Thresholds",
-    "description" : "The health test thresholds for monitoring of free space on the filesystems that contain this role's checkpoint directories. Specified as a percentage of the capacity on the filesystem. This setting is not used if a Checkpoint Directories Free Space Monitoring Absolute Thresholds setting is configured.",
+    "displayName" : "JobHistory Server Advanced Configuration Snippet (Safety Valve) for yarn-site.xml",
+    "description" : "For advanced use only, a string to be inserted into <strong>yarn-site.xml</strong> for this role only.",
     "relatedName" : ""
   }, {
-    "name" : "dfs_secondary_https_port",
+    "name" : "history_process_username",
     "required" : false,
-    "default" : "50495",
-    "displayName" : "Secure SecondaryNameNode Web UI Port (SSL)",
-    "description" : "The base port where the secure SecondaryNameNode web UI listens.",
-    "relatedName" : "dfs.secondary.https.port"
+    "default" : "mapred",
+    "displayName" : "System User",
+    "description" : "The user that the JobHistory Server process should run as.",
+    "relatedName" : ""
   }, {
     "name" : "enable_config_alerts",
     "required" : false,
@@ -231,13 +241,6 @@
     "default" : "{\"critical\":\"never\",\"warning\":\"never\"}",
     "displayName" : "Log Directory Free Space Monitoring Percentage Thresholds",
     "description" : "The health test thresholds for monitoring of free space on the filesystem that contains this role's log directory. Specified as a percentage of the capacity on that filesystem. This setting is not used if a Log Directory Free Space Monitoring Absolute Thresholds setting is configured.",
-    "relatedName" : ""
-  }, {
-    "name" : "secondarynamenode_web_metric_collection_enabled",
-    "required" : false,
-    "default" : "true",
-    "displayName" : "Web Metric Collection",
-    "description" : "Enables the health test that the Cloudera Manager Agent can successfully contact and gather metrics from the web server.",
     "relatedName" : ""
   }, {
     "name" : "role_triggers",
@@ -254,12 +257,6 @@
     "description" : "The health test thresholds for monitoring of free space on the filesystem that contains this role's log directory.",
     "relatedName" : ""
   }, {
-    "name" : "dfs_secondarynamenode_nameservice",
-    "required" : false,
-    "displayName" : "SecondaryNameNode Nameservice",
-    "description" : "Nameservice of this SecondaryNameNode",
-    "relatedName" : ""
-  }, {
     "name" : "oom_heap_dump_enabled",
     "required" : false,
     "default" : "false",
@@ -267,26 +264,26 @@
     "description" : "When set, generates heap dump file when java.lang.OutOfMemoryError is thrown.",
     "relatedName" : ""
   }, {
+    "name" : "mr2_jobhistory_log_dir",
+    "required" : false,
+    "default" : "/var/log/hadoop-mapreduce",
+    "displayName" : "JobHistory Server Log Directory",
+    "description" : "Directory where JobHistory Server will place its log files.",
+    "relatedName" : "hadoop.log.dir"
+  }, {
     "name" : "max_log_backup_index",
     "required" : false,
     "default" : "10",
-    "displayName" : "SecondaryNameNode Maximum Log File Backups",
-    "description" : "The maximum number of rolled log files to keep for SecondaryNameNode logs.  Typically used by log4j.",
+    "displayName" : "JobHistory Server Maximum Log File Backups",
+    "description" : "The maximum number of rolled log files to keep for JobHistory Server logs.  Typically used by log4j.",
     "relatedName" : ""
   }, {
-    "name" : "secondary_namenode_bind_wildcard",
+    "name" : "jobhistory_host_health_enabled",
     "required" : false,
-    "default" : "false",
-    "displayName" : "Bind SecondaryNameNode to Wildcard Address",
-    "description" : "If enabled, the SecondaryNameNode binds to the wildcard address (\"0.0.0.0\") on all of its ports.",
+    "default" : "true",
+    "displayName" : "JobHistory Server Host Health Test",
+    "description" : "When computing the overall JobHistory Server health, consider the host's health.",
     "relatedName" : ""
-  }, {
-    "name" : "fs_checkpoint_period",
-    "required" : false,
-    "default" : "3600",
-    "displayName" : "Filesystem Checkpoint Period",
-    "description" : "The time between two periodic file system checkpoints.",
-    "relatedName" : "dfs.namenode.checkpoint.period"
   }, {
     "name" : "unexpected_exits_window",
     "required" : false,

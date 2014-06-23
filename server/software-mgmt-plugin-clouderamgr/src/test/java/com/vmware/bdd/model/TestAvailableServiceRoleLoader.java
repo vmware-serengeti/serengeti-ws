@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.model;
 
+import com.vmware.bdd.model.support.AvailableServiceRole;
 import com.vmware.bdd.model.support.AvailableServiceRoleLoader;
 import org.testng.annotations.Test;
 
@@ -27,10 +28,9 @@ import java.io.IOException;
 public class TestAvailableServiceRoleLoader {
 
    @Test
-   public void testLoader() throws IOException {
-      AvailableServiceRoleLoader.clean();
-      AvailableServiceRoleLoader.getServiceRole("NAMENODE");
+   public void testLoadAll() throws IOException {
+      AvailableServiceRoleLoader.loadAll();
       System.out.println(AvailableServiceRoleLoader.dump());
+      System.out.println(AvailableServiceRoleLoader.load("HDFS").getAvailableConfigurations().keySet());
    }
-
 }

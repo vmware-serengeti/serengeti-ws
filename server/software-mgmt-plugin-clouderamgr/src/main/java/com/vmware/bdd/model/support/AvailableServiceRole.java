@@ -17,7 +17,10 @@ package com.vmware.bdd.model.support;
 import com.google.gson.annotations.Expose;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Author: Xiaoding Bian
@@ -30,7 +33,10 @@ public class AvailableServiceRole {
    public static final String ROOT_SERVICE = "CLUSTER";
 
    @Expose
-   private String name;
+   private String name; // the name used in Cloudera Manager, i.e, "SERVER" for zookeeper server
+
+   @Expose
+   private String displayName; // the alias name used in BDE, i.e, "ZOOKEEPER_SERVER" for role "SERVER"
 
    @Expose(serialize = false)
    private AvailableServiceRole parent;
@@ -50,8 +56,8 @@ public class AvailableServiceRole {
    @Expose
    private int versionCdhMax;
 
-   @Expose
-   private List<AvailableConfiguration> availableConfigurations; // TODO: use map instead
+   @Expose(serialize = false)
+   private Map<String, AvailableConfiguration> availableConfigurations;
 
    public String getName() {
       return name;
@@ -59,6 +65,14 @@ public class AvailableServiceRole {
 
    public void setName(String name) {
       this.name = name;
+   }
+
+   public String getDisplayName() {
+      return displayName;
+   }
+
+   public void setDisplayName(String displayName) {
+      this.displayName = displayName;
    }
 
    public AvailableServiceRole getParent() {
@@ -80,7 +94,7 @@ public class AvailableServiceRole {
       try {
          this.parent = null;
          if (parent != null) {
-            this.parent = AvailableServiceRoleLoader.getServiceRole(parent);
+            this.parent = AvailableServiceRoleLoader.load(parent);
          }
       } catch (IOException e) {
          e.printStackTrace();
@@ -127,12 +141,15 @@ public class AvailableServiceRole {
       this.versionCdhMax = versionCdhMax;
    }
 
-   public List<AvailableConfiguration> getAvailableConfigurations() {
+   public Map<String, AvailableConfiguration> getAvailableConfigurations() {
       return availableConfigurations;
    }
 
-   public void setAvailableConfigurations(List<AvailableConfiguration> availableConfigurations) {
-      this.availableConfigurations = availableConfigurations;
+   public void setAvailableConfigurations(List<AvailableConfiguration> configs) {
+      this.availableConfigurations = new HashMap<String, AvailableConfiguration>();
+      for (AvailableConfiguration config : configs) {
+         this.availableConfigurations.put(config.getName(), config);
+      }
    }
 
    public boolean isService() {
@@ -141,5 +158,29 @@ public class AvailableServiceRole {
 
    public boolean isRole() {
       return getParent() != null && getParent().isService();
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) {
+         return true;
+      }
+      if (o == null || this.getClass() != o.getClass()) {
+         return false;
+      }
+      AvailableServiceRole other = (AvailableServiceRole) o;
+      if (this.getName().equalsIgnoreCase(other.getName()) && this.getDisplayName().equalsIgnoreCase(other.getDisplayName())) {
+         return true;
+      }
+      return false;
+   }
+
+   @Override
+   public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (name == null? 0 : name.hashCode());
+      result = prime * result + (displayName == null? 0 : displayName.hashCode());
+      return result;
    }
 }

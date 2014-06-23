@@ -15,6 +15,7 @@
 package com.vmware.bdd.model;
 
 import com.google.gson.annotations.Expose;
+import com.vmware.bdd.model.support.AvailableServiceRole;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,7 @@ public class CmServiceDef {
    private String name;
 
    @Expose
-   private String type; // TODO: relate to CmServiceRoleType
+   private AvailableServiceRole type;
 
    @Expose
    private String displayName;
@@ -40,7 +41,7 @@ public class CmServiceDef {
    private Map<String, String> configs;
 
    @Expose
-   private List<CmRoleDef> roles; // TODO: validate role.type, refer to http://cloudera.github.io/cm_api/apidocs/v6/path__clusters_-clusterName-_services_-serviceName-_roles.html
+   private List<CmRoleDef> roles;
 
    @Expose
    private List<String> roleConfigGroups;
@@ -55,7 +56,7 @@ public class CmServiceDef {
 
    public CmServiceDef() {}
 
-   public CmServiceDef(String name, String type, String displayName, Map<String, String> configs,
+   public CmServiceDef(String name, AvailableServiceRole type, String displayName, Map<String, String> configs,
          List<CmRoleDef> roles, List<String> roleConfigGroups, List<String> replicationSchedules, List<String> snapshotPolicies) {
       this.name = name;
       this.type = type;
@@ -75,11 +76,11 @@ public class CmServiceDef {
       this.name = name;
    }
 
-   public String getType() {
+   public AvailableServiceRole getType() {
       return type;
    }
 
-   public void setType(String type) {
+   public void setType(AvailableServiceRole type) {
       this.type = type;
    }
 

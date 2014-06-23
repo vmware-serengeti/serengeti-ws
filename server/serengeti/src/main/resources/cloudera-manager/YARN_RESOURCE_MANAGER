@@ -1,0 +1,513 @@
+{
+  "name": "RESOURCEMANAGER",
+  "displayName": "YARN_RESOURCE_MANAGER",
+  "parent": "YARN",
+  "repository": "CDH",
+  "versionApiMin": 6,
+  "versionApiMax": -1,
+  "versionCdhMin": 6,
+  "versionCdhMax": -1,
+  "availableConfigurations" : [
+  {
+    "name" : "resource_manager_java_heapsize",
+    "required" : false,
+    "default" : "1073741824",
+    "displayName" : "Java Heap Size of ResourceManager in Bytes",
+    "description" : "Maximum size for the Java Process heap memory.  Passed to Java -Xmx.  Measured in bytes.",
+    "relatedName" : ""
+  }, {
+    "name" : "yarn_scheduler_maximum_allocation_mb",
+    "required" : false,
+    "default" : "65536",
+    "displayName" : "Container Memory Maximum",
+    "description" : "The largest amount of physical memory, in MiB, that can be requested for a container.",
+    "relatedName" : "yarn.scheduler.maximum-allocation-mb"
+  }, {
+    "name" : "yarn_scheduler_maximum_allocation_vcores",
+    "required" : false,
+    "default" : "32",
+    "displayName" : "Container Virtual CPU Cores Maximum",
+    "description" : "The largest number of virtual CPU cores that can be requested for a container. This parameter has no effect prior to CDH 4.4.",
+    "relatedName" : "yarn.scheduler.maximum-allocation-vcores"
+  }, {
+    "name" : "resourcemanager_gc_duration_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"60.0\",\"warning\":\"30.0\"}",
+    "displayName" : "Garbage Collection Duration Thresholds",
+    "description" : "The health test thresholds for the weighted average time spent in Java garbage collection. Specified as a percentage of elapsed wall clock time.",
+    "relatedName" : ""
+  }, {
+    "name" : "yarn_resourcemanager_admin_client_thread_count",
+    "required" : false,
+    "default" : "1",
+    "displayName" : "Admin Client Thread Count",
+    "description" : "Number of threads used to handle the ResourceManager admin interface.",
+    "relatedName" : "yarn.resourcemanager.admin.client.thread-count"
+  }, {
+    "name" : "yarn_scheduler_increment_allocation_vcores",
+    "required" : false,
+    "default" : "1",
+    "displayName" : "Container Virtual CPU Cores Increment",
+    "description" : "If using the Fair Scheduler, virtual core requests will be rounded up to the nearest multiple of this number. This parameter has no effect prior to CDH 5.",
+    "relatedName" : "yarn.scheduler.increment-allocation-vcores"
+  }, {
+    "name" : "yarn_resourcemanager_container_liveness_monitor_interval_ms",
+    "required" : false,
+    "default" : "600000",
+    "displayName" : "Container Monitor Interval",
+    "description" : "The periodic interval that the ResourceManager will check whether containers are still alive.",
+    "relatedName" : "yarn.resourcemanager.container.liveness-monitor.interval-ms"
+  }, {
+    "name" : "yarn_resourcemanager_scheduler_address",
+    "required" : false,
+    "default" : "8030",
+    "displayName" : "Scheduler Address",
+    "description" : "The address of the scheduler interface in the ResourceManager.",
+    "relatedName" : "yarn.resourcemanager.scheduler.address"
+  }, {
+    "name" : "log_threshold",
+    "required" : false,
+    "default" : "INFO",
+    "displayName" : "ResourceManager Logging Threshold",
+    "description" : "The minimum log level for ResourceManager logs",
+    "relatedName" : ""
+  }, {
+    "name" : "resourcemanager_fair_scheduler_locality_threshold_node",
+    "required" : false,
+    "displayName" : "Fair Scheduler Node Locality Threshold",
+    "description" : "For applications that request containers on particular nodes, the number of scheduling opportunities since the last container assignment to wait before accepting a placement on another node. Expressed as a float between 0 and 1, which, as a fraction of the cluster size, is the number of scheduling opportunities to pass up. If not set, this means don't pass up any scheduling opportunities. Requires Fair Scheduler continuous scheduling to be disabled. If continuous scheduling is enabled, yarn.scheduler.fair.locality-delay-node-ms should be used instead.",
+    "relatedName" : "yarn.scheduler.fair.locality.threshold.node"
+  }, {
+    "name" : "yarn_resourcemanager_recovery_enabled",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable ResourceManager Recovery",
+    "description" : "When enabled, any applications that were running on the cluster when the ResourceManager died will be recovered when the ResourceManager next starts. <strong>Note:</strong> If RM-HA is enabled, then this configuration is always enabled.",
+    "relatedName" : "yarn.resourcemanager.recovery.enabled"
+  }, {
+    "name" : "resourcemanager_web_metric_collection_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Web Metric Collection",
+    "description" : "Enables the health test that the Cloudera Manager Agent can successfully contact and gather metrics from the web server.",
+    "relatedName" : ""
+  }, {
+    "name" : "resourcemanager_fair_scheduler_size_based_weight",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Fair Scheduler Size-Based Weight",
+    "description" : "When enabled, the Fair Scheduler will assign shares to individual apps based on their size, rather than providing an equal share to all apps regardless of size.",
+    "relatedName" : "yarn.scheduler.fair.sizebasedweight"
+  }, {
+    "name" : "resourcemanager_startup_tolerance_minutes",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Health Check Startup Tolerance",
+    "description" : "The amount of time allowed after this role is started that failures of health checks that rely on communication with this role will be tolerated.",
+    "relatedName" : ""
+  }, {
+    "name" : "yarn_scheduler_minimum_allocation_vcores",
+    "required" : false,
+    "default" : "1",
+    "displayName" : "Container Virtual CPU Cores Minimum",
+    "description" : "The smallest number of virtual CPU cores that can be requested for a container. If using the Capacity or FIFO scheduler (or any scheduler, prior to CDH 5), virtual core requests will be rounded up to the nearest multiple of this number. This parameter has no effect prior to CDH 4.4.",
+    "relatedName" : "yarn.scheduler.minimum-allocation-vcores"
+  }, {
+    "name" : "enable_alerts",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Health Alerts for this Role",
+    "description" : "When set, Cloudera Manager will send alerts when the health of this role reaches the threshold specified by the EventServer setting eventserver_health_events_alert_threshold",
+    "relatedName" : ""
+  }, {
+    "name" : "rm_memory_soft_limit",
+    "required" : false,
+    "default" : "-1",
+    "displayName" : "Cgroup Memory Soft Limit",
+    "description" : "Soft memory limit to assign to this role, enforced by the Linux kernel. When the limit is reached, the kernel will reclaim pages charged to the process if and only if the host is facing memory pressure. If reclaiming fails, the kernel may kill the process. Both anonymous as well as page cache pages contribute to the limit. Use a value of -1 B to specify no limit. By default processes not managed by Cloudera Manager will have no limit.",
+    "relatedName" : "memory.soft_limit_in_bytes"
+  }, {
+    "name" : "yarn_nm_liveness_monitor_expiry_interval_ms",
+    "required" : false,
+    "default" : "600000",
+    "displayName" : "NodeManager Monitor Expiry",
+    "description" : "The expiry interval to wait until a NodeManager is considered dead.",
+    "relatedName" : "yarn.nm.liveness-monitor.expiry-interval-ms"
+  }, {
+    "name" : "resource_manager_java_opts",
+    "required" : false,
+    "default" : "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:-CMSConcurrentMTEnabled -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled",
+    "displayName" : "Java Configuration Options for ResourceManager",
+    "description" : "These arguments will be passed as part of the Java command line. Commonly, garbage collection flags or extra debugging flags would be passed here.",
+    "relatedName" : ""
+  }, {
+    "name" : "process_auto_restart",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Automatically Restart Process",
+    "description" : "When set, this role's process is automatically (and transparently) restarted in the event of an unexpected failure.",
+    "relatedName" : ""
+  }, {
+    "name" : "yarn_resourcemanager_address",
+    "required" : false,
+    "default" : "8032",
+    "displayName" : "ResourceManager Address",
+    "description" : "The address of the applications manager interface in the ResourceManager.",
+    "relatedName" : "yarn.resourcemanager.address"
+  }, {
+    "name" : "oom_heap_dump_dir",
+    "required" : false,
+    "default" : "/tmp",
+    "displayName" : "Heap Dump Directory",
+    "description" : "Path to directory where heap dumps are generated when java.lang.OutOfMemoryError error is thrown. This directory is automatically created if it doesn't exist. However, if this directory already exists, role user must have write access to this directory. If this directory is shared amongst multiple roles, it should have 1777 permissions. Note that the heap dump files are created with 600 permissions and are owned by the role user. The amount of free space in this directory should be greater than the maximum Java Process heap size configured for this role.",
+    "relatedName" : ""
+  }, {
+    "name" : "log_event_whitelist",
+    "required" : false,
+    "default" : "{\n  \"version\": \"0\",\n  \"rules\": [\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 1, \"threshold\":\"FATAL\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\": \".* is deprecated. Instead, use .*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\": \".* is deprecated. Use .* instead\"},\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 2, \"exceptiontype\": \".*\"},\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 1, \"threshold\":\"WARN\"}\n  ]\n}\n",
+    "displayName" : "Rules to Extract Events from Log Files",
+    "description" : "<p>This file contains the rules which govern how log messages are turned into events by the custom log4j appender that this role loads. It is in JSON format, and is composed of a list of rules. Every log message is evaluated against each of these rules in turn to decide whether or not to send an event for that message.</p><p>Each rule has some or all of the following fields:</p><ul><li><span class='code'>alert</span> - whether or not events generated from this rule should be promoted to alerts. A value of \"true\" will cause alerts to be generated. If not specified, the default is \"false\".</li><li><span class='code'>rate</span> <strong>(mandatory)</strong> - the maximum number of log messages matching this rule that may be sent as events every minute. If more than <tt>rate</tt> matching log messages are received in a single minute, the extra messages are ignored. If rate is less than 0, the number of messages per minute is unlimited.</li><li><span class='code'>periodminutes</span>  - the number of minutes during which the publisher will only publish <tt>rate</tt> events or fewer. If not specified, the default is <strong>one minute</strong></li><li><span class='code'>threshold</span> - apply this rule only to messages with this log4j severity level or above. An example is \"WARN\" for warning level messages or higher.</li><li><span class='code'>content</span> - match only those messages whose contents match this regular expression.</li><li><span class='code'>exceptiontype</span> - match only those messages which are part of an exception message. The exception type must match this regular expression.</li></ul><br/><p>Example:<span class='code'>{\"alert\": false, \"rate\": 10, \"exceptiontype\": \"java.lang.StringIndexOutOfBoundsException\"}</span></p><p>This rule will send events to Cloudera Manager for every <span class='code'>StringIndexOutOfBoundsException</span>, up to a maximum of 10 every minute.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "yarn_resourcemanager_resource_tracker_address",
+    "required" : false,
+    "default" : "8031",
+    "displayName" : "Resource Tracker Address",
+    "description" : "The address of the resource tracker interface in the ResourceManager.",
+    "relatedName" : "yarn.resourcemanager.resource-tracker.address"
+  }, {
+    "name" : "resourcemanager_config_safety_valve",
+    "required" : false,
+    "displayName" : "ResourceManager Advanced Configuration Snippet (Safety Valve) for yarn-site.xml",
+    "description" : "For advanced use only, a string to be inserted into <strong>yarn-site.xml</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "rlimit_fds",
+    "required" : false,
+    "displayName" : "Maximum Process File Descriptors",
+    "description" : "If configured, overrides the process soft and hard rlimits (also called ulimits) for file descriptors to the configured value.",
+    "relatedName" : ""
+  }, {
+    "name" : "log4j_safety_valve",
+    "required" : false,
+    "displayName" : "ResourceManager Logging Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, a string to be inserted into <strong>log4j.properties</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "max_log_size",
+    "required" : false,
+    "default" : "200",
+    "displayName" : "ResourceManager Max Log Size",
+    "description" : "The maximum size, in megabytes, per log file for ResourceManager logs.  Typically used by log4j.",
+    "relatedName" : ""
+  }, {
+    "name" : "unexpected_exits_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"any\",\"warning\":\"never\"}",
+    "displayName" : "Unexpected Exits Thresholds",
+    "description" : "The health test thresholds for unexpected exits encountered within a recent period specified by the unexpected_exits_window configuration for the role.",
+    "relatedName" : ""
+  }, {
+    "name" : "resourcemanager_webserver_port",
+    "required" : false,
+    "default" : "8088",
+    "displayName" : "Web Application Address",
+    "description" : "The address of the ResourceManager web application.",
+    "relatedName" : "yarn.resourcemanager.webapp.address"
+  }, {
+    "name" : "resource_manager_log_dir",
+    "required" : false,
+    "default" : "/var/log/hadoop-yarn",
+    "displayName" : "ResourceManager Log Directory",
+    "description" : "Directory where ResourceManager will place its log files.",
+    "relatedName" : "hadoop.log.dir"
+  }, {
+    "name" : "log_directory_free_space_percentage_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"never\",\"warning\":\"never\"}",
+    "displayName" : "Log Directory Free Space Monitoring Percentage Thresholds",
+    "description" : "The health test thresholds for monitoring of free space on the filesystem that contains this role's log directory. Specified as a percentage of the capacity on that filesystem. This setting is not used if a Log Directory Free Space Monitoring Absolute Thresholds setting is configured.",
+    "relatedName" : ""
+  }, {
+    "name" : "resourcemanager_mapred_safety_valve",
+    "required" : false,
+    "displayName" : "ResourceManager Advanced Configuration Snippet (Safety Valve) for mapred-site.xml",
+    "description" : "For advanced use only, a string to be inserted into <strong>mapred-site.xml</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "log_directory_free_space_absolute_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"5.36870912E9\",\"warning\":\"1.073741824E10\"}",
+    "displayName" : "Log Directory Free Space Monitoring Absolute Thresholds",
+    "description" : "The health test thresholds for monitoring of free space on the filesystem that contains this role's log directory.",
+    "relatedName" : ""
+  }, {
+    "name" : "oom_heap_dump_enabled",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Dump Heap When Out of Memory",
+    "description" : "When set, generates heap dump file when java.lang.OutOfMemoryError is thrown.",
+    "relatedName" : ""
+  }, {
+    "name" : "max_log_backup_index",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "ResourceManager Maximum Log File Backups",
+    "description" : "The maximum number of rolled log files to keep for ResourceManager logs.  Typically used by log4j.",
+    "relatedName" : ""
+  }, {
+    "name" : "yarn_resourcemanager_admin_address",
+    "required" : false,
+    "default" : "8033",
+    "displayName" : "Administration Address",
+    "description" : "The address of the admin interface in the ResourceManager.",
+    "relatedName" : "yarn.resourcemanager.admin.address"
+  }, {
+    "name" : "resourcemanager_web_metric_collection_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"never\",\"warning\":\"10000.0\"}",
+    "displayName" : "Web Metric Collection Duration",
+    "description" : "The health test thresholds on the duration of the metrics request to the web server.",
+    "relatedName" : ""
+  }, {
+    "name" : "unexpected_exits_window",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Unexpected Exits Monitoring Period",
+    "description" : "The period to review when computing unexpected exits.",
+    "relatedName" : ""
+  }, {
+    "name" : "yarn_rm_bind_wildcard",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Bind ResourceManager to Wildcard Address",
+    "description" : "If enabled, the ResourceManager binds to the wildcard address (\"0.0.0.0\") on all of its ports.",
+    "relatedName" : ""
+  }, {
+    "name" : "yarn_scheduler_increment_allocation_mb",
+    "required" : false,
+    "default" : "512",
+    "displayName" : "Container Memory Increment",
+    "description" : "If using the Fair Scheduler, memory requests will be rounded up to the nearest multiple of this number. This parameter has no effect prior to CDH 5.",
+    "relatedName" : "yarn.scheduler.increment-allocation-mb"
+  }, {
+    "name" : "resourcemanager_fair_scheduler_preemption",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Fair Scheduler Preemption",
+    "description" : "When enabled, if a pool's minimum share is not met for some period of time, the Fair Scheduler preempts applications in other pools. Preemption guarantees that production applications are not starved while also allowing the cluster to be used for experimental and research applications. To minimize wasted computation, the Fair Scheduler preempts the most recently launched applications.",
+    "relatedName" : "yarn.scheduler.fair.preemption"
+  }, {
+    "name" : "rm_hosts_allow_safety_valve",
+    "required" : false,
+    "displayName" : "ResourceManager Advanced Configuration Snippet (Safety Valve) for nodes_allow.txt",
+    "description" : "For advanced use only, a string to be inserted into <strong>nodes_allow.txt</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "yarn_resourcemanager_nm_liveness_monitor_interval_ms",
+    "required" : false,
+    "default" : "1000",
+    "displayName" : "NodeManager Monitor Interval",
+    "description" : "The periodic interval that the ResourceManager will check whether NodeManagers are still alive.",
+    "relatedName" : "yarn.resourcemanager.nm.liveness-monitor.interval-ms"
+  }, {
+    "name" : "resourcemanager_fair_scheduler_assign_multiple",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Fair Scheduler Assign Multiple Tasks",
+    "description" : "Enables multiple Fair Scheduler container assignments in one heartbeat, which improves cluster throughput when there are many small tasks to run.",
+    "relatedName" : "yarn.scheduler.fair.assignmultiple"
+  }, {
+    "name" : "resourcemanager_host_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "ResourceManager Host Health Test",
+    "description" : "When computing the overall ResourceManager health, consider the host's health.",
+    "relatedName" : ""
+  }, {
+    "name" : "resourcemanager_gc_duration_window",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Garbage Collection Duration Monitoring Period",
+    "description" : "The period to review when computing the moving average of garbage collection time.",
+    "relatedName" : ""
+  }, {
+    "name" : "resourcemanager_fair_scheduler_locality_threshold_rack",
+    "required" : false,
+    "displayName" : "Fair Scheduler Rack Locality Threshold",
+    "description" : "For applications that request containers on particular racks, the number of scheduling opportunities since the last container assignment to wait before accepting a placement on another rack. Expressed as a float between 0 and 1, which, as a fraction of the cluster size, is the number of scheduling opportunities to pass up. If not set, this means don't pass up any scheduling opportunities. Requires Fair Scheduler continuous scheduling to be disabled. If continuous scheduling is enabled, yarn.scheduler.fair.locality-delay-rack-ms should be used instead.",
+    "relatedName" : "yarn.scheduler.fair.locality.threshold.rack"
+  }, {
+    "name" : "oom_sigkill_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Kill When Out of Memory",
+    "description" : "When set, a SIGKILL signal is sent to the role process when java.lang.OutOfMemoryError is thrown.",
+    "relatedName" : ""
+  }, {
+    "name" : "yarn_resourcemanager_resource_tracker_client_thread_count",
+    "required" : false,
+    "default" : "50",
+    "displayName" : "Resource Tracker Thread Count",
+    "description" : "Number of threads to handle resource tracker calls.",
+    "relatedName" : "yarn.resourcemanager.resource-tracker.client.thread-count"
+  }, {
+    "name" : "yarn_resourcemanager_client_thread_count",
+    "required" : false,
+    "default" : "50",
+    "displayName" : "Client Thread Count",
+    "description" : "The number of threads used to handle applications manager requests.",
+    "relatedName" : "yarn.resourcemanager.client.thread-count"
+  }, {
+    "name" : "rm_hosts_exclude_safety_valve",
+    "required" : false,
+    "displayName" : "ResourceManager Advanced Configuration Snippet (Safety Valve) for nodes_exclude.txt",
+    "description" : "For advanced use only, a string to be inserted into <strong>nodes_exclude.txt</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "rm_memory_hard_limit",
+    "required" : false,
+    "default" : "-1",
+    "displayName" : "Cgroup Memory Hard Limit",
+    "description" : "Hard memory limit to assign to this role, enforced by the Linux kernel. When the limit is reached, the kernel will reclaim pages charged to the process. If reclaiming fails, the kernel may kill the process. Both anonymous as well as page cache pages contribute to the limit. Use a value of -1 B to specify no limit. By default processes not managed by Cloudera Manager will have no limit.",
+    "relatedName" : "memory.limit_in_bytes"
+  }, {
+    "name" : "rm_cpu_shares",
+    "required" : false,
+    "default" : "1024",
+    "displayName" : "Cgroup CPU Shares",
+    "description" : "Number of CPU shares to assign to this role. The greater the number of shares, the larger the share of the host's CPUs that will be given to this role when the host experiences CPU contention. Must be between 2 and 262144. Defaults to 1024 for processes not managed by Cloudera Manager.",
+    "relatedName" : "cpu.shares"
+  }, {
+    "name" : "yarn_resourcemanager_amliveliness_monitor_interval_ms",
+    "required" : false,
+    "default" : "1000",
+    "displayName" : "ApplicationMaster Monitor Interval",
+    "description" : "The periodic interval that the ResourceManager will check whether ApplicationMasters is still alive.",
+    "relatedName" : "yarn.resourcemanager.amliveliness-monitor.interval-ms"
+  }, {
+    "name" : "yarn_scheduler_fair_continuous_scheduling_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Fair Scheduler Continuous Scheduling",
+    "description" : "Enable continuous scheduling in the Fair Scheduler. When enabled, scheduling decisions are decoupled from NodeManager heartbeats, leading to faster resource allocations.",
+    "relatedName" : "yarn.scheduler.fair.continuous-scheduling-enabled"
+  }, {
+    "name" : "yarn_am_liveness_monitor_expiry_interval_ms",
+    "required" : false,
+    "default" : "600000",
+    "displayName" : "ApplicationMaster Monitor Expiry",
+    "description" : "The expiry interval to wait until an ApplicationMaster is considered dead.",
+    "relatedName" : "yarn.am.liveness-monitor.expiry-interval-ms"
+  }, {
+    "name" : "yarn_resourcemanager_scheduler_class",
+    "required" : false,
+    "default" : "org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler",
+    "displayName" : "Scheduler Class",
+    "description" : "The class to use as the resource scheduler.  FairScheduler is only supported in CDH 4.2.1 and later.",
+    "relatedName" : "yarn.resourcemanager.scheduler.class"
+  }, {
+    "name" : "resourcemanager_fd_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"70.0\",\"warning\":\"50.0\"}",
+    "displayName" : "File Descriptor Monitoring Thresholds",
+    "description" : "The health test thresholds of the number of file descriptors used. Specified as a percentage of file descriptor limit.",
+    "relatedName" : ""
+  }, {
+    "name" : "rm_io_weight",
+    "required" : false,
+    "default" : "500",
+    "displayName" : "Cgroup I/O Weight",
+    "description" : "Weight for the read I/O requests issued by this role. The greater the weight, the higher the priority of the requests when the host experiences I/O contention. Must be between 100 and 1000. Defaults to 1000 for processes not managed by Cloudera Manager.",
+    "relatedName" : "blkio.weight"
+  }, {
+    "name" : "yarn_resourcemanager_max_completed_applications",
+    "required" : false,
+    "default" : "10000",
+    "displayName" : "Max Completed Applications",
+    "description" : "The maximum number of completed applications that the ResourceManager keeps.",
+    "relatedName" : "yarn.resourcemanager.max-completed-applications"
+  }, {
+    "name" : "hadoop_metrics2_safety_valve",
+    "required" : false,
+    "displayName" : "Hadoop Metrics2 Advanced Configuration Snippet (Safety Valve)",
+    "description" : "Advanced Configuration Snippet (Safety Valve) for Hadoop Metrics2. Properties will be inserted into <strong>hadoop-metrics2.properties</strong>.",
+    "relatedName" : ""
+  }, {
+    "name" : "resourcemanager_fair_scheduler_user_as_default_queue",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Fair Scheduler User As Default Queue",
+    "description" : "When set to <b>true</b>, the Fair Scheduler uses the username as the default pool name, in the event that a pool name is not specified. When set to <b>false</b>, all applications are run in a shared pool, called <b>default</b>.",
+    "relatedName" : "yarn.scheduler.fair.user-as-default-queue"
+  }, {
+    "name" : "yarn_scheduler_fair_locality_delay_node_ms",
+    "required" : false,
+    "default" : "2000",
+    "displayName" : "Fair Scheduler Node Locality Delay",
+    "description" : "For applications that request containers on particular nodes, the minimum time in milliseconds the Fair Scheduler waits before accepting a placement on another node. Requires Fair Scheduler continuous scheduling to be enabled. If continuous scheduling is disabled, yarn.scheduler.fair.locality.threshold.node should be used instead.",
+    "relatedName" : "yarn.scheduler.fair.locality-delay-node-ms"
+  }, {
+    "name" : "yarn_scheduler_fair_locality_delay_rack_ms",
+    "required" : false,
+    "default" : "4000",
+    "displayName" : "Fair Scheduler Rack Locality Delay",
+    "description" : "For applications that request containers on particular racks, the minimum time in milliseconds the Fair Scheduler waits before accepting a placement on another rack. Requires Fair Scheduler continuous scheduling to be enabled. If continuous scheduling is disabled, yarn.scheduler.fair.locality.threshold.rack should be used instead.",
+    "relatedName" : "yarn.scheduler.fair.locality-delay-rack-ms"
+  }, {
+    "name" : "resourcemanager_fair_scheduler_configuration",
+    "required" : false,
+    "displayName" : "Fair Scheduler XML Advanced Configuration Snippet (Safety Valve)",
+    "description" : "Enter an XML string that will be inserted verbatim into the Fair Scheduler allocations file. For CDH5, overrides the configuration set using the Pools configuration UI. For CDH4, this is the only way to configure the Fair Scheduler for YARN.",
+    "relatedName" : ""
+  }, {
+    "name" : "enable_config_alerts",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Configuration Change Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when this entity's configuration changes.",
+    "relatedName" : ""
+  }, {
+    "name" : "resourcemanager_scm_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "ResourceManager Process Health Test",
+    "description" : "Enables the health test that the ResourceManager's process state is consistent with the role configuration",
+    "relatedName" : ""
+  }, {
+    "name" : "role_triggers",
+    "required" : false,
+    "default" : "[]",
+    "displayName" : "Role Triggers",
+    "description" : "<p>The configured triggers for this role. This is a JSON formatted list of triggers. These triggers are evaluated as part as the health system. Every trigger expression is parsed, and if the trigger condition is met, the list of actions provided in the trigger expression is executed.</p><p>Each trigger has all of the following fields:</p><ul><li><span class='code'>triggerName</span> <strong>(mandatory)</strong> - the name of the trigger. This value must be unique for the specific role. </li><li><span class='code'>triggerExpression</span> <strong>(mandatory)</strong> - a tsquery expression representing the trigger. <li><span class='code'>streamThreshold</span> <strong>(optional)</strong> - the maximum number of streams that can satisfy a condition of a trigger before the condition fires. By default set to 0, and any stream returned will cause the condition to fire. <li><span class='code'>enabled</span> <strong> (optional)</strong> - by default set to 'true'. If set to 'false' the trigger will not be evaluated.</p><p>For example, here is a JSON formatted trigger configured for a DataNode that fires if the DataNode has more than 1500 file-descriptors opened:</p><p><pre>[{\"triggerName\": \"sample-trigger\",\n  \"triggerExpression\": \"IF (SELECT fd_open WHERE roleName=$ROLENAME and last(fd_open) > 1500) DO health:red\",\n  \"streamThreshold\": 0}, \"enabled\": \"true\"]</pre></p><p>Consult the trigger rules documentation for more details on how to write triggers using tsquery.</p><p>The JSON format is evolving and may change in the future and as a result backward compatibility is not guaranteed between releases at this time.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "yarn_scheduler_minimum_allocation_mb",
+    "required" : false,
+    "default" : "1024",
+    "displayName" : "Container Memory Minimum",
+    "description" : "The smallest amount of physical memory, in MiB, that can be requested for a container. If using the Capacity or FIFO scheduler (or any scheduler, prior to CDH 5), memory requests will be rounded up to the nearest multiple of this number.",
+    "relatedName" : "yarn.scheduler.minimum-allocation-mb"
+  }, {
+    "name" : "resourcemanager_capacity_scheduler_configuration",
+    "required" : false,
+    "default" : "<?xml version=\"1.0\"?>\n<configuration>\n  <property>\n    <name>yarn.scheduler.capacity.root.queues</name>\n    <value>default</value>\n  </property>\n  <property>\n    <name>yarn.scheduler.capacity.root.capacity</name>\n    <value>100</value>\n  </property>\n  <property>\n    <name>yarn.scheduler.capacity.root.default.capacity</name>\n    <value>100</value>\n  </property>\n</configuration>\n",
+    "displayName" : "Capacity Scheduler Configuration",
+    "description" : "Enter an XML string that represents the Capacity Scheduler configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "yarn_resourcemanager_am_max_retries",
+    "required" : false,
+    "default" : "1",
+    "displayName" : "ApplicationMaster Max Retries",
+    "description" : "The maximum number that an ApplicationMaster will retry.",
+    "relatedName" : "yarn.resourcemanager.am.max-retries"
+  }, {
+    "name" : "yarn_resourcemanager_scheduler_client_thread_count",
+    "required" : false,
+    "default" : "50",
+    "displayName" : "Scheduler Thread Count",
+    "description" : "The number of threads used to handle requests through the scheduler interface.",
+    "relatedName" : "yarn.resourcemanager.scheduler.client.thread-count"
+  } ]
+}

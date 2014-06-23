@@ -1,5 +1,6 @@
 {
   "name": "DATANODE",
+  "displayName": "HDFS_DATANODE",
   "parent": "HDFS",
   "repository": "CDH",
   "versionApiMin": 3,

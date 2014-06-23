@@ -117,9 +117,11 @@ public interface SoftwareManager {
     * ClusterOperationReports to notify operation status change for this
     * cluster, otherwise, client cannot get information in this long operation
     * time
-    * 
-    * @param clusterSpec
+    *
+    * @param blueprint
+    * @param reports
     * @return
+    * @throws SoftwareManagementPluginException
     */
    boolean createCluster(ClusterBlueprint blueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException;
@@ -191,10 +193,12 @@ public interface SoftwareManager {
     * Sync call Plugin should update ClusterOperationReports to notify operation
     * status change for this cluster, otherwise, client cannot get information
     * in this long operation time
-    * 
+    *
     * @param clusterName
-    * @param instances
-    * @return task id
+    * @param nodes
+    * @param reports
+    * @return
+    * @throws SoftwareManagementPluginException
     */
    boolean decomissionNodes(String clusterName, List<NodeInfo> nodes,
          ClusterReportQueue reports) throws SoftwareManagementPluginException;
@@ -220,8 +224,10 @@ public interface SoftwareManager {
     * in this long operation time
     * 
     * @param clusterName
-    * @param instances
+    * @param nodes
+    * @param reports
     * @return
+    * @throws SoftwareManagementPluginException
     */
    boolean startNodes(String clusterName, List<NodeInfo> nodes,
          ClusterReportQueue reports) throws SoftwareManagementPluginException;
@@ -245,7 +251,7 @@ public interface SoftwareManager {
     * Get current cluster service status, including cluster status, and node
     * status TODO: define cluster query object
     * 
-    * @param clusterName
+    * @param blueprint
     * @return
     */
    ClusterReport queryClusterStatus(ClusterBlueprint blueprint);

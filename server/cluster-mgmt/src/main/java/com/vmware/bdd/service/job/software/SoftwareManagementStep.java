@@ -125,14 +125,20 @@ public class SoftwareManagementStep extends TrackableTasklet {
       if (!CommonUtil.isBlank(clusterSpec.getAppManager())) {
          SoftwareManager softwareMgr =
                softwareMgrs.getSoftwareManager(clusterSpec.getAppManager());
-         ClusterBlueprint clusterBlueprint =
+
+         ClusterBlueprint clusterBlueprint = getFromJobExecutionContext(chunkContext,
+               JobConstants.CLUSTER_BLUEPRINT_JOB_PARAM, ClusterBlueprint.class);
+         if (clusterBlueprint == null) {
+         clusterBlueprint =
                lockClusterEntityMgr.getClusterEntityMgr().toClusterBluePrint(
                      clusterName);
+            putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_BLUEPRINT_JOB_PARAM, clusterBlueprint);
+         }
+
          task =
                SoftwareManagementTaskFactory.createExternalMgtTask(targetName,
                      managementOperation, clusterBlueprint, statusUpdater,
                      lockClusterEntityMgr, softwareMgr);
-         logger.info((new Gson()).toJson(clusterBlueprint));
 
       } else {
 

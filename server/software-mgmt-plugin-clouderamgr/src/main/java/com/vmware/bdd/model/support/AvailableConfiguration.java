@@ -45,9 +45,6 @@ public class AvailableConfiguration {
    private String relatedName;
 
    @Expose
-   private String validationState; // TODO: remove since it maybe of no use
-
-   @Expose
    private String validationMessage; // TODO: remove
 
    public String getName() {
@@ -100,14 +97,6 @@ public class AvailableConfiguration {
 
    public void setRelatedName(String relatedName) {
       this.relatedName = relatedName;
-   }
-
-   public String getValidationState() {
-      return validationState;
-   }
-
-   public void setValidationState(String validationState) {
-      this.validationState = validationState;
    }
 
    public String getValidationMessage() {
