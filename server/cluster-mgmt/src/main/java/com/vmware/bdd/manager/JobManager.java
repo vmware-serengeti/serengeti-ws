@@ -42,6 +42,7 @@ import org.springframework.batch.core.step.job.JobParametersExtractor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.bdd.apitypes.ClusterRead;
+import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.apitypes.TaskRead.Type;
@@ -50,8 +51,8 @@ import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
-import com.vmware.bdd.service.job.SimpleStepExecutionListener;
 import com.vmware.bdd.service.job.NodeOperationStatus;
+import com.vmware.bdd.service.job.SimpleStepExecutionListener;
 import com.vmware.bdd.service.job.SubJobStep;
 import com.vmware.bdd.service.job.TrackableTasklet;
 import com.vmware.bdd.utils.JobUtils;
@@ -108,8 +109,8 @@ public class JobManager {
     */
    public long runSubJobForNodes(String jobName,
          List<JobParameters> jobParametersList, String clusterName,
-         ClusterRead.ClusterStatus successStatus,
-         ClusterRead.ClusterStatus failStatus) throws Exception {
+         ClusterStatus successStatus,
+         ClusterStatus failStatus) throws Exception {
       return createAndLaunchJobWithSubJob(clusterName, jobName,
             jobParametersList, successStatus, failStatus);
    }
@@ -131,8 +132,8 @@ public class JobManager {
     * @throws Exception
     */
    public long runJobWithSubJob(String jobName, JobParameters param,
-         String subJobName, ClusterRead.ClusterStatus successStatus,
-         ClusterRead.ClusterStatus failStatus) throws Exception {
+         String subJobName, ClusterStatus successStatus,
+         ClusterStatus failStatus) throws Exception {
       logger.debug("::runJobWithSubJob: " + jobName + ", subJobName: "
             + subJobName);
       long result = Long.MIN_VALUE;
@@ -190,8 +191,8 @@ public class JobManager {
     */
    private synchronized long createAndLaunchJobWithSubJob(String clusterName,
          String subJobName, List<JobParameters> subJobParameters,
-         ClusterRead.ClusterStatus successStatus,
-         ClusterRead.ClusterStatus failStatus) throws Exception {
+         ClusterStatus successStatus,
+         ClusterStatus failStatus) throws Exception {
       SimpleJob mainJob =
             new SimpleJob("composed-job-" + clusterName + "-" + subJobName
                   + "-" + System.nanoTime());

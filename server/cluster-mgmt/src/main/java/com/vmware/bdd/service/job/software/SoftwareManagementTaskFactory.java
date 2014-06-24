@@ -17,8 +17,8 @@ package com.vmware.bdd.service.job.software;
 import com.vmware.bdd.command.ClusterCmdUtil;
 import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
 import com.vmware.bdd.service.job.StatusUpdater;
-import com.vmware.bdd.service.job.software.external.DefaultExternalManagementTask;
-import com.vmware.bdd.service.job.software.ironfan.IronfanSoftwareManagementTask;
+import com.vmware.bdd.service.job.software.external.ExternalManagementTask;
+import com.vmware.bdd.service.job.software.thrift.ThriftSoftwareManagementTask;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.thrift.ClusterAction;
@@ -32,7 +32,7 @@ import com.vmware.bdd.software.mgmt.thrift.ClusterOperation;
  */
 public class SoftwareManagementTaskFactory {
 
-   public static ISoftwareManagementTask createIronfanTask(String targetName,
+   public static ISoftwareManagementTask createThriftTask(String targetName,
          String specFileName, StatusUpdater statusUpdater,
          ManagementOperation managementOperation,
          ILockedClusterEntityManager lockClusterEntityMgr) {
@@ -65,8 +65,8 @@ public class SoftwareManagementTaskFactory {
       clusterOperation.setTargetName(targetName);
       clusterOperation.setSpecFileName(specFileName);
       clusterOperation.setLogLevel(ClusterCmdUtil.getLogLevel());
-      IronfanSoftwareManagementTask task =
-            new IronfanSoftwareManagementTask(clusterOperation, statusUpdater,
+      ThriftSoftwareManagementTask task =
+            new ThriftSoftwareManagementTask(clusterOperation, statusUpdater,
                   lockClusterEntityMgr);
       return task;
    }
@@ -76,7 +76,7 @@ public class SoftwareManagementTaskFactory {
          ClusterBlueprint clusterBlueprint, StatusUpdater statusUpdater,
          ILockedClusterEntityManager lockedClusterEntityManager,
          SoftwareManager softwareManager) {
-      ISoftwareManagementTask task = new DefaultExternalManagementTask(targetName, managementOperation,
+      ISoftwareManagementTask task = new ExternalManagementTask(targetName, managementOperation,
             clusterBlueprint, statusUpdater, lockedClusterEntityManager,
             softwareManager);
       return task;

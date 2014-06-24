@@ -22,7 +22,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;

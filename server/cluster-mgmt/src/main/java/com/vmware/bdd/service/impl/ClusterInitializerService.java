@@ -21,7 +21,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.IClusterInitializerService;

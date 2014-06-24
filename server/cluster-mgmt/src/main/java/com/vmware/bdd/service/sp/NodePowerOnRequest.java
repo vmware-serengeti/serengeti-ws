@@ -132,7 +132,7 @@ public class NodePowerOnRequest extends SimpleRequest {
 
    // TODO: CM and Ambari
    public ISoftwareManagementTask createCommandTask(String clusterName, String specFileName) {
-      return SoftwareManagementTaskFactory.createIronfanTask(clusterName, specFileName, null, ManagementOperation.CONFIGURE, lockClusterEntityMgr);
+      return SoftwareManagementTaskFactory.createThriftTask(clusterName, specFileName, null, ManagementOperation.CONFIGURE, lockClusterEntityMgr);
    }
 
 }

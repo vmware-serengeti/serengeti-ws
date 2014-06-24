@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.service.job.software.ironfan;
+package com.vmware.bdd.service.job.software.thrift;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,20 +23,19 @@ import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.software.ISoftwareManagementTask;
-import com.vmware.bdd.service.job.software.ProgressMonitor;
 import com.vmware.bdd.software.mgmt.impl.SoftwareManagementClient;
 import com.vmware.bdd.software.mgmt.thrift.ClusterAction;
 import com.vmware.bdd.software.mgmt.thrift.ClusterOperation;
 
-public class IronfanSoftwareManagementTask implements ISoftwareManagementTask {
+public class ThriftSoftwareManagementTask implements ISoftwareManagementTask {
    private static final Logger logger = Logger
-         .getLogger(IronfanSoftwareManagementTask.class);
+         .getLogger(ThriftSoftwareManagementTask.class);
 
    private ClusterOperation clusterOperation;
    private StatusUpdater statusUpdater;
    private ILockedClusterEntityManager clusterEntityMgr;
 
-   public IronfanSoftwareManagementTask(ClusterOperation clusterOperation,
+   public ThriftSoftwareManagementTask(ClusterOperation clusterOperation,
          StatusUpdater updater, ILockedClusterEntityManager lockClusterEntityMgr) {
       this.clusterOperation = clusterOperation;
       this.statusUpdater = updater;
@@ -64,8 +63,8 @@ public class IronfanSoftwareManagementTask implements ISoftwareManagementTask {
 
       // start monitor thread
       Thread progressThread = null;
-      ProgressMonitor monitor = null;
-      monitor = new ProgressMonitor(clusterOperation.getTargetName(), statusUpdater, clusterEntityMgr);
+      ThriftProgressMonitor monitor = null;
+      monitor = new ThriftProgressMonitor(clusterOperation.getTargetName(), statusUpdater, clusterEntityMgr);
       progressThread = new Thread(monitor, "ProgressMonitor-" + clusterOperation.getTargetName());
       progressThread.setDaemon(true);
       progressThread.start();

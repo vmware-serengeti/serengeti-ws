@@ -32,6 +32,7 @@ import org.testng.annotations.Test;
 import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
+import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpConfigInfo;
 import com.vmware.bdd.apitypes.NetworkRead;
@@ -120,7 +121,7 @@ public class ClusterCommandsTest extends MockRestServer {
         cr1.setName("cluster1");
         cr1.setDistro("distro1");
         cr1.setInstanceNum(10);
-        cr1.setStatus(ClusterRead.ClusterStatus.RUNNING);
+        cr1.setStatus(ClusterStatus.RUNNING);
         List<NodeGroupRead> nodeGroupRead1 = new LinkedList<NodeGroupRead>();
         nodeGroupRead1.add(ngr1);
         nodeGroupRead1.add(ngr2);
@@ -209,7 +210,7 @@ public class ClusterCommandsTest extends MockRestServer {
         cr1.setName("cluster1");
         cr1.setDistro("distro1");
         cr1.setInstanceNum(10);
-        cr1.setStatus(ClusterRead.ClusterStatus.RUNNING);
+        cr1.setStatus(ClusterStatus.RUNNING);
         List<NodeGroupRead> nodeGroupRead1 = new LinkedList<NodeGroupRead>();
         nodeGroupRead1.add(ngr1);
         nodeGroupRead1.add(ngr2);
@@ -563,12 +564,12 @@ public class ClusterCommandsTest extends MockRestServer {
         cr1.setName("cluster1");
         cr1.setDistro("distro1");
         cr1.setInstanceNum(10);
-        cr1.setStatus(ClusterRead.ClusterStatus.RUNNING);
+        cr1.setStatus(ClusterStatus.RUNNING);
         ClusterRead cr2 = new ClusterRead();
         cr2.setName("cluster2");
         cr2.setDistro("distro2");
         cr2.setInstanceNum(20);
-        cr2.setStatus(ClusterRead.ClusterStatus.STOPPED);
+        cr2.setStatus(ClusterStatus.STOPPED);
         List<NodeGroupRead> nodeGroupRead1 = new LinkedList<NodeGroupRead>();
         nodeGroupRead1.add(ngr1);
         nodeGroupRead1.add(ngr2);
@@ -655,7 +656,7 @@ public class ClusterCommandsTest extends MockRestServer {
       cr1.setName("cluster1");
       cr1.setDistro("distro1");
       cr1.setInstanceNum(10);
-      cr1.setStatus(ClusterRead.ClusterStatus.RUNNING);
+      cr1.setStatus(ClusterStatus.RUNNING);
       List<NodeGroupRead> nodeGroupRead1 = new LinkedList<NodeGroupRead>();
       nodeGroupRead1.add(ngr1);
       cr1.setNodeGroups(nodeGroupRead1);
@@ -732,7 +733,7 @@ public class ClusterCommandsTest extends MockRestServer {
       cr1.setInstanceNum(10);
       cr1.setVhmMinNum(-1);
       cr1.setVhmMaxNum(-1);
-      cr1.setStatus(ClusterRead.ClusterStatus.RUNNING);
+      cr1.setStatus(ClusterStatus.RUNNING);
       List<NodeGroupRead> nodeGroupRead = new LinkedList<NodeGroupRead>();
       nodeGroupRead.add(ngr1);
       List<String> roles2 = new LinkedList<String>();
@@ -867,7 +868,7 @@ public class ClusterCommandsTest extends MockRestServer {
        cr1.setName("cluster1");
        cr1.setDistro("distro1");
        cr1.setInstanceNum(10);
-       cr1.setStatus(ClusterRead.ClusterStatus.RUNNING);
+       cr1.setStatus(ClusterStatus.RUNNING);
        List<NodeGroupRead> nodeGroupRead1 = new LinkedList<NodeGroupRead>();
        nodeGroupRead1.add(ngr1);
        cr1.setNodeGroups(nodeGroupRead1);
@@ -905,7 +906,7 @@ public class ClusterCommandsTest extends MockRestServer {
        cr1.setName("cluster1");
        cr1.setDistro("distro1");
        cr1.setInstanceNum(10);
-       cr1.setStatus(ClusterRead.ClusterStatus.RUNNING);
+       cr1.setStatus(ClusterStatus.RUNNING);
        List<NodeGroupRead> nodeGroupRead1 = new LinkedList<NodeGroupRead>();
        nodeGroupRead1.add(ngr1);
        cr1.setNodeGroups(nodeGroupRead1);

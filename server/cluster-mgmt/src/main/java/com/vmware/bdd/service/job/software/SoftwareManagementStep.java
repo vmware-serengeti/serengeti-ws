@@ -160,7 +160,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
          }
 
          task =
-               SoftwareManagementTaskFactory.createIronfanTask(targetName,
+               SoftwareManagementTaskFactory.createThriftTask(targetName,
                      specFilePath, statusUpdater, managementOperation,
                      lockClusterEntityMgr);
       }

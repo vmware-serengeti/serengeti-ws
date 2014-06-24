@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.service.job.software;
+package com.vmware.bdd.service.job.software.thrift;
 
 import org.apache.log4j.Logger;
 
@@ -28,8 +28,8 @@ import com.vmware.bdd.utils.TracedRunnable;
  * @since 0.8
  *
  */
-public class ProgressMonitor extends TracedRunnable {
-   private static final Logger logger = Logger.getLogger(ProgressMonitor.class);
+public class ThriftProgressMonitor extends TracedRunnable {
+   private static final Logger logger = Logger.getLogger(ThriftProgressMonitor.class);
    private static final long QUERY_INTERVAL_DEFAULT = 1000 * 10; // 10 seconds
    private static final long QUERY_INTERVAL_LONG = 1000 * 60 * 5; // 5 minutes
    private static final long QUERY_INTERVAL_MAX = 1000 * 60 * 15; // 15 minutes
@@ -42,7 +42,7 @@ public class ProgressMonitor extends TracedRunnable {
    private ILockedClusterEntityManager clusterEntityMgr;
    private volatile boolean stop;
 
-   public ProgressMonitor(String targetName, StatusUpdater statusUpdater,
+   public ThriftProgressMonitor(String targetName, StatusUpdater statusUpdater,
          ILockedClusterEntityManager clusterEntityMgr) {
       this.targetName = targetName;
       this.statusUpdater = statusUpdater;

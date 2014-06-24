@@ -70,6 +70,8 @@ import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.utils.Constants;
 
 /**
@@ -115,12 +117,12 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public Set<String> getSupportedRoles() {
+   public Set<String> getSupportedRoles() throws SoftwareManagementPluginException {
       return null;
    }
 
    @Override
-   public List<HadoopStack> getSupportedStacks() {
+   public List<HadoopStack> getSupportedStacks() throws SoftwareManagementPluginException {
       List<HadoopStack> list = new ArrayList<HadoopStack>();
       HadoopStack cdh4 = new HadoopStack();
       cdh4.setDistro("CDH4");
@@ -136,17 +138,20 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public String getSupportedConfigs(HadoopStack stack) {
+   public String getSupportedConfigs(HadoopStack stack)
+         throws SoftwareManagementPluginException {
       return null;
    }
 
    @Override
-   public boolean validateBlueprint(ClusterBlueprint blueprint) throws SoftwareManagementPluginException {
+   public boolean validateBlueprint(ClusterBlueprint blueprint)
+         throws SoftwareManagementPluginException {
       return true;
    }
 
    @Override
-   public boolean createCluster(ClusterBlueprint blueprint) throws Exception{
+   public boolean createCluster(ClusterBlueprint blueprint,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       boolean success = false;
       try {
          CmClusterDef clusterDef = new CmClusterDef(blueprint);
@@ -170,52 +175,62 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean reconfigCluster(ClusterBlueprint blueprint) {
+   public boolean reconfigCluster(ClusterBlueprint blueprint,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       return false;
    }
 
    @Override
-   public boolean scaleOutCluster(String clusterName, NodeGroupInfo group, List<NodeInfo> addedNodes) {
+   public boolean scaleOutCluster(String clusterName, NodeGroupInfo group, List<NodeInfo> addedNodes,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       return false;
    }
 
    @Override
-   public boolean startCluster(String clusterName) {
+   public boolean startCluster(String clusterName,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       return false;
    }
 
    @Override
-   public boolean deleteCluster(String clusterName) {
+   public boolean deleteCluster(String clusterName,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       return false;
    }
 
    @Override
-   public boolean onStopCluster(String clusterName) {
+   public boolean onStopCluster(String clusterName,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       return false;
    }
 
    @Override
-   public boolean onDeleteCluster(String clusterName) {
+   public boolean onDeleteCluster(String clusterName,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       return false;
    }
 
    @Override
-   public boolean decomissionNodes(String clusterName, List<NodeInfo> nodes) {
+   public boolean decomissionNodes(String clusterName, List<NodeInfo> nodes,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       return false;
    }
 
    @Override
-   public boolean comissionNodes(String clusterName, List<NodeInfo> nodes) {
+   public boolean comissionNodes(String clusterName, List<NodeInfo> nodes,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       return false;
    }
 
    @Override
-   public boolean startNodes(String clusterName, List<NodeInfo> nodes) {
+   public boolean startNodes(String clusterName, List<NodeInfo> nodes,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       return false;
    }
 
    @Override
-   public boolean stopNodes(String clusterName, List<NodeInfo> nodes) {
+   public boolean stopNodes(String clusterName, List<NodeInfo> nodes,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       return false;
    }
 
@@ -225,7 +240,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public String queryClusterStatus(ClusterBlueprint blueprint) {
+   public ClusterReport queryClusterStatus(ClusterBlueprint blueprint) {
       return null;
    }
 
@@ -241,12 +256,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public boolean validateRoles(ClusterBlueprint blueprint, List<String> roles) throws SoftwareManagementPluginException {
-      return true;
-   }
-
-   @Override
-   public boolean validateCliConfigurations(ClusterBlueprint blueprint)
-         throws SoftwareManagementPluginException {
       return true;
    }
 

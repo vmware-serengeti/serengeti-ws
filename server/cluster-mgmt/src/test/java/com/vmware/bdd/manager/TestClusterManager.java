@@ -39,7 +39,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.entity.ClusterEntity;
@@ -48,8 +48,8 @@ import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.ClusterManagerException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.MockTmScheduler;
-import com.vmware.bdd.service.MockVcCache;
 import com.vmware.bdd.service.MockTmScheduler.VmOperation;
+import com.vmware.bdd.service.MockVcCache;
 
 @ContextConfiguration(locations = { "classpath:/spring/*-context.xml" })
 public class TestClusterManager extends AbstractTestNGSpringContextTests {

@@ -1,9 +1,9 @@
 package com.vmware.bdd.software.mgmt.plugin.monitor;
 
-import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
-
-import java.util.List;
 import java.util.Map;
+
+import com.vmware.bdd.apitypes.ClusterStatus;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 
 /**
  * Author: Xiaoding Bian
@@ -12,6 +12,7 @@ import java.util.Map;
  */
 public class ClusterReport {
 
+   private ClusterStatus status;
    private String name;
 
    private String action;
@@ -19,8 +20,6 @@ public class ClusterReport {
    private boolean success;
 
    private boolean finished;
-
-   private boolean seenByCleaner; // if cleaner has seen this report last round, then clean it this round
 
    private Map<String, GroupReport> groups; // groupName -> groupReport
 

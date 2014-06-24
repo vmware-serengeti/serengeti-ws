@@ -14,16 +14,17 @@
  ***************************************************************************/
 package com.vmware.bdd.service;
 
-import com.vmware.bdd.service.impl.ClouderaManagerImpl;
-import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
-import com.vmware.bdd.utils.SerialUtils;
+import java.io.IOException;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-import java.io.IOException;
+import com.vmware.bdd.service.impl.ClouderaManagerImpl;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
+import com.vmware.bdd.utils.SerialUtils;
 
 /**
  * Author: Xiaoding Bian
@@ -61,7 +62,8 @@ public class TestClouderaManagerImpl {
    public void testInitializeCluster() throws Exception {
       String content = SerialUtils.dataFromFile("/tmp/basic_hdfs_yarn");
       ClusterBlueprint blueprint = SerialUtils.getObjectByJsonString(ClusterBlueprint.class, content);
-      provider.createCluster(blueprint);
+      ClusterReportQueue queue = new ClusterReportQueue();
+      provider.createCluster(blueprint, queue);
    }
 
 }

@@ -19,10 +19,10 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map.Entry;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -35,16 +35,15 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.google.gson.reflect.TypeToken;
-import com.vmware.bdd.apitypes.NetConfigInfo;
-import com.vmware.bdd.apitypes.Priority;
-
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Type;
 
 import com.google.gson.Gson;
-import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.google.gson.reflect.TypeToken;
+import com.vmware.bdd.apitypes.ClusterStatus;
+import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.security.EncryptionGuard;
 import com.vmware.bdd.utils.ConfigInfo;

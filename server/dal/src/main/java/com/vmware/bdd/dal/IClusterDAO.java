@@ -17,7 +17,7 @@ package com.vmware.bdd.dal;
 import java.util.List;
 import java.util.Set;
 
-import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 

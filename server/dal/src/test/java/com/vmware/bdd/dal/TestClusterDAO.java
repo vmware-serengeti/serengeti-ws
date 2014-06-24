@@ -20,10 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import com.vmware.bdd.entity.NodeEntity;
-import com.vmware.bdd.entity.VcResourcePoolEntity;
 import org.apache.log4j.Logger;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
@@ -34,13 +31,15 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.gson.Gson;
-import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.entity.VcResourcePoolEntity;
 
 @ContextConfiguration(locations = {"classpath:/META-INF/spring/*-context.xml"})
 public class TestClusterDAO extends AbstractTransactionalTestNGSpringContextTests {

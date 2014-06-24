@@ -17,7 +17,7 @@ package com.vmware.bdd.manager.intf;
 import java.util.List;
 
 import com.vmware.bdd.apitypes.ClusterRead;
-import com.vmware.bdd.apitypes.ClusterRead.ClusterStatus;
+import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.DiskEntity;

@@ -31,6 +31,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.ClusterRead;
+import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.service.job.JobConstants;
 
@@ -187,8 +188,8 @@ public class TestJobManager {
       String subJobName = "simpleJob";
       long jobExecutionId =
             jobManager.runSubJobForNodes(subJobName, jobParametersList,
-                  clusterName, ClusterRead.ClusterStatus.RUNNING,
-                  ClusterRead.ClusterStatus.ERROR);
+                  clusterName, ClusterStatus.RUNNING,
+                  ClusterStatus.ERROR);
       while (true) {
          Thread.sleep(50);
          TaskRead tr = jobManager.getJobExecutionStatus(jobExecutionId);
@@ -233,8 +234,8 @@ public class TestJobManager {
       jobParametersList.add(nodeParameters);
       long jobExecutionId =
             jobManager.runSubJobForNodes("simpleJob", jobParametersList,
-                  clusterName, ClusterRead.ClusterStatus.RUNNING,
-                  ClusterRead.ClusterStatus.ERROR);
+                  clusterName, ClusterStatus.RUNNING,
+                  ClusterStatus.ERROR);
       while (true) {
          Thread.sleep(50);
          TaskRead tr = jobManager.getJobExecutionStatus(jobExecutionId);

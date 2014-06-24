@@ -14,14 +14,24 @@
  ***************************************************************************/
 package com.vmware.bdd.software.mgmt.plugin.impl;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
-import com.vmware.bdd.software.mgmt.plugin.model.*;
+import com.vmware.bdd.software.mgmt.plugin.model.ChefServerUtils;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.ServiceType;
-
-import java.net.URI;
-import java.util.*;
 
 
 public class DefaultSoftwareManagerImpl implements SoftwareManager {
@@ -57,19 +67,19 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public Set<String> getSupportedRoles() {
+   public Set<String> getSupportedRoles() throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return null;
    }
 
    @Override
-   public List<HadoopStack> getSupportedStacks() {
+   public List<HadoopStack> getSupportedStacks() throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return null;
    }
 
    @Override
-   public String getSupportedConfigs(HadoopStack stack) {
+   public String getSupportedConfigs(HadoopStack stack) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return null;
    }
@@ -112,12 +122,6 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
          e.getFailedMsgList().add(failedMsgList.toString());
          throw e;
       }
-      return true;
-   }
-
-   @Override
-   public boolean validateCliConfigurations(ClusterBlueprint blueprint)
-         throws SoftwareManagementPluginException {
       return true;
    }
 
@@ -276,68 +280,79 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean createCluster(ClusterBlueprint blueprint) throws Exception {
+   public boolean createCluster(ClusterBlueprint blueprint,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
-   public boolean reconfigCluster(ClusterBlueprint blueprint) {
+   public boolean reconfigCluster(ClusterBlueprint blueprint,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
    public boolean scaleOutCluster(String clusterName, NodeGroupInfo group,
-         List<NodeInfo> addedNodes) {
+         List<NodeInfo> addedNodes,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
-   public boolean startCluster(String clusterName) {
+   public boolean startCluster(String clusterName,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
-   public boolean deleteCluster(String clusterName) {
+   public boolean deleteCluster(String clusterName,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
-   public boolean onStopCluster(String clusterName) {
+   public boolean onStopCluster(String clusterName,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
-   public boolean onDeleteCluster(String clusterName) {
+   public boolean onDeleteCluster(String clusterName,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
-   public boolean decomissionNodes(String clusterName, List<NodeInfo> nodes) {
+   public boolean decomissionNodes(String clusterName, List<NodeInfo> nodes,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
-   public boolean comissionNodes(String clusterName, List<NodeInfo> nodes) {
+   public boolean comissionNodes(String clusterName, List<NodeInfo> nodes,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
-   public boolean startNodes(String clusterName, List<NodeInfo> nodes) {
+   public boolean startNodes(String clusterName, List<NodeInfo> nodes,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
-   public boolean stopNodes(String clusterName, List<NodeInfo> nodes) {
+   public boolean stopNodes(String clusterName, List<NodeInfo> nodes,
+         ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
@@ -349,13 +364,14 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public String queryClusterStatus(ClusterBlueprint blueprint) {
+   public ClusterReport queryClusterStatus(ClusterBlueprint blueprint) {
       // TODO Auto-generated method stub
       return null;
    }
 
    @Override
-   public List<String> validateScaling(NodeGroupInfo group) {
+   public List<String> validateScaling(NodeGroupInfo group) 
+   throws SoftwareManagementPluginException {
       // resize of job tracker and name node is not supported
       List<String> roles = group.getRoles();
       List<String> unsupportedRoles = new ArrayList<String>();
