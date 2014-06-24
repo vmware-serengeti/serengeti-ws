@@ -38,6 +38,18 @@ public class AppConfigValidationFactory {
 
    static final Logger logger = Logger.getLogger(AppConfigValidationFactory.class);
 
+   /* 
+    * Validate the config type if valid or not. Config type is a first nesting level in a configuration,
+    * such as 'hadoop','hbase','zookeeper' etc.
+    */
+   @SuppressWarnings("unchecked")
+   public static void validateConfigType(Map<String, Object> config, List<String> warningMsgList) {
+      String jsonStr = CommonUtil.readJsonFile("whitelist.json");
+      Gson gson = new Gson();
+      List<Map<String, Map<String,List<Map<String, String>>>>> whiteList = gson.fromJson(jsonStr, List.class);
+      validateConfigType(config, whiteList, warningMsgList);
+   }
+
    @SuppressWarnings("unchecked")
    public static ValidateResult blackListHandle(Map<String, Object> config) {
       ValidateResult validateResult = new ValidateResult();
@@ -57,14 +69,11 @@ public class AppConfigValidationFactory {
     }
 
    /*
-    * Validate the config type whether valid or not. Config type is a first nesting level in a configuration,
-    * such as 'hadoop','hbase','zookeeper' etc. If all of the config types is true, we will validate configure
-    * files of each config type.
+    * Validate configure files of each config type.
     */
    @SuppressWarnings("unchecked")
    private static <T> ValidateResult processAppConfigValidation(Map<String, Object> config,
          ValidateResult validateResult, List<Map<String, Map<String, List<T>>>> list, ValidationType type) {
-      validateConfigType(config, list);
       for (Entry<String, Object> configTypeEntry : config.entrySet()) {
          if (!(configTypeEntry.getValue() instanceof Map)) {
             throw new RuntimeException(Constants.CLUSTER_CONFIG_FORMAT_ERROR);
@@ -85,30 +94,40 @@ public class AppConfigValidationFactory {
       return validateResult;
    }
 
-   private static <T> void validateConfigType (Map<String, Object> config, List<Map<String, Map<String, List<T>>>> list) {
-      String configType = "";
-      boolean found = false;
-      for (Entry<String, Object> configTypeEntry : config.entrySet()) {
-         configType = configTypeEntry.getKey();
-         found = false;
-         for (Map<String, Map<String, List<T>>> listTypeMap : list) {
-            if (listTypeMap.containsKey(configType)) {
-               found = true;
+   private static <T> void validateConfigType(Map<String, Object> config,
+         List<Map<String, Map<String, List<T>>>> list,
+         List<String> warningMsgList) {
+      if (warningMsgList != null) {
+         String configType = "";
+         List<String> grayList = new ArrayList<String>();
+         boolean found = false;
+         for (Entry<String, Object> configTypeEntry : config.entrySet()) {
+            configType = configTypeEntry.getKey();
+            found = false;
+            for (Map<String, Map<String, List<T>>> listTypeMap : list) {
+               if (listTypeMap.containsKey(configType)) {
+                  found = true;
+               }
+            }
+            if (!found) {
+               grayList.add(configType);
             }
          }
-         if(!found) {
-            break;
+         if (!found) {
+            StringBuffer errorMsg = new StringBuffer();
+            String be = " is ";
+            errorMsg.append(Constants.CLUSTER_CONFIG_TYPE_NOT_RAGULARLY_BEFORE);
+            for (String grayConfigType : grayList) {
+               errorMsg.append(grayConfigType);
+               errorMsg.append(", ");
+            }
+            if (grayList.size() > 1) {
+               be = " are ";
+            }
+            errorMsg.replace(errorMsg.length() - 2, errorMsg.length(), be
+                  + Constants.CLUSTER_CONFIG_TYPE_NOT_RAGULARLY_AFTER);
+            warningMsgList.add(errorMsg.toString());
          }
-      }
-      if(!found) {
-         StringBuffer errorMsg = new StringBuffer();
-         errorMsg.append(Constants.CLUSTER_CONFIG_TYPE_ERROR);
-         for(Map<String, Map<String, List<T>>> listTypeMap : list) {
-            errorMsg.append(listTypeMap.keySet().iterator().next());
-            errorMsg.append(", ");
-         }
-         errorMsg.replace(errorMsg.length()-2, errorMsg.length(),". ");
-         throw new RuntimeException(errorMsg.toString());
       }
    }
 

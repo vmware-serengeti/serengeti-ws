@@ -1525,11 +1525,15 @@ public class ClusterCommands implements CommandMarker {
    private void validateConfiguration(ClusterCreate cluster,
          boolean skipConfigValidation, List<String> warningMsgList,
          List<String> failedMsgList) {
+
       // validate blacklist
       ValidateResult blackListResult = validateBlackList(cluster);
       addBlackListWarning(blackListResult, warningMsgList);
 
       if (!skipConfigValidation) {
+         // validate config type
+         AppConfigValidationUtils.validateSupportType(cluster.getConfiguration(),
+               warningMsgList);
          // validate whitelist
          ValidateResult whiteListResult = validateWhiteList(cluster);
          addWhiteListWarningOrFailure(cluster.getName(), whiteListResult,
@@ -1655,10 +1659,10 @@ public class ClusterCommands implements CommandMarker {
                getValidateWarningMsg(whiteListResult.getFailureNames(),
                      Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING);
          if (!warningMsgList.isEmpty()) {
-            if (noExistingWarningMsg != null) {
+            if (!CommonUtil.isBlank(noExistingWarningMsg)) {
                warningMsgList.add(noExistingWarningMsg);
             }
-            if (failureNameWarningMsg != null) {
+            if (!CommonUtil.isBlank(failureNameWarningMsg)) {
                warningMsgList.add(failureNameWarningMsg);
             }
          }
@@ -1676,8 +1680,8 @@ public class ClusterCommands implements CommandMarker {
                getValidateWarningMsg(blackListResult.getFailureNames(),
                      Constants.PARAM_CLUSTER_IN_BLACK_LIST_WARNING
                            + Constants.PARAM_CLUSTER_NOT_TAKE_EFFECT);
-         if (!warningList.isEmpty()) {
-            if (warningMsg != null) {
+         if (warningList != null) {
+            if (!CommandsUtils.isBlank(warningMsg)) {
                warningList.add(warningMsg);
             }
          }

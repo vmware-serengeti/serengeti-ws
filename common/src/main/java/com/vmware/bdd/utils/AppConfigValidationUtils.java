@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import java.util.List;
 import java.util.Map;
 
 public class AppConfigValidationUtils {
@@ -24,7 +25,7 @@ public class AppConfigValidationUtils {
    }
 
    /**
-    * Validate the configration of spec file.
+    * If the config type is supported, validate the configration of each file in the spec file.
     * 
     * @param type
     *           validate type,blacklist or whitelist
@@ -42,4 +43,15 @@ public class AppConfigValidationUtils {
       }
       return validateResult;
    }
+
+   /**
+    * Validate if support certain products
+    * @param config
+    * @param warningMsgList
+    */
+   public static void validateSupportType(Map<String, Object> config,
+         List<String> warningMsgList) {
+      AppConfigValidationFactory.validateConfigType(config, warningMsgList);
+   }
+
 }
