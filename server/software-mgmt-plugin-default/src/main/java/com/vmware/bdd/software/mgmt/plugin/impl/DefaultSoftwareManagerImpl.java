@@ -195,7 +195,8 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
          if (nodeGroups == null) {
             valid = false;
             failedMsgList.add("Missing JobTracker or TaskTracker role.");
-         } else {
+         } else if(!roles.contains("hbase_master")){
+            // TODO: consider Ambari need specify hadoop_namenode role when use of external HDFS
             if (roles.contains("hadoop_namenode")
                   || roles.contains("hadoop_datanode")) {
                valid = false;
