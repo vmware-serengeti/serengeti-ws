@@ -42,6 +42,7 @@ public class NodeReport implements Cloneable {
    private int errCode;
 
    private String errMsg;
+
    private boolean useClusterMsg;
 
    public NodeReport() {}
@@ -56,6 +57,7 @@ public class NodeReport implements Cloneable {
       this.errCode = 0;
       this.errMsg = null;
       this.progress = 0;
+      this.useClusterMsg = true;
    }
 
    public String getName() {

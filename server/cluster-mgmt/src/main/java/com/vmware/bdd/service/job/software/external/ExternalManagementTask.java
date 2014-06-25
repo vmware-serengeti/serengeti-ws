@@ -15,8 +15,10 @@
 package com.vmware.bdd.service.job.software.external;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
@@ -58,16 +60,22 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
 
       Map<String, Object> result = new HashMap<String, Object>();
 
-      Thread progressThread = null;
       ClusterReportQueue queue = new ClusterReportQueue();
+      /*
+      Thread progressThread = null;
       ExternalProgressMonitor monitor =
             new ExternalProgressMonitor(targetName, queue, statusUpdater,
                   lockedClusterEntityManager);
       progressThread = new Thread(monitor, "ProgressMonitor-" + targetName);
       progressThread.setDaemon(true);
       progressThread.start();
+      */
 
       boolean success = false;
+
+      Thread monitor = new Drain(queue);
+      monitor.start();
+
       try {
          switch(managementOperation) {
             case CREATE:
@@ -88,17 +96,46 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
          logger.error(" operation : " + managementOperation.name()
                + " failed on cluster: " + targetName, t);
       } finally {
+         /*
          if (progressThread != null) {
             if (monitor != null) {
                monitor.setStop(true); // tell monitor to stop monitoring then the thread will exit
                progressThread.interrupt(); // wake it up to stop immediately if it's sleeping
                progressThread.join();
             }
+            */
+         if (monitor != null) {
+            monitor.interrupt();
+            monitor.join();
          }
       }
 
       result.put("succeed", success);
 
       return result;
+   }
+
+   private class Drain extends Thread {
+      private ClusterReportQueue queue;
+
+      public Drain(ClusterReportQueue queue) {
+         this.queue = queue;
+      }
+
+      @Override
+      public void run() {
+         while (true) {
+            List<ClusterReport> reports = queue.pollClusterReport();
+            for (ClusterReport report : reports) {
+               logger.info("Action: " + report.getAction() + ", Progress: " + report.getProgress());
+            }
+            try {
+               Thread.sleep(5000);
+            } catch (InterruptedException e) {
+               break;
+            }
+         }
+      }
+
    }
 }

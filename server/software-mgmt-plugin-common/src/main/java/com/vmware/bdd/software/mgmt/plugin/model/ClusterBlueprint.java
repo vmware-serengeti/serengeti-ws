@@ -15,6 +15,7 @@
 package com.vmware.bdd.software.mgmt.plugin.model;
 
 import com.google.gson.annotations.Expose;
+import com.vmware.bdd.apitypes.ClusterStatus;
 
 import java.io.Serializable;
 import java.util.List;
@@ -38,8 +39,10 @@ public class ClusterBlueprint implements Serializable {
 
    @Expose
    private HadoopStack hadoopStack;
+
    private String externalHDFS;
    private boolean needToValidateConfig;
+
 
    public String getName() {
       return name;

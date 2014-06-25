@@ -25,18 +25,57 @@ import java.util.List;
  * 
  **/
 public class SoftwareManagementPluginException extends RuntimeException {
-   private static final long serialVersionUID = 1L;
-
+   private static final long serialVersionUID = -3167102179098077601L;
    private String errCode;
 
    public SoftwareManagementPluginException() {
       super();
    }
 
-   public SoftwareManagementPluginException(String errCode, String message,
-         Throwable cause) {
+   public SoftwareManagementPluginException(String message) {
+      this(message, null);
+   }
+
+   public SoftwareManagementPluginException(String message, Throwable cause) {
+      this("UNKNOWN", message, cause);
+   }
+
+   public SoftwareManagementPluginException(String errCode, String message, Throwable cause) {
       super(message, cause);
       this.errCode = errCode;
+   }
+
+   public static SoftwareManagementPluginException INVALID_VERSION(String version, Throwable cause) {
+      return new SoftwareManagementPluginException("INVALID_VERSION", "Version " + version + " is invalid", cause);
+   }
+
+   public static SoftwareManagementPluginException CREATE_CLUSTER_FAILED(String clusterName, Throwable cause) {
+      return new SoftwareManagementPluginException("CREATE_CLUSTER_FAILED", "Failed to create cluster " + clusterName, cause);
+   }
+
+   public static SoftwareManagementPluginException DELETE_CLUSTER_FAILED(String clusterName, Throwable cause) {
+      return new SoftwareManagementPluginException("DELETE_CLUSTER_FAILED", "Failed to delete cluster " + clusterName, cause);
+   }
+
+   public static SoftwareManagementPluginException START_CLUSTER_FAILED(String clusterName, Throwable cause) {
+      return new SoftwareManagementPluginException("START_CLUSTER_FAILED", "Failed to start cluster " + clusterName, cause);
+   }
+
+   public static SoftwareManagementPluginException STOP_CLUSTER_FAILED(String clusterName, Throwable cause) {
+      return new SoftwareManagementPluginException("STOP_CLUSTER_FAILED", "Failed to stop cluster " + clusterName, cause);
+   }
+
+   public static SoftwareManagementPluginException CONFIGURE_SERVICE_FAILED(String clusterName, Throwable cause) {
+      return new SoftwareManagementPluginException("CONFIGURE_SERVICE_FAILED", "Failed to configure service for cluster " + clusterName, cause);
+   }
+
+
+   public static SoftwareManagementPluginException START_SERVICE_FAILED(String clusterName, Throwable cause) {
+      return new SoftwareManagementPluginException("START_SERVICE_FAILED", "Failed to start service for cluster " + clusterName, cause);
+   }
+
+   public static SoftwareManagementPluginException CLUSTER_ALREADY_EXIST(String clusterName, Throwable cause) {
+      return new SoftwareManagementPluginException("CLUSTER_ALREADY_EXIST", "Cluster " + clusterName + " already exist", cause);
    }
 
    public String getErrCode() {

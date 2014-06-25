@@ -24,9 +24,6 @@ import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.thrift.ClusterAction;
 import com.vmware.bdd.software.mgmt.thrift.ClusterOperation;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author Jarred Li
  * @version 0.8
