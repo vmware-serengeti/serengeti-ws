@@ -171,13 +171,15 @@ public class SoftwareManagementStep extends TrackableTasklet {
                      lockClusterEntityMgr);
       }
 
-      Map<String, Object> ret = task.call();
+      if (task != null) {
+         Map<String, Object> ret = task.call();
 
-      if (!(Boolean) ret.get("succeed")) {
-         String errorMessage = (String) ret.get("errorMessage");
-         putIntoJobExecutionContext(chunkContext,
-               JobConstants.CURRENT_ERROR_MESSAGE, errorMessage);
-         throw TaskException.EXECUTION_FAILED(errorMessage);
+         if (!(Boolean) ret.get("succeed")) {
+            String errorMessage = (String) ret.get("errorMessage");
+            putIntoJobExecutionContext(chunkContext,
+                  JobConstants.CURRENT_ERROR_MESSAGE, errorMessage);
+            throw TaskException.EXECUTION_FAILED(errorMessage);
+         }
       }
 
       return RepeatStatus.FINISHED;
