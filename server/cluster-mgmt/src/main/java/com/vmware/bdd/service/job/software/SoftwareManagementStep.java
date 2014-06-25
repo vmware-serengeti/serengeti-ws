@@ -25,7 +25,6 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.command.CommandUtil;
 import com.vmware.bdd.entity.NodeEntity;
@@ -41,6 +40,7 @@ import com.vmware.bdd.service.job.TrackableTasklet;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.SyncHostsUtils;
 
 public class SoftwareManagementStep extends TrackableTasklet {
@@ -122,7 +122,8 @@ public class SoftwareManagementStep extends TrackableTasklet {
                   getJobExecutionId(chunkContext));
 
       ISoftwareManagementTask task = null;
-      if (!CommonUtil.isBlank(clusterSpec.getAppManager())) {
+      if (!CommonUtil.isBlank(clusterSpec.getAppManager())
+            && !Constants.IRONFAN.equalsIgnoreCase(clusterSpec.getAppManager())) {
          SoftwareManager softwareMgr =
                softwareMgrs.getSoftwareManager(clusterSpec.getAppManager());
 
