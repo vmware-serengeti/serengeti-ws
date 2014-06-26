@@ -26,23 +26,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.vmware.bdd.apitypes.NetworkAdd;
-
 import org.apache.log4j.Logger;
 
 import com.google.gson.internal.Pair;
-import com.vmware.aurora.interfaces.model.IDatabaseConfig.Priority;
-import com.vmware.aurora.vc.DiskSpec.AllocationType;
 import com.vmware.aurora.composition.NetworkSchema;
 import com.vmware.aurora.composition.NetworkSchema.Network;
 import com.vmware.aurora.composition.ResourceSchema;
+import com.vmware.aurora.interfaces.model.IDatabaseConfig.Priority;
+import com.vmware.aurora.vc.DiskSpec.AllocationType;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksType;
+import com.vmware.bdd.apitypes.DiskSplitPolicy;
+import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks.GroupRacksType;
 import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
-import com.vmware.bdd.apitypes.StorageRead.DiskSplitPolicy;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractCluster;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractDatastore;

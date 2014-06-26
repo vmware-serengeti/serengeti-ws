@@ -35,7 +35,6 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.spectypes.HadoopRole;
 
 public class CommonUtil {
 
@@ -174,22 +173,6 @@ public class CommonUtil {
       Pattern pattern = Pattern.compile("[a-zA-Z0-9_@#$%^&*]+");
       if (!pattern.matcher(password).matches()) {
          return true;
-      }
-      return false;
-   }
-
-   public static boolean isComputeOnly(List<String> roles, String distroVendor) {
-      if (distroVendor != null && distroVendor.equalsIgnoreCase(Constants.MAPR_VENDOR)) {
-         if (roles != null && roles.contains(HadoopRole.MAPR_TASKTRACKER_ROLE.toString()) &&
-               !roles.contains(HadoopRole.MAPR_NFS_ROLE.toString())){
-            return true;
-         }
-      } else {
-         if (roles != null && roles.contains(HadoopRole.HADOOP_TASKTRACKER.toString())
-               && (roles.size() == 1 || (roles.size() == 2 && roles.contains(
-               HadoopRole.TEMPFS_CLIENT_ROLE.toString())))) {
-            return true;
-         }
       }
       return false;
    }

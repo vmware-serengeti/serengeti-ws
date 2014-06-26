@@ -23,15 +23,6 @@ import org.codehaus.jackson.annotate.JsonIgnore;
  */
 public class StorageRead {
 
-   public enum DiskSplitPolicy {
-      // separate this disk on datastores as much as possible
-      EVEN_SPLIT,
-      // separate this disk on datastore as less as possible
-      AGGREGATE,
-      // separate this disk onto at most two datastores, first try with two if possible 
-      BI_SECTOR
-   }
-
    public enum DiskScsiControllerType {
       LSI_CONTROLLER, PARA_VIRTUAL_CONTROLLER
    }
@@ -69,6 +60,7 @@ public class StorageRead {
    }
 
    private String type;
+   private String expectedTypeFromRoles;
 
    private Priority shares;
 
@@ -185,5 +177,13 @@ public class StorageRead {
 
    public void setAllocType(String allocType) {
       this.allocType = allocType;
+   }
+
+   public String getExpectedTypeFromRoles() {
+      return expectedTypeFromRoles;
+   }
+
+   public void setExpectedTypeFromRoles(String expectedTypeFromRoles) {
+      this.expectedTypeFromRoles = expectedTypeFromRoles;
    }
 }

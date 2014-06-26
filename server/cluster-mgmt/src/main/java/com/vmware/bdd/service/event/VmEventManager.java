@@ -39,6 +39,7 @@ import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.manager.ClusterManager;
+import com.vmware.bdd.manager.SoftwareManagerCollector;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
 import com.vmware.bdd.service.utils.VcResourceUtils;
@@ -119,6 +120,7 @@ public class VmEventManager implements IEventProcessor {
    private Folder rootSerengetiFolder = null;
    private EventScheduler eventScheduler = null;
    private ClusterManager clusterManager;
+   private SoftwareManagerCollector softwareManagerCollector;
 
    public VmEventManager(IConcurrentLockedClusterEntityManager lockMgr) {
       super();
@@ -129,6 +131,15 @@ public class VmEventManager implements IEventProcessor {
 
    public void setClusterManager(ClusterManager clusterManager) {
       this.clusterManager = clusterManager;
+   }
+
+   public SoftwareManagerCollector getSoftwareManagerCollector() {
+      return softwareManagerCollector;
+   }
+
+   public void setSoftwareManagerCollector(
+         SoftwareManagerCollector softwareManagerCollector) {
+      this.softwareManagerCollector = softwareManagerCollector;
    }
 
    public synchronized void start() {
@@ -389,7 +400,8 @@ public class VmEventManager implements IEventProcessor {
                      "Powered On");
                if (external) {
                   NodePowerOnRequest request =
-                        new NodePowerOnRequest(lockMgr, moId, clusterManager);
+                        new NodePowerOnRequest(lockMgr, moId, clusterManager,
+                              softwareManagerCollector);
                   CmsWorker.addRequest(WorkQueue.VC_TASK_NO_DELAY, request);
                }
             }

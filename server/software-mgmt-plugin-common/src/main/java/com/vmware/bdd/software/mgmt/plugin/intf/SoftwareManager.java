@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
+import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
@@ -106,11 +107,8 @@ public interface SoftwareManager {
    String getSupportedConfigs(HadoopStack stack)
          throws SoftwareManagementPluginException;
 
-   boolean validateBlueprint(ClusterBlueprint blueprint)
-         throws SoftwareManagementPluginException;
-
-   boolean validateRoles(ClusterBlueprint blueprint, List<String> roles)
-         throws SoftwareManagementPluginException;
+   boolean validateBlueprint(ClusterBlueprint blueprint, List<String> distroRoles)
+         throws ValidationException;
 
    /**
     * Sync call to create hadoop software Plugin should should update
@@ -268,10 +266,24 @@ public interface SoftwareManager {
 
    /**
     * Plugin has a chance to update infrastructure setting here. Specifically,
-    * plugin can set default
+    * plugin can set default disk type
     * 
     * @param blueprint
     */
    void updateInfrastructure(ClusterBlueprint blueprint)
          throws SoftwareManagementPluginException;
+
+   boolean hasHbase(ClusterBlueprint blueprint);
+   boolean hasMgmtRole(List<String> roles);
+   boolean isComputeOnlyRoles(List<String> roles);
+
+   /**
+    * This is the infrastructure requirement comes from software manager
+    * for one specific node group.
+    * It generally happens for some special roles supported. E.g. if only
+    * zookeeper role is installed in one node group, only two data disk can be leveraged.
+    * @param group
+    * @return
+    */
+   boolean twoDataDisksRequired(NodeGroupInfo group);
 }

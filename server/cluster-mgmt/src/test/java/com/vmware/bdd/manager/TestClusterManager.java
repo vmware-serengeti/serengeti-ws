@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -51,15 +52,22 @@ import com.vmware.bdd.service.MockTmScheduler;
 import com.vmware.bdd.service.MockTmScheduler.VmOperation;
 import com.vmware.bdd.service.MockVcCache;
 
-@ContextConfiguration(locations = { "classpath:/spring/*-context.xml" })
+@ContextConfiguration(locations = { "classpath:/spring/*-context.xml"})
 public class TestClusterManager extends AbstractTestNGSpringContextTests {
 
    private static final String TEST_CLUSTER_NAME = "testClusterMgr";
    @Autowired
    private IClusterEntityManager clusterEntityMgr;
+   @Autowired
+   private SoftwareManagerCollector softwareManagerCollector;
 
    @Autowired
    private ClusterManager clusterMgr;
+
+   @BeforeClass
+   public void setUp() {
+      softwareManagerCollector.loadSoftwareManagers();
+   }
 
    @BeforeMethod(groups = { "TestClusterManager" }, dependsOnGroups = { "TestVmEventManager" })
    public void setMockup() {

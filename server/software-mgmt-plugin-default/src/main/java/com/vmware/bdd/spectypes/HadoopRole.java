@@ -15,6 +15,7 @@
 package com.vmware.bdd.spectypes;
 
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,46 +26,30 @@ public enum HadoopRole {
    //NOTE: when you add a new role, please put it into an appropriate position
    //based on their dependencies. The more dependent, the latter position
    //0 dependency
-   ZOOKEEPER_ROLE("zookeeper"),
-   HADOOP_JOURNALNODE_ROLE("hadoop_journalnode"), //for Hadoop 2.x Namenode HA
+   ZOOKEEPER_ROLE("zookeeper"), HADOOP_JOURNALNODE_ROLE("hadoop_journalnode"), //for Hadoop 2.x Namenode HA
    //1 dependency
    HADOOP_NAMENODE_ROLE("hadoop_namenode"),
    //2 dependency
-   HBASE_MASTER_ROLE("hbase_master"),
-   TEMPFS_SERVER_ROLE("tempfs_server"),
-   HADOOP_JOBTRACKER_ROLE("hadoop_jobtracker"),
-   HADOOP_RESOURCEMANAGER_ROLE("hadoop_resourcemanager"),
-   HADOOP_DATANODE("hadoop_datanode"),
+   HBASE_MASTER_ROLE("hbase_master"), TEMPFS_SERVER_ROLE("tempfs_server"), HADOOP_JOBTRACKER_ROLE(
+         "hadoop_jobtracker"), HADOOP_RESOURCEMANAGER_ROLE(
+         "hadoop_resourcemanager"), HADOOP_DATANODE("hadoop_datanode"),
    //3 dependencies
-   TEMPFS_CLIENT_ROLE("tempfs_client"),
-   HADOOP_TASKTRACKER("hadoop_tasktracker"),
-   HADOOP_NODEMANAGER_ROLE("hadoop_nodemanager"),
-   HBASE_REGIONSERVER_ROLE("hbase_regionserver"),
+   TEMPFS_CLIENT_ROLE("tempfs_client"), HADOOP_TASKTRACKER("hadoop_tasktracker"), HADOOP_NODEMANAGER_ROLE(
+         "hadoop_nodemanager"), HBASE_REGIONSERVER_ROLE("hbase_regionserver"),
    //4 dependencies
-   HADOOP_CLIENT_ROLE("hadoop_client"),
-   HBASE_CLIENT_ROLE("hbase_client"),
-   PIG_ROLE("pig"),
-   HIVE_ROLE("hive"),
-   HIVE_SERVER_ROLE("hive_server"),
+   HADOOP_CLIENT_ROLE("hadoop_client"), HBASE_CLIENT_ROLE("hbase_client"), PIG_ROLE(
+         "pig"), HIVE_ROLE("hive"), HIVE_SERVER_ROLE("hive_server"),
    // mapr
-   MAPR_ROLE("mapr"),
-   MAPR_ZOOKEEPER_ROLE("mapr_zookeeper"),
-   MAPR_CLDB_ROLE("mapr_cldb"),
-   MAPR_JOBTRACKER_ROLE("mapr_jobtracker"),
-   MAPR_HBASE_MASTER_ROLE("mapr_hbase_master"),
-   MAPR_NFS_ROLE("mapr_nfs"),
-   MAPR_WEBSERVER_ROLE("mapr_webserver"),
-   MAPR_FILESERVER_ROLE("mapr_fileserver"),
-   MAPR_TASKTRACKER_ROLE("mapr_tasktracker"),
-   MAPR_HBASE_REGIONSERVER_ROLE("mapr_hbase_regionserver"),
-   MAPR_METRICS_ROLE("mapr_metrics"),
-   MAPR_PIG_ROLE("mapr_pig"),
-   MAPR_HIVE_ROLE("mapr_hive"),
-   MAPR_HIVE_SERVER_ROLE("mapr_hive_server"),
-   MAPR_CLIENT_ROLE("mapr_client"),
-   MAPR_HBASE_CLIENT_ROLE("mapr_hbase_client"),
-   MAPR_MYSQL_SERVER_ROLE("mapr_mysql_server"),
-   MAPR_MYSQL_CLIENT_ROLE("mapr_mysql_client"),
+   MAPR_ROLE("mapr"), MAPR_ZOOKEEPER_ROLE("mapr_zookeeper"), MAPR_CLDB_ROLE(
+         "mapr_cldb"), MAPR_JOBTRACKER_ROLE("mapr_jobtracker"), MAPR_HBASE_MASTER_ROLE(
+         "mapr_hbase_master"), MAPR_NFS_ROLE("mapr_nfs"), MAPR_WEBSERVER_ROLE(
+         "mapr_webserver"), MAPR_FILESERVER_ROLE("mapr_fileserver"), MAPR_TASKTRACKER_ROLE(
+         "mapr_tasktracker"), MAPR_HBASE_REGIONSERVER_ROLE(
+         "mapr_hbase_regionserver"), MAPR_METRICS_ROLE("mapr_metrics"), MAPR_PIG_ROLE(
+         "mapr_pig"), MAPR_HIVE_ROLE("mapr_hive"), MAPR_HIVE_SERVER_ROLE(
+         "mapr_hive_server"), MAPR_CLIENT_ROLE("mapr_client"), MAPR_HBASE_CLIENT_ROLE(
+         "mapr_hbase_client"), MAPR_MYSQL_SERVER_ROLE("mapr_mysql_server"), MAPR_MYSQL_CLIENT_ROLE(
+         "mapr_mysql_client"),
 
    // put other predefined roles here or above
 
@@ -105,7 +90,8 @@ public enum HadoopRole {
    }
 
    /**
-    * If a Role exists in Chef Server, but not predefined in HadoopRole enum, it's a customized role.
+    * If a Role exists in Chef Server, but not predefined in HadoopRole enum,
+    * it's a customized role.
     */
    public static boolean isCustomizedRole(String role) {
       return HadoopRole.fromString(role) == HadoopRole.CUSTOMIZED_ROLE;
@@ -114,8 +100,8 @@ public enum HadoopRole {
    /**
     * Compare the order of roles according to their dependencies(the enum ordial
     * is very important here)
-    *
-    *
+    * 
+    * 
     */
    public static class RoleComparactor implements Comparator<String> {
       @Override
@@ -129,20 +115,40 @@ public enum HadoopRole {
          if (role1Dependency == role2Dependency) {
             return 0;
          }
-
          //null elements will be sorted behind the list
          if (role1Dependency == null) {
             return 1;
          } else if (role2Dependency == null) {
             return -1;
          }
+         int result = compareWithHDFS(role1Dependency, role2Dependency);
+         if (result == 0) {
+            result = compareEnumOrdinal(role1Dependency, role2Dependency);
+         }
+         return result;
+      }
 
-         if (role1Dependency.ordinal() == role2Dependency.ordinal()) {
+      private int compareEnumOrdinal(HadoopRole role1, HadoopRole role2) {
+         if (role1.ordinal() == role2.ordinal()) {
             return 0;
          } else {
-            return (role1Dependency.ordinal() > role2Dependency.ordinal()) ? 1
-                  : -1;
+            return (role1.ordinal() > role2.ordinal()) ? 1 : -1;
          }
+      }
+
+      private int compareWithHDFS(HadoopRole role1, HadoopRole role2) {
+         boolean role1BiggerThanHDFS = role1.shouldRunAfterHDFS();
+         boolean role2BiggerThanHDFS = role2.shouldRunAfterHDFS();
+         if (role1BiggerThanHDFS && role2BiggerThanHDFS) {
+            return 0;
+         }
+         if (role1BiggerThanHDFS) {
+            return 1;
+         }
+         if (role2BiggerThanHDFS) {
+            return -1;
+         }
+         return 0;
       }
    }
 
@@ -177,8 +183,9 @@ public enum HadoopRole {
 
    static {
       HadoopRole[] hbaseRoles =
-            new HadoopRole[] { HBASE_MASTER_ROLE, HBASE_REGIONSERVER_ROLE, HBASE_CLIENT_ROLE,
-                               MAPR_HBASE_MASTER_ROLE, MAPR_HBASE_REGIONSERVER_ROLE, MAPR_HBASE_CLIENT_ROLE };
+            new HadoopRole[] { HBASE_MASTER_ROLE, HBASE_REGIONSERVER_ROLE,
+                  HBASE_CLIENT_ROLE, MAPR_HBASE_MASTER_ROLE,
+                  MAPR_HBASE_REGIONSERVER_ROLE, MAPR_HBASE_CLIENT_ROLE };
 
       hbaseRoleDesc = new HashSet<String>(hbaseRoles.length);
 
@@ -193,5 +200,18 @@ public enum HadoopRole {
             return true;
       }
       return false;
+   }
+
+   public static EnumSet<HadoopRole> getEnumRoles(List<String> roles,
+         List<String> unSupportedRoles) {
+      EnumSet<HadoopRole> enumRoles = EnumSet.noneOf(HadoopRole.class);
+      for (String role : roles) {
+         HadoopRole configuredRole = HadoopRole.fromString(role);
+         if (configuredRole == null) {
+            unSupportedRoles.add(role);
+         }
+         enumRoles.add(configuredRole);
+      }
+      return enumRoles;
    }
 }

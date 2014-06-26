@@ -17,19 +17,12 @@ package com.vmware.bdd.service.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
-import com.google.gson.GsonBuilder;
-import com.vmware.bdd.exception.CmException;
-import com.vmware.bdd.model.support.AvailableManagementService;
-import com.vmware.bdd.model.support.AvailableParcelStage;
-import com.vmware.bdd.model.support.AvailableServiceRole;
 import org.apache.commons.lang.WordUtils;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -60,13 +53,16 @@ import com.cloudera.api.v3.ParcelResource;
 import com.cloudera.api.v6.RootResourceV6;
 import com.cloudera.api.v6.ServicesResourceV6;
 import com.google.common.collect.ImmutableList;
-import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.vmware.bdd.exception.CmException;
 import com.vmware.bdd.model.CmClusterDef;
 import com.vmware.bdd.model.CmNodeDef;
 import com.vmware.bdd.model.CmRoleDef;
 import com.vmware.bdd.model.CmServiceDef;
+import com.vmware.bdd.model.support.AvailableManagementService;
+import com.vmware.bdd.model.support.AvailableParcelStage;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
+import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
@@ -146,7 +142,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean validateBlueprint(ClusterBlueprint blueprint) throws SoftwareManagementPluginException {
+   public boolean validateBlueprint(ClusterBlueprint blueprint, List<String> distroRoles) throws ValidationException {
       /*
       1) only a NameNode is not allowed.
       2) for YARN, jobhistory is required;
@@ -277,11 +273,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
    @Override
    public HealthStatus getStatus() {
       return HealthStatus.Connected;
-   }
-
-   @Override
-   public boolean validateRoles(ClusterBlueprint blueprint, List<String> roles) throws SoftwareManagementPluginException {
-      return true;
    }
 
    private boolean unprovision(CmClusterDef cluster) throws CmException {
@@ -1097,8 +1088,33 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public void updateInfrastructure(ClusterBlueprint blueprint) {
+   public void updateInfrastructure(ClusterBlueprint blueprint)
+      throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
 
+   }
+
+   @Override
+   public boolean hasHbase(ClusterBlueprint blueprint) {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public boolean hasMgmtRole(List<String> roles) {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public boolean isComputeOnlyRoles(List<String> roles) {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public boolean twoDataDisksRequired(NodeGroupInfo group) {
+      // TODO Auto-generated method stub
+      return false;
    }
 }

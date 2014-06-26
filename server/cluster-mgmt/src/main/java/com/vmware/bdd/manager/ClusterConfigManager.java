@@ -16,8 +16,6 @@ package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,20 +37,20 @@ import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.DiskSpec.AllocationType;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
+import com.vmware.bdd.apitypes.DiskSplitPolicy;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NetworkAdd;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.PlacementPolicy;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks.GroupRacksType;
 import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
-import com.vmware.bdd.apitypes.StorageRead.DiskSplitPolicy;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.IpBlockEntity;
@@ -68,14 +66,13 @@ import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
-import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
+import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
-import com.vmware.bdd.spectypes.GroupType;
 import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
 import com.vmware.bdd.spectypes.VcCluster;
-import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
@@ -171,6 +168,41 @@ public class ClusterConfigManager {
         this.softwareManagerCollector = softwareManagerCollector;
    }
 
+   private void applyInfraChanges(ClusterCreate cluster,
+         ClusterBlueprint blueprint) {
+      cluster.setConfiguration(blueprint.getConfiguration());
+      sortNodeGroups(cluster, blueprint);
+      // as we've sorted node groups, so here we can assume node group are in same location in the array.
+      for (int i = 0; i < blueprint.getNodeGroups().size(); i++) {
+         NodeGroupInfo group = blueprint.getNodeGroups() .get(i);
+         NodeGroupCreate groupCreate = cluster.getNodeGroups()[i];
+         groupCreate.setConfiguration(group.getConfiguration());
+         groupCreate.setRoles(group.getRoles());
+         groupCreate.setInstanceType(group.getInstanceType());
+         groupCreate.setPlacementPolicies(group.getPlacement());
+         if (groupCreate.getStorage() == null) {
+            groupCreate.setStorage(new StorageRead());
+         }
+         groupCreate.getStorage().setSizeGB(group.getStorageSize());
+         groupCreate.getStorage().setExpectedTypeFromRoles(group.getStorageExpectedType());
+      }
+      cluster.setExternalHDFS(blueprint.getExternalHDFS());
+   }
+
+   private void sortNodeGroups(ClusterCreate cluster,
+         ClusterBlueprint blueprint) {
+      NodeGroupCreate[] sortedGroups = new NodeGroupCreate[cluster.getNodeGroups().length];
+      for(int i = 0; i < blueprint.getNodeGroups().size(); i ++) {
+         NodeGroupInfo groupInfo = blueprint.getNodeGroups().get(i);
+         if (cluster.getNodeGroups()[i].getName().equals(groupInfo.getName())) {
+            // to save query time
+            sortedGroups[i] = cluster.getNodeGroups()[i];
+         }
+         sortedGroups[i] = cluster.getNodeGroup(groupInfo.getName());
+      }
+      cluster.setNodeGroups(sortedGroups);
+   }
+
    @Transactional
    public ClusterEntity createClusterConfig(ClusterCreate cluster) {
       String name = cluster.getName();
@@ -200,11 +232,14 @@ public class ClusterConfigManager {
           throw new ClusterConfigException(null, "Failed to get softwareManager.");
       }
        // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
+      ClusterBlueprint blueprint = cluster.toBlueprint();
       try {
-          softwareManager.validateRoles(cluster.toBlueprint(), distro.getRoles());
+         //TODO emma: refactor distro manager, to remove distroRoles parameter in this method
+          softwareManager.validateBlueprint(cluster.toBlueprint(), distro.getRoles());
           cluster.validateClusterCreate(failedMsgList, warningMsgList);
-      } catch (SoftwareManagementPluginException e) {
-          failedMsgList.add(e.getFailedMsgList().toString());
+      } catch (ValidationException e) {
+          failedMsgList.addAll(e.getFailedMsgList());
+          warningMsgList.addAll(e.getWarningMsgList());
       }
 
       if (!failedMsgList.isEmpty()) {
@@ -215,8 +250,6 @@ public class ClusterConfigManager {
          throw ClusterConfigException.INVALID_PLACEMENT_POLICIES(failedMsgList);
       }
 
-      transformHDFSUrl(cluster);
-
       try {
          ClusterEntity entity = clusterEntityMgr.findByName(name);
          if (entity != null) {
@@ -225,6 +258,7 @@ public class ClusterConfigManager {
             throw BddException.ALREADY_EXISTS("Cluster", name);
          }
 
+         updateInfrastructure(cluster, softwareManager, blueprint);
          // persist cluster config
          logger.debug("begin to add cluster config for " + name);
          Gson gson = new Gson();
@@ -239,7 +273,7 @@ public class ClusterConfigManager {
          // set cluster version
          clusterEntity.setVersion(clusterEntityMgr.getServerVersion());
 
-         if (cluster.containsComputeOnlyNodeGroups()) {
+         if (cluster.containsComputeOnlyNodeGroups(softwareManager)) {
             clusterEntity.setAutomationEnable(automationEnable);
          } else {
             clusterEntity.setAutomationEnable(null);
@@ -267,9 +301,6 @@ public class ClusterConfigManager {
          clusterEntity.setVhmJobTrackerPort("50030");
          if (cluster.getConfiguration() != null
                && cluster.getConfiguration().size() > 0) {
-            // validate hadoop config
-            CommonClusterExpandPolicy.validateAppConfig(
-                  cluster.getConfiguration(), cluster.isValidateConfig());
             clusterEntity.setHadoopConfig((new Gson()).toJson(cluster
                   .getConfiguration()));
 
@@ -325,6 +356,12 @@ public class ClusterConfigManager {
                + ", which is already existed.");
          throw BddException.ALREADY_EXISTS(ex, "Cluster", name);
       }
+   }
+
+   private void updateInfrastructure(ClusterCreate cluster,
+         SoftwareManager softwareManager, ClusterBlueprint blueprint) {
+      softwareManager.updateInfrastructure(blueprint);
+      applyInfraChanges(cluster, blueprint);
    }
 
    private Map<NetTrafficType, List<NetConfigInfo>> validateAndConvertNetNamesToNetConfigs(
@@ -518,105 +555,17 @@ public class ClusterConfigManager {
       return valid;
    }
 
-   private void transformHDFSUrl(ClusterCreate cluster) {
-      if (cluster.hasHDFSUrlConfigured()) {
-         if (cluster.validateHDFSUrl()) {
-            changeNodeGroupHDFSUrl(cluster.getNodeGroups(),
-                  cluster.getExternalHDFS());
-            changeClusterHDFSUrl(cluster);
-         } else {
-            throw BddException.INVALID_PARAMETER("externalHDFS",
-                  cluster.getExternalHDFS());
-         }
-      }
-   }
-
-   @SuppressWarnings("unchecked")
-   private void changeNodeGroupHDFSUrl(NodeGroupCreate[] nodeGroups,
-         String externalHDFS) {
-      if (nodeGroups == null || nodeGroups.length == 0) {
-         return;
-      }
-      String[] configKeyNames =
-            new String[] { "hadoop", "core-site.xml", "fs.default.name" };
-      for (NodeGroupCreate nodeGroup : nodeGroups) {
-         Map<String, Object> conf = nodeGroup.getConfiguration();
-         if (conf != null) {
-            for (String configKeyName : configKeyNames) {
-               if (configKeyName
-                     .equals(configKeyNames[configKeyNames.length - 1])) {
-                  if (conf.get(configKeyName) != null) {
-                     conf.put(configKeyName, externalHDFS);
-                  }
-               } else {
-                  conf = (Map<String, Object>) conf.get(configKeyName);
-                  if (conf == null) {
-                     break;
-                  }
-               }
-            }
-         }
-      }
-   }
-
-   private void changeClusterHDFSUrl(ClusterCreate cluster) {
-      Map<String, Object> conf = cluster.getConfiguration();
-      if (conf == null) {
-         conf = new HashMap<String, Object>();
-         cluster.setConfiguration(conf);
-      }
-      @SuppressWarnings("unchecked")
-      Map<String, Object> hadoopConf = (Map<String, Object>) conf.get("hadoop");
-      if (hadoopConf == null) {
-         hadoopConf = new HashMap<String, Object>();
-         conf.put("hadoop", hadoopConf);
-      }
-      @SuppressWarnings("unchecked")
-      Map<String, Object> coreSiteConf =
-            (Map<String, Object>) hadoopConf.get("core-site.xml");
-      if (coreSiteConf == null) {
-         coreSiteConf = new HashMap<String, Object>();
-         hadoopConf.put("core-site.xml", coreSiteConf);
-      }
-      coreSiteConf.put("fs.default.name", cluster.getExternalHDFS());
-   }
-
    private Set<NodeGroupEntity> convertNodeGroupsToEntities(Gson gson,
          ClusterEntity clusterEntity, String distro, NodeGroupCreate[] groups,
          boolean validateWhiteList) {
       Set<NodeGroupEntity> nodeGroups;
       nodeGroups = new HashSet<NodeGroupEntity>();
-      Set<String> referencedNodeGroups = new HashSet<String>();
       for (NodeGroupCreate group : groups) {
          NodeGroupEntity groupEntity =
                convertGroup(gson, clusterEntity, group, distro,
                      validateWhiteList);
          if (groupEntity != null) {
             nodeGroups.add(groupEntity);
-            if (groupEntity.getStorageType() == DatastoreType.TEMPFS) {
-               for (NodeGroupAssociation associate : groupEntity
-                     .getGroupAssociations()) {
-                  referencedNodeGroups.add(associate.getReferencedGroup());
-               }
-            }
-         }
-      }
-
-      //insert tempfs_server role into the referenced data node groups
-      if (clusterEntity.getAppManager() == null
-            || Constants.IRONFAN
-                  .equalsIgnoreCase(clusterEntity.getAppManager())) {
-         //TODO emma: move to software manager
-         for (String nodeGroupName : referencedNodeGroups) {
-            for (NodeGroupEntity groupEntity : nodeGroups) {
-               if (groupEntity.getName().equals(nodeGroupName)) {
-                  @SuppressWarnings("unchecked")
-                  List<String> sortedRoles =
-                     gson.fromJson(groupEntity.getRoles(), List.class);
-                  sortedRoles.add(0, HadoopRole.TEMPFS_SERVER_ROLE.toString());
-                  groupEntity.setRoles(gson.toJson(sortedRoles));
-               }
-            }
          }
       }
       return nodeGroups;
@@ -684,31 +633,7 @@ public class ClusterConfigManager {
       convertStorage(group, groupEntity, roles);
       roles.addAll(group.getRoles());
 
-      //TODO emma: move to default software manager
-      EnumSet<HadoopRole> enumRoles = null;
-      if (clusterEntity.getAppManager() == null
-            || Constants.IRONFAN
-                  .equalsIgnoreCase(clusterEntity.getAppManager())) {
-         enumRoles = getEnumRoles(group.getRoles(), distro);
-         if (enumRoles.isEmpty()) {
-            throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(group
-                  .getName());
-         }
-
-         // We will respect the original orders as users input through LinkedHashSet for group including
-         // customized roles, because chef server has strict role orders in some cases.
-
-         if (enumRoles.contains(HadoopRole.CUSTOMIZED_ROLE)) {
-            groupEntity.setRoles(gson.toJson(roles));
-         } else { //we will sort the roles according to their dependencies
-            List<String> sortedRolesByDependency = new ArrayList<String>();
-            sortedRolesByDependency.addAll(roles);
-            Collections.sort(sortedRolesByDependency, new RoleComparactor());
-            groupEntity.setRoles(gson.toJson(sortedRolesByDependency));
-         }
-      } else {
-         groupEntity.setRoles(gson.toJson(roles));
-      }
+      groupEntity.setRoles(gson.toJson(roles));
 
       if (group.getInstanceNum() <= 0) {
          logger.warn("Zero or negative instance number for group "
@@ -731,24 +656,11 @@ public class ClusterConfigManager {
          localPattern = datastoreMgr.getAllLocalDatastores();
       }
 
-      // TODO emma: move HadoopRole related logic to default software manager, and leave common logic here
-      if (clusterEntity.getAppManager() == null
-            || Constants.IRONFAN
-                  .equalsIgnoreCase(clusterEntity.getAppManager())) {
-         GroupType groupType = GroupType.fromHadoopRole(enumRoles);
-         CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity,
-               groupType, sharedPattern, localPattern);
-      }
+      CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity,
+            group, sharedPattern, localPattern);
       groupEntity.setHaFlag(group.getHaFlag());
       if (group.getConfiguration() != null
             && group.getConfiguration().size() > 0) {
-         // validate hadoop config
-         if (clusterEntity.getAppManager() == null
-               || Constants.IRONFAN
-                     .equalsIgnoreCase(clusterEntity.getAppManager())) {
-            CommonClusterExpandPolicy.validateAppConfig(group.getConfiguration(),
-                  validateWhiteList);
-         }
          groupEntity.setHadoopConfig(gson.toJson(group.getConfiguration()));
       }
       // set vm folder path
@@ -767,8 +679,6 @@ public class ClusterConfigManager {
          if (storageType != null) {
             if (storageType.equalsIgnoreCase(DatastoreType.TEMPFS.name())) {
                groupEntity.setStorageType(DatastoreType.TEMPFS);
-               //TODO emma: disable Tempfs role temporarily
-//               roles.add(HadoopRole.TEMPFS_CLIENT_ROLE.toString());
             } else if (storageType.equalsIgnoreCase(DatastoreType.LOCAL.name())) {
                groupEntity.setStorageType(DatastoreType.LOCAL);
             } else {
@@ -892,12 +802,6 @@ public class ClusterConfigManager {
          nodeGroups.add(group);
          instanceNum += group.getInstanceNum();
       }
-      // TODO emma: move to default software manager
-      if (clusterEntity.getAppManager() == null
-            || Constants.IRONFAN
-                  .equalsIgnoreCase(clusterEntity.getAppManager())) {
-         sortGroups(nodeGroups);
-      }
       clusterConfig.setNodeGroups(nodeGroups
             .toArray(new NodeGroupCreate[nodeGroups.size()]));
 
@@ -915,18 +819,6 @@ public class ClusterConfigManager {
       }
    }
 
-   private void sortGroups(List<NodeGroupCreate> nodeGroups) {
-	   logger.debug("begin to sort node groups.");
-	   Collections.sort(nodeGroups, new Comparator<NodeGroupCreate>() {
-		   public int compare(NodeGroupCreate arg0, NodeGroupCreate arg1) {
-			   if (arg0.getGroupType().equals(arg1.getGroupType())) {
-				   return arg0.getName().compareTo(arg1.getName());
-			   } else {
-				   return arg0.getGroupType().compareTo(arg1.getGroupType());
-			   }
-		   }
-	   });
-   }
 
    private List<NetworkAdd> allocatNetworkIp(List<String> networkNames,
          ClusterEntity clusterEntity, long instanceNum, boolean needAllocIp) {
@@ -976,24 +868,9 @@ public class ClusterConfigManager {
          NodeGroupEntity ngEntity, String clusterName) {
       Gson gson = new Gson();
       List<String> groupRoles = gson.fromJson(ngEntity.getRoles(), List.class);
-      String distro = clusterEntity.getDistro();
       NodeGroupCreate group = new NodeGroupCreate();
       group.setName(ngEntity.getName());
-      // TODO emma: move to default software manager
       EnumSet<HadoopRole> enumRoles = null;
-      if (clusterEntity.getAppManager() == null
-            || Constants.IRONFAN
-                  .equalsIgnoreCase(clusterEntity.getAppManager())) {
-         enumRoles = getEnumRoles(groupRoles, distro);
-         if (enumRoles.isEmpty()) {
-            throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(ngEntity
-                  .getName());
-         }
-
-         GroupType groupType = GroupType.fromHadoopRole(enumRoles);
-         AuAssert.check(groupType != null);
-         group.setGroupType(groupType);
-      }
       group.setRoles(groupRoles);
       int cpu = ngEntity.getCpuNum();
       if (cpu > 0) {
@@ -1118,14 +995,10 @@ public class ClusterConfigManager {
       storage.setShares(ngEntity.getCluster().getIoShares());
 
       // set storage split policy based on group roles
-      // TODO emma: add corresponding logic for all software managers
-      if ((ngEntity.getCluster().getAppManager() == null || Constants.IRONFAN
-            .equalsIgnoreCase(ngEntity.getCluster().getAppManager()))
-            && (enumRoles.size() == 1 || (enumRoles.size() == 2 && enumRoles
-                  .contains(HadoopRole.HADOOP_JOURNALNODE_ROLE)))
-            && (enumRoles.contains(HadoopRole.ZOOKEEPER_ROLE) || enumRoles
-                  .contains(HadoopRole.MAPR_ZOOKEEPER_ROLE))) {
-         // if this group contains only one zookeeper role
+      SoftwareManager softwareManager =
+            softwareManagerCollector.getSoftwareManager(ngEntity.getCluster()
+                  .getAppManager());
+      if (softwareManager.twoDataDisksRequired(group.toNodeGroupInfo())) {
          logger.debug("use bi_sector disk layout for zookeeper only group.");
          storage.setSplitPolicy(DiskSplitPolicy.BI_SECTOR);
       } else {
@@ -1196,19 +1069,6 @@ public class ClusterConfigManager {
       return new ArrayList<String>(storePattern);
    }
 
-   private EnumSet<HadoopRole> getEnumRoles(List<String> roles, String distro) {
-      logger.debug("convert string roles to enum roles");
-      EnumSet<HadoopRole> enumRoles = EnumSet.noneOf(HadoopRole.class);
-      for (String role : roles) {
-         HadoopRole configuredRole = HadoopRole.fromString(role);
-         if (configuredRole == null) {
-            throw ClusterConfigException.UNSUPPORTED_HADOOP_ROLE(role, distro);
-         }
-         enumRoles.add(configuredRole);
-      }
-      return enumRoles;
-   }
-
    @Transactional
    public void updateAppConfig(String clusterName, ClusterCreate clusterCreate) {
       logger.debug("Update configuration for cluster " + clusterName);
@@ -1219,14 +1079,32 @@ public class ClusterConfigManager {
          logger.error("cluster " + clusterName + " does not exist");
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
-      transformHDFSUrl(clusterCreate);
+      SoftwareManager softwareManager =
+            softwareManagerCollector
+                  .getSoftwareManager(cluster.getAppManager());
+      if (softwareManager == null) {
+          logger.error("Failed to get softwareManger.");
+          throw new ClusterConfigException(null, "Failed to get softwareManager.");
+      }
+       // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
+      ClusterBlueprint blueprint = clusterCreate.toBlueprint();
+      DistroRead distro = null;
+      if (Constants.IRONFAN.equalsIgnoreCase(clusterCreate.getAppManager())) {
+         distro = distroMgr.getDistroByName(cluster.getDistro());
+      } else {
+         distro = distroMgr.getDistroByName(clusterCreate.getAppManager(), cluster.getDistro());
+      }
+      try {
+          softwareManager.validateBlueprint(blueprint, distro.getRoles());
+      } catch (ValidationException e) {
+         throw new ClusterConfigException(e, e.getMessage() + e.getFailedMsgList().toString());
+      }
+
+      updateInfrastructure(clusterCreate, softwareManager, blueprint);
       Map<String, Object> clusterLevelConfig = clusterCreate.getConfiguration();
 
       if (clusterLevelConfig != null && clusterLevelConfig.size() > 0) {
          logger.debug("Cluster level app config is updated.");
-         CommonClusterExpandPolicy.validateAppConfig(
-               clusterCreate.getConfiguration(),
-               clusterCreate.isValidateConfig());
          cluster.setHadoopConfig((new Gson()).toJson(clusterLevelConfig));
          updateVhmJobTrackerPort(clusterCreate, cluster);
       } else {
@@ -1258,8 +1136,6 @@ public class ClusterConfigManager {
          if (groupConfig != null && groupConfig.size() > 0) {
             NodeGroupEntity groupEntity = groupMap.get(groupCreate.getName());
             // validate hadoop config
-            CommonClusterExpandPolicy.validateAppConfig(groupConfig,
-                  validateWhiteList);
             groupEntity.setHadoopConfig(gson.toJson(groupConfig));
             updatedGroups.add(groupCreate.getName());
          }

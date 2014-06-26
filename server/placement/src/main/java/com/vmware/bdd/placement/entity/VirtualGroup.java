@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractCluster;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;

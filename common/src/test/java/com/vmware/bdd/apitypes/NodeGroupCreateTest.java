@@ -22,10 +22,9 @@ import java.util.Set;
 
 import org.testng.annotations.Test;
 
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
-import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation.GroupAssociationType;
+
 
 public class NodeGroupCreateTest {
 
@@ -78,21 +77,6 @@ public class NodeGroupCreateTest {
       group.setPlacementPolicies(placementPolicy);
       assertEquals(placementPolicy.getInstancePerHost(),
             group.instancePerHost());
-   }
-
-   @Test
-   public void testIsComputeOnlyGroup() {
-      NodeGroupCreate worker = new NodeGroupCreate();
-      worker.setRoles(Arrays.asList(HadoopRole.HADOOP_TASKTRACKER.toString()));
-      assertEquals(true, worker.isComputeOnlyGroup());
-      worker.setRoles(Arrays.asList(HadoopRole.HADOOP_TASKTRACKER.toString(),
-            HadoopRole.TEMPFS_CLIENT_ROLE.toString()));
-      assertEquals(true, worker.isComputeOnlyGroup());
-      worker.setRoles(Arrays.asList(HadoopRole.MAPR_TASKTRACKER_ROLE.toString()));
-      assertEquals(true, worker.isComputeOnlyGroup());
-      worker.setRoles(Arrays.asList(HadoopRole.HADOOP_TASKTRACKER.toString(),
-            HadoopRole.HADOOP_DATANODE.toString()));
-      assertEquals(false, worker.isComputeOnlyGroup());
    }
 
    @SuppressWarnings("static-access")

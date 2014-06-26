@@ -23,11 +23,10 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.Gson;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksType;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation.GroupAssociationType;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks.GroupRacksType;
 import com.vmware.bdd.apitypes.RackInfo;
-import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.BddException;

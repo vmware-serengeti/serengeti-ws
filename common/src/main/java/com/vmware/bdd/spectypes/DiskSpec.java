@@ -17,8 +17,8 @@ package com.vmware.bdd.spectypes;
 
 import java.lang.reflect.Field;
 
+import com.vmware.bdd.apitypes.DiskSplitPolicy;
 import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
-import com.vmware.bdd.apitypes.StorageRead.DiskSplitPolicy;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 
 public class DiskSpec implements Comparable<DiskSpec> {

@@ -104,6 +104,8 @@ public class SoftwareManagementStep extends TrackableTasklet {
       // Only check host time for configure (config, start, disk fix, scale up)
       // operation and create (resume only) operation
       ClusterCreate clusterSpec = clusterManager.getClusterSpec(clusterName);
+      SoftwareManager softwareMgr =
+         softwareMgrs.getSoftwareManager(clusterSpec.getAppManager());
       if (ManagementOperation.CONFIGURE.equals(managementOperation)
             || JobConstants.RESUME_CLUSTER_JOB_NAME.equals(jobName)) {
          logger.info("Start to check host time.");
@@ -114,7 +116,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
          for (NodeEntity node : nodes) {
             hostnames.add(node.getHostName());
          }
-         SyncHostsUtils.SyncHosts(clusterSpec, hostnames);
+         SyncHostsUtils.SyncHosts(clusterSpec, hostnames, softwareMgr);
       }
 
       StatusUpdater statusUpdater =
@@ -124,52 +126,12 @@ public class SoftwareManagementStep extends TrackableTasklet {
       ISoftwareManagementTask task = null;
       if (!CommonUtil.isBlank(clusterSpec.getAppManager())
             && !Constants.IRONFAN.equalsIgnoreCase(clusterSpec.getAppManager())) {
-         SoftwareManager softwareMgr =
-               softwareMgrs.getSoftwareManager(clusterSpec.getAppManager());
-
-         ClusterBlueprint clusterBlueprint = getFromJobExecutionContext(chunkContext,
-               JobConstants.CLUSTER_BLUEPRINT_JOB_PARAM, ClusterBlueprint.class);
-         if (clusterBlueprint == null) {
-         clusterBlueprint =
-               lockClusterEntityMgr.getClusterEntityMgr().toClusterBluePrint(
-                     clusterName);
-            putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_BLUEPRINT_JOB_PARAM, clusterBlueprint);
-         }
-
          task =
-               SoftwareManagementTaskFactory.createExternalMgtTask(targetName,
-                     managementOperation, clusterBlueprint, statusUpdater,
-                     lockClusterEntityMgr, softwareMgr);
+               createExternalTask(chunkContext, targetName, clusterName,
+                     clusterSpec, statusUpdater);
 
       } else {
-
-         // get command work directory
-         File workDir =
-               CommandUtil.createWorkDir(getJobExecutionId(chunkContext));
-
-         // update work directory in job context
-         putIntoJobExecutionContext(chunkContext,
-               JobConstants.CURRENT_COMMAND_WORK_DIR, workDir.getAbsolutePath());
-
-         boolean needAllocIp = true;
-         if (ManagementOperation.DESTROY.equals(managementOperation)) {
-            needAllocIp = false;
-         }
-         String specFilePath = null;
-
-         if (managementOperation.ordinal() != ManagementOperation.DESTROY
-               .ordinal()) {
-            // write cluster spec file
-            File specFile =
-                  clusterManager.writeClusterSpecFile(targetName, workDir,
-                        needAllocIp);
-            specFilePath = specFile.getAbsolutePath();
-         }
-
-         task =
-               SoftwareManagementTaskFactory.createThriftTask(targetName,
-                     specFilePath, statusUpdater, managementOperation,
-                     lockClusterEntityMgr);
+         task = createThriftTask(chunkContext, targetName, statusUpdater);
       }
 
       if (task != null) {
@@ -184,6 +146,62 @@ public class SoftwareManagementStep extends TrackableTasklet {
       }
 
       return RepeatStatus.FINISHED;
+   }
+
+   private ISoftwareManagementTask createThriftTask(ChunkContext chunkContext,
+         String targetName, StatusUpdater statusUpdater) {
+      ISoftwareManagementTask task;
+      // get command work directory
+      File workDir =
+            CommandUtil.createWorkDir(getJobExecutionId(chunkContext));
+
+      // update work directory in job context
+      putIntoJobExecutionContext(chunkContext,
+            JobConstants.CURRENT_COMMAND_WORK_DIR, workDir.getAbsolutePath());
+
+      boolean needAllocIp = true;
+      if (ManagementOperation.DESTROY.equals(managementOperation)) {
+         needAllocIp = false;
+      }
+      String specFilePath = null;
+
+      if (managementOperation.ordinal() != ManagementOperation.DESTROY
+            .ordinal()) {
+         // write cluster spec file
+         File specFile =
+               clusterManager.writeClusterSpecFile(targetName, workDir,
+                     needAllocIp);
+         specFilePath = specFile.getAbsolutePath();
+      }
+
+      task =
+            SoftwareManagementTaskFactory.createThriftTask(targetName,
+                  specFilePath, statusUpdater, managementOperation,
+                  lockClusterEntityMgr);
+      return task;
+   }
+
+   private ISoftwareManagementTask createExternalTask(
+         ChunkContext chunkContext, String targetName, String clusterName,
+         ClusterCreate clusterSpec, StatusUpdater statusUpdater) {
+      ISoftwareManagementTask task;
+      SoftwareManager softwareMgr =
+            softwareMgrs.getSoftwareManager(clusterSpec.getAppManager());
+
+      ClusterBlueprint clusterBlueprint = getFromJobExecutionContext(chunkContext,
+            JobConstants.CLUSTER_BLUEPRINT_JOB_PARAM, ClusterBlueprint.class);
+      if (clusterBlueprint == null) {
+      clusterBlueprint =
+            lockClusterEntityMgr.getClusterEntityMgr().toClusterBluePrint(
+                  clusterName);
+         putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_BLUEPRINT_JOB_PARAM, clusterBlueprint);
+      }
+
+      task =
+            SoftwareManagementTaskFactory.createExternalMgtTask(targetName,
+                  managementOperation, clusterBlueprint, statusUpdater,
+                  lockClusterEntityMgr, softwareMgr);
+      return task;
    }
 
    public ClusterManager getClusterManager() {

@@ -15,8 +15,6 @@
 package com.vmware.bdd.entity;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,14 +36,13 @@ import org.hibernate.annotations.Type;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
-import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
+import com.vmware.bdd.apitypes.InstanceType;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
+import com.vmware.bdd.apitypes.PlacementPolicy;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.StorageRead;
-import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
 
 /**
@@ -426,18 +423,6 @@ public class NodeGroupEntity extends EntityBase {
       Gson gson = new Gson();
       @SuppressWarnings("unchecked")
       List<String> groupRoles = gson.fromJson(roles, List.class);
-      Collections.sort(groupRoles, new Comparator<String>() {
-         @Override
-         public int compare(String str1, String str2) {
-            if (HadoopRole.fromString(str1).shouldRunAfterHDFS()) {
-               return 1;
-            } else if (HadoopRole.fromString(str2).shouldRunAfterHDFS()) {
-               return -1;
-            } else {
-               return 0;
-            }
-         }
-      });
       nodeGroupRead.setRoles(groupRoles);
 
       StorageRead storage = new StorageRead();

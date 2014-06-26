@@ -32,7 +32,7 @@ import org.testng.annotations.Test;
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;

@@ -22,6 +22,7 @@ import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.vim.binding.impl.vim.ResourceAllocationInfoImpl;
 import com.vmware.vim.binding.impl.vim.SharesInfoImpl;
 import com.vmware.vim.binding.vim.ResourceAllocationInfo;
@@ -37,17 +38,20 @@ public class CreateResourcePoolSP implements Callable<Void> {
    private VcResourcePool parentVcResourcePool;
    private String childVcResourcePoolName;
    private NodeGroupCreate nodeGroup;
+   private SoftwareManager softManager;
 
    public CreateResourcePoolSP(VcResourcePool parentVcResourcePool,
          final String childVcResourcePoolName) {
-      this(parentVcResourcePool, childVcResourcePoolName, null);
+      this(parentVcResourcePool, childVcResourcePoolName, null, null);
    }
 
    public CreateResourcePoolSP(VcResourcePool parentVcResourcePool,
-         final String childVcResourcePoolName, NodeGroupCreate nodeGroup) {
+         final String childVcResourcePoolName, NodeGroupCreate nodeGroup,
+         SoftwareManager softManager) {
       this.parentVcResourcePool = parentVcResourcePool;
       this.childVcResourcePoolName = childVcResourcePoolName;
       this.nodeGroup = nodeGroup;
+      this.softManager = softManager;
    }
 
    @Override
@@ -76,7 +80,7 @@ public class CreateResourcePoolSP implements Callable<Void> {
          Boolean expandable = Boolean.valueOf(true);
          Long limit = Long.valueOf(-1);
          SharesInfo shares = new SharesInfoImpl();
-         if (nodeGroup != null && nodeGroup.isComputeOnlyGroup()) {
+         if (nodeGroup != null && softManager.isComputeOnlyRoles(nodeGroup.getRoles())) {
             shares.setLevel(SharesInfo.Level.low);
          } else {
             shares.setLevel(SharesInfo.Level.normal);

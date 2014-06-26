@@ -10,12 +10,12 @@
 
    <modules>
       <module>server/software-mgmt-plugin-common</module>
-      <module>server/software-mgmt-plugin-default</module>
       <module>impala</module>
       <module>lib/vlsi</module>
       <module>server/common</module>
       <module>server/vc</module>
       <module>common</module>
+      <module>server/software-mgmt-plugin-default</module>
       <module>thrift/java</module>
       <module>server/res-mgmt</module>
       <module>server/software-mgmt-plugin-clouderamgr</module>

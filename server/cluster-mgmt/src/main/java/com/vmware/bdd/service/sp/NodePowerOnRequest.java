@@ -29,11 +29,13 @@ import com.vmware.bdd.command.CommandUtil;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.manager.ClusterManager;
+import com.vmware.bdd.manager.SoftwareManagerCollector;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
 import com.vmware.bdd.service.job.software.ISoftwareManagementTask;
 import com.vmware.bdd.service.job.software.ManagementOperation;
 import com.vmware.bdd.service.job.software.SoftwareManagementTaskFactory;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.SyncHostsUtils;
@@ -44,6 +46,7 @@ public class NodePowerOnRequest extends SimpleRequest {
    private IConcurrentLockedClusterEntityManager lockClusterEntityMgr;
    private String vmId;
    private ClusterManager clusterManager;
+   private SoftwareManagerCollector softwareManagerCollector;
 
    public IConcurrentLockedClusterEntityManager getLockClusterEntityMgr() {
       return lockClusterEntityMgr;
@@ -57,10 +60,12 @@ public class NodePowerOnRequest extends SimpleRequest {
 
    public NodePowerOnRequest(
          IConcurrentLockedClusterEntityManager lockClusterEntityMgr,
-         String vmId, ClusterManager clusterManager) {
+         String vmId, ClusterManager clusterManager,
+         SoftwareManagerCollector softwareManagerCollector) {
       this.lockClusterEntityMgr = lockClusterEntityMgr;
       this.vmId = vmId;
       this.clusterManager = clusterManager;
+      this.softwareManagerCollector = softwareManagerCollector;
    }
 
    @Override
@@ -107,7 +112,10 @@ public class NodePowerOnRequest extends SimpleRequest {
 
       Set<String> hostnames = new HashSet<String>();
       hostnames.add(node.getHostName());
-      SyncHostsUtils.SyncHosts(clusterSpec, hostnames);
+      SoftwareManager softManager =
+            softwareManagerCollector
+                  .getSoftwareManagerByClusterName(clusterName);
+      SyncHostsUtils.SyncHosts(clusterSpec, hostnames, softManager);
 
       // get command work directory
       File workDir = CommandUtil.createWorkDir((int)Math.random()*1000);

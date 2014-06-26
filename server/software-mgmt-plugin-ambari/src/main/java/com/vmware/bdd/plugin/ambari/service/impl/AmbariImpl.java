@@ -30,6 +30,7 @@ import com.vmware.bdd.plugin.ambari.api.model.ClusterRequestStatus;
 import com.vmware.bdd.plugin.ambari.exception.AmException;
 import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
+import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
@@ -112,13 +113,6 @@ public class AmbariImpl implements SoftwareManager {
    public String getSupportedConfigs(HadoopStack stack) {
       // TODO Auto-generated method stub
       return null;
-   }
-
-   @Override
-   public boolean validateBlueprint(ClusterBlueprint blueprint)
-         throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
-      return false;
    }
 
    @Override
@@ -296,13 +290,6 @@ public class AmbariImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean validateRoles(ClusterBlueprint blueprint, List<String> roles)
-         throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   @Override
    public List<String> validateScaling(NodeGroupInfo group) {
       // TODO Auto-generated method stub
       return null;
@@ -391,4 +378,34 @@ public class AmbariImpl implements SoftwareManager {
       return null;
    }
 
+   @Override
+   public boolean validateBlueprint(ClusterBlueprint blueprint,
+         List<String> distroRoles) throws ValidationException {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public boolean hasHbase(ClusterBlueprint blueprint) {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public boolean hasMgmtRole(List<String> roles) {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public boolean isComputeOnlyRoles(List<String> roles) {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public boolean twoDataDisksRequired(NodeGroupInfo group) {
+      // TODO Auto-generated method stub
+      return false;
+   }
 }

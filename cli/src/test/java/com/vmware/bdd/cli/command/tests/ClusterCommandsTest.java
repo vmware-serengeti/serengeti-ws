@@ -35,12 +35,12 @@ import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.apitypes.TaskRead;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.apitypes.TaskRead.Type;
 import com.vmware.bdd.apitypes.TopologyType;
@@ -48,7 +48,6 @@ import com.vmware.bdd.cli.commands.ClusterCommands;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 import com.vmware.bdd.cli.commands.CookieCache;
-import com.vmware.bdd.spectypes.HadoopRole;
 
 @Test
 @ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
@@ -100,7 +99,7 @@ public class ClusterCommandsTest extends MockRestServer {
         List<String> roles1 = new LinkedList<String>();
         roles1.add(Constants.ROLE_HADOOP_JOB_TRACKER);
         List<String> roles2 = new LinkedList<String>();
-        roles2.add(HadoopRole.ZOOKEEPER_ROLE.toString());
+        roles2.add("zookeeper");
         NodeGroupRead ngr1 = new NodeGroupRead();
         ngr1.setName("NodeGroup1");
         ngr1.setCpuNum(6);

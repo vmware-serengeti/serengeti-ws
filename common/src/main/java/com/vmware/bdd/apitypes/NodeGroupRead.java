@@ -18,7 +18,6 @@ import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
 
 /**
  * Nodegroup get output. Node group is a set of nodes with same properties, for
@@ -58,6 +57,8 @@ public class NodeGroupRead {
    @Expose
    @SerializedName("placement_policies")
    private PlacementPolicy placementPolicies;
+
+   private boolean isComputeOnly;
 
    public String getName() {
       return name;
@@ -138,5 +139,13 @@ public class NodeGroupRead {
 
    public void setPlacementPolicies(PlacementPolicy placementPolicies) {
       this.placementPolicies = placementPolicies;
+   }
+
+   public boolean isComputeOnly() {
+      return isComputeOnly;
+   }
+
+   public void setComputeOnly(boolean isComputeOnly) {
+      this.isComputeOnly = isComputeOnly;
    }
 }

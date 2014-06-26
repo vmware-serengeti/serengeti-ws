@@ -23,13 +23,14 @@ import org.apache.log4j.Logger;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 
 public class SyncHostsUtils {
    private static final Logger logger = Logger.getLogger(SyncHostsUtils.class);
 
-   public static void SyncHosts(ClusterCreate clusterSpec, Set<String> hostnames) {
+   public static void SyncHosts(ClusterCreate clusterSpec, Set<String> hostnames, SoftwareManager softMgr) {
       int maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC;
-      if (clusterSpec.checkHBase())
+      if (softMgr.hasHbase(clusterSpec.toBlueprint()))
          maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC_HBASE;
       List<String> outOfSyncHosts = new ArrayList<String>();
       for (String hostname : hostnames) {

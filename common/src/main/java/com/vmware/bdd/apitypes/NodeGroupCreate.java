@@ -18,22 +18,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
-import com.vmware.bdd.apitypes.NodeGroup.InstanceType;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksType;
-import com.vmware.bdd.spectypes.GroupType;
-import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation.GroupAssociationType;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks.GroupRacksType;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.Constants;
 
 /**
  * Cluster creation parameters
@@ -42,7 +39,6 @@ public class NodeGroupCreate {
 
    @Expose
    private String name;
-   private GroupType groupType;
    @Expose
    private List<String> roles;
    @Expose
@@ -85,7 +81,6 @@ public class NodeGroupCreate {
 
    public NodeGroupCreate(NodeGroupCreate group) {
       this.cpuNum = group.cpuNum;
-      this.groupType = group.groupType;
       this.haFlag = group.haFlag;
       this.instanceNum = group.instanceNum;
       this.instanceType = group.instanceType;
@@ -107,8 +102,16 @@ public class NodeGroupCreate {
         nodeGroupInfo.setInstanceNum(instanceNum);
         nodeGroupInfo.setRoles(roles);
         nodeGroupInfo.setConfiguration(configuration);
-
-        //TODO(qjin): fill in nodes info?
+        if (haFlag.equalsIgnoreCase(Constants.HA_FLAG_FT) || 
+              haFlag.equalsIgnoreCase(Constants.HA_FLAG_ON)) {
+           nodeGroupInfo.setHaEnabled(true);
+        }
+        nodeGroupInfo.setInstanceType(instanceType);
+        nodeGroupInfo.setPlacement(placementPolicies);
+        if (storage != null) {
+           nodeGroupInfo.setStorageSize(storage.getSizeGB());
+           nodeGroupInfo.setStorageType(storage.getType());
+        }
         nodeGroupInfo.setNodes(null);
         return nodeGroupInfo;
    }
@@ -215,15 +218,6 @@ public class NodeGroupCreate {
    }
 
    @RestIgnore
-   public GroupType getGroupType() {
-      return groupType;
-   }
-
-   public void setGroupType(GroupType groupType) {
-      this.groupType = groupType;
-   }
-
-   @RestIgnore
    public List<VcCluster> getVcClusters(ClusterCreate cluster) {
       if (this.vcClusters == null || this.vcClusters.size() == 0) {
          return cluster.getVcClusters();
@@ -288,24 +282,6 @@ public class NodeGroupCreate {
          return this.placementPolicies.getInstancePerHost();
       }
       return null;
-   }
-
-   @JsonIgnore
-   public boolean isComputeOnlyGroup() {
-      List<String> roles = getRoles();
-      if (roles != null
-            && ((roles.size() == 1 && roles.get(0).equals(
-                  HadoopRole.HADOOP_TASKTRACKER.toString()))
-                  || (roles.size() == 2
-                        && roles.contains(HadoopRole.HADOOP_TASKTRACKER
-                              .toString()) && roles
-                        .contains(HadoopRole.TEMPFS_CLIENT_ROLE.toString())) || (roles
-                  .contains(HadoopRole.MAPR_TASKTRACKER_ROLE.toString()) && !roles
-                  .contains(HadoopRole.MAPR_NFS_ROLE.toString())))) {
-         return true;
-      } else {
-         return false;
-      }
    }
 
    public boolean validatePlacementPolicies(ClusterCreate cluster,

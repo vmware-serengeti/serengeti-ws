@@ -29,10 +29,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.PlacementPolicy;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.placement.entity.AbstractDatacenter;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractCluster;

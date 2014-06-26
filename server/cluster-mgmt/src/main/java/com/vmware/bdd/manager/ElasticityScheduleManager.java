@@ -25,7 +25,6 @@ import org.apache.log4j.Logger;
 
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.manager.ClusterManager;
 
 
 /**

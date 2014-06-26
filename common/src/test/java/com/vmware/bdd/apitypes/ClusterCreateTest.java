@@ -14,22 +14,26 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
-import com.vmware.bdd.apitypes.Datastore.DatastoreType;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
-import com.vmware.bdd.exception.ClusterConfigException;
-import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.utils.ConfigInfo;
-import com.vmware.bdd.utils.Constants;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.*;
-
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation.GroupAssociationType;
+import com.vmware.bdd.exception.ClusterConfigException;
+import com.vmware.bdd.utils.ConfigInfo;
+import com.vmware.bdd.utils.Constants;
 
 public class ClusterCreateTest {
 
@@ -123,11 +127,11 @@ public class ClusterCreateTest {
       NodeGroupCreate compute = new NodeGroupCreate();
       compute.setName("compute");
       compute.setInstanceNum(10);
-      compute.setRoles(Arrays.asList(HadoopRole.HADOOP_TASKTRACKER.toString()));
+      compute.setRoles(Arrays.asList("hadoop_tasktracker"));
       NodeGroupCreate data = new NodeGroupCreate();
       data.setName("data");
       compute.setInstanceNum(4);
-      data.setRoles(Arrays.asList(HadoopRole.HADOOP_DATANODE.toString()));
+      data.setRoles(Arrays.asList("hadoop_datanode"));
       cluster.setNodeGroups(new NodeGroupCreate[] { compute, data });
       cluster.setTopologyPolicy(TopologyType.HVE);
       assertEquals(true, cluster.validateNodeGroupPlacementPolicies(
@@ -169,13 +173,13 @@ public class ClusterCreateTest {
       StorageRead computeStorageRead = new StorageRead();
       computeStorageRead.setType("NFS");
       compute.setStorage(computeStorageRead);
-      compute.setRoles(Arrays.asList(HadoopRole.HADOOP_TASKTRACKER.toString()));
+      compute.setRoles(Arrays.asList("hadoop_tasktracker"));
       NodeGroupCreate data = new NodeGroupCreate();
       data.setName("data");
       StorageRead dataStorageRead = new StorageRead();
       dataStorageRead.setType(DatastoreType.LOCAL.toString());
       data.setStorage(dataStorageRead);
-      data.setRoles(Arrays.asList(HadoopRole.HADOOP_DATANODE.toString()));
+      data.setRoles(Arrays.asList("hadoop_datanode"));
       cluster.setNodeGroups(new NodeGroupCreate[] { compute, data });
       cluster.validateStorageType(failedMsgList);
       assertEquals(1, failedMsgList.size());
@@ -238,26 +242,6 @@ public class ClusterCreateTest {
    }
 
    @Test
-   public void testContainsComputeOnlyNodeGroups() {
-      ClusterCreate cluster = new ClusterCreate();
-      NodeGroupCreate compute = new NodeGroupCreate();
-      NodeGroupCreate data = new NodeGroupCreate();
-      compute.setRoles(Arrays.asList(HadoopRole.HADOOP_TASKTRACKER.toString()));
-      data.setRoles(Arrays.asList(HadoopRole.HADOOP_DATANODE.toString()));
-      cluster.setNodeGroups(new NodeGroupCreate[] { compute, data });
-      assertEquals(true, cluster.containsComputeOnlyNodeGroups());
-      compute.setRoles(Arrays.asList(HadoopRole.HADOOP_TASKTRACKER.toString(),
-            HadoopRole.TEMPFS_CLIENT_ROLE.toString()));
-      cluster.setNodeGroups(new NodeGroupCreate[] { compute, data });
-      assertEquals(true, cluster.containsComputeOnlyNodeGroups());
-      NodeGroupCreate worker = new NodeGroupCreate();
-      worker.setRoles(Arrays.asList(HadoopRole.HADOOP_TASKTRACKER.toString(),
-            HadoopRole.HADOOP_DATANODE.toString()));
-      cluster.setNodeGroups(new NodeGroupCreate[] { worker });
-      assertEquals(false, cluster.containsComputeOnlyNodeGroups());
-   }
-
-   @Test
    public void testValidateClusterCreate() {
       ClusterCreate cluster = new ClusterCreate();
       cluster.setDistroVendor(Constants.DEFAULT_VENDOR);
@@ -279,29 +263,28 @@ public class ClusterCreateTest {
       master.setMemCapacityMB(7501);
       master.setSwapRatio(0F);
       master.setInstanceNum(1);
-      master.setRoles(Arrays.asList(HadoopRole.HADOOP_NAMENODE_ROLE.toString(),
-            HadoopRole.HADOOP_JOBTRACKER_ROLE.toString()));
+      master.setRoles(Arrays.asList("hadoop_namenode",
+            "hadoop_jobtracker"));
       NodeGroupCreate worker = new NodeGroupCreate();
       worker.setName("worker");
-      worker.setRoles(Arrays.asList(HadoopRole.HADOOP_DATANODE.toString(),
-            HadoopRole.HADOOP_TASKTRACKER.toString()));
+      worker.setRoles(Arrays.asList("hadoop_datanode",
+            "hadoop_tasktracker"));
       worker.setMemCapacityMB(3748);
       worker.setInstanceNum(0);
       NodeGroupCreate client = new NodeGroupCreate();
       client.setName("client");
       client.setMemCapacityMB(3748);
       client.setInstanceNum(0);
-      client.setRoles(Arrays.asList(HadoopRole.HADOOP_CLIENT_ROLE.toString(),
-            HadoopRole.HIVE_SERVER_ROLE.toString(),
-            HadoopRole.HIVE_ROLE.toString()));
+      client.setRoles(Arrays.asList("hadoop_client",
+            "hive_server",
+            "hive"));
       List<String> failedMsgList = new ArrayList<String>();
       List<String> warningMsgList = new ArrayList<String>();
       cluster.setNodeGroups(new NodeGroupCreate[] { master, worker, client });
       cluster.validateClusterCreate(failedMsgList, warningMsgList);
-      assertEquals(2, failedMsgList.size());
+      assertEquals(1, failedMsgList.size());
       assertEquals("The 'swapRatio' must be greater than 0 in group master.",
             failedMsgList.get(0));
-      assertEquals("worker.instanceNum=0.", failedMsgList.get(1));
       assertEquals(1, warningMsgList.size());
       assertEquals(
             "Warning: The size of the virtual machine memory must be evenly divisible by 4. For group master, 7500 replaces 7501 for the memCapacityMB value.",

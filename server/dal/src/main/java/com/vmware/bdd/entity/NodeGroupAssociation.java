@@ -23,7 +23,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation.GroupAssociationType;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation.GroupAssociationType;
+
 
 @Entity
 @SequenceGenerator(name = "IdSequence", sequenceName = "node_group_association_seq", allocationSize = 1)

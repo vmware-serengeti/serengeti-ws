@@ -43,9 +43,9 @@ import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.LimitInstruction;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.entity.ClusterEntity;
@@ -350,7 +350,6 @@ public class ClusterManager {
       if (groups != null) {
          for (NodeGroupCreate group : groups) {
             group.setVcClusters(null);
-            group.setGroupType(null);
             group.getStorage().setImagestoreNamePattern(null);
             group.getStorage().setDiskstoreNamePattern(null);
             group.setVmFolderPath(null);
@@ -1181,6 +1180,9 @@ public class ClusterManager {
          logger.error("cluster " + clusterName + " does not exist");
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
+      SoftwareManager softMgr =
+         softwareManagerCollector
+               .getSoftwareManager(cluster.getAppManager());
 
       ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
@@ -1216,7 +1218,7 @@ public class ClusterManager {
          List<String> roles = nodeGroup.getRoleNameList();
 
          // TODO: more fine control on node roles
-         if (HadoopRole.hasMgmtRole(roles)) {
+         if (softMgr.hasMgmtRole(roles)) {
             logger.info("node group " + nodeGroup.getName()
                   + " contains management roles, pass it");
             continue;

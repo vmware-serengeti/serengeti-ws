@@ -14,15 +14,12 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
@@ -73,7 +70,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
    @SerializedName("disk_priority")
    private Priority ioShares;
 
-   private boolean nodeGroupSorted;
+//   private boolean nodeGroupSorted;
 
    private boolean dcSeperation;
 
@@ -166,15 +163,6 @@ public class ClusterRead implements Comparable<ClusterRead> {
    }
 
    public List<NodeGroupRead> getNodeGroups() {
-      if (nodeGroups == null) {
-         return null;
-      }
-      NodeGroupReadComparactor comparactor = new NodeGroupReadComparactor();
-      //Note: if node groups will be modified by server, please consider collections.unmodifiedList() first.
-      if (!nodeGroupSorted) {
-         Collections.sort(nodeGroups, comparactor);
-         nodeGroupSorted = true;
-      }
       return nodeGroups;
    }
 
@@ -212,7 +200,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
       if (nodeGroups != null && !nodeGroups.isEmpty()) {
          int count = 0;
          for (NodeGroupRead nodeGroup : getNodeGroups()) {
-            if (CommonUtil.isComputeOnly(nodeGroup.getRoles(), distroVendor)) {
+            if (nodeGroup.isComputeOnly()) {
                if (nodeGroupNames != null && nodeGroupNames.length > 0) {
                   nodeGroupNames[0].add(nodeGroup.getName());
                }
@@ -222,7 +210,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
          if (count == 0) {
             return false;
          }
-      }else {
+      } else {
          return false;
       }
       return true;
@@ -234,14 +222,14 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
       if (nodeGroups != null && !nodeGroups.isEmpty()) {
          for (NodeGroupRead nodeGroup : getNodeGroups()) {
-            if (CommonUtil.isComputeOnly(nodeGroup.getRoles(), distroVendor)) {
+            if (nodeGroup.isComputeOnly()) {
                count = count + nodeGroup.getInstanceNum();
             }
          }
       }
       return count;
    }
-
+   /*
    private NodeGroupRead matchNodeGroupByName(List<NodeGroupRead> nodeGroups,
          String nodeGroupName) {
       NodeGroupRead nodeGoupRead = null;
@@ -254,11 +242,11 @@ public class ClusterRead implements Comparable<ClusterRead> {
       return nodeGoupRead;
    }
 
-   /**
+   *//**
     * Compare the order of node groups according to their roles
     *
     *
-    */
+    *//*
    private class NodeGroupReadComparactor implements Comparator<NodeGroupRead> {
       @Override
       public int compare(NodeGroupRead ng1, NodeGroupRead ng2) {
@@ -305,7 +293,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
          return (null != role) ? role.ordinal() : -1;
       }
    }
-
+*/
    @Override
    public int compareTo(ClusterRead cluster) {
       if (CommonUtil.isBlank(cluster.getName())) {

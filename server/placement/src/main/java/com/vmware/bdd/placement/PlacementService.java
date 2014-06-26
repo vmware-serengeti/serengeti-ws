@@ -27,7 +27,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.Pair;
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.NodeGroup.PlacementPolicy.GroupRacks.GroupRacksType;
+import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks.GroupRacksType;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.placement.entity.VirtualGroup;

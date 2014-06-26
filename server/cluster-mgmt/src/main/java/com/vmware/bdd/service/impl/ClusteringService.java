@@ -113,6 +113,7 @@ import com.vmware.bdd.service.sp.StartVmSP;
 import com.vmware.bdd.service.sp.StopVmSP;
 import com.vmware.bdd.service.sp.UpdateVmProgressCallback;
 import com.vmware.bdd.service.utils.VcResourceUtils;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.HadoopRole;
@@ -283,6 +284,7 @@ public class ClusteringService implements IClusteringService {
          } catch (InterruptedException e) {
             logger.warn("interupted during sleep " + e.getMessage());
          }
+         softwareManagerCollector.loadSoftwareManagers();
          startVMEventProcessor();
          String poolSize =
                Configuration.getNonEmptyString("serengeti.scheduler.poolsize");
@@ -312,7 +314,6 @@ public class ClusteringService implements IClusteringService {
          clusterInitializerService.transformClusterStatus();
          elasticityScheduleMgr.start();
          configureAlarm();
-         softwareManagerCollector.loadSoftwareManagers();
          initialized = true;
       }
    }
@@ -321,6 +322,7 @@ public class ClusteringService implements IClusteringService {
       // add event handler for Serengeti after VC event handler is registered.
       processor = new VmEventManager(lockClusterEntityMgr);
       processor.setClusterManager(clusterManager);
+      processor.setSoftwareManagerCollector(softwareManagerCollector);
       processor.start();
    }
 
@@ -768,10 +770,11 @@ public class ClusteringService implements IClusteringService {
          }
          List<String> roles =
                new Gson().fromJson(node.getNodeGroup().getRoles(), List.class);
-         String distroVendor =
-               node.getNodeGroup().getCluster().getDistroVendor();
+         SoftwareManager softMgr =
+            softwareManagerCollector.getSoftwareManager(cluster.getAppManager());
+
          boolean isComputeOnlyNode =
-               CommonUtil.isComputeOnly(roles, distroVendor);
+            softMgr.isComputeOnlyRoles(roles);
          SetAutoElasticitySP sp =
                new SetAutoElasticitySP(clusterName, vm, serengetiUUID,
                      masterMoId, masterUUID, enableAutoElasticity,
@@ -998,6 +1001,9 @@ public class ClusteringService implements IClusteringService {
        * define cluster resource pool name.
        */
       String clusterName = vNodes.get(0).getClusterName();
+      SoftwareManager softManager =
+            softwareManagerCollector
+                  .getSoftwareManagerByClusterName(clusterName);
       String uuid = ConfigInfo.getSerengetiUUID();
       String clusterRpName = uuid + "-" + clusterName;
       if (clusterRpName.length() > VC_RP_MAX_NAME_LENGTH) {
@@ -1114,7 +1120,7 @@ public class ClusteringService implements IClusteringService {
                   }
                   CreateResourcePoolSP nodeGroupSP =
                         new CreateResourcePoolSP(parentVcResourcePool,
-                              nodeGroup.getName(), nodeGroup);
+                              nodeGroup.getName(), nodeGroup, softManager);
                   nodeGroupSPs[i] = nodeGroupSP;
                   i++;
                }
@@ -1273,8 +1279,10 @@ public class ClusteringService implements IClusteringService {
       }
 
       List<String> roles = vNode.getNodeGroup().getRoles();
-      //TODO emma: add corresponding functions for all software managers
-      if (roles != null && HadoopRole.hasMgmtRole(roles)) {
+      SoftwareManager softMgr =
+         softwareManagerCollector.getSoftwareManagerByClusterName(vNode.getClusterName());
+
+      if (roles != null && softMgr.hasMgmtRole(roles)) {
          logger.debug(vNode.getVmName() + " is a master node");
          logger.debug("set disk mode to persistent for VM " + vNode.getVmName());
          // change disk mode to persistent, instead of independent_persistent, to allow snapshot and clone on VM
@@ -1366,7 +1374,10 @@ public class ClusteringService implements IClusteringService {
 
       // check time on hosts
       int maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC;
-      if (clusterSpec.checkHBase())
+      SoftwareManager softMgr =
+            softwareManagerCollector.getSoftwareManager(clusterSpec
+                  .getAppManager());
+      if (softMgr.hasHbase(clusterSpec.toBlueprint()))
          maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC_HBASE;
 
       List<String> outOfSyncHosts = new ArrayList<String>();

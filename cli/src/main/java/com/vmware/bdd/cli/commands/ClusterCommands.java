@@ -59,7 +59,6 @@ import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.ClusterRestClient;
 import com.vmware.bdd.cli.rest.DistroRestClient;
 import com.vmware.bdd.cli.rest.NetworkRestClient;
-import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AppConfigValidationUtils;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
 import com.vmware.bdd.utils.CommonUtil;
@@ -623,7 +622,7 @@ public class ClusterCommands implements CommandMarker {
             for (NodeGroupRead ng : ngs) {
                if (ng.getName().equals(nodeGroup)) {
                   found = true;
-                  if (ng.getRoles() != null
+                  /*if (ng.getRoles() != null
                         && ng.getRoles().contains(
                               HadoopRole.ZOOKEEPER_ROLE.toString())
                         && instanceNum > 1) {
@@ -633,7 +632,7 @@ public class ClusterCommands implements CommandMarker {
                            Constants.OUTPUT_OP_RESULT_FAIL,
                            Constants.ZOOKEEPER_NOT_RESIZE);
                      return;
-                  }
+                  }*/ // TODO emma: do not check as client do not know who is Zookeeper
                   break;
                }
             }
@@ -783,7 +782,7 @@ public class ClusterCommands implements CommandMarker {
                      Constants.OUTPUT_OP_RESULT_FAIL,
                      Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
                return;
-            }
+            } 
          } else if (ioShares == null) {
             // in this case, no parameter is specified excpet "cluster name", return directly
             System.out.println("There is nothing to adjust, please specify more parameters.");
@@ -895,7 +894,7 @@ public class ClusterCommands implements CommandMarker {
                         + " does not exist.");
             return;
          }
-
+/* TODO emma: remove validation from client as client does not have knowledge about if it's compute only node group
          //validate the node group type
          if ((elasticityMode || minComputeNodeNum || maxComputeNodeNum || targetComputeNodeNum)
                && !cluster.validateSetManualElasticity()) {
@@ -904,7 +903,7 @@ public class ClusterCommands implements CommandMarker {
                   Constants.OUTPUT_OP_RESULT_FAIL,
                   Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
             return;
-         }
+         }*/
 
          // reset Auto Elasticity parameters. The default values are:
          // elasticityMode: manual

@@ -49,6 +49,7 @@ import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
@@ -56,9 +57,7 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.thrift.GroupData;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
-import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
 
@@ -489,6 +488,13 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
          Map<String, Object> groupConfigs = gson.fromJson(group.getHadoopConfig(), Map.class);
          nodeGroupInfo.setConfiguration(groupConfigs);
       }
+      if (group.getHaFlag().equalsIgnoreCase(Constants.HA_FLAG_FT) || 
+            group.getHaFlag().equalsIgnoreCase(Constants.HA_FLAG_ON)) {
+         nodeGroupInfo.setHaEnabled(true);
+      }
+      nodeGroupInfo.setInstanceType(group.getNodeType());
+      nodeGroupInfo.setStorageSize(group.getStorageSize());
+      nodeGroupInfo.setStorageType(group.getStorageType().name());
 
       // set nodes
       List<NodeInfo> nodeInfos = new ArrayList<NodeInfo>();
@@ -534,35 +540,17 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       clusterRead.setVhmTargetNum(cluster.getVhmTargetNum());
       clusterRead.setIoShares(cluster.getIoShares());
       clusterRead.setVersion(cluster.getVersion());
-      // TODO emma: move to default software manager
-      boolean isDefaultSoftwareManager = CommonUtil.isBlank(cluster.getAppManager());
-      boolean computeOnly = true;
+      SoftwareManager softMgr =
+            softwareManagerCollector
+                  .getSoftwareManager(cluster.getAppManager());
       List<NodeGroupRead> groupList = new ArrayList<NodeGroupRead>();
       for (NodeGroupEntity group : cluster.getNodeGroups()) {
-         groupList.add(group.toNodeGroupRead(ignoreObsoleteNode));
-         if (isDefaultSoftwareManager && group.getRoles() != null
-               && (group.getRoles().contains(
-                     HadoopRole.HADOOP_NAMENODE_ROLE.toString()) || group
-                     .getRoles().contains(HadoopRole.MAPR_CLDB_ROLE.toString()))) {
-            computeOnly = false;
-         }
+         NodeGroupRead groupRead = group.toNodeGroupRead(ignoreObsoleteNode);
+         groupRead.setComputeOnly(softMgr.isComputeOnlyRoles(groupRead.getRoles()));
+         groupList.add(groupRead);
       }
 
       clusterRead.setNodeGroups(groupList);
-
-      if (isDefaultSoftwareManager && computeOnly && cluster.getHadoopConfig() != null) {
-         Map conf = (new Gson()).fromJson(cluster.getHadoopConfig(), Map.class);
-         Map hadoopConf = (Map) conf.get("hadoop");
-         if (hadoopConf != null) {
-            Map coreSiteConf = (Map) hadoopConf.get("core-site.xml");
-            if (coreSiteConf != null) {
-               String hdfs = (String) coreSiteConf.get("fs.default.name");
-               if (hdfs != null && !hdfs.isEmpty()) {
-                  clusterRead.setExternalHDFS(hdfs);
-               }
-            }
-         }
-      }
 
       Set<VcResourcePoolEntity> rps = cluster.getUsedRps();
       List<ResourcePoolRead> rpReads =

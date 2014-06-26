@@ -27,8 +27,6 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
-import com.vmware.bdd.spectypes.HadoopRole;
-
 public class CommonUtilTest {
 
    @Test
@@ -146,7 +144,7 @@ public class CommonUtilTest {
       pattern = CommonUtil.getDatastoreJavaPattern("(192.168.0.1)data*");
       assertTrue(datastore.matches(pattern));
    }
-
+/*
    @Test
    public void testIsComputeOnly() {
       List<String> roles = new ArrayList<String>();
@@ -164,7 +162,7 @@ public class CommonUtilTest {
       assertTrue(CommonUtil.isComputeOnly(roles, distroVendor));
       roles.add(HadoopRole.MAPR_NFS_ROLE.toString());
       assertTrue(!CommonUtil.isComputeOnly(roles, distroVendor));
-   }
+   }*/
 
    @Test
    public void testMakeVmMemoryDivisibleBy4() {
