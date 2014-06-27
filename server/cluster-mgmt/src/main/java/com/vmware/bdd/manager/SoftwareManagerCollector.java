@@ -26,8 +26,10 @@ import org.springframework.stereotype.Service;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.entity.AppManagerEntity;
+import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.resmgmt.IAppManagerService;
 import com.vmware.bdd.software.mgmt.plugin.impl.DefaultSoftwareManagerImpl;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -47,6 +49,9 @@ public class SoftwareManagerCollector {
 
    @Autowired
    private IAppManagerService appManagerService;
+
+   @Autowired
+   private IClusterEntityManager clusterEntityManager;
 
    private Map<String, SoftwareManager> cache =
          new HashMap<String, SoftwareManager>();
@@ -162,6 +167,23 @@ public class SoftwareManagerCollector {
       //TODO:
       //it's either not defined or being initialized
       return null;
+   }
+
+   /**
+    * Get software manager instance by cluster name (do not call this api before
+    * cluster information is written to meta-db
+    *
+    * @param name
+    * @return null if cluster name does not have a corresponding software
+    *         manager instance
+    */
+   public synchronized SoftwareManager getSoftwareManagerByClusterName(String name) {
+      ClusterEntity clusterEntity = clusterEntityManager.findByName(name);
+      if (clusterEntity == null) {
+         logger.warn("Can't find cluster with name: " + name);
+         return null;
+      }
+      return getSoftwareManager(clusterEntity.getAppManager());
    }
 
    public synchronized void loadSoftwareManagers() {
