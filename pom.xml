@@ -441,6 +441,8 @@
       <cm.version>5.0.1</cm.version>
       <vmware.vlsi.version>1.0.8</vmware.vlsi.version>
       <bdd.skipTests>true</bdd.skipTests>
+      <cxf.version>2.7.4</cxf.version>
+      <fasterxml.jackson.version>2.1.0</fasterxml.jackson.version>
    </properties>
    <build>
       <pluginManagement>
