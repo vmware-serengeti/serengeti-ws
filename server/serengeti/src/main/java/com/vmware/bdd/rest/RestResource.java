@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.rest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -69,6 +70,8 @@ import com.vmware.bdd.service.impl.ClusteringService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.IpAddressUtil;
@@ -819,6 +822,42 @@ public class RestResource {
          throw BddException.NOT_FOUND("App Manager", appManagerName);
       }
       return read;
+   }
+
+   /**
+    * Get supported stack information of a BDE appmanager
+    * @param appManagerName
+    * @return The BDE appmanager information
+    */
+   @RequestMapping(value = "/appmanager/{appManagerName}/stacks", method = RequestMethod.GET, produces = "application/json")
+   @ResponseBody
+   public List<HadoopStack> getAppManagerStacks(@PathVariable("appManagerName") String appManagerName) {
+      appManagerName = CommonUtil.decode(appManagerName);
+      if (CommonUtil.isBlank(appManagerName)
+            || !CommonUtil.validateResourceName(appManagerName)) {
+         throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
+      }
+      //TODO: remove switch after Distro Management moved to software-mgmt-plugin-default
+      if (Constants.IRONFAN.equalsIgnoreCase(appManagerName)) {
+         List<HadoopStack> stacks = new ArrayList<HadoopStack>();
+         List<DistroRead> distros = distroManager.getDistros();
+         for (DistroRead distro : distros) {
+            HadoopStack stack = new HadoopStack();
+            stack.setDistro(distro.getName());
+            stack.setVendor(distro.getVendor());
+            stack.setFullVersion(distro.getVersion());
+            stack.setHveSupported(distro.isHveSupported());
+            stack.setRoles(distro.getRoles());
+            stacks.add(stack);
+         }
+         return stacks;
+      } else {
+         SoftwareManager softMgr = softwareManagerCollector.getSoftwareManager(appManagerName);
+         if (softMgr == null) {
+            throw BddException.NOT_FOUND("App Manager", appManagerName);
+         }
+         return softMgr.getSupportedStacks();
+      }
    }
 
    /**

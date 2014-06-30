@@ -23,7 +23,6 @@ import javax.persistence.Table;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.apitypes.AppManagerAdd;
-import com.vmware.bdd.software.mgmt.plugin.model.PluginInfo;
 
 /**
  * Author: Xiaoding Bian
@@ -39,14 +38,14 @@ public class AppManagerEntity extends EntityBase {
    @Column(name = "name", unique = true, nullable = false)
    private String name;
 
-   @Column(name = "provider", nullable = false)
-   private String provider;
+   @Column(name = "description")
+   private String description;
 
-   @Column(name = "host")
-   private String host;
+   @Column(name = "type", nullable = false)
+   private String type;
 
-   @Column(name = "port")
-   private int port;
+   @Column(name = "url")
+   private String url;
 
    @Column(name = "username")
    private String username;
@@ -54,35 +53,32 @@ public class AppManagerEntity extends EntityBase {
    @Column(name = "password")
    private String password;
 
-   @Column(name = "private_key")
-   private String privateKey;
+   @Column(name = "ssl_certificate")
+   private String sslCertificate;
 
    static final Logger logger = Logger.getLogger(ClusterEntity.class);
 
    public AppManagerEntity() {
    }
 
-   public AppManagerEntity(String name, String provider, String host, int port, String username, String password, String privateKey) {
+   public AppManagerEntity(String name, String description, String type, String url, String username, String password, String sslCertificate) {
       this.name = name;
-      this.provider = provider;
-      this.host = host;
-      this.port = port;
+      this.description = description;
+      this.type = type;
+      this.url = url;
       this.username = username;
       this.password = password;
-      this.privateKey = privateKey;
+      this.sslCertificate = sslCertificate;
    }
 
    public AppManagerEntity(AppManagerAdd appManagerAdd) {
       this.name = appManagerAdd.getName();
-      this.provider = appManagerAdd.getProvider();
-      this.host = appManagerAdd.getHost();
-//      this.port = this.provider.getDefaultPort();
-      if (appManagerAdd.getPort() != -1) {
-         this.port = appManagerAdd.getPort();
-      }
+      this.description = appManagerAdd.getDescription();
+      this.type = appManagerAdd.getType();
+      this.url = appManagerAdd.getUrl();
       this.username = appManagerAdd.getUsername();
       this.password = appManagerAdd.getPassword();
-      this.privateKey = appManagerAdd.getPrivateKey();
+      this.sslCertificate = appManagerAdd.getSslCertificate();
    }
 
    public String getName() {
@@ -93,28 +89,28 @@ public class AppManagerEntity extends EntityBase {
       this.name = name;
    }
 
-   public String getProvider() {
-      return provider;
+   public String getDescription() {
+      return description;
    }
 
-   public void setProvider(String provider) {
-      this.provider = provider;
+   public void setDescription(String description) {
+      this.description = description;
    }
 
-   public String getHost() {
-      return host;
+   public String getType() {
+      return type;
    }
 
-   public void setHost(String host) {
-      this.host = host;
+   public void setType(String type) {
+      this.type = type;
    }
 
-   public int getPort() {
-      return port;
+   public String getUrl() {
+      return url;
    }
 
-   public void setPort(int port) {
-      this.port = port;
+   public void setUrl(String url) {
+      this.url = url;
    }
 
    public String getUsername() {
@@ -133,22 +129,11 @@ public class AppManagerEntity extends EntityBase {
       this.password = password;
    }
 
-   public String getPrivateKey() {
-      return privateKey;
+   public String getSslCertificate() {
+      return sslCertificate;
    }
 
-   public void setPrivateKey(String privateKey) {
-      this.privateKey = privateKey;
-   }
-
-   public PluginInfo toPluginInfo() {
-      PluginInfo pluginInfo = new PluginInfo();
-      pluginInfo.setName(this.name);
-      pluginInfo.setHost(this.host);
-      pluginInfo.setPort(this.port);
-      pluginInfo.setUsername(this.username);
-      pluginInfo.setPassword(this.password);
-      pluginInfo.setPrivateKey(this.privateKey);
-      return pluginInfo;
+   public void setSslCertificate(String sslCertificate) {
+      this.sslCertificate = sslCertificate;
    }
 }

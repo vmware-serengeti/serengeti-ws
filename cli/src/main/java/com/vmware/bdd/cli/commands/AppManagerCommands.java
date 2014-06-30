@@ -23,6 +23,7 @@ import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.cli.rest.AppManagerRestClient;
 import com.vmware.bdd.cli.rest.CliRestException;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.CommandMarker;
@@ -47,27 +48,29 @@ public class AppManagerCommands implements CommandMarker {
       return true;
    }
 
-   @CliCommand(value = "appmanager add", help = "add a vendor instance")
+   @CliCommand(value = "appmanager add", help = "Add an App Manager instance")
    public void addAppManager(
          @CliOption(key = { "name" }, mandatory = true, help = "The instance name") final String name,
-         @CliOption(key = { "provider" }, mandatory = true, help = "The provider type, ClouderaManager or Ambari") final String provider,
-         @CliOption(key = { "host" }, mandatory = true, help = "The host address") final String host,
-         @CliOption(key = { "port" }, mandatory = false, unspecifiedDefaultValue = "-1", help = "The port") final int port,
+         @CliOption(key = { "description" }, mandatory = true, help = "The instance description") final String description,
+         @CliOption(key = { "type" }, mandatory = true, help = "The provider type, ClouderaManager or Ambari") final String type,
+         @CliOption(key = { "url" }, mandatory = true, help = "The instance URL") final String url,
          @CliOption(key = { "username" }, mandatory = false, help = "The username to login software manager server") final String username,
          @CliOption(key = { "password"}, mandatory = false, help = "The password") final String password,
-         @CliOption(key = { "privateKeyFile"}, mandatory = true, help = "The private key file for communication between server and agents") final String path) {
+         @CliOption(key = { "sslCertificateFile"}, mandatory = true, help = "The ssl certificate file of the instance") final String path) {
 
       // rest invocation
       try {
          AppManagerAdd appManagerAdd = new AppManagerAdd();
          appManagerAdd.setName(name);
-         appManagerAdd.setProvider(provider);
-         appManagerAdd.setHost(host);
-         appManagerAdd.setPort(port);
+         appManagerAdd.setDescription(description);
+         appManagerAdd.setType(type);
+         appManagerAdd.setUrl(url);
          appManagerAdd.setUsername(username);
          appManagerAdd.setPassword(password);
-         appManagerAdd.setPrivateKey(CommandsUtils.dataFromFile(path));
+         appManagerAdd.setSslCertificate(CommandsUtils.dataFromFile(path));
          restClient.add(appManagerAdd);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_APPMANAGER, name,
+               Constants.OUTPUT_OP_RESULT_ADD);
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER, name,
                Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
@@ -83,9 +86,10 @@ public class AppManagerCommands implements CommandMarker {
     * @param name
     *           The appmanager name
     */
-   @CliCommand(value = "appmanager list", help = "Display appmanager list.")
+   @CliCommand(value = "appmanager list", help = "Display App Manager list.")
    public void listAppManager(
-         @CliOption(key = { "name" }, mandatory = false, help = "The appmanager name") final String name) {
+         @CliOption(key = { "name" }, mandatory = false, help = "The appmanager name") final String name,
+         @CliOption(key = { "supportedStacks" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "The supported stacks") final boolean supportedStacks) {
       // rest invocation
       try {
          if (CommandsUtils.isBlank(name)) {
@@ -94,15 +98,50 @@ public class AppManagerCommands implements CommandMarker {
                prettyOutputAppManagerInfo(appmanagers);
             }
          } else {
-            AppManagerRead appmanager = restClient.get(name);
-            if (appmanager != null) {
-               prettyOutputAppManagerInfo(appmanager);
+            if (supportedStacks) {
+               HadoopStack[] stacks = restClient.getStacks(name);
+               if (stacks != null && stacks.length > 0) {
+                  prettyOutputAppManagerStacks(stacks);
+               }
+            } else {
+               AppManagerRead appmanager = restClient.get(name);
+               if (appmanager != null) {
+                  prettyOutputAppManagerInfo(appmanager);
+               }
             }
          }
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER, name,
-               Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
+               name, Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
+      }
+   }
+
+   /**
+    * @param stacks
+    */
+   private void prettyOutputAppManagerStacks(HadoopStack[] stacks) {
+      if (stacks != null && stacks.length > 0) {
+         LinkedHashMap<String, List<String>> stackColumnNamesWithGetMethodNames =
+               new LinkedHashMap<String, List<String>>();
+         stackColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_NAME, Arrays.asList("getDistro"));
+         stackColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_VENDOR, Arrays.asList("getVendor"));
+         stackColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_VERSION, Arrays.asList("getFullVersion"));
+         stackColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_HVE, Arrays.asList("isHveSupported"));
+         stackColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_ROLES, Arrays.asList("getRoles"));
+
+         try {
+            CommandsUtils.printInTableFormat(
+                  stackColumnNamesWithGetMethodNames, stacks,
+                  Constants.OUTPUT_INDENT);
+         } catch (Exception e) {
+            System.err.println(e.getMessage());
+         }
       }
    }
 
@@ -113,14 +152,13 @@ public class AppManagerCommands implements CommandMarker {
          appManagerColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_NAME, Arrays.asList("getName"));
          appManagerColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_PROVIDER, Arrays.asList("getProvider"));
+               Constants.FORMAT_TABLE_COLUMN_DESCRIPTION, Arrays.asList("getDescription"));
          appManagerColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_HOST, Arrays.asList("getHost"));
+               Constants.FORMAT_TABLE_COLUMN_TYPE, Arrays.asList("getType"));
          appManagerColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_PORT, Arrays.asList("getPort"));
+               Constants.FORMAT_TABLE_COLUMN_URL, Arrays.asList("getUrl"));
          appManagerColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_USERNAME, Arrays.asList("getUsername"));
-
 
          try {
             CommandsUtils.printInTableFormat(

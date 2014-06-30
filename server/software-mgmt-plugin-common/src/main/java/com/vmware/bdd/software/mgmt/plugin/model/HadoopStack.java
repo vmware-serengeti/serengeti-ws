@@ -18,8 +18,14 @@ import java.util.List;
 
    @Expose
    private String fullVersion;
+
+   @Expose
    private boolean hveSupported;
+
+   @Expose
    private List<String> roles;
+
+   @Expose
    private String vendor;
 
    public String getDistro() {

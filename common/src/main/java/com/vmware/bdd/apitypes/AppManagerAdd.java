@@ -29,13 +29,13 @@ public class AppManagerAdd {
    private String name;
 
    @Expose
-   private String provider;
+   private String description;
 
    @Expose
-   private String host;
+   private String type;
 
    @Expose
-   private int port;
+   private String url;
 
    @Expose
    private String username;
@@ -44,7 +44,7 @@ public class AppManagerAdd {
    private String password;
 
    @Expose
-   private String privateKey;
+   private String sslCertificate;
 
    public String getName() {
       return name;
@@ -54,28 +54,28 @@ public class AppManagerAdd {
       this.name = name;
    }
 
-   public String getProvider() {
-      return provider;
+   public String getDescription() {
+      return description;
    }
 
-   public void setProvider(String provider) {
-      this.provider = provider;
+   public void setDescription(String description) {
+      this.description = description;
    }
 
-   public String getHost() {
-      return host;
+   public String getType() {
+      return type;
    }
 
-   public void setHost(String host) {
-      this.host = host;
+   public void setType(String type) {
+      this.type = type;
    }
 
-   public int getPort() {
-      return port;
+   public String getUrl() {
+      return url;
    }
 
-   public void setPort(int port) {
-      this.port = port;
+   public void setUrl(String url) {
+      this.url = url;
    }
 
    public String getUsername() {
@@ -94,12 +94,12 @@ public class AppManagerAdd {
       this.password = password;
    }
 
-   public String getPrivateKey() {
-      return privateKey;
+   public String getSslCertificate() {
+      return sslCertificate;
    }
 
-   public void setPrivateKey(String privateKey) {
-      this.privateKey = privateKey;
+   public void setSslCertificate(String sslCertificate) {
+      this.sslCertificate = sslCertificate;
    }
 
    public String toString() {

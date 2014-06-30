@@ -15,6 +15,8 @@
 
 package com.vmware.bdd.apitypes;
 
+import java.util.List;
+
 import com.google.gson.annotations.Expose;
 
 public class AppManagerRead {
@@ -23,13 +25,13 @@ public class AppManagerRead {
    private String name;
 
    @Expose
-   private String provider;
+   private String description;
 
    @Expose
-   private String host;
+   private String type;
 
    @Expose
-   private int port;
+   private String url;
 
    @Expose
    private String username;
@@ -37,8 +39,11 @@ public class AppManagerRead {
    //@Expose
    //private String password;
 
-   //@Expose
-   //private String privateKey;
+   @Expose
+   private String sslCertificate;
+
+   @Expose
+   private List<String> managedClusters;
 
    /**
     * @return the name
@@ -55,45 +60,45 @@ public class AppManagerRead {
    }
 
    /**
-    * @return the provider
+    * @return the description
     */
-   public String getProvider() {
-      return provider;
+   public String getDescription() {
+      return description;
    }
 
    /**
-    * @param provider the provider to set
+    * @param description the description to set
     */
-   public void setProvider(String provider) {
-      this.provider = provider;
+   public void setDescription(String description) {
+      this.description = description;
    }
 
    /**
-    * @return the host
+    * @return the type
     */
-   public String getHost() {
-      return host;
+   public String getType() {
+      return type;
    }
 
    /**
-    * @param host the host to set
+    * @param type the type to set
     */
-   public void setHost(String host) {
-      this.host = host;
+   public void setType(String type) {
+      this.type = type;
    }
 
    /**
-    * @return the port
+    * @return the url
     */
-   public int getPort() {
-      return port;
+   public String getUrl() {
+      return url;
    }
 
    /**
-    * @param port the port to set
+    * @param url the url to set
     */
-   public void setPort(int port) {
-      this.port = port;
+   public void setUrl(String url) {
+      this.url = url;
    }
 
    /**
@@ -110,14 +115,44 @@ public class AppManagerRead {
       this.username = username;
    }
 
+   /**
+    * @return the ssl certificate
+    */
+   public String getSslCertificate() {
+      return sslCertificate;
+   }
+
+   /**
+    * @param sslCertificate the ssl certificate to set
+    */
+   public void setSslCertificate(String sslCertificate) {
+      this.sslCertificate = sslCertificate;
+   }
+
+   /**
+    * @return the list of managed cluster names
+    */
+   public List<String> getManagedClusters() {
+      return managedClusters;
+   }
+
+   /**
+    * @param managedClusters the list of managed cluster names to set
+    */
+   public void setManagedClusters(List<String> managedClusters) {
+      this.managedClusters = managedClusters;
+   }
+
    @Override
    public String toString() {
       return new StringBuffer().append("[AppManagerRead] ")
             .append("name:").append(this.name)
-            .append(",provider:").append(this.provider)
-            .append(",host:").append(this.host)
-            .append(",port:").append(this.port)
+            .append("description:").append(this.description)
+            .append(",type:").append(this.type)
+            .append(",url:").append(this.url)
             .append(",username:").append(this.username)
+            .append(",sslCertificate:").append(this.sslCertificate)
+            .append(",managedClusters:").append(this.managedClusters)
             .toString();
    }
 

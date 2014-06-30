@@ -70,14 +70,14 @@ create table ip_block (
 
 create sequence appmanager_seq;
 create table appmanager (
-   id           bigint       not null unique DEFAULT nextval('appmanager_seq'::regclass),
-   name         varchar(255) not null unique,
-   provider     varchar(255) not null,
-   host         varchar(255) not null,
-   port         integer,
-   username     varchar(255) not null,
-   password     varchar(2048) not null,
-   private_key  varchar(2048) not null,
+   id              bigint        not null unique DEFAULT nextval('appmanager_seq'::regclass),
+   name            varchar(255)  not null unique,
+   description     varchar(255),
+   type            varchar(255)  not null,
+   url             varchar(255)  not null,
+   username        varchar(255)  not null,
+   password        varchar(2048) not null,
+   ssl_certificate varchar(2048),
    primary key (id)
 );
 

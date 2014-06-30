@@ -18,6 +18,7 @@ package com.vmware.bdd.cli.rest;
 import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.cli.commands.Constants;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.utils.CommonUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,13 +47,25 @@ public class AppManagerRestClient {
       final String path = Constants.REST_PATH_APPMANAGER;
       final HttpMethod httpverb = HttpMethod.GET;
 
-      return restClient.getObject(name, AppManagerRead.class, path, httpverb, false);
+      return restClient.getObject(name, AppManagerRead.class, path, httpverb,
+            false);
    }
 
    public AppManagerRead[] getAll() {
       final String path = Constants.REST_PATH_APPMANAGERS;
       final HttpMethod httpverb = HttpMethod.GET;
 
-      return restClient.getAllObjects(AppManagerRead[].class, path, httpverb, false);
+      return restClient.getAllObjects(AppManagerRead[].class, path, httpverb,
+            false);
+   }
+
+   public HadoopStack[] getStacks(String name) {
+      final String path =
+            Constants.REST_PATH_APPMANAGER + "/" + name + "/"
+                  + Constants.REST_PATH_STACKS;
+      final HttpMethod httpverb = HttpMethod.GET;
+
+      return restClient.getAllObjects(HadoopStack[].class, path, httpverb,
+            false);
    }
 }

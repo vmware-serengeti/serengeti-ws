@@ -130,7 +130,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
 
    /**
     * Validate role's existence
-    * 
+    *
     * @param blueprint
     * @param distroRoles
     * @return
@@ -158,7 +158,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    /**
     * Check whether the roles used in the cluster exist in distro manifest and
     * Chef Server.
-    * 
+    *
     */
    private void checkUnsupportedRoles(ClusterBlueprint blueprint,
          List<String> distroRoles, List<String> failedMsgList) {
@@ -698,7 +698,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public List<String> validateScaling(NodeGroupInfo group) 
+   public List<String> validateScaling(NodeGroupInfo group)
    throws SoftwareManagementPluginException {
       // resize of job tracker and name node is not supported
       List<String> roles = group.getRoles();

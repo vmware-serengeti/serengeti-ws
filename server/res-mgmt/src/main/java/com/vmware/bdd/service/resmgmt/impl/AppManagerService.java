@@ -76,12 +76,21 @@ public class AppManagerService implements IAppManagerService{
          return null;
       }
 
+      return toAppManagerRead(entity);
+   }
+
+   /**
+    * @param entity
+    * @return
+    */
+   private AppManagerRead toAppManagerRead(AppManagerEntity entity) {
       AppManagerRead read = new AppManagerRead();
       read.setName(entity.getName());
-      read.setProvider(entity.getProvider());
-      read.setHost(entity.getHost());
-      read.setPort(entity.getPort());
+      read.setDescription(entity.getDescription());
+      read.setType(entity.getType());
+      read.setUrl(entity.getUrl());
       read.setUsername(entity.getUsername());
+      read.setSslCertificate(entity.getSslCertificate());
       return read;
    }
 
@@ -95,13 +104,7 @@ public class AppManagerService implements IAppManagerService{
       List<AppManagerRead> reads = new ArrayList<AppManagerRead>();
       AppManagerRead read;
       for (AppManagerEntity entity : entities) {
-         read = new AppManagerRead();
-         read.setName(entity.getName());
-         read.setProvider(entity.getProvider());
-         read.setHost(entity.getHost());
-         read.setPort(entity.getPort());
-         read.setUsername(entity.getUsername());
-         reads.add(read);
+         reads.add(toAppManagerRead(entity));
       }
       return reads;
    }

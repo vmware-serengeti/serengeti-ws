@@ -35,14 +35,10 @@ import com.vmware.bdd.software.mgmt.plugin.impl.DefaultSoftwareManagerImpl;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManagerFactory;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.Constants;
 
 @Service
 public class SoftwareManagerCollector {
-
-   /**
-    *
-    */
-   private static final String IRONFAN_SOFTWARE_MANAGER = "Ironfan";
 
    private static final Logger logger = Logger
          .getLogger(SoftwareManagerCollector.class);
@@ -55,6 +51,8 @@ public class SoftwareManagerCollector {
 
    private Map<String, SoftwareManager> cache =
          new HashMap<String, SoftwareManager>();
+
+   private String privateKey = null;
 
    private static String configurationPrefix = "appmanager.factoryclass.";
 
@@ -81,6 +79,13 @@ public class SoftwareManagerCollector {
       appManagerService.addAppManager(appManagerAdd);
    }
 
+   private String getPrivateKey() {
+      if (privateKey == null) {
+         //TODO: find a proper way to read key from file
+         privateKey = CommonUtil.readJsonFile(Constants.SERENGETI_PRIVATE_KEY_FILE);
+      }
+      return privateKey;
+   }
    /**
     * @param appManagerAdd
     * @return
@@ -88,12 +93,12 @@ public class SoftwareManagerCollector {
    private SoftwareManager loadSoftwareManager(AppManagerAdd appManagerAdd) {
       // Retrieve app manager factory class from serengeti.properties
       String factoryClassName =
-            Configuration.getString(configurationPrefix + appManagerAdd.getProvider());
+            Configuration.getString(configurationPrefix + appManagerAdd.getType());
       if (CommonUtil.isBlank(factoryClassName)) {
-         logger.error("Factory class for " + appManagerAdd.getProvider()
+         logger.error("Factory class for " + appManagerAdd.getType()
                + " is not defined in serengeti.properties");
          throw SoftwareManagerCollectorException.CLASS_NOT_DEFINED(appManagerAdd
-               .getProvider());
+               .getType());
       }
       logger.info("Factory class name is " + factoryClassName);
 
@@ -122,15 +127,12 @@ public class SoftwareManagerCollector {
       }
 
       logger.info("Start to invoke software manager factory to create software manager.");
-      String url =
-            "https://" + appManagerAdd.getHost() + ":"
-                  + appManagerAdd.getPort();
       SoftwareManager softwareManager = null;
       try {
          softwareManager =
-               softwareManagerFactory.getSoftwareManager(url, appManagerAdd
+               softwareManagerFactory.getSoftwareManager(appManagerAdd.getUrl(), appManagerAdd
                      .getUsername(), appManagerAdd.getPassword().toCharArray(),
-                     appManagerAdd.getPrivateKey());
+                     getPrivateKey());
       } catch (Exception ex) {
          logger.error("Create software manager failed: " + ex.getMessage());
          throw BddException.INTERNAL(ex, "Create software manager failed.");
@@ -158,7 +160,7 @@ public class SoftwareManagerCollector {
     */
    public synchronized SoftwareManager getSoftwareManager(String name) {
       if (CommonUtil.isBlank(name)) {
-         return cache.get(IRONFAN_SOFTWARE_MANAGER);
+         return cache.get(Constants.IRONFAN);
       }
       if (cache.containsKey(name)) {
          return cache.get(name);
@@ -191,31 +193,31 @@ public class SoftwareManagerCollector {
       // Should block request until initialized
       // temporarily load ironfan software manager instance here
       AppManagerAdd appManagerAdd;
-      if (appManagerService.findAppManagerByName(IRONFAN_SOFTWARE_MANAGER) == null) {
+      if (appManagerService.findAppManagerByName(Constants.IRONFAN) == null) {
          appManagerAdd = new AppManagerAdd();
-         appManagerAdd.setName(IRONFAN_SOFTWARE_MANAGER);
-         appManagerAdd.setProvider(IRONFAN_SOFTWARE_MANAGER);
-         appManagerAdd.setHost("localhost");
-         appManagerAdd.setPort(-1);
+         appManagerAdd.setName(Constants.IRONFAN);
+         appManagerAdd.setDescription(Constants.IRONFAN_DESCRIPTION);
+         appManagerAdd.setType(Constants.IRONFAN);
+         appManagerAdd.setUrl("http://localhost");
          appManagerAdd.setUsername("n/a");
          appManagerAdd.setPassword("n/a");
-         appManagerAdd.setPrivateKey("n/a");
+         appManagerAdd.setSslCertificate("n/a");
          appManagerService.addAppManager(appManagerAdd);
       }
       SoftwareManager ironfanSoftwareManager = new DefaultSoftwareManagerImpl();
-      cache.put(IRONFAN_SOFTWARE_MANAGER, ironfanSoftwareManager);
+      cache.put(Constants.IRONFAN, ironfanSoftwareManager);
 
       List<AppManagerEntity> appManagers = appManagerService.findAll();
       for (AppManagerEntity appManager : appManagers) {
-         if (!appManager.getName().equals(IRONFAN_SOFTWARE_MANAGER)) {
+         if (!appManager.getName().equals(Constants.IRONFAN)) {
             appManagerAdd = new AppManagerAdd();
             appManagerAdd.setName(appManager.getName());
-            appManagerAdd.setProvider(appManager.getProvider());
-            appManagerAdd.setHost(appManager.getHost());
-            appManagerAdd.setPort(appManager.getPort());
+            appManagerAdd.setDescription(appManager.getDescription());
+            appManagerAdd.setType(appManager.getType());
+            appManagerAdd.setUrl(appManager.getUrl());
             appManagerAdd.setUsername(appManager.getUsername());
             appManagerAdd.setPassword(appManager.getPassword());
-            appManagerAdd.setPrivateKey(appManager.getPrivateKey());
+            appManagerAdd.setSslCertificate(appManager.getSslCertificate());
             loadSoftwareManager(appManagerAdd);
          }
       }
