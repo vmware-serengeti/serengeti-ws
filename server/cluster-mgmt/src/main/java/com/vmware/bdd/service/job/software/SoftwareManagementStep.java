@@ -39,7 +39,6 @@ import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.TrackableTasklet;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
-import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.SyncHostsUtils;
 
@@ -103,9 +102,8 @@ public class SoftwareManagementStep extends TrackableTasklet {
 
       // Only check host time for configure (config, start, disk fix, scale up)
       // operation and create (resume only) operation
-      ClusterCreate clusterSpec = clusterManager.getClusterSpec(clusterName);
       SoftwareManager softwareMgr =
-         softwareMgrs.getSoftwareManager(clusterSpec.getAppManager());
+         softwareMgrs.getSoftwareManagerByClusterName(clusterName);
       if (ManagementOperation.CONFIGURE.equals(managementOperation)
             || JobConstants.RESUME_CLUSTER_JOB_NAME.equals(jobName)) {
          logger.info("Start to check host time.");
@@ -116,6 +114,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
          for (NodeEntity node : nodes) {
             hostnames.add(node.getHostName());
          }
+         ClusterCreate clusterSpec = clusterManager.getClusterSpec(clusterName);
          SyncHostsUtils.SyncHosts(clusterSpec, hostnames, softwareMgr);
       }
 
@@ -124,11 +123,10 @@ public class SoftwareManagementStep extends TrackableTasklet {
                   getJobExecutionId(chunkContext));
 
       ISoftwareManagementTask task = null;
-      if (!CommonUtil.isBlank(clusterSpec.getAppManager())
-            && !Constants.IRONFAN.equalsIgnoreCase(clusterSpec.getAppManager())) {
+      if (!softwareMgr.getName().equals(Constants.IRONFAN)) {
          task =
                createExternalTask(chunkContext, targetName, clusterName,
-                     clusterSpec, statusUpdater);
+                     statusUpdater);
 
       } else {
          task = createThriftTask(chunkContext, targetName, statusUpdater);
@@ -160,13 +158,14 @@ public class SoftwareManagementStep extends TrackableTasklet {
             JobConstants.CURRENT_COMMAND_WORK_DIR, workDir.getAbsolutePath());
 
       boolean needAllocIp = true;
-      if (ManagementOperation.DESTROY.equals(managementOperation)) {
+      if (ManagementOperation.DESTROY.equals(managementOperation) 
+            || ManagementOperation.PRE_DESTROY.equals(managementOperation)) {
          needAllocIp = false;
       }
       String specFilePath = null;
 
-      if (managementOperation.ordinal() != ManagementOperation.DESTROY
-            .ordinal()) {
+      if (!(ManagementOperation.DESTROY.equals(managementOperation) 
+            || ManagementOperation.PRE_DESTROY.equals(managementOperation))) {
          // write cluster spec file
          File specFile =
                clusterManager.writeClusterSpecFile(targetName, workDir,
@@ -183,10 +182,10 @@ public class SoftwareManagementStep extends TrackableTasklet {
 
    private ISoftwareManagementTask createExternalTask(
          ChunkContext chunkContext, String targetName, String clusterName,
-         ClusterCreate clusterSpec, StatusUpdater statusUpdater) {
+         StatusUpdater statusUpdater) {
       ISoftwareManagementTask task;
       SoftwareManager softwareMgr =
-            softwareMgrs.getSoftwareManager(clusterSpec.getAppManager());
+            softwareMgrs.getSoftwareManagerByClusterName(clusterName);
 
       ClusterBlueprint clusterBlueprint = getFromJobExecutionContext(chunkContext,
             JobConstants.CLUSTER_BLUEPRINT_JOB_PARAM, ClusterBlueprint.class);

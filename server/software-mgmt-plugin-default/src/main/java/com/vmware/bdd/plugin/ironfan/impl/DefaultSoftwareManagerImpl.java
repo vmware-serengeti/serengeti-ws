@@ -31,6 +31,7 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.utils.Constants;
 
 
 public class DefaultSoftwareManagerImpl implements SoftwareManager {
@@ -46,7 +47,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
 
    @Override
    public String getName() {
-      return "Default";
+      return Constants.IRONFAN;
    }
 
    @Override

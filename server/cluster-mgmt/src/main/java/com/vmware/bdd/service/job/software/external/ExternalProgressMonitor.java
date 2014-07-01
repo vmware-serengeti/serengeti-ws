@@ -28,8 +28,8 @@ import com.vmware.bdd.utils.TracedRunnable;
  * @since 0.8
  *
  */
-public class ThriftProgressMonitor extends TracedRunnable {
-   private static final Logger logger = Logger.getLogger(ThriftProgressMonitor.class);
+public class ExternalProgressMonitor extends TracedRunnable {
+   private static final Logger logger = Logger.getLogger(ExternalProgressMonitor.class);
    private static final long QUERY_INTERVAL_DEFAULT = 1000 * 10; // 10 seconds
    private static final long QUERY_INTERVAL_LONG = 1000 * 60 * 5; // 5 minutes
    private static final long QUERY_INTERVAL_MAX = 1000 * 60 * 15; // 15 minutes
@@ -42,7 +42,7 @@ public class ThriftProgressMonitor extends TracedRunnable {
    private ILockedClusterEntityManager clusterEntityMgr;
    private volatile boolean stop;
 
-   public ThriftProgressMonitor(String targetName, StatusUpdater statusUpdater,
+   public ExternalProgressMonitor(String targetName, StatusUpdater statusUpdater,
          ILockedClusterEntityManager clusterEntityMgr) {
       this.targetName = targetName;
       this.statusUpdater = statusUpdater;
