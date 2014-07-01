@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import com.vmware.bdd.software.mgmt.plugin.model.ChefServerUtils;
+import com.vmware.bdd.plugin.ironfan.utils.ChefServerUtils;
 
 public class TestSuiteUtils {
 

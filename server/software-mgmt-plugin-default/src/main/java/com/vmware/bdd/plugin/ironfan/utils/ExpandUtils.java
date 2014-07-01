@@ -1,4 +1,4 @@
-package com.vmware.bdd.software.mgmt.plugin.utils;
+package com.vmware.bdd.plugin.ironfan.utils;
 
 import org.apache.commons.configuration.ConversionException;
 import org.apache.log4j.Logger;

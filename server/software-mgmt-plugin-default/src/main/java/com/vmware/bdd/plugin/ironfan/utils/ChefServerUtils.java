@@ -1,4 +1,4 @@
-package com.vmware.bdd.software.mgmt.plugin.model;
+package com.vmware.bdd.plugin.ironfan.utils;
 
 /***************************************************************************
  * Copyright (c) 2014 VMware, Inc. All Rights Reserved.

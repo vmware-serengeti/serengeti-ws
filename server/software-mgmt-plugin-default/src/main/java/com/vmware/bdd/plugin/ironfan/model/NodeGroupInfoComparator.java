@@ -1,8 +1,9 @@
-package com.vmware.bdd.software.mgmt.plugin.model;
+package com.vmware.bdd.plugin.ironfan.model;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.HadoopRole.RoleComparactor;
 

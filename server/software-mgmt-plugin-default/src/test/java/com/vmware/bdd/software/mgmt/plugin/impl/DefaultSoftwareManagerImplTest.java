@@ -1,3 +1,17 @@
+/***************************************************************************
+ * Copyright (c) 2012-2014 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
 package com.vmware.bdd.software.mgmt.plugin.impl;
 
 import java.util.ArrayList;
@@ -19,6 +33,8 @@ import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.plugin.ironfan.impl.ClusterValidator;
+import com.vmware.bdd.plugin.ironfan.impl.DefaultSoftwareManagerImpl;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
@@ -27,7 +43,8 @@ import com.vmware.bdd.spectypes.ServiceType;
 import com.vmware.bdd.utils.Constants;
 
 public class DefaultSoftwareManagerImplTest extends TestCase {
-    private static DefaultSoftwareManagerImpl defaultSoftwareManager = new DefaultSoftwareManagerImpl();
+   private static DefaultSoftwareManagerImpl defaultSoftwareManager = new DefaultSoftwareManagerImpl();
+    private static ClusterValidator validator = new ClusterValidator();
 
     @BeforeClass
     public void setup() throws Exception {
@@ -49,7 +66,7 @@ public class DefaultSoftwareManagerImplTest extends TestCase {
     public void testValidateRoleDependency() {
         ClusterBlueprint blueprint = new ClusterBlueprint();
         List<String> failedMsgList = new ArrayList<String>();
-        assertEquals(false, defaultSoftwareManager.validateRoleDependency(failedMsgList, blueprint));
+        assertEquals(false, validator.validateRoleDependency(failedMsgList, blueprint));
 
         NodeGroupInfo compute = new NodeGroupInfo();
         NodeGroupInfo data = new NodeGroupInfo();
@@ -57,13 +74,13 @@ public class DefaultSoftwareManagerImplTest extends TestCase {
         nodeGroupInfos.add(compute);
         nodeGroupInfos.add(data);
         blueprint.setNodeGroups(nodeGroupInfos);
-        assertEquals(false, defaultSoftwareManager.validateRoleDependency(failedMsgList, blueprint));
+        assertEquals(false, validator.validateRoleDependency(failedMsgList, blueprint));
         assertEquals(2, failedMsgList.size());
         failedMsgList.clear();
         blueprint.setExternalHDFS("hdfs://192.168.0.2:9000");
         compute.setRoles(Arrays.asList(HadoopRole.HADOOP_TASKTRACKER.toString()));
         data.setRoles(Arrays.asList(HadoopRole.HADOOP_DATANODE.toString()));
-        assertEquals(false, defaultSoftwareManager.validateRoleDependency(failedMsgList, blueprint));
+        assertEquals(false, validator.validateRoleDependency(failedMsgList, blueprint));
         assertEquals(2, failedMsgList.size());
         assertEquals("Duplicate NameNode or DataNode role.", failedMsgList.get(0));
         assertEquals("Missing JobTracker or ResourceManager role.",
@@ -73,7 +90,7 @@ public class DefaultSoftwareManagerImplTest extends TestCase {
         nodeGroupInfos = new ArrayList<NodeGroupInfo>();
         nodeGroupInfos.add(compute);
         blueprint.setNodeGroups(nodeGroupInfos);
-        assertEquals(false, defaultSoftwareManager.validateRoleDependency(failedMsgList, blueprint));
+        assertEquals(false, validator.validateRoleDependency(failedMsgList, blueprint));
         assertEquals(1, failedMsgList.size());
         assertEquals("Cannot find one or more roles in " + ServiceType.MAPRED + " "
                 + ServiceType.MAPRED.getRoles()
@@ -86,7 +103,7 @@ public class DefaultSoftwareManagerImplTest extends TestCase {
         nodeGroupInfos.add(master);
         nodeGroupInfos.add(compute);
         blueprint.setNodeGroups(nodeGroupInfos);
-        assertEquals(false, defaultSoftwareManager.validateRoleDependency(failedMsgList, blueprint));
+        assertEquals(false, validator.validateRoleDependency(failedMsgList, blueprint));
         assertEquals(1, failedMsgList.size());
         assertEquals("Some dependent services " + EnumSet.of(ServiceType.HDFS)
                         + " " + ServiceType.MAPRED
@@ -133,7 +150,7 @@ public class DefaultSoftwareManagerImplTest extends TestCase {
        groups.add(worker);
        groups.add(client);
        blueprint.setNodeGroups(groups);
-       defaultSoftwareManager.validateGroupConfig(blueprint, failedMsgList, warningMsgList);
+       validator.validateGroupConfig(blueprint, failedMsgList, warningMsgList);
        assertEquals(1, failedMsgList.size());
        assertEquals("worker.instanceNum=0.", failedMsgList.get(0));
        assertEquals(0, warningMsgList.size());
