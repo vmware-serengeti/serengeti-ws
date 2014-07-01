@@ -140,7 +140,7 @@ public class ClusterCommandsTest extends MockRestServer {
         setup();
         this.buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET, HttpStatus.OK,
               mapper.writeValueAsString(cr1));
-        this.buildReqRespWithoutRespBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/nodegroup/NodeGroup1/instancenum",
+        this.buildReqRespWithoutRespBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/nodegroup/NodeGroup2/instancenum",
                 HttpMethod.PUT, HttpStatus.NO_CONTENT, "5");
         clusterCommands.resizeCluster("cluster1", "NodeGroup2", 5,0,0);
 
