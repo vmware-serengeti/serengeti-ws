@@ -20,7 +20,7 @@ import java.util.concurrent.BlockingQueue;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 
 public class ClusterReportQueue {
-   private static int DEFAULT_CLUSTER_REPORT_MAX_NUMBER = 10;
+   private static int DEFAULT_CLUSTER_REPORT_MAX_NUMBER = 1000;
    // map operation ID to report info, operation ID should be: clusterName + "_" + Operation + "_" + LaunchTime.
    // i.e, cluster01_create_201405011315, do not use clusterName as ID to avoid potential concurrency issues in future.
    private final BlockingQueue<ClusterReport> reports =
