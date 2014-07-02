@@ -161,7 +161,7 @@ public class ClusterCreate implements Serializable {
 
    public void setName(String name) {
       this.name = name;
-   }   
+   }
 
    public String getAppManager() {
       return appManager;
@@ -771,7 +771,8 @@ public class ClusterCreate implements Serializable {
        hadoopStack.setDistro(distro);
        hadoopStack.setFullVersion(distroVersion); // TODO
        blueprint.setHadoopStack(hadoopStack);
-       blueprint.setNeedToValidateConfig(validateConfig);
+       blueprint.setNeedToValidateConfig(validateConfig == null ? false
+            : validateConfig);
 
        // set nodes/nodegroups
        List<NodeGroupInfo> nodeGroupInfos = new ArrayList<NodeGroupInfo>();
