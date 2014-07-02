@@ -58,6 +58,7 @@ import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Type;
+import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
 import com.vmware.bdd.manager.ClusterManager;
@@ -186,14 +187,17 @@ public class RestResource {
       if (!CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
-      /* if (!CommonUtil.isBlank(createSpec.getAppManager())) {
-         createSpec.setAppManager(appManagerService.getNameByType(Constants.IRONFAN)[0]);
+      if (!CommonUtil.isBlank(createSpec.getAppManager())) {
+         createSpec.setAppManager(Constants.IRONFAN);
       } else {
-         ApplicationManager applicationManager = appManagerService.findPluginByName(createSpec.getAppManager());
-         if (applicationManager == null) {
-            throw BddException.NOT_FOUND("application manager", createSpec.getAppManager());
+         AppManagerEntity appManager =
+               appManagerService.findAppManagerByName(createSpec
+                     .getAppManager());
+         if (appManager == null) {
+            throw BddException.NOT_FOUND("application manager",
+                  createSpec.getAppManager());
          }
-      } */
+      }
       long jobExecutionId = clusterMgr.createCluster(createSpec);
       redirectRequest(jobExecutionId, request, response);
    }
@@ -817,7 +821,7 @@ public class RestResource {
             || !CommonUtil.validateResourceName(appManagerName)) {
          throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
       }
-      AppManagerRead read = appManagerService.getAppManagerRead(appManagerName);
+      AppManagerRead read = softwareManagerCollector.getAppManagerRead(appManagerName);
       if (read == null) {
          throw BddException.NOT_FOUND("App Manager", appManagerName);
       }
@@ -827,7 +831,7 @@ public class RestResource {
    /**
     * Get supported stack information of a BDE appmanager
     * @param appManagerName
-    * @return The BDE appmanager information
+    * @return The list of supported stacks
     */
    @RequestMapping(value = "/appmanager/{appManagerName}/stacks", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
@@ -862,12 +866,12 @@ public class RestResource {
 
    /**
     * Get all BDE appmanagers' information
-    * @return A list of BDE appmanager information
+    * @return The list of Application Managers in BDE
     */
    @RequestMapping(value = "/appmanagers", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public List<AppManagerRead> getAppManagers() {
-      return appManagerService.getAllAppManagerReads();
+      return softwareManagerCollector.getAllAppManagerReads();
    }
 
    /**

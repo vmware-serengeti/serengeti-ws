@@ -19,7 +19,6 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
@@ -32,6 +31,10 @@ public class ClusterRead implements Comparable<ClusterRead> {
    private String externalHDFS;
    @Expose
    private String distro;
+
+   @Expose
+   @SerializedName("app_manager")
+   private String appManager;
 
    @Expose
    @SerializedName("distro_vendor")
@@ -112,6 +115,14 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
    public void setExternalHDFS(String externalHDFS) {
       this.externalHDFS = externalHDFS;
+   }
+
+   public String getAppManager() {
+      return appManager;
+   }
+
+   public void setAppManager(String appManager) {
+      this.appManager = appManager;
    }
 
    public String getDistro() {

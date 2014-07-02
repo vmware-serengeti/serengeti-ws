@@ -48,6 +48,8 @@ public interface IClusterEntityManager {
 
    public NodeEntity findNodeByName(String nodeName);
 
+   public List<String> findByAppManager(String appManagerName);
+
    public List<ClusterEntity> findAllClusters();
 
    public List<NodeGroupEntity> findAllGroups(String clusterName);

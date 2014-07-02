@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +37,7 @@ import com.vmware.bdd.utils.CommonUtil;
  * @author Terry Li
  * @since 0.8
  * @version 0.8
- * 
+ *
  */
 @Repository
 @Transactional(readOnly = true)
@@ -76,6 +77,19 @@ public class ClusterDAO extends BaseDAO<ClusterEntity> implements IClusterDAO {
          if (CommonUtil.matchDatastorePattern(patterns, usedDS)) {
             clusterNames.add(cluster.getName());
          }
+      }
+      return clusterNames;
+   }
+
+   @Override
+   public List<String> findClustersByAppManager(String appManagerName) {
+      Order order = Order.asc("name");
+      List<ClusterEntity> clusters =
+            findByCriteria(new Order[] { order }, null, null,
+                  Restrictions.eq("appmanager", appManagerName));
+      List<String> clusterNames = new ArrayList<String>();
+      for (ClusterEntity cluster : clusters) {
+         clusterNames.add(cluster.getName());
       }
       return clusterNames;
    }

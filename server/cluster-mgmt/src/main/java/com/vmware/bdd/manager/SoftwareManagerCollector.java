@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.AppManagerAdd;
+import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.exception.BddException;
@@ -222,5 +223,25 @@ public class SoftwareManagerCollector {
          }
       }
 
+   }
+
+   public List<AppManagerRead> getAllAppManagerReads() {
+      List<AppManagerRead> appManagerReads =
+            appManagerService.getAllAppManagerReads();
+      for (AppManagerRead appManagerRead : appManagerReads) {
+         appManagerRead.setManagedClusters(clusterEntityManager
+               .findByAppManager(appManagerRead.getName()));
+      }
+      return appManagerReads;
+   }
+
+   public AppManagerRead getAppManagerRead(String appManagerName) {
+      AppManagerRead appManagerRead =
+            appManagerService.getAppManagerRead(appManagerName);
+      if (appManagerRead != null) {
+         appManagerRead.setManagedClusters(clusterEntityManager
+               .findByAppManager(appManagerName));
+      }
+      return appManagerRead;
    }
 }

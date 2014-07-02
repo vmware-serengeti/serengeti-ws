@@ -37,6 +37,7 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
+import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterStatus;
@@ -55,6 +56,7 @@ import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.NodeStatus;
 import com.vmware.bdd.apitypes.TopologyType;
+import com.vmware.bdd.cli.rest.AppManagerRestClient;
 import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.ClusterRestClient;
 import com.vmware.bdd.cli.rest.DistroRestClient;
@@ -75,8 +77,8 @@ public class ClusterCommands implements CommandMarker {
    @Autowired
    private ClusterRestClient restClient;
 
-//   @Autowired
-//   private AppManagerClient appManagerClient;
+   @Autowired
+   private AppManagerRestClient appManagerRestClient;
 
    @Autowired
    private Configuration hadoopConfiguration;
@@ -139,19 +141,22 @@ public class ClusterCommands implements CommandMarker {
       ClusterCreate clusterCreate = new ClusterCreate();
       clusterCreate.setName(name);
 
-      /*if (CommandsUtils.isBlank(appManager)) {
-         appManager = appManagerClient.getNamebyType(Constants.IRONFAN)[0];
-      } else {
-         ApplicationManager applicationManager = appManagerClient.get(appManager);
-         if (applicationManager == null) {
+      if (!CommandsUtils.isBlank(appManager) && !Constants.IRONFAN.equalsIgnoreCase(appManager)) {
+         AppManagerRead appManagerRead = appManagerRestClient.get(appManager);
+         if (appManagerRead == null) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   name, Constants.OUTPUT_OP_CREATE,
-                  Constants.OUTPUT_OP_RESULT_FAIL, appManager + " cannot be found in the list of application manager list.");
+                  Constants.OUTPUT_OP_RESULT_FAIL,
+                  appManager + " cannot be found in the list of application managers.");
             return;
          }
-      }*/
-      
-      clusterCreate.setAppManager(appManager);
+      }
+
+      if (CommandsUtils.isBlank(appManager)) {
+         clusterCreate.setAppManager(Constants.IRONFAN);
+      } else {
+         clusterCreate.setAppManager(appManager);
+      }
 
       if (setClusterPassword) {
          String password = getPassword();
@@ -196,7 +201,7 @@ public class ClusterCommands implements CommandMarker {
       try {
          if (distro != null) {
             List<String> distroNames = null;
-            if (Constants.IRONFAN.equalsIgnoreCase(appManager) || CommandsUtils.isBlank(appManager)) {
+            if (CommandsUtils.isBlank(appManager) || Constants.IRONFAN.equalsIgnoreCase(appManager)) {
                distroNames = getDistroNames();
             } else {
                distroNames = getDistroNames(appManager);
@@ -211,7 +216,7 @@ public class ClusterCommands implements CommandMarker {
                return;
             }
          } else {
-            if (Constants.IRONFAN.equalsIgnoreCase(appManager) || CommandsUtils.isBlank(appManager)) {
+            if (CommandsUtils.isBlank(appManager) || Constants.IRONFAN.equalsIgnoreCase(appManager)) {
                String defaultDistroName =
                      clusterCreate.getDefaultDistroName(distroRestClient.getAll());
                if (CommandsUtils.isBlank(defaultDistroName)) {
@@ -222,7 +227,7 @@ public class ClusterCommands implements CommandMarker {
                   return;
                } else {
                   clusterCreate.setDistro(defaultDistroName);
-               }               
+               }
             } else {
                clusterCreate.setDistro(clusterCreate.getDefaultDistroName(appManager));
             }
@@ -234,12 +239,12 @@ public class ClusterCommands implements CommandMarker {
          return;
       }
       DistroRead distroRead = null;
-      if (Constants.IRONFAN.equalsIgnoreCase(appManager) || CommandsUtils.isBlank(appManager)) {
-         distroRead = distroRestClient.get(clusterCreate.getDistro());         
+      if (CommandsUtils.isBlank(appManager) || Constants.IRONFAN.equalsIgnoreCase(appManager)) {
+         distroRead = distroRestClient.get(clusterCreate.getDistro());
       } else {
          distroRead = distroRestClient.get(appManager, clusterCreate.getDistro());
       }
-      
+
       clusterCreate.setDistroVendor(distroRead.getVendor());
       clusterCreate.setDistroVersion(distroRead.getVersion());
       if (rpNames != null) {
@@ -278,7 +283,7 @@ public class ClusterCommands implements CommandMarker {
             clusterCreate.setExternalHDFS(clusterSpec.getExternalHDFS());
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
-            if (appManager == null) {
+            if (CommandsUtils.isBlank(appManager) || Constants.IRONFAN.equalsIgnoreCase(appManager)) {
                 validateConfiguration(clusterCreate, skipConfigValidation,
                         warningMsgList, failedMsgList);
             }
@@ -782,7 +787,7 @@ public class ClusterCommands implements CommandMarker {
                      Constants.OUTPUT_OP_RESULT_FAIL,
                      Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
                return;
-            } 
+            }
          } else if (ioShares == null) {
             // in this case, no parameter is specified excpet "cluster name", return directly
             System.out.println("There is nothing to adjust, please specify more parameters.");
@@ -1361,6 +1366,7 @@ public class ClusterCommands implements CommandMarker {
             new LinkedHashMap<String, String>();
       clusterParams.put("CLUSTER NAME", cluster.getName());
       clusterParams.put("AGENT VERSION", cluster.getVersion());
+      clusterParams.put("APP MANAGER", cluster.getAppManager());
       clusterParams.put("DISTRO", cluster.getDistro());
       if (topology != null && topology != TopologyType.NONE) {
          clusterParams.put("TOPOLOGY", topology.toString());

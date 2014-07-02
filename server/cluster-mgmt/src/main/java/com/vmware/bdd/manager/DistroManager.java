@@ -135,7 +135,7 @@ class Distro {
    public void setPackages(List<RolePackageMapping> packages) {
       this.packages = packages;
    }
-   
+
    public DistroRead convert() {
       DistroRead dr = new DistroRead();
       Set<String> roles = new TreeSet<String>();
@@ -206,7 +206,7 @@ public class DistroManager {
             softwareManagerCollector.getSoftwareManager(appManager);
       if (softwareManager == null) {
          logger.error("Failed to get softwareManger.");
-         throw new ClusterConfigException(null, "Failed to get softwareManager.");
+         throw ClusterConfigException.FAILED_TO_GET_SOFTWARE_MANAGER(appManager);
       }
       if (softwareManager.getType()
             .equalsIgnoreCase(Constants.CLOUDERA_MANAGER)) {

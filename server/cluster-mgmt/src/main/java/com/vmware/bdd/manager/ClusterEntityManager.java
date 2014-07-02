@@ -168,6 +168,10 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       return nodeDao.findByName(nodeName);
    }
 
+   public List<String> findByAppManager(String appManagerName) {
+      return clusterDao.findClustersByAppManager(appManagerName);
+   }
+
    public List<ClusterEntity> findAllClusters() {
       return clusterDao.findAll();
    }
@@ -529,7 +533,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
          Map<String, Object> groupConfigs = gson.fromJson(group.getHadoopConfig(), Map.class);
          nodeGroupInfo.setConfiguration(groupConfigs);
       }
-      if (group.getHaFlag().equalsIgnoreCase(Constants.HA_FLAG_FT) || 
+      if (group.getHaFlag().equalsIgnoreCase(Constants.HA_FLAG_FT) ||
             group.getHaFlag().equalsIgnoreCase(Constants.HA_FLAG_ON)) {
          nodeGroupInfo.setHaEnabled(true);
       }
@@ -550,7 +554,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
 
       nodeGroupInfo.setNodes(nodeInfos);
       return nodeGroupInfo;
-   
+
    }
 
    public NodeGroupInfo toNodeGroupInfo(String clusterName, String groupName) {
@@ -572,6 +576,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
             .setInstanceNum(cluster.getRealInstanceNum(ignoreObsoleteNode));
       clusterRead.setName(cluster.getName());
       clusterRead.setStatus(clusterStatus);
+      clusterRead.setAppManager(cluster.getAppManager());
       clusterRead.setDistro(cluster.getDistro());
       clusterRead.setDistroVendor(cluster.getDistroVendor());
       clusterRead.setTopologyPolicy(cluster.getTopologyPolicy());

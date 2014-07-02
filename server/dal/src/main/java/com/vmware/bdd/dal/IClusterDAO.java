@@ -26,7 +26,7 @@ import com.vmware.bdd.entity.NodeEntity;
  * @author Terry Li
  * @since 0.8
  * @version 0.8
- * 
+ *
  */
 public interface IClusterDAO extends IBaseDAO<ClusterEntity> {
 
@@ -35,6 +35,8 @@ public interface IClusterDAO extends IBaseDAO<ClusterEntity> {
    List<String> findClustersByUsedResourcePool(String rpName);
 
    List<String> findClustersByUsedDatastores(Set<String> patterns);
+
+   List<String> findClustersByAppManager(String appManagerName);
 
    boolean isExist(String name);
 

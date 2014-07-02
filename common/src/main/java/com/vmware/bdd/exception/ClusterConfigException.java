@@ -145,4 +145,7 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException LOCAL_STORAGE_USED_FOR_FT_GROUP(String group) {
       return new ClusterConfigException(null, "LOCAL_STORAGE_USED_FOR_FT_GROUP", group);
    }
+   public static ClusterConfigException FAILED_TO_GET_SOFTWARE_MANAGER(String appMgrName) {
+      return new ClusterConfigException(null, "FAILED_TO_GET_SOFTWARE_MANAGER", appMgrName);
+   }
 }

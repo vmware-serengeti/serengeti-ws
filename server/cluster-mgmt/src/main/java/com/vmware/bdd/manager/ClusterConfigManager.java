@@ -229,7 +229,7 @@ public class ClusterConfigManager {
       SoftwareManager softwareManager = softwareManagerCollector.getSoftwareManager(appManager);
       if (softwareManager == null) {
           logger.error("Failed to get softwareManger.");
-          throw new ClusterConfigException(null, "Failed to get softwareManager.");
+          throw ClusterConfigException.FAILED_TO_GET_SOFTWARE_MANAGER(appManager);
       }
        // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
       ClusterBlueprint blueprint = cluster.toBlueprint();
@@ -330,10 +330,10 @@ public class ClusterConfigManager {
          if (clusterEntity.getTopologyPolicy() == TopologyType.HVE) {
             boolean hveSupported = false;
             if (clusterEntity.getDistro() != null) {
-               
+
                DistroRead dr =null;
                if (Constants.IRONFAN.equalsIgnoreCase(appManager)) {
-                  dr = distroMgr.getDistroByName(clusterEntity.getDistro());                  
+                  dr = distroMgr.getDistroByName(clusterEntity.getDistro());
                } else {
                   dr = distroMgr.getDistroByName(appManager, clusterEntity.getDistro());
                }
