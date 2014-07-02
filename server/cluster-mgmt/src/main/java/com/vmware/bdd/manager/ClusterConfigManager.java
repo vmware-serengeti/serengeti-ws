@@ -215,7 +215,7 @@ public class ClusterConfigManager {
 
       String appManager = cluster.getAppManager();
       if (appManager == null) {
-         appManager = Constants.IRONFAN;//TODO(qjin):refactor
+         appManager = Constants.IRONFAN;
       }
       DistroRead distro = null;
       if (Constants.IRONFAN.equalsIgnoreCase(appManager)) {

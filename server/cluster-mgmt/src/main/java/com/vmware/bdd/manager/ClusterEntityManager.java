@@ -48,6 +48,7 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
+import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
@@ -591,6 +592,10 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       SoftwareManager softMgr =
             softwareManagerCollector
                   .getSoftwareManager(cluster.getAppManager());
+      if (softMgr == null) {
+         logger.error("Failed to get softwareManger.");
+         throw ClusterConfigException.FAILED_TO_GET_SOFTWARE_MANAGER(cluster.getAppManager());
+      }
       List<NodeGroupRead> groupList = new ArrayList<NodeGroupRead>();
       for (NodeGroupEntity group : cluster.getNodeGroups()) {
          NodeGroupRead groupRead = group.toNodeGroupRead(ignoreObsoleteNode);

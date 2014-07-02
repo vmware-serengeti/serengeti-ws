@@ -148,4 +148,7 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException FAILED_TO_GET_SOFTWARE_MANAGER(String appMgrName) {
       return new ClusterConfigException(null, "FAILED_TO_GET_SOFTWARE_MANAGER", appMgrName);
    }
+   public static ClusterConfigException INSTANCE_SIZE_NOT_SET(String group) {
+      return new ClusterConfigException(null, "INSTANCE_SIZE_NOT_SET", group);
+   }
 }

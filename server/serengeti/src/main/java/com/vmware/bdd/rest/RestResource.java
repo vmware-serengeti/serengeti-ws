@@ -187,7 +187,7 @@ public class RestResource {
       if (!CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
-      if (!CommonUtil.isBlank(createSpec.getAppManager())) {
+      if (CommonUtil.isBlank(createSpec.getAppManager())) {
          createSpec.setAppManager(Constants.IRONFAN);
       } else {
          AppManagerEntity appManager =

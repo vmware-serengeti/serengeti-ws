@@ -37,13 +37,20 @@ public class CommonClusterExpandPolicy {
          Set<String> sharedPattern, Set<String> localPattern) {
       logger.debug("Expand instance type config for group " + ngEntity.getName());
       InstanceType instanceType = ngEntity.getNodeType();
-      logger.debug("instance type is " + instanceType.toString());
-
       int memory = ngEntity.getMemorySize();
+      int cpu = ngEntity.getCpuNum();
+      if (instanceType == null && (cpu == 0 || memory == 0)) {
+         throw ClusterConfigException.INSTANCE_SIZE_NOT_SET(group.getName());
+      }
+      if (instanceType == null) {
+         logger.debug("instance type is not set.");
+      } else {
+         logger.debug("instance type is " + instanceType.toString());
+      }
+
       if (memory == 0) {
          ngEntity.setMemorySize(instanceType.getMemoryMB());
       }
-      int cpu = ngEntity.getCpuNum();
       if (cpu == 0) {
          ngEntity.setCpuNum(instanceType.getCpuNum());
       }
