@@ -19,6 +19,7 @@ import mockit.MockClass;
 
 import com.vmware.bdd.manager.ConcurrentWriteLockedClusterEntityManager;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 
 @MockClass(realClass = ConcurrentWriteLockedClusterEntityManager.class)
 public class MockConcurrentClusterEntityManager extends
@@ -39,4 +40,11 @@ public class MockConcurrentClusterEntityManager extends
    synchronized public void refreshNodeByVmName(String vmId, String vmName,
          String nodeAction, boolean inSession) {
    }
+
+   @Mock
+   public boolean handleOperationStatus(String clusterName,
+         ClusterReport report, boolean lastUpdate) {
+      return report.isFinished();
+   }
+
 }

@@ -15,18 +15,13 @@
 package com.vmware.bdd.service.job.software.external;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.vmware.bdd.entity.ClusterEntity;
-import com.vmware.bdd.entity.NodeEntity;
-import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
-import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.utils.TracedRunnable;
 
 /**
@@ -38,9 +33,6 @@ import com.vmware.bdd.utils.TracedRunnable;
 public class ExternalProgressMonitor extends TracedRunnable {
    private static final Logger logger = Logger.getLogger(ExternalProgressMonitor.class);
    private static final long QUERY_INTERVAL_DEFAULT = 1000 * 10; // 10 seconds
-   private static final long QUERY_INTERVAL_LONG = 1000 * 60 * 5; // 5 minutes
-   private static final long QUERY_INTERVAL_MAX = 1000 * 60 * 15; // 15 minutes
-   private static final int BIG_CLUSTER_NODES_COUNT = 100;
 
    private ClusterReportQueue queue;
    private String targetName;
@@ -117,6 +109,7 @@ public class ExternalProgressMonitor extends TracedRunnable {
             if (statusUpdater != null) {
                statusUpdater.setProgress(((double) progress) / 100);
             }
+            logger.info("cluster  finished? " + lastestReport.isFinished());
          }
 
          setLastErrorMsg(lastestReport.getErrMsg());

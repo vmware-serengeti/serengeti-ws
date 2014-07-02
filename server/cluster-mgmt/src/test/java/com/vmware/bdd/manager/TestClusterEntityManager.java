@@ -15,6 +15,7 @@
 package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,11 +26,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.gson.Gson;
+import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation.GroupAssociationType;
@@ -39,6 +41,8 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupAssociation;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
+import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.Constants;
 
@@ -55,14 +59,20 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
    @Autowired
    private IClusterEntityManager clusterEntityMgr;
 
-   @BeforeClass
-   public static void setup() {
-
+   @BeforeMethod
+   public void setup() {
+      ClusterEntity cluster = clusterEntityMgr.findByName(CLUSTER_NAME);
+      if (cluster != null)
+         clusterEntityMgr.delete(cluster);
+      cluster = assembleClusterEntity(CLUSTER_NAME);
+      clusterEntityMgr.insert(cluster);
    }
 
-   @AfterClass
-   public static void deleteAll() {
-
+   @AfterMethod
+   public void tearDown() {
+      ClusterEntity cluster = clusterEntityMgr.findByName(CLUSTER_NAME);
+      if (cluster != null)
+         clusterEntityMgr.delete(cluster);
    }
 
    static ClusterEntity assembleClusterEntity(String clusterName) {
@@ -225,5 +235,35 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
       clusterEntityMgr.delete(cluster);
       Assert.assertTrue(clusterEntityMgr.findByName(CLUSTER_NAME) == null,
             "cluster " + CLUSTER_NAME + " should be deleted");
+   }
+
+   @Test
+   public void testHandleExternalOperationStatus() {
+      ClusterReport report = new ClusterReport();
+      report.setAction("Installing agent...");
+      report.setFinished(false);
+      report.setName(CLUSTER_NAME);
+      report.setProgress(80);
+      report.setNodeReports(new HashMap<String, NodeReport>());
+      NodeReport node = new NodeReport();
+      node.setAction("Installing node agent...");
+      node.setName(HDFS_NODE_0);
+      report.getNodeReports().put(HDFS_NODE_0, node);
+
+      node = new NodeReport();
+      node.setName(HDFS_NODE_1);
+      node.setUseClusterMsg(true);
+      report.getNodeReports().put(HDFS_NODE_1, node);
+
+      boolean result = clusterEntityMgr.handleOperationStatus(CLUSTER_NAME, report, false);
+      Assert.assertFalse(result, 
+            "cluster " + CLUSTER_NAME + " operation should not be finished");
+      List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(CLUSTER_NAME);
+      Assert.assertTrue("Installing node agent...".equals(nodes.get(0).getAction()),
+            "node 1 action should be " + "Installing node agent..." 
+            + ", but got " + nodes.get(0).getAction());
+      Assert.assertTrue("Installing agent...".equals(nodes.get(1).getAction()),
+            "node 1 action should be " + "Installing agent..." 
+            + ", but got " + nodes.get(1).getAction());
    }
 }

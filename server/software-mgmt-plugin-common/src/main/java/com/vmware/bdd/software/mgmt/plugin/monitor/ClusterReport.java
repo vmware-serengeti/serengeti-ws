@@ -30,7 +30,7 @@ public class ClusterReport implements Cloneable{
    /**
     * This map should not be empty
     */
-   private Map<String, NodeReport> nodeReports;
+   private Map<String, NodeReport> nodeReports = new HashMap<String, NodeReport>();
 
    public ClusterReport() {}
 
@@ -40,7 +40,6 @@ public class ClusterReport implements Cloneable{
       this.finished = false;
       this.success = false;
       this.progress = 0;
-      this.nodeReports = new HashMap<String, NodeReport>();
       for (NodeGroupInfo ng : clusterBlueprint.getNodeGroups()) {
          for (NodeInfo nodeInfo : ng.getNodes()) {
             NodeReport nodeReport = new NodeReport(nodeInfo);

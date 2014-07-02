@@ -370,6 +370,8 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
             if (nodeReport.isUseClusterMsg() && report.getAction() != null) {
                logger.debug("set node action to:" + report.getAction());
                node.setAction(report.getAction());
+            } else if (nodeReport.getAction() != null) {
+               node.setAction(nodeReport.getAction());
             }
             if (nodeReport.getErrMsg() != null) {
                logger.debug("set node error message to:" + report.getAction());
