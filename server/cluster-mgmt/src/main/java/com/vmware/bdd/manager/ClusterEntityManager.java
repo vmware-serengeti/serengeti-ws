@@ -54,6 +54,9 @@ import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
+import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
+import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport.ServiceStatus;
 import com.vmware.bdd.software.mgmt.thrift.GroupData;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
@@ -332,6 +335,44 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
          }
       }
       logger.debug("updated database");
+      return finished;
+   }
+
+   @Transactional
+   @RetryTransaction
+   public boolean handleOperationStatus(String clusterName,
+         ClusterReport report, boolean lastUpdate) {
+      boolean finished = report.isFinished();
+      ClusterEntity cluster = findByName(report.getName());
+      Map<String, NodeReport> nodeReportMap = report.getNodeReports();
+      for (NodeGroupEntity group : cluster.getNodeGroups()) {
+         for (NodeEntity node : group.getNodes()) {
+            NodeReport nodeReport = nodeReportMap.get(node.getVmName());
+            if (nodeReport == null) {
+               continue;
+            }
+            if (nodeReport.getStatus() != null) {
+               logger.debug("node:" + node.getVmName()
+                     + ", status changed from old status: " + node.getStatus()
+                     + " to new status: " + nodeReport.getStatus().toString());
+               if (!node.isDisconnected()) {
+                  if (nodeReport.getStatus() == ServiceStatus.RUNNING) {
+                     node.setStatus(NodeStatus.SERVICE_READY);
+                  } else {
+                     node.setStatus(NodeStatus.BOOTSTRAP_FAILED);
+                  }
+               }
+            }
+            if (nodeReport.isUseClusterMsg() && report.getAction() != null) {
+               logger.debug("set node action to:" + report.getAction());
+               node.setAction(report.getAction());
+            }
+            if (nodeReport.getErrMsg() != null) {
+               logger.debug("set node error message to:" + report.getAction());
+               node.setErrMessage(nodeReport.getErrMsg());
+            }
+         }
+      }
       return finished;
    }
 

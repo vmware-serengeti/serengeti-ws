@@ -25,6 +25,7 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 
 public interface IClusterEntityManager {
@@ -79,6 +80,9 @@ public interface IClusterEntityManager {
 
    public boolean handleOperationStatus(String clusterName,
          OperationStatusWithDetail status, boolean lastUpdate);
+
+   public boolean handleOperationStatus(String clusterName,
+         ClusterReport report, boolean lastUpdate);
 
    public void syncUp(String clusterName, boolean updateClusterStatus);
 

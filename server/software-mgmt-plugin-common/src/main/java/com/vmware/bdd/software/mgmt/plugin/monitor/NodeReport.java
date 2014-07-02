@@ -1,6 +1,5 @@
 package com.vmware.bdd.software.mgmt.plugin.monitor;
 
-import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 
 /**
@@ -8,7 +7,23 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
  * Date: 6/10/14
  * Time: 7:33 PM
  */
-public class NodeReport implements Cloneable{
+public class NodeReport implements Cloneable {
+
+   public static enum ServiceStatus {
+      INSTALLATION_FAILED ( "Installation Failed" ),
+      CONFIGURATION_FAILED ( "Configuration Failed" ),
+      STARTUP_FAILED ( "Startup Failed" ),
+      RUNNING ( "Running" ),
+      FAILED ( "Failed" );
+
+      private String description;
+      private ServiceStatus(String description) {
+         this.description = description;
+      }
+      public String toString() {
+         return description;
+      }
+   }
 
    private String name;
 
@@ -16,7 +31,7 @@ public class NodeReport implements Cloneable{
 
    private String action;
 
-   private NodeStatus status;
+   private ServiceStatus status;
 
    private boolean finished;
 
@@ -27,6 +42,7 @@ public class NodeReport implements Cloneable{
    private int errCode;
 
    private String errMsg;
+   private boolean useClusterMsg;
 
    public NodeReport() {}
 
@@ -66,11 +82,11 @@ public class NodeReport implements Cloneable{
       this.action = action;
    }
 
-   public NodeStatus getStatus() {
+   public ServiceStatus getStatus() {
       return status;
    }
 
-   public void setStatus(NodeStatus status) {
+   public void setStatus(ServiceStatus status) {
       this.status = status;
    }
 
@@ -112,6 +128,14 @@ public class NodeReport implements Cloneable{
 
    public void setErrMsg(String errMsg) {
       this.errMsg = errMsg;
+   }
+
+   public boolean isUseClusterMsg() {
+      return useClusterMsg;
+   }
+
+   public void setUseClusterMsg(boolean useClusterMsg) {
+      this.useClusterMsg = useClusterMsg;
    }
 
    /**

@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.manager.intf;
 
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 
 public interface ILockedClusterEntityManager {
@@ -22,6 +23,10 @@ public interface ILockedClusterEntityManager {
 
    public boolean handleOperationStatus(String clusterName,
          OperationStatusWithDetail status, boolean lastUpdate);
+
+   public boolean handleOperationStatus(String clusterName,
+         ClusterReport report, boolean lastUpdate);
+
    public void syncUp(String clusterName, boolean updateClusterStatus);
 
    public void removeVmReference(String clusterName, String vmId);

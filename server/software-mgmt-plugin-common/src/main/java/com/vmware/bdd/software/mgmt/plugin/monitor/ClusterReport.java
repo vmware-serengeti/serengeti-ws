@@ -24,7 +24,12 @@ public class ClusterReport implements Cloneable{
    private boolean finished;
 
    private int progress;
+   private String errMsg;
+   private String errCode;
 
+   /**
+    * This map should not be empty
+    */
    private Map<String, NodeReport> nodeReports;
 
    public ClusterReport() {}
@@ -97,6 +102,22 @@ public class ClusterReport implements Cloneable{
 
    public void setProgress(int progress) {
       this.progress = progress;
+   }
+
+   public String getErrMsg() {
+      return errMsg;
+   }
+
+   public void setErrMsg(String errMsg) {
+      this.errMsg = errMsg;
+   }
+
+   public String getErrCode() {
+      return errCode;
+   }
+
+   public void setErrCode(String errCode) {
+      this.errCode = errCode;
    }
 
    /**

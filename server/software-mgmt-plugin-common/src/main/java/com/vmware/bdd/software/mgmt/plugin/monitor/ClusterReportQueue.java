@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.software.mgmt.plugin.monitor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -27,8 +29,10 @@ public class ClusterReportQueue {
          new ArrayBlockingQueue<ClusterReport>(
                DEFAULT_CLUSTER_REPORT_MAX_NUMBER);
 
-   public ClusterReport pollClusterReport() {
-      return reports.poll();
+   public List<ClusterReport> pollClusterReport() {
+      List<ClusterReport> result = new ArrayList<ClusterReport>();
+      reports.drainTo(result);
+      return result;
    }
 
    public void addClusterReport(ClusterReport report) throws SoftwareManagementPluginException {

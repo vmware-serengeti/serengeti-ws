@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.vmware.bdd.aop.annotation.ClusterEntityConcurrentWriteLock;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 
 @Component
@@ -93,5 +94,11 @@ public class ConcurrentWriteLockedClusterEntityManager implements
    public void refreshNodeByVmName(String clusterName, String vmId,
          String vmName, String nodeAction, boolean inSession) {
       clusterEntityMgr.refreshNodeByVmName(vmId, vmName, nodeAction, inSession);
+   }
+
+   @Override
+   public boolean handleOperationStatus(String clusterName,
+         ClusterReport report, boolean lastUpdate) {
+      return clusterEntityMgr.handleOperationStatus(clusterName, report, lastUpdate);
    }
 }

@@ -23,6 +23,7 @@ import com.vmware.bdd.aop.annotation.ClusterEntityExclusiveWriteLock;
 import com.vmware.bdd.aop.lock.LockFactory;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 
 /**
@@ -109,5 +110,11 @@ public class ExclusiveWriteLockedClusterEntityManager implements
 
    public ReentrantReadWriteLock.WriteLock getLock(String clusterName) {
       return LockFactory.getClusterLock(clusterName).writeLock();
+   }
+
+   @Override
+   public boolean handleOperationStatus(String clusterName,
+         ClusterReport report, boolean lastUpdate) {
+      return clusterEntityMgr.handleOperationStatus(clusterName, report, lastUpdate);
    }
 }

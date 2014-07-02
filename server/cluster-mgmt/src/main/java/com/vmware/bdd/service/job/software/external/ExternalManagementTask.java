@@ -58,13 +58,19 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
 
       Map<String, Object> result = new HashMap<String, Object>();
 
-      // TODO: start software operation monitor
+      Thread progressThread = null;
       ClusterReportQueue queue = new ClusterReportQueue();
+      ExternalProgressMonitor monitor =
+            new ExternalProgressMonitor(targetName, queue, statusUpdater,
+                  lockedClusterEntityManager);
+      progressThread = new Thread(monitor, "ProgressMonitor-" + targetName);
+      progressThread.setDaemon(true);
+      progressThread.start();
+
       boolean success = false;
       try {
          switch(managementOperation) {
             case CREATE:
-               // TODO: set targetName
                success = softwareManager.createCluster(clusterBlueprint, queue);
                break;
             case CONFIGURE:
@@ -78,10 +84,17 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
             default:
                success = true;
          }
-      } catch (Exception e) {
-
+      } catch (Throwable t) {
+         logger.error(" operation : " + managementOperation.name()
+               + " failed on cluster: " + targetName, t);
       } finally {
-         // TODO: stop monitor
+         if (progressThread != null) {
+            if (monitor != null) {
+               monitor.setStop(true); // tell monitor to stop monitoring then the thread will exit
+               progressThread.interrupt(); // wake it up to stop immediately if it's sleeping
+               progressThread.join();
+            }
+         }
       }
 
       result.put("succeed", success);
