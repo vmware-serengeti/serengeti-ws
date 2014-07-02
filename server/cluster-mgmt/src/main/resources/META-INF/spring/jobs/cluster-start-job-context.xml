@@ -36,14 +36,14 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="startClusterVerifyNodeStatus" next="softwareBootstrapClusterStep">
+		<step id="startClusterVerifyNodeStatus" next="softwareBootstrapStartClusterStep">
 			<tasklet ref="startClusterNodeStatusVerifyTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="softwareBootstrapClusterStep">
-			<tasklet ref="softwareBootstrapTargetTasklet" />
+		<step id="softwareBootstrapStartClusterStep">
+			<tasklet ref="softwareBootstrapStartClusterTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

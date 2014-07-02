@@ -137,8 +137,8 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    @Override
    public boolean onStopCluster(String clusterName,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
-      return false;
+      // We don't acctually stop any services for ironfan deployed cluster
+      return true;
    }
 
    @Override

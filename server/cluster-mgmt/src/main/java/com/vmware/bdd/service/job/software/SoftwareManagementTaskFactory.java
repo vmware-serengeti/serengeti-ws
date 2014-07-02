@@ -51,8 +51,9 @@ public class SoftwareManagementTaskFactory {
          clusterOperation.setAction(ClusterAction.START);
          break;
       case STOP:
-         clusterOperation.setAction(ClusterAction.STOP);
-         break;
+         //When stop ironfan deployed cluster, don't need to stop
+         //hadoop services, return directly.
+         return null;
       case DESTROY:
          clusterOperation.setAction(ClusterAction.DESTROY);
          break;

@@ -61,4 +61,11 @@ public interface ClustersResource {
    @Path("/{clusterName}/requests")
    public RequestsResource getRequestsResource(@PathParam(Parameters.CLUSTER_NAME) String clusterName);
 
+   @POST
+   @Path("/{clusterName}")
+   public boolean startCluster(@PathParam(Parameters.CLUSTER_NAME) String clusterName);
+
+   @POST
+   @Path("/{clusterName}")
+   public boolean stopCluster(@PathParam(Parameters.CLUSTER_NAME) String clusterName);
 }

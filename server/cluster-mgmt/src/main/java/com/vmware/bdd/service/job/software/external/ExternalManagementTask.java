@@ -28,7 +28,6 @@ import com.vmware.bdd.service.job.software.ManagementOperation;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
-
 /**
  * Author: Xiaoding Bian
  * Date: 6/11/14
@@ -89,6 +88,12 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
                break;
             case DESTROY:
                success = softwareManager.deleteCluster(clusterBlueprint.getName(), queue);
+            case START:
+               success = softwareManager.startCluster(clusterBlueprint.getName(), queue);
+               break;
+            case STOP:
+               success = softwareManager.onStopCluster(clusterBlueprint.getName(),queue);
+               break;
             default:
                success = true;
          }

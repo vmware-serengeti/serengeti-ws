@@ -333,8 +333,8 @@ public class AmbariImpl implements SoftwareManager {
    @Override
    public boolean onStopCluster(String clusterName, ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
-      return false;
+      // TODO(qjin): need to stop all services in Ambari deployed cluster
+      return true;
    }
 
    @Override

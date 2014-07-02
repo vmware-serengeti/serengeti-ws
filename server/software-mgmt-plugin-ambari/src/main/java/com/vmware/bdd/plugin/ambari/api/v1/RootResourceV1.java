@@ -15,7 +15,6 @@
 package com.vmware.bdd.plugin.ambari.api.v1;
 
 import javax.ws.rs.Path;
-
 @Path("")
 public interface RootResourceV1 {
    /**

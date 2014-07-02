@@ -65,6 +65,10 @@ public class SoftwareManagementPluginException extends RuntimeException {
       return new SoftwareManagementPluginException("STOP_CLUSTER_FAILED", "Failed to stop cluster " + clusterName, cause);
    }
 
+   public static SoftwareManagementPluginException CHECK_SERVICE_FAILED(String clusterName, Throwable cause) {
+      return new SoftwareManagementPluginException("CHECK_SERVICE_FAILED", "Failed to check service state for cluster " + clusterName, cause);
+   }
+
    public static SoftwareManagementPluginException CONFIGURE_SERVICE_FAILED(String clusterName, Throwable cause) {
       return new SoftwareManagementPluginException("CONFIGURE_SERVICE_FAILED", "Failed to configure service for cluster " + clusterName, cause);
    }

@@ -127,7 +127,6 @@ public class SoftwareManagementStep extends TrackableTasklet {
          task =
                createExternalTask(chunkContext, targetName, clusterName,
                      statusUpdater);
-
       } else {
          task = createThriftTask(chunkContext, targetName, statusUpdater);
       }

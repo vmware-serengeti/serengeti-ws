@@ -55,6 +55,7 @@ import com.cloudera.api.model.ApiService;
 import com.cloudera.api.model.ApiServiceConfig;
 import com.cloudera.api.model.ApiServiceList;
 import com.cloudera.api.model.ApiServiceState;
+
 import com.cloudera.api.v3.ParcelResource;
 import com.cloudera.api.v6.RootResourceV6;
 import com.cloudera.api.v6.ServicesResourceV6;
@@ -63,6 +64,7 @@ import com.vmware.bdd.plugin.clouderamgr.model.CmClusterDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmNodeDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmRoleDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmServiceDef;
+import com.vmware.aurora.util.AuAssert;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -203,7 +205,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       } catch (SoftwareManagementPluginException ex) {
          throw ex;
       } catch (Exception e) {
-         logger.error(e.getMessage());
+         logger.error(e.getMessage(), e);
          throw SoftwareManagementPluginException.CREATE_CLUSTER_FAILED(blueprint.getName(), e);
       }
 
@@ -218,12 +220,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public boolean scaleOutCluster(String clusterName, NodeGroupInfo group, List<NodeInfo> addedNodes,
-         ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      return false;
-   }
-
-   @Override
-   public boolean startCluster(String clusterName,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       return false;
    }
@@ -248,19 +244,21 @@ public class ClouderaManagerImpl implements SoftwareManager {
          throw SoftwareManagementPluginException.DELETE_CLUSTER_FAILED(clusterName, e);
       }
       return true;
-   }
+  }
 
    @Override
    public boolean onStopCluster(String clusterName,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      return false;
+      return stopCluster(clusterName);
+
+      //TODO(qjin): handle reports
    }
 
    @Override
    public boolean onDeleteCluster(String clusterName,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // just stop this cluster
-      return stop(clusterName);
+      return onStopCluster(clusterName, reports);
    }
 
    @Override
@@ -358,34 +356,73 @@ public class ClouderaManagerImpl implements SoftwareManager {
       return servicesNotStarted.isEmpty();
    }
 
-   private boolean stop(String clusterName) throws ClouderaManagerException {
-      try {
-         if ((!isStopped(clusterName))) {
-            execute(apiResourceRootV6.getClustersResource().stopCommand(clusterName));
+   private boolean needStop(String clusterName) {
+      if (!isProvisioned(clusterName)) {
+         return false;
+      }
+
+      for (ApiService apiService : apiResourceRootV6.getClustersResource().getServicesResource(clusterName).readServices(DataView.SUMMARY)) {
+         if (apiService.getServiceState().equals(ApiServiceState.STARTED) || apiService.getServiceState().equals(ApiServiceState.STARTING)) {
+            return true;
          }
+      }
+
+      return false;
+   }
+
+   private boolean needStart(String clusterName) {
+      if (!isProvisioned(clusterName)) {
+         return false;
+      }
+      for (ApiService apiService : apiResourceRootV6.getClustersResource().getServicesResource(clusterName).readServices(DataView.SUMMARY)) {
+         if (apiService.getServiceState().equals(ApiServiceState.STARTED) || apiService.getServiceState().equals(ApiServiceState.STARTING)) {
+            continue;
+         } else {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   private boolean stopCluster(String clusterName) throws SoftwareManagementPluginException {
+      AuAssert.check(clusterName != null && !clusterName.isEmpty());
+      try {
+         if (isStopped(clusterName) || !needStop(clusterName)) {
+            return true;
+         }
+
+         execute(apiResourceRootV6.getClustersResource().stopCommand(clusterName));
       } catch (Exception e) {
-         // if "stop" command is not allowed, just ignore
          throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(clusterName, e);
       }
       return true;
    }
 
-   private boolean isStopped(String clusterName) throws ClouderaManagerException {
+   @Override
+   public boolean startCluster(String clusterName, ClusterReportQueue reports) throws SoftwareManagementPluginException {
+      AuAssert.check(clusterName != null && !clusterName.isEmpty());
+      try {
+         if (!needStart(clusterName)) {
+            return true;
+         }
 
+         execute(apiResourceRootV6.getClustersResource().startCommand(clusterName));
+      } catch (Exception e) {
+         throw SoftwareManagementPluginException.START_CLUSTER_FAILED(clusterName, e);
+      }
+      return true;
+   }
+
+   private boolean isStopped(String clusterName) throws ClouderaManagerException {
       if (!isProvisioned(clusterName)) {
          return false;
       }
 
-      try {
-         for (ApiService apiService : apiResourceRootV6.getClustersResource().getServicesResource(clusterName).readServices(DataView.SUMMARY)) {
-            if (!apiService.getServiceState().equals(ApiServiceState.STOPPED)) {
-               return false;
-            }
+      for (ApiService apiService : apiResourceRootV6.getClustersResource().getServicesResource(clusterName).readServices(DataView.SUMMARY)) {
+         if (!apiService.getServiceState().equals(ApiServiceState.STOPPED)) {
+            return false;
          }
-      } catch (Exception e) {
-         throw new SoftwareManagementPluginException(clusterName, e);
       }
-
       return true;
    }
 
@@ -961,7 +998,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
          throw SoftwareManagementPluginException.CONFIGURE_SERVICE_FAILED(cluster.getName(),e);
       }
    }
-
 
    /**
     * start services/roles, assume the roles' IDs are already synched

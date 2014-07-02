@@ -52,8 +52,8 @@ module Software
             action = "create"
             option = "-f #{clusterOperation.specFileName} --yes --bootstrap"
           when ClusterAction::START
-            action = "start"
-            option = "-f #{clusterOperation.specFileName} --yes --bootstrap"
+            action = "bootstrap"
+            option = "-f #{clusterOperation.specFileName} --yes"
           when ClusterAction::STOP
             action = "stop"
             option = "-f #{clusterOperation.specFileName} --yes"
