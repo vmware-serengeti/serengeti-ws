@@ -123,7 +123,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
                   getJobExecutionId(chunkContext));
 
       ISoftwareManagementTask task = null;
-      if (!softwareMgr.getName().equals(Constants.IRONFAN)) {
+      if (!Constants.IRONFAN.equals(softwareMgr.getName())) {
          task =
                createExternalTask(chunkContext, targetName, clusterName,
                      statusUpdater);
@@ -158,13 +158,13 @@ public class SoftwareManagementStep extends TrackableTasklet {
             JobConstants.CURRENT_COMMAND_WORK_DIR, workDir.getAbsolutePath());
 
       boolean needAllocIp = true;
-      if (ManagementOperation.DESTROY.equals(managementOperation) 
+      if (ManagementOperation.DESTROY.equals(managementOperation)
             || ManagementOperation.PRE_DESTROY.equals(managementOperation)) {
          needAllocIp = false;
       }
       String specFilePath = null;
 
-      if (!(ManagementOperation.DESTROY.equals(managementOperation) 
+      if (!(ManagementOperation.DESTROY.equals(managementOperation)
             || ManagementOperation.PRE_DESTROY.equals(managementOperation))) {
          // write cluster spec file
          File specFile =
