@@ -55,4 +55,16 @@ public class SoftwareManagerCollectorException extends BddException {
       return new SoftwareManagerCollectorException(null, "CLASS_NOT_DEFINED",
             name);
    }
+
+   public static SoftwareManagerCollectorException PRIVATE_KEY_NOT_FOUND(
+         Exception ex, String privateKeyFilePath) {
+      return new SoftwareManagerCollectorException(ex, "PRIVATE_KEY_NOT_FOUND",
+            privateKeyFilePath);
+   }
+
+   public static SoftwareManagerCollectorException PRIVATE_KEY_READ_ERROR(
+         Exception ex, String privateKeyFilePath) {
+      return new SoftwareManagerCollectorException(ex, "PRIVATE_KEY_READ_ERROR",
+            privateKeyFilePath);
+   }
 }

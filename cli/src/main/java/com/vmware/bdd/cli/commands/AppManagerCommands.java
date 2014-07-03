@@ -51,12 +51,12 @@ public class AppManagerCommands implements CommandMarker {
    @CliCommand(value = "appmanager add", help = "Add an App Manager instance")
    public void addAppManager(
          @CliOption(key = { "name" }, mandatory = true, help = "The instance name") final String name,
-         @CliOption(key = { "description" }, mandatory = true, help = "The instance description") final String description,
+         @CliOption(key = { "description" }, mandatory = false, help = "The instance description") final String description,
          @CliOption(key = { "type" }, mandatory = true, help = "The provider type, ClouderaManager or Ambari") final String type,
          @CliOption(key = { "url" }, mandatory = true, help = "The instance URL") final String url,
          @CliOption(key = { "username" }, mandatory = false, help = "The username to login software manager server") final String username,
          @CliOption(key = { "password"}, mandatory = false, help = "The password") final String password,
-         @CliOption(key = { "sslCertificateFile"}, mandatory = true, help = "The ssl certificate file of the instance") final String path) {
+         @CliOption(key = { "sslCertificateFile"}, mandatory = false, help = "The ssl certificate file of the instance") final String path) {
 
       // rest invocation
       try {

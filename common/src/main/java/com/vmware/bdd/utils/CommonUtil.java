@@ -15,6 +15,9 @@
 package com.vmware.bdd.utils;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -65,7 +68,37 @@ public class CommonUtil {
           }
       }
       return jsonBuff.toString();
-  }
+   }
+
+   //TODO this is copied from CLI CommandsUtils
+   public static String dataFromFile(String filePath) throws IOException,
+         FileNotFoundException {
+      StringBuffer dataStringBuffer = new StringBuffer();
+      FileInputStream fis = null;
+      InputStreamReader inputStreamReader = null;
+      BufferedReader bufferedReader = null;
+      try {
+         fis = new FileInputStream(filePath);
+         inputStreamReader = new InputStreamReader(fis, "UTF-8");
+         bufferedReader = new BufferedReader(inputStreamReader);
+         String line = "";
+         while ((line = bufferedReader.readLine()) != null) {
+            dataStringBuffer.append(line);
+            dataStringBuffer.append("\n");
+         }
+      } finally {
+         if (fis != null) {
+            fis.close();
+         }
+         if (inputStreamReader != null) {
+            inputStreamReader.close();
+         }
+         if (bufferedReader != null) {
+            bufferedReader.close();
+         }
+      }
+      return dataStringBuffer.toString();
+   }
 
    public static List<String> inputsConvert(String inputs) {
       List<String> names = new ArrayList<String>();

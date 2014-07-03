@@ -15,6 +15,8 @@
 
 package com.vmware.bdd.manager;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,8 +84,21 @@ public class SoftwareManagerCollector {
 
    private String getPrivateKey() {
       if (privateKey == null) {
-         //TODO: find a proper way to read key from file
-         privateKey = CommonUtil.readJsonFile(Constants.SERENGETI_PRIVATE_KEY_FILE);
+         try {
+            privateKey =
+                  CommonUtil.dataFromFile(Constants.SERENGETI_PRIVATE_KEY_FILE);
+         } catch (FileNotFoundException e) {
+            logger.error("Serengeti private key file "
+                  + Constants.SERENGETI_PRIVATE_KEY_FILE + " does not exist.",
+                  e);
+            throw SoftwareManagerCollectorException.PRIVATE_KEY_NOT_FOUND(e,
+                  Constants.SERENGETI_PRIVATE_KEY_FILE);
+         } catch (IOException e) {
+            logger.error("Error in reading Serengeti private key file "
+                  + Constants.SERENGETI_PRIVATE_KEY_FILE + ".", e);
+            throw SoftwareManagerCollectorException.PRIVATE_KEY_READ_ERROR(e,
+                  Constants.SERENGETI_PRIVATE_KEY_FILE);
+         }
       }
       return privateKey;
    }
