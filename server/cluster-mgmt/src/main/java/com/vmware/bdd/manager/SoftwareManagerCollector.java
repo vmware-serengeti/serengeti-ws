@@ -17,6 +17,7 @@ package com.vmware.bdd.manager;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ public class SoftwareManagerCollector {
    private String privateKey = null;
 
    private static String configurationPrefix = "appmanager.factoryclass.";
+   private static String appmanagerTypesKey = "appmanager.types";
 
    /**
     * Software manager name will be unique inside of BDE. Otherwise, creation
@@ -258,5 +260,15 @@ public class SoftwareManagerCollector {
                .findByAppManager(appManagerName));
       }
       return appManagerRead;
+   }
+
+   public List<String> getAllAppManagerTypes() {
+      String[] types = null;
+      String appmanagerTypes =
+            Configuration.getStrings(appmanagerTypesKey, "");
+      if (appmanagerTypes != null) {
+         types = appmanagerTypes.split(",");
+      }
+      return Arrays.asList(types);
    }
 }

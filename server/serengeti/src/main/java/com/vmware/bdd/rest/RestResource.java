@@ -792,11 +792,23 @@ public class RestResource {
       networkSvc.increaseIPs(networkName, network.getIpBlocks());
    }
 
+   /**
+    * Get all appmanager types supported by BDE
+    * @return The list of Application Manager types in BDE
+    */
+   @RequestMapping(value = "/appmanagers/types", method = RequestMethod.GET, produces = "application/json")
+   @ResponseBody
+   public List<String> getAppManagerTypes() {
+      return softwareManagerCollector.getAllAppManagerTypes();
+   }
+
+   /**
+    * Add an appmanager to BDE
+    * @param appManagerAdd
+    */
    @RequestMapping(value = "/appmanagers", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
    public void addAppManager(@RequestBody final AppManagerAdd appManagerAdd) {
-      //does it?
-      verifyInitialized();
       if (appManagerAdd == null) {
          throw BddException.INVALID_PARAMETER("appManagerAdd", null);
       }
