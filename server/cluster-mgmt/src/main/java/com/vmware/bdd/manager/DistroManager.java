@@ -208,20 +208,17 @@ public class DistroManager {
          logger.error("Failed to get softwareManger.");
          throw ClusterConfigException.FAILED_TO_GET_SOFTWARE_MANAGER(appManager);
       }
-      if (softwareManager.getType()
-            .equalsIgnoreCase(Constants.CLOUDERA_MANAGER)) {
-         List<HadoopStack> hadoopStacks = softwareManager.getSupportedStacks();
-         if (hadoopStacks != null && hadoopStacks.size() > 0) {
-            List<DistroRead> distros = new ArrayList<DistroRead>();
-            for (HadoopStack hadoopStack : hadoopStacks) {
-               DistroRead distro = new DistroRead();
-               distro.setName(hadoopStack.getDistro());
-               distro.setVendor(hadoopStack.getVendor());
-               distro.setVersion(hadoopStack.getFullVersion());
-               distros.add(distro);
-            }
-            return distros;
+      List<HadoopStack> hadoopStacks = softwareManager.getSupportedStacks();
+      if (hadoopStacks != null && hadoopStacks.size() > 0) {
+         List<DistroRead> distros = new ArrayList<DistroRead>();
+         for (HadoopStack hadoopStack : hadoopStacks) {
+            DistroRead distro = new DistroRead();
+            distro.setName(hadoopStack.getDistro());
+            distro.setVendor(hadoopStack.getVendor());
+            distro.setVersion(hadoopStack.getFullVersion());
+            distros.add(distro);
          }
+         return distros;
       }
       return null;
    }

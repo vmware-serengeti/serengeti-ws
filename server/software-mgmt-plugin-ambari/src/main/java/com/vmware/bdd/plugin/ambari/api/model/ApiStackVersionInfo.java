@@ -31,7 +31,7 @@ public class ApiStackVersionInfo {
    private String StackVersion;
 
    @Expose
-   private boolean active;
+   private Boolean active;
 
    @Expose
    @SerializedName("min_upgrade_version")
@@ -65,11 +65,11 @@ public class ApiStackVersionInfo {
       StackVersion = stackVersion;
    }
 
-   public boolean isActive() {
+   public Boolean isActive() {
       return active;
    }
 
-   public void setActive(boolean active) {
+   public void setActive(Boolean active) {
       this.active = active;
    }
 

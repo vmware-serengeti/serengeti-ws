@@ -20,13 +20,13 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class ApiStackVersion {
-   
+
    @Expose
    private String href;
-   
+
    @Expose
    @SerializedName("Versions")
-   private List<ApiStackVersionInfo> apiStackVersioninfos;
+   private ApiStackVersionInfo apiStackVersionInfo;
 
    @Expose
    @SerializedName("stackServices")
@@ -44,13 +44,12 @@ public class ApiStackVersion {
       this.href = href;
    }
 
-   public List<ApiStackVersionInfo> getApiStackVersioninfos() {
-      return apiStackVersioninfos;
+   public ApiStackVersionInfo getApiStackVersionInfo() {
+      return apiStackVersionInfo;
    }
 
-   public void setApiStackVersioninfos(
-         List<ApiStackVersionInfo> apiStackVersioninfos) {
-      this.apiStackVersioninfos = apiStackVersioninfos;
+   public void setApiStackVersionInfos(ApiStackVersionInfo apiStackVersionInfo) {
+      this.apiStackVersionInfo = apiStackVersionInfo;
    }
 
    public List<ApiStackService> getApiStackServices() {

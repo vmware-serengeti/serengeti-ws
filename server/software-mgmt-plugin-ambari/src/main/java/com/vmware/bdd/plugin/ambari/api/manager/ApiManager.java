@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.manager;
 
+import org.apache.log4j.Logger;
+
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
 import com.vmware.bdd.plugin.ambari.api.ApiRootResource;
 import com.vmware.bdd.plugin.ambari.api.manager.intf.IApiManager;
@@ -38,6 +40,8 @@ import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
 
 public class ApiManager implements IApiManager {
+
+   private static final Logger logger = Logger.getLogger(ApiManager.class);
 
    private RootResourceV1 apiResourceRootV1;
 
@@ -202,8 +206,11 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiRequest request(String clusterName, Long requestId) {
-      String requestJson = apiResourceRootV1.getClustersResource().getRequestsResource(clusterName).readRequest(requestId);
-      ApiRequest apiRequest = ApiUtils.jsonToObject(ApiRequest.class, requestJson);
+      String requestJson =
+            apiResourceRootV1.getClustersResource()
+                  .getRequestsResource(clusterName).readRequest(requestId);
+      ApiRequest apiRequest =
+            ApiUtils.jsonToObject(ApiRequest.class, requestJson);
       return apiRequest;
    }
 

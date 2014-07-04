@@ -16,15 +16,18 @@ package com.vmware.bdd.plugin.ambari.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.google.gson.annotations.Expose;
 import com.vmware.bdd.plugin.ambari.api.model.ApiComponentInfo;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHost;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHostGroup;
 
-public class AmNodeDef  implements Serializable{
+public class AmNodeDef implements Serializable {
 
    private static final long serialVersionUID = 5585914239769234047L;
 
@@ -41,7 +44,7 @@ public class AmNodeDef  implements Serializable{
    private String rackInfo;
 
    @Expose
-   private Map<String, Object> configurations;
+   private List<Map<String, Object>> configurations;
 
    @Expose
    private List<String> components;
@@ -78,11 +81,11 @@ public class AmNodeDef  implements Serializable{
       this.rackInfo = rackInfo;
    }
 
-   public Map<String, Object> getConfigurations() {
+   public List<Map<String, Object>> getConfigurations() {
       return configurations;
    }
 
-   public void setConfigurations(Map<String, Object> configurations) {
+   public void setConfigurations(List<Map<String, Object>> configurations) {
       this.configurations = configurations;
    }
 
@@ -94,17 +97,94 @@ public class AmNodeDef  implements Serializable{
       this.components = components;
    }
 
+   public void setVolumns(List<String> volumns) {
+      for (String component : components) {
+         switch (component) {
+         case "NAMENODE":
+            addConfiguration("hdfs-site", "dfs.namenode.name.dir",
+                  dataDirs(volumns, "/hdfs/namenode"));
+            break;
+         case "SECONDARY_NAMENODE":
+            addConfiguration("hdfs-site", "dfs.namenode.checkpoint.dir",
+                  dataDirs(volumns, "/hdfs/namesecondary"));
+            break;
+         case "DATANODE":
+            addConfiguration("hdfs-site", "dfs.datanode.data.dir",
+                  dataDirs(volumns, "/hdfs/data"));
+            break;
+         case "NODEMANAGER":
+            addConfiguration("yarn-site", "yarn.nodemanager.local-dirs",
+                  dataDirs(volumns, "/yarn/local"));
+            break;
+         default:
+            break;
+         }
+      }
+   }
+
+   private String dataDirs(List<String> volumes, String postFix) {
+      if ("/hdfs/namesecondary".equals(postFix)) {
+         return volumes.get(0);
+      }
+      List<String> dirList = new ArrayList<String>();
+      for (String volume : volumes) {
+         dirList.add(volume + postFix);
+      }
+      return StringUtils.join(dirList, ",");
+   }
+
+   public void setBlueprintConfigurationsToAm(Map<String, Object> configuration) {
+      if (configuration != null) {
+         for (String ConfigurationType : configuration.keySet()) {
+            setConfigurations(ConfigurationType,
+                  (Map<String, String>) configuration.get(ConfigurationType));
+         }
+      }
+   }
+
+   public void addConfiguration(String ConfigurationType, String propertyName,
+         String propertyValue) {
+      Map<String, String> property = new HashMap<String, String>();
+      property.put(propertyName, propertyValue);
+      setConfigurations(ConfigurationType, property);
+   }
+
+   public void setConfigurations(String ConfigurationType,
+         Map<String, String> property) {
+      Map<String, Object> configuration = new HashMap<String, Object>();
+      configuration.put(ConfigurationType, property);
+      if (configurations == null || configurations.isEmpty()) {
+         configurations = new ArrayList<Map<String, Object>>();
+         configurations.add(configuration);
+      } else {
+         boolean isContainsKey = false;
+         for (Map<String, Object> nodeConfiguration : configurations) {
+            if (nodeConfiguration.containsKey(ConfigurationType)) {
+               Map<String, String> properties =
+                     (Map<String, String>) nodeConfiguration
+                           .get(ConfigurationType);
+               properties.putAll(property);
+               isContainsKey = true;
+            }
+         }
+         if (!isContainsKey) {
+            configurations.add(configuration);
+         }
+      }
+   }
+
    public ApiHostGroup toApiHostGroupForBlueprint() {
       ApiHostGroup apiHostGroup = new ApiHostGroup();
 
       apiHostGroup.setName(name);
       apiHostGroup.setCardinality("1");
 
+      List<Map<String, Object>> apiConfigurations =
+            new ArrayList<Map<String, Object>>();
       if (configurations != null) {
-         List<Map<String, Object>> apiConfigurations = new ArrayList<Map<String, Object>>();
-         apiConfigurations.add(configurations);
-         apiHostGroup.setConfigurations(apiConfigurations);
+         apiConfigurations = configurations;
       }
+      apiHostGroup.setConfigurations(apiConfigurations);
 
       List<ApiComponentInfo> apiComponents = new ArrayList<ApiComponentInfo>();
       for (String componentName : components) {
@@ -121,12 +201,12 @@ public class AmNodeDef  implements Serializable{
 
       apiHostGroup.setName(name);
 
-      if (configurations  != null) {
-         List<Map<String, Object>> apiConfigurations = new ArrayList<Map<String, Object>>();
-         apiConfigurations.add(configurations);
-         // TODO volumns
-         apiHostGroup.setConfigurations(apiConfigurations);
+      List<Map<String, Object>> apiConfigurations =
+            new ArrayList<Map<String, Object>>();
+      if (configurations != null) {
+         apiConfigurations = configurations;
       }
+      apiHostGroup.setConfigurations(apiConfigurations);
 
       List<ApiHost> apiHosts = new ArrayList<ApiHost>();
       ApiHost apiHost = new ApiHost();

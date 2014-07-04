@@ -16,6 +16,44 @@ package com.vmware.bdd.plugin.ambari.api.model;
 
 public enum BootstrapStatus {
 
-   RUNNING, SUCCESS, ERROR
+   RUNNING(0),
+   SUCCESS(1),
+   ERROR(2);
 
+   private final int status;
+
+   private BootstrapStatus(int status) {
+      this.status = status;
+   }
+
+   /**
+    * Indicates whether or not it is a valid failure state.
+    *
+    * @return true if this is a valid failure state.
+    */
+   public boolean isFailedState() {
+      switch (BootstrapStatus.values()[this.status]) {
+      case ERROR:
+         return true;
+      default:
+         return false;
+      }
+   }
+
+   /**
+    * Indicates whether or not this is a completed state. Completed means that
+    * the associated task has stopped running because it has finished
+    * successfully or has failed.
+    *
+    * @return true if this is a completed state.
+    */
+   public boolean isCompletedState() {
+      switch (BootstrapStatus.values()[this.status]) {
+      case SUCCESS:
+      case ERROR:
+         return true;
+      default:
+         return false;
+      }
+   }
 }

@@ -53,6 +53,10 @@ public class AmException extends BddException {
       return new AmException(null, "BOOTSTRAP_REQUEST_FAILED", requestId);
    }
 
+   public static AmException BOOTSTRAP_ALL_HOSTS_FAILED(Long requestId) {
+      return new AmException(null, "BOOTSTRAP_ALL_HOSTS_FAILED", requestId);
+   }
+
    public static AmException CREATE_BLUEPRINT_FAILED(String clusterName) {
       return new AmException(null, "CREATE_BLUEPRINT_FAILED", clusterName);
    }

@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -25,6 +26,10 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
+import com.vmware.bdd.plugin.ambari.api.model.ApiStack;
+import com.vmware.bdd.plugin.ambari.api.model.ApiStackList;
+import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersion;
+import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersionInfo;
 import com.vmware.bdd.plugin.ambari.api.model.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ClusterRequestStatus;
 import com.vmware.bdd.plugin.ambari.exception.AmException;
@@ -43,23 +48,13 @@ public class AmbariImpl implements SoftwareManager {
 
    private static final Logger logger = Logger.getLogger(AmbariImpl.class);
 
-   private String version;
-   private int versionApi;
-   private int versionHdp;
+   private String privateKey;
    private ApiManager apiManager;
 
-   public AmbariImpl(String version, int versionApi, int versionHdp,
-         String amServerHost, int port, String user, String password)
-         throws AmException {
-      this.version = version;
-      this.versionApi = versionApi;
-      this.versionHdp = versionHdp;
-      this.apiManager = new ApiManager(amServerHost, port, user, password);
-   }
-
    public AmbariImpl(String amServerHost, int port, String username,
-         String password, String certificate) {
+         String password, String privateKey) {
       this.apiManager = new ApiManager(amServerHost, port, username, password);
+      this.privateKey = privateKey;
    }
 
    public ApiManager getApiManager() {
@@ -86,7 +81,7 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public boolean echo() {
-      return false;
+      return true;
       // TODO Auto-generated method stub
 
    }
@@ -104,9 +99,33 @@ public class AmbariImpl implements SoftwareManager {
    }
 
    @Override
-   public List<HadoopStack> getSupportedStacks() {
-      // TODO Auto-generated method stub
-      return null;
+   public List<HadoopStack> getSupportedStacks()
+         throws SoftwareManagementPluginException {
+      List<HadoopStack> hadoopStacks = new ArrayList<HadoopStack>();
+      ApiStackList stackList = apiManager.stackList();
+      for (ApiStack apiStack : stackList.getApiStacks()) {
+         for (ApiStackVersion apiStackVersionSummary : apiManager
+               .stackVersionList(apiStack.getApiStackName().getStackName())
+               .getApiStackVersions()) {
+            ApiStackVersionInfo apiStackVersionInfoSummary =
+                  apiStackVersionSummary.getApiStackVersionInfo();
+            ApiStackVersion apiStackVersion =
+                  apiManager.stackVersion(
+                        apiStackVersionInfoSummary.getStackName(),
+                        apiStackVersionInfoSummary.getStackVersion());
+            ApiStackVersionInfo apiStackVersionInfo =
+                  apiStackVersion.getApiStackVersionInfo();
+            if (apiStackVersionInfo.isActive()) {
+               HadoopStack hadoopStack = new HadoopStack();
+               hadoopStack.setDistroName(apiStackVersionInfo.getStackName(), apiStackVersionInfo.getStackVersion());
+               hadoopStack
+                     .setFullVersion(apiStackVersionInfo.getStackVersion());
+               hadoopStack.setVendor(apiStackVersionInfo.getStackName());
+               hadoopStacks.add(hadoopStack);
+            }
+         }
+      }
+      return hadoopStacks;
    }
 
    @Override
@@ -120,10 +139,11 @@ public class AmbariImpl implements SoftwareManager {
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       boolean success = false;
       try {
-         AmClusterDef clusterDef = new AmClusterDef(blueprint);
+         AmClusterDef clusterDef = new AmClusterDef(blueprint, privateKey);
          if (!isProvisioned(clusterDef.getName())) { // TODO: if provision failed the first time, isProvisioned is true, should consider resume
             provisionCluster(clusterDef);
          }
+         success = true;
       } catch (Exception e) {
          throw AmException.PROVISION_FAILED(blueprint.getName());
       }
@@ -150,11 +170,11 @@ public class AmbariImpl implements SoftwareManager {
       return false;
    }
 
-   private void provisionCluster(final AmClusterDef clusterDef)
+   public void provisionCluster(final AmClusterDef clusterDef)
          throws AmException {
       try {
          ApiBootstrap apiBootstrap = bootstrap(clusterDef);
-         bootstrapping(apiBootstrap);
+         bootstrapping(apiBootstrap, clusterDef);
 
          createBlueprint(clusterDef);
 
@@ -176,33 +196,35 @@ public class AmbariImpl implements SoftwareManager {
       }
    }
 
-   public void bootstrapping(ApiBootstrap apiBootstrap) throws AmException {
+   public void bootstrapping(ApiBootstrap apiBootstrap,
+         final AmClusterDef clusterDef) throws AmException {
       try {
          boolean success = false;
+         ApiBootstrapStatus apiBootstrapStatus = null;
          while (true) {
-            boolean isNotRunning = true;
-            ApiBootstrapStatus apiBootstrapStatus =
+            apiBootstrapStatus =
                   apiManager.bootstrapStatus(apiBootstrap.getRequestId());
             BootstrapStatus bootstrapStatus =
                   BootstrapStatus.valueOf(apiBootstrapStatus.getStatus());
-            switch (bootstrapStatus) {
-            case RUNNING:
+            if (bootstrapStatus.isCompletedState()) {
+               if (!bootstrapStatus.isFailedState()) {
+                  success = true;
+               }
+               break;
+            } else {
                Thread.sleep(3000);
-               isNotRunning = false;
-            case SUCCESS:
-               success = true;
-               break;
-            case ERROR:
-               break;
-            default:
-               break;
-            }
-            if (isNotRunning) {
-               break;
             }
          }
          if (!success) {
             throw AmException.BOOTSTRAP_REQUEST_FAILED(apiBootstrap
+                  .getRequestId());
+         }
+
+         int bootstrapedHostCount =
+               apiBootstrapStatus.getApiBootstrapHostStatus().size();
+         int needBootstrapHostCount = clusterDef.getNodes().size();
+         if (needBootstrapHostCount != bootstrapedHostCount) {
+            throw AmException.BOOTSTRAP_ALL_HOSTS_FAILED(apiBootstrap
                   .getRequestId());
          }
       } catch (Exception e) {
@@ -256,29 +278,19 @@ public class AmbariImpl implements SoftwareManager {
       try {
          boolean success = false;
          while (true) {
-            boolean isNotRunning = true;
             ApiRequest apiRequest =
                   apiManager.request(clusterName, apiRequestSummary
                         .getApiRequestInfo().getRequestId());
             ClusterRequestStatus clusterRequestStatus =
                   ClusterRequestStatus.valueOf(apiRequest.getApiRequestInfo()
                         .getRequestStatus());
-            switch (clusterRequestStatus) {
-            case InProgress:
+            if (clusterRequestStatus.isCompletedState()) {
+               if (!clusterRequestStatus.isFailedState()) {
+                  success = true;
+               }
+               break;
+            } else {
                Thread.sleep(3000);
-               isNotRunning = false;
-            case SUCCESS:
-               success = true;
-               break;
-            case FAILED:
-               break;
-            case ABORTED:
-               break;
-            default:
-               break;
-            }
-            if (isNotRunning) {
-               break;
             }
          }
          if (!success) {

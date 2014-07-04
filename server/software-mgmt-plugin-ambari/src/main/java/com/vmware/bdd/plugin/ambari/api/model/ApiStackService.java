@@ -26,12 +26,12 @@ public class ApiStackService {
 
    @Expose
    @SerializedName("StackServices")
-   private List<ApiStackServiceInfo> apiStackServiceInfos;
+   private ApiStackServiceInfo apiStackServiceInfo;
 
    @Expose
    @SerializedName("serviceComponents")
    private List<ApiComponent> serviceComponents;
-   
+
    public String getHref() {
       return href;
    }
@@ -40,12 +40,12 @@ public class ApiStackService {
       this.href = href;
    }
 
-   public List<ApiStackServiceInfo> getApiStackServiceInfos() {
-      return apiStackServiceInfos;
+   public ApiStackServiceInfo getApiStackServiceInfo() {
+      return apiStackServiceInfo;
    }
 
-   public void setApiStackServiceInfos(List<ApiStackServiceInfo> apiStackServiceInfos) {
-      this.apiStackServiceInfos = apiStackServiceInfos;
+   public void setApiStackServiceInfo(ApiStackServiceInfo apiStackServiceInfo) {
+      this.apiStackServiceInfo = apiStackServiceInfo;
    }
 
    public List<ApiComponent> getServiceComponents() {

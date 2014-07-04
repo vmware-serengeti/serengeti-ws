@@ -53,11 +53,11 @@ public class AmClusterDef implements Serializable {
    @Expose
    private AmStackDef amStack;
 
-   public AmClusterDef(ClusterBlueprint blueprint) {
+   public AmClusterDef(ClusterBlueprint blueprint, String privateKey) {
       this.name = blueprint.getName();
       this.version = blueprint.getHadoopStack().getFullVersion();
       this.verbose = true;
-      this.sshKey = null; // TODO
+      this.sshKey = privateKey;
       this.user = "serengeti";
 
       this.nodes = new ArrayList<AmNodeDef>();
@@ -68,20 +68,21 @@ public class AmClusterDef implements Serializable {
             nodeDef.setIp(node.getMgtIpAddress());
             nodeDef.setFqdn(node.getHostname());
             nodeDef.setRackInfo(node.getRack());
-            nodeDef.setConfigurations(group.getConfiguration());
+            nodeDef.setBlueprintConfigurationsToAm(group.getConfiguration());
             nodeDef.setComponents(group.getRoles());
+            nodeDef.setVolumns(node.getVolumes());
             this.nodes.add(nodeDef);
          }
       }
 
       AmStackDef stackDef = new AmStackDef();
-      stackDef.setName(blueprint.getHadoopStack().getDistro());
+      stackDef.setName(blueprint.getHadoopStack().getVendor());
       stackDef.setVersion(blueprint.getHadoopStack().getFullVersion());
       this.amStack = stackDef;
    }
 
    public String getName() {
-      return name;
+     return name;
    }
 
    public void setName(String name) {

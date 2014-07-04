@@ -513,7 +513,8 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       // set HadoopStack
       HadoopStack hadoopStack = new HadoopStack();
       hadoopStack.setDistro(clusterEntity.getDistro());
-      hadoopStack.setFullVersion(null); // TODO
+      hadoopStack.setVendor(clusterEntity.getDistroVendor());
+      hadoopStack.setFullVersion(clusterEntity.getDistroVersion());
       blueprint.setHadoopStack(hadoopStack);
 
       // set nodes/nodegroups
@@ -549,6 +550,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       for (NodeEntity node : group.getNodes()) {
          NodeInfo nodeInfo = new NodeInfo();
          nodeInfo.setName(node.getVmName());
+         nodeInfo.setHostname(node.getGuestHostName());
          nodeInfo.setIpConfigs(node.convertToIpConfigInfo());
          nodeInfo.setRack(node.getRack());
          nodeInfo.setVolumes(node.getDataVolumnsMountPoint());
