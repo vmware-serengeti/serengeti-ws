@@ -2039,4 +2039,18 @@ public class ClusteringService implements IClusteringService {
       return initialized;
    }
 
+   @Override
+   public boolean isSupportVHM(String clusterName) {
+      ClusterEntity cluster = getClusterEntityMgr().findByName(clusterName);
+      SoftwareManager softMgr =
+            softwareManagerCollector
+                  .getSoftwareManagerByClusterName(clusterName);
+      if (!softMgr.hasComputeMasterGroup(getClusterEntityMgr()
+            .toClusterBluePrint(clusterName))) {
+         logger.warn("Use of auto elasticity, must configure Jobtracker or ResourceManager.");
+         return false;
+      }
+      return true;
+   }
+
 }

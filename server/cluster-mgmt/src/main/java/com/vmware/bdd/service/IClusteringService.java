@@ -199,4 +199,6 @@ public interface IClusteringService {
    public String getTemplateVmName();
 
    public VmEventManager getEventProcessor();
+
+   boolean isSupportVHM(String clusterName);
 }

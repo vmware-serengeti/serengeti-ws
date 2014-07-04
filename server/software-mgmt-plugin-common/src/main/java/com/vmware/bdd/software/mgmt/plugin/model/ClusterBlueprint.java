@@ -41,6 +41,7 @@ public class ClusterBlueprint implements Serializable {
    private HadoopStack hadoopStack;
 
    private String externalHDFS;
+   private String externalMapReduce;
    private boolean needToValidateConfig;
 
 
@@ -90,6 +91,14 @@ public class ClusterBlueprint implements Serializable {
 
    public void setExternalHDFS(String externalHDFS) {
       this.externalHDFS = externalHDFS;
+   }
+
+   public String getExternalMapReduce() {
+      return externalMapReduce;
+   }
+
+   public void setExternalMapReduce(String externalMapReduce) {
+      this.externalMapReduce = externalMapReduce;
    }
 
    public boolean isNeedToValidateConfig() {

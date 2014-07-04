@@ -31,7 +31,10 @@ public class SetAutoElasticityStep extends TrackableTasklet {
          JobExecutionStatusHolder jobExecutionStatusHolder) throws Exception {
       String clusterName = getJobParameters(chunkContext).getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
 
-      boolean success = clusteringService.setAutoElasticity(clusterName, refreshAllNodes);
+      boolean success = true;
+      if (clusteringService.isSupportVHM(clusterName)) {
+         success = clusteringService.setAutoElasticity(clusterName, refreshAllNodes);         
+      }
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, success);
       if (!success) {
          throw TaskException.EXECUTION_FAILED("failed to enable auto elasticity for cluster " + clusterName);

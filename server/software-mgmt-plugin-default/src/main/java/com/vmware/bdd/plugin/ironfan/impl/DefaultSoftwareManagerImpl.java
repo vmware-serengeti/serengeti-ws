@@ -260,5 +260,30 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
       }
       return false;
    }
+
+   @Override
+   public boolean hasComputeMasterGroup(ClusterBlueprint blueprint) {
+      List<NodeGroupInfo> nodeGroups = blueprint.getNodeGroups();
+      List<String> roles = new ArrayList<String>();
+      String distroVendor = blueprint.getHadoopStack().getVendor();
+      if (nodeGroups != null) {
+         for (NodeGroupInfo nodeGroup : nodeGroups) {
+            roles.addAll(nodeGroup.getRoles());
+         }
+      }
+      if (distroVendor.equalsIgnoreCase(Constants.MAPR_VENDOR)) {
+         if (!roles.contains(HadoopRole.MAPR_JOBTRACKER_ROLE.toString())) {
+            return false;
+         }
+      } else {
+         if (!roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())
+               && !roles.contains(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE
+                     .toString())) {
+            return false;
+         }
+      }
+      return true;
+   }
+
 }
 

@@ -29,6 +29,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
    @Expose
    private String name;
    private String externalHDFS;
+   private String externalMapReduce;
    @Expose
    private String distro;
 
@@ -123,6 +124,14 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
    public void setAppManager(String appManager) {
       this.appManager = appManager;
+   }
+
+   public String getExternalMapReduce() {
+      return externalMapReduce;
+   }
+
+   public void setExternalMapReduce(String externalMapReduce) {
+      this.externalMapReduce = externalMapReduce;
    }
 
    public String getDistro() {

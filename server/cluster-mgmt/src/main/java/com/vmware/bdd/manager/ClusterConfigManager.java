@@ -191,6 +191,7 @@ public class ClusterConfigManager {
          groupCreate.getStorage().setExpectedTypeFromRoles(group.getStorageExpectedType());
       }
       cluster.setExternalHDFS(blueprint.getExternalHDFS());
+      cluster.setExternalMapReduce(blueprint.getExternalMapReduce());
    }
 
    private void sortNodeGroups(ClusterCreate cluster,

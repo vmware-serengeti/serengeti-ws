@@ -238,4 +238,10 @@ public class MockSoftwareManager implements SoftwareManager {
       // TODO Auto-generated method stub
       return false;
    }
+
+   @Override
+   public boolean hasComputeMasterGroup(ClusterBlueprint blueprint) {
+      // TODO Auto-generated method stub
+      return false;
+   }
 }

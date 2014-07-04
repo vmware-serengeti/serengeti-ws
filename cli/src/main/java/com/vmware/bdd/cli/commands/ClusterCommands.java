@@ -278,6 +278,7 @@ public class ClusterCommands implements CommandMarker {
                         CommandsUtils.dataFromFile(specFilePath));
             clusterCreate.setSpecFile(true);
             clusterCreate.setExternalHDFS(clusterSpec.getExternalHDFS());
+            clusterCreate.setExternalMapReduce(clusterSpec.getExternalMapReduce());
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
             if (CommandsUtils.isBlank(appManager) || Constants.IRONFAN.equalsIgnoreCase(appManager)) {
@@ -1411,6 +1412,10 @@ public class ClusterCommands implements CommandMarker {
       if (cluster.getExternalHDFS() != null
             && !cluster.getExternalHDFS().isEmpty()) {
          clusterParams.put("EXTERNAL HDFS", cluster.getExternalHDFS());
+      }
+      //Burst out
+      if (!CommandsUtils.isBlank(cluster.getExternalMapReduce())) {
+         clusterParams.put("EXTERNAL MAPREDUCE", cluster.getExternalMapReduce());
       }
       for (String key : clusterParams.keySet()) {
          System.out.printf(Constants.OUTPUT_INDENT + "%-26s:"

@@ -276,6 +276,7 @@ public interface SoftwareManager {
    boolean hasHbase(ClusterBlueprint blueprint);
    boolean hasMgmtRole(List<String> roles);
    boolean isComputeOnlyRoles(List<String> roles);
+   boolean hasComputeMasterGroup(ClusterBlueprint blueprint);
 
    /**
     * This is the infrastructure requirement comes from software manager

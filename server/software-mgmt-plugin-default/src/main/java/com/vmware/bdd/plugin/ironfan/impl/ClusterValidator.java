@@ -35,6 +35,7 @@ import com.vmware.bdd.spectypes.NodeGroupRole;
 import com.vmware.bdd.spectypes.ServiceType;
 import com.vmware.bdd.utils.AppConfigValidationUtils;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.ValidateResult;
 
@@ -169,18 +170,20 @@ public class ClusterValidator {
                valid = false;
                failedMsgList.add("Duplicate NameNode or DataNode role.");
             }
-            if (!roles.contains("hadoop_jobtracker")
-                  && !roles.contains("hadoop_resourcemanager")) {
-               valid = false;
-               failedMsgList.add("Missing JobTracker or ResourceManager role.");
-            }
-            if (!roles.contains("hadoop_tasktracker")
-                  && !roles.contains("hadoop_nodemanager")) {
-               valid = false;
-               failedMsgList.add("Missing TaskTracker or NodeManager role.");
+            if (!hasMapreduceConfigured(blueprint)) {
+               if (!roles.contains("hadoop_jobtracker")
+                     && !roles.contains("hadoop_resourcemanager")) {
+                  valid = false;
+                  failedMsgList.add("Missing JobTracker or ResourceManager role.");
+               }
+               if (!roles.contains("hadoop_tasktracker")
+                     && !roles.contains("hadoop_nodemanager")) {
+                  valid = false;
+                  failedMsgList.add("Missing TaskTracker or NodeManager role.");
+               }
             }
          }
-      } else { //case 2
+      } else if (!hasMapreduceConfigured(blueprint)){ //case 2
          // get involved service types of the spec file
          EnumSet<ServiceType> serviceTypes = EnumSet.noneOf(ServiceType.class);
          for (ServiceType service : ServiceType.values()) {
@@ -499,5 +502,9 @@ public class ClusterValidator {
          return false;
       }
       return true;
+   }
+
+   public boolean hasMapreduceConfigured(ClusterBlueprint cluster) {
+      return !CommonUtil.isBlank(cluster.getExternalMapReduce());
    }
 }

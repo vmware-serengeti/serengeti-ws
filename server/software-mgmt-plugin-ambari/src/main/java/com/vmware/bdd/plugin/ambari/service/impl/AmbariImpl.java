@@ -420,4 +420,10 @@ public class AmbariImpl implements SoftwareManager {
       // TODO Auto-generated method stub
       return false;
    }
+
+   @Override
+   public boolean hasComputeMasterGroup(ClusterBlueprint blueprint) {
+      // TODO Auto-generated method stub
+      return false;
+   }
 }

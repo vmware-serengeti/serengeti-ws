@@ -13,7 +13,6 @@
         "dfs.data.dir"
       ],
       "mapred-site.xml": [
-        "mapred.job.tracker",
         "mapred.local.dir",
         "mapred.task.cache.levels",
         "mapred.jobtracker.jobSchedulable",

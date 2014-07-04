@@ -362,4 +362,24 @@ public class DefaultSoftwareManagerImplTest extends TestCase {
     public void testValidateScaling() throws Exception {
 
     }
+
+   @Test
+   public void testHasComputeMasterGroup() {
+      ClusterBlueprint blueprint = new ClusterBlueprint();
+      HadoopStack hadoopStack = new HadoopStack();
+      hadoopStack.setVendor(Constants.DEFAULT_VENDOR);
+      blueprint.setHadoopStack(hadoopStack);
+      NodeGroupInfo compute = new NodeGroupInfo();
+      compute.setRoles(Arrays.asList(HadoopRole.HADOOP_TASKTRACKER.toString()));
+      List<NodeGroupInfo> nodeGroupInfos = new ArrayList<NodeGroupInfo>();
+      nodeGroupInfos.add(compute);
+      blueprint.setNodeGroups(nodeGroupInfos);
+      assertFalse(defaultSoftwareManager.hasComputeMasterGroup(blueprint));
+      NodeGroupInfo master = new NodeGroupInfo();
+      master.setRoles(Arrays.asList(HadoopRole.HADOOP_JOBTRACKER_ROLE
+            .toString()));
+      nodeGroupInfos.add(master);
+      blueprint.setNodeGroups(nodeGroupInfos);
+      assertTrue(defaultSoftwareManager.hasComputeMasterGroup(blueprint));
+   }
 }

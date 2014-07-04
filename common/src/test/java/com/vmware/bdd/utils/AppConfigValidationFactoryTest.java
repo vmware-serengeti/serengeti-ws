@@ -42,7 +42,7 @@ public class AppConfigValidationFactoryTest {
       Map<String,Object> zookeeperEnvMap=new HashMap<String,Object>();
       corePopertysMap.put("hadoop.tmp.dir", "/tmp");
       hdfsPopertysMap.put("dfs.http.address", "localhost");
-      mapredPopertysMap.put("mapred.job.tracker","127.0.1.2");
+      mapredPopertysMap.put("mapred.task.cache.levels","3");
       hbaseSiteMap.put("hbase.cluster.distributed", "false");
       zookeeperEnvMap.put("JVMFLAGS", "-Xmx1g");
       zookeeperEnvMap.put("other", "error");
@@ -137,7 +137,7 @@ public class AppConfigValidationFactoryTest {
       ValidateResult validateResult=AppConfigValidationFactory.blackListHandle(cluster.getConfiguration());
       assertEquals(validateResult.getType(),ValidateResult.Type.NAME_IN_BLACK_LIST);
       assertEquals(validateResult.getFailureNames().get(0), "dfs.http.address");
-      assertEquals(validateResult.getFailureNames().get(1), "mapred.job.tracker");
+      assertEquals(validateResult.getFailureNames().get(1), "mapred.task.cache.levels");
       assertEquals(validateResult.getFailureNames().get(2), "hbase.cluster.distributed");
    }
 

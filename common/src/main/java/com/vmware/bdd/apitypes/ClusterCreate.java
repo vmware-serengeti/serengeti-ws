@@ -35,6 +35,8 @@ import java.net.URI;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 /**
  * Cluster creation spec
  */
@@ -48,6 +50,7 @@ public class ClusterCreate implements Serializable {
    private String appManager;
    private ClusterType type;
    private String externalHDFS;
+   private String externalMapReduce;
    @Expose
    @SerializedName("groups")
    private NodeGroupCreate[] nodeGroups;
@@ -130,6 +133,7 @@ public class ClusterCreate implements Serializable {
       this.distroVendor = cluster.distroVendor;
       this.distroVersion = cluster.distroVersion;
       this.externalHDFS = cluster.externalHDFS;
+      this.externalMapReduce = cluster.externalMapReduce;
       this.networkConfig = cluster.networkConfig;
       this.networkings = cluster.networkings;
       this.nodeGroups = cluster.nodeGroups;
@@ -185,6 +189,14 @@ public class ClusterCreate implements Serializable {
 
    public String getExternalHDFS() {
       return externalHDFS;
+   }
+
+   public String getExternalMapReduce() {
+      return externalMapReduce;
+   }
+
+   public void setExternalMapReduce(String externalMapReduce) {
+      this.externalMapReduce = externalMapReduce;
    }
 
    public String getDistro() {
@@ -765,12 +777,14 @@ public class ClusterCreate implements Serializable {
        // TODO: topology
        blueprint.setConfiguration(configuration);
        blueprint.setExternalHDFS(externalHDFS);
+       blueprint.setExternalMapReduce(externalMapReduce);
 
        // set HadoopStack
        HadoopStack hadoopStack = new HadoopStack();
        hadoopStack.setDistro(distro);
        hadoopStack.setFullVersion(distroVersion); // TODO
        blueprint.setHadoopStack(hadoopStack);
+
        blueprint.setNeedToValidateConfig(validateConfig == null ? false
             : validateConfig);
 
