@@ -16,6 +16,7 @@ package com.vmware.bdd.rest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -513,6 +514,19 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
       return clusterMgr.getClusterSpec(clusterName);
+   }
+
+   @RequestMapping(value = "/cluster/{clusterName}/rack", method = RequestMethod.GET, produces = "application/json")
+   @ResponseBody
+   public Map<String, String> getClusterRackTopology(
+         @PathVariable("clusterName") String clusterName,
+         @RequestParam(value = "topology", required = false) String topology) {
+      clusterName = CommonUtil.decode(clusterName);
+      if (CommonUtil.isBlank(clusterName)
+            || !CommonUtil.validateClusterName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+      return clusterMgr.getRackTopology(clusterName, topology);
    }
 
    /**

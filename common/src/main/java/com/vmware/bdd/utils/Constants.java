@@ -208,4 +208,5 @@ public class Constants {
    public static final String SERENGETI_PRIVATE_KEY_FILE = "/home/serengeti/.ssh/id_rsa";
    public static final String CLOUDERA_MANAGER = "ClouderaManager";
    public static final String CLOUDERA_MANAGER_DEFAULT_DISTRO = "CDH4";
+   public static final String NULL = "null";
 }

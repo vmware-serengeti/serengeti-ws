@@ -15,6 +15,7 @@
 package com.vmware.bdd.cli.commands;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -22,13 +23,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -40,6 +45,7 @@ import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.impl.Indenter;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -136,16 +142,7 @@ public class CommandsUtils {
          prettyPrinter.indentArraysWith(indenter);
          generator.setPrettyPrinter(prettyPrinter);
          generator.writeObject(object);
-         if (fileName == null) {
-            System.out.println();
-         } else {
-            File file = new File(fileName);
-            String filePath = file.getAbsolutePath();
-            if (isJansiAvailable() && !isBlank(filePath)) {
-               filePath = transferEncoding(filePath);
-            }
-            System.out.println("Exported to file " + filePath);
-         }
+         writeEndingMsgToScreen(fileName);
       } finally {
          if (out != null && !(out instanceof PrintStream)) {
             out.close();
@@ -562,4 +559,56 @@ public class CommandsUtils {
             Configuration.getEncoding());
    }
 
+   public static void gracefulRackTopologyOutput(
+         Map<String, String> racksTopology, String fileName, String delimeter)
+         throws Exception {
+      StringBuffer buff = new StringBuffer();
+      if (CommonUtil.isBlank(delimeter)) {
+         delimeter = "\n";
+      }
+      if (racksTopology != null && racksTopology.size() > 0) {
+         Iterator<Entry<String, String>> it =
+               racksTopology.entrySet().iterator();
+         Map.Entry<String, String> entry = null;
+         String vmIP = "";
+         String rackPath = "";
+         while (it.hasNext()) {
+            entry = (Map.Entry<String, String>) it.next();
+            vmIP = entry.getKey();
+            rackPath = entry.getValue();
+            buff.append(vmIP + " " + rackPath + delimeter);
+         }
+      }
+
+      OutputStream out = null;
+      BufferedWriter bw = null;
+      try {
+         if (!isBlank(fileName)) {
+            out = new FileOutputStream(fileName);
+         } else {
+            out = System.out;
+         }
+         bw = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+         bw.write(buff.toString());
+         bw.flush();
+         writeEndingMsgToScreen(fileName);
+      } finally {
+         if (bw != null && !(out instanceof PrintStream)) {
+            bw.close();
+         }
+      }
+   }
+
+   private static void writeEndingMsgToScreen(String fileName) throws Exception {
+      if (fileName == null) {
+         System.out.println();
+      } else {
+         File file = new File(fileName);
+         String filePath = file.getAbsolutePath();
+         if (isJansiAvailable() && !isBlank(filePath)) {
+            filePath = transferEncoding(filePath);
+         }
+         System.out.println("Exported to file " + filePath);
+      }
+   }
 }

@@ -44,10 +44,13 @@ import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.LimitInstruction;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.NodeGroupRead;
+import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.TaskRead;
+import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
@@ -66,7 +69,6 @@ import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.specpolicy.ClusterSpecFactory;
-import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
@@ -1281,6 +1283,29 @@ public class ClusterManager {
          logger.error("failed to fix disk failures, " + e.getMessage());
          throw e;
       }
+   }
+
+   public Map<String, String> getRackTopology(String clusterName, String topology) {
+     ClusterRead cluster = clusterEntityMgr.toClusterRead(clusterName);
+      Set<String> hosts = new HashSet<String>();
+      Set<String> racks = new HashSet<String>();
+      List<NodeRead> nodes = new ArrayList<NodeRead>();
+      for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {
+         for (NodeRead node : nodeGroup.getInstances()) {
+            hosts.add(node.getHostName());
+            racks.add(node.getRack());
+            nodes.add(node);
+         }
+      }
+
+      if (CommonUtil.isBlank(topology)) {
+         topology = cluster.getTopologyPolicy().toString();
+      }
+
+      AuAssert.check(hosts.size() > 0);
+      clusterConfigMgr.validateRackTopologyUploaded(hosts, topology);
+
+      return clusterConfigMgr.buildTopology(nodes, topology);
    }
 
 }

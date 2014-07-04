@@ -47,6 +47,8 @@ public class Constants {
    public static final String REST_PATH_SPEC = "spec";
    public static final String REST_PATH_TOPOLOGY = "racks";
    public static final String REST_PATH_STACKS = "stacks";
+   public static final String REST_PATH_CLUSTER_RACK = "rack";
+   public static final String REST_PATH_CLUSTER_RACK_PARAM_TOPOLOGY = "topology";
 
    public static final String QUERY_ACTION_KEY = "state";
    public static final String QUERY_ACTION_START = "start";
@@ -260,4 +262,11 @@ public class Constants {
    public static final String PASSWORD_HINT = "Password are from " + PASSWORD_MIN_LENGTH + " to " + PASSWORD_MAX_LENGTH + " characters, and can include alphanumeric characters ([0-9, a-z, A-Z]) and the following special characters: _, @, #, $, %, ^, &, *";
    public static final String FAILED_NODES_MESSAGE = "The failed nodes: ";
    public static final String IRONFAN = "Ironfan";
+   public static final String CANNOT_SPECIFY_TWO_PATH_FOR_EXPORT = "You cannot specify 2 paths for spec file.";
+   public static final String CANNOT_EXPORT_CLUSTER_AND_RACK_OPOLOGY_SIMULTANEOUSLY = "You cannot specify export cluster and rack topology simultaneously.";
+
+   public static final String CLUSTER_NOT_EXIST = "Cluster doesn't exist";
+   public static final String EXPORT_TYPE_SPEC = "spec";
+   public static final String EXPORT_TYPE_RACK = "rack";
+   public static final String UNKNOWN_EXPORT_TYPE = "export type is unknown";
 }

@@ -34,6 +34,7 @@ import com.vmware.bdd.apitypes.FixDiskRequestBody;
 import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
+import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.cli.commands.CommandsUtils;
@@ -92,6 +93,20 @@ public class ClusterRestClient {
 
       return restClient.getObjectByPath(ClusterCreate.class, path, httpverb,
             false);
+   }
+
+   @SuppressWarnings("unchecked")
+   public Map<String, String> getRackTopology(String clusterName, String topology) {
+      clusterName = CommonUtil.encode(clusterName);
+      StringBuilder path = new StringBuilder();
+      path.append(Constants.REST_PATH_CLUSTER).append("/").append(clusterName).append("/").append(Constants.REST_PATH_CLUSTER_RACK);
+      if (!CommonUtil.isBlank(topology)) {
+         path.append("?");
+         path.append(Constants.REST_PATH_CLUSTER_RACK_PARAM_TOPOLOGY).append("=").append(topology);
+      }
+
+      final HttpMethod httpverb = HttpMethod.GET;
+      return restClient.getObjectByPath(Map.class, path.toString(), httpverb, false);
    }
 
    public ClusterRead[] getAll(Boolean detail) {
@@ -288,4 +303,5 @@ public class ClusterRestClient {
          }
       };
    }
+
 }

@@ -19,11 +19,13 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,7 +42,9 @@ import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.DiskSplitPolicy;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpBlock;
+import com.vmware.bdd.apitypes.IpConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo;
+import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
@@ -1148,4 +1152,73 @@ public class ClusterConfigManager {
       }
    }
 
+   /**
+    * validate if rack topology of all hosts is uploaded
+    * @param hosts
+    * @param topology
+    */
+   @Transactional
+   public void validateRackTopologyUploaded(Set<String> hosts, String topology) {
+      Map<String, String> rackMap = rackInfoMgr.exportHostRackMap();
+      List<String> invalidHosts = new ArrayList<String>();
+      for (String hostName : hosts) {
+         if (!rackMap.containsKey(hostName)) {
+            invalidHosts.add(hostName);
+         }
+      }
+      if (invalidHosts.size() > 0) {
+         if (topology.equalsIgnoreCase(TopologyType.HVE.toString())
+               || topology.equalsIgnoreCase(TopologyType.RACK_AS_RACK.toString())) {
+            throw ClusterConfigException.TOPOLOGY_WITH_NO_MAPPING_INFO_EXIST(topology);
+         }
+      }
+   }
+
+   /**
+    * build rack topology of the nodes according to the topology
+    * @param nodes
+    * @param topology
+    * @return
+    */
+   @Transactional
+   public Map<String, String> buildTopology(List<NodeRead> nodes, String topology) {
+      topology = topology.toUpperCase();
+      Map<String, String> map = new HashMap<String, String>();
+      Map<NetTrafficType, List<IpConfigInfo>> ipConfigMap = null;
+      Map<String, String> hostRackMap = rackInfoMgr.exportHostRackMap();
+      Iterator<Entry<NetTrafficType, List<IpConfigInfo>>> ipConfigsIt = null;
+      Entry<NetTrafficType, List<IpConfigInfo>> ipConfigEntry = null;
+      List<IpConfigInfo> ipConfigs = null;
+      for (NodeRead node : nodes) {
+         ipConfigMap = node.getIpConfigs();
+         ipConfigsIt = ipConfigMap.entrySet().iterator();
+         while (ipConfigsIt.hasNext()) {
+            ipConfigEntry = ipConfigsIt.next();
+            ipConfigs = ipConfigEntry.getValue();
+            if (ipConfigs != null && ipConfigs.size() > 0) {
+               for (IpConfigInfo ipConfig : ipConfigs) {
+                  if (!CommonUtil.isBlank(ipConfig.getIpAddress())) {
+                     switch (topology) {
+                     case "HOST_AS_RACK":
+                        map.put(ipConfig.getIpAddress(), "/" + node.getHostName());
+                        break;
+                     case "RACK_AS_RACK":
+                        map.put(ipConfig.getIpAddress(), "/" + hostRackMap.get(node.getHostName()));
+                        break;
+                     case "HVE":
+                        map.put(ipConfig.getIpAddress(),
+                              "/" + hostRackMap.get(node.getHostName()) + "/" + node.getHostName());
+                        break;
+                     case "NONE":
+                     default:
+                        map.put(ipConfig.getIpAddress(), "/default-rack");
+                        break;
+                     }
+                  }
+               }
+            }
+         }
+      }
+      return map;
+   }
 }

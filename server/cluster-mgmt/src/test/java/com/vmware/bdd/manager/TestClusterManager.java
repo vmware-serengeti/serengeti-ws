@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.manager;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.io.BufferedReader;
@@ -22,9 +23,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import mockit.Mock;
@@ -40,9 +44,16 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterStatus;
+import com.vmware.bdd.apitypes.IpConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.NodeGroupRead;
+import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
@@ -60,7 +71,8 @@ public class TestClusterManager extends AbstractTestNGSpringContextTests {
    private IClusterEntityManager clusterEntityMgr;
    @Autowired
    private SoftwareManagerCollector softwareManagerCollector;
-
+   @Autowired
+   private ClusterConfigManager clusterConfigMgr;
    @Autowired
    private ClusterManager clusterMgr;
 
@@ -227,5 +239,75 @@ public class TestClusterManager extends AbstractTestNGSpringContextTests {
       clusterMgr.asyncSetParam(TEST_CLUSTER_NAME, 3, 1, 4, true,
             Priority.HIGH);
       assertTrue(true, "Should get exception but not.");
+   }
+
+   @Test
+   public void testGetRackTopology() {
+      IClusterEntityManager iclusterEntityManager =
+            new MockUp<IClusterEntityManager>() {
+               @Mock
+               public ClusterRead toClusterRead(String name) {
+                  ClusterRead cluster = new ClusterRead();
+                  cluster.setTopologyPolicy(TopologyType.NONE);
+                  List<NodeGroupRead> nodeGroups =
+                        new ArrayList<NodeGroupRead>();
+                  NodeGroupRead nodeGroup = new NodeGroupRead();
+                  List<NodeRead> nodes = new ArrayList<NodeRead>();
+                  NodeRead node = new NodeRead();
+                  node.setRack("rack1");
+                  node.setHostName("host1.com");
+                  Map<NetTrafficType, List<IpConfigInfo>> ipConfigs =
+                        new HashMap<NetTrafficType, List<IpConfigInfo>>();
+                  IpConfigInfo ipConfigInfo1 =
+                        new IpConfigInfo(NetTrafficType.MGT_NETWORK, "nw1",
+                              "portgroup1", "192.168.1.100");
+                  List<IpConfigInfo> ipConfigInfos1 =
+                        new ArrayList<IpConfigInfo>();
+                  ipConfigInfos1.add(ipConfigInfo1);
+                  IpConfigInfo ipConfigInfo2 =
+                        new IpConfigInfo(NetTrafficType.HDFS_NETWORK, "nw2",
+                              "portgroup2", "192.168.2.100");
+                  IpConfigInfo ipConfigInfo3 =
+                        new IpConfigInfo(NetTrafficType.HDFS_NETWORK, "nw3",
+                              "portgroup3", "192.168.3.100");
+                  List<IpConfigInfo> ipConfigInfos2 =
+                        new ArrayList<IpConfigInfo>();
+                  ipConfigInfos2.add(ipConfigInfo2);
+                  ipConfigInfos2.add(ipConfigInfo3);
+                  ipConfigs.put(NetTrafficType.MGT_NETWORK, ipConfigInfos1);
+                  ipConfigs.put(NetTrafficType.HDFS_NETWORK, ipConfigInfos2);
+                  node.setIpConfigs(ipConfigs);
+                  nodes.add(node);
+                  nodeGroup.setInstances(nodes);
+                  nodeGroups.add(nodeGroup);
+                  cluster.setNodeGroups(nodeGroups);
+                  return cluster;
+               }
+            }.getMockInstance();
+
+      new MockUp<ClusterConfigManager>() {
+         @Mock
+         public boolean validateRackTopologyUploaded(Set<String> hosts, String topology) {
+            return true;
+         }
+
+         @Mock
+         public Map<String, String> buildTopology(List<NodeRead> nodes, String topology) {
+            Map<String, String> rackTopology = new HashMap<String, String>();
+            Iterator<Map.Entry<NetConfigInfo.NetTrafficType, List<IpConfigInfo>>> ipConfigIt =
+                  nodes.get(0).getIpConfigs().entrySet().iterator();
+            while (ipConfigIt.hasNext()) {
+               Entry<NetTrafficType, List<IpConfigInfo>> entry = ipConfigIt.next();
+               for (IpConfigInfo ipConfig : entry.getValue()) {
+                  rackTopology.put(ipConfig.getIpAddress(), nodes.get(0).getRack());
+               }
+            }
+            return rackTopology;
+         }
+      };
+      clusterMgr.setClusterEntityMgr(iclusterEntityManager);
+      Map<String, String> racksTopology =
+            clusterMgr.getRackTopology(TEST_CLUSTER_NAME, "HOST_AS_RACK");
+      assertEquals("rack1", racksTopology.get("192.168.1.100"));
    }
 }

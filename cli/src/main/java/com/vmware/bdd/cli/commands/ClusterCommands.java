@@ -184,19 +184,16 @@ public class ClusterCommands implements CommandMarker {
          clusterCreate.setType(ClusterType.HDFS_MAPRED);
       }
 
+      TopologyType policy = null;
       if (topology != null) {
-         try {
-            clusterCreate.setTopologyPolicy(TopologyType.valueOf(topology));
-         } catch (IllegalArgumentException ex) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  name, Constants.OUTPUT_OP_CREATE,
-                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
-                        + " " + "topologyType=" + topology);
+         policy = validateTopologyValue(name, topology);
+         if (policy == null) {
             return;
          }
       } else {
-         clusterCreate.setTopologyPolicy(TopologyType.NONE);
+         policy = TopologyType.NONE;
       }
+      clusterCreate.setTopologyPolicy(policy);
 
       try {
          if (distro != null) {
@@ -525,16 +522,49 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   @CliCommand(value = "cluster export", help = "Export cluster specification")
-   public void exportClusterSpec(
+   @CliCommand(value = "cluster export", help = "Export cluster data")
+   public void exportClusterData(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
-         @CliOption(key = { "specFile" }, mandatory = false, help = "the cluster spec file path") final String fileName) {
+         @CliOption(key = { "specFile" }, mandatory = false, help = "The cluster spec file path") final String specFileName,
+         @CliOption(key = { "type" }, mandatory = false, help = "The data type to export: RACK or SPEC") final String type,
+         @CliOption(key = { "topology" }, mandatory = false, help = "The topology type: HVE or RACK_AS_RACK or HOST_AS_RACK") final String topology,
+         @CliOption(key = { "delimiter" }, mandatory = false, help = "The string used to separate each line") final String delimeter,
+         @CliOption(key = { "output" }, mandatory = false, help = "The path to the output file") final String output) {
 
-      // rest invocation
+      // when neither fileName nor type is specified, path is null and when output, it will be replaced
+      // with System.out
+      String path = null;
+      if (!CommandsUtils.isBlank(specFileName)) {
+         if (!CommandsUtils.isBlank(type)) {
+            System.out.println(Constants.TYPE_SPECFILE_CONFLICT);
+            return;
+         }
+         path = specFileName;
+      } else if (!CommandsUtils.isBlank((type))) {
+         if (!CommandsUtils.isBlank(output)) {
+            path = output;
+         }
+      }
+
+      if (topology != null && validateTopologyValue(name, topology) == null) {
+         return;
+      }
+
       try {
-         ClusterCreate cluster = restClient.getSpec(name);
-         if (cluster != null) {
-            CommandsUtils.prettyJsonOutput(cluster, fileName);
+         if ((CommandsUtils.isBlank(specFileName) && CommandsUtils.isBlank(type)) ||
+               !CommandsUtils.isBlank(specFileName) ||
+               type.equalsIgnoreCase(Constants.EXPORT_TYPE_SPEC)) {
+            ClusterCreate cluster = restClient.getSpec(name);
+            if (cluster == null) {
+               System.out.println(Constants.CLUSTER_NOT_EXIST);
+               return;
+            }
+            CommandsUtils.prettyJsonOutput(cluster, path);
+         } else if (type.equalsIgnoreCase(Constants.EXPORT_TYPE_RACK)) {
+            Map<String, String> rackTopology = restClient.getRackTopology(name, topology);
+            CommandsUtils.gracefulRackTopologyOutput(rackTopology, path, delimeter);
+         } else {
+            System.out.println(Constants.UNKNOWN_EXPORT_TYPE);
          }
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
@@ -1751,5 +1781,18 @@ public class ClusterCommands implements CommandMarker {
          }
       }
       return true;
+   }
+
+   private TopologyType validateTopologyValue(String clusterName, String topology) {
+      TopologyType value = null;
+      try {
+         value = TopologyType.valueOf(topology);
+      } catch (IllegalArgumentException ex) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+               clusterName, Constants.OUTPUT_OP_CREATE,
+               Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
+                     + " " + "topologyType=" + topology);
+      }
+      return value;
    }
 }

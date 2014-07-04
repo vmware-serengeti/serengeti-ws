@@ -597,19 +597,19 @@ public class ClusterCommandsTest extends MockRestServer {
           CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile(this.getClass().getResource("/hadoop_cluster.json").getPath()));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/hadoop/spec", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(clusterSpec));
-       clusterCommands.exportClusterSpec("hadoop", null);
+       clusterCommands.exportClusterData("hadoop", null, null, null, null, null);
 
        setup();
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/hadoop/spec", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(clusterSpec));
-       clusterCommands.exportClusterSpec("hadoop", "exportedSpec.json");
+       clusterCommands.exportClusterData("hadoop", "exportedSpec.json", null, null, null, null);
        clusterSpec = CommandsUtils.getObjectByJsonString(ClusterCreate.class, CommandsUtils.dataFromFile("exportedSpec.json"));
        Assert.assertEquals(clusterSpec.getNodeGroups().length, 3);
        File exportedFile = new File("exportedSpec.json");
        if (exportedFile.exists()) {
           Assert.assertEquals(exportedFile.delete(), true);
        }
-
+       //TODOqqjin): need add more cases
        CookieCache.clear();
     }
 

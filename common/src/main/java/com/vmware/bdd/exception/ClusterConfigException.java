@@ -15,6 +15,7 @@
 package com.vmware.bdd.exception;
 
 import java.util.List;
+import java.util.Set;
 
 import com.vmware.bdd.apitypes.TopologyType;
 
