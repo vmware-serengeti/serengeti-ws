@@ -67,4 +67,16 @@ public class SoftwareManagementException extends BddException {
       return new SoftwareManagementException(t,
             "GET_OPERATIOIN_STATUS_UNKNOWN_ERROR", targetName);
    }
+
+   public static SoftwareManagementException GET_DISK_FORMAT_STATUS_ERROR(
+         String vmName) {
+      return new SoftwareManagementException(null,
+            "GET_DISK_FORMAT_STATUS_ERROR", vmName);
+   }
+
+   public static SoftwareManagementException FAILED_TO_FORMAT_DISK(
+         String vmName, String errorMsg) {
+      return new SoftwareManagementException(null, "FAILED_TO_FORMAT_DISK",
+            vmName, errorMsg);
+   }
 }

@@ -209,4 +209,6 @@ public class Constants {
    public static final String CLOUDERA_MANAGER = "ClouderaManager";
    public static final String CLOUDERA_MANAGER_DEFAULT_DISTRO = "CDH4";
    public static final String NULL = "null";
+   public static final String VM_DISK_FORMAT_STATUS_KEY = "guestinfo.DiskFormatStatus";
+   public static final String VM_DISK_FORMAT_ERROR_KEY = "guestinfo.DiskFormatError";
 }

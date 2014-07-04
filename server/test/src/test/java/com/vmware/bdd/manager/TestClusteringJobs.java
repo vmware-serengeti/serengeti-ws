@@ -17,6 +17,7 @@ package com.vmware.bdd.manager;
 import static org.testng.AssertJUnit.assertTrue;
 
 import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -162,9 +163,37 @@ public class TestClusteringJobs extends
       return sb.toString();
    }
 
+   private void testGuestInfo() {
+      clusterSvc.init();
+      VcContext.inVcSessionDo(new VcSession<Void>() {
+         @Override
+         protected boolean isTaskSession() {
+            return true;
+         }
+
+         @Override
+         protected Void body() throws Exception {
+            VcVirtualMachine vm = VcCache.get("null:VirtualMachine:vm-97169");
+
+            InputStreamReader reader = new InputStreamReader(System.in);
+            char[] cbuf = new char[10];
+            int num = reader.read(cbuf);
+            while (num != -1) {
+               Map<String, String> variables = vm.getGuestVariables();
+               System.out.println("All guest variables.");
+               for (String key : variables.keySet()) {
+                  System.out.println("key:" + key + ", value:" + variables.get(key));
+               }
+            }
+            return null;
+         }
+      });
+
+   }
    @BeforeClass(groups = { "TestClusteringJobs" })
    public void setup() throws Exception {
       Properties testProperty = new Properties();
+      testGuestInfo();
       testProperty.load(new FileInputStream(
             "src/test/resources/vc-test.properties"));
       staticDns1 = testProperty.getProperty(TEST_STATIC_DNS1);
