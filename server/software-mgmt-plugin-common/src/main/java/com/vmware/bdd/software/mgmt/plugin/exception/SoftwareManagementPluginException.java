@@ -49,8 +49,8 @@ public class SoftwareManagementPluginException extends RuntimeException {
       return new SoftwareManagementPluginException("INVALID_VERSION", "Version " + version + " is invalid", cause);
    }
 
-   public static SoftwareManagementPluginException CREATE_CLUSTER_FAILED(String clusterName, Throwable cause) {
-      return new SoftwareManagementPluginException("CREATE_CLUSTER_FAILED", "Failed to create cluster " + clusterName, cause);
+   public static SoftwareManagementPluginException CREATE_CLUSTER_FAILED(String message, Throwable cause) {
+      return new SoftwareManagementPluginException("CREATE_CLUSTER_FAILED", message, cause);
    }
 
    public static SoftwareManagementPluginException DELETE_CLUSTER_FAILED(String clusterName, Throwable cause) {
@@ -69,13 +69,13 @@ public class SoftwareManagementPluginException extends RuntimeException {
       return new SoftwareManagementPluginException("CHECK_SERVICE_FAILED", "Failed to check service state for cluster " + clusterName, cause);
    }
 
-   public static SoftwareManagementPluginException CONFIGURE_SERVICE_FAILED(String clusterName, Throwable cause) {
-      return new SoftwareManagementPluginException("CONFIGURE_SERVICE_FAILED", "Failed to configure service for cluster " + clusterName, cause);
+   public static SoftwareManagementPluginException CONFIGURE_SERVICE_FAILED(String message, Throwable cause) {
+      return new SoftwareManagementPluginException("CONFIGURE_SERVICE_FAILED", message, cause);
    }
 
 
-   public static SoftwareManagementPluginException START_SERVICE_FAILED(String clusterName, Throwable cause) {
-      return new SoftwareManagementPluginException("START_SERVICE_FAILED", "Failed to start service for cluster " + clusterName, cause);
+   public static SoftwareManagementPluginException START_SERVICE_FAILED(String message, Throwable cause) {
+      return new SoftwareManagementPluginException("START_SERVICE_FAILED", message, cause);
    }
 
    public static SoftwareManagementPluginException CLUSTER_ALREADY_EXIST(String clusterName, Throwable cause) {

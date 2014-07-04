@@ -60,7 +60,6 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
       Map<String, Object> result = new HashMap<String, Object>();
 
       ClusterReportQueue queue = new ClusterReportQueue();
-      /*
       Thread progressThread = null;
       ExternalProgressMonitor monitor =
             new ExternalProgressMonitor(targetName, queue, statusUpdater,
@@ -68,12 +67,8 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
       progressThread = new Thread(monitor, "ProgressMonitor-" + targetName);
       progressThread.setDaemon(true);
       progressThread.start();
-      */
 
       boolean success = false;
-
-      Thread monitor = new Drain(queue);
-      monitor.start();
 
       try {
          switch(managementOperation) {
@@ -100,47 +95,21 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
       } catch (Throwable t) {
          logger.error(" operation : " + managementOperation.name()
                + " failed on cluster: " + targetName, t);
+         result.put("errorMessage", t.getMessage());
       } finally {
-         /*
          if (progressThread != null) {
-            if (monitor != null) {
                monitor.setStop(true); // tell monitor to stop monitoring then the thread will exit
                progressThread.interrupt(); // wake it up to stop immediately if it's sleeping
                progressThread.join();
             }
-            */
-         if (monitor != null) {
-            monitor.interrupt();
-            monitor.join();
          }
-      }
 
       result.put("succeed", success);
 
+      if (!success) {
+         logger.error("command execution failed. " + result.get("errorMessage"));
+      }
+
       return result;
-   }
-
-   private class Drain extends Thread {
-      private ClusterReportQueue queue;
-
-      public Drain(ClusterReportQueue queue) {
-         this.queue = queue;
-      }
-
-      @Override
-      public void run() {
-         while (true) {
-            List<ClusterReport> reports = queue.pollClusterReport();
-            for (ClusterReport report : reports) {
-               logger.info("Action: " + report.getAction() + ", Progress: " + report.getProgress());
-            }
-            try {
-               Thread.sleep(5000);
-            } catch (InterruptedException e) {
-               break;
-            }
-         }
-      }
-
    }
 }

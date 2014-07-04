@@ -21,6 +21,7 @@ import com.vmware.bdd.plugin.clouderamgr.service.ClouderaManagerImpl;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
+import org.apache.log4j.Logger;
 
 /**
  * Author: Xiaoding Bian
@@ -28,6 +29,8 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
  * Time: 10:24 AM
  */
 public class ParcelProvisionPoller extends StatusPoller {
+
+   private static final Logger logger = Logger.getLogger(ParcelProvisionPoller.class);
 
    private ParcelResource apiParcelResource;
    private AvailableParcelStage toStage;
@@ -76,6 +79,9 @@ public class ParcelProvisionPoller extends StatusPoller {
          // sometimes parcelState.getProgress() > parcel.getTotalProgress()
          if (toProgress > endProgress) {
             toProgress = endProgress;
+         }
+         if(toProgress/10 != currentProgress/10) {
+            logger.info("Parcel progress: " + toProgress);
          }
          if (toProgress > currentProgress) {
             currentReport.setProgress(toProgress);

@@ -91,11 +91,11 @@ public class ExternalProgressMonitor extends TracedRunnable {
             stop = true;
          }
          if (stop) {
-            logger.info("received stop signal, will do one more query then exit, so as to retrieve the final progress after Ironfan exits.");
+            logger.info("received stop signal, will do one more query then exit, so as to retrieve the final progress after external appmanager exits.");
             exit = true;
          }
 
-         logger.info("progress query started");
+         logger.debug("progress query started");
          List<ClusterReport> reports = queue.pollClusterReport();
          if (reports.isEmpty()) {
             logger.debug("No reports found. Waiting ...");
@@ -109,7 +109,6 @@ public class ExternalProgressMonitor extends TracedRunnable {
             if (statusUpdater != null) {
                statusUpdater.setProgress(((double) progress) / 100);
             }
-            logger.info("cluster  finished? " + lastestReport.isFinished());
          }
 
          setLastErrorMsg(lastestReport.getErrMsg());

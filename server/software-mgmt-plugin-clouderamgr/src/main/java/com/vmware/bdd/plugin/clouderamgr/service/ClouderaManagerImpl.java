@@ -89,6 +89,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private String privateKey;
    private RootResourceV6 apiResourceRootV6;
    private String cmServerHostId;
+   private String domain;
    private String cmServerHost;
    private int cmPort;
    private String cmUsername;
@@ -122,6 +123,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          String password, String privateKey) throws ClouderaManagerException {
       this.cmServerHost = cmServerHost;
       this.cmPort = port;
+      this.domain = "http://" + cmServerHost + ":" + cmPort;
       this.cmUsername = user;
       this.cmPassword = password;
       ApiRootResource apiRootResource = new ClouderaManagerClientBuilder().withHost(cmServerHost)
@@ -191,22 +193,30 @@ public class ClouderaManagerImpl implements SoftwareManager {
    public boolean createCluster(ClusterBlueprint blueprint,
          ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
       boolean success = false;
+      CmClusterDef clusterDef = null;
       try {
-         CmClusterDef clusterDef = new CmClusterDef(blueprint);
+         clusterDef = new CmClusterDef(blueprint);
          //provisionManagement();
          provisionCluster(clusterDef, reportQueue);
          provisionParcels(clusterDef, reportQueue);
          configureServices(clusterDef, reportQueue);
          startServices(clusterDef, reportQueue, true);
+         success = true;
          clusterDef.getCurrentReport().setAction("Successfully Create Cluster");
          clusterDef.getCurrentReport().setProgress(100);
-         reportQueue.addClusterReport(clusterDef.getCurrentReport().clone());
-         success = true;
+         clusterDef.getCurrentReport().setSuccess(true);
       } catch (SoftwareManagementPluginException ex) {
+         clusterDef.getCurrentReport().setAction("Failed to Create Cluster");
+         clusterDef.getCurrentReport().setSuccess(false);
          throw ex;
       } catch (Exception e) {
-         logger.error(e.getMessage(), e);
-         throw SoftwareManagementPluginException.CREATE_CLUSTER_FAILED(blueprint.getName(), e);
+         clusterDef.getCurrentReport().setAction("Failed to Create Cluster");
+         clusterDef.getCurrentReport().setSuccess(false);
+         logger.error(e.getMessage());
+         throw SoftwareManagementPluginException.CREATE_CLUSTER_FAILED(e.getMessage(), e);
+      } finally {
+         clusterDef.getCurrentReport().setFinished(true);
+         reportQueue.addClusterReport(clusterDef.getCurrentReport().clone());
       }
 
       return success;
@@ -244,7 +254,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          throw SoftwareManagementPluginException.DELETE_CLUSTER_FAILED(clusterName, e);
       }
       return true;
-  }
+   }
 
    @Override
    public boolean onStopCluster(String clusterName,
@@ -599,7 +609,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
             logger.info("install command id: " + cmd.getId());
 
             hostInstallPoller = new HostInstallPoller(apiResourceRootV6, cmd.getId(), cluster.getCurrentReport(), reportQueue,
-                  ProgressSplit.INSTALL_HOSTS_AGENT.getProgress(), cmServerHost, cmPort, cmUsername, cmPassword);
+                  ProgressSplit.INSTALL_HOSTS_AGENT.getProgress(), domain, cmUsername, cmPassword);
             executeAndReport("Installing Host Agents", cmd, ProgressSplit.INSTALL_HOSTS_AGENT.getProgress(),
                   cluster.getCurrentReport(), reportQueue, hostInstallPoller, true);
          } catch (Exception e) {
@@ -616,8 +626,10 @@ public class ClouderaManagerImpl implements SoftwareManager {
                }
             }
 
-            logger.info("Failed to install agents on nodes: " + failedIps.toString());
-            throw ClouderaManagerException.INSTALL_AGENTS_FAIL("Failed to install agents on nodes: " + failedIps.toString(), e);
+            String errMsg = "Failed to install agents on nodes: " + failedIps.toString()
+                  + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
+            logger.error(errMsg);
+            throw ClouderaManagerException.INSTALL_AGENTS_FAIL(errMsg, e);
          }
       } else {
          cluster.getCurrentReport().setProgress(ProgressSplit.INSTALL_HOSTS_AGENT.getProgress());
@@ -778,20 +790,20 @@ public class ClouderaManagerImpl implements SoftwareManager {
       // validate this cluster has access to all Parcels it requires
       executeAndReport("Validating parcels availability", null, ProgressSplit.VALIDATE_PARCELS_AVAILABILITY.getProgress(),
             cluster.getCurrentReport(), reportQueue, new StatusPoller() {
-               @Override
-               public boolean poll() {
-                  for (ApiParcel parcel : apiResourceRootV6.getClustersResource().getParcelsResource(cluster.getName())
-                        .readParcels(DataView.FULL).getParcels()) {
-                     try {
-                        repositoriesRequired.remove(parcel.getProduct());
-                     } catch (IllegalArgumentException e) {
-                        // ignore
-                     }
-                  }
-                  // TODO: if one required parcel is not available, will run forever, need timeout/validation
-                  return repositoriesRequired.isEmpty();
+         @Override
+         public boolean poll() {
+            for (ApiParcel parcel : apiResourceRootV6.getClustersResource().getParcelsResource(cluster.getName())
+                  .readParcels(DataView.FULL).getParcels()) {
+               try {
+                  repositoriesRequired.remove(parcel.getProduct());
+               } catch (IllegalArgumentException e) {
+                  // ignore
                }
-            }, false);
+            }
+            // TODO: if one required parcel is not available, will run forever, need timeout/validation
+            return repositoriesRequired.isEmpty();
+         }
+      }, false);
 
       apiResourceRootV6.getClouderaManagerResource().updateConfig(
             new ApiConfigList(Arrays.asList(new ApiConfig[]{new ApiConfig("PARCEL_UPDATE_FREQ", "60")})));
@@ -812,6 +824,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
          final ParcelResource apiParcelResource = apiResourceRootV6.getClustersResource()
                .getParcelsResource(cluster.getName()).getParcelResource(repository, parcelVersion.toString());
+         String refMsg = referCmfUrlMsg(domain + "/cmf/parcel/status");
          if (AvailableParcelStage.valueOf(apiParcelResource.readParcel().getStage()).ordinal() < AvailableParcelStage.DOWNLOADED.ordinal()) {
             String action = "Downloading parcel...";
 
@@ -829,7 +842,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
                      cluster.getCurrentReport(), reportQueue, poll, false);
             }
             if (AvailableParcelStage.valueOf(apiParcelResource.readParcel().getStage()).ordinal() < AvailableParcelStage.DOWNLOADED.ordinal()) {
-               throw ClouderaManagerException.DOWNLOAD_PARCEL_FAIL();
+               throw ClouderaManagerException.DOWNLOAD_PARCEL_FAIL(apiParcelResource.readParcel().getProduct(),
+                     apiParcelResource.readParcel().getVersion(), refMsg);
             }
          }
 
@@ -844,7 +858,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
                   cluster.getCurrentReport(), reportQueue, poller, false);
 
             if (AvailableParcelStage.valueOf(apiParcelResource.readParcel().getStage()).ordinal() < AvailableParcelStage.DISTRIBUTED.ordinal()) {
-               throw ClouderaManagerException.DISTRIBUTE_PARCEL_FAIL(cluster.getName());
+               throw ClouderaManagerException.DISTRIBUTE_PARCEL_FAIL(apiParcelResource.readParcel().getProduct(),
+                     apiParcelResource.readParcel().getVersion(), refMsg);
             }
          }
          if (AvailableParcelStage.valueOf(apiParcelResource.readParcel().getStage()).ordinal() < AvailableParcelStage.ACTIVATED.ordinal()) {
@@ -861,7 +876,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
             }, false);
 
             if (AvailableParcelStage.valueOf(apiParcelResource.readParcel().getStage()).ordinal() < AvailableParcelStage.ACTIVATED.ordinal()) {
-               throw ClouderaManagerException.DISTRIBUTE_PARCEL_FAIL(cluster.getName());
+               throw ClouderaManagerException.ACTIVATE_PARCEL_FAIL(apiParcelResource.readParcel().getProduct(),
+                     apiParcelResource.readParcel().getVersion(), refMsg);
             }
          }
       }
@@ -995,7 +1011,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
          executeAndReport("Deploy client config", apiResourceRootV6.getClustersResource().deployClientConfig(cluster.getName()),
                ProgressSplit.CONFIGURE_SERVICES.getProgress(), cluster.getCurrentReport(), reportQueue);
       } catch (Exception e) {
-         throw SoftwareManagementPluginException.CONFIGURE_SERVICE_FAILED(cluster.getName(),e);
+         String errMsg = "Failed to configure services" + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
+         logger.error(errMsg);
+         throw SoftwareManagementPluginException.CONFIGURE_SERVICE_FAILED(errMsg, e);
       }
    }
 
@@ -1011,7 +1029,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
       boolean executed = true;
       int endProgress = ProgressSplit.START_SERVICES.getProgress();
       try {
-
          if (!cluster.isEmpty()) {
             if (!isConfigured(cluster)) {
                configureServices(cluster, reportQueue);
@@ -1058,9 +1075,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
             reportQueue.addClusterReport(cluster.getCurrentReport().clone());
          }
       } catch (Exception e) {
-         e.printStackTrace();
-         logger.info(e.getMessage());
-         throw SoftwareManagementPluginException.START_SERVICE_FAILED(cluster.getName(), e);
+         String errMsg = "Failed to start services" + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
+         logger.error(errMsg);
+         throw SoftwareManagementPluginException.START_SERVICE_FAILED(errMsg, e);
       }
 
       return executed;
@@ -1252,7 +1269,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          boolean checkReturn) throws Exception {
 
       if (action != null) {
-         logger.info("Cloudera Manager Action: " + action);
+         logger.info("Action: " + action);
          currentReport.setClusterAndNodesAction(action);
          reportQueue.addClusterReport(currentReport.clone());
       }
@@ -1263,7 +1280,15 @@ public class ClouderaManagerImpl implements SoftwareManager {
       if (checkReturn && command != null
             && !(commandReturn = apiResourceRootV6.getCommandsResource().readCommand(command.getId())).getSuccess()) {
          logger.info("Failed to run command: " + command);
-         throw new RuntimeException(command.getResultMessage());
+         String errorMsg = command.getResultMessage();
+         if (errorMsg == null) {
+            if (command.getResultDataUrl() != null) {
+               errorMsg = referCmfUrlMsg(command.getResultDataUrl());
+            } else {
+               errorMsg = referCmfUrlMsg(domain + "/cmf/command/" + command.getId() + "/details");
+            }
+         }
+         throw new RuntimeException(errorMsg);
       }
 
       if (endProgress != INVALID_PROGRESS) {
@@ -1274,6 +1299,10 @@ public class ClouderaManagerImpl implements SoftwareManager {
       }
 
       return commandReturn;
+   }
+
+   private String referCmfUrlMsg(String url) {
+      return "Please refer to " + url + " for details";
    }
 
    private static abstract class Retriable {
@@ -1307,7 +1336,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public void updateInfrastructure(ClusterBlueprint blueprint)
-      throws SoftwareManagementPluginException {
+         throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
 
    }

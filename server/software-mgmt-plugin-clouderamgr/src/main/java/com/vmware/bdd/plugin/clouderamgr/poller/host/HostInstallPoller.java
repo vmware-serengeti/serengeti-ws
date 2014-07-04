@@ -78,13 +78,13 @@ public class HostInstallPoller extends StatusPoller{
    public HostInstallPoller(final RootResourceV6 rootResource, final Long parentCmdId,
          final ClusterReport currentReport,
          final ClusterReportQueue reportQueue, int endProgress,
-         String host, int port, String username, String password) throws Exception {
+         String domain, String username, String password) throws Exception {
       this.rootResource = rootResource;
       this.parentCmdId = parentCmdId;
       this.reportQueue = reportQueue;
       this.currentReport = currentReport;
       this.endProgress = endProgress;
-      this.domain = "http://" + host + ":" + port;
+      this.domain = domain;
       this.username = username;
       this.password = password;
    }
@@ -133,6 +133,7 @@ public class HostInstallPoller extends StatusPoller{
       }
       if (toReport != null) {
          // free the "currentReport" lock before adding to reportQueue to avoid blocking
+         logger.info("report status progress=" + toReport.getProgress() + ", action=" + toReport.getAction());
          reportQueue.addClusterReport(toReport);
       }
       if (rootResource.getCommandsResource().readCommand(parentCmdId).getEndTime() != null) {

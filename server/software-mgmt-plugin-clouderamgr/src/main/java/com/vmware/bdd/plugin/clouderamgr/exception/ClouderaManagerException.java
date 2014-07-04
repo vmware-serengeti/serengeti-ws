@@ -35,17 +35,19 @@ public class ClouderaManagerException extends SoftwareManagementPluginException 
       return new ClouderaManagerException("UNSURE_CLUSTER_EXIST", "not sure exist", null);
    }
 
-   public static ClouderaManagerException DOWNLOAD_PARCEL_FAIL() {
-      return new ClouderaManagerException("DOWN_PARCEL_FAIL", "Failed to download parcel", null);
-   }
-
    public static SoftwareManagementPluginException INSTALL_AGENTS_FAIL(String message, Throwable cause) {
       return new SoftwareManagementPluginException("INSTALL_AGENTS_FAIL", message, cause);
    }
 
-   public static ClouderaManagerException DISTRIBUTE_PARCEL_FAIL(String clusterName) {
-      return new ClouderaManagerException("DISTRIBUTE_PARCEL_FAIL", "Failed to distribute parcel for cluster " + clusterName, null);
+   public static ClouderaManagerException DOWNLOAD_PARCEL_FAIL(String product, String version, String refMsg) {
+      return new ClouderaManagerException("DOWN_PARCEL_FAIL", "Failed to download parcel " + product + " " + version + ", " + refMsg, null);
    }
 
+   public static ClouderaManagerException DISTRIBUTE_PARCEL_FAIL(String product, String version,  String refMsg) {
+      return new ClouderaManagerException("DISTRIBUTE_PARCEL_FAIL", "Failed to distribute parcel " + product + " " + version + ", " + refMsg, null);
+   }
 
+   public static ClouderaManagerException ACTIVATE_PARCEL_FAIL(String product, String version,  String refMsg) {
+      return new ClouderaManagerException("ACTIVATE_PARCEL_FAIL", "Failed to activate parcel " + product + " " + version + ", " + refMsg, null);
+   }
 }
