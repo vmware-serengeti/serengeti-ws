@@ -129,6 +129,12 @@ public class ClusterReport implements Cloneable {
       }
    }
 
+   public void clearAllNodesErrorMsg() {
+      for(NodeReport nodeReport: this.nodeReports.values()) {
+         nodeReport.setErrMsg(null);
+      }
+   }
+
    public boolean isSuccess() {
       return success;
    }

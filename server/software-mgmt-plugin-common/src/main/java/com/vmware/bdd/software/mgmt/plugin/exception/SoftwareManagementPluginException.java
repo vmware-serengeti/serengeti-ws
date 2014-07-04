@@ -67,8 +67,8 @@ public class SoftwareManagementPluginException extends RuntimeException {
       return new SoftwareManagementPluginException("RETRIEVE_SUPPORTED_STACKS", message, cause);
    }
 
-   public static SoftwareManagementPluginException DELETE_CLUSTER_FAILED(String clusterName, Throwable cause) {
-      return new SoftwareManagementPluginException("DELETE_CLUSTER_FAILED", "Failed to delete cluster " + clusterName, cause);
+   public static SoftwareManagementPluginException DELETE_CLUSTER_FAILED(String errMsg, Throwable cause) {
+      return new SoftwareManagementPluginException("DELETE_CLUSTER_FAILED", errMsg, cause);
    }
 
    public static SoftwareManagementPluginException START_CLUSTER_FAILED(String errMsg, Throwable cause) {
@@ -77,10 +77,6 @@ public class SoftwareManagementPluginException extends RuntimeException {
 
    public static SoftwareManagementPluginException STOP_CLUSTER_FAILED(String errMsg, Throwable cause) {
       return new SoftwareManagementPluginException("STOP_CLUSTER_FAILED", errMsg, cause);
-   }
-
-   public static SoftwareManagementPluginException CHECK_SERVICE_FAILED(String clusterName, Throwable cause) {
-      return new SoftwareManagementPluginException("CHECK_SERVICE_FAILED", "Failed to check service state for cluster " + clusterName, cause);
    }
 
    public static SoftwareManagementPluginException CONFIGURE_SERVICE_FAILED(String message, Throwable cause) {

@@ -75,7 +75,9 @@ public class ClusterOperationPoller extends StatusPoller {
                TaskStatus taskStatus =
                      TaskStatus.valueOf(apiTask.getApiTaskInfo().getStatus());
                if (taskStatus.isRunningState()) {
-                  if (clusterRequestStatus.isFailedState()) {
+                  if (clusterRequestStatus.isFailedState() &&
+                        apiTaskInfo.getStderr() != null &&
+                        !apiTaskInfo.getStderr().isEmpty()) {
                      nodeReport.setAction(apiTaskInfo.getCommandDetail() + ": "
                            + apiTaskInfo.getStderr());
                   } else {

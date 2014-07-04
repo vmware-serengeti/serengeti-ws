@@ -48,6 +48,10 @@ public interface IApiManager {
 
    public ApiStack getStack(String stackName) throws AmbariApiException;
 
+   ApiService readService(String clusterName, String serviceName) throws AmbariApiException;
+
+   boolean isServiceStarted(String clusterName, String serviceName);
+
    public ApiStackVersionList getStackVersionList(String stackName) throws AmbariApiException;
 
    public ApiStackVersion getStackVersion(String stackName, String stackVersion) throws AmbariApiException;
@@ -148,7 +152,7 @@ public interface IApiManager {
    public boolean deleteService(String clusterName, String serviceName);
 
    public ApiRequest deleteHost(String clusterName, String fqdn);
-   
+
    public Map<String, ServiceStatus> getHostStatus(String clusterName) throws AmbariApiException;
 
    public String healthCheck() throws AmbariApiException;

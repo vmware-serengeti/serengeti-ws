@@ -118,6 +118,22 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
+   public ApiService readService(String clusterName, String serviceName) throws AmbariApiException {
+      Response response = apiResourceRootV1.getClustersResource().getServicesResource(clusterName).readService(serviceName);
+      String serviceJson = handleAmbariResponse(response);
+      logger.debug("Service " + serviceName + " is: " + serviceJson);
+      ApiService apiService = ApiUtils.jsonToObject(ApiService.class, serviceJson);
+      return apiService;
+   }
+
+   @Override
+   public boolean isServiceStarted(String clusterName, String serviceName) throws AmbariApiException {
+      ApiService service = readService(clusterName, serviceName);
+      String serviceState = service.getServiceInfo().getState();
+      return ApiServiceStatus.STARTED.name().equalsIgnoreCase(serviceState);
+   }
+
+   @Override
    public ApiStackVersionList getStackVersionList(String stackName)
          throws AmbariApiException {
       Response response =
@@ -275,6 +291,7 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiRequest stopAllServicesInCluster(String clusterName) throws AmbariApiException {
+      logger.info("Ambari is stopping all services in cluster " + clusterName);
       ApiServiceInfo serviceInfo = new ApiServiceInfo();
       serviceInfo.setState(ApiServiceStatus.INSTALLED.name());
       ApiBody body = new ApiBody();

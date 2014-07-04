@@ -422,6 +422,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
                      node.setStatus(NodeStatus.UNKNOWN, false);
                      break;
                   case PROVISIONING:
+                  case STOPPED:
                      node.setStatus(NodeStatus.VM_READY, false);
                      break;
                   default:
@@ -438,10 +439,16 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
             } else if (nodeReport.getAction() != null) {
                node.setAction(nodeReport.getAction());
             }
-            if (lastUpdate && nodeReport.getErrMsg() != null) {
-               logger.debug("set node error message to:" + report.getAction());
-               node.setErrMessage(nodeReport.getErrMsg());
-               node.setActionFailed(true);
+            if (lastUpdate) {
+               if (nodeReport.getErrMsg() != null) {
+                  logger.debug("set node error message to:" + report.getAction());
+                  node.setErrMessage(nodeReport.getErrMsg());
+                  node.setActionFailed(true);
+               } else {
+                  logger.debug("clear node error message for node " + node.getHostName());
+                  node.setErrMessage(null);
+                  node.setActionFailed(false);
+               }
             }
          }
       }

@@ -23,10 +23,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ws.rs.NotFoundException;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+
+import javax.ws.rs.NotFoundException;
+
+import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
+import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.TaskStatus;
+import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
@@ -506,11 +511,13 @@ public class AmbariImpl implements SoftwareManager {
 
          // For cluster resume/resize, the blueprint is already exist, we need to delete this cluster first.
          if (isProvisioned(clusterName) && isClusterProvisionedByBDE(clusterDef)) {
-            ApiRequest apiRequestSummary = apiManager.stopAllServicesInCluster(clusterName);
-            boolean success = doSoftwareOperation(clusterName, apiRequestSummary, clusterDef.getCurrentReport(), reportQueue);
-            if (!success) {
-               logger.error("Failed to stop all services in cluster");
-               throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(clusterName, null);
+            try {
+               ApiRequest apiRequestSummary = apiManager.stopAllServicesInCluster(clusterName);
+               doSoftwareOperation(clusterName, apiRequestSummary, clusterDef.getCurrentReport(), reportQueue);
+            } catch (Exception e) {
+               String errMsg = getErrorMsg("stop all services", e);
+               logger.error(errMsg, e);
+               throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(errMsg, e);
             }
             apiManager.deleteCluster(clusterName);
          }
@@ -551,6 +558,14 @@ public class AmbariImpl implements SoftwareManager {
       }
    }
 
+   private String getErrorMsg(String action, Exception e) {
+      StringBuilder errMsg = new StringBuilder();
+      errMsg.append("Failed to " + action);
+      if (e != null && e.getMessage() != null && !e.getMessage().isEmpty()) {
+         errMsg.append(": " + e.getMessage());
+      }
+      return errMsg.toString();
+   }
    @Override
    public List<String> validateScaling(NodeGroupInfo group) {
       // TODO Auto-generated method stub
@@ -900,43 +915,66 @@ public class AmbariImpl implements SoftwareManager {
       if (!isProvisioned(clusterName)) {
          throw SoftwareManagementPluginException.START_CLUSTER_FAILED("Cluster is not provisioned", null);
       }
+      if (!isClusterProvisionedByBDE(clusterDef)) {
+         throw SoftwareManagementPluginException.START_CLUSTER_FAILED("Can not start a cluster that is not provisioned by Big Data Extension", null);
+      }
+
+      ClusterReport clusterReport = clusterDef.getCurrentReport();
+      clusterReport.setAction("Ambari is starting services");
+      clusterReport.setProgress(ProgressSplit.OPERATION_BEGIN.getProgress());
+      reportStatus(clusterReport, reports);
+      boolean success = false;
+      //when start services, some tasks will fail with error msg "Host Role in invalid state".
+      // The failed task are random(I had saw NodeManager, ResourceManager, NAGOIS failed), and the
+      // root cause is not clear by now. Each time, when I retry, it succeed. So just add retry logic to make a
+      // a temp fix for it.
+      //TODO(qjin): find out the root cause of failure in startting services
+      Exception resultException = null;
       try {
-         ClusterReport clusterReport = clusterDef.getCurrentReport();
-         clusterReport.setAction("Ambari is starting services");
-         clusterReport.setProgress(ProgressSplit.OPERATION_BEGIN.getProgress());
-         boolean success = false;
-         //when start services, some tasks will fail with error msg "Host Role in invalid state".
-         // The failed task are random(I had saw NodeManager, ResourceManager, NAGOIS failed), and the
-         // root cause is not clear by now. Each time, when I retry, it succeed. So just add retry logic to make a
-         // a temp fix for it.
-         //TODO(qjin): find out the root cause of failure in startting services
          for (int i = 0; i < REQUEST_MAX_RETRY_TIMES; i++) {
+            ApiRequest apiRequestSummary;
             try {
-               ApiRequest apiRequestSummary = apiManager.startAllServicesInCluster(clusterName);
-               success = doSoftwareOperation(clusterBlueprint.getName(), apiRequestSummary, clusterReport, reports);
-               if (!success) {
-                  logger.warn("Failed to start cluster services, retrying after 5 seconds...");
-                  try {
-                     Thread.sleep(5000);
-                  } catch (Exception e) {
-                     logger.info("interrupted when sleeping, trying to start cluster services immediately");
-                  }
-               } else {
-                  break;
+               apiRequestSummary = apiManager.startAllServicesInCluster(clusterName);
+               //when reach here, command is succeed. If ApiRequestInfo is null, it means the command has been
+               //finished successfully, otherwise we need to wait for it using doSoftwareOperation
+               if (apiRequestSummary.getApiRequestInfo() == null) {
+                  success = true;
+                  return true;
                }
+               success = doSoftwareOperation(clusterBlueprint.getName(), apiRequestSummary, clusterReport, reports);
             } catch (Exception e) {
-               logger.warn("Got exception when start cluster", e);
+               resultException = e;
+               logger.warn("Failed to start cluster services, retrying after 5 seconds...", e);
+               try {
+                  Thread.sleep(5000);
+               } catch (InterruptedException interrupt) {
+                  logger.info("interrupted when sleeping, trying to start cluster services immediately");
+               }
             }
          }
+      } finally {
          if (!success) {
-            logger.error("Ambari failed to start services");
-            throw SoftwareManagementPluginException.START_CLUSTER_FAILED(clusterName, null);
+            String errMsg = getErrorMsg("start all services", resultException);
+            logger.error(errMsg, resultException);
+            throw SoftwareManagementPluginException.START_CLUSTER_FAILED(errMsg, resultException);
          }
-      } catch (Exception e) {
-         logger.error("Ambari got an exception when start services in cluster", e);
-         throw SoftwareManagementPluginException.START_CLUSTER_FAILED(clusterName, e);
+
+         clusterReport.setClusterAndNodesServiceStatus(ServiceStatus.STARTED);
+         clusterReport.setClusterAndNodesAction("");
+         clusterReport.clearAllNodesErrorMsg();
+         reportStatus(clusterReport.clone(), reports);
+         return true;
       }
-      return true;
+   }
+
+   private void waitServiceToStart(final String clusterName, final String serviceName) throws Exception {
+      StatusPoller servicePoller = new StatusPoller() {
+         @Override
+         public boolean poll() {
+            return apiManager.isServiceStarted(clusterName, serviceName);
+         }
+      };
+      servicePoller.waitForComplete();
    }
 
    @Override
@@ -951,32 +989,37 @@ public class AmbariImpl implements SoftwareManager {
       String clusterName = clusterBlueprint.getName();
       AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, null);
       ClusterReport clusterReport = clusterDef.getCurrentReport();
-
+      boolean success = false;
       try {
          if (!isProvisioned(clusterName)) {
             return true;
          }
+         if (!isClusterProvisionedByBDE(clusterDef)) {
+            throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED("Cannot stop a cluster that is not provisioned by Big Data Extension", null);
+         }
          clusterReport.setAction("Ambari is stopping services");
          clusterReport.setProgress(ProgressSplit.OPERATION_BEGIN.getProgress());
-
-         //TODO(qjin): here we only consider unstopped services, maybe need to handle other kinds of state(STOPPING, STARTING) carefully
+         reportStatus(clusterReport, reports);
          ApiRequest apiRequestSummary = apiManager.stopAllServicesInCluster(clusterName);
-         boolean success = doSoftwareOperation(clusterName, apiRequestSummary, clusterReport, reports);
-
-         if (!success) {
-            logger.error("Failed to stop all services in cluster");
-            throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(clusterName, null);
+         if (apiRequestSummary == null || apiRequestSummary.getApiRequestInfo() == null) {
+            logger.info("Services is already stopped in cluster " + clusterName);
+            return true;
          }
+         doSoftwareOperation(clusterName, apiRequestSummary, clusterReport, reports);
+         clusterReport.setClusterAndNodesAction("");
+         clusterReport.clearAllNodesErrorMsg();
+         clusterReport.setClusterAndNodesServiceStatus(ServiceStatus.STOPPED);
+         reportStatus(clusterReport.clone(), reports);
          return true;
       } catch (Exception e) {
-         logger.error("Ambari got an exception when stopping cluster services: ", e);
-         throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(clusterName, e);
+         String errMsg = getErrorMsg("stop all services", e);
+         logger.error(errMsg, e);
+         throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(errMsg, e);
       }
    }
 
    private boolean doSoftwareOperation(String clusterName, ApiRequest apiRequestSummary,
                                        ClusterReport clusterReport, ClusterReportQueue reports) throws Exception{
-      reportStatus(clusterReport, reports);
       ClusterOperationPoller poller =
             new ClusterOperationPoller(apiManager, apiRequestSummary,
                   clusterName, clusterReport, reports,
@@ -993,21 +1036,36 @@ public class AmbariImpl implements SoftwareManager {
       if (!clusterRequestStatus.isFailedState()) {
          success = true;
       } else {
-         logger.error("Failed to do request, the apiRequestInfo is :" + ApiUtils.objectToJson(apiRequest.getApiRequestInfo()));
+         logger.error("Failed to do request: " + ApiUtils.objectToJson(apiRequest.getApiRequestInfo()));
          List<ApiTask> apiTasks = apiRequest.getApiTasks();
-         logger.info("ApiTaskInfo are: ");
+         Map<String, NodeReport> nodeReports = clusterReport.getNodeReports();
+         HashMap<String, List<String>> errMsg = new HashMap<>();
          for (ApiTask apiTask : apiTasks) {
-            ApiTaskInfo apiTaskInfo = apiTask.getApiTaskInfo();
-            logger.info(ApiUtils.objectToJson(apiTaskInfo));
-            logger.info("command: " + apiTaskInfo.getCommandDetail() +
-                        "role: " + apiTaskInfo.getRole() +
-                        "StructuredOut: " + apiTaskInfo.getStructuredOut() +
-                        "stderr: " + apiTaskInfo.getStderr() +
-                        "status: " + apiTaskInfo.getStatus());
-            if (apiTaskInfo != null && apiTaskInfo.getStderr() != null) {
-               logger.error(apiTaskInfo.getCommandDetail() + ": " + apiTaskInfo.getStderr());
+            ApiTaskInfo taskInfo = apiTask.getApiTaskInfo();
+            if (TaskStatus.valueOf(taskInfo.getStatus()).isFailedState()) {
+               if (!errMsg.containsKey(taskInfo.getHostName())) {
+                  List<String> errs = new ArrayList<>();
+                  errMsg.put(taskInfo.getHostName(), errs);
+               }
+               String taskErrMsg = taskInfo.getCommandDetail() + " " + taskInfo.getStatus();
+               errMsg.get(taskInfo.getHostName()).add(taskErrMsg);
+               logger.error("command: " + taskInfo.getCommandDetail() +
+                     "role: " + taskInfo.getRole() +
+                     "StructuredOut: " + taskInfo.getStructuredOut() +
+                     "stderr: " + taskInfo.getStderr() +
+                     "status: " + taskInfo.getStatus());
             }
          }
+         for (NodeReport nodeReport: nodeReports.values()) {
+            if (errMsg.containsKey(nodeReport.getHostname())) {
+               nodeReport.setErrMsg(errMsg.get(nodeReport.getHostname()).toString());
+            }
+         }
+         String requestErrorMsg = "Failed to execute request: " +
+                  apiRequest.getApiRequestInfo().getRequestStatus() + ". Refer to each node for details.";
+         clusterReport.setErrMsg(requestErrorMsg);
+         reportStatus(clusterReport.clone(), reports);
+         throw new RuntimeException(requestErrorMsg);
       }
       return success;
    }
@@ -1051,7 +1109,7 @@ public class AmbariImpl implements SoftwareManager {
          return true;
       } catch (Exception e) {
          logger.error("Ambari got an exception when deleting cluster", e);
-         throw SoftwareManagementPluginException.DELETE_CLUSTER_FAILED(clusterBlueprint.getName(), e);
+         throw SoftwareManagementPluginException.DELETE_CLUSTER_FAILED(e.getMessage(), e);
       }
    }
 

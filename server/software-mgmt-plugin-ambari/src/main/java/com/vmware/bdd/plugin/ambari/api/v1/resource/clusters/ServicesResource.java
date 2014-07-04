@@ -57,4 +57,8 @@ public interface ServicesResource {
    @DELETE
    @Path("/{serviceName}")
    public Response deleteService(@PathParam(Parameters.SERVICE_NAME) String serviceName);
+
+   @GET
+   @Path("/{serviceName}")
+   public Response readService(@PathParam(Parameters.SERVICE_NAME) String serviceName);
 }
