@@ -154,12 +154,16 @@ public class ClouderaManagerImpl implements SoftwareManager {
       HadoopStack cdh4 = new HadoopStack();
       cdh4.setDistro("CDH4");
       cdh4.setVendor("CDH");
-      cdh4.setFullVersion("CDH4");
+      cdh4.setFullVersion("4.0");
+      cdh4.setRoles(Arrays.asList("HDFS_DATANODE", "YARN_NODE_MANAGER"));
       list.add(cdh4);
       HadoopStack cdh5 = new HadoopStack();
       cdh5.setDistro("CDH5");
       cdh5.setVendor("CDH");
-      cdh5.setFullVersion("CDH5");
+      cdh5.setFullVersion("5.0");
+      cdh5.setRoles(Arrays.asList("HDFS_NAMENODE", "HDFS_SECONDARY_NAMENODE",
+            "YARN_RESOURCE_MANAGER", "YARN_JOB_HISTORY", "HDFS_DATANODE",
+            "YARN_NODE_MANAGER"));
       list.add(cdh5);
       return list;
    }
