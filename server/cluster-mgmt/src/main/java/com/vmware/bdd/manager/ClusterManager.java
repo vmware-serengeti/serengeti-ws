@@ -523,7 +523,7 @@ public class ClusterManager {
          logger.error("can not config cluster: " + clusterName + ", "
                + cluster.getStatus());
          throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
-               "To update a cluster, its status must be RUNNING");
+               "To update a cluster, its status must be RUNNING, CONFIGURE_ERROR or SERVICE_ERROR");
       }
       clusterConfigMgr.updateAppConfig(clusterName, createSpec);
 
@@ -700,8 +700,7 @@ public class ClusterManager {
 
       ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
-      if (cluster.getStatus().isActiveServiceStatus()
-            || cluster.getStatus() == ClusterStatus.SERVICE_ERROR) {
+      if (cluster.getStatus().isActiveServiceStatus()) {
          logger.error("cluster " + clusterName + " is running already");
          throw ClusterManagerException.ALREADY_STARTED_ERROR(clusterName);
       }
@@ -712,7 +711,7 @@ public class ClusterManager {
                + " cannot be started, it is in " + cluster.getStatus()
                + " status");
          throw ClusterManagerException.START_NOT_ALLOWED_ERROR(clusterName,
-               "To start a cluster, its status must be STOPPED");
+               "To start a cluster, its status must be STOPPED or ERROR");
       }
 
       cluster.setVhmTargetNum(-1);
@@ -761,7 +760,7 @@ public class ClusterManager {
                + " cannot be stopped, it is in " + cluster.getStatus()
                + " status");
          throw ClusterManagerException.STOP_NOT_ALLOWED_ERROR(clusterName,
-               "To stop a cluster, its status must be RUNNING");
+               "To stop a cluster, its status must be RUNNING, ERROR or SERVICE_ERROR");
       }
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
@@ -981,7 +980,7 @@ public class ClusterManager {
          logger.error("Cannot change elasticity parameters, when cluster "
                + clusterName + " is in " + cluster.getStatus() + " status");
          throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
-               clusterName, "The cluster's status must be RUNNING or STOPPED");
+               clusterName, "The cluster's status must be RUNNING, SERVICE_ERROR or STOPPED");
       }
 
       clusterEntityMgr.update(cluster);
