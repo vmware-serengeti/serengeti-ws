@@ -36,7 +36,7 @@ public class SetPasswordException extends BddException{
       return new SetPasswordException(cause, "GOT_JSCH_EXCEPTION_WHEN_SET_PASSWORD", nodeIP);
    }
 
-   public static SetPasswordException FAIL_TO_GET_NODE_IP(String vmName) {
-      return new SetPasswordException(null, "FAIL_TO_GET_NODE_IP", vmName);
+   public static SetPasswordException FAIL_TO_SETUP_LOGIN_TTY(String nodeIP, String errMsg) {
+      return new SetPasswordException(null, "FAIL_TO_SETUP_LOGIN_TTY", nodeIP, errMsg);
    }
 }

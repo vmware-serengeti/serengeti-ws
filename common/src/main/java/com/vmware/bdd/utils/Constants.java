@@ -173,7 +173,6 @@ public class Constants {
 
    public static final String SSH_PRIVATE_KEY_FILE_NAME = "id_rsa";
    public static final String SSH_PRIVATE_KEY_CONFIG_NAME = "serengeti.ssh.private.key.file";
-   public static final int SSH_PORT = 22;
    public static final int SSH_SESSION_TIMEOUT = 15000;
    public static final String SET_PASSWORD_SCRIPT_CONFIG_NAME = "serengeti.set.password.script";
    public static final String SSH_USER_CONFIG_NAME = "serengeti.ssh.user";
@@ -182,9 +181,6 @@ public class Constants {
    public static final int DEFAULT_SSH_PORT = 22;
    public static final String DEFAULT_SET_PASSWORD_SCRIPT = "set-password";
    public static final int SET_PASSWORD_MAX_RETRY_TIMES = 10;
-   public static final String SET_PASSWORD_FAILED = "Failed to set password";
-   public static final String SET_PASSWORDLESS_LOGIN_FAILED = "Failed to set passwordless login for ";
-   public static final String PASSWORD_CHARACTER_REQUIREMENT = "Passwords can include only alphanumeric characters ([0-9, a-z, A-Z]) and the following special characters: _, @, #, $, %, ^, &, *";
    public static final String NEW_LINE = "\n";
    public static final String DEFAULT_PASSWORDLESS_LOGIN_SCRIPT = "setup-passwordless-login";
    public static final String PASSWORDLESS_LOGIN_SCRIPT = "serengeti.passwordless.login.script";
@@ -196,7 +192,6 @@ public class Constants {
    public static final String NODE_UPGRADE_SCRIPT_FILE_NAME = "serengeti-upgrade-node.sh";
    public static final String NEED_UPGRADE = "Earlier";
    public static final String MSG_SETTING_UP_PASSWORDLESS_LOGIN = "Setting up passwordless login to ";
-   public static final String DEFAULT_PASSWORD = "password";
    public static final String SERENGETI_TTY_NAME = "serengeti.tty.name";
    public static final String SERENGETI_DEFAULT_TTY_NAME = "tty1";
    public static final String SERENGETI_DEFAULT_PASSWORD = "serengeti.default.password";
@@ -216,4 +211,6 @@ public class Constants {
    public static final String APPMANAGER_KEYSTORE_FILE = "appmanagers.jks";
    public static final char[] APPMANAGER_KEYSTORE_PASSWORD = "changeit".toCharArray();
    public static final int APPMGR_CONNECT_TIMEOUT_SECONDS = 30;
+   public static final String SERENGETI_SETUP_LOGIN_TTY_SCRIPT = "serengeti.setup.login.tty.script";
+   public static final String SERENGETI_DEFAULT_SETUP_LOGIN_TTY_SCRIPT = "setup-login-tty";
 }

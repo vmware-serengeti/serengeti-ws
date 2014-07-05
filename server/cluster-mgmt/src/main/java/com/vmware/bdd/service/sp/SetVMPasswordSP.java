@@ -20,7 +20,6 @@ import java.util.concurrent.Callable;
 
 import com.jcraft.jsch.JSchException;
 import com.vmware.bdd.entity.NodeEntity;
-import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.ShellCommandExecutor;
 
 import org.apache.log4j.Logger;
@@ -141,9 +140,7 @@ public class SetVMPasswordSP implements Callable<Void> {
             }
          }
          if (setPasswordSucceed) {
-            //if refresh failed, user still can manually refresh tty by Ctrl+C, so don't need to check whether
-            //it succeed or not
-            refreshTty();
+            handleTty();
             break;
          } else {
             logger.info("Set password for " + nodeIP + " failed for " + (i + 1)
@@ -179,11 +176,17 @@ public class SetVMPasswordSP implements Callable<Void> {
             ShellCommandExecutor.execCmd(cmd, null, null, this.setupPasswordLessLoginTimeout, Constants.MSG_SETTING_UP_PASSWORDLESS_LOGIN + hostIP + ".");
             logger.info("Set passwordless login successfully for " + hostIP);
             return true;
-         } catch (BddException e) {
+         } catch (Exception e) {
             if (e.getMessage().contains(Constants.EXEC_COMMAND_TIMEOUT)) {
                timeoutCount++;
             }
-            logger.warn("Set passwordless login no. " + i + " and got exception: " + e.getMessage());
+            logger.warn("Set passwordless login no. " + i + " and got exception: " + e.getMessage(), e);
+            //sometimes the sshd daemon may not ready, add sleep can avoid the race
+            try {
+               Thread.sleep(3000);
+            } catch (InterruptedException ie) {
+               logger.warn("Interrupted when waiting for setupPasswordlessLogin, retry immediately.", ie);
+            }
          }
       }
       logger.error("Failed to set passwordless login for " + hostIP);
@@ -193,19 +196,53 @@ public class SetVMPasswordSP implements Callable<Void> {
       throw SetPasswordException.FAIL_TO_SETUP_PASSWORDLESS_LOGIN(hostIP);
    }
 
-   private boolean refreshTty() {
+   private void handleTty() throws Exception {
+      setupLoginTty();
+      refreshTty();
+   }
+
+   private void refreshTty() {
       String ttyName = Configuration.getString(Constants.SERENGETI_TTY_NAME, Constants.SERENGETI_DEFAULT_TTY_NAME);
       String cmd = "ps aux | grep " + ttyName + " | grep -v \"grep\" | awk '{print $2}' | sudo xargs kill -9";
       SSHUtil sshUtil = new SSHUtil();
-
+      //if refresh failed, user still can manually refresh tty by Ctrl+C, so don't need to check whether
+      //it succeed or not
       try {
          boolean refreshTtySucceed = sshUtil.execCmd(sshUser, privateKeyFile, nodeIP, sshPort, cmd, null, null);
          logger.info("Refresh " + ttyName + " on " + nodeIP + (refreshTtySucceed ? "succeed" : "failed") + ".");
-         return refreshTtySucceed;
       } catch (JSchException e) {
-         logger.error("Refresh tty on " + nodeIP + " failed.");
-         return false;
+         logger.error("Got exception when refresh tty on " + nodeIP, e);
       }
+   }
+
+   private void setupLoginTty() throws Exception {
+      String setupTtyScriptName = Configuration.getString(Constants.SERENGETI_SETUP_LOGIN_TTY_SCRIPT, Constants.SERENGETI_DEFAULT_SETUP_LOGIN_TTY_SCRIPT);
+      String setupTtyScript = getScriptName(setupTtyScriptName);
+      String cmd = "sudo " + setupTtyScript;
+      String action = "Setup login tty for " + nodeIP;
+      logger.info(action + " command is: " + cmd);
+      SSHUtil sshUtil = new SSHUtil();
+      String errMsg = null;
+      for (int i = 0; i < Constants.SET_PASSWORD_MAX_RETRY_TIMES; i++) {
+         try {
+            if (sshUtil.execCmd(sshUser, privateKeyFile, nodeIP, sshPort, cmd, null, null)) {
+               logger.info(action + " succeed.");
+               return;
+            }
+         } catch (JSchException e) {
+            logger.warn("Got exception when " + action, e);
+            if (errMsg == null) {
+               errMsg = e.getMessage();
+            }
+         }
+         try {
+            Thread.sleep(3000);
+         } catch (InterruptedException e1) {
+            logger.info("Interrupted when waiting for setup login tty, retry immediately...");
+         }
+      }
+      logger.info(action + " failed");
+      throw SetPasswordException.FAIL_TO_SETUP_LOGIN_TTY(nodeIP, errMsg);
    }
 
    public ByteArrayInputStream parseInputStream(String in) throws Exception {
