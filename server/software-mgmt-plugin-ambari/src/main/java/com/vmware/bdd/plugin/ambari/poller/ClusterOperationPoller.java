@@ -21,7 +21,7 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 
-public class ClusterProvisionPoller extends StatusPoller {
+public class ClusterOperationPoller extends StatusPoller {
 
    private ApiManager apiManager;
    private ApiRequest apiRequestSummary;
@@ -31,10 +31,10 @@ public class ClusterProvisionPoller extends StatusPoller {
    private int beginProgress;
    private int endProgress;
 
-   public ClusterProvisionPoller(final ApiManager apiManager,
-         final ApiRequest apiRequestSummary, final String clusterName,
-         final ClusterReport currentReport,
-         final ClusterReportQueue reportQueue, int endProgress) {
+   public ClusterOperationPoller(final ApiManager apiManager,
+                                 final ApiRequest apiRequestSummary, final String clusterName,
+                                 final ClusterReport currentReport,
+                                 final ClusterReportQueue reportQueue, int endProgress) {
       this.apiManager = apiManager;
       this.apiRequestSummary = apiRequestSummary;
       this.clusterName = clusterName;
@@ -66,7 +66,7 @@ public class ClusterProvisionPoller extends StatusPoller {
          if (toProgress >= endProgress) {
             toProgress = endProgress;
          }
-         if (toProgress / 10 != currentProgress / 10) {
+         if (toProgress != currentProgress) {
             currentReport.setProgress(toProgress);
             reportQueue.addClusterReport(currentReport.clone());
          }

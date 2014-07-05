@@ -41,6 +41,9 @@ public class AmException extends BddException {
       return new AmException(null, "PROVISION_FAILED", clusterName);
    }
 
+   public static AmException STOP_SERVICES_FAILED(String clusterName, String serviceName) {
+      return null;
+   }
    public static AmException PROVISION_WITH_BLUEPRINT_FAILED(String clusterName) {
       return new AmException(null, "PROVISION_WITH_BLUEPRINT_FAILED", clusterName);
    }

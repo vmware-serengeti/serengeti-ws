@@ -30,6 +30,7 @@ public class ApiClusterInfo {
    @Expose
    private String version;
 
+
    public Long getClusterId() {
       return clusterId;
    }
@@ -53,4 +54,5 @@ public class ApiClusterInfo {
    public void setVersion(String version) {
       this.version = version;
    }
+
 }

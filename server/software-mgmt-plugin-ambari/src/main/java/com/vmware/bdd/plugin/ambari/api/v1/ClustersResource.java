@@ -15,8 +15,10 @@
 package com.vmware.bdd.plugin.ambari.api.v1;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -58,14 +60,15 @@ public interface ClustersResource {
    @Consumes({ MediaType.APPLICATION_XML })
    public String createCluster(@PathParam(Parameters.CLUSTER_NAME) String clusterName, String clusterBlueprint);
 
+   @DELETE
+   @Path("/{clusterName}")
+   public String deleteCluster(@PathParam(Parameters.CLUSTER_NAME) String clusterName);
+
    @Path("/{clusterName}/requests")
    public RequestsResource getRequestsResource(@PathParam(Parameters.CLUSTER_NAME) String clusterName);
 
-   @POST
-   @Path("/{clusterName}")
-   public boolean startCluster(@PathParam(Parameters.CLUSTER_NAME) String clusterName);
 
-   @POST
-   @Path("/{clusterName}")
-   public boolean stopCluster(@PathParam(Parameters.CLUSTER_NAME) String clusterName);
+   @Path("/{clusterName}/services")
+   public ServicesResource getServicesResource(@PathParam(Parameters.CLUSTER_NAME) String clusterName);
+
 }

@@ -31,6 +31,9 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiStackService;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersionList;
+import com.vmware.bdd.plugin.ambari.api.model.ApiService;
+
+import java.util.List;
 
 public interface IApiManager {
 
@@ -59,6 +62,14 @@ public interface IApiManager {
 
    public ApiCluster cluster(String clusterName);
 
+   public List<ApiService> clusterServices(String clusterName);
+
+   public ApiRequest stopAllServicesInCluster(String clusterName);
+
+   public ApiRequest startAllServicesInCluster(String clusterName);
+
+   public List<String> getClusterServicesNames(String clusterName);
+
    public ApiRequest provisionCluster(String clusterName, ApiClusterBlueprint apiClusterBlueprint);
 
    public ApiBlueprintList blueprintList();
@@ -73,4 +84,5 @@ public interface IApiManager {
 
    public ApiBlueprint createBlueprint(String blueprintName, ApiBlueprint blueprint);
 
+   public ApiRequest deleteCluster(String clusterName);
 }

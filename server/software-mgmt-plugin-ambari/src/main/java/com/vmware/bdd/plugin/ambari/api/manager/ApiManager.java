@@ -14,11 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.manager;
 
-import org.apache.log4j.Logger;
-
-import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
-import com.vmware.bdd.plugin.ambari.api.ApiRootResource;
-import com.vmware.bdd.plugin.ambari.api.manager.intf.IApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprintList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrap;
@@ -36,8 +31,18 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiStackService;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersionList;
+import com.vmware.bdd.plugin.ambari.api.model.ApiService;
+import org.apache.log4j.Logger;
+
+import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
+import com.vmware.bdd.plugin.ambari.api.ApiRootResource;
+import com.vmware.bdd.plugin.ambari.api.manager.intf.IApiManager;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class ApiManager implements IApiManager {
 
@@ -164,6 +169,80 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
+   public List<ApiService> clusterServices(String clusterName) {
+      String clusterJson =
+            apiResourceRootV1.getClustersResource().readCluster(clusterName);
+      logger.info("in getClusterServicesNames, cluster info is " + clusterJson);
+      ApiCluster apiCluster =
+            ApiUtils.jsonToObject(ApiCluster.class, clusterJson);
+      return apiCluster.getApiServices();
+   }
+
+   /*
+    * Only used to make request for stop/start services in cluster
+    */
+   private String makeRequestForStartStopClusterServices(String queryState, String context, String state) {
+      assert(queryState != null && context != null && state != null);
+
+      HashMap<String, String> requestInfo = new HashMap();
+      requestInfo.put("query", "ServiceInfo/" + queryState);
+      requestInfo.put("context", context);
+
+      HashMap<String, HashMap> body = new HashMap();
+      HashMap<String, String> serviceInfo = new HashMap();
+      serviceInfo.put("state", state);
+      body.put("ServiceInfo", serviceInfo);
+
+      HashMap<String, HashMap> request = new HashMap();
+      request.put("RequestInfo", requestInfo);
+      request.put("Body", body);
+      return ApiUtils.objectToJson(request);
+   }
+
+   @Override
+   public ApiRequest stopAllServicesInCluster(String clusterName) {
+      String request = makeRequestForStartStopClusterServices("state!=INSTALLED", "Ambari is stopping all services", "INSTALLED");
+      logger.info("the request in stop cluster is :" + request);
+
+      String responseJson = apiResourceRootV1.getClustersResource().getServicesResource(clusterName).stopAllServices(clusterName, request);
+      return ApiUtils.jsonToObject(ApiRequest.class, responseJson);
+   }
+
+   @Override
+   public ApiRequest startAllServicesInCluster(String clusterName) {
+      String requestJson = makeRequestForStartStopClusterServices("state!=STARTED", "Ambari is starting all services", "STARTED");
+      logger.info("the request in start cluster is :" + requestJson);
+
+      String response = apiResourceRootV1.getClustersResource().getServicesResource(clusterName).startAllServices(clusterName, requestJson);
+      logger.info("The reponse when startAllService is :" + response);
+      return ApiUtils.jsonToObject(ApiRequest.class, response);
+   }
+
+   @Override
+   public List<String> getClusterServicesNames(String clusterName) {
+      String clusterJson =
+            apiResourceRootV1.getClustersResource().readCluster(clusterName);
+      logger.info("in getClusterServicesNames, cluster info is " + clusterJson);
+      ApiCluster apiCluster =
+            ApiUtils.jsonToObject(ApiCluster.class, clusterJson);
+      List<ApiService> apiServices = apiCluster.getApiServices();
+      List<String> servicesNames = null;
+      for (ApiService apiService : apiServices) {
+         if (apiService != null) {
+            HashMap<String, String> serviceInfo = apiService.getServiceInfo();
+            String serviceName = serviceInfo.get("service_name");
+            if (serviceInfo != null && serviceName != null) {
+               if (servicesNames == null) {
+                  servicesNames = new ArrayList<String>();
+               }
+               servicesNames.add(serviceName);
+            }
+         }
+      }
+      return servicesNames;
+   }
+
+   @Override
    public ApiRequest provisionCluster(String clusterName,
          ApiClusterBlueprint apiClusterBlueprint) {
       String requestJson =
@@ -192,6 +271,13 @@ public class ApiManager implements IApiManager {
       ApiBlueprint apiBlueprintResult =
             ApiUtils.jsonToObject(ApiBlueprint.class, blueprintJson);
       return apiBlueprintResult;
+   }
+
+   @Override
+   public ApiRequest deleteCluster(String clusterName) {
+      String response = apiResourceRootV1.getClustersResource().deleteCluster(clusterName);
+      logger.info("in delete cluster, reponse is :" + response);
+      return ApiUtils.jsonToObject(ApiRequest.class, response);
    }
 
    @Override

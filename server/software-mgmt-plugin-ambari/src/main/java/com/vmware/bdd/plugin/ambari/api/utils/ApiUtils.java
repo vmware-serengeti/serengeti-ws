@@ -17,6 +17,8 @@ package com.vmware.bdd.plugin.ambari.api.utils;
 import java.lang.reflect.Constructor;
 import java.util.Date;
 
+import com.google.gson.GsonBuilder;
+import org.apache.log4j.Logger;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 import org.joda.time.Period;
@@ -30,6 +32,7 @@ import com.google.gson.Gson;
 import com.vmware.bdd.plugin.ambari.api.Parameters;
 
 public final class ApiUtils {
+   private static final Logger logger = Logger.getLogger(ApiUtils.class);
 
    private static final DateTimeFormatter DATE_TIME_PRINTER = ISODateTimeFormat.dateTime();
    private static final DateTimeFormatter DATE_TIME_PARSER = ISODateTimeFormat.dateTimeParser();
@@ -141,18 +144,18 @@ public final class ApiUtils {
          Gson gson = new Gson();
          entity = gson.fromJson(apiJson, entityClass);
       } catch (Exception e) {
-         e.printStackTrace();
+         logger.error(e.getMessage());
       }
       return entity;
    }
-   
+
    public static String objectToJson(Object object) {
       String jsonString = null;
       try {
          Gson gson = new Gson();
          jsonString = gson.toJson(object);
       } catch (Exception e) {
-         e.printStackTrace();
+         logger.error(e.getMessage());
       }
       return jsonString;
    }

@@ -17,20 +17,19 @@ package com.vmware.bdd.plugin.ambari.api.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
+import java.util.HashMap;
 
-public class ApiCluster {
-
+/**
+ * Created by qjin on 7/4/14.
+ */
+public class ApiService {
    @Expose
+   @SerializedName("href")
    private String href;
 
    @Expose
-   @SerializedName("Clusters")
-   private ApiClusterInfo clusterInfo;
-
-   @Expose
-   @SerializedName("services")
-   private List<ApiService> apiServices;
+   @SerializedName("ServiceInfo")
+   private HashMap<String, String> serviceInfo;
 
    public String getHref() {
       return href;
@@ -40,19 +39,12 @@ public class ApiCluster {
       this.href = href;
    }
 
-   public ApiClusterInfo getClusterInfo() {
-      return clusterInfo;
+   public HashMap<String, String> getServiceInfo() {
+      return serviceInfo;
    }
 
-   public void setClusterInfo(ApiClusterInfo clusterInfo) {
-      this.clusterInfo = clusterInfo;
+   public void setServiceInfo(HashMap<String, String> serviceInfo) {
+      this.serviceInfo = serviceInfo;
    }
 
-   public List<ApiService> getApiServices() {
-      return apiServices;
-   }
-
-   public void setApiServices(List<ApiService> apiServices) {
-      this.apiServices = apiServices;
-   }
 }

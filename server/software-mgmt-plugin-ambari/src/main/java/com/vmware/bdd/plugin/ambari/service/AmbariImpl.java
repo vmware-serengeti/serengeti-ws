@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
@@ -35,7 +36,6 @@ import com.vmware.bdd.plugin.ambari.api.model.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ClusterRequestStatus;
 import com.vmware.bdd.plugin.ambari.exception.AmException;
 import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
-import com.vmware.bdd.plugin.ambari.poller.ClusterProvisionPoller;
 import com.vmware.bdd.plugin.ambari.poller.HostBootstrapPoller;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
@@ -60,7 +60,9 @@ public class AmbariImpl implements SoftwareManager {
       BOOTSTRAP_HOSTS(10),
       CREATE_BLUEPRINT(30),
       PROVISION_CLUSTER(50),
-      PROVISION_SUCCESS(100);
+      PROVISION_SUCCESS(100),
+      OPERATION_BEGIN(0),
+      OPERATION_FINISHED(100);
 
       private int progress;
 
@@ -183,7 +185,7 @@ public class AmbariImpl implements SoftwareManager {
                e.getMessage(), e);
       } finally {
          clusterDef.getCurrentReport().setFinished(true);
-         reportStatus(clusterDef, reportQueue);
+         reportStatus(clusterDef.getCurrentReport(), reportQueue);
       }
       return success;
    }
@@ -236,7 +238,7 @@ public class AmbariImpl implements SoftwareManager {
          clusterDef.getCurrentReport().setAction("Bootstrapping host");
          clusterDef.getCurrentReport().setProgress(
                ProgressSplit.BOOTSTRAP_HOSTS.getProgress());
-         reportStatus(clusterDef, reportQueue);
+         reportStatus(clusterDef.getCurrentReport(), reportQueue);
 
          ApiBootstrap apiBootstrapRequest =
                apiManager.createBootstrap(clusterDef.toApibootStrap());
@@ -286,7 +288,7 @@ public class AmbariImpl implements SoftwareManager {
          clusterDef.getCurrentReport().setAction("Create blueprint");
          clusterDef.getCurrentReport().setProgress(
                ProgressSplit.CREATE_BLUEPRINT.getProgress());
-         reportStatus(clusterDef, reportQueue);
+         reportStatus(clusterDef.getCurrentReport(), reportQueue);
 
          if (!isBlueprintcreated(clusterDef)) {
             apiManager.createBlueprint(clusterDef.getName(),
@@ -302,7 +304,7 @@ public class AmbariImpl implements SoftwareManager {
          logger.error(e.getMessage());
          throw AmException.CREATE_BLUEPRINT_FAILED(clusterDef.getName());
       } finally {
-         reportStatus(clusterDef, reportQueue);
+         reportStatus(clusterDef.getCurrentReport(), reportQueue);
       }
    }
 
@@ -329,15 +331,15 @@ public class AmbariImpl implements SoftwareManager {
                "Provisioning cluster with blueprint");
          clusterDef.getCurrentReport().setProgress(
                ProgressSplit.PROVISION_CLUSTER.getProgress());
-         reportStatus(clusterDef, reportQueue);
+         reportStatus(clusterDef.getCurrentReport(), reportQueue);
 
          String clusterName = clusterDef.getName();
          ApiRequest apiRequestSummary =
                apiManager.provisionCluster(clusterDef.getName(),
                      clusterDef.toApiClusterBlueprint());
 
-         ClusterProvisionPoller poller =
-               new ClusterProvisionPoller(apiManager, apiRequestSummary,
+         ClusterOperationPoller poller =
+               new ClusterOperationPoller(apiManager, apiRequestSummary,
                      clusterName, clusterDef.getCurrentReport(), reportQueue,
                      ProgressSplit.PROVISION_SUCCESS.getProgress());
          poller.waitForComplete();
@@ -402,29 +404,88 @@ public class AmbariImpl implements SoftwareManager {
    @Override
    public boolean startCluster(String clusterName, ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
-      return false;
+      try {
+         ClusterReport clusterReport = new ClusterReport();
+         clusterReport.setAction("Ambari is starting services");
+         clusterReport.setProgress(ProgressSplit.OPERATION_BEGIN.getProgress());
+
+         ApiRequest apiRequestSummary = apiManager.startAllServicesInCluster(clusterName);
+         boolean success = doSoftwareOperation(clusterName, apiRequestSummary, clusterReport, reports);
+         if (!success) {
+            logger.error("Ambari failed to start services");
+            throw SoftwareManagementPluginException.START_CLUSTER_FAILED(clusterName, null);
+         }
+         return success;
+      } catch (Exception e) {
+         logger.error("Ambari got an exception when start services in cluster", e);
+         throw SoftwareManagementPluginException.START_CLUSTER_FAILED(clusterName, e);
+      }
    }
 
    @Override
    public boolean deleteCluster(String clusterName, ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
-      return false;
+      return true;
    }
 
    @Override
    public boolean onStopCluster(String clusterName, ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
-      // TODO(qjin): need to stop all services in Ambari deployed cluster
-      return true;
+      try {
+         ClusterReport clusterReport = new ClusterReport();
+         clusterReport.setAction("Ambari is stopping services");
+         clusterReport.setProgress(ProgressSplit.OPERATION_BEGIN.getProgress());
+
+         //TODO(qjin): here we only consider unstopped services, maybe need to handle other kinds of state(STOPPING, STARTING) carefully
+         ApiRequest apiRequestSummary = apiManager.stopAllServicesInCluster(clusterName);
+
+         boolean success = doSoftwareOperation(clusterName, apiRequestSummary, clusterReport, reports);
+
+         if (!success) {
+            logger.error("Failed to stop all services in cluster");
+            throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(clusterName, null);
+         }
+         return true;
+      } catch (Exception e) {
+         logger.error("Ambari got an exception when stopping cluster services: ", e);
+         throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(clusterName, e);
+      }
+   }
+
+   private boolean doSoftwareOperation(String clusterName, ApiRequest apiRequestSummary,
+                                       ClusterReport clusterReport, ClusterReportQueue reports) throws Exception{
+      reportStatus(clusterReport, reports);
+      ClusterOperationPoller poller =
+            new ClusterOperationPoller(apiManager, apiRequestSummary,
+                  clusterName, clusterReport, reports,
+                  ProgressSplit.OPERATION_FINISHED.getProgress());
+      poller.waitForComplete();
+
+      boolean success = false;
+      ApiRequest apiRequest =
+            apiManager.request(clusterName, apiRequestSummary
+                  .getApiRequestInfo().getRequestId());
+      ClusterRequestStatus clusterRequestStatus =
+            ClusterRequestStatus.valueOf(apiRequest.getApiRequestInfo()
+                  .getRequestStatus());
+      if (!clusterRequestStatus.isFailedState()) {
+         success = true;
+      }
+      return success;
    }
 
    @Override
    public boolean onDeleteCluster(String clusterName, ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
-      return false;
+      try {
+         //Stop services if needed
+         onStopCluster(clusterName, reports);
+         ApiRequest response = apiManager.deleteCluster(clusterName);
+         return true;
+      } catch (Exception e) {
+         logger.error("Ambari got an exception when deleting cluster", e);
+         throw SoftwareManagementPluginException.DELETE_CLUSTER_FAILED(clusterName, e);
+      }
    }
 
    @Override
@@ -498,9 +559,9 @@ public class AmbariImpl implements SoftwareManager {
       return false;
    }
 
-   private void reportStatus(final AmClusterDef clusterDef,
+   private void reportStatus(final ClusterReport clusterReport,
          final ClusterReportQueue reportQueue) {
-      reportQueue.addClusterReport(clusterDef.getCurrentReport().clone());
+      reportQueue.addClusterReport(clusterReport.clone());
    }
 
    @Override
