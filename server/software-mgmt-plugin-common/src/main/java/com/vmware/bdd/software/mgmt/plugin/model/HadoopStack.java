@@ -5,8 +5,6 @@ import com.google.gson.annotations.Expose;
 import java.io.Serializable;
 import java.util.List;
 
-import org.codehaus.plexus.util.StringUtils;
-
 /**
  * Hadoop distribution information, for instance CDH5 5.0.1
  * @author line
@@ -70,7 +68,7 @@ import org.codehaus.plexus.util.StringUtils;
       this.vendor = vendor;
    }
 
-   public void setDistroName(String stackName, String stackVersion) {
-      this.distro = stackName + "_" + StringUtils.join(StringUtils.split(stackVersion, "."), "_");
+   public void setDistro(String stackName, String stackVersion) {
+      this.distro = stackName + "-" + stackVersion;
    }
 }
