@@ -246,8 +246,7 @@ public class SoftwareManagerCollector {
       List<AppManagerRead> appManagerReads =
             appManagerService.getAllAppManagerReads();
       for (AppManagerRead appManagerRead : appManagerReads) {
-         appManagerRead.setManagedClusters(clusterEntityManager
-               .findByAppManager(appManagerRead.getName()));
+         setAppManagerReadDynamicProperties(appManagerRead);
       }
       return appManagerReads;
    }
@@ -256,10 +255,21 @@ public class SoftwareManagerCollector {
       AppManagerRead appManagerRead =
             appManagerService.getAppManagerRead(appManagerName);
       if (appManagerRead != null) {
-         appManagerRead.setManagedClusters(clusterEntityManager
-               .findByAppManager(appManagerName));
+         setAppManagerReadDynamicProperties(appManagerRead);
       }
       return appManagerRead;
+   }
+
+   /**
+    * @param appManagerRead
+    */
+   private void setAppManagerReadDynamicProperties(AppManagerRead appManagerRead) {
+      appManagerRead.setManagedClusters(clusterEntityManager
+            .findByAppManager(appManagerRead.getName()));
+      SoftwareManager softwareManager = this.getSoftwareManager(appManagerRead.getName());
+      if (softwareManager != null) {
+         appManagerRead.setVersion(softwareManager.getVersion());
+      }
    }
 
    public List<String> getAllAppManagerTypes() {

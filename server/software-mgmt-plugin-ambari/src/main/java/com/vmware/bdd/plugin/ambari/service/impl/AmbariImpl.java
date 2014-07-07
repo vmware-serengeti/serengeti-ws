@@ -426,4 +426,13 @@ public class AmbariImpl implements SoftwareManager {
       // TODO Auto-generated method stub
       return false;
    }
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager#getVersion()
+    */
+   @Override
+   public String getVersion() {
+      // TODO Auto-generated method stub
+      return null;
+   }
 }

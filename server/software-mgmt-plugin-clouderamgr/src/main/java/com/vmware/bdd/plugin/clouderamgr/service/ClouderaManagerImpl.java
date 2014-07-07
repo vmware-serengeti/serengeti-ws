@@ -30,6 +30,7 @@ import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableParcelStage;
 import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
 import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
+
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -55,7 +56,6 @@ import com.cloudera.api.model.ApiService;
 import com.cloudera.api.model.ApiServiceConfig;
 import com.cloudera.api.model.ApiServiceList;
 import com.cloudera.api.model.ApiServiceState;
-
 import com.cloudera.api.v3.ParcelResource;
 import com.cloudera.api.v6.RootResourceV6;
 import com.cloudera.api.v6.ServicesResourceV6;
@@ -1370,5 +1370,14 @@ public class ClouderaManagerImpl implements SoftwareManager {
    public boolean hasComputeMasterGroup(ClusterBlueprint blueprint) {
       // TODO Auto-generated method stub
       return false;
+   }
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager#getVersion()
+    */
+   @Override
+   public String getVersion() {
+      // TODO Auto-generated method stub
+      return null;
    }
 }

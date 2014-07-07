@@ -45,6 +45,9 @@ public class AppManagerRead {
    @Expose
    private List<String> managedClusters;
 
+   @Expose
+   private String version;
+
    /**
     * @return the name
     */
@@ -143,6 +146,20 @@ public class AppManagerRead {
       this.managedClusters = managedClusters;
    }
 
+   /**
+    * @return the version
+    */
+   public String getVersion() {
+      return version;
+   }
+
+   /**
+    * @param version the version to set
+    */
+   public void setVersion(String version) {
+      this.version = version;
+   }
+
    @Override
    public String toString() {
       return new StringBuffer().append("[AppManagerRead] ")
@@ -153,6 +170,7 @@ public class AppManagerRead {
             .append(",username:").append(this.username)
             .append(",sslCertificate:").append(this.sslCertificate)
             .append(",managedClusters:").append(this.managedClusters)
+            .append(",version:").append(this.version)
             .toString();
    }
 

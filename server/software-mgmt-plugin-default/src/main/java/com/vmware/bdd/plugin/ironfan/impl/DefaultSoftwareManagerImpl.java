@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -189,7 +190,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public List<String> validateScaling(NodeGroupInfo group) 
+   public List<String> validateScaling(NodeGroupInfo group)
    throws SoftwareManagementPluginException {
       // resize of job tracker and name node is not supported
       List<String> roles = group.getRoles();
@@ -283,6 +284,14 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
          }
       }
       return true;
+   }
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager#getVersion()
+    */
+   @Override
+   public String getVersion() {
+      return Configuration.getNonEmptyString("serengeti.version");
    }
 
 }

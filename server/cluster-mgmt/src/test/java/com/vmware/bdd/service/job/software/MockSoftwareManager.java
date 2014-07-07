@@ -212,7 +212,7 @@ public class MockSoftwareManager implements SoftwareManager {
    public void updateInfrastructure(ClusterBlueprint blueprint)
          throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
-      
+
    }
 
    @Override
@@ -243,5 +243,14 @@ public class MockSoftwareManager implements SoftwareManager {
    public boolean hasComputeMasterGroup(ClusterBlueprint blueprint) {
       // TODO Auto-generated method stub
       return false;
+   }
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager#getVersion()
+    */
+   @Override
+   public String getVersion() {
+      // TODO Auto-generated method stub
+      return null;
    }
 }

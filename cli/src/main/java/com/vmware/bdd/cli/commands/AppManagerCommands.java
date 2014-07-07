@@ -160,6 +160,8 @@ public class AppManagerCommands implements CommandMarker {
          appManagerColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_USERNAME, Arrays.asList("getUsername"));
          //appManagerColumnNamesWithGetMethodNames.put(
+         //      Constants.FORMAT_TABLE_COLUMN_VERSION, Arrays.asList("getVersion"));
+         //appManagerColumnNamesWithGetMethodNames.put(
          //      Constants.FORMAT_TABLE_COLUMN_CLUSTER_NAME, Arrays.asList("getManagedClusters"));
 
          try {
