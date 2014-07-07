@@ -978,7 +978,7 @@ public class RestResource {
     * @param distroName
     * @return The distribution information
     */
-   @RequestMapping(value = "/{appManager}/distro/{distroName}", method = RequestMethod.GET, produces = "application/json")
+   @RequestMapping(value = "/{appManager}/distro/{distroName:.+}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public DistroRead getDistroByName(
          @PathVariable("appManager") String appManager,
