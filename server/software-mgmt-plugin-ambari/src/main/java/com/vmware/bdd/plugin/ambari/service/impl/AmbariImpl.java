@@ -117,7 +117,7 @@ public class AmbariImpl implements SoftwareManager {
                   apiStackVersion.getApiStackVersionInfo();
             if (apiStackVersionInfo.isActive()) {
                HadoopStack hadoopStack = new HadoopStack();
-               hadoopStack.setDistroName(apiStackVersionInfo.getStackName(), apiStackVersionInfo.getStackVersion());
+               hadoopStack.setDistro(apiStackVersionInfo.getStackName(), apiStackVersionInfo.getStackVersion());
                hadoopStack
                      .setFullVersion(apiStackVersionInfo.getStackVersion());
                hadoopStack.setVendor(apiStackVersionInfo.getStackName());
