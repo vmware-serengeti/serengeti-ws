@@ -27,6 +27,7 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiHostGroup;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 
 public class AmClusterDef implements Serializable {
 
@@ -53,12 +54,15 @@ public class AmClusterDef implements Serializable {
    @Expose
    private AmStackDef amStack;
 
+   private ClusterReport currentReport;
+
    public AmClusterDef(ClusterBlueprint blueprint, String privateKey) {
       this.name = blueprint.getName();
       this.version = blueprint.getHadoopStack().getFullVersion();
       this.verbose = true;
       this.sshKey = privateKey;
       this.user = "serengeti";
+      this.currentReport = new ClusterReport(blueprint);
 
       this.nodes = new ArrayList<AmNodeDef>();
       for (NodeGroupInfo group : blueprint.getNodeGroups()) {
@@ -135,6 +139,14 @@ public class AmClusterDef implements Serializable {
 
    public void setAmStack(AmStackDef amStack) {
       this.amStack = amStack;
+   }
+
+   public ClusterReport getCurrentReport() {
+      return currentReport;
+   }
+
+   public void setCurrentReport(ClusterReport currentReport) {
+      this.currentReport = currentReport;
    }
 
    public ApiBootstrap toApibootStrap() {
