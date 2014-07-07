@@ -129,7 +129,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       ApiRootResource apiRootResource = new ClouderaManagerClientBuilder().withHost(cmServerHost)
             .withPort(port).withUsernamePassword(user, password).build();
       this.apiResourceRootV6 = apiRootResource.getRootV6();
-      this.privateKey = privateKey; // TODO: privateKey should bind to a given cluster rather than this instance
+      this.privateKey = privateKey;
    }
 
    @Override
@@ -766,6 +766,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          // TODO: resize
          return;
       }
+
 
       apiResourceRootV6.getClouderaManagerResource().updateConfig(
             new ApiConfigList(Arrays.asList(new ApiConfig[]{new ApiConfig("PARCEL_UPDATE_FREQ", "1")})));

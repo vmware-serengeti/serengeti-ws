@@ -14,58 +14,124 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.clouderamgr.service;
 
-import java.io.IOException;
-
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
+import com.cloudera.api.ApiRootResource;
+import com.cloudera.api.ClouderaManagerClientBuilder;
+import com.cloudera.api.v6.RootResourceV6;
+import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
+import com.vmware.bdd.plugin.clouderamgr.service.cm.FakeRootResource;
+import com.vmware.bdd.plugin.clouderamgr.utils.SerialUtils;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
+import com.vmware.bdd.utils.CommonUtil;
+import mockit.Mock;
+import mockit.MockClass;
+import mockit.Mockit;
+import org.apache.log4j.Logger;
+import org.mockito.Mockito;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
-
-import com.vmware.bdd.plugin.clouderamgr.service.ClouderaManagerImpl;
-import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
-import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
-import com.vmware.bdd.plugin.clouderamgr.utils.SerialUtils;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Author: Xiaoding Bian
- * Date: 5/23/14
- * Time: 9:53 AM
+ * Date: 7/5/14
+ * Time: 9:51 PM
  */
 public class TestClouderaManagerImpl {
-   private static ClouderaManagerImpl provider;
+   private static final Logger logger = Logger.getLogger(TestClouderaManagerImpl.class);
 
-   @BeforeClass(groups = { "TestClouderaManagerImpl" })
-   public static void setup() {
-      try {
-         String privateKey = SerialUtils.dataFromFile("/tmp/privatekey");
-         provider = new ClouderaManagerImpl("10.141.72.255", 7180, "admin", "admin", privateKey);
-      } catch (IOException e) {
-         e.printStackTrace();
+   private static ApiRootResource apiRootResource;
+   private static RootResourceV6 rootResourceV6;
+   private static ClouderaManagerImpl provider;
+   private static ClusterBlueprint blueprint;
+   private static ClusterReportQueue reportQueue;
+
+   @MockClass(realClass = ClouderaManagerClientBuilder.class)
+   public static class MockClouderaManagerClientBuilder {
+      private ClouderaManagerClientBuilder builder = new ClouderaManagerClientBuilder();
+      @Mock
+      public ClouderaManagerClientBuilder withHost(String host) {
+         return builder;
+      }
+
+      @Mock
+      public ClouderaManagerClientBuilder withPort(int port) {
+         return builder;
+      }
+
+      @Mock
+      public ClouderaManagerClientBuilder withUsernamePassword(String user, String password) {
+         return builder;
+      }
+
+      @Mock
+      public ApiRootResource build() {
+         return apiRootResource;
       }
    }
 
-   @AfterClass(groups = { "TestClouderaManagerImpl" })
-   public static void tearDown() {
+   @MockClass(realClass = HostInstallPoller.class)
+   public static class MockHostInstallPoller {
+      @Mock
+      public void setup() {
+      }
+
+      @Mock
+      public boolean poll() {
+         return true;
+      }
+
+      @Mock
+      public void tearDown() {
+      }
+   }
+
+   @BeforeClass( groups = { "TestClouderaManagerImpl" }, dependsOnGroups = { "TestClusterDef" })
+   public static void setup() throws IOException {
+      Mockit.setUpMock(MockClouderaManagerClientBuilder.class);
+      Mockit.setUpMock(MockHostInstallPoller.class);
+      apiRootResource = Mockito.mock(ApiRootResource.class);
+      rootResourceV6 = new FakeRootResource();
+      Mockito.when(apiRootResource.getRootV6()).thenReturn(rootResourceV6);
+
+      provider = new ClouderaManagerImpl("127.0.0.1", 7180, "admin", "admin", "RSA_CERT");
+      blueprint = SerialUtils.getObjectByJsonString(ClusterBlueprint.class, CommonUtil.readJsonFile("simple_blueprint.json"));
+
+      reportQueue = new ClusterReportQueue();
+   }
+
+   @BeforeClass( groups = { "TestClouderaManagerImpl" }, dependsOnGroups = { "TestClusterDef" })
+   public static void tearDown() throws IOException, InterruptedException {
 
    }
 
    @BeforeMethod(groups = { "TestClouderaManagerImpl" })
-   public void beforeMethod() {
-
+   public void setupBeforeMethod() {
    }
 
-   @AfterMethod(groups = { "TestClouderaManagerImpl" })
-   public void afterMethod() {
-
+   @Test( groups = { "TestClouderaManagerImpl" })
+   public void testGetName() {
+      Assert.assertEquals(provider.getName(), "ClouderaManager");
    }
 
-   //@Test(groups = { "TestClouderaManagerImpl" })
-   public void testInitializeCluster() throws Exception {
-      String content = SerialUtils.dataFromFile("/tmp/serengeti.log");
-      ClusterBlueprint blueprint = SerialUtils.getObjectByJsonString(ClusterBlueprint.class, content);
-      ClusterReportQueue queue = new ClusterReportQueue();
-      provider.createCluster(blueprint, queue);
+   @Test( groups = { "TestClouderaManagerImpl" })
+   public void testGetSupportedStacks() {
+      List<HadoopStack> stacks = provider.getSupportedStacks();
+      Assert.assertTrue(!stacks.isEmpty());
    }
 
+   @Test( groups = { "TestClouderaManagerImpl" })
+   public void testCreateCluster() {
+      provider.createCluster(blueprint, reportQueue);
+      List<ClusterReport> reports = reportQueue.pollClusterReport();
+      for (ClusterReport report : reports) {
+         System.out.println("Action: " + report.getAction() + ", Progress: " + report.getProgress());
+      }
+   }
 }

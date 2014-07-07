@@ -1,0 +1,178 @@
+{
+  "name": "ZOOKEEPER",
+  "displayName": "ZOOKEEPER",
+  "parent": "CLUSTER",
+  "repository": "CDH",
+  "versionApiMin": 3,
+  "versionApiMax": -1,
+  "versionCdhMin": 4,
+  "versionCdhMax": -1,
+  "availableConfigurations" : [
+  {
+    "name" : "service_triggers",
+    "required" : false,
+    "default" : "[]",
+    "displayName" : "Service Triggers",
+    "description" : "<p>The configured triggers for this service. This is a JSON formatted list of triggers. These triggers are evaluated as part as the health system. Every trigger expression is parsed, and if the trigger condition is met, the list of actions provided in the trigger expression is executed.</p><p>Each trigger has all of the following fields:</p><ul><li><span class='code'>triggerName</span> <strong>(mandatory)</strong> - the name of the trigger. This value must be unique for the specific service. </li><li><span class='code'>triggerExpression</span> <strong>(mandatory)</strong> - a tsquery expression representing the trigger. <li><span class='code'>streamThreshold</span> <strong>(optional)</strong> - the maximum number of streams that can satisfy a condition of a trigger before the condition fires. By default set to 0, and any stream returned will cause the condition to fire. <li><span class='code'>enabled</span> <strong> (optional)</strong> - by default set to 'true'. If set to 'false' the trigger will not be evaluated.</p><p>For example, here is a JSON formatted trigger that fires if there are more than 10 DataNodes with more than 500 file-descriptors opened:</p><p><pre>[{\"triggerName\": \"sample-trigger\",\n  \"triggerExpression\": \"IF (SELECT fd_open WHERE roleType = DataNode and last(fd_open) > 500) DO health:red\",\n  \"streamThreshold\": 10, \"enabled\": \"true\"}]</pre></p><p>Consult the trigger rules documentation for more details on how to write triggers using tsquery.</p><p>The JSON format is evolving and may change in the future and as a result backward compatibility is not guaranteed between releases at this time.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "cleanupRetainCount",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Cleanup Retain Count",
+    "description" : "The number of snapshot files and corresponding transaction logs to keep when running the Cleanup command.",
+    "relatedName" : ""
+  }, {
+    "name" : "zookeeper_env_safety_valve",
+    "required" : false,
+    "displayName" : "ZooKeeper Service Environment Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, key-value pairs (one on each line) to be inserted into a role's environment. Applies to configurations of all roles in this service except client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "zookeeper_canary_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "ZooKeeper Canary Health Check",
+    "description" : "Enables the health check that a client can connect to ZooKeeper and perform basic operations",
+    "relatedName" : ""
+  }, {
+    "name" : "leaderServes",
+    "required" : false,
+    "default" : "yes",
+    "displayName" : "Leader Serves",
+    "description" : "Whether the leader accepts client connections.",
+    "relatedName" : "leaderServes"
+  }, {
+    "name" : "syncLimit",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Synchronization Limit",
+    "description" : "Amount of time, in ticks, to allow followers to sync with ZooKeeper. If followers fall too far behind a leader, they are dropped.",
+    "relatedName" : "syncLimit"
+  }, {
+    "name" : "zookeeper_servers_healthy_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"51.0\",\"warning\":\"99.0\"}",
+    "displayName" : "Healthy Server Monitoring Thresholds",
+    "description" : "The health test thresholds of the overall Server health. The check returns \"Concerning\" health if the percentage of \"Healthy\" Servers falls below the warning threshold. The check is unhealthy if the total percentage of \"Healthy\" and \"Concerning\" Servers falls below the critical threshold.",
+    "relatedName" : ""
+  }, {
+    "name" : "smon_derived_configs_safety_valve",
+    "required" : false,
+    "displayName" : "Service Monitor Derived Configs Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, a list of derived configuration properties that will be used by the Service Monitor instead of the default ones.",
+    "relatedName" : ""
+  }, {
+    "name" : "catch_events",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Log Event Capture",
+    "description" : "When set, each role will identify important log events and forward them to Cloudera Manager.",
+    "relatedName" : ""
+  }, {
+    "name" : "process_username",
+    "required" : false,
+    "default" : "zookeeper",
+    "displayName" : "System User",
+    "description" : "The user that this service's processes should run as.",
+    "relatedName" : ""
+  }, {
+    "name" : "zookeeper_datadir_autocreate",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable auto-creation of data directories",
+    "description" : "Automatically create data directories at startup, if they do not exist. Enabling this configuration should be used with care as it will suppress any errors in setup of data directories.",
+    "relatedName" : ""
+  }, {
+    "name" : "autopurgeInterval",
+    "required" : false,
+    "default" : "24",
+    "displayName" : "Auto Purge Time Interval",
+    "description" : "The time interval in hours for which the purge task has to be triggered. Set to a positive integer (1 and above) to enable the auto purging. Defaults to 24.",
+    "relatedName" : "autopurge.purgeInterval"
+  }, {
+    "name" : "enable_config_alerts",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Configuration Change Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when this entity's configuration changes.",
+    "relatedName" : ""
+  }, {
+    "name" : "zookeeper_canary_session_timeout",
+    "required" : false,
+    "default" : "30000",
+    "displayName" : "ZooKeeper Canary Session Timeout",
+    "description" : "Configures the timeout used by the canary sessions with ZooKeeper servers",
+    "relatedName" : ""
+  }, {
+    "name" : "initLimit",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "Initialization Limit",
+    "description" : "Amount of time, in ticks, to allow followers to connect and sync to a leader. Increase this value as needed, if the amount of data managed by ZooKeeper is large.",
+    "relatedName" : "initLimit"
+  }, {
+    "name" : "zookeeper_canary_connection_timeout",
+    "required" : false,
+    "default" : "10000",
+    "displayName" : "ZooKeeper Canary Connection Timeout",
+    "description" : "Configures the timeout used by the canary for connection establishment with ZooKeeper servers",
+    "relatedName" : ""
+  }, {
+    "name" : "zookeeper_canary_operation_timeout",
+    "required" : false,
+    "default" : "30000",
+    "displayName" : "ZooKeeper Canary Operation Timeout",
+    "description" : "Configures the timeout used by the canary for ZooKeeper operations",
+    "relatedName" : ""
+  }, {
+    "name" : "zookeeper_canary_root_path",
+    "required" : false,
+    "default" : "/cloudera_manager_zookeeper_canary",
+    "displayName" : "ZooKeeper Canary Root Znode Path",
+    "description" : "Configures the path of the root znode under which all canary updates are performed",
+    "relatedName" : ""
+  }, {
+    "name" : "autopurgeSnapRetainCount",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Auto Purge Snapshots Retain Count",
+    "description" : "When enabled, ZooKeeper auto purge feature retains this many most recent snapshots and the corresponding transaction logs in the dataDir and dataLogDir respectively and deletes the rest. Defaults to 5. Minimum value is 3.",
+    "relatedName" : "autopurge.snapRetainCount"
+  }, {
+    "name" : "tickTime",
+    "required" : false,
+    "default" : "2000",
+    "displayName" : "Tick Time",
+    "description" : "The length of time, in milliseconds, of a single tick, which is the basic time unit used by ZooKeeper. A tick is used to regulate heartbeats and timeouts.",
+    "relatedName" : "tickTime"
+  }, {
+    "name" : "enable_alerts",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Service Level Health Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when the health of this service reaches the threshold specified by the EventServer setting eventserver_health_events_alert_threshold",
+    "relatedName" : ""
+  }, {
+    "name" : "enableSecurity",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Kerberos Authentication",
+    "description" : "Enable Kerberos authentication for ZooKeeper.",
+    "relatedName" : "enableSecurity"
+  }, {
+    "name" : "log_event_retry_frequency",
+    "required" : false,
+    "default" : "30",
+    "displayName" : "Log Event Retry Frequency",
+    "description" : "The frequency in which the log4j event publication appender will retry sending undelivered log events to the Event server, in seconds",
+    "relatedName" : ""
+  }, {
+    "name" : "process_groupname",
+    "required" : false,
+    "default" : "zookeeper",
+    "displayName" : "System Group",
+    "description" : "The group that this service's processes should run as.",
+    "relatedName" : ""
+  } ]
+}

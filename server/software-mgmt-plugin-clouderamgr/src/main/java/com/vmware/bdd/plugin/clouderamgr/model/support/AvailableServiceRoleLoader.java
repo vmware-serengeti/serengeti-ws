@@ -43,7 +43,8 @@ public class AvailableServiceRoleLoader {
                .append(File.separator).append("cloudera-manager");
          clouderaConfDir = builder.toString();
       } else {
-         clouderaConfDir = "/tmp/cloudera-manager"; // for test only
+         // for test only
+         clouderaConfDir = AvailableServiceRoleLoader.class.getClassLoader().getResource("cloudera-manager").getPath();
       }
    }
 

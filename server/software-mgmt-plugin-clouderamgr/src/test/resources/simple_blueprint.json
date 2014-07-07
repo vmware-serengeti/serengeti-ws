@@ -9,8 +9,8 @@
         {
             "name": "master",
             "roles": [
-                "NAMENODE",
-                "RESOURCEMANAGER"
+                "HDFS_NAMENODE",
+                "YARN_RESOURCE_MANAGER"
             ],
             "instanceNum": 1,
             "configuration": {
@@ -22,7 +22,7 @@
             "nodes": [
                 {
                     "name": "cluster01-master-0",
-                    "rack": "rack1",
+                    "rack": "/rack1",
                     "hostname": "host01",
                     "ipConfigs": {
                         "MGT_NETWORK": [
@@ -41,8 +41,8 @@
         {
             "name": "worker",
             "roles": [
-                "DATANODE",
-                "NODEMANAGER"
+                "HDFS_DATANODE",
+                "YARN_NODE_MANAGER"
             ],
             "instanceNum": 3,
             "configuration": {
@@ -53,7 +53,7 @@
             "nodes": [
                 {
                     "name": "cluster01-worker-0",
-                    "rack": "rack2",
+                    "rack": "/rack2",
                     "hostname": "host02",
                     "ipConfigs": {
                         "MGT_NETWORK": [
@@ -69,7 +69,7 @@
                 },
                 {
                     "name": "cluster01-worker-1",
-                    "rack": "rack2",
+                    "rack": "/rack2",
                     "hostname": "host02",
                     "ipConfigs": {
                         "MGT_NETWORK": [
@@ -88,13 +88,13 @@
         {
             "name": "backup",
             "roles": [
-                "SECONDARYNAMENODE"
+                "HDFS_SECONDARY_NAMENODE"
             ],
             "instanceNum": 1,
             "nodes": [
                 {
                     "name": "cluster01-backup-0",
-                    "rack": "rack3",
+                    "rack": "/rack3",
                     "hostname": "host03",
                     "ipConfigs": {
                         "MGT_NETWORK": [

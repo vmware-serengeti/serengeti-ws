@@ -20,6 +20,8 @@ import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.plugin.clouderamgr.utils.SerialUtils;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
 import java.io.IOException;
 
 /**
@@ -31,7 +33,7 @@ public class TestClusterDef {
 
    private static ClusterBlueprint blueprint = null;
 
-   @BeforeClass
+   @BeforeClass(groups = { "TestClusterDef" }, dependsOnGroups = {"TestAvailableServiceRoleLoader"})
    public static void setup() throws IOException {
 
       String content = CommonUtil.readJsonFile("simple_blueprint.json");
@@ -39,8 +41,7 @@ public class TestClusterDef {
       blueprint = SerialUtils.getObjectByJsonString(ClusterBlueprint.class, content);
    }
 
-   //@Test
-   //TODO: enable this UT later
+   @Test(groups = { "TestClusterDef" })
    public void testBluePrintToCmCluster() throws IOException {
 
       CmClusterDef clusterDef = new CmClusterDef(blueprint);

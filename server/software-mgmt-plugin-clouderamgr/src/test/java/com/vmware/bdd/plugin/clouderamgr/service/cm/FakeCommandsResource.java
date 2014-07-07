@@ -12,24 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.clouderamgr.model;
+package com.vmware.bdd.plugin.clouderamgr.service.cm;
 
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleLoader;
-import org.testng.annotations.Test;
+import com.cloudera.api.model.ApiCommand;
+import com.cloudera.api.v1.CommandsResource;
 
-import java.io.IOException;
+import java.util.Date;
 
 /**
  * Author: Xiaoding Bian
- * Date: 6/12/14
- * Time: 7:48 PM
+ * Date: 7/7/14
+ * Time: 10:44 AM
  */
-public class TestAvailableServiceRoleLoader {
+public class FakeCommandsResource implements CommandsResource {
+   @Override
+   public ApiCommand readCommand(long l) {
+      System.out.println("calling " + this.getClass().getInterfaces()[0].getName() + "#" + Thread.currentThread().getStackTrace()[1].getMethodName());
+      ApiCommand command = new ApiCommand();
+      command.setEndTime(new Date());
+      command.setId(l);
+      command.setSuccess(true);
+      return command;
+   }
 
-   @Test(groups = {"TestAvailableServiceRoleLoader"})
-   public void testLoad() throws IOException {
-      AvailableServiceRoleLoader.loadAll();
-      System.out.println(AvailableServiceRoleLoader.dump());
-      System.out.println(AvailableServiceRoleLoader.load("HDFS").getAvailableConfigurations().keySet());
+   @Override
+   public ApiCommand abortCommand(long l) {
+      return null;
    }
 }
