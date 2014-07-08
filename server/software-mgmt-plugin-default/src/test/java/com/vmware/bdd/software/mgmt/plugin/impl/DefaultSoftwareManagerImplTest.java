@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.testng.annotations.BeforeClass;
@@ -381,5 +382,18 @@ public class DefaultSoftwareManagerImplTest extends TestCase {
       nodeGroupInfos.add(master);
       blueprint.setNodeGroups(nodeGroupInfos);
       assertTrue(defaultSoftwareManager.hasComputeMasterGroup(blueprint));
+   }
+
+   @Test
+   public void testValidateGroupConfig() throws Exception {
+      ClusterCreate cluster =
+            TestFileUtil
+                  .getSimpleClusterSpec(TestFileUtil.HDFS_HA_CLUSTER_FILE);
+      cluster.setDistro("apache");
+      List<String> failedMsgList = new ArrayList<String>();
+      List<String> warningMsgList = new ArrayList<String>();
+      validator.validateGroupConfig(cluster.toBlueprint(), failedMsgList, warningMsgList);
+      Assert.assertTrue("Should get empty fail message.", failedMsgList.isEmpty());
+      Assert.assertTrue("Should get empty warning message.", warningMsgList.isEmpty());
    }
 }

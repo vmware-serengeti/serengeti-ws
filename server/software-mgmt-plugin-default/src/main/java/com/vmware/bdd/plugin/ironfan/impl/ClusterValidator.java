@@ -327,28 +327,28 @@ public class ClusterValidator {
                   }
                }
             }
-         if (!supportedWithHdfs2(blueprint)) {
-            if (namenodeHACheck || masterCount > 1) {
-               failedMsgList.add(Constants.CURRENT_DISTRO_CAN_NOT_SUPPORT_HDFS2);
-            }
-         } else if (namenodeHACheck) {
-            if (numOfJournalNode >= 0 && numOfJournalNode < 3) {
-               failedMsgList.add(Constants.WRONG_NUM_OF_JOURNALNODE);
-            } else if (numOfJournalNode > 0 && numOfJournalNode % 2 == 0) {
-               warningMsgList.add(Constants.ODD_NUM_OF_JOURNALNODE);
-            }
-            //check if zookeeper exists for automatic namenode ha failover
-            if (zookeeperCount == 0) {
-               failedMsgList.add(Constants.NAMENODE_AUTO_FAILOVER_ZOOKEEPER);
-            }
+      }
+      if (!supportedWithHdfs2(blueprint)) {
+         if (namenodeHACheck || masterCount > 1) {
+            failedMsgList.add(Constants.CURRENT_DISTRO_CAN_NOT_SUPPORT_HDFS2);
          }
-         if ((jobtrackerCount > 1) || (resourcemanagerCount > 1)
-               || (zookeeperCount > 1) || (hbasemasterCount > 1)) {
-            failedMsgList.add(Constants.WRONG_NUM_OF_NODEGROUPS);
+      } else if (namenodeHACheck) {
+         if (numOfJournalNode >= 0 && numOfJournalNode < 3) {
+            failedMsgList.add(Constants.WRONG_NUM_OF_JOURNALNODE);
+         } else if (numOfJournalNode > 0 && numOfJournalNode % 2 == 0) {
+            warningMsgList.add(Constants.ODD_NUM_OF_JOURNALNODE);
          }
-         if (numOfJournalNode > 0 && !namenodeHACheck) {
-            failedMsgList.add(Constants.NO_NAMENODE_HA);
+         //check if zookeeper exists for automatic namenode ha failover
+         if (zookeeperCount == 0) {
+            failedMsgList.add(Constants.NAMENODE_AUTO_FAILOVER_ZOOKEEPER);
          }
+      }
+      if ((jobtrackerCount > 1) || (resourcemanagerCount > 1)
+            || (zookeeperCount > 1) || (hbasemasterCount > 1)) {
+         failedMsgList.add(Constants.WRONG_NUM_OF_NODEGROUPS);
+      }
+      if (numOfJournalNode > 0 && !namenodeHACheck) {
+         failedMsgList.add(Constants.NO_NAMENODE_HA);
       }
       if (!warningMsgList.isEmpty() && !warningMsgList.get(0).startsWith("Warning: ")) {
          warningMsgList.set(0, "Warning: " + warningMsgList.get(0));
