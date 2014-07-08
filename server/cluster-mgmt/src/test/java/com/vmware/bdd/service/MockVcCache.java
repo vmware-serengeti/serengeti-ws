@@ -14,6 +14,9 @@
  ***************************************************************************/
 package com.vmware.bdd.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import mockit.Mock;
 import mockit.MockClass;
 
@@ -25,6 +28,7 @@ import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcObject;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.bdd.service.job.software.TestPreConfigAop;
 import com.vmware.vim.binding.vim.vm.ConfigInfo;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 
@@ -32,9 +36,27 @@ import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 public class MockVcCache {
 
    private static boolean getFlag = false;
+   private static Map<String, VcVirtualMachine> cache = new HashMap<String, VcVirtualMachine>();
+
+   public static void cleanCache() {
+      cache.clear();
+   }
+
    @Mock
    static public <T extends VcObject> T getIgnoreMissing(String id) {
-      if (getFlag) {
+      if (cache.containsKey(id)) {
+         return (T)cache.get(id);
+      }
+      if (id != null && id.contains(TestPreConfigAop.VM_MOB_PREFIX)) {
+         VcVirtualMachine vm = Mockito.mock(VcVirtualMachine.class);
+         Mockito.when(vm.getName()).thenReturn(id);
+         ConfigInfo config = Mockito.mock(ConfigInfo.class);
+         Mockito.when(vm.getConfig()).thenReturn(config);
+         Mockito.when(config.getUuid()).thenReturn("test-uuid");
+         Mockito.when(vm.getId()).thenReturn(id);
+         cache.put(id, vm);
+         return (T)vm;
+      } else if (getFlag) {
          if (id != null && id.equals("create-vm-succ")) {
             VcVirtualMachine vm = Mockito.mock(VcVirtualMachine.class);
             VcHost host = Mockito.mock(VcHost.class);
@@ -59,6 +81,7 @@ public class MockVcCache {
          return null;
       }
    }
+
    public static void setGetFlag(boolean flag) {
       getFlag = flag;
    }

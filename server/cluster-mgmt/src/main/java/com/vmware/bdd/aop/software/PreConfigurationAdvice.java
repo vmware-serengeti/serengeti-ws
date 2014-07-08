@@ -14,26 +14,34 @@
  ***************************************************************************/
 package com.vmware.bdd.aop.software;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.AnnotationUtils;
 
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Priority;
 import com.vmware.aurora.composition.concurrent.Scheduler;
+import com.vmware.aurora.util.AuAssert;
+import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
-import com.vmware.bdd.software.mgmt.exception.SoftwareManagementException;
+import com.vmware.bdd.software.mgmt.plugin.aop.PreConfiguration;
+import com.vmware.bdd.software.mgmt.plugin.exception.InfrastructureException;
 
 @Aspect
-public class BeforeClusterConfigurationAdvice {
-   private static final Logger logger = Logger.getLogger(BeforeClusterConfigurationAdvice.class);
+public class PreConfigurationAdvice {
+   private static final Logger logger = Logger.getLogger(PreConfigurationAdvice.class);
    private IClusterEntityManager clusterEntityMgr;
 
    public IClusterEntityManager getClusterEntityMgr() {
@@ -45,9 +53,40 @@ public class BeforeClusterConfigurationAdvice {
       this.clusterEntityMgr = clusterEntityMgr;
    }
 
-   @Before("args(clusterName)")
-   public void preClusterConfiguration(String clusterName, int maxWaitingSeconds)
-   throws {
+   @Around("@annotation(com.vmware.bdd.software.mgmt.plugin.aop.PreConfiguration)")
+   public void preClusterConfiguration(ProceedingJoinPoint pjp) throws Throwable {
+      MethodSignature signature = (MethodSignature) pjp.getSignature();
+      Method method = signature.getMethod();
+      PreConfiguration beforeConfig = AnnotationUtils.findAnnotation(method, PreConfiguration.class);
+      String nameParam = beforeConfig.clusterNameParam();
+      String waitingTimeParam = beforeConfig.maxWaitingTimeParam();
+
+      String[] paramNames = signature.getParameterNames();
+      Object[] args = pjp.getArgs();
+      String clusterName = null;
+      int maxWaitingSeconds = 120;
+      for (int i = 0; i < paramNames.length; i++) {
+         if (paramNames[i].equals(nameParam)) {
+            clusterName = (String)args[i];
+         }
+         if (paramNames[i].equals(waitingTimeParam)) {
+            maxWaitingSeconds = (Integer)args[i];
+         }
+      }
+      if (clusterName == null) {
+         logger.error("Cluster name is not specified in method");
+         throw BddException.INTERNAL(null, "Wrong annotation usage. Cluster name must be specified in method.");
+      }
+      ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
+      if (cluster == null) {
+         throw BddException.NOT_FOUND("Cluster", clusterName);
+      }
+      preClusterConfiguration(clusterName, maxWaitingSeconds);
+   }
+
+   private void preClusterConfiguration(String clusterName, int maxWaitingSeconds)
+   throws InfrastructureException {
+      logger.info("Pre configuration for cluster " + clusterName);
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(clusterName);
       Callable<Void>[] callables = new Callable[nodes.size()];
       int i = 0;
@@ -66,13 +105,14 @@ public class BeforeClusterConfigurationAdvice {
             logger.error("No disk format waiting task is executed.");
             throw BddException.INTERNAL(null, "No disk format waiting task is executed.");
          }
+         List<String> errorMsgList = new ArrayList<String>();
          for (i = 0; i < callables.length; i++) {
             if (result[i].throwable != null) {
-               if (result[i].throwable instanceof SoftwareManagementException) {
-                  ((SoftwareManagementException)result[i].throwable)
-               }
+               errorMsgList.add(result[i].throwable.getMessage());
             }
-
+         }
+         if (!errorMsgList.isEmpty()) {
+            throw InfrastructureException.DISK_FORTMAT_FAILED(clusterName, errorMsgList);
          }
       }  catch (InterruptedException e) {
          logger.error("error in waiting disk format", e);

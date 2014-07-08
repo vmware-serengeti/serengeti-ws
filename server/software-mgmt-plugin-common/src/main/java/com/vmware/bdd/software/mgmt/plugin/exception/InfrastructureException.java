@@ -17,25 +17,33 @@ package com.vmware.bdd.software.mgmt.plugin.exception;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ValidationException extends SoftwareManagementPluginException {
+public class InfrastructureException extends SoftwareManagementPluginException {
    private static final long serialVersionUID = 1L;
-
    private List<String> failedMsgList = new ArrayList<String>();
-   private List<String> warningMsgList = new ArrayList<String>();
 
-   public ValidationException() {
+   public InfrastructureException() {
       super();
    }
 
-   public ValidationException(String errCode, String message) {
+   public InfrastructureException(String errCode, String message) {
       super(errCode, message, null);
    }
 
    public List<String> getFailedMsgList() {
-       return failedMsgList;
+      return failedMsgList;
    }
 
-   public List<String> getWarningMsgList() {
-       return warningMsgList;
+   public void setFailedMsgList(List<String> failedMsgList) {
+      this.failedMsgList = failedMsgList;
+   }
+
+   public static InfrastructureException DISK_FORTMAT_FAILED(
+         String clusterName, List<String> failedMsgList) {
+      InfrastructureException e =
+            new InfrastructureException("DISK_FORTMAT_FAILED",
+                  "Failed to format disk for cluster " + clusterName);
+      e.setFailedMsgList(failedMsgList);
+      return e;
+
    }
 }

@@ -14,8 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.software.mgmt.plugin.exception;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <code>SoftwareManagementPluginException</code> is the superclass of those

@@ -75,7 +75,7 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
          clusterEntityMgr.delete(cluster);
    }
 
-   static ClusterEntity assembleClusterEntity(String clusterName) {
+   public static ClusterEntity assembleClusterEntity(String clusterName) {
       ClusterEntity cluster = new ClusterEntity(clusterName);
       cluster.setDistro("apache");
       cluster.setDistroVendor(Constants.DEFAULT_VENDOR);

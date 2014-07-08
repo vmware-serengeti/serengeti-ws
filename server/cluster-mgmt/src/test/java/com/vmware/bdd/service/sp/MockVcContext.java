@@ -14,12 +14,14 @@
  ***************************************************************************/
 package com.vmware.bdd.service.sp;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import mockit.Mock;
 import mockit.MockClass;
 
 import com.vmware.aurora.exception.AuroraException;
+import com.vmware.aurora.exception.VcException;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 
@@ -33,7 +35,17 @@ public class MockVcContext {
          body.setAccessible(true);
          body.invoke(session);
       } catch (Exception e) {
-         throw AuroraException.wrapIfNeeded(e);
+         Throwable t = null;
+         if (e instanceof InvocationTargetException) {
+            t = ((InvocationTargetException)e).getTargetException();
+         } else {
+            t = e;
+         }
+         if (t instanceof AuroraException) {
+            throw (AuroraException)e;
+         }
+         throw VcException.GENERAL_ERROR(t);
+
       }
       return null;
    }
