@@ -1091,16 +1091,20 @@ public class ClusterConfigManager {
           logger.error("Failed to get softwareManger.");
           throw new ClusterConfigException(null, "Failed to get softwareManager.");
       }
-       // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
+      // read distro and distroVersion from ClusterEntity and set to ClusterCreate
+      clusterCreate.setDistro(cluster.getDistro());
+      clusterCreate.setDistroVersion(cluster.getDistroVersion());
+
+      // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
       ClusterBlueprint blueprint = clusterCreate.toBlueprint();
       DistroRead distro = null;
-      if (Constants.IRONFAN.equalsIgnoreCase(clusterCreate.getAppManager())) {
+      if (Constants.IRONFAN.equalsIgnoreCase(cluster.getAppManager())) {
          distro = distroMgr.getDistroByName(cluster.getDistro());
       } else {
-         distro = distroMgr.getDistroByName(clusterCreate.getAppManager(), cluster.getDistro());
+         distro = distroMgr.getDistroByName(cluster.getAppManager(), cluster.getDistro());
       }
       try {
-          softwareManager.validateBlueprint(blueprint, distro.getRoles());
+         softwareManager.validateBlueprint(blueprint, distro.getRoles());
       } catch (ValidationException e) {
          throw new ClusterConfigException(e, e.getMessage() + e.getFailedMsgList().toString());
       }
