@@ -46,6 +46,24 @@ public class FakeParcelsResource implements ParcelsResourceV5 {
       state.setTotalProgress(100);
       parcel.setState(state);
       parcels.add(parcel);
+      ApiParcel parcel2 = new ApiParcel();
+      parcel2.setProduct("CDH");
+      parcel2.setVersion("4.7.0-1.cdh4.7.0.p0.13");
+      parcel2.setStage(AvailableParcelStage.AVAILABLE_REMOTELY.toString());
+      ApiParcelState state2 = new ApiParcelState();
+      state2.setProgress(0);
+      state2.setTotalProgress(100);
+      parcel2.setState(state2);
+      parcels.add(parcel2);
+      ApiParcel parcel3 = new ApiParcel();
+      parcel3.setProduct("CDH");
+      parcel3.setVersion("5.0.1-1.cdh5.0.1.p0.13");
+      parcel3.setStage(AvailableParcelStage.AVAILABLE_REMOTELY.toString());
+      ApiParcelState state3 = new ApiParcelState();
+      state3.setProgress(0);
+      state3.setTotalProgress(100);
+      parcel3.setState(state3);
+      parcels.add(parcel3);
       parcelResource = new FakeParcelResource(parcel);
    }
 
@@ -57,12 +75,14 @@ public class FakeParcelsResource implements ParcelsResourceV5 {
 
    @Override
    public ApiParcelList readParcels(@DefaultValue("summary") DataView dataView) {
+      System.out.println("calling " + this.getClass().getInterfaces()[0].getName() + "#" + Thread.currentThread().getStackTrace()[1].getMethodName());
       return parcels;
    }
 
    @Override
    public ParcelResource getParcelResource(String s, String s2) {
       System.out.println("calling " + this.getClass().getInterfaces()[0].getName() + "#" + Thread.currentThread().getStackTrace()[1].getMethodName());
+      System.out.println("repo: " + s + ", exact version: " + s2);
       return parcelResource;
    }
 }

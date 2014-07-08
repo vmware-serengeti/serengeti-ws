@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.gson.GsonBuilder;
 import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
@@ -84,7 +85,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    private static final Logger logger = Logger.getLogger(ClouderaManagerImpl.class);
 
-   private final int versionCdh = 5; // TODO: only test CDH5 so far
    private final String usernameForHosts = "serengeti";
    private String privateKey;
    private RootResourceV6 apiResourceRootV6;
@@ -94,7 +94,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private int cmPort;
    private String cmUsername;
    private String cmPassword;
-   private static final int API_POLL_PERIOD_MS = 500;
 
    private final static int INVALID_PROGRESS = -1;
    private enum ProgressSplit {
@@ -134,7 +133,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public String getName() {
-      return "ClouderaManager";
+      return Constants.CDH_PLUGIN_NAME;
    }
 
    @Override
@@ -144,7 +143,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public String getType() {
-      return "ClouderaManager";
+      return Constants.CDH_PLUGIN_NAME;
    }
 
    @Override
@@ -154,22 +153,29 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public List<HadoopStack> getSupportedStacks() throws SoftwareManagementPluginException {
-      List<HadoopStack> list = new ArrayList<HadoopStack>();
-      HadoopStack cdh4 = new HadoopStack();
-      cdh4.setDistro("CDH4");
-      cdh4.setVendor("CDH");
-      cdh4.setFullVersion("4.0");
-      cdh4.setRoles(Arrays.asList("HDFS_DATANODE", "YARN_NODE_MANAGER"));
-      list.add(cdh4);
-      HadoopStack cdh5 = new HadoopStack();
-      cdh5.setDistro("CDH5");
-      cdh5.setVendor("CDH");
-      cdh5.setFullVersion("5.0");
-      cdh5.setRoles(Arrays.asList("HDFS_NAMENODE", "HDFS_SECONDARY_NAMENODE",
-            "YARN_RESOURCE_MANAGER", "YARN_JOB_HISTORY", "HDFS_DATANODE",
-            "YARN_NODE_MANAGER"));
-      list.add(cdh5);
-      return list;
+      String randomClusterName = UUID.randomUUID().toString();
+      final ApiClusterList clusterList = new ApiClusterList();
+      ApiCluster apiCluster = new ApiCluster();
+      apiCluster.setName(randomClusterName);
+      apiCluster.setVersion(ApiClusterVersion.CDH5);
+      clusterList.add(apiCluster);
+      apiResourceRootV6.getClustersResource().createClusters(clusterList);
+
+      List<HadoopStack> hadoopStacks = new ArrayList<HadoopStack>();
+      for (ApiParcel apiParcel : apiResourceRootV6.getClustersResource().getParcelsResource(randomClusterName)
+            .readParcels(DataView.SUMMARY).getParcels()) {
+         if (apiParcel.getProduct().equals(Constants.CDH_REPO_PREFIX)) {
+            DefaultArtifactVersion parcelVersion = new DefaultArtifactVersion(apiParcel.getVersion());
+            HadoopStack stack = new HadoopStack();
+            stack.setDistro(apiParcel.getProduct(), parcelVersion.getMajorVersion() + "."
+                  + parcelVersion.getMinorVersion() + "." + parcelVersion.getIncrementalVersion());
+            stack.setFullVersion(apiParcel.getVersion());
+            stack.setVendor(Constants.CDH_DISTRO_VENDOR);
+            hadoopStacks.add(stack);
+         }
+      }
+      apiResourceRootV6.getClustersResource().deleteCluster(randomClusterName);
+      return hadoopStacks;
    }
 
    @Override
@@ -767,7 +773,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
          return;
       }
 
-
       apiResourceRootV6.getClouderaManagerResource().updateConfig(
             new ApiConfigList(Arrays.asList(new ApiConfig[]{new ApiConfig("PARCEL_UPDATE_FREQ", "1")})));
 
@@ -809,13 +814,36 @@ public class ClouderaManagerImpl implements SoftwareManager {
       apiResourceRootV6.getClouderaManagerResource().updateConfig(
             new ApiConfigList(Arrays.asList(new ApiConfig[]{new ApiConfig("PARCEL_UPDATE_FREQ", "60")})));
 
+      DefaultArtifactVersion expectVersion = null;
+      if (cluster.getFullVersion() != null) {
+         expectVersion = new DefaultArtifactVersion(cluster.getFullVersion());
+      }
+
       for (String repository : repositoriesRequiredOrdered) {
          DefaultArtifactVersion parcelVersion = null;
          for (ApiParcel apiParcel : apiResourceRootV6.getClustersResource().getParcelsResource(cluster.getName())
                .readParcels(DataView.FULL).getParcels()) {
             DefaultArtifactVersion parcelVersionTmp = new DefaultArtifactVersion(apiParcel.getVersion());
             if (apiParcel.getProduct().equals(repository)) {
-               if (!apiParcel.getProduct().equals(Constants.CDH_REPO_PREFIX) || versionCdh == parcelVersionTmp.getMajorVersion()) {
+               if (apiParcel.getProduct().equals(Constants.CDH_REPO_PREFIX)) {
+                  /*
+                   * Policy for "CDH" parcel:
+                   * 1) If specify fullVersion, try to find that parcel, if cannot, select the latest parcel(with highest version).
+                   * 2) If fullVersion not specified, select the latest parcel
+                   */
+                  if (parcelVersion == null || parcelVersion.compareTo(parcelVersionTmp) < 0) {
+                     parcelVersion = new DefaultArtifactVersion(apiParcel.getVersion());
+                  }
+                  if (expectVersion != null && parcelVersionTmp.getMajorVersion() == expectVersion.getMajorVersion()
+                        && parcelVersionTmp.getMinorVersion() == expectVersion.getMinorVersion()
+                        && parcelVersionTmp.getIncrementalVersion() == expectVersion.getIncrementalVersion()) {
+                     parcelVersion = new DefaultArtifactVersion(apiParcel.getVersion());
+                     break;
+                  }
+               }
+
+               if (!apiParcel.getProduct().equals(Constants.CDH_REPO_PREFIX)) {
+                  // For non-CDH parcel, just select the latest one
                   if (parcelVersion == null || parcelVersion.compareTo(parcelVersionTmp) < 0) {
                      parcelVersion = new DefaultArtifactVersion(apiParcel.getVersion());
                   }

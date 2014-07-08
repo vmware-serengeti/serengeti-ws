@@ -17,6 +17,7 @@ package com.vmware.bdd.plugin.clouderamgr.service;
 import com.cloudera.api.ApiRootResource;
 import com.cloudera.api.ClouderaManagerClientBuilder;
 import com.cloudera.api.v6.RootResourceV6;
+import com.google.gson.Gson;
 import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
 import com.vmware.bdd.plugin.clouderamgr.service.cm.FakeRootResource;
 import com.vmware.bdd.plugin.clouderamgr.utils.SerialUtils;
@@ -123,11 +124,14 @@ public class TestClouderaManagerImpl {
    @Test( groups = { "TestClouderaManagerImpl" })
    public void testGetSupportedStacks() {
       List<HadoopStack> stacks = provider.getSupportedStacks();
-      Assert.assertTrue(!stacks.isEmpty());
+      Assert.assertTrue(stacks.get(0).getDistro().equals("CDH-5.0.2"));
+      Assert.assertTrue(stacks.get(1).getDistro().equals("CDH-4.7.0"));
    }
 
    @Test( groups = { "TestClouderaManagerImpl" })
    public void testCreateCluster() {
+      blueprint.getHadoopStack().setDistro("CDH-5.0.1");
+      // FakeParcelsResource#getParcelResource should print the right parcel version
       provider.createCluster(blueprint, reportQueue);
       List<ClusterReport> reports = reportQueue.pollClusterReport();
       for (ClusterReport report : reports) {

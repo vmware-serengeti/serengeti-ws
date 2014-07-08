@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.clouderamgr.model;
 
+import com.cloudera.api.model.ApiClusterVersion;
 import com.google.gson.annotations.Expose;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleLoader;
@@ -21,7 +22,9 @@ import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
+import com.vmware.bdd.utils.AuAssert;
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -43,8 +46,6 @@ public class CmClusterDef implements Serializable {
 
    @Expose
    private String name;
-
-   private String reportId;
 
    @Expose
    private String displayName;
@@ -73,8 +74,15 @@ public class CmClusterDef implements Serializable {
    public CmClusterDef(ClusterBlueprint blueprint) throws IOException {
       this.name = blueprint.getName();
       this.displayName = blueprint.getName();
-      this.version = blueprint.getHadoopStack().getDistro();
-      this.fullVersion = blueprint.getHadoopStack().getFullVersion();
+      try {
+         String[] distroInfo = blueprint.getHadoopStack().getDistro().split("-");
+         this.version = distroInfo[0] + (new DefaultArtifactVersion(distroInfo[1])).getMajorVersion();
+         this.fullVersion = distroInfo[1];
+      } catch (Exception e) {
+         // in case distro is null or not complete
+         this.version = ApiClusterVersion.CDH5.toString();
+         this.fullVersion = null;
+      }
       this.isParcel = true;
       this.nodes = new ArrayList<CmNodeDef>();
       this.services = new ArrayList<CmServiceDef>();

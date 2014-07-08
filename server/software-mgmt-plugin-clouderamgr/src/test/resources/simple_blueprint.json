@@ -2,8 +2,7 @@
     "name": "cluster01",
     "instanceNum": 5,
     "hadoopStack": {
-        "distro": "CDH5",
-        "fullVersion": "5.0.1"
+        "distro": "CDH-5.0.1"
     },
     "nodeGroups":[
         {

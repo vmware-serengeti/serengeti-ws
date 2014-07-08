@@ -19,6 +19,7 @@ import com.vmware.bdd.plugin.clouderamgr.model.CmClusterDef;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.plugin.clouderamgr.utils.SerialUtils;
+import junit.framework.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -44,15 +45,24 @@ public class TestClusterDef {
    @Test(groups = { "TestClusterDef" })
    public void testBluePrintToCmCluster() throws IOException {
 
+      blueprint.getHadoopStack().setDistro("CDH-5.0.1");
+
       CmClusterDef clusterDef = new CmClusterDef(blueprint);
+      Assert.assertTrue(clusterDef.getVersion().equals("CDH5"));
+      Assert.assertTrue(clusterDef.getFullVersion().equals("5.0.1"));
 
       Gson gson = new Gson();
-
-      System.out.println(gson.toJson(clusterDef));
-
       System.out.println(gson.toJson(clusterDef.ipToNode()));
-
       System.out.println(gson.toJson(clusterDef.ipToRoles()));
-   }
 
+      blueprint.getHadoopStack().setDistro("CDH");
+      clusterDef = new CmClusterDef(blueprint);
+      Assert.assertTrue(clusterDef.getVersion().equals("CDH5"));
+      Assert.assertTrue(clusterDef.getFullVersion() == null);
+
+      blueprint.getHadoopStack().setDistro(null);
+      clusterDef = new CmClusterDef(blueprint);
+      Assert.assertTrue(clusterDef.getVersion().equals("CDH5"));
+      Assert.assertTrue(clusterDef.getFullVersion() == null);
+   }
 }
