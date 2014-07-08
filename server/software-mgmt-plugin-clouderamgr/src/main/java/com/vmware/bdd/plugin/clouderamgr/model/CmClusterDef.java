@@ -17,12 +17,11 @@ package com.vmware.bdd.plugin.clouderamgr.model;
 import com.cloudera.api.model.ApiClusterVersion;
 import com.google.gson.annotations.Expose;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleLoader;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
-import com.vmware.bdd.utils.AuAssert;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -101,7 +100,7 @@ public class CmClusterDef implements Serializable {
             this.nodes.add(nodeDef);
 
             for (String type : group.getRoles()) {
-               AvailableServiceRole roleType = AvailableServiceRoleLoader.load(type);
+               AvailableServiceRole roleType = AvailableServiceRoleContainer.load(type);
                AvailableServiceRole serviceType = roleType.getParent();
                CmServiceDef service = serviceDefOfType(serviceType);
                CmRoleDef roleDef = new CmRoleDef();

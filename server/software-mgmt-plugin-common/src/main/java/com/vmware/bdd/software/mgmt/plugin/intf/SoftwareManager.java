@@ -76,7 +76,7 @@ public interface SoftwareManager {
     *
     * @return
     */
-   Set<String> getSupportedRoles() throws SoftwareManagementPluginException;
+   Set<String> getSupportedRoles(HadoopStack hadoopStack) throws SoftwareManagementPluginException;
 
    /**
     * Supported Hadoop stack, for instance "CDH 5", "HDP 2.1.1"

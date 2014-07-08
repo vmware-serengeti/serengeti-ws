@@ -34,7 +34,7 @@ public class TestClusterDef {
 
    private static ClusterBlueprint blueprint = null;
 
-   @BeforeClass(groups = { "TestClusterDef" }, dependsOnGroups = {"TestAvailableServiceRoleLoader"})
+   @BeforeClass(groups = { "TestClusterDef" }, dependsOnGroups = {"TestAvailableServiceRoleContainer"})
    public static void setup() throws IOException {
 
       String content = CommonUtil.readJsonFile("simple_blueprint.json");

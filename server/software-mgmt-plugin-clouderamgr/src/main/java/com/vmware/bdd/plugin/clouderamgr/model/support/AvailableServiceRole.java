@@ -78,25 +78,10 @@ public class AvailableServiceRole {
       return parent;
    }
 
-   public void setParentObject(AvailableServiceRole parent) {
-      this.parent = parent;
-   }
-
-   public String getParentName() {
+   public void setParent(String parent) throws IOException {
+      this.parent = null;
       if (parent != null) {
-         return parent.getName();
-      }
-      return null;
-   }
-
-   public void setParent(String parent) {
-      try {
-         this.parent = null;
-         if (parent != null) {
-            this.parent = AvailableServiceRoleLoader.load(parent);
-         }
-      } catch (IOException e) {
-         e.printStackTrace();
+         this.parent = AvailableServiceRoleContainer.load(parent);
       }
    }
 
@@ -152,11 +137,11 @@ public class AvailableServiceRole {
    }
 
    public boolean isService() {
-      return getParentName().equalsIgnoreCase(ROOT_SERVICE);
+      return parent != null && parent.getDisplayName().equalsIgnoreCase(ROOT_SERVICE);
    }
 
    public boolean isRole() {
-      return getParent() != null && getParent().isService();
+      return parent != null && parent.isService();
    }
 
    @Override

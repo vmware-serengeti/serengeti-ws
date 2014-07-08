@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.clouderamgr.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,6 +25,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gson.GsonBuilder;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
 import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
 import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableManagementService;
@@ -147,8 +150,19 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public Set<String> getSupportedRoles() throws SoftwareManagementPluginException {
-      return null;
+   public Set<String> getSupportedRoles(HadoopStack hadoopStack) throws SoftwareManagementPluginException {
+      int majorVersion = Constants.VERSION_UNBOUNDED;
+      try {
+         String[] versionInfo = hadoopStack.getDistro().split("-");
+         majorVersion = (new DefaultArtifactVersion(versionInfo[1])).getMajorVersion();
+      } catch (Exception e) {
+         // ignore
+      }
+      try {
+         return AvailableServiceRoleContainer.allRoles(majorVersion);
+      } catch (IOException e) {
+         throw new SoftwareManagementPluginException(e.getMessage());
+      }
    }
 
    @Override
@@ -179,9 +193,21 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public String getSupportedConfigs(HadoopStack stack)
+   public String getSupportedConfigs(HadoopStack hadoopStack)
          throws SoftwareManagementPluginException {
-      return null;
+      int majorVersion = Constants.VERSION_UNBOUNDED;
+      try {
+         String[] versionInfo = hadoopStack.getDistro().split("-");
+         majorVersion = (new DefaultArtifactVersion(versionInfo[1])).getMajorVersion();
+      } catch (Exception e) {
+         // ignore
+      }
+
+      try {
+         return AvailableServiceRoleContainer.getSupportedConfigs(majorVersion);
+      } catch (IOException e) {
+         throw new SoftwareManagementPluginException(e.getMessage());
+      }
    }
 
    @Override

@@ -38,6 +38,7 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Author: Xiaoding Bian
@@ -126,6 +127,22 @@ public class TestClouderaManagerImpl {
       List<HadoopStack> stacks = provider.getSupportedStacks();
       Assert.assertTrue(stacks.get(0).getDistro().equals("CDH-5.0.2"));
       Assert.assertTrue(stacks.get(1).getDistro().equals("CDH-4.7.0"));
+   }
+
+   @Test( groups = { "TestClouderaManagerImpl" })
+   public void testGetSupportedRoles() {
+      HadoopStack stack = new HadoopStack();
+      stack.setDistro("CDH-5.0.1");
+      Set<String> roles = provider.getSupportedRoles(stack);
+      System.out.println(roles.toString());
+   }
+
+   @Test( groups = { "TestClouderaManagerImpl" })
+   public void testGetSupportedConfigs() {
+      HadoopStack stack = new HadoopStack();
+      stack.setDistro("CDH-5.0.1");
+      String configs = provider.getSupportedConfigs(stack);
+      System.out.println(configs);
    }
 
    @Test( groups = { "TestClouderaManagerImpl" })

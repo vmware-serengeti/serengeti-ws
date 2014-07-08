@@ -5,7 +5,7 @@
   "repository": "CDH",
   "versionApiMin": 6,
   "versionApiMax": -1,
-  "versionCdhMin": 6,
+  "versionCdhMin": 5,
   "versionCdhMax": -1,
   "availableConfigurations" : [
   {

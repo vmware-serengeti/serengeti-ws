@@ -76,7 +76,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public Set<String> getSupportedRoles() throws SoftwareManagementPluginException {
+   public Set<String> getSupportedRoles(HadoopStack hadoopStack) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return null;
    }

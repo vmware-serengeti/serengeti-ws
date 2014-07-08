@@ -114,7 +114,7 @@ public class AmbariImpl implements SoftwareManager {
    }
 
    @Override
-   public Set<String> getSupportedRoles() {
+   public Set<String> getSupportedRoles(HadoopStack hadoopStack) {
       // TODO Auto-generated method stub
       return null;
    }
