@@ -117,28 +117,28 @@ public class MockSoftwareManager implements SoftwareManager {
    }
 
    @Override
-   public boolean startCluster(String clusterName, ClusterReportQueue reports)
+   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
-   public boolean deleteCluster(String clusterName, ClusterReportQueue reports)
+   public boolean deleteCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
-   public boolean onStopCluster(String clusterName, ClusterReportQueue reports)
+   public boolean onStopCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
-   public boolean onDeleteCluster(String clusterName, ClusterReportQueue reports)
+   public boolean onDeleteCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;

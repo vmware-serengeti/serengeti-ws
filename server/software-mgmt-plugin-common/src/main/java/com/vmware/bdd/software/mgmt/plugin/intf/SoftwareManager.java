@@ -147,7 +147,7 @@ public interface SoftwareManager {
     * notify operation status change for this cluster, otherwise, client cannot
     * get information in this long operation time
     */
-   boolean startCluster(String clusterName, ClusterReportQueue reports)
+   boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException;
 
    /**
@@ -155,7 +155,7 @@ public interface SoftwareManager {
     * to notify operation status change for this cluster, otherwise, client
     * cannot get information in this long operation time
     */
-   boolean deleteCluster(String clusterName, ClusterReportQueue reports)
+   boolean deleteCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException;
 
    /**
@@ -168,7 +168,7 @@ public interface SoftwareManager {
     *
     * @return
     */
-   boolean onStopCluster(String clusterName, ClusterReportQueue reports)
+   boolean onStopCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException;
 
    /**
@@ -181,7 +181,7 @@ public interface SoftwareManager {
     *
     * @return
     */
-   boolean onDeleteCluster(String clusterName, ClusterReportQueue reports)
+   boolean onDeleteCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException;
 
    // Node level command is prepared for rolling update, e.g. disk fix, scale up cpu/memory/storage

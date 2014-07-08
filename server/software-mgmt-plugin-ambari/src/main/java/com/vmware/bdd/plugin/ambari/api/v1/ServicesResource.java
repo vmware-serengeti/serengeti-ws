@@ -23,6 +23,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -32,10 +33,14 @@ public interface ServicesResource {
    @PUT
    @Path("/")
    @Consumes({ MediaType.APPLICATION_XML})
-   public String stopAllServices(@PathParam(Parameters.CLUSTER_NAME) String clusterName, String request);
+   public String stopAllServices(@PathParam(Parameters.CLUSTER_NAME) String clusterName,
+                                 @QueryParam("params/run_smoke_test") String runSmockTest,
+                                 String request);
 
    @PUT
    @Path("/")
    @Consumes({ MediaType.APPLICATION_XML})
-   public String startAllServices(@PathParam(Parameters.CLUSTER_NAME)String clusterName, String request);
+   public String startAllServices(@PathParam(Parameters.CLUSTER_NAME)String clusterName,
+                                  @QueryParam("params/run_smoke_test") String runSmockTest,
+                                  String request);
 }

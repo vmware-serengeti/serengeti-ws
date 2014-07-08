@@ -93,6 +93,10 @@ public class ApiRequestInfo {
    @SerializedName("type")
    private String type;
 
+   @Expose
+   @SerializedName("context")
+   private String context;
+
    public Long getRequestId() {
       return requestId;
    }
@@ -235,5 +239,13 @@ public class ApiRequestInfo {
 
    public void setType(String type) {
       this.type = type;
+   }
+
+   public String getContext() {
+      return context;
+   }
+
+   public void setContext(String context) {
+      this.context = context;
    }
 }

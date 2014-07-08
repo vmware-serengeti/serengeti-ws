@@ -16,8 +16,16 @@ package com.vmware.bdd.plugin.ambari.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import com.vmware.bdd.plugin.ambari.api.model.ApiTask;
+import com.vmware.bdd.plugin.ambari.api.model.ApiTaskInfo;
+import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
+import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -59,6 +67,7 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 public class AmbariImpl implements SoftwareManager {
 
    private static final Logger logger = Logger.getLogger(AmbariImpl.class);
+   private static final int REQUEST_MAX_RETRY_TIMES = 10;
 
    private String privateKey;
    private ApiManager apiManager;
@@ -439,37 +448,63 @@ public class AmbariImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean startCluster(String clusterName, ClusterReportQueue reports)
+   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
+      AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, null);
+      String clusterName = clusterDef.getName();
       try {
-         ClusterReport clusterReport = new ClusterReport();
+         ClusterReport clusterReport = clusterDef.getCurrentReport();
          clusterReport.setAction("Ambari is starting services");
          clusterReport.setProgress(ProgressSplit.OPERATION_BEGIN.getProgress());
-
-         ApiRequest apiRequestSummary = apiManager.startAllServicesInCluster(clusterName);
-         boolean success = doSoftwareOperation(clusterName, apiRequestSummary, clusterReport, reports);
+         boolean success = false;
+         //when start services, some tasks will fail with error msg "Host Role in invalid state".
+         // The failed task are random(I had saw NodeManager, ResourceManager, NAGOIS failed), and the
+         // root cause is not clear by now. Each time, when I retry, it succeed. So just add retry logic to make a
+         // a temp fix for it.
+         //TODO(qjin): find out the root cause of failure in startting services
+         for (int i = 0; i < REQUEST_MAX_RETRY_TIMES; i++) {
+            ApiRequest apiRequestSummary = apiManager.startAllServicesInCluster(clusterName);
+            try {
+               success = doSoftwareOperation(clusterBlueprint.getName(), apiRequestSummary, clusterReport, reports);
+               if (!success) {
+                  logger.warn("Failed to start cluster services, retrying after 5 seconds...");
+                  try {
+                     Thread.sleep(5000);
+                  } catch (Exception e) {
+                     logger.info("interrupted when sleeping, trying to start cluster services immediately");
+                  }
+               } else {
+                  break;
+               }
+            } catch (Exception e) {
+               logger.warn("Got exception when start cluster", e);
+            }
+         }
          if (!success) {
             logger.error("Ambari failed to start services");
             throw SoftwareManagementPluginException.START_CLUSTER_FAILED(clusterName, null);
          }
-         return success;
       } catch (Exception e) {
          logger.error("Ambari got an exception when start services in cluster", e);
          throw SoftwareManagementPluginException.START_CLUSTER_FAILED(clusterName, e);
       }
+      return true;
    }
 
    @Override
-   public boolean deleteCluster(String clusterName, ClusterReportQueue reports)
+   public boolean deleteCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
       return true;
    }
 
    @Override
-   public boolean onStopCluster(String clusterName, ClusterReportQueue reports)
+   public boolean onStopCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
+      String clusterName = clusterBlueprint.getName();
+      AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, null);
+      ClusterReport clusterReport = clusterDef.getCurrentReport();
+
       try {
-         ClusterReport clusterReport = new ClusterReport();
          clusterReport.setAction("Ambari is stopping services");
          clusterReport.setProgress(ProgressSplit.OPERATION_BEGIN.getProgress());
 
@@ -500,28 +535,45 @@ public class AmbariImpl implements SoftwareManager {
 
       boolean success = false;
       ApiRequest apiRequest =
-            apiManager.request(clusterName, apiRequestSummary
+            apiManager.requestWithTasks(clusterName, apiRequestSummary
                   .getApiRequestInfo().getRequestId());
       ClusterRequestStatus clusterRequestStatus =
             ClusterRequestStatus.valueOf(apiRequest.getApiRequestInfo()
                   .getRequestStatus());
       if (!clusterRequestStatus.isFailedState()) {
          success = true;
+      } else {
+         logger.error("Failed to do request, the apiRequestInfo is :" + ApiUtils.objectToJson(apiRequest.getApiRequestInfo()));
+         List<ApiTask> apiTasks = apiRequest.getApiTasks();
+         logger.info("ApiTaskInfo are: ");
+         for (ApiTask apiTask : apiTasks) {
+            ApiTaskInfo apiTaskInfo = apiTask.getApiTaskInfo();
+            logger.info(ApiUtils.objectToJson(apiTaskInfo));
+            logger.info("command: " + apiTaskInfo.getCommandDetail() +
+                        "role: " + apiTaskInfo.getRole() +
+                        "StructuredOut: " + apiTaskInfo.getStructuredOut() +
+                        "stderr: " + apiTaskInfo.getStderr() +
+                        "status: " + apiTaskInfo.getStatus());
+            if (apiTaskInfo != null && apiTaskInfo.getStderr() != null) {
+               logger.error(apiTaskInfo.getCommandDetail() + ": " + apiTaskInfo.getStderr());
+            }
+         }
       }
       return success;
    }
 
    @Override
-   public boolean onDeleteCluster(String clusterName, ClusterReportQueue reports)
+   public boolean onDeleteCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
       try {
          //Stop services if needed
-         onStopCluster(clusterName, reports);
-         ApiRequest response = apiManager.deleteCluster(clusterName);
+         //TODO(qjin): need to check if we there is any error msg
+         onStopCluster(clusterBlueprint, reports);
+         ApiRequest response = apiManager.deleteCluster(clusterBlueprint.getName());
          return true;
       } catch (Exception e) {
          logger.error("Ambari got an exception when deleting cluster", e);
-         throw SoftwareManagementPluginException.DELETE_CLUSTER_FAILED(clusterName, e);
+         throw SoftwareManagementPluginException.DELETE_CLUSTER_FAILED(clusterBlueprint.getName(), e);
       }
    }
 

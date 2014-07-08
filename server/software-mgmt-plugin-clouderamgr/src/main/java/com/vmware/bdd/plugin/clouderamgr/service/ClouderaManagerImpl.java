@@ -258,8 +258,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean deleteCluster(String clusterName,
+   public boolean deleteCluster(ClusterBlueprint clusterBlueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
+      String clusterName = clusterBlueprint.getName();
       try {
          if (!isProvisioned(clusterName)) {
             return true;
@@ -280,18 +281,18 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean onStopCluster(String clusterName,
+   public boolean onStopCluster(ClusterBlueprint clusterBlueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      return stopCluster(clusterName);
+      return stopCluster(clusterBlueprint);
 
       //TODO(qjin): handle reports
    }
 
    @Override
-   public boolean onDeleteCluster(String clusterName,
+   public boolean onDeleteCluster(ClusterBlueprint clusterBlueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // just stop this cluster
-      return onStopCluster(clusterName, reports);
+      return onStopCluster(clusterBlueprint, reports);
    }
 
    @Override
@@ -458,30 +459,32 @@ public class ClouderaManagerImpl implements SoftwareManager {
       return false;
    }
 
-   private boolean stopCluster(String clusterName) throws SoftwareManagementPluginException {
-      AuAssert.check(clusterName != null && !clusterName.isEmpty());
+   private boolean stopCluster(ClusterBlueprint clusterBlueprint) throws SoftwareManagementPluginException {
+      assert(clusterBlueprint != null && clusterBlueprint.getName() != null && !clusterBlueprint.getName().isEmpty());
+      String clusterName = clusterBlueprint.getName();
       try {
          if (isStopped(clusterName) || !needStop(clusterName)) {
             return true;
          }
-
          execute(apiResourceRootV6.getClustersResource().stopCommand(clusterName));
       } catch (Exception e) {
+         logger.error("Got an exception when cloudera manager stopping cluster", e);
          throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(clusterName, e);
       }
       return true;
    }
 
    @Override
-   public boolean startCluster(String clusterName, ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      AuAssert.check(clusterName != null && !clusterName.isEmpty());
+   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports) throws SoftwareManagementPluginException {
+      assert(clusterBlueprint != null && clusterBlueprint.getName() != null && !clusterBlueprint.getName().isEmpty());
+      String clusterName = clusterBlueprint.getName();
       try {
          if (!needStart(clusterName)) {
             return true;
          }
-
          execute(apiResourceRootV6.getClustersResource().startCommand(clusterName));
       } catch (Exception e) {
+         logger.error("Got an exception when cloudera manager starting cluster", e);
          throw SoftwareManagementPluginException.START_CLUSTER_FAILED(clusterName, e);
       }
       return true;

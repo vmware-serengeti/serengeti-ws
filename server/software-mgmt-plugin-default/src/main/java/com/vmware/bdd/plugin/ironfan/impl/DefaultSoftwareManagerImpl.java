@@ -165,28 +165,28 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean startCluster(String clusterName,
+   public boolean startCluster(ClusterBlueprint clusterBlueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
-   public boolean deleteCluster(String clusterName,
+   public boolean deleteCluster(ClusterBlueprint clusterBlueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }
 
    @Override
-   public boolean onStopCluster(String clusterName,
+   public boolean onStopCluster(ClusterBlueprint clusterBlueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // We don't acctually stop any services for ironfan deployed cluster
       return true;
    }
 
    @Override
-   public boolean onDeleteCluster(String clusterName,
+   public boolean onDeleteCluster(ClusterBlueprint clusterBlueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;

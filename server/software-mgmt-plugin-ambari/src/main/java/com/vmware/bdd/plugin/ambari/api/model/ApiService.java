@@ -29,7 +29,7 @@ public class ApiService {
 
    @Expose
    @SerializedName("ServiceInfo")
-   private HashMap<String, String> serviceInfo;
+   private ApiServiceInfo serviceInfo;
 
    public String getHref() {
       return href;
@@ -39,11 +39,11 @@ public class ApiService {
       this.href = href;
    }
 
-   public HashMap<String, String> getServiceInfo() {
+   public ApiServiceInfo getServiceInfo() {
       return serviceInfo;
    }
 
-   public void setServiceInfo(HashMap<String, String> serviceInfo) {
+   public void setServiceInfo(ApiServiceInfo serviceInfo) {
       this.serviceInfo = serviceInfo;
    }
 
