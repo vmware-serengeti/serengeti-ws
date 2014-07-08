@@ -654,6 +654,9 @@
           "name": "yarn.ipc.rpc.class"
         },
         {
+          "name": "yarn.resourcemanager.hostname"
+        },
+        {
           "name": "yarn.resourcemanager.address"
         },
         {
@@ -877,6 +880,9 @@
         }
       ],
       "mapred-site.xml": [
+        {
+          "name": "mapred.job.tracker"
+        },
         {
           "name": "hadoop.job.history.location"
         },
@@ -1893,6 +1899,9 @@
   {
     "hbase": {
       "hbase-site.xml": [
+        {
+          "name": "hbase.rootdir"
+        },
         {
           "name": "hbase.master.port"
         },
