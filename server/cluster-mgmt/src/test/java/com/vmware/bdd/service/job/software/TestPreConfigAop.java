@@ -46,8 +46,7 @@ public class TestPreConfigAop extends AbstractTestNGSpringContextTests {
 
    @BeforeClass
    public static void init() {
-      Scheduler.init(Constants.DEFAULT_SCHEDULER_POOL_SIZE,
-            Constants.DEFAULT_SCHEDULER_POOL_SIZE);
+      Scheduler.init(5, 5);
    }
 
    @BeforeMethod
