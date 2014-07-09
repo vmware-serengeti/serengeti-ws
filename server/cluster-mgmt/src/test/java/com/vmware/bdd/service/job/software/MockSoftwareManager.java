@@ -90,7 +90,7 @@ public class MockSoftwareManager implements SoftwareManager {
    }
 
    @Override
-   public Set<String> getSupportedRoles()
+   public Set<String> getSupportedRoles(HadoopStack hadoopStack)
          throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return null;
