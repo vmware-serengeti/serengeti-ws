@@ -123,10 +123,14 @@ public class HostInstallPoller extends StatusPoller{
       ClusterReport toReport = null;
       synchronized (currentReport) {
          if (!reported) {
-            int currentProgress = currentReport.getProgress();
-            int toProgress = currentProgress + (endProgress - currentProgress) / leftStepsNum;
-            currentReport.setProgress(toProgress > endProgress ? endProgress : toProgress );
-            leftStepsNum -= 1;
+            if (leftStepsNum == 0) {
+               currentReport.setProgress(endProgress);
+            } else {
+               int currentProgress = currentReport.getProgress();
+               int toProgress = currentProgress + (endProgress - currentProgress) / leftStepsNum;
+               currentReport.setProgress(toProgress > endProgress ? endProgress : toProgress );
+               leftStepsNum -= 1;
+            }
             toReport = currentReport.clone();
             reported = true;
          }

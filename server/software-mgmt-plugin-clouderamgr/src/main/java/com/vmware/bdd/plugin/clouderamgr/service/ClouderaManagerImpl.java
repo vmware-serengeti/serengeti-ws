@@ -724,8 +724,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private void provisionCluster(final CmClusterDef cluster, final ClusterReportQueue reportQueue) throws Exception {
 
       if (!isProvisioned(cluster.getName())) {
-
-         //execute("Inspecting Hosts", apiResourceRootV6.getClouderaManagerResource().inspectHostsCommand());
          executeAndReport("Inspecting Hosts", apiResourceRootV6.getClouderaManagerResource().inspectHostsCommand(),
                ProgressSplit.INSPECT_HOSTS.getProgress(), cluster.getCurrentReport(), reportQueue, false);
 
