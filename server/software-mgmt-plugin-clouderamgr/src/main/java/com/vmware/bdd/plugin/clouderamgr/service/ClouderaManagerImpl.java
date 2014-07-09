@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gson.GsonBuilder;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
 import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
 import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
