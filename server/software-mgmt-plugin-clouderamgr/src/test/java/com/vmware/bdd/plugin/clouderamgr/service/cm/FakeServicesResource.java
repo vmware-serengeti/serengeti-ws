@@ -71,11 +71,13 @@ public class FakeServicesResource implements ServicesResourceV6 {
    public ApiServiceList services;
    public Map<String, RolesResourceV6> rolesResources;
    public RoleCommandsResourceV6 roleCommandsResource;
+   public RoleConfigGroupsResource roleConfigGroupsResource;
 
    public FakeServicesResource() {
       services = new ApiServiceList();
       rolesResources = new HashMap<String, RolesResourceV6>();
       roleCommandsResource = new FakeRoleCommandsResource();
+      roleConfigGroupsResource = new FakeRoleConfigGroupsResource();
    }
 
    @Override
@@ -327,7 +329,8 @@ public class FakeServicesResource implements ServicesResourceV6 {
 
    @Override
    public RoleConfigGroupsResource getRoleConfigGroupsResource(String s) {
-      return null;
+      System.out.println("calling " + this.getClass().getInterfaces()[0].getName() + "#" + Thread.currentThread().getStackTrace()[1].getMethodName());
+      return roleConfigGroupsResource;
    }
 
    @Override

@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.cloudera.api.model.ApiRoleConfigGroup;
 import com.google.gson.GsonBuilder;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
 import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
@@ -955,9 +956,13 @@ public class ClouderaManagerImpl implements SoftwareManager {
          apiService.setDisplayName(serviceDef.getDisplayName());
 
          ApiServiceConfig apiServiceConfig = new ApiServiceConfig();
-         // TODO: support user defined configs
 
-         // config service dependencies
+         if (serviceDef.getConfiguration() != null) {
+            for (String key : serviceDef.getConfiguration().keySet()) {
+               apiServiceConfig.add(new ApiConfig(key, serviceDef.getConfiguration().get(key)));
+            }
+         }
+
          Set<String> serviceTypes = cluster.allServiceTypes();
          switch (typeName) {
             case "YARN": //TODO: Compute Only
@@ -1027,6 +1032,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
             default:
                break;
          }
+
          apiService.setConfig(apiServiceConfig);
 
          List<ApiRole> apiRoles = new ArrayList<ApiRole>();
@@ -1035,9 +1041,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
             apiRole.setType(roleDef.getType().getName());
             apiRole.setHostRef(new ApiHostRef(roleDef.getNodeRef()));
             ApiConfigList roleConfigList = new ApiConfigList();
-            if (roleDef.getConfigs() != null) {
-               for (String key : roleDef.getConfigs().keySet()) {
-                  roleConfigList.add(new ApiConfig(key, roleDef.getConfigs().get(key)));
+            if (roleDef.getConfiguration() != null) {
+               for (String key : roleDef.getConfiguration().keySet()) {
+                  roleConfigList.add(new ApiConfig(key, roleDef.getConfiguration().get(key)));
                }
             }
             apiRole.setConfig(roleConfigList);
@@ -1051,6 +1057,10 @@ public class ClouderaManagerImpl implements SoftwareManager {
       try {
          apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).createServices(serviceList);
          logger.info("Finished create services");
+
+         updateRoleConfigGroups(cluster.getName());
+         logger.info("Updated roles config groups");
+
          syncRolesId(cluster);
 
          // Necessary, since createServices a habit of kicking off async commands (eg ZkAutoInit )
@@ -1067,6 +1077,56 @@ public class ClouderaManagerImpl implements SoftwareManager {
          String errMsg = "Failed to configure services" + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
          logger.error(errMsg);
          throw SoftwareManagementPluginException.CONFIGURE_SERVICE_FAILED(errMsg, e);
+      }
+   }
+
+   /**
+    * Update base role config groups to avoid showing error msg on CM GUI, these configurations do not take
+    * effect actually, will be overridden by each role's configuration.
+    * @param clusterName
+    * @throws IOException
+    */
+   private void updateRoleConfigGroups(String clusterName) throws IOException {
+      Map<String, String> nameMap = AvailableServiceRoleContainer.nameToDisplayName();
+      if (nameMap == null || nameMap.isEmpty()) {
+         return;
+      }
+      ServicesResourceV6 servicesResource = apiResourceRootV6.getClustersResource().getServicesResource(clusterName);
+      for (ApiService service : servicesResource.readServices(DataView.SUMMARY)) {
+         for (ApiRoleConfigGroup roleConfigGroup : servicesResource.getRoleConfigGroupsResource(service.getName())
+               .readRoleConfigGroups()) {
+            if (roleConfigGroup == null || !nameMap.containsKey(roleConfigGroup.getRoleType())) {
+               continue;
+            }
+
+            String roleDisplayName = nameMap.get(roleConfigGroup.getRoleType());
+            ApiConfigList configList = new ApiConfigList();
+            boolean needUpdate = true;
+            switch (roleDisplayName) {
+               case "HDFS_NAMENODE":
+                  configList.add(new ApiConfig(Constants.CONFIG_DFS_NAME_DIR_LIST, "/tmp/dfs/nn"));
+                  break;
+               case "HDFS_DATANODE":
+                  configList.add(new ApiConfig(Constants.CONFIG_DFS_DATA_DIR_LIST, "/tmp/dfs/dn"));
+                  break;
+               case "HDFS_SECONDARY_NAMENODE":
+                  configList.add(new ApiConfig(Constants.CONFIG_FS_CHECKPOINT_DIR_LIST, "/tmp/dfs/snn"));
+                  break;
+               case "YARN_NODE_MANAGER":
+                  configList.add(new ApiConfig(Constants.CONFIG_NM_LOCAL_DIRS, "/tmp/yarn/nm"));
+                  break;
+               default:
+                  needUpdate = false;
+                  break;
+            }
+
+            if (needUpdate) {
+               logger.info("Updating base role config group of type: " + roleDisplayName);
+               roleConfigGroup.setConfig(configList);
+               servicesResource.getRoleConfigGroupsResource(service.getName()).updateRoleConfigGroup(roleConfigGroup.getName(),
+                     roleConfigGroup, Constants.ROLE_CONFIG_GROUP_UPDATE_NOTES);
+            }
+         }
       }
    }
 

@@ -18,6 +18,7 @@ import com.cloudera.api.model.ApiClusterVersion;
 import com.google.gson.annotations.Expose;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
+import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
@@ -56,9 +57,6 @@ public class CmClusterDef implements Serializable {
    private String fullVersion;
 
    @Expose
-   private Boolean isParcel;
-
-   @Expose
    private List<CmNodeDef> nodes;
 
    @Expose
@@ -82,7 +80,6 @@ public class CmClusterDef implements Serializable {
          this.version = ApiClusterVersion.CDH5.toString();
          this.fullVersion = null;
       }
-      this.isParcel = true;
       this.nodes = new ArrayList<CmNodeDef>();
       this.services = new ArrayList<CmServiceDef>();
       this.currentReport = new ClusterReport(blueprint);
@@ -102,29 +99,30 @@ public class CmClusterDef implements Serializable {
             for (String type : group.getRoles()) {
                AvailableServiceRole roleType = AvailableServiceRoleContainer.load(type);
                AvailableServiceRole serviceType = roleType.getParent();
-               CmServiceDef service = serviceDefOfType(serviceType);
+               CmServiceDef service = serviceDefOfType(serviceType, blueprint.getConfiguration());
                CmRoleDef roleDef = new CmRoleDef();
                roleDef.setName(node.getName() + NAME_SEPARATOR + service.getType().getName() + NAME_SEPARATOR + roleType.getName()); // temp name
                roleDef.setType(roleType);
                roleDef.setNodeRef(nodeDef.getNodeId());
                switch (roleType.getDisplayName()) {
                   case "HDFS_NAMENODE":
-                     roleDef.addConfig("dfs_name_dir_list", dataDirs(node.getVolumes(), "/dfs/nn"));
+                     roleDef.addConfig(Constants.CONFIG_DFS_NAME_DIR_LIST, dataDirs(node.getVolumes(), "/dfs/nn"));
                      break;
                   case "HDFS_DATANODE":
-                     roleDef.addConfig("dfs_data_dir_list", dataDirs(node.getVolumes(), "/dfs/dn"));
+                     roleDef.addConfig(Constants.CONFIG_DFS_DATA_DIR_LIST, dataDirs(node.getVolumes(), "/dfs/dn"));
                      break;
                   case "HDFS_SECONDARY_NAMENODE":
-                     roleDef.addConfig("fs_checkpoint_dir_list", dataDirs(node.getVolumes(), "/dfs/snn"));
+                     roleDef.addConfig(Constants.CONFIG_FS_CHECKPOINT_DIR_LIST, dataDirs(node.getVolumes(), "/dfs/snn"));
                      break;
                   case "YARN_NODE_MANAGER":
-                     roleDef.addConfig("yarn_nodemanager_local_dirs", dataDirs(node.getVolumes(), "/yarn/nm"));
+                     roleDef.addConfig(Constants.CONFIG_NM_LOCAL_DIRS, dataDirs(node.getVolumes(), "/yarn/nm"));
                      break;
                   default:
                      break;
                }
+               roleDef.addConfigs(blueprint.getConfiguration());
+               roleDef.addConfigs(group.getConfiguration()); // group level configs will override cluster level configs
                service.addRole(roleDef);
-               // TODO: service/role configs
             }
          }
       }
@@ -145,7 +143,7 @@ public class CmClusterDef implements Serializable {
     * @return
     */
 
-    private synchronized CmServiceDef serviceDefOfType(AvailableServiceRole serviceType) {
+   private synchronized CmServiceDef serviceDefOfType(AvailableServiceRole serviceType, Map<String, Object> configuration) {
       if (this.services == null) {
          this.services = new ArrayList<CmServiceDef>();
       }
@@ -158,6 +156,7 @@ public class CmClusterDef implements Serializable {
       service.setName(this.name + NAME_SEPARATOR + serviceType.getName());
       service.setDisplayName(service.getName());
       service.setType(serviceType);
+      service.addConfigs(configuration);
       this.services.add(service);
       return service;
    }
@@ -192,14 +191,6 @@ public class CmClusterDef implements Serializable {
 
    public void setFullVersion(String fullVersion) {
       this.fullVersion = fullVersion;
-   }
-
-   public Boolean getIsParcel() {
-      return isParcel;
-   }
-
-   public void setIsParcel(Boolean isParcel) {
-      this.isParcel = isParcel;
    }
 
    public List<CmNodeDef> getNodes() {

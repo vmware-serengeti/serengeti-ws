@@ -25,4 +25,11 @@ public interface Constants {
    public static final String CDH_PLUGIN_NAME = "ClouderaManager";
    public static final String CMS_NAME_TOKEN_DELIM = "_";
    public static final int VERSION_UNBOUNDED = -1;
+
+   public static final String CONFIG_DFS_NAME_DIR_LIST = "dfs_name_dir_list";
+   public static final String CONFIG_DFS_DATA_DIR_LIST = "dfs_data_dir_list";
+   public static final String CONFIG_FS_CHECKPOINT_DIR_LIST = "fs_checkpoint_dir_list";
+   public static final String CONFIG_NM_LOCAL_DIRS = "yarn_nodemanager_local_dirs";
+
+   public static final String ROLE_CONFIG_GROUP_UPDATE_NOTES = "Update Base Role Config Group By VMware Big Data Extention";
 }

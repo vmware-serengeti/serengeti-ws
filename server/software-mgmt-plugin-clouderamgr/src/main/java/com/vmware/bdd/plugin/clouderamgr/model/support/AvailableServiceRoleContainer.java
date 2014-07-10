@@ -151,6 +151,16 @@ public class AvailableServiceRoleContainer {
       return roles;
    }
 
+   public static Map<String, String> nameToDisplayName() throws IOException {
+      loadAll();
+      Map<String, String> nameMap = new HashMap<String, String>();
+      for (Object o : elements.values()) {
+         AvailableServiceRole element = (AvailableServiceRole) o;
+         nameMap.put(element.getName(), element.getDisplayName());
+      }
+      return nameMap;
+   }
+
    public static String dump() {
       return (new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()).toJson(elements);
    }

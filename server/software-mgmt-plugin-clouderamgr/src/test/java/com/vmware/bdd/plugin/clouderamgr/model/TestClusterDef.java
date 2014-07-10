@@ -16,6 +16,7 @@ package com.vmware.bdd.plugin.clouderamgr.model;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.plugin.clouderamgr.model.CmClusterDef;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.plugin.clouderamgr.utils.SerialUtils;
@@ -54,6 +55,27 @@ public class TestClusterDef {
       Gson gson = new Gson();
       System.out.println(gson.toJson(clusterDef.ipToNode()));
       System.out.println(gson.toJson(clusterDef.ipToRoles()));
+      System.out.println(gson.toJson(clusterDef.nodeRefToRoles()));
+
+      Assert.assertTrue(clusterDef.allServiceNames().size() == 2);
+      Assert.assertTrue(clusterDef.allServiceNames().contains("cluster01_HDFS"));
+      Assert.assertTrue(clusterDef.allServiceTypes().size() == 2);
+      Assert.assertTrue(clusterDef.allServiceTypes().contains("HDFS"));
+
+      Assert.assertTrue(clusterDef.serviceNameOfType("HDFS").equals("cluster01_HDFS"));
+
+      for (CmServiceDef serviceDef : clusterDef.getServices()) {
+         if (serviceDef.getType().getDisplayName().equals("HDFS")) {
+            Assert.assertTrue(serviceDef.getConfiguration().containsKey("hdfs_namenode_health_enabled"));
+            for (CmRoleDef roleDef : serviceDef.getRoles()) {
+               if (roleDef.getType().getDisplayName().equals("HDFS_DATANODE")) {
+                  Assert.assertTrue(roleDef.getConfiguration().containsKey("dfs_datanode_failed_volumes_tolerated"));
+                  Assert.assertTrue(roleDef.getConfiguration().containsKey("fake_config"));
+                  Assert.assertTrue(roleDef.getConfiguration().get("fake_config").equals("group_level_value"));
+               }
+            }
+         }
+      }
 
       blueprint.getHadoopStack().setDistro("CDH");
       clusterDef = new CmClusterDef(blueprint);

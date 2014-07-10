@@ -26,19 +26,7 @@ import java.util.Map;
  * Date: 5/23/14
  * Time: 4:54 PM
  */
-public class CmServiceDef {
-
-   @Expose
-   private String name;
-
-   @Expose
-   private AvailableServiceRole type;
-
-   @Expose
-   private String displayName;
-
-   @Expose
-   private Map<String, String> configs;
+public class CmServiceDef extends AbstractCmServiceRole{
 
    @Expose
    private List<CmRoleDef> roles;
@@ -52,52 +40,18 @@ public class CmServiceDef {
    @Expose
    private List<String> snapshotPolicies;
 
-   public static final int VERSION_UNBOUNDED = -1;
-
    public CmServiceDef() {}
 
    public CmServiceDef(String name, AvailableServiceRole type, String displayName, Map<String, String> configs,
          List<CmRoleDef> roles, List<String> roleConfigGroups, List<String> replicationSchedules, List<String> snapshotPolicies) {
-      this.name = name;
-      this.type = type;
-      this.displayName = displayName;
-      this.configs = configs;
+      setName(name);
+      setType(type);
+      setDisplayName(displayName);
+      setConfiguration(configs);
       this.roles = roles;
       this.roleConfigGroups = roleConfigGroups;
       this.replicationSchedules = replicationSchedules;
       this.snapshotPolicies = snapshotPolicies;
-   }
-
-   public String getName() {
-      return name;
-   }
-
-   public void setName(String name) {
-      this.name = name;
-   }
-
-   public AvailableServiceRole getType() {
-      return type;
-   }
-
-   public void setType(AvailableServiceRole type) {
-      this.type = type;
-   }
-
-   public String getDisplayName() {
-      return displayName;
-   }
-
-   public void setDisplayName(String displayName) {
-      this.displayName = displayName;
-   }
-
-   public Map<String, String> getConfigs() {
-      return configs;
-   }
-
-   public void setConfigs(Map<String, String> configs) {
-      this.configs = configs;
    }
 
    public List<CmRoleDef> getRoles() {
@@ -139,4 +93,13 @@ public class CmServiceDef {
       this.roles.add(role);
    }
 
+   @Override
+   public boolean isService() {
+      return true;
+   }
+
+   @Override
+   public boolean isRole() {
+      return false;
+   }
 }

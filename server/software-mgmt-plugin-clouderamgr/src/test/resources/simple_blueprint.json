@@ -13,7 +13,7 @@
             ],
             "instanceNum": 1,
             "configuration": {
-                "NAMENODE": {
+                "HDFS_NAMENODE": {
                     "namenode_java_heapsize": "2048000000"
                 }
             }
@@ -45,8 +45,9 @@
             ],
             "instanceNum": 3,
             "configuration": {
-                "DATANODE" : {
-                    "datanode_java_heapsize": "2048000000"
+                "HDFS_DATANODE" : {
+                    "datanode_java_heapsize": "2048000000",
+                    "fake_config" : "group_level_value"
                 }
             },
             "nodes": [
@@ -116,24 +117,25 @@
             "hdfs_active_namenode_detection_window": "true",
             "dfs_encrypt_data_transfer_algorithm": "rc4"
         },
-        "SECONDARYNAMENODE": {
+        "HDFS_SECONDARY_NAMENODE": {
             "secondarynamenode_scm_health_enabled": "true",
             "secondarynamenode_java_opts": "-XX:+UseParNewGC",
             "secondarynamenode_fd_thresholds": "{\"critical\":\"70.0\",\"warning\":\"50.0\"}"
         },
-        "DATANODE": {
+        "HDFS_DATANODE": {
             "dfs_datanode_du_reserved": "1024000000",
-            "dfs_datanode_failed_volumes_tolerated": "2"
+            "dfs_datanode_failed_volumes_tolerated": "2",
+            "fake_config": "cluster_level_value"
         },
         "YARN": { // service
             "admin_application_list_settings": "ALL",
             "yarn_scheduler_fair_allow_undeclared_pools": "true"
         },
-        "RESOURCEMANAGER": {
+        "YARN_RESOURCE_MANAGER": {
             "yarn_scheduler_maximum_allocation_mb": "1024000",
             "resource_manager_java_heapsize": "2048000000"
         },
-        "NODEMANAGER": {
+        "YARN_NODE_MANAGER": {
             "yarn_nodemanager_heartbeat_interval_ms": "1000",
             "yarn_nodemanager_resource_cpu_vcores": "8"
         }
