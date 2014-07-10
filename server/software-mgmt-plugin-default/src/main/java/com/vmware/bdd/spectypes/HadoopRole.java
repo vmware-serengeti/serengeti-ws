@@ -161,7 +161,7 @@ public enum HadoopRole {
                   HADOOP_JOBTRACKER_ROLE, HIVE_SERVER_ROLE, MAPR_CLDB_ROLE,
                   MAPR_JOBTRACKER_ROLE, MAPR_ZOOKEEPER_ROLE,
                   MAPR_HBASE_MASTER_ROLE, MAPR_HIVE_SERVER_ROLE,
-                  HADOOP_RESOURCEMANAGER_ROLE };
+                  MAPR_MYSQL_SERVER_ROLE, HADOOP_RESOURCEMANAGER_ROLE };
 
       mgmtRoleDesc = new HashSet<String>(mgmtRoles.length);
 

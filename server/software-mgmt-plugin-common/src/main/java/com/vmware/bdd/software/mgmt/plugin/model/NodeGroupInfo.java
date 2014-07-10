@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.annotations.Expose;
-import com.vmware.bdd.apitypes.DiskSplitPolicy;
 import com.vmware.bdd.apitypes.InstanceType;
 import com.vmware.bdd.apitypes.PlacementPolicy;
 
@@ -35,7 +34,6 @@ public class NodeGroupInfo implements Serializable{
 
    private boolean haEnabled;
    private String storageType;
-   private String storageExpectedType;
    private PlacementPolicy placement;
    private InstanceType instanceType;
    private int storageSize;
@@ -118,13 +116,5 @@ public class NodeGroupInfo implements Serializable{
 
    public void setStorageSize(int storageSize) {
       this.storageSize = storageSize;
-   }
-
-   public String getStorageExpectedType() {
-      return storageExpectedType;
-   }
-
-   public void setStorageExpectedType(String storageExpectedType) {
-      this.storageExpectedType = storageExpectedType;
    }
 }

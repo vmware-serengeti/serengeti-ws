@@ -76,7 +76,6 @@ import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
 import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.spectypes.IronfanStack;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
@@ -180,7 +179,6 @@ public class ClusterConfigManager {
             groupCreate.setStorage(new StorageRead());
          }
          groupCreate.getStorage().setSizeGB(group.getStorageSize());
-         groupCreate.getStorage().setExpectedTypeFromRoles(group.getStorageExpectedType());
       }
       cluster.setExternalHDFS(blueprint.getExternalHDFS());
       cluster.setExternalMapReduce(blueprint.getExternalMapReduce());
@@ -654,8 +652,10 @@ public class ClusterConfigManager {
          localPattern = datastoreMgr.getAllLocalDatastores();
       }
 
-      CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity,
-            group, sharedPattern, localPattern);
+      SoftwareManager softwareManager =
+            getSoftwareManager(clusterEntity.getAppManager());
+      CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity, group,
+            sharedPattern, localPattern, softwareManager);
       groupEntity.setHaFlag(group.getHaFlag());
       if (group.getConfiguration() != null
             && group.getConfiguration().size() > 0) {

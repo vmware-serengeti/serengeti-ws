@@ -27,12 +27,10 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
-import com.vmware.bdd.apitypes.InstanceType;
 import com.vmware.bdd.apitypes.PlacementPolicy;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterConfigException;
-import com.vmware.bdd.plugin.ironfan.utils.ExpandUtils;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.spectypes.GroupType;
@@ -49,7 +47,6 @@ public class InfrastructureUpdator {
    }
 
    public void updateInfrastructure(ClusterBlueprint blueprint) {
-      expandDefaultCluster(blueprint);
       updateExternalConfig(blueprint);
       addTempFSServerRole(blueprint);
       sortNodeGroupRoles(blueprint);
@@ -66,39 +63,6 @@ public class InfrastructureUpdator {
          setExternalMapReduceFromConf(blueprint);
       } else {
          setHadoopConfFromExternalMapReduce(blueprint);
-      }
-   }
-
-   private void expandDefaultCluster(ClusterBlueprint blueprint) {
-      for (NodeGroupInfo group : blueprint.getNodeGroups()) {
-         expandNodeGroup(group);
-      }
-   }
-
-   private void expandNodeGroup(NodeGroupInfo group) {
-      logger.debug("Expand instance type config for group " + group.getName());
-      EnumSet<HadoopRole> enumRoles = HadoopRole.getEnumRoles(group.getRoles(), new ArrayList<String>());
-      GroupType groupType = GroupType.fromHadoopRole(enumRoles);
-      InstanceType instanceType = group.getInstanceType();
-      if (instanceType == null) {
-         // replace with default instanceType
-         if (groupType == GroupType.MASTER_GROUP
-               || groupType == GroupType.MASTER_JOBTRACKER_GROUP
-               || groupType == GroupType.HBASE_MASTER_GROUP
-               || groupType == GroupType.ZOOKEEPER_GROUP) {
-            instanceType = InstanceType.MEDIUM;
-         } else {
-            instanceType = InstanceType.SMALL;
-         }
-         group.setInstanceType(instanceType);
-      }
-      if (group.getStorageSize() <= 0) {
-         group.setStorageSize(ExpandUtils.getStorage(instanceType, groupType));
-         logger.debug("storage size is setting to default value: " + group.getStorageSize());
-      }
-      if (group.getStorageType() == null) {
-         DatastoreType storeType = groupType.getStorageEnumType();
-         group.setStorageExpectedType(storeType.name());
       }
    }
 

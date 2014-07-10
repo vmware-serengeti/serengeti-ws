@@ -60,7 +60,6 @@ public class StorageRead {
    }
 
    private String type;
-   private String expectedTypeFromRoles;
 
    private Priority shares;
 
@@ -177,13 +176,5 @@ public class StorageRead {
 
    public void setAllocType(String allocType) {
       this.allocType = allocType;
-   }
-
-   public String getExpectedTypeFromRoles() {
-      return expectedTypeFromRoles;
-   }
-
-   public void setExpectedTypeFromRoles(String expectedTypeFromRoles) {
-      this.expectedTypeFromRoles = expectedTypeFromRoles;
    }
 }

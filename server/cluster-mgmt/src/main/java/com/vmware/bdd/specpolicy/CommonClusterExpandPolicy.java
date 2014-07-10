@@ -21,10 +21,12 @@ import org.apache.log4j.Logger;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
+import com.vmware.bdd.apitypes.GroupType;
 import com.vmware.bdd.apitypes.InstanceType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.ClusterConfigException;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.spectypes.HadoopDistroMap;
 import com.vmware.bdd.spectypes.IronfanStack;
 
@@ -32,7 +34,7 @@ public class CommonClusterExpandPolicy {
    private static final Logger logger = Logger.getLogger(CommonClusterExpandPolicy.class);
 
    public static void expandGroupInstanceType(NodeGroupEntity ngEntity, NodeGroupCreate group,
-         Set<String> sharedPattern, Set<String> localPattern) {
+         Set<String> sharedPattern, Set<String> localPattern, SoftwareManager softwareManager) {
       logger.debug("Expand instance type config for group " + ngEntity.getName());
       InstanceType instanceType = ngEntity.getNodeType();
       int memory = ngEntity.getMemorySize();
@@ -42,10 +44,28 @@ public class CommonClusterExpandPolicy {
       }
       if (instanceType == null) {
          logger.debug("instance type is not set.");
+         if (softwareManager.hasMgmtRole(group.getRoles())) {
+            instanceType = InstanceType.MEDIUM;
+         } else {
+            instanceType = InstanceType.SMALL;
+         }
+         ngEntity.setNodeType(instanceType);
       } else {
          logger.debug("instance type is " + instanceType.toString());
       }
-
+      if (group.getStorage().getSizeGB() <= 0) {
+         GroupType groupType = null;
+         if (softwareManager.hasMgmtRole(group.getRoles())) {
+            groupType = GroupType.MANAGEMENTGROUP;
+         } else {
+            groupType = GroupType.WORKGROUP;
+         }
+         ngEntity.setStorageSize(ExpandUtils.getStorage(instanceType, groupType));
+         logger.debug("CommonClusterExpandPolicy::expandGroupInstanceType:storage size is setting to default value: "
+               + ngEntity.getStorageSize());
+      } else {
+         ngEntity.setStorageSize(group.getStorage().getSizeGB());
+      }
       if (memory == 0) {
          ngEntity.setMemorySize(instanceType.getMemoryMB());
       }
@@ -56,8 +76,13 @@ public class CommonClusterExpandPolicy {
       // storage
       logger.debug("storage size is set to : " + ngEntity.getStorageSize());
       if (ngEntity.getStorageType() == null) {
-         String expectedType = group.getStorage().getExpectedTypeFromRoles();
-         DatastoreType storeType = DatastoreType.valueOf(expectedType);
+         
+         DatastoreType storeType = null;
+         if (softwareManager.hasMgmtRole(group.getRoles())) {
+            storeType = DatastoreType.SHARED;
+         } else {
+            storeType = DatastoreType.LOCAL;
+         }
          if ((sharedPattern == null || sharedPattern.isEmpty())
                && DatastoreType.SHARED == storeType) {
             storeType = DatastoreType.LOCAL;
