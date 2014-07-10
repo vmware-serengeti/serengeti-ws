@@ -14,9 +14,6 @@
 		<property name="networkMgr">
 			<ref bean="networkService" />
 		</property>
-		<property name="distroMgr">
-			<ref bean="distroManager" />
-		</property>
 		<property name="datastoreMgr">
 			<ref bean="datastoreService" />
 		</property>
@@ -24,7 +21,6 @@
 			<ref bean="rackInfoManager" />
 		</property>
 	</bean>
-	<bean id="distroManager" class="com.vmware.bdd.manager.DistroManager" />
 
 	<bean id="rackInfoManager" class="com.vmware.bdd.manager.RackInfoManager" />
 
@@ -39,9 +35,6 @@
 		</property>
 		<property name="jobManager">
 			<ref bean="jobManager" />
-		</property>
-		<property name="distroManager">
-			<ref bean="distroManager" />
 		</property>
 	</bean>
 

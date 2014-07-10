@@ -67,20 +67,6 @@ public class ClusterCreateTest {
    }
 
    @Test
-   public void testGetDefaultDistroName() {
-      ClusterCreate cluster = new ClusterCreate();
-      DistroRead dr1 = new DistroRead();
-      dr1.setVendor(Constants.CDH_VENDOR);
-      dr1.setName("CDH");
-      Assert.assertNull(cluster.getDefaultDistroName(new DistroRead[] { dr1 }));
-      DistroRead dr2 = new DistroRead();
-      dr2.setVendor(Constants.DEFAULT_VENDOR);
-      dr2.setName("apache");
-      assertEquals(dr2.getName(),
-            cluster.getDefaultDistroName(new DistroRead[] { dr1, dr2 }));
-   }
-
-   @Test
    public void testValidateCDHVersion() {
       List<String> warningMsgList = new LinkedList<String>();
       ClusterCreate cluster = new ClusterCreate();
@@ -113,6 +99,16 @@ public class ClusterCreateTest {
       cluster.validateCDHVersion(warningMsgList);
       assertEquals(true, warningMsgList.size() == 0);
       cluster.setDistroVersion("3u6");
+      cluster.validateCDHVersion(warningMsgList);
+      assertEquals(true, warningMsgList.size() == 0);
+      cluster.setDistroVersion("4.0.2-1.cdh5.0.2.p0.13");
+      cluster.validateCDHVersion(warningMsgList);
+      assertEquals(true, warningMsgList.size() == 0);
+      cluster.setDistroVersion("5.0.2-1.cdh5.0.2.p0.13");
+      cluster.validateCDHVersion(warningMsgList);
+      assertEquals(true, warningMsgList.size() == 1);
+      warningMsgList.clear();
+      cluster.setDistroVersion("45.0.2-1.cdh5.0.2.p0.13");
       cluster.validateCDHVersion(warningMsgList);
       assertEquals(true, warningMsgList.size() == 0);
    }

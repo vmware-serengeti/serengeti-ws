@@ -15,6 +15,7 @@
 package com.vmware.bdd.plugin.ambari.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -461,8 +462,8 @@ public class AmbariImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean validateBlueprint(ClusterBlueprint blueprint,
-         List<String> distroRoles) throws ValidationException {
+   public boolean validateBlueprint(ClusterBlueprint blueprint)
+         throws ValidationException {
       // TODO Auto-generated method stub
       return false;
    }
@@ -506,5 +507,13 @@ public class AmbariImpl implements SoftwareManager {
    public String getVersion() {
       // TODO Auto-generated method stub
       return null;
+   }
+
+   @Override
+   public HadoopStack getDefaultStack()
+         throws SoftwareManagementPluginException {
+      List<HadoopStack> hadoopStacks = getSupportedStacks();
+      Collections.<HadoopStack> sort(hadoopStacks);
+      return hadoopStacks.get(0);
    }
 }

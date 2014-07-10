@@ -68,4 +68,26 @@ public class AppManagerRestClient {
       return restClient.getAllObjects(HadoopStack[].class, path, httpverb,
             false);
    }
+
+   public HadoopStack getDefaultStack(String name) {
+      name = CommonUtil.encode(name);
+      final String path =
+            Constants.REST_PATH_APPMANAGER + "/" + name + "/"
+                  + Constants.REST_PATH_DEFAULT_STACK;
+      final HttpMethod httpverb = HttpMethod.GET;
+
+      return restClient.getAllObjects(HadoopStack.class, path, httpverb,
+            false);
+   }
+
+   public HadoopStack getStackByName(String appMangerName, String stackName) {
+      appMangerName = CommonUtil.encode(appMangerName);
+      final String path =
+            Constants.REST_PATH_APPMANAGER + "/" + appMangerName + "/"
+                  + Constants.REST_PATH_STACK;
+      final HttpMethod httpverb = HttpMethod.GET;
+
+      return restClient.getObject(stackName, HadoopStack.class, path, httpverb,
+            false);
+   }
 }

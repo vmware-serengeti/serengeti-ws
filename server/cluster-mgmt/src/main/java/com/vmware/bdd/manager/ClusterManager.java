@@ -41,7 +41,6 @@ import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterStatus;
-import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.LimitInstruction;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
@@ -50,7 +49,6 @@ import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.TaskRead;
-import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
@@ -68,7 +66,10 @@ import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.specpolicy.ClusterSpecFactory;
+import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
+import com.vmware.bdd.spectypes.IronfanStack;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
@@ -83,8 +84,6 @@ public class ClusterManager {
    private INetworkService networkManager;
 
    private JobManager jobManager;
-
-   private DistroManager distroManager;
 
    private IResourceService resMgr;
 
@@ -150,15 +149,6 @@ public class ClusterManager {
       this.rackInfoMgr = rackInfoMgr;
    }
 
-   public DistroManager getDistroManager() {
-      return distroManager;
-   }
-
-   @Autowired
-   public void setDistroManager(DistroManager distroManager) {
-      this.distroManager = distroManager;
-   }
-
    public IClusteringService getClusteringService() {
       return clusteringService;
    }
@@ -200,8 +190,16 @@ public class ClusterManager {
       ClusterRead read = clusterEntityMgr.toClusterRead(clusterName, true);
 
       Map<String, Object> attrs = new HashMap<String, Object>();
-      attrs.put("cloud_provider", cloudProvider);
-      attrs.put("cluster_definition", clusterConfig);
+
+      if (Constants.IRONFAN.equalsIgnoreCase(clusterConfig.getAppManager())) {
+         SoftwareManager softwareManager = clusterConfigMgr.getSoftwareManager(clusterConfig.getAppManager());
+         IronfanStack stack = (IronfanStack)filterDistroFromAppManager(softwareManager, clusterConfig.getDistro());
+         CommonClusterExpandPolicy.expandDistro(clusterConfig, stack);
+         
+         attrs.put("cloud_provider", cloudProvider);
+         attrs.put("cluster_definition", clusterConfig);         
+      }
+
       if (read != null) {
          attrs.put("cluster_data", read);
       }
@@ -380,21 +378,11 @@ public class ClusterManager {
    }
 
    public Long createCluster(ClusterCreate createSpec) throws Exception {
-      if (CommonUtil.isBlank(createSpec.getDistro())) {
-         setDefaultDistro(createSpec);
-      }
-      DistroRead distroRead = null;
-      if (CommonUtil.isBlank(createSpec.getAppManager())
-            || Constants.IRONFAN.equalsIgnoreCase(createSpec.getAppManager())) {
-         distroRead =
-               getDistroManager().getDistroByName(createSpec.getDistro());
-      } else {
-         distroRead =
-               this.getDistroManager().getDistroByName(
-                     createSpec.getAppManager(), createSpec.getDistro());
-      }
-      createSpec.setDistroVendor(distroRead.getVendor());
-      createSpec.setDistroVersion(distroRead.getVersion());
+      SoftwareManager softMgr = softwareManagerCollector.getSoftwareManager(createSpec.getAppManager());
+      // @ Todo if specify hadoop stack, we can get hadoop stack by stack name. Otherwise, we will get a default hadoop stack.
+      HadoopStack stack = clusterConfigMgr.filterDistroFromAppManager(softMgr, createSpec.getDistro());
+      createSpec.setDistroVendor(stack.getVendor());
+      createSpec.setDistroVersion(stack.getFullVersion());
       // create auto rps if vc cluster/rp is specified
       createAutoRps(createSpec);
       ClusterCreate clusterSpec =
@@ -531,13 +519,6 @@ public class ClusterManager {
          }
       }
       return clusters;
-   }
-
-   private void setDefaultDistro(ClusterCreate createSpec) {
-      List<DistroRead> distroList = distroManager.getDistros();
-      DistroRead[] distros = new DistroRead[distroList.size()];
-      createSpec.setDistro(createSpec.getDefaultDistroName(distroList
-            .toArray(distros)));
    }
 
    public Long configCluster(String clusterName, ClusterCreate createSpec)
@@ -1308,4 +1289,9 @@ public class ClusterManager {
       return clusterConfigMgr.buildTopology(nodes, topology);
    }
 
+   public HadoopStack filterDistroFromAppManager(
+         SoftwareManager softwareManager, String distroName) {
+      return clusterConfigMgr.filterDistroFromAppManager(softwareManager,
+            distroName);
+   }
 }

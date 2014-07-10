@@ -47,6 +47,8 @@ public class Constants {
    public static final String REST_PATH_SPEC = "spec";
    public static final String REST_PATH_TOPOLOGY = "racks";
    public static final String REST_PATH_STACKS = "stacks";
+   public static final String REST_PATH_DEFAULT_STACK = "defaultstack";
+   public static final String REST_PATH_STACK = "stack";
    public static final String REST_PATH_CLUSTER_RACK = "rack";
    public static final String REST_PATH_CLUSTER_RACK_PARAM_TOPOLOGY = "topology";
 

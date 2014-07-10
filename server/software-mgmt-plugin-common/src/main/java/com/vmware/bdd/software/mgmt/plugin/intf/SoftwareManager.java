@@ -86,6 +86,8 @@ public interface SoftwareManager {
    List<HadoopStack> getSupportedStacks()
          throws SoftwareManagementPluginException;
 
+   HadoopStack getDefaultStack()
+         throws SoftwareManagementPluginException;
    /**
     * Supported configuration for specified stack. The returned value can be used to config created
     * cluster through custom cluster specification
@@ -112,7 +114,7 @@ public interface SoftwareManager {
    String getSupportedConfigs(HadoopStack stack)
          throws SoftwareManagementPluginException;
 
-   boolean validateBlueprint(ClusterBlueprint blueprint, List<String> distroRoles)
+   boolean validateBlueprint(ClusterBlueprint blueprint)
          throws ValidationException;
 
    /**

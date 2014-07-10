@@ -23,9 +23,9 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,14 +40,13 @@ import com.vmware.aurora.vc.DiskSpec.AllocationType;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.DiskSplitPolicy;
-import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.IpConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo;
-import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.PlacementPolicy;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks;
@@ -73,9 +72,11 @@ import com.vmware.bdd.service.resmgmt.IResourcePoolService;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
 import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.spectypes.IronfanStack;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
@@ -88,7 +89,6 @@ public class ClusterConfigManager {
 
    private IResourcePoolService rpMgr;
    private INetworkService networkMgr;
-   private DistroManager distroMgr;
    private RackInfoManager rackInfoMgr;
    private IDatastoreService datastoreMgr;
    private IClusterEntityManager clusterEntityMgr;
@@ -115,14 +115,6 @@ public class ClusterConfigManager {
 
    public void setDatastoreMgr(IDatastoreService datastoreMgr) {
       this.datastoreMgr = datastoreMgr;
-   }
-
-   public DistroManager getDistroMgr() {
-      return distroMgr;
-   }
-
-   public void setDistroMgr(DistroManager distroMgr) {
-      this.distroMgr = distroMgr;
    }
 
    public RackInfoManager getRackInfoMgr() {
@@ -222,25 +214,15 @@ public class ClusterConfigManager {
       if (appManager == null) {
          appManager = Constants.IRONFAN;
       }
-      DistroRead distro = null;
-      if (Constants.IRONFAN.equalsIgnoreCase(appManager)) {
-         distro = distroMgr.getDistroByName(cluster.getDistro());
-      } else {
-         distro = distroMgr.getDistroByName(appManager, cluster.getDistro());
-      }
-      if (cluster.getDistro() == null || distro == null) {
+      SoftwareManager softwareManager = getSoftwareManager(appManager);
+      HadoopStack stack = filterDistroFromAppManager(softwareManager, cluster.getDistro());
+      if (cluster.getDistro() == null || stack == null) {
          throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
-      }
-      SoftwareManager softwareManager = softwareManagerCollector.getSoftwareManager(appManager);
-      if (softwareManager == null) {
-          logger.error("Failed to get softwareManger.");
-          throw ClusterConfigException.FAILED_TO_GET_SOFTWARE_MANAGER(appManager);
       }
        // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
       ClusterBlueprint blueprint = cluster.toBlueprint();
       try {
-         //TODO emma: refactor distro manager, to remove distroRoles parameter in this method
-          softwareManager.validateBlueprint(cluster.toBlueprint(), distro.getRoles());
+          softwareManager.validateBlueprint(cluster.toBlueprint());
           cluster.validateClusterCreate(failedMsgList, warningMsgList);
       } catch (ValidationException e) {
           failedMsgList.addAll(e.getFailedMsgList());
@@ -335,15 +317,11 @@ public class ClusterConfigManager {
          if (clusterEntity.getTopologyPolicy() == TopologyType.HVE) {
             boolean hveSupported = false;
             if (clusterEntity.getDistro() != null) {
-
-               DistroRead dr =null;
-               if (Constants.IRONFAN.equalsIgnoreCase(appManager)) {
-                  dr = distroMgr.getDistroByName(clusterEntity.getDistro());
-               } else {
-                  dr = distroMgr.getDistroByName(appManager, clusterEntity.getDistro());
-               }
-               if (dr != null) {
-                  hveSupported = dr.isHveSupported();
+               HadoopStack hadoopStack =
+                     filterDistroFromAppManager(softwareManager,
+                           clusterEntity.getDistro());
+               if (hadoopStack != null) {
+                  hveSupported = hadoopStack.isHveSupported();
                }
             }
             if (!hveSupported) {
@@ -360,6 +338,21 @@ public class ClusterConfigManager {
          logger.info("can not create cluster " + name
                + ", which is already existed.");
          throw BddException.ALREADY_EXISTS(ex, "Cluster", name);
+      }
+   }
+
+   public HadoopStack filterDistroFromAppManager(
+         SoftwareManager softwareManager, String distroName) {
+      List<HadoopStack> hadoopStacks = softwareManager.getSupportedStacks();
+      if (!CommonUtil.isBlank(distroName)) {
+         for (HadoopStack hadoopStack : hadoopStacks) {
+            if (distroName.equalsIgnoreCase(hadoopStack.getDistro())) {
+               return hadoopStack;
+            }
+         }
+         throw BddException.NOT_FOUND("Distro", distroName);
+      } else {
+         return softwareManager.getDefaultStack();
       }
    }
 
@@ -720,6 +713,8 @@ public class ClusterConfigManager {
       }
       ClusterCreate clusterConfig = new ClusterCreate();
       clusterConfig.setName(clusterEntity.getName());
+      clusterConfig.setAppManager(clusterEntity.getAppManager());
+      clusterConfig.setDistro(clusterEntity.getDistro());
       convertClusterConfig(clusterEntity, clusterConfig, needAllocIp);
 
       Gson gson =
@@ -734,12 +729,6 @@ public class ClusterConfigManager {
          ClusterCreate clusterConfig, boolean needAllocIp) {
       logger.debug("begin to expand config for cluster "
             + clusterEntity.getName());
-      if (CommonUtil.isBlank(clusterEntity.getAppManager())
-            || clusterEntity.getAppManager()
-                  .equalsIgnoreCase(Constants.IRONFAN)) {
-         CommonClusterExpandPolicy.expandDistro(clusterEntity, clusterConfig,
-               distroMgr);
-      }
       clusterConfig.setDistroVendor(clusterEntity.getDistroVendor());
       clusterConfig.setDistroVersion(clusterEntity.getDistroVersion());
       clusterConfig.setAppManager(clusterEntity.getAppManager());
@@ -1000,9 +989,7 @@ public class ClusterConfigManager {
       storage.setShares(ngEntity.getCluster().getIoShares());
 
       // set storage split policy based on group roles
-      SoftwareManager softwareManager =
-            softwareManagerCollector.getSoftwareManager(ngEntity.getCluster()
-                  .getAppManager());
+      SoftwareManager softwareManager = getSoftwareManager(ngEntity.getCluster().getAppManager());
       if (softwareManager.twoDataDisksRequired(group.toNodeGroupInfo())) {
          logger.debug("use bi_sector disk layout for zookeeper only group.");
          storage.setSplitPolicy(DiskSplitPolicy.BI_SECTOR);
@@ -1084,27 +1071,15 @@ public class ClusterConfigManager {
          logger.error("cluster " + clusterName + " does not exist");
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
-      SoftwareManager softwareManager =
-            softwareManagerCollector
-                  .getSoftwareManager(cluster.getAppManager());
-      if (softwareManager == null) {
-          logger.error("Failed to get softwareManger.");
-          throw new ClusterConfigException(null, "Failed to get softwareManager.");
-      }
+      SoftwareManager softwareManager = getSoftwareManager(cluster.getAppManager());
       // read distro and distroVersion from ClusterEntity and set to ClusterCreate
       clusterCreate.setDistro(cluster.getDistro());
       clusterCreate.setDistroVersion(cluster.getDistroVersion());
 
       // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
       ClusterBlueprint blueprint = clusterCreate.toBlueprint();
-      DistroRead distro = null;
-      if (Constants.IRONFAN.equalsIgnoreCase(cluster.getAppManager())) {
-         distro = distroMgr.getDistroByName(cluster.getDistro());
-      } else {
-         distro = distroMgr.getDistroByName(cluster.getAppManager(), cluster.getDistro());
-      }
       try {
-         softwareManager.validateBlueprint(blueprint, distro.getRoles());
+         softwareManager.validateBlueprint(blueprint);
       } catch (ValidationException e) {
          throw new ClusterConfigException(e, e.getMessage() + e.getFailedMsgList().toString());
       }
@@ -1225,5 +1200,14 @@ public class ClusterConfigManager {
          }
       }
       return map;
+   }
+
+   public SoftwareManager getSoftwareManager(String appManager) {
+      SoftwareManager softwareManager = softwareManagerCollector.getSoftwareManager(appManager);
+      if (softwareManager == null) {
+         logger.error("Failed to get softwareManger.");
+         throw ClusterConfigException.FAILED_TO_GET_SOFTWARE_MANAGER(appManager);
+      }
+      return softwareManager;
    }
 }

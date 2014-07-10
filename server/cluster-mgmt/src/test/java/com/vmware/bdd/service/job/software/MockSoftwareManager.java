@@ -111,13 +111,6 @@ public class MockSoftwareManager implements SoftwareManager {
    }
 
    @Override
-   public boolean validateBlueprint(ClusterBlueprint blueprint,
-         List<String> distroRoles) throws ValidationException {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   @Override
    public boolean reconfigCluster(ClusterBlueprint blueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
@@ -252,5 +245,19 @@ public class MockSoftwareManager implements SoftwareManager {
    public String getVersion() {
       // TODO Auto-generated method stub
       return null;
+   }
+
+   @Override
+   public HadoopStack getDefaultStack()
+         throws SoftwareManagementPluginException {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public boolean validateBlueprint(ClusterBlueprint blueprint)
+         throws ValidationException {
+      // TODO Auto-generated method stub
+      return false;
    }
 }

@@ -16,12 +16,15 @@ package com.vmware.bdd.plugin.ironfan.impl;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
+import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -32,6 +35,7 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.spectypes.IronfanStack;
 import com.vmware.bdd.utils.Constants;
 
 
@@ -39,11 +43,13 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    private static final Logger logger = Logger.getLogger(DefaultSoftwareManagerImpl.class);
    private ClusterValidator validator;
    private InfrastructureUpdator updator;
+   private DistroManager distroManager;
 
    public DefaultSoftwareManagerImpl() {
       validator = new ClusterValidator();
       updator = new InfrastructureUpdator();
       updator.setValidator(validator);
+      distroManager = new DistroManager();
    }
 
    @Override
@@ -83,8 +89,31 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
 
    @Override
    public List<HadoopStack> getSupportedStacks() throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
-      return null;
+      List<HadoopStack> stacks = new ArrayList<HadoopStack>();
+      List<DistroRead> distros = distroManager.getDistros();
+      IronfanStack stack = null;
+      String packagesExistStatus = "";
+      Map <String, String> hadoopDistroMap = null;
+      for (DistroRead distro : distros) {
+         stack = new IronfanStack();
+         stack.setDistro(distro.getName());
+         stack.setVendor(distro.getVendor());
+         stack.setFullVersion(distro.getVersion());
+         stack.setHveSupported(distro.isHveSupported());
+         stack.setRoles(distro.getRoles());
+         packagesExistStatus = distroManager.checkPackagesExistStatus(distro.getName()).toString();
+         stack.setPackagesExistStatus(packagesExistStatus);
+         hadoopDistroMap = new HashMap<String, String>();
+         hadoopDistroMap.put("HadoopUrl", distroManager.getPackageUrlByDistroRole(distro.getName(), HadoopRole.HADOOP_NAMENODE_ROLE.toString()));
+         hadoopDistroMap.put("HiveUrl", distroManager.getPackageUrlByDistroRole(distro.getName(), HadoopRole.HIVE_ROLE.toString()));
+         hadoopDistroMap.put("PigUrl", distroManager.getPackageUrlByDistroRole(distro.getName(), HadoopRole.PIG_ROLE.toString()));
+         hadoopDistroMap.put("HbaseUrl", distroManager.getPackageUrlByDistroRole(distro.getName(), HadoopRole.HBASE_MASTER_ROLE.toString()));
+         hadoopDistroMap.put("ZookeeperUrl", distroManager.getPackageUrlByDistroRole(distro.getName(), HadoopRole.ZOOKEEPER_ROLE.toString()));
+         stack.setHadoopDistroMap(hadoopDistroMap);
+         stack.setPackageRepos(distroManager.getPackageRepos(distro.getName()));
+         stacks.add(stack);
+      }
+      return stacks;
    }
 
    @Override
@@ -94,9 +123,15 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean validateBlueprint(ClusterBlueprint blueprint, List<String> distroRoles)
+   public boolean validateBlueprint(ClusterBlueprint blueprint)
          throws ValidationException {
-      return validator.validateBlueprint(blueprint, distroRoles);
+      DistroRead distroRead =
+            this.distroManager.getDistroByName(blueprint.getHadoopStack()
+                  .getDistro());
+      if (distroRead == null || distroRead.getRoles() == null) {
+         return false;
+      }
+      return validator.validateBlueprint(blueprint, distroRead.getRoles());
    }
 
    @Override
@@ -292,6 +327,18 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    @Override
    public String getVersion() {
       return Configuration.getNonEmptyString("serengeti.version");
+   }
+
+   @Override
+   public HadoopStack getDefaultStack()
+         throws SoftwareManagementPluginException {
+      List<HadoopStack> hadoopStacks = getSupportedStacks();
+      for (HadoopStack stack : hadoopStacks) {
+         if (Constants.DEFAULT_VENDOR.equalsIgnoreCase(stack.getVendor())) {
+            return stack;
+         }
+      }
+      return null;
    }
 
 }

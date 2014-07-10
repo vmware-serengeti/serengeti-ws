@@ -17,6 +17,7 @@ package com.vmware.bdd.plugin.clouderamgr.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -210,7 +211,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean validateBlueprint(ClusterBlueprint blueprint, List<String> distroRoles) throws ValidationException {
+   public boolean validateBlueprint(ClusterBlueprint blueprint) throws ValidationException {
       /*
       1) only a NameNode is not allowed.
       2) for YARN, jobhistory is required;
@@ -1430,5 +1431,13 @@ public class ClouderaManagerImpl implements SoftwareManager {
    public String getVersion() {
       // TODO Auto-generated method stub
       return null;
+   }
+
+   @Override
+   public HadoopStack getDefaultStack()
+         throws SoftwareManagementPluginException {
+      List<HadoopStack> hadoopStacks = getSupportedStacks();
+      Collections.<HadoopStack> sort(hadoopStacks);
+      return hadoopStacks.get(0);
    }
 }

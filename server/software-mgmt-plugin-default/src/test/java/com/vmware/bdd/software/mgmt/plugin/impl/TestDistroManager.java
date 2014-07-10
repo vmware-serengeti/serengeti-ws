@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.manager;
+package com.vmware.bdd.software.mgmt.plugin.impl;
 
 import static org.testng.AssertJUnit.assertTrue;
 import static org.testng.AssertJUnit.fail;
@@ -23,6 +23,7 @@ import java.util.List;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.DistroRead;
+import com.vmware.bdd.plugin.ironfan.impl.DistroManager;
 import com.vmware.bdd.utils.Constants;
 
 public class TestDistroManager {

@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.specpolicy;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -22,13 +23,10 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.InstanceType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.ClusterConfigException;
-import com.vmware.bdd.manager.DistroManager;
-import com.vmware.bdd.manager.DistroManager.PackagesExistStatus;
 import com.vmware.bdd.spectypes.HadoopDistroMap;
-import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.spectypes.IronfanStack;
 
 public class CommonClusterExpandPolicy {
    private static final Logger logger = Logger.getLogger(CommonClusterExpandPolicy.class);
@@ -88,26 +86,27 @@ public class CommonClusterExpandPolicy {
       }
    }
 
-   public static void expandDistro(ClusterEntity clusterEntity, ClusterCreate clusterConfig, DistroManager distroMgr) {
-      String distro = clusterEntity.getDistro();
-      clusterConfig.setDistro(distro);
-      PackagesExistStatus status = distroMgr.checkPackagesExistStatus(distro);
-      switch (status) {
-      case TARBALL:
+   public static void expandDistro(ClusterCreate clusterConfig,
+         IronfanStack stack) {
+      String packagesExistStatus = stack.getPackagesExistStatus();
+      clusterConfig.setPackagesExistStatus(packagesExistStatus);
+      switch (packagesExistStatus) {
+      case "TARBALL":
          HadoopDistroMap map = new HadoopDistroMap();
-         map.setHadoopUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.HADOOP_NAMENODE_ROLE.toString()));
-         map.setHiveUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.HIVE_ROLE.toString()));
-         map.setPigUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.PIG_ROLE.toString()));
-         map.setHbaseUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.HBASE_MASTER_ROLE.toString()));
-         map.setZookeeperUrl(distroMgr.getPackageUrlByDistroRole(distro, HadoopRole.ZOOKEEPER_ROLE.toString()));
+         Map<String, String> distroMap = stack.getHadoopDistroMap();
+         map.setHadoopUrl(distroMap.get("HadoopUrl"));
+         map.setHiveUrl(distroMap.get("HiveUrl"));
+         map.setPigUrl(distroMap.get("PigUrl"));
+         map.setHbaseUrl(distroMap.get("HbaseUrl"));
+         map.setZookeeperUrl(distroMap.get("ZookeeperUrl"));
          clusterConfig.setDistroMap(map);
          break;
-      case REPO:
-         clusterConfig.setPackageRepos(distroMgr.getPackageRepos(distro));
+      case "REPO":
+         clusterConfig.setPackageRepos(stack.getPackageRepos());
          break;
-      case NONE:
+      case "NONE":
          throw ClusterConfigException.MANIFEST_CONFIG_TARBALL_REPO_NONE();
-      case BOTH:
+      case "BOTH":
          throw ClusterConfigException.MANIFEST_CONFIG_TARBALL_REPO_COEXIST();
       }
    }

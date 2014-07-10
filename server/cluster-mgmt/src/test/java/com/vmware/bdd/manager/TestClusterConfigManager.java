@@ -56,8 +56,9 @@ import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.manager.DistroManager.PackagesExistStatus;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.plugin.ironfan.impl.DistroManager;
+import com.vmware.bdd.plugin.ironfan.impl.DistroManager.PackagesExistStatus;
 import com.vmware.bdd.plugin.ironfan.utils.ChefServerUtils;
 import com.vmware.bdd.service.MockVcVmUtil;
 import com.vmware.bdd.service.impl.ClusteringService;
@@ -156,7 +157,6 @@ public class TestClusterConfigManager {
       ClusteringService clusteringService =
             Mockito.mock(ClusteringService.class);
       mockChefServerRoles();
-      clusterConfigMgr.setDistroMgr(distroMgr);
       clusterConfigMgr.setClusteringService(clusteringService);
       clusterEntityMgr =
             context

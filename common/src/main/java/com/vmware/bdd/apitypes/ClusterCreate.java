@@ -14,6 +14,17 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
+import java.io.Serializable;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
@@ -29,13 +40,6 @@ import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
-
-import java.io.Serializable;
-import java.net.URI;
-import java.util.*;
-import java.util.regex.Pattern;
-
-import org.apache.log4j.Logger;
 
 /**
  * Cluster creation spec
@@ -62,6 +66,7 @@ public class ClusterCreate implements Serializable {
    @Expose
    @SerializedName("distro_version")
    private String distroVersion;
+   private String packagesExistStatus;
    @Expose
    @SerializedName("http_proxy")
    private String httpProxy;
@@ -223,6 +228,14 @@ public class ClusterCreate implements Serializable {
 
    public void setDistroVersion(String distroVersion) {
       this.distroVersion = distroVersion;
+   }
+
+   public String getPackagesExistStatus() {
+      return packagesExistStatus;
+   }
+
+   public void setPackagesExistStatus(String packagesExistStatus) {
+      this.packagesExistStatus = packagesExistStatus;
    }
 
    @RestIgnore
@@ -640,30 +653,16 @@ public class ClusterCreate implements Serializable {
       return true;
    }
 
-   public String getDefaultDistroName(DistroRead[] distros) {
-      if (distros != null) {
-         for (DistroRead distro : distros) {
-            if (distro.getVendor().equalsIgnoreCase(Constants.DEFAULT_VENDOR)) {
-               return distro.getName();
-            }
-         }
-      }
-      return null;
-   }
-
-   public String getDefaultDistroName(String appManager) {
-
-      return Constants.CLOUDERA_MANAGER_DEFAULT_DISTRO;
-   }
-
    public void validateCDHVersion(List<String> warningMsgList) {
       // If current distro's version is greater than cdh4.2.1, the FQDN must be configured.
       if (this.getDistroVendor().equalsIgnoreCase(Constants.CDH_VENDOR)) {
-         Pattern pattern = Pattern.compile(Constants.CDH4_PATTERN);
-         if (!pattern.matcher(this.getDistroVersion()).matches()) {
+         Pattern pattern = Pattern.compile(Constants.CDH_PATTERN);
+         Matcher matcher=pattern.matcher(this.getDistroVersion());
+         if (!matcher.find()) {
             return;
          }
-         if (compare(this.getDistroVersion(), "4.2.1") > 0) {
+         String version = this.getDistroVersion().substring(matcher.start(), matcher.end());
+         if (compare(version, "4.2.1") > 0) {
             warningMsgList.add(Constants.MUST_CONFIGURE_FQDN);
          }
       }
@@ -799,4 +798,5 @@ public class ClusterCreate implements Serializable {
        blueprint.setNodeGroups(nodeGroupInfos);
        return blueprint;
    }
+
 }

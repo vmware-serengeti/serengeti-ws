@@ -59,8 +59,8 @@ import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.cli.rest.AppManagerRestClient;
 import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.ClusterRestClient;
-import com.vmware.bdd.cli.rest.DistroRestClient;
 import com.vmware.bdd.cli.rest.NetworkRestClient;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.utils.AppConfigValidationUtils;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
 import com.vmware.bdd.utils.CommonUtil;
@@ -68,8 +68,6 @@ import com.vmware.bdd.utils.ValidateResult;
 
 @Component
 public class ClusterCommands implements CommandMarker {
-   @Autowired
-   private DistroRestClient distroRestClient;
 
    @Autowired
    private NetworkRestClient networkRestClient;
@@ -197,12 +195,7 @@ public class ClusterCommands implements CommandMarker {
 
       try {
          if (distro != null) {
-            List<String> distroNames = null;
-            if (CommandsUtils.isBlank(appManager) || Constants.IRONFAN.equalsIgnoreCase(appManager)) {
-               distroNames = getDistroNames();
-            } else {
-               distroNames = getDistroNames(appManager);
-            }
+            List<String> distroNames = getDistroNames(clusterCreate.getAppManager());
             if (validName(distro, distroNames)) {
                clusterCreate.setDistro(distro);
             } else {
@@ -213,20 +206,16 @@ public class ClusterCommands implements CommandMarker {
                return;
             }
          } else {
-            if (CommandsUtils.isBlank(appManager) || Constants.IRONFAN.equalsIgnoreCase(appManager)) {
-               String defaultDistroName =
-                     clusterCreate.getDefaultDistroName(distroRestClient.getAll());
-               if (CommandsUtils.isBlank(defaultDistroName)) {
-                  CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                        name, Constants.OUTPUT_OP_CREATE,
-                        Constants.OUTPUT_OP_RESULT_FAIL,
-                        Constants.PARAM__NO_DEFAULT_DISTRO);
-                  return;
-               } else {
-                  clusterCreate.setDistro(defaultDistroName);
-               }
+            String defaultDistroName =
+                  getDefaultDistroName(clusterCreate.getAppManager());
+            if (CommandsUtils.isBlank(defaultDistroName)) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                     name, Constants.OUTPUT_OP_CREATE,
+                     Constants.OUTPUT_OP_RESULT_FAIL,
+                     Constants.PARAM__NO_DEFAULT_DISTRO);
+               return;
             } else {
-               clusterCreate.setDistro(clusterCreate.getDefaultDistroName(appManager));
+               clusterCreate.setDistro(defaultDistroName);
             }
          }
       } catch (CliRestException e) {
@@ -235,15 +224,9 @@ public class ClusterCommands implements CommandMarker {
                e.getMessage());
          return;
       }
-      DistroRead distroRead = null;
-      if (CommandsUtils.isBlank(appManager) || Constants.IRONFAN.equalsIgnoreCase(appManager)) {
-         distroRead = distroRestClient.get(clusterCreate.getDistro());
-      } else {
-         distroRead = distroRestClient.get(appManager, clusterCreate.getDistro());
-      }
-
-      clusterCreate.setDistroVendor(distroRead.getVendor());
-      clusterCreate.setDistroVersion(distroRead.getVersion());
+      HadoopStack stack = getHadoopStackByName(clusterCreate.getAppManager(), clusterCreate.getDistro());
+      clusterCreate.setDistroVendor(stack.getVendor());
+      clusterCreate.setDistroVersion(stack.getFullVersion());
       if (rpNames != null) {
          List<String> rpNamesList = CommandsUtils.inputsConvert(rpNames);
          if (rpNamesList.isEmpty()) {
@@ -386,6 +369,19 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
+   private HadoopStack getHadoopStackByName(String appManager, String stackName) {
+      return appManagerRestClient.getStackByName(appManager, stackName);
+   }
+
+   private String getDefaultDistroName(String appManager) {
+      HadoopStack stack = appManagerRestClient.getDefaultStack(appManager);
+      if (stack != null) {
+         return stack.getDistro();
+      } else {
+         return null;
+      }
+   }
+
    /**
     * notify user which network Serengeti will pick up for mgt/hdfs/mapred
     *
@@ -481,19 +477,6 @@ public class ClusterCommands implements CommandMarker {
          return false;
       }
       return true;
-   }
-
-   private List<String> findDistroRoles(ClusterCreate clusterCreate) {
-      DistroRead distroRead = null;
-      distroRead =
-            distroRestClient
-                  .get(clusterCreate.getDistro() != null ? clusterCreate
-                        .getDistro() : Constants.DEFAULT_DISTRO);
-      if (distroRead != null) {
-         return distroRead.getRoles();
-      } else {
-         return null;
-      }
    }
 
    @CliCommand(value = "cluster list", help = "Get cluster information")
@@ -1300,28 +1283,13 @@ public class ClusterCommands implements CommandMarker {
       return allNetworks;
    }
 
-   private List<String> getDistroNames() {
-
-      List<String> distroNames = new ArrayList<String>(0);
-
-      DistroRead[] distros = distroRestClient.getAll();
-
-      if (distros != null) {
-         for (DistroRead distro : distros)
-            distroNames.add(distro.getName());
-      }
-      return distroNames;
-   }
-
    private List<String> getDistroNames(String appManager) {
-
       List<String> distroNames = new ArrayList<String>(0);
-
-      DistroRead[] distros = distroRestClient.getAll(appManager);
-
-      if (distros != null) {
-         for (DistroRead distro : distros)
-            distroNames.add(distro.getName());
+      HadoopStack[] stacks = appManagerRestClient.getStacks(appManager);
+      if (stacks != null) {
+         for (HadoopStack stack : stacks) {
+            distroNames.add(stack.getDistro());            
+         }
       }
       return distroNames;
    }
