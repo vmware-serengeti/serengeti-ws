@@ -14,11 +14,11 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job.software.external;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
@@ -27,6 +27,8 @@ import com.vmware.bdd.service.job.software.ISoftwareManagementTask;
 import com.vmware.bdd.service.job.software.ManagementOperation;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 /**
  * Author: Xiaoding Bian
@@ -88,6 +90,23 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
                break;
             case STOP:
                success = softwareManager.onStopCluster(clusterBlueprint.getName(),queue);
+               break;
+            case START_NODES:
+               List<NodeInfo> nodes = new ArrayList<NodeInfo>();
+               for (NodeGroupInfo group : clusterBlueprint.getNodeGroups()) {
+                  if (group != null) {
+                     for (NodeInfo node : group.getNodes()) {
+                        if (node.getName().equals(targetName)) {
+                           nodes.add(node);
+                           break;
+                        }
+                     }
+                     if (!nodes.isEmpty()) {
+                        break;
+                     }
+                  }
+               }
+               success = softwareManager.startNodes(clusterBlueprint.getName(), nodes, queue);
                break;
             default:
                success = true;

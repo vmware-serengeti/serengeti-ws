@@ -32,6 +32,7 @@ import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.SoftwareManagerCollector;
 import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
+import com.vmware.bdd.service.ISoftwareSyncUpService;
 import com.vmware.bdd.service.job.DefaultStatusUpdater;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.JobExecutionStatusHolder;
@@ -50,6 +51,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
    private IExclusiveLockedClusterEntityManager lockClusterEntityMgr;
    private SoftwareManagerCollector softwareMgrs;
    private boolean checkVMStatus = false;
+   private ISoftwareSyncUpService serviceSyncup;
 
    public IExclusiveLockedClusterEntityManager getLockClusterEntityMgr() {
       return lockClusterEntityMgr;
@@ -70,6 +72,15 @@ public class SoftwareManagementStep extends TrackableTasklet {
       this.softwareMgrs = softwareMgrs;
    }
 
+   public ISoftwareSyncUpService getServiceSyncup() {
+      return serviceSyncup;
+   }
+
+   @Autowired
+   public void setServiceSyncup(ISoftwareSyncUpService serviceSyncup) {
+      this.serviceSyncup = serviceSyncup;
+   }
+
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,
          JobExecutionStatusHolder jobExecutionStatusHolder) throws Exception {
@@ -86,6 +97,11 @@ public class SoftwareManagementStep extends TrackableTasklet {
       String jobName = chunkContext.getStepContext().getJobName();
       logger.info("target : " + targetName + ", operation: "
             + managementOperation + ", jobname: " + jobName);
+
+      if (!serviceSyncup.isClusterInQueue(clusterName)) {
+         serviceSyncup.syncUp(clusterName);
+         logger.info("Start service sync up for cluster " + clusterName);
+      }
 
       boolean vmPowerOn = false;
       String vmPowerOnStr =

@@ -1,9 +1,22 @@
+/***************************************************************************
+ * Copyright (c) 2012-2014 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
 package com.vmware.bdd.software.mgmt.plugin.monitor;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
@@ -13,7 +26,7 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
  * Date: 6/10/14
  * Time: 7:34 PM
  */
-public class ClusterReport implements Cloneable{
+public class ClusterReport implements Cloneable {
 
    private String name;
 
@@ -26,6 +39,8 @@ public class ClusterReport implements Cloneable{
    private int progress;
    private String errMsg;
    private String errCode;
+
+   private ServiceStatus status;
 
    /**
     * This map should not be empty
@@ -117,6 +132,14 @@ public class ClusterReport implements Cloneable{
 
    public void setErrCode(String errCode) {
       this.errCode = errCode;
+   }
+
+   public ServiceStatus getStatus() {
+      return status;
+   }
+
+   public void setStatus(ServiceStatus status) {
+      this.status = status;
    }
 
    /**

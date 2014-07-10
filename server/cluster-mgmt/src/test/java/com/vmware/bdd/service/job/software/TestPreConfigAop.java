@@ -141,7 +141,8 @@ public class TestPreConfigAop extends AbstractTestNGSpringContextTests {
       updator.start();
 
       try {
-         user.testAop(TEST_CLUSTER_NAME, 20);
+         boolean result = user.testAop(TEST_CLUSTER_NAME, 20);
+         Assert.assertTrue(result, "Should get true");
          updator.join();
       } catch (InfrastructureException e) {
          logger.error("Got exception " + e.getFailedMsgList());

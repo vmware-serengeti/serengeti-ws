@@ -8,7 +8,8 @@ public class MockPreConfigUser {
    private static final Logger logger = Logger.getLogger(MockPreConfigUser.class);
 
    @PreConfiguration(clusterNameParam="clusterName", maxWaitingTimeParam="waitingSeconds")
-   public void testAop(String clusterName, int waitingSeconds) {
+   public boolean testAop(String clusterName, int waitingSeconds) {
       logger.info("In testAop");
+      return true;
    }
 }

@@ -54,7 +54,7 @@ public class PreConfigurationAdvice {
    }
 
    @Around("@annotation(com.vmware.bdd.software.mgmt.plugin.aop.PreConfiguration)")
-   public void preClusterConfiguration(ProceedingJoinPoint pjp) throws Throwable {
+   public Object preClusterConfiguration(ProceedingJoinPoint pjp) throws Throwable {
       MethodSignature signature = (MethodSignature) pjp.getSignature();
       Method method = signature.getMethod();
       PreConfiguration beforeConfig = AnnotationUtils.findAnnotation(method, PreConfiguration.class);
@@ -82,6 +82,7 @@ public class PreConfigurationAdvice {
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
       preClusterConfiguration(clusterName, maxWaitingSeconds);
+      return pjp.proceed();
    }
 
    private void preClusterConfiguration(String clusterName, int maxWaitingSeconds)

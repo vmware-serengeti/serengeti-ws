@@ -12,8 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.apitypes;
+package com.vmware.bdd.software.mgmt.plugin.monitor;
 
-public enum ClusterStatus {
-   RUNNING, PROVISIONING, PROVISION_ERROR, UPGRADING, UPDATING, DELETING, STOPPED, ERROR, STOPPING, STARTING, CONFIGURING, CONFIGURE_ERROR, NA, VHM_RUNNING, VMRECONFIGURING, MAINTENANCE, UPGRADE_ERROR, SERVICE_ERROR
+public enum ServiceStatus {
+   INSTALLATION_FAILED ( "Installation Failed" ),
+   CONFIGURATION_FAILED ( "Configuration Failed" ),
+   STARTUP_FAILED ( "Startup Failed" ),
+   RUNNING ( "Running" ),
+   FAILED ( "Failed" );
+
+   private String description;
+   private ServiceStatus(String description) {
+      this.description = description;
+   }
+   public String toString() {
+      return description;
+   }
 }

@@ -142,7 +142,10 @@ public class CmsWorker {
       // Highest priority queue, execution without delay & threshold (limit capacity).
       BASE_VM_SYNC_NO_DELAY(new DelayedReqQueue(0, 1000, Integer.MAX_VALUE)),
       // Execute every 5 minutes, up to 1000 requests per interval.
-      BASE_VM_FIVE_MIN_DELAY(new DelayedReqQueue(5 * 60, 1000, Integer.MAX_VALUE));
+      BASE_VM_FIVE_MIN_DELAY(new DelayedReqQueue(5 * 60, 1000, Integer.MAX_VALUE)),
+      // Execute every 5 minute, up to 1000 requests per interval.
+      CUSTOM_FIVE_MIN_SYNC_DELAY(new DelayedReqQueue(5 * 60, 1000, 1000)),
+      CUSTOM_SYNC_NO_DELAY(new DelayedReqQueue(0, 1000, 1000));
 
       private DelayedReqQueue queue;
 
@@ -180,7 +183,10 @@ public class CmsWorker {
                       WorkQueue.VCD_SYNC_NO_DELAY, null),
       BASE_VM_SYNC_THREAD(EnumSet.of(WorkQueue.BASE_VM_SYNC_NO_DELAY,
                                      WorkQueue.BASE_VM_FIVE_MIN_DELAY),
-                          WorkQueue.BASE_VM_SYNC_NO_DELAY, null);
+                          WorkQueue.BASE_VM_SYNC_NO_DELAY, null),
+      CUSTOM_SYNC_THREAD(EnumSet.of(WorkQueue.CUSTOM_SYNC_NO_DELAY,
+                                    WorkQueue.CUSTOM_FIVE_MIN_SYNC_DELAY),
+                          WorkQueue.CUSTOM_FIVE_MIN_SYNC_DELAY, null);
 
       private CmsWorkerLoop thread;
 
@@ -304,6 +310,9 @@ public class CmsWorker {
       }
 
       abstract protected boolean executeOnce();
+      protected boolean isContinue() {
+         return true;
+      }
 
       @Override
       final protected boolean execute() {
@@ -314,14 +323,19 @@ public class CmsWorker {
             logger.error("error executing periodic req " + e);
             done = true;
          }
-         if (done) {
-            // Schedule the next execution of this request.
-            DelayedReqQueue q = queue.getQ();
-            q.add(this);
+         if (isContinue()) {
+            if (done) {
+               // Schedule the next execution of this request.
+               DelayedReqQueue q = queue.getQ();
+               q.add(this);
+               return true;
+            }
+            // will be rescheduled
+            return false;
+         } else {
+            // do not reschedule
             return true;
          }
-         // will be rescheduled
-         return false;
       }
 
       /**
@@ -331,6 +345,10 @@ public class CmsWorker {
        */
       protected void queueRequest(Request request) {
          queue.getQ().add(request);
+      }
+
+      public void removeRequest() {
+         queue.getQ().remove(this);
       }
    }
 

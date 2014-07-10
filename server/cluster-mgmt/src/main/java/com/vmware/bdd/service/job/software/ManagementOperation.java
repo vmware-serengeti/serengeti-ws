@@ -26,6 +26,7 @@ public enum ManagementOperation {
    CREATE,
    UPDATE,
    START,
+   START_NODES,
    STOP,
    PRE_DESTROY,
    DESTROY,

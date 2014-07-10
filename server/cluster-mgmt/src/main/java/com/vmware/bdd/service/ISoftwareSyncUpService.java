@@ -12,8 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.apitypes;
+package com.vmware.bdd.service;
 
-public enum ClusterStatus {
-   RUNNING, PROVISIONING, PROVISION_ERROR, UPGRADING, UPDATING, DELETING, STOPPED, ERROR, STOPPING, STARTING, CONFIGURING, CONFIGURE_ERROR, NA, VHM_RUNNING, VMRECONFIGURING, MAINTENANCE, UPGRADE_ERROR, SERVICE_ERROR
+/**
+ * Sync up with software manager for service status and configuration
+ * @author line
+ *
+ */
+public interface ISoftwareSyncUpService {
+   /**
+    * Sync up every 5 minutes 
+    * @param clusterName
+    */
+   void syncUp(String clusterName);
+   /**
+    * Sync up once only
+    * @param clusterName
+    */
+   void syncUpOnce(String clusterName);
+   /** 
+    * Detect if this cluster is already in sync up queue
+    * @param clusterName
+    * @return
+    */
+   boolean isClusterInQueue(String clusterName);
 }

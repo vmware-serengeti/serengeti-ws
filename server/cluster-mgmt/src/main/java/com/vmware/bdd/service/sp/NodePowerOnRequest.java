@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.aurora.util.CmsWorker.SimpleRequest;
@@ -32,10 +33,13 @@ import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.SoftwareManagerCollector;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
+import com.vmware.bdd.service.job.JobConstants;
+import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.software.ISoftwareManagementTask;
 import com.vmware.bdd.service.job.software.ManagementOperation;
 import com.vmware.bdd.service.job.software.SoftwareManagementTaskFactory;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.SyncHostsUtils;
@@ -71,14 +75,17 @@ public class NodePowerOnRequest extends SimpleRequest {
    @Override
    protected boolean execute() {
       logger.info("Start to waiting for VM " + vmId + " post power on status");
-      IClusterEntityManager clusterEntityMgr = lockClusterEntityMgr.getClusterEntityMgr();
+      IClusterEntityManager clusterEntityMgr =
+            lockClusterEntityMgr.getClusterEntityMgr();
       String serverVersion = clusterEntityMgr.getServerVersion();
       NodeEntity nodeEntity = clusterEntityMgr.getNodeWithNicsByMobId(vmId);
       if (nodeEntity == null) {
          logger.info("Node " + nodeEntity.getVmName() + " is deleted.");
       }
       boolean needBootstrap = nodeEntity.needUpgrade(serverVersion);
-      StartVmPostPowerOn query = new StartVmPostPowerOn(nodeEntity.fetchAllPortGroups(), Constants.VM_POWER_ON_WAITING_SEC, clusterEntityMgr);
+      StartVmPostPowerOn query =
+            new StartVmPostPowerOn(nodeEntity.fetchAllPortGroups(),
+                  Constants.VM_POWER_ON_WAITING_SEC, clusterEntityMgr);
       query.setVmId(vmId);
       try {
          query.call();
@@ -92,11 +99,15 @@ public class NodePowerOnRequest extends SimpleRequest {
       if (nodeEntity.isVmReady() && needBootstrap) {
          try {
             bootstrapNode(nodeEntity, clusterName);
-         } catch (Exception e){
-            logger.error("Bootstrapping node " + nodeEntity.getVmName() + " failed", e);
+         } catch (Exception e) {
+            logger.error("Bootstrapping node " + nodeEntity.getVmName()
+                  + " failed", e);
             nodeEntity.setStatus(NodeStatus.BOOTSTRAP_FAILED);
             nodeEntity.setActionFailed(true);
-            nodeEntity.setErrMessage("Bootstrapping node " + nodeEntity.getVmName() + " failed. Please ssh to this node and run 'sudo chef-client' to get error details.");
+            nodeEntity
+                  .setErrMessage("Bootstrapping node "
+                        + nodeEntity.getVmName()
+                        + " failed. Please ssh to this node and run 'sudo chef-client' to get error details.");
             lockClusterEntityMgr.getClusterEntityMgr().update(nodeEntity);
          }
       }
@@ -117,15 +128,14 @@ public class NodePowerOnRequest extends SimpleRequest {
                   .getSoftwareManagerByClusterName(clusterName);
       SyncHostsUtils.SyncHosts(clusterSpec, hostnames, softManager);
 
-      // get command work directory
-      File workDir = CommandUtil.createWorkDir((int)Math.random()*1000);
+      ISoftwareManagementTask task = null;
+      if (!Constants.IRONFAN.equals(softManager.getName())) {
+         task =
+               createExternalTask(targetName, clusterName);
+      } else {
+         task = createThriftCommandTask(targetName);
+      }
 
-      // write cluster spec file
-      String specFilePath = null;
-      File specFile = clusterManager.writeClusterSpecFile(targetName, workDir, true);
-      specFilePath = specFile.getAbsolutePath();
-
-      ISoftwareManagementTask task =  createCommandTask(targetName, specFilePath);
       try {
          Map<String, Object> ret = task.call();
 
@@ -138,9 +148,40 @@ public class NodePowerOnRequest extends SimpleRequest {
       }
    }
 
+   private ISoftwareManagementTask createExternalTask(String targetName,
+         String clusterName) {
+      SoftwareManager softwareMgr =
+            softwareManagerCollector
+                  .getSoftwareManagerByClusterName(clusterName);
+      ClusterBlueprint clusterBlueprint =
+            lockClusterEntityMgr.getClusterEntityMgr().toClusterBluePrint(
+                  clusterName);
+      return SoftwareManagementTaskFactory.createExternalMgtTask(targetName,
+            ManagementOperation.START_NODES, clusterBlueprint, null,
+            lockClusterEntityMgr, softwareMgr);
+   }
+
+   private ISoftwareManagementTask createThriftCommandTask(String targetName) {
+      // get command work directory
+      File workDir = CommandUtil.createWorkDir((int) Math.random() * 1000);
+
+      // write cluster spec file
+      String specFilePath = null;
+      File specFile =
+            clusterManager.writeClusterSpecFile(targetName, workDir, true);
+      specFilePath = specFile.getAbsolutePath();
+
+      ISoftwareManagementTask task =
+            createCommandTask(targetName, specFilePath);
+      return task;
+   }
+
    // TODO: CM and Ambari
-   public ISoftwareManagementTask createCommandTask(String clusterName, String specFileName) {
-      return SoftwareManagementTaskFactory.createThriftTask(clusterName, specFileName, null, ManagementOperation.CONFIGURE, lockClusterEntityMgr);
+   public ISoftwareManagementTask createCommandTask(String clusterName,
+         String specFileName) {
+      return SoftwareManagementTaskFactory.createThriftTask(clusterName,
+            specFileName, null, ManagementOperation.CONFIGURE,
+            lockClusterEntityMgr);
    }
 
 }
