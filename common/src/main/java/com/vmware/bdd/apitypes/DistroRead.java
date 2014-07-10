@@ -16,6 +16,7 @@ package com.vmware.bdd.apitypes;
 
 import java.util.List;
 
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
@@ -25,6 +26,17 @@ public class DistroRead implements Comparable<DistroRead>{
    private String version;
    private boolean hveSupported;
    private List<String> roles;
+
+   public DistroRead() {
+   }
+
+   public DistroRead(HadoopStack stack) {
+      this.name = stack.getDistro();
+      this.vendor = stack.getVendor();
+      this.version = stack.getFullVersion();
+      this.hveSupported = stack.isHveSupported();
+      this.roles = stack.getRoles();
+   }
 
    public String getName() {
       return name;

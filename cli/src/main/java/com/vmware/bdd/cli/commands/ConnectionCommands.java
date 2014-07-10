@@ -36,10 +36,6 @@ public class ConnectionCommands implements CommandMarker {
    @Autowired
    RestClient conn;
 
-   private enum PromptType {
-      USER_NAME, PASSWORD
-   }
-
    @CliAvailabilityIndicator({"connect help"})
    public boolean isCommandAvailable() {
       return true;
@@ -54,16 +50,16 @@ public class ConnectionCommands implements CommandMarker {
       Map<String,String> loginInfo = new HashMap<String,String>();
       String username = null;
       String password = null;
-      loginInfo.put("username", username);
-      loginInfo.put("password", password);
+      loginInfo.put(Constants.LOGIN_USERNAME, username);
+      loginInfo.put(Constants.LOGIN_PASSWORD, password);
       try {
          if (CommandsUtils.isBlank(username)) {
-            if(!prompt(Constants.CONNECT_ENTER_USER_NAME, PromptType.USER_NAME, loginInfo)){
+            if(!CommandsUtils.prompt(Constants.CONNECT_ENTER_USER_NAME, CommandsUtils.PromptType.USER_NAME, loginInfo)){
                return ;
             }
          }
          if (CommandsUtils.isBlank(password)) {
-            if(!prompt(Constants.CONNECT_ENTER_PASSWORD, PromptType.PASSWORD, loginInfo)){
+            if(!CommandsUtils.prompt(Constants.CONNECT_ENTER_PASSWORD, CommandsUtils.PromptType.PASSWORD, loginInfo)){
                return ;
             }
          }
@@ -84,16 +80,16 @@ public class ConnectionCommands implements CommandMarker {
          return;
       }
       Map<String,String> loginInfo = new HashMap<String,String>();
-      loginInfo.put("username", username);
-      loginInfo.put("password", password);
+      loginInfo.put(Constants.LOGIN_USERNAME, username);
+      loginInfo.put(Constants.LOGIN_PASSWORD, password);
       try {
          if (CommandsUtils.isBlank(username)) {
-            if(!prompt(Constants.CONNECT_ENTER_USER_NAME, PromptType.USER_NAME, loginInfo)){
+            if(!CommandsUtils.prompt(Constants.CONNECT_ENTER_USER_NAME, CommandsUtils.PromptType.USER_NAME, loginInfo)){
                return ;
             }
          }
          if (CommandsUtils.isBlank(password)) {
-            if(!prompt(Constants.CONNECT_ENTER_PASSWORD, PromptType.PASSWORD, loginInfo)){
+            if(!CommandsUtils.prompt(Constants.CONNECT_ENTER_PASSWORD, CommandsUtils.PromptType.PASSWORD, loginInfo)){
                return ;
             }
          }
@@ -113,12 +109,12 @@ public class ConnectionCommands implements CommandMarker {
       if (count < 0) {
          return false;
       }
-      ConnectType connectType = conn.connect(hostName, loginInfo.get("username"), loginInfo.get("password"));
+      ConnectType connectType = conn.connect(hostName, loginInfo.get(Constants.LOGIN_USERNAME), loginInfo.get(Constants.LOGIN_PASSWORD));
       if (connectType == ConnectType.UNAUTHORIZATION) {
          if (count == 0) {
             return false;
          }
-         if (!prompt(Constants.CONNECT_ENTER_PASSWORD, PromptType.PASSWORD, loginInfo)) {
+         if (!CommandsUtils.prompt(Constants.CONNECT_ENTER_PASSWORD, CommandsUtils.PromptType.PASSWORD, loginInfo)) {
             return false;
          } else {
             count--;
@@ -127,7 +123,7 @@ public class ConnectionCommands implements CommandMarker {
       }
       return true;
    }
-   
+
    private void getServerVersion(final String hostName) throws Exception {
       final String path = Constants.REST_PATH_HELLO;
       final HttpMethod httpverb = HttpMethod.GET;
@@ -138,45 +134,6 @@ public class ConnectionCommands implements CommandMarker {
          System.out.println("Warning: CLI version "+ cliVersion + " does not match with management server version " + serverVersion + ".");
          System.out.println("You must use the same version for CLI and management server. Otherwise, some commands may not be compatible.");
       }
-   }
-
-   private boolean prompt(String msg, PromptType promptType, Map<String,String> loginInfo) throws Exception {
-      int k = 0;
-      String enter = "";
-      while (k < 3) {
-         enter = readEnter(msg, promptType);
-         if (!CommandsUtils.isBlank(enter)) {
-            if (promptType == PromptType.USER_NAME) {
-               loginInfo.put("username", enter);
-            } else {
-               loginInfo.put("password", enter);
-            }
-            break;
-         } else {
-            StringBuilder warningMsg = new StringBuilder();
-            if (promptType == PromptType.USER_NAME) {
-               warningMsg.append(Constants.CONNECT_USER_NAME);
-            } else {
-               warningMsg.append(Constants.CONNECT_PASSWORD);
-            }
-            warningMsg.append(Constants.CONNECT_CAN_NOT_BE_NULL);
-            System.out.println(warningMsg.toString());
-         }
-         k++;
-      }
-      return k < 3;
-   }
-
-   private String readEnter(String msg,PromptType promptType) throws Exception {
-      String enter = "";
-      ConsoleReader reader = new ConsoleReader();
-      reader.setPrompt(msg);
-      if (promptType == PromptType.USER_NAME) {
-         enter = reader.readLine();
-      } else if (promptType == PromptType.PASSWORD) {
-         enter = reader.readLine(Character.valueOf('*'));
-      }
-      return enter;
    }
 
    private boolean validateHostPort(String hostName) {

@@ -45,7 +45,7 @@ public class ClusterValidator {
    public boolean validateBlueprint(ClusterBlueprint blueprint, List<String> distroRoles)
          throws ValidationException {
       logger.info("Start to validate bludprint for cluster " + blueprint.getName());
-      if (blueprint.getHadoopStack().getDistro().equalsIgnoreCase("MAPR")) {
+      if (Constants.MAPR_VENDOR.equalsIgnoreCase(blueprint.getHadoopStack().getVendor())) {
          return true;
       }
       return validateNoneMaprDistros(blueprint, distroRoles);

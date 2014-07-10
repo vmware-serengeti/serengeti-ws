@@ -1285,10 +1285,10 @@ public class ClusterCommands implements CommandMarker {
 
    private List<String> getDistroNames(String appManager) {
       List<String> distroNames = new ArrayList<String>(0);
-      HadoopStack[] stacks = appManagerRestClient.getStacks(appManager);
-      if (stacks != null) {
-         for (HadoopStack stack : stacks) {
-            distroNames.add(stack.getDistro());            
+      DistroRead[] distros = appManagerRestClient.getDistros(appManager);
+      if (distros != null) {
+         for (DistroRead distro : distros) {
+            distroNames.add(distro.getName());
          }
       }
       return distroNames;

@@ -18,12 +18,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 
 public class IronfanStack extends HadoopStack {
 
    /**
-    * 
+    *
     */
    private static final long serialVersionUID = 7572021110483416556L;
 
@@ -33,6 +35,7 @@ public class IronfanStack extends HadoopStack {
 
    private List<String> packageRepos;
 
+   @JsonIgnore
    public String getPackagesExistStatus() {
       return packagesExistStatus;
    }
@@ -41,6 +44,7 @@ public class IronfanStack extends HadoopStack {
       this.packagesExistStatus = packagesExistStatus;
    }
 
+   @JsonIgnore
    public Map<String, String> getHadoopDistroMap() {
       return hadoopDistroMap;
    }
@@ -49,6 +53,7 @@ public class IronfanStack extends HadoopStack {
       this.hadoopDistroMap = hadoopDistroMap;
    }
 
+   @JsonIgnore
    public List<String> getPackageRepos() {
       return packageRepos;
    }

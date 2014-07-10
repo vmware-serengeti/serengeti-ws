@@ -17,6 +17,7 @@ package com.vmware.bdd.plugin.ironfan.impl;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +37,7 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.IronfanStack;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
 
@@ -45,11 +47,18 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    private InfrastructureUpdator updator;
    private DistroManager distroManager;
 
+   private static final String mapredConfigsFile = "mapred.json";
+   private static final String yarnConfigsFile = "yarn.json";
+   private String mapredConfigs = "";
+   private String yarnConfigs = "";
+
    public DefaultSoftwareManagerImpl() {
       validator = new ClusterValidator();
       updator = new InfrastructureUpdator();
       updator.setValidator(validator);
       distroManager = new DistroManager();
+      mapredConfigs = CommonUtil.readJsonFile(mapredConfigsFile);
+      yarnConfigs = CommonUtil.readJsonFile(yarnConfigsFile);
    }
 
    @Override
@@ -83,7 +92,12 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
 
    @Override
    public Set<String> getSupportedRoles(HadoopStack hadoopStack) throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
+      List<DistroRead> distros = distroManager.getDistros();
+      for (DistroRead distro : distros) {
+         if (hadoopStack.getDistro().equals(distro.getName())) {
+            return new HashSet(distro.getRoles());
+         }
+      }
       return null;
    }
 
@@ -118,8 +132,16 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
 
    @Override
    public String getSupportedConfigs(HadoopStack stack) throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
-      return null;
+      if (Constants.MAPR_VENDOR.equalsIgnoreCase(stack.getVendor())) {
+         return "Not supported";
+      }
+      List<String> roles = stack.getRoles();
+      if (roles.contains(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString())
+            || roles.contains(HadoopRole.HADOOP_NODEMANAGER_ROLE)) {
+         return yarnConfigs;
+      } else {
+         return mapredConfigs;
+      }
    }
 
    @Override

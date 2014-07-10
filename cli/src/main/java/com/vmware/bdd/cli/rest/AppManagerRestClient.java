@@ -17,6 +17,7 @@ package com.vmware.bdd.cli.rest;
 
 import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.apitypes.AppManagerRead;
+import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.cli.commands.Constants;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.utils.CommonUtil;
@@ -59,13 +60,43 @@ public class AppManagerRestClient {
             false);
    }
 
-   public HadoopStack[] getStacks(String name) {
+   public DistroRead[] getDistros(String name) {
       final String path =
             Constants.REST_PATH_APPMANAGER + "/" + name + "/"
-                  + Constants.REST_PATH_STACKS;
+                  + Constants.REST_PATH_DISTROS;
       final HttpMethod httpverb = HttpMethod.GET;
 
-      return restClient.getAllObjects(HadoopStack[].class, path, httpverb,
+      return restClient.getAllObjects(DistroRead[].class, path, httpverb,
+            false);
+   }
+
+   public String[] getTypes() {
+      final String path = Constants.REST_PATH_APPMANAGERS + "/types";
+      final HttpMethod httpverb = HttpMethod.GET;
+
+      return restClient.getAllObjects(String[].class, path, httpverb,
+            false);
+   }
+
+   public String[] getRoles(String appMgrName, String distroName) {
+      final String path =
+            Constants.REST_PATH_APPMANAGER + "/" + appMgrName + "/"
+                  + Constants.REST_PATH_DISTRO + "/" + distroName + "/"
+                  + Constants.REST_PATH_ROLES;
+      final HttpMethod httpverb = HttpMethod.GET;
+
+      return restClient.getAllObjects(String[].class, path, httpverb,
+            false);
+   }
+
+   public String getConfigurations(String appMgrName, String distroName) {
+      final String path =
+            Constants.REST_PATH_APPMANAGER + "/" + appMgrName + "/"
+                  + Constants.REST_PATH_DISTRO + "/" + distroName + "/"
+                  + Constants.REST_PATH_CONFIGURATIONS;
+      final HttpMethod httpverb = HttpMethod.GET;
+
+      return restClient.getAllObjects(String.class, path, httpverb,
             false);
    }
 

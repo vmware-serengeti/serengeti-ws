@@ -611,4 +611,48 @@ public class CommandsUtils {
          System.out.println("Exported to file " + filePath);
       }
    }
+
+   public enum PromptType {
+      USER_NAME, PASSWORD
+   }
+
+   public static boolean prompt(String msg, PromptType promptType,
+         Map<String, String> loginInfo) throws Exception {
+      int k = 0;
+      String enter = "";
+      while (k < 3) {
+         enter = readEnter(msg, promptType);
+         if (!CommandsUtils.isBlank(enter)) {
+            if (promptType == PromptType.USER_NAME) {
+               loginInfo.put(Constants.LOGIN_USERNAME, enter);
+            } else {
+               loginInfo.put(Constants.LOGIN_PASSWORD, enter);
+            }
+            break;
+         } else {
+            StringBuilder warningMsg = new StringBuilder();
+            if (promptType == PromptType.USER_NAME) {
+               warningMsg.append(Constants.CONNECT_USER_NAME);
+            } else {
+               warningMsg.append(Constants.CONNECT_PASSWORD);
+            }
+            warningMsg.append(Constants.CONNECT_CAN_NOT_BE_NULL);
+            System.out.println(warningMsg.toString());
+         }
+         k++;
+      }
+      return k < 3;
+   }
+
+   private static String readEnter(String msg, PromptType promptType) throws Exception {
+      String enter = "";
+      ConsoleReader reader = new ConsoleReader();
+      reader.setPrompt(msg);
+      if (promptType == PromptType.USER_NAME) {
+         enter = reader.readLine();
+      } else if (promptType == PromptType.PASSWORD) {
+         enter = reader.readLine(Character.valueOf('*'));
+      }
+      return enter;
+   }
 }

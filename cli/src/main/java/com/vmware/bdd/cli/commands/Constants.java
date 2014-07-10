@@ -49,6 +49,8 @@ public class Constants {
    public static final String REST_PATH_STACKS = "stacks";
    public static final String REST_PATH_DEFAULT_STACK = "defaultstack";
    public static final String REST_PATH_STACK = "stack";
+   public static final String REST_PATH_ROLES = "roles";
+   public static final String REST_PATH_CONFIGURATIONS = "configurations";
    public static final String REST_PATH_CLUSTER_RACK = "rack";
    public static final String REST_PATH_CLUSTER_RACK_PARAM_TOPOLOGY = "topology";
 
@@ -230,6 +232,7 @@ public class Constants {
    public static final String DEFAULT_DISTRO = "apache";
    public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure you want to continue (Y/N)? ";
    public static final String PARAM_PROMPT_ADD_CERTIFICATE_MESSAGE = "Are you sure you want to add this certificate (Y/N)? ";
+   public static final String PARAM_PROMPT_SSL_CERTIFICATE_MESSAGE = "Enter the file path of the ssl certificate: ";
    public static final String PARAM_CLUSTER_IN_BLACK_LIST_WARNING =
          "not allowed to customize in Serengeti.";
    public static final String PARAM_CLUSTER_NOT_TAKE_EFFECT = "Your settings will not take effect.";
@@ -271,4 +274,7 @@ public class Constants {
    public static final String EXPORT_TYPE_SPEC = "spec";
    public static final String EXPORT_TYPE_RACK = "rack";
    public static final String UNKNOWN_EXPORT_TYPE = "export type is unknown";
+
+   public static final String LOGIN_USERNAME = "username";
+   public static final String LOGIN_PASSWORD = "password";
 }
