@@ -1,0 +1,19 @@
+{
+  "externalHDFS": "hdfs://hostname-of-namenode:8020",
+  "externalMapReduce": "hostname-of-resourcemanager",
+  "nodeGroups":[
+    {
+      "name": "worker",
+      "roles": [
+        "hadoop_nodemanager"
+      ],
+      "instanceNum": 3,
+      "cpuNum": 2,
+      "memCapacityMB": 7500,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 20
+      }
+    }
+  ]
+}
