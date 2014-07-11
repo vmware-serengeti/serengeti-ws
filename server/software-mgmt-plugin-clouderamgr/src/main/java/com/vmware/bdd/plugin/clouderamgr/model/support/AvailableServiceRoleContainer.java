@@ -36,7 +36,7 @@ import org.apache.log4j.Logger;
 public class AvailableServiceRoleContainer {
 
    private static final Logger logger = Logger.getLogger(AvailableServiceRoleContainer.class);
-   private static Map<String, Object> elements = new HashMap<String, Object>();
+   private static Map<String, AvailableServiceRole> elements = new HashMap<String, AvailableServiceRole>();
    private static String clouderaConfDir = null;
 
    static {
@@ -61,7 +61,7 @@ public class AvailableServiceRoleContainer {
    public static synchronized AvailableServiceRole load(String displayName) throws IOException {
       String upDisplayName = displayName.toUpperCase();
       if (elements.containsKey(upDisplayName)) {
-         return (AvailableServiceRole) elements.get(upDisplayName);
+         return elements.get(upDisplayName);
       }
 
       logger.info("loading " + upDisplayName + "...");
@@ -96,16 +96,15 @@ public class AvailableServiceRoleContainer {
    public static Set<String> allServices(int majorVersion) throws IOException {
       loadAll();
       Set<String> services = new HashSet<String>();
-      for (Object o : elements.values()) {
-         AvailableServiceRole element = (AvailableServiceRole) o;
-         if (element.isService() && isValid(majorVersion, element)) {
+      for (AvailableServiceRole element : elements.values()) {
+         if (element.isService() && isSupported(majorVersion, element)) {
             services.add(element.getDisplayName());
          }
       }
       return services;
    }
 
-   private static boolean isValid(int majorVersion, AvailableServiceRole element) {
+   public static boolean isSupported(int majorVersion, AvailableServiceRole element) {
       if (majorVersion == Constants.VERSION_UNBOUNDED) {
          return true;
       }
@@ -121,9 +120,8 @@ public class AvailableServiceRoleContainer {
    public static String getSupportedConfigs(int majorVersion) throws IOException {
       loadAll();
       Map<String, Object> configs = new HashMap<String, Object>();
-      for (Object o : elements.values()) {
-         AvailableServiceRole element = (AvailableServiceRole) o;
-         if ((element.isService() || element.isRole()) && isValid(majorVersion, element)) {
+      for (AvailableServiceRole element : elements.values()) {
+         if ((element.isService() || element.isRole()) && isSupported(majorVersion, element)) {
             configs.put(element.getDisplayName(), element.getAvailableConfigurations().keySet());
          }
       }
@@ -143,9 +141,8 @@ public class AvailableServiceRoleContainer {
    public static Set<String> allRoles(int majorVersion) throws IOException {
       loadAll();
       Set<String> roles = new HashSet<String>();
-      for (Object o : elements.values()) {
-         AvailableServiceRole element = (AvailableServiceRole) o;
-         if (element.isRole() && isValid(majorVersion, element)) {
+      for (AvailableServiceRole element : elements.values()) {
+         if (element.isRole() && isSupported(majorVersion, element)) {
             roles.add(element.getDisplayName());
          }
       }
@@ -155,8 +152,7 @@ public class AvailableServiceRoleContainer {
    public static Map<String, String> nameToDisplayName() throws IOException {
       loadAll();
       Map<String, String> nameMap = new HashMap<String, String>();
-      for (Object o : elements.values()) {
-         AvailableServiceRole element = (AvailableServiceRole) o;
+      for (AvailableServiceRole element : elements.values()) {
          nameMap.put(element.getName(), element.getDisplayName());
       }
       return nameMap;
@@ -164,9 +160,5 @@ public class AvailableServiceRoleContainer {
 
    public static String dump() {
       return (new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()).toJson(elements);
-   }
-
-   public static void clean() {
-      elements.clear();
    }
 }

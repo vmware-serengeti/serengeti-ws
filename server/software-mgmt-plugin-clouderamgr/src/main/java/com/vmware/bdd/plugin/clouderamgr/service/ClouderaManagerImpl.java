@@ -33,6 +33,7 @@ import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableManagementService;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableParcelStage;
 import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
+import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
 import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 
@@ -152,15 +153,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public Set<String> getSupportedRoles(HadoopStack hadoopStack) throws SoftwareManagementPluginException {
-      int majorVersion = Constants.VERSION_UNBOUNDED;
       try {
-         String[] versionInfo = hadoopStack.getDistro().split("-");
-         majorVersion = (new DefaultArtifactVersion(versionInfo[1])).getMajorVersion();
-      } catch (Exception e) {
-         // ignore
-      }
-      try {
-         return AvailableServiceRoleContainer.allRoles(majorVersion);
+         return AvailableServiceRoleContainer.allRoles(CmUtils.majorVersionOfHadoopStack(hadoopStack));
       } catch (IOException e) {
          throw new SoftwareManagementPluginException(e.getMessage());
       }
@@ -196,16 +190,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
    @Override
    public String getSupportedConfigs(HadoopStack hadoopStack)
          throws SoftwareManagementPluginException {
-      int majorVersion = Constants.VERSION_UNBOUNDED;
       try {
-         String[] versionInfo = hadoopStack.getDistro().split("-");
-         majorVersion = (new DefaultArtifactVersion(versionInfo[1])).getMajorVersion();
-      } catch (Exception e) {
-         // ignore
-      }
-
-      try {
-         return AvailableServiceRoleContainer.getSupportedConfigs(majorVersion);
+         return AvailableServiceRoleContainer.getSupportedConfigs(CmUtils.majorVersionOfHadoopStack(hadoopStack));
       } catch (IOException e) {
          throw new SoftwareManagementPluginException(e.getMessage());
       }
@@ -213,13 +199,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public boolean validateBlueprint(ClusterBlueprint blueprint) throws ValidationException {
-      /*
-      1) only a NameNode is not allowed.
-      2) for YARN, jobhistory is required;
-      3) rackId must like unix paths
-      4) HBase must depends on Zookeeper, etc.
-       */
-      return true;
+      return (new CmClusterValidator()).validateBlueprint(blueprint);
    }
 
    @Override
@@ -340,7 +320,12 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public boolean echo() {
-      return true;
+      try {
+         String message = "Hello";
+         return apiResourceRootV6.getToolsResource().echo(message).equals(message);
+      } catch (Exception e) {
+         return false;
+      }
    }
 
    @Override
@@ -1489,8 +1474,11 @@ public class ClouderaManagerImpl implements SoftwareManager {
     */
    @Override
    public String getVersion() {
-      // TODO Auto-generated method stub
-      return null;
+      try {
+         return apiResourceRootV6.getClouderaManagerResource().getVersion().getVersion();
+      } catch (Exception e) {
+         return "UNKNOWN";
+      }
    }
 
    @Override
