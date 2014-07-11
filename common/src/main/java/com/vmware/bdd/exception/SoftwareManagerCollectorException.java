@@ -51,6 +51,12 @@ public class SoftwareManagerCollectorException extends BddException {
       return new SoftwareManagerCollectorException(null, "ECHO_FAILURE", name);
    }
 
+   public static SoftwareManagerCollectorException CONNECT_FAILURE(String name,
+         String errorMsg) {
+      return new SoftwareManagerCollectorException(null, "CONNECT_FAILURE",
+            name, errorMsg);
+   }
+
    public static SoftwareManagerCollectorException CLASS_NOT_DEFINED(String name) {
       return new SoftwareManagerCollectorException(null, "CLASS_NOT_DEFINED",
             name);

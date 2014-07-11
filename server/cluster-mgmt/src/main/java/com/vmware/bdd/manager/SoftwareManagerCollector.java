@@ -36,6 +36,7 @@ import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.plugin.ironfan.impl.DefaultSoftwareManagerImpl;
 import com.vmware.bdd.service.resmgmt.IAppManagerService;
+import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManagerFactory;
 import com.vmware.bdd.utils.CommonUtil;
@@ -78,6 +79,10 @@ public class SoftwareManagerCollector {
       }
 
       SoftwareManager softwareManager = loadSoftwareManager(appManagerAdd);
+
+      validateSoftwareManager(appManagerAdd.getName(), softwareManager);
+
+      cache.put(appManagerAdd.getName(), softwareManager);
 
       logger.info("Add app manager to meta-db.");
       // add to meta-db through AppManagerService
@@ -156,18 +161,28 @@ public class SoftwareManagerCollector {
          throw BddException.INTERNAL(ex, "Create software manager failed.");
       }
 
+      return softwareManager;
+   }
+
+   /**
+    * @param appManagerAdd
+    * @param softwareManager
+    */
+   private void validateSoftwareManager(String name, SoftwareManager softwareManager) {
       logger.info("Check echo() of software manager.");
       // validate instance is reachable
-      if (!softwareManager.echo()) {
+      try {
+         if (!softwareManager.echo()) {
+            logger.error("Cannot connect to Software Manager "
+                  + name + ", check the connection information.");
+            throw SoftwareManagerCollectorException.ECHO_FAILURE(name);
+         }
+      } catch (SoftwareManagementPluginException e) {
          logger.error("Cannot connect to Software Manager "
-               + appManagerAdd.getName() + ", check the connection information.");
-         throw SoftwareManagerCollectorException.ECHO_FAILURE(appManagerAdd
-               .getName());
+               + name + ", check the connection information.", e);
+         throw SoftwareManagerCollectorException.CONNECT_FAILURE(name,
+               e.getMessage());
       }
-
-      cache.put(appManagerAdd.getName(), softwareManager);
-
-      return softwareManager;
    }
 
    /**
@@ -236,7 +251,13 @@ public class SoftwareManagerCollector {
             appManagerAdd.setUsername(appManager.getUsername());
             appManagerAdd.setPassword(appManager.getPassword());
             appManagerAdd.setSslCertificate(appManager.getSslCertificate());
-            loadSoftwareManager(appManagerAdd);
+            // Do not block initialization in case of Exception
+            try {
+               loadSoftwareManager(appManagerAdd);
+            } catch (SoftwareManagerCollectorException e) {
+               logger.error("Error loading Software Manager: " + appManagerAdd,
+                     e);
+            }
          }
       }
 

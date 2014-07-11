@@ -264,7 +264,7 @@ public class Constants {
    public static final String PASSWORD_CHARACTER_REQUIREMENT = "Passwords can include only alphanumeric characters ([0-9, a-z, A-Z]) and the following special characters: _, @, #, $, %, ^, &, *";
    public static final String PASSWORD_HINT = "Password are from " + PASSWORD_MIN_LENGTH + " to " + PASSWORD_MAX_LENGTH + " characters, and can include alphanumeric characters ([0-9, a-z, A-Z]) and the following special characters: _, @, #, $, %, ^, &, *";
    public static final String FAILED_NODES_MESSAGE = "The failed nodes: ";
-   public static final String IRONFAN = "Ironfan";
+   public static final String IRONFAN = "Default";
    public static final String CANNOT_SPECIFY_TWO_PATH_FOR_EXPORT = "You cannot specify 2 paths for spec file.";
    public static final String CANNOT_EXPORT_CLUSTER_AND_RACK_OPOLOGY_SIMULTANEOUSLY = "You cannot specify export cluster and rack topology simultaneously.";
 

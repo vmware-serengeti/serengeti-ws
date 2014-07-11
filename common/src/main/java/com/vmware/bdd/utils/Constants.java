@@ -203,7 +203,7 @@ public class Constants {
    public static final String EXEC_COMMAND_TIMEOUT = " timeout.";
    public static final String EXEC_COMMAND_FAILED = " failed.";
    public static final String NO_RESOURCE_POOL_IS_CREATED = "no resource pool is created.";
-   public static final String IRONFAN = "Ironfan";
+   public static final String IRONFAN = "Default";
    public static final String IRONFAN_DESCRIPTION = "Default Software Manager";
    public static final String SERENGETI_PRIVATE_KEY_FILE = "/home/serengeti/.ssh/id_rsa";
    public static final String CLOUDERA_MANAGER = "ClouderaManager";
