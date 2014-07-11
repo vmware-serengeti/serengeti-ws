@@ -969,7 +969,7 @@ public class RestResource {
    }
 
 
-   @RequestMapping(value = "/appmanager/{appManagerName}/stack/{stackName}", method = RequestMethod.GET, produces = "application/json")
+   @RequestMapping(value = "/appmanager/{appManagerName}/stack/{stackName:.+}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
    public HadoopStack getStackByName(
          @PathVariable("appManagerName") String appManagerName,
