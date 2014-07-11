@@ -253,7 +253,9 @@ public class SoftwareManagerCollector {
             appManagerAdd.setSslCertificate(appManager.getSslCertificate());
             // Do not block initialization in case of Exception
             try {
-               loadSoftwareManager(appManagerAdd);
+               SoftwareManager softwareManager =
+                     loadSoftwareManager(appManagerAdd);
+               cache.put(appManager.getName(), softwareManager);
             } catch (SoftwareManagerCollectorException e) {
                logger.error("Error loading Software Manager: " + appManagerAdd,
                      e);
