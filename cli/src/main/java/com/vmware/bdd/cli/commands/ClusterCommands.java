@@ -60,7 +60,6 @@ import com.vmware.bdd.cli.rest.AppManagerRestClient;
 import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.ClusterRestClient;
 import com.vmware.bdd.cli.rest.NetworkRestClient;
-import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.utils.AppConfigValidationUtils;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
 import com.vmware.bdd.utils.CommonUtil;
@@ -212,7 +211,7 @@ public class ClusterCommands implements CommandMarker {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                      name, Constants.OUTPUT_OP_CREATE,
                      Constants.OUTPUT_OP_RESULT_FAIL,
-                     Constants.PARAM__NO_DEFAULT_DISTRO);
+                     Constants.PARAM_NO_DEFAULT_DISTRO);
                return;
             } else {
                clusterCreate.setDistro(defaultDistroName);
@@ -224,9 +223,9 @@ public class ClusterCommands implements CommandMarker {
                e.getMessage());
          return;
       }
-      HadoopStack stack = getHadoopStackByName(clusterCreate.getAppManager(), clusterCreate.getDistro());
-      clusterCreate.setDistroVendor(stack.getVendor());
-      clusterCreate.setDistroVersion(stack.getFullVersion());
+      DistroRead distroRead = getDistroByName(clusterCreate.getAppManager(), clusterCreate.getDistro());
+      clusterCreate.setDistroVendor(distroRead.getVendor());
+      clusterCreate.setDistroVersion(distroRead.getVersion());
       if (rpNames != null) {
          List<String> rpNamesList = CommandsUtils.inputsConvert(rpNames);
          if (rpNamesList.isEmpty()) {
@@ -369,14 +368,14 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   private HadoopStack getHadoopStackByName(String appManager, String stackName) {
-      return appManagerRestClient.getStackByName(appManager, stackName);
+   private DistroRead getDistroByName(String appManager, String distroName) {
+      return appManagerRestClient.getDistroByName(appManager, distroName);
    }
 
    private String getDefaultDistroName(String appManager) {
-      HadoopStack stack = appManagerRestClient.getDefaultStack(appManager);
-      if (stack != null) {
-         return stack.getDistro();
+      DistroRead distro = appManagerRestClient.getDefaultDistro(appManager);
+      if (distro != null) {
+         return distro.getName();
       } else {
          return null;
       }

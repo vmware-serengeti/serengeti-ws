@@ -283,7 +283,7 @@ public class ClusterCommandsTest extends MockRestServer {
        networks[0] = network;
 
        ObjectMapper mapper = new ObjectMapper();
-       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Ironfan/defaultstack", HttpMethod.GET, HttpStatus.OK,
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Ironfan/defaultdistro", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(distros));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
@@ -311,7 +311,7 @@ public class ClusterCommandsTest extends MockRestServer {
         networks[0] = network;
 
         ObjectMapper mapper = new ObjectMapper();
-        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Ironfan/defaultstack", HttpMethod.GET, HttpStatus.OK,
+        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Ironfan/defaultdistro", HttpMethod.GET, HttpStatus.OK,
               mapper.writeValueAsString(distros));
         buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
                 mapper.writeValueAsString(networks));
@@ -358,7 +358,7 @@ public class ClusterCommandsTest extends MockRestServer {
        networks[0] = network;
 
        ObjectMapper mapper = new ObjectMapper();
-       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Ironfan/defaultstack", HttpMethod.GET, HttpStatus.OK,
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Ironfan/defaultdistro", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(distros));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
@@ -368,7 +368,7 @@ public class ClusterCommandsTest extends MockRestServer {
        clusterCommands.createCluster("cluster1WithHadoopSpec", null, null, null, "src/test/resources/hadoop_cluster.json", null, null, null, null, null, null, false, false, true, false);
 
        setup();
-       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Ironfan/defaultstack", HttpMethod.GET, HttpStatus.OK,
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Ironfan/defaultdistro", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(distros));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
@@ -377,7 +377,7 @@ public class ClusterCommandsTest extends MockRestServer {
        clusterCommands.createCluster("cluster1WithHBaseSpec", null, null, null, "src/test/resources/hbase_cluster.json", null, null, null, null, null, null, false, false, true, false);
 
        setup();
-       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Ironfan/defaultstack", HttpMethod.GET, HttpStatus.OK,
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Ironfan/defaultdistro", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(distros));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
@@ -386,7 +386,7 @@ public class ClusterCommandsTest extends MockRestServer {
        clusterCommands.createCluster("cluster1WithDCSeperationSpec", null, null, null, "src/test/resources/data_compute_separation_cluster.json", null, null, null, null, null, null, false, false, true, false);
 
        setup();
-       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Ironfan/defaultstack", HttpMethod.GET, HttpStatus.OK,
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Ironfan/defaultdistro", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(distros));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
@@ -434,7 +434,7 @@ public class ClusterCommandsTest extends MockRestServer {
         networks[0] = network;
 
         ObjectMapper mapper = new ObjectMapper();
-        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Ironfan/defaultstack", HttpMethod.GET, HttpStatus.OK,
+        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Ironfan/defaultdistro", HttpMethod.GET, HttpStatus.OK,
               mapper.writeValueAsString(distros));
         buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
                 mapper.writeValueAsString(networks));

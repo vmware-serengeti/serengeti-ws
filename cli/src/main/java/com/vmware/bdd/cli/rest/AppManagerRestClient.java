@@ -19,7 +19,6 @@ import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.cli.commands.Constants;
-import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.utils.CommonUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,25 +99,25 @@ public class AppManagerRestClient {
             false);
    }
 
-   public HadoopStack getDefaultStack(String name) {
+   public DistroRead getDefaultDistro(String name) {
       name = CommonUtil.encode(name);
       final String path =
             Constants.REST_PATH_APPMANAGER + "/" + name + "/"
-                  + Constants.REST_PATH_DEFAULT_STACK;
+                  + Constants.REST_PATH_DEFAULT_DISTRO;
       final HttpMethod httpverb = HttpMethod.GET;
 
-      return restClient.getAllObjects(HadoopStack.class, path, httpverb,
+      return restClient.getAllObjects(DistroRead.class, path, httpverb,
             false);
    }
 
-   public HadoopStack getStackByName(String appMangerName, String stackName) {
+   public DistroRead getDistroByName(String appMangerName, String distroName) {
       appMangerName = CommonUtil.encode(appMangerName);
       final String path =
             Constants.REST_PATH_APPMANAGER + "/" + appMangerName + "/"
-                  + Constants.REST_PATH_STACK;
+                  + Constants.REST_PATH_DISTRO;
       final HttpMethod httpverb = HttpMethod.GET;
 
-      return restClient.getObject(stackName, HadoopStack.class, path, httpverb,
+      return restClient.getObject(distroName, DistroRead.class, path, httpverb,
             false);
    }
 }

@@ -181,7 +181,7 @@ public class AppManagerCommands implements CommandMarker {
             if (distros) {
                AppManagerRead[] appmanagers = restClient.getAll();
                for (AppManagerRead appmanager : appmanagers) {
-                  prettyOutputAppManagerStacks(appmanager);
+                  prettyOutputAppManagerDistros(appmanager);
                }
             } else {
                AppManagerRead[] appmanagers = restClient.getAll();
@@ -190,14 +190,14 @@ public class AppManagerCommands implements CommandMarker {
          } else {
             AppManagerRead appmanager = restClient.get(name);
             if (distros) {
-               prettyOutputAppManagerStacks(appmanager);
+               prettyOutputAppManagerDistros(appmanager);
             } else if (CommandsUtils.isBlank(distroName)) {
                prettyOutputAppManagerInfo(appmanager);
             } else {
                if (roles) {
-                  String[] stackRoles = restClient.getRoles(name, distroName);
-                  for (String stackRole : stackRoles) {
-                     System.out.println(stackRole);
+                  String[] distroRoles = restClient.getRoles(name, distroName);
+                  for (String distroRole : distroRoles) {
+                     System.out.println(distroRole);
                   }
                } else if (configurations) {
                   System.out.println(restClient.getConfigurations(name, distroName));
@@ -214,7 +214,7 @@ public class AppManagerCommands implements CommandMarker {
    /**
     * @param appmanager
     */
-   private void prettyOutputAppManagerStacks(AppManagerRead appmanager) {
+   private void prettyOutputAppManagerDistros(AppManagerRead appmanager) {
       printSeperator();
       String description = appmanager.getDescription();
       if (description == null) description = "";
@@ -234,25 +234,25 @@ public class AppManagerCommands implements CommandMarker {
 
       DistroRead[] distros = restClient.getDistros(appmanager.getName());
       if (distros != null && distros.length > 0) {
-         LinkedHashMap<String, List<String>> stackColumnNamesWithGetMethodNames =
+         LinkedHashMap<String, List<String>> distroColumnNamesWithGetMethodNames =
                new LinkedHashMap<String, List<String>>();
-         stackColumnNamesWithGetMethodNames.put(
+         distroColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_NAME, Arrays.asList("getName"));
-         stackColumnNamesWithGetMethodNames
+         distroColumnNamesWithGetMethodNames
                .put(Constants.FORMAT_TABLE_COLUMN_VENDOR,
                      Arrays.asList("getVendor"));
-         stackColumnNamesWithGetMethodNames.put(
+         distroColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_VERSION,
                Arrays.asList("getVersion"));
-         stackColumnNamesWithGetMethodNames.put(
+         distroColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_HVE,
                Arrays.asList("isHveSupported"));
-         stackColumnNamesWithGetMethodNames.put(
+         distroColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_ROLES, Arrays.asList("getRoles"));
 
          try {
             CommandsUtils.printInTableFormat(
-                  stackColumnNamesWithGetMethodNames, distros,
+                  distroColumnNamesWithGetMethodNames, distros,
                   Constants.OUTPUT_INDENT);
          } catch (Exception e) {
             System.err.println(e.getMessage());

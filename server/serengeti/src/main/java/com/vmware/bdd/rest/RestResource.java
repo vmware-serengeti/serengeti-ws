@@ -15,7 +15,6 @@
 package com.vmware.bdd.rest;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,7 +60,6 @@ import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Type;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.exception.NetworkException;
 import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.JobManager;
@@ -860,7 +858,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/appmanager/{appManagerName}/distros", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   public List<DistroRead> getAppManagerStacks(@PathVariable("appManagerName") String appManagerName) {
+   public List<DistroRead> getAppManagerDistros(@PathVariable("appManagerName") String appManagerName) {
       appManagerName = CommonUtil.decode(appManagerName);
       if (CommonUtil.isBlank(appManagerName)
             || !CommonUtil.validateResourceName(appManagerName)) {
@@ -953,9 +951,9 @@ public class RestResource {
    }
 
 
-   @RequestMapping(value = "/appmanager/{appManagerName}/defaultstack", method = RequestMethod.GET, produces = "application/json")
+   @RequestMapping(value = "/appmanager/{appManagerName}/defaultdistro", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   public HadoopStack getDefaultStack(@PathVariable("appManagerName") String appManagerName) {
+   public DistroRead getDefaultStack(@PathVariable("appManagerName") String appManagerName) {
       appManagerName = CommonUtil.decode(appManagerName);
       if (CommonUtil.isBlank(appManagerName)
             || !CommonUtil.validateResourceName(appManagerName)) {
@@ -965,15 +963,20 @@ public class RestResource {
       if (softMgr == null) {
          throw BddException.NOT_FOUND("App Manager", appManagerName);
       }
-      return softMgr.getDefaultStack();
+      HadoopStack stack = softMgr.getDefaultStack();
+      if (stack == null) {
+         return null;
+      } else {
+         return new DistroRead(stack);
+      }
    }
 
 
-   @RequestMapping(value = "/appmanager/{appManagerName}/stack/{stackName:.+}", method = RequestMethod.GET, produces = "application/json")
+   @RequestMapping(value = "/appmanager/{appManagerName}/distro/{distroName:.+}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   public HadoopStack getStackByName(
+   public DistroRead getDistroByName(
          @PathVariable("appManagerName") String appManagerName,
-         @PathVariable("stackName") String stackName) {
+         @PathVariable("distroName") String distroName) {
       appManagerName = CommonUtil.decode(appManagerName);
       if (CommonUtil.isBlank(appManagerName)
             || !CommonUtil.validateResourceName(appManagerName)) {
@@ -983,22 +986,12 @@ public class RestResource {
       if (softMgr == null) {
          throw BddException.NOT_FOUND("App Manager", appManagerName);
       }
-      return clusterMgr.filterDistroFromAppManager(softMgr, stackName);
-   }
-
-   /**
-    * Temporary function, remove after DistroManager refactoring
-    *
-    * @param distroRead
-    * @return
-    */
-   private HadoopStack toHadoopStack(DistroRead distroRead) {
-      HadoopStack stack = new HadoopStack();
-      stack.setDistro(distroRead.getName());
-      stack.setVendor(distroRead.getVendor());
-      stack.setFullVersion(distroRead.getVersion());
-      stack.setRoles(distroRead.getRoles());
-      return stack;
+      HadoopStack stack = clusterMgr.filterDistroFromAppManager(softMgr, distroName);
+      if (stack == null) {
+         return null;
+      } else {
+         return new DistroRead(stack);
+      }
    }
 
    /**
@@ -1058,31 +1051,6 @@ public class RestResource {
    }
 
    /**
-    * Get available distributions information of application manager
-    * @return A list of distribution information
-    */
-   @RequestMapping(value = "/appmanager/stacks", method = RequestMethod.GET, produces = "application/json")
-   @ResponseBody
-   public Map<String, List<HadoopStack>> getAppManagerStacks() {
-      Map<String, List<HadoopStack>> appManagerStacksMap = new HashMap<String, List<HadoopStack>>();
-      List<HadoopStack> hadoopStacks = null;
-      List<AppManagerRead> appMangers = softwareManagerCollector.getAllAppManagerReads();
-      SoftwareManager softwareManager = null;
-      for (AppManagerRead appManager : appMangers) {
-         softwareManager = softwareManagerCollector.getSoftwareManager(appManager.getName());
-         if (softwareManager == null) {
-            logger.error("Failed to get softwareManger.");
-            throw ClusterConfigException.FAILED_TO_GET_SOFTWARE_MANAGER(appManager.getName());
-         }
-         hadoopStacks = softwareManager.getSupportedStacks();
-         if (hadoopStacks != null) {
-            appManagerStacksMap.put(appManager.getName(), hadoopStacks);
-         }
-      }
-      return appManagerStacksMap;
-   }
-
-   /**
     * Get the distribution information by its name such as apache, bigtop, cdh, intel, gphd, hdp, mapr, phd,etc.
     * @param distroName
     * @return The distribution information
@@ -1107,32 +1075,6 @@ public class RestResource {
       }
       throw BddException.NOT_FOUND("Distro", distroName);
    }
-
-   /**
-    * Get the distribution information of application manager by its name .
-    * @param distroName
-    * @return The distribution information
-    */
-   /*
-   @RequestMapping(value = "/{appManager}/distro/{distroName:.+}", method = RequestMethod.GET, produces = "application/json")
-   @ResponseBody
-   public DistroRead getDistroByName(
-         @PathVariable("appManager") String appManager,
-         @PathVariable("distroName") String distroName) {
-      if(CommonUtil.isBlank(appManager) || Constants.IRONFAN.equalsIgnoreCase(appManager)) {
-         throw BddException.INVALID_PARAMETER("appManager", appManager);
-      }
-      if (CommonUtil.isBlank(distroName)
-            || !CommonUtil.validateDistroName(distroName)) {
-         throw BddException.INVALID_PARAMETER("distro name", distroName);
-      }
-      DistroRead distro = distroManager.getDistroByName(appManager, distroName);
-      if (distro == null) {
-         throw BddException.NOT_FOUND("Distro", distroName);
-      }
-
-      return distro;
-   }*/
 
    @ExceptionHandler(Throwable.class)
    @ResponseBody

@@ -46,9 +46,7 @@ public class Constants {
    public static final String REST_PATH_FIX_DISK = "disk";
    public static final String REST_PATH_SPEC = "spec";
    public static final String REST_PATH_TOPOLOGY = "racks";
-   public static final String REST_PATH_STACKS = "stacks";
-   public static final String REST_PATH_DEFAULT_STACK = "defaultstack";
-   public static final String REST_PATH_STACK = "stack";
+   public static final String REST_PATH_DEFAULT_DISTRO = "defaultdistro";
    public static final String REST_PATH_ROLES = "roles";
    public static final String REST_PATH_CONFIGURATIONS = "configurations";
    public static final String REST_PATH_CLUSTER_RACK = "rack";
@@ -173,7 +171,7 @@ public class Constants {
    public static final String PARAM_NETWORK_NAME = "network name";
    public static final String PARAM_NOT_SPECIFIED = " is not specified.";
    public static final String PARAM_CANNOT_FIND_NETWORK = "Cannot find the specified network.";
-   public static final String PARAM__NO_DEFAULT_DISTRO = "no default distro. Install a distribution and/or specify the distribution with the --distro parameter.";
+   public static final String PARAM_NO_DEFAULT_DISTRO = "no default distro. Install a distribution and/or specify the distribution with the --distro parameter.";
    public static final String PARAM_NOT_CONTAIN_HORIZONTAL_LINE = " cannot contain '-'.";
    public static final String PARAM_NOT_CONTAIN_BLANK_SPACE = " cannot contain blank space.";
    public static final String PARAM_SHOULD_SPECIFY_DISK = "You should specify --disk .";

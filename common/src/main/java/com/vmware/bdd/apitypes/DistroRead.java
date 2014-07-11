@@ -31,11 +31,13 @@ public class DistroRead implements Comparable<DistroRead>{
    }
 
    public DistroRead(HadoopStack stack) {
-      this.name = stack.getDistro();
-      this.vendor = stack.getVendor();
-      this.version = stack.getFullVersion();
-      this.hveSupported = stack.isHveSupported();
-      this.roles = stack.getRoles();
+      if (stack != null) {
+         this.name = stack.getDistro();
+         this.vendor = stack.getVendor();
+         this.version = stack.getFullVersion();
+         this.hveSupported = stack.isHveSupported();
+         this.roles = stack.getRoles();
+      }
    }
 
    public String getName() {
