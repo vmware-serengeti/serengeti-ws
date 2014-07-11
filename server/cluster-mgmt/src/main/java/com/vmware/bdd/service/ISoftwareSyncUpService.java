@@ -30,10 +30,4 @@ public interface ISoftwareSyncUpService {
     * @param clusterName
     */
    void syncUpOnce(String clusterName);
-   /** 
-    * Detect if this cluster is already in sync up queue
-    * @param clusterName
-    * @return
-    */
-   boolean isClusterInQueue(String clusterName);
 }

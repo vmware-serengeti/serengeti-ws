@@ -15,9 +15,14 @@
 package com.vmware.bdd.service.impl;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
@@ -25,9 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vmware.aurora.util.CmsWorker;
-import com.vmware.aurora.util.CmsWorker.PeriodicRequest;
-import com.vmware.aurora.util.CmsWorker.WorkQueue;
 import com.vmware.bdd.aop.annotation.RetryTransaction;
 import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.NodeStatus;
@@ -46,11 +48,16 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 @Service
 public class SoftwareSyncupService implements ISoftwareSyncUpService,
       InitializingBean {
+   private static final int SYNCUP_INTERVAL_MILLISECONDS = 300000; // every 5 minutes
    private static final Logger logger = Logger
          .getLogger(SoftwareSyncupService.class);
+   private static final int MAX_QUEUE_SIZE = 1000;
+   private static final String SERVICE_SYNCUP_THREAD_NAME = "ServiceSyncup";
    private SoftwareManagerCollector softwareManagerCollector;
    private IExclusiveLockedClusterEntityManager lockedEntityManager;
-   private Set<String> inQueueCluster = new HashSet<String>();
+   private BlockingQueue<String> requestQueue = new ArrayBlockingQueue<String>(
+         MAX_QUEUE_SIZE);
+   private Timer syncupTimer;
 
    public SoftwareManagerCollector getSoftwareManagerCollector() {
       return softwareManagerCollector;
@@ -74,21 +81,22 @@ public class SoftwareSyncupService implements ISoftwareSyncUpService,
 
    @Override
    public void afterPropertiesSet() throws Exception {
-      List<ClusterEntity> clusters = lockedEntityManager.getClusterEntityMgr().findAllClusters();
+      List<ClusterEntity> clusters =
+            lockedEntityManager.getClusterEntityMgr().findAllClusters();
       for (ClusterEntity cluster : clusters) {
-         syncUp(cluster.getName());
+         requestQueue.add(cluster.getName());
          logger.info("Start service sync up for cluster " + cluster.getName());
       }
+      syncupTimer = new Timer(SERVICE_SYNCUP_THREAD_NAME, true);
+      StatusSyncUpTask task =
+            new StatusSyncUpTask(lockedEntityManager, softwareManagerCollector,
+                  requestQueue);
+      syncupTimer.schedule(task, SYNCUP_INTERVAL_MILLISECONDS);
    }
 
    @Override
    public void syncUp(String clusterName) {
-      StatusSyncUpRequest request =
-            new StatusSyncUpRequest(clusterName, lockedEntityManager,
-                  softwareManagerCollector, this,
-                  WorkQueue.CUSTOM_FIVE_MIN_SYNC_DELAY);
-      CmsWorker.addPeriodic(request);
-      inQueueCluster.add(clusterName);
+      requestQueue.add(clusterName);
    }
 
    @Override
@@ -97,75 +105,67 @@ public class SoftwareSyncupService implements ISoftwareSyncUpService,
 
    }
 
-   private void removeClusterFromQueue(String clusterName) {
-      inQueueCluster.remove(clusterName);
-   }
-
-   @Override
-   public boolean isClusterInQueue(String clusterName) {
-      return inQueueCluster.contains(clusterName);
-   }
-
-   private static class StatusSyncUpRequest extends PeriodicRequest {
+   private static class StatusSyncUpTask extends TimerTask {
       private ILockedClusterEntityManager lockedEntityManager;
       private SoftwareManagerCollector softwareManagerCollector;
-      private SoftwareSyncupService syncupService;
-      private String clusterName;
-      private boolean isContinue = true;
+      private BlockingQueue<String> requestQueue;
 
-      private void setContinue(boolean isContinue) {
-         this.isContinue = isContinue;
-         if (!isContinue) {
-            syncupService.removeClusterFromQueue(clusterName);
-            logger.info("Stop service sync up for cluster " + clusterName);
-         }
-      }
-
-      public StatusSyncUpRequest(String clusterName,
-            ILockedClusterEntityManager lockedEntityManager,
+      public StatusSyncUpTask(ILockedClusterEntityManager lockedEntityManager,
             SoftwareManagerCollector softwareManagerCollector,
-            SoftwareSyncupService syncupService, WorkQueue queue) {
-         super(queue);
-         this.clusterName = clusterName;
+            BlockingQueue<String> requestQueue) {
          this.lockedEntityManager = lockedEntityManager;
          this.softwareManagerCollector = softwareManagerCollector;
-         this.syncupService = syncupService;
+         this.requestQueue = requestQueue;
       }
 
       @Override
-      protected boolean executeOnce() {
-         ClusterEntity cluster =
-               lockedEntityManager.getClusterEntityMgr()
-                     .findByName(clusterName);
-         if (cluster == null) {
-            setContinue(false);
-            return true;
+      public void run() {
+         // using set to remove duplicate
+         Set<String> clusterList = new HashSet<String>();
+         requestQueue.drainTo(clusterList);
+         if (clusterList.isEmpty()) {
+            logger.debug("No cluster need to be sync up for service status.");
+            return;
          }
 
-         if (!cluster.inStableStatus()) {
-            logger.debug("Cluster " + clusterName + " is in status "
-                  + cluster.inStableStatus());
-            logger.debug("Do not sync up this time.");
-            return true;
+         Iterator<String> ite = clusterList.iterator();
+         for (String clusterName = ite.next(); ite.hasNext();) {
+            ClusterEntity cluster =
+                  lockedEntityManager.getClusterEntityMgr().findByName(
+                        clusterName);
+            if (cluster == null) {
+               logger.info("Cluster " + clusterName
+                     + " does not exist, stop sync up for it.");
+               ite.remove();
+               continue;
+            }
+
+            if (!cluster.inStableStatus()) {
+               logger.debug("Cluster " + clusterName + " is in status "
+                     + cluster.inStableStatus());
+               logger.debug("Do not sync up this time.");
+               continue;
+            }
+            ClusterBlueprint blueprint =
+                  lockedEntityManager.getClusterEntityMgr().toClusterBluePrint(
+                        clusterName);
+            SoftwareManager softMgr =
+                  softwareManagerCollector
+                        .getSoftwareManagerByClusterName(clusterName);
+            if (softMgr == null) {
+               logger.error("No software manager for cluster " + clusterName
+                     + " available.");
+               continue;
+            }
+            ClusterReport report = softMgr.queryClusterStatus(blueprint);
+            if (report == null) {
+               logger.debug("No service status got from software manager, ignore it.");
+               continue;
+            }
+            setClusterStatus(clusterName, report);
          }
-         ClusterBlueprint blueprint =
-               lockedEntityManager.getClusterEntityMgr().toClusterBluePrint(
-                     clusterName);
-         SoftwareManager softMgr =
-               softwareManagerCollector
-                     .getSoftwareManagerByClusterName(clusterName);
-         if (softMgr == null) {
-            logger.error("No software manager for cluster " + clusterName
-                  + " available.");
-            return true;
-         }
-         ClusterReport report = softMgr.queryClusterStatus(blueprint);
-         if (report == null) {
-            logger.debug("No service status got from software manager, ignore it.");
-            return true;
-         }
-         setClusterStatus(clusterName, report);
-         return true;
+         //add back all clusters for next time sync up.
+         requestQueue.addAll(clusterList);
       }
 
       @Transactional
@@ -223,11 +223,6 @@ public class SoftwareSyncupService implements ISoftwareSyncUpService,
                }
             }
          }
-      }
-
-      @Override
-      protected boolean isContinue() {
-         return isContinue;
       }
    }
 }

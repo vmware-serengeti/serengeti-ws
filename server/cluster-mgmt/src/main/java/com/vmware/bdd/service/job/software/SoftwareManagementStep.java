@@ -98,10 +98,8 @@ public class SoftwareManagementStep extends TrackableTasklet {
       logger.info("target : " + targetName + ", operation: "
             + managementOperation + ", jobname: " + jobName);
 
-      if (!serviceSyncup.isClusterInQueue(clusterName)) {
-         serviceSyncup.syncUp(clusterName);
-         logger.info("Start service sync up for cluster " + clusterName);
-      }
+      serviceSyncup.syncUp(clusterName);
+      logger.debug("Try to sync up service status for cluster " + clusterName);
 
       boolean vmPowerOn = false;
       String vmPowerOnStr =
@@ -119,7 +117,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
       // Only check host time for configure (config, start, disk fix, scale up)
       // operation and create (resume only) operation
       SoftwareManager softwareMgr =
-         softwareMgrs.getSoftwareManagerByClusterName(clusterName);
+            softwareMgrs.getSoftwareManagerByClusterName(clusterName);
       if (ManagementOperation.CONFIGURE.equals(managementOperation)
             || JobConstants.RESUME_CLUSTER_JOB_NAME.equals(jobName)) {
          logger.info("Start to check host time.");
