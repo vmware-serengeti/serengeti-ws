@@ -284,7 +284,6 @@ public class ClusteringService implements IClusteringService {
          } catch (InterruptedException e) {
             logger.warn("interupted during sleep " + e.getMessage());
          }
-         softwareManagerCollector.loadSoftwareManagers();
          startVMEventProcessor();
          String poolSize =
                Configuration.getNonEmptyString("serengeti.scheduler.poolsize");

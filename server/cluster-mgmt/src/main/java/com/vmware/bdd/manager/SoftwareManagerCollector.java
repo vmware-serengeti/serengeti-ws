@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +44,7 @@ import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
 @Service
-public class SoftwareManagerCollector {
+public class SoftwareManagerCollector implements InitializingBean {
 
    private static final Logger logger = Logger
          .getLogger(SoftwareManagerCollector.class);
@@ -303,5 +304,13 @@ public class SoftwareManagerCollector {
          types = appmanagerTypes.split(",");
       }
       return Arrays.asList(types);
+   }
+
+   /* (non-Javadoc)
+    * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
+    */
+   @Override
+   public void afterPropertiesSet() throws Exception {
+      this.loadSoftwareManagers();
    }
 }
