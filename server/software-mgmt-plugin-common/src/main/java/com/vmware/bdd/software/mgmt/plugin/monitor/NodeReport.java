@@ -27,6 +27,8 @@ public class NodeReport implements Cloneable {
 
    private String ipAddress;
 
+   private String hostname;
+
    private String action;
 
    private ServiceStatus status;
@@ -48,6 +50,7 @@ public class NodeReport implements Cloneable {
    public NodeReport(NodeInfo nodeInfo) {
       this.name = nodeInfo.getName();
       this.ipAddress = nodeInfo.getMgtIpAddress();
+      this.hostname = nodeInfo.getHostname();
       this.action = null;
       this.status = null;
       this.success = false;
@@ -72,6 +75,14 @@ public class NodeReport implements Cloneable {
 
    public void setIpAddress(String ipAddress) {
       this.ipAddress = ipAddress;
+   }
+
+   public String getHostname() {
+      return hostname;
+   }
+
+   public void setHostname(String hostname) {
+      this.hostname = hostname;
    }
 
    public String getAction() {

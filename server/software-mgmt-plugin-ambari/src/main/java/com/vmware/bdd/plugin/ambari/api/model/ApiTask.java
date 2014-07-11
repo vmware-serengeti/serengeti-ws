@@ -14,23 +14,17 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.model;
 
-import java.util.List;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiRequest {
+public class ApiTask {
 
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("Requests")
-   private ApiRequestInfo apiRequestInfo;
-
-   @Expose
-   @SerializedName("tasks")
-   private List<ApiTask> apiTasks;
+   @SerializedName("Tasks")
+   private ApiTaskInfo apiTaskInfo;
 
    public String getHref() {
       return href;
@@ -40,20 +34,11 @@ public class ApiRequest {
       this.href = href;
    }
 
-   public ApiRequestInfo getApiRequestInfo() {
-      return apiRequestInfo;
+   public ApiTaskInfo getApiTaskInfo() {
+      return apiTaskInfo;
    }
 
-   public void setApiRequestInfo(ApiRequestInfo apiRequestInfo) {
-      this.apiRequestInfo = apiRequestInfo;
+   public void setApiTaskInfo(ApiTaskInfo apiTaskInfo) {
+      this.apiTaskInfo = apiTaskInfo;
    }
-
-   public List<ApiTask> getApiTasks() {
-      return apiTasks;
-   }
-
-   public void setApiTasks(List<ApiTask> apiTasks) {
-      this.apiTasks = apiTasks;
-   }
-
 }

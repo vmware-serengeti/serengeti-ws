@@ -14,14 +14,25 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.poller;
 
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
+import com.vmware.bdd.plugin.ambari.api.model.ApiTask;
+import com.vmware.bdd.plugin.ambari.api.model.ApiTaskInfo;
 import com.vmware.bdd.plugin.ambari.api.model.ClusterRequestStatus;
+import com.vmware.bdd.plugin.ambari.api.model.TaskStatus;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
+import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 
 public class ClusterOperationPoller extends StatusPoller {
+
+   private static final Logger logger = Logger
+         .getLogger(ClusterOperationPoller.class);
 
    private ApiManager apiManager;
    private ApiRequest apiRequestSummary;
@@ -32,9 +43,9 @@ public class ClusterOperationPoller extends StatusPoller {
    private int endProgress;
 
    public ClusterOperationPoller(final ApiManager apiManager,
-                                 final ApiRequest apiRequestSummary, final String clusterName,
-                                 final ClusterReport currentReport,
-                                 final ClusterReportQueue reportQueue, int endProgress) {
+         final ApiRequest apiRequestSummary, final String clusterName,
+         final ClusterReport currentReport,
+         final ClusterReportQueue reportQueue, int endProgress) {
       this.apiManager = apiManager;
       this.apiRequestSummary = apiRequestSummary;
       this.clusterName = clusterName;
@@ -46,17 +57,37 @@ public class ClusterOperationPoller extends StatusPoller {
 
    @Override
    public boolean poll() {
+      Long requestId = apiRequestSummary.getApiRequestInfo().getRequestId();
+      logger.info("Waiting for cluster request " + requestId + " to complete.");
       ApiRequest apiRequest =
-            apiManager.request(clusterName, apiRequestSummary
-                  .getApiRequestInfo().getRequestId());
+            apiManager.requestWithTasks(clusterName, requestId);
 
       ClusterRequestStatus clusterRequestStatus =
             ClusterRequestStatus.valueOf(apiRequest.getApiRequestInfo()
                   .getRequestStatus());
 
-      if (clusterRequestStatus.isCompletedState()) {
-         return true;
+      Map<String, NodeReport> nodeReports = currentReport.getNodeReports();
+      for (String nodeReportKey : nodeReports.keySet()) {
+         for (ApiTask apiTask : apiRequest.getApiTasks()) {
+            NodeReport nodeReport = nodeReports.get(nodeReportKey);
+            nodeReport.setUseClusterMsg(false);
+            ApiTaskInfo apiTaskInfo = apiTask.getApiTaskInfo();
+            if (nodeReport.getHostname().equals(apiTaskInfo.getHostName())) {
+               TaskStatus taskStatus =
+                     TaskStatus.valueOf(apiTask.getApiTaskInfo().getStatus());
+               if (taskStatus.isRunningState()) {
+                  if (clusterRequestStatus.isFailedState()) {
+                     nodeReport.setAction(apiTaskInfo.getCommandDetail() + ": "
+                           + apiTaskInfo.getStderr());
+                  } else {
+                     nodeReport.setAction(apiTaskInfo.getCommandDetail());
+                  }
+                  nodeReports.put(nodeReportKey, nodeReport);
+               }
+            }
+         }
       }
+      currentReport.setNodeReports(nodeReports);
 
       int provisionPercent =
             (int) apiRequest.getApiRequestInfo().getProgressPercent();
@@ -66,10 +97,15 @@ public class ClusterOperationPoller extends StatusPoller {
          if (toProgress >= endProgress) {
             toProgress = endProgress;
          }
-         if (toProgress != currentProgress) {
+         if (toProgress != currentProgress
+               || clusterRequestStatus.isCompletedState()) {
             currentReport.setProgress(toProgress);
             reportQueue.addClusterReport(currentReport.clone());
          }
+      }
+
+      if (clusterRequestStatus.isCompletedState()) {
+         return true;
       }
 
       return false;

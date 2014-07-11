@@ -54,9 +54,8 @@ public interface IApiManager {
    public ApiComponentList serviceComponentList(String stackName,
          String stackVersion, String stackServiceName);
 
-   public ApiComponent serviceComponent(String stackName,
-         String stackVersion, String stackServiceName,
-         String serviceComponentName);
+   public ApiComponent serviceComponent(String stackName, String stackVersion,
+         String stackServiceName, String serviceComponentName);
 
    public ApiClusterList clusterList();
 
@@ -70,7 +69,8 @@ public interface IApiManager {
 
    public List<String> getClusterServicesNames(String clusterName);
 
-   public ApiRequest provisionCluster(String clusterName, ApiClusterBlueprint apiClusterBlueprint);
+   public ApiRequest provisionCluster(String clusterName,
+         ApiClusterBlueprint apiClusterBlueprint);
 
    public ApiBlueprintList blueprintList();
 
@@ -82,7 +82,10 @@ public interface IApiManager {
 
    public ApiBootstrapStatus bootstrapStatus(Long bootstrapId);
 
-   public ApiBlueprint createBlueprint(String blueprintName, ApiBlueprint blueprint);
+   public ApiBlueprint createBlueprint(String blueprintName,
+         ApiBlueprint blueprint);
 
    public ApiRequest deleteCluster(String clusterName);
+
+   public ApiRequest requestWithTasks(String clusterName, Long requestId);
 }

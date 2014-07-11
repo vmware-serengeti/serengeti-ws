@@ -14,7 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.model;
 
-public enum ClusterRequestStatus {
+public enum TaskStatus {
 
    PENDING(0), //Not queued for a host
    QUEUED(1), //Queued for a host
@@ -26,7 +26,7 @@ public enum ClusterRequestStatus {
 
    private final int status;
 
-   private ClusterRequestStatus(int status) {
+   private TaskStatus(int status) {
       this.status = status;
    }
 
@@ -36,7 +36,7 @@ public enum ClusterRequestStatus {
     * @return true if this is a valid failure state.
     */
    public boolean isFailedState() {
-      switch (ClusterRequestStatus.values()[this.status]) {
+      switch (TaskStatus.values()[this.status]) {
       case FAILED:
       case TIMEDOUT:
       case ABORTED:
@@ -54,7 +54,7 @@ public enum ClusterRequestStatus {
     * @return true if this is a completed state.
     */
    public boolean isCompletedState() {
-      switch (ClusterRequestStatus.values()[this.status]) {
+      switch (TaskStatus.values()[this.status]) {
       case COMPLETED:
       case FAILED:
       case TIMEDOUT:
@@ -66,7 +66,7 @@ public enum ClusterRequestStatus {
    }
 
    public boolean isRunningState() {
-      switch (ClusterRequestStatus.values()[this.status]) {
+      switch (TaskStatus.values()[this.status]) {
       case IN_PROGRESS:
          return true;
       default:

@@ -14,58 +14,49 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.exception;
 
-import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 
-public class AmException extends BddException {
+public class AmException extends SoftwareManagementPluginException {
 
    private static final long serialVersionUID = 5585914528769234047L;
 
    public AmException() {
    }
 
-   public AmException(String msg) {}
-
-   public AmException(Throwable cause, String errorId, Object... detail) {
-      super(cause, "Ambari", errorId, detail);
+   public AmException(String msg) {
    }
 
-   public static AmException INVALID_VERSION(String version) {
-      return new AmException(null, "INVALID_VERSION", version);
+   public AmException(String errCode, String message, Throwable cause) {
+      super(errCode, message, cause);
    }
 
    public static AmException UNSURE_CLUSTER_EXIST(String clusterName) {
-      return new AmException(null, "UNSURE_CLUSTER_EXIST", clusterName);
+      return new AmException("UNSURE_CLUSTER_EXIST", "cluster " + clusterName
+            + "not sure exist", null);
    }
 
-   public static AmException PROVISION_FAILED(String clusterName) {
-      return new AmException(null, "PROVISION_FAILED", clusterName);
-   }
-
-   public static AmException STOP_SERVICES_FAILED(String clusterName, String serviceName) {
+   public static AmException STOP_SERVICES_FAILED(String clusterName,
+         String serviceName) {
       return null;
    }
-   public static AmException PROVISION_WITH_BLUEPRINT_FAILED(String clusterName) {
-      return new AmException(null, "PROVISION_WITH_BLUEPRINT_FAILED", clusterName);
+
+   public static AmException BOOTSTRAP_FAILED(String message, Throwable cause) {
+      return new AmException("BOOTSTRAP_FAILED", message, cause);
    }
 
-   public static AmException BOOTSTRAP_FAILED(String clusterName) {
-      return new AmException(null, "BOOTSTRAP_FAILED", clusterName);
+   public static AmException CREATE_BLUEPRINT_FAILED(String message,
+         Throwable cause) {
+      return new AmException("CREATE_BLUEPRINT_FAILED", message, cause);
    }
 
-   public static AmException BOOTSTRAP_REQUEST_FAILED(Long requestId) {
-      return new AmException(null, "BOOTSTRAP_REQUEST_FAILED", requestId);
+   public static AmException UNSURE_BLUEPRINT_EXIST(String message,
+         Throwable cause) {
+      return new AmException("UNSURE_BLUEPRINT_EXIST", message, cause);
    }
 
-   public static AmException BOOTSTRAP_ALL_HOSTS_FAILED(Long requestId) {
-      return new AmException(null, "BOOTSTRAP_ALL_HOSTS_FAILED", requestId);
-   }
-
-   public static AmException CREATE_BLUEPRINT_FAILED(String clusterName) {
-      return new AmException(null, "CREATE_BLUEPRINT_FAILED", clusterName);
-   }
-
-   public static AmException UNSURE_BLUEPRINT_EXIST(String blueprintName) {
-      return new AmException(null, "UNSURE_BLUEPRINT_EXIST", blueprintName);
+   public static AmException PROVISION_WITH_BLUEPRINT_FAILED(String message,
+         Throwable cause) {
+      return new AmException("PROVISION_WITH_BLUEPRINT_FAILED", message, cause);
    }
 
 }

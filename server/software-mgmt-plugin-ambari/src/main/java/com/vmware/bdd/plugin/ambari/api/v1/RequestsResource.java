@@ -19,12 +19,14 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.vmware.bdd.plugin.ambari.api.Parameters;
 
 @Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+      MediaType.TEXT_PLAIN })
 public interface RequestsResource {
 
    @GET
@@ -34,5 +36,11 @@ public interface RequestsResource {
    @GET
    @Path("/{RequestId}")
    public String readRequest(@PathParam(Parameters.REQUEST_ID) Long RequestId);
+
+   @GET
+   @Path("/{RequestId}")
+   public String readRequestWithTasks(
+         @PathParam(Parameters.REQUEST_ID) Long RequestId,
+         @QueryParam("fields") String fields);
 
 }

@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.poller;
 
+import org.apache.log4j.Logger;
+
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapStatus;
@@ -23,6 +25,9 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 
 public class HostBootstrapPoller extends StatusPoller {
+
+   private static final Logger logger = Logger
+         .getLogger(HostBootstrapPoller.class);
 
    private ApiManager apiManager;
    private ApiBootstrap apiBootstrap;
@@ -42,8 +47,11 @@ public class HostBootstrapPoller extends StatusPoller {
 
    @Override
    public boolean poll() {
+      Long requestId = apiBootstrap.getRequestId();
+      logger.info("Waiting for bootstrap hosts request " + requestId
+            + " to complete.");
       ApiBootstrapStatus apiBootstrapStatus =
-            apiManager.bootstrapStatus(apiBootstrap.getRequestId());
+            apiManager.bootstrapStatus(requestId);
 
       BootstrapStatus bootstrapStatus =
             BootstrapStatus.valueOf(apiBootstrapStatus.getStatus());
