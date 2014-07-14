@@ -26,6 +26,7 @@ import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
 import com.vmware.bdd.apitypes.DistroRead;
+import com.vmware.bdd.cli.rest.AppManagerRestClient;
 import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.DistroRestClient;
 
@@ -33,6 +34,8 @@ import com.vmware.bdd.cli.rest.DistroRestClient;
 public class DistroCommands implements CommandMarker {
    @Autowired
    private DistroRestClient restClient;
+   @Autowired
+   private AppManagerRestClient appManagerRestClient;
 
    @CliAvailabilityIndicator({ "distro help" })
    public boolean isCommandAvailable() {
@@ -42,15 +45,22 @@ public class DistroCommands implements CommandMarker {
    @CliCommand(value = "distro list", help = "Get distro information")
    public void getDistro(
          @CliOption(key = { "name" }, mandatory = false, help = "The distro name") final String name,
+         @CliOption(key = { "appManager" }, mandatory = false, help = "The appmanager name") final String appManager,
          @CliOption(key = { "detail" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to show detail information") final boolean detail) {
 
+      String appmanager;
+      if (CommandsUtils.isBlank(appManager)) {
+         appmanager = Constants.IRONFAN;
+      } else {
+         appmanager = appManager;
+      }
       // rest invocation
       try {
          if (name == null) {
-            DistroRead[] distros = restClient.getAll();
+            DistroRead[] distros = appManagerRestClient.getDistros(appmanager);
             prettyOutputDistrosInfo(distros);
          } else {
-            DistroRead distro = restClient.get(name);
+            DistroRead distro = appManagerRestClient.getDistroByName(appmanager, name);
             prettyOutputDistroInfo(distro);
          }
       } catch (CliRestException e) {
@@ -58,7 +68,6 @@ public class DistroCommands implements CommandMarker {
                Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
       }
-
    }
 
    private void prettyOutputDistrosInfo(DistroRead[] distros) {

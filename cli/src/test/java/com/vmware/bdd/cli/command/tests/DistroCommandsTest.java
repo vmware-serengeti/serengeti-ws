@@ -64,28 +64,28 @@ public class DistroCommandsTest extends MockRestServer {
 
       distros[0] = distro1;
       distros[1] = distro2;
-      
+
       ObjectMapper mapper = new ObjectMapper();
-      
-      buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/distros",
+
+      buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Default/distros",
             HttpMethod.GET, HttpStatus.OK, mapper.writeValueAsString(distros));
 
       //get all distros
-      distroCommands.getDistro(null, false);
+      distroCommands.getDistro(null, null, false);
       CookieCache.clear();
    }
-   
+
    @Test
    public void testDistroListFailure() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
-      buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/distros",
+      buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Default/distros",
             HttpMethod.GET, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
       //get all distros
-      distroCommands.getDistro(null, false);
+      distroCommands.getDistro(null, null, false);
       CookieCache.clear();
    }
 }

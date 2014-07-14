@@ -171,10 +171,46 @@ public class AppManagerCommands implements CommandMarker {
    @CliCommand(value = "appmanager list", help = "Display App Manager list.")
    public void listAppManager(
          @CliOption(key = { "name" }, mandatory = false, help = "The appmanager name") final String name,
-         @CliOption(key = { "distros" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "The supported distros") final boolean distros,
-         @CliOption(key = { "distro" }, mandatory = false, help = "The distro name") final String distroName,
-         @CliOption(key = { "roles" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "The roles") final boolean roles,
-         @CliOption(key = { "configurations" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "The configurations") final boolean configurations) {
+         @CliOption(key = { "distros" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "List the supported distros") final boolean distros,
+         @CliOption(key = { "distro" }, mandatory = false, help = "The distro name") final String distro,
+         @CliOption(key = { "roles" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "List the roles") final boolean roles,
+         @CliOption(key = { "configurations" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "List the configurations") final boolean configurations) {
+      // parameters validation
+      if (distros && !CommandsUtils.isBlank(distro)) {
+         CommandsUtils
+               .printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER, name,
+                     Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
+                     "Cannot use --distros and --distro <distro name> at the same time.");
+         return;
+      }
+
+      if (CommandsUtils.isBlank(name) && !CommandsUtils.isBlank(distro)) {
+         CommandsUtils
+               .printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER, name,
+                     Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
+                     "--distro <distro name> must be used with --name <app manager name>.");
+         return;
+      }
+
+      if ((CommandsUtils.isBlank(name) || CommandsUtils.isBlank(distro))
+            && (roles || configurations)) {
+         CommandsUtils
+               .printCmdFailure(
+                     Constants.OUTPUT_OBJECT_APPMANAGER,
+                     name,
+                     Constants.OUTPUT_OP_LIST,
+                     Constants.OUTPUT_OP_RESULT_FAIL,
+                     "--roles or --configurations must be used with --name <app manager name> and --distro <distro name>.");
+         return;
+      }
+
+      if (roles && configurations) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
+               name, Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
+               "Cannot use --roles and --configurations at the same time.");
+         return;
+      }
+
       // rest invocation
       try {
          if (CommandsUtils.isBlank(name)) {
@@ -188,19 +224,23 @@ public class AppManagerCommands implements CommandMarker {
                prettyOutputAppManagerInfo(appmanagers);
             }
          } else {
-            AppManagerRead appmanager = restClient.get(name);
             if (distros) {
+               AppManagerRead appmanager = restClient.get(name);
                prettyOutputAppManagerDistros(appmanager);
-            } else if (CommandsUtils.isBlank(distroName)) {
+            } else if (CommandsUtils.isBlank(distro)) {
+               AppManagerRead appmanager = restClient.get(name);
                prettyOutputAppManagerInfo(appmanager);
             } else {
                if (roles) {
-                  String[] distroRoles = restClient.getRoles(name, distroName);
+                  String[] distroRoles = restClient.getRoles(name, distro);
                   for (String distroRole : distroRoles) {
                      System.out.println(distroRole);
                   }
                } else if (configurations) {
-                  System.out.println(restClient.getConfigurations(name, distroName));
+                  System.out.println(restClient.getConfigurations(name, distro));
+               } else {
+                  DistroRead distroRead = restClient.getDistroByName(name, distro);
+                  prettyOutputAppManagerDistro(new DistroRead[]{distroRead});
                }
             }
          }
@@ -233,6 +273,10 @@ public class AppManagerCommands implements CommandMarker {
       System.out.println();
 
       DistroRead[] distros = restClient.getDistros(appmanager.getName());
+      prettyOutputAppManagerDistro(distros);
+   }
+
+   private void prettyOutputAppManagerDistro(DistroRead[] distros) {
       if (distros != null && distros.length > 0) {
          LinkedHashMap<String, List<String>> distroColumnNamesWithGetMethodNames =
                new LinkedHashMap<String, List<String>>();
