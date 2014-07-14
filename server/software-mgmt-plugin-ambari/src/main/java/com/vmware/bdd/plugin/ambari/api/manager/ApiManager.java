@@ -14,6 +14,16 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.manager;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+
+import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
+import com.vmware.bdd.plugin.ambari.api.ApiRootResource;
+import com.vmware.bdd.plugin.ambari.api.manager.intf.IApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprintList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrap;
@@ -21,28 +31,26 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.ApiClusterList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiComponent;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackComponentList;
+import com.vmware.bdd.plugin.ambari.api.model.ApiComponentList;
+import com.vmware.bdd.plugin.ambari.api.model.ApiHost;
+import com.vmware.bdd.plugin.ambari.api.model.ApiHostList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequestList;
+import com.vmware.bdd.plugin.ambari.api.model.ApiService;
+import com.vmware.bdd.plugin.ambari.api.model.ApiServiceComponent;
+import com.vmware.bdd.plugin.ambari.api.model.ApiServiceComponentInfo;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStack;
+import com.vmware.bdd.plugin.ambari.api.model.ApiStackComponentList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackService;
+import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceComponent;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersionList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiService;
-import org.apache.log4j.Logger;
-
-import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
-import com.vmware.bdd.plugin.ambari.api.ApiRootResource;
-import com.vmware.bdd.plugin.ambari.api.manager.intf.IApiManager;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import com.vmware.bdd.plugin.ambari.model.AmHealthState;
+import com.vmware.bdd.plugin.ambari.model.ComponentStatus;
 
 public class ApiManager implements IApiManager {
 
@@ -151,7 +159,7 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiComponent stackComponent(String stackName, String stackVersion,
+   public ApiStackServiceComponent stackComponent(String stackName, String stackVersion,
          String stackServiceName, String stackComponentName) {
       String stackComponentJson =
             apiResourceRootV1.getStacks2Resource()
@@ -161,8 +169,8 @@ public class ApiManager implements IApiManager {
                   .readServiceComponent(stackComponentName);
       logger.debug("Response of component of service from ambari server:");
       logger.debug(stackComponentJson);
-      ApiComponent apiServiceComponent =
-            ApiUtils.jsonToObject(ApiComponent.class, stackComponentJson);
+      ApiStackServiceComponent apiServiceComponent =
+            ApiUtils.jsonToObject(ApiStackServiceComponent.class, stackComponentJson);
       return apiServiceComponent;
    }
 
@@ -368,4 +376,53 @@ public class ApiManager implements IApiManager {
       return apiRequest;
    }
 
+   @Override
+   public AmHealthState getClusterStatus(String clusterName) {
+      String fields = "ServiceComponentInfo";
+      String servicesWithState = 
+            apiResourceRootV1.getClustersResource()
+            .getComponentsResource(clusterName).readComponentsWithFilter(fields);
+      ApiComponentList componentList = ApiUtils.jsonToObject(ApiComponentList.class, servicesWithState);
+      AmHealthState state = AmHealthState.HEALTHY;
+      if (componentList.getApiComponents() != null) {
+         for (ApiServiceComponent component : componentList.getApiComponents()) {
+        	 ApiServiceComponentInfo info = component.getApiServiceComponent();
+        	 if (info.getCategory().equalsIgnoreCase("CLIENT")
+        			 && (!ComponentStatus.INSTALLED.toString()
+        	                  .equalsIgnoreCase(info.getState()))) {
+        		 state = AmHealthState.UNHEALTHY;
+        	 } else if ((!info.getCategory().equalsIgnoreCase("CLIENT"))
+        			 && (!ComponentStatus.STARTED.toString()
+        	                  .equalsIgnoreCase(info.getState()))) {
+               state = AmHealthState.UNHEALTHY;
+            }
+         }
+      }
+      return state;
+   }
+
+   @Override
+   public Map<String, AmHealthState> getHostStatus(String clusterName) {
+      String fields = "Hosts/host_status";
+      String hostsWithState = 
+            apiResourceRootV1.getClustersResource()
+            .getHostsResource(clusterName).readHostsWithFilter(fields);
+      ApiHostList hostList = ApiUtils.jsonToObject(ApiHostList.class, hostsWithState);
+      Map<String, AmHealthState> result = new HashMap<String, AmHealthState>();
+
+      List<ApiHost> apiHosts = hostList.getApiHosts();
+      if (apiHosts != null) {
+         for (ApiHost apiHost : apiHosts) {
+            String state = apiHost.getApiHostInfo().getState();
+            if (AmHealthState.HEALTHY.toString().equalsIgnoreCase(state)) {
+               result.put(apiHost.getApiHostInfo().getHost_name(),
+                     AmHealthState.HEALTHY);
+            } else {
+               result.put(apiHost.getApiHostInfo().getHost_name(),
+                     AmHealthState.UNHEALTHY);
+            }
+         }
+      }
+      return result;
+   }
 }

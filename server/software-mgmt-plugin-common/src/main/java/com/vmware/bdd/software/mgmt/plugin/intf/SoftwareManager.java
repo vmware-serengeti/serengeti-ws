@@ -30,12 +30,12 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
  * The software manager will be listed in BDE client with name as the UID. User
  * will pick up one software manager during cluster operation. And then all
  * software management requests will be sent to this instance.
- *
+ * 
  * Annotation @BeforeClusterConfiguration should be used before cluster
  * creation, to allow infrastructure management finish all tasks
- *
+ * 
  * @author line
- *
+ * 
  */
 public interface SoftwareManager {
    public enum HealthStatus {
@@ -44,14 +44,14 @@ public interface SoftwareManager {
 
    /**
     * Plugin name, which should be unique in BDE scope
-    *
+    * 
     * @return
     */
    String getName();
 
    /**
     * Plugin description, which will be shown through BDE CLI/UI.
-    *
+    * 
     * @return
     */
    String getDescription();
@@ -73,14 +73,15 @@ public interface SoftwareManager {
    /**
     * The supported role names, for instance NameNode, Secondary NameNode, etc.
     * The role name will be used to validate user input in cluster spec
-    *
+    * 
     * @return
     */
-   Set<String> getSupportedRoles(HadoopStack hadoopStack) throws SoftwareManagementPluginException;
+   Set<String> getSupportedRoles(HadoopStack hadoopStack)
+         throws SoftwareManagementPluginException;
 
    /**
     * Supported Hadoop stack, for instance "CDH 5", "HDP 2.1.1"
-    *
+    * 
     * @return
     */
    List<HadoopStack> getSupportedStacks()
@@ -110,6 +111,7 @@ public interface SoftwareManager {
     *             ]
     *   }
     *
+    * 
     */
    String getSupportedConfigs(HadoopStack stack)
          throws SoftwareManagementPluginException;
@@ -122,7 +124,7 @@ public interface SoftwareManager {
     * ClusterOperationReports to notify operation status change for this
     * cluster, otherwise, client cannot get information in this long operation
     * time
-    *
+    * 
     * @param blueprint
     * @param reports
     * @return
@@ -170,11 +172,11 @@ public interface SoftwareManager {
    /**
     * This method will be guaranteed to be invoked before BDE invoke cluster
     * stop, allowing plugin to do some clean up
-    *
+    * 
     * Sync call Plugin should should update ClusterOperationReports to notify
     * operation status change for this cluster, otherwise, client cannot get
     * information in this long operation time
-    *
+    * 
     * @return
     */
    boolean onStopCluster(String clusterName, ClusterReportQueue reports)
@@ -183,11 +185,11 @@ public interface SoftwareManager {
    /**
     * This method will be guaranteed to invoked before BDE invoke cluster
     * delete, allowing plugin to do some clean up
-    *
+    * 
     * Sync call Plugin should update ClusterOperationReports to notify operation
     * status change for this cluster, otherwise, client cannot get information
     * in this long operation time
-    *
+    * 
     * @return
     */
    boolean onDeleteCluster(String clusterName, ClusterReportQueue reports)
@@ -198,7 +200,7 @@ public interface SoftwareManager {
     * Sync call Plugin should update ClusterOperationReports to notify operation
     * status change for this cluster, otherwise, client cannot get information
     * in this long operation time
-    *
+    * 
     * @param clusterName
     * @param nodes
     * @param reports
@@ -212,7 +214,7 @@ public interface SoftwareManager {
     * Sync call Plugin should update ClusterOperationReports to notify operation
     * status change for this cluster, otherwise, client cannot get information
     * in this long operation time
-    *
+    * 
     * @param clusterName
     * @param nodes
     * @return
@@ -223,11 +225,11 @@ public interface SoftwareManager {
    /**
     * The commission nodes method is guaranteed to be invoked before this method
     * is called.
-    *
+    * 
     * Sync call Plugin should update ClusterOperationReports to notify operation
     * status change for this cluster, otherwise, client cannot get information
     * in this long operation time
-    *
+    * 
     * @param clusterName
     * @param nodes
     * @param reports
@@ -241,7 +243,7 @@ public interface SoftwareManager {
     * Sync call Plugin should update ClusterOperationReports to notify operation
     * status change for this cluster, otherwise, client cannot get information
     * in this long operation time
-    *
+    * 
     * @param clusterName
     * @param nodes
     * @return
@@ -255,16 +257,17 @@ public interface SoftwareManager {
    /**
     * Get current cluster service status, including cluster status, and node
     * status TODO: define cluster query object
-    *
+    * 
     * @param blueprint
     * @return
     */
-   ClusterReport queryClusterStatus(ClusterBlueprint blueprint);
+   ClusterReport queryClusterStatus(ClusterBlueprint blueprint)
+         throws SoftwareManagementPluginException;
 
    /**
     * Validate if this node group is scalable or not. Return list of unsupported
     * role names
-    *
+    * 
     * @param group
     * @return
     */
@@ -274,22 +277,26 @@ public interface SoftwareManager {
    /**
     * Plugin has a chance to update infrastructure setting here. Specifically,
     * plugin can set default disk type
-    *
+    * 
     * @param blueprint
     */
    void updateInfrastructure(ClusterBlueprint blueprint)
          throws SoftwareManagementPluginException;
 
    boolean hasHbase(ClusterBlueprint blueprint);
+
    boolean hasMgmtRole(List<String> roles);
+
    boolean isComputeOnlyRoles(List<String> roles);
+
    boolean hasComputeMasterGroup(ClusterBlueprint blueprint);
 
    /**
-    * This is the infrastructure requirement comes from software manager
-    * for one specific node group.
-    * It generally happens for some special roles supported. E.g. if only
-    * zookeeper role is installed in one node group, only two data disk can be leveraged.
+    * This is the infrastructure requirement comes from software manager for one
+    * specific node group. It generally happens for some special roles
+    * supported. E.g. if only zookeeper role is installed in one node group,
+    * only two data disk can be leveraged.
+    * 
     * @param group
     * @return
     */

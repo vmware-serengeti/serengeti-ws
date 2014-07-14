@@ -30,6 +30,9 @@ public class CmNodeDef implements Serializable {
    private static final long serialVersionUID = -561299694244815038L;
 
    @Expose
+   private String name;
+
+   @Expose
    private String nodeId;
 
    @Expose
@@ -43,6 +46,14 @@ public class CmNodeDef implements Serializable {
 
    @Expose
    private Map<String, String> configs;
+
+   public String getName() {
+      return name;
+   }
+
+   public void setName(String name) {
+      this.name = name;
+   }
 
    public String getNodeId() {
       return nodeId;

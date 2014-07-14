@@ -14,6 +14,9 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.manager.intf;
 
+import java.util.List;
+import java.util.Map;
+
 import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprintList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrap;
@@ -21,19 +24,18 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.ApiClusterList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiComponent;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackComponentList;
+import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceComponent;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequestList;
+import com.vmware.bdd.plugin.ambari.api.model.ApiService;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStack;
+import com.vmware.bdd.plugin.ambari.api.model.ApiStackComponentList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackService;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersionList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiService;
-
-import java.util.List;
+import com.vmware.bdd.plugin.ambari.model.AmHealthState;
 
 public interface IApiManager {
 
@@ -54,7 +56,7 @@ public interface IApiManager {
    public ApiStackComponentList stackComponentList(String stackName,
          String stackVersion, String stackServiceName);
 
-   public ApiComponent stackComponent(String stackName, String stackVersion,
+   public ApiStackServiceComponent stackComponent(String stackName, String stackVersion,
          String stackServiceName, String stackComponentName);
 
    public ApiClusterList clusterList();
@@ -88,4 +90,8 @@ public interface IApiManager {
    public ApiRequest deleteCluster(String clusterName);
 
    public ApiRequest requestWithTasks(String clusterName, Long requestId);
+
+   public AmHealthState getClusterStatus(String clusterName);
+
+   public Map<String, AmHealthState> getHostStatus(String clusterName);
 }

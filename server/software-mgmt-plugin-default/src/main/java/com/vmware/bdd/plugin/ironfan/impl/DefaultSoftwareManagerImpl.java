@@ -242,7 +242,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
 
    @Override
    public ClusterReport queryClusterStatus(ClusterBlueprint blueprint) {
-      // TODO Auto-generated method stub
+      // Ironfan does not monitor cluster status after cluster is created
       return null;
    }
 

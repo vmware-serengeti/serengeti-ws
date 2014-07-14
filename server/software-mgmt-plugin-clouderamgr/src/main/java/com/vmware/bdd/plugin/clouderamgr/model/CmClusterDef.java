@@ -91,6 +91,7 @@ public class CmClusterDef implements Serializable {
             /*
              Rack names are slash-separated identifiers, like Unix paths. For example, "/rack1" and "/cabinet3/rack4" are both valid.
              */
+            nodeDef.setName(node.getName());
             nodeDef.setRackId(node.getRack());
             nodeDef.setNodeId(node.getName()); // temp id, will be updated when installed.
             nodeDef.setConfigs(null);

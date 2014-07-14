@@ -53,6 +53,10 @@ public class ApiComponentInfo {
    @SerializedName("is_master")
    private Boolean isMaster;
 
+   @Expose
+   @SerializedName("state")
+   private String state;
+
    public String getName() {
       return name;
    }
@@ -123,5 +127,13 @@ public class ApiComponentInfo {
 
    public void setMaster(Boolean isMaster) {
       this.isMaster = isMaster;
+   }
+
+   public String getState() {
+      return state;
+   }
+
+   public void setState(String state) {
+      this.state = state;
    }
 }

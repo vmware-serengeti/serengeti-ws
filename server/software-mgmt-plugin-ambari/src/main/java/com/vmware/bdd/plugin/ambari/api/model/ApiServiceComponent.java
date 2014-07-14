@@ -14,45 +14,45 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.model;
 
+import java.util.List;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiHostInfo {
+public class ApiServiceComponent {
 
    @Expose
-   @SerializedName("cluster_name")
-   private String clusterName;
+   private String href;
 
    @Expose
-   @SerializedName("host_name")
-   private String host_name;
+   @SerializedName("ServiceComponentInfo")
+   private ApiServiceComponentInfo apiServiceComponent;
 
    @Expose
-   @SerializedName("host_status")
-   private String state;
+   private List<String> dependencies;
 
-   public String getClusterName() {
-      return clusterName;
+   public String getHref() {
+      return href;
    }
 
-   public void setClusterName(String clusterName) {
-      this.clusterName = clusterName;
+   public void setHref(String href) {
+      this.href = href;
    }
 
-   public String getHost_name() {
-      return host_name;
+   public ApiServiceComponentInfo getApiServiceComponent() {
+      return apiServiceComponent;
    }
 
-   public void setHost_name(String host_name) {
-      this.host_name = host_name;
+   public void setApiServiceComponent(ApiServiceComponentInfo apiServiceComponent) {
+      this.apiServiceComponent = apiServiceComponent;
    }
 
-   public String getState() {
-      return state;
+   public List<String> getDependencies() {
+      return dependencies;
    }
 
-   public void setState(String state) {
-      this.state = state;
+   public void setDependencies(List<String> dependencies) {
+      this.dependencies = dependencies;
    }
 
 }

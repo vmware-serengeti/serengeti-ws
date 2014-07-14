@@ -17,9 +17,8 @@ package com.vmware.bdd.plugin.ambari.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
-import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -39,7 +38,9 @@ import com.vmware.bdd.plugin.ambari.api.model.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ClusterRequestStatus;
 import com.vmware.bdd.plugin.ambari.exception.AmException;
 import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
+import com.vmware.bdd.plugin.ambari.model.AmHealthState;
 import com.vmware.bdd.plugin.ambari.model.AmNodeDef;
+import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
 import com.vmware.bdd.plugin.ambari.poller.HostBootstrapPoller;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
@@ -50,6 +51,8 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
+import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 
 public class AmbariImpl implements SoftwareManager {
 
@@ -535,8 +538,27 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public ClusterReport queryClusterStatus(ClusterBlueprint blueprint) {
-      // TODO Auto-generated method stub
-      return null;
+      AmClusterDef clusterDef = new AmClusterDef(blueprint, privateKey);
+      AmHealthState state = apiManager.getClusterStatus(blueprint.getName());
+      if (AmHealthState.HEALTHY == state) {
+         clusterDef.getCurrentReport().setStatus(ServiceStatus.RUNNING);
+      } else {
+         clusterDef.getCurrentReport().setStatus(ServiceStatus.FAILED);
+      }
+      Map<String, AmHealthState> hostStates = 
+            apiManager.getHostStatus(blueprint.getName());
+      Map<String, NodeReport> nodeReports = 
+            clusterDef.getCurrentReport().getNodeReports();
+      for (AmNodeDef node : clusterDef.getNodes()) {
+         String fqdn = node.getFqdn();
+         AmHealthState health = hostStates.get(fqdn);
+         if (AmHealthState.HEALTHY == health) {
+            nodeReports.get(node.getName()).setStatus(ServiceStatus.RUNNING);
+         } else {
+            nodeReports.get(node.getName()).setStatus(ServiceStatus.FAILED);
+         }
+      }
+      return clusterDef.getCurrentReport().clone();
    }
 
    @Override

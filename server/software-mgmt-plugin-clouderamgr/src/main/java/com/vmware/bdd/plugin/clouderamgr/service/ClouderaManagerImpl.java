@@ -25,18 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.cloudera.api.model.ApiRoleConfigGroup;
-import com.google.gson.GsonBuilder;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
-import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
-import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableManagementService;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableParcelStage;
-import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
-import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
-import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
-import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
-
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -50,12 +38,14 @@ import com.cloudera.api.model.ApiClusterVersion;
 import com.cloudera.api.model.ApiCommand;
 import com.cloudera.api.model.ApiConfig;
 import com.cloudera.api.model.ApiConfigList;
+import com.cloudera.api.model.ApiHealthSummary;
 import com.cloudera.api.model.ApiHost;
 import com.cloudera.api.model.ApiHostInstallArguments;
 import com.cloudera.api.model.ApiHostRef;
 import com.cloudera.api.model.ApiHostRefList;
 import com.cloudera.api.model.ApiParcel;
 import com.cloudera.api.model.ApiRole;
+import com.cloudera.api.model.ApiRoleConfigGroup;
 import com.cloudera.api.model.ApiRoleNameList;
 import com.cloudera.api.model.ApiRoleState;
 import com.cloudera.api.model.ApiService;
@@ -66,11 +56,20 @@ import com.cloudera.api.v3.ParcelResource;
 import com.cloudera.api.v6.RootResourceV6;
 import com.cloudera.api.v6.ServicesResourceV6;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.GsonBuilder;
+import com.vmware.aurora.util.AuAssert;
+import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
 import com.vmware.bdd.plugin.clouderamgr.model.CmClusterDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmNodeDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmRoleDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmServiceDef;
-import com.vmware.aurora.util.AuAssert;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableManagementService;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableParcelStage;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
+import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
+import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
+import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
+import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -80,6 +79,9 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
+import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
+import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 
 /**
  * Author: Xiaoding Bian
@@ -314,8 +316,44 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public ClusterReport queryClusterStatus(ClusterBlueprint blueprint) {
-      return null;
+   public ClusterReport queryClusterStatus(ClusterBlueprint blueprint)
+         throws SoftwareManagementPluginException {
+      if (blueprint == null) {
+         logger.info("Empty blueprint is passed to query cluster status. Return null.");
+         return null;
+      }
+      try {
+         CmClusterDef cluster = new CmClusterDef(blueprint);
+         syncHostsId(cluster);
+         if (isStarted(cluster)) {
+            cluster.getCurrentReport().setStatus(ServiceStatus.RUNNING);
+            logger.debug("Cluster " + blueprint.getName() + " is healthy.");
+         } else {
+            logger.debug("Cluster " + blueprint.getName() + " is not started yet.");
+            cluster.getCurrentReport().setStatus(ServiceStatus.FAILED);
+         }
+         queryNodesStatus(cluster);
+         return cluster.getCurrentReport().clone();
+      } catch (Exception e) {
+         throw SoftwareManagementPluginException.CREATE_CLUSTER_FAILED(
+               e.getMessage(), e);
+      }
+   }
+
+   private void queryNodesStatus(CmClusterDef cluster) {
+      for (CmNodeDef node : cluster.getNodes()) {
+         ApiHost host = apiResourceRootV6.getHostsResource().readHost(node.getNodeId());
+         ApiHealthSummary health = host.getHealthSummary();
+         Map<String, NodeReport> nodeReports = cluster.getCurrentReport().getNodeReports();
+         NodeReport nodeReport = nodeReports.get(node.getName());
+         if (health.GOOD.equals(health)) {
+            nodeReport.setStatus(ServiceStatus.RUNNING);
+            logger.debug("Node " + nodeReport.getName() + " is running well.");
+         } else {
+            logger.debug("Node " + nodeReport.getName() + " is not running well.");
+            nodeReport.setStatus(ServiceStatus.FAILED);
+         }
+      }
    }
 
    @Override
