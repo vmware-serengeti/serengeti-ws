@@ -85,6 +85,7 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
                break;
             case DESTROY:
                success = softwareManager.deleteCluster(clusterBlueprint.getName(), queue);
+               break;
             case START:
                success = softwareManager.startCluster(clusterBlueprint.getName(), queue);
                break;
