@@ -62,6 +62,7 @@ import com.vmware.bdd.software.mgmt.thrift.GroupData;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
 
@@ -591,6 +592,13 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       clusterRead.setVhmTargetNum(cluster.getVhmTargetNum());
       clusterRead.setIoShares(cluster.getIoShares());
       clusterRead.setVersion(cluster.getVersion());
+      if (!CommonUtil.isBlank(cluster.getAdvancedProperties())) {
+         Gson gson = new Gson();
+         Map<String, String> advancedProperties = gson.fromJson(cluster.getAdvancedProperties(), Map.class);
+         clusterRead.setExternalHDFS(advancedProperties.get("ExternalHDFS"));
+         clusterRead.setExternalMapReduce(advancedProperties.get("ExternalMapReduce"));
+      }
+
       SoftwareManager softMgr =
             softwareManagerCollector
                   .getSoftwareManager(cluster.getAppManager());

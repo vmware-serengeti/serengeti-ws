@@ -107,6 +107,7 @@ create table cluster (
    version             varchar(255),
    last_status         varchar(255),
    appmanager          varchar(255),
+   advanced_properties text,
    primary key (id)
 );
 

@@ -114,6 +114,10 @@ public class ClusterEntity extends EntityBase {
    @Type(type = "text")
    private String hadoopConfig;
 
+   @Column(name = "advanced_properties")
+   @Type(type = "text")
+   private String advancedProperties;
+
    @Column(name = "automation_enable")
    private Boolean automationEnable;
 
@@ -460,5 +464,13 @@ public class ClusterEntity extends EntityBase {
 
    public void setLastStatus(ClusterStatus lastStatus) {
       this.lastStatus = lastStatus;
+   }
+
+   public String getAdvancedProperties() {
+      return advancedProperties;
+   }
+
+   public void setAdvancedProperties(String advancedProperties) {
+      this.advancedProperties = advancedProperties;
    }
 }

@@ -291,7 +291,7 @@ public class ClusterConfigManager {
 
             updateVhmJobTrackerPort(cluster, clusterEntity);
          }
-
+         setAdvancedProperties(cluster.getExternalHDFS(), cluster.getExternalMapReduce(), clusterEntity);
          NodeGroupCreate[] groups = cluster.getNodeGroups();
          if (groups != null && groups.length > 0) {
             clusterEntity
@@ -336,6 +336,18 @@ public class ClusterConfigManager {
          logger.info("can not create cluster " + name
                + ", which is already existed.");
          throw BddException.ALREADY_EXISTS(ex, "Cluster", name);
+      }
+   }
+
+   private void setAdvancedProperties(String externalHDFS,
+         String externalMapReduce, ClusterEntity clusterEntity) {
+      if (!CommonUtil.isBlank(externalHDFS)
+            || !CommonUtil.isBlank(externalMapReduce)) {
+         Map<String, String> advancedProperties = new HashMap<String, String>();
+         advancedProperties.put("ExternalHDFS", externalHDFS);
+         advancedProperties.put("ExternalMapReduce", externalMapReduce);
+         Gson g = new Gson();
+         clusterEntity.setAdvancedProperties(g.toJson(advancedProperties));
       }
    }
 
@@ -1075,7 +1087,14 @@ public class ClusterConfigManager {
       // read distro and distroVersion from ClusterEntity and set to ClusterCreate
       clusterCreate.setDistro(cluster.getDistro());
       clusterCreate.setDistroVersion(cluster.getDistroVersion());
-
+      if (!CommonUtil.isBlank(cluster.getAdvancedProperties())) {
+         Gson gson = new Gson();
+         Map<String, String> advancedProperties =
+               gson.fromJson(cluster.getAdvancedProperties(), Map.class);
+         clusterCreate.setExternalHDFS(advancedProperties.get("ExternalHDFS"));
+         clusterCreate.setExternalMapReduce(advancedProperties
+               .get("ExternalMapReduce"));
+      }
       // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
       ClusterBlueprint blueprint = clusterCreate.toBlueprint();
       try {
@@ -1095,7 +1114,7 @@ public class ClusterConfigManager {
          logger.debug("cluster configuration is not set in cluster spec, so treat it as an empty configuration.");
          cluster.setHadoopConfig(null);
       }
-
+      setAdvancedProperties(clusterCreate.getExternalHDFS(), clusterCreate.getExternalMapReduce(), cluster);
       updateNodegroupAppConfig(clusterCreate, cluster,
             clusterCreate.isValidateConfig());
    }
