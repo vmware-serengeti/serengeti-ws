@@ -322,7 +322,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
    public boolean echo() {
       try {
          String message = "Hello";
-         return apiResourceRootV6.getToolsResource().echo(message).equals(message);
+         return apiResourceRootV6.getToolsResource().echo(message).getMessage().equals(message);
       } catch (Exception e) {
          return false;
       }
