@@ -576,7 +576,10 @@ public class CommandsUtils {
             entry = (Map.Entry<String, String>) it.next();
             vmIP = entry.getKey();
             rackPath = entry.getValue();
-            buff.append(vmIP + " " + rackPath + delimeter);
+            buff.append(vmIP).append(" ").append(rackPath).append(delimeter);
+         }
+         if (buff.length() > 0) {
+            buff.delete(buff.length() - delimeter.length(), buff.length());
          }
       }
 
