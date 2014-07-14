@@ -193,7 +193,6 @@ public class TestClusteringJobs extends
    @BeforeClass(groups = { "TestClusteringJobs" })
    public void setup() throws Exception {
       Properties testProperty = new Properties();
-      testGuestInfo();
       testProperty.load(new FileInputStream(
             "src/test/resources/vc-test.properties"));
       staticDns1 = testProperty.getProperty(TEST_STATIC_DNS1);
