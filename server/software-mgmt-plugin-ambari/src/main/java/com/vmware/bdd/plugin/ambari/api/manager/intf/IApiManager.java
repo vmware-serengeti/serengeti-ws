@@ -22,7 +22,7 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.ApiClusterList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiComponent;
-import com.vmware.bdd.plugin.ambari.api.model.ApiComponentList;
+import com.vmware.bdd.plugin.ambari.api.model.ApiStackComponentList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequestList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStack;
@@ -51,11 +51,11 @@ public interface IApiManager {
    public ApiStackService stackService(String stackName, String stackVersion,
          String stackServiceName);
 
-   public ApiComponentList serviceComponentList(String stackName,
+   public ApiStackComponentList stackComponentList(String stackName,
          String stackVersion, String stackServiceName);
 
-   public ApiComponent serviceComponent(String stackName, String stackVersion,
-         String stackServiceName, String serviceComponentName);
+   public ApiComponent stackComponent(String stackName, String stackVersion,
+         String stackServiceName, String stackComponentName);
 
    public ApiClusterList clusterList();
 

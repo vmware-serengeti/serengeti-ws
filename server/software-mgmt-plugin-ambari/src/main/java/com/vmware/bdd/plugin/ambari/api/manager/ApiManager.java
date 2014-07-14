@@ -22,7 +22,7 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.ApiClusterList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiComponent;
-import com.vmware.bdd.plugin.ambari.api.model.ApiComponentList;
+import com.vmware.bdd.plugin.ambari.api.model.ApiStackComponentList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequestList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStack;
@@ -134,35 +134,35 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiComponentList serviceComponentList(String stackName,
+   public ApiStackComponentList stackComponentList(String stackName,
          String stackVersion, String stackServiceName) {
-      String serviceComponentsJson =
+      String stackComponentsJson =
             apiResourceRootV1.getStacks2Resource()
                   .getStackVersionsResource(stackName)
                   .getStackServicesResource(stackVersion)
                   .getServiceComponentsResource(stackServiceName)
                   .readServiceComponents();
       logger.debug("Response of component list of service from ambari server:");
-      logger.debug(serviceComponentsJson);
-      ApiComponentList apiServiceComponents =
+      logger.debug(stackComponentsJson);
+      ApiStackComponentList apiServiceComponents =
             ApiUtils
-                  .jsonToObject(ApiComponentList.class, serviceComponentsJson);
+                  .jsonToObject(ApiStackComponentList.class, stackComponentsJson);
       return apiServiceComponents;
    }
 
    @Override
-   public ApiComponent serviceComponent(String stackName, String stackVersion,
-         String stackServiceName, String serviceComponentName) {
-      String serviceComponentJson =
+   public ApiComponent stackComponent(String stackName, String stackVersion,
+         String stackServiceName, String stackComponentName) {
+      String stackComponentJson =
             apiResourceRootV1.getStacks2Resource()
                   .getStackVersionsResource(stackName)
                   .getStackServicesResource(stackVersion)
                   .getServiceComponentsResource(stackServiceName)
-                  .readServiceComponent(serviceComponentName);
+                  .readServiceComponent(stackComponentName);
       logger.debug("Response of component of service from ambari server:");
-      logger.debug(serviceComponentJson);
+      logger.debug(stackComponentJson);
       ApiComponent apiServiceComponent =
-            ApiUtils.jsonToObject(ApiComponent.class, serviceComponentJson);
+            ApiUtils.jsonToObject(ApiComponent.class, stackComponentJson);
       return apiServiceComponent;
    }
 

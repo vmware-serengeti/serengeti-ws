@@ -19,7 +19,7 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiComponentList {
+public class ApiStackComponentList {
 
    @Expose
    private String href;
