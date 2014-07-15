@@ -39,5 +39,4 @@ public class CmUtils {
       Pattern rackPattern = Pattern.compile("(/[a-zA-Z0-9\\.\\-\\_]+)+");
       return rackPattern.matcher(rack).matches();
    }
-
 }

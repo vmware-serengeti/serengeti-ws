@@ -19,8 +19,11 @@ public enum ServiceStatus {
    CONFIGURATION_FAILED ( "Configuration Failed" ),
    STARTUP_FAILED ( "Startup Failed" ),
    RUNNING ( "Running" ),
-   FAILED ( "Failed" );
-
+   FAILED ( "Failed" ),
+   STOP_FAILED( "Stop Failed"),
+   STOP_SUCCEED( "Stop Succeed"),
+   STARTING( "Starting" ),
+   STARTED( "Started" );
    private String description;
    private ServiceStatus(String description) {
       this.description = description;

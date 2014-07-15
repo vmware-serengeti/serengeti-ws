@@ -470,8 +470,8 @@ public class AmbariImpl implements SoftwareManager {
          // a temp fix for it.
          //TODO(qjin): find out the root cause of failure in startting services
          for (int i = 0; i < REQUEST_MAX_RETRY_TIMES; i++) {
-            ApiRequest apiRequestSummary = apiManager.startAllServicesInCluster(clusterName);
             try {
+               ApiRequest apiRequestSummary = apiManager.startAllServicesInCluster(clusterName);
                success = doSoftwareOperation(clusterBlueprint.getName(), apiRequestSummary, clusterReport, reports);
                if (!success) {
                   logger.warn("Failed to start cluster services, retrying after 5 seconds...");

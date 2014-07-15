@@ -271,10 +271,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public boolean onStopCluster(ClusterBlueprint clusterBlueprint,
-         ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      return stopCluster(clusterBlueprint);
-
-      //TODO(qjin): handle reports
+         ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
+      return stopServices(clusterBlueprint, reportQueue);
    }
 
    @Override
@@ -434,49 +432,73 @@ public class ClouderaManagerImpl implements SoftwareManager {
       return false;
    }
 
-   private boolean needStart(String clusterName) {
-      if (!isProvisioned(clusterName)) {
-         return false;
-      }
-      for (ApiService apiService : apiResourceRootV6.getClustersResource().getServicesResource(clusterName).readServices(DataView.SUMMARY)) {
-         if (apiService.getServiceState().equals(ApiServiceState.STARTED) || apiService.getServiceState().equals(ApiServiceState.STARTING)) {
-            continue;
-         } else {
-            return true;
-         }
-      }
-      return false;
-   }
-
-   private boolean stopCluster(ClusterBlueprint clusterBlueprint) throws SoftwareManagementPluginException {
+   // When stop command failed to execute, we should not ignore it, because that will
+   // make the cloudera manager in inconsistent state with bde. So when we fail, we throw exception
+   private boolean stopServices(ClusterBlueprint clusterBlueprint, ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
       assert(clusterBlueprint != null && clusterBlueprint.getName() != null && !clusterBlueprint.getName().isEmpty());
       String clusterName = clusterBlueprint.getName();
+      CmClusterDef clusterDef;
+      ClusterReport report = null;
       try {
+         clusterDef = new CmClusterDef(clusterBlueprint);
+         report = clusterDef.getCurrentReport();
          if (isStopped(clusterName) || !needStop(clusterName)) {
+            report.setAction("No Need to Stop Services");
+            report.setSuccess(true);
             return true;
          }
          execute(apiResourceRootV6.getClustersResource().stopCommand(clusterName));
+         report.setSuccess(true);
+         report.setAction("Stopping Services Successfully");
+         report.setStatus(ServiceStatus.STOP_SUCCEED);
+         return true;
       } catch (Exception e) {
-         logger.error("Got an exception when cloudera manager stopping cluster", e);
+         logger.error("Got an exception when cloudera manager stopping services", e);
+         report.setAction("Failed to Stop Services. Ignoring");
+         report.setSuccess(false);
          throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(clusterName, e);
+      } finally {
+         report.setProgress(100);
+         report.setFinished(true);
+         reportQueue.addClusterReport(report.clone());
       }
-      return true;
    }
 
    @Override
    public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports) throws SoftwareManagementPluginException {
       assert(clusterBlueprint != null && clusterBlueprint.getName() != null && !clusterBlueprint.getName().isEmpty());
       String clusterName = clusterBlueprint.getName();
+      CmClusterDef clusterDef = null;
+      ClusterReport report = null;
+      boolean succeed = false;
       try {
-         if (!needStart(clusterName)) {
+         clusterDef = new CmClusterDef(clusterBlueprint);
+         report = clusterDef.getCurrentReport();
+         if (isStarted(clusterDef)) {
+            succeed = true;
             return true;
          }
          execute(apiResourceRootV6.getClustersResource().startCommand(clusterName));
+         succeed = true;
+         return true;
       } catch (Exception e) {
+         report.setAction("Start Services Failed");
+         report.setStatus(ServiceStatus.STARTUP_FAILED);
          logger.error("Got an exception when cloudera manager starting cluster", e);
          throw SoftwareManagementPluginException.START_CLUSTER_FAILED(clusterName, e);
+      } finally {
+         if (clusterDef != null) {
+            clusterDef.getCurrentReport().setFinished(true);
+            if (succeed) {
+               report.setSuccess(true);
+               report.setAction("Start Services Successfully");
+               report.setProgress(100);
+               report.setClusterAndNodesServiceStatus(ServiceStatus.RUNNING);
+               logger.info("Cloudera Manager started all services successfully.");
+            }
+            reports.addClusterReport(clusterDef.getCurrentReport().clone());
+         }
       }
-      return true;
    }
 
    private boolean isStopped(String clusterName) throws ClouderaManagerException {
@@ -1558,14 +1580,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       if (checkReturn && command != null
             && !(commandReturn = apiResourceRootV6.getCommandsResource().readCommand(command.getId())).getSuccess()) {
          logger.info("Failed to run command: " + command);
-         String errorMsg = command.getResultMessage();
-         if (errorMsg == null) {
-            if (command.getResultDataUrl() != null) {
-               errorMsg = referCmfUrlMsg(command.getResultDataUrl());
-            } else {
-               errorMsg = referCmfUrlMsg(domain + "/cmf/command/" + command.getId() + "/details");
-            }
-         }
+         String errorMsg = getErrorMsg(command, domain);
          throw new RuntimeException(errorMsg);
       }
 
@@ -1577,6 +1592,18 @@ public class ClouderaManagerImpl implements SoftwareManager {
       }
 
       return commandReturn;
+   }
+
+   private String getErrorMsg(ApiCommand command, String domain) {
+      String errorMsg = command.getResultMessage();
+      if (errorMsg == null) {
+         if (command.getResultDataUrl() != null) {
+            errorMsg = referCmfUrlMsg(command.getResultDataUrl());
+         } else {
+            errorMsg = referCmfUrlMsg(domain + "/cmf/command/" + command.getId() + "/details");
+         }
+      }
+      return errorMsg;
    }
 
    private String referCmfUrlMsg(String url) {

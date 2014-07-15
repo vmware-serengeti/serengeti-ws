@@ -94,6 +94,13 @@ public class ClusterReport implements Cloneable {
       }
    }
 
+   public void setClusterAndNodesServiceStatus(ServiceStatus status) {
+      setStatus(status);
+      for (NodeReport nodeReport : this.nodeReports.values()) {
+         nodeReport.setStatus(status);
+      }
+   }
+
    public boolean isSuccess() {
       return success;
    }
