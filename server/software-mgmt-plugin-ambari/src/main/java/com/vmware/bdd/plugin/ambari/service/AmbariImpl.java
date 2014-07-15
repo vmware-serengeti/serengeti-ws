@@ -27,7 +27,7 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapHostStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
-import com.vmware.bdd.plugin.ambari.api.model.ApiComponent;
+import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceComponent;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStack;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackList;
@@ -156,7 +156,7 @@ public class AmbariImpl implements SoftwareManager {
                            hadoopStack.getFullVersion());
                for (ApiStackService apiStackService : apiStackServiceList
                      .getApiStackServices()) {
-                  for (ApiComponent apiComponent : apiStackService
+                  for (ApiStackServiceComponent apiComponent : apiStackService
                         .getServiceComponents()) {
                      roles.add(apiComponent.getApiServiceComponent()
                            .getComponentName());
