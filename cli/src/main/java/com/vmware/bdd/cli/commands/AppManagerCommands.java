@@ -233,8 +233,10 @@ public class AppManagerCommands implements CommandMarker {
             } else {
                if (roles) {
                   String[] distroRoles = restClient.getRoles(name, distro);
-                  for (String distroRole : distroRoles) {
-                     System.out.println(distroRole);
+                  if (null != distroRoles) {
+                     for (String distroRole : distroRoles) {
+                        System.out.println(distroRole);
+                     }
                   }
                } else if (configurations) {
                   System.out.println(restClient.getConfigurations(name, distro));
