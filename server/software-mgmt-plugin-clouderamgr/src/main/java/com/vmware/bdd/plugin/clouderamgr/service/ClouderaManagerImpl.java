@@ -153,14 +153,14 @@ public class ClouderaManagerImpl implements SoftwareManager {
       return Constants.CDH_PLUGIN_NAME;
    }
 
-   @Override
+   /*@Override
    public Set<String> getSupportedRoles(HadoopStack hadoopStack) throws SoftwareManagementPluginException {
       try {
          return AvailableServiceRoleContainer.allRoles(CmUtils.majorVersionOfHadoopStack(hadoopStack));
       } catch (IOException e) {
          throw new SoftwareManagementPluginException(e.getMessage());
       }
-   }
+   }*/
 
    @Override
    public List<HadoopStack> getSupportedStacks() throws SoftwareManagementPluginException {

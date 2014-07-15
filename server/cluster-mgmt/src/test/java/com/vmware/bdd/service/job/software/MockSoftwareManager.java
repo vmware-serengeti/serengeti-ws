@@ -1,8 +1,6 @@
 package com.vmware.bdd.service.job.software;
 
 import java.util.List;
-import java.util.Set;
-
 import mockit.Mock;
 import mockit.MockClass;
 
@@ -85,13 +83,6 @@ public class MockSoftwareManager implements SoftwareManager {
 
    @Override
    public HealthStatus getStatus() throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   @Override
-   public Set<String> getSupportedRoles(HadoopStack hadoopStack)
-         throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return null;
    }

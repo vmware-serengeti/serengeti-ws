@@ -17,8 +17,6 @@ package com.vmware.bdd.rest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -885,7 +883,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/appmanager/{appManagerName}/distro/{distroName}/roles", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   public Set<String> getAppManagerDistroRoles(
+   public List<String> getAppManagerDistroRoles(
          @PathVariable("appManagerName") String appManagerName,
          @PathVariable("distroName") String distroName) {
       appManagerName = CommonUtil.decode(appManagerName);
@@ -909,7 +907,7 @@ public class RestResource {
       if (hadoopStack == null) {
          throw BddException.NOT_FOUND("Distro", distroName);
       } else {
-         return softMgr.getSupportedRoles(hadoopStack);
+         return hadoopStack.getRoles();
       }
    }
 

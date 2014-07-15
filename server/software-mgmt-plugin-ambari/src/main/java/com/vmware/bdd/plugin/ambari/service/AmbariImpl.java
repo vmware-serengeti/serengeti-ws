@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -113,12 +111,6 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public HealthStatus getStatus() {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   @Override
-   public Set<String> getSupportedRoles(HadoopStack hadoopStack) {
       // TODO Auto-generated method stub
       return null;
    }
@@ -545,9 +537,9 @@ public class AmbariImpl implements SoftwareManager {
       } else {
          clusterDef.getCurrentReport().setStatus(ServiceStatus.FAILED);
       }
-      Map<String, AmHealthState> hostStates = 
+      Map<String, AmHealthState> hostStates =
             apiManager.getHostStatus(blueprint.getName());
-      Map<String, NodeReport> nodeReports = 
+      Map<String, NodeReport> nodeReports =
             clusterDef.getCurrentReport().getNodeReports();
       for (AmNodeDef node : clusterDef.getNodes()) {
          String fqdn = node.getFqdn();

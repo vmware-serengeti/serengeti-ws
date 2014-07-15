@@ -17,7 +17,6 @@ package com.vmware.bdd.plugin.clouderamgr.service;
 import com.cloudera.api.ApiRootResource;
 import com.cloudera.api.ClouderaManagerClientBuilder;
 import com.cloudera.api.v6.RootResourceV6;
-import com.google.gson.Gson;
 import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
 import com.vmware.bdd.plugin.clouderamgr.service.cm.FakeRootResource;
 import com.vmware.bdd.plugin.clouderamgr.utils.SerialUtils;
@@ -38,7 +37,6 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Author: Xiaoding Bian
@@ -129,13 +127,13 @@ public class TestClouderaManagerImpl {
       Assert.assertTrue(stacks.get(1).getDistro().equals("CDH-4.7.0"));
    }
 
-   @Test( groups = { "TestClouderaManagerImpl" })
+   /*@Test( groups = { "TestClouderaManagerImpl" })
    public void testGetSupportedRoles() {
       HadoopStack stack = new HadoopStack();
       stack.setDistro("CDH-5.0.1");
       Set<String> roles = provider.getSupportedRoles(stack);
       System.out.println(roles.toString());
-   }
+   }*/
 
    @Test( groups = { "TestClouderaManagerImpl" })
    public void testGetSupportedConfigs() {

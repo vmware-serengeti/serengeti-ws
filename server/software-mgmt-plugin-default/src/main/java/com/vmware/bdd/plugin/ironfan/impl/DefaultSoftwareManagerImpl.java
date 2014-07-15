@@ -17,11 +17,8 @@ package com.vmware.bdd.plugin.ironfan.impl;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
@@ -87,17 +84,6 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    @Override
    public HealthStatus getStatus() {
       // TODO Auto-generated method stub
-      return null;
-   }
-
-   @Override
-   public Set<String> getSupportedRoles(HadoopStack hadoopStack) throws SoftwareManagementPluginException {
-      List<DistroRead> distros = distroManager.getDistros();
-      for (DistroRead distro : distros) {
-         if (hadoopStack.getDistro().equals(distro.getName())) {
-            return new HashSet(distro.getRoles());
-         }
-      }
       return null;
    }
 
