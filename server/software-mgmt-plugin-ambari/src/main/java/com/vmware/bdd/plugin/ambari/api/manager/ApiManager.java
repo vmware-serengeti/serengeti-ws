@@ -379,21 +379,21 @@ public class ApiManager implements IApiManager {
    @Override
    public AmHealthState getClusterStatus(String clusterName) {
       String fields = "ServiceComponentInfo";
-      String servicesWithState = 
+      String servicesWithState =
             apiResourceRootV1.getClustersResource()
             .getComponentsResource(clusterName).readComponentsWithFilter(fields);
       ApiComponentList componentList = ApiUtils.jsonToObject(ApiComponentList.class, servicesWithState);
       AmHealthState state = AmHealthState.HEALTHY;
       if (componentList.getApiComponents() != null) {
          for (ApiServiceComponent component : componentList.getApiComponents()) {
-        	 ApiServiceComponentInfo info = component.getApiServiceComponent();
-        	 if (info.getCategory().equalsIgnoreCase("CLIENT")
-        			 && (!ComponentStatus.INSTALLED.toString()
-        	                  .equalsIgnoreCase(info.getState()))) {
-        		 state = AmHealthState.UNHEALTHY;
-        	 } else if ((!info.getCategory().equalsIgnoreCase("CLIENT"))
-        			 && (!ComponentStatus.STARTED.toString()
-        	                  .equalsIgnoreCase(info.getState()))) {
+            ApiServiceComponentInfo info = component.getApiServiceComponent();
+            if (info.getCategory().equalsIgnoreCase("CLIENT")
+                  && (!ComponentStatus.INSTALLED.toString()
+                        .equalsIgnoreCase(info.getState()))) {
+               state = AmHealthState.UNHEALTHY;
+            } else if ((!info.getCategory().equalsIgnoreCase("CLIENT"))
+                  && (!ComponentStatus.STARTED.toString()
+                        .equalsIgnoreCase(info.getState()))) {
                state = AmHealthState.UNHEALTHY;
             }
          }
@@ -404,7 +404,7 @@ public class ApiManager implements IApiManager {
    @Override
    public Map<String, AmHealthState> getHostStatus(String clusterName) {
       String fields = "Hosts/host_status";
-      String hostsWithState = 
+      String hostsWithState =
             apiResourceRootV1.getClustersResource()
             .getHostsResource(clusterName).readHostsWithFilter(fields);
       ApiHostList hostList = ApiUtils.jsonToObject(ApiHostList.class, hostsWithState);

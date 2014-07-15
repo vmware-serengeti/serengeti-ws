@@ -86,7 +86,7 @@ public class TestAmbariImpl {
       Assert.assertTrue(report.getStatus() == ServiceStatus.RUNNING);
       report.getNodeReports();
       for (NodeReport nodeReport : report.getNodeReports().values()) {
-    	  Assert.assertTrue(nodeReport.getStatus() == ServiceStatus.RUNNING);
+         Assert.assertTrue(nodeReport.getStatus() == ServiceStatus.RUNNING);
       }
    }
 }

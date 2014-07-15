@@ -129,44 +129,45 @@ public class SoftwareSyncupService implements ISoftwareSyncUpService,
          }
 
          try {
-        	 Iterator<String> ite = clusterList.iterator();
-        	 for (String clusterName = ite.next(); ite.hasNext();) {
-        		 ClusterEntity cluster =
-        				 lockedEntityManager.getClusterEntityMgr().findByName(
-        						 clusterName);
-        		 if (cluster == null) {
-        			 logger.info("Cluster " + clusterName
-        					 + " does not exist, stop sync up for it.");
-        			 ite.remove();
-        			 continue;
-        		 }
+            Iterator<String> ite = clusterList.iterator();
+            for (String clusterName = ite.next(); ite.hasNext();) {
+               ClusterEntity cluster =
+                     lockedEntityManager.getClusterEntityMgr().findByName(
+                           clusterName);
+               if (cluster == null) {
+                  logger.info("Cluster " + clusterName
+                        + " does not exist, stop sync up for it.");
+                  ite.remove();
+                  continue;
+               }
 
-        		 if (!cluster.inStableStatus()) {
-        			 logger.debug("Cluster " + clusterName + " is in status "
-        					 + cluster.inStableStatus());
-        			 logger.debug("Do not sync up this time.");
-        			 continue;
-        		 }
-        		 ClusterBlueprint blueprint =
-        				 lockedEntityManager.getClusterEntityMgr().toClusterBluePrint(
-        						 clusterName);
-        		 SoftwareManager softMgr =
-        				 softwareManagerCollector
-        				 .getSoftwareManagerByClusterName(clusterName);
-        		 if (softMgr == null) {
-        			 logger.error("No software manager for cluster " + clusterName
-        					 + " available.");
-        			 continue;
-        		 }
-        		 ClusterReport report = softMgr.queryClusterStatus(blueprint);
-        		 if (report == null) {
-        			 logger.debug("No service status got from software manager, ignore it.");
-        			 continue;
-        		 }
-        		 setClusterStatus(clusterName, report);
-        	 }
+               if (!cluster.inStableStatus()) {
+                  logger.debug("Cluster " + clusterName + " is in status "
+                        + cluster.inStableStatus());
+                  logger.debug("Do not sync up this time.");
+                  continue;
+               }
+               ClusterBlueprint blueprint =
+                     lockedEntityManager.getClusterEntityMgr()
+                           .toClusterBluePrint(clusterName);
+               SoftwareManager softMgr =
+                     softwareManagerCollector
+                           .getSoftwareManagerByClusterName(clusterName);
+               if (softMgr == null) {
+                  logger.error("No software manager for cluster " + clusterName
+                        + " available.");
+                  continue;
+               }
+               ClusterReport report = softMgr.queryClusterStatus(blueprint);
+               if (report == null) {
+                  logger.debug("No service status got from software manager, ignore it.");
+                  continue;
+               }
+               setClusterStatus(clusterName, report);
+            }
          } catch (Exception e) {
-        	 logger.error("Failed to syncup cluster status for " + e.getMessage(), e);
+            logger.error(
+                  "Failed to syncup cluster status for " + e.getMessage(), e);
          }
          //add back all clusters for next time sync up.
          requestQueue.addAll(clusterList);
