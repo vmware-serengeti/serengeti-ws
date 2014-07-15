@@ -104,7 +104,7 @@ public class TestClusterManager extends AbstractTestNGSpringContextTests {
       }
    }
 
-   @Test
+   @Test(groups = { "TestClusterManager" })
    public void testWriteClusterSpecFileWithUTF8() throws Exception {
       final String dirPath = "src/test/resources";
       final String filePath = dirPath + "/클러스터.json";
@@ -168,7 +168,7 @@ public class TestClusterManager extends AbstractTestNGSpringContextTests {
       return buff.toString();
    }
 
-   @Test
+   @Test(groups = { "TestClusterManager" }, dependsOnMethods = "testWriteClusterSpecFileWithUTF8")
    public void testAsyncSetParamIoPriorityFailed() throws Exception {
       ClusterEntity cluster =
             TestClusterEntityManager.assembleClusterEntity(TEST_CLUSTER_NAME);
@@ -191,7 +191,7 @@ public class TestClusterManager extends AbstractTestNGSpringContextTests {
       }
    }
 
-   @Test
+   @Test(groups = { "TestClusterManager" }, dependsOnMethods = "testAsyncSetParamIoPriorityFailed")
    public void testAsyncSetParamAutoElasticityFailed() throws Exception {
       ClusterEntity cluster =
             TestClusterEntityManager.assembleClusterEntity(TEST_CLUSTER_NAME);
@@ -217,8 +217,7 @@ public class TestClusterManager extends AbstractTestNGSpringContextTests {
       }
    }
 
-
-   @Test
+   @Test(groups = { "TestClusterManager" }, dependsOnMethods = "testAsyncSetParamAutoElasticityFailed")
    public void testAsyncSetParamAutoElasticitySuccess() throws Exception {
       ClusterEntity cluster =
             TestClusterEntityManager.assembleClusterEntity(TEST_CLUSTER_NAME);
@@ -241,7 +240,7 @@ public class TestClusterManager extends AbstractTestNGSpringContextTests {
       assertTrue(true, "Should get exception but not.");
    }
 
-   @Test
+   @Test(groups = { "TestClusterManager" }, dependsOnMethods = "testAsyncSetParamAutoElasticitySuccess")
    public void testGetRackTopology() {
       IClusterEntityManager iclusterEntityManager =
             new MockUp<IClusterEntityManager>() {
