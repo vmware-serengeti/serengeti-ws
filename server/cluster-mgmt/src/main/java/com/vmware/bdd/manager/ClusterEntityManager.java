@@ -346,6 +346,37 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
 
    @Transactional
    @RetryTransaction
+   public void setClusterStatus(String clusterName, ClusterReport report) {
+      ClusterEntity cluster = findByName(clusterName);
+      switch (cluster.getStatus()) {
+      case RUNNING:
+         if (report.getStatus() != ServiceStatus.RUNNING) {
+            cluster.setStatus(ClusterStatus.SERVICE_ERROR);
+            logger.info("Got status " + report.getStatus()
+                  + ", change cluster status from RUNNING to SERVICE_ERROR.");
+         }
+         break;
+      case PROVISION_ERROR:
+      case ERROR:
+      case CONFIGURE_ERROR:
+      case UPGRADE_ERROR:
+      case SERVICE_ERROR:
+         if (report.getStatus() == ServiceStatus.RUNNING) {
+            cluster.setStatus(ClusterStatus.RUNNING);
+            logger.info("Got status " + report.getStatus()
+                  + ", change cluster status from " + cluster.getStatus()
+                  + " to RUNNING.");
+         }
+         break;
+      default:
+         break;
+      }
+      // process node status
+      handleOperationStatus(clusterName, report, true);
+   }
+
+   @Transactional
+   @RetryTransaction
    public boolean handleOperationStatus(String clusterName,
          ClusterReport report, boolean lastUpdate) {
       boolean finished = report.isFinished();
@@ -375,7 +406,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
             } else if (nodeReport.getAction() != null) {
                node.setAction(nodeReport.getAction());
             }
-            if (nodeReport.getErrMsg() != null) {
+            if (lastUpdate && nodeReport.getErrMsg() != null) {
                logger.debug("set node error message to:" + report.getAction());
                node.setErrMessage(nodeReport.getErrMsg());
             }

@@ -86,6 +86,8 @@ public interface IClusterEntityManager {
    public boolean handleOperationStatus(String clusterName,
          ClusterReport report, boolean lastUpdate);
 
+   public void setClusterStatus(String clusterName, ClusterReport report);
+
    public void syncUp(String clusterName, boolean updateClusterStatus);
 
    public void removeVmReference(String vmId);

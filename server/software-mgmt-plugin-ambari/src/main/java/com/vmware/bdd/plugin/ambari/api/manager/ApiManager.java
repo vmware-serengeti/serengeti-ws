@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.NotFoundException;
+
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
@@ -393,9 +395,11 @@ public class ApiManager implements IApiManager {
    @Override
    public AmHealthState getClusterStatus(String clusterName) {
       String fields = "ServiceComponentInfo";
-      String servicesWithState =
+      String servicesWithState = null;
+      servicesWithState =
             apiResourceRootV1.getClustersResource()
             .getComponentsResource(clusterName).readComponentsWithFilter(fields);
+
       ApiComponentList componentList = ApiUtils.jsonToObject(ApiComponentList.class, servicesWithState);
       AmHealthState state = AmHealthState.HEALTHY;
       if (componentList.getApiComponents() != null) {

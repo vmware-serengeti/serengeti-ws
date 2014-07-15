@@ -128,9 +128,10 @@ public class SoftwareSyncupService implements ISoftwareSyncUpService,
             return;
          }
 
-         try {
-            Iterator<String> ite = clusterList.iterator();
-            for (String clusterName = ite.next(); ite.hasNext();) {
+         Iterator<String> ite = clusterList.iterator();
+         for (String clusterName = ite.next(); ite.hasNext(); clusterName =
+               ite.next()) {
+            try {
                ClusterEntity cluster =
                      lockedEntityManager.getClusterEntityMgr().findByName(
                            clusterName);
@@ -163,71 +164,15 @@ public class SoftwareSyncupService implements ISoftwareSyncUpService,
                   logger.debug("No service status got from software manager, ignore it.");
                   continue;
                }
-               setClusterStatus(clusterName, report);
+               lockedEntityManager.getClusterEntityMgr().setClusterStatus(
+                     clusterName, report);
+            } catch (Exception e) {
+               logger.error("Failed to syncup status for cluster "
+                     + clusterName + ". Error message: " + e.getMessage(), e);
             }
-         } catch (Exception e) {
-            logger.error(
-                  "Failed to syncup cluster status for " + e.getMessage(), e);
          }
          //add back all clusters for next time sync up.
          requestQueue.addAll(clusterList);
-      }
-
-      @Transactional
-      @RetryTransaction
-      private void setClusterStatus(String clusterName, ClusterReport report) {
-         ClusterEntity cluster =
-               lockedEntityManager.getClusterEntityMgr()
-                     .findByName(clusterName);
-         switch (cluster.getStatus()) {
-         case RUNNING:
-            if (report.getStatus() != ServiceStatus.RUNNING) {
-               cluster.setStatus(ClusterStatus.SERVICE_ERROR);
-               logger.info("Got status " + report.getStatus()
-                     + ", change cluster status from RUNNING to SERVICE_ERROR.");
-            }
-            break;
-         case PROVISION_ERROR:
-         case ERROR:
-         case CONFIGURE_ERROR:
-         case UPGRADE_ERROR:
-         case SERVICE_ERROR:
-            if (report.getStatus() == ServiceStatus.RUNNING) {
-               cluster.setStatus(ClusterStatus.RUNNING);
-               logger.info("Got status " + report.getStatus()
-                     + ", change cluster status from " + cluster.getStatus()
-                     + " to RUNNING.");
-            }
-            break;
-         default:
-            break;
-         }
-
-         Map<String, NodeReport> nodeReports = report.getNodeReports();
-         List<NodeEntity> nodes =
-               lockedEntityManager.getClusterEntityMgr().findAllNodes(
-                     clusterName);
-         if (nodeReports != null && !nodeReports.isEmpty()) {
-            for (NodeEntity node : nodes) {
-               if (node.getStatus().ordinal() > NodeStatus.VM_READY.ordinal()) {
-                  NodeReport nodeReport = nodeReports.get(node.getVmName());
-                  if (nodeReport != null) {
-                     NodeStatus oldState = node.getStatus();
-                     if (nodeReport.getStatus() == ServiceStatus.RUNNING) {
-                        node.setStatus(NodeStatus.SERVICE_READY);
-                     } else {
-                        node.setStatus(NodeStatus.BOOTSTRAP_FAILED);
-                     }
-                     if (oldState != node.getStatus()) {
-                        logger.info("Got status " + nodeReport.getStatus()
-                              + " for node " + node.getVmName()
-                              + ", change VM status from " + node.getStatus()
-                              + " to " + node.getStatus());
-                     }
-                  }
-               }
-            }
-         }
       }
    }
 }

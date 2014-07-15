@@ -26,6 +26,8 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiTaskInfo;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
 
+import javax.ws.rs.NotFoundException;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -608,6 +610,7 @@ public class AmbariImpl implements SoftwareManager {
    @Override
    public ClusterReport queryClusterStatus(ClusterBlueprint blueprint) {
       AmClusterDef clusterDef = new AmClusterDef(blueprint, privateKey);
+      try {
       AmHealthState state = apiManager.getClusterStatus(blueprint.getName());
       if (AmHealthState.HEALTHY == state) {
          clusterDef.getCurrentReport().setStatus(ServiceStatus.RUNNING);
@@ -626,6 +629,10 @@ public class AmbariImpl implements SoftwareManager {
          } else {
             nodeReports.get(node.getName()).setStatus(ServiceStatus.FAILED);
          }
+      }
+      } catch (NotFoundException e) {
+         logger.info("Cluster " + blueprint.getName() + " does not exist in server.");
+         return null;
       }
       return clusterDef.getCurrentReport().clone();
    }
