@@ -27,9 +27,12 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapHostStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
+import com.vmware.bdd.plugin.ambari.api.model.ApiComponent;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStack;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackList;
+import com.vmware.bdd.plugin.ambari.api.model.ApiStackService;
+import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersionInfo;
 import com.vmware.bdd.plugin.ambari.api.model.BootstrapStatus;
@@ -40,6 +43,7 @@ import com.vmware.bdd.plugin.ambari.model.AmHealthState;
 import com.vmware.bdd.plugin.ambari.model.AmNodeDef;
 import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
 import com.vmware.bdd.plugin.ambari.poller.HostBootstrapPoller;
+import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -86,8 +90,7 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public String getName() {
-      // TODO Auto-generated method stub
-      return null;
+      return Constants.AMBARI_PLUGIN_NAME;
    }
 
    @Override
@@ -98,21 +101,27 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public String getType() {
-      // TODO Auto-generated method stub
-      return null;
+      return Constants.AMBARI_PLUGIN_NAME;
    }
 
    @Override
    public boolean echo() {
-      return true;
-      // TODO Auto-generated method stub
-
+      switch (apiManager.healthCheck()) {
+      case Constants.HEALTH_STATUS:
+         return true;
+      default:
+         return false;
+      }
    }
 
    @Override
    public HealthStatus getStatus() {
-      // TODO Auto-generated method stub
-      return null;
+      switch (apiManager.healthCheck()) {
+      case Constants.HEALTH_STATUS:
+         return HealthStatus.Connected;
+      default:
+         return HealthStatus.Disconnected;
+      }
    }
 
    @Override
@@ -139,6 +148,22 @@ public class AmbariImpl implements SoftwareManager {
                hadoopStack
                      .setFullVersion(apiStackVersionInfo.getStackVersion());
                hadoopStack.setVendor(apiStackVersionInfo.getStackName());
+
+               List<String> roles = new ArrayList<String>();
+               ApiStackServiceList apiStackServiceList =
+                     apiManager.stackServiceListWithComponents(
+                           hadoopStack.getVendor(),
+                           hadoopStack.getFullVersion());
+               for (ApiStackService apiStackService : apiStackServiceList
+                     .getApiStackServices()) {
+                  for (ApiComponent apiComponent : apiStackService
+                        .getServiceComponents()) {
+                     roles.add(apiComponent.getApiServiceComponent()
+                           .getComponentName());
+                  }
+               }
+               hadoopStack.setRoles(roles);
+
                hadoopStacks.add(hadoopStack);
             }
          }

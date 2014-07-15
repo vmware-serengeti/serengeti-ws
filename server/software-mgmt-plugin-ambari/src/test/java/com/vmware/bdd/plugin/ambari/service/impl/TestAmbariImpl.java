@@ -19,6 +19,7 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager.HealthStatus;
 
 public class TestAmbariImpl {
 //   private static final Logger logger = Logger.getLogger(TestAmbariImpl.class);
@@ -88,5 +89,25 @@ public class TestAmbariImpl {
       for (NodeReport nodeReport : report.getNodeReports().values()) {
          Assert.assertTrue(nodeReport.getStatus() == ServiceStatus.RUNNING);
       }
+   }
+   
+   @Test(groups = { "TestAmbariImpl" })
+   public void testEcho() throws IOException {
+      Assert.assertTrue(provider.echo());
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testGetStatus() throws IOException {
+      Assert.assertTrue(provider.getStatus().equals(HealthStatus.Connected));
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testGetSupportedRoles() throws IOException {
+
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testGetSupportedStacks() throws IOException {
+
    }
 }

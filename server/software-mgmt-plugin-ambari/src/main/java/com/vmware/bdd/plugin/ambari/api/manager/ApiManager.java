@@ -127,6 +127,21 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
+   public ApiStackServiceList stackServiceListWithComponents(String stackName,
+         String stackVersion) {
+      String apiStackServicesWithComponentsJson =
+            apiResourceRootV1.getStacks2Resource()
+                  .getStackVersionsResource(stackName)
+                  .getStackServicesResource(stackVersion).readStackServicesWithCompoents("serviceComponents");
+      logger.debug("Response of service list with components of stack from ambari server:");
+      logger.debug(apiStackServicesWithComponentsJson);
+      ApiStackServiceList apiStackServices =
+            ApiUtils.jsonToObject(ApiStackServiceList.class,
+                  apiStackServicesWithComponentsJson);
+      return apiStackServices;
+   }
+
+   @Override
    public ApiStackService stackService(String stackName, String stackVersion,
          String stackServiceName) {
       String apiStackServiceJson =
@@ -425,4 +440,10 @@ public class ApiManager implements IApiManager {
       }
       return result;
    }
+
+   public String healthCheck() {
+      String healthStatus = apiResourceRootV1.getHealthCheck().check();
+      return healthStatus;
+   }
+
 }

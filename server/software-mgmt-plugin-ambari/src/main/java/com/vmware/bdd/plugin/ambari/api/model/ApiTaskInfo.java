@@ -14,8 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.model;
 
-import java.util.Map;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 

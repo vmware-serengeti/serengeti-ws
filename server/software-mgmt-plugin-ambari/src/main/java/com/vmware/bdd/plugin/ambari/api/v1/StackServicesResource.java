@@ -19,6 +19,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.vmware.bdd.plugin.ambari.api.Parameters;
@@ -32,9 +33,13 @@ public interface StackServicesResource {
    public String readStackServices();
 
    @GET
+   @Path("/")
+   public String readStackServicesWithCompoents(@QueryParam("fields") String fields);
+
+   @GET
    @Path("/{stackServiceName}")
    public String readStackService(@PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName);
-   
+
    @Path("/{stackServiceName}/serviceComponents")
    public ServiceComponentsResource getServiceComponentsResource(@PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName);
 

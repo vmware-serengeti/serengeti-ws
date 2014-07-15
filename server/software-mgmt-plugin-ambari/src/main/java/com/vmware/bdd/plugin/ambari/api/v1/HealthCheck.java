@@ -14,30 +14,18 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.v1;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-@Path("")
-public interface RootResourceV1 {
-   /**
-    * Lists all known clusters.
-    */
-   @Path("/clusters")
-   public ClustersResource getClustersResource();
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
-   /**
-    * Lists all known bootstrap.
-    */
-   @Path("/bootstrap")
-   public BootstrapResource getBootstrapResource();
+@Consumes({ MediaType.APPLICATION_JSON })
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
+public interface HealthCheck {
 
-   /**
-    * Lists all known blueprints.
-    */
-   @Path("/blueprints")
-   public BlueprintsResource getBlueprintsResource();
+   @GET
+   @Path("/")
+   public String check();
 
-   @Path("/stacks2")
-   public Stacks2Resource getStacks2Resource();
-
-   @Path("/check")
-   public HealthCheck getHealthCheck();
 }

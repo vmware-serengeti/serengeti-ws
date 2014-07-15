@@ -50,6 +50,9 @@ public interface IApiManager {
    public ApiStackServiceList stackServiceList(String stackName,
          String stackVersion);
 
+   public ApiStackServiceList stackServiceListWithComponents(String stackName,
+         String stackVersion);
+
    public ApiStackService stackService(String stackName, String stackVersion,
          String stackServiceName);
 
@@ -94,4 +97,6 @@ public interface IApiManager {
    public AmHealthState getClusterStatus(String clusterName);
 
    public Map<String, AmHealthState> getHostStatus(String clusterName);
+   
+   public String healthCheck();
 }

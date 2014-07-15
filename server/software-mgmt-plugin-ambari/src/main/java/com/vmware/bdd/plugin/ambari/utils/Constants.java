@@ -12,32 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.v1;
+package com.vmware.bdd.plugin.ambari.utils;
 
-import javax.ws.rs.Path;
-@Path("")
-public interface RootResourceV1 {
-   /**
-    * Lists all known clusters.
-    */
-   @Path("/clusters")
-   public ClustersResource getClustersResource();
+public interface Constants {
 
-   /**
-    * Lists all known bootstrap.
-    */
-   @Path("/bootstrap")
-   public BootstrapResource getBootstrapResource();
+   public static final String AMBARI_PLUGIN_NAME = "Ambari";
+   public static final String HEALTH_STATUS = "RUNNING";
 
-   /**
-    * Lists all known blueprints.
-    */
-   @Path("/blueprints")
-   public BlueprintsResource getBlueprintsResource();
-
-   @Path("/stacks2")
-   public Stacks2Resource getStacks2Resource();
-
-   @Path("/check")
-   public HealthCheck getHealthCheck();
 }
