@@ -51,6 +51,10 @@ public class SoftwareManagementPluginException extends RuntimeException {
       return new SoftwareManagementPluginException("CREATE_CLUSTER_FAILED", message, cause);
    }
 
+   public static SoftwareManagementPluginException RETRIEVE_SUPPORTED_STACKS(String message, Throwable cause) {
+      return new SoftwareManagementPluginException("RETRIEVE_SUPPORTED_STACKS", message, cause);
+   }
+
    public static SoftwareManagementPluginException DELETE_CLUSTER_FAILED(String clusterName, Throwable cause) {
       return new SoftwareManagementPluginException("DELETE_CLUSTER_FAILED", "Failed to delete cluster " + clusterName, cause);
    }

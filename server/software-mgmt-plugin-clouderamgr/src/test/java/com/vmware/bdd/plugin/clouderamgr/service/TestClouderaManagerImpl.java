@@ -124,16 +124,10 @@ public class TestClouderaManagerImpl {
    public void testGetSupportedStacks() {
       List<HadoopStack> stacks = provider.getSupportedStacks();
       Assert.assertTrue(stacks.get(0).getDistro().equals("CDH-5.0.2"));
+      Assert.assertTrue(stacks.get(0).getRoles().contains("YARN_NODE_MANAGER"));
       Assert.assertTrue(stacks.get(1).getDistro().equals("CDH-4.7.0"));
+      Assert.assertFalse(stacks.get(1).getRoles().contains("YARN_NODE_MANAGER"));
    }
-
-   /*@Test( groups = { "TestClouderaManagerImpl" })
-   public void testGetSupportedRoles() {
-      HadoopStack stack = new HadoopStack();
-      stack.setDistro("CDH-5.0.1");
-      Set<String> roles = provider.getSupportedRoles(stack);
-      System.out.println(roles.toString());
-   }*/
 
    @Test( groups = { "TestClouderaManagerImpl" })
    public void testGetSupportedConfigs() {

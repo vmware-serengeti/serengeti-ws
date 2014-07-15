@@ -170,23 +170,31 @@ public class ClouderaManagerImpl implements SoftwareManager {
       apiCluster.setName(randomClusterName);
       apiCluster.setVersion(ApiClusterVersion.CDH5);
       clusterList.add(apiCluster);
-      apiResourceRootV6.getClustersResource().createClusters(clusterList);
-
-      List<HadoopStack> hadoopStacks = new ArrayList<HadoopStack>();
-      for (ApiParcel apiParcel : apiResourceRootV6.getClustersResource().getParcelsResource(randomClusterName)
-            .readParcels(DataView.SUMMARY).getParcels()) {
-         if (apiParcel.getProduct().equals(Constants.CDH_REPO_PREFIX)) {
-            DefaultArtifactVersion parcelVersion = new DefaultArtifactVersion(apiParcel.getVersion());
-            HadoopStack stack = new HadoopStack();
-            stack.setDistro(apiParcel.getProduct(), parcelVersion.getMajorVersion() + "."
-                  + parcelVersion.getMinorVersion() + "." + parcelVersion.getIncrementalVersion());
-            stack.setFullVersion(apiParcel.getVersion());
-            stack.setVendor(Constants.CDH_DISTRO_VENDOR);
-            hadoopStacks.add(stack);
+      try {
+         List<HadoopStack> hadoopStacks = new ArrayList<HadoopStack>();
+         apiResourceRootV6.getClustersResource().createClusters(clusterList);
+         for (ApiParcel apiParcel : apiResourceRootV6.getClustersResource().getParcelsResource(randomClusterName)
+               .readParcels(DataView.SUMMARY).getParcels()) {
+            if (apiParcel.getProduct().equals(Constants.CDH_REPO_PREFIX)) {
+               DefaultArtifactVersion parcelVersion = new DefaultArtifactVersion(apiParcel.getVersion());
+               HadoopStack stack = new HadoopStack();
+               stack.setDistro(apiParcel.getProduct(), parcelVersion.getMajorVersion() + "."
+                     + parcelVersion.getMinorVersion() + "." + parcelVersion.getIncrementalVersion());
+               stack.setFullVersion(apiParcel.getVersion());
+               stack.setVendor(Constants.CDH_DISTRO_VENDOR);
+               List<String> roles = new ArrayList<String>();
+               for (String role : AvailableServiceRoleContainer.allRoles(parcelVersion.getMajorVersion())) {
+                  roles.add(role);
+               }
+               stack.setRoles(roles);
+               hadoopStacks.add(stack);
+            }
          }
+         apiResourceRootV6.getClustersResource().deleteCluster(randomClusterName);
+         return hadoopStacks;
+      } catch (Exception e) {
+         throw SoftwareManagementPluginException.RETRIEVE_SUPPORTED_STACKS(e.getMessage(), e);
       }
-      apiResourceRootV6.getClustersResource().deleteCluster(randomClusterName);
-      return hadoopStacks;
    }
 
    @Override
