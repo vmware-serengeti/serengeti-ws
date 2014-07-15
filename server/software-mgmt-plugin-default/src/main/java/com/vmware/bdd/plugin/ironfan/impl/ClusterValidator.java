@@ -306,13 +306,14 @@ public class ClusterValidator {
 
                      //check if datanode and region server are seperate
                      List<String> roles = nodeGroup.getRoles();
-                     if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE
+                     // TODO: After refactor the error message handle,  need uncomment it.
+                     /* if (roles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE
                            .toString())
                            && !roles.contains(HadoopRole.HADOOP_DATANODE
                                  .toString())) {
                         warningMsgList
                         .add(Constants.REGISONSERVER_DATANODE_SEPERATION);
-                     }
+                     } */
                      break;
                   case CLIENT:
                      if (nodeGroup.isHaEnabled()) {
