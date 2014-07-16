@@ -97,23 +97,24 @@ public class NodeGroupCreate {
    }
 
    public NodeGroupInfo toNodeGroupInfo() {
-        NodeGroupInfo nodeGroupInfo = new NodeGroupInfo();
-        nodeGroupInfo.setName(name);
-        nodeGroupInfo.setInstanceNum(instanceNum);
-        nodeGroupInfo.setRoles(roles);
-        nodeGroupInfo.setConfiguration(configuration);
-        if (haFlag.equalsIgnoreCase(Constants.HA_FLAG_FT) || 
-              haFlag.equalsIgnoreCase(Constants.HA_FLAG_ON)) {
-           nodeGroupInfo.setHaEnabled(true);
-        }
-        nodeGroupInfo.setInstanceType(instanceType);
-        nodeGroupInfo.setPlacement(placementPolicies);
-        if (storage != null) {
-           nodeGroupInfo.setStorageSize(storage.getSizeGB());
-           nodeGroupInfo.setStorageType(storage.getType());
-        }
-        nodeGroupInfo.setNodes(null);
-        return nodeGroupInfo;
+      NodeGroupInfo nodeGroupInfo = new NodeGroupInfo();
+      nodeGroupInfo.setName(name);
+      nodeGroupInfo.setInstanceNum(instanceNum);
+      nodeGroupInfo.setRoles(roles);
+      nodeGroupInfo.setConfiguration(configuration);
+      if (haFlag != null
+            && (haFlag.equalsIgnoreCase(Constants.HA_FLAG_FT) || haFlag
+                  .equalsIgnoreCase(Constants.HA_FLAG_ON))) {
+         nodeGroupInfo.setHaEnabled(true);
+      }
+      nodeGroupInfo.setInstanceType(instanceType);
+      nodeGroupInfo.setPlacement(placementPolicies);
+      if (storage != null) {
+         nodeGroupInfo.setStorageSize(storage.getSizeGB());
+         nodeGroupInfo.setStorageType(storage.getType());
+      }
+      nodeGroupInfo.setNodes(null);
+      return nodeGroupInfo;
    }
 
    public Map<String, Object> getConfiguration() {
