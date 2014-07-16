@@ -153,6 +153,7 @@ public class Constants {
    public static final String VSPHERE_PROVIDER_TYPE = "VC";
    public static final String HA_FLAG_ON = "on";
    public static final String HA_FLAG_FT = "ft";
+   public static final String HA_FLAG_OFF = "off";
 
    public static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE = "elastic_runtime.automation.enable";
    public static final String MUST_CONFIGURE_FQDN =

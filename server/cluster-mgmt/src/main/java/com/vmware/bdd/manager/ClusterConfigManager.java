@@ -668,7 +668,12 @@ public class ClusterConfigManager {
             getSoftwareManager(clusterEntity.getAppManager());
       CommonClusterExpandPolicy.expandGroupInstanceType(groupEntity, group,
             sharedPattern, localPattern, softwareManager);
-      groupEntity.setHaFlag(group.getHaFlag());
+      String haFlag = group.getHaFlag();
+      if (haFlag == null) {
+         groupEntity.setHaFlag(Constants.HA_FLAG_OFF);
+      } else {
+         groupEntity.setHaFlag(haFlag);
+      }
       if (group.getConfiguration() != null
             && group.getConfiguration().size() > 0) {
          groupEntity.setHadoopConfig(gson.toJson(group.getConfiguration()));
