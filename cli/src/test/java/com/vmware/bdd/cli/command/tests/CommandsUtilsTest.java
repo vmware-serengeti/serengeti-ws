@@ -364,6 +364,7 @@ public class CommandsUtilsTest {
          String topologyInfo = CommandsUtils.dataFromFile(topologyFile);
          assertTrue(topologyInfo.contains("192.168.0.4"));
          assertTrue(topologyInfo.contains("/rack2/host3"));
+         assertTrue(topologyInfo.contains("192.168.0.2 /rack1/host2"));
          assertEquals(topologyInfo.split(",").length, 4);
          f.delete();
       }
