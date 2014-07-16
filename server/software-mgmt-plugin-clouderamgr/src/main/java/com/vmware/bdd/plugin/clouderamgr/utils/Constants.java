@@ -31,5 +31,13 @@ public interface Constants {
    public static final String CONFIG_FS_CHECKPOINT_DIR_LIST = "fs_checkpoint_dir_list";
    public static final String CONFIG_NM_LOCAL_DIRS = "yarn_nodemanager_local_dirs";
 
+   // HA configs
+   public static final String CONFIG_DFS_JOURNALNODE_EDITS_DIR = "dfs_journalnode_edits_dir";
+   public static final String CONFIG_AUTO_FAILOVER_ENABLED = "autofailover_enabled";
+   public static final String CONFIG_DFS_FEDERATION_NAMESERVICE = "dfs_federation_namenode_nameservice";
+   public static final String CONFIG_DFS_NAMENODE_QUORUM_JOURNAL_NAME = "dfs_namenode_quorum_journal_name";
+
+   public static final String CONFIG_ZOOKEEPER_SERVER_ID = "serverId";
+
    public static final String ROLE_CONFIG_GROUP_UPDATE_NOTES = "Update Base Role Config Group By VMware Big Data Extention";
 }

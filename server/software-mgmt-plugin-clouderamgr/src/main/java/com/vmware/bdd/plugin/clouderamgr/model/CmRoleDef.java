@@ -31,12 +31,22 @@ public class CmRoleDef extends AbstractCmServiceRole{
    @Expose
    private String nodeRef;
 
+   private boolean isActive; // only useful for NN HA so far
+
    public String getNodeRef() {
       return nodeRef;
    }
 
    public void setNodeRef(String nodeRef) {
       this.nodeRef = nodeRef;
+   }
+
+   public boolean isActive() {
+      return isActive;
+   }
+
+   public void setActive(boolean isActive) {
+      this.isActive = isActive;
    }
 
    @Override

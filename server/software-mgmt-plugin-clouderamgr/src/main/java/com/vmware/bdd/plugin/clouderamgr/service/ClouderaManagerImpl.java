@@ -25,6 +25,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.cloudera.api.model.ApiRoleConfigGroup;
+import com.google.gson.GsonBuilder;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
+import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
+import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableManagementService;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableParcelStage;
+import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
+import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
+import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
+import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -45,7 +56,6 @@ import com.cloudera.api.model.ApiHostRef;
 import com.cloudera.api.model.ApiHostRefList;
 import com.cloudera.api.model.ApiParcel;
 import com.cloudera.api.model.ApiRole;
-import com.cloudera.api.model.ApiRoleConfigGroup;
 import com.cloudera.api.model.ApiRoleNameList;
 import com.cloudera.api.model.ApiRoleState;
 import com.cloudera.api.model.ApiService;
@@ -56,20 +66,10 @@ import com.cloudera.api.v3.ParcelResource;
 import com.cloudera.api.v6.RootResourceV6;
 import com.cloudera.api.v6.ServicesResourceV6;
 import com.google.common.collect.ImmutableList;
-import com.google.gson.GsonBuilder;
-import com.vmware.aurora.util.AuAssert;
-import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
 import com.vmware.bdd.plugin.clouderamgr.model.CmClusterDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmNodeDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmRoleDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmServiceDef;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableManagementService;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableParcelStage;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
-import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
-import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
-import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
-import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -81,7 +81,6 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
-import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 
 /**
  * Author: Xiaoding Bian
@@ -219,7 +218,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
       CmClusterDef clusterDef = null;
       try {
          clusterDef = new CmClusterDef(blueprint);
-         //provisionManagement();
          provisionCluster(clusterDef, reportQueue);
          provisionParcels(clusterDef, reportQueue);
          configureServices(clusterDef, reportQueue);
@@ -999,6 +997,11 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
          Set<String> serviceTypes = cluster.allServiceTypes();
          switch (typeName) {
+            case "HDFS":
+               if (cluster.isFailoverEnabled()) {
+                  apiServiceConfig.add(new ApiConfig("zookeeper_service", cluster.serviceNameOfType("ZOOKEEPER")));
+               }
+               break;
             case "YARN": //TODO: Compute Only
                apiServiceConfig.add(new ApiConfig("hdfs_service", cluster.serviceNameOfType("HDFS")));
                break;
@@ -1146,6 +1149,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
                case "HDFS_SECONDARY_NAMENODE":
                   configList.add(new ApiConfig(Constants.CONFIG_FS_CHECKPOINT_DIR_LIST, "/tmp/dfs/snn"));
                   break;
+               case "HDFS_JOURNALNODE":
+                  configList.add(new ApiConfig(Constants.CONFIG_DFS_JOURNALNODE_EDITS_DIR, "/tmp/dfs/jn"));
+                  break;
                case "YARN_NODE_MANAGER":
                   configList.add(new ApiConfig(Constants.CONFIG_NM_LOCAL_DIRS, "/tmp/yarn/nm"));
                   break;
@@ -1162,6 +1168,130 @@ public class ClouderaManagerImpl implements SoftwareManager {
             }
          }
       }
+   }
+
+   /**
+    *
+    * @param cluster
+    * @param reportQueue
+    */
+   private void startNnHA(final CmClusterDef cluster, final ClusterReportQueue reportQueue, final int endProgress) throws Exception {
+
+      // Initialize Zookeeper
+      CmServiceDef zkService = cluster.serviceDefOfType("ZOOKEEPER");
+
+      executeAndReport("Initializing Zookeeper", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+            .zooKeeperInitCommand(zkService.getName()),
+            INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false);
+
+      startService(cluster, zkService, (cluster.getCurrentReport().getProgress() + endProgress) / 2, reportQueue);
+
+      // Initialize High Availability state in Zookeeper
+      CmServiceDef hdfsService = cluster.serviceDefOfType("HDFS");
+      // TODO: multiple nameservices
+      for (CmRoleDef roleDef : hdfsService.getRoles()) {
+         if (roleDef.getType().getDisplayName().equals("HDFS_FAILOVER_CONTROLLER") && roleDef.isActive()) {
+            executeAndReport("Initialize High Availability state in Zookeeper", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                  .getRoleCommandsResource(hdfsService.getName())
+                  .hdfsInitializeAutoFailoverCommand(new ApiRoleNameList(ImmutableList.<String>builder().add(roleDef.getName()).build())),
+                  INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false);
+            break;
+         }
+      }
+
+      // Start JournalNodes
+      ApiRoleNameList jnRoles = new ApiRoleNameList();
+      for (CmRoleDef roleDef : hdfsService.getRoles()) {
+         if (roleDef.getType().getDisplayName().equals("HDFS_JOURNALNODE")) {
+            jnRoles.add(roleDef.getName());
+         }
+      }
+      executeAndReport("Starting JournalNodes", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+            .getRoleCommandsResource(hdfsService.getName()).startCommand(jnRoles),
+            INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false);
+
+      /*
+      1) Format active NN
+      2) Intialize shared edits directory of NameNode
+      3) Start active NN
+      */
+      for (CmRoleDef roleDef : hdfsService.getRoles()) {
+         if (roleDef.getType().getDisplayName().equals("HDFS_NAMENODE") && roleDef.isActive()) {
+            ApiRoleNameList nnRoles = new ApiRoleNameList();
+            nnRoles.add(roleDef.getName());
+            try {
+               executeAndReport("Formating Active Namenode",
+                     apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                           .getRoleCommandsResource(hdfsService.getName()).formatCommand(nnRoles),
+                     INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false);
+            } catch (Exception e){
+               // ignore
+            }
+
+            try {
+               executeAndReport("Initializing Shared Edits Directory of Namenode",
+                     apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                           .getRoleCommandsResource(hdfsService.getName()).hdfsInitializeSharedDirCommand(nnRoles),
+                     INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false);
+            } catch (Exception e) {
+               // ignore
+            }
+
+            executeAndReport("Starting Active Namenode", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                  .getRoleCommandsResource(hdfsService.getName()).startCommand(nnRoles),
+                  INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
+
+            break;    // TODO: federation
+         }
+      }
+
+      // Wait for active NameNode start up
+      Thread.sleep(10 * 1000); // TODO: wait until standby NN started responding to RPCs
+
+      /*
+      1) Bootstrapping standby NN
+      2) Start standby NN
+       */
+      for (CmRoleDef roleDef : hdfsService.getRoles()) {
+         if (roleDef.getType().getDisplayName().equals("HDFS_NAMENODE") && !roleDef.isActive()) {
+
+            ApiRoleNameList nnRoles = new ApiRoleNameList();
+            nnRoles.add(roleDef.getName());
+            executeAndReport("Boostrapping Standby Namenode",
+                  apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                        .getRoleCommandsResource(hdfsService.getName()).hdfsBootstrapStandByCommand(nnRoles),
+                  INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
+
+            executeAndReport("Starting Standby Namenode", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                  .getRoleCommandsResource(hdfsService.getName()).startCommand(nnRoles),
+                  INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
+
+            break;
+         }
+      }
+
+      // Start Failover controllers
+      List<String> failOverRoles = new ArrayList<String>();
+      for (CmRoleDef roleDef : hdfsService.getRoles()) {
+         if (roleDef.getType().getDisplayName().equals("HDFS_FAILOVER_CONTROLLER")) {
+            failOverRoles.add(roleDef.getName());
+         }
+      }
+
+      executeAndReport("Starting Failover Controllers", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+            .getRoleCommandsResource(hdfsService.getName()).startCommand(new ApiRoleNameList(failOverRoles)),
+            INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
+
+      // Wait for standby NameNode start up
+      Thread.sleep(10 * 1000); // TODO: wait until standby NN started responding to RPCs
+
+      // Create HDFS /tmp directory
+      executeAndReport("Creating HDFS Temp Dir", apiResourceRootV6.getClustersResource()
+            .getServicesResource(cluster.getName()).hdfsCreateTmpDir(hdfsService.getName()),
+            INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
+
+      // Start all other roles;
+      startService(cluster, hdfsService, endProgress, reportQueue);
    }
 
    /**
@@ -1182,7 +1312,19 @@ public class ClouderaManagerImpl implements SoftwareManager {
             }
             if (!isStarted(cluster)) {
                int leftServices = cluster.getServices().size();
+               if (cluster.isFailoverEnabled()) {
+                  int haProgress = cluster.getCurrentReport().getProgress()
+                        + (endProgress - cluster.getCurrentReport().getProgress()) * 2 / leftServices;
+                  startNnHA(cluster, reportQueue, haProgress);
+                  leftServices -= 2;
+               }
+
                for (CmServiceDef serviceDef : cluster.getServices()) {
+                  if (apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                        .readService(serviceDef.getName()).getServiceState().equals(ApiServiceState.STARTED)) {
+                     // Zookeeper and HDFS services may be already started in startNnHA()
+                     continue;
+                  }
                   if (isFirstStart) {
                      // pre start
                      preStartServices(cluster, serviceDef, reportQueue);
@@ -1192,7 +1334,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
                   }
 
                   // start
-                  startService(cluster, serviceDef, reportQueue);
+                  startService(cluster, serviceDef, INVALID_PROGRESS, reportQueue);
 
                   if (isFirstStart) {
                      // post start
@@ -1251,13 +1393,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
                   .createHBaseRootCommand(serviceDef.getName()),
                   INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
          case "ZOOKEEPER":
-
             executeAndReport("Initializing Zookeeper", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                   .zooKeeperInitCommand(serviceDef.getName()),
                   INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false);
-            execute(
-                  apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                        .zooKeeperInitCommand(serviceDef.getName()), false);
             break;
          case "SOLR":
             execute(
@@ -1309,6 +1447,10 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    private void postStartServices(final CmClusterDef cluster, CmServiceDef serviceDef, final ClusterReportQueue reportQueue) throws Exception {
       switch (serviceDef.getType().getDisplayName()) {
+         case "HDFS":
+            executeAndReport("Creating HDFS Temp Dir", apiResourceRootV6.getClustersResource()
+                  .getServicesResource(cluster.getName()).hdfsCreateTmpDir(serviceDef.getName()),
+                  INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false);
          default:
             break;
       }
@@ -1316,22 +1458,15 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    private void postStartRoles(final CmClusterDef cluster, CmServiceDef serviceDef, CmRoleDef roleDef, final ClusterReportQueue reportQueue) throws Exception {
       switch (roleDef.getType().getDisplayName()) {
-         case "HDFS_NAMENODE":
-            ApiRoleNameList formatList = new ApiRoleNameList();
-            formatList.add(roleDef.getName());
-            executeAndReport("Creating HDFS Temp Dir", apiResourceRootV6.getClustersResource()
-                  .getServicesResource(cluster.getName()).hdfsCreateTmpDir(serviceDef.getName()),
-                  INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false);
-            break;
          default:
             break;
       }
    }
 
-   private void startService(CmClusterDef cluster, CmServiceDef serviceDef, final ClusterReportQueue reportQueue) throws Exception {
+   private void startService(CmClusterDef cluster, CmServiceDef serviceDef, int toProgress, final ClusterReportQueue reportQueue) throws Exception {
       executeAndReport("Starting Service " + serviceDef.getType().getDisplayName(), apiResourceRootV6.getClustersResource()
             .getServicesResource(cluster.getName()).startCommand(serviceDef.getName()),
-            INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false);
+            toProgress, cluster.getCurrentReport(), reportQueue, true);
    }
 
    private void startManagement() {
@@ -1345,7 +1480,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
          // ignore
       }
    }
-
 
    public void unconfigureServices(final CmClusterDef cluster) throws Exception {
       for (String serviceName : cluster.allServiceNames()) {

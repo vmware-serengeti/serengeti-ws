@@ -42,6 +42,7 @@ import com.cloudera.api.model.ApiRollingRestartArgs;
 import com.cloudera.api.model.ApiService;
 import com.cloudera.api.model.ApiServiceConfig;
 import com.cloudera.api.model.ApiServiceList;
+import com.cloudera.api.model.ApiServiceState;
 import com.cloudera.api.v1.ActivitiesResource;
 import com.cloudera.api.v1.NameservicesResource;
 import com.cloudera.api.v3.RoleConfigGroupsResource;
@@ -153,7 +154,9 @@ public class FakeServicesResource implements ServicesResourceV6 {
 
    @Override
    public ApiService readService(String s) {
-      return null;
+      ApiService apiService = new ApiService();
+      apiService.setServiceState(ApiServiceState.UNKNOWN);
+      return apiService;
    }
 
    @Override

@@ -62,6 +62,8 @@ public class CmClusterDef implements Serializable {
    @Expose
    private List<CmServiceDef> services;
 
+   private boolean failoverEnabled;
+
    private ClusterReport currentReport;
 
    private static String NAME_SEPARATOR = "_";
@@ -83,7 +85,11 @@ public class CmClusterDef implements Serializable {
       this.nodes = new ArrayList<CmNodeDef>();
       this.services = new ArrayList<CmServiceDef>();
       this.currentReport = new ClusterReport(blueprint);
+      this.failoverEnabled = isFailoverEnabled(blueprint);
+      Integer zkIdIndex = 1;
+      Integer nameServiceIndex = 0;
       for (NodeGroupInfo group : blueprint.getNodeGroups()) {
+         boolean alreadyHasActive = false;
          for (NodeInfo node : group.getNodes()) {
             CmNodeDef nodeDef = new CmNodeDef();
             nodeDef.setIpAddress(node.getMgtIpAddress());
@@ -108,15 +114,48 @@ public class CmClusterDef implements Serializable {
                switch (roleType.getDisplayName()) {
                   case "HDFS_NAMENODE":
                      roleDef.addConfig(Constants.CONFIG_DFS_NAME_DIR_LIST, dataDirs(node.getVolumes(), "/dfs/nn"));
+                     if (failoverEnabled) {
+                        if (!alreadyHasActive) {
+                           nameServiceIndex++;
+                        }
+                        roleDef.addConfig(Constants.CONFIG_AUTO_FAILOVER_ENABLED, "true");
+                        roleDef.addConfig(Constants.CONFIG_DFS_FEDERATION_NAMESERVICE, "nameservice" + nameServiceIndex.toString()); // TODO: federation
+                        roleDef.addConfig(Constants.CONFIG_DFS_NAMENODE_QUORUM_JOURNAL_NAME, "nameservice" + nameServiceIndex.toString());
+                        roleDef.setActive(!alreadyHasActive);
+
+                        // auto-complete Failover Controller role
+                        if (!group.getRoles().contains("HDFS_FAILOVER_CONTROLLER")) {
+                           CmRoleDef failoverRole = new CmRoleDef();
+                           AvailableServiceRole failoverRoleType = AvailableServiceRoleContainer.load("HDFS_FAILOVER_CONTROLLER");
+                           failoverRole.setName(node.getName() + NAME_SEPARATOR + service.getType().getName() + NAME_SEPARATOR + failoverRoleType.getName()); // temp name
+                           failoverRole.setType(failoverRoleType);
+                           failoverRole.setNodeRef(nodeDef.getNodeId());
+                           failoverRole.addConfigs(blueprint.getConfiguration());
+                           failoverRole.addConfigs(group.getConfiguration()); // group level configs will override cluster level configs
+                           failoverRole.setActive(!alreadyHasActive);
+                           service.addRole(failoverRole);
+                        }
+                        alreadyHasActive = true;
+                     }
+                     break;
+                  case "HDFS_FAILOVER_CONTROLLER":
+                     roleDef.setActive(!alreadyHasActive);
                      break;
                   case "HDFS_DATANODE":
                      roleDef.addConfig(Constants.CONFIG_DFS_DATA_DIR_LIST, dataDirs(node.getVolumes(), "/dfs/dn"));
+                     break;
+                  case "HDFS_JOURNALNODE":
+                     roleDef.addConfig(Constants.CONFIG_DFS_JOURNALNODE_EDITS_DIR, node.getVolumes().get(0) + "/dfs/jn");
                      break;
                   case "HDFS_SECONDARY_NAMENODE":
                      roleDef.addConfig(Constants.CONFIG_FS_CHECKPOINT_DIR_LIST, dataDirs(node.getVolumes(), "/dfs/snn"));
                      break;
                   case "YARN_NODE_MANAGER":
                      roleDef.addConfig(Constants.CONFIG_NM_LOCAL_DIRS, dataDirs(node.getVolumes(), "/yarn/nm"));
+                     break;
+                  case "ZOOKEEPER_SERVER":
+                     roleDef.addConfig(Constants.CONFIG_ZOOKEEPER_SERVER_ID, zkIdIndex.toString());
+                     zkIdIndex += 1;
                      break;
                   default:
                      break;
@@ -128,6 +167,24 @@ public class CmClusterDef implements Serializable {
          }
       }
    }
+
+   public boolean isFailoverEnabled() {
+      return failoverEnabled;
+   }
+
+   private boolean isFailoverEnabled(ClusterBlueprint blueprint) {
+      int nnNum = 0;
+      for (NodeGroupInfo group : blueprint.getNodeGroups()) {
+         for (String role : group.getRoles()) {
+            if (role.equals("HDFS_NAMENODE")) {
+               nnNum += group.getInstanceNum();
+            }
+         }
+      }
+
+      return nnNum > 1;
+   }
+
 
    private String dataDirs(List<String> volumes, String postFix) {
       List<String> dirList = new ArrayList<String>();
@@ -238,24 +295,18 @@ public class CmClusterDef implements Serializable {
       return allServiceTypes;
    }
 
-   /**
-    * A cluster should has only one service for a given service type
-    * @param type
-    * @return
-    */
-   public String serviceNameOfType(AvailableServiceRole type) {
-      for (CmServiceDef serviceDef : this.services) {
-         if (type.equals(serviceDef.getType())) {
-            return serviceDef.getName();
-         }
+   public String serviceNameOfType(String typeName) {
+      CmServiceDef serviceDef = serviceDefOfType(typeName);
+      if (serviceDef == null) {
+         return null;
       }
-      return null;
+      return serviceDef.getName();
    }
 
-   public String serviceNameOfType(String typeName) {
+   public CmServiceDef serviceDefOfType(String typeName) {
       for (CmServiceDef serviceDef : this.services) {
          if (typeName.equalsIgnoreCase(serviceDef.getType().getDisplayName())) {
-            return serviceDef.getName();
+            return serviceDef;
          }
       }
       return null;
@@ -308,5 +359,4 @@ public class CmClusterDef implements Serializable {
 
       return nodeRefToRolesMap;
    }
-
 }
