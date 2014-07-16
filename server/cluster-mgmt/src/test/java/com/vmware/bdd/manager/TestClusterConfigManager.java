@@ -41,6 +41,7 @@ import org.testng.annotations.Test;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.DistroRead;
@@ -539,6 +540,9 @@ public class TestClusterConfigManager {
       }
       cluster = clusterEntityMgr.findByName("my-cluster-external-hdfs");
       Assert.assertTrue(cluster != null);
+      Assert.assertEquals(cluster.getAdvancedProperties(), "{\"ExternalHDFS\":\"hdfs://168.192.0.70:8020\"}");
+      ClusterRead clusterRead = clusterEntityMgr.toClusterRead("my-cluster-external-hdfs");
+      Assert.assertEquals(clusterRead.getExternalHDFS(), "hdfs://168.192.0.70:8020");
 
       ClusterCreate attrs =
             clusterConfigMgr.getClusterConfig("my-cluster-external-hdfs");
@@ -555,6 +559,59 @@ public class TestClusterConfigManager {
       Assert.assertTrue(manifest.indexOf(hdfsArray[3]) == -1,
             "\"fs.default.name\" must be coved under the node group 2 level");
 
+   }
+
+   @Test(groups = { "TestClusterConfigManager" })
+   public void testClusterConfigWithExternalMapReduce() throws Exception {
+      String externalMR = "192.168.0.1:8021";
+      String externalHDFS = "hdfs://192.168.0.2:8020";
+      ClusterCreate spec = new ClusterCreate();
+      spec.setName("my-cluster-external-mr");
+      List<String> rps = new ArrayList<String>();
+      rps.add("myRp1");
+      spec.setRpNames(rps);
+      spec.setNetworkConfig(createNetConfigs());
+      spec.setDistro("apache");
+      spec.setDistroVendor(Constants.DEFAULT_VENDOR);
+      spec.setExternalMapReduce(externalMR);
+      spec.setExternalHDFS(externalHDFS);
+      String clusterConfigJson =
+            "{\"configuration\":{\"hadoop\":{\"mapred-site.xml\":{\"mapred.job.tracker\":\""
+                  + externalMR
+                  + "\"}, \"core-site.xml\":{\"fs.default.name\":\""
+                  + externalHDFS + "\"}}}}";
+      Map clusterConfig = (new Gson()).fromJson(clusterConfigJson, Map.class);
+      spec.setConfiguration((Map<String, Object>) (clusterConfig
+            .get("configuration")));
+      // build 3 worker groups
+      NodeGroupCreate worker = new NodeGroupCreate();
+      List<String> computeRoles = new ArrayList<String>();
+      computeRoles.add("hadoop_tasktracker");
+      worker.setRoles(computeRoles);
+      worker.setName("compute1");
+      worker.setInstanceNum(2);
+      worker.setInstanceType(InstanceType.MEDIUM);
+      StorageRead storage = new StorageRead();
+      storage.setType("LOCAL");
+      storage.setSizeGB(10);
+      worker.setStorage(storage);
+      spec.setNodeGroups(new NodeGroupCreate[] { worker });
+
+      spec = ClusterSpecFactory.getCustomizedSpec(spec);
+      clusterConfigMgr.createClusterConfig(spec);
+      ClusterEntity cluster =
+            clusterEntityMgr.findByName("my-cluster-external-mr");
+
+      Assert.assertTrue(cluster != null);
+      Assert.assertEquals(
+            cluster.getAdvancedProperties(),
+            "{\"ExternalMapReduce\":\"192.168.0.1:8021\",\"ExternalHDFS\":\"hdfs://192.168.0.2:8020\"}");
+      ClusterRead clusterRead =
+            clusterEntityMgr.toClusterRead("my-cluster-external-mr");
+      Assert.assertEquals(clusterRead.getExternalHDFS(),
+            "hdfs://192.168.0.2:8020");
+      Assert.assertEquals(clusterRead.getExternalMapReduce(),
+            "192.168.0.1:8021");
    }
 
    @SuppressWarnings({ "unchecked", "rawtypes" })

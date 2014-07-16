@@ -24,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -345,6 +346,27 @@ public class CommandsUtilsTest {
          }
       }
 
+   }
+
+   @Test
+   public void testGracefulRackTopologyOutput() throws Exception {
+      String topologyFile = "src/test/resources/topology.data";
+      Map<String, String> racksTopology = new HashMap<String, String>();
+      racksTopology.put("192.168.0.1", "/rack1/host1");
+      racksTopology.put("192.168.0.2", "/rack1/host2");
+      racksTopology.put("192.168.0.3", "/rack1/host1");
+      racksTopology.put("192.168.0.4", "/rack2/host3");
+      CommandsUtils
+            .gracefulRackTopologyOutput(racksTopology, topologyFile, ",");
+      File f = new File(topologyFile);
+      assertTrue(f.exists());
+      if (f.exists()) {
+         String topologyInfo = CommandsUtils.dataFromFile(topologyFile);
+         assertTrue(topologyInfo.contains("192.168.0.4"));
+         assertTrue(topologyInfo.contains("/rack2/host3"));
+         assertEquals(topologyInfo.split(",").length, 4);
+         f.delete();
+      }
    }
 
    private void removeProperties(String propertiesFilePath,
