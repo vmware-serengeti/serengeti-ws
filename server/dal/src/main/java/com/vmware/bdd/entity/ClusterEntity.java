@@ -350,7 +350,7 @@ public class ClusterEntity extends EntityBase {
       ClusterStatus[] stableStatus =
             new ClusterStatus[] { ClusterStatus.RUNNING, ClusterStatus.STOPPED,
                   ClusterStatus.CONFIGURE_ERROR, ClusterStatus.ERROR,
-                  ClusterStatus.PROVISION_ERROR };
+                  ClusterStatus.PROVISION_ERROR, ClusterStatus.SERVICE_ERROR };
 
       return Arrays.asList(stableStatus).contains(this.status);
    }

@@ -16,15 +16,8 @@ package com.vmware.bdd.plugin.ambari.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import com.vmware.bdd.plugin.ambari.api.model.ApiTask;
-import com.vmware.bdd.plugin.ambari.api.model.ApiTaskInfo;
-import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
-import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
 
 import javax.ws.rs.NotFoundException;
 
@@ -37,16 +30,19 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapHostStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceComponent;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStack;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackService;
+import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceComponent;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersionInfo;
+import com.vmware.bdd.plugin.ambari.api.model.ApiTask;
+import com.vmware.bdd.plugin.ambari.api.model.ApiTaskInfo;
 import com.vmware.bdd.plugin.ambari.api.model.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ClusterRequestStatus;
+import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.exception.AmException;
 import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
 import com.vmware.bdd.plugin.ambari.model.AmHealthState;

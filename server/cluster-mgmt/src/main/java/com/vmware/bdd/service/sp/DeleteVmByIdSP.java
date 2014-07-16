@@ -74,6 +74,12 @@ public class DeleteVmByIdSP implements Callable<Void> {
                VcUtil.processNotFoundException(e, vmId, logger);
                return null;
             } catch (Exception e) {
+               if (e.getCause() != null &&
+                     e.getCause() instanceof ManagedObjectNotFound) {
+                  VcUtil.processNotFoundException(
+                        (ManagedObjectNotFound) e.getCause(), vmId, logger);
+                  return null;
+               }
                //if vm is in inaccessible state, unregister VM directly
                if (vcVm.getConnectionState() == ConnectionState.inaccessible) {
                   logger.error("Failed to delete VM " + vcVm.getName(), e);

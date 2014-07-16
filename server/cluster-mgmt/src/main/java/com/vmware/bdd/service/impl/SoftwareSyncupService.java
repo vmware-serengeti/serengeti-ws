@@ -14,10 +14,10 @@
  ***************************************************************************/
 package com.vmware.bdd.service.impl;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -28,13 +28,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.vmware.bdd.aop.annotation.RetryTransaction;
-import com.vmware.bdd.apitypes.ClusterStatus;
-import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.entity.ClusterEntity;
-import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.manager.SoftwareManagerCollector;
 import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
 import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
@@ -42,8 +37,6 @@ import com.vmware.bdd.service.ISoftwareSyncUpService;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
-import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
-import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 
 @Service
 public class SoftwareSyncupService implements ISoftwareSyncUpService,
@@ -91,7 +84,7 @@ public class SoftwareSyncupService implements ISoftwareSyncUpService,
       StatusSyncUpTask task =
             new StatusSyncUpTask(lockedEntityManager, softwareManagerCollector,
                   requestQueue);
-      syncupTimer.schedule(task, SYNCUP_INTERVAL_MILLISECONDS);
+      syncupTimer.scheduleAtFixedRate(task, new Date(), SYNCUP_INTERVAL_MILLISECONDS);
    }
 
    @Override
@@ -143,7 +136,7 @@ public class SoftwareSyncupService implements ISoftwareSyncUpService,
                }
 
                if (!cluster.inStableStatus()) {
-                  logger.debug("Cluster " + clusterName + " is in status "
+                  logger.debug("Cluster " + clusterName + " is in stable status "
                         + cluster.inStableStatus());
                   logger.debug("Do not sync up this time.");
                   continue;
@@ -164,15 +157,17 @@ public class SoftwareSyncupService implements ISoftwareSyncUpService,
                   logger.debug("No service status got from software manager, ignore it.");
                   continue;
                }
+               logger.debug("Got cluster status: " + report.getStatus());
                lockedEntityManager.getClusterEntityMgr().setClusterStatus(
                      clusterName, report);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                logger.error("Failed to syncup status for cluster "
                      + clusterName + ". Error message: " + e.getMessage(), e);
             }
          }
          //add back all clusters for next time sync up.
          requestQueue.addAll(clusterList);
+         logger.debug("queued cluster names: " + requestQueue);
       }
    }
 }
