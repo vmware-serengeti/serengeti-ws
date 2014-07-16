@@ -1665,7 +1665,7 @@ public class ClusterCommands implements CommandMarker {
          String failureNameWarningMsg =
                getValidateWarningMsg(whiteListResult.getFailureNames(),
                      Constants.PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING);
-         if (!warningMsgList.isEmpty()) {
+         if (warningMsgList != null) {
             if (!CommonUtil.isBlank(noExistingWarningMsg)) {
                warningMsgList.add(noExistingWarningMsg);
             }
