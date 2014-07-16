@@ -19,6 +19,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.bdd.plugin.ambari.api.model.ApiTask;
+import com.vmware.bdd.plugin.ambari.api.model.ApiTaskInfo;
+import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
+import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
+
 import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.lang.StringUtils;
@@ -38,16 +43,12 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceComponent;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersionInfo;
-import com.vmware.bdd.plugin.ambari.api.model.ApiTask;
-import com.vmware.bdd.plugin.ambari.api.model.ApiTaskInfo;
 import com.vmware.bdd.plugin.ambari.api.model.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ClusterRequestStatus;
-import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.exception.AmException;
 import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
 import com.vmware.bdd.plugin.ambari.model.AmHealthState;
 import com.vmware.bdd.plugin.ambari.model.AmNodeDef;
-import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
 import com.vmware.bdd.plugin.ambari.poller.HostBootstrapPoller;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
@@ -191,20 +192,23 @@ public class AmbariImpl implements SoftwareManager {
       boolean success = false;
       AmClusterDef clusterDef = null;
       try {
+         logger.info("Blueprint:");
+         logger.info(ApiUtils.objectToJson(blueprint));
          logger.info("Start cluster " + blueprint.getName() + " creation.");
          clusterDef = new AmClusterDef(blueprint, privateKey);
          provisionCluster(clusterDef, reportQueue);
          success = true;
-         clusterDef.getCurrentReport().setAction("Successfully Create Cluster");
+         clusterDef.getCurrentReport().setAction("Successfully create cluster");
          clusterDef.getCurrentReport().setProgress(
                ProgressSplit.PROVISION_SUCCESS.getProgress());
          clusterDef.getCurrentReport().setSuccess(true);
       } catch (Exception e) {
-         clusterDef.getCurrentReport().setAction("Failed to Create Cluster");
+         clusterDef.getCurrentReport().setAction("Failed to create cluster");
          clusterDef.getCurrentReport().setSuccess(false);
-         logger.error(e.getMessage());
+         String errorMessage = errorMessage("Failed to create cluster " + blueprint.getName(), e);
+         logger.error(errorMessage);
          throw SoftwareManagementPluginException.CREATE_CLUSTER_FAILED(
-               e.getMessage(), e);
+               errorMessage, e);
       } finally {
          clusterDef.getCurrentReport().setFinished(true);
          reportStatus(clusterDef.getCurrentReport(), reportQueue);
@@ -218,7 +222,7 @@ public class AmbariImpl implements SoftwareManager {
       return null;
    }
 
-   public boolean isProvisioned(String clusterName)
+   private boolean isProvisioned(String clusterName)
          throws SoftwareManagementPluginException {
       try {
          for (ApiCluster apiCluster : apiManager.clusterList().getClusters()) {
@@ -233,7 +237,7 @@ public class AmbariImpl implements SoftwareManager {
       return false;
    }
 
-   public void provisionCluster(final AmClusterDef clusterDef,
+   private void provisionCluster(final AmClusterDef clusterDef,
          final ClusterReportQueue reportQueue)
          throws SoftwareManagementPluginException {
       try {
@@ -252,12 +256,14 @@ public class AmbariImpl implements SoftwareManager {
          }
 
       } catch (Exception e) {
+         String errorMessage = errorMessage("Failed to provision cluster " + clusterDef.getName(), e);
+         logger.error(errorMessage);
          throw SoftwareManagementPluginException.CREATE_CLUSTER_FAILED(
-               e.getMessage(), e);
+               errorMessage, e);
       }
    }
 
-   public void bootstrap(final AmClusterDef clusterDef,
+   private void bootstrap(final AmClusterDef clusterDef,
          final ClusterReportQueue reportQueue)
          throws SoftwareManagementPluginException {
       try {
@@ -268,7 +274,7 @@ public class AmbariImpl implements SoftwareManager {
          reportStatus(clusterDef.getCurrentReport(), reportQueue);
 
          ApiBootstrap apiBootstrapRequest =
-               apiManager.createBootstrap(clusterDef.toApibootStrap());
+               apiManager.createBootstrap(clusterDef.toApiBootStrap());
 
          HostBootstrapPoller poller =
                new HostBootstrapPoller(apiManager, apiBootstrapRequest,
@@ -294,7 +300,7 @@ public class AmbariImpl implements SoftwareManager {
             allHostsBootstrapped = false;
          }
          if (!success) {
-            String errmsg = null;
+            String errmsg = "";
             List<String> notBootstrapNodes = new ArrayList<String>();
             if (!allHostsBootstrapped) {
                for (AmNodeDef node : clusterDef.getNodes()) {
@@ -323,14 +329,15 @@ public class AmbariImpl implements SoftwareManager {
          }
       } catch (Exception e) {
          clusterDef.getCurrentReport().setAction("Failed to bootstrap host");
-         logger.error(e.getMessage());
-         throw AmException.BOOTSTRAP_FAILED(e.getMessage(), e);
+         String errorMessage = errorMessage("Failed to bootstrap hosts of cluster " + clusterDef.getName(), e);
+         logger.error(errorMessage);
+         throw AmException.BOOTSTRAP_FAILED(errorMessage, e);
       } finally {
          reportQueue.addClusterReport(clusterDef.getCurrentReport().clone());
       }
    }
 
-   public void createBlueprint(final AmClusterDef clusterDef,
+   private void createBlueprint(final AmClusterDef clusterDef,
          final ClusterReportQueue reportQueue)
          throws SoftwareManagementPluginException {
       try {
@@ -348,14 +355,15 @@ public class AmbariImpl implements SoftwareManager {
          }
       } catch (Exception e) {
          clusterDef.getCurrentReport().setAction("Failed to create blueprint");
-         logger.error(e.getMessage());
-         throw AmException.CREATE_BLUEPRINT_FAILED(e.getMessage(), e);
+         String errorMessage = errorMessage("Failed to create blueprint of cluster " + clusterDef.getName(), e);
+         logger.error(errorMessage);
+         throw AmException.CREATE_BLUEPRINT_FAILED(errorMessage, e);
       } finally {
          reportStatus(clusterDef.getCurrentReport(), reportQueue);
       }
    }
 
-   public boolean isBlueprintcreated(final AmClusterDef clusterDef)
+   private boolean isBlueprintcreated(final AmClusterDef clusterDef)
          throws SoftwareManagementPluginException {
       try {
          for (ApiBlueprint apiBlueprint : apiManager.blueprintList()
@@ -366,12 +374,12 @@ public class AmbariImpl implements SoftwareManager {
             }
          }
       } catch (Exception e) {
-         throw AmException.UNSURE_BLUEPRINT_EXIST(e.getMessage(), e);
+         throw AmException.UNSURE_BLUEPRINT_EXIST(clusterDef.getName());
       }
       return false;
    }
 
-   public void provisionWithBlueprint(final AmClusterDef clusterDef,
+   private void provisionWithBlueprint(final AmClusterDef clusterDef,
          final ClusterReportQueue reportQueue)
          throws SoftwareManagementPluginException {
       try {
@@ -411,8 +419,9 @@ public class AmbariImpl implements SoftwareManager {
       } catch (Exception e) {
          clusterDef.getCurrentReport().setAction(
                "Failed to provision cluster with blueprint");
-         logger.error(e.getMessage());
-         throw AmException.PROVISION_WITH_BLUEPRINT_FAILED(e.getMessage(), e);
+         String errorMessage = errorMessage("Failed to provision cluster " + clusterDef.getName() + " with blueprint", e);
+         logger.error(errorMessage);
+         throw AmException.PROVISION_WITH_BLUEPRINT_FAILED(errorMessage, e);
       } finally {
          reportQueue.addClusterReport(clusterDef.getCurrentReport().clone());
       }
@@ -687,5 +696,13 @@ public class AmbariImpl implements SoftwareManager {
       List<HadoopStack> hadoopStacks = getSupportedStacks();
       Collections.<HadoopStack> sort(hadoopStacks);
       return hadoopStacks.get(0);
+   }
+
+   private String errorMessage(String defaultMessage, Exception e) {
+      String errorMessage = defaultMessage;
+      if (e.getMessage() != null) {
+         errorMessage = e.getMessage();
+      }
+      return errorMessage;
    }
 }

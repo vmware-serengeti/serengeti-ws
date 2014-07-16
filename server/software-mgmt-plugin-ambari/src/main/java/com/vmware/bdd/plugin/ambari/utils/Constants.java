@@ -18,5 +18,6 @@ public interface Constants {
 
    public static final String AMBARI_PLUGIN_NAME = "Ambari";
    public static final String HEALTH_STATUS = "RUNNING";
+   public static final String AMBARI_SSH_USER = "serengeti";
 
 }

@@ -58,7 +58,6 @@ public class ClusterOperationPoller extends StatusPoller {
    @Override
    public boolean poll() {
       Long requestId = apiRequestSummary.getApiRequestInfo().getRequestId();
-      logger.info("Waiting for cluster request " + requestId + " to complete.");
       ApiRequest apiRequest =
             apiManager.requestWithTasks(clusterName, requestId);
 
@@ -97,8 +96,15 @@ public class ClusterOperationPoller extends StatusPoller {
          if (toProgress >= endProgress) {
             toProgress = endProgress;
          }
-         if (toProgress != currentProgress
-               || clusterRequestStatus.isCompletedState()) {
+         boolean isCompletedState = clusterRequestStatus.isCompletedState();
+         if ((toProgress != currentProgress) && (provisionPercent % 10 == 0)
+               || isCompletedState) {
+            if (isCompletedState) {
+               logger.info("Cluster request " + requestId + " is completed.");
+            } else {
+               logger.info("Waiting for cluster request " + requestId
+                     + " to complete.");
+            }
             currentReport.setProgress(toProgress);
             reportQueue.addClusterReport(currentReport.clone());
          }

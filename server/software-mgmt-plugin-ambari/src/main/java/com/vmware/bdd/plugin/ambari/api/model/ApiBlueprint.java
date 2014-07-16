@@ -15,6 +15,7 @@
 package com.vmware.bdd.plugin.ambari.api.model;
 
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -23,6 +24,9 @@ public class ApiBlueprint {
 
    @Expose
    private String href;
+
+   @Expose
+   private List<Map<String, Object>> configurations;
 
    @Expose
    @SerializedName("host_groups")
@@ -38,6 +42,14 @@ public class ApiBlueprint {
 
    public void setHref(String href) {
       this.href = href;
+   }
+
+   public List<Map<String, Object>> getConfigurations() {
+      return configurations;
+   }
+
+   public void setConfigurations(List<Map<String, Object>> configurations) {
+      this.configurations = configurations;
    }
 
    public ApiBlueprintInfo getApiBlueprintInfo() {

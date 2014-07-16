@@ -17,7 +17,6 @@ package com.vmware.bdd.plugin.ambari.api.utils;
 import java.lang.reflect.Constructor;
 import java.util.Date;
 
-import com.google.gson.GsonBuilder;
 import org.apache.log4j.Logger;
 import org.joda.time.Duration;
 import org.joda.time.Instant;

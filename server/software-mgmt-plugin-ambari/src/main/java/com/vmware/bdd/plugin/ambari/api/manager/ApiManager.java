@@ -19,8 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.NotFoundException;
-
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
@@ -289,6 +287,8 @@ public class ApiManager implements IApiManager {
    @Override
    public ApiRequest provisionCluster(String clusterName,
          ApiClusterBlueprint apiClusterBlueprint) {
+      logger.info("ApiClusterBlueprint:");
+      logger.info(ApiUtils.objectToJson(apiClusterBlueprint));
       String requestJson =
             apiResourceRootV1.getClustersResource().createCluster(clusterName,
                   ApiUtils.objectToJson(apiClusterBlueprint));
@@ -313,6 +313,8 @@ public class ApiManager implements IApiManager {
    @Override
    public ApiBlueprint createBlueprint(String blueprintName,
          ApiBlueprint apiBlueprint) {
+      logger.info("ApiBlueprint:");
+      logger.info(ApiUtils.objectToJson(apiBlueprint));
       String blueprintJson =
             apiResourceRootV1.getBlueprintsResource().createBlueprint(
                   blueprintName, ApiUtils.objectToJson(apiBlueprint));
@@ -356,6 +358,8 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiBootstrap createBootstrap(ApiBootstrap bootstrap) {
+      logger.info("ApiBootstrap:");
+      logger.info(ApiUtils.objectToJson(bootstrap));
       String bootstrapJson =
             apiResourceRootV1.getBootstrapResource().createBootstrap(
                   ApiUtils.objectToJson(bootstrap));

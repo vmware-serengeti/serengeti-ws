@@ -32,7 +32,7 @@ public class AmException extends SoftwareManagementPluginException {
 
    public static AmException UNSURE_CLUSTER_EXIST(String clusterName) {
       return new AmException("UNSURE_CLUSTER_EXIST", "cluster " + clusterName
-            + "not sure exist", null);
+            + " not sure exist", null);
    }
 
    public static AmException STOP_SERVICES_FAILED(String clusterName,
@@ -49,9 +49,9 @@ public class AmException extends SoftwareManagementPluginException {
       return new AmException("CREATE_BLUEPRINT_FAILED", message, cause);
    }
 
-   public static AmException UNSURE_BLUEPRINT_EXIST(String message,
-         Throwable cause) {
-      return new AmException("UNSURE_BLUEPRINT_EXIST", message, cause);
+   public static AmException UNSURE_BLUEPRINT_EXIST(String blueprintName) {
+      return new AmException("UNSURE_BLUEPRINT_EXIST", "blueprint "
+            + blueprintName + " not sure exist", null);
    }
 
    public static AmException PROVISION_WITH_BLUEPRINT_FAILED(String message,

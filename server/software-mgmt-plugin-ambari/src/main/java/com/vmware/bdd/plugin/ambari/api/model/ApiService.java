@@ -17,8 +17,6 @@ package com.vmware.bdd.plugin.ambari.api.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.HashMap;
-
 /**
  * Created by qjin on 7/4/14.
  */

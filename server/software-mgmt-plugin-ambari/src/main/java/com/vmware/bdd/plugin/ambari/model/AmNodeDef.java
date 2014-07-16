@@ -26,6 +26,7 @@ import com.google.gson.annotations.Expose;
 import com.vmware.bdd.plugin.ambari.api.model.ApiComponentInfo;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHost;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHostGroup;
+import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 
 public class AmNodeDef implements Serializable {
 
@@ -133,44 +134,11 @@ public class AmNodeDef implements Serializable {
       return StringUtils.join(dirList, ",");
    }
 
-   public void setBlueprintConfigurationsToAm(Map<String, Object> configuration) {
-      if (configuration != null) {
-         for (String ConfigurationType : configuration.keySet()) {
-            setConfigurations(ConfigurationType,
-                  (Map<String, String>) configuration.get(ConfigurationType));
-         }
-      }
-   }
-
-   public void addConfiguration(String ConfigurationType, String propertyName,
+   public void addConfiguration(String configurationType, String propertyName,
          String propertyValue) {
       Map<String, String> property = new HashMap<String, String>();
       property.put(propertyName, propertyValue);
-      setConfigurations(ConfigurationType, property);
-   }
-
-   public void setConfigurations(String ConfigurationType,
-         Map<String, String> property) {
-      Map<String, Object> configuration = new HashMap<String, Object>();
-      configuration.put(ConfigurationType, property);
-      if (configurations == null || configurations.isEmpty()) {
-         configurations = new ArrayList<Map<String, Object>>();
-         configurations.add(configuration);
-      } else {
-         boolean isContainsKey = false;
-         for (Map<String, Object> nodeConfiguration : configurations) {
-            if (nodeConfiguration.containsKey(ConfigurationType)) {
-               Map<String, String> properties =
-                     (Map<String, String>) nodeConfiguration
-                           .get(ConfigurationType);
-               properties.putAll(property);
-               isContainsKey = true;
-            }
-         }
-         if (!isContainsKey) {
-            configurations.add(configuration);
-         }
-      }
+      this.configurations = AmUtils.toAmConfigurations(this.configurations, configurationType, property);
    }
 
    public ApiHostGroup toApiHostGroupForBlueprint() {

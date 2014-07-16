@@ -17,6 +17,7 @@ package com.vmware.bdd.plugin.ambari.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.annotations.Expose;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprint;
@@ -24,6 +25,8 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprintInfo;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHostGroup;
+import com.vmware.bdd.plugin.ambari.utils.AmUtils;
+import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
@@ -56,13 +59,18 @@ public class AmClusterDef implements Serializable {
 
    private ClusterReport currentReport;
 
+   @Expose
+   private List<Map<String, Object>> configurations;
+
    public AmClusterDef(ClusterBlueprint blueprint, String privateKey) {
       this.name = blueprint.getName();
       this.version = blueprint.getHadoopStack().getFullVersion();
       this.verbose = true;
       this.sshKey = privateKey;
-      this.user = "serengeti";
+      this.user = Constants.AMBARI_SSH_USER;
       this.currentReport = new ClusterReport(blueprint);
+      this.configurations =
+            AmUtils.toAmConfigurations(blueprint.getConfiguration());
 
       this.nodes = new ArrayList<AmNodeDef>();
       for (NodeGroupInfo group : blueprint.getNodeGroups()) {
@@ -72,7 +80,8 @@ public class AmClusterDef implements Serializable {
             nodeDef.setIp(node.getMgtIpAddress());
             nodeDef.setFqdn(node.getHostname());
             nodeDef.setRackInfo(node.getRack());
-            nodeDef.setBlueprintConfigurationsToAm(group.getConfiguration());
+            nodeDef.setConfigurations(AmUtils.toAmConfigurations(group
+                  .getConfiguration()));
             nodeDef.setComponents(group.getRoles());
             nodeDef.setVolumns(node.getVolumes());
             this.nodes.add(nodeDef);
@@ -86,7 +95,7 @@ public class AmClusterDef implements Serializable {
    }
 
    public String getName() {
-     return name;
+      return name;
    }
 
    public void setName(String name) {
@@ -149,7 +158,15 @@ public class AmClusterDef implements Serializable {
       this.currentReport = currentReport;
    }
 
-   public ApiBootstrap toApibootStrap() {
+   public List<Map<String, Object>> getConfigurations() {
+      return configurations;
+   }
+
+   public void setConfigurations(List<Map<String, Object>> configurations) {
+      this.configurations = configurations;
+   }
+
+   public ApiBootstrap toApiBootStrap() {
       ApiBootstrap apiBootstrap = new ApiBootstrap();
       apiBootstrap.setVerbose(verbose);
       List<String> hosts = new ArrayList<String>();
@@ -164,6 +181,8 @@ public class AmClusterDef implements Serializable {
 
    public ApiBlueprint toApiBlueprint() {
       ApiBlueprint apiBlueprint = new ApiBlueprint();
+
+      apiBlueprint.setConfigurations(configurations);
 
       ApiBlueprintInfo apiBlueprintInfo = new ApiBlueprintInfo();
       apiBlueprintInfo.setStackName(amStack.getName());
