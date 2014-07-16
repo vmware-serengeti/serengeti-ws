@@ -153,6 +153,12 @@ public class CmClusterDef implements Serializable {
                   case "YARN_NODE_MANAGER":
                      roleDef.addConfig(Constants.CONFIG_NM_LOCAL_DIRS, dataDirs(node.getVolumes(), "/yarn/nm"));
                      break;
+                  case "MAPREDUCE_JOBTRACKER":
+                     roleDef.addConfig(Constants.CONFIG_MAPRED_JT_LOCAL_DIR_LIST, dataDirs(node.getVolumes(), "/mapred/jt"));
+                     break;
+                  case "MAPREDUCE_TASKTRACKER":
+                     roleDef.addConfig(Constants.CONFIG_MAPRED_TT_LOCAL_DIR_LIST, dataDirs(node.getVolumes(), "/mapred/tt"));
+                     break;
                   case "ZOOKEEPER_SERVER":
                      roleDef.addConfig(Constants.CONFIG_ZOOKEEPER_SERVER_ID, zkIdIndex.toString());
                      zkIdIndex += 1;

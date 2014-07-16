@@ -1155,6 +1155,12 @@ public class ClouderaManagerImpl implements SoftwareManager {
                case "YARN_NODE_MANAGER":
                   configList.add(new ApiConfig(Constants.CONFIG_NM_LOCAL_DIRS, "/tmp/yarn/nm"));
                   break;
+               case "MAPREDUCE_JOBTRACKER":
+                  configList.add(new ApiConfig(Constants.CONFIG_MAPRED_JT_LOCAL_DIR_LIST, "/tmp/mapred/jt"));
+                  break;
+               case "MAPREDUCE_TASKTRACKER":
+                  configList.add(new ApiConfig(Constants.CONFIG_MAPRED_TT_LOCAL_DIR_LIST, "/tmp/mapred/tt"));
+                  break;
                default:
                   needUpdate = false;
                   break;

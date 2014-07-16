@@ -1,0 +1,543 @@
+{
+  "name": "TASKTRACKER",
+  "displayName": "MAPREDUCE_TASKTRACKER",
+  "parent": "MAPREDUCE",
+  "repository": "CDH",
+  "versionApiMin": 3,
+  "versionApiMax": -1,
+  "versionCdhMin": 4,
+  "versionCdhMax": -1,
+  "availableConfigurations" : [
+  {
+    "name" : "mapred_tasktracker_instrumentation",
+    "required" : false,
+    "default" : "org.apache.hadoop.mapred.TaskTrackerMetricsInst",
+    "displayName" : "TaskTracker Instrumentation Class",
+    "description" : "The instrumentation class to associate with each TaskTracker. If using Cloudera's Activity Monitor, adjust this to use org.apache.hadoop.mapred.TaskTrackerCmonInst.",
+    "relatedName" : "mapred.tasktracker.instrumentation"
+  }, {
+    "name" : "mapred_tasktracker_map_tasks_maximum",
+    "required" : false,
+    "default" : "2",
+    "displayName" : "Maximum Number of Simultaneous Map Tasks",
+    "description" : "The maximum number of map tasks that a TaskTracker can run simultaneously.  Sometimes referred to as \"map slots.\"",
+    "relatedName" : "mapred.tasktracker.map.tasks.maximum"
+  }, {
+    "name" : "mapred_tasktracker_reduce_tasks_maximum",
+    "required" : false,
+    "default" : "2",
+    "displayName" : "Maximum Number of Simultaneous Reduce Tasks",
+    "description" : "The maximum number of reduce tasks that a TaskTracker can run simultaneously.  Sometimes referred to as \"reduce slots.\"",
+    "relatedName" : "mapred.tasktracker.reduce.tasks.maximum"
+  }, {
+    "name" : "task_tracker_java_heapsize",
+    "required" : false,
+    "default" : "1073741824",
+    "displayName" : "Java Heap Size of TaskTracker in Bytes",
+    "description" : "Maximum size for the Java Process heap memory.  Passed to Java -Xmx.  Measured in bytes.",
+    "relatedName" : ""
+  }, {
+    "name" : "tasktracker_mapred_local_dir_list",
+    "required" : true,
+    "displayName" : "TaskTracker Local Data Directory List",
+    "description" : "List of directories on the local filesystem where a TaskTracker stores intermediate data files. To spread disk I/O, enter a comma-separated list of directories on different devices. Directories that do not exist are ignored. Typical values are /data/N/mapred/local for N = 1, 2, 3...",
+    "relatedName" : "mapred.local.dir"
+  }, {
+    "name" : "hadoop_metrics_dir",
+    "required" : false,
+    "default" : "/tmp/metrics",
+    "displayName" : "Hadoop Metrics Output Directory",
+    "description" : "If using FileContext, directory to write metrics to.",
+    "relatedName" : ""
+  }, {
+    "name" : "tasktracker_connectivity_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "TaskTracker Connectivity Health Test",
+    "description" : "Enables the health test that the TaskTracker is connected to the JobTracker",
+    "relatedName" : ""
+  }, {
+    "name" : "tasktracker_config_safety_valve",
+    "required" : false,
+    "displayName" : "TaskTracker Advanced Configuration Snippet (Safety Valve) for mapred-site.xml",
+    "description" : "For advanced use only, a string to be inserted into <strong>mapred-site.xml</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "log_threshold",
+    "required" : false,
+    "default" : "INFO",
+    "displayName" : "TaskTracker Logging Threshold",
+    "description" : "The minimum log level for TaskTracker logs",
+    "relatedName" : ""
+  }, {
+    "name" : "override_mapred_reduce_task_max_heap",
+    "required" : false,
+    "displayName" : "Reduce Task Maximum Heap Size (Client Override)",
+    "description" : "The maximum heap size, in bytes, of the child reduce processes. This number will be formatted and concatenated with 'Reduce Task Java Opts Base' to pass to Hadoop. Will override value in client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "override_mapred_child_java_opts_base",
+    "required" : false,
+    "displayName" : "MapReduce Child Java Opts Base (Client Override)",
+    "description" : "Java opts for the TaskTracker child processes. The following symbol, if present, will be interpolated: @taskid@ is replaced by current TaskID. Any other occurrences of '@' will go unchanged. For example, to enable verbose gc logging to a file named for the taskid in /tmp pass a value of: \"-verbose:gc -Xloggc:/tmp/@taskid@.gc\". The configuration variable 'mapred.child.ulimit' can be used to control the maximum virtual memory of the child processes. Note that unlike Hadoop, Cloudera Manager separates the child options into this setting and a separate setting just for the maximum heap size. Will override value in client configuration.",
+    "relatedName" : "mapred.child.java.opts"
+  }, {
+    "name" : "tasktracker_log_dir",
+    "required" : false,
+    "default" : "/var/log/hadoop-0.20-mapreduce",
+    "displayName" : "TaskTracker Log Directory",
+    "description" : "Directory where TaskTracker will place its log files.",
+    "relatedName" : "hadoop.log.dir"
+  }, {
+    "name" : "override_mapred_output_compression_type",
+    "required" : false,
+    "displayName" : "Compression Type of MapReduce Job Output (Client Override)",
+    "description" : "For MapReduce job outputs that are compressed as SequenceFiles, you can select one of these compression type options: NONE, RECORD or BLOCK. Cloudera recommends BLOCK. Will override value in client configuration.",
+    "relatedName" : "mapred.output.compression.type"
+  }, {
+    "name" : "override_mapred_reduce_tasks_speculative_execution",
+    "required" : false,
+    "default" : "no_override",
+    "displayName" : "Reduce Tasks Speculative Execution (Client Override)",
+    "description" : "If enabled, multiple instances of some reduce tasks may be executed in parallel.",
+    "relatedName" : "mapred.reduce.tasks.speculative.execution"
+  }, {
+    "name" : "tasktracker_blacklisted_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "TaskTracker Blacklisted Health Test",
+    "description" : "Enables the health test that the TaskTracker is not blacklisted",
+    "relatedName" : ""
+  }, {
+    "name" : "mapred_healthchecker_script_path",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Healthchecker Script Path",
+    "description" : "Absolute path to the script which is periodically run by the node health monitoring service to determine if the node is healthy or not. If the value of this key is empty or the file does not exist in the location configured here, the node health monitoring service is not started.",
+    "relatedName" : "mapred.healthChecker.script.path"
+  }, {
+    "name" : "tasktracker_connectivity_tolerance",
+    "required" : false,
+    "default" : "180",
+    "displayName" : "TaskTracker Connectivity Tolerance at Startup",
+    "description" : "The amount of time to wait for the TaskTracker to fully start up and connect to the JobTracker before enforcing the connectivity check.",
+    "relatedName" : ""
+  }, {
+    "name" : "enable_alerts",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Health Alerts for this Role",
+    "description" : "When set, Cloudera Manager will send alerts when the health of this role reaches the threshold specified by the EventServer setting eventserver_health_events_alert_threshold",
+    "relatedName" : ""
+  }, {
+    "name" : "override_mapred_child_java_opts_max_heap",
+    "required" : false,
+    "displayName" : "MapReduce Child Java Maximum Heap Size (Client Override)",
+    "description" : "The maximum heap size, in bytes, of the Java child process. This number will be formatted and concatenated with the 'base' setting for 'mapred.child.java.opts' to pass to Hadoop. Will override value in client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "rm_memory_soft_limit",
+    "required" : false,
+    "default" : "-1",
+    "displayName" : "Cgroup Memory Soft Limit",
+    "description" : "Soft memory limit to assign to this role, enforced by the Linux kernel. When the limit is reached, the kernel will reclaim pages charged to the process if and only if the host is facing memory pressure. If reclaiming fails, the kernel may kill the process. Both anonymous as well as page cache pages contribute to the limit. Use a value of -1 B to specify no limit. By default processes not managed by Cloudera Manager will have no limit.",
+    "relatedName" : "memory.soft_limit_in_bytes"
+  }, {
+    "name" : "process_auto_restart",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Automatically Restart Process",
+    "description" : "When set, this role's process is automatically (and transparently) restarted in the event of an unexpected failure.",
+    "relatedName" : ""
+  }, {
+    "name" : "task_tracker_http_address",
+    "required" : false,
+    "default" : "0.0.0.0",
+    "displayName" : "TaskTracker Web UI Address",
+    "description" : "Address where TaskTracker listens for web requests",
+    "relatedName" : ""
+  }, {
+    "name" : "oom_heap_dump_dir",
+    "required" : false,
+    "default" : "/tmp",
+    "displayName" : "Heap Dump Directory",
+    "description" : "Path to directory where heap dumps are generated when java.lang.OutOfMemoryError error is thrown. This directory is automatically created if it doesn't exist. However, if this directory already exists, role user must have write access to this directory. If this directory is shared amongst multiple roles, it should have 1777 permissions. Note that the heap dump files are created with 600 permissions and are owned by the role user. The amount of free space in this directory should be greater than the maximum Java Process heap size configured for this role.",
+    "relatedName" : ""
+  }, {
+    "name" : "log_event_whitelist",
+    "required" : false,
+    "default" : "{\n  \"version\": \"0\",\n  \"rules\": [\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"ERROR\", \"content\":\"/mapOutput.*\"},\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 1, \"threshold\":\"FATAL\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\": \".* is deprecated. Instead, use .*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\": \".* is deprecated. Use .* instead\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.io.IOException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.net.SocketException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.net.SocketClosedException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.io.EOFException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"org.mortbay.jetty.EofException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.nio.channels.CancelledKeyException\"},\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 2, \"exceptiontype\": \".*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"Unknown job [^ ]+ being deleted.*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"Error executing shell command .+ No such process.+\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"Error sending signal TERM to process group.*No such process.*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"Exit code from task is :.*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"TaskTracker's totalMemoryAllottedForTasks is -1. TaskMemoryManager is disabled.\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\".*attempt to override final parameter.+\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"[^ ]+ is a deprecated filesystem name. Use.*\"},\n    {\"alert\": false, \"rate\": 1, \"threshold\":\"INFO\", \"content\":\".*failed to report status for.*Killing!\"},\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 1, \"threshold\":\"WARN\"}\n  ]\n}\n",
+    "displayName" : "Rules to Extract Events from Log Files",
+    "description" : "<p>This file contains the rules which govern how log messages are turned into events by the custom log4j appender that this role loads. It is in JSON format, and is composed of a list of rules. Every log message is evaluated against each of these rules in turn to decide whether or not to send an event for that message.</p><p>Each rule has some or all of the following fields:</p><ul><li><span class='code'>alert</span> - whether or not events generated from this rule should be promoted to alerts. A value of \"true\" will cause alerts to be generated. If not specified, the default is \"false\".</li><li><span class='code'>rate</span> <strong>(mandatory)</strong> - the maximum number of log messages matching this rule that may be sent as events every minute. If more than <tt>rate</tt> matching log messages are received in a single minute, the extra messages are ignored. If rate is less than 0, the number of messages per minute is unlimited.</li><li><span class='code'>periodminutes</span>  - the number of minutes during which the publisher will only publish <tt>rate</tt> events or fewer. If not specified, the default is <strong>one minute</strong></li><li><span class='code'>threshold</span> - apply this rule only to messages with this log4j severity level or above. An example is \"WARN\" for warning level messages or higher.</li><li><span class='code'>content</span> - match only those messages whose contents match this regular expression.</li><li><span class='code'>exceptiontype</span> - match only those messages which are part of an exception message. The exception type must match this regular expression.</li></ul><br/><p>Example:<span class='code'>{\"alert\": false, \"rate\": 10, \"exceptiontype\": \"java.lang.StringIndexOutOfBoundsException\"}</span></p><p>This rule will send events to Cloudera Manager for every <span class='code'>StringIndexOutOfBoundsException</span>, up to a maximum of 10 every minute.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "tasktracker_fd_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"70.0\",\"warning\":\"50.0\"}",
+    "displayName" : "File Descriptor Monitoring Thresholds",
+    "description" : "The health test thresholds of the number of file descriptors used. Specified as a percentage of file descriptor limit.",
+    "relatedName" : ""
+  }, {
+    "name" : "tasktracker_gc_duration_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"60.0\",\"warning\":\"30.0\"}",
+    "displayName" : "Garbage Collection Duration Thresholds",
+    "description" : "The health test thresholds for the weighted average time spent in Java garbage collection. Specified as a percentage of elapsed wall clock time.",
+    "relatedName" : ""
+  }, {
+    "name" : "hadoop_metrics_class",
+    "required" : false,
+    "default" : "org.apache.hadoop.metrics.spi.NoEmitMetricsContext",
+    "displayName" : "Hadoop Metrics Class",
+    "description" : "Implementation daemons will use to report some internal statistics. The default (NoEmitMetricsContext) will display metrics on /metrics on the status port. The GangliaContext and GangliaContext31 classes will report metrics to your specified Ganglia Monitoring Daemons (gmond). The ganglia wire format changed incompatibly at version 3.1.0. If you are running any version of ganglia 3.1.0 or newer, use the GangliaContext31 metric class; otherwise, use the GangliaContext metric class.",
+    "relatedName" : ""
+  }, {
+    "name" : "tasktracker_http_threads",
+    "required" : false,
+    "default" : "80",
+    "displayName" : "Number of TaskTracker HTTP Threads",
+    "description" : "The number of worker threads for the HTTP server. This is used for map output fetching.",
+    "relatedName" : "tasktracker.http.threads"
+  }, {
+    "name" : "tasktracker_host_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "TaskTracker Host Health Test",
+    "description" : "When computing the overall TaskTracker health, consider the host's health.",
+    "relatedName" : ""
+  }, {
+    "name" : "rlimit_fds",
+    "required" : false,
+    "displayName" : "Maximum Process File Descriptors",
+    "description" : "If configured, overrides the process soft and hard rlimits (also called ulimits) for file descriptors to the configured value.",
+    "relatedName" : ""
+  }, {
+    "name" : "log4j_safety_valve",
+    "required" : false,
+    "displayName" : "TaskTracker Logging Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, a string to be inserted into <strong>log4j.properties</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "max_log_size",
+    "required" : false,
+    "default" : "200",
+    "displayName" : "TaskTracker Max Log Size",
+    "description" : "The maximum size, in megabytes, per log file for TaskTracker logs.  Typically used by log4j.",
+    "relatedName" : ""
+  }, {
+    "name" : "tasktracker_web_metric_collection_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"never\",\"warning\":\"10000.0\"}",
+    "displayName" : "Web Metric Collection Duration",
+    "description" : "The health test thresholds on the duration of the metrics request to the web server.",
+    "relatedName" : ""
+  }, {
+    "name" : "unexpected_exits_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"any\",\"warning\":\"never\"}",
+    "displayName" : "Unexpected Exits Thresholds",
+    "description" : "The health test thresholds for unexpected exits encountered within a recent period specified by the unexpected_exits_window configuration for the role.",
+    "relatedName" : ""
+  }, {
+    "name" : "taskcontroller_config_safety_valve",
+    "required" : false,
+    "displayName" : "TaskTracker Advanced Configuration Snippet (Safety Valve) for taskcontroller.cfg",
+    "description" : "For advanced use only, a string to be inserted into <strong>taskcontroller.cfg</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "log_directory_free_space_percentage_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"never\",\"warning\":\"never\"}",
+    "displayName" : "Log Directory Free Space Monitoring Percentage Thresholds",
+    "description" : "The health test thresholds for monitoring of free space on the filesystem that contains this role's log directory. Specified as a percentage of the capacity on that filesystem. This setting is not used if a Log Directory Free Space Monitoring Absolute Thresholds setting is configured.",
+    "relatedName" : ""
+  }, {
+    "name" : "log_directory_free_space_absolute_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"5.36870912E9\",\"warning\":\"1.073741824E10\"}",
+    "displayName" : "Log Directory Free Space Monitoring Absolute Thresholds",
+    "description" : "The health test thresholds for monitoring of free space on the filesystem that contains this role's log directory.",
+    "relatedName" : ""
+  }, {
+    "name" : "oom_heap_dump_enabled",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Dump Heap When Out of Memory",
+    "description" : "When set, generates heap dump file when java.lang.OutOfMemoryError is thrown.",
+    "relatedName" : ""
+  }, {
+    "name" : "override_io_sort_mb",
+    "required" : false,
+    "displayName" : "I/O Sort Memory Buffer (MiB) (Client Override)",
+    "description" : "The total amount of memory buffer, in megabytes, to use while sorting files. Note that this memory comes out of the user JVM heap size (meaning total user JVM heap - this amount of memory = total user usable heap space.  Note that Cloudera's default differs from Hadoop's default; Cloudera uses a bigger buffer by default because modern machines often have more RAM. Will override value in client configuration.",
+    "relatedName" : "io.sort.mb"
+  }, {
+    "name" : "max_log_backup_index",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "TaskTracker Maximum Log File Backups",
+    "description" : "The maximum number of rolled log files to keep for TaskTracker logs.  Typically used by log4j.",
+    "relatedName" : ""
+  }, {
+    "name" : "override_mapred_output_compression_codec",
+    "required" : false,
+    "displayName" : "Compression Codec of MapReduce Job Output (Client Override)",
+    "description" : "For MapReduce job outputs that are compressed, specify the compression codec to use. Will override value in client configuration.",
+    "relatedName" : "mapred.output.compression.codec"
+  }, {
+    "name" : "override_mapred_map_task_ulimit",
+    "required" : false,
+    "displayName" : "Map Task Maximum Virtual Memory (KiB) (Client Override)",
+    "description" : "The maximum virtual memory, in KiB, available to map tasks. Note: this must be greater than or equal to the -Xmx passed to the JavaVM via 'Map Task Java Opts', or else the VM might not start. This takes precedence over the generic 'mapred.child.ulimit'. Will override value in client configuration.",
+    "relatedName" : "mapred.map.child.ulimit"
+  }, {
+    "name" : "unexpected_exits_window",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Unexpected Exits Monitoring Period",
+    "description" : "The period to review when computing unexpected exits.",
+    "relatedName" : ""
+  }, {
+    "name" : "override_mapred_child_ulimit",
+    "required" : false,
+    "displayName" : "MapReduce Maximum Virtual Memory (KiB) (Client Override)",
+    "description" : "The maximum virtual memory, in KiB, of a process launched by the MapReduce framework. This can be used to control both the MapReduce tasks and applications using Hadoop Pipes, Hadoop Streaming, and so on. By default, it is left unspecified to allow administrators to control it 'via limits.conf' and other mechanisms. Note: 'mapred.child.ulimit' must be greater than or equal to approximately 1.5 times the -Xmx passed to JavaVM, or else the VM might not start. Will override value in client configuration.",
+    "relatedName" : "mapred.child.ulimit"
+  }, {
+    "name" : "override_mapred_map_task_java_opts",
+    "required" : false,
+    "displayName" : "Map Task Java Opts Base (Client Override)",
+    "description" : "Java opts for the TaskTracker child map processes. The following symbol, if present, will be interpolated: @taskid@ is replaced by current TaskID. Any other occurrences of '@' will go unchanged. For example, to enable verbose gc logging to a file named for the taskid in /tmp pass a value of: \"-verbose:gc -Xloggc:/tmp/@taskid@.gc\". The configuration variable 'Map Task Maximum Virtual Memory' can be used to control the maximum virtual memory of the map processes. This takes precedence over the generic 'mapred.child.java.opts'.",
+    "relatedName" : "mapred.map.child.java.opts"
+  }, {
+    "name" : "override_io_sort_spill_percent",
+    "required" : false,
+    "displayName" : "I/O Sort Spill Percent (Client Override)",
+    "description" : "The soft limit in either the buffer or record collection buffers. When this limit is reached, a thread will begin to spill the contents to disk in the background. Note that this does not imply any chunking of data to the spill. A value less than 0.5 is not recommended. The syntax is in decimal units; the default is 80% and is formatted 0.8. Will override value in client configuration.",
+    "relatedName" : "io.sort.spill.percent"
+  }, {
+    "name" : "override_mapred_submit_replication",
+    "required" : false,
+    "displayName" : "Mapreduce Submit Replication (Client Override)",
+    "description" : "The replication level for submitted job files.",
+    "relatedName" : "mapred.submit.replication"
+  }, {
+    "name" : "override_mapred_userlog_retain_hours",
+    "required" : false,
+    "displayName" : "Maximum Time to Retain User Logs (Client Override)",
+    "description" : "The maximum time, in hours, to retain the user logs after job completion.",
+    "relatedName" : "mapred.userlog.retain.hours"
+  }, {
+    "name" : "mapred_tasktracker_instrumentation_cmon_jettyport",
+    "required" : false,
+    "default" : "4867",
+    "displayName" : "TaskTracker Activity Monitor Instrumentation Plugin Port",
+    "description" : "Port where TaskTracker Activity Monitor instrumentation plugin listens for requests. This setting is ignored unless the TaskTracker Instrumentation Class Class is set to org.apache.hadoop.mapred.TaskTrackerCmonInst.",
+    "relatedName" : "mapred.tasktracker.instrumentation.cmon.jettyport"
+  }, {
+    "name" : "override_mapred_reduce_task_java_opts",
+    "required" : false,
+    "displayName" : "Reduce Task Java Opts Base (Client Override)",
+    "description" : "Java opts for the TaskTracker child map processes. The following symbol, if present, will be interpolated: @taskid@ is replaced by current TaskID. Any other occurrences of '@' will go unchanged. For example, to enable verbose gc logging to a file named for the taskid in /tmp pass a value of: \"-verbose:gc -Xloggc:/tmp/@taskid@.gc\". The configuration variable 'Reduce Task Maximum Virtual Memory' can be used to control the maximum virtual memory of the reduce processes. This takes precedence over the generic 'mapred.child.java.opts'.",
+    "relatedName" : "mapred.reduce.child.java.opts"
+  }, {
+    "name" : "override_io_compression_codecs",
+    "required" : false,
+    "displayName" : "Compression Codecs (Client Override)",
+    "description" : "Comma-separated list of compression codecs that can be used in job or map compression.",
+    "relatedName" : "io.compression.codecs"
+  }, {
+    "name" : "override_mapred_reduce_task_ulimit",
+    "required" : false,
+    "displayName" : "Reduce Task Maximum Virtual Memory (KiB) (Client Override)",
+    "description" : "The maximum virtual memory, in KiB, available to reduce tasks. Note: this must be greater than or equal to the -Xmx passed to the JavaVM via 'Map Task Java Opts', or else the VM might not start. This takes precedence over the generic 'mapred.child.ulimit'. Will override value in client configuration.",
+    "relatedName" : "mapred.reduce.child.ulimit"
+  }, {
+    "name" : "hadoop_metrics_ganglia_servers",
+    "required" : false,
+    "displayName" : "Hadoop Metrics Ganglia Servers",
+    "description" : "If using GangliaContext, a comma-delimited list of host:port pairs pointing to 'gmond' servers you would like to publish metrics to.  In practice, this set of 'gmond' should match the set of 'gmond' in your 'gmetad' datasource list for the cluster.",
+    "relatedName" : ""
+  }, {
+    "name" : "override_mapred_output_compress",
+    "required" : false,
+    "default" : "no_override",
+    "displayName" : "Compress MapReduce Job Output (Client Override)",
+    "description" : "Compress the output of MapReduce jobs. Will override value in client configuration.",
+    "relatedName" : "mapred.output.compress"
+  }, {
+    "name" : "oom_sigkill_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Kill When Out of Memory",
+    "description" : "When set, a SIGKILL signal is sent to the role process when java.lang.OutOfMemoryError is thrown.",
+    "relatedName" : ""
+  }, {
+    "name" : "override_io_sort_factor",
+    "required" : false,
+    "displayName" : "I/O Sort Factor (Client Override)",
+    "description" : "The number of streams to merge at once while sorting files. That is, the number of sort heads to use during the merge sort on the reducer side. This determines the number of open file handles. Merging more files in parallel reduces merge sort iterations and improves run time by eliminating disk I/O. Note that merging more files in parallel uses more memory. If 'io.sort.factor' is set too high or the maximum JVM heap is set too low, excessive garbage collection will occur. The Hadoop default is 10, but Cloudera recommends a higher value. Will override value in client configuration.",
+    "relatedName" : "io.sort.factor"
+  }, {
+    "name" : "override_mapred_compress_map_output",
+    "required" : false,
+    "default" : "no_override",
+    "displayName" : "Use Compression on Map Outputs (Client Override)",
+    "description" : "If enabled, uses compression on the map outputs before they are sent across the network. Will override value in client configuration.",
+    "relatedName" : "mapred.compress.map.output"
+  }, {
+    "name" : "mapred_healthchecker_script_args",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Healthchecker Script Arguments",
+    "description" : "Comma-separated list of arguments which are to be passed to node health script when it is being launched.",
+    "relatedName" : "mapred.healthChecker.script.args"
+  }, {
+    "name" : "override_mapred_map_output_compression_codec",
+    "required" : false,
+    "displayName" : "Compression Codec of MapReduce Map Output (Client Override)",
+    "description" : "For MapReduce map outputs that are compressed, specify the compression codec to use. Will override value in client configuration.",
+    "relatedName" : "mapred.map.output.compression.codec"
+  }, {
+    "name" : "rm_memory_hard_limit",
+    "required" : false,
+    "default" : "-1",
+    "displayName" : "Cgroup Memory Hard Limit",
+    "description" : "Hard memory limit to assign to this role, enforced by the Linux kernel. When the limit is reached, the kernel will reclaim pages charged to the process. If reclaiming fails, the kernel may kill the process. Both anonymous as well as page cache pages contribute to the limit. Use a value of -1 B to specify no limit. By default processes not managed by Cloudera Manager will have no limit.",
+    "relatedName" : "memory.limit_in_bytes"
+  }, {
+    "name" : "tasktracker_gc_duration_window",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Garbage Collection Duration Monitoring Period",
+    "description" : "The period to review when computing the moving average of garbage collection time.",
+    "relatedName" : ""
+  }, {
+    "name" : "rm_cpu_shares",
+    "required" : false,
+    "default" : "1024",
+    "displayName" : "Cgroup CPU Shares",
+    "description" : "Number of CPU shares to assign to this role. The greater the number of shares, the larger the share of the host's CPUs that will be given to this role when the host experiences CPU contention. Must be between 2 and 262144. Defaults to 1024 for processes not managed by Cloudera Manager.",
+    "relatedName" : "cpu.shares"
+  }, {
+    "name" : "override_io_sort_record_percent",
+    "required" : false,
+    "displayName" : "I/O Sort Record Percent (Client Override)",
+    "description" : "The percentage of 'io.sort.mb' dedicated to tracking record boundaries. If this value is represented as 'r', and 'io.sort.mb' is represented as 'x', then the maximum number of records collected before the collection thread must block is equal to (r * x) / 4. The syntax is in decimal units; the default is 5% and is formatted 0.05. Will override value in client configuration.",
+    "relatedName" : "io.sort.record.percent"
+  }, {
+    "name" : "tasktracker_scm_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "TaskTracker Process Health Test",
+    "description" : "Enables the health test that the TaskTracker's process state is consistent with the role configuration",
+    "relatedName" : ""
+  }, {
+    "name" : "override_mapred_reduce_slowstart_completed_maps",
+    "required" : false,
+    "displayName" : "Number of Map Tasks to Complete Before Reduce Tasks (Client Override)",
+    "description" : "Fraction of the number of map tasks in the job which should be completed before reduce tasks are scheduled for the job.",
+    "relatedName" : "mapred.reduce.slowstart.completed.maps"
+  }, {
+    "name" : "taskcontroller_group",
+    "required" : false,
+    "default" : "mapred",
+    "displayName" : "Task Controller Group",
+    "description" : "The system group that owns the task-controller binary. This does not need to be changed unless the ownership of the binary is explicitly changed.",
+    "relatedName" : "mapreduce.tasktracker.group"
+  }, {
+    "name" : "rm_io_weight",
+    "required" : false,
+    "default" : "500",
+    "displayName" : "Cgroup I/O Weight",
+    "description" : "Weight for the read I/O requests issued by this role. The greater the weight, the higher the priority of the requests when the host experiences I/O contention. Must be between 100 and 1000. Defaults to 1000 for processes not managed by Cloudera Manager.",
+    "relatedName" : "blkio.weight"
+  }, {
+    "name" : "hadoop_metrics_safety_valve",
+    "required" : false,
+    "displayName" : "Hadoop Metrics Advanced Configuration Snippet (Safety Valve)",
+    "description" : "Advanced Configuration Snippet (Safety Valve) for Hadoop Metrics. Properties will be inserted into <strong>hadoop-metrics.properties</strong> for this role only. Note that Cloudera Manager tunes hadoop-metrics.properties to work optimally with its Service Monitoring features. By overriding the default, Cloudera Manager might not be able to provide accurate monitoring information, health tests or alerts.",
+    "relatedName" : ""
+  }, {
+    "name" : "override_mapred_map_task_max_heap",
+    "required" : false,
+    "displayName" : "Map Task Maximum Heap Size (Client Override)",
+    "description" : "The maximum heap size, in bytes, of the child map processes. This number will be formatted and concatenated with 'Map Task Java Opts Base' to pass to Hadoop. Will override value in client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "taskcontroller_min_user_id",
+    "required" : false,
+    "default" : "1000",
+    "displayName" : "Minimum User ID for Job Submission",
+    "description" : "The lowest user ID (UID) that a user may have in order to submit a job to this TaskTracker. Only applies when the TaskTracker is running in secure mode",
+    "relatedName" : "min.user.id"
+  }, {
+    "name" : "task_tracker_http_port",
+    "required" : false,
+    "default" : "50060",
+    "displayName" : "TaskTracker Web UI Port",
+    "description" : "Port where TaskTracker listens for web requests",
+    "relatedName" : "mapred.task.tracker.http.address"
+  }, {
+    "name" : "tasktracker_java_opts",
+    "required" : false,
+    "default" : "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:-CMSConcurrentMTEnabled -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled",
+    "displayName" : "Java Configuration Options for TaskTracker",
+    "description" : "These arguments will be passed as part of the Java command line. Commonly, garbage collection flags or extra debugging flags would be passed here.",
+    "relatedName" : ""
+  }, {
+    "name" : "tasktracker_web_metric_collection_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Web Metric Collection",
+    "description" : "Enables the health test that the Cloudera Manager Agent can successfully contact and gather metrics from the web server.",
+    "relatedName" : ""
+  }, {
+    "name" : "enable_config_alerts",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Configuration Change Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when this entity's configuration changes.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapred_tasktracker_instrumentation_cmon_jettyhost",
+    "required" : false,
+    "default" : "127.0.0.1",
+    "displayName" : "TaskTracker Activity Monitor Instrumentation Plugin Address",
+    "description" : "Address where TaskTracker Activity Monitor instrumentation plugin listens for requests. This setting is ignored unless the TaskTracker Instrumentation Class is set to org.apache.hadoop.mapred.TaskTrackerCmonInst. This is usually set to 127.0.0.1.",
+    "relatedName" : "mapred.tasktracker.instrumentation.cmon.jettyhost"
+  }, {
+    "name" : "override_mapred_job_reuse_jvm_num_tasks",
+    "required" : false,
+    "displayName" : "Number of Tasks to Run per JVM (Client Override)",
+    "description" : "Number of tasks to run per JVM. If set to -1, there is no limit. Will override value in client configuration.",
+    "relatedName" : "mapred.job.reuse.jvm.num.tasks"
+  }, {
+    "name" : "role_triggers",
+    "required" : false,
+    "default" : "[]",
+    "displayName" : "Role Triggers",
+    "description" : "<p>The configured triggers for this role. This is a JSON formatted list of triggers. These triggers are evaluated as part as the health system. Every trigger expression is parsed, and if the trigger condition is met, the list of actions provided in the trigger expression is executed.</p><p>Each trigger has all of the following fields:</p><ul><li><span class='code'>triggerName</span> <strong>(mandatory)</strong> - the name of the trigger. This value must be unique for the specific role. </li><li><span class='code'>triggerExpression</span> <strong>(mandatory)</strong> - a tsquery expression representing the trigger. </li><li><span class='code'>streamThreshold</span> <strong>(optional)</strong> - the maximum number of streams that can satisfy a condition of a trigger before the condition fires. By default set to 0, and any stream returned will cause the condition to fire. </li><li><span class='code'>enabled</span> <strong> (optional)</strong> - by default set to 'true'. If set to 'false' the trigger will not be evaluated.</li></ul></p><p>For example, here is a JSON formatted trigger configured for a DataNode that fires if the DataNode has more than 1500 file-descriptors opened:</p><p><pre>[{\"triggerName\": \"sample-trigger\",\n  \"triggerExpression\": \"IF (SELECT fd_open WHERE roleName=$ROLENAME and last(fd_open) > 1500) DO health:bad\",\n  \"streamThreshold\": 0}, \"enabled\": \"true\"]</pre></p><p>Consult the trigger rules documentation for more details on how to write triggers using tsquery.</p><p>The JSON format is evolving and may change in the future and as a result backward compatibility is not guaranteed between releases at this time.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "override_mapred_map_tasks_speculative_execution",
+    "required" : false,
+    "default" : "no_override",
+    "displayName" : "Map Tasks Speculative Execution (Client Override)",
+    "description" : "If enabled, multiple instances of some map tasks may be executed in parallel.",
+    "relatedName" : "mapred.map.tasks.speculative.execution"
+  }, {
+    "name" : "taskcontroller_banned_users",
+    "required" : false,
+    "default" : "mapred,hdfs,bin",
+    "displayName" : "Users Banned from Job Submission",
+    "description" : "Comma-separated list of users banned from submitting MapReduce jobs to this TaskTracker. Only applies when the TaskTracker is running in secure mode",
+    "relatedName" : "banned.users"
+  }, {
+    "name" : "override_mapred_reduce_parallel_copies",
+    "required" : false,
+    "displayName" : "Default Number of Parallel Transfers During Shuffle (Client Override)",
+    "description" : "The default number of parallel transfers run by reduce during the copy (shuffle) phase. This number should be between sqrt(nodes*number_of_map_slots_per_node) and nodes*s/2. Will override value in client configuration.",
+    "relatedName" : "mapred.reduce.parallel.copies"
+  } ]
+}

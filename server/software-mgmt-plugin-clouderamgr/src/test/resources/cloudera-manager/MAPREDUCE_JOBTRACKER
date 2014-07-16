@@ -1,0 +1,596 @@
+{
+  "name": "JOBTRACKER",
+  "displayName": "MAPREDUCE_JOBTRACKER",
+  "parent": "MAPREDUCE",
+  "repository": "CDH",
+  "versionApiMin": 3,
+  "versionApiMax": -1,
+  "versionCdhMin": 4,
+  "versionCdhMax": -1,
+  "availableConfigurations" : [ {
+    "name" : "jobtracker_mapred_local_dir_list",
+    "required" : true,
+    "displayName" : "JobTracker Local Data Directory",
+    "description" : "Directory on the local filesystem where the JobTracker stores job configuration data. Directories that do not exist are ignored. A single directory is sufficient; a list of multiple directories will not cause problems.",
+    "relatedName" : "mapred.local.dir"
+  }, {
+    "name" : "mapred_job_tracker_handler_count",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "JobTracker Handler Count",
+    "description" : "The number of server threads for the JobTracker. This should be approximately 20 * ln(the number of TaskTracker nodes).",
+    "relatedName" : "mapred.job.tracker.handler.count",
+    "validationMessage" : "JobTracker Handler Count is at least 4% of the number of TaskTrackers. Suggested minimum value: 22"
+  }, {
+    "name" : "hadoop_metrics_dir",
+    "required" : false,
+    "default" : "/tmp/metrics",
+    "displayName" : "Hadoop Metrics Output Directory",
+    "description" : "If using FileContext, directory to write metrics to.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_thrift_threads_max",
+    "required" : false,
+    "default" : "20",
+    "displayName" : "Hue Thrift Server Max Threadcount",
+    "description" : "Maximum number of running threads for the Hue Thrift server running on the Jobtracker",
+    "relatedName" : "dfs.thrift.threads.max"
+  }, {
+    "name" : "jobtracker_host_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "JobTracker Host Health Test",
+    "description" : "When computing the overall JobTracker health, consider the host's health.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapred_job_tracker_history_completed_dir",
+    "required" : false,
+    "displayName" : "Completed Job History Location",
+    "description" : "Location to store the job history files of completed jobs. If a location is not specified, the job history files of completed jobs are stored in a subdirectory of the 'Running Job History Location'. If set, completed jobs will be moved into this directory in HDFS.",
+    "relatedName" : "mapred.job.tracker.history.completed.location"
+  }, {
+    "name" : "mapreduce_jobhistory_max_age_ms",
+    "required" : false,
+    "default" : "604800000",
+    "displayName" : "Job History Files Maximum Age",
+    "description" : "Job history files older than this time duration will deleted when the history cleaner runs.",
+    "relatedName" : "mapreduce.jobhistory.max-age-ms"
+  }, {
+    "name" : "jobtracker_java_heapsize",
+    "required" : false,
+    "default" : "1073741824",
+    "displayName" : "Java Heap Size of Jobtracker in Bytes",
+    "description" : "Maximum size for the Java Process heap memory.  Passed to Java -Xmx.  Measured in bytes.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapred_client_failover_connection_retries_on_timeouts",
+    "required" : false,
+    "default" : "0",
+    "displayName" : "JobTracker Client Max Retries",
+    "description" : "The maximum number of times to retry on timeouts between failovers.",
+    "relatedName" : "mapred.client.failover.connection.retries.on.timeouts"
+  }, {
+    "name" : "mapred_job_tracker_persist_jobstatus_dir",
+    "required" : false,
+    "default" : "/jobtracker/jobsInfo",
+    "displayName" : "Directory for JobTracker Job Status Persistence",
+    "description" : "The HDFS directory in which job status information is kept persistently. The directory must exist and be owned by the mapred user.",
+    "relatedName" : "mapred.job.tracker.persist.jobstatus.dir"
+  }, {
+    "name" : "log_threshold",
+    "required" : false,
+    "default" : "INFO",
+    "displayName" : "JobTracker Logging Threshold",
+    "description" : "The minimum log level for JobTracker logs",
+    "relatedName" : ""
+  }, {
+    "name" : "mapred_jobtracker_maxtasks_per_job",
+    "required" : false,
+    "displayName" : "Maximum Tasks per Job",
+    "description" : "The maximum number of tasks for a single job. Use a value of -1 B to specify no maximum. Note that allowing jobs with a large number of tasks increases memory usage by the JobTracker.",
+    "relatedName" : "mapred.jobtracker.maxtasks.per.job"
+  }, {
+    "name" : "mapred_fairscheduler_poolnameproperty",
+    "required" : false,
+    "default" : "user.name",
+    "displayName" : "Fair Scheduler Pool Name Property",
+    "description" : "Specify the 'jobconf' property that determines the pool that a job belongs in. The default is 'user.name' (one pool for each user). If you want to use MapReduce's \"queue\" system to enable authorization for the Fair Scheduler, specify 'mapred.job.queue.name'. This requires adding the Fair Scheduler's pool names to 'mapred.queue.names' and users to submit jobs using the 'mapred.job.queue.name' property instead of the 'mapred.fairscheduler.pool' property. Note that 'mapred.fairscheduler.poolnameproperty' is used only for jobs in which 'mapred.fairscheduler.pool' is not explicitly set.",
+    "relatedName" : "mapred.fairscheduler.poolnameproperty"
+  }, {
+    "name" : "mapred_client_failover_sleep_base_millis",
+    "required" : false,
+    "default" : "500",
+    "displayName" : "JobTracker Client Base Sleep",
+    "description" : "The time in milliseconds to wait before the first failover.",
+    "relatedName" : "mapred.client.failover.sleep.base.millis"
+  }, {
+    "name" : "hadoop_rpc_socket_factory_class_job_submission_protocol",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Hadoop Socket Factory for Job Submission",
+    "description" : "Socket Factory to use to connect to a MapReduce master (JobTracker). If null or empty, then use hadoop.rpc.socket.factory.class.default.",
+    "relatedName" : "hadoop.rpc.socket.factory.class.JobSubmissionProtocol"
+  }, {
+    "name" : "mapred_fairscheduler_assignmultiple",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Fair Scheduler Assign Multiple Tasks",
+    "description" : "Allows the Fair Scheduler to assign both a map task and a reduce task on each Cloudera Agent heartbeat, which improves cluster throughput when there are many small tasks to run.",
+    "relatedName" : "mapred.fairscheduler.assignmultiple"
+  }, {
+    "name" : "jobtracker_startup_tolerance",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Health Check Startup Tolerance",
+    "description" : "The amount of time allowed after this role is started that failures of health checks that rely on communication with this role will be tolerated.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapred_fairscheduler_allocation",
+    "required" : false,
+    "default" : "<?xml version=\"1.0\"?>\n<allocations>\n</allocations>",
+    "displayName" : "Fair Scheduler Allocation",
+    "description" : "Enter an XML string that represents the Fair Scheduler allocation pools.",
+    "relatedName" : ""
+  }, {
+    "name" : "jobtracker_gc_duration_window",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Garbage Collection Duration Monitoring Period",
+    "description" : "The period to review when computing the moving average of garbage collection time.",
+    "relatedName" : ""
+  }, {
+    "name" : "job_tracker_name",
+    "required" : false,
+    "displayName" : "JobTracker Logical Name",
+    "description" : "For High Availability this is the logical name for the JobTracker active-standby pair.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapred_job_tracker_persist_jobstatus_hours",
+    "required" : false,
+    "default" : "0",
+    "displayName" : "Time Limit of JobTracker Job Status Persistence",
+    "description" : "The number of hours job status information is persisted in HDFS. The job status information will be available after it drops out of the memory queue and between JobTracker restarts. If zero is specified for this property, the job status information is not persisted.",
+    "relatedName" : "mapred.job.tracker.persist.jobstatus.hours"
+  }, {
+    "name" : "mapred_capacity_scheduler_configuration",
+    "required" : false,
+    "default" : "<?xml version=\"1.0\"?>\n\n<!-- This is the configuration file for the resource manager in Hadoop. -->\n<!-- You can configure various scheduling parameters related to queues. -->\n<!-- The properties for a queue follow a naming convention,such as, -->\n<!-- mapred.capacity-scheduler.queue.<queue-name>.property-name. -->\n\n<configuration>\n\n  <property>\n    <name>mapred.capacity-scheduler.queue.default.capacity</name>\n    <value>100</value>\n    <description>Percentage of the number of slots in the cluster that are\n      to be available for jobs in this queue.\n    </description>    \n  </property>\n  \n  <property>\n    <name>mapred.capacity-scheduler.queue.default.maximum-capacity</name>\n    <value>-1</value>\n    <description>\n        maximum-capacity defines a limit beyond which a queue cannot use the capacity of the cluster.\n        This provides a means to limit how much excess capacity a queue can use. By default, there is no limit.\n        The maximum-capacity of a queue can only be greater than or equal to its minimum capacity.\n        Default value of -1 implies a queue can use complete capacity of the cluster.\n\n        This property could be to curtail certain jobs which are long running in nature from occupying more than a \n        certain percentage of the cluster, which in the absence of pre-emption, could lead to capacity guarantees of \n        other queues being affected.\n        \n        One important thing to note is that maximum-capacity is a percentage , so based on the cluster's capacity\n        the max capacity would change. So if large no of nodes or racks get added to the cluster , max Capacity in \n        absolute terms would increase accordingly.\n    </description>    \n  </property>\n  \n  <property>\n    <name>mapred.capacity-scheduler.queue.default.supports-priority</name>\n    <value>false</value>\n    <description>If true, priorities of jobs will be taken into \n      account in scheduling decisions.\n    </description>\n  </property>\n\n  <property>\n    <name>mapred.capacity-scheduler.queue.default.minimum-user-limit-percent</name>\n    <value>100</value>\n    <description> Each queue enforces a limit on the percentage of resources \n    allocated to a user at any given time, if there is competition for them. \n    This user limit can vary between a minimum and maximum value. The former\n    depends on the number of users who have submitted jobs, and the latter is\n    set to this property value. For example, suppose the value of this \n    property is 25. If two users have submitted jobs to a queue, no single \n    user can use more than 50% of the queue resources. If a third user submits\n    a job, no single user can use more than 33% of the queue resources. With 4 \n    or more users, no user can use more than 25% of the queue's resources. A \n    value of 100 implies no user limits are imposed. \n    </description>\n  </property>\n  <property>\n    <name>mapred.capacity-scheduler.queue.default.maximum-initialized-jobs-per-user</name>\n    <value>2</value>\n    <description>The maximum number of jobs to be pre-initialized for a user\n    of the job queue.\n    </description>\n  </property>\n\n  <!-- The default configuration settings for the capacity task scheduler -->\n  <!-- The default values would be applied to all the queues which don't have -->\n  <!-- the appropriate property for the particular queue -->\n  <property>\n    <name>mapred.capacity-scheduler.default-supports-priority</name>\n    <value>false</value>\n    <description>If true, priorities of jobs will be taken into \n      account in scheduling decisions by default in a job queue.\n    </description>\n  </property>\n  \n  <property>\n    <name>mapred.capacity-scheduler.default-minimum-user-limit-percent</name>\n    <value>100</value>\n    <description>The percentage of the resources limited to a particular user\n      for the job queue at any given point of time by default.\n    </description>\n  </property>\n\n  <property>\n    <name>mapred.capacity-scheduler.default-maximum-initialized-jobs-per-user</name>\n    <value>2</value>\n    <description>The maximum number of jobs to be pre-initialized for a user\n    of the job queue.\n    </description>\n  </property>\n\n\n  <!-- Capacity scheduler Job Initialization configuration parameters -->\n  <property>\n    <name>mapred.capacity-scheduler.init-poll-interval</name>\n    <value>5000</value>\n    <description>The amount of time in miliseconds which is used to poll \n    the job queues for jobs to initialize.\n    </description>\n  </property>\n  <property>\n    <name>mapred.capacity-scheduler.init-worker-threads</name>\n    <value>5</value>\n    <description>Number of worker threads which would be used by\n    Initialization poller to initialize jobs in a set of queue.\n    If number mentioned in property is equal to number of job queues\n    then a single thread would initialize jobs in a queue. If lesser\n    then a thread would get a set of queues assigned. If the number\n    is greater then number of threads would be equal to number of \n    job queues.\n    </description>\n  </property>\n\n</configuration>\n",
+    "displayName" : "Capacity Scheduler Configuration",
+    "description" : "Enter an XML string that represents the Capacity Scheduler configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "jobtracker_hosts_exclude_safety_valve",
+    "required" : false,
+    "displayName" : "JobTracker Advanced Configuration Snippet (Safety Valve) for mapred_hosts_exclude.txt",
+    "description" : "For advanced use only, a string to be inserted into <strong>mapred_hosts_exclude.txt</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "enable_alerts",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Health Alerts for this Role",
+    "description" : "When set, Cloudera Manager will send alerts when the health of this role reaches the threshold specified by the EventServer setting eventserver_health_events_alert_threshold",
+    "relatedName" : ""
+  }, {
+    "name" : "mapred_jobtracker_completeuserjobs_maximum",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Maximum Completed User Jobs",
+    "description" : "The maximum number of completed jobs per user to retain before delegating them to the job history.",
+    "relatedName" : "mapred.jobtracker.completeuserjobs.maximum"
+  }, {
+    "name" : "rm_memory_soft_limit",
+    "required" : false,
+    "default" : "-1",
+    "displayName" : "Cgroup Memory Soft Limit",
+    "description" : "Soft memory limit to assign to this role, enforced by the Linux kernel. When the limit is reached, the kernel will reclaim pages charged to the process if and only if the host is facing memory pressure. If reclaiming fails, the kernel may kill the process. Both anonymous as well as page cache pages contribute to the limit. Use a value of -1 B to specify no limit. By default processes not managed by Cloudera Manager will have no limit.",
+    "relatedName" : "memory.soft_limit_in_bytes"
+  }, {
+    "name" : "process_auto_restart",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Automatically Restart Process",
+    "description" : "When set, this role's process is automatically (and transparently) restarted in the event of an unexpected failure.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapreduce_jobtracker_split_metainfo_maxsize",
+    "required" : false,
+    "default" : "10000000",
+    "displayName" : "JobTracker MetaInfo Maxsize",
+    "description" : "The maximum permissible size of the split metainfo file. The JobTracker won't attempt to read split metainfo files bigger than the configured value. No limits if set to -1.",
+    "relatedName" : "mapreduce.jobtracker.split.metainfo.maxsize"
+  }, {
+    "name" : "oom_heap_dump_dir",
+    "required" : false,
+    "default" : "/tmp",
+    "displayName" : "Heap Dump Directory",
+    "description" : "Path to directory where heap dumps are generated when java.lang.OutOfMemoryError error is thrown. This directory is automatically created if it doesn't exist. However, if this directory already exists, role user must have write access to this directory. If this directory is shared amongst multiple roles, it should have 1777 permissions. Note that the heap dump files are created with 600 permissions and are owned by the role user. The amount of free space in this directory should be greater than the maximum Java Process heap size configured for this role.",
+    "relatedName" : ""
+  }, {
+    "name" : "log_event_whitelist",
+    "required" : false,
+    "default" : "{\n  \"version\": \"0\",\n  \"rules\": [\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 1, \"threshold\":\"FATAL\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\": \".* is deprecated. Instead, use .*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\": \".* is deprecated. Use .* instead\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.io.IOException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.net.SocketException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.net.SocketClosedException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.io.EOFException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.nio.channels.CancelledKeyException\"},\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 2, \"exceptiontype\": \".*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"Unknown job [^ ]+ being deleted.*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"Error executing shell command .+ No such process.+\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\".*attempt to override final parameter.+\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"[^ ]+ is a deprecated filesystem name. Use.*\"},\n    {\"alert\": false, \"rate\": 5, \"periodminutes\": 1, \"threshold\":\"WARN\"}\n  ]\n}\n",
+    "displayName" : "Rules to Extract Events from Log Files",
+    "description" : "<p>This file contains the rules which govern how log messages are turned into events by the custom log4j appender that this role loads. It is in JSON format, and is composed of a list of rules. Every log message is evaluated against each of these rules in turn to decide whether or not to send an event for that message.</p><p>Each rule has some or all of the following fields:</p><ul><li><span class='code'>alert</span> - whether or not events generated from this rule should be promoted to alerts. A value of \"true\" will cause alerts to be generated. If not specified, the default is \"false\".</li><li><span class='code'>rate</span> <strong>(mandatory)</strong> - the maximum number of log messages matching this rule that may be sent as events every minute. If more than <tt>rate</tt> matching log messages are received in a single minute, the extra messages are ignored. If rate is less than 0, the number of messages per minute is unlimited.</li><li><span class='code'>periodminutes</span>  - the number of minutes during which the publisher will only publish <tt>rate</tt> events or fewer. If not specified, the default is <strong>one minute</strong></li><li><span class='code'>threshold</span> - apply this rule only to messages with this log4j severity level or above. An example is \"WARN\" for warning level messages or higher.</li><li><span class='code'>content</span> - match only those messages whose contents match this regular expression.</li><li><span class='code'>exceptiontype</span> - match only those messages which are part of an exception message. The exception type must match this regular expression.</li></ul><br/><p>Example:<span class='code'>{\"alert\": false, \"rate\": 10, \"exceptiontype\": \"java.lang.StringIndexOutOfBoundsException\"}</span></p><p>This rule will send events to Cloudera Manager for every <span class='code'>StringIndexOutOfBoundsException</span>, up to a maximum of 10 every minute.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "mapreduce_jobtracker_staging_root_dir",
+    "required" : false,
+    "default" : "/user",
+    "displayName" : "MapReduce JobTracker Staging Root Directory",
+    "description" : "The root HDFS directory of the staging area for users' MapReduce jobs; for example /user. The staging directories are always named after the user.",
+    "relatedName" : "mapreduce.jobtracker.staging.root.dir"
+  }, {
+    "name" : "hadoop_metrics_class",
+    "required" : false,
+    "default" : "org.apache.hadoop.metrics.spi.NoEmitMetricsContext",
+    "displayName" : "Hadoop Metrics Class",
+    "description" : "Implementation daemons will use to report some internal statistics. The default (NoEmitMetricsContext) will display metrics on /metrics on the status port. The GangliaContext and GangliaContext31 classes will report metrics to your specified Ganglia Monitoring Daemons (gmond). The ganglia wire format changed incompatibly at version 3.1.0. If you are running any version of ganglia 3.1.0 or newer, use the GangliaContext31 metric class; otherwise, use the GangliaContext metric class.",
+    "relatedName" : ""
+  }, {
+    "name" : "job_tracker_port",
+    "required" : false,
+    "default" : "8021",
+    "displayName" : "JobTracker Port",
+    "description" : "Port for the internal JobTracker protocol.",
+    "relatedName" : "mapred.job.tracker"
+  }, {
+    "name" : "mapred_job_tracker_persist_jobstatus_active",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Persist JobTracker Job Status",
+    "description" : "If enabled, job status information is persisted.",
+    "relatedName" : "mapred.job.tracker.persist.jobstatus.active"
+  }, {
+    "name" : "jobtracker_web_metric_collection_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Web Metric Collection",
+    "description" : "Enables the health test that the Cloudera Manager Agent can successfully contact and gather metrics from the web server.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_thrift_threads_min",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "Hue Thrift Server Min Threadcount",
+    "description" : "Minimum number of running threads for the Hue Thrift server running on the Jobtracker",
+    "relatedName" : "dfs.thrift.threads.min"
+  }, {
+    "name" : "ha_job_tracker_port",
+    "required" : false,
+    "default" : "8023",
+    "displayName" : "JobTracker Port for HA",
+    "description" : "Port of the High Availability service protocol for the JobTracker. The JobTracker listens on a separate port for High Availability operations which is why this property exists in addition to 'mapred.job.tracker'.",
+    "relatedName" : "mapred.ha.job.tracker"
+  }, {
+    "name" : "mapred_job_tracker_http_port",
+    "required" : false,
+    "default" : "50030",
+    "displayName" : "JobTracker HTTP Server Port",
+    "description" : "The port where the JobTracker HTTP server listens. If the port is 0, the server starts on a free port.",
+    "relatedName" : "mapred.job.tracker.http.address"
+  }, {
+    "name" : "rlimit_fds",
+    "required" : false,
+    "displayName" : "Maximum Process File Descriptors",
+    "description" : "If configured, overrides the process soft and hard rlimits (also called ulimits) for file descriptors to the configured value.",
+    "relatedName" : ""
+  }, {
+    "name" : "jobtracker_config_safety_valve",
+    "required" : false,
+    "displayName" : "JobTracker Advanced Configuration Snippet (Safety Valve) for mapred-site.xml",
+    "description" : "For advanced use only, a string to be inserted into <strong>mapred-site.xml</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "log4j_safety_valve",
+    "required" : false,
+    "displayName" : "JobTracker Logging Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, a string to be inserted into <strong>log4j.properties</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "max_log_size",
+    "required" : false,
+    "default" : "200",
+    "displayName" : "JobTracker Max Log Size",
+    "description" : "The maximum size, in megabytes, per log file for JobTracker logs.  Typically used by log4j.",
+    "relatedName" : ""
+  }, {
+    "name" : "jobtracker_fd_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"70.0\",\"warning\":\"50.0\"}",
+    "displayName" : "File Descriptor Monitoring Thresholds",
+    "description" : "The health test thresholds of the number of file descriptors used. Specified as a percentage of file descriptor limit.",
+    "relatedName" : ""
+  }, {
+    "name" : "unexpected_exits_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"any\",\"warning\":\"never\"}",
+    "displayName" : "Unexpected Exits Thresholds",
+    "description" : "The health test thresholds for unexpected exits encountered within a recent period specified by the unexpected_exits_window configuration for the role.",
+    "relatedName" : ""
+  }, {
+    "name" : "hadoop_job_history_dir",
+    "required" : false,
+    "default" : "/var/log/hadoop-0.20-mapreduce/history",
+    "displayName" : "Running Job History Location",
+    "description" : "Location to store the job history files of running jobs. This is a path on the host where the JobTracker is running.",
+    "relatedName" : "hadoop.job.history.location"
+  }, {
+    "name" : "mapred_client_failover_connection_retries",
+    "required" : false,
+    "default" : "0",
+    "displayName" : "JobTracker Client Connection Retries",
+    "description" : "The maximum number of times to retry between failovers.",
+    "relatedName" : "mapred.client.failover.connection.retries"
+  }, {
+    "name" : "log_directory_free_space_percentage_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"never\",\"warning\":\"never\"}",
+    "displayName" : "Log Directory Free Space Monitoring Percentage Thresholds",
+    "description" : "The health test thresholds for monitoring of free space on the filesystem that contains this role's log directory. Specified as a percentage of the capacity on that filesystem. This setting is not used if a Log Directory Free Space Monitoring Absolute Thresholds setting is configured.",
+    "relatedName" : ""
+  }, {
+    "name" : "jobtracker_java_opts",
+    "required" : false,
+    "default" : "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:-CMSConcurrentMTEnabled -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled",
+    "displayName" : "Java Configuration Options for JobTracker",
+    "description" : "These arguments will be passed as part of the Java command line. Commonly, garbage collection flags or extra debugging flags would be passed here.",
+    "relatedName" : ""
+  }, {
+    "name" : "log_directory_free_space_absolute_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"5.36870912E9\",\"warning\":\"1.073741824E10\"}",
+    "displayName" : "Log Directory Free Space Monitoring Absolute Thresholds",
+    "description" : "The health test thresholds for monitoring of free space on the filesystem that contains this role's log directory.",
+    "relatedName" : ""
+  }, {
+    "name" : "jobtracker_gc_duration_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"60.0\",\"warning\":\"30.0\"}",
+    "displayName" : "Garbage Collection Duration Thresholds",
+    "description" : "The health test thresholds for the weighted average time spent in Java garbage collection. Specified as a percentage of elapsed wall clock time.",
+    "relatedName" : ""
+  }, {
+    "name" : "oom_heap_dump_enabled",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Dump Heap When Out of Memory",
+    "description" : "When set, generates heap dump file when java.lang.OutOfMemoryError is thrown.",
+    "relatedName" : ""
+  }, {
+    "name" : "max_log_backup_index",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "JobTracker Maximum Log File Backups",
+    "description" : "The maximum number of rolled log files to keep for JobTracker logs.  Typically used by log4j.",
+    "relatedName" : ""
+  }, {
+    "name" : "unexpected_exits_window",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Unexpected Exits Monitoring Period",
+    "description" : "The period to review when computing unexpected exits.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapred_jobtracker_retirejob_interval",
+    "required" : false,
+    "default" : "86400000",
+    "displayName" : "JobTracker Retire Job Interval (milliseconds)",
+    "description" : "Number of milliseconds job history objects are kept.",
+    "relatedName" : "mapred.jobtracker.retirejob.interval"
+  }, {
+    "name" : "mapred_client_failover_sleep_max_millis",
+    "required" : false,
+    "default" : "1500",
+    "displayName" : "JobTracker Client Maximum Sleep",
+    "description" : "The maximum amount of time in milliseconds to wait between failovers (for exponential backoff).",
+    "relatedName" : "mapred.client.failover.sleep.max.millis"
+  }, {
+    "name" : "mapred_job_tracker_http_host",
+    "required" : false,
+    "default" : "0.0.0.0",
+    "displayName" : "JobTracker HTTP Server Address",
+    "description" : "The address where the JobTracker HTTP server listens. The default address, 0.0.0.0, binds to all interfaces.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_thrift_timeout",
+    "required" : false,
+    "default" : "60",
+    "displayName" : "Hue Thrift Server Timeout",
+    "description" : "Timeout in seconds for the Hue Thrift server running on the Jobtracker",
+    "relatedName" : "dfs.thrift.timeout"
+  }, {
+    "name" : "hadoop_metrics_ganglia_servers",
+    "required" : false,
+    "displayName" : "Hadoop Metrics Ganglia Servers",
+    "description" : "If using GangliaContext, a comma-delimited list of host:port pairs pointing to 'gmond' servers you would like to publish metrics to.  In practice, this set of 'gmond' should match the set of 'gmond' in your 'gmetad' datasource list for the cluster.",
+    "relatedName" : ""
+  }, {
+    "name" : "jobtracker_scm_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "JobTracker Process Health Test",
+    "description" : "Enables the health test that the JobTracker's process state is consistent with the role configuration",
+    "relatedName" : ""
+  }, {
+    "name" : "oom_sigkill_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Kill When Out of Memory",
+    "description" : "When set, a SIGKILL signal is sent to the role process when java.lang.OutOfMemoryError is thrown.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapred_user_jobconf_limit",
+    "required" : false,
+    "default" : "5242880",
+    "displayName" : "User JobConf Limit",
+    "description" : "The maximum allowed size of the user jobconf.",
+    "relatedName" : "mapred.user.jobconf.limit"
+  }, {
+    "name" : "rm_memory_hard_limit",
+    "required" : false,
+    "default" : "-1",
+    "displayName" : "Cgroup Memory Hard Limit",
+    "description" : "Hard memory limit to assign to this role, enforced by the Linux kernel. When the limit is reached, the kernel will reclaim pages charged to the process. If reclaiming fails, the kernel may kill the process. Both anonymous as well as page cache pages contribute to the limit. Use a value of -1 B to specify no limit. By default processes not managed by Cloudera Manager will have no limit.",
+    "relatedName" : "memory.limit_in_bytes"
+  }, {
+    "name" : "mapred_fairscheduler_allow_undeclared_pools",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Fair Scheduler Allow Undeclared Pools",
+    "description" : "Enable job submission to pools not declared in the allocation file.",
+    "relatedName" : "mapred.fairscheduler.allow.undeclared.pools"
+  }, {
+    "name" : "rm_cpu_shares",
+    "required" : false,
+    "default" : "1024",
+    "displayName" : "Cgroup CPU Shares",
+    "description" : "Number of CPU shares to assign to this role. The greater the number of shares, the larger the share of the host's CPUs that will be given to this role when the host experiences CPU contention. Must be between 2 and 262144. Defaults to 1024 for processes not managed by Cloudera Manager.",
+    "relatedName" : "cpu.shares"
+  }, {
+    "name" : "jobtracker_web_metric_collection_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"never\",\"warning\":\"10000.0\"}",
+    "displayName" : "Web Metric Collection Duration",
+    "description" : "The health test thresholds on the duration of the metrics request to the web server.",
+    "relatedName" : ""
+  }, {
+    "name" : "jobtracker_log_dir",
+    "required" : false,
+    "default" : "/var/log/hadoop-0.20-mapreduce",
+    "displayName" : "JobTracker Log Directory",
+    "description" : "Directory where JobTracker will place its log files.",
+    "relatedName" : "hadoop.log.dir"
+  }, {
+    "name" : "mapred_fairscheduler_weight_adjuster",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Fair Scheduler Weight Adjuster",
+    "description" : "An extension point that lets you specify a class to adjust the weights of running jobs. This class should implement the WeightAdjuster interface. There is currently one example implementation - NewJobWeightBooster, which increases the weight of jobs for their first 5 minutes to let short jobs finish faster. To use it, set the weightadjuster property to the full classname, org.apache.hadoop.mapred.NewJobWeightBooster. NewJobWeightBooster itself provides two parameters for setting the duration and boost factor. mapred.newjobweightbooster.factor: Factor by which new jobs weight should be boosted. Default is 3. mapred.newjobweightbooster.duration: Boost duration in milliseconds. Default is 300000 for 5 minutes.",
+    "relatedName" : "mapred.fairscheduler.weight.adjuster"
+  }, {
+    "name" : "mapreduce_jobhistory_cleaner_interval",
+    "required" : false,
+    "default" : "86400000",
+    "displayName" : "Job History Files Cleaner Interval",
+    "description" : "Time interval for history cleaner to check for files to delete. Files are only deleted if they are older than mapreduce.jobhistory.max-age-ms.",
+    "relatedName" : "mapreduce.jobhistory.cleaner.interval"
+  }, {
+    "name" : "mapred_queue_names_list",
+    "required" : false,
+    "default" : "default",
+    "displayName" : "MapReduce Queue Names",
+    "description" : "Comma separated list of queues configured for the JobTracker in this service instance. Jobs are added to queues. Schedulers can configure different scheduling properties for the queues specified in this list. You can configure queue properties that are common to all schedulers, by using the naming convention 'mapred.queue.$QUEUE-NAME.$PROPERTY-NAME' in this property (for example, 'mapred.queue.default.submit-job-acl'). The number of queues configured in this property depends on the type of scheduler specified in 'mapred.jobtracker.taskScheduler'. The default scheduler JobQueueTaskScheduler supports a single queue only. Before adding more queues to this property, make sure that the scheduler in 'mapred.jobtracker.taskScheduler' supports multiple queues. This property can also be populated with the Fair Scheduler's pool names to enable authorization of the Fair Scheduler. This requires setting 'mapred.fairscheduler.poolnameproperty' to 'mapred.job.queue.name' and users to submit jobs to the right queue by setting the 'mapred.job.queue.name' property in their jobs.",
+    "relatedName" : "mapred.queue.names"
+  }, {
+    "name" : "mapred_jobtracker_hue_thrift_plugin_port",
+    "required" : false,
+    "default" : "9290",
+    "displayName" : "Hue Thrift Plugin Port",
+    "description" : "Port to use for 'org.apache.hadoop.thriftfs.ThriftJobTrackerPlugin' that is used by Hue's NameNode plugin.",
+    "relatedName" : "jobtracker.thrift.address"
+  }, {
+    "name" : "rm_io_weight",
+    "required" : false,
+    "default" : "500",
+    "displayName" : "Cgroup I/O Weight",
+    "description" : "Weight for the read I/O requests issued by this role. The greater the weight, the higher the priority of the requests when the host experiences I/O contention. Must be between 100 and 1000. Defaults to 1000 for processes not managed by Cloudera Manager.",
+    "relatedName" : "blkio.weight"
+  }, {
+    "name" : "mapred_client_failover_max_attempts",
+    "required" : false,
+    "default" : "15",
+    "displayName" : "JobTracker Client Max Failover Attempt",
+    "description" : "The maximum number of times a client of JobTracker tries to fail over.",
+    "relatedName" : "mapred.client.failover.max.attempts"
+  }, {
+    "name" : "hadoop_metrics_safety_valve",
+    "required" : false,
+    "displayName" : "Hadoop Metrics Advanced Configuration Snippet (Safety Valve)",
+    "description" : "Advanced Configuration Snippet (Safety Valve) for Hadoop Metrics. Properties will be inserted into <strong>hadoop-metrics.properties</strong> for this role only. Note that Cloudera Manager tunes hadoop-metrics.properties to work optimally with its Service Monitoring features. By overriding the default, Cloudera Manager might not be able to provide accurate monitoring information, health tests or alerts.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapred_acls_enabled",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable MapReduce ACLs",
+    "description" : "Specifies whether ACLs should be checked for authorization of users who are doing various queue and job-level operations. ACLs are disabled by default. If enabled, the JobTracker and TaskTracker perform access control checks when users make requests for queue and job operations. Examples of queue operations are submitting a job to the queue and killing a job in the queue. Examples of job operations are viewing the job details (mapreduce.job.acl-view-job), modifying the job (mapreduce.job.acl-modify-job), or using MapReduce APIs, RPCs, or the console and web user interfaces.",
+    "relatedName" : "mapred.acls.enabled"
+  }, {
+    "name" : "mapred_fairscheduler_preemption",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Fair Scheduler Preemption",
+    "description" : "Enables Fair Scheduler preemption. If a pool's minimum share is not met for some period of time, the Fair Scheduler optionally supports preemption of jobs in other pools. The pool will be allowed to kill tasks from other pools to make room to run. Preemption can be used to guarantee that production jobs are not starved while also allowing the Hadoop cluster to be used for experimental and research jobs. In addition, a pool can also be allowed to preempt tasks if it is below half of its fair share for a configurable timeout (generally set larger than the minimum share preemption timeout). When choosing tasks to kill, the Fair Scheduler picks the most-recently launched tasks from over-allocated jobs, to minimize wasted computation. Preemption does not cause the preempted jobs to fail because Hadoop jobs tolerate losing tasks; it only makes them take longer to finish.",
+    "relatedName" : "mapred.fairscheduler.preemption"
+  }, {
+    "name" : "mapred_jobtracker_restart_recover",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Job Recovery Upon Restart",
+    "description" : "Enables job recovery upon restart. If the property is set to true, then if and when the JobTracker stops while a job is running, it will resubmit the job on restart.",
+    "relatedName" : "mapred.jobtracker.restart.recover"
+  }, {
+    "name" : "webinterface_private_actions",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Web Interface Private Actions",
+    "description" : "If enabled, administrative actions such as 'kill job' will be displayed in the JobTracker's web interface. These actions can then be triggered by anyone who has access to the web interface.",
+    "relatedName" : "webinterface.private.actions"
+  }, {
+    "name" : "enable_config_alerts",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Configuration Change Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when this entity's configuration changes.",
+    "relatedName" : ""
+  }, {
+    "name" : "jobtracker_hosts_allow_safety_valve",
+    "required" : false,
+    "displayName" : "JobTracker Advanced Configuration Snippet (Safety Valve) for mapred_hosts_allow.txt",
+    "description" : "For advanced use only, a string to be inserted into <strong>mapred_hosts_allow.txt</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "role_triggers",
+    "required" : false,
+    "default" : "[]",
+    "displayName" : "Role Triggers",
+    "description" : "<p>The configured triggers for this role. This is a JSON formatted list of triggers. These triggers are evaluated as part as the health system. Every trigger expression is parsed, and if the trigger condition is met, the list of actions provided in the trigger expression is executed.</p><p>Each trigger has all of the following fields:</p><ul><li><span class='code'>triggerName</span> <strong>(mandatory)</strong> - the name of the trigger. This value must be unique for the specific role. </li><li><span class='code'>triggerExpression</span> <strong>(mandatory)</strong> - a tsquery expression representing the trigger. </li><li><span class='code'>streamThreshold</span> <strong>(optional)</strong> - the maximum number of streams that can satisfy a condition of a trigger before the condition fires. By default set to 0, and any stream returned will cause the condition to fire. </li><li><span class='code'>enabled</span> <strong> (optional)</strong> - by default set to 'true'. If set to 'false' the trigger will not be evaluated.</li></ul></p><p>For example, here is a JSON formatted trigger configured for a DataNode that fires if the DataNode has more than 1500 file-descriptors opened:</p><p><pre>[{\"triggerName\": \"sample-trigger\",\n  \"triggerExpression\": \"IF (SELECT fd_open WHERE roleName=$ROLENAME and last(fd_open) > 1500) DO health:bad\",\n  \"streamThreshold\": 0}, \"enabled\": \"true\"]</pre></p><p>Consult the trigger rules documentation for more details on how to write triggers using tsquery.</p><p>The JSON format is evolving and may change in the future and as a result backward compatibility is not guaranteed between releases at this time.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "mapred_jobtracker_taskScheduler",
+    "required" : false,
+    "default" : "org.apache.hadoop.mapred.FairScheduler",
+    "displayName" : "Task Scheduler",
+    "description" : "The class responsible for scheduling tasks. Cloudera recommends the Fair Scheduler. The JobQueueTaskScheduler is often referred to as the FIFO scheduler.",
+    "relatedName" : "mapred.jobtracker.taskScheduler"
+  }, {
+    "name" : "mapred_queue_acls",
+    "required" : false,
+    "default" : "<?xml version=\"1.0\"?>\n<?xml-stylesheet type=\"text/xsl\" href=\"configuration.xsl\"?>\n<configuration>\n  <property>\n    <name>mapred.queue.default.acl-submit-job</name>\n    <value>*</value>\n  </property>\n  <property>\n    <name>mapred.queue.default.acl-administer-jobs</name>\n    <value> </value>\n  </property>\n</configuration>",
+    "displayName" : "MapReduce Queue ACLs",
+    "description" : "String representing an XML file that controls, per queue, which users are allowed to submit and administrate jobs in that queue.  The default setting is that all users and groups are allowed to submit jobs to queue 'default' and no users or groups are allowed to administer jobs other than their own that are submitted to queue 'default'.",
+    "relatedName" : ""
+  }, {
+    "name" : "job_tracker_bind_wildcard",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Bind JobTracker to Wildcard Address",
+    "description" : "If enabled, the JobTracker binds to the wildcard address (\"0.0.0.0\") on all of its ports.",
+    "relatedName" : ""
+  }, {
+    "name" : "hue_jobtracker_plugin",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable JobTracker Plugins Required for Hue",
+    "description" : "If enabled, adds 'org.apache.hadoop.thriftfs.ThriftJobTrackerPlugin' to the 'mapred.jobtracker.plugins' configuration.  This property must be enabled to allow Hue to operate.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapred_jobtracker_plugins_list",
+    "required" : false,
+    "default" : "",
+    "displayName" : "MapReduce JobTracker Plugins",
+    "description" : "mapred.jobtracker.plugins: Comma-separated list of JobTracker plugins to be activated. If one plugin cannot be loaded, all plugins are ignored. Note that there are separate controls below to enable the Hue Thrift plugin.",
+    "relatedName" : "mapred.jobtracker.plugins"
+  } ]
+}
