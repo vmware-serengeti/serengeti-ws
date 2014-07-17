@@ -566,7 +566,7 @@ public class TestClusteringJobs extends
    public void testCreateClusterFailed() throws Exception {
       ClusterCreate createSpec =
             ClusterSpecFactory.createDefaultSpec(ClusterType.HDFS_MAPRED,
-                  Constants.DEFAULT_VENDOR, null);
+                  Constants.DEFAULT_VENDOR, null, null);
       createSpec.setName(TEST_DHCP_CLUSTER_NAME);
       createSpec.setNetworkConfig(createNetConfig(TEST_DHCP_NETWORK_NAME, dhcpPortgroup));
       createSpec.setDistro("apache");

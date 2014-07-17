@@ -334,7 +334,7 @@ public class TestClusterConfigManager {
       spec.setDistro("apache");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       spec.setType(ClusterType.HDFS_MAPRED);
-      spec = ClusterSpecFactory.getCustomizedSpec(spec);
+      spec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       clusterConfigMgr.createClusterConfig(spec);
 
       ClusterEntity cluster = clusterEntityMgr.findClusterById(1l);
@@ -363,7 +363,7 @@ public class TestClusterConfigManager {
       spec.setDistroVendor(Constants.CDH_VENDOR);
       spec.setDistroVersion("4.4.0");
       spec.setType(ClusterType.HDFS_MAPRED);
-      ClusterCreate newSpec = ClusterSpecFactory.getCustomizedSpec(spec);
+      ClusterCreate newSpec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       Assert.assertTrue(newSpec.getNodeGroups().length == 3);
       List<String> masterRoles = newSpec.getNodeGroups()[0].getRoles();
       Assert.assertTrue(
@@ -373,7 +373,7 @@ public class TestClusterConfigManager {
 
       spec.setDistro("cdh5");
       spec.setDistroVersion("5.0.0");
-      newSpec = ClusterSpecFactory.getCustomizedSpec(spec);
+      newSpec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       Assert.assertTrue(newSpec.getNodeGroups().length == 3);
       masterRoles = newSpec.getNodeGroups()[0].getRoles();
       Assert.assertTrue(
@@ -394,7 +394,7 @@ public class TestClusterConfigManager {
       spec.setDistroVendor(Constants.HDP_VENDOR);
       spec.setDistroVersion("1.3");
       spec.setType(ClusterType.HDFS_MAPRED);
-      ClusterCreate newSpec = ClusterSpecFactory.getCustomizedSpec(spec);
+      ClusterCreate newSpec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       Assert.assertTrue(newSpec.getNodeGroups().length == 3);
       List<String> masterRoles = newSpec.getNodeGroups()[0].getRoles();
       Assert.assertTrue(
@@ -404,7 +404,7 @@ public class TestClusterConfigManager {
 
       spec.setDistro("hdp2");
       spec.setDistroVersion("2.0");
-      newSpec = ClusterSpecFactory.getCustomizedSpec(spec);
+      newSpec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       Assert.assertTrue(newSpec.getNodeGroups().length == 3);
       masterRoles = newSpec.getNodeGroups()[0].getRoles();
       Assert.assertTrue(
@@ -425,7 +425,7 @@ public class TestClusterConfigManager {
       spec.setDistroVendor(Constants.BIGTOP_VENDOR);
       spec.setDistroVersion("0.7");
       spec.setType(ClusterType.HDFS_MAPRED);
-      ClusterCreate newSpec = ClusterSpecFactory.getCustomizedSpec(spec);
+      ClusterCreate newSpec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       Assert.assertTrue(newSpec.getNodeGroups().length == 3);
       List<String> masterRoles = newSpec.getNodeGroups()[0].getRoles();
       Assert.assertTrue(
@@ -446,7 +446,7 @@ public class TestClusterConfigManager {
       spec.setDistroVendor(Constants.INTEL_VENDOR);
       spec.setDistroVersion("2.6");
       spec.setType(ClusterType.HDFS_MAPRED);
-      ClusterCreate newSpec = ClusterSpecFactory.getCustomizedSpec(spec);
+      ClusterCreate newSpec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       Assert.assertTrue(newSpec.getNodeGroups().length == 3);
       List<String> masterRoles = newSpec.getNodeGroups()[0].getRoles();
       Assert.assertTrue(
@@ -456,7 +456,7 @@ public class TestClusterConfigManager {
 
       spec.setDistro("intel3");
       spec.setDistroVersion("3.1");
-      newSpec = ClusterSpecFactory.getCustomizedSpec(spec);
+      newSpec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       Assert.assertTrue(newSpec.getNodeGroups().length == 3);
       masterRoles = newSpec.getNodeGroups()[0].getRoles();
       Assert.assertTrue(
@@ -530,7 +530,7 @@ public class TestClusterConfigManager {
 
       NodeGroupCreate[] ngs = new NodeGroupCreate[] { ng0, ng1, ng2 };
       spec.setNodeGroups(ngs);
-      spec = ClusterSpecFactory.getCustomizedSpec(spec);
+      spec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       clusterConfigMgr.createClusterConfig(spec);
 
       ClusterEntity cluster = clusterEntityMgr.findClusterById(1l);
@@ -597,7 +597,7 @@ public class TestClusterConfigManager {
       worker.setStorage(storage);
       spec.setNodeGroups(new NodeGroupCreate[] { worker });
 
-      spec = ClusterSpecFactory.getCustomizedSpec(spec);
+      spec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       clusterConfigMgr.createClusterConfig(spec);
       ClusterEntity cluster =
             clusterEntityMgr.findByName("my-cluster-external-mr");
@@ -684,7 +684,7 @@ public class TestClusterConfigManager {
 
       NodeGroupCreate[] ngs = new NodeGroupCreate[] { ng0, ng1, ng2 };
       spec.setNodeGroups(ngs);
-      spec = ClusterSpecFactory.getCustomizedSpec(spec);
+      spec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       clusterConfigMgr.createClusterConfig(spec);
 
       ClusterEntity cluster = clusterEntityMgr.findClusterById(1l);
@@ -772,7 +772,7 @@ public class TestClusterConfigManager {
       ngs[2].setPlacementPolicies(policy);
 
       spec.setNodeGroups(ngs);
-      spec = ClusterSpecFactory.getCustomizedSpec(spec);
+      spec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       clusterConfigMgr.createClusterConfig(spec);
 
       ClusterEntity cluster = clusterEntityMgr.findClusterById(1l);
@@ -1028,7 +1028,7 @@ public class TestClusterConfigManager {
       spec.setType(ClusterType.HDFS_MAPRED);
       spec.setDistro("apache");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
-      spec = ClusterSpecFactory.getCustomizedSpec(spec);
+      spec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       clusterConfigMgr.createClusterConfig(spec);
 
       ClusterEntity cluster = clusterEntityMgr.findClusterById(1l);
@@ -1198,7 +1198,7 @@ public class TestClusterConfigManager {
       spec.setType(ClusterType.HDFS_MAPRED);
       spec.setDistro("apache");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
-      spec = ClusterSpecFactory.getCustomizedSpec(spec);
+      spec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       spec.setType(null);
       String configJson =
             "{\"cluster_configuration\":{\"hadoop\":{\"core-site.xml\":{\"hadoop.security.group.mapping\":\"xyz\",\"hadoop.security.authorization\":true}}}}";

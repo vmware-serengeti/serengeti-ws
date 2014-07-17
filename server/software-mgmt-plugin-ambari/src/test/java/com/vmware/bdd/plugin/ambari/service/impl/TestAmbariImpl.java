@@ -27,7 +27,7 @@ public class TestAmbariImpl {
 
    @BeforeClass(groups = { "TestAmbariImpl" })
    public static void setup() {
-      provider = new AmbariImpl("10.141.73.103", 8080, "admin", "admin", null);
+      //provider = new AmbariImpl("10.141.73.103", 8080, "admin", "admin", null);
    }
 
    @AfterClass(groups = { "TestAmbariImpl" })
@@ -91,12 +91,12 @@ public class TestAmbariImpl {
       }
    }
    
-   @Test(groups = { "TestAmbariImpl" })
+   //@Test(groups = { "TestAmbariImpl" })
    public void testEcho() throws IOException {
       Assert.assertTrue(provider.echo());
    }
 
-   @Test(groups = { "TestAmbariImpl" })
+   //@Test(groups = { "TestAmbariImpl" })
    public void testGetStatus() throws IOException {
       Assert.assertTrue(provider.getStatus().equals(HealthStatus.Connected));
    }
