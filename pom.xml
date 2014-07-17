@@ -447,7 +447,7 @@
       </dependencies>
    </dependencyManagement>
    <properties>
-      <serengeti.version>2.0.0</serengeti.version>
+      <serengeti.version>2.1.0</serengeti.version>
       <java.source.version>1.7</java.source.version>
       <java.target.version>1.7</java.target.version>
       <spring.version>3.2.3.RELEASE</spring.version>
