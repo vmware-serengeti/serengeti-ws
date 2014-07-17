@@ -123,6 +123,8 @@ public class Constants {
    public static final String PHD_VENDOR = "PHD";
    public static final String INTEL_VENDOR = "INTEL";
    public static final String BIGTOP_VENDOR = "BIGTOP";
+
+   public static final String CLOUDERA_MANAGER_PLUGIN_TYPE = "ClouderaManager"; // must match serengeti.properties
    public static final String CURRENT_DISTRO_CAN_NOT_SUPPORT_HDFS2 =
          "The current Hadoop distribution does not support HDFS2 High Availability or federation.";
    public static final String CDH_PATTERN = "^[4-9](\\.\\w+)+";
@@ -207,7 +209,6 @@ public class Constants {
    public static final String IRONFAN = "Default";
    public static final String IRONFAN_DESCRIPTION = "Default Software Manager";
    public static final String SERENGETI_PRIVATE_KEY_FILE = "/home/serengeti/.ssh/id_rsa";
-   public static final String CLOUDERA_MANAGER = "ClouderaManager";
    public static final String VM_DISK_FORMAT_STATUS_KEY = "guestinfo.DiskFormatCode";
    public static final String VM_DISK_FORMAT_ERROR_KEY = "guestinfo.disk.format.status";
 }

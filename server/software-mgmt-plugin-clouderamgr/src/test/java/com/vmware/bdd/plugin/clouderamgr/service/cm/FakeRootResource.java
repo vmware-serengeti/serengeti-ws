@@ -33,7 +33,6 @@ import com.cloudera.api.v6.TimeSeriesResourceV6;
  * Time: 9:58 PM
  */
 
-//@MockClass(realClass = RootResourceV6.class)
 public class FakeRootResource implements RootResourceV6 {
 
    public ClustersResourceV6 clustersResourceV6;

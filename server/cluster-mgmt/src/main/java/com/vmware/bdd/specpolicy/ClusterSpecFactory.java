@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 
+import com.vmware.bdd.manager.SoftwareManagerCollector;
 import org.apache.commons.configuration.ConfigurationUtils;
 import org.apache.log4j.Logger;
 
@@ -44,7 +45,7 @@ public class ClusterSpecFactory {
    private static final String HDFS_MAPRED_TEMPLATE_SPEC =
          "hdfs-mapred-template-spec.json";
    private static final String HDFS_YARN_TEMPLATE_SPEC =
-      "hdfs-yarn-template-spec.json";
+         "hdfs-yarn-template-spec.json";
    private static final String HDFS_HBASE_TEMPLATE_SPEC =
          "hdfs-hbase-template-spec.json";
    private static final String HDFS_MAPRED_MAPR_TEMPLATE_SPEC =
@@ -57,6 +58,10 @@ public class ClusterSpecFactory {
          "hdfs-mapred-gphd-template-spec.json";
    private static final String HDFS_HBASE_GPHD_TEMPLATE_SPEC =
          "hdfs-hbase-gphd-template-spec.json";
+   private static final String CM_HDFS_MAPRED_TEMPLATE_SPEC =
+         "cm-hdfs-mapred-template-spec.json";
+   private static final String CM_HDFS_YARN_TEMPLATE_SPEC =
+         "cm-hdfs-yarn-template-spec.json";
 
    private static File locateSpecFile(String filename) {
       // try to locate file directly
@@ -123,7 +128,7 @@ public class ClusterSpecFactory {
     * @throws FileNotFoundException
     */
    public static ClusterCreate createDefaultSpec(ClusterType type,
-         String vendor, String distroVersion) throws FileNotFoundException {
+         String vendor, String distroVersion, String appManagerType) throws FileNotFoundException {
       // loading from file each time is slow but fine
       if (vendor.trim().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
          switch (type) {
@@ -148,6 +153,13 @@ public class ClusterSpecFactory {
       } else {
          MAPREDUCE_VERSION mr =
                getDefaultMapReduceVersion(vendor, distroVersion);
+         if (appManagerType.equals(Constants.CLOUDERA_MANAGER_PLUGIN_TYPE)) {
+            if (mr == MAPREDUCE_VERSION.V1) {
+               return loadFromFile(locateSpecFile(CM_HDFS_MAPRED_TEMPLATE_SPEC));
+            } else {
+               return loadFromFile(locateSpecFile(CM_HDFS_YARN_TEMPLATE_SPEC));
+            }
+         }
          switch (type) {
          case HDFS:
             return loadFromFile(locateSpecFile(HDFS_TEMPLATE_SPEC));
@@ -225,7 +237,7 @@ public class ClusterSpecFactory {
     * @return customized cluster spec
     * @throws FileNotFoundException
     */
-   public static ClusterCreate getCustomizedSpec(ClusterCreate spec)
+   public static ClusterCreate getCustomizedSpec(ClusterCreate spec, String appManagerType)
          throws FileNotFoundException {
       if ((spec.getType() == null)
             || (spec.getType() != null && spec.isSpecFile())) {
@@ -233,8 +245,7 @@ public class ClusterSpecFactory {
       }
 
       ClusterCreate newSpec =
-            createDefaultSpec(spec.getType(), spec.getDistroVendor(),
-                  spec.getDistroVersion());
+            createDefaultSpec(spec.getType(), spec.getDistroVendor(), spec.getDistroVersion(), appManagerType);
 
       // --name
       if (spec.getName() != null) {

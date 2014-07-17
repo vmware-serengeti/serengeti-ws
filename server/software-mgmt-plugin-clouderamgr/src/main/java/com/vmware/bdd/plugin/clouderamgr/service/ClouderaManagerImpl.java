@@ -149,17 +149,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public String getType() {
-      return Constants.CDH_PLUGIN_NAME;
+      return com.vmware.bdd.utils.Constants.CLOUDERA_MANAGER_PLUGIN_TYPE;
    }
-
-   /*@Override
-   public Set<String> getSupportedRoles(HadoopStack hadoopStack) throws SoftwareManagementPluginException {
-      try {
-         return AvailableServiceRoleContainer.allRoles(CmUtils.majorVersionOfHadoopStack(hadoopStack));
-      } catch (IOException e) {
-         throw new SoftwareManagementPluginException(e.getMessage());
-      }
-   }*/
 
    @Override
    public List<HadoopStack> getSupportedStacks() throws SoftwareManagementPluginException {

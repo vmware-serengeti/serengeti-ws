@@ -386,7 +386,7 @@ public class ClusterManager {
       // create auto rps if vc cluster/rp is specified
       createAutoRps(createSpec);
       ClusterCreate clusterSpec =
-            ClusterSpecFactory.getCustomizedSpec(createSpec);
+            ClusterSpecFactory.getCustomizedSpec(createSpec, softMgr.getType());
       createSpec.verifyClusterNameLength();
       clusterSpec.validateNodeGroupNames();
       //Check the cpu, memory max configuration according vm hardware version
