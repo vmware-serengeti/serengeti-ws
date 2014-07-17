@@ -20,7 +20,6 @@ public enum ServiceStatus {
    STARTUP_FAILED ( "Startup Failed" ),
    FAILED ( "Failed" ),
    STOP_FAILED( "Stop Failed"),
-   STOP_SUCCEED( "Stop Succeed"),
    STARTING( "Starting" ),
    STARTED ( "Started" ),
    UNHEALTHY ("Unhealthy"), // unhealthy is better than alert, as the service is still usable

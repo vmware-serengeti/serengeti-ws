@@ -437,6 +437,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
             if (lastUpdate && nodeReport.getErrMsg() != null) {
                logger.debug("set node error message to:" + report.getAction());
                node.setErrMessage(nodeReport.getErrMsg());
+               node.setActionFailed(true);
             }
          }
       }

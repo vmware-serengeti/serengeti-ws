@@ -59,12 +59,12 @@ public class SoftwareManagementPluginException extends RuntimeException {
       return new SoftwareManagementPluginException("DELETE_CLUSTER_FAILED", "Failed to delete cluster " + clusterName, cause);
    }
 
-   public static SoftwareManagementPluginException START_CLUSTER_FAILED(String clusterName, Throwable cause) {
-      return new SoftwareManagementPluginException("START_CLUSTER_FAILED", "Failed to start cluster " + clusterName, cause);
+   public static SoftwareManagementPluginException START_CLUSTER_FAILED(String errMsg, Throwable cause) {
+      return new SoftwareManagementPluginException("START_CLUSTER_FAILED", errMsg, cause);
    }
 
-   public static SoftwareManagementPluginException STOP_CLUSTER_FAILED(String clusterName, Throwable cause) {
-      return new SoftwareManagementPluginException("STOP_CLUSTER_FAILED", "Failed to stop cluster " + clusterName, cause);
+   public static SoftwareManagementPluginException STOP_CLUSTER_FAILED(String errMsg, Throwable cause) {
+      return new SoftwareManagementPluginException("STOP_CLUSTER_FAILED", errMsg, cause);
    }
 
    public static SoftwareManagementPluginException CHECK_SERVICE_FAILED(String clusterName, Throwable cause) {

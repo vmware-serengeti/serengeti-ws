@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.cloudera.api.model.ApiRoleState;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -112,8 +113,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
       DISTRIBUTE_PARCEL(70),
       ACTIVATE_PARCEL(75),
       CONFIGURE_SERVICES(80),
-      START_SERVICES(100);
-
+      START_SERVICES(100),
+      STOP_SERVICES(100);
       private int progress;
       private ProgressSplit(int progress) {
          this.progress = progress;
@@ -463,7 +464,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          }
 
       } catch (Exception e) {
-         throw SoftwareManagementPluginException.START_CLUSTER_FAILED(cluster.getName(), e);
+         throw SoftwareManagementPluginException.START_CLUSTER_FAILED(e.getMessage(), e);
       }
       return servicesNotStarted.isEmpty();
    }
@@ -487,35 +488,91 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private boolean stopServices(ClusterBlueprint clusterBlueprint, ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
       assert(clusterBlueprint != null && clusterBlueprint.getName() != null && !clusterBlueprint.getName().isEmpty());
       String clusterName = clusterBlueprint.getName();
-      CmClusterDef clusterDef;
+      CmClusterDef clusterDef = null;
       ClusterReport report = null;
+      boolean succeed = false;
       try {
          clusterDef = new CmClusterDef(clusterBlueprint);
          report = clusterDef.getCurrentReport();
          if (isStopped(clusterName) || !needStop(clusterName)) {
-            report.setAction("No Need to Stop Services");
-            report.setSuccess(true);
+            succeed = true;
             return true;
          }
-         execute(apiResourceRootV6.getClustersResource().stopCommand(clusterName));
-         report.setSuccess(true);
-         report.setAction("Stopping Services Successfully");
-         report.setStatus(ServiceStatus.STOP_SUCCEED);
+         executeAndReport("Stopping Services",
+               apiResourceRootV6.getClustersResource().stopCommand(clusterName),
+               ProgressSplit.STOP_SERVICES.getProgress(),
+               report,
+               reportQueue,
+               true);
+         succeed = true;
          return true;
       } catch (Exception e) {
          logger.error("Got an exception when cloudera manager stopping services", e);
-         report.setAction("Failed to Stop Services. Ignoring");
-         report.setSuccess(false);
-         throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(clusterName, e);
+         report.setClusterAndNodesServiceStatus(ServiceStatus.STOP_FAILED);
+         HashMap<String, Set<String>> unstoppedRoles = getFailedRoles(clusterName, ApiRoleState.STOPPED);
+         setRolesErrorMsg(report, unstoppedRoles, "stopping");
+         throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(e.getMessage(), e);
       } finally {
-         report.setProgress(100);
-         report.setFinished(true);
-         reportQueue.addClusterReport(report.clone());
+         if (clusterDef != null) {
+            if (succeed) {
+               report.setClusterAndNodesServiceStatus(ServiceStatus.STOPPED);
+               report.setProgress(ProgressSplit.STOP_SERVICES.getProgress());
+               logger.info("Cloudera Manager stopped all services successfully.");
+            }
+            report.setClusterAndNodesAction("");
+            report.setFinished(true);
+            report.setSuccess(succeed);
+            reportQueue.addClusterReport(report.clone());
+         }
+      }
+   }
+
+   /*
+    * get roles that is not in the expected state
+    */
+   private HashMap<String, Set<String>> getFailedRoles(String clusterName, ApiRoleState roleState) {
+      HashMap<String, Set<String>> failedRoles = null;
+      ApiServiceList serviceList = apiResourceRootV6.getClustersResource().getServicesResource(clusterName).readServices(DataView.FULL);
+      if (serviceList != null && serviceList.getServices() != null && !serviceList.getServices().isEmpty()) {
+         for (ApiService service : serviceList.getServices()) {
+            for (ApiRole role : apiResourceRootV6.getClustersResource().getServicesResource(clusterName)
+                  .getRolesResource(service.getName()).readRoles()) {
+               logger.info("role " + role.getName() + " is in state " + role.getRoleState());
+               if (!roleState.equals(role.getRoleState())) {
+                  if (failedRoles == null) {
+                     failedRoles = new HashMap<>();
+                  }
+                  String hostId = role.getHostRef().getHostId();
+                  if (!failedRoles.containsKey(hostId)) {
+                     failedRoles.put(hostId, new HashSet<String>());
+                  }
+                  String roleDisplayName = getRoleDisplayName(role.getType());
+                  if (roleDisplayName == null) {
+                     roleDisplayName = "UNKNOWN_ROLE";
+                  }
+                  failedRoles.get(hostId).add(roleDisplayName);
+               }
+            }
+         }
+      }
+      logger.info("Roles not in " + roleState + " state are: " + failedRoles.toString());
+      return failedRoles;
+   }
+
+   private String getRoleDisplayName(String type) {
+      try {
+         Map<String, String> nameMap = AvailableServiceRoleContainer.nameToDisplayName();
+         if (nameMap == null || nameMap.isEmpty()) {
+            return null;
+         }
+         return nameMap.get(type);
+      } catch (Exception e) {
+         return null;
       }
    }
 
    @Override
-   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports) throws SoftwareManagementPluginException {
+   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
       assert(clusterBlueprint != null && clusterBlueprint.getName() != null && !clusterBlueprint.getName().isEmpty());
       String clusterName = clusterBlueprint.getName();
       CmClusterDef clusterDef = null;
@@ -524,31 +581,57 @@ public class ClouderaManagerImpl implements SoftwareManager {
       try {
          clusterDef = new CmClusterDef(clusterBlueprint);
          report = clusterDef.getCurrentReport();
-         if (isStarted(clusterDef)) {
+         if (isExistingServiceStarted(clusterName)) {
             succeed = true;
             return true;
          }
-         execute(apiResourceRootV6.getClustersResource().startCommand(clusterName));
+         executeAndReport("Staring Services",
+                           apiResourceRootV6.getClustersResource().startCommand(clusterName),
+                           ProgressSplit.START_SERVICES.getProgress(),
+                           report,
+                           reportQueue,
+                           true);
          succeed = true;
          return true;
       } catch (Exception e) {
-         report.setAction("Start Services Failed");
-         report.setStatus(ServiceStatus.STARTUP_FAILED);
+         report.setClusterAndNodesServiceStatus(ServiceStatus.STARTUP_FAILED);
          logger.error("Got an exception when cloudera manager starting cluster", e);
-         throw SoftwareManagementPluginException.START_CLUSTER_FAILED(clusterName, e);
+         HashMap<String, Set<String>> unstartedRoles = getFailedRoles(clusterName, ApiRoleState.STARTED);
+         setRolesErrorMsg(report, unstartedRoles, "starting");
+         throw SoftwareManagementPluginException.START_CLUSTER_FAILED(e.getMessage(), e);
       } finally {
          if (clusterDef != null) {
-            clusterDef.getCurrentReport().setFinished(true);
+            report.setFinished(true);
             if (succeed) {
-               report.setSuccess(true);
-               report.setAction("Start Services Successfully");
-               report.setProgress(100);
+               report.setProgress(ProgressSplit.START_SERVICES.getProgress());
                report.setClusterAndNodesServiceStatus(ServiceStatus.STARTED);
                logger.info("Cloudera Manager started all services successfully.");
             }
-            reports.addClusterReport(clusterDef.getCurrentReport().clone());
+            report.setClusterAndNodesAction("");//clean action field
+            report.setFinished(true);
+            report.setSuccess(succeed);
+            reportQueue.addClusterReport(report.clone());
          }
       }
+   }
+
+   private void setRolesErrorMsg(ClusterReport report, HashMap<String, Set<String>> failedRoles, String action) {
+      if (failedRoles == null || failedRoles.isEmpty()) {
+         return;
+      }
+      Map<String, NodeReport> nodeReports = report.getNodeReports();
+      for (String hostId: failedRoles.keySet()) {
+         String ip = hostId2IP(hostId);
+         for (String nodeReportKey: nodeReports.keySet()) {
+            NodeReport nodeReport = nodeReports.get(nodeReportKey);
+            if (nodeReport.getIpAddress().equals(ip)) {
+               logger.info("added " + failedRoles.get(hostId).toString() + " to " + nodeReport.getIpAddress());
+               nodeReport.setUseClusterMsg(false);
+               nodeReport.setErrMsg("Failed to " + action + " roles " + failedRoles.get(hostId));
+            }
+         }
+      }
+      failedRoles.clear();
    }
 
    private boolean isStopped(String clusterName) throws ClouderaManagerException {
@@ -1413,8 +1496,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
             break;
          case "ZOOKEEPER":
             executeAndReport("Initializing Zookeeper", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                  .zooKeeperInitCommand(serviceDef.getName()),
-                  INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false);
+                        .zooKeeperInitCommand(serviceDef.getName()),
+                  INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false
+            );
             break;
          case "SOLR":
             execute(
@@ -1584,15 +1668,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
       if (checkReturn && command != null
             && !(commandReturn = apiResourceRootV6.getCommandsResource().readCommand(command.getId())).getSuccess()) {
          logger.info("Failed to run command: " + command);
-         String errorMsg = command.getResultMessage();
-
-         if (errorMsg == null) {
-            if (command.getResultDataUrl() != null) {
-               errorMsg = referCmfUrlMsg(command.getResultDataUrl());
-            } else {
-               errorMsg = referCmfUrlMsg(domain + "/cmf/command/" + command.getId() + "/details");
-            }
-         }
+         String errorMsg = getSummaryErrorMsg(command, domain);
+         logger.error(errorMsg);
          throw new RuntimeException(errorMsg);
       }
 
@@ -1604,6 +1681,26 @@ public class ClouderaManagerImpl implements SoftwareManager {
       }
 
       return commandReturn;
+   }
+
+   private String getSummaryErrorMsg(ApiCommand command, String domain) {
+      ApiCommand newCommand = apiResourceRootV6.getCommandsResource().readCommand(command.getId());
+      StringBuilder errorMsg = new StringBuilder(newCommand.getResultMessage());
+      if (errorMsg.length() > 0) {
+         errorMsg.append(". ");
+      }
+      if (newCommand.getResultDataUrl() != null) {
+         errorMsg = errorMsg.append(referCmfUrlMsg(newCommand.getResultDataUrl()));
+      } else {
+         errorMsg = errorMsg.append(referCmfUrlMsg(domain + "/cmf/command/" + newCommand.getId() + "/details"));
+      }
+      return errorMsg.toString();
+   }
+
+   private String hostId2IP(String hostId) {
+      logger.info("hostId is " + hostId);
+      ApiHost host = apiResourceRootV6.getHostsResource().readHost(hostId);
+      return host.getIpAddress();
    }
 
    private String referCmfUrlMsg(String url) {
