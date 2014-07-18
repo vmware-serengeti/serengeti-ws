@@ -97,6 +97,8 @@ public interface IApiManager {
    public AmHealthState getClusterStatus(String clusterName);
 
    public Map<String, AmHealthState> getHostStatus(String clusterName);
-   
+
    public String healthCheck();
+
+   public String version();
 }

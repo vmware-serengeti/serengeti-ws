@@ -686,8 +686,7 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public String getVersion() {
-      // TODO Auto-generated method stub
-      return null;
+      return apiManager.version();
    }
 
    @Override

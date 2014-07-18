@@ -12,35 +12,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.v1;
+package com.vmware.bdd.plugin.ambari.api.model;
 
-import javax.ws.rs.Path;
-@Path("")
-public interface RootResourceV1 {
-   /**
-    * Lists all known clusters.
-    */
-   @Path("/clusters")
-   public ClustersResource getClustersResource();
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
-   /**
-    * Lists all known bootstrap.
-    */
-   @Path("/bootstrap")
-   public BootstrapResource getBootstrapResource();
+public class ApiRootServicesComponents {
 
-   /**
-    * Lists all known blueprints.
-    */
-   @Path("/blueprints")
-   public BlueprintsResource getBlueprintsResource();
+   @Expose
+   private String href;
 
-   @Path("/stacks2")
-   public Stacks2Resource getStacks2Resource();
+   @Expose
+   @SerializedName("RootServiceComponents")
+   private ApiRootServicesComponentInfo apiRootServicesComponent;
 
-   @Path("/check")
-   public HealthCheck getHealthCheck();
+   public String getHref() {
+      return href;
+   }
 
-   @Path("/services")
-   public RootServicesResource getRootServicesResource();
+   public void setHref(String href) {
+      this.href = href;
+   }
+
+   public ApiRootServicesComponentInfo getApiRootServicesComponent() {
+      return apiRootServicesComponent;
+   }
+
+   public void setApiServiceComponent(ApiRootServicesComponentInfo apiServiceComponent) {
+      this.apiRootServicesComponent = apiServiceComponent;
+   }
+
 }

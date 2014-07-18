@@ -44,6 +44,7 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiServiceComponent;
 import com.vmware.bdd.plugin.ambari.api.model.ApiServiceComponentInfo;
 import com.vmware.bdd.plugin.ambari.api.model.ApiServiceInfo;
 import com.vmware.bdd.plugin.ambari.api.model.ApiServiceStatus;
+import com.vmware.bdd.plugin.ambari.api.model.ApiRootServicesComponents;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStack;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackComponentList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackList;
@@ -451,6 +452,14 @@ public class ApiManager implements IApiManager {
    public String healthCheck() {
       String healthStatus = apiResourceRootV1.getHealthCheck().check();
       return healthStatus;
+   }
+
+   @Override
+   public String version() {
+      String requestJson = apiResourceRootV1.getRootServicesResource().readRootServiceComponents();
+      ApiRootServicesComponents apiRequest =
+            ApiUtils.jsonToObject(ApiRootServicesComponents.class, requestJson);
+      return apiRequest.getApiRootServicesComponent().getComponentVersion();
    }
 
 }
