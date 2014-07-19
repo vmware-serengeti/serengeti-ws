@@ -24,6 +24,7 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.ApiClusterList;
+import com.vmware.bdd.plugin.ambari.api.model.ApiHostList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequestList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiService;
@@ -84,7 +85,7 @@ public interface IApiManager {
 
    public ApiBlueprint getBlueprint(String blueprintName);
 
-   public void deleteBlueprint(String blueprintName);
+   public ApiRequest deleteBlueprint(String blueprintName);
 
    public ApiRequestList requestList(String clusterName);
 
@@ -104,7 +105,14 @@ public interface IApiManager {
    public ServiceStatus getClusterStatus(String clusterName);
 
    public Map<String, ServiceStatus> getHostStatus(String clusterName);
+
+   ApiHostList getHostsSummaryInfo(String clusterName);
+
    public String healthCheck();
 
    public String version();
+
+   public ApiRequest deleteService(String clusterName, String serviceName);
+
+   public ApiRequest deleteHost(String clusterName, String fqdn);
 }

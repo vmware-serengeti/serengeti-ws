@@ -14,9 +14,13 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.v1;
 
+import com.vmware.bdd.plugin.ambari.api.Parameters;
+
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -33,4 +37,8 @@ public interface HostsResource {
    @GET
    @Path("/")
    public String readHostsWithFilter(@QueryParam("fields") String fields);
+
+   @DELETE
+   @Path("/{hostFQDN}")
+   public String deleteHost(@PathParam(Parameters.HOST_FQDN) String hostFQDN);
 }

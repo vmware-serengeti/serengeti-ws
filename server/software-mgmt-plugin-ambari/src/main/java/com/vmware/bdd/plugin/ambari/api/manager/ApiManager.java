@@ -279,12 +279,16 @@ public class ApiManager implements IApiManager {
       for (ApiService apiService : apiServices) {
          if (apiService != null) {
             ApiServiceInfo serviceInfo = apiService.getServiceInfo();
-            String serviceName = serviceInfo.getServiceName();
-            if (serviceInfo != null && serviceName != null) {
-               if (servicesNames == null) {
-                  servicesNames = new ArrayList<String>();
+            if (serviceInfo != null) {
+               String serviceName = serviceInfo.getServiceName();
+               if (serviceName != null) {
+                  if (servicesNames == null) {
+                     servicesNames = new ArrayList<String>();
+                  }
+                  servicesNames.add(serviceName);
                }
-               servicesNames.add(serviceName);
+            } else {
+               logger.info("service info is empty when read cluster " + clusterName);
             }
          }
       }
@@ -342,9 +346,17 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public void deleteBlueprint(String blueprintName) {
+   public ApiRequest deleteBlueprint(String blueprintName) {
       logger.info("Delete apiBlueprint " + blueprintName);
-      apiResourceRootV1.getBlueprintsResource().deleteBlueprint(blueprintName);
+      String response = apiResourceRootV1.getBlueprintsResource().deleteBlueprint(blueprintName);
+      return ApiUtils.jsonToObject(ApiRequest.class, response);
+   }
+
+   @Override
+   public ApiRequest deleteHost(String clusterName, String fqdn) {
+      logger.info("Deleting host " + fqdn + " in cluster " + clusterName);
+      String response = apiResourceRootV1.getClustersResource().getHostsResource(clusterName).deleteHost(fqdn);
+      return ApiUtils.jsonToObject(ApiRequest.class, response);
    }
 
    @Override
@@ -481,6 +493,13 @@ public class ApiManager implements IApiManager {
       return result;
    }
 
+   @Override
+   public ApiHostList getHostsSummaryInfo(String clusterName) {
+      String hostListInfo = apiResourceRootV1.getClustersResource().getHostsResource(clusterName).readHosts();
+      logger.info("All hosts in cluster " + clusterName + " is " + hostListInfo);
+      return ApiUtils.jsonToObject(ApiHostList.class, hostListInfo);
+   }
+
    private ApiHostList getHostsWithRoleState(String clusterName) {
       String fields = "Hosts/host_status,,host_components/HostRoles";
       String hostsWithState =
@@ -501,6 +520,13 @@ public class ApiManager implements IApiManager {
       ApiRootServicesComponents apiRequest =
             ApiUtils.jsonToObject(ApiRootServicesComponents.class, requestJson);
       return apiRequest.getApiRootServicesComponent().getComponentVersion();
+   }
+
+   @Override
+   public ApiRequest deleteService(String clusterName, String serviceName) {
+      logger.info("Deleting service " + serviceName + " in cluster " + clusterName);
+      String response = apiResourceRootV1.getClustersResource().getServicesResource(clusterName).deleteService(serviceName);
+      return ApiUtils.jsonToObject(ApiRequest.class, response);
    }
 
    private ApiStackServiceList readServicesWithFilter(String stackName,

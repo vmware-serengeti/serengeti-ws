@@ -20,6 +20,7 @@ package com.vmware.bdd.plugin.ambari.api.v1;
 import com.vmware.bdd.plugin.ambari.api.Parameters;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -48,4 +49,8 @@ public interface ServicesResource {
    @GET
    @Path("/")
    public String readServicesWithFilter(@QueryParam("fields") String fields);
+
+   @DELETE
+   @Path("/{serviceName}")
+   public String deleteService(@PathParam(Parameters.SERVICE_NAME) String serviceName);
 }
