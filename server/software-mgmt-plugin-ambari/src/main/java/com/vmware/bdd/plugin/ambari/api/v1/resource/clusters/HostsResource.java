@@ -39,6 +39,10 @@ public interface HostsResource {
    @Path("/")
    public Response readHostsWithFilter(@QueryParam("fields") String fields);
 
+   @GET
+   @Path("/{hostFQDN}")
+   public Response readHost(@PathParam(Parameters.HOST_FQDN) String hostFQDN);
+
    @DELETE
    @Path("/{hostFQDN}")
    public Response deleteHost(@PathParam(Parameters.HOST_FQDN) String hostFQDN);

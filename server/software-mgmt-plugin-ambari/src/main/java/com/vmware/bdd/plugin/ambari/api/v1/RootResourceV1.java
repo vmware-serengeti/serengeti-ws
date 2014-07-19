@@ -46,4 +46,7 @@ public interface RootResourceV1 {
 
    @Path("/services")
    public RootServicesResource getRootServicesResource();
+
+   @Path("/persist")
+   public PersistResource getPersistResource();
 }

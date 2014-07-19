@@ -25,6 +25,7 @@ import java.util.Set;
 
 import javax.ws.rs.NotFoundException;
 
+import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -547,6 +548,9 @@ public class AmbariImpl implements SoftwareManager {
          throws SoftwareManagementPluginException {
       AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, null);
       String clusterName = clusterDef.getName();
+      if (!isProvisioned(clusterName)) {
+         throw SoftwareManagementPluginException.START_CLUSTER_FAILED("Cluster is not provisioned", null);
+      }
       try {
          ClusterReport clusterReport = clusterDef.getCurrentReport();
          clusterReport.setAction("Ambari is starting services");
@@ -600,16 +604,14 @@ public class AmbariImpl implements SoftwareManager {
       ClusterReport clusterReport = clusterDef.getCurrentReport();
 
       try {
+         if (!isProvisioned(clusterName)) {
+            return true;
+         }
          clusterReport.setAction("Ambari is stopping services");
          clusterReport.setProgress(ProgressSplit.OPERATION_BEGIN.getProgress());
 
          //TODO(qjin): here we only consider unstopped services, maybe need to handle other kinds of state(STOPPING, STARTING) carefully
          ApiRequest apiRequestSummary = apiManager.stopAllServicesInCluster(clusterName);
-         //when command failed, the apiRequestSummary or ApiRequestInfo will be null, this part will be enhanced after error
-         //handling is done
-         if (apiRequestSummary == null || apiRequestSummary.getApiRequestInfo() == null) {
-            return false;
-         }
          boolean success = doSoftwareOperation(clusterName, apiRequestSummary, clusterReport, reports);
 
          if (!success) {
@@ -662,30 +664,41 @@ public class AmbariImpl implements SoftwareManager {
    }
 
    @Override
-   //TODO(qjin): when error handling is ready, check the response of each command
    public boolean onDeleteCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
       try {
          String clusterName = clusterBlueprint.getName();
-         //Stop services if needed, when stop failed, we will try to forcely delete resource
-         if (!onStopCluster(clusterBlueprint, reports)) {
-            logger.error("Ambari failed to stop services");
-         }
-         List<String> serviceNames = apiManager.getClusterServicesNames(clusterName);
-         if (serviceNames != null && !serviceNames.isEmpty()) {
-            for (String serviceName : serviceNames) {
-               ApiRequest deleteService = apiManager.deleteService(clusterName, serviceName);
+         AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, null);
+         if (isProvisioned(clusterName) && isClusterProvisionedByBDE(clusterDef)) {
+            //Stop services if needed, when stop failed, we will try to forcely delete resource
+            //although we may also fail because of resource dependency. In that case, we will
+            //throw out the exception and fail
+            if (!onStopCluster(clusterBlueprint, reports)) {
+               logger.error("Ambari failed to stop services");
             }
-         }
-         List<ApiHost> hosts = apiManager.getHostsSummaryInfo(clusterName).getApiHosts();
-         if (hosts != null && !hosts.isEmpty()) {
-            for (ApiHost host: hosts) {
-               String hostName = host.getApiHostInfo().getHostName();
-               ApiRequest deleteHost = apiManager.deleteHost(clusterName, hostName);
+            List<String> serviceNames = apiManager.getClusterServicesNames(clusterName);
+            if (serviceNames != null && !serviceNames.isEmpty()) {
+               for (String serviceName : serviceNames) {
+                  apiManager.deleteService(clusterName, serviceName);
+               }
             }
+            if (apiManager.getHostsSummaryInfo(clusterName) != null) {
+               List<ApiHost> hosts = apiManager.getHostsSummaryInfo(clusterName).getApiHosts();
+               if (hosts != null && !hosts.isEmpty()) {
+                  for (ApiHost host : hosts) {
+                     assert(host.getApiHostInfo() != null);
+                     String hostName = host.getApiHostInfo().getHostName();
+                     apiManager.deleteHost(clusterName, hostName);
+                  }
+               }
+            }
+            apiManager.deleteCluster(clusterName);
          }
-         ApiRequest deleteCluster = apiManager.deleteCluster(clusterBlueprint.getName());
-         ApiRequest deleteBlueprint = apiManager.deleteBlueprint(clusterBlueprint.getName());
+         if (isBlueprintCreated(clusterDef) && isBlueprintCreatedByBDE(clusterDef)) {
+            apiManager.deleteBlueprint(clusterName);
+         }
+         ApiPersist persist = new ApiPersist("");
+         apiManager.updatePersist(persist);
          return true;
       } catch (Exception e) {
          logger.error("Ambari got an exception when deleting cluster", e);

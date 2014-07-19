@@ -22,6 +22,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.http.HttpStatus;
 
@@ -386,30 +387,38 @@ public class ApiManager implements IApiManager {
       return apiBlueprintResult;
    }
 
+   public boolean updatePersist(ApiPersist persist) throws AmbariApiException {
+      String persistJson = ApiUtils.objectToJson(persist);
+      logger.info("Updating persist to:" + persistJson);
+      Response response = apiResourceRootV1.getPersistResource().updatePersist(persistJson);
+      handleAmbariResponse(response);
+      return true;
+   }
+
    @Override
-   public ApiRequest deleteHost(String clusterName, String fqdn) {
+   public ApiRequest deleteHost(String clusterName, String fqdn) throws AmbariApiException {
       logger.info("Deleting host " + fqdn + " in cluster " + clusterName);
       Response response = apiResourceRootV1.getClustersResource().getHostsResource(clusterName).deleteHost(fqdn);
       String deleteHostJson = handleAmbariResponse(response);
       return ApiUtils.jsonToObject(ApiRequest.class, deleteHostJson);
    }
 
-   public ApiRequest deleteBlueprint(String blueprintName) throws AmbariApiException {
+   public boolean deleteBlueprint(String blueprintName) throws AmbariApiException {
       logger.info("Delete apiBlueprint " + blueprintName);
       Response response =
             apiResourceRootV1.getBlueprintsResource().deleteBlueprint(
                   blueprintName);
-      String deleteBlueprintJson = handleAmbariResponse(response);
-      return ApiUtils.jsonToObject(ApiRequest.class, deleteBlueprintJson);
+      handleAmbariResponse(response);
+      return true;
    }
 
    @Override
-   public ApiRequest deleteCluster(String clusterName) throws AmbariApiException {
+   public boolean deleteCluster(String clusterName) throws AmbariApiException {
+      logger.info("Ambari is deleting cluster " + clusterName);
       Response response =
             apiResourceRootV1.getClustersResource().deleteCluster(clusterName);
-      String deleteClusterJson = handleAmbariResponse(response);
-      logger.debug("in delete cluster, reponse is :" + deleteClusterJson);
-      return ApiUtils.jsonToObject(ApiRequest.class, deleteClusterJson);
+      handleAmbariResponse(response);
+      return HttpStatus.isSuccess(response.getStatus());
    }
 
    @Override
@@ -582,11 +591,11 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiRequest deleteService(String clusterName, String serviceName) {
+   public boolean deleteService(String clusterName, String serviceName) {
       logger.info("Deleting service " + serviceName + " in cluster " + clusterName);
       Response response = apiResourceRootV1.getClustersResource().getServicesResource(clusterName).deleteService(serviceName);
-      String deleteServiceJson = handleAmbariResponse(response);
-      return ApiUtils.jsonToObject(ApiRequest.class, deleteServiceJson);
+      handleAmbariResponse(response);
+      return true;
    }
 
    private ApiStackServiceList getServicesWithFilter(String stackName,

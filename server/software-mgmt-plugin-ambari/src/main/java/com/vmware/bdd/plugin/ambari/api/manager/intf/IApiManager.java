@@ -86,7 +86,7 @@ public interface IApiManager {
 
    public ApiBlueprint getBlueprint(String blueprintName) throws AmbariApiException;
 
-   public ApiRequest deleteBlueprint(String blueprintName) throws AmbariApiException;
+   public boolean deleteBlueprint(String blueprintName) throws AmbariApiException;
 
    public ApiRequestList getRequestList(String clusterName) throws AmbariApiException;
 
@@ -99,7 +99,7 @@ public interface IApiManager {
    public ApiBlueprint createBlueprint(String blueprintName,
          ApiBlueprint blueprint) throws AmbariApiException;
 
-   public ApiRequest deleteCluster(String clusterName) throws AmbariApiException;
+   public boolean deleteCluster(String clusterName) throws AmbariApiException;
 
    public ApiRequest getRequestWithTasks(String clusterName, Long requestId) throws AmbariApiException;
 
@@ -107,7 +107,7 @@ public interface IApiManager {
 
    public ApiHostList getHostsSummaryInfo(String clusterName);
 
-   public ApiRequest deleteService(String clusterName, String serviceName);
+   public boolean deleteService(String clusterName, String serviceName);
 
    public ApiRequest deleteHost(String clusterName, String fqdn);
    
