@@ -582,7 +582,7 @@ public class ClusterManager {
       ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
       if (cluster.getStatus() != ClusterStatus.PROVISION_ERROR
-            || cluster.getStatus() != ClusterStatus.SERVICE_ERROR) {
+            && cluster.getStatus() != ClusterStatus.SERVICE_ERROR) {
          logger.error("can not resume creation of cluster: " + clusterName
                + ", " + cluster.getStatus());
          throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
