@@ -265,7 +265,11 @@ public class ClusterManager {
                break;
             case SERVICE_READY:
             case BOOTSTRAP_FAILED:
+            case SERVICE_ALERT:
+            case SERVICE_UNHEALTHY:
                node.setPowerStatusChanged(false);
+               break;
+            default:
                break;
             }
          }
@@ -314,8 +318,7 @@ public class ClusterManager {
 
       // return the latest data from db
       if (realTime
-            && (cluster.getStatus() == ClusterStatus.RUNNING || cluster
-                  .getStatus() == ClusterStatus.VHM_RUNNING)
+            && cluster.getStatus().isSyncServiceStatus()
             // for not running cluster, we don't sync up status from chef
             && checkAndResetNodePowerStatusChanged(clusterName)) {
          refreshClusterStatus(clusterName);
@@ -533,8 +536,9 @@ public class ClusterManager {
 
       ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
-      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
-            && !ClusterStatus.CONFIGURE_ERROR.equals(cluster.getStatus())) {
+      if (!cluster.getStatus().isActiveServiceStatus()
+            && !ClusterStatus.CONFIGURE_ERROR.equals(cluster.getStatus())
+            && !ClusterStatus.SERVICE_ERROR.equals(cluster.getStatus())) {
          logger.error("can not config cluster: " + clusterName + ", "
                + cluster.getStatus());
          throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
@@ -577,11 +581,12 @@ public class ClusterManager {
 
       ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
-      if (cluster.getStatus() != ClusterStatus.PROVISION_ERROR) {
+      if (cluster.getStatus() != ClusterStatus.PROVISION_ERROR
+            || cluster.getStatus() != ClusterStatus.SERVICE_ERROR) {
          logger.error("can not resume creation of cluster: " + clusterName
                + ", " + cluster.getStatus());
          throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
-               "To update a cluster, its status must be PROVISION_ERROR");
+               "To update a cluster, its status must be PROVISION_ERROR or SERVICE_ERROR");
       }
       List<String> dsNames = getUsedDS(cluster.getVcDatastoreNameList());
       if (dsNames.isEmpty()) {
@@ -628,12 +633,7 @@ public class ClusterManager {
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
 
-      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
-            && !ClusterStatus.STOPPED.equals(cluster.getStatus())
-            && !ClusterStatus.ERROR.equals(cluster.getStatus())
-            && !ClusterStatus.PROVISION_ERROR.equals(cluster.getStatus())
-            && !ClusterStatus.CONFIGURE_ERROR.equals(cluster.getStatus())
-            && !ClusterStatus.UPGRADE_ERROR.equals(cluster.getStatus())) {
+      if (!cluster.getStatus().isStableStatus()) {
          logger.error("cluster: " + clusterName
                + " cannot be deleted, it is in " + cluster.getStatus()
                + " status");
@@ -678,11 +678,7 @@ public class ClusterManager {
          throw ClusterManagerException.ALREADY_LATEST_VERSION_ERROR(clusterName);
       }
 
-      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
-            && !ClusterStatus.STOPPED.equals(cluster.getStatus())
-            && !ClusterStatus.ERROR.equals(cluster.getStatus())
-            && !ClusterStatus.CONFIGURE_ERROR.equals(cluster.getStatus())
-            && !ClusterStatus.UPGRADE_ERROR.equals(cluster.getStatus())) {
+      if (!cluster.getStatus().isStableStatus()) {
          logger.error("cluster: " + clusterName
                + " cannot be upgraded, it is in " + cluster.getStatus()
                + " status");
@@ -723,7 +719,8 @@ public class ClusterManager {
 
       ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
-      if (ClusterStatus.RUNNING.equals(cluster.getStatus())) {
+      if (cluster.getStatus().isActiveServiceStatus()
+            || cluster.getStatus() == ClusterStatus.SERVICE_ERROR) {
          logger.error("cluster " + clusterName + " is running already");
          throw ClusterManagerException.ALREADY_STARTED_ERROR(clusterName);
       }
@@ -776,7 +773,8 @@ public class ClusterManager {
          throw ClusterManagerException.ALREADY_STOPPED_ERROR(clusterName);
       }
 
-      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
+      if (!cluster.getStatus().isActiveServiceStatus()
+            && !ClusterStatus.SERVICE_ERROR.equals(cluster.getStatus())
             && !ClusterStatus.ERROR.equals(cluster.getStatus())) {
          logger.error("cluster " + clusterName
                + " cannot be stopped, it is in " + cluster.getStatus()
@@ -853,7 +851,7 @@ public class ClusterManager {
          throw ClusterManagerException.ROLES_NOT_SUPPORTED(unsupportedRoles);
       }
 
-      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
+      if (!cluster.getStatus().isActiveServiceStatus()) {
          logger.error("cluster " + clusterName
                + " can be resized only in RUNNING status, it is now in "
                + cluster.getStatus() + " status");
@@ -990,13 +988,14 @@ public class ClusterManager {
       //enableAuto is only set during cluster running status and
       //other elasticity attributes are only set during cluster running/stop status
       if ((enableAuto != null)
-            && !ClusterStatus.RUNNING.equals(cluster.getStatus())) {
+            && !cluster.getStatus().isActiveServiceStatus()) {
          logger.error("Cannot change elasticity mode, when cluster "
                + clusterName + " is in " + cluster.getStatus() + " status");
          throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
                clusterName, "The cluster's status must be RUNNING");
       }
-      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
+      if (!cluster.getStatus().isActiveServiceStatus()
+            && !ClusterStatus.SERVICE_ERROR.equals(cluster.getStatus())
             && !ClusterStatus.STOPPED.equals(cluster.getStatus())) {
          logger.error("Cannot change elasticity parameters, when cluster "
                + clusterName + " is in " + cluster.getStatus() + " status");
@@ -1050,7 +1049,7 @@ public class ClusterManager {
 
       ClusterRead cluster = getClusterByName(clusterName, false);
       // cluster must be running status
-      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())) {
+      if (!cluster.getStatus().isActiveServiceStatus()) {
          String msg = "Cluster "+ clusterName +" is not running.";
          logger.error(msg);
          throw ClusterManagerException
@@ -1114,7 +1113,7 @@ public class ClusterManager {
             + " in the cluster " + clusterName);
 
       // cluster must be in RUNNING or STOPPEED status
-      if (!ClusterStatus.RUNNING.equals(cluster.getStatus())
+      if (!cluster.getStatus().isActiveServiceStatus()
             && !ClusterStatus.STOPPED.equals(cluster.getStatus())) {
          String msg = "The cluster's status must be RUNNING or STOPPED";
          logger.error(msg);
@@ -1171,7 +1170,7 @@ public class ClusterManager {
 
       ClusterStatus oldStatus = cluster.getStatus();
 
-      if (ClusterStatus.RUNNING != oldStatus) {
+      if (!oldStatus.isActiveServiceStatus()) {
          throw ClusterHealServiceException.NOT_SUPPORTED(clusterName,
                "The cluster status must be RUNNING");
       }

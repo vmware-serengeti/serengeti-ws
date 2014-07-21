@@ -14,6 +14,51 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
+import java.util.EnumSet;
+
 public enum ClusterStatus {
-   RUNNING, PROVISIONING, PROVISION_ERROR, UPGRADING, UPDATING, DELETING, STOPPED, ERROR, STOPPING, STARTING, CONFIGURING, CONFIGURE_ERROR, NA, VHM_RUNNING, VMRECONFIGURING, MAINTENANCE, UPGRADE_ERROR, SERVICE_ERROR
+   RUNNING,
+   PROVISIONING,
+   PROVISION_ERROR,
+   UPGRADING,
+   UPDATING,
+   DELETING,
+   STOPPED,
+   ERROR,
+   STOPPING,
+   STARTING,
+   CONFIGURING,
+   CONFIGURE_ERROR,
+   NA,
+   VHM_RUNNING,
+   VMRECONFIGURING,
+   MAINTENANCE,
+   UPGRADE_ERROR,
+   SERVICE_ERROR,
+   SERVICE_WARNING;
+
+   private static EnumSet<ClusterStatus> stableStatus = EnumSet.of(
+         RUNNING, STOPPED,
+         CONFIGURE_ERROR, ERROR,
+         PROVISION_ERROR, UPGRADE_ERROR,
+         SERVICE_ERROR, SERVICE_WARNING);
+
+   private static EnumSet<ClusterStatus> activeServiceStatus = EnumSet.of(
+         RUNNING, SERVICE_WARNING);
+
+   private static EnumSet<ClusterStatus> syncServiceStatus = EnumSet.of(
+         RUNNING, SERVICE_WARNING,
+         SERVICE_ERROR, VHM_RUNNING);
+
+   public boolean isStableStatus() {
+      return stableStatus.contains(this);
+   }
+
+   public boolean isActiveServiceStatus() {
+      return activeServiceStatus.contains(this);
+   }
+
+   public boolean isSyncServiceStatus() {
+      return syncServiceStatus.contains(this);
+   }
 }

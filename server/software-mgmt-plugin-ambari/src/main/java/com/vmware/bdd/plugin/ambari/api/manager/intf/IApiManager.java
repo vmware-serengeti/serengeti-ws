@@ -24,7 +24,6 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.ApiClusterList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceComponent;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequestList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiService;
@@ -32,10 +31,11 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiStack;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackComponentList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackService;
+import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceComponent;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersionList;
-import com.vmware.bdd.plugin.ambari.model.AmHealthState;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 
 public interface IApiManager {
 
@@ -94,10 +94,9 @@ public interface IApiManager {
 
    public ApiRequest requestWithTasks(String clusterName, Long requestId);
 
-   public AmHealthState getClusterStatus(String clusterName);
+   public ServiceStatus getClusterStatus(String clusterName);
 
-   public Map<String, AmHealthState> getHostStatus(String clusterName);
-
+   public Map<String, ServiceStatus> getHostStatus(String clusterName);
    public String healthCheck();
 
    public String version();

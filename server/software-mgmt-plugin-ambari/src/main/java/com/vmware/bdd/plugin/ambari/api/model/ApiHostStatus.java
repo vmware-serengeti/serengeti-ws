@@ -17,12 +17,8 @@
 
 package com.vmware.bdd.plugin.ambari.api.model;
 
-/**
- * Created by qjin on 7/7/14.
- */
-public enum ApiServiceStatus {
-   STARTED,    //service is running
-   INSTALLED,   //service is installed, but not running
-   STOPPED,
-   ALERT
+public enum ApiHostStatus {
+   HEALTHY,
+   ALERT,
+   UNHEALTHY
 }

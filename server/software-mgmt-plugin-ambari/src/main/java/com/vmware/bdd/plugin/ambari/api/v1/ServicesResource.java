@@ -20,6 +20,7 @@ package com.vmware.bdd.plugin.ambari.api.v1;
 import com.vmware.bdd.plugin.ambari.api.Parameters;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -43,4 +44,8 @@ public interface ServicesResource {
    public String startAllServices(@PathParam(Parameters.CLUSTER_NAME)String clusterName,
                                   @QueryParam("params/run_smoke_test") String runSmockTest,
                                   String request);
+
+   @GET
+   @Path("/")
+   public String readServicesWithFilter(@QueryParam("fields") String fields);
 }

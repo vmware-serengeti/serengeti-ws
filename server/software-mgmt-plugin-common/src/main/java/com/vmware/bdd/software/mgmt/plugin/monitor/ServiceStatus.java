@@ -18,12 +18,16 @@ public enum ServiceStatus {
    INSTALLATION_FAILED ( "Installation Failed" ),
    CONFIGURATION_FAILED ( "Configuration Failed" ),
    STARTUP_FAILED ( "Startup Failed" ),
-   RUNNING ( "Running" ),
    FAILED ( "Failed" ),
    STOP_FAILED( "Stop Failed"),
    STOP_SUCCEED( "Stop Succeed"),
    STARTING( "Starting" ),
-   STARTED( "Started" );
+   STARTED ( "Started" ),
+   UNHEALTHY ("Unhealthy"), // unhealthy is better than alert, as the service is still usable
+   ALERT ( "Alert" ),
+   STOPPED ("Stopped"),
+   UNKONWN ("Unknown");
+
    private String description;
    private ServiceStatus(String description) {
       this.description = description;

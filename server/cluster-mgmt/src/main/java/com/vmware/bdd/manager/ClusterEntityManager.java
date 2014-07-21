@@ -347,32 +347,41 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    @Transactional
    @RetryTransaction
    public void setClusterStatus(String clusterName, ClusterReport report) {
-      ClusterEntity cluster = findByName(clusterName);
-      switch (cluster.getStatus()) {
-      case RUNNING:
-         if (report.getStatus() != ServiceStatus.RUNNING) {
-            cluster.setStatus(ClusterStatus.SERVICE_ERROR);
-            logger.info("Got status " + report.getStatus()
-                  + ", change cluster status from RUNNING to SERVICE_ERROR.");
-         }
-         break;
-      case PROVISION_ERROR:
-      case ERROR:
-      case CONFIGURE_ERROR:
-      case UPGRADE_ERROR:
-      case SERVICE_ERROR:
-         if (report.getStatus() == ServiceStatus.RUNNING) {
-            cluster.setStatus(ClusterStatus.RUNNING);
-            logger.info("Got status " + report.getStatus()
-                  + ", change cluster status from " + cluster.getStatus()
-                  + " to RUNNING.");
-         }
-         break;
-      default:
-         break;
-      }
+      // process cluster status
+      handleClusterStatus(clusterName, report);
       // process node status
       handleOperationStatus(clusterName, report, true);
+   }
+
+   private void handleClusterStatus(String clusterName, ClusterReport report) {
+      ClusterEntity cluster = findByName(clusterName);
+      ClusterStatus oldState = cluster.getStatus();
+      switch (oldState) {
+      case RUNNING:
+      case SERVICE_ERROR:
+      case SERVICE_WARNING:
+         switch (report.getStatus()) {
+         case STARTED:
+            cluster.setStatus(ClusterStatus.RUNNING);
+            break;
+         case ALERT:
+            cluster.setStatus(ClusterStatus.SERVICE_WARNING);
+            break;
+         case STOPPED:
+            cluster.setStatus(ClusterStatus.SERVICE_ERROR);
+            break;
+         default:
+            break;
+         }
+         logger.info("Got status " + report.getStatus()
+               + ", change cluster status from " + oldState
+               + " to " + cluster.getStatus());
+         break;
+      default:
+         logger.debug("In status " + cluster.getStatus() +
+               ". Do not change cluster status based on service status change.");
+         break;
+      }
    }
 
    @Transactional
@@ -393,9 +402,20 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
                      + ", status changed from old status: " + node.getStatus()
                      + " to new status: " + nodeReport.getStatus().toString());
                if (!node.isDisconnected()) {
-                  if (nodeReport.getStatus() == ServiceStatus.RUNNING) {
+                  switch (nodeReport.getStatus()) {
+                  case STARTED:
                      node.setStatus(NodeStatus.SERVICE_READY);
-                  } else {
+                     break;
+                  case UNHEALTHY:
+                     node.setStatus(NodeStatus.SERVICE_UNHEALTHY);
+                     break;
+                  case ALERT:
+                     node.setStatus(NodeStatus.SERVICE_ALERT);
+                     break;
+                  case UNKONWN:
+                     node.setStatus(NodeStatus.UNKNOWN);
+                     break;
+                  default:
                      node.setStatus(NodeStatus.BOOTSTRAP_FAILED);
                   }
                }
@@ -656,7 +676,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
       clusterRead.setResourcePools(rpReads);
 
-      if (clusterStatus == ClusterStatus.RUNNING
+      if (clusterStatus.isActiveServiceStatus()
             || clusterStatus == ClusterStatus.STOPPED) {
          clusterRead.setDcSeperation(clusterRead.validateSetManualElasticity());
       }

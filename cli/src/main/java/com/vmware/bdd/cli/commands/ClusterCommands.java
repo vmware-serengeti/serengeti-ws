@@ -666,8 +666,7 @@ public class ClusterCommands implements CommandMarker {
             if (instanceNum > 0) {
                restClient.resize(name, nodeGroup, instanceNum);
             } else if (cpuNumber > 0 || memory > 0) {
-               if (cluster.getStatus().ordinal() != ClusterStatus.RUNNING
-                     .ordinal()) {
+               if (!cluster.getStatus().isActiveServiceStatus()) {
                   CommandsUtils.printCmdFailure(
                         Constants.OUTPUT_OBJECT_CLUSTER, name,
                         Constants.OUTPUT_OP_RESIZE,

@@ -36,7 +36,7 @@ public class ClusterNodeUpdator extends PeriodicRequest {
    protected boolean executeOnce() {
       List<ClusterEntity> clusters = entityMgr.findAllClusters();
       for (ClusterEntity cluster : clusters) {
-         if (cluster.inStableStatus()) {
+         if (cluster.getStatus().isStableStatus()) {
             syncUp(cluster.getName());
          }
       }

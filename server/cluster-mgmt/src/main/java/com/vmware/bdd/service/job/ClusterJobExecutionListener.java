@@ -195,7 +195,16 @@ public class ClusterJobExecutionListener extends SimpleJobExecutionListener {
       if (success && successStatus != null) {
          status = ClusterStatus.valueOf(successStatus);
       } else if (!success && failureStatus != null) {
-         status = ClusterStatus.valueOf(failureStatus);
+         Boolean softMgmtFailed =
+               TrackableTasklet.getFromJobExecutionContext(
+                     je.getExecutionContext(),
+                     JobConstants.SOFTWARE_MANAGEMENT_STEP_FAILE, Boolean.class);
+         if (softMgmtFailed != null && softMgmtFailed) {
+            logger.debug("Set to service error status for cluster " + clusterName);
+            status = ClusterStatus.SERVICE_ERROR;
+         } else {
+            status = ClusterStatus.valueOf(failureStatus);
+         }
       }
 
       logger.info("set cluster " + clusterName + " status to " + status);

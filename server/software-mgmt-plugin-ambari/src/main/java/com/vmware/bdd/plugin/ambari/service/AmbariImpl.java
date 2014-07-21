@@ -19,11 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.vmware.bdd.plugin.ambari.api.model.ApiTask;
-import com.vmware.bdd.plugin.ambari.api.model.ApiTaskInfo;
-import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
-import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
-
 import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.lang.StringUtils;
@@ -43,12 +38,15 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceComponent;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersionInfo;
+import com.vmware.bdd.plugin.ambari.api.model.ApiTask;
+import com.vmware.bdd.plugin.ambari.api.model.ApiTaskInfo;
 import com.vmware.bdd.plugin.ambari.api.model.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ClusterRequestStatus;
+import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.exception.AmException;
 import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
-import com.vmware.bdd.plugin.ambari.model.AmHealthState;
 import com.vmware.bdd.plugin.ambari.model.AmNodeDef;
+import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
 import com.vmware.bdd.plugin.ambari.poller.HostBootstrapPoller;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
@@ -616,25 +614,17 @@ public class AmbariImpl implements SoftwareManager {
    public ClusterReport queryClusterStatus(ClusterBlueprint blueprint) {
       AmClusterDef clusterDef = new AmClusterDef(blueprint, privateKey);
       try {
-      AmHealthState state = apiManager.getClusterStatus(blueprint.getName());
-      if (AmHealthState.HEALTHY == state) {
-         clusterDef.getCurrentReport().setStatus(ServiceStatus.RUNNING);
-      } else {
-         clusterDef.getCurrentReport().setStatus(ServiceStatus.FAILED);
-      }
-      Map<String, AmHealthState> hostStates =
-            apiManager.getHostStatus(blueprint.getName());
-      Map<String, NodeReport> nodeReports =
-            clusterDef.getCurrentReport().getNodeReports();
-      for (AmNodeDef node : clusterDef.getNodes()) {
-         String fqdn = node.getFqdn();
-         AmHealthState health = hostStates.get(fqdn);
-         if (AmHealthState.HEALTHY == health) {
-            nodeReports.get(node.getName()).setStatus(ServiceStatus.RUNNING);
-         } else {
-            nodeReports.get(node.getName()).setStatus(ServiceStatus.FAILED);
+         ServiceStatus status = apiManager.getClusterStatus(blueprint.getName());
+         clusterDef.getCurrentReport().setStatus(status);
+
+         Map<String, ServiceStatus> hostStates =
+               apiManager.getHostStatus(blueprint.getName());
+         Map<String, NodeReport> nodeReports =
+               clusterDef.getCurrentReport().getNodeReports();
+         for (AmNodeDef node : clusterDef.getNodes()) {
+            String fqdn = node.getFqdn();
+            nodeReports.get(node.getName()).setStatus(hostStates.get(fqdn));
          }
-      }
       } catch (NotFoundException e) {
          logger.info("Cluster " + blueprint.getName() + " does not exist in server.");
          return null;

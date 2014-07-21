@@ -19,17 +19,18 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiServiceComponent {
+public class ApiServiceAlert {
 
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("ServiceComponentInfo")
-   private ApiServiceComponentInfo apiServiceComponent;
+   @SerializedName("ServiceInfo")
+   private ApiServiceInfo apiServiceInfo;
 
    @Expose
-   private List<String> dependencies;
+   @SerializedName("alerts")
+   private ApiAlert apiAlert;
 
    public String getHref() {
       return href;
@@ -39,20 +40,19 @@ public class ApiServiceComponent {
       this.href = href;
    }
 
-   public ApiServiceComponentInfo getApiServiceComponent() {
-      return apiServiceComponent;
+   public ApiServiceInfo getApiServiceInfo() {
+      return apiServiceInfo;
    }
 
-   public void setApiServiceComponent(ApiServiceComponentInfo apiServiceComponent) {
-      this.apiServiceComponent = apiServiceComponent;
+   public void setApiServiceInfo(ApiServiceInfo apiServiceInfo) {
+      this.apiServiceInfo = apiServiceInfo;
    }
 
-   public List<String> getDependencies() {
-      return dependencies;
+   public ApiAlert getApiAlert() {
+      return apiAlert;
    }
 
-   public void setDependencies(List<String> dependencies) {
-      this.dependencies = dependencies;
+   public void setApiAlert(ApiAlert apiAlert) {
+      this.apiAlert = apiAlert;
    }
-
 }

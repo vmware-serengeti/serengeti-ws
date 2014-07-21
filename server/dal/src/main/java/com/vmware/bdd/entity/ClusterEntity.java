@@ -346,15 +346,6 @@ public class ClusterEntity extends EntityBase {
       return ConfigInfo.getSerengetiRootFolder() + "/" + this.name;
    }
 
-   public boolean inStableStatus() {
-      ClusterStatus[] stableStatus =
-            new ClusterStatus[] { ClusterStatus.RUNNING, ClusterStatus.STOPPED,
-                  ClusterStatus.CONFIGURE_ERROR, ClusterStatus.ERROR,
-                  ClusterStatus.PROVISION_ERROR, ClusterStatus.SERVICE_ERROR };
-
-      return Arrays.asList(stableStatus).contains(this.status);
-   }
-
    public Boolean getAutomationEnable() {
       return automationEnable;
    }

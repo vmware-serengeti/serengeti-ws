@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
 import com.vmware.bdd.plugin.ambari.api.ApiRootResource;
 import com.vmware.bdd.plugin.ambari.api.manager.intf.IApiManager;
+import com.vmware.bdd.plugin.ambari.api.model.ApiAlert;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprintList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBody;
@@ -32,16 +33,16 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.ApiClusterList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiComponentList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHost;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHostList;
+import com.vmware.bdd.plugin.ambari.api.model.ApiHostStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiPutRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequestInfo;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequestList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiService;
-import com.vmware.bdd.plugin.ambari.api.model.ApiServiceComponent;
-import com.vmware.bdd.plugin.ambari.api.model.ApiServiceComponentInfo;
+import com.vmware.bdd.plugin.ambari.api.model.ApiServiceAlert;
+import com.vmware.bdd.plugin.ambari.api.model.ApiServiceAlertList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiServiceInfo;
 import com.vmware.bdd.plugin.ambari.api.model.ApiServiceStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRootServicesComponents;
@@ -55,8 +56,7 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersionList;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
-import com.vmware.bdd.plugin.ambari.model.AmHealthState;
-import com.vmware.bdd.plugin.ambari.model.ComponentStatus;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 
 public class ApiManager implements IApiManager {
 
@@ -397,56 +397,74 @@ public class ApiManager implements IApiManager {
       return apiRequest;
    }
 
-   @Override
-   public AmHealthState getClusterStatus(String clusterName) {
-      String fields = "ServiceComponentInfo";
-      String servicesWithState = null;
-      servicesWithState =
-            apiResourceRootV1.getClustersResource()
-            .getComponentsResource(clusterName).readComponentsWithFilter(fields);
-
-      ApiComponentList componentList = ApiUtils.jsonToObject(ApiComponentList.class, servicesWithState);
-      AmHealthState state = AmHealthState.HEALTHY;
-      if (componentList.getApiComponents() != null) {
-         for (ApiServiceComponent component : componentList.getApiComponents()) {
-            ApiServiceComponentInfo info = component.getApiServiceComponent();
-            if (info.getCategory().equalsIgnoreCase("CLIENT")
-                  && (!ComponentStatus.INSTALLED.toString()
-                        .equalsIgnoreCase(info.getState()))) {
-               state = AmHealthState.UNHEALTHY;
-            } else if ((!info.getCategory().equalsIgnoreCase("CLIENT"))
-                  && (!ComponentStatus.STARTED.toString()
-                        .equalsIgnoreCase(info.getState()))) {
-               state = AmHealthState.UNHEALTHY;
+   public ServiceStatus getClusterStatus(String clusterName) {
+      ApiServiceAlertList serviceList = getServicesWithAlert(clusterName);
+      if (serviceList.getApiServiceAlerts() != null) {
+         boolean allStopped = true;
+         boolean hasStartedAlert = false;
+         for (ApiServiceAlert service : serviceList.getApiServiceAlerts()) {
+            ApiServiceInfo info = service.getApiServiceInfo();
+            ApiAlert alert = service.getApiAlert();
+            if (ApiServiceStatus.STARTED.name().equalsIgnoreCase(info.getState())) {
+               allStopped = false;
+               if (alert != null && alert.getSummary() != null
+                     && alert.getSummary().getCritical() > 0) {
+                  hasStartedAlert = true;
+               }
             }
          }
+         if (allStopped) {
+            return ServiceStatus.STOPPED;
+         }
+         if (hasStartedAlert) {
+            return ServiceStatus.ALERT;
+         }
       }
-      return state;
+      return ServiceStatus.STARTED;
+   }
+
+   private ApiServiceAlertList getServicesWithAlert(String clusterName) {
+      String fields = "alerts/summary,ServiceInfo/state";
+      String servicesWithAlert =
+            apiResourceRootV1.getClustersResource()
+            .getServicesResource(clusterName).readServicesWithFilter(fields);
+
+      ApiServiceAlertList serviceList =
+            ApiUtils.jsonToObject(ApiServiceAlertList.class, servicesWithAlert);
+      return serviceList;
    }
 
    @Override
-   public Map<String, AmHealthState> getHostStatus(String clusterName) {
-      String fields = "Hosts/host_status";
-      String hostsWithState =
-            apiResourceRootV1.getClustersResource()
-            .getHostsResource(clusterName).readHostsWithFilter(fields);
-      ApiHostList hostList = ApiUtils.jsonToObject(ApiHostList.class, hostsWithState);
-      Map<String, AmHealthState> result = new HashMap<String, AmHealthState>();
+   public Map<String, ServiceStatus> getHostStatus(String clusterName) {
+      ApiHostList hostList = getHostsWithRoleState(clusterName);
+      Map<String, ServiceStatus> result = new HashMap<String, ServiceStatus>();
 
       List<ApiHost> apiHosts = hostList.getApiHosts();
       if (apiHosts != null) {
          for (ApiHost apiHost : apiHosts) {
             String state = apiHost.getApiHostInfo().getState();
-            if (AmHealthState.HEALTHY.toString().equalsIgnoreCase(state)) {
+            if (ApiHostStatus.HEALTHY.name().equalsIgnoreCase(state)) {
                result.put(apiHost.getApiHostInfo().getHost_name(),
-                     AmHealthState.HEALTHY);
-            } else {
+                     ServiceStatus.STARTED);
+            } else if (ApiHostStatus.UNHEALTHY.name().equalsIgnoreCase(state)) {
                result.put(apiHost.getApiHostInfo().getHost_name(),
-                     AmHealthState.UNHEALTHY);
-            }
+                     ServiceStatus.UNHEALTHY);
+            } else if (ApiHostStatus.ALERT.name().equalsIgnoreCase(state)) {
+               result.put(apiHost.getApiHostInfo().getHost_name(),
+                     ServiceStatus.ALERT);
+            } 
          }
       }
       return result;
+   }
+
+   private ApiHostList getHostsWithRoleState(String clusterName) {
+      String fields = "Hosts/host_status,,host_components/HostRoles";
+      String hostsWithState =
+            apiResourceRootV1.getClustersResource()
+            .getHostsResource(clusterName).readHostsWithFilter(fields);
+      ApiHostList hostList = ApiUtils.jsonToObject(ApiHostList.class, hostsWithState);
+      return hostList;
    }
 
    public String healthCheck() {

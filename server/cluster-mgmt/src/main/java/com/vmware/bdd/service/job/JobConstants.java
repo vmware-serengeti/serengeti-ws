@@ -57,6 +57,7 @@ public interface JobConstants {
    public static final String VERIFY_NODE_STATUS_RESULT_PARAM = "verifyNodeResult";
    public static final String CURRENT_COMMAND_WORK_DIR = "currentCommandWorkDir";
    public static final String CURRENT_ERROR_MESSAGE= "currentErrorMessage";
+   public static final String SOFTWARE_MANAGEMENT_STEP_FAILE= "softMgmtFailed";
    public static final String CLUSTER_RESOURCE_RESERVATION_ID_JOB_PARAM = "ResourceReservationId";
    public static final String EXPECTED_NODE_STATUS = "expectedNodeStatus";
    public static final String SUB_JOB_ENABLED = "sub.job.enabled";

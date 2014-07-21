@@ -135,10 +135,11 @@ public class SoftwareSyncupService implements ISoftwareSyncUpService,
                   continue;
                }
 
-               if (!cluster.inStableStatus()) {
-                  logger.debug("Cluster " + clusterName + " is in stable status "
-                        + cluster.inStableStatus());
-                  logger.debug("Do not sync up this time.");
+               if (!cluster.getStatus().isSyncServiceStatus()) {
+                  logger.debug("Cluster " + clusterName + " is in status "
+                        + cluster.getStatus());
+                  logger.debug("Stop sync up for it");
+                  ite.remove();
                   continue;
                }
                ClusterBlueprint blueprint =

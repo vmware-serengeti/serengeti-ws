@@ -24,7 +24,9 @@ public enum NodeStatus {
    POWERED_ON ( "Powered On" ),
    VM_READY ( "VM Ready" ),
    BOOTSTRAP_FAILED ( "Bootstrap Failed" ),
-   SERVICE_READY ( "Service Ready"),
+   SERVICE_ALERT ( "Service Alert" ),
+   SERVICE_UNHEALTHY( "Service Unhealthy" ),
+   SERVICE_READY ( "Service Ready" ),
    UNKNOWN ( "Unknown Status" ); // illegal status
 
    private String description;

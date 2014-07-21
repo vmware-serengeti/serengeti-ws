@@ -16,7 +16,6 @@ package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -75,7 +74,6 @@ import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
-import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
@@ -886,7 +884,6 @@ public class ClusterConfigManager {
       List<String> groupRoles = gson.fromJson(ngEntity.getRoles(), List.class);
       NodeGroupCreate group = new NodeGroupCreate();
       group.setName(ngEntity.getName());
-      EnumSet<HadoopRole> enumRoles = null;
       group.setRoles(groupRoles);
       int cpu = ngEntity.getCpuNum();
       if (cpu > 0) {
@@ -950,7 +947,7 @@ public class ClusterConfigManager {
          group.setRpNames(Arrays.asList(rpNames));
       }
 
-      expandGroupStorage(ngEntity, group, enumRoles);
+      expandGroupStorage(ngEntity, group);
       group.setHaFlag(ngEntity.getHaFlag());
       if (ngEntity.getHadoopConfig() != null) {
          Map<String, Object> hadoopConfig =
@@ -963,7 +960,7 @@ public class ClusterConfigManager {
    }
 
    private void expandGroupStorage(NodeGroupEntity ngEntity,
-         NodeGroupCreate group, EnumSet<HadoopRole> enumRoles) {
+         NodeGroupCreate group) {
       int storageSize = ngEntity.getStorageSize();
       DatastoreType storageType = ngEntity.getStorageType();
 

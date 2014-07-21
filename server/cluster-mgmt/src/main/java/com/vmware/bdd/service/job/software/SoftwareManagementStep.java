@@ -152,6 +152,8 @@ public class SoftwareManagementStep extends TrackableTasklet {
             String errorMessage = (String) ret.get("errorMessage");
             putIntoJobExecutionContext(chunkContext,
                   JobConstants.CURRENT_ERROR_MESSAGE, errorMessage);
+            putIntoJobExecutionContext(chunkContext,
+                  JobConstants.SOFTWARE_MANAGEMENT_STEP_FAILE, true);
             throw TaskException.EXECUTION_FAILED(errorMessage);
          }
       }

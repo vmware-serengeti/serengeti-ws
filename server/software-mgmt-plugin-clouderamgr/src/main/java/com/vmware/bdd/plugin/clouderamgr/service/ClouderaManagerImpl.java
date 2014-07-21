@@ -26,18 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.cloudera.api.model.ApiRoleConfigGroup;
-import com.google.gson.GsonBuilder;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
-import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
-import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableManagementService;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableParcelStage;
-import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
-import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
-import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
-import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -51,6 +39,7 @@ import com.cloudera.api.model.ApiClusterVersion;
 import com.cloudera.api.model.ApiCommand;
 import com.cloudera.api.model.ApiConfig;
 import com.cloudera.api.model.ApiConfigList;
+import com.cloudera.api.model.ApiConfigStalenessStatus;
 import com.cloudera.api.model.ApiHealthSummary;
 import com.cloudera.api.model.ApiHost;
 import com.cloudera.api.model.ApiHostInstallArguments;
@@ -58,8 +47,8 @@ import com.cloudera.api.model.ApiHostRef;
 import com.cloudera.api.model.ApiHostRefList;
 import com.cloudera.api.model.ApiParcel;
 import com.cloudera.api.model.ApiRole;
+import com.cloudera.api.model.ApiRoleConfigGroup;
 import com.cloudera.api.model.ApiRoleNameList;
-import com.cloudera.api.model.ApiRoleState;
 import com.cloudera.api.model.ApiService;
 import com.cloudera.api.model.ApiServiceConfig;
 import com.cloudera.api.model.ApiServiceList;
@@ -68,10 +57,20 @@ import com.cloudera.api.v3.ParcelResource;
 import com.cloudera.api.v6.RootResourceV6;
 import com.cloudera.api.v6.ServicesResourceV6;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.GsonBuilder;
+import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
 import com.vmware.bdd.plugin.clouderamgr.model.CmClusterDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmNodeDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmRoleDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmServiceDef;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableManagementService;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableParcelStage;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
+import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
+import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
+import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
+import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -83,6 +82,7 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
+import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 
 /**
  * Author: Xiaoding Bian
@@ -323,19 +323,58 @@ public class ClouderaManagerImpl implements SoftwareManager {
       try {
          CmClusterDef cluster = new CmClusterDef(blueprint);
          syncHostsId(cluster);
-         if (isStarted(cluster)) {
-            cluster.getCurrentReport().setStatus(ServiceStatus.RUNNING);
-            logger.debug("Cluster " + blueprint.getName() + " is healthy.");
+         if (isExistingServiceStarted(cluster.getName())) {
+            ApiHealthSummary summary = getExistingServiceHealthStatus(cluster.getName());
+            if (summary.ordinal() >= ApiHealthSummary.GOOD.ordinal()) {
+               if (summary.ordinal() == ApiHealthSummary.GOOD.ordinal()) {
+                  cluster.getCurrentReport().setStatus(ServiceStatus.STARTED);
+                  logger.debug("Cluster " + blueprint.getName() + " is healthy.");
+               } else {
+                  cluster.getCurrentReport().setStatus(ServiceStatus.ALERT);
+                  logger.debug("Cluster " + blueprint.getName() + " is concerning.");
+               }
+            } else {
+               cluster.getCurrentReport().setStatus(ServiceStatus.STARTED);
+               logger.debug("Cluster " + blueprint.getName() + " is started, but health status is unknown.");
+            }
          } else {
-            logger.debug("Cluster " + blueprint.getName() + " is not started yet.");
-            cluster.getCurrentReport().setStatus(ServiceStatus.FAILED);
+            logger.debug("Cluster " + blueprint.getName() + " services are not all started yet.");
+            cluster.getCurrentReport().setStatus(ServiceStatus.STOPPED);
          }
          queryNodesStatus(cluster);
          return cluster.getCurrentReport().clone();
       } catch (Exception e) {
-         throw SoftwareManagementPluginException.CREATE_CLUSTER_FAILED(
-               e.getMessage(), e);
+         throw SoftwareManagementPluginException.QUERY_CLUSTER_STATUS_FAILED(
+               blueprint.getName(), e);
       }
+   }
+
+   private ApiHealthSummary getExistingServiceHealthStatus(String clusterName) {
+      ApiHealthSummary summary = ApiHealthSummary.DISABLED;
+      for (ApiService apiService : apiResourceRootV6.getClustersResource()
+            .getServicesResource(clusterName).readServices(DataView.SUMMARY)) {
+         ApiHealthSummary health = apiService.getHealthSummary();
+         logger.debug("Cluster " + clusterName + " Service " 
+         + apiService.getType() + " status is " + health);
+         if (health.ordinal() > summary.ordinal()) {
+            summary = health;
+         }
+      }
+      logger.debug("Cluster " + clusterName + " Service status is " + summary);
+      return summary;
+   }
+
+   private boolean isExistingServiceStarted(String clusterName) {
+      boolean started = true;
+      for (ApiService apiService : apiResourceRootV6.getClustersResource()
+            .getServicesResource(clusterName).readServices(DataView.SUMMARY)) {
+         ApiServiceState serviceState = apiService.getServiceState();
+         if (!ApiServiceState.STARTED.equals(serviceState)) {
+            started = false;
+            break;
+         }
+      }
+      return started;
    }
 
    private void queryNodesStatus(CmClusterDef cluster) {
@@ -344,12 +383,23 @@ public class ClouderaManagerImpl implements SoftwareManager {
          ApiHealthSummary health = host.getHealthSummary();
          Map<String, NodeReport> nodeReports = cluster.getCurrentReport().getNodeReports();
          NodeReport nodeReport = nodeReports.get(node.getName());
-         if (health.GOOD.equals(health)) {
-            nodeReport.setStatus(ServiceStatus.RUNNING);
+         switch(health) {
+         case GOOD:
+            nodeReport.setStatus(ServiceStatus.STARTED);
             logger.debug("Node " + nodeReport.getName() + " is running well.");
-         } else {
+            break;
+         case CONCERNING:
+            nodeReport.setStatus(ServiceStatus.UNHEALTHY);
+            logger.debug("Node " + nodeReport.getName() + " is concerning.");
+            break;
+         case BAD:
             logger.debug("Node " + nodeReport.getName() + " is not running well.");
             nodeReport.setStatus(ServiceStatus.FAILED);
+            break;
+         default:
+            logger.debug("Node " + nodeReport.getName() + " is unknown.");
+            nodeReport.setStatus(ServiceStatus.UNKONWN);
+            break;
          }
       }
    }
@@ -406,11 +456,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
          for (ApiService apiService : apiResourceRootV6.getClustersResource()
                .getServicesResource(cluster.getName())
                .readServices(DataView.SUMMARY)) {
-            for (ApiRole apiRole : apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                  .getRolesResource(apiService.getName()).readRoles()) {
-               if (apiRole.getRoleState().equals(ApiRoleState.STARTED)) {
-                  servicesNotStarted.remove(apiRole.getName());
-               }
+            ApiServiceState serviceState = apiService.getServiceState();
+            if (serviceState == ApiServiceState.STARTED) {
+               servicesNotStarted.remove(apiService.getName());
             }
          }
 
@@ -495,7 +543,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
                report.setSuccess(true);
                report.setAction("Start Services Successfully");
                report.setProgress(100);
-               report.setClusterAndNodesServiceStatus(ServiceStatus.RUNNING);
+               report.setClusterAndNodesServiceStatus(ServiceStatus.STARTED);
                logger.info("Cloudera Manager started all services successfully.");
             }
             reports.addClusterReport(clusterDef.getCurrentReport().clone());
@@ -527,17 +575,13 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
             for (ApiService apiService : apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                   .readServices(DataView.SUMMARY)) {
-               servicesNotConfigured.remove(apiService.getName());
-               /*
-               for (ApiRole apiRole : apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                     .getRolesResource(apiService.getName()).readRoles()) {
-                  servicesNotConfigured.remove(apiRole.getName());
+               ApiConfigStalenessStatus stale = apiService.getConfigStalenessStatus();
+               if (stale == ApiConfigStalenessStatus.FRESH) {
+                  servicesNotConfigured.remove(apiService.getName());
                }
-               */
             }
             executed = true;
          }
-
       } catch (Exception e) {
          throw new SoftwareManagementPluginException(cluster.getName(), e);
       }

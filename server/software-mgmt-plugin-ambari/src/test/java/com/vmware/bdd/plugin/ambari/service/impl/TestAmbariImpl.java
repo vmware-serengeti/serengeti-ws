@@ -84,10 +84,10 @@ public class TestAmbariImpl {
       node.setName("test_vm_5");
       nodes.add(node);
       ClusterReport report = provider.queryClusterStatus(blueprint);
-      Assert.assertTrue(report.getStatus() == ServiceStatus.RUNNING);
+      Assert.assertTrue(report.getStatus() == ServiceStatus.STARTED);
       report.getNodeReports();
       for (NodeReport nodeReport : report.getNodeReports().values()) {
-         Assert.assertTrue(nodeReport.getStatus() == ServiceStatus.RUNNING);
+         Assert.assertTrue(nodeReport.getStatus() == ServiceStatus.STARTED);
       }
    }
    

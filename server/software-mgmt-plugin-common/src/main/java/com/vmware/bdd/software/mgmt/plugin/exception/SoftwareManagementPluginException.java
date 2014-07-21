@@ -84,6 +84,11 @@ public class SoftwareManagementPluginException extends RuntimeException {
       return new SoftwareManagementPluginException("CLUSTER_ALREADY_EXIST", "Cluster " + clusterName + " already exist", cause);
    }
 
+   public static SoftwareManagementPluginException QUERY_CLUSTER_STATUS_FAILED(String clusterName, Throwable cause) {
+      return new SoftwareManagementPluginException("QUERY_CLUSTER_STATUS_FAILED", 
+            "Failed to query status of cluster " + clusterName, cause);
+   }
+
    public String getErrCode() {
       return errCode;
    }
