@@ -828,8 +828,13 @@ public class ClusterConfigManager {
          Map<String, Object> hadoopConfig = (new Gson()).fromJson(clusterEntity.getHadoopConfig(), Map.class);
          clusterConfig.setConfiguration(hadoopConfig);
       }
+      if (!CommonUtil.isBlank(clusterEntity.getAdvancedProperties())) {
+          Gson gson = new Gson(); 
+          Map<String, String> advancedProperties = gson.fromJson(clusterEntity.getAdvancedProperties(), Map.class);
+          clusterConfig.setExternalHDFS(advancedProperties.get("ExternalHDFS"));
+          clusterConfig.setExternalMapReduce(advancedProperties.get("ExternalMapReduce"));
+       }
    }
-
 
    private List<NetworkAdd> allocatNetworkIp(List<String> networkNames,
          ClusterEntity clusterEntity, long instanceNum, boolean needAllocIp) {

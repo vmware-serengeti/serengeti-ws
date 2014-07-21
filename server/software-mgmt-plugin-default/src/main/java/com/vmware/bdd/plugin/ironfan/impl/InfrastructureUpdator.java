@@ -50,7 +50,6 @@ public class InfrastructureUpdator {
       updateExternalConfig(blueprint);
       addTempFSServerRole(blueprint);
       sortNodeGroupRoles(blueprint);
-      sortGroups(blueprint);
    }
 
    private void updateExternalConfig(ClusterBlueprint blueprint) {
@@ -64,27 +63,6 @@ public class InfrastructureUpdator {
       } else {
          setHadoopConfFromExternalMapReduce(blueprint);
       }
-   }
-
-   private void sortGroups(ClusterBlueprint blueprint) {
-      logger.debug("begin to sort node groups.");
-      Collections.sort(blueprint.getNodeGroups(), new Comparator<NodeGroupInfo>() {
-         public int compare(NodeGroupInfo arg0, NodeGroupInfo arg1) {
-            List<String> roles = new ArrayList<String>();
-            EnumSet<HadoopRole> enumRoles0 =
-                  HadoopRole.getEnumRoles(arg0.getRoles(), roles);
-            GroupType groupType0 = GroupType.fromHadoopRole(enumRoles0);
-            EnumSet<HadoopRole> enumRoles1 =
-                  HadoopRole.getEnumRoles(arg1.getRoles(), roles);
-            GroupType groupType1 = GroupType.fromHadoopRole(enumRoles1);
-
-            if (groupType0.equals(groupType1)) {
-               return arg0.getName().compareTo(arg1.getName());
-            } else {
-               return groupType0.compareTo(groupType1);
-            }
-         }
-      });
    }
 
    private void sortNodeGroupRoles(ClusterBlueprint blueprint) {
