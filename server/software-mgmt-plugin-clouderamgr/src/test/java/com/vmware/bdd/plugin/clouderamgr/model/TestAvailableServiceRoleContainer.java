@@ -15,11 +15,15 @@
 package com.vmware.bdd.plugin.clouderamgr.model;
 
 import com.google.gson.Gson;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
 import junit.framework.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +40,12 @@ public class TestAvailableServiceRoleContainer {
       AvailableServiceRoleContainer.loadAll();
       System.out.println(AvailableServiceRoleContainer.dump());
       System.out.println(AvailableServiceRoleContainer.load("HDFS").getAvailableConfigurations().keySet());
+      System.out.println((new Gson()).toJson(AvailableServiceRoleContainer.load("HUE").getDependencies()));
+
+      Assert.assertTrue(AvailableServiceRoleContainer.load("HBASE").compareTo(AvailableServiceRoleContainer.load("ZOOKEEPER")) == 1);
+      Assert.assertTrue(AvailableServiceRoleContainer.load("ZOOKEEPER").compareTo(AvailableServiceRoleContainer.load("HBASE")) == -1);
+      Assert.assertTrue(AvailableServiceRoleContainer.load("HDFS").compareTo(AvailableServiceRoleContainer.load("YARN_RESOURCE_MANAGER")) == 0);
+      Assert.assertTrue(AvailableServiceRoleContainer.load("HBASE").compareTo(AvailableServiceRoleContainer.load("YARN")) == 0);
    }
 
    @Test(groups = {"TestAvailableServiceRoleContainer"})

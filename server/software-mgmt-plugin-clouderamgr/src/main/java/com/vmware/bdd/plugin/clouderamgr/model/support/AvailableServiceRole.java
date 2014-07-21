@@ -17,18 +17,21 @@ package com.vmware.bdd.plugin.clouderamgr.model.support;
 import com.google.gson.annotations.Expose;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Author: Xiaoding Bian
  * Date: 6/12/14
  * Time: 3:37 PM
  */
-public class AvailableServiceRole {
+public class AvailableServiceRole implements Comparable<AvailableServiceRole> {
 
-   public static final int VERSION_UNBOUNDED = -1;
    public static final String ROOT_SERVICE = "CLUSTER";
 
    @Expose
@@ -57,6 +60,8 @@ public class AvailableServiceRole {
 
    @Expose(serialize = false)
    private Map<String, AvailableConfiguration> availableConfigurations;
+
+   private List<Dependency> dependencies;
 
    public String getName() {
       return name;
@@ -131,9 +136,22 @@ public class AvailableServiceRole {
 
    public void setAvailableConfigurations(List<AvailableConfiguration> configs) {
       this.availableConfigurations = new HashMap<String, AvailableConfiguration>();
+      this.dependencies = new ArrayList<Dependency>();
+      Pattern serviceDependPattern = Pattern.compile("([a-z]+\\_)+service$");
       for (AvailableConfiguration config : configs) {
          this.availableConfigurations.put(config.getName(), config);
+         if (serviceDependPattern.matcher(config.getName()).matches()) {
+            try {
+               Dependency dependency = new Dependency(config);
+               this.dependencies.add(dependency);
+            } catch (Exception e) {
+            }
+         }
       }
+   }
+
+   public List<Dependency> getDependencies() {
+      return dependencies;
    }
 
    public boolean isService() {
@@ -166,5 +184,63 @@ public class AvailableServiceRole {
       result = prime * result + (name == null? 0 : name.hashCode());
       result = prime * result + (displayName == null? 0 : displayName.hashCode());
       return result;
+   }
+
+   @Override
+   public int compareTo(AvailableServiceRole other) {
+      if (!isService() || !other.isService()) {
+         return 0;
+      }
+      for (Dependency dependency : dependencies) {
+         if (dependency.getServices().contains(other.getDisplayName())) {
+            return 1;
+         }
+      }
+      for (Dependency dependency : other.getDependencies()) {
+         if (dependency.getServices().contains(this.getDisplayName())) {
+            return -1;
+         }
+      }
+      return 0;
+   }
+
+   public static class Dependency {
+      private List<String> services;
+      private String configKey;
+      private boolean required;
+
+      public boolean isRequired() {
+         return required;
+      }
+
+      public void setRequired(boolean required) {
+         this.required = required;
+      }
+
+      public List<String> getServices() {
+         return services;
+      }
+
+      public void setServices(List<String> services) {
+         this.services = services;
+      }
+
+      public String getConfigKey() {
+         return configKey;
+      }
+
+      public void setConfigKey(String configKey) {
+         this.configKey = configKey;
+      }
+
+      public Dependency(AvailableConfiguration config) {
+         String[] item = config.getName().split("_");
+         this.services = new ArrayList<String>();
+         for (int i = 0; i < item.length - 1; i++) {
+            this.services.add(item[i].toUpperCase());
+         }
+         this.configKey = config.getName();
+         this.required = config.isRequired();
+      }
    }
 }

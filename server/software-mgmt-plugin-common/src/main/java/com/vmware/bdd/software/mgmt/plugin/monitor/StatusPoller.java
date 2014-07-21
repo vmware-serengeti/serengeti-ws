@@ -21,7 +21,7 @@ package com.vmware.bdd.software.mgmt.plugin.monitor;
  */
 public abstract class StatusPoller {
 
-   private int pollPeriodMs = 3000;
+   private int pollPeriodMs = 1000;
 
    public void waitForComplete() throws Exception {
       setup();

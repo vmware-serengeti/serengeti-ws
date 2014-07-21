@@ -19,6 +19,7 @@ import com.google.gson.GsonBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -160,5 +161,29 @@ public class AvailableServiceRoleContainer {
 
    public static String dump() {
       return (new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()).toJson(elements);
+   }
+
+   public static boolean circularDependencyCheck() {
+      /*
+      Map<AvailableServiceRole, BitSet> serviceToId = new HashMap<AvailableServiceRole, BitSet>();
+
+      int index = 0;
+      for (AvailableServiceRole service : elements.values()) {
+         if (service.isService()) {
+            BitSet bitSet = new BitSet();
+            bitSet.set(index, true);
+            serviceToId.put(service, bitSet);
+            index++;
+         }
+      }
+
+      Set<AvailableServiceRole> leftServices = serviceToId.keySet();
+      while (!leftServices.isEmpty()) {
+         Map<AvailableServiceRole, BitSet> accessedServices = new HashMap<AvailableServiceRole, BitSet>();
+         AvailableServiceRole currentService = leftServices.iterator().next();
+
+      }
+      */
+      return true;
    }
 }

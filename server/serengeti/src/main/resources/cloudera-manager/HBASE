@@ -1,0 +1,477 @@
+{
+  "name": "HBASE",
+  "displayName": "HBASE",
+  "parent": "CLUSTER",
+  "repository": "CDH",
+  "versionApiMin": 3,
+  "versionApiMax": -1,
+  "versionCdhMin": 4,
+  "versionCdhMax": -1,
+  "availableConfigurations" : [
+  {
+    "name" : "hdfs_service",
+    "required" : true,
+    "displayName" : "HDFS Service",
+    "description" : "Name of the HDFS service that this HBase service instance depends on",
+    "relatedName" : ""
+  }, {
+    "name" : "zookeeper_service",
+    "required" : true,
+    "displayName" : "ZooKeeper Service",
+    "description" : "Name of the ZooKeeper service that this HBase service instance depends on",
+    "relatedName" : ""
+  }, {
+    "name" : "zookeeper_znode_rootserver",
+    "required" : false,
+    "default" : "root-region-server",
+    "displayName" : "ZooKeeper Znode Rootserver",
+    "description" : "Path to ZooKeeper Node holding root region location. This is written by the HBase Master and read by clients and RegionServers. If a relative path is given, the parent folder will be ${zookeeper.znode.parent}. By default, the root location is stored at /hbase/root-region-server.",
+    "relatedName" : "zookeeper.znode.rootserver"
+  }, {
+    "name" : "hbase_hbck_poller_enabled",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "HBase Hbck Poller",
+    "description" : "Enables the HBase Hbck Poller so that Hbck reports will be available. Enabling the Hbck poller will increase the amount of memory used by the Service Monitor. Consider increasing the Service Monitor Java heap size by an additional 3KB per region. For example, for a cluster with 10,000 regions, increase the JVM heap size by approximately 30MB.",
+    "relatedName" : ""
+  }, {
+    "name" : "audit_event_log_dir",
+    "required" : false,
+    "default" : "/var/log/hbase/audit",
+    "displayName" : "Audit Log Directory",
+    "description" : "Path to the directory where audit logs will be written. The directory will be created if it doesn't exist.",
+    "relatedName" : "audit_event_log_dir"
+  }, {
+    "name" : "zookeeper_pause",
+    "required" : false,
+    "displayName" : "ZooKeeper Connection Retry Pause Duration",
+    "description" : "Period of time, in milliseconds, to pause between connection retries to ZooKeeper. Used together with ${zookeeper.retries} in an exponential backoff fashion when making queries to ZooKeeper.",
+    "relatedName" : "zookeeper.pause"
+  }, {
+    "name" : "hbase_security_authorization",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "HBase Secure Authorization",
+    "description" : "Enable HBase authorization",
+    "relatedName" : "hbase.security.authorization"
+  }, {
+    "name" : "dfs_client_read_shortcircuit",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable HDFS Short Circuit Read",
+    "description" : "Enable HDFS short circuit read. This allows a client co-located with the DataNode to read HDFS file blocks directly. This gives a performance boost to distributed clients that are aware of locality.",
+    "relatedName" : "dfs.client.read.shortcircuit"
+  }, {
+    "name" : "smon_derived_configs_safety_valve",
+    "required" : false,
+    "displayName" : "Service Monitor Derived Configs Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, a list of derived configuration properties that will be used by the Service Monitor instead of the default ones.",
+    "relatedName" : ""
+  }, {
+    "name" : "catch_events",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Log Event Capture",
+    "description" : "When set, each role will identify important log events and forward them to Cloudera Manager.",
+    "relatedName" : ""
+  }, {
+    "name" : "zookeeper_session_timeout",
+    "required" : false,
+    "default" : "60000",
+    "displayName" : "ZooKeeper Session Timeout",
+    "description" : "ZooKeeper session timeout in milliseconds. HBase passes this to the ZooKeeper quorum as the suggested maximum time for a session. See http://hadoop.apache.org/zookeeper/docs/current/zookeeperProgrammers.html#ch_zkSessions The client sends a requested timeout, the server responds with the timeout that it can give the client.",
+    "relatedName" : "zookeeper.session.timeout"
+  }, {
+    "name" : "navigator_event_tracker",
+    "required" : false,
+    "default" : "{\n  \"comment\" : [\n    \"Default event tracker for HBase services.\",\n    \"Defines equality by comparing username, action, table name, family \",\n    \"and qualifier of the events.\"\n  ],\n  \"timeToLive\" : 60000,\n  \"fields\" : [\n    { \"type\": \"value\", \"name\" : \"tableName\" },\n    { \"type\": \"value\", \"name\" : \"family\" },\n    { \"type\": \"value\", \"name\" : \"qualifier\" },\n    { \"type\": \"value\", \"name\" : \"operation\" },\n    { \"type\": \"username\", \"name\" : \"username\" }\n  ]\n}\n",
+    "displayName" : "Event Tracker",
+    "description" : "<p>\nConfigures the rules for event tracking and coalescing. This feature is\nused to define equivalency between different audit events. When\nevents match, according to a set of configurable parameters, only one\nentry in the audit list is generated for all the matching events.\n</p>\n\n<p>\nTracking works by keeping a reference to events when they first appear,\nand comparing other incoming events against the \"tracked\" events according\nto the rules defined here.\n</p>\n\n<p>Event trackers are defined in a JSON object like the following:</p>\n\n<pre>\n{\n  \"timeToLive\" : [integer],\n  \"fields\" : [\n    {\n      \"type\" : [string],\n      \"name\" : [string]\n    }\n  ]\n}\n</pre>\n\n<p>\nWhere:\n</p>\n\n<ul>\n  <li>timeToLive: maximum amount of time an event will be tracked, in\n  milliseconds. Must be provided. This defines how long, since it's\n  first seen, an event will be tracked. A value of 0 disables tracking.</li>\n\n  <li>fields: list of fields to compare when matching events against\n  tracked events.</li>\n</ul>\n\n<p>\nEach field has an evaluator type associated with it. The evaluator defines\nhow the field data is to be compared. The following evaluators are\navailable:\n</p>\n\n<ul>\n  <li>value: uses the field value for comparison.</li>\n\n  <li>username: treats the field value as a user name, and ignores any\n  host-specific data. This is useful for environment using Kerberos,\n  so that only the principal name and realm are compared.</li>\n</ul>\n\n<p>\nThe following is the list of fields that can used to compare HBase events:\n</p>\n<ul>\n  <li>allowed: whether the operation was allowed or denied.</li>\n  <li>username: the user performing the action.</li>\n  <li>scope: the scopeof the operation.</li>\n  <li>family: the column family afftected by the operation.</li>\n  <li>qualifier: the qualifier the operation.</li>\n  <li>action: the action being performed.</li>\n</ul>\n",
+    "relatedName" : "navigator_event_tracker"
+  }, {
+    "name" : "oozie_proxy_user_hosts_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Oozie Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the Oozie user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "relatedName" : "hadoop.proxyuser.oozie.hosts"
+  }, {
+    "name" : "hbase_canary_alert_unhealthy_region_percent_threshold",
+    "required" : false,
+    "default" : "0.1",
+    "displayName" : "HBase Canary Unhealthy Region Percentage Alert Threshold",
+    "description" : "An alert is published if the HBase region health canary detects at least this percentage of total regions are unhealthy. This threshold is used if the explicit count is not set via the hbase_canary_alert_unhealthy_region_count_threshold config.",
+    "relatedName" : ""
+  }, {
+    "name" : "navigator_audit_log_max_backup_index",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "Number of Audit Logs to Retain",
+    "description" : "Maximum number of rolled over audit logs to retain. The logs will not be deleted if they contain audit events that have not yet been propagated to Audit Server.",
+    "relatedName" : "navigator.audit_log_max_backup_index"
+  }, {
+    "name" : "hbase_user_to_impersonate",
+    "required" : false,
+    "default" : "hbase",
+    "displayName" : "HBase User to Impersonate",
+    "description" : "The user the management services will impersonate as when connecting to HBase. Defaults to 'hbase', a superuser.",
+    "relatedName" : "hbase.user.to.impersonate"
+  }, {
+    "name" : "enable_alerts",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Service Level Health Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when the health of this service reaches the threshold specified by the EventServer setting eventserver_health_events_alert_threshold",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_replication_source_nb_capacity",
+    "required" : false,
+    "default" : "1000",
+    "displayName" : "Replication Batch Size",
+    "description" : "Maximum number of hlog entries to replicate in one go. If this is large, and a consumer takes a while to process the events, the HBase RPC call will time out.",
+    "relatedName" : "replication.source.nb.capacity"
+  }, {
+    "name" : "hbase_enable_replication",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Replication",
+    "description" : "Allow HBase tables to be replicated.",
+    "relatedName" : "hbase.replication"
+  }, {
+    "name" : "hbase_service_config_safety_valve",
+    "required" : false,
+    "displayName" : "HBase Service Advanced Configuration Snippet (Safety Valve) for hbase-site.xml",
+    "description" : "For advanced use only, a string to be inserted into <strong>hbase-site.xml</strong>. Applies to configurations of all roles in this service except client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_region_health_canary_exclude_tables",
+    "required" : false,
+    "default" : "",
+    "displayName" : "HBase Region Health Canary Exclude Tables",
+    "description" : "Tables to exclude in the HBase Region Health Canary which will scan a row from every region.",
+    "relatedName" : ""
+  }, {
+    "name" : "navigator_audit_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Collection",
+    "description" : "Enable collection of audit events from the service's roles.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_client_write_buffer",
+    "required" : false,
+    "default" : "2097152",
+    "displayName" : "HBase Client Write Buffer",
+    "description" : "Write buffer size in bytes. A larger buffer requires more memory on both the client and the server because the server instantiates the passed write buffer to process it but reduces the number of remote procedure calls (RPC). To estimate the amount of server memory used, multiply the value of 'hbase.client.write.buffer' by the value of 'hbase.regionserver.handler.count'.",
+    "relatedName" : "hbase.client.write.buffer"
+  }, {
+    "name" : "service_triggers",
+    "required" : false,
+    "default" : "[]",
+    "displayName" : "Service Triggers",
+    "description" : "<p>The configured triggers for this service. This is a JSON formatted list of triggers. These triggers are evaluated as part as the health system. Every trigger expression is parsed, and if the trigger condition is met, the list of actions provided in the trigger expression is executed.</p><p>Each trigger has all of the following fields:</p><ul><li><span class='code'>triggerName</span> <strong>(mandatory)</strong> - the name of the trigger. This value must be unique for the specific service. </li><li><span class='code'>triggerExpression</span> <strong>(mandatory)</strong> - a tsquery expression representing the trigger. </li><li><span class='code'>streamThreshold</span> <strong>(optional)</strong> - the maximum number of streams that can satisfy a condition of a trigger before the condition fires. By default set to 0, and any stream returned will cause the condition to fire. </li><li><span class='code'>enabled</span> <strong> (optional)</strong> - by default set to 'true'. If set to 'false' the trigger will not be evaluated.</li></ul></p><p>For example, here is a JSON formatted trigger that fires if there are more than 10 DataNodes with more than 500 file-descriptors opened:</p><p><pre>[{\"triggerName\": \"sample-trigger\",\n  \"triggerExpression\": \"IF (SELECT fd_open WHERE roleType = DataNode and last(fd_open) > 500) DO health:bad\",\n  \"streamThreshold\": 10, \"enabled\": \"true\"}]</pre></p><p>Consult the trigger rules documentation for more details on how to write triggers using tsquery.</p><p>The JSON format is evolving and may change in the future and as a result backward compatibility is not guaranteed between releases at this time.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "navigator_audit_event_filter",
+    "required" : false,
+    "default" : "{\n  \"comment\" : [\n    \"Default filter for HBase services.\",\n    \"Discards events that affect the internal -ROOT-, .META. and _acl_ tables.\"\n  ],\n  \"defaultAction\" : \"accept\",\n  \"rules\" : [\n    {\n      \"action\" : \"discard\",\n      \"fields\" : [\n        { \"name\" : \"tableName\", \"match\" : \"(?:-ROOT-|.META.|_acl_|hbase:meta|hbase:acl)\" }\n      ]\n    }\n  ]\n}\n",
+    "displayName" : "Event Filter",
+    "description" : "<p>Event filters are defined in a JSON object like the following:</p>\n\n<pre>\n{\n  \"defaultAction\" : (\"accept\", \"discard\"),\n  \"rules\" : [\n    {\n      \"action\" : (\"accept\", \"discard\"),\n      \"fields\" : [\n        {\n          \"name\" : \"fieldName\",\n          \"match\" : \"regex\"\n        }\n      ]\n    }\n  ]\n}\n</pre>\n\n<p>\nA filter has a default action and a list of rules, in order of precedence.\nEach rule defines an action, and a list of fields to match against the\naudit event.\n</p>\n\n<p>\nA rule is \"accepted\" if all the listed field entries match the audit\nevent. At that point, the action declared by the rule is taken.\n</p>\n\n<p>\nIf no rules match the event, the default action is taken. Actions\ndefault to \"accept\" if not defined in the JSON object.\n</p>\n\n<p>\nThe following is the list of fields that can be filtered for HBase events:\n</p>\n<ul>\n  <li>allowed: whether the operation was allowed or denied.</li>\n  <li>username: the user performing the action.</li>\n  <li>tableName: the table affected by the operation.</li>\n  <li>family: the column family affected by the operation.</li>\n  <li>qualifier: the qualifier the operation.</li>\n  <li>action: the action being performed.</li>\n</ul>\n",
+    "relatedName" : "navigator.event.filter"
+  }, {
+    "name" : "hbase_client_keyvalue_maxsize",
+    "required" : false,
+    "default" : "10485760",
+    "displayName" : "Maximum Size of HBase Client KeyValue",
+    "description" : "Specifies the combined maximum allowed size of a KeyValue instance. This option configures an upper boundary for a single entry saved in a storage file. This option prevents a region from splitting if the data is too large. Set this option to a fraction of the maximum region size. To disable this check, use a value of zero or less.",
+    "relatedName" : "hbase.client.keyvalue.maxsize"
+  }, {
+    "name" : "hbase_service_splitlog_manager_timeout",
+    "required" : false,
+    "default" : "120000",
+    "displayName" : "SplitLog Manager Timeout",
+    "description" : "Timeout (in ms) for the distributed log splitting manager to receive response from a worker.",
+    "relatedName" : "hbase.splitlog.manager.timeout"
+  }, {
+    "name" : "hbase_hbck_poller_check_hdfs",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "HBase Hbck Check HDFS",
+    "description" : "Configures whether the Hbck poller checks HDFS or not. Checking HBase tables and regions information on HDFS can take a while.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_master_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Active Master Health Test",
+    "description" : "When computing the overall HBase cluster health, consider the active HBase Master's health.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_security_authentication",
+    "required" : false,
+    "default" : "simple",
+    "displayName" : "HBase Secure Authentication",
+    "description" : "Choose the authentication mechanism used by HBase",
+    "relatedName" : "hbase.security.authentication"
+  }, {
+    "name" : "navigator_audit_log_max_file_size",
+    "required" : false,
+    "default" : "100",
+    "displayName" : "Maximum Audit Log File Size",
+    "description" : "Maximum size of audit log file in MB before it is rolled over.",
+    "relatedName" : "navigator.audit_log_max_file_size"
+  }, {
+    "name" : "hbase_service_env_safety_valve",
+    "required" : false,
+    "displayName" : "HBase Service Environment Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, key-value pairs (one on each line) to be inserted into a role's environment. Applies to configurations of all roles in this service except client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_replication_source_ratio",
+    "required" : false,
+    "default" : "1.0",
+    "displayName" : "Replication Source Ratio",
+    "description" : "Ratio of Lily HBase Indexers used by each HBase RegionServer while doing replication.",
+    "relatedName" : "replication.source.ratio"
+  }, {
+    "name" : "zookeeper_znode_parent",
+    "required" : false,
+    "default" : "/hbase",
+    "displayName" : "ZooKeeper Znode Parent",
+    "description" : "The root znode for HBase in ZooKeeper. All of HBase's ZooKeeper files that are configured with a relative path will go under this node. By default, all of HBase's ZooKeeper file paths are configured with a relative path, so they will all go under this directory unless changed.",
+    "relatedName" : "zookeeper.znode.parent"
+  }, {
+    "name" : "hue_proxy_user_hosts_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Hue Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the Hue user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "relatedName" : "hadoop.proxyuser.hue.hosts"
+  }, {
+    "name" : "navigator_client_config_safety_valve",
+    "required" : false,
+    "displayName" : "HBASE Client Advanced Configuration Snippet (Safety Valve) for navigator.client.properties",
+    "description" : "For advanced use only, a string to be inserted into the client configuration for <strong>navigator.client.properties</strong>.",
+    "relatedName" : ""
+  }, {
+    "name" : "process_groupname",
+    "required" : false,
+    "default" : "hbase",
+    "displayName" : "System Group",
+    "description" : "The group that this service's processes should run as.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_client_scanner_caching",
+    "required" : false,
+    "default" : "100",
+    "displayName" : "HBase Client Scanner Caching",
+    "description" : "Number of rows to fetch when calling next on a scanner if it is not served from memory. Higher caching values enable faster scanners but require more memory and some calls of next may take longer when the cache is empty.",
+    "relatedName" : "hbase.client.scanner.caching"
+  }, {
+    "name" : "hbase_regionservers_healthy_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"90.0\",\"warning\":\"95.0\"}",
+    "displayName" : "Healthy RegionServer Monitoring Thresholds",
+    "description" : "The health test thresholds of the overall RegionServer health. The check returns \"Concerning\" health if the percentage of \"Healthy\" RegionServers falls below the warning threshold. The check is unhealthy if the total percentage of \"Healthy\" and \"Concerning\" RegionServers falls below the critical threshold.",
+    "relatedName" : ""
+  }, {
+    "name" : "smon_client_config_overrides",
+    "required" : false,
+    "default" : "<property><name>zookeeper.recovery.retry</name><value>0</value></property><property><name>zookeeper.recovery.retry.intervalmill</name><value>3000</value></property><property><name>hbase.zookeeper.recoverable.waittime</name><value>1000</value></property><property><name>zookeeper.session.timeout</name><value>30000</value></property><property><name>hbase.rpc.timeout</name><value>10000</value></property><property><name>hbase.client.retries.number</name><value>1</value></property><property><name>hbase.client.rpc.maxattempts</name><value>1</value></property><property><name>hbase.client.operation.timeout</name><value>10000</value></property>",
+    "displayName" : "Service Monitor Client Config Overrides",
+    "description" : "For advanced use only, a list of configuration properties that will be used by the Service Monitor instead of the current client configuration for the service.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_superuser",
+    "required" : false,
+    "default" : "",
+    "displayName" : "HBase Superusers",
+    "description" : "List of users or groups, who are allowed full privileges, regardless of stored ACLs, across the cluster. Only used when HBase security is enabled.",
+    "relatedName" : "hbase.superuser"
+  }, {
+    "name" : "hbase_backup_masters_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Backup Masters Health Test",
+    "description" : "When computing the overall HBase cluster health, consider the health of the backup HBase Masters.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_client_pause",
+    "required" : false,
+    "default" : "100",
+    "displayName" : "HBase Client Pause",
+    "description" : "A general client pause time value. Used mostly as a time period to wait before retrying operations such as a failed get or region lookup.",
+    "relatedName" : "hbase.client.pause"
+  }, {
+    "name" : "hbase_client_retries_number",
+    "required" : false,
+    "default" : "35",
+    "displayName" : "Maximum HBase Client Retries",
+    "description" : "Maximum number of client retries. Used as a maximum for all operations such as fetching of the root region from the root RegionServer, getting a cell's value, and starting a row update.",
+    "relatedName" : "hbase.client.retries.number"
+  }, {
+    "name" : "navigator_audit_queue_policy",
+    "required" : false,
+    "default" : "DROP",
+    "displayName" : "Queue Policy",
+    "description" : "Action to take when the audit event queue is full. Drop the event or shutdown the affected process.",
+    "relatedName" : "navigator.batch.queue_policy"
+  }, {
+    "name" : "hbase_secure_rpc_engine",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "HBase Secure RPC Engine",
+    "description" : "Set to true to use HBase Secure RPC Engine for remote procedure calls (RPC). This is only effective in simple authentication mode. Does not provide authentication for RPC calls, but provides user information in the audit logs.  Changing this setting requires a restart of this and all dependent services and redeployment of client configurations, along with a restart of the Service Monitor management role.",
+    "relatedName" : "hbase.secure.rpc.engine"
+  }, {
+    "name" : "hdfs_rootdir",
+    "required" : false,
+    "default" : "/hbase",
+    "displayName" : "HDFS Root Directory",
+    "description" : "The HDFS directory shared by HBase RegionServers.",
+    "relatedName" : "hbase.rootdir"
+  }, {
+    "name" : "hbase_enable_indexing",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Indexing",
+    "description" : "Allow indexing of tables in HBase by Lily HBase Indexer. <strong>Note:</strong> Replication must be enabled for indexing to work.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_hbck_alert_region_error_count_threshold",
+    "required" : false,
+    "displayName" : "HBase Hbck Region Error Count Alert Threshold",
+    "description" : "An alert is published if the HBase Hbck tool detects at least this many regions with errors across all tables in this service. If the value is not set, alerts will not be published based on the count of regions with errors.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_region_health_canary_slow_run_alert_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "HBase Region Health Canary Slow Run Alert Enabled",
+    "description" : "An alert is published if the HBase region health canary runs slowly.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_server_thread_wakefrequency",
+    "required" : false,
+    "default" : "10000",
+    "displayName" : "HBase Server Thread Wake Frequency",
+    "description" : "Period of time, in milliseconds, to pause between searches for work. Used as a sleep interval by service threads such as a META scanner and log roller.",
+    "relatedName" : "hbase.server.thread.wakefrequency"
+  }, {
+    "name" : "oozie_proxy_user_groups_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Oozie Proxy User Groups",
+    "description" : "Comma-delimited list of groups that you want to allow the Oozie user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "relatedName" : "hadoop.proxyuser.oozie.groups"
+  }, {
+    "name" : "hbase_graceful_stop_timeout",
+    "required" : false,
+    "default" : "180",
+    "displayName" : "Graceful Shutdown Timeout",
+    "description" : "Timeout for graceful shutdown of this HBase service. Once this timeout is reached, any remaining running roles are abruptly shutdown. A value of 0 means no timeout.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_snapshot_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Snapshots",
+    "description" : "Enable snapshots. Disabling snapshots requires deletion of all snapshots before restarting the HBase master; the HBase master will not start if snapshots are disabled and snapshots exist.",
+    "relatedName" : "hbase.snapshot.enabled"
+  }, {
+    "name" : "hbase_coprocessor_abort_on_error",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "HBase Coprocessor Abort on Error",
+    "description" : "Set to true to cause the hosting server (Master or RegionServer) to abort if a coprocessor throws a Throwable object that is not IOException or a subclass of IOException. Setting it to true might be useful in development environments where one wants to terminate the server as soon as possible to simplify coprocessor failure analysis.",
+    "relatedName" : "hbase.coprocessor.abortonerror"
+  }, {
+    "name" : "hbase_hbck_slow_run_alert_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "HBase Hbck Slow Run Alert Enabled",
+    "description" : "An alert is published if the HBase Hbck tool runs slowly.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_canary_alert_unhealthy_region_count_threshold",
+    "required" : false,
+    "displayName" : "HBase Canary Unhealthy Region Count Alert Threshold",
+    "description" : "An alert is published if the HBase region health canary detects at least this many unhealthy regions. This setting takes precedence over the hbase_canary_alert_unhealthy_region_percent_threshold config.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_rpc_timeout",
+    "required" : false,
+    "default" : "60000",
+    "displayName" : "RPC Timeout",
+    "description" : "Timeout for all HBase RPCs in milliseconds.",
+    "relatedName" : "hbase.rpc.timeout"
+  }, {
+    "name" : "hbase_active_master_detecton_window",
+    "required" : false,
+    "default" : "3",
+    "displayName" : "HBase Active Master Detection Window",
+    "description" : "The tolerance window that will be used in HBase service tests that depend on detection of the active HBase Master.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_hbck_alert_error_codes",
+    "required" : false,
+    "default" : "NO_META_REGION,NULL_ROOT_REGION",
+    "displayName" : "HBase Hbck Alert Error Codes",
+    "description" : "An alert is published if the HBase Hbck tool finds any errors with matching codes. Possible error codes: UNKNOWN, NO_META_REGION, NULL_ROOT_REGION, NO_VERSION_FILE, NOT_IN_META_HDFS, NOT_IN_META, NOT_IN_META_OR_DEPLOYED, NOT_IN_HDFS_OR_DEPLOYED, NOT_IN_HDFS, SERVER_DOES_NOT_MATCH_META, NOT_DEPLOYED, MULTI_DEPLOYED, SHOULD_NOT_BE_DEPLOYED, MULTI_META_REGION, RS_CONNECT_FAILURE, FIRST_REGION_STARTKEY_NOT_EMPTY, LAST_REGION_ENDKEY_NOT_EMPTY, DUPE_STARTKEYS, HOLE_IN_REGION_CHAIN, OVERLAP_IN_REGION_CHAIN, REGION_CYCLE, DEGENERATE_REGION, ORPHAN_HDFS_REGION, LINGERING_SPLIT_PARENT, NO_TABLEINFO_FILE",
+    "relatedName" : ""
+  }, {
+    "name" : "process_username",
+    "required" : false,
+    "default" : "hbase",
+    "displayName" : "System User",
+    "description" : "The user that this service's processes should run as.",
+    "relatedName" : ""
+  }, {
+    "name" : "hue_proxy_user_groups_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Hue Proxy User Groups",
+    "description" : "Comma-delimited list of groups that you want to allow the Hue user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "relatedName" : "hadoop.proxyuser.hue.groups"
+  }, {
+    "name" : "enable_config_alerts",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Configuration Change Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when this entity's configuration changes.",
+    "relatedName" : ""
+  }, {
+    "name" : "zookeeper_retries",
+    "required" : false,
+    "displayName" : "ZooKeeper Connection Retries",
+    "description" : "The number of times to retry connections to ZooKeeper. Used for reading and writing root region location. Used together with ${zookeeper.pause} in an exponential backoff fashion when making queries to ZooKeeper.",
+    "relatedName" : "zookeeper.retries"
+  }, {
+    "name" : "hbase_region_health_canary_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "HBase Region Health Canary",
+    "description" : "Enables the canary that checks HBase region availability by scanning a row from every region.",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_hbck_poller_max_error_count",
+    "required" : false,
+    "default" : "10000",
+    "displayName" : "HBase Hbck Poller Maximum Error Count",
+    "description" : "Maximum number of errors that the HBase Hbck poller will retain through a given run",
+    "relatedName" : ""
+  }, {
+    "name" : "hbase_hbck_alert_error_count_threshold",
+    "required" : false,
+    "displayName" : "HBase Hbck Error Count Alert Threshold",
+    "description" : "An alert is published if the HBase Hbck tool detects at least this many errors across all tables in this service. Some errors are not associated with a region, e.g. 'RS_CONNECT_FAILURE'. If the value is not set, alerts will not be published based on the count of errors.",
+    "relatedName" : ""
+  }, {
+    "name" : "log_event_retry_frequency",
+    "required" : false,
+    "default" : "30",
+    "displayName" : "Log Event Retry Frequency",
+    "description" : "The frequency in which the log4j event publication appender will retry sending undelivered log events to the Event server, in seconds",
+    "relatedName" : ""
+  } ]
+}

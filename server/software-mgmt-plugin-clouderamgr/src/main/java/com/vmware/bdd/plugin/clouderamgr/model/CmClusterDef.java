@@ -88,6 +88,7 @@ public class CmClusterDef implements Serializable {
       this.failoverEnabled = isFailoverEnabled(blueprint);
       Integer zkIdIndex = 1;
       Integer nameServiceIndex = 0;
+      boolean hasImpala = false;
       for (NodeGroupInfo group : blueprint.getNodeGroups()) {
          boolean alreadyHasActive = false;
          for (NodeInfo node : group.getNodes()) {
@@ -106,6 +107,9 @@ public class CmClusterDef implements Serializable {
             for (String type : group.getRoles()) {
                AvailableServiceRole roleType = AvailableServiceRoleContainer.load(type);
                AvailableServiceRole serviceType = roleType.getParent();
+               if (serviceType.getDisplayName().equals("IMPALA")) {
+                  hasImpala = true;
+               }
                CmServiceDef service = serviceDefOfType(serviceType, blueprint.getConfiguration());
                CmRoleDef roleDef = new CmRoleDef();
                roleDef.setName(node.getName() + NAME_SEPARATOR + service.getType().getName() + NAME_SEPARATOR + roleType.getName()); // temp name
@@ -169,6 +173,21 @@ public class CmClusterDef implements Serializable {
                roleDef.addConfigs(blueprint.getConfiguration());
                roleDef.addConfigs(group.getConfiguration()); // group level configs will override cluster level configs
                service.addRole(roleDef);
+            }
+         }
+
+         // impala requires special settings for HDFS service
+         if (hasImpala) {
+            for (CmServiceDef serviceDef : services) {
+               if (serviceDef.getType().getDisplayName().equals("HDFS")) {
+                  serviceDef.addConfig("dfs_block_local_path_access_user", "impala");
+                  for (CmRoleDef roleDef : serviceDef.getRoles()) {
+                     if (roleDef.getType().getDisplayName().equals("HDFS_DATANODE")) {
+                        roleDef.addConfig("dfs_datanode_data_dir_perm", "755");
+                     }
+                  }
+                  break;
+               }
             }
          }
       }
