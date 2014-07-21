@@ -90,6 +90,7 @@ public class AppManagerService implements IAppManagerService{
       read.setType(entity.getType());
       read.setUrl(entity.getUrl());
       read.setUsername(entity.getUsername());
+      read.setPassword(entity.getPassword());
       read.setSslCertificate(entity.getSslCertificate());
       return read;
    }
