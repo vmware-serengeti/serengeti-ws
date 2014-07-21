@@ -15,6 +15,8 @@
 package com.vmware.bdd.service.job.software;
 
 import com.vmware.bdd.command.ClusterCmdUtil;
+import com.vmware.bdd.entity.NodeEntity;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.software.external.ExternalManagementTask;
@@ -42,8 +44,15 @@ public class SoftwareManagementTaskFactory {
          clusterOperation.setAction(ClusterAction.CREATE);
          break;
       case QUERY:
-         clusterOperation.setAction(ClusterAction.QUERY);
-         break;
+         String clusterName = targetName.split("-")[0];
+         boolean needQuery = checkAndResetNodePowerStatusChanged(clusterName, 
+               lockClusterEntityMgr.getClusterEntityMgr());
+         if (needQuery) {
+            clusterOperation.setAction(ClusterAction.QUERY);
+            break;
+         } else {
+            return null;
+         }
       case UPDATE:
          clusterOperation.setAction(ClusterAction.UPDATE);
          break;
@@ -70,6 +79,29 @@ public class SoftwareManagementTaskFactory {
             new ThriftSoftwareManagementTask(clusterOperation, statusUpdater,
                   lockClusterEntityMgr);
       return task;
+   }
+
+   private static boolean checkAndResetNodePowerStatusChanged(String clusterName,
+         IClusterEntityManager clusterEntityMgr) {
+      boolean statusStale = false;
+
+      for (NodeEntity node : clusterEntityMgr.findAllNodes(clusterName)) {
+         if (node.isPowerStatusChanged()) {
+            switch (node.getStatus()) {
+            case VM_READY:
+               statusStale = true;
+               break;
+            case SERVICE_READY:
+            case BOOTSTRAP_FAILED:
+               node.setPowerStatusChanged(false);
+               break;
+            default:
+               break;
+            }
+         }
+      }
+
+      return statusStale;
    }
 
    public static ISoftwareManagementTask createExternalMgtTask(

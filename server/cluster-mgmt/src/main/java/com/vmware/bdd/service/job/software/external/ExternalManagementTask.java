@@ -29,6 +29,7 @@ import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 /**
  * Author: Xiaoding Bian
@@ -107,6 +108,11 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
                   }
                }
                success = softwareManager.startNodes(clusterBlueprint.getName(), nodes, queue);
+               break;
+            case QUERY:
+               ClusterReport report = softwareManager.queryClusterStatus(clusterBlueprint);
+               queue.addClusterReport(report);
+               success = true;
                break;
             default:
                success = true;

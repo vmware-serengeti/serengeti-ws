@@ -254,30 +254,6 @@ public class ClusterManager {
       return file;
    }
 
-   private boolean checkAndResetNodePowerStatusChanged(String clusterName) {
-      boolean statusStale = false;
-
-      for (NodeEntity node : clusterEntityMgr.findAllNodes(clusterName)) {
-         if (node.isPowerStatusChanged()) {
-            switch (node.getStatus()) {
-            case VM_READY:
-               statusStale = true;
-               break;
-            case SERVICE_READY:
-            case BOOTSTRAP_FAILED:
-            case SERVICE_ALERT:
-            case SERVICE_UNHEALTHY:
-               node.setPowerStatusChanged(false);
-               break;
-            default:
-               break;
-            }
-         }
-      }
-
-      return statusStale;
-   }
-
    private void refreshClusterStatus(String clusterName) {
       List<String> clusterNames = new ArrayList<String>();
       clusterNames.add(clusterName);
@@ -318,9 +294,8 @@ public class ClusterManager {
 
       // return the latest data from db
       if (realTime
-            && cluster.getStatus().isSyncServiceStatus()
+            && cluster.getStatus().isSyncServiceStatus()) {
             // for not running cluster, we don't sync up status from chef
-            && checkAndResetNodePowerStatusChanged(clusterName)) {
          refreshClusterStatus(clusterName);
       }
 

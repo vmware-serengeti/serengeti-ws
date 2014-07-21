@@ -350,7 +350,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       // process cluster status
       handleClusterStatus(clusterName, report);
       // process node status
-      handleOperationStatus(clusterName, report, true);
+      handleNodeStatus(report, true);
    }
 
    private void handleClusterStatus(String clusterName, ClusterReport report) {
@@ -388,6 +388,11 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    @RetryTransaction
    public boolean handleOperationStatus(String clusterName,
          ClusterReport report, boolean lastUpdate) {
+      handleClusterStatus(clusterName, report);
+      return handleNodeStatus(report, lastUpdate);
+   }
+
+   private boolean handleNodeStatus(ClusterReport report, boolean lastUpdate) {
       boolean finished = report.isFinished();
       ClusterEntity cluster = findByName(report.getName());
       Map<String, NodeReport> nodeReportMap = report.getNodeReports();
@@ -398,26 +403,29 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
                continue;
             }
             if (nodeReport.getStatus() != null) {
-               logger.debug("node:" + node.getVmName()
-                     + ", status changed from old status: " + node.getStatus()
-                     + " to new status: " + nodeReport.getStatus().toString());
                if (!node.isDisconnected()) {
+                  logger.debug("Got node " + node.getVmName() 
+                        + " status " + nodeReport.getStatus().toString());
+                  NodeStatus oldStatus = node.getStatus();
                   switch (nodeReport.getStatus()) {
                   case STARTED:
-                     node.setStatus(NodeStatus.SERVICE_READY);
+                     node.setStatus(NodeStatus.SERVICE_READY, false);
                      break;
                   case UNHEALTHY:
-                     node.setStatus(NodeStatus.SERVICE_UNHEALTHY);
+                     node.setStatus(NodeStatus.SERVICE_UNHEALTHY, false);
                      break;
                   case ALERT:
-                     node.setStatus(NodeStatus.SERVICE_ALERT);
+                     node.setStatus(NodeStatus.SERVICE_ALERT, false);
                      break;
                   case UNKONWN:
-                     node.setStatus(NodeStatus.UNKNOWN);
+                     node.setStatus(NodeStatus.UNKNOWN, false);
                      break;
                   default:
-                     node.setStatus(NodeStatus.BOOTSTRAP_FAILED);
+                     node.setStatus(NodeStatus.BOOTSTRAP_FAILED, false);
                   }
+                  logger.debug("node:" + node.getVmName()
+                        + ", status changed from old status: " + oldStatus
+                        + " to new status: " + node.getStatus());
                }
             }
             if (nodeReport.isUseClusterMsg() && report.getAction() != null) {
