@@ -1,0 +1,71 @@
+{
+  "nodeGroups":[
+  {
+    "name": "zookeeper",
+    "roles": [
+      "ZOOKEEPER_SERVER"
+      ],
+    "instanceNum": 3,
+    "cpuNum": 2,
+    "memCapacityMB": 3500,
+    "storage": {
+      "type": "LOCAL",
+      "sizeGB": 20
+    }
+  },
+  {
+    "name": "journalnode",
+    "roles": [
+      "HDFS_JOURNALNODE"
+      ],
+    "instanceNum": 3,
+    "cpuNum": 2,
+    "memCapacityMB": 3500,
+    "storage": {
+      "type": "LOCAL",
+      "sizeGB": 20
+    }
+  },
+  {
+    "name": "DataMaster",
+    "roles": [
+      "HDFS_NAMENODE",
+      ],
+    "instanceNum": 2,
+    "cpuNum": 2,
+    "memCapacityMB": 7500,
+    "storage": {
+      "type": "SHARED",
+      "sizeGB": 50
+    }
+  },
+  {
+    "name": "ComputeMaster",
+    "roles": [
+      "YARN_RESOURCE_MANAGER",
+      "YARN_JOB_HISTORY"
+      ],
+    "instanceNum": 2,
+    "cpuNum": 2,
+    "memCapacityMB": 7500,
+    "storage": {
+      "type": "SHARED",
+      "sizeGB": 50
+    }
+  },
+  {
+    "name": "worker",
+    "roles": [
+      "HDFS_DATANODE",
+      "YARN_NODE_MANAGER"
+      ],
+    "instanceNum": 3,
+    "cpuNum": 4,
+    "memCapacityMB": 7500,
+    "storage": {
+      "type": "LOCAL",
+      "sizeGB": 50
+    }
+  }
+  ]
+}

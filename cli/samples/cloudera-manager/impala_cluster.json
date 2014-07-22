@@ -1,0 +1,78 @@
+{
+  "nodeGroups":[
+  {
+    "name": "zookeeper",
+    "roles": [
+      "ZOOKEEPER_SERVER"
+      ],
+    "instanceNum": 3,
+    "cpuNum": 2,
+    "memCapacityMB": 3500,
+    "storage": {
+      "type": "LOCAL",
+      "sizeGB": 50
+    }
+  },
+  {
+    "name": "master",
+    "roles": [
+      "HDFS_NAMENODE",
+      "HDFS_SECONDARY_NAMENODE",
+      "YARN_RESOURCE_MANAGER",
+      "YARN_JOB_HISTORY"
+      ],
+    "instanceNum": 1,
+    "cpuNum": 8,
+    "memCapacityMB": 15000,
+    "storage": {
+      "type": "LOCAL",
+      "sizeGB": 50
+    }
+  },
+  {
+    "name": "sql",
+    "roles": [
+      "HIVE_SERVER2",
+      "HIVE_METASTORE",
+      "IMPALA_CATALOG_SERVER",
+      "IMPALA_STATE_STORE",
+      "HBASE_MASTER",
+      "HBASE_REST_SERVER",
+      "HBASE_THRIFT_SERVER"
+      ],
+    "instanceNum": 1,
+    "cpuNum": 8,
+    "memCapacityMB": 15000,
+    "storage": {
+      "type": "LOCAL",
+      "sizeGB": 50
+    }
+  },
+  {
+    "name": "worker",
+    "roles": [
+      "HDFS_DATANODE",
+      "YARN_NODE_MANAGER",
+      "HBASE_REGION_SERVER",
+      "IMPALA_DAEMON"
+      ],
+    "instanceNum": 3,
+    "cpuNum": 2,
+    "memCapacityMB": 15000,  
+    "storage": {
+      "type": "LOCAL",
+      "sizeGB": 20
+    }
+  }
+  ],
+    "configuration": {
+      "HIVE": {
+        "hive_metastore_database_host": "192.168.0.1",
+        "hive_metastore_database_name": "hivemetastore",
+        "hive_metastore_database_password": "password",
+        "hive_metastore_database_port": "5432",
+        "hive_metastore_database_type": "postgresql",
+        "hive_metastore_database_user": "hive"
+      }
+    }
+}

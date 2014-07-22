@@ -1,0 +1,47 @@
+{
+  "nodeGroups":[
+  {
+    "name": "zookeeper",
+    "roles": [
+      "ZOOKEEPER_SERVER"
+      ],
+    "instanceNum": 3,
+    "cpuNum": 2,
+    "memCapacityMB": 3500,
+    "storage": {
+      "type": "LOCAL",
+      "sizeGB": 50
+    }
+  },
+  {
+    "name": "master",
+    "roles": [
+      "HDFS_NAMENODE",
+      "HBASE_MASTER",
+      "HBASE_REST_SERVER",
+      "HBASE_THRIFT_SERVER"
+      ],
+    "instanceNum": 1,
+    "cpuNum": 2,
+    "memCapacityMB": 7500,
+    "storage": {
+      "type": "SHARED",
+      "sizeGB": 50
+    }
+  },
+  {
+    "name": "worker",
+    "roles": [
+      "HDFS_DATANODE",
+      "HBASE_REGION_SERVER"
+      ],
+    "instanceNum": 3,
+    "cpuNum": 2,
+    "memCapacityMB": 7500,
+    "storage": {
+      "type": "LOCAL",
+      "sizeGB": 50
+    }
+  }
+  ]
+}
