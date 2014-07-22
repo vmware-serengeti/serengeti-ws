@@ -40,20 +40,20 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiPutRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequestInfo;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequestList;
+import com.vmware.bdd.plugin.ambari.api.model.ApiRootServicesComponents;
 import com.vmware.bdd.plugin.ambari.api.model.ApiService;
 import com.vmware.bdd.plugin.ambari.api.model.ApiServiceAlert;
 import com.vmware.bdd.plugin.ambari.api.model.ApiServiceAlertList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiServiceInfo;
 import com.vmware.bdd.plugin.ambari.api.model.ApiServiceStatus;
-import com.vmware.bdd.plugin.ambari.api.model.ApiRootServicesComponents;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStack;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackComponentList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceComponent;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersion;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersionList;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponentList;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceComponent;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionList;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
@@ -135,16 +135,15 @@ public class ApiManager implements IApiManager {
    @Override
    public ApiStackServiceList stackServiceListWithComponents(String stackName,
          String stackVersion) {
-      String apiStackServicesWithComponentsJson =
-            apiResourceRootV1.getStacks2Resource()
-                  .getStackVersionsResource(stackName)
-                  .getStackServicesResource(stackVersion).readStackServicesWithCompoents("serviceComponents");
-      logger.debug("Response of service list with components of stack from ambari server:");
-      logger.debug(apiStackServicesWithComponentsJson);
-      ApiStackServiceList apiStackServices =
-            ApiUtils.jsonToObject(ApiStackServiceList.class,
-                  apiStackServicesWithComponentsJson);
-      return apiStackServices;
+      return readServicesWithFilter(stackName, stackVersion,
+            "serviceComponents/dependencies");
+   }
+
+   @Override
+   public ApiStackServiceList stackServiceListWithConfigurations(String stackName,
+         String stackVersion) {
+      return readServicesWithFilter(stackName, stackVersion,
+            "configurations/StackConfigurations/type");
    }
 
    @Override
@@ -174,14 +173,14 @@ public class ApiManager implements IApiManager {
       logger.debug("Response of component list of service from ambari server:");
       logger.debug(stackComponentsJson);
       ApiStackComponentList apiServiceComponents =
-            ApiUtils
-                  .jsonToObject(ApiStackComponentList.class, stackComponentsJson);
+            ApiUtils.jsonToObject(ApiStackComponentList.class,
+                  stackComponentsJson);
       return apiServiceComponents;
    }
 
    @Override
-   public ApiStackServiceComponent stackComponent(String stackName, String stackVersion,
-         String stackServiceName, String stackComponentName) {
+   public ApiStackServiceComponent stackComponent(String stackName,
+         String stackVersion, String stackServiceName, String stackComponentName) {
       String stackComponentJson =
             apiResourceRootV1.getStacks2Resource()
                   .getStackVersionsResource(stackName)
@@ -191,7 +190,8 @@ public class ApiManager implements IApiManager {
       logger.debug("Response of component of service from ambari server:");
       logger.debug(stackComponentJson);
       ApiStackServiceComponent apiServiceComponent =
-            ApiUtils.jsonToObject(ApiStackServiceComponent.class, stackComponentJson);
+            ApiUtils.jsonToObject(ApiStackServiceComponent.class,
+                  stackComponentJson);
       return apiServiceComponent;
    }
 
@@ -239,7 +239,10 @@ public class ApiManager implements IApiManager {
       String request = ApiUtils.objectToJson(stopRequest);
       logger.debug("The request in stop cluster is :" + request);
 
-      String responseJson = apiResourceRootV1.getClustersResource().getServicesResource(clusterName).stopAllServices(clusterName, "true", request);
+      String responseJson =
+            apiResourceRootV1.getClustersResource()
+                  .getServicesResource(clusterName)
+                  .stopAllServices(clusterName, "true", request);
       logger.debug("The response when ambari stop cluster is :" + responseJson);
       return ApiUtils.jsonToObject(ApiRequest.class, responseJson);
    }
@@ -256,7 +259,10 @@ public class ApiManager implements IApiManager {
       String request = ApiUtils.objectToJson(stopRequest);
       logger.debug("The request in start cluster is :" + request);
 
-      String response = apiResourceRootV1.getClustersResource().getServicesResource(clusterName).startAllServices(clusterName, "true", request);
+      String response =
+            apiResourceRootV1.getClustersResource()
+                  .getServicesResource(clusterName)
+                  .startAllServices(clusterName, "true", request);
       logger.debug("The reponse when startAllService is :" + response);
       return ApiUtils.jsonToObject(ApiRequest.class, response);
    }
@@ -328,7 +334,8 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiRequest deleteCluster(String clusterName) {
-      String response = apiResourceRootV1.getClustersResource().deleteCluster(clusterName);
+      String response =
+            apiResourceRootV1.getClustersResource().deleteCluster(clusterName);
       logger.debug("in delete cluster, reponse is :" + response);
       return ApiUtils.jsonToObject(ApiRequest.class, response);
    }
@@ -397,6 +404,7 @@ public class ApiManager implements IApiManager {
       return apiRequest;
    }
 
+
    public ServiceStatus getClusterStatus(String clusterName) {
       ApiServiceAlertList serviceList = getServicesWithAlert(clusterName);
       if (serviceList.getApiServiceAlerts() != null) {
@@ -452,7 +460,7 @@ public class ApiManager implements IApiManager {
             } else if (ApiHostStatus.ALERT.name().equalsIgnoreCase(state)) {
                result.put(apiHost.getApiHostInfo().getHost_name(),
                      ServiceStatus.ALERT);
-            } 
+            }
          }
       }
       return result;
@@ -478,6 +486,21 @@ public class ApiManager implements IApiManager {
       ApiRootServicesComponents apiRequest =
             ApiUtils.jsonToObject(ApiRootServicesComponents.class, requestJson);
       return apiRequest.getApiRootServicesComponent().getComponentVersion();
+   }
+
+   private ApiStackServiceList readServicesWithFilter(String stackName,
+         String stackVersion, String filter) {
+      String apiStackServicesWithComponentsJson =
+            apiResourceRootV1.getStacks2Resource()
+                  .getStackVersionsResource(stackName)
+                  .getStackServicesResource(stackVersion)
+                  .readServicesWithFilter(filter);
+      logger.debug("Response of service list with components of stack from ambari server:");
+      logger.debug(apiStackServicesWithComponentsJson);
+      ApiStackServiceList apiStackServices =
+            ApiUtils.jsonToObject(ApiStackServiceList.class,
+                  apiStackServicesWithComponentsJson);
+      return apiStackServices;
    }
 
 }

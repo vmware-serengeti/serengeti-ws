@@ -12,24 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model;
+package com.vmware.bdd.plugin.ambari.api.model.stack;
 
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiStackServiceComponent {
+public class ApiStackOperatingSystem {
 
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("StackServiceComponents")
-   private ApiComponentInfo apiServiceComponent;
+   @SerializedName("OperatingSystems")
+   private ApiStackOperatingSystemInfo apiStackOperatingSysteminfo;
 
    @Expose
-   private List<String> dependencies;
+   @SerializedName("repositories")
+   private List<ApiStackOperatingSystemRepository> apiStackOperatingSystemRepositories;
 
    public String getHref() {
       return href;
@@ -39,20 +40,22 @@ public class ApiStackServiceComponent {
       this.href = href;
    }
 
-   public ApiComponentInfo getApiServiceComponent() {
-      return apiServiceComponent;
+   public ApiStackOperatingSystemInfo getApiStackOperatingSysteminfo() {
+      return apiStackOperatingSysteminfo;
    }
 
-   public void setApiServiceComponent(ApiComponentInfo apiServiceComponent) {
-      this.apiServiceComponent = apiServiceComponent;
+   public void setApiStackOperatingSysteminfo(
+         ApiStackOperatingSystemInfo apiStackOperatingSysteminfo) {
+      this.apiStackOperatingSysteminfo = apiStackOperatingSysteminfo;
    }
 
-   public List<String> getDependencies() {
-      return dependencies;
+   public List<ApiStackOperatingSystemRepository> getApiStackOperatingSystemRepositories() {
+      return apiStackOperatingSystemRepositories;
    }
 
-   public void setDependencies(List<String> dependencies) {
-      this.dependencies = dependencies;
+   public void setApiStackOperatingSystemRepositories(
+         List<ApiStackOperatingSystemRepository> apiStackOperatingSystemRepositories) {
+      this.apiStackOperatingSystemRepositories =
+            apiStackOperatingSystemRepositories;
    }
-
 }

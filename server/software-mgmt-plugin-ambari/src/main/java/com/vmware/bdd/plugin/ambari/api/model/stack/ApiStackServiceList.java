@@ -12,30 +12,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.v1;
+package com.vmware.bdd.plugin.ambari.api.model.stack;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import java.util.List;
 
-import com.vmware.bdd.plugin.ambari.api.Parameters;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
-@Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-public interface Stacks2Resource {
-   
-   @GET
-   @Path("/")
-   public String readStacks();
-   
-   @GET
-   @Path("/{stackName}")
-   public String readStack(@PathParam(Parameters.STACK_NAME) String stackName);
+public class ApiStackServiceList {
 
-   @Path("/{stackName}/versions")
-   public StackVersionsResource getStackVersionsResource(@PathParam(Parameters.STACK_NAME) String stackName);
+   @Expose
+   private String href;
+
+   @Expose
+   @SerializedName("items")
+   private List<ApiStackService> apiStackServices;
+
+   public String getHref() {
+      return href;
+   }
+
+   public void setHref(String href) {
+      this.href = href;
+   }
+
+   public List<ApiStackService> getApiStackServices() {
+      return apiStackServices;
+   }
+
+   public void setApiStackServices(List<ApiStackService> apiStackServices) {
+      this.apiStackServices = apiStackServices;
+   }
 
 }

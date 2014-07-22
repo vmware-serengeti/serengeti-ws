@@ -31,18 +31,18 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapHostStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStack;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceComponent;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersion;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersionInfo;
 import com.vmware.bdd.plugin.ambari.api.model.ApiTask;
 import com.vmware.bdd.plugin.ambari.api.model.ApiTaskInfo;
 import com.vmware.bdd.plugin.ambari.api.model.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ClusterRequestStatus;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceComponent;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionInfo;
 import com.vmware.bdd.plugin.ambari.exception.AmException;
 import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
 import com.vmware.bdd.plugin.ambari.model.AmNodeDef;
@@ -635,8 +635,9 @@ public class AmbariImpl implements SoftwareManager {
    @Override
    public boolean validateBlueprint(ClusterBlueprint blueprint)
          throws ValidationException {
-      // TODO Auto-generated method stub
-      return false;
+      AmClusterValidator amClusterValidator = new AmClusterValidator();
+      amClusterValidator.setApiManager(apiManager);
+      return amClusterValidator.validateBlueprint(blueprint);
    }
 
    @Override

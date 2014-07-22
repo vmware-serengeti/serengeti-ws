@@ -12,22 +12,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model;
+package com.vmware.bdd.plugin.ambari.api.model.stack;
+
+import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiStackName {
+public class ApiStackOperatingSystemList {
 
    @Expose
-   @SerializedName("stack_name")
-   private String stackName;
+   private String href;
 
-   public String getStackName() {
-      return stackName;
+   @Expose
+   @SerializedName("items")
+   private List<ApiStackOperatingSystem> apiStackOperatingSystems;
+
+   public String getHref() {
+      return href;
    }
 
-   public void setStackName(String stackName) {
-      this.stackName = stackName;
+   public void setHref(String href) {
+      this.href = href;
+   }
+
+   public List<ApiStackOperatingSystem> getApiStackOperatingSystems() {
+      return apiStackOperatingSystems;
+   }
+
+   public void setApiStackOperatingSystems(
+         List<ApiStackOperatingSystem> apiStackOperatingSystems) {
+      this.apiStackOperatingSystems = apiStackOperatingSystems;
    }
 }

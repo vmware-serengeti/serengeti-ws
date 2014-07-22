@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model;
+package com.vmware.bdd.plugin.ambari.api.model.stack;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

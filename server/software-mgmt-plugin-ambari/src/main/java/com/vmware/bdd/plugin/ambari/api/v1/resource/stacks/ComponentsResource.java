@@ -12,35 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model;
+package com.vmware.bdd.plugin.ambari.api.v1.resource.stacks;
 
-import java.util.List;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import com.vmware.bdd.plugin.ambari.api.Parameters;
 
-public class ApiStackVersionList {
+@Consumes({ MediaType.APPLICATION_JSON })
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
+public interface ComponentsResource {
 
-   @Expose
-   private String href;
+   @GET
+   @Path("/")
+   public String readServiceComponents();
 
-   @Expose
-   @SerializedName("items")
-   private List<ApiStackVersion> apiStackVersions;
-
-   public String getHref() {
-      return href;
-   }
-
-   public void setHref(String href) {
-      this.href = href;
-   }
-
-   public List<ApiStackVersion> getApiStackVersions() {
-      return apiStackVersions;
-   }
-
-   public void setApiStackVersions(List<ApiStackVersion> apiStackVersions) {
-      this.apiStackVersions = apiStackVersions;
-   }
+   @GET
+   @Path("/{serviceComponentName}")
+   public String readServiceComponent(@PathParam(Parameters.SERVICE_COMPONENT_NAME) String serviceComponentName);
 }

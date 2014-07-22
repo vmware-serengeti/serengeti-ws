@@ -12,37 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.v1;
+package com.vmware.bdd.plugin.ambari.api.model.stack;
 
-import javax.ws.rs.Path;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
-import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks.Stacks2Resource;
-@Path("")
-public interface RootResourceV1 {
-   /**
-    * Lists all known clusters.
-    */
-   @Path("/clusters")
-   public ClustersResource getClustersResource();
+public class ApiStackName {
 
-   /**
-    * Lists all known bootstrap.
-    */
-   @Path("/bootstrap")
-   public BootstrapResource getBootstrapResource();
+   @Expose
+   @SerializedName("stack_name")
+   private String stackName;
 
-   /**
-    * Lists all known blueprints.
-    */
-   @Path("/blueprints")
-   public BlueprintsResource getBlueprintsResource();
+   public String getStackName() {
+      return stackName;
+   }
 
-   @Path("/stacks2")
-   public Stacks2Resource getStacks2Resource();
-
-   @Path("/check")
-   public HealthCheck getHealthCheck();
-
-   @Path("/services")
-   public RootServicesResource getRootServicesResource();
+   public void setStackName(String stackName) {
+      this.stackName = stackName;
+   }
 }

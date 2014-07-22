@@ -781,6 +781,7 @@ public class ClusterCreate implements Serializable {
        // set HadoopStack
        HadoopStack hadoopStack = new HadoopStack();
        hadoopStack.setDistro(distro);
+       hadoopStack.setVendor(distroVendor);
        hadoopStack.setFullVersion(distroVersion); // TODO
        blueprint.setHadoopStack(hadoopStack);
 

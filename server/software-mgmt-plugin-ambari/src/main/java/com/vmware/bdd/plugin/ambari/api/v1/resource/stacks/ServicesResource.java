@@ -12,30 +12,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.v1;
+package com.vmware.bdd.plugin.ambari.api.v1.resource.stacks;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.vmware.bdd.plugin.ambari.api.Parameters;
 
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-public interface StackVersionsResource {
+public interface ServicesResource {
 
    @GET
    @Path("/")
-   public String readStackVersions();
+   public String readStackServices();
 
    @GET
-   @Path("/{stackVersion}")
-   public String readStackVersion(@PathParam(Parameters.STACK_VERSION) String stackVersion);
+   @Path("/")
+   public String readServicesWithFilter(@QueryParam("fields") String fields);
 
-   @Path("/{stackVersion}/stackServices")
-   public StackServicesResource getStackServicesResource(@PathParam(Parameters.STACK_VERSION) String stackVersion);
+   @GET
+   @Path("/{stackServiceName}")
+   public String readStackService(@PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName);
+
+   @Path("/{stackServiceName}/serviceComponents")
+   public ComponentsResource getServiceComponentsResource(@PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName);
 
 }

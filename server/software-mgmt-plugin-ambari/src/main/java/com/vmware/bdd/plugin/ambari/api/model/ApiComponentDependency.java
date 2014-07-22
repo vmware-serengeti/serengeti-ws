@@ -17,53 +17,29 @@ package com.vmware.bdd.plugin.ambari.api.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiStackOperatingSystemRepository {
+public class ApiComponentDependency {
+   @Expose
+   private String href;
 
    @Expose
-   @SerializedName("os_type")
-   private String osType;
+   @SerializedName("Dependencies")
+   private ApiComponentDependencyInfo apiComponentDependencyInfo;
 
-   @Expose
-   @SerializedName("repo_id")
-   private String repoId;
-
-   @Expose
-   @SerializedName("stack_name")
-   private String stackName;
-
-   @Expose
-   @SerializedName("stack_version")
-   private String stackVersion;
-
-   public String getOsType() {
-      return osType;
+   public String getHref() {
+      return href;
    }
 
-   public void setOsType(String osType) {
-      this.osType = osType;
+   public void setHref(String href) {
+      this.href = href;
    }
 
-   public String getRepoId() {
-      return repoId;
+   public ApiComponentDependencyInfo getApiComponentDependencyInfo() {
+      return apiComponentDependencyInfo;
    }
 
-   public void setRepoId(String repoId) {
-      this.repoId = repoId;
+   public void setApiComponentDependencyInfo(
+         ApiComponentDependencyInfo apiComponentDependencyInfo) {
+      this.apiComponentDependencyInfo = apiComponentDependencyInfo;
    }
 
-   public String getStackName() {
-      return stackName;
-   }
-
-   public void setStackName(String stackName) {
-      this.stackName = stackName;
-   }
-
-   public String getStackVersion() {
-      return stackVersion;
-   }
-
-   public void setStackVersion(String stackVersion) {
-      this.stackVersion = stackVersion;
-   }
 }

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.v1;
+package com.vmware.bdd.plugin.ambari.api.v1.resource.stacks;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -25,13 +25,17 @@ import com.vmware.bdd.plugin.ambari.api.Parameters;
 
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-public interface ServiceComponentsResource {
+public interface VersionsResource {
 
    @GET
    @Path("/")
-   public String readServiceComponents();
+   public String readStackVersions();
 
    @GET
-   @Path("/{serviceComponentName}")
-   public String readServiceComponent(@PathParam(Parameters.SERVICE_COMPONENT_NAME) String serviceComponentName);
+   @Path("/{stackVersion}")
+   public String readStackVersion(@PathParam(Parameters.STACK_VERSION) String stackVersion);
+
+   @Path("/{stackVersion}/stackServices")
+   public ServicesResource getStackServicesResource(@PathParam(Parameters.STACK_VERSION) String stackVersion);
+
 }

@@ -12,29 +12,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model;
+package com.vmware.bdd.plugin.ambari.api.model.stack;
 
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiStackVersion {
+public class ApiStackService {
 
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("Versions")
-   private ApiStackVersionInfo apiStackVersionInfo;
+   @SerializedName("StackServices")
+   private ApiStackServiceInfo apiStackServiceInfo;
 
    @Expose
-   @SerializedName("stackServices")
-   private List<ApiStackService> apiStackServices;
+   @SerializedName("serviceComponents")
+   private List<ApiStackServiceComponent> serviceComponents;
 
    @Expose
-   @SerializedName("operatingSystems")
-   private List<ApiStackOperatingSystem> ApiStackOperatingSystems;
+   @SerializedName("configurations")
+   private List<ApiConfiguration> apiConfigurations;
 
    public String getHref() {
       return href;
@@ -44,29 +44,28 @@ public class ApiStackVersion {
       this.href = href;
    }
 
-   public ApiStackVersionInfo getApiStackVersionInfo() {
-      return apiStackVersionInfo;
+   public ApiStackServiceInfo getApiStackServiceInfo() {
+      return apiStackServiceInfo;
    }
 
-   public void setApiStackVersionInfos(ApiStackVersionInfo apiStackVersionInfo) {
-      this.apiStackVersionInfo = apiStackVersionInfo;
+   public void setApiStackServiceInfo(ApiStackServiceInfo apiStackServiceInfo) {
+      this.apiStackServiceInfo = apiStackServiceInfo;
    }
 
-   public List<ApiStackService> getApiStackServices() {
-      return apiStackServices;
+   public List<ApiStackServiceComponent> getServiceComponents() {
+      return serviceComponents;
    }
 
-   public void setApiStackServices(List<ApiStackService> apiStackServices) {
-      this.apiStackServices = apiStackServices;
+   public void setServiceComponents(
+         List<ApiStackServiceComponent> serviceComponents) {
+      this.serviceComponents = serviceComponents;
    }
 
-   public List<ApiStackOperatingSystem> getApiStackOperatingSystems() {
-      return ApiStackOperatingSystems;
+   public List<ApiConfiguration> getApiConfigurations() {
+      return apiConfigurations;
    }
 
-   public void setApiStackOperatingSystems(
-         List<ApiStackOperatingSystem> apiStackOperatingSystems) {
-      ApiStackOperatingSystems = apiStackOperatingSystems;
+   public void setApiConfigurations(List<ApiConfiguration> apiConfigurations) {
+      this.apiConfigurations = apiConfigurations;
    }
-
 }

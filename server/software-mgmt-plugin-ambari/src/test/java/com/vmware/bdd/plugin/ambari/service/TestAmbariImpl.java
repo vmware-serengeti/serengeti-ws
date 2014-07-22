@@ -1,4 +1,4 @@
-package com.vmware.bdd.plugin.ambari.service.impl;
+package com.vmware.bdd.plugin.ambari.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager.HealthStatus;
 
 public class TestAmbariImpl {
-//   private static final Logger logger = Logger.getLogger(TestAmbariImpl.class);
+   //   private static final Logger logger = Logger.getLogger(TestAmbariImpl.class);
    private static AmbariImpl provider;
 
    @BeforeClass(groups = { "TestAmbariImpl" })
@@ -90,7 +90,7 @@ public class TestAmbariImpl {
          Assert.assertTrue(nodeReport.getStatus() == ServiceStatus.STARTED);
       }
    }
-   
+
    //@Test(groups = { "TestAmbariImpl" })
    public void testEcho() throws IOException {
       Assert.assertTrue(provider.echo());

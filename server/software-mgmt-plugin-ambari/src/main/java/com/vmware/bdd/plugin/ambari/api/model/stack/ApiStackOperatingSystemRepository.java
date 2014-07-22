@@ -12,47 +12,58 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model;
-
-import java.util.List;
+package com.vmware.bdd.plugin.ambari.api.model.stack;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiStackService {
-   
-   @Expose
-   private String href;
+public class ApiStackOperatingSystemRepository {
 
    @Expose
-   @SerializedName("StackServices")
-   private ApiStackServiceInfo apiStackServiceInfo;
+   @SerializedName("os_type")
+   private String osType;
 
    @Expose
-   @SerializedName("serviceComponents")
-   private List<ApiStackServiceComponent> serviceComponents;
+   @SerializedName("repo_id")
+   private String repoId;
 
-   public String getHref() {
-      return href;
+   @Expose
+   @SerializedName("stack_name")
+   private String stackName;
+
+   @Expose
+   @SerializedName("stack_version")
+   private String stackVersion;
+
+   public String getOsType() {
+      return osType;
    }
 
-   public void setHref(String href) {
-      this.href = href;
+   public void setOsType(String osType) {
+      this.osType = osType;
    }
 
-   public ApiStackServiceInfo getApiStackServiceInfo() {
-      return apiStackServiceInfo;
+   public String getRepoId() {
+      return repoId;
    }
 
-   public void setApiStackServiceInfo(ApiStackServiceInfo apiStackServiceInfo) {
-      this.apiStackServiceInfo = apiStackServiceInfo;
+   public void setRepoId(String repoId) {
+      this.repoId = repoId;
    }
 
-   public List<ApiStackServiceComponent> getServiceComponents() {
-      return serviceComponents;
+   public String getStackName() {
+      return stackName;
    }
 
-   public void setServiceComponents(List<ApiStackServiceComponent> serviceComponents) {
-      this.serviceComponents = serviceComponents;
+   public void setStackName(String stackName) {
+      this.stackName = stackName;
+   }
+
+   public String getStackVersion() {
+      return stackVersion;
+   }
+
+   public void setStackVersion(String stackVersion) {
+      this.stackVersion = stackVersion;
    }
 }

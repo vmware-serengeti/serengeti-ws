@@ -12,21 +12,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model;
+package com.vmware.bdd.plugin.ambari.api.model.stack;
 
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiStackServiceList {
-   
+public class ApiStackVersion {
+
    @Expose
    private String href;
-   
+
    @Expose
-   @SerializedName("items")
+   @SerializedName("Versions")
+   private ApiStackVersionInfo apiStackVersionInfo;
+
+   @Expose
+   @SerializedName("stackServices")
    private List<ApiStackService> apiStackServices;
+
+   @Expose
+   @SerializedName("operatingSystems")
+   private List<ApiStackOperatingSystem> ApiStackOperatingSystems;
 
    public String getHref() {
       return href;
@@ -36,12 +44,29 @@ public class ApiStackServiceList {
       this.href = href;
    }
 
+   public ApiStackVersionInfo getApiStackVersionInfo() {
+      return apiStackVersionInfo;
+   }
+
+   public void setApiStackVersionInfos(ApiStackVersionInfo apiStackVersionInfo) {
+      this.apiStackVersionInfo = apiStackVersionInfo;
+   }
+
    public List<ApiStackService> getApiStackServices() {
       return apiStackServices;
    }
 
    public void setApiStackServices(List<ApiStackService> apiStackServices) {
       this.apiStackServices = apiStackServices;
+   }
+
+   public List<ApiStackOperatingSystem> getApiStackOperatingSystems() {
+      return ApiStackOperatingSystems;
+   }
+
+   public void setApiStackOperatingSystems(
+         List<ApiStackOperatingSystem> apiStackOperatingSystems) {
+      ApiStackOperatingSystems = apiStackOperatingSystems;
    }
 
 }

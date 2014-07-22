@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class AmUtils {
 
@@ -64,4 +65,8 @@ public class AmUtils {
       return configurations;
    }
 
+   public static boolean isValidRack(String rack) {
+      Pattern rackPattern = Pattern.compile("(/[a-zA-Z0-9\\.\\-\\_]+)+");
+      return rackPattern.matcher(rack).matches();
+   }
 }

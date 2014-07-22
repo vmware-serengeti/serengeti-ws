@@ -27,14 +27,14 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiClusterList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequestList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiService;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStack;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackComponentList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceComponent;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackServiceList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersion;
-import com.vmware.bdd.plugin.ambari.api.model.ApiStackVersionList;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponentList;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceComponent;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionList;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 
 public interface IApiManager {
@@ -51,6 +51,9 @@ public interface IApiManager {
          String stackVersion);
 
    public ApiStackServiceList stackServiceListWithComponents(String stackName,
+         String stackVersion);
+
+   public ApiStackServiceList stackServiceListWithConfigurations(String stackName,
          String stackVersion);
 
    public ApiStackService stackService(String stackName, String stackVersion,
