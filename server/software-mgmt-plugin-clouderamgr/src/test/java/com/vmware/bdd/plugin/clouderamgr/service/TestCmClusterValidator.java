@@ -132,7 +132,7 @@ public class TestCmClusterValidator {
    }
 
    @Test
-   public void testHA() {
+   public void testNnHA() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();
          blueprint.getNodeGroups().get(0).getRoles().remove("HDFS_SECONDARY_NAMENODE");
@@ -145,7 +145,20 @@ public class TestCmClusterValidator {
    }
 
    @Test
-   public void testServiceDependency() {
+   public void testNnFederation() {
+      try {
+         ClusterBlueprint blueprint = generateBlueprint();
+         blueprint.getNodeGroups().get(1).getRoles().add("HDFS_NAMENODE");
+         CmClusterValidator validator = new CmClusterValidator();
+         Assert.assertFalse(validator.validateBlueprint(blueprint));
+      } catch (ValidationException e) {
+         System.out.println("warning_msg_list: " + e.getWarningMsgList());
+         System.out.println("error_msg_list: " + e.getFailedMsgList());
+      }
+   }
+
+   @Test
+   public void testServiceDependency01() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();
          blueprint.getNodeGroups().get(0).getRoles().remove("HDFS_NAMENODE");
@@ -158,6 +171,55 @@ public class TestCmClusterValidator {
          System.out.println("error_msg_list: " + e.getFailedMsgList());
       }
    }
+
+   @Test
+   public void testServiceDependency02() {
+      try {
+         ClusterBlueprint blueprint = generateBlueprint();
+         blueprint.getNodeGroups().get(0).getRoles().add("HIVE_METASTORE");
+         blueprint.getNodeGroups().get(0).getRoles().remove("YARN_RESOURCE_MANAGER");
+         blueprint.getNodeGroups().get(0).getRoles().remove("YARN_JOB_HISTORY");
+         blueprint.getNodeGroups().get(1).getRoles().add("HIVE_SERVER2");
+         blueprint.getNodeGroups().get(1).getRoles().remove("YARN_NODE_MANAGER");
+         CmClusterValidator validator = new CmClusterValidator();
+         Assert.assertFalse(validator.validateBlueprint(blueprint));
+      } catch (ValidationException e) {
+         System.out.println("warning_msg_list: " + e.getWarningMsgList());
+         System.out.println("error_msg_list: " + e.getFailedMsgList());
+      }
+   }
+
+   @Test
+   public void testBadInstanceNum01() {
+      try {
+         ClusterBlueprint blueprint = generateBlueprint();
+         blueprint.getNodeGroups().get(0).getRoles().add("ZOOKEEPER_SERVER");
+         blueprint.getNodeGroups().get(0).getRoles().add("HDFS_JOURNALNODE");
+         CmClusterValidator validator = new CmClusterValidator();
+         Assert.assertFalse(validator.validateBlueprint(blueprint));
+      } catch (ValidationException e) {
+         System.out.println("warning_msg_list: " + e.getWarningMsgList());
+         System.out.println("error_msg_list: " + e.getFailedMsgList());
+      }
+   }
+
+   @Test
+   public void testBadInstanceNum02() {
+      try {
+         ClusterBlueprint blueprint = generateBlueprint();
+         blueprint.getNodeGroups().get(0).getRoles().add("ZOOKEEPER_SERVER");
+         blueprint.getNodeGroups().get(1).getRoles().add("ZOOKEEPER_SERVER");
+         blueprint.getNodeGroups().get(0).getRoles().add("HDFS_JOURNALNODE");
+         blueprint.getNodeGroups().get(1).getRoles().add("HDFS_JOURNALNODE");
+         blueprint.getNodeGroups().get(1).getRoles().add("YARN_RESOURCE_MANAGER");
+         CmClusterValidator validator = new CmClusterValidator();
+         Assert.assertFalse(validator.validateBlueprint(blueprint));
+      } catch (ValidationException e) {
+         System.out.println("warning_msg_list: " + e.getWarningMsgList());
+         System.out.println("error_msg_list: " + e.getFailedMsgList());
+      }
+   }
+
 
    private ClusterBlueprint generateBlueprint() {
       //return SerialUtils.getObjectByJsonString(ClusterBlueprint.class, CommonUtil.readJsonFile("simple_blueprint.json"));
@@ -177,6 +239,7 @@ public class TestCmClusterValidator {
       roles01.add("YARN_RESOURCE_MANAGER");
       roles01.add("YARN_JOB_HISTORY");
       group01.setRoles(roles01);
+      group01.setInstanceNum(1);
       Map<String, Object> configs = new HashMap<String, Object>();
 
       Map<String, String> nnConfig = new HashMap<String, String>();
@@ -212,6 +275,7 @@ public class TestCmClusterValidator {
       List<NodeInfo> nodes02 = new ArrayList<>();
       nodes02.add(node02);
       group02.setNodes(nodes02);
+      group02.setInstanceNum(3);
 
       groups.add(group01);
       groups.add(group02);

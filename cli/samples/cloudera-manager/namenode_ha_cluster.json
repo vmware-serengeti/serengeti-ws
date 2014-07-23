@@ -29,7 +29,7 @@
   {
     "name": "DataMaster",
     "roles": [
-      "HDFS_NAMENODE",
+      "HDFS_NAMENODE"
       ],
     "instanceNum": 2,
     "cpuNum": 2,
@@ -45,7 +45,7 @@
       "YARN_RESOURCE_MANAGER",
       "YARN_JOB_HISTORY"
       ],
-    "instanceNum": 2,
+    "instanceNum": 1,
     "cpuNum": 2,
     "memCapacityMB": 7500,
     "storage": {
