@@ -129,9 +129,9 @@ public class AppManagerCommands implements CommandMarker {
                            CommandsUtils.dataFromFile(sslCertificateFilePath);
                      break;
                   } catch (FileNotFoundException e) {
-                     System.out.println("Cannot find file " + sslCertificateFilePath);
+                     System.out.println("Cannot find file " + sslCertificateFilePath + ".");
                   } catch (IOException e) {
-                     System.out.println("Cannot read file " + sslCertificateFilePath);
+                     System.out.println("Cannot read file " + sslCertificateFilePath + ".");
                   }
                }
             } catch (IOException e) {
@@ -144,7 +144,7 @@ public class AppManagerCommands implements CommandMarker {
          } else {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
                   name, Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
-                  "failed to read ssl certificate file");
+                  "failed to read ssl certificate file.");
             return;
          }
       }
@@ -177,6 +177,7 @@ public class AppManagerCommands implements CommandMarker {
          @CliOption(key = { "configurations" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "List the configurations") final boolean configurations) {
       // parameters validation
       if (distros && !CommandsUtils.isBlank(distro)) {
+         // appmanager list --distros --distro <distro>
          CommandsUtils
                .printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER, name,
                      Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
@@ -185,6 +186,7 @@ public class AppManagerCommands implements CommandMarker {
       }
 
       if (CommandsUtils.isBlank(name) && !CommandsUtils.isBlank(distro)) {
+         // appmanager list --distro <distro>
          CommandsUtils
                .printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER, name,
                      Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
@@ -194,6 +196,9 @@ public class AppManagerCommands implements CommandMarker {
 
       if ((CommandsUtils.isBlank(name) || CommandsUtils.isBlank(distro))
             && (roles || configurations)) {
+         // appmanager list --roles
+         // appmanager list --configurations
+         // need to have both --name <name> and --distro <distro>
          CommandsUtils
                .printCmdFailure(
                      Constants.OUTPUT_OBJECT_APPMANAGER,
@@ -205,6 +210,7 @@ public class AppManagerCommands implements CommandMarker {
       }
 
       if (roles && configurations) {
+         // appmanager list --roles --configurations
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
                name, Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
                "Cannot use --roles and --configurations at the same time.");
@@ -215,23 +221,28 @@ public class AppManagerCommands implements CommandMarker {
       try {
          if (CommandsUtils.isBlank(name)) {
             if (distros) {
+               // appmanager list --distros
                AppManagerRead[] appmanagers = restClient.getAll();
                for (AppManagerRead appmanager : appmanagers) {
                   prettyOutputAppManagerDistros(appmanager);
                }
             } else {
+               // appmanager list
                AppManagerRead[] appmanagers = restClient.getAll();
                prettyOutputAppManagerInfo(appmanagers);
             }
          } else {
             if (distros) {
+               // appmanager list --name <name> --distros
                AppManagerRead appmanager = restClient.get(name);
                prettyOutputAppManagerDistros(appmanager);
             } else if (CommandsUtils.isBlank(distro)) {
+               // appmanager list --name <name>
                AppManagerRead appmanager = restClient.get(name);
                prettyOutputAppManagerInfo(appmanager);
             } else {
                if (roles) {
+                  // appmanager list --name <name> --distro <distro> --roles
                   String[] distroRoles = restClient.getRoles(name, distro);
                   if (null != distroRoles) {
                      for (String distroRole : distroRoles) {
@@ -239,8 +250,10 @@ public class AppManagerCommands implements CommandMarker {
                      }
                   }
                } else if (configurations) {
+                  // appmanager list --name <name> --distro <distro> --configurations
                   System.out.println(restClient.getConfigurations(name, distro));
                } else {
+                  // appmanager list --name <name> --distro <distro>
                   DistroRead distroRead = restClient.getDistroByName(name, distro);
                   prettyOutputAppManagerDistro(new DistroRead[]{distroRead});
                }

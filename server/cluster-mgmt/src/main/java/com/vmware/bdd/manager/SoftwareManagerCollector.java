@@ -267,11 +267,13 @@ public class SoftwareManagerCollector implements InitializingBean {
    }
 
    public List<AppManagerRead> getAllAppManagerReads() {
+      logger.debug("get all app managers");
       List<AppManagerRead> appManagerReads =
             appManagerService.getAllAppManagerReads();
       for (AppManagerRead appManagerRead : appManagerReads) {
          setAppManagerReadDynamicProperties(appManagerRead);
       }
+      logger.debug("got all app managers");
       return appManagerReads;
    }
 
