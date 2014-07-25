@@ -284,7 +284,7 @@ public class ClusterCommandsTest extends MockRestServer {
 
        ObjectMapper mapper = new ObjectMapper();
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Default/defaultdistro", HttpMethod.GET, HttpStatus.OK,
-             mapper.writeValueAsString(distros));
+             mapper.writeValueAsString(distros[0]));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
 
