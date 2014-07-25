@@ -32,6 +32,10 @@ public class ApiCluster {
    @SerializedName("services")
    private List<ApiService> apiServices;
 
+   @Expose
+   @SerializedName("hosts")
+   private List<ApiHost> apiHosts;
+
    public String getHref() {
       return href;
    }
@@ -54,5 +58,13 @@ public class ApiCluster {
 
    public void setApiServices(List<ApiService> apiServices) {
       this.apiServices = apiServices;
+   }
+
+   public List<ApiHost> getApiHosts() {
+      return apiHosts;
+   }
+
+   public void setApiHosts(List<ApiHost> apiHosts) {
+      this.apiHosts = apiHosts;
    }
 }

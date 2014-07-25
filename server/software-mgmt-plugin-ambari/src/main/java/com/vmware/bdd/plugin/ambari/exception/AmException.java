@@ -54,6 +54,11 @@ public class AmException extends SoftwareManagementPluginException {
             + blueprintName + " not sure exist", null);
    }
 
+   public static AmException BLUEPRINT_ALREADY_EXIST(String blueprintName) {
+      return new AmException("BLUEPRINT_ALREADY_EXIST", "blueprint "
+            + blueprintName + " already exist", null);
+   }
+
    public static AmException PROVISION_WITH_BLUEPRINT_FAILED(String message,
          Throwable cause) {
       return new AmException("PROVISION_WITH_BLUEPRINT_FAILED", message, cause);

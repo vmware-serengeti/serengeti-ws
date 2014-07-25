@@ -16,8 +16,11 @@ package com.vmware.bdd.plugin.ambari.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.NotFoundException;
 
@@ -30,6 +33,9 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapHostStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
+import com.vmware.bdd.plugin.ambari.api.model.ApiComponentInfo;
+import com.vmware.bdd.plugin.ambari.api.model.ApiHost;
+import com.vmware.bdd.plugin.ambari.api.model.ApiHostGroup;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiTask;
 import com.vmware.bdd.plugin.ambari.api.model.ApiTaskInfo;
@@ -246,11 +252,13 @@ public class AmbariImpl implements SoftwareManager {
 
             provisionWithBlueprint(clusterDef, reportQueue);
          } else {
-            /*
-            For cluster resume/resize, the cluster is already exist, we need to check if this cluster is created by BDE.
-            So far, just check if all IPs exist in Cloudera Cluster are included in given blueprint
-             */
-            // TODO
+            if (isClusterProvisionedByBDE(clusterDef)) {
+               bootstrap(clusterDef, reportQueue);
+
+               createBlueprint(clusterDef, reportQueue);
+
+               provisionWithBlueprint(clusterDef, reportQueue);
+            }
          }
 
       } catch (Exception e) {
@@ -259,6 +267,24 @@ public class AmbariImpl implements SoftwareManager {
          throw SoftwareManagementPluginException.CREATE_CLUSTER_FAILED(
                errorMessage, e);
       }
+   }
+
+   private boolean isClusterProvisionedByBDE(final AmClusterDef clusterDef) {
+      /*
+      For cluster resume/resize, the cluster is already exist, we need to check if this cluster is created by BDE.
+      So far, just check if all hostnames exist in Ambari Cluster are included in given blueprint
+       */
+      String clusterName = clusterDef.getName();
+      Set<String> hostnames = new HashSet<String>();
+      for (AmNodeDef node : clusterDef.getNodes()) {
+         hostnames.add(node.getFqdn());
+      }
+      for (ApiHost apiHost : apiManager.cluster(clusterName).getApiHosts()) {
+         if (!hostnames.contains(apiHost.getApiHostInfo().getHostName())) {
+            throw SoftwareManagementPluginException.CLUSTER_ALREADY_EXIST(clusterName, null);
+         }
+      }
+      return true;
    }
 
    private void bootstrap(final AmClusterDef clusterDef,
@@ -338,22 +364,30 @@ public class AmbariImpl implements SoftwareManager {
    private void createBlueprint(final AmClusterDef clusterDef,
          final ClusterReportQueue reportQueue)
          throws SoftwareManagementPluginException {
+      String clusterName = clusterDef.getName();
       try {
-         logger.info("Creating blueprint of cluster " + clusterDef.getName());
+         logger.info("Creating blueprint of cluster " + clusterName);
          clusterDef.getCurrentReport().setAction("Create blueprint");
          clusterDef.getCurrentReport().setProgress(
                ProgressSplit.CREATE_BLUEPRINT.getProgress());
          reportStatus(clusterDef.getCurrentReport(), reportQueue);
 
-         if (!isBlueprintcreated(clusterDef)) {
-            apiManager.createBlueprint(clusterDef.getName(),
-                  clusterDef.toApiBlueprint());
+         if (!isBlueprintCreated(clusterDef)) {
+            apiManager.createBlueprint(clusterName, clusterDef.toApiBlueprint());
          } else {
-            // TODO  consider cluster resume
+            if (isBlueprintCreatedByBDE(clusterDef)) {
+
+               // For cluster resume/resize, the blueprint is already exist, we need to delete this blueprint first.
+               if (isBlueprintCreatedByBDE(clusterDef)) {
+                  apiManager.deleteBlueprint(clusterName);
+               }
+
+               apiManager.createBlueprint(clusterName, clusterDef.toApiBlueprint());
+            }
          }
       } catch (Exception e) {
          clusterDef.getCurrentReport().setAction("Failed to create blueprint");
-         String errorMessage = errorMessage("Failed to create blueprint of cluster " + clusterDef.getName(), e);
+         String errorMessage = errorMessage("Failed to create blueprint of cluster " + clusterName, e);
          logger.error(errorMessage);
          throw AmException.CREATE_BLUEPRINT_FAILED(errorMessage, e);
       } finally {
@@ -361,7 +395,7 @@ public class AmbariImpl implements SoftwareManager {
       }
    }
 
-   private boolean isBlueprintcreated(final AmClusterDef clusterDef)
+   private boolean isBlueprintCreated(final AmClusterDef clusterDef)
          throws SoftwareManagementPluginException {
       try {
          for (ApiBlueprint apiBlueprint : apiManager.blueprintList()
@@ -377,6 +411,38 @@ public class AmbariImpl implements SoftwareManager {
       return false;
    }
 
+   private boolean isBlueprintCreatedByBDE(final AmClusterDef clusterDef)
+         throws SoftwareManagementPluginException {
+      /*
+      For cluster resume/resize, the blueprint is already exist, we need to check if this blueprint is created by BDE.
+      So far, just check if all goup names and components exist in Ambari Cluster are included in given blueprint
+       */
+      String clusterName = clusterDef.getName();
+      ApiBlueprint apiBlueprint = apiManager.getBlueprint(clusterName);
+
+      Map<String, Set> GroupNamesWithComponents = new HashMap<String, Set>();
+      for (AmNodeDef node : clusterDef.getNodes()) {
+         Set<String> components = new HashSet<String>();
+         GroupNamesWithComponents.put(node.getName(), components);
+      }
+
+      for (ApiHostGroup apiHostGroup : apiBlueprint.getApiHostGroups()) {
+         String groupName = apiHostGroup.getName();
+         if (!GroupNamesWithComponents.containsKey(groupName)) {
+            throw AmException.BLUEPRINT_ALREADY_EXIST(clusterName);
+         }
+         Set<String> components = GroupNamesWithComponents.get(groupName);
+         if (components != null && !components.isEmpty()) {
+            for (ApiComponentInfo apiComponent : apiHostGroup.getApiComponents()) {
+               if (!components.contains(apiComponent.getName())) {
+                  throw AmException.BLUEPRINT_ALREADY_EXIST(clusterName);
+               }
+            }
+         }
+      }
+      return true;
+   }
+
    private void provisionWithBlueprint(final AmClusterDef clusterDef,
          final ClusterReportQueue reportQueue)
          throws SoftwareManagementPluginException {
@@ -389,6 +455,13 @@ public class AmbariImpl implements SoftwareManager {
          reportStatus(clusterDef.getCurrentReport(), reportQueue);
 
          String clusterName = clusterDef.getName();
+
+         // For cluster resume/resize, the blueprint is already exist, we need to delete this cluster first.
+         if (isProvisioned(clusterName) && isClusterProvisionedByBDE(clusterDef)) {
+            apiManager.stopAllServicesInCluster(clusterName);
+            apiManager.deleteCluster(clusterName);
+         }
+
          ApiRequest apiRequestSummary =
                apiManager.provisionCluster(clusterDef.getName(),
                      clusterDef.toApiClusterBlueprint());

@@ -318,6 +318,15 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
+   public ApiBlueprint getBlueprint(String blueprintName) {
+      String blueprintJson = apiResourceRootV1.getBlueprintsResource().readBlueprint(blueprintName);
+      logger.debug("Response of blueprint from ambari server:");
+      logger.debug(blueprintJson);
+      ApiBlueprint apiBlueprint = ApiUtils.jsonToObject(ApiBlueprint.class, blueprintJson);
+      return apiBlueprint;
+   }
+
+   @Override
    public ApiBlueprint createBlueprint(String blueprintName,
          ApiBlueprint apiBlueprint) {
       logger.info("ApiBlueprint:");
@@ -330,6 +339,12 @@ public class ApiManager implements IApiManager {
       ApiBlueprint apiBlueprintResult =
             ApiUtils.jsonToObject(ApiBlueprint.class, blueprintJson);
       return apiBlueprintResult;
+   }
+
+   @Override
+   public void deleteBlueprint(String blueprintName) {
+      logger.info("Delete apiBlueprint " + blueprintName);
+      apiResourceRootV1.getBlueprintsResource().deleteBlueprint(blueprintName);
    }
 
    @Override
@@ -452,13 +467,13 @@ public class ApiManager implements IApiManager {
          for (ApiHost apiHost : apiHosts) {
             String state = apiHost.getApiHostInfo().getState();
             if (ApiHostStatus.HEALTHY.name().equalsIgnoreCase(state)) {
-               result.put(apiHost.getApiHostInfo().getHost_name(),
+               result.put(apiHost.getApiHostInfo().getHostName(),
                      ServiceStatus.STARTED);
             } else if (ApiHostStatus.UNHEALTHY.name().equalsIgnoreCase(state)) {
-               result.put(apiHost.getApiHostInfo().getHost_name(),
+               result.put(apiHost.getApiHostInfo().getHostName(),
                      ServiceStatus.UNHEALTHY);
             } else if (ApiHostStatus.ALERT.name().equalsIgnoreCase(state)) {
-               result.put(apiHost.getApiHostInfo().getHost_name(),
+               result.put(apiHost.getApiHostInfo().getHostName(),
                      ServiceStatus.ALERT);
             }
          }

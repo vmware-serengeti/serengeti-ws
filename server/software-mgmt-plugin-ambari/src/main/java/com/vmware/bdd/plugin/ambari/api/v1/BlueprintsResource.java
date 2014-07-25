@@ -15,6 +15,7 @@
 package com.vmware.bdd.plugin.ambari.api.v1;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -35,6 +36,10 @@ public interface BlueprintsResource {
    @GET
    @Path("/{blueprintName}")
    public String readBlueprint(@PathParam(BLUEPRINT_NAME) String blueprintName);
+
+   @DELETE
+   @Path("/{blueprintName}")
+   public String deleteBlueprint(@PathParam(BLUEPRINT_NAME) String blueprintName);
 
    @POST
    @Path("/{blueprintName}")

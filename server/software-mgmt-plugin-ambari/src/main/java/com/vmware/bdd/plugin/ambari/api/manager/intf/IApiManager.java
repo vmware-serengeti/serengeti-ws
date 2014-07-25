@@ -82,6 +82,10 @@ public interface IApiManager {
 
    public ApiBlueprintList blueprintList();
 
+   public ApiBlueprint getBlueprint(String blueprintName);
+
+   public void deleteBlueprint(String blueprintName);
+
    public ApiRequestList requestList(String clusterName);
 
    public ApiRequest request(String clusterName, Long requestId);

@@ -25,7 +25,7 @@ public class ApiHostInfo {
 
    @Expose
    @SerializedName("host_name")
-   private String host_name;
+   private String hostName;
 
    @Expose
    @SerializedName("host_status")
@@ -39,12 +39,12 @@ public class ApiHostInfo {
       this.clusterName = clusterName;
    }
 
-   public String getHost_name() {
-      return host_name;
+   public String getHostName() {
+      return hostName;
    }
 
-   public void setHost_name(String host_name) {
-      this.host_name = host_name;
+   public void setHostName(String hostName) {
+      this.hostName = hostName;
    }
 
    public String getState() {
