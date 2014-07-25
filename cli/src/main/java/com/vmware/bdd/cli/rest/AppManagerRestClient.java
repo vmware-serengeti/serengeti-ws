@@ -120,4 +120,18 @@ public class AppManagerRestClient {
       return restClient.getObject(distroName, DistroRead.class, path, httpverb,
             false);
    }
+
+   public void modify(AppManagerAdd appManagerAdd) {
+      final String path = Constants.REST_PATH_APPMANAGERS;
+      final HttpMethod httpverb = HttpMethod.PUT;
+      restClient.update(appManagerAdd, path, httpverb);
+   }
+
+   public void delete(String id) {
+      id = CommonUtil.encode(id);
+      final String path = Constants.REST_PATH_APPMANAGER;
+      final HttpMethod httpverb = HttpMethod.DELETE;
+
+      restClient.deleteObject(id, path, httpverb);
+   }
 }

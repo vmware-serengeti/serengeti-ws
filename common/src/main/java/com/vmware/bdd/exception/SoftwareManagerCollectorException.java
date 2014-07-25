@@ -15,6 +15,8 @@
 
 package com.vmware.bdd.exception;
 
+import java.util.List;
+
 public class SoftwareManagerCollectorException extends BddException {
    private static final long serialVersionUID = 1l;
 
@@ -73,4 +75,25 @@ public class SoftwareManagerCollectorException extends BddException {
       return new SoftwareManagerCollectorException(ex, "PRIVATE_KEY_READ_ERROR",
             privateKeyFilePath);
    }
+
+   public static SoftwareManagerCollectorException CAN_NOT_DELETE(
+         String appManagerName, List<String> clusters) {
+      return new SoftwareManagerCollectorException(null, "CAN_NOT_DELETE",
+            appManagerName, clusters);
+   }
+
+   public static SoftwareManagerCollectorException APPMANAGER_NOT_FOUND(
+         String appManagerName) {
+      return new SoftwareManagerCollectorException(null, "APPMANAGER_NOT_FOUND",
+            appManagerName);
+   }
+
+   public static SoftwareManagerCollectorException CAN_NOT_DELETE_DEFAULT() {
+      return new SoftwareManagerCollectorException(null, "CAN_NOT_DELETE_DEFAULT");
+   }
+
+   public static SoftwareManagerCollectorException CAN_NOT_MODIFY_DEFAULT() {
+      return new SoftwareManagerCollectorException(null, "CAN_NOT_MODIFY_DEFAULT");
+   }
+
 }

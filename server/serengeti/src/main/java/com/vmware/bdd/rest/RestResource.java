@@ -830,6 +830,38 @@ public class RestResource {
    }
 
    /**
+    * Modify an app manager
+    * @param appManagerAdd
+    * @param request
+    * @param response
+    */
+   @RequestMapping(value = "/appmanagers", method = RequestMethod.PUT, consumes = "application/json")
+   @ResponseStatus(HttpStatus.OK)
+   public void modifyAppManager(@RequestBody AppManagerAdd appManagerAdd,
+         HttpServletRequest request,
+         HttpServletResponse response) {
+      if (appManagerAdd == null) {
+         throw BddException.INVALID_PARAMETER("appManagerAdd", null);
+      }
+      softwareManagerCollector.modifySoftwareManager(appManagerAdd);
+   }
+
+   /**
+    * Delete an app manager
+    * @param appManagerName
+    */
+   @RequestMapping(value = "/appmanager/{appManagerName}", method = RequestMethod.DELETE)
+   @ResponseStatus(HttpStatus.OK)
+   public void deleteAppManager(@PathVariable("appManagerName") String appManagerName) {
+      appManagerName = CommonUtil.decode(appManagerName);
+      if (CommonUtil.isBlank(appManagerName)
+            || !CommonUtil.validateResourceName(appManagerName)) {
+         throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
+      }
+      softwareManagerCollector.deleteSoftwareManager(appManagerName);
+   }
+
+   /**
     * Get a BDE appmanager information
     * @param appManagerName
     * @return The BDE appmanager information

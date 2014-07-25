@@ -27,7 +27,9 @@ import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.dal.IAppManagerDAO;
+import com.vmware.bdd.dal.IClusterDAO;
 import com.vmware.bdd.entity.AppManagerEntity;
+import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.service.resmgmt.IAppManagerService;
 
 
@@ -43,18 +45,7 @@ public class AppManagerService implements IAppManagerService{
 
    private IAppManagerDAO appManagerDAO;
 
-   @Override
-   public synchronized void addAppManager(AppManagerAdd appManagerAdd) {
-      logger.info((new Gson()).toJson(appManagerAdd));
-      // TODO: validation
-      AppManagerEntity appManagerEntity = new AppManagerEntity(appManagerAdd);
-      appManagerDAO.insert(appManagerEntity);
-   }
-
-   @Override
-   public AppManagerEntity findAppManagerByName(String name) {
-      return appManagerDAO.findByName(name);
-   }
+   private IClusterDAO clusterDAO;
 
    public IAppManagerDAO getAppManagerDAO() {
       return appManagerDAO;
@@ -63,6 +54,30 @@ public class AppManagerService implements IAppManagerService{
    @Autowired
    public void setAppManagerDAO(IAppManagerDAO appManagerDAO) {
       this.appManagerDAO = appManagerDAO;
+   }
+
+   public IClusterDAO getClusterDao() {
+      return clusterDAO;
+   }
+
+   @Autowired
+   public void setClusterDao(IClusterDAO clusterDao) {
+      this.clusterDAO = clusterDao;
+   }
+
+   @Override
+   @Transactional
+   public synchronized void addAppManager(AppManagerAdd appManagerAdd) {
+      logger.info((new Gson()).toJson(appManagerAdd));
+      // TODO: validation
+      AppManagerEntity appManagerEntity = new AppManagerEntity(appManagerAdd);
+      appManagerDAO.insert(appManagerEntity);
+   }
+
+   @Override
+   @Transactional(readOnly = true)
+   public AppManagerEntity findAppManagerByName(String name) {
+      return appManagerDAO.findByName(name);
    }
 
    /* (non-Javadoc)
@@ -114,7 +129,54 @@ public class AppManagerService implements IAppManagerService{
     * @see com.vmware.bdd.service.resmgmt.IAppManagerService#findAll()
     */
    @Override
+   @Transactional(readOnly = true)
    public List<AppManagerEntity> findAll() {
       return appManagerDAO.findAll();
+   }
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.service.resmgmt.IAppManagerService#deleteAppManager(java.lang.String)
+    */
+   @Override
+   @Transactional
+   public void deleteAppManager(String name) {
+      logger.debug("delete app manager " + name);
+      AppManagerEntity entity = appManagerDAO.findByName(name);
+      if (entity == null) {
+         logger.error("Cannot find app manager " + name);
+         throw SoftwareManagerCollectorException.APPMANAGER_NOT_FOUND(name);
+      }
+
+      List<String> clusterNames =
+            getClusterDao().findClustersByAppManager(name);
+      if (null != clusterNames && !clusterNames.isEmpty()) {
+         logger.error("Cannot delete app manager " + name
+               + " because it is used by the following clusters "
+               + clusterNames + ".");
+         throw SoftwareManagerCollectorException.CAN_NOT_DELETE(name,
+               clusterNames);
+      }
+
+      appManagerDAO.delete(entity);
+      logger.debug("successfully deleted app manager " + name);
+
+   }
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.service.resmgmt.IAppManagerService#modifyAppManager(com.vmware.bdd.apitypes.AppManagerAdd)
+    */
+   @Override
+   public void modifyAppManager(AppManagerAdd appManagerAdd) {
+      logger.debug("modify app manager " + appManagerAdd);
+      String name = appManagerAdd.getName();
+      AppManagerEntity entity = appManagerDAO.findByName(name);
+      entity.setDescription(appManagerAdd.getDescription());
+      entity.setType(appManagerAdd.getType());
+      entity.setUrl(appManagerAdd.getUrl());
+      entity.setUsername(appManagerAdd.getUsername());
+      entity.setPassword(appManagerAdd.getPassword());
+      entity.setSslCertificate(appManagerAdd.getSslCertificate());
+      appManagerDAO.update(entity);
+      logger.debug("successfully modified app manager " + appManagerAdd);
    }
 }

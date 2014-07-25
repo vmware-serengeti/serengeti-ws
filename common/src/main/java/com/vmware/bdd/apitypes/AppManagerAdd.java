@@ -15,7 +15,6 @@
 
 package com.vmware.bdd.apitypes;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 
 /**
@@ -102,7 +101,13 @@ public class AppManagerAdd {
       this.sslCertificate = sslCertificate;
    }
 
+   /* (non-Javadoc)
+    * @see java.lang.Object#toString()
+    */
+   @Override
    public String toString() {
-      return (new Gson()).toJson(this);
+      return "AppManagerAdd [name=" + name + ", description=" + description
+            + ", type=" + type + ", url=" + url + ", username=" + username
+            + ", sslCertificate=" + sslCertificate + "]";
    }
 }

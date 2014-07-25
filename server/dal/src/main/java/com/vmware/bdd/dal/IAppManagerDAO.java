@@ -9,7 +9,7 @@ import com.vmware.bdd.entity.AppManagerEntity;
  * Date: 6/4/14
  * Time: 2:53 PM
  */
-public interface IAppManagerDAO {
+public interface IAppManagerDAO extends IBaseDAO<AppManagerEntity> {
 
    List<AppManagerEntity> findAll();
 

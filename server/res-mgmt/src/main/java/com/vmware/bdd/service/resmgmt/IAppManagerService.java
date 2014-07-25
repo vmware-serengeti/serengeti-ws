@@ -37,4 +37,8 @@ public interface IAppManagerService {
    public AppManagerRead getAppManagerRead(String name);
 
    public List<AppManagerRead> getAllAppManagerReads();
+
+   public void deleteAppManager(String name);
+
+   public void modifyAppManager(AppManagerAdd appManagerAdd);
 }

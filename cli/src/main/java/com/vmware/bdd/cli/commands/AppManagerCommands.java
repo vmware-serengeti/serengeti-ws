@@ -55,7 +55,7 @@ public class AppManagerCommands implements CommandMarker {
       return true;
    }
 
-   /*@CliCommand(value = "appmanager types", help = "List all App Manager types")
+   /*@CliCommand(value = "appmanager types", help = "List all app manager types")
    public void getAppManagerTypes() {
       try {
          String[] types = restClient.getTypes();
@@ -69,7 +69,7 @@ public class AppManagerCommands implements CommandMarker {
       }
    }*/
 
-   @CliCommand(value = "appmanager add", help = "Add an App Manager instance")
+   @CliCommand(value = "appmanager add", help = "Add an app manager instance")
    public void addAppManager(
          @CliOption(key = { "name" }, mandatory = true, help = "The instance name") final String name,
          @CliOption(key = { "description" }, mandatory = false, help = "The instance description") final String description,
@@ -168,7 +168,7 @@ public class AppManagerCommands implements CommandMarker {
     * @param name
     *           The appmanager name
     */
-   @CliCommand(value = "appmanager list", help = "Display App Manager list.")
+   @CliCommand(value = "appmanager list", help = "Display app manager list.")
    public void listAppManager(
          @CliOption(key = { "name" }, mandatory = false, help = "The appmanager name") final String name,
          @CliOption(key = { "distros" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "List the supported distros") final boolean distros,
@@ -361,5 +361,48 @@ public class AppManagerCommands implements CommandMarker {
    private void prettyOutputAppManagerInfo(AppManagerRead appmanager) {
       if (appmanager != null)
          prettyOutputAppManagerInfo(new AppManagerRead[] { appmanager });
+   }
+
+   @CliCommand(value = "appmanager modify", help = "Modify an app manager instance")
+   public void modifyAppManager(
+         @CliOption(key = { "name" }, mandatory = true, help = "The instance name") final String name,
+         @CliOption(key = { "description" }, mandatory = false, help = "The instance description") final String description,
+         @CliOption(key = { "type" }, mandatory = true, help = "The provider type, ClouderaManager or Ambari") final String type,
+         @CliOption(key = { "url" }, mandatory = true, help = "The instance URL, e.g. http://hostname:port") final String url,
+         @CliOption(key = { "username" }, mandatory = true, help = "The login user name") final String username,
+         @CliOption(key = { "password" }, mandatory = true, help = "The login password") final String password) {
+      //TODO follow the spec
+      AppManagerAdd appManagerAdd = new AppManagerAdd();
+      appManagerAdd.setName(name);
+      appManagerAdd.setDescription(description);
+      appManagerAdd.setType(type);
+      appManagerAdd.setUrl(url);
+      appManagerAdd.setUsername(username);
+      appManagerAdd.setPassword(password);
+
+      try {
+         restClient.modify(appManagerAdd);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_APPMANAGER,
+               name, Constants.OUTPUT_OP_RESULT_MODIFY);
+      } catch (Exception e) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
+               name, Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL,
+               e.getMessage());
+      }
+
+   }
+
+   @CliCommand(value = "appmanager delete", help = "Delete an app manager instance")
+   public void deleteAppManager(
+         @CliOption(key = { "name" }, mandatory = true, help = "The app manager name") final String name) {
+      try {
+         restClient.delete(name);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_APPMANAGER, name,
+               Constants.OUTPUT_OP_RESULT_DELETE);
+      } catch (CliRestException e) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER, name,
+               Constants.OUTPUT_OP_DELETE, Constants.OUTPUT_OP_RESULT_FAIL,
+               e.getMessage());
+      }
    }
 }

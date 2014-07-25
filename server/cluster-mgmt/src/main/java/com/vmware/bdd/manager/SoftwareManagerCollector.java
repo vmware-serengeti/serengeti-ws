@@ -315,4 +315,45 @@ public class SoftwareManagerCollector implements InitializingBean {
    public void afterPropertiesSet() throws Exception {
       this.loadSoftwareManagers();
    }
+
+   public void deleteSoftwareManager(String appManagerName) {
+      logger.debug("delete app manager " + appManagerName);
+      if (Constants.IRONFAN.equals(appManagerName)) {
+         logger.error("Cannot delete default software manager.");
+         throw SoftwareManagerCollectorException.CAN_NOT_DELETE_DEFAULT();
+      }
+      appManagerService.deleteAppManager(appManagerName);
+      logger.debug("successfully deleted app manager " + appManagerName);
+      cache.remove(appManagerName);
+      logger.debug("app manager " + appManagerName + " removed from cache");
+   }
+
+   public void modifySoftwareManager(AppManagerAdd appManagerAdd) {
+      logger.debug("modify app manager " + appManagerAdd);
+      String name = appManagerAdd.getName();
+      if (Constants.IRONFAN.equals(name)) {
+         logger.error("Cannot delete default software manager.");
+         throw SoftwareManagerCollectorException.CAN_NOT_MODIFY_DEFAULT();
+      }
+      AppManagerEntity appManager = appManagerService.findAppManagerByName(name);
+      if (null == appManager) {
+         logger.error("Cannot find app manager " + name);
+         throw SoftwareManagerCollectorException.APPMANAGER_NOT_FOUND(name);
+      }
+
+      logger.info("Load software manager using new properties " + appManagerAdd);
+      SoftwareManager softwareManager = loadSoftwareManager(appManagerAdd);
+
+      logger.info("Validate the new software manager");
+      validateSoftwareManager(name, softwareManager);
+
+      logger.info("Modify meta db");
+      appManagerService.modifyAppManager(appManagerAdd);
+      logger.info("Remove old software manager instance from cache");
+      cache.remove(name);
+      logger.info("Add new software manager instance into cache");
+      cache.put(name, softwareManager);
+
+      logger.debug("successfully modified app manager " + appManagerAdd);
+   }
 }
