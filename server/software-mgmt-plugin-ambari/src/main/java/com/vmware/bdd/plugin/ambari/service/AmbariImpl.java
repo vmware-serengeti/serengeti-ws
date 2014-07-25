@@ -202,6 +202,12 @@ public class AmbariImpl implements SoftwareManager {
          clusterDef = new AmClusterDef(blueprint, privateKey);
          provisionCluster(clusterDef, reportQueue);
          success = true;
+
+         // All nodes use cluster message after cluster provision successfully.
+         Map<String, NodeReport> nodeReports = clusterDef.getCurrentReport().getNodeReports();
+         for (String nodeReportKey : nodeReports.keySet()) {
+            nodeReports.get(nodeReportKey).setUseClusterMsg(true);
+         }
          clusterDef.getCurrentReport().setAction("Successfully create cluster");
          clusterDef.getCurrentReport().setProgress(
                ProgressSplit.PROVISION_SUCCESS.getProgress());
@@ -458,7 +464,12 @@ public class AmbariImpl implements SoftwareManager {
 
          // For cluster resume/resize, the blueprint is already exist, we need to delete this cluster first.
          if (isProvisioned(clusterName) && isClusterProvisionedByBDE(clusterDef)) {
-            apiManager.stopAllServicesInCluster(clusterName);
+            ApiRequest apiRequestSummary = apiManager.stopAllServicesInCluster(clusterName);
+            boolean success = doSoftwareOperation(clusterName, apiRequestSummary, clusterDef.getCurrentReport(), reportQueue);
+            if (!success) {
+               logger.error("Failed to stop all services in cluster");
+               throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(clusterName, null);
+            }
             apiManager.deleteCluster(clusterName);
          }
 
