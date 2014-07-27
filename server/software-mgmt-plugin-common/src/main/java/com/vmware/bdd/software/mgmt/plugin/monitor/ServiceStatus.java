@@ -25,6 +25,7 @@ public enum ServiceStatus {
    UNHEALTHY ("Unhealthy"), // unhealthy is better than alert, as the service is still usable
    ALERT ( "Alert" ),
    STOPPED ("Stopped"),
+   PROVISIONING( "Provisioning" ),
    UNKONWN ("Unknown");
 
    private String description;

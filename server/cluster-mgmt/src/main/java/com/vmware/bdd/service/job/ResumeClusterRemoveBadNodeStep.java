@@ -23,9 +23,11 @@ import java.util.Set;
 
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.manager.ClusterConfigManager;
+import com.vmware.bdd.manager.SoftwareManagerCollector;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.utils.JobUtils;
@@ -33,6 +35,12 @@ import com.vmware.bdd.utils.JobUtils;
 public class ResumeClusterRemoveBadNodeStep extends TrackableTasklet {
    private IClusteringService clusteringService;
    private ClusterConfigManager configMgr;
+   private SoftwareManagerCollector softwareMgrs;
+
+   @Autowired
+   public void setSoftwareMgrs(SoftwareManagerCollector softwareMgrs) {
+      this.softwareMgrs = softwareMgrs;
+   }
 
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,
@@ -46,6 +54,9 @@ public class ResumeClusterRemoveBadNodeStep extends TrackableTasklet {
       // portgroupName -> Set<ipAddress>
       Map<String, Set<String>> occupiedIpSets = new HashMap<String, Set<String>>();
       JobUtils.separateVcUnreachableNodes(existingNodes, deletedNodes, occupiedIpSets);
+      ResizeClusterRemoveBadNodeStep.deleteServices(getClusterEntityMgr(),
+            softwareMgrs.getSoftwareManagerByClusterName(clusterName),
+            deletedNodes);
 
       boolean deleted = clusteringService.removeBadNodes(clusterSpec, existingNodes, deletedNodes, occupiedIpSets, statusUpdator);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, existingNodes);

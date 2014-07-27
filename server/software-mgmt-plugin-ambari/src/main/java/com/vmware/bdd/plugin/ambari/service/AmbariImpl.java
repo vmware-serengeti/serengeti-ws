@@ -688,6 +688,12 @@ public class AmbariImpl implements SoftwareManager {
    }
 
    @Override
+   public boolean onDeleteNodes(ClusterBlueprint blueprint, List<String> nodeNames) throws SoftwareManagementPluginException {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
    public boolean decomissionNodes(String clusterName, List<NodeInfo> nodes,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub

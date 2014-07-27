@@ -65,6 +65,7 @@ import com.cloudera.api.model.ApiRole;
 import com.cloudera.api.model.ApiRoleConfigGroup;
 import com.cloudera.api.model.ApiRoleList;
 import com.cloudera.api.model.ApiRoleNameList;
+import com.cloudera.api.model.ApiRoleRef;
 import com.cloudera.api.model.ApiRoleState;
 import com.cloudera.api.model.ApiService;
 import com.cloudera.api.model.ApiServiceConfig;
@@ -297,6 +298,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          success = true;
          clusterDef.getCurrentReport().setProgress(100);
          clusterDef.getCurrentReport().setAction("");
+         clusterDef.getCurrentReport().setClusterAndNodesServiceStatus(ServiceStatus.STARTED);
       } catch (SoftwareManagementPluginException ex) {
          if (ex instanceof ClouderaManagerException 
                && ((ClouderaManagerException)ex).getRefHostId() != null) {
@@ -468,6 +470,36 @@ public class ClouderaManagerImpl implements SoftwareManager {
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // just stop this cluster
       return onStopCluster(clusterBlueprint, reports);
+   }
+
+   @Override
+   public boolean onDeleteNodes(ClusterBlueprint blueprint, List<String> nodeNames) throws SoftwareManagementPluginException {
+      CmClusterDef clusterDef = null;
+      try {
+         clusterDef = new CmClusterDef(blueprint);
+         syncHostsId(clusterDef);
+         List<ApiHost> hosts = new ArrayList<>();
+         for (CmNodeDef nodeDef : clusterDef.getNodes()) {
+            if (nodeNames.contains(nodeDef.getName())
+                  && !nodeDef.getName().equals(nodeDef.getNodeId())) {
+               try {
+                  ApiHost host = apiResourceRootV6.getHostsResource().readHost(nodeDef.getNodeId());
+                  if (host != null) {
+                     hosts.add(host);
+                  }
+               } catch (NotFoundException e) {
+                  logger.debug("Host " + nodeDef.getNodeId() + " is not found from Cloudera Manager.");
+                  continue;
+               }
+            }
+         }
+         removeHosts(clusterDef, hosts);
+         clusterDef.getCurrentReport().setProgress(100);
+         clusterDef.getCurrentReport().setAction("");
+      } catch (Exception e) {
+         logger.error("Failed to remove hosts " + nodeNames, e);
+      }
+      return true;
    }
 
    @Override
@@ -1072,9 +1104,12 @@ public class ClouderaManagerImpl implements SoftwareManager {
             .readServices(DataView.SUMMARY)) {
          for (ApiRole apiRole : apiResourceRootV6.getClustersResource().getServicesResource(clusterDef.getName())
                .getRolesResource(apiService.getName()).readRoles()) {
-            for (CmRoleDef roleDef : nodeRefToRoles.get(apiRole.getHostRef().getHostId())) {
-               if (apiRole.getType().equalsIgnoreCase(roleDef.getType().getName())) {
-                  roleDef.setName(apiRole.getName());
+            List<CmRoleDef> roleDefs = nodeRefToRoles.get(apiRole.getHostRef().getHostId());
+            if (roleDefs != null) {
+               for (CmRoleDef roleDef : roleDefs) {
+                  if (apiRole.getType().equalsIgnoreCase(roleDef.getType().getName())) {
+                     roleDef.setName(apiRole.getName());
+                  }
                }
             }
          }
@@ -1116,23 +1151,25 @@ public class ClouderaManagerImpl implements SoftwareManager {
          for (CmNodeDef node : cluster.getNodes()) {
             ips.add(node.getIpAddress());
          }
+         List<ApiHost> hosts = new ArrayList<>();
          for (ApiHostRef hostRef : apiResourceRootV6.getClustersResource().listHosts(cluster.getName())) {
             ApiHost host = apiResourceRootV6.getHostsResource().readHost(hostRef.getHostId());
             if (!ips.contains(host.getIpAddress())) {
                if (host.getHealthSummary().equals(ApiHealthSummary.BAD) ||
                      host.getHealthSummary().equals(ApiHealthSummary.NOT_AVAILABLE)) {
-                  logger.info("Host " + host.getHostname() + " is removed for it's not in cluster " + cluster.getName()
+                  hosts.add(host);
+                  logger.info("Host " + host.getHostname() + " should be removed for it's not in cluster " + cluster.getName()
                         + " and in " + host.getHealthSummary() + " status");
-                  try {
-                     apiResourceRootV6.getClustersResource().removeHost(cluster.getName(), hostRef.getHostId());
-                     apiResourceRootV6.getHostsResource().deleteHost(hostRef.getHostId());
-                  } catch (Exception e) {
-                     logger.error("Failed to remove bad host " + host.getHostname(), e);
-                  }
                   continue;
                }
                throw SoftwareManagementPluginException.CLUSTER_ALREADY_EXIST(cluster.getName(), null);
             }
+         }
+
+         try {
+            removeHosts(cluster, hosts);
+         } catch (Exception e) {
+            logger.error("Failed to remove bad hosts " + hosts, e);
          }
       }
 
@@ -1164,6 +1201,21 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
          // Add hosts to this cluster
          apiResourceRootV6.getClustersResource().addHosts(cluster.getName(), new ApiHostRefList(new ArrayList<ApiHostRef>(toAddHosts)));
+      }
+   }
+
+   private void removeHosts(final CmClusterDef cluster, List<ApiHost> hosts) throws Exception {
+      for (ApiHost apiHost : hosts) {
+         List<ApiRoleRef> apiRoles = apiHost.getRoleRefs();
+         for (ApiRoleRef apiRoleRef : apiRoles) {
+            logger.debug("Start to remove role " + apiRoleRef.getRoleName() + " from host " + apiHost.getHostname());
+            apiResourceRootV6.getClustersResource()
+                  .getServicesResource(apiRoleRef.getClusterName())
+                  .getRolesResource(apiRoleRef.getServiceName())
+                  .deleteRole(apiRoleRef.getRoleName());
+         }
+         logger.debug("Start to remove host " + apiHost.getHostId());
+         apiResourceRootV6.getHostsResource().deleteHost(apiHost.getHostId());
       }
    }
 
@@ -1946,8 +1998,10 @@ public class ClouderaManagerImpl implements SoftwareManager {
          logger.info("Action: " + action);
          if (nodeNames != null) {
             currentReport.setNodesAction(action, nodeNames);
+            currentReport.setNodesStatus(ServiceStatus.PROVISIONING, nodeNames);
          } else {
             currentReport.setClusterAndNodesAction(action);
+            currentReport.setClusterAndNodesServiceStatus(ServiceStatus.PROVISIONING);
          }
          reportQueue.addClusterReport(currentReport.clone());
       }
@@ -1960,7 +2014,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
          logger.info("Failed to run command: " + command);
          String errorMsg = getSummaryErrorMsg(command, domain);
          logger.error(errorMsg);
-         throw ClouderaManagerException.COMMAND_EXECUTION_FAILED(commandReturn.getHostRef().getHostId(), errorMsg);
+         String hostId = (commandReturn.getHostRef() == null) ? null : commandReturn.getHostRef().getHostId();
+         throw ClouderaManagerException.COMMAND_EXECUTION_FAILED(hostId, errorMsg);
       }
 
       if (endProgress != INVALID_PROGRESS) {

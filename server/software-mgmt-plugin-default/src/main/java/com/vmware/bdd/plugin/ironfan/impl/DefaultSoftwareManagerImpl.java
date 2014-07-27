@@ -192,6 +192,12 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    }
 
    @Override
+   public boolean onDeleteNodes(ClusterBlueprint blueprint, List<String> nodeNames) throws SoftwareManagementPluginException {
+      // do nothing
+      return true;
+   }
+
+   @Override
    public boolean decomissionNodes(String clusterName, List<NodeInfo> nodes,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub

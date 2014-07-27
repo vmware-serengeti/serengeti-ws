@@ -184,6 +184,15 @@ public interface SoftwareManager {
    boolean onDeleteCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException;
 
+   /**
+    * This method will be invoked before BDE delete VMs
+    * @param blueprint
+    * @param nodeNames
+    * @return
+    * @throws SoftwareManagementPluginException
+    */
+   boolean onDeleteNodes(ClusterBlueprint blueprint, List<String> nodeNames) throws SoftwareManagementPluginException;
+
    // Node level command is prepared for rolling update, e.g. disk fix, scale up cpu/memory/storage
    /**
     * Sync call Plugin should update ClusterOperationReports to notify operation

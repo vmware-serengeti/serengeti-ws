@@ -20,24 +20,36 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.vmware.bdd.utils.Constants;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.manager.ClusterConfigManager;
+import com.vmware.bdd.manager.SoftwareManagerCollector;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IClusteringService;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.VcVmUtil;
 
 public class ResizeClusterRemoveBadNodeStep extends TrackableTasklet {
    private IClusteringService clusteringService;
    private ClusterConfigManager configMgr;
+   private SoftwareManagerCollector softwareMgrs;
+
+   @Autowired
+   public void setSoftwareMgrs(SoftwareManagerCollector softwareMgrs) {
+      this.softwareMgrs = softwareMgrs;
+   }
 
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,
@@ -66,7 +78,9 @@ public class ResizeClusterRemoveBadNodeStep extends TrackableTasklet {
             groupName, oldInstanceNum, clusterSpec);
       StatusUpdater statusUpdator = new DefaultStatusUpdater(
             jobExecutionStatusHolder, getJobExecutionId(chunkContext));
-
+      deleteServices(getClusterEntityMgr(),
+            softwareMgrs.getSoftwareManagerByClusterName(clusterName),
+            deletedNodes);
       boolean deleted = clusteringService.syncDeleteVMs(deletedNodes, 
             statusUpdator, false);
       putIntoJobExecutionContext(chunkContext, 
@@ -152,5 +166,29 @@ public class ResizeClusterRemoveBadNodeStep extends TrackableTasklet {
 
    public void setConfigMgr(ClusterConfigManager configMgr) {
       this.configMgr = configMgr;
+   }
+
+
+   public static void deleteServices(IClusterEntityManager clusterEntityMgr, 
+         SoftwareManager softMgr, List<BaseNode> toBeDeleted) {
+      if (toBeDeleted.isEmpty()) {
+         return;
+      }
+
+      ClusterBlueprint blueprint =
+            clusterEntityMgr.toClusterBluePrint(toBeDeleted.get(0)
+                  .getClusterName());
+      ClusterReportQueue queue = new ClusterReportQueue();
+      List<String> nodeNames = new ArrayList<>();
+      for (BaseNode node : toBeDeleted) {
+         if (node.getVmMobId() != null) {
+            nodeNames.add(node.getVmName());
+         }
+      }
+      try {
+         softMgr.onDeleteNodes(blueprint, nodeNames);
+      } catch (Exception e) {
+         logger.error("Failed to delete services on bad nodes: " + nodeNames);
+      }
    }
 }

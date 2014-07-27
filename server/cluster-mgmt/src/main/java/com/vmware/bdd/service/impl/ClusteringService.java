@@ -114,6 +114,8 @@ import com.vmware.bdd.service.sp.StopVmSP;
 import com.vmware.bdd.service.sp.UpdateVmProgressCallback;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.HadoopRole;
@@ -1859,7 +1861,6 @@ public class ClusteringService implements IClusteringService {
          storeProcedures.add(deleteSp);
          toBeDeleted.add(node);
       }
-
       try {
          if (storeProcedures.isEmpty()) {
             logger.info("no VM is created. Return directly.");

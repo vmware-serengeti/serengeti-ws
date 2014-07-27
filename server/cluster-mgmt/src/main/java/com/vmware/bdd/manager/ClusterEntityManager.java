@@ -421,6 +421,9 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
                   case UNKONWN:
                      node.setStatus(NodeStatus.UNKNOWN, false);
                      break;
+                  case PROVISIONING:
+                     node.setStatus(NodeStatus.VM_READY, false);
+                     break;
                   default:
                      node.setStatus(NodeStatus.BOOTSTRAP_FAILED, false);
                   }
