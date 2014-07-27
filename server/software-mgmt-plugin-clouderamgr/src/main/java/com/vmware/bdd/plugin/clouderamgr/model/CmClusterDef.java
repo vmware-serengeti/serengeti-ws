@@ -352,10 +352,7 @@ public class CmClusterDef implements Serializable {
 
    public Map<String, List<CmRoleDef>> ipToRoles() {
 
-      Map<String, CmNodeDef> idToNodeMap = new HashMap<String, CmNodeDef>();
-      for(CmNodeDef node : nodes) {
-         idToNodeMap.put(node.getNodeId(), node);
-      }
+      Map<String, CmNodeDef> idToNodeMap = idToHosts();
 
       Map<String, List<CmRoleDef>> ipToRolesMap = new HashMap<String, List<CmRoleDef>>();
       for (CmServiceDef service : services) {
@@ -369,6 +366,22 @@ public class CmClusterDef implements Serializable {
       }
 
       return ipToRolesMap;
+   }
+
+   public Map<String, CmNodeDef> idToHosts() {
+      Map<String, CmNodeDef> idToNodeMap = new HashMap<String, CmNodeDef>();
+      for(CmNodeDef node : nodes) {
+         idToNodeMap.put(node.getNodeId(), node);
+      }
+      return idToNodeMap;
+   }
+
+   public Map<String, String> hostIdToName() {
+      Map<String, String> idToNodeMap = new HashMap<String, String>();
+      for(CmNodeDef node : nodes) {
+         idToNodeMap.put(node.getNodeId(), node.getName());
+      }
+      return idToNodeMap;
    }
 
    public Map<String, List<CmRoleDef>> nodeRefToRoles() {

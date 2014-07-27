@@ -176,12 +176,14 @@ public class VcVmUtil {
        * to do enough validation to avoid Null Point Exception
        */
       if (nicInfos == null || nicInfos.length == 0) {
+         logger.info("Return null ipv4 address");
          return ipaddress;
       }
 
       for (NicInfo nicInfo : nicInfos) {
          if (nicInfo.getNetwork() == null
                || !nicInfo.getNetwork().equals(portGroup)) {
+            logger.info("Nic Network is " + nicInfo.getNetwork());
             continue;
          }
 
@@ -196,6 +198,7 @@ public class VcVmUtil {
           */
          if (nicInfo.getIpConfig() == null) {
             if (nicInfo.getIpAddress() == null || nicInfo.getIpAddress().length == 0) {
+               logger.info("Nic ip address is " + nicInfo.getIpAddress());
                continue;
             }
             for (String addr : nicInfo.getIpAddress()) {
@@ -235,7 +238,7 @@ public class VcVmUtil {
             }
          }
       }
-
+      logger.info("Return ip address " + ipaddress);
       return ipaddress;
    }
 

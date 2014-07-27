@@ -15,6 +15,7 @@
 package com.vmware.bdd.software.mgmt.plugin.monitor;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
@@ -91,6 +92,33 @@ public class ClusterReport implements Cloneable {
       setAction(action);
       for (NodeReport nodeReport : this.nodeReports.values()) {
          nodeReport.setAction(action);
+      }
+   }
+
+   public void setNodesAction(String action, List<String> nodeNames) {
+      if (nodeNames == null) {
+         return;
+      }
+      for (String nodeName : nodeNames) {
+         nodeReports.get(nodeName).setAction(action);
+      }
+   }
+
+   public void setNodesStatus(ServiceStatus status, List<String> nodeNames) {
+      if (nodeNames == null) {
+         return;
+      }
+      for (String nodeName : nodeNames) {
+         nodeReports.get(nodeName).setStatus(status);
+      }
+   }
+
+   public void setNodesError(String errMsg, List<String> nodeNames) {
+      if (nodeNames == null) {
+         return;
+      }
+      for (String nodeName : nodeNames) {
+         nodeReports.get(nodeName).setErrMsg(errMsg);
       }
    }
 

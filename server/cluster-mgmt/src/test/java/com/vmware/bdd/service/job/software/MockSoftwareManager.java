@@ -109,8 +109,8 @@ public class MockSoftwareManager implements SoftwareManager {
    }
 
    @Override
-   public boolean scaleOutCluster(String clusterName, NodeGroupInfo group,
-         List<NodeInfo> addedNodes, ClusterReportQueue reports)
+   public boolean scaleOutCluster(ClusterBlueprint blueprint, List<String> addedNodeNames,
+         ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;

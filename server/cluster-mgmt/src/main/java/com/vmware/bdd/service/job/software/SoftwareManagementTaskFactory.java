@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job.software;
 
+import org.springframework.batch.core.scope.context.ChunkContext;
+
 import com.vmware.bdd.command.ClusterCmdUtil;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
@@ -41,6 +43,9 @@ public class SoftwareManagementTaskFactory {
       ClusterOperation clusterOperation = new ClusterOperation();
       switch (managementOperation) {
       case CREATE:
+         clusterOperation.setAction(ClusterAction.CREATE);
+         break;
+      case RESIZE:
          clusterOperation.setAction(ClusterAction.CREATE);
          break;
       case QUERY:
@@ -108,10 +113,10 @@ public class SoftwareManagementTaskFactory {
          String targetName, ManagementOperation managementOperation,
          ClusterBlueprint clusterBlueprint, StatusUpdater statusUpdater,
          ILockedClusterEntityManager lockedClusterEntityManager,
-         SoftwareManager softwareManager) {
+         SoftwareManager softwareManager, ChunkContext chunkContext) {
       ISoftwareManagementTask task = new ExternalManagementTask(targetName, managementOperation,
             clusterBlueprint, statusUpdater, lockedClusterEntityManager,
-            softwareManager);
+            softwareManager, chunkContext);
       return task;
    }
 }

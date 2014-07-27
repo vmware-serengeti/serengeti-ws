@@ -214,7 +214,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
       task =
             SoftwareManagementTaskFactory.createExternalMgtTask(targetName,
                   managementOperation, clusterBlueprint, statusUpdater,
-                  lockClusterEntityMgr, softwareMgr);
+                  lockClusterEntityMgr, softwareMgr, chunkContext);
       return task;
    }
 

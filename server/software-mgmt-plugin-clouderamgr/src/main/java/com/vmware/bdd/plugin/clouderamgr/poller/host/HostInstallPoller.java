@@ -22,6 +22,7 @@ import com.vmware.bdd.plugin.clouderamgr.poller.host.parser.IDetailsParser;
 import com.vmware.bdd.plugin.clouderamgr.poller.host.parser.ParseResult;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
+import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -72,18 +73,21 @@ public class HostInstallPoller extends StatusPoller{
    private int endProgress;
    private ExecutorService executor;
    private Set<String> msgSet = new HashSet<String>();
+   private List<String> installingNodes;
+
    volatile private boolean reported;
    volatile private boolean running =  true;
 
    public HostInstallPoller(final RootResourceV6 rootResource, final Long parentCmdId,
          final ClusterReport currentReport,
-         final ClusterReportQueue reportQueue, int endProgress,
+         final ClusterReportQueue reportQueue, int endProgress, List<String> nodeNames,
          String domain, String username, String password) throws Exception {
       this.rootResource = rootResource;
       this.parentCmdId = parentCmdId;
       this.reportQueue = reportQueue;
       this.currentReport = currentReport;
       this.endProgress = endProgress;
+      this.installingNodes = nodeNames;
       this.domain = domain;
       this.username = username;
       this.password = password;
@@ -221,7 +225,7 @@ public class HostInstallPoller extends StatusPoller{
                      synchronized (currentReport) {
                         if (!msgSet.contains(currentMsg)) {
                            msgSet.add(currentMsg);
-                           currentReport.setAction(currentMsg);
+                           setNodeActions();
                            reported = false;
                         }
                      }
@@ -239,6 +243,13 @@ public class HostInstallPoller extends StatusPoller{
             }
          } finally {
             httpget.releaseConnection();
+         }
+      }
+
+      private void setNodeActions() {
+         for (String nodeName : installingNodes) {
+            NodeReport node = currentReport.getNodeReports().get(nodeName);
+            node.setAction(currentMsg);
          }
       }
    }

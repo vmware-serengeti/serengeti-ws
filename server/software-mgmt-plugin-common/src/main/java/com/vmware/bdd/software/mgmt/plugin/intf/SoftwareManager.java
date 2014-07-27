@@ -138,8 +138,8 @@ public interface SoftwareManager {
     * cluster, otherwise, client cannot get information in this long operation
     * time
     */
-   boolean scaleOutCluster(String clusterName, NodeGroupInfo group,
-         List<NodeInfo> addedNodes, ClusterReportQueue reports)
+   boolean scaleOutCluster(ClusterBlueprint blueprint, List<String> addedNodeNames,
+         ClusterReportQueue reports)
          throws SoftwareManagementPluginException; // for resize node group instance number
 
    /**

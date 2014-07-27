@@ -22,7 +22,11 @@ import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginExc
  * Time: 1:13 PM
  */
 public class ClouderaManagerException extends SoftwareManagementPluginException {
+   private String hostId;
 
+   public String getRefHostId() {
+      return hostId;
+   }
 
    public ClouderaManagerException() {
    }
@@ -49,5 +53,11 @@ public class ClouderaManagerException extends SoftwareManagementPluginException 
 
    public static ClouderaManagerException ACTIVATE_PARCEL_FAIL(String product, String version,  String refMsg) {
       return new ClouderaManagerException("ACTIVATE_PARCEL_FAIL", "Failed to activate parcel " + product + " " + version + ", " + refMsg, null);
+   }
+
+   public static ClouderaManagerException COMMAND_EXECUTION_FAILED(String hostId,  String refMsg) {
+      ClouderaManagerException e = new ClouderaManagerException("COMMAND_EXECUTION_FAILED", refMsg, null);
+      e.hostId = hostId;
+      return e;
    }
 }

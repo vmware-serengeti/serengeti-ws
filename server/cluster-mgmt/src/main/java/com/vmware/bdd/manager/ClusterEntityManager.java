@@ -403,7 +403,8 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
                continue;
             }
             if (nodeReport.getStatus() != null) {
-               if (!node.isDisconnected()) {
+               if (!node.isDisconnected() 
+                     && node.getStatus().ordinal() >= NodeStatus.VM_READY.ordinal()) {
                   logger.debug("Got node " + node.getVmName() 
                         + " status " + nodeReport.getStatus().toString());
                   NodeStatus oldStatus = node.getStatus();

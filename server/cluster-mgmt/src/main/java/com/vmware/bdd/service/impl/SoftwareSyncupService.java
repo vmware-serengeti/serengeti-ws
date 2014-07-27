@@ -121,9 +121,8 @@ public class SoftwareSyncupService implements ISoftwareSyncUpService,
             return;
          }
 
-         Iterator<String> ite = clusterList.iterator();
-         for (String clusterName = ite.next(); ite.hasNext(); clusterName =
-               ite.next()) {
+         for (Iterator<String> ite = clusterList.iterator(); ite.hasNext(); ) {
+            String clusterName = ite.next();
             try {
                ClusterEntity cluster =
                      lockedEntityManager.getClusterEntityMgr().findByName(

@@ -158,7 +158,7 @@ public class NodePowerOnRequest extends SimpleRequest {
                   clusterName);
       return SoftwareManagementTaskFactory.createExternalMgtTask(targetName,
             ManagementOperation.START_NODES, clusterBlueprint, null,
-            lockClusterEntityMgr, softwareMgr);
+            lockClusterEntityMgr, softwareMgr, null);
    }
 
    private ISoftwareManagementTask createThriftCommandTask(String targetName) {

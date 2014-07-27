@@ -33,7 +33,7 @@ public class TestExternalManagementTask {
                   ManagementOperation.CREATE, new ClusterBlueprint(),
                   new MockStatusUpdator(),
                   new MockConcurrentClusterEntityManager(),
-                  new MockSoftwareManager());
+                  new MockSoftwareManager(), null);
 
       Map<String, Object> result = task.call();
       Assert.assertTrue("should get success result", (Boolean)result.get("succeed"));

@@ -21,25 +21,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.cloudera.api.model.ApiRoleState;
-import com.cloudera.api.model.ApiRoleConfigGroup;
-import com.google.gson.GsonBuilder;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
-import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
-import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableManagementService;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableParcelStage;
-import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
-import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
-import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
-import com.vmware.bdd.software.mgmt.plugin.aop.PreConfiguration;
-import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
+import javax.ws.rs.NotFoundException;
+
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -61,7 +50,10 @@ import com.cloudera.api.model.ApiHostRef;
 import com.cloudera.api.model.ApiHostRefList;
 import com.cloudera.api.model.ApiParcel;
 import com.cloudera.api.model.ApiRole;
+import com.cloudera.api.model.ApiRoleConfigGroup;
+import com.cloudera.api.model.ApiRoleList;
 import com.cloudera.api.model.ApiRoleNameList;
+import com.cloudera.api.model.ApiRoleState;
 import com.cloudera.api.model.ApiService;
 import com.cloudera.api.model.ApiServiceConfig;
 import com.cloudera.api.model.ApiServiceList;
@@ -70,10 +62,20 @@ import com.cloudera.api.v3.ParcelResource;
 import com.cloudera.api.v6.RootResourceV6;
 import com.cloudera.api.v6.ServicesResourceV6;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.GsonBuilder;
+import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
 import com.vmware.bdd.plugin.clouderamgr.model.CmClusterDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmNodeDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmRoleDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmServiceDef;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableManagementService;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableParcelStage;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
+import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
+import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
+import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
+import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -85,6 +87,7 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
+import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 
 /**
  * Author: Xiaoding Bian
@@ -213,8 +216,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
       CmClusterDef clusterDef = null;
       try {
          clusterDef = new CmClusterDef(blueprint);
-         provisionCluster(clusterDef, reportQueue);
-         provisionParcels(clusterDef, reportQueue);
+         provisionCluster(clusterDef, null, reportQueue);
+         provisionParcels(clusterDef, null, reportQueue);
          configureServices(clusterDef, reportQueue);
          startServices(clusterDef, reportQueue, true);
          success = true;
@@ -245,9 +248,155 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean scaleOutCluster(String clusterName, NodeGroupInfo group, List<NodeInfo> addedNodes,
-         ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      return false;
+   public boolean scaleOutCluster(ClusterBlueprint blueprint, List<String> addedNodeNames, 
+         ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
+      boolean success = false;
+      CmClusterDef clusterDef = null;
+      try {
+         clusterDef = new CmClusterDef(blueprint);
+         provisionCluster(clusterDef, addedNodeNames, reportQueue, true);
+         provisionParcels(clusterDef, addedNodeNames, reportQueue);
+         Map<String, List<ApiRole>> roles = configureNodeServices(
+               clusterDef, reportQueue, addedNodeNames);
+         startNodeServices(clusterDef, addedNodeNames, roles, reportQueue);
+         success = true;
+         clusterDef.getCurrentReport().setProgress(100);
+         clusterDef.getCurrentReport().setAction("");
+      } catch (SoftwareManagementPluginException ex) {
+         if (ex instanceof ClouderaManagerException 
+               && ((ClouderaManagerException)ex).getRefHostId() != null) {
+            String hostId = ((ClouderaManagerException)ex).getRefHostId();
+            CmNodeDef nodeDef = clusterDef.idToHosts().get(hostId);
+            String errMsg = null;
+            if (nodeDef != null) {
+               errMsg = "Failed to start role for node "  + nodeDef.getName() + " for " 
+                     + ((ex.getMessage() == null) ? "" : (", " + ex.getMessage()));
+               // reset all node actions.
+               clusterDef.getCurrentReport().setNodesAction("", addedNodeNames);
+               clusterDef.getCurrentReport().setNodesStatus(ServiceStatus.STOPPED, addedNodeNames);
+
+               // set error message for specified node
+               clusterDef.getCurrentReport().getNodeReports()
+                     .get(nodeDef.getName()).setErrMsg(errMsg);
+               throw  SoftwareManagementPluginException.START_SERVICE_FAILED(errMsg, ex.getCause());
+            }
+         }
+         clusterDef.getCurrentReport().setNodesError(ex.getMessage(), addedNodeNames);
+         clusterDef.getCurrentReport().setNodesStatus(ServiceStatus.STOPPED, addedNodeNames);
+         throw ex;
+      } catch (Exception e) {
+         clusterDef.getCurrentReport().setNodesError(
+               "Failed to bootstrap nodes for " + e.getMessage(), addedNodeNames);
+         logger.error(e.getMessage());
+         throw SoftwareManagementPluginException.SCALE_OUT_CLUSTER_FAILED(e.getMessage(), e);
+      } finally {
+         clusterDef.getCurrentReport().setSuccess(success);
+         clusterDef.getCurrentReport().setFinished(true);
+         reportQueue.addClusterReport(clusterDef.getCurrentReport().clone());
+      }
+      return success;
+   }
+
+   private Map<String, List<ApiRole>> configureNodeServices(final CmClusterDef cluster, 
+         final ClusterReportQueue reportQueue, List<String> addedNodeNames)
+               throws SoftwareManagementPluginException {
+
+      Map<String, String> nodeRefToName = cluster.hostIdToName();
+      Map<String, List<CmRoleDef>> serviceRolesMap = new HashMap<String, List<CmRoleDef>>();
+      Set<String> addedNodeNameSet = new HashSet<String>();
+      addedNodeNameSet.addAll(addedNodeNames);
+      for (CmServiceDef serviceDef : cluster.getServices()) {
+         List<CmRoleDef> roles = serviceDef.getRoles();
+         for (CmRoleDef role : roles) {
+            String nodeId = role.getNodeRef();
+            String nodeName = nodeRefToName.get(nodeId);
+            if (addedNodeNameSet.contains(nodeName)) {
+               // new added hosts
+               List<CmRoleDef> roleDefs = serviceRolesMap.get(serviceDef.getName());
+               if (roleDefs == null) {
+                  roleDefs = new ArrayList<CmRoleDef>();
+                  serviceRolesMap.put(serviceDef.getName(), roleDefs);
+               }
+               roleDefs.add(role);
+            }
+         }
+      }
+
+      Map<String, List<ApiRole>> result = new HashMap<>();
+      try {
+         ApiServiceList apiServiceList = apiResourceRootV6.getClustersResource()
+               .getServicesResource(cluster.getName()).readServices(DataView.SUMMARY);
+         for (ApiService apiService : apiServiceList.getServices()) {
+            if (!serviceRolesMap.containsKey(apiService.getName())) {
+               // not touched by this resize, continue
+               continue;
+            }
+            result.put(apiService.getName(), new ArrayList<ApiRole>());
+            List<CmRoleDef> roleDefs = serviceRolesMap.get(apiService.getName());
+            List<ApiRole> apiRoles =
+                  apiResourceRootV6.getClustersResource()
+                  .getServicesResource(cluster.getName())
+                  .getRolesResource(apiService.getName()).readRoles()
+                  .getRoles();
+            logger.debug("Existing roles " + apiRoles);
+            for (ApiRole apiRole : apiRoles) {
+               for (Iterator<CmRoleDef> ite = roleDefs.iterator(); ite.hasNext(); ) {
+                  CmRoleDef roleDef = ite.next();
+                  if (apiRole.getHostRef().getHostId().equals(roleDef.getNodeRef())) {
+                     ite.remove();
+                     result.get(apiService.getName()).add(apiRole);
+                     break;
+                  }
+               }
+            }
+            if (!roleDefs.isEmpty()) {
+               List<ApiRole> newRoles = new ArrayList<>();
+               for (CmRoleDef roleDef : roleDefs) {
+                  ApiRole apiRole = createApiRole(roleDef);
+                  newRoles.add(apiRole);
+               }
+               String action = "Configuring service " + apiService.getDisplayName();
+               cluster.getCurrentReport().setNodesAction(action, addedNodeNames);
+               reportQueue.addClusterReport(cluster.getCurrentReport().clone());
+
+               logger.debug("Creating roles " + newRoles);
+               ApiRoleList roleList =
+                     apiResourceRootV6.getClustersResource()
+                     .getServicesResource(cluster.getName())
+                     .getRolesResource(apiService.getName())
+                     .createRoles(new ApiRoleList(newRoles));
+               result.get(apiService.getName()).addAll(roleList.getRoles());
+            }
+         }
+         logger.info("Finished configure services");
+
+         syncRolesId(cluster);
+
+         preDeployConfig(cluster);
+
+         executeAndReport("Deploy client config", addedNodeNames, 
+               apiResourceRootV6.getClustersResource().deployClientConfig(cluster.getName()),
+               ProgressSplit.CONFIGURE_SERVICES.getProgress(), cluster.getCurrentReport(), reportQueue, true);
+         return result;
+      } catch (Exception e) {
+         String errMsg = "Failed to configure services" + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
+         logger.error(errMsg);
+         throw SoftwareManagementPluginException.CONFIGURE_SERVICE_FAILED(errMsg, e);
+      }
+   }
+
+   private ApiRole createApiRole(CmRoleDef role) {
+      ApiRole apiRole = new ApiRole();
+      apiRole.setType(role.getType().getName());
+      apiRole.setHostRef(new ApiHostRef(role.getNodeRef()));
+      ApiConfigList roleConfigList = new ApiConfigList();
+      if (role.getConfiguration() != null) {
+         for (String key : role.getConfiguration().keySet()) {
+            roleConfigList.add(new ApiConfig(key, role.getConfiguration().get(key)));
+         }
+      }
+      apiRole.setConfig(roleConfigList);
+      return apiRole;
    }
 
    @Override
@@ -381,27 +530,32 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    private void queryNodesStatus(CmClusterDef cluster) {
       for (CmNodeDef node : cluster.getNodes()) {
-         ApiHost host = apiResourceRootV6.getHostsResource().readHost(node.getNodeId());
-         ApiHealthSummary health = host.getHealthSummary();
          Map<String, NodeReport> nodeReports = cluster.getCurrentReport().getNodeReports();
          NodeReport nodeReport = nodeReports.get(node.getName());
-         switch(health) {
-         case GOOD:
-            nodeReport.setStatus(ServiceStatus.STARTED);
-            logger.debug("Node " + nodeReport.getName() + " is running well.");
-            break;
-         case CONCERNING:
-            nodeReport.setStatus(ServiceStatus.UNHEALTHY);
-            logger.debug("Node " + nodeReport.getName() + " is concerning.");
-            break;
-         case BAD:
-            logger.debug("Node " + nodeReport.getName() + " is not running well.");
+         try {
+            ApiHost host = apiResourceRootV6.getHostsResource().readHost(node.getNodeId());
+            ApiHealthSummary health = host.getHealthSummary();
+            switch(health) {
+            case GOOD:
+               nodeReport.setStatus(ServiceStatus.STARTED);
+               logger.debug("Node " + nodeReport.getName() + " is running well.");
+               break;
+            case CONCERNING:
+               nodeReport.setStatus(ServiceStatus.UNHEALTHY);
+               logger.debug("Node " + nodeReport.getName() + " is concerning.");
+               break;
+            case BAD:
+               logger.debug("Node " + nodeReport.getName() + " is not running well.");
+               nodeReport.setStatus(ServiceStatus.FAILED);
+               break;
+            default:
+               logger.debug("Node " + nodeReport.getName() + " is unknown.");
+               nodeReport.setStatus(ServiceStatus.UNKONWN);
+               break;
+            }
+         } catch (NotFoundException e) {
+            logger.debug("Node " + node.getName() + " is not found in Cloudera Manager.");
             nodeReport.setStatus(ServiceStatus.FAILED);
-            break;
-         default:
-            logger.debug("Node " + nodeReport.getName() + " is unknown.");
-            nodeReport.setStatus(ServiceStatus.UNKONWN);
-            break;
          }
       }
    }
@@ -782,7 +936,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
     * @param reportQueue
     * @throws Exception
     */
-   private void installHosts(final CmClusterDef cluster, final ClusterReportQueue reportQueue) throws Exception {
+   private void installHosts(final CmClusterDef cluster, final List<String> addedNodes, 
+         final ClusterReportQueue reportQueue) throws Exception {
       logger.info("Installing agent for each node of cluster: " + cluster.getName());
       List<String> ips = new ArrayList<String>();
       List<String> hostnames = new ArrayList<String>();
@@ -817,8 +972,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
             logger.info("install command id: " + cmd.getId());
 
             hostInstallPoller = new HostInstallPoller(apiResourceRootV6, cmd.getId(), cluster.getCurrentReport(), reportQueue,
-                  ProgressSplit.INSTALL_HOSTS_AGENT.getProgress(), domain, cmUsername, cmPassword);
-            executeAndReport("Installing Host Agents", cmd, ProgressSplit.INSTALL_HOSTS_AGENT.getProgress(),
+                  ProgressSplit.INSTALL_HOSTS_AGENT.getProgress(), addedNodes, domain, cmUsername, cmPassword);
+            executeAndReport("Installing Host Agents", addedNodes, cmd, ProgressSplit.INSTALL_HOSTS_AGENT.getProgress(),
                   cluster.getCurrentReport(), reportQueue, hostInstallPoller, true);
          } catch (Exception e) {
             logger.info(e.getMessage());
@@ -891,16 +1046,22 @@ public class ClouderaManagerImpl implements SoftwareManager {
       }
    }
 
+   private void provisionCluster(final CmClusterDef cluster, final List<String> addedNodes, 
+         final ClusterReportQueue reportQueue) throws Exception {
+      provisionCluster(cluster, addedNodes, reportQueue, false);
+   }
+
    /**
     * Reentrant
     * @param cluster
     * @param reportQueue
     * @throws Exception
     */
-   private void provisionCluster(final CmClusterDef cluster, final ClusterReportQueue reportQueue) throws Exception {
+   private void provisionCluster(final CmClusterDef cluster, final List<String> addedNodes, 
+         final ClusterReportQueue reportQueue, boolean removeBadHosts) throws Exception {
 
       if (!isProvisioned(cluster.getName())) {
-         executeAndReport("Inspecting Hosts", apiResourceRootV6.getClouderaManagerResource().inspectHostsCommand(),
+         executeAndReport("Inspecting Hosts", addedNodes, apiResourceRootV6.getClouderaManagerResource().inspectHostsCommand(),
                ProgressSplit.INSPECT_HOSTS.getProgress(), cluster.getCurrentReport(), reportQueue, false);
 
          final ApiClusterList clusterList = new ApiClusterList();
@@ -921,7 +1082,20 @@ public class ClouderaManagerImpl implements SoftwareManager {
             ips.add(node.getIpAddress());
          }
          for (ApiHostRef hostRef : apiResourceRootV6.getClustersResource().listHosts(cluster.getName())) {
-            if (!ips.contains(apiResourceRootV6.getHostsResource().readHost(hostRef.getHostId()).getIpAddress())) {
+            ApiHost host = apiResourceRootV6.getHostsResource().readHost(hostRef.getHostId());
+            if (!ips.contains(host.getIpAddress())) {
+               if (host.getHealthSummary().equals(ApiHealthSummary.BAD) ||
+                     host.getHealthSummary().equals(ApiHealthSummary.NOT_AVAILABLE)) {
+                  logger.info("Host " + host.getHostname() + " is removed for it's not in cluster " + cluster.getName()
+                        + " and in " + host.getHealthSummary() + " status");
+                  try {
+                     apiResourceRootV6.getClustersResource().removeHost(cluster.getName(), hostRef.getHostId());
+                     apiResourceRootV6.getHostsResource().deleteHost(hostRef.getHostId());
+                  } catch (Exception e) {
+                     logger.error("Failed to remove bad host " + host.getHostname(), e);
+                  }
+                  continue;
+               }
                throw SoftwareManagementPluginException.CLUSTER_ALREADY_EXIST(cluster.getName(), null);
             }
          }
@@ -930,7 +1104,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       retry(2, new Retriable() {
          @Override
          public void doWork() throws Exception {
-            installHosts(cluster, reportQueue);
+            installHosts(cluster, addedNodes, reportQueue);
          }
       });
 
@@ -966,10 +1140,10 @@ public class ClouderaManagerImpl implements SoftwareManager {
     * @param reportQueue
     * @throws Exception
     */
-   private void provisionParcels(final CmClusterDef cluster, final ClusterReportQueue reportQueue) throws Exception {
+   private void provisionParcels(final CmClusterDef cluster, final List<String> addedNodes,
+         final ClusterReportQueue reportQueue) throws Exception {
 
       if (isConfigured(cluster)) {
-         // TODO: resize
          return;
       }
 
@@ -994,7 +1168,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       }
 
       // validate this cluster has access to all Parcels it requires
-      executeAndReport("Validating parcels availability", null, ProgressSplit.VALIDATE_PARCELS_AVAILABILITY.getProgress(),
+      executeAndReport("Validating parcels availability", addedNodes, null, ProgressSplit.VALIDATE_PARCELS_AVAILABILITY.getProgress(),
             cluster.getCurrentReport(), reportQueue, new StatusPoller() {
          @Override
          public boolean poll() {
@@ -1114,7 +1288,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    public void configureServices(final CmClusterDef cluster, final ClusterReportQueue reportQueue) {
       if (isConfigured(cluster)) {
-         // TODO: resize
          syncRolesId(cluster);
          return;
       }
@@ -1157,16 +1330,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
          List<ApiRole> apiRoles = new ArrayList<ApiRole>();
          for (CmRoleDef roleDef : serviceDef.getRoles()) {
-            ApiRole apiRole = new ApiRole();
-            apiRole.setType(roleDef.getType().getName());
-            apiRole.setHostRef(new ApiHostRef(roleDef.getNodeRef()));
-            ApiConfigList roleConfigList = new ApiConfigList();
-            if (roleDef.getConfiguration() != null) {
-               for (String key : roleDef.getConfiguration().keySet()) {
-                  roleConfigList.add(new ApiConfig(key, roleDef.getConfiguration().get(key)));
-               }
-            }
-            apiRole.setConfig(roleConfigList);
+            ApiRole apiRole = createApiRole(roleDef);
             apiRoles.add(apiRole);
          }
 
@@ -1183,13 +1347,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
          syncRolesId(cluster);
 
-         // Necessary, since createServices a habit of kicking off async commands (eg ZkAutoInit )
-         for (CmServiceDef serviceDef : cluster.getServices()) {
-            for (ApiCommand command : apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                  .listActiveCommands(serviceDef.getName(), DataView.SUMMARY)) {
-               execute(command);
-            }
-         }
+         preDeployConfig(cluster);
 
          executeAndReport("Deploy client config", apiResourceRootV6.getClustersResource().deployClientConfig(cluster.getName()),
                ProgressSplit.CONFIGURE_SERVICES.getProgress(), cluster.getCurrentReport(), reportQueue);
@@ -1197,6 +1355,16 @@ public class ClouderaManagerImpl implements SoftwareManager {
          String errMsg = "Failed to configure services" + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
          logger.error(errMsg);
          throw SoftwareManagementPluginException.CONFIGURE_SERVICE_FAILED(errMsg, e);
+      }
+   }
+
+   private void preDeployConfig(final CmClusterDef cluster) throws Exception {
+      // Necessary, since createServices a habit of kicking off async commands (eg ZkAutoInit )
+      for (CmServiceDef serviceDef : cluster.getServices()) {
+         for (ApiCommand command : apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+               .listActiveCommands(serviceDef.getName(), DataView.SUMMARY)) {
+            execute(command);
+         }
       }
    }
 
@@ -1381,6 +1549,39 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
       // Start all other roles;
       startService(cluster, hdfsService, endProgress, reportQueue);
+   }
+
+   private boolean startNodeServices(final CmClusterDef cluster, final List<String> addedNodes,
+         final Map<String, List<ApiRole>> roles, final ClusterReportQueue reportQueue)
+               throws Exception {
+      boolean executed = true;
+      int endProgress = ProgressSplit.START_SERVICES.getProgress();
+      for (String serviceName : roles.keySet()) {
+         Set<String> roleDisplayNames = new HashSet<>();
+         List<String> roleNames = new ArrayList<>();
+         for (ApiRole role : roles.get(serviceName)) {
+            if (isRoleStarted(cluster.getName(), serviceName, role.getName())) {
+               continue;
+            }
+            roleNames.add(role.getName());
+            roleDisplayNames.add(role.getType());
+         }
+         executeAndReport("Starting Roles " + roleDisplayNames, addedNodes,
+               apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+               .getRoleCommandsResource(serviceName).startCommand(new ApiRoleNameList(roleNames)),
+               INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
+         cluster.getCurrentReport().setProgress(endProgress);
+         reportQueue.addClusterReport(cluster.getCurrentReport().clone());
+      }
+      return executed;
+   }
+
+   private boolean isRoleStarted(String clusterName, String serviceName, String roleName) {
+      ApiRoleState roleState = apiResourceRootV6.getClustersResource()
+            .getServicesResource(clusterName)
+            .getRolesResource(serviceName)
+            .readRole(roleName).getRoleState();
+      return roleState.equals(ApiRoleState.STARTED);
    }
 
    /**
@@ -1635,11 +1836,28 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    private ApiCommand executeAndReport(String action, final ApiBulkCommandList bulkCommand, int endProgress,
          ClusterReport currentReport, ClusterReportQueue reportQueue, boolean checkReturn) throws Exception {
+      return executeAndReport(action, null, bulkCommand, endProgress, currentReport, reportQueue, checkReturn);
+   }
+
+   private ApiCommand executeAndReport(String action, List<String> addedNodes, final ApiBulkCommandList bulkCommand, 
+         int endProgress, ClusterReport currentReport, ClusterReportQueue reportQueue, boolean checkReturn)
+               throws Exception {
       ApiCommand lastCommand = null;
       for (ApiCommand command : bulkCommand) {
-         lastCommand = executeAndReport(action, command, endProgress, currentReport, reportQueue, checkReturn);
+         lastCommand = executeAndReport(action, addedNodes, command, endProgress, currentReport, reportQueue, checkReturn);
       }
       return lastCommand;
+   }
+
+   private ApiCommand executeAndReport(String action, final List<String> nodeNames, final ApiCommand command, 
+         int endProgress, ClusterReport currentReport, ClusterReportQueue reportQueue, boolean checkReturn) throws Exception {
+      return executeAndReport(action, nodeNames, command, endProgress, currentReport, reportQueue,
+            new StatusPoller() {
+               @Override
+               public boolean poll() {
+                  return apiResourceRootV6.getCommandsResource().readCommand(command.getId()).getEndTime() != null;
+               }
+            }, checkReturn);
    }
 
    private ApiCommand executeAndReport(String action, final ApiCommand command, int endProgress,
@@ -1656,10 +1874,20 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private ApiCommand executeAndReport(String action, final ApiCommand command, int endProgress,
          ClusterReport currentReport, ClusterReportQueue reportQueue, StatusPoller poller,
          boolean checkReturn) throws Exception {
+      return executeAndReport(action, null, command, endProgress, currentReport, reportQueue, poller, checkReturn);
+   }
+
+   private ApiCommand executeAndReport(String action, List<String> nodeNames, final ApiCommand command, 
+         int endProgress, ClusterReport currentReport, ClusterReportQueue reportQueue, StatusPoller poller,
+         boolean checkReturn) throws Exception {
 
       if (action != null) {
          logger.info("Action: " + action);
-         currentReport.setClusterAndNodesAction(action);
+         if (nodeNames != null) {
+            currentReport.setNodesAction(action, nodeNames);
+         } else {
+            currentReport.setClusterAndNodesAction(action);
+         }
          reportQueue.addClusterReport(currentReport.clone());
       }
 
@@ -1671,7 +1899,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          logger.info("Failed to run command: " + command);
          String errorMsg = getSummaryErrorMsg(command, domain);
          logger.error(errorMsg);
-         throw new RuntimeException(errorMsg);
+         throw ClouderaManagerException.COMMAND_EXECUTION_FAILED(commandReturn.getHostRef().getHostId(), errorMsg);
       }
 
       if (endProgress != INVALID_PROGRESS) {

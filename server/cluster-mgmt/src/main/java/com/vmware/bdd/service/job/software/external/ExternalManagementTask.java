@@ -20,9 +20,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.springframework.batch.core.scope.context.ChunkContext;
 
+import com.vmware.aurora.util.AuAssert;
 import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
+import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.StatusUpdater;
+import com.vmware.bdd.service.job.TrackableTasklet;
 import com.vmware.bdd.service.job.software.ISoftwareManagementTask;
 import com.vmware.bdd.service.job.software.ManagementOperation;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -31,6 +35,7 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
+import com.vmware.bdd.utils.CommonUtil;
 /**
  * Author: Xiaoding Bian
  * Date: 6/11/14
@@ -45,16 +50,19 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
    private StatusUpdater statusUpdater;
    private ILockedClusterEntityManager lockedClusterEntityManager;
    private SoftwareManager softwareManager;
+   private ChunkContext chunkContext;
 
    public ExternalManagementTask(String targetName, ManagementOperation managementOperation,
          ClusterBlueprint clusterBlueprint, StatusUpdater statusUpdater,
-         ILockedClusterEntityManager lockedClusterEntityManager, SoftwareManager softwareManager) {
+         ILockedClusterEntityManager lockedClusterEntityManager, SoftwareManager softwareManager,
+         ChunkContext chunkContext) {
       this.targetName = targetName;
       this.managementOperation = managementOperation;
       this.clusterBlueprint = clusterBlueprint;
       this.statusUpdater = statusUpdater;
       this.lockedClusterEntityManager = lockedClusterEntityManager;
       this.softwareManager = softwareManager;
+      this.chunkContext = chunkContext;
    }
 
    @Override
@@ -114,6 +122,11 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
                queue.addClusterReport(report);
                success = true;
                break;
+            case RESIZE:
+               AuAssert.check(chunkContext != null);
+               List<String> addedNodes = getResizedVmNames(chunkContext, clusterBlueprint);
+               success = softwareManager.scaleOutCluster(clusterBlueprint, addedNodes, queue);
+               break;
             default:
                success = true;
          }
@@ -136,5 +149,29 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
       }
 
       return result;
+   }
+
+   private List<String> getResizedVmNames(ChunkContext chunkContext, 
+         ClusterBlueprint clusterBlueprint) {
+      String groupName =
+            TrackableTasklet.getJobParameters(chunkContext).getString(
+                  JobConstants.GROUP_NAME_JOB_PARAM);
+      long oldInstanceNum =
+            TrackableTasklet.getJobParameters(chunkContext).getLong(
+               JobConstants.GROUP_INSTANCE_OLD_NUMBER_JOB_PARAM);
+
+      List<String> addedNodeNames = new ArrayList<String>();
+      for (NodeGroupInfo group : clusterBlueprint.getNodeGroups()) {
+         if (group.getName().equals(groupName)) {
+            for (NodeInfo node: group.getNodes()) {
+               long index = CommonUtil.getVmIndex(node.getName());
+               if (index < oldInstanceNum) {
+                  continue;
+               }
+               addedNodeNames.add(node.getName());
+            }
+         }
+      }
+      return addedNodeNames;
    }
 }
