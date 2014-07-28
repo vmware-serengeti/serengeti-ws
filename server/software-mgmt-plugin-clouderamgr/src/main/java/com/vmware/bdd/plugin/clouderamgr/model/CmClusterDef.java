@@ -113,6 +113,7 @@ public class CmClusterDef implements Serializable {
                CmServiceDef service = serviceDefOfType(serviceType, blueprint.getConfiguration());
                CmRoleDef roleDef = new CmRoleDef();
                roleDef.setName(node.getName() + NAME_SEPARATOR + service.getType().getName() + NAME_SEPARATOR + roleType.getName()); // temp name
+               roleDef.setDisplayName(roleDef.getName());
                roleDef.setType(roleType);
                roleDef.setNodeRef(nodeDef.getNodeId());
                switch (roleType.getDisplayName()) {

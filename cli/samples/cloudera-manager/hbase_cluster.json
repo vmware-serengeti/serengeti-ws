@@ -17,13 +17,14 @@
     "name": "master",
     "roles": [
       "HDFS_NAMENODE",
+      "HDFS_SECONDARY_NAMENODE",
       "HBASE_MASTER",
       "HBASE_REST_SERVER",
       "HBASE_THRIFT_SERVER"
       ],
     "instanceNum": 1,
     "cpuNum": 2,
-    "memCapacityMB": 7500,
+    "memCapacityMB": 15000,
     "storage": {
       "type": "SHARED",
       "sizeGB": 50

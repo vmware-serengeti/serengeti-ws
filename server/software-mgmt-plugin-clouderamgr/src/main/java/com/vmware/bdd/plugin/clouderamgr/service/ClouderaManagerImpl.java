@@ -28,7 +28,19 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.ws.rs.NotFoundException;
-
+import com.cloudera.api.model.ApiRoleState;
+import com.cloudera.api.model.ApiRoleConfigGroup;
+import com.google.gson.GsonBuilder;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
+import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
+import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableManagementService;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableParcelStage;
+import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
+import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
+import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
+import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -218,7 +230,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          clusterDef = new CmClusterDef(blueprint);
          provisionCluster(clusterDef, null, reportQueue);
          provisionParcels(clusterDef, null, reportQueue);
-         configureServices(clusterDef, reportQueue);
+         configureServices(clusterDef, reportQueue, true);
          startServices(clusterDef, reportQueue, true);
          success = true;
          clusterDef.getCurrentReport().setAction("Successfully Create Cluster");
@@ -243,8 +255,31 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public boolean reconfigCluster(ClusterBlueprint blueprint,
-         ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      return false;
+         ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
+      boolean success = false;
+      CmClusterDef clusterDef = null;
+      try {
+         clusterDef = new CmClusterDef(blueprint);
+         syncHostsId(clusterDef);
+         configureServices(clusterDef, reportQueue, false);
+         success = true;
+         clusterDef.getCurrentReport().setAction("Successfully Reconfigure Cluster");
+         clusterDef.getCurrentReport().setProgress(100);
+         clusterDef.getCurrentReport().setSuccess(true);
+      } catch (SoftwareManagementPluginException ex) {
+         clusterDef.getCurrentReport().setAction("Failed to Reconfigure Cluster");
+         clusterDef.getCurrentReport().setSuccess(false);
+         throw ex;
+      } catch (Exception e) {
+         clusterDef.getCurrentReport().setAction("Failed to Reconfigure Cluster");
+         clusterDef.getCurrentReport().setSuccess(false);
+         logger.error(e.getMessage());
+         throw SoftwareManagementPluginException.RECONFIGURE_CLUSTER_FAILED(e.getMessage(), e);
+      } finally {
+         clusterDef.getCurrentReport().setFinished(true);
+         reportQueue.addClusterReport(clusterDef.getCurrentReport().clone());
+      }
+      return success;
    }
 
    @Override
@@ -1286,10 +1321,13 @@ public class ClouderaManagerImpl implements SoftwareManager {
       }
    }
 
-   public void configureServices(final CmClusterDef cluster, final ClusterReportQueue reportQueue) {
-      if (isConfigured(cluster)) {
+   private void configureServices(final CmClusterDef cluster, final ClusterReportQueue reportQueue, final boolean skipIfConfigured) {
+      boolean servicesConfigured = isConfigured(cluster);
+      if (servicesConfigured) {
          syncRolesId(cluster);
-         return;
+         if (skipIfConfigured) {
+            return;
+         }
       }
       String action = "Configuring cluster services";
       cluster.getCurrentReport().setAction(action);
@@ -1326,11 +1364,32 @@ public class ClouderaManagerImpl implements SoftwareManager {
             }
          }
 
+         // update configs if service already exist
+         if (servicesConfigured
+               && apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).readService(serviceDef.getName()) != null) {
+            apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                  .updateServiceConfig(serviceDef.getName(), "update configs for role " + serviceDef.getName(), apiServiceConfig);
+            logger.info("Finished reconfigure service " + serviceDef.getName());
+         }
+
          apiService.setConfig(apiServiceConfig);
 
          List<ApiRole> apiRoles = new ArrayList<ApiRole>();
          for (CmRoleDef roleDef : serviceDef.getRoles()) {
             ApiRole apiRole = createApiRole(roleDef);
+
+            /*
+            update configs of this role if services already exist,
+            the roleDef's roleName is already synced up at the beginning of this function
+             */
+            if (servicesConfigured
+                  && apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).readService(serviceDef.getName()) != null
+                  && apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).getRolesResource(serviceDef.getName()).readRole(roleDef.getName()) != null) {
+               apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).getRolesResource(serviceDef.getName())
+                     .updateRoleConfig(roleDef.getName(), "update config for role " + roleDef.getDisplayName(), apiRole.getConfig());
+               logger.info("Finished reconfigure role " + roleDef.getDisplayName());
+            }
+
             apiRoles.add(apiRole);
          }
 
@@ -1339,13 +1398,15 @@ public class ClouderaManagerImpl implements SoftwareManager {
       }
 
       try {
-         apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).createServices(serviceList);
-         logger.info("Finished create services");
+         if (!servicesConfigured) {
+            apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).createServices(serviceList);
+            logger.info("Finished create services");
 
-         updateRoleConfigGroups(cluster.getName());
-         logger.info("Updated roles config groups");
+            updateRoleConfigGroups(cluster.getName());
+            logger.info("Updated roles config groups");
 
-         syncRolesId(cluster);
+            syncRolesId(cluster);
+         }
 
          preDeployConfig(cluster);
 
@@ -1598,7 +1659,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       try {
          if (!cluster.isEmpty()) {
             if (!isConfigured(cluster)) {
-               configureServices(cluster, reportQueue);
+               configureServices(cluster, reportQueue, true);
             }
             if (!isStarted(cluster)) {
                // sort the services based on their dependency relationship.

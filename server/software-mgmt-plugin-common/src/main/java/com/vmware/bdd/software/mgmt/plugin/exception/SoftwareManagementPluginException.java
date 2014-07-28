@@ -55,6 +55,10 @@ public class SoftwareManagementPluginException extends RuntimeException {
       return new SoftwareManagementPluginException("SCALE_OUT_CLUSTER_FAILED", message, cause);
    }
 
+   public static SoftwareManagementPluginException RECONFIGURE_CLUSTER_FAILED(String message, Throwable cause) {
+      return new SoftwareManagementPluginException("RECONFIGURE_CLUSTER_FAILED", message, cause);
+   }
+
    public static SoftwareManagementPluginException RETRIEVE_SUPPORTED_STACKS(String message, Throwable cause) {
       return new SoftwareManagementPluginException("RETRIEVE_SUPPORTED_STACKS", message, cause);
    }
