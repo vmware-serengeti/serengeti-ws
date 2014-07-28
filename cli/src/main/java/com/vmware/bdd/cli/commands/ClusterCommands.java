@@ -192,29 +192,28 @@ public class ClusterCommands implements CommandMarker {
       }
       clusterCreate.setTopologyPolicy(policy);
 
+
+      DistroRead distroRead4Create;
       try {
          if (distro != null) {
-            List<String> distroNames = getDistroNames(clusterCreate.getAppManager());
-            if (validName(distro, distroNames)) {
-               clusterCreate.setDistro(distro);
-            } else {
+            DistroRead[] distroReads = appManagerRestClient.getDistros(clusterCreate.getAppManager());
+            distroRead4Create = getDistroByName(distroReads, distro);
+
+            if (distroRead4Create == null) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                      name, Constants.OUTPUT_OP_CREATE,
                      Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_DISTRO
-                           + Constants.PARAM_NOT_SUPPORTED + distroNames);
+                           + Constants.PARAM_NOT_SUPPORTED + getDistroNames(distroReads));
                return;
             }
          } else {
-            String defaultDistroName =
-                  getDefaultDistroName(clusterCreate.getAppManager());
-            if (CommandsUtils.isBlank(defaultDistroName)) {
+            distroRead4Create = appManagerRestClient.getDefaultDistro(clusterCreate.getAppManager());
+            if (distroRead4Create == null || CommandsUtils.isBlank(distroRead4Create.getName())) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                      name, Constants.OUTPUT_OP_CREATE,
                      Constants.OUTPUT_OP_RESULT_FAIL,
                      Constants.PARAM_NO_DEFAULT_DISTRO);
                return;
-            } else {
-               clusterCreate.setDistro(defaultDistroName);
             }
          }
       } catch (CliRestException e) {
@@ -223,9 +222,10 @@ public class ClusterCommands implements CommandMarker {
                e.getMessage());
          return;
       }
-      DistroRead distroRead = getDistroByName(clusterCreate.getAppManager(), clusterCreate.getDistro());
-      clusterCreate.setDistroVendor(distroRead.getVendor());
-      clusterCreate.setDistroVersion(distroRead.getVersion());
+      clusterCreate.setDistro(distroRead4Create.getName());
+      clusterCreate.setDistroVendor(distroRead4Create.getVendor());
+      clusterCreate.setDistroVersion(distroRead4Create.getVersion());
+
       if (rpNames != null) {
          List<String> rpNamesList = CommandsUtils.inputsConvert(rpNames);
          if (rpNamesList.isEmpty()) {
@@ -368,17 +368,15 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   private DistroRead getDistroByName(String appManager, String distroName) {
-      return appManagerRestClient.getDistroByName(appManager, distroName);
-   }
-
-   private String getDefaultDistroName(String appManager) {
-      DistroRead distro = appManagerRestClient.getDefaultDistro(appManager);
-      if (distro != null) {
-         return distro.getName();
-      } else {
-         return null;
+   private DistroRead getDistroByName(DistroRead[] distroReads, String distroName) {
+      if(distroReads != null && distroName != null) {
+         for (DistroRead distroRead : distroReads) {
+            if (distroName.equals(distroRead.getName())) {
+               return distroRead;
+            }
+         }
       }
+      return null;
    }
 
    /**
@@ -1281,12 +1279,12 @@ public class ClusterCommands implements CommandMarker {
       return allNetworks;
    }
 
-   private List<String> getDistroNames(String appManager) {
-      List<String> distroNames = new ArrayList<String>(0);
-      DistroRead[] distros = appManagerRestClient.getDistros(appManager);
-      if (distros != null) {
-         for (DistroRead distro : distros) {
-            distroNames.add(distro.getName());
+   private String[] getDistroNames(DistroRead[] distroReads) {
+      String[] distroNames = null;
+      if(distroReads != null) {
+         distroNames = new String[distroReads.length];
+         for (int i = 0; i < distroNames.length; i++) {
+            distroNames[i] = distroReads[i].getName();
          }
       }
       return distroNames;

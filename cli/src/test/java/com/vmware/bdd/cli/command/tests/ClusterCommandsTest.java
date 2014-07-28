@@ -297,6 +297,38 @@ public class ClusterCommandsTest extends MockRestServer {
     }
 
     @Test
+    public void testCreateClusterWithDistroName() throws Exception {
+        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+        DistroRead[] distros = new DistroRead[3];
+        distros[0] = new DistroRead();
+        distros[0].setName(Constants.DEFAULT_DISTRO+0);
+        distros[1] = new DistroRead();
+        distros[1].setName(Constants.DEFAULT_DISTRO);
+        distros[2] = new DistroRead();
+        distros[2].setName(Constants.DEFAULT_DISTRO+2);
+        NetworkRead[] networks = new NetworkRead[1];
+        NetworkRead network = new NetworkRead();
+        network.setName("dhcp");
+        network.setDhcp(true);
+        network.setPortGroup("pg1");
+        networks[0] = network;
+
+        ObjectMapper mapper = new ObjectMapper();
+        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Default/distros", HttpMethod.GET, HttpStatus.OK,
+                mapper.writeValueAsString(distros));
+        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
+                mapper.writeValueAsString(networks));
+
+        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST,
+                HttpStatus.NO_CONTENT, "");
+
+        clusterCommands.createCluster("cluster1", null, "HADOOP", Constants.DEFAULT_DISTRO, null, null, null, null, null, null, null, false, false, true, false);
+
+        CookieCache.clear();
+    }
+
+
+    @Test
     public void testCreateClusterFailure() throws Exception {
         CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         DistroRead[] distros = new DistroRead[1];
