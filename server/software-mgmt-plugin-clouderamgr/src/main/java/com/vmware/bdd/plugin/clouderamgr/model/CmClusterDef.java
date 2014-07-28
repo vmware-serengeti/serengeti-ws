@@ -125,6 +125,7 @@ public class CmClusterDef implements Serializable {
                         roleDef.addConfig(Constants.CONFIG_AUTO_FAILOVER_ENABLED, "true");
                         roleDef.addConfig(Constants.CONFIG_DFS_FEDERATION_NAMESERVICE, "nameservice" + nameServiceIndex.toString()); // TODO: federation
                         roleDef.addConfig(Constants.CONFIG_DFS_NAMENODE_QUORUM_JOURNAL_NAME, "nameservice" + nameServiceIndex.toString());
+                        //roleDef.addConfig(Constants.CONFIG_DFS_NAMESERVICE_MOUNTPOINTS, "/");
                         roleDef.setActive(!alreadyHasActive);
 
                         // auto-complete Failover Controller role

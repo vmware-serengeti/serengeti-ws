@@ -22,6 +22,8 @@ import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+import com.vmware.bdd.utils.Constants;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -49,7 +51,7 @@ public class CmClusterValidator {
    }
 
    public boolean validateBlueprint(ClusterBlueprint blueprint) {
-      logger.info("Start to validate bludprint for cluster " + blueprint.getName());
+      logger.info("Start to validate blueprint for cluster " + blueprint.getName());
 
       String distro = blueprint.getHadoopStack().getDistro();
       int majorVersion = CmUtils.majorVersionOfHadoopStack(blueprint.getHadoopStack());
@@ -71,8 +73,12 @@ public class CmClusterValidator {
             return false;
          }
 
+         int nnGroupsNum = 0;
          for (NodeGroupInfo group : blueprint.getNodeGroups()) {
             validateConfigs(group.getConfiguration(), unRecogConfigTypes, unRecogConfigKeys, majorVersion);
+            if (group.getRoles().contains("HDFS_NAMENODE")) {
+               nnGroupsNum++;
+            }
 
             for (String roleName: group.getRoles()) {
                if (!availableRoles.contains(roleName)) {
@@ -103,6 +109,10 @@ public class CmClusterValidator {
             }
          }
 
+         if (nnGroupsNum > 1) {
+            errorMsgList.add("Namenode federation is not supported currently");
+         }
+
          if (unRecogRoles != null && !unRecogRoles.isEmpty()) {      // point 1: unrecognized roles
             errorMsgList.add("Roles " + unRecogRoles.toString() + " are not available by distro " + distro);
          }
@@ -121,14 +131,46 @@ public class CmClusterValidator {
          }
 
          for (String serviceName : definedServices) {
+            // service dependency check
+            for (AvailableServiceRole.Dependency dependency : AvailableServiceRoleContainer.load(serviceName).getDependencies()) {
+               if (!dependency.isRequired()) {
+                  continue;
+               }
+               if (dependency.getServices().size() == 1 && !definedServices.contains(dependency.getServices().get(0))) {
+                  errorMsgList.add(serviceName + " depends on " + dependency.getServices().get(0) + " service");
+               } else {
+                  boolean found = false;
+                  for (String dependService : dependency.getServices()) {
+                     if (definedServices.contains(dependService)) {
+                        found = true;
+                     }
+                  }
+                  if (!found) {
+                     errorMsgList.add(serviceName + " depends on one service of " + dependency.getServices().toString());
+                  }
+               }
+            }
+
             Set<String> requiredRoles = new HashSet<String>();
             switch (serviceName) {
                case "HDFS":
                   requiredRoles.add("HDFS_NAMENODE");
                   requiredRoles.add("HDFS_DATANODE");
                   if (checkRequiredRoles(serviceName, requiredRoles, definedRoles.keySet(), errorMsgList)) {
-                     if (definedRoles.get("HDFS_NAMENODE") < 2 && !definedRoles.containsKey("HDFS_SECONDARY_NAMENODE")) { // TODO: how to check HA
-                        errorMsgList.add("HDFS service not configured for High Availability must have a SecondaryNameNode");
+                     if (nnGroupsNum == 1) {
+                        if (definedRoles.get("HDFS_NAMENODE") < 2 && !definedRoles.containsKey("HDFS_SECONDARY_NAMENODE")) {
+                           errorMsgList.add("HDFS service not configured for High Availability must have a SecondaryNameNode");
+                        }
+                        if (definedRoles.get("HDFS_NAMENODE") >= 2 && !definedRoles.containsKey("HDFS_JOURNALNODE")) {
+                           errorMsgList.add("HDFS service configured for High Availability must have journal nodes");
+                        }
+                     }
+                  }
+                  if (definedRoles.containsKey("HDFS_JOURNALNODE")) {
+                     if (definedRoles.get("HDFS_JOURNALNODE") > 1 && definedRoles.get("HDFS_JOURNALNODE") < 3) {
+                        errorMsgList.add(Constants.WRONG_NUM_OF_JOURNALNODE);
+                     } else if (definedRoles.get("HDFS_JOURNALNODE") % 2 == 0) {
+                        warningMsgList.add(Constants.ODD_NUM_OF_JOURNALNODE);
                      }
                   }
                   break;
@@ -136,18 +178,67 @@ public class CmClusterValidator {
                   requiredRoles.add("YARN_RESOURCE_MANAGER");
                   requiredRoles.add("YARN_NODE_MANAGER");
                   requiredRoles.add("YARN_JOB_HISTORY");
-                  checkRequiredRoles(serviceName, requiredRoles, definedRoles.keySet(), errorMsgList);
-                  if (!definedServices.contains("HDFS")) {
-                     errorMsgList.add("YARN service depends on HDFS service");
+                  if (checkRequiredRoles(serviceName, requiredRoles, definedRoles.keySet(), errorMsgList)) {
+                     if (definedRoles.get("YARN_RESOURCE_MANAGER") > 1) {
+                        errorMsgList.add(Constants.WRONG_NUM_OF_RESOURCEMANAGER);
+                     }
+                  }
+                  break;
+               case "MAPREDUCE":
+                  requiredRoles.add("MAPREDUCE_JOBTRACKER");
+                  requiredRoles.add("MAPREDUCE_TASKTRACKER");
+                  if (checkRequiredRoles(serviceName, requiredRoles, definedRoles.keySet(), errorMsgList)) {
+                     if (definedRoles.get("MAPREDUCE_JOBTRACKER") > 1) {
+                        errorMsgList.add(Constants.WRONG_NUM_OF_JOBTRACKER);
+                     }
                   }
                   break;
                case "HBASE":
-                  if (!definedServices.contains("HDFS")) {
-                     errorMsgList.add("HBASE service depends on HDFS service");
+                  requiredRoles.add("HBASE_MASTER");
+                  requiredRoles.add("HBASE_REGION_SERVER");
+                  checkRequiredRoles(serviceName, requiredRoles, definedRoles.keySet(), errorMsgList);
+                  break;
+               case "ZOOKEEPER":
+                  requiredRoles.add("ZOOKEEPER_SERVER");
+                  if (checkRequiredRoles(serviceName, requiredRoles, definedRoles.keySet(), errorMsgList)) {
+                     if (definedRoles.get("ZOOKEEPER_SERVER") > 0 && definedRoles.get("ZOOKEEPER_SERVER") < 3) {
+                        errorMsgList.add(Constants.WRONG_NUM_OF_ZOOKEEPER);
+                     } else if (definedRoles.get("ZOOKEEPER_SERVER") % 2 == 0)  {
+                        warningMsgList.add(Constants.ODD_NUM_OF_ZOOKEEPER);
+                     }
                   }
-                  if (!definedServices.contains("ZOOKEEPER")) {
-                     errorMsgList.add("HBASE service depends on ZOOKEEPER service");
+                  break;
+               case "HIVE":
+                  requiredRoles.add("HIVE_METASTORE");
+                  requiredRoles.add("HIVE_SERVER2");
+                  checkRequiredRoles(serviceName, requiredRoles, definedRoles.keySet(), errorMsgList);
+                  String[] requiredConfigs = {
+                        "hive_metastore_database_host",
+                        "hive_metastore_database_name",
+                        "hive_metastore_database_password",
+                        "hive_metastore_database_port",
+                        "hive_metastore_database_type",
+                        "hive_metastore_database_user"
+                  };
+
+                  boolean configured = true;
+                  if (blueprint.getConfiguration().containsKey("HIVE")) {
+                     Map<String, String> configuredItems = (Map<String, String>) blueprint.getConfiguration().get("HIVE");
+                     for (String item : requiredConfigs) {
+                        if (!configuredItems.containsKey(item)) {
+                           configured = false;
+                           break;
+                        }
+                     }
+                  } else {
+                     configured = false;
                   }
+
+                  if (!configured) {
+                     errorMsgList.add("HIVE service depends on an external database, please setup one and provide configuration properties ["
+                           + StringUtils.join(requiredConfigs, ",") + "] for HIVE service");
+                  }
+
                   break;
                default:
                   break;

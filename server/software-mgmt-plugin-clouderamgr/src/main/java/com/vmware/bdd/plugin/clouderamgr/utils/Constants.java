@@ -38,6 +38,7 @@ public interface Constants {
    public static final String CONFIG_AUTO_FAILOVER_ENABLED = "autofailover_enabled";
    public static final String CONFIG_DFS_FEDERATION_NAMESERVICE = "dfs_federation_namenode_nameservice";
    public static final String CONFIG_DFS_NAMENODE_QUORUM_JOURNAL_NAME = "dfs_namenode_quorum_journal_name";
+   public static final String CONFIG_DFS_NAMESERVICE_MOUNTPOINTS = "nameservice_mountpoints";
 
    public static final String CONFIG_ZOOKEEPER_SERVER_ID = "serverId";
 
