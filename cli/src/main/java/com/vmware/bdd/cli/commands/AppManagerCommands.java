@@ -82,64 +82,16 @@ public class AppManagerCommands implements CommandMarker {
       appManagerAdd.setType(type);
       appManagerAdd.setUrl(url);
 
-      Map<String,String> loginInfo = new HashMap<String,String>();
-      String username = null;
-      String password = null;
-      loginInfo.put(Constants.LOGIN_USERNAME, username);
-      loginInfo.put(Constants.LOGIN_PASSWORD, password);
-      try {
-         if (CommandsUtils.isBlank(username)) {
-            if (!CommandsUtils.prompt(Constants.CONNECT_ENTER_USER_NAME,
-                  CommandsUtils.PromptType.USER_NAME, loginInfo)) {
-               return;
-            }
-         }
-         if (CommandsUtils.isBlank(password)) {
-            if (!CommandsUtils.prompt(Constants.CONNECT_ENTER_PASSWORD, CommandsUtils.PromptType.PASSWORD,
-                  loginInfo)) {
-               return;
-            }
-         }
-      } catch (Exception e) {
-         System.out.println();
-         System.out.println(Constants.OUTPUT_OBJECT_APPMANAGER + " "
-               + Constants.OUTPUT_OP_RESULT_FAIL + ": " + e.getMessage());
+      Map<String, String> loginInfo = getAccount();
+      if (null == loginInfo) {
          return;
       }
-      username = loginInfo.get(Constants.LOGIN_USERNAME);
-      password = loginInfo.get(Constants.LOGIN_PASSWORD);
-      appManagerAdd.setUsername(username);
-      appManagerAdd.setPassword(password);
+      appManagerAdd.setUsername(loginInfo.get(Constants.LOGIN_USERNAME));
+      appManagerAdd.setPassword(loginInfo.get(Constants.LOGIN_PASSWORD));
 
-      String sslCertificateFilePath = null;
-      String sslCertificate = null;
       if (url.toLowerCase().startsWith("https")) {
-         int k = 0;
-         while (k < 3) {
-            try {
-               ConsoleReader reader = new ConsoleReader();
-               reader.setPrompt(Constants.PARAM_PROMPT_SSL_CERTIFICATE_MESSAGE);
-               sslCertificateFilePath = reader.readLine();
-
-               if (CommonUtil.isBlank(sslCertificateFilePath)) {
-                  System.out.println("File path cannot be null.");
-               } else {
-                  try {
-                     sslCertificate =
-                           CommandsUtils.dataFromFile(sslCertificateFilePath);
-                     break;
-                  } catch (FileNotFoundException e) {
-                     System.out.println("Cannot find file " + sslCertificateFilePath + ".");
-                  } catch (IOException e) {
-                     System.out.println("Cannot read file " + sslCertificateFilePath + ".");
-                  }
-               }
-            } catch (IOException e) {
-               System.out.println("Cannot read file path.");
-            }
-            k++;
-         }
-         if (k < 3) {
+         String sslCertificate = getSslCertificate();
+         if (null != sslCertificate) {
             appManagerAdd.setSslCertificate(sslCertificate);
          } else {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
@@ -158,6 +110,69 @@ public class AppManagerCommands implements CommandMarker {
                name, Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
       }
+   }
+
+   private String getSslCertificate() {
+      String sslCertificateFilePath;
+      String sslCertificate = "";
+      int k = 0;
+      while (k < 3) {
+         try {
+            ConsoleReader reader = new ConsoleReader();
+            reader.setPrompt(Constants.PARAM_PROMPT_SSL_CERTIFICATE_MESSAGE);
+            sslCertificateFilePath = reader.readLine();
+
+            if (CommonUtil.isBlank(sslCertificateFilePath)) {
+               System.out.println("File path cannot be null.");
+            } else {
+               try {
+                  sslCertificate =
+                        CommandsUtils.dataFromFile(sslCertificateFilePath);
+                  break;
+               } catch (FileNotFoundException e) {
+                  System.out.println("Cannot find file " + sslCertificateFilePath + ".");
+               } catch (IOException e) {
+                  System.out.println("Cannot read file " + sslCertificateFilePath + ".");
+               }
+            }
+         } catch (IOException e) {
+            System.out.println("Cannot read file path.");
+         }
+         k++;
+      }
+      if (k < 3) {
+         return sslCertificate;
+      } else {
+         return null;
+      }
+   }
+
+   private Map<String, String> getAccount() {
+      Map<String,String> loginInfo = new HashMap<String,String>();
+      String username = null;
+      String password = null;
+      loginInfo.put(Constants.LOGIN_USERNAME, username);
+      loginInfo.put(Constants.LOGIN_PASSWORD, password);
+      try {
+         if (CommandsUtils.isBlank(username)) {
+            if (!CommandsUtils.prompt(Constants.CONNECT_ENTER_USER_NAME,
+                  CommandsUtils.PromptType.USER_NAME, loginInfo)) {
+               return null;
+            }
+         }
+         if (CommandsUtils.isBlank(password)) {
+            if (!CommandsUtils.prompt(Constants.CONNECT_ENTER_PASSWORD, CommandsUtils.PromptType.PASSWORD,
+                  loginInfo)) {
+               return null;
+            }
+         }
+      } catch (Exception e) {
+         System.out.println();
+         System.out.println(Constants.OUTPUT_OBJECT_APPMANAGER + " "
+               + Constants.OUTPUT_OP_RESULT_FAIL + ": " + e.getMessage());
+         return null;
+      }
+      return loginInfo;
    }
 
    /**
@@ -366,21 +381,76 @@ public class AppManagerCommands implements CommandMarker {
    @CliCommand(value = "appmanager modify", help = "Modify an app manager instance")
    public void modifyAppManager(
          @CliOption(key = { "name" }, mandatory = true, help = "The instance name") final String name,
-         @CliOption(key = { "description" }, mandatory = false, help = "The instance description") final String description,
-         @CliOption(key = { "type" }, mandatory = true, help = "The provider type, ClouderaManager or Ambari") final String type,
-         @CliOption(key = { "url" }, mandatory = true, help = "The instance URL, e.g. http://hostname:port") final String url,
-         @CliOption(key = { "username" }, mandatory = true, help = "The login user name") final String username,
-         @CliOption(key = { "password" }, mandatory = true, help = "The login password") final String password) {
-      //TODO follow the spec
-      AppManagerAdd appManagerAdd = new AppManagerAdd();
-      appManagerAdd.setName(name);
-      appManagerAdd.setDescription(description);
-      appManagerAdd.setType(type);
-      appManagerAdd.setUrl(url);
-      appManagerAdd.setUsername(username);
-      appManagerAdd.setPassword(password);
+         //@CliOption(key = { "description" }, mandatory = false, help = "The instance description") final String description,
+         //@CliOption(key = { "type" }, mandatory = false, help = "The provider type, ClouderaManager or Ambari") final String type,
+         @CliOption(key = { "url" }, mandatory = false, help = "The instance URL, e.g. http://hostname:port") final String url,
+         @CliOption(key = { "changeAccount" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Change login account") final boolean changeAccount,
+         @CliOption(key = { "changeCertificate" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Change ssl certificate") final boolean changeCertificate) {
+
+      if (url == null && !changeAccount && !changeCertificate) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
+               name, Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL,
+               "Must use at least one of --url, --changeAccount or --changeCertificate.");
+         return;
+      }
 
       try {
+         AppManagerRead appManagerRead = restClient.get(name);
+
+         AppManagerAdd appManagerAdd = new AppManagerAdd();
+         appManagerAdd.setName(name);
+         //appManagerAdd.setDescription(description);
+         appManagerAdd.setDescription(appManagerRead.getDescription());
+         //appManagerAdd.setType(type);
+         appManagerAdd.setType(appManagerRead.getType());
+         if (url == null) {
+            appManagerAdd.setUrl(appManagerRead.getUrl());
+         } else {
+            appManagerAdd.setUrl(url);
+         }
+
+         if (changeAccount) {
+            Map<String, String> loginInfo = getAccount();
+            if (null == loginInfo) {
+               return;
+            }
+            appManagerAdd.setUsername(loginInfo.get(Constants.LOGIN_USERNAME));
+            appManagerAdd.setPassword(loginInfo.get(Constants.LOGIN_PASSWORD));
+         } else {
+            appManagerAdd.setUsername(appManagerRead.getUsername());
+            appManagerAdd.setPassword(appManagerRead.getPassword());
+         }
+
+         if ((url != null && url.toLowerCase().startsWith("https"))
+               || (url == null && changeCertificate && appManagerAdd
+                     .getSslCertificate().toLowerCase().startsWith("https"))) {
+            // new URL starts with https or
+            // changeCertificate for old URL starts with https (no new URL)
+            String sslCertificate = getSslCertificate();
+            if (null == sslCertificate) {
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
+                     name, Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL,
+                     "Fail to get ssl certificate.");
+               return;
+            }
+            appManagerAdd.setSslCertificate(sslCertificate);
+         } else if (url == null
+               && changeCertificate
+               && !appManagerAdd.getSslCertificate().toLowerCase()
+                     .startsWith("https")) {
+            // changeCertificate for old URL does not start with https (no new URL)
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
+                  name, Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL,
+                  "Cannot set ssl certificate for http service.");
+            return;
+         } else if (url != null && !url.toLowerCase().startsWith("https")) {
+            // new url does not start with https
+            appManagerAdd.setSslCertificate(null);
+         } else {
+            // no new url or changeCertificate
+            appManagerAdd.setSslCertificate(appManagerRead.getSslCertificate());
+         }
+
          restClient.modify(appManagerAdd);
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_APPMANAGER,
                name, Constants.OUTPUT_OP_RESULT_MODIFY);
