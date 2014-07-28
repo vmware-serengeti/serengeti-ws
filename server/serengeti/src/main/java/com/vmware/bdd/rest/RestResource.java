@@ -1036,7 +1036,7 @@ public class RestResource {
 
    /**
     * Store rack list information into BDE for rack related support, such as hadoop rack awareness and node placement policies
-    * @param racksInfo
+    * @param racksInfo A list of rack information
     */
    @RequestMapping(value = "/racks", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.OK)
