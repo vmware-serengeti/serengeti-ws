@@ -359,8 +359,14 @@ public class ClusterManager {
       SoftwareManager softMgr = softwareManagerCollector.getSoftwareManager(createSpec.getAppManager());
       // @ Todo if specify hadoop stack, we can get hadoop stack by stack name. Otherwise, we will get a default hadoop stack.
       HadoopStack stack = clusterConfigMgr.filterDistroFromAppManager(softMgr, createSpec.getDistro());
+
+      // if the distro is not specified by the REST Client, add it.
+      if(CommonUtil.isBlank(createSpec.getDistro())) {
+         createSpec.setDistro(stack.getDistro());
+      }
       createSpec.setDistroVendor(stack.getVendor());
       createSpec.setDistroVersion(stack.getFullVersion());
+
       // create auto rps if vc cluster/rp is specified
       createAutoRps(createSpec);
       ClusterCreate clusterSpec =
