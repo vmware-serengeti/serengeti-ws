@@ -16,6 +16,7 @@ package com.vmware.bdd.plugin.ambari.api.v1;
 
 import javax.ws.rs.Path;
 
+import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.ClustersResource;
 import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks.Stacks2Resource;
 @Path("")
 public interface RootResourceV1 {

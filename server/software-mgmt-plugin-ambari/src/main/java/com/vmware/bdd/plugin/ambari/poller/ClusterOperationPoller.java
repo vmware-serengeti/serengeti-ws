@@ -19,11 +19,11 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
-import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
-import com.vmware.bdd.plugin.ambari.api.model.ApiTask;
-import com.vmware.bdd.plugin.ambari.api.model.ApiTaskInfo;
-import com.vmware.bdd.plugin.ambari.api.model.ClusterRequestStatus;
-import com.vmware.bdd.plugin.ambari.api.model.TaskStatus;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTask;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTaskInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ClusterRequestStatus;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.TaskStatus;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
@@ -59,7 +59,7 @@ public class ClusterOperationPoller extends StatusPoller {
    public boolean poll() {
       Long requestId = apiRequestSummary.getApiRequestInfo().getRequestId();
       ApiRequest apiRequest =
-            apiManager.requestWithTasks(clusterName, requestId);
+            apiManager.getRequestWithTasks(clusterName, requestId);
 
       ClusterRequestStatus clusterRequestStatus =
             ClusterRequestStatus.valueOf(apiRequest.getApiRequestInfo()

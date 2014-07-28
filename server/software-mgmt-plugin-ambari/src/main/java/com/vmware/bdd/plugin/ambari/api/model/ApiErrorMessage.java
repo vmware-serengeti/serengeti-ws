@@ -12,25 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.v1;
+package com.vmware.bdd.plugin.ambari.api.model;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import com.google.gson.annotations.Expose;
 
-@Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-public interface RootServicesResource {
+public class ApiErrorMessage {
 
-   @GET
-   @Path("/")
-   public Response readRootService();
+   @Expose
+   private String status;
 
-   @GET
-   @Path("/AMBARI/components/AMBARI_SERVER")
-   public Response readRootServiceComponents();
+   @Expose
+   private String message;
 
+   public String getStatus() {
+      return status;
+   }
+
+   public void setStatus(String status) {
+      this.status = status;
+   }
+
+   public String getMessage() {
+      return message;
+   }
+
+   public void setMessage(String message) {
+      this.message = message;
+   }
 }

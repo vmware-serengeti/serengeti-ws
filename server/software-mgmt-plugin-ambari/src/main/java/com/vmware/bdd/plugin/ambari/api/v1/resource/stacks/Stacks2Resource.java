@@ -20,6 +20,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import com.vmware.bdd.plugin.ambari.api.Parameters;
 
@@ -30,11 +31,11 @@ public interface Stacks2Resource {
 
    @GET
    @Path("/")
-   public String readStacks();
+   public Response readStacks();
 
    @GET
    @Path("/{stackName}")
-   public String readStack(@PathParam(Parameters.STACK_NAME) String stackName);
+   public Response readStack(@PathParam(Parameters.STACK_NAME) String stackName);
 
    @Path("/{stackName}/versions")
    public VersionsResource getStackVersionsResource(

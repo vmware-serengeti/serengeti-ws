@@ -23,9 +23,9 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.gson.annotations.Expose;
-import com.vmware.bdd.plugin.ambari.api.model.ApiComponentInfo;
-import com.vmware.bdd.plugin.ambari.api.model.ApiHost;
-import com.vmware.bdd.plugin.ambari.api.model.ApiHostGroup;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 
 public class AmNodeDef implements Serializable {

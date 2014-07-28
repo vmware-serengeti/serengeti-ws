@@ -12,26 +12,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
+package com.vmware.bdd.plugin.ambari.api.model.blueprint;
 
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
 
-public class ApiStackServiceComponent {
+public class ApiBlueprint {
 
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("StackServiceComponents")
-   private ApiComponentInfo apiServiceComponent;
+   private List<Map<String, Object>> configurations;
 
    @Expose
-   @SerializedName("dependencies")
-   private List<ApiComponentDependency> apiComponentDependencies;
+   @SerializedName("host_groups")
+   private List<ApiHostGroup> apiHostGroups;
+
+   @Expose
+   @SerializedName("Blueprints")
+   private ApiBlueprintInfo apiBlueprintInfo;
 
    public String getHref() {
       return href;
@@ -41,21 +45,28 @@ public class ApiStackServiceComponent {
       this.href = href;
    }
 
-   public ApiComponentInfo getApiServiceComponent() {
-      return apiServiceComponent;
+   public List<Map<String, Object>> getConfigurations() {
+      return configurations;
    }
 
-   public void setApiServiceComponent(ApiComponentInfo apiServiceComponent) {
-      this.apiServiceComponent = apiServiceComponent;
+   public void setConfigurations(List<Map<String, Object>> configurations) {
+      this.configurations = configurations;
    }
 
-   public List<ApiComponentDependency> getApiComponentDependencies() {
-      return apiComponentDependencies;
+   public ApiBlueprintInfo getApiBlueprintInfo() {
+      return apiBlueprintInfo;
    }
 
-   public void setApiComponentDependencies(
-         List<ApiComponentDependency> apiComponentDependencies) {
-      this.apiComponentDependencies = apiComponentDependencies;
+   public void setApiBlueprintInfo(ApiBlueprintInfo apiBlueprintInfo) {
+      this.apiBlueprintInfo = apiBlueprintInfo;
+   }
+
+   public List<ApiHostGroup> getApiHostGroups() {
+      return apiHostGroups;
+   }
+
+   public void setApiHostGroups(List<ApiHostGroup> apiHostGroups) {
+      this.apiHostGroups = apiHostGroups;
    }
 
 }

@@ -19,19 +19,26 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import com.vmware.bdd.plugin.ambari.api.Parameters;
 
 @Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+      MediaType.TEXT_PLAIN })
 public interface ComponentsResource {
 
    @GET
    @Path("/")
-   public String readServiceComponents();
+   public Response readComponents();
 
    @GET
-   @Path("/{serviceComponentName}")
-   public String readServiceComponent(@PathParam(Parameters.SERVICE_COMPONENT_NAME) String serviceComponentName);
+   @Path("/")
+   public Response readComponentsWithFilter(@QueryParam("fields") String fields);
+
+   @GET
+   @Path("/{componentName}")
+   public Response readComponent(@PathParam(Parameters.COMPONENT_NAME) String componentName);
 }

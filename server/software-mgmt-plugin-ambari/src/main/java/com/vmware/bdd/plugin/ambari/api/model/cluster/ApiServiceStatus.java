@@ -15,42 +15,14 @@
  *  **************************************************************************
  */
 
-package com.vmware.bdd.plugin.ambari.api.model;
-
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestInfo;
+package com.vmware.bdd.plugin.ambari.api.model.cluster;
 
 /**
  * Created by qjin on 7/7/14.
  */
-public class ApiPutRequest {
-   @Expose
-   @SerializedName("Body")
-   private ApiBody body;
-
-   @Expose
-   @SerializedName("RequestInfo")
-   private ApiRequestInfo requestInfo;
-
-   public ApiPutRequest(ApiRequestInfo apiRequestInfo, ApiBody apiBody) {
-      this.requestInfo = apiRequestInfo;
-      this.body = apiBody;
-   }
-
-   public ApiBody getBody() {
-      return body;
-   }
-
-   public void setBody(ApiBody body) {
-      this.body = body;
-   }
-
-   public ApiRequestInfo getRequestInfo() {
-      return requestInfo;
-   }
-
-   public void setRequestInfo(ApiRequestInfo requestInfo) {
-      this.requestInfo = requestInfo;
-   }
+public enum ApiServiceStatus {
+   STARTED,    //service is running
+   INSTALLED,   //service is installed, but not running
+   STOPPED,
+   ALERT
 }

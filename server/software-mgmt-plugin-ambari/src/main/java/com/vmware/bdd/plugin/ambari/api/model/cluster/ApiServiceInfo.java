@@ -15,42 +15,48 @@
  *  **************************************************************************
  */
 
-package com.vmware.bdd.plugin.ambari.api.model;
+package com.vmware.bdd.plugin.ambari.api.model.cluster;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestInfo;
 
 /**
  * Created by qjin on 7/7/14.
  */
-public class ApiPutRequest {
+public class ApiServiceInfo {
    @Expose
-   @SerializedName("Body")
-   private ApiBody body;
+   @SerializedName("cluster_name")
+   private String clusterName;
 
    @Expose
-   @SerializedName("RequestInfo")
-   private ApiRequestInfo requestInfo;
+   @SerializedName("service_name")
+   private String serviceName;
 
-   public ApiPutRequest(ApiRequestInfo apiRequestInfo, ApiBody apiBody) {
-      this.requestInfo = apiRequestInfo;
-      this.body = apiBody;
+   @Expose
+   @SerializedName("state")
+   private String state;
+
+   public String getClusterName() {
+      return clusterName;
    }
 
-   public ApiBody getBody() {
-      return body;
+   public void setClusterName(String clusterName) {
+      this.clusterName = clusterName;
    }
 
-   public void setBody(ApiBody body) {
-      this.body = body;
+   public String getServiceName() {
+      return serviceName;
    }
 
-   public ApiRequestInfo getRequestInfo() {
-      return requestInfo;
+   public void setServiceName(String serviceName) {
+      this.serviceName = serviceName;
    }
 
-   public void setRequestInfo(ApiRequestInfo requestInfo) {
-      this.requestInfo = requestInfo;
+   public String getState() {
+      return state;
+   }
+
+   public void setState(String state) {
+      this.state = state;
    }
 }

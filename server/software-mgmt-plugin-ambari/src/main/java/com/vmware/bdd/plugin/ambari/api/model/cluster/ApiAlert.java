@@ -12,25 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.v1;
+package com.vmware.bdd.plugin.ambari.api.model.cluster;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
-@Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-public interface RootServicesResource {
+public class ApiAlert {
+   @Expose
+   @SerializedName("summary")
+   private ApiAlertSummary summary;
 
-   @GET
-   @Path("/")
-   public Response readRootService();
+   public ApiAlertSummary getSummary() {
+      return summary;
+   }
 
-   @GET
-   @Path("/AMBARI/components/AMBARI_SERVER")
-   public Response readRootServiceComponents();
-
+   public void setSummary(ApiAlertSummary summary) {
+      this.summary = summary;
+   }
 }

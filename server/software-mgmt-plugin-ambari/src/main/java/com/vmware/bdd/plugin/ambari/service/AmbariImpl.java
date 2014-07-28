@@ -24,24 +24,24 @@ import java.util.Set;
 
 import javax.ws.rs.NotFoundException;
 
-import com.vmware.bdd.plugin.ambari.api.model.ApiHost;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
-import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprint;
-import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrap;
-import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapHostStatus;
-import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapStatus;
-import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
-import com.vmware.bdd.plugin.ambari.api.model.ApiComponentInfo;
-import com.vmware.bdd.plugin.ambari.api.model.ApiHostGroup;
-import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
-import com.vmware.bdd.plugin.ambari.api.model.ApiTask;
-import com.vmware.bdd.plugin.ambari.api.model.ApiTaskInfo;
-import com.vmware.bdd.plugin.ambari.api.model.BootstrapStatus;
-import com.vmware.bdd.plugin.ambari.api.model.ClusterRequestStatus;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
+import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
+import com.vmware.bdd.plugin.ambari.api.model.blueprint.BootstrapStatus;
+import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
+import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapHostStatus;
+import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapStatus;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTask;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTaskInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ClusterRequestStatus;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
@@ -140,15 +140,15 @@ public class AmbariImpl implements SoftwareManager {
    public List<HadoopStack> getSupportedStacks()
          throws SoftwareManagementPluginException {
       List<HadoopStack> hadoopStacks = new ArrayList<HadoopStack>();
-      ApiStackList stackList = apiManager.stackList();
+      ApiStackList stackList = apiManager.getStackList();
       for (ApiStack apiStack : stackList.getApiStacks()) {
          for (ApiStackVersion apiStackVersionSummary : apiManager
-               .stackVersionList(apiStack.getApiStackName().getStackName())
+               .getStackVersionList(apiStack.getApiStackName().getStackName())
                .getApiStackVersions()) {
             ApiStackVersionInfo apiStackVersionInfoSummary =
                   apiStackVersionSummary.getApiStackVersionInfo();
             ApiStackVersion apiStackVersion =
-                  apiManager.stackVersion(
+                  apiManager.getStackVersion(
                         apiStackVersionInfoSummary.getStackName(),
                         apiStackVersionInfoSummary.getStackVersion());
             ApiStackVersionInfo apiStackVersionInfo =
@@ -163,7 +163,7 @@ public class AmbariImpl implements SoftwareManager {
 
                List<String> roles = new ArrayList<String>();
                ApiStackServiceList apiStackServiceList =
-                     apiManager.stackServiceListWithComponents(
+                     apiManager.getStackServiceListWithComponents(
                            hadoopStack.getVendor(),
                            hadoopStack.getFullVersion());
                for (ApiStackService apiStackService : apiStackServiceList
@@ -235,7 +235,7 @@ public class AmbariImpl implements SoftwareManager {
    private boolean isProvisioned(String clusterName)
          throws SoftwareManagementPluginException {
       try {
-         for (ApiCluster apiCluster : apiManager.clusterList().getClusters()) {
+         for (ApiCluster apiCluster : apiManager.getClusterList().getClusters()) {
             if (apiCluster.getClusterInfo().getClusterName()
                   .equals(clusterName)) {
                return true;
@@ -285,7 +285,7 @@ public class AmbariImpl implements SoftwareManager {
       for (AmNodeDef node : clusterDef.getNodes()) {
          hostnames.add(node.getFqdn());
       }
-      for (ApiHost apiHost : apiManager.cluster(clusterName).getApiHosts()) {
+      for (ApiHost apiHost : apiManager.getCluster(clusterName).getApiHosts()) {
          if (!hostnames.contains(apiHost.getApiHostInfo().getHostName())) {
             throw SoftwareManagementPluginException.CLUSTER_ALREADY_EXIST(clusterName, null);
          }
@@ -315,7 +315,7 @@ public class AmbariImpl implements SoftwareManager {
          boolean success = false;
          boolean allHostsBootstrapped = true;
          ApiBootstrapStatus apiBootstrapStatus =
-               apiManager.bootstrapStatus(apiBootstrapRequest.getRequestId());
+               apiManager.getBootstrapStatus(apiBootstrapRequest.getRequestId());
          BootstrapStatus bootstrapStatus =
                BootstrapStatus.valueOf(apiBootstrapStatus.getStatus());
          if (!bootstrapStatus.isFailedState()) {
@@ -404,7 +404,7 @@ public class AmbariImpl implements SoftwareManager {
    private boolean isBlueprintCreated(final AmClusterDef clusterDef)
          throws SoftwareManagementPluginException {
       try {
-         for (ApiBlueprint apiBlueprint : apiManager.blueprintList()
+         for (ApiBlueprint apiBlueprint : apiManager.getBlueprintList()
                .getApiBlueprints()) {
             if (clusterDef.getName().equals(
                   apiBlueprint.getApiBlueprintInfo().getBlueprintName())) {
@@ -485,7 +485,7 @@ public class AmbariImpl implements SoftwareManager {
 
          boolean success = false;
          ApiRequest apiRequest =
-               apiManager.request(clusterName, apiRequestSummary
+               apiManager.getRequest(clusterName, apiRequestSummary
                      .getApiRequestInfo().getRequestId());
          ClusterRequestStatus clusterRequestStatus =
                ClusterRequestStatus.valueOf(apiRequest.getApiRequestInfo()
@@ -628,7 +628,7 @@ public class AmbariImpl implements SoftwareManager {
 
       boolean success = false;
       ApiRequest apiRequest =
-            apiManager.requestWithTasks(clusterName, apiRequestSummary
+            apiManager.getRequestWithTasks(clusterName, apiRequestSummary
                   .getApiRequestInfo().getRequestId());
       ClusterRequestStatus clusterRequestStatus =
             ClusterRequestStatus.valueOf(apiRequest.getApiRequestInfo()
@@ -782,7 +782,7 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public String getVersion() {
-      return apiManager.version();
+      return apiManager.getVersion();
    }
 
    @Override

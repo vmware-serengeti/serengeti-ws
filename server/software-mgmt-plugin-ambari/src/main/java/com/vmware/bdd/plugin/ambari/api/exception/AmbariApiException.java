@@ -12,25 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.v1;
+package com.vmware.bdd.plugin.ambari.api.exception;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
-@Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-public interface RootServicesResource {
+public class AmbariApiException extends RuntimeException {
 
-   @GET
-   @Path("/")
-   public Response readRootService();
+   private static final long serialVersionUID = 5585914528766844047L;
 
-   @GET
-   @Path("/AMBARI/components/AMBARI_SERVER")
-   public Response readRootServiceComponents();
+   private String errCode;
 
+   public AmbariApiException() {
+   }
+
+   public AmbariApiException(String msg) {
+   }
+
+   public AmbariApiException(String errCode, String message, Throwable cause) {
+      super(message, cause);
+      this.errCode = errCode;
+   }
+
+   public static AmbariApiException RESPONSE_EXCEPTION(int errCode, String message) {
+      return new AmbariApiException(String.valueOf(errCode), message, null);
+   }
+
+   public String getErrCode() {
+      return errCode;
+   }
 }

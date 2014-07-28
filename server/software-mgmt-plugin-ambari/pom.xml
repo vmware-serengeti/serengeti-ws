@@ -95,5 +95,10 @@
          <artifactId>joda-time</artifactId>
          <version>2.3</version>
       </dependency>
+      <dependency>
+         <groupId>org.eclipse.jetty</groupId>
+         <artifactId>jetty-http</artifactId>
+         <version>9.2.2.v20140723</version>
+      </dependency>
    </dependencies>
 </project>

@@ -12,31 +12,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.v1.resource.stacks;
+package com.vmware.bdd.plugin.ambari.api.v1.resource.clusters;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.vmware.bdd.plugin.ambari.api.Parameters;
 
 @Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-public interface VersionsResource {
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+      MediaType.TEXT_PLAIN })
+public interface RequestsResource {
 
    @GET
    @Path("/")
-   public Response readStackVersions();
+   public Response readRequests();
 
    @GET
-   @Path("/{stackVersion}")
-   public Response readStackVersion(@PathParam(Parameters.STACK_VERSION) String stackVersion);
+   @Path("/{RequestId}")
+   public Response readRequest(@PathParam(Parameters.REQUEST_ID) Long RequestId);
 
-   @Path("/{stackVersion}/stackServices")
-   public ServicesResource getStackServicesResource(@PathParam(Parameters.STACK_VERSION) String stackVersion);
+   @GET
+   @Path("/{RequestId}")
+   public Response readRequestWithTasks(
+         @PathParam(Parameters.REQUEST_ID) Long RequestId,
+         @QueryParam("fields") String fields);
 
 }

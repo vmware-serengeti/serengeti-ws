@@ -12,25 +12,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.v1;
+package com.vmware.bdd.plugin.ambari.api.model.cluster;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import java.util.List;
 
-@Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-public interface RootServicesResource {
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
-   @GET
-   @Path("/")
-   public Response readRootService();
+public class ApiClusterBlueprint {
 
-   @GET
-   @Path("/AMBARI/components/AMBARI_SERVER")
-   public Response readRootServiceComponents();
+   @Expose
+   private String blueprint;
 
+   @Expose
+   @SerializedName("host_groups")
+   private List<ApiHostGroup> apiHostGroups;
+
+   public String getBlueprint() {
+      return blueprint;
+   }
+
+   public void setBlueprint(String blueprint) {
+      this.blueprint = blueprint;
+   }
+
+   public List<ApiHostGroup> getApiHostGroups() {
+      return apiHostGroups;
+   }
+
+   public void setApiHostGroups(List<ApiHostGroup> apiHostGroups) {
+      this.apiHostGroups = apiHostGroups;
+   }
 }

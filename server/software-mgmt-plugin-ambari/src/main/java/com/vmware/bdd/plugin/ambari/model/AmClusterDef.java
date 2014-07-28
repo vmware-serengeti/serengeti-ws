@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.annotations.Expose;
-import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprint;
-import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprintInfo;
-import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrap;
-import com.vmware.bdd.plugin.ambari.api.model.ApiClusterBlueprint;
-import com.vmware.bdd.plugin.ambari.api.model.ApiHostGroup;
+import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
+import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprintInfo;
+import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;

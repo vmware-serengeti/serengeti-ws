@@ -23,7 +23,7 @@ public final class Parameters {
    static public final String STACK_NAME = "stackName";
    static public final String STACK_VERSION = "stackVersion";
    static public final String STACK_SERVICE_NAME = "stackServiceName";
-   public static final String SERVICE_COMPONENT_NAME = "serviceComponentName";
+   public static final String COMPONENT_NAME = "componentName";
    public static final String REQUEST_ID = "RequestId";
    public static final String SERVICE_NAME = "serviceName";
    public static final String HOST_FQDN = "hostFQDN";

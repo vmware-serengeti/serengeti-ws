@@ -112,7 +112,7 @@ public class AmClusterValidator {
 
       ApiStackServiceList servicesList =
             apiManager
-                  .stackServiceListWithComponents(stackVendor, stackVersion);
+                  .getStackServiceListWithComponents(stackVendor, stackVersion);
 
       List<ApiStackServiceComponent> apiStackComponents =
             new ArrayList<ApiStackServiceComponent>();
@@ -206,7 +206,7 @@ public class AmClusterValidator {
 
 
       ApiStackServiceList servicesList =
-            apiManager.stackServiceListWithConfigurations(stackVendor,
+            apiManager.getStackServiceListWithConfigurations(stackVendor,
                   stackVersion);
       Map<String, Object> supportedConfigs = new HashMap<String, Object>();
       for (ApiStackService apiStackService : servicesList.getApiStackServices()) {

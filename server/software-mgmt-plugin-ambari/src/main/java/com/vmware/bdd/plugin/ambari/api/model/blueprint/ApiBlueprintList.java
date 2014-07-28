@@ -12,26 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
+package com.vmware.bdd.plugin.ambari.api.model.blueprint;
 
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 
-public class ApiStackServiceComponent {
+public class ApiBlueprintList {
 
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("StackServiceComponents")
-   private ApiComponentInfo apiServiceComponent;
-
-   @Expose
-   @SerializedName("dependencies")
-   private List<ApiComponentDependency> apiComponentDependencies;
+   @SerializedName("items")
+   private List<ApiBlueprint> apiBlueprints;
 
    public String getHref() {
       return href;
@@ -41,21 +36,12 @@ public class ApiStackServiceComponent {
       this.href = href;
    }
 
-   public ApiComponentInfo getApiServiceComponent() {
-      return apiServiceComponent;
+   public List<ApiBlueprint> getApiBlueprints() {
+      return apiBlueprints;
    }
 
-   public void setApiServiceComponent(ApiComponentInfo apiServiceComponent) {
-      this.apiServiceComponent = apiServiceComponent;
-   }
-
-   public List<ApiComponentDependency> getApiComponentDependencies() {
-      return apiComponentDependencies;
-   }
-
-   public void setApiComponentDependencies(
-         List<ApiComponentDependency> apiComponentDependencies) {
-      this.apiComponentDependencies = apiComponentDependencies;
+   public void setApiBlueprints(List<ApiBlueprint> apiBlueprints) {
+      this.apiBlueprints = apiBlueprints;
    }
 
 }

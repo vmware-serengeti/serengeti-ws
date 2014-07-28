@@ -21,6 +21,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import com.vmware.bdd.plugin.ambari.api.Parameters;
 
@@ -36,7 +37,7 @@ public interface BootstrapResource {
     */
    @POST
    @Path("/")
-   public String createBootstrap(String bootstrap);
+   public Response createBootstrap(String bootstrap);
 
    /**
     * Reads information about a bootstrap.
@@ -46,6 +47,6 @@ public interface BootstrapResource {
     */
    @GET
    @Path("/{bootstrapId}")
-   public String readBootstrapStatus(@PathParam(Parameters.BOOTSTRAP_ID) Long bootstrapId);
+   public Response readBootstrapStatus(@PathParam(Parameters.BOOTSTRAP_ID) Long bootstrapId);
 
 }

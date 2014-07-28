@@ -19,33 +19,38 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.http.HttpStatus;
 
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
 import com.vmware.bdd.plugin.ambari.api.ApiRootResource;
+import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
 import com.vmware.bdd.plugin.ambari.api.manager.intf.IApiManager;
-import com.vmware.bdd.plugin.ambari.api.model.ApiAlert;
-import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprint;
-import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprintList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBody;
-import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrap;
-import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapStatus;
-import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
-import com.vmware.bdd.plugin.ambari.api.model.ApiClusterBlueprint;
-import com.vmware.bdd.plugin.ambari.api.model.ApiClusterList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiHost;
-import com.vmware.bdd.plugin.ambari.api.model.ApiHostList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiHostStatus;
+import com.vmware.bdd.plugin.ambari.api.model.ApiErrorMessage;
 import com.vmware.bdd.plugin.ambari.api.model.ApiPutRequest;
-import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
-import com.vmware.bdd.plugin.ambari.api.model.ApiRequestInfo;
-import com.vmware.bdd.plugin.ambari.api.model.ApiRequestList;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRootServicesComponents;
-import com.vmware.bdd.plugin.ambari.api.model.ApiService;
-import com.vmware.bdd.plugin.ambari.api.model.ApiServiceAlert;
-import com.vmware.bdd.plugin.ambari.api.model.ApiServiceAlertList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiServiceInfo;
-import com.vmware.bdd.plugin.ambari.api.model.ApiServiceStatus;
+import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
+import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprintList;
+import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
+import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapStatus;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiAlert;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostStatus;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceAlert;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceAlertList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceStatus;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponentList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
@@ -73,8 +78,9 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiStackList stackList() {
-      String stacksJson = apiResourceRootV1.getStacks2Resource().readStacks();
+   public ApiStackList getStackList() throws AmbariApiException {
+      Response response = apiResourceRootV1.getStacks2Resource().readStacks();
+      String stacksJson = handleAmbariResponse(response);
       logger.debug("Response of stack list from ambari server:");
       logger.debug(stacksJson);
       ApiStackList apiStackList =
@@ -83,9 +89,10 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiStack stack(String stackName) {
-      String stackJson =
+   public ApiStack getStack(String stackName) throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getStacks2Resource().readStack(stackName);
+      String stackJson = handleAmbariResponse(response);
       logger.debug("Response of stack from ambari server:");
       logger.debug(stackJson);
       ApiStack apiStack = ApiUtils.jsonToObject(ApiStack.class, stackJson);
@@ -93,10 +100,12 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiStackVersionList stackVersionList(String stackName) {
-      String stackVersionsJson =
+   public ApiStackVersionList getStackVersionList(String stackName)
+         throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getStacks2Resource()
                   .getStackVersionsResource(stackName).readStackVersions();
+      String stackVersionsJson = handleAmbariResponse(response);
       logger.debug("Response of version list of stack from ambari server:");
       logger.debug(stackVersionsJson);
       ApiStackVersionList apiStackVersionList =
@@ -105,11 +114,13 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiStackVersion stackVersion(String stackName, String stackVersion) {
-      String stackVersionJson =
+   public ApiStackVersion getStackVersion(String stackName, String stackVersion)
+         throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getStacks2Resource()
                   .getStackVersionsResource(stackName)
                   .readStackVersion(stackVersion);
+      String stackVersionJson = handleAmbariResponse(response);
       logger.debug("Response of version of stack from ambari server:");
       logger.debug(stackVersionJson);
       ApiStackVersion apiStackVersion =
@@ -118,12 +129,13 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiStackServiceList stackServiceList(String stackName,
-         String stackVersion) {
-      String apiStackServicesJson =
+   public ApiStackServiceList getStackServiceList(String stackName,
+         String stackVersion) throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getStacks2Resource()
                   .getStackVersionsResource(stackName)
                   .getStackServicesResource(stackVersion).readStackServices();
+      String apiStackServicesJson = handleAmbariResponse(response);
       logger.debug("Response of service list of stack from ambari server:");
       logger.debug(apiStackServicesJson);
       ApiStackServiceList apiStackServices =
@@ -133,27 +145,29 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiStackServiceList stackServiceListWithComponents(String stackName,
-         String stackVersion) {
-      return readServicesWithFilter(stackName, stackVersion,
+   public ApiStackServiceList getStackServiceListWithComponents(
+         String stackName, String stackVersion) throws AmbariApiException {
+      return getServicesWithFilter(stackName, stackVersion,
             "serviceComponents/dependencies");
    }
 
    @Override
-   public ApiStackServiceList stackServiceListWithConfigurations(String stackName,
-         String stackVersion) {
-      return readServicesWithFilter(stackName, stackVersion,
+   public ApiStackServiceList getStackServiceListWithConfigurations(
+         String stackName, String stackVersion) throws AmbariApiException {
+      return getServicesWithFilter(stackName, stackVersion,
             "configurations/StackConfigurations/type");
    }
 
    @Override
-   public ApiStackService stackService(String stackName, String stackVersion,
-         String stackServiceName) {
-      String apiStackServiceJson =
+   public ApiStackService getStackService(String stackName,
+         String stackVersion, String stackServiceName)
+         throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getStacks2Resource()
                   .getStackVersionsResource(stackName)
                   .getStackServicesResource(stackVersion)
                   .readStackService(stackServiceName);
+      String apiStackServiceJson = handleAmbariResponse(response);
       logger.debug("Response of service of stack from ambari server:");
       logger.debug(apiStackServiceJson);
       ApiStackService apiStackService =
@@ -162,14 +176,16 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiStackComponentList stackComponentList(String stackName,
-         String stackVersion, String stackServiceName) {
-      String stackComponentsJson =
+   public ApiStackComponentList getStackComponentList(String stackName,
+         String stackVersion, String stackServiceName)
+         throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getStacks2Resource()
                   .getStackVersionsResource(stackName)
                   .getStackServicesResource(stackVersion)
-                  .getServiceComponentsResource(stackServiceName)
-                  .readServiceComponents();
+                  .getComponentsResource(stackServiceName)
+                  .readComponents();
+      String stackComponentsJson = handleAmbariResponse(response);
       logger.debug("Response of component list of service from ambari server:");
       logger.debug(stackComponentsJson);
       ApiStackComponentList apiServiceComponents =
@@ -179,14 +195,16 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiStackServiceComponent stackComponent(String stackName,
-         String stackVersion, String stackServiceName, String stackComponentName) {
-      String stackComponentJson =
+   public ApiStackServiceComponent getStackComponent(String stackName,
+         String stackVersion, String stackServiceName, String stackComponentName)
+         throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getStacks2Resource()
                   .getStackVersionsResource(stackName)
                   .getStackServicesResource(stackVersion)
-                  .getServiceComponentsResource(stackServiceName)
-                  .readServiceComponent(stackComponentName);
+                  .getComponentsResource(stackServiceName)
+                  .readComponent(stackComponentName);
+      String stackComponentJson = handleAmbariResponse(response);
       logger.debug("Response of component of service from ambari server:");
       logger.debug(stackComponentJson);
       ApiStackServiceComponent apiServiceComponent =
@@ -196,9 +214,10 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiClusterList clusterList() {
-      String clustersJson =
+   public ApiClusterList getClusterList() throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getClustersResource().readClusters();
+      String clustersJson = handleAmbariResponse(response);
       logger.debug("Response of cluster list from ambari server:");
       logger.debug(clustersJson);
       ApiClusterList apiClusterList =
@@ -207,9 +226,10 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiCluster cluster(String clusterName) {
-      String clusterJson =
+   public ApiCluster getCluster(String clusterName) throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getClustersResource().readCluster(clusterName);
+      String clusterJson = handleAmbariResponse(response);
       logger.debug("Response of cluster from ambari server:");
       logger.debug(clusterJson);
       ApiCluster apiCluster =
@@ -218,9 +238,10 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public List<ApiService> clusterServices(String clusterName) {
-      String clusterJson =
+   public List<ApiService> getClusterServices(String clusterName) throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getClustersResource().readCluster(clusterName);
+      String clusterJson = handleAmbariResponse(response);
       logger.debug("in getClusterServicesNames, cluster info is " + clusterJson);
       ApiCluster apiCluster =
             ApiUtils.jsonToObject(ApiCluster.class, clusterJson);
@@ -228,7 +249,7 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiRequest stopAllServicesInCluster(String clusterName) {
+   public ApiRequest stopAllServicesInCluster(String clusterName) throws AmbariApiException {
       ApiServiceInfo serviceInfo = new ApiServiceInfo();
       serviceInfo.setState(ApiServiceStatus.INSTALLED.name());
       ApiBody body = new ApiBody();
@@ -239,16 +260,18 @@ public class ApiManager implements IApiManager {
       String request = ApiUtils.objectToJson(stopRequest);
       logger.debug("The request in stop cluster is :" + request);
 
-      String responseJson =
+      Response response =
             apiResourceRootV1.getClustersResource()
                   .getServicesResource(clusterName)
                   .stopAllServices(clusterName, "true", request);
-      logger.debug("The response when ambari stop cluster is :" + responseJson);
-      return ApiUtils.jsonToObject(ApiRequest.class, responseJson);
+      String stopServicesJson = handleAmbariResponse(response);
+      logger.debug("The response when ambari stop cluster is :"
+            + stopServicesJson);
+      return ApiUtils.jsonToObject(ApiRequest.class, stopServicesJson);
    }
 
    @Override
-   public ApiRequest startAllServicesInCluster(String clusterName) {
+   public ApiRequest startAllServicesInCluster(String clusterName) throws AmbariApiException {
       ApiServiceInfo serviceInfo = new ApiServiceInfo();
       serviceInfo.setState(ApiServiceStatus.STARTED.name());
       ApiBody body = new ApiBody();
@@ -259,18 +282,20 @@ public class ApiManager implements IApiManager {
       String request = ApiUtils.objectToJson(stopRequest);
       logger.debug("The request in start cluster is :" + request);
 
-      String response =
+      Response response =
             apiResourceRootV1.getClustersResource()
                   .getServicesResource(clusterName)
                   .startAllServices(clusterName, "true", request);
-      logger.debug("The reponse when startAllService is :" + response);
-      return ApiUtils.jsonToObject(ApiRequest.class, response);
+      String startServicesJson = handleAmbariResponse(response);
+      logger.debug("The reponse when startAllService is :" + startServicesJson);
+      return ApiUtils.jsonToObject(ApiRequest.class, startServicesJson);
    }
 
    @Override
-   public List<String> getClusterServicesNames(String clusterName) {
-      String clusterJson =
+   public List<String> getClusterServicesNames(String clusterName) throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getClustersResource().readCluster(clusterName);
+      String clusterJson = handleAmbariResponse(response);
       logger.debug("in getClusterServicesNames, cluster info is " + clusterJson);
       ApiCluster apiCluster =
             ApiUtils.jsonToObject(ApiCluster.class, clusterJson);
@@ -297,12 +322,13 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiRequest provisionCluster(String clusterName,
-         ApiClusterBlueprint apiClusterBlueprint) {
+         ApiClusterBlueprint apiClusterBlueprint) throws AmbariApiException {
       logger.info("ApiClusterBlueprint:");
       logger.info(ApiUtils.objectToJson(apiClusterBlueprint));
-      String requestJson =
+      Response response =
             apiResourceRootV1.getClustersResource().createCluster(clusterName,
                   ApiUtils.objectToJson(apiClusterBlueprint));
+      String requestJson = handleAmbariResponse(response);
       logger.debug("Response of provision cluster with blueprint from ambari server:");
       logger.debug(requestJson);
       ApiRequest apiRequest =
@@ -311,9 +337,10 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiBlueprintList blueprintList() {
-      String blueprintsJson =
+   public ApiBlueprintList getBlueprintList() throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getBlueprintsResource().readBlueprints();
+      String blueprintsJson = handleAmbariResponse(response);
       logger.debug("Response of blueprint list from ambari server:");
       logger.debug(blueprintsJson);
       ApiBlueprintList apiBlueprintList =
@@ -322,22 +349,27 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiBlueprint getBlueprint(String blueprintName) {
-      String blueprintJson = apiResourceRootV1.getBlueprintsResource().readBlueprint(blueprintName);
+   public ApiBlueprint getBlueprint(String blueprintName) throws AmbariApiException {
+      Response response =
+            apiResourceRootV1.getBlueprintsResource().readBlueprint(
+                  blueprintName);
+      String blueprintJson = handleAmbariResponse(response);
       logger.debug("Response of blueprint from ambari server:");
       logger.debug(blueprintJson);
-      ApiBlueprint apiBlueprint = ApiUtils.jsonToObject(ApiBlueprint.class, blueprintJson);
+      ApiBlueprint apiBlueprint =
+            ApiUtils.jsonToObject(ApiBlueprint.class, blueprintJson);
       return apiBlueprint;
    }
 
    @Override
    public ApiBlueprint createBlueprint(String blueprintName,
-         ApiBlueprint apiBlueprint) {
+         ApiBlueprint apiBlueprint) throws AmbariApiException {
       logger.info("ApiBlueprint:");
       logger.info(ApiUtils.objectToJson(apiBlueprint));
-      String blueprintJson =
+      Response response =
             apiResourceRootV1.getBlueprintsResource().createBlueprint(
                   blueprintName, ApiUtils.objectToJson(apiBlueprint));
+      String blueprintJson = handleAmbariResponse(response);
       logger.debug("Response of blueprint creation from ambari server:");
       logger.debug(blueprintJson);
       ApiBlueprint apiBlueprintResult =
@@ -346,32 +378,37 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiRequest deleteBlueprint(String blueprintName) {
-      logger.info("Delete apiBlueprint " + blueprintName);
-      String response = apiResourceRootV1.getBlueprintsResource().deleteBlueprint(blueprintName);
-      return ApiUtils.jsonToObject(ApiRequest.class, response);
-   }
-
-   @Override
    public ApiRequest deleteHost(String clusterName, String fqdn) {
       logger.info("Deleting host " + fqdn + " in cluster " + clusterName);
-      String response = apiResourceRootV1.getClustersResource().getHostsResource(clusterName).deleteHost(fqdn);
-      return ApiUtils.jsonToObject(ApiRequest.class, response);
+      Response response = apiResourceRootV1.getClustersResource().getHostsResource(clusterName).deleteHost(fqdn);
+      String deleteHostJson = handleAmbariResponse(response);
+      return ApiUtils.jsonToObject(ApiRequest.class, deleteHostJson);
+   }
+
+   public ApiRequest deleteBlueprint(String blueprintName) throws AmbariApiException {
+      logger.info("Delete apiBlueprint " + blueprintName);
+      Response response =
+            apiResourceRootV1.getBlueprintsResource().deleteBlueprint(
+                  blueprintName);
+      String deleteBlueprintJson = handleAmbariResponse(response);
+      return ApiUtils.jsonToObject(ApiRequest.class, deleteBlueprintJson);
    }
 
    @Override
-   public ApiRequest deleteCluster(String clusterName) {
-      String response =
+   public ApiRequest deleteCluster(String clusterName) throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getClustersResource().deleteCluster(clusterName);
-      logger.debug("in delete cluster, reponse is :" + response);
-      return ApiUtils.jsonToObject(ApiRequest.class, response);
+      String deleteClusterJson = handleAmbariResponse(response);
+      logger.debug("in delete cluster, reponse is :" + deleteClusterJson);
+      return ApiUtils.jsonToObject(ApiRequest.class, deleteClusterJson);
    }
 
    @Override
-   public ApiRequestList requestList(String clusterName) {
-      String requestsJson =
+   public ApiRequestList getRequestList(String clusterName) throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getClustersResource()
                   .getRequestsResource(clusterName).readRequests();
+      String requestsJson = handleAmbariResponse(response);
       logger.debug("Response of request list from ambari server:");
       logger.debug(requestsJson);
       ApiRequestList apiRequestList =
@@ -380,10 +417,11 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiRequest request(String clusterName, Long requestId) {
-      String requestJson =
+   public ApiRequest getRequest(String clusterName, Long requestId) throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getClustersResource()
                   .getRequestsResource(clusterName).readRequest(requestId);
+      String requestJson = handleAmbariResponse(response);
       logger.debug("Response of request from ambari server:");
       logger.debug(requestJson);
       ApiRequest apiRequest =
@@ -392,12 +430,13 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiBootstrap createBootstrap(ApiBootstrap bootstrap) {
+   public ApiBootstrap createBootstrap(ApiBootstrap bootstrap) throws AmbariApiException {
       logger.info("ApiBootstrap:");
       logger.info(ApiUtils.objectToJson(bootstrap));
-      String bootstrapJson =
+      Response response =
             apiResourceRootV1.getBootstrapResource().createBootstrap(
                   ApiUtils.objectToJson(bootstrap));
+      String bootstrapJson = handleAmbariResponse(response);
       logger.debug("Response of bootstrap creation from ambari server:");
       logger.debug(bootstrapJson);
       ApiBootstrap apiBootstrap =
@@ -406,10 +445,11 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiBootstrapStatus bootstrapStatus(Long bootstrapId) {
-      String bootstrapStatusJson =
+   public ApiBootstrapStatus getBootstrapStatus(Long bootstrapId) throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getBootstrapResource().readBootstrapStatus(
                   bootstrapId);
+      String bootstrapStatusJson = handleAmbariResponse(response);
       logger.debug("Response of bootstrap status from ambari server:");
       logger.debug(bootstrapStatusJson);
       ApiBootstrapStatus apiBootstrapRequest =
@@ -419,11 +459,12 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiRequest requestWithTasks(String clusterName, Long requestId) {
-      String requestWithTasksJson =
+   public ApiRequest getRequestWithTasks(String clusterName, Long requestId) throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getClustersResource()
                   .getRequestsResource(clusterName)
                   .readRequestWithTasks(requestId, "*,tasks/Tasks/*");
+      String requestWithTasksJson = handleAmbariResponse(response);
       logger.debug("Response of request with tasks from ambari server:");
       logger.debug(requestWithTasksJson);
       ApiRequest apiRequest =
@@ -432,7 +473,7 @@ public class ApiManager implements IApiManager {
    }
 
 
-   public ServiceStatus getClusterStatus(String clusterName) {
+   public ServiceStatus getClusterStatus(String clusterName) throws AmbariApiException {
       ApiServiceAlertList serviceList = getServicesWithAlert(clusterName);
       if (serviceList.getApiServiceAlerts() != null) {
          boolean allStopped = true;
@@ -440,7 +481,8 @@ public class ApiManager implements IApiManager {
          for (ApiServiceAlert service : serviceList.getApiServiceAlerts()) {
             ApiServiceInfo info = service.getApiServiceInfo();
             ApiAlert alert = service.getApiAlert();
-            if (ApiServiceStatus.STARTED.name().equalsIgnoreCase(info.getState())) {
+            if (ApiServiceStatus.STARTED.name().equalsIgnoreCase(
+                  info.getState())) {
                allStopped = false;
                if (alert != null && alert.getSummary() != null
                      && alert.getSummary().getCritical() > 0) {
@@ -458,19 +500,20 @@ public class ApiManager implements IApiManager {
       return ServiceStatus.STARTED;
    }
 
-   private ApiServiceAlertList getServicesWithAlert(String clusterName) {
+   private ApiServiceAlertList getServicesWithAlert(String clusterName) throws AmbariApiException {
       String fields = "alerts/summary,ServiceInfo/state";
-      String servicesWithAlert =
+      Response response =
             apiResourceRootV1.getClustersResource()
-            .getServicesResource(clusterName).readServicesWithFilter(fields);
-
+                  .getServicesResource(clusterName)
+                  .readServicesWithFilter(fields);
+      String servicesWithAlert = handleAmbariResponse(response);
       ApiServiceAlertList serviceList =
             ApiUtils.jsonToObject(ApiServiceAlertList.class, servicesWithAlert);
       return serviceList;
    }
 
    @Override
-   public Map<String, ServiceStatus> getHostStatus(String clusterName) {
+   public Map<String, ServiceStatus> getHostStatus(String clusterName) throws AmbariApiException {
       ApiHostList hostList = getHostsWithRoleState(clusterName);
       Map<String, ServiceStatus> result = new HashMap<String, ServiceStatus>();
 
@@ -495,28 +538,35 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiHostList getHostsSummaryInfo(String clusterName) {
-      String hostListInfo = apiResourceRootV1.getClustersResource().getHostsResource(clusterName).readHosts();
+      Response response = apiResourceRootV1.getClustersResource().getHostsResource(clusterName).readHosts();
+      String hostListInfo = handleAmbariResponse(response);
       logger.info("All hosts in cluster " + clusterName + " is " + hostListInfo);
       return ApiUtils.jsonToObject(ApiHostList.class, hostListInfo);
    }
 
-   private ApiHostList getHostsWithRoleState(String clusterName) {
+   private ApiHostList getHostsWithRoleState(String clusterName) throws AmbariApiException {
       String fields = "Hosts/host_status,,host_components/HostRoles";
-      String hostsWithState =
+      Response response =
             apiResourceRootV1.getClustersResource()
-            .getHostsResource(clusterName).readHostsWithFilter(fields);
-      ApiHostList hostList = ApiUtils.jsonToObject(ApiHostList.class, hostsWithState);
+                  .getHostsResource(clusterName).readHostsWithFilter(fields);
+      String hostsWithState = handleAmbariResponse(response);
+      ApiHostList hostList =
+            ApiUtils.jsonToObject(ApiHostList.class, hostsWithState);
       return hostList;
    }
 
-   public String healthCheck() {
-      String healthStatus = apiResourceRootV1.getHealthCheck().check();
+   public String healthCheck() throws AmbariApiException {
+      Response response = apiResourceRootV1.getHealthCheck().check();
+      String healthStatus = handleAmbariResponse(response);
       return healthStatus;
    }
 
    @Override
-   public String version() {
-      String requestJson = apiResourceRootV1.getRootServicesResource().readRootServiceComponents();
+   public String getVersion() throws AmbariApiException {
+      Response response =
+            apiResourceRootV1.getRootServicesResource()
+                  .readRootServiceComponents();
+      String requestJson = handleAmbariResponse(response);
       ApiRootServicesComponents apiRequest =
             ApiUtils.jsonToObject(ApiRootServicesComponents.class, requestJson);
       return apiRequest.getApiRootServicesComponent().getComponentVersion();
@@ -525,17 +575,20 @@ public class ApiManager implements IApiManager {
    @Override
    public ApiRequest deleteService(String clusterName, String serviceName) {
       logger.info("Deleting service " + serviceName + " in cluster " + clusterName);
-      String response = apiResourceRootV1.getClustersResource().getServicesResource(clusterName).deleteService(serviceName);
-      return ApiUtils.jsonToObject(ApiRequest.class, response);
+      Response response = apiResourceRootV1.getClustersResource().getServicesResource(clusterName).deleteService(serviceName);
+      String deleteServiceJson = handleAmbariResponse(response);
+      return ApiUtils.jsonToObject(ApiRequest.class, deleteServiceJson);
    }
 
-   private ApiStackServiceList readServicesWithFilter(String stackName,
-         String stackVersion, String filter) {
-      String apiStackServicesWithComponentsJson =
+   private ApiStackServiceList getServicesWithFilter(String stackName,
+         String stackVersion, String filter) throws AmbariApiException {
+      Response response =
             apiResourceRootV1.getStacks2Resource()
                   .getStackVersionsResource(stackName)
                   .getStackServicesResource(stackVersion)
                   .readServicesWithFilter(filter);
+      String apiStackServicesWithComponentsJson =
+            handleAmbariResponse(response);
       logger.debug("Response of service list with components of stack from ambari server:");
       logger.debug(apiStackServicesWithComponentsJson);
       ApiStackServiceList apiStackServices =
@@ -544,4 +597,20 @@ public class ApiManager implements IApiManager {
       return apiStackServices;
    }
 
+   private String handleAmbariResponse(Response response)
+         throws AmbariApiException {
+      String result = response.readEntity(String.class);
+      int errCode = response.getStatus();
+      if (!HttpStatus.isSuccess(errCode)) {
+         String errMessage = null;
+         if (result != null && !result.isEmpty()) {
+            ApiErrorMessage apiErrorMessage = ApiUtils.jsonToObject(ApiErrorMessage.class, result);
+            errMessage = "status: " + apiErrorMessage.getStatus() + ", message: " + apiErrorMessage.getMessage();
+         } else {
+            errMessage = "status: " + errCode + ", message: " + HttpStatus.getMessage(errCode);
+         }
+         throw AmbariApiException.RESPONSE_EXCEPTION(errCode, errMessage);
+      }
+      return result;
+   }
 }

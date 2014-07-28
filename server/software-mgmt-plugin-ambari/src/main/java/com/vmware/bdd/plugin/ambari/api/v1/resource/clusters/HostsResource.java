@@ -12,31 +12,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.v1.resource.stacks;
+package com.vmware.bdd.plugin.ambari.api.v1.resource.clusters;
+
+import com.vmware.bdd.plugin.ambari.api.Parameters;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.vmware.bdd.plugin.ambari.api.Parameters;
-
 @Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-public interface VersionsResource {
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+      MediaType.TEXT_PLAIN })
+public interface HostsResource {
 
    @GET
    @Path("/")
-   public Response readStackVersions();
+   public Response readHosts();
 
    @GET
-   @Path("/{stackVersion}")
-   public Response readStackVersion(@PathParam(Parameters.STACK_VERSION) String stackVersion);
+   @Path("/")
+   public Response readHostsWithFilter(@QueryParam("fields") String fields);
 
-   @Path("/{stackVersion}/stackServices")
-   public ServicesResource getStackServicesResource(@PathParam(Parameters.STACK_VERSION) String stackVersion);
-
+   @DELETE
+   @Path("/{hostFQDN}")
+   public Response deleteHost(@PathParam(Parameters.HOST_FQDN) String hostFQDN);
 }

@@ -17,17 +17,18 @@ package com.vmware.bdd.plugin.ambari.api.manager.intf;
 import java.util.List;
 import java.util.Map;
 
-import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprint;
-import com.vmware.bdd.plugin.ambari.api.model.ApiBlueprintList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrap;
-import com.vmware.bdd.plugin.ambari.api.model.ApiBootstrapStatus;
-import com.vmware.bdd.plugin.ambari.api.model.ApiCluster;
-import com.vmware.bdd.plugin.ambari.api.model.ApiClusterBlueprint;
-import com.vmware.bdd.plugin.ambari.api.model.ApiClusterList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiHostList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiRequest;
-import com.vmware.bdd.plugin.ambari.api.model.ApiRequestList;
-import com.vmware.bdd.plugin.ambari.api.model.ApiService;
+import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
+import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
+import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprintList;
+import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
+import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapStatus;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponentList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
@@ -40,79 +41,79 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 
 public interface IApiManager {
 
-   public ApiStackList stackList();
+   public ApiStackList getStackList() throws AmbariApiException;
 
-   public ApiStack stack(String stackName);
+   public ApiStack getStack(String stackName) throws AmbariApiException;
 
-   public ApiStackVersionList stackVersionList(String stackName);
+   public ApiStackVersionList getStackVersionList(String stackName) throws AmbariApiException;
 
-   public ApiStackVersion stackVersion(String stackName, String stackVersion);
+   public ApiStackVersion getStackVersion(String stackName, String stackVersion) throws AmbariApiException;
 
-   public ApiStackServiceList stackServiceList(String stackName,
-         String stackVersion);
+   public ApiStackServiceList getStackServiceList(String stackName,
+         String stackVersion) throws AmbariApiException;
 
-   public ApiStackServiceList stackServiceListWithComponents(String stackName,
-         String stackVersion);
+   public ApiStackServiceList getStackServiceListWithComponents(String stackName,
+         String stackVersion) throws AmbariApiException;
 
-   public ApiStackServiceList stackServiceListWithConfigurations(String stackName,
-         String stackVersion);
+   public ApiStackServiceList getStackServiceListWithConfigurations(String stackName,
+         String stackVersion) throws AmbariApiException;
 
-   public ApiStackService stackService(String stackName, String stackVersion,
-         String stackServiceName);
+   public ApiStackService getStackService(String stackName, String stackVersion,
+         String stackServiceName) throws AmbariApiException;
 
-   public ApiStackComponentList stackComponentList(String stackName,
-         String stackVersion, String stackServiceName);
+   public ApiStackComponentList getStackComponentList(String stackName,
+         String stackVersion, String stackServiceName) throws AmbariApiException;
 
-   public ApiStackServiceComponent stackComponent(String stackName, String stackVersion,
-         String stackServiceName, String stackComponentName);
+   public ApiStackServiceComponent getStackComponent(String stackName, String stackVersion,
+         String stackServiceName, String stackComponentName) throws AmbariApiException;
 
-   public ApiClusterList clusterList();
+   public ApiClusterList getClusterList() throws AmbariApiException;
 
-   public ApiCluster cluster(String clusterName);
+   public ApiCluster getCluster(String clusterName) throws AmbariApiException;
 
-   public List<ApiService> clusterServices(String clusterName);
+   public List<ApiService> getClusterServices(String clusterName) throws AmbariApiException;
 
-   public ApiRequest stopAllServicesInCluster(String clusterName);
+   public ApiRequest stopAllServicesInCluster(String clusterName) throws AmbariApiException;
 
-   public ApiRequest startAllServicesInCluster(String clusterName);
+   public ApiRequest startAllServicesInCluster(String clusterName) throws AmbariApiException;
 
-   public List<String> getClusterServicesNames(String clusterName);
+   public List<String> getClusterServicesNames(String clusterName) throws AmbariApiException;
 
    public ApiRequest provisionCluster(String clusterName,
-         ApiClusterBlueprint apiClusterBlueprint);
+         ApiClusterBlueprint apiClusterBlueprint) throws AmbariApiException;
 
-   public ApiBlueprintList blueprintList();
+   public ApiBlueprintList getBlueprintList() throws AmbariApiException;
 
-   public ApiBlueprint getBlueprint(String blueprintName);
+   public ApiBlueprint getBlueprint(String blueprintName) throws AmbariApiException;
 
-   public ApiRequest deleteBlueprint(String blueprintName);
+   public ApiRequest deleteBlueprint(String blueprintName) throws AmbariApiException;
 
-   public ApiRequestList requestList(String clusterName);
+   public ApiRequestList getRequestList(String clusterName) throws AmbariApiException;
 
-   public ApiRequest request(String clusterName, Long requestId);
+   public ApiRequest getRequest(String clusterName, Long requestId) throws AmbariApiException;
 
-   public ApiBootstrap createBootstrap(ApiBootstrap bootstrap);
+   public ApiBootstrap createBootstrap(ApiBootstrap bootstrap) throws AmbariApiException;
 
-   public ApiBootstrapStatus bootstrapStatus(Long bootstrapId);
+   public ApiBootstrapStatus getBootstrapStatus(Long bootstrapId) throws AmbariApiException;
 
    public ApiBlueprint createBlueprint(String blueprintName,
-         ApiBlueprint blueprint);
+         ApiBlueprint blueprint) throws AmbariApiException;
 
-   public ApiRequest deleteCluster(String clusterName);
+   public ApiRequest deleteCluster(String clusterName) throws AmbariApiException;
 
-   public ApiRequest requestWithTasks(String clusterName, Long requestId);
+   public ApiRequest getRequestWithTasks(String clusterName, Long requestId) throws AmbariApiException;
 
-   public ServiceStatus getClusterStatus(String clusterName);
+   public ServiceStatus getClusterStatus(String clusterName) throws AmbariApiException;
 
-   public Map<String, ServiceStatus> getHostStatus(String clusterName);
-
-   ApiHostList getHostsSummaryInfo(String clusterName);
-
-   public String healthCheck();
-
-   public String version();
+   public ApiHostList getHostsSummaryInfo(String clusterName);
 
    public ApiRequest deleteService(String clusterName, String serviceName);
 
    public ApiRequest deleteHost(String clusterName, String fqdn);
+   
+   public Map<String, ServiceStatus> getHostStatus(String clusterName) throws AmbariApiException;
+
+   public String healthCheck() throws AmbariApiException;
+
+   public String getVersion() throws AmbariApiException;
 }

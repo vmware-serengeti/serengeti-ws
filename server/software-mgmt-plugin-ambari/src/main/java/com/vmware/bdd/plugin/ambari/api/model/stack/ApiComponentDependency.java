@@ -14,24 +14,16 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.model.stack;
 
-import java.util.List;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 
-public class ApiStackServiceComponent {
-
+public class ApiComponentDependency {
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("StackServiceComponents")
-   private ApiComponentInfo apiServiceComponent;
-
-   @Expose
-   @SerializedName("dependencies")
-   private List<ApiComponentDependency> apiComponentDependencies;
+   @SerializedName("Dependencies")
+   private ApiComponentDependencyInfo apiComponentDependencyInfo;
 
    public String getHref() {
       return href;
@@ -41,21 +33,13 @@ public class ApiStackServiceComponent {
       this.href = href;
    }
 
-   public ApiComponentInfo getApiServiceComponent() {
-      return apiServiceComponent;
+   public ApiComponentDependencyInfo getApiComponentDependencyInfo() {
+      return apiComponentDependencyInfo;
    }
 
-   public void setApiServiceComponent(ApiComponentInfo apiServiceComponent) {
-      this.apiServiceComponent = apiServiceComponent;
-   }
-
-   public List<ApiComponentDependency> getApiComponentDependencies() {
-      return apiComponentDependencies;
-   }
-
-   public void setApiComponentDependencies(
-         List<ApiComponentDependency> apiComponentDependencies) {
-      this.apiComponentDependencies = apiComponentDependencies;
+   public void setApiComponentDependencyInfo(
+         ApiComponentDependencyInfo apiComponentDependencyInfo) {
+      this.apiComponentDependencyInfo = apiComponentDependencyInfo;
    }
 
 }

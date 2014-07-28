@@ -15,25 +15,10 @@
  *  **************************************************************************
  */
 
-package com.vmware.bdd.plugin.ambari.api.model;
+package com.vmware.bdd.plugin.ambari.api.model.cluster;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceInfo;
-
-/**
- * Created by qjin on 7/7/14.
- */
-public class ApiBody {
-   @Expose
-   @SerializedName("ServiceInfo")
-   private ApiServiceInfo serviceInfo;
-
-   public ApiServiceInfo getServiceInfo() {
-      return serviceInfo;
-   }
-
-   public void setServiceInfo(ApiServiceInfo serviceInfo) {
-      this.serviceInfo = serviceInfo;
-   }
+public enum ApiHostStatus {
+   HEALTHY,
+   ALERT,
+   UNHEALTHY
 }

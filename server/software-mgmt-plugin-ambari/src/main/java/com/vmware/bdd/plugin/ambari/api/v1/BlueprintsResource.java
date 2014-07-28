@@ -22,6 +22,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import static com.vmware.bdd.plugin.ambari.api.Parameters.BLUEPRINT_NAME;
 
@@ -31,19 +32,19 @@ public interface BlueprintsResource {
 
    @GET
    @Path("/")
-   public String readBlueprints();
+   public Response readBlueprints();
 
    @GET
    @Path("/{blueprintName}")
-   public String readBlueprint(@PathParam(BLUEPRINT_NAME) String blueprintName);
+   public Response readBlueprint(@PathParam(BLUEPRINT_NAME) String blueprintName);
 
    @DELETE
    @Path("/{blueprintName}")
-   public String deleteBlueprint(@PathParam(BLUEPRINT_NAME) String blueprintName);
+   public Response deleteBlueprint(@PathParam(BLUEPRINT_NAME) String blueprintName);
 
    @POST
    @Path("/{blueprintName}")
    @Consumes({ MediaType.APPLICATION_XML })
-   public String createBlueprint(@PathParam(BLUEPRINT_NAME) String blueprintName, String blueprint);
+   public Response createBlueprint(@PathParam(BLUEPRINT_NAME) String blueprintName, String blueprint);
 
 }

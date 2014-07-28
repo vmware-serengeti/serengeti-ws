@@ -12,26 +12,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
-
-import java.util.List;
+package com.vmware.bdd.plugin.ambari.api.model.cluster;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 
-public class ApiStackServiceComponent {
+import java.util.List;
+
+public class ApiCluster {
 
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("StackServiceComponents")
-   private ApiComponentInfo apiServiceComponent;
+   @SerializedName("Clusters")
+   private ApiClusterInfo clusterInfo;
 
    @Expose
-   @SerializedName("dependencies")
-   private List<ApiComponentDependency> apiComponentDependencies;
+   @SerializedName("services")
+   private List<ApiService> apiServices;
+
+   @Expose
+   @SerializedName("hosts")
+   private List<ApiHost> apiHosts;
 
    public String getHref() {
       return href;
@@ -41,21 +44,27 @@ public class ApiStackServiceComponent {
       this.href = href;
    }
 
-   public ApiComponentInfo getApiServiceComponent() {
-      return apiServiceComponent;
+   public ApiClusterInfo getClusterInfo() {
+      return clusterInfo;
    }
 
-   public void setApiServiceComponent(ApiComponentInfo apiServiceComponent) {
-      this.apiServiceComponent = apiServiceComponent;
+   public void setClusterInfo(ApiClusterInfo clusterInfo) {
+      this.clusterInfo = clusterInfo;
    }
 
-   public List<ApiComponentDependency> getApiComponentDependencies() {
-      return apiComponentDependencies;
+   public List<ApiService> getApiServices() {
+      return apiServices;
    }
 
-   public void setApiComponentDependencies(
-         List<ApiComponentDependency> apiComponentDependencies) {
-      this.apiComponentDependencies = apiComponentDependencies;
+   public void setApiServices(List<ApiService> apiServices) {
+      this.apiServices = apiServices;
    }
 
+   public List<ApiHost> getApiHosts() {
+      return apiHosts;
+   }
+
+   public void setApiHosts(List<ApiHost> apiHosts) {
+      this.apiHosts = apiHosts;
+   }
 }
