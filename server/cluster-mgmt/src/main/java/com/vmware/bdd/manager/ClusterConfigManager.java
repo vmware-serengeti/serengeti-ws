@@ -1107,7 +1107,7 @@ public class ClusterConfigManager {
       try {
          softwareManager.validateBlueprint(blueprint);
       } catch (ValidationException e) {
-          throw ClusterConfigException.INVALID_SPEC(e.getFailedMsgList());
+         throw new ClusterConfigException(e, e.getMessage() + e.getFailedMsgList().toString());
       }
 
       updateInfrastructure(clusterCreate, softwareManager, blueprint);
