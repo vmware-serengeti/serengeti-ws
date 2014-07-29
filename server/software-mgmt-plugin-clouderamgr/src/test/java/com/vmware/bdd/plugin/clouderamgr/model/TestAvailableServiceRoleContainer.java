@@ -46,6 +46,20 @@ public class TestAvailableServiceRoleContainer {
       Assert.assertTrue(AvailableServiceRoleContainer.load("ZOOKEEPER").compareTo(AvailableServiceRoleContainer.load("HBASE")) == -1);
       Assert.assertTrue(AvailableServiceRoleContainer.load("HDFS").compareTo(AvailableServiceRoleContainer.load("YARN_RESOURCE_MANAGER")) == 0);
       Assert.assertTrue(AvailableServiceRoleContainer.load("HBASE").compareTo(AvailableServiceRoleContainer.load("YARN")) == 0);
+      Assert.assertTrue(AvailableServiceRoleContainer.load("HDFS").compareTo(AvailableServiceRoleContainer.load("HIVE")) == -1);
+      Assert.assertTrue(AvailableServiceRoleContainer.load("IMPALA").compareTo(AvailableServiceRoleContainer.load("ZOOKEEPER")) == 1);
+
+      List<AvailableServiceRole> services = new ArrayList<AvailableServiceRole>();
+      services.add(AvailableServiceRoleContainer.load("HIVE"));
+      services.add(AvailableServiceRoleContainer.load("HBASE"));
+      services.add(AvailableServiceRoleContainer.load("HDFS"));
+      services.add(AvailableServiceRoleContainer.load("ZOOKEEPER"));
+      services.add(AvailableServiceRoleContainer.load("YARN"));
+      services.add(AvailableServiceRoleContainer.load("IMPALA"));
+      Collections.sort(services);
+      for (AvailableServiceRole service : services) {
+         System.out.println(service.getDisplayName());
+      }
    }
 
    @Test(groups = {"TestAvailableServiceRoleContainer"})

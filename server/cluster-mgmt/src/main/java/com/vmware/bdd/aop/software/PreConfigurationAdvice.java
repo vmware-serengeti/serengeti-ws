@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
 import org.apache.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -40,7 +41,7 @@ import com.vmware.bdd.software.mgmt.plugin.aop.PreConfiguration;
 import com.vmware.bdd.software.mgmt.plugin.exception.InfrastructureException;
 
 @Aspect
-public class PreConfigurationAdvice {
+public class PreConfigurationAdvice implements PreStartServices {
    private static final Logger logger = Logger.getLogger(PreConfigurationAdvice.class);
    private IClusterEntityManager clusterEntityMgr;
 
@@ -81,11 +82,12 @@ public class PreConfigurationAdvice {
       if (cluster == null) {
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
-      preClusterConfiguration(clusterName, maxWaitingSeconds);
+      preStartServices(clusterName, maxWaitingSeconds);
       return pjp.proceed();
    }
 
-   private void preClusterConfiguration(String clusterName, int maxWaitingSeconds)
+   @Override
+   public void preStartServices(String clusterName, int maxWaitingSeconds)
    throws InfrastructureException {
       logger.info("Pre configuration for cluster " + clusterName);
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(clusterName);

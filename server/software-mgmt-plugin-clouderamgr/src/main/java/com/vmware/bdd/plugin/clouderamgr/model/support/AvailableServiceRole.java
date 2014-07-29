@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -191,17 +193,34 @@ public class AvailableServiceRole implements Comparable<AvailableServiceRole> {
       if (!isService() || !other.isService()) {
          return 0;
       }
-      for (Dependency dependency : dependencies) {
-         if (dependency.getServices().contains(other.getDisplayName())) {
-            return 1;
-         }
+      if (dependsOn(other)) {
+         return 1;
       }
-      for (Dependency dependency : other.getDependencies()) {
-         if (dependency.getServices().contains(this.getDisplayName())) {
-            return -1;
-         }
+      if (other.dependsOn(this)) {
+         return -1;
       }
       return 0;
+   }
+
+   private boolean dependsOn(AvailableServiceRole other) {
+      Queue<AvailableServiceRole> queue = new LinkedList<AvailableServiceRole>();
+      queue.add(this);
+      while (!queue.isEmpty()) {
+         AvailableServiceRole item = queue.poll();
+         for (Dependency dependency : item.getDependencies()) {
+            for (String serviceName : dependency.getServices()) {
+               if (serviceName.equals(other.getDisplayName())) {
+                  return true;
+               }
+               try {
+                  queue.add(AvailableServiceRoleContainer.load(serviceName));
+               } catch (IOException e) {
+               }
+            }
+         }
+      }
+
+      return false;
    }
 
    public static class Dependency {
