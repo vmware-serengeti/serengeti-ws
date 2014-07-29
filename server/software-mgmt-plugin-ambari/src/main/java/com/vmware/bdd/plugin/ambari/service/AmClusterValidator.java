@@ -204,7 +204,6 @@ public class AmClusterValidator {
          return;
       }
 
-
       ApiStackServiceList servicesList =
             apiManager.getStackServiceListWithConfigurations(stackVendor,
                   stackVersion);
@@ -232,6 +231,7 @@ public class AmClusterValidator {
          }
       }
 
+      Map<String, Object> notAvailableConfig = new HashMap<String, Object>();
       for (String key : config.keySet()) {
          boolean isSupportedType = false;
          for (String configType : supportedConfigs.keySet()) {
@@ -246,22 +246,27 @@ public class AmClusterValidator {
             unRecogConfigTypes.add(key);
          }
 
-         Map<String, String> items = (Map<String, String>) config.get(key);
-         for (String subKey : items.keySet()) {
-            boolean isSupportedPropety = false;
-            for (String propertyName : (List<String>) supportedConfigs.get(key + ".xml")) {
-               if (propertyName.equals(subKey)) {
-                  isSupportedPropety = true;
-                  if (isSupportedPropety) {
-                     continue;
+         try {
+            Map<String, String> items = (Map<String, String>) config.get(key);
+            for (String subKey : items.keySet()) {
+               boolean isSupportedPropety = false;
+               for (String propertyName : (List<String>) supportedConfigs
+                     .get(key + ".xml")) {
+                  if (propertyName.equals(subKey)) {
+                     isSupportedPropety = true;
+                     if (isSupportedPropety) {
+                        continue;
+                     }
                   }
                }
+               if (!isSupportedPropety) {
+                  unRecogConfigKeys.add(subKey);
+               }
             }
-            if (!isSupportedPropety) {
-               unRecogConfigKeys.add(subKey);
-            }
+         } catch (Exception e) {
+            notAvailableConfig.put(key, config.get(key));
+            errorMsgList.add("Configuration item " + notAvailableConfig.toString() + " is invalid");
          }
-
       }
    }
 
