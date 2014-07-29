@@ -584,10 +584,6 @@ public class ClusterCreate implements Serializable {
       if (!warningMsgList.isEmpty() && !warningMsgList.get(0).startsWith("Warning: ")) {
          warningMsgList.set(0, "Warning: " + warningMsgList.get(0));
       }
-
-      //TODO emma: confirm with CLI validation
-      // been in software manager
-//      validateRoleWithWarning(failedMsgList, warningMsgList);
    }
 
    private void checkCPUAndMemory(NodeGroupCreate nodeGroup,

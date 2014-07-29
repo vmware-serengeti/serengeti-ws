@@ -541,6 +541,25 @@ public class RestClient {
       }
    }
 
+   public <T> T getObject(final String path, Class<T> entityType, final HttpMethod verb, Object body) {
+      checkConnection();
+      try {
+         if (verb == HttpMethod.POST) {
+            ResponseEntity<T> response = this.restQueryWithBody(path, entityType, body);
+            if (!validateAuthorization(response)) {
+               return null;
+            }
+            T objectRead = response.getBody();
+
+            return objectRead;
+         } else {
+            throw new Exception(Constants.HTTP_VERB_ERROR);
+         }
+      } catch (Exception e) {
+         throw new CliRestException(CommandsUtils.getExceptionMessage(e));
+      }
+   }
+
    /**
     * Method to get by path
     * 
@@ -764,6 +783,13 @@ public class RestClient {
       HttpEntity<Object> entity = new HttpEntity<Object>(entityName, headers);
 
       return client.exchange(targetUri, HttpMethod.PUT, entity, String.class);
+   }
+
+   private <T> ResponseEntity<T> restQueryWithBody(String path, Class<T> entityType, Object body) {
+      String targetUri = hostUri + Constants.HTTPS_CONNECTION_API + path;
+      HttpHeaders headers = buildHeaders();
+      HttpEntity<Object> entity = new HttpEntity<Object>(body, headers);
+      return client.exchange(targetUri, HttpMethod.POST, entity, entityType);
    }
 
    @SuppressWarnings("rawtypes")

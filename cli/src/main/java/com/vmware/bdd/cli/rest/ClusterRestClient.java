@@ -35,6 +35,7 @@ import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TaskRead;
+import com.vmware.bdd.apitypes.ValidateResult;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 import com.vmware.bdd.utils.CommonUtil;
@@ -80,6 +81,13 @@ public class ClusterRestClient {
       final HttpMethod httpverb = HttpMethod.GET;
       return restClient
             .getObject(id, ClusterRead.class, path, httpverb, detail);
+   }
+
+   public ValidateResult validateBlueprint(ClusterCreate cluster) {
+      String name = CommonUtil.encode(cluster.getName());
+      final String path = Constants.REST_PATH_CLUSTER + "/" + name + "/validate";
+      final HttpMethod httpverb = HttpMethod.POST;
+      return restClient.getObject(path, ValidateResult.class, httpverb, cluster);
    }
 
    public ClusterCreate getSpec(String id) {

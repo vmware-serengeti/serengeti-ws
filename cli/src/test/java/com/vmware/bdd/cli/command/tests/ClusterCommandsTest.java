@@ -44,6 +44,7 @@ import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.apitypes.TaskRead.Type;
 import com.vmware.bdd.apitypes.TopologyType;
+import com.vmware.bdd.apitypes.ValidateResult;
 import com.vmware.bdd.cli.commands.ClusterCommands;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
@@ -389,13 +390,17 @@ public class ClusterCommandsTest extends MockRestServer {
        network.setPortGroup("pg1");
        networks[0] = network;
 
+       ValidateResult vr = new ValidateResult();
+       vr.setValidated(true);
+
        ObjectMapper mapper = new ObjectMapper();
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Default/defaultdistro", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(distros[0]));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
-       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST,
-             HttpStatus.NO_CONTENT, "");
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1WithHadoopSpec/validate", HttpMethod.POST,
+             HttpStatus.OK, mapper.writeValueAsString(vr));
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST, HttpStatus.NO_CONTENT, "");
 
        clusterCommands.createCluster("cluster1WithHadoopSpec", null, null, null, "src/test/resources/hadoop_cluster.json", null, null, null, null, null, null, false, false, true, false);
 
@@ -404,8 +409,9 @@ public class ClusterCommandsTest extends MockRestServer {
              mapper.writeValueAsString(distros[0]));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
-       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST,
-             HttpStatus.NO_CONTENT, "");
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1WithHBaseSpec/validate", HttpMethod.POST,
+             HttpStatus.OK, mapper.writeValueAsString(vr));
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST, HttpStatus.NO_CONTENT, "");
        clusterCommands.createCluster("cluster1WithHBaseSpec", null, null, null, "src/test/resources/hbase_cluster.json", null, null, null, null, null, null, false, false, true, false);
 
        setup();
@@ -413,8 +419,9 @@ public class ClusterCommandsTest extends MockRestServer {
              mapper.writeValueAsString(distros[0]));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
-       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST,
-             HttpStatus.NO_CONTENT, "");
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1WithDCSeperationSpec/validate", HttpMethod.POST,
+             HttpStatus.OK, mapper.writeValueAsString(vr));
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST, HttpStatus.NO_CONTENT, "");
        clusterCommands.createCluster("cluster1WithDCSeperationSpec", null, null, null, "src/test/resources/data_compute_separation_cluster.json", null, null, null, null, null, null, false, false, true, false);
 
        setup();
@@ -422,8 +429,9 @@ public class ClusterCommandsTest extends MockRestServer {
              mapper.writeValueAsString(distros[0]));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(networks));
-       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST,
-             HttpStatus.NO_CONTENT, "");
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1WithNameNodeHASpec/validate", HttpMethod.POST,
+             HttpStatus.OK, mapper.writeValueAsString(vr));
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST, HttpStatus.NO_CONTENT, "");
        clusterCommands.createCluster("cluster1WithNameNodeHASpec", null, null, null, "src/test/resources/namenode_ha_cluster.json", null, null, null, null, null, null, false, false, true, false);
        CookieCache.clear();
     }

@@ -17,6 +17,7 @@ package com.vmware.bdd.rest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -56,6 +57,7 @@ import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Type;
+import com.vmware.bdd.apitypes.ValidateResult;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
@@ -69,7 +71,9 @@ import com.vmware.bdd.service.resmgmt.IAppManagerService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
+import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
@@ -1104,6 +1108,25 @@ public class RestResource {
          }
       }
       throw BddException.NOT_FOUND("Distro", distroName);
+   }
+
+   @RequestMapping(value = "/cluster/{clusterName}/validate", method = RequestMethod.POST, produces = "application/json")
+   @ResponseBody
+   public ValidateResult validateBlueprint(@RequestBody ClusterCreate createSpec) {
+      SoftwareManager softwareManager =
+            clusterMgr.getClusterConfigMgr().getSoftwareManager(
+                  createSpec.getAppManager());
+      ClusterBlueprint blueprint = createSpec.toBlueprint();
+      ValidateResult result = new ValidateResult();
+      boolean validated = false;
+      try {
+         validated = softwareManager.validateBlueprint(blueprint);
+      } catch (ValidationException ve) {
+         result.setFailedMsgList(ve.getFailedMsgList());
+         result.setWarningMsgList(ve.getWarningMsgList());
+      }
+      result.setValidated(validated);
+      return result;
    }
 
    @ExceptionHandler(Throwable.class)

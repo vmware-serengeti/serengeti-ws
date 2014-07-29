@@ -40,7 +40,6 @@ import org.springframework.stereotype.Component;
 import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
-import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.ElasticityRequestBody;
@@ -263,6 +262,7 @@ public class ClusterCommands implements CommandMarker {
             clusterCreate.setExternalMapReduce(clusterSpec.getExternalMapReduce());
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
+            // TODO: W'd better merge validateConfiguration with validateClusterSpec to avoid repeated validation.
             if (CommandsUtils.isBlank(appManager) || Constants.IRONFAN.equalsIgnoreCase(appManager)) {
                 validateConfiguration(clusterCreate, skipConfigValidation,
                         warningMsgList, failedMsgList);
@@ -338,7 +338,7 @@ public class ClusterCommands implements CommandMarker {
       //TODO(qjin): 1, in validateClusterCreate, implement roles check and validation
       //            2, consider use service to validate configuration for different appManager
       if (specFilePath != null) {
-         clusterCreate.validateClusterCreate(failedMsgList, warningMsgList);
+         validateClusterSpec(clusterCreate, failedMsgList, warningMsgList);
       }
 
       // give a warning message if both type and specFilePath are specified
@@ -377,6 +377,17 @@ public class ClusterCommands implements CommandMarker {
          }
       }
       return null;
+   }
+
+   private void validateClusterSpec(ClusterCreate clusterCreate,
+         List<String> failedMsgList, List<String> warningMsgList) {
+      clusterCreate.validateClusterCreate(failedMsgList, warningMsgList);
+      //validate roles and configuration.
+      com.vmware.bdd.apitypes.ValidateResult vr = restClient.validateBlueprint(clusterCreate);
+      if (!vr.isValidated()) {
+         failedMsgList.addAll(vr.getFailedMsgList());
+         warningMsgList.addAll(vr.getWarningMsgList());
+      }
    }
 
    /**
