@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,7 +111,9 @@ public class SoftwareManagerCollector implements InitializingBean {
       }
       return privateKey;
    }
+
    /**
+    *
     * @param appManagerAdd
     * @return
     */
@@ -126,28 +129,14 @@ public class SoftwareManagerCollector implements InitializingBean {
       }
       logger.info("Factory class name is " + factoryClassName);
 
-      Class<?> factoryClass;
-      try {
-         factoryClass = Class.forName(factoryClassName);
-      } catch (ClassNotFoundException e) {
-         logger.error("Cannot load factory class " + factoryClassName
-               + " in classpath.");
-         throw SoftwareManagerCollectorException.CLASS_NOT_FOUND_ERROR(e,
-               factoryClassName);
-      }
-      logger.info("Factory class loaded.");
       SoftwareManagerFactory softwareManagerFactory = null;
       try {
-         softwareManagerFactory =
-               (SoftwareManagerFactory) factoryClass.newInstance();
-      } catch (InstantiationException e) {
-         logger.error("Cannot instantiate " + factoryClassName);
-         throw SoftwareManagerCollectorException.CAN_NOT_INSTANTIATE(e,
-               factoryClassName);
-      } catch (IllegalAccessException e) {
+         Class<? extends SoftwareManagerFactory> clazz = ReflectionUtils.getClass(factoryClassName, SoftwareManagerFactory.class);
+         logger.info("Factory class loaded.");
+         softwareManagerFactory = ReflectionUtils.newInstance(clazz);
+      } catch (Exception e) {
          logger.error(e.getMessage());
-         throw SoftwareManagerCollectorException.ILLEGAL_ACCESS(e,
-               factoryClassName);
+         throw SoftwareManagerCollectorException.CAN_NOT_INSTANTIATE(e, factoryClassName);
       }
 
       logger.info("Start to invoke software manager factory to create software manager.");
@@ -166,7 +155,8 @@ public class SoftwareManagerCollector implements InitializingBean {
    }
 
    /**
-    * @param appManagerAdd
+    *
+    * @param name
     * @param softwareManager
     */
    private void validateSoftwareManager(String name, SoftwareManager softwareManager) {

@@ -41,6 +41,7 @@ import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
 import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
 import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
+import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -807,6 +808,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
             succeed = true;
             return true;
          }
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName(), 120);
          executeAndReport("Staring Services",
                            apiResourceRootV6.getClustersResource().startCommand(clusterName),
                            ProgressSplit.START_SERVICES.getProgress(),
@@ -1705,10 +1707,10 @@ public class ClouderaManagerImpl implements SoftwareManager {
     * @throws com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException
     */
    private boolean startServices(final CmClusterDef cluster, final ClusterReportQueue reportQueue, final boolean isFirstStart) throws ClouderaManagerException {
-
       boolean executed = true;
       int endProgress = ProgressSplit.START_SERVICES.getProgress();
       try {
+         ReflectionUtils.getPreStartServicesHook().preStartServices(cluster.getName(), 120);
          if (!cluster.isEmpty()) {
             if (!isConfigured(cluster)) {
                configureServices(cluster, reportQueue, true);

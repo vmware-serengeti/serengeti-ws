@@ -20,10 +20,13 @@ import com.cloudera.api.v6.RootResourceV6;
 import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
 import com.vmware.bdd.plugin.clouderamgr.service.cm.FakeRootResource;
 import com.vmware.bdd.plugin.clouderamgr.utils.SerialUtils;
+import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
+import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
+import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 import com.vmware.bdd.utils.CommonUtil;
 import mockit.Mock;
 import mockit.MockClass;
@@ -92,10 +95,24 @@ public class TestClouderaManagerImpl {
       }
    }
 
+   @MockClass(realClass = ReflectionUtils.class)
+   public static class MockReflectionUtils {
+      @Mock
+      public static PreStartServices getPreStartServicesHook() {
+         return new PreStartServices() {
+            @Override
+            public void preStartServices(String clusterName,
+                  int maxWaitingSeconds) throws SoftwareManagementPluginException {
+            }
+         };
+      }
+   }
+
    @BeforeClass( groups = { "TestClouderaManagerImpl" }, dependsOnGroups = { "TestClusterDef" })
    public static void setup() throws IOException {
       Mockit.setUpMock(MockClouderaManagerClientBuilder.class);
       Mockit.setUpMock(MockHostInstallPoller.class);
+      Mockit.setUpMock(MockReflectionUtils.class);
       apiRootResource = Mockito.mock(ApiRootResource.class);
       rootResourceV6 = new FakeRootResource();
       Mockito.when(apiRootResource.getRootV6()).thenReturn(rootResourceV6);

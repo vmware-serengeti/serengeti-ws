@@ -26,12 +26,13 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Priority;
 import com.vmware.aurora.composition.concurrent.Scheduler;
-import com.vmware.aurora.util.AuAssert;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
@@ -41,8 +42,8 @@ import com.vmware.bdd.software.mgmt.plugin.aop.PreConfiguration;
 import com.vmware.bdd.software.mgmt.plugin.exception.InfrastructureException;
 
 @Aspect
-public class PreConfigurationAdvice implements PreStartServices {
-   private static final Logger logger = Logger.getLogger(PreConfigurationAdvice.class);
+public class DefaultPreStartServicesAdvice implements PreStartServices {
+   private static final Logger logger = Logger.getLogger(DefaultPreStartServicesAdvice.class);
    private IClusterEntityManager clusterEntityMgr;
 
    public IClusterEntityManager getClusterEntityMgr() {
@@ -87,9 +88,14 @@ public class PreConfigurationAdvice implements PreStartServices {
    }
 
    @Override
-   public void preStartServices(String clusterName, int maxWaitingSeconds)
-   throws InfrastructureException {
+   public void preStartServices(String clusterName, int maxWaitingSeconds) throws InfrastructureException {
       logger.info("Pre configuration for cluster " + clusterName);
+      synchronized(this) {
+         if (clusterEntityMgr == null) {
+            ApplicationContext context = new ClassPathXmlApplicationContext("classpath*:/../spring/*-context.xml");
+            clusterEntityMgr = (IClusterEntityManager) context.getBean("clusterEntityManager");
+         }
+      }
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(clusterName);
       Callable<Void>[] callables = new Callable[nodes.size()];
       int i = 0;

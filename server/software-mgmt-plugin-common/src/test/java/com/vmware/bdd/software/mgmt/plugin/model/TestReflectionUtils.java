@@ -1,7 +1,5 @@
 package com.vmware.bdd.software.mgmt.plugin.model;
 
-import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
-import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManagerFactory;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 import org.testng.annotations.Test;
 
@@ -13,8 +11,9 @@ import org.testng.annotations.Test;
 public class TestReflectionUtils {
 
    @Test
-   public void testGetClass() throws IllegalAccessException, InstantiationException {
-      Class<? extends Object> clazz = ReflectionUtils.getClass("com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint", Object.class);
-      ClusterBlueprint blueprint = (ClusterBlueprint)clazz.newInstance();
+   public void testGetClass() {
+      Class<? extends Object> clazz = ReflectionUtils.getClass(
+            "com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint", Object.class);
+      ReflectionUtils.newInstance(clazz);
    }
 }

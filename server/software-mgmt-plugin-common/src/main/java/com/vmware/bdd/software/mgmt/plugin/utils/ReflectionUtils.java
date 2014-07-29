@@ -22,7 +22,7 @@ public class ReflectionUtils {
    private static final Class<?>[] EMPTY_ARRAY = new Class[]{};
 
    public static PreStartServices getPreStartServicesHook() {
-      String className = "com.vmware.bdd.aop.software.PreConfigurationAdvice";
+      String className = "com.vmware.bdd.aop.software.DefaultPreStartServicesAdvice";
       Class<? extends PreStartServices> clazz = getClass(className, PreStartServices.class);
       return newInstance(clazz);
    }
@@ -31,7 +31,7 @@ public class ReflectionUtils {
       try {
          Class<?> theClass = Class.forName(className);
          if (theClass != null && !superClass.isAssignableFrom(theClass)) {
-            throw new RuntimeException(theClass +" not " + superClass.getName());
+            throw new RuntimeException(theClass + " is not a subclass of " + superClass.getName());
          } else if (theClass != null) {
             return theClass.asSubclass(superClass);
          } else {
@@ -59,6 +59,9 @@ public class ReflectionUtils {
       return result;
    }
 
+   /**
+    * TODO: launch a daemon thread to call this function to avoid potential memory leak
+    */
    static void clearCache() {
       CONSTRUCTOR_CACHE.clear();
    }
