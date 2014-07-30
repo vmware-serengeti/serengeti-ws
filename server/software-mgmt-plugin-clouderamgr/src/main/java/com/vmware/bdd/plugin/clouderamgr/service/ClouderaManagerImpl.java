@@ -15,6 +15,7 @@
 package com.vmware.bdd.plugin.clouderamgr.service;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,11 +43,11 @@ import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
 import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
+
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import com.cloudera.api.ApiRootResource;
-import com.cloudera.api.ClouderaManagerClientBuilder;
 import com.cloudera.api.DataView;
 import com.cloudera.api.model.ApiBulkCommandList;
 import com.cloudera.api.model.ApiCluster;
@@ -63,11 +64,9 @@ import com.cloudera.api.model.ApiHostRef;
 import com.cloudera.api.model.ApiHostRefList;
 import com.cloudera.api.model.ApiParcel;
 import com.cloudera.api.model.ApiRole;
-import com.cloudera.api.model.ApiRoleConfigGroup;
 import com.cloudera.api.model.ApiRoleList;
 import com.cloudera.api.model.ApiRoleNameList;
 import com.cloudera.api.model.ApiRoleRef;
-import com.cloudera.api.model.ApiRoleState;
 import com.cloudera.api.model.ApiService;
 import com.cloudera.api.model.ApiServiceConfig;
 import com.cloudera.api.model.ApiServiceList;
@@ -76,20 +75,10 @@ import com.cloudera.api.v3.ParcelResource;
 import com.cloudera.api.v6.RootResourceV6;
 import com.cloudera.api.v6.ServicesResourceV6;
 import com.google.common.collect.ImmutableList;
-import com.google.gson.GsonBuilder;
-import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
 import com.vmware.bdd.plugin.clouderamgr.model.CmClusterDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmNodeDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmRoleDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmServiceDef;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableManagementService;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableParcelStage;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
-import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
-import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
-import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
-import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -101,7 +90,6 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
-import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 
 /**
  * Author: Xiaoding Bian
@@ -154,6 +142,20 @@ public class ClouderaManagerImpl implements SoftwareManager {
       this.cmPassword = password;
       ApiRootResource apiRootResource = new ClouderaManagerClientBuilder().withHost(cmServerHost)
             .withPort(port).withUsernamePassword(user, password).build();
+      this.apiResourceRootV6 = apiRootResource.getRootV6();
+      this.privateKey = privateKey;
+   }
+
+   public ClouderaManagerImpl(URL url, String user, String password,
+         String privateKey) throws ClouderaManagerException {
+      this.cmServerHost = url.getHost();
+      this.cmPort = url.getPort();
+      this.domain = url.getProtocol() + "://" + cmServerHost + ":" + cmPort;
+      this.cmUsername = user;
+      this.cmPassword = password;
+      ApiRootResource apiRootResource =
+            new ClouderaManagerClientBuilder().withBaseURL(url)
+                  .withUsernamePassword(user, password).build();
       this.apiResourceRootV6 = apiRootResource.getRootV6();
       this.privateKey = privateKey;
    }
@@ -285,7 +287,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean scaleOutCluster(ClusterBlueprint blueprint, List<String> addedNodeNames, 
+   public boolean scaleOutCluster(ClusterBlueprint blueprint, List<String> addedNodeNames,
          ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
       boolean success = false;
       CmClusterDef clusterDef = null;
@@ -301,13 +303,13 @@ public class ClouderaManagerImpl implements SoftwareManager {
          clusterDef.getCurrentReport().setAction("");
          clusterDef.getCurrentReport().setClusterAndNodesServiceStatus(ServiceStatus.STARTED);
       } catch (SoftwareManagementPluginException ex) {
-         if (ex instanceof ClouderaManagerException 
+         if (ex instanceof ClouderaManagerException
                && ((ClouderaManagerException)ex).getRefHostId() != null) {
             String hostId = ((ClouderaManagerException)ex).getRefHostId();
             CmNodeDef nodeDef = clusterDef.idToHosts().get(hostId);
             String errMsg = null;
             if (nodeDef != null) {
-               errMsg = "Failed to start role for node "  + nodeDef.getName() + " for " 
+               errMsg = "Failed to start role for node "  + nodeDef.getName() + " for "
                      + ((ex.getMessage() == null) ? "" : (", " + ex.getMessage()));
                // reset all node actions.
                clusterDef.getCurrentReport().setNodesAction("", addedNodeNames);
@@ -335,7 +337,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       return success;
    }
 
-   private Map<String, List<ApiRole>> configureNodeServices(final CmClusterDef cluster, 
+   private Map<String, List<ApiRole>> configureNodeServices(final CmClusterDef cluster,
          final ClusterReportQueue reportQueue, List<String> addedNodeNames)
                throws SoftwareManagementPluginException {
 
@@ -412,7 +414,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
          preDeployConfig(cluster);
 
-         executeAndReport("Deploy client config", addedNodeNames, 
+         executeAndReport("Deploy client config", addedNodeNames,
                apiResourceRootV6.getClustersResource().deployClientConfig(cluster.getName()),
                ProgressSplit.CONFIGURE_SERVICES.getProgress(), cluster.getCurrentReport(), reportQueue, true);
          return result;
@@ -573,7 +575,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       for (ApiService apiService : apiResourceRootV6.getClustersResource()
             .getServicesResource(clusterName).readServices(DataView.SUMMARY)) {
          ApiHealthSummary health = apiService.getHealthSummary();
-         logger.debug("Cluster " + clusterName + " Service " 
+         logger.debug("Cluster " + clusterName + " Service "
          + apiService.getType() + " status is " + health);
          if (health.ordinal() > summary.ordinal()) {
             summary = health;
@@ -1005,7 +1007,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
     * @param reportQueue
     * @throws Exception
     */
-   private void installHosts(final CmClusterDef cluster, final List<String> addedNodes, 
+   private void installHosts(final CmClusterDef cluster, final List<String> addedNodes,
          final ClusterReportQueue reportQueue) throws Exception {
       logger.info("Installing agent for each node of cluster: " + cluster.getName());
       List<String> ips = new ArrayList<String>();
@@ -1118,7 +1120,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       }
    }
 
-   private void provisionCluster(final CmClusterDef cluster, final List<String> addedNodes, 
+   private void provisionCluster(final CmClusterDef cluster, final List<String> addedNodes,
          final ClusterReportQueue reportQueue) throws Exception {
       provisionCluster(cluster, addedNodes, reportQueue, false);
    }
@@ -1129,7 +1131,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
     * @param reportQueue
     * @throws Exception
     */
-   private void provisionCluster(final CmClusterDef cluster, final List<String> addedNodes, 
+   private void provisionCluster(final CmClusterDef cluster, final List<String> addedNodes,
          final ClusterReportQueue reportQueue, boolean removeBadHosts) throws Exception {
 
       if (!isProvisioned(cluster.getName())) {
@@ -1954,7 +1956,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       return executeAndReport(action, null, bulkCommand, endProgress, currentReport, reportQueue, checkReturn);
    }
 
-   private ApiCommand executeAndReport(String action, List<String> addedNodes, final ApiBulkCommandList bulkCommand, 
+   private ApiCommand executeAndReport(String action, List<String> addedNodes, final ApiBulkCommandList bulkCommand,
          int endProgress, ClusterReport currentReport, ClusterReportQueue reportQueue, boolean checkReturn)
                throws Exception {
       ApiCommand lastCommand = null;
@@ -1964,7 +1966,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       return lastCommand;
    }
 
-   private ApiCommand executeAndReport(String action, final List<String> nodeNames, final ApiCommand command, 
+   private ApiCommand executeAndReport(String action, final List<String> nodeNames, final ApiCommand command,
          int endProgress, ClusterReport currentReport, ClusterReportQueue reportQueue, boolean checkReturn) throws Exception {
       return executeAndReport(action, nodeNames, command, endProgress, currentReport, reportQueue,
             new StatusPoller() {
@@ -1992,7 +1994,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       return executeAndReport(action, null, command, endProgress, currentReport, reportQueue, poller, checkReturn);
    }
 
-   private ApiCommand executeAndReport(String action, List<String> nodeNames, final ApiCommand command, 
+   private ApiCommand executeAndReport(String action, List<String> nodeNames, final ApiCommand command,
          int endProgress, ClusterReport currentReport, ClusterReportQueue reportQueue, StatusPoller poller,
          boolean checkReturn) throws Exception {
 

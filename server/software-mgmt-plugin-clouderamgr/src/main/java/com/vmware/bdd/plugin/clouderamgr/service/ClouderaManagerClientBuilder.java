@@ -12,20 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api;
+package com.vmware.bdd.plugin.clouderamgr.service;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
+import com.cloudera.api.ApiObjectMapper;
+import com.cloudera.api.ApiRootResource;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.feature.AbstractFeature;
 import org.apache.cxf.feature.LoggingFeature;
@@ -35,11 +27,18 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.google.common.annotations.VisibleForTesting;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
-public class AmbariManagerClientbuilder {
-   public static final int DEFAULT_TCP_PORT = 8080;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+public class ClouderaManagerClientBuilder {
+   public static final int DEFAULT_TCP_PORT = 7180;
    public static final long DEFAULT_CONNECTION_TIMEOUT = 0;
    public static final TimeUnit DEFAULT_CONNECTION_TIMEOUT_UNITS =
          TimeUnit.MILLISECONDS;
@@ -61,58 +60,58 @@ public class AmbariManagerClientbuilder {
    private boolean validateCerts = true;
    private boolean validateCn = true;
 
-   public AmbariManagerClientbuilder withBaseURL(URL baseUrl) {
+   public ClouderaManagerClientBuilder withBaseURL(URL baseUrl) {
       this.baseUrl = baseUrl;
       return this;
    }
 
-   public AmbariManagerClientbuilder withHost(String hostname) {
+   public ClouderaManagerClientBuilder withHost(String hostname) {
       this.hostname = hostname;
       return this;
    }
 
-   public AmbariManagerClientbuilder withPort(int port) {
+   public ClouderaManagerClientBuilder withPort(int port) {
       this.port = port;
       return this;
    }
 
-   public AmbariManagerClientbuilder enableTLS() {
+   public ClouderaManagerClientBuilder enableTLS() {
       this.enableTLS = true;
       return this;
    }
 
-   public AmbariManagerClientbuilder enableLogging() {
+   public ClouderaManagerClientBuilder enableLogging() {
       this.enableLogging = true;
       return this;
    }
 
-   public AmbariManagerClientbuilder withUsernamePassword(String username,
+   public ClouderaManagerClientBuilder withUsernamePassword(String username,
          String password) {
       this.username = username;
       this.password = password;
       return this;
    }
 
-   public AmbariManagerClientbuilder withConnectionTimeout(
+   public ClouderaManagerClientBuilder withConnectionTimeout(
          long connectionTimeout, TimeUnit connectionTimeoutUnits) {
       this.connectionTimeout = connectionTimeout;
       this.connectionTimeoutUnits = connectionTimeoutUnits;
       return this;
    }
 
-   public AmbariManagerClientbuilder withReceiveTimeout(long receiveTimeout,
+   public ClouderaManagerClientBuilder withReceiveTimeout(long receiveTimeout,
          TimeUnit receiveTimeoutUnits) {
       this.receiveTimeout = receiveTimeout;
       this.receiveTimeoutUnits = receiveTimeoutUnits;
       return this;
    }
 
-   public AmbariManagerClientbuilder disableTlsCertValidation() {
+   public ClouderaManagerClientBuilder disableTlsCertValidation() {
       this.validateCerts = false;
       return this;
    }
 
-   public AmbariManagerClientbuilder disableTlsCnValidation() {
+   public ClouderaManagerClientBuilder disableTlsCnValidation() {
       this.validateCn = false;
       return this;
    }
@@ -164,12 +163,6 @@ public class AmbariManagerClientbuilder {
       if (enableLogging) {
          bean.setFeatures(Arrays.<AbstractFeature> asList(new LoggingFeature()));
       }
-
-      Map<String, String> headers = new HashMap<String, String>();
-      headers.put("X-Requested-By", "ambari");
-      bean.setHeaders(headers);
-      bean.setInheritHeaders(true);
-
       bean.setResourceClass(proxyType);
       bean.setProvider(new JacksonJsonProvider(new ApiObjectMapper()));
 
@@ -232,4 +225,5 @@ public class AmbariManagerClientbuilder {
       }
 
    }
+
 }

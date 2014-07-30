@@ -15,7 +15,6 @@
 package com.vmware.bdd.plugin.clouderamgr.service;
 
 import com.cloudera.api.ApiRootResource;
-import com.cloudera.api.ClouderaManagerClientBuilder;
 import com.cloudera.api.v6.RootResourceV6;
 import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
 import com.vmware.bdd.plugin.clouderamgr.service.cm.FakeRootResource;

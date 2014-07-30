@@ -42,8 +42,7 @@ public class AmbariFactory implements SoftwareManagerFactory {
          logger.warn(msg);
          throw new BddException(null, "SOFT_MANAGER", "INVALID_URL", msg);
       }
-      return new AmbariImpl(url.getHost(), url.getPort(), username, new String(
-            password), certificate);
+      return new AmbariImpl(url, username, new String(password), certificate);
    }
 
 }

@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.service;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -97,6 +98,11 @@ public class AmbariImpl implements SoftwareManager {
    public AmbariImpl(String amServerHost, int port, String username,
          String password, String privateKey) {
       this.apiManager = new ApiManager(amServerHost, port, username, password);
+      this.privateKey = privateKey;
+   }
+
+   public AmbariImpl(URL url, String username, String password, String privateKey) {
+      this.apiManager = new ApiManager(url, username, password);
       this.privateKey = privateKey;
    }
 

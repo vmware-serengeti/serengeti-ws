@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.manager;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,6 +74,14 @@ public class ApiManager implements IApiManager {
       ApiRootResource amApiRootResource =
             new AmbariManagerClientbuilder().withHost(amServerHost)
                   .withPort(port).withUsernamePassword(user, password).build();
+
+      apiResourceRootV1 = amApiRootResource.getRootV1();
+   }
+
+   public ApiManager(URL baseUrl, String user, String password) {
+      ApiRootResource amApiRootResource =
+            new AmbariManagerClientbuilder().withBaseURL(baseUrl)
+                  .withUsernamePassword(user, password).build();
 
       apiResourceRootV1 = amApiRootResource.getRootV1();
    }

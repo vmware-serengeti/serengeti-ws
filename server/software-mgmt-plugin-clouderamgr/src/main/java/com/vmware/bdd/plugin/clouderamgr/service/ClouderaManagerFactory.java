@@ -42,8 +42,8 @@ public class ClouderaManagerFactory implements SoftwareManagerFactory{
          logger.warn(msg);
          throw new BddException(null, "SOFT_MANAGER", "INVALID_URL", msg);
       }
-      return new ClouderaManagerImpl(url.getHost(), url.getPort(), username,
-            new String(password), certificate);
+      return new ClouderaManagerImpl(url, username, new String(password),
+            certificate);
    }
 
 }

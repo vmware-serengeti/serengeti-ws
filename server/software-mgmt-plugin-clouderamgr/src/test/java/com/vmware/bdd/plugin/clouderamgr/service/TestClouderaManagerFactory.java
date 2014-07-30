@@ -16,6 +16,7 @@ package com.vmware.bdd.plugin.clouderamgr.service;
 
 import static org.testng.Assert.assertEquals;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +28,6 @@ import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
 import com.cloudera.api.ApiRootResource;
-import com.cloudera.api.ClouderaManagerClientBuilder;
 import com.cloudera.api.DataView;
 import com.cloudera.api.model.ApiHost;
 import com.cloudera.api.model.ApiHostList;
@@ -52,6 +52,11 @@ public class TestClouderaManagerFactory {
 
       @Mock
       public ClouderaManagerClientBuilder withPort(int port) {
+         return builder;
+      }
+
+      @Mock
+      public ClouderaManagerClientBuilder withBaseURL(URL url) {
          return builder;
       }
 
