@@ -22,11 +22,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.AssertJUnit.assertFalse;
+import static org.testng.AssertJUnit.fail;
 
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
@@ -43,7 +45,7 @@ import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.ServiceType;
 import com.vmware.bdd.utils.Constants;
 
-public class DefaultSoftwareManagerImplTest extends TestCase {
+public class DefaultSoftwareManagerImplTest {
    private static DefaultSoftwareManagerImpl defaultSoftwareManager = new DefaultSoftwareManagerImpl();
    private static ClusterValidator validator = new ClusterValidator();
 
@@ -132,11 +134,11 @@ public class DefaultSoftwareManagerImplTest extends TestCase {
       master.setName("master");
       master.setInstanceNum(1);
       master.setRoles(Arrays.asList(HadoopRole.HADOOP_NAMENODE_ROLE.toString(),
-            HadoopRole.HADOOP_JOBTRACKER_ROLE.toString()));
+            HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString()));
       NodeGroupInfo worker = new NodeGroupInfo();
       worker.setName("worker");
       worker.setRoles(Arrays.asList(HadoopRole.HADOOP_DATANODE.toString(),
-            HadoopRole.HADOOP_TASKTRACKER.toString()));
+            HadoopRole.HADOOP_NODEMANAGER_ROLE.toString()));
       worker.setInstanceNum(0);
       NodeGroupInfo client = new NodeGroupInfo();
       client.setName("client");
@@ -209,7 +211,7 @@ public class DefaultSoftwareManagerImplTest extends TestCase {
       cluster.setNodeGroups(Arrays.asList(compute));
       assertEquals(false,
             cluster.validateSetManualElasticity(Arrays.asList("compute")));
-      cluster.setDistroVendor(Constants.DEFAULT_VENDOR);
+      cluster.setDistroVendor(Constants.APACHE_VENDOR);
       compute.setRoles(Arrays.asList("hadoop_tasktracker"));
       compute.setComputeOnly(defaultSoftwareManager.isComputeOnlyRoles(compute.getRoles()));
       cluster.setNodeGroups(Arrays.asList(compute));
@@ -371,14 +373,13 @@ public class DefaultSoftwareManagerImplTest extends TestCase {
       hadoopStack.setVendor(Constants.DEFAULT_VENDOR);
       blueprint.setHadoopStack(hadoopStack);
       NodeGroupInfo compute = new NodeGroupInfo();
-      compute.setRoles(Arrays.asList(HadoopRole.HADOOP_TASKTRACKER.toString()));
+      compute.setRoles(Arrays.asList(HadoopRole.HADOOP_NODEMANAGER_ROLE.toString()));
       List<NodeGroupInfo> nodeGroupInfos = new ArrayList<NodeGroupInfo>();
       nodeGroupInfos.add(compute);
       blueprint.setNodeGroups(nodeGroupInfos);
       assertFalse(defaultSoftwareManager.hasComputeMasterGroup(blueprint));
       NodeGroupInfo master = new NodeGroupInfo();
-      master.setRoles(Arrays.asList(HadoopRole.HADOOP_JOBTRACKER_ROLE
-            .toString()));
+      master.setRoles(Arrays.asList(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString()));
       nodeGroupInfos.add(master);
       blueprint.setNodeGroups(nodeGroupInfos);
       assertTrue(defaultSoftwareManager.hasComputeMasterGroup(blueprint));
@@ -389,11 +390,11 @@ public class DefaultSoftwareManagerImplTest extends TestCase {
       ClusterCreate cluster =
          TestFileUtil
          .getSimpleClusterSpec(TestFileUtil.HDFS_HA_CLUSTER_FILE);
-      cluster.setDistro("apache");
+      cluster.setDistro("bigtop");
       List<String> failedMsgList = new ArrayList<String>();
       List<String> warningMsgList = new ArrayList<String>();
       validator.validateGroupConfig(cluster.toBlueprint(), failedMsgList, warningMsgList);
-      Assert.assertTrue("Should get empty fail message.", failedMsgList.isEmpty());
-      Assert.assertTrue("Should get empty warning message.", warningMsgList.isEmpty());
+      assertTrue("Should get empty fail message.", failedMsgList.isEmpty());
+      assertTrue("Should get empty warning message.", warningMsgList.isEmpty());
    }
 }

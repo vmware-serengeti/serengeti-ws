@@ -14,13 +14,13 @@
  ******************************************************************************/
 package com.vmware.bdd.cli.command.tests;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.apitypes.BddErrorMessage;
@@ -154,12 +154,12 @@ public class AppManagerCommandsTest extends MockRestServer {
 
       //ObjectMapper mapper = new ObjectMapper();
       buildReqRespWithoutReqBody(
-            "https://127.0.0.1:8443/serengeti/api/appmanager/Default/distro/apache/roles",
+            "https://127.0.0.1:8443/serengeti/api/appmanager/Default/distro/bigtop/roles",
             HttpMethod.GET, HttpStatus.OK, "");
 
-      // appmanager list --name Default --distro apache --roles
+      // appmanager list --name Default --distro bigtop --roles
       appManagerCommands
-            .listAppManager("Default", false, "apache", true, false);
+            .listAppManager("Default", false, "bigtop", true, false);
 
       CookieCache.clear();
    }
@@ -170,12 +170,12 @@ public class AppManagerCommandsTest extends MockRestServer {
 
       //ObjectMapper mapper = new ObjectMapper();
       buildReqRespWithoutReqBody(
-            "https://127.0.0.1:8443/serengeti/api/appmanager/Default/distro/apache/configurations",
+            "https://127.0.0.1:8443/serengeti/api/appmanager/Default/distro/bigtop/configurations",
             HttpMethod.GET, HttpStatus.OK, "");
 
       // appmanager list --name Default --distro apache --roles
       appManagerCommands
-            .listAppManager("Default", false, "apache", false, true);
+            .listAppManager("Default", false, "bigtop", false, true);
 
       CookieCache.clear();
    }

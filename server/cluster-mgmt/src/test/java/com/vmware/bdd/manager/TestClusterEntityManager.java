@@ -77,7 +77,7 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
 
    public static ClusterEntity assembleClusterEntity(String clusterName) {
       ClusterEntity cluster = new ClusterEntity(clusterName);
-      cluster.setDistro("apache");
+      cluster.setDistro("bigtop");
       cluster.setDistroVendor(Constants.DEFAULT_VENDOR);
       cluster.setTopologyPolicy(TopologyType.NONE);
       cluster.setStatus(ClusterStatus.PROVISIONING);

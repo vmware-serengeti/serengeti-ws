@@ -641,7 +641,7 @@ public class ClusterCreate implements Serializable {
 
    // For HDFS2, apache, mapr, and gphd distros do not have hdfs2 features.
    public boolean supportedWithHdfs2() {
-      if (this.getDistroVendor().equalsIgnoreCase(Constants.DEFAULT_VENDOR)
+      if (this.getDistroVendor().equalsIgnoreCase(Constants.APACHE_VENDOR)
             || this.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR)
             || this.getDistroVendor().equalsIgnoreCase(Constants.GPHD_VENDOR)){
          return false;

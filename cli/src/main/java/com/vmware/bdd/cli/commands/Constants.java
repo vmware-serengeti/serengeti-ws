@@ -227,7 +227,7 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_DESCRIPTION = "DESCRIPTION";
    public static final String FORMAT_TABLE_COLUMN_URL = "URL";
    public static final String FORMAT_TABLE_COLUMN_USERNAME = "USERNAME";
-   public static final String DEFAULT_DISTRO = "apache";
+   public static final String DEFAULT_DISTRO = "bigtop";
    public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure you want to continue (Y/N)? ";
    public static final String PARAM_PROMPT_ADD_CERTIFICATE_MESSAGE = "Are you sure you want to add this certificate (Y/N)? ";
    public static final String PARAM_PROMPT_SSL_CERTIFICATE_MESSAGE = "Enter the file path of the ssl certificate: ";

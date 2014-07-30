@@ -331,7 +331,7 @@ public class TestClusterConfigManager {
       rps.add("myRp1");
       spec.setRpNames(rps);
       spec.setNetworkConfig(createNetConfigs());
-      spec.setDistro("apache");
+      spec.setDistro("bigtop");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       spec.setType(ClusterType.HDFS_MAPRED);
       spec = ClusterSpecFactory.getCustomizedSpec(spec, null);
@@ -477,7 +477,7 @@ public class TestClusterConfigManager {
       rps.add("myRp1");
       spec.setRpNames(rps);
       spec.setNetworkConfig(createNetConfigs());
-      spec.setDistro("apache");
+      spec.setDistro("bigtop");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       spec.setExternalHDFS(hdfsArray[0]);
       String clusterConfigJson =
@@ -488,10 +488,10 @@ public class TestClusterConfigManager {
             .get("configuration")));
       //build a jobtracker group, two compute node groups.
       NodeGroupCreate ng0 = new NodeGroupCreate();
-      List<String> jobtrackerRole = new ArrayList<String>();
-      jobtrackerRole.add("hadoop_jobtracker");
-      ng0.setRoles(jobtrackerRole);
-      ng0.setName("jobtracker");
+      List<String> computerMasterRoles = new ArrayList<String>();
+      computerMasterRoles.add("hadoop_resourcemanager");
+      ng0.setRoles(computerMasterRoles);
+      ng0.setName("resourcemanager");
       ng0.setInstanceNum(1);
       ng0.setInstanceType(InstanceType.LARGE);
       String ng0ConfigJson =
@@ -502,9 +502,9 @@ public class TestClusterConfigManager {
             .get("configuration")));
 
       NodeGroupCreate ng1 = new NodeGroupCreate();
-      List<String> computeRoles = new ArrayList<String>();
-      computeRoles.add("hadoop_tasktracker");
-      ng1.setRoles(computeRoles);
+      List<String> computeWorkerRoles = new ArrayList<String>();
+      computeWorkerRoles.add("hadoop_nodemanager");
+      ng1.setRoles(computeWorkerRoles);
       ng1.setName("compute1");
       ng1.setInstanceNum(4);
       ng1.setInstanceType(InstanceType.MEDIUM);
@@ -519,7 +519,7 @@ public class TestClusterConfigManager {
       ng1.setConfiguration((Map<String, Object>) (ng1Config
             .get("configuration")));
       NodeGroupCreate ng2 = new NodeGroupCreate();
-      ng2.setRoles(computeRoles);
+      ng2.setRoles(computeWorkerRoles);
       ng2.setName("compute2");
       ng2.setInstanceNum(2);
       ng2.setInstanceType(InstanceType.MEDIUM);
@@ -571,7 +571,7 @@ public class TestClusterConfigManager {
       rps.add("myRp1");
       spec.setRpNames(rps);
       spec.setNetworkConfig(createNetConfigs());
-      spec.setDistro("apache");
+      spec.setDistro("bigtop");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       spec.setExternalMapReduce(externalMR);
       spec.setExternalHDFS(externalHDFS);
@@ -586,7 +586,7 @@ public class TestClusterConfigManager {
       // build 3 worker groups
       NodeGroupCreate worker = new NodeGroupCreate();
       List<String> computeRoles = new ArrayList<String>();
-      computeRoles.add("hadoop_tasktracker");
+      computeRoles.add("hadoop_nodemanager");
       worker.setRoles(computeRoles);
       worker.setName("compute1");
       worker.setInstanceNum(2);
@@ -627,7 +627,7 @@ public class TestClusterConfigManager {
       rps.add("myRp1");
       spec.setRpNames(rps);
       spec.setNetworkConfig(createNetConfigs());
-      spec.setDistro("apache");
+      spec.setDistro("bigtop");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       String clusterConfigJson =
             "{\"configuration\":{\"hadoop\":{\"core-site.xml\":{\"fs.default.name\":\""
@@ -639,9 +639,9 @@ public class TestClusterConfigManager {
       NodeGroupCreate ng0 = new NodeGroupCreate();
       List<String> masterRole = new ArrayList<String>();
       masterRole.add("hadoop_namenode");
-      masterRole.add("hadoop_jobtracker");
+      masterRole.add("hadoop_resourcemanager");
       ng0.setRoles(masterRole);
-      ng0.setName("jobtracker");
+      ng0.setName("master");
       ng0.setInstanceNum(1);
       ng0.setInstanceType(InstanceType.LARGE);
       String ng0ConfigJson =
@@ -653,7 +653,7 @@ public class TestClusterConfigManager {
 
       NodeGroupCreate ng1 = new NodeGroupCreate();
       List<String> computeRoles = new ArrayList<String>();
-      computeRoles.add("hadoop_tasktracker");
+      computeRoles.add("hadoop_nodemanager");
       ng1.setRoles(computeRoles);
       ng1.setName("compute1");
       ng1.setInstanceNum(4);
@@ -1026,7 +1026,7 @@ public class TestClusterConfigManager {
       dsNames.add("testLocalStore");
       spec.setDsNames(dsNames);
       spec.setType(ClusterType.HDFS_MAPRED);
-      spec.setDistro("apache");
+      spec.setDistro("bigtop");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       spec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       clusterConfigMgr.createClusterConfig(spec);
@@ -1196,7 +1196,7 @@ public class TestClusterConfigManager {
       spec.setRpNames(rps);
       spec.setNetworkConfig(createNetConfigs());
       spec.setType(ClusterType.HDFS_MAPRED);
-      spec.setDistro("apache");
+      spec.setDistro("bigtop");
       spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       spec = ClusterSpecFactory.getCustomizedSpec(spec, null);
       spec.setType(null);

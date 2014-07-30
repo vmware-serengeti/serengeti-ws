@@ -389,7 +389,7 @@ public class TestClusteringJobs extends
       createSpec.setName(TEST_STATIC_IP_CLUSTER_NAME);
       createSpec.setType(ClusterType.HDFS_MAPRED);
       createSpec.setNetworkConfig(createNetConfig(TEST_STATIC_NETWORK_NAME, staticPortgroup));
-      createSpec.setDistro("apache");
+      createSpec.setDistro("bigtop");
       createSpec.setDistroVendor(Constants.DEFAULT_VENDOR);
       long jobExecutionId = clusterMgr.createCluster(createSpec);
       ClusterRead cluster =
@@ -569,7 +569,7 @@ public class TestClusteringJobs extends
                   Constants.DEFAULT_VENDOR, null, null);
       createSpec.setName(TEST_DHCP_CLUSTER_NAME);
       createSpec.setNetworkConfig(createNetConfig(TEST_DHCP_NETWORK_NAME, dhcpPortgroup));
-      createSpec.setDistro("apache");
+      createSpec.setDistro("bigtop");
       NodeGroupCreate worker = createSpec.getNodeGroup("worker");
       worker.setInstanceNum(1);
       long jobExecutionId = clusterMgr.createCluster(createSpec);

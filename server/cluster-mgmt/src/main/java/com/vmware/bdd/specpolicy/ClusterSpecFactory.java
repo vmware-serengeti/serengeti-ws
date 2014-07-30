@@ -180,6 +180,10 @@ public class ClusterSpecFactory {
    private static MAPREDUCE_VERSION getDefaultMapReduceVersion(String vendor,
          String distroVersion) {
       if (vendor.trim().equalsIgnoreCase(Constants.DEFAULT_VENDOR)) {
+         return MAPREDUCE_VERSION.V2;
+      }
+
+      if (vendor.trim().equalsIgnoreCase(Constants.APACHE_VENDOR)) {
          return MAPREDUCE_VERSION.V1;
       }
 
@@ -223,8 +227,8 @@ public class ClusterSpecFactory {
          return MAPREDUCE_VERSION.V1;
       }
 
-      logger.error("Unknown distro vendor, return default map reduce version v1");
-      return MAPREDUCE_VERSION.V1;
+      logger.error("Unknown distro vendor, return default mapreduce version 2");
+      return MAPREDUCE_VERSION.V2;
    }
 
    /**

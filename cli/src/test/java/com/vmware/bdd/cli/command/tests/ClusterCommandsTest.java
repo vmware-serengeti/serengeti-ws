@@ -368,10 +368,10 @@ public class ClusterCommandsTest extends MockRestServer {
        List<String> roles = new ArrayList<String>();
        roles.add("hadoop");
        roles.add("hadoop_namenode");
-       roles.add("hadoop_jobtracker");
+       roles.add("hadoop_resourcemanager");
        roles.add("hadoop_worker");
        roles.add("hadoop_datanode");
-       roles.add("hadoop_tasktracker");
+       roles.add("hadoop_nodemanager");
        roles.add("hadoop_client");
        roles.add("hive");
        roles.add("hive_server");
@@ -753,7 +753,7 @@ public class ClusterCommandsTest extends MockRestServer {
       ngr1.setRoles(roles1);
       ClusterRead cr1 = new ClusterRead();
       cr1.setName("cluster1");
-      cr1.setDistroVendor("Apache");
+      cr1.setDistroVendor("BIGTOP");
       cr1.setDistro("distro1");
       cr1.setInstanceNum(10);
       cr1.setVhmMinNum(-1);

@@ -325,15 +325,20 @@ public class DistroManager {
       }
    }
 
-   public List<DistroRead> getDistros() {
-      loadManifest(false);
-      List<DistroRead> drs = new ArrayList<DistroRead>();
+   public List<String> getSupportedVendors() {
       String vendorStr = Configuration.getStrings(VENDOR, "");
       String vendorStrTmp = vendorStr.toLowerCase();
       List<String> vendors =
             Arrays.asList(vendorStrTmp.indexOf(",") != -1 ? vendorStrTmp.split(",")
                   : new String[] { vendorStrTmp });
-      List<String>  errorVendors = new ArrayList<String> ();
+      return vendors;
+   }
+
+   public List<DistroRead> getDistros() {
+      loadManifest(false);
+      List<DistroRead> drs = new ArrayList<DistroRead>();
+      List<String> vendors = getSupportedVendors();
+      List<String> errorVendors = new ArrayList<String> ();
       for (Distro distro : distros.values()) {
          DistroRead dr = distro.convert();
          //check vendor name is whether configured in serengeti.properties

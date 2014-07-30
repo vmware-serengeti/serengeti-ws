@@ -40,9 +40,9 @@ public class ClusterCreateTest {
    @Test
    public void testSupportedWithHdfs2() {
       ClusterCreate cluster = new ClusterCreate();
-      cluster.setDistroVendor(Constants.DEFAULT_VENDOR);
-      cluster.setDistroVersion("1.0.1");
-      assertEquals(false, cluster.supportedWithHdfs2());
+      cluster.setDistroVendor(Constants.BIGTOP_VENDOR);
+      cluster.setDistroVersion("0.8.0");
+      assertEquals(true, cluster.supportedWithHdfs2());
       cluster.setDistroVendor(Constants.CDH_VENDOR);
       cluster.setDistroVersion("4.1.2");
       assertEquals(true, cluster.supportedWithHdfs2());
@@ -260,11 +260,11 @@ public class ClusterCreateTest {
       master.setSwapRatio(0F);
       master.setInstanceNum(1);
       master.setRoles(Arrays.asList("hadoop_namenode",
-            "hadoop_jobtracker"));
+            "hadoop_resourcemanager"));
       NodeGroupCreate worker = new NodeGroupCreate();
       worker.setName("worker");
       worker.setRoles(Arrays.asList("hadoop_datanode",
-            "hadoop_tasktracker"));
+            "hadoop_nodemanager"));
       worker.setMemCapacityMB(3748);
       worker.setInstanceNum(0);
       NodeGroupCreate client = new NodeGroupCreate();

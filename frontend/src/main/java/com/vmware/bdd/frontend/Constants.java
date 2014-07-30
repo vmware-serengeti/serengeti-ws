@@ -169,7 +169,7 @@ public class Constants {
    public static String FORMAT_TABLE_COLUMN_RAM_MB = "RAM(MB)";
    public static String FORMAT_TABLE_COLUMN_CPU_MHZ = "CPU(MHZ)";
    public static final String FORMAT_TABLE_COLUMN_TASK = "TASK";
-   public static final String DEFAULT_DISTRO = "apache";
+   public static final String DEFAULT_DISTRO = "bigtop";
    public static final String PARAM_NO_DISTRO_AVAILABLE = "no distro available,please upload one distro";
    public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure you want to continue (Y/N)? ";
    public static final String PARAM_CLUSTER_IN_BLACK_LIST_WARNING =

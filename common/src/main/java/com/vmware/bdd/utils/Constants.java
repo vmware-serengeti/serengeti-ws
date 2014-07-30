@@ -115,7 +115,8 @@ public class Constants {
          "Valid storage types are SHARED, LOCAL, and TEMPFS.";
    public static final String TEMPFS_NOT_ALLOWED =
          "TEMPFS storage can be set only on compute nodes with strict association to data nodes.";
-   public static final String DEFAULT_VENDOR = "Apache";
+   public static final String DEFAULT_VENDOR = "BIGTOP";
+   public static final String APACHE_VENDOR = "APACHE";
    public static final String CDH_VENDOR = "CDH";
    public static final String GPHD_VENDOR = "GPHD";
    public static final String HDP_VENDOR = "HDP";
