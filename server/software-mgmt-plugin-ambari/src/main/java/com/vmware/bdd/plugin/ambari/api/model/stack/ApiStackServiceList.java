@@ -14,10 +14,13 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.model.stack;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 
 public class ApiStackServiceList {
 
@@ -44,4 +47,23 @@ public class ApiStackServiceList {
       this.apiStackServices = apiStackServices;
    }
 
+   public Map<String, String> configTypeToService() {
+      Map<String, String> result = new HashMap<>();
+      if (apiStackServices != null) {
+         for (ApiStackService service : apiStackServices) {
+            result.putAll(service.configTypeToService());
+         }
+      }
+      return result;
+   }
+
+   public Map<String, ApiComponentInfo> componentToInfo() {
+      Map<String, ApiComponentInfo> result = new HashMap<>();
+      if (apiStackServices != null) {
+         for (ApiStackService service : apiStackServices) {
+            result.putAll(service.componentToInfo());
+         }
+      }
+      return result;
+   }
 }

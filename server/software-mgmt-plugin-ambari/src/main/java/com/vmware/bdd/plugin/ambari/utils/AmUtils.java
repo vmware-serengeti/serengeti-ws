@@ -20,6 +20,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.plugin.ambari.api.model.ApiHostsRequest;
+import com.vmware.bdd.plugin.ambari.api.model.ApiHostsRequestInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponents;
+
 public class AmUtils {
 
    public static List<Map<String, Object>> toAmConfigurations(
@@ -68,5 +73,19 @@ public class AmUtils {
    public static boolean isValidRack(String rack) {
       Pattern rackPattern = Pattern.compile("(/[a-zA-Z0-9\\.\\-\\_]+)+");
       return rackPattern.matcher(rack).matches();
+   }
+
+   public static ApiHostsRequest createInstallComponentsRequest() {
+      ApiHostsRequest hostsRequest = new ApiHostsRequest();
+      ApiHostComponents components = new ApiHostComponents();
+      hostsRequest.setBody(components);
+      ApiComponentInfo hostRoles = new ApiComponentInfo();
+      hostRoles.setState("INSTALLED");
+      components.setHostRoles(hostRoles);
+      ApiHostsRequestInfo requestInfo = new ApiHostsRequestInfo();
+      hostsRequest.setRequestInfo(requestInfo);
+      requestInfo.setContext("Installing components");
+      requestInfo.setQueryString("HostRoles/state=INIT");
+      return hostsRequest;
    }
 }

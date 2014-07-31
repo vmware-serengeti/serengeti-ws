@@ -74,6 +74,9 @@ public class ApiRequestInfo {
    private String requestStatus;
 
    @Expose
+   private String status;
+
+   @Expose
    @SerializedName("resource_filters")
    private List<String> resourceFilters;
 
@@ -247,5 +250,13 @@ public class ApiRequestInfo {
 
    public void setContext(String context) {
       this.context = context;
+   }
+
+   public String getStatus() {
+      return status;
+   }
+
+   public void setStatus(String status) {
+      this.status = status;
    }
 }

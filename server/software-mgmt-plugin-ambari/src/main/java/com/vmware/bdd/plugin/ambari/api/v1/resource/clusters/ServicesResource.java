@@ -33,6 +33,7 @@ import javax.ws.rs.core.Response;
 /**
  * Created by qjin on 7/6/14.
  */
+@Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
 public interface ServicesResource {
    @PUT

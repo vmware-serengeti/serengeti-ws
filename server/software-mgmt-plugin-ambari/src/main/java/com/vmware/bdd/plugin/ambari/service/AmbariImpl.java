@@ -30,7 +30,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
-import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
@@ -38,9 +37,16 @@ import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapHostStatus;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroupConfiguration;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroupInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponent;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponents;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTask;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTaskInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ClusterRequestStatus;
@@ -51,6 +57,7 @@ import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionInfo;
+import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.exception.AmException;
 import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
 import com.vmware.bdd.plugin.ambari.model.AmNodeDef;
@@ -303,21 +310,36 @@ public class AmbariImpl implements SoftwareManager {
    private void bootstrap(final AmClusterDef clusterDef,
          final ClusterReportQueue reportQueue)
          throws SoftwareManagementPluginException {
+      bootstrap(clusterDef, null, reportQueue);
+   }
+
+   private void bootstrap(final AmClusterDef clusterDef,
+         final List<String> addedHosts,
+         final ClusterReportQueue reportQueue)
+         throws SoftwareManagementPluginException {
       try {
-         logger.info("Bootstrapping hosts of cluster " + clusterDef.getName());
-         clusterDef.getCurrentReport().setAction("Bootstrapping host");
-         clusterDef.getCurrentReport().setProgress(
-               ProgressSplit.BOOTSTRAP_HOSTS.getProgress());
+         if (addedHosts != null) {
+            logger.info("Bootstrapping hosts " + addedHosts);
+            clusterDef.getCurrentReport().setNodesAction("Bootstrapping host", addedHosts);
+            clusterDef.getCurrentReport().setProgress(
+                  ProgressSplit.BOOTSTRAP_HOSTS.getProgress());
+         } else {
+            logger.info("Bootstrapping hosts of cluster " + clusterDef.getName());
+            clusterDef.getCurrentReport().setAction("Bootstrapping host");
+            clusterDef.getCurrentReport().setProgress(
+                  ProgressSplit.BOOTSTRAP_HOSTS.getProgress());
+         }
          reportStatus(clusterDef.getCurrentReport(), reportQueue);
 
          ApiBootstrap apiBootstrapRequest =
-               apiManager.createBootstrap(clusterDef.toApiBootStrap());
+               apiManager.createBootstrap(clusterDef.toApiBootStrap(addedHosts));
 
          HostBootstrapPoller poller =
                new HostBootstrapPoller(apiManager, apiBootstrapRequest,
                      clusterDef.getCurrentReport(), reportQueue,
                      ProgressSplit.CREATE_BLUEPRINT.getProgress());
          poller.waitForComplete();
+         logger.debug("Bootstrap request id: " + apiBootstrapRequest.getRequestId());
 
          boolean success = false;
          boolean allHostsBootstrapped = true;
@@ -325,13 +347,21 @@ public class AmbariImpl implements SoftwareManager {
                apiManager.getBootstrapStatus(apiBootstrapRequest.getRequestId());
          BootstrapStatus bootstrapStatus =
                BootstrapStatus.valueOf(apiBootstrapStatus.getStatus());
+         logger.debug("Bootstrap status " + bootstrapStatus);
          if (!bootstrapStatus.isFailedState()) {
             success = true;
          }
 
          int bootstrapedHostCount =
                apiBootstrapStatus.getApiBootstrapHostStatus().size();
-         int needBootstrapHostCount = clusterDef.getNodes().size();
+         int needBootstrapHostCount = -1;
+         if (addedHosts == null) {
+            needBootstrapHostCount = clusterDef.getNodes().size();
+         } else {
+            needBootstrapHostCount = addedHosts.size();
+         }
+         logger.debug("Need to bootstrap host number: " + needBootstrapHostCount);
+         logger.debug("Got bootstrap status number: " + bootstrapedHostCount);
          if (needBootstrapHostCount != bootstrapedHostCount) {
             success = false;
             allHostsBootstrapped = false;
@@ -361,11 +391,16 @@ public class AmbariImpl implements SoftwareManager {
             } else {
                errmsg = apiBootstrapStatus.getLog();
             }
-            clusterDef.getCurrentReport().setAction("Failed to bootstrap host");
+            String actionFailure = "Failed to bootstrap host";
+            if (addedHosts != null) {
+               clusterDef.getCurrentReport().setNodesError(actionFailure, addedHosts);
+            } else {
+               clusterDef.getCurrentReport().setErrMsg(actionFailure);
+            }
             throw AmException.BOOTSTRAP_FAILED(errmsg, null);
          }
       } catch (Exception e) {
-         clusterDef.getCurrentReport().setAction("Failed to bootstrap host");
+         clusterDef.getCurrentReport().setErrMsg("Failed to bootstrap host");
          String errorMessage = errorMessage("Failed to bootstrap hosts of cluster " + clusterDef.getName(), e);
          logger.error(errorMessage);
          throw AmException.BOOTSTRAP_FAILED(errorMessage, e);
@@ -519,7 +554,7 @@ public class AmbariImpl implements SoftwareManager {
    @Override
    public List<String> validateScaling(NodeGroupInfo group) {
       // TODO Auto-generated method stub
-      return null;
+      return new ArrayList<String>();
    }
 
    @Override
@@ -540,7 +575,245 @@ public class AmbariImpl implements SoftwareManager {
          ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
-      return false;
+      boolean success = false;
+      AmClusterDef clusterDef = null;
+      try {
+         logger.info("Blueprint:");
+         logger.info(ApiUtils.objectToJson(blueprint));
+         logger.info("Start cluster " + blueprint.getName() + " scale out.");
+         clusterDef = new AmClusterDef(blueprint, privateKey);
+         bootstrap(clusterDef, addedNodeNames, reports);
+         provisionComponents(clusterDef, addedNodeNames, reports);
+         success = true;
+
+         clusterDef.getCurrentReport().setNodesAction("", addedNodeNames);
+         clusterDef.getCurrentReport().setNodesStatus(ServiceStatus.STARTED, addedNodeNames);
+         clusterDef.getCurrentReport().setProgress(
+               ProgressSplit.PROVISION_SUCCESS.getProgress());
+         clusterDef.getCurrentReport().setSuccess(true);
+      } catch (Exception e) {
+         clusterDef.getCurrentReport().setNodesError(
+               "Failed to bootstrap nodes for " + e.getMessage(),
+               addedNodeNames);
+         clusterDef.getCurrentReport().setSuccess(false);
+         String errorMessage = errorMessage("Failed to scale out cluster " + blueprint.getName(), e);
+         logger.error(errorMessage);
+         throw SoftwareManagementPluginException.CREATE_CLUSTER_FAILED(
+               errorMessage, e);
+      } finally {
+         clusterDef.getCurrentReport().setFinished(true);
+         reportStatus(clusterDef.getCurrentReport(), reports);
+      }
+      return success;
+   }
+
+   private boolean provisionComponents(AmClusterDef clusterDef, List<String> addedNodeNames,
+         ClusterReportQueue reports) throws Exception {
+      logger.info("Installing roles " + addedNodeNames);
+      ApiStackServiceList stackServiceList =
+            apiManager.getStackWithCompAndConfigs(clusterDef.getAmStack()
+                  .getName(), clusterDef.getAmStack().getVersion());
+      Map<String, String> configTypeToService = stackServiceList.configTypeToService();
+      Map<String, ApiComponentInfo> componentToInfo = stackServiceList.componentToInfo();
+      ApiHostComponents apiHostComponents = null;
+      Set<String> serviceNames = getExistingClusterServices(clusterDef);
+      List<String> targetHostNames = new ArrayList<>();
+      List<AmNodeDef> targetNodeDefs = new ArrayList<>();
+      for (AmNodeDef nodeDef : clusterDef.getNodes()) {
+         if (addedNodeNames.contains(nodeDef.getName())) {
+            if (apiHostComponents == null) {
+               apiHostComponents =
+                     createHostComponents(componentToInfo, serviceNames,
+                           nodeDef);
+            }
+            targetHostNames.add(nodeDef.getFqdn());
+            targetNodeDefs.add(nodeDef);
+         }
+      }
+      if (apiHostComponents.getHostComponents().isEmpty()) {
+         logger.info("No roles need to install on hosts.");
+         return true;
+      }
+      apiManager.addHostsToCluster(clusterDef.getName(), targetHostNames);
+      installComponents(clusterDef, reports, apiHostComponents, targetHostNames);
+
+      // add configurations
+      createConfigGroups(clusterDef, configTypeToService, targetNodeDefs);
+      return startAllComponents(clusterDef, componentToInfo, apiHostComponents,
+            targetHostNames);
+   }
+
+   private boolean startAllComponents(AmClusterDef clusterDef,
+         Map<String, ApiComponentInfo> componentToInfo,
+         ApiHostComponents apiHostComponents, List<String> targetHostNames) 
+         throws SoftwareManagementPluginException {
+      List<String> componentNames = new ArrayList<>();
+      for (ApiHostComponent hostComponent : apiHostComponents.getHostComponents()) {
+         String componentName = hostComponent.getHostComponent().getComponentName();
+         ApiComponentInfo compInfo = componentToInfo.get(componentName);
+         if (compInfo.isClient()) {
+            continue;
+         }
+         componentNames.add(componentName);
+      }
+      if (componentNames.isEmpty()) {
+         logger.debug("Client only roles installed.");
+         return true;
+      }
+      boolean success = false;
+      logger.debug("Starting roles: " + componentNames);
+      ApiRequest apiRequest =
+            apiManager.startComponents(clusterDef.getName(), targetHostNames,
+                  componentNames);
+      ClusterRequestStatus clusterRequestStatus =
+            ClusterRequestStatus.valueOf(apiRequest.getApiRequestInfo()
+                  .getRequestStatus());
+      if (!clusterRequestStatus.isFailedState()) {
+         success = true;
+      }
+      if (!success) {
+         throw SoftwareManagementPluginException.SCALE_OUT_CLUSTER_FAILED(
+               "Failed to start components.", null);
+      }
+      return success;
+   }
+
+   private void createConfigGroups(AmClusterDef clusterDef,
+         Map<String, String> configTypeToService, List<AmNodeDef> targetNodeDefs) 
+               throws SoftwareManagementPluginException {
+      List<ApiConfigGroup> configGroups = new ArrayList<>();
+      Map<String, ApiConfigGroup> serviceToGroup = new HashMap<>();
+      for (AmNodeDef nodeDef : targetNodeDefs) {
+         // for each node, one set of config group will be created
+         // for each service, one config group will be created, which contains all property types belong to this service
+         serviceToGroup.clear();
+         List<Map<String, Object>> configs = nodeDef.getConfigurations();
+         int i = 1;
+         for (Map<String, Object> map : configs) {
+            for (String type : map.keySet()) {
+               String serviceName = configTypeToService.get(type + ".xml");
+               ApiConfigGroup confGroup = serviceToGroup.get(serviceName);
+               if (confGroup == null) {
+                  confGroup = createConfigGroup(clusterDef, nodeDef, serviceName);
+                  serviceToGroup.put(serviceName, confGroup);
+               }
+               ApiConfigGroupConfiguration sameType = null;
+               for (ApiConfigGroupConfiguration config : confGroup
+                     .getApiConfigGroupInfo().getDesiredConfigs()) {
+                  if (config.getType().equals(type)) {
+                     sameType = config;
+                     break;
+                  }
+               }
+               if (sameType == null) {
+                  sameType =
+                        createApiConfigGroupConf(i, type, serviceName,
+                              confGroup);
+               }
+               Map<String, String> property = (Map<String, String>)map.get(type);
+               sameType.getProperties().putAll(property);
+            }
+         }
+         configGroups.addAll(serviceToGroup.values());
+      }
+      apiManager.createConfigGroups(clusterDef.getName(), configGroups);
+   }
+
+   private ApiConfigGroupConfiguration createApiConfigGroupConf(int i,
+         String type, String serviceName, ApiConfigGroup confGroup) {
+      ApiConfigGroupConfiguration sameType;
+      sameType = new ApiConfigGroupConfiguration();
+      sameType.setType(type);
+      sameType.setTag(serviceName + i);
+      sameType.setProperties(new HashMap<String, String>());
+      i ++;
+      confGroup.getApiConfigGroupInfo().getDesiredConfigs()
+            .add(sameType);
+      return sameType;
+   }
+
+   private ApiConfigGroup createConfigGroup(AmClusterDef clusterDef, AmNodeDef nodeDef,
+         String serviceName) {
+      ApiConfigGroup confGroup;
+      confGroup = new ApiConfigGroup();
+      ApiConfigGroupInfo info = new ApiConfigGroupInfo();
+      confGroup.setApiConfigGroupInfo(info);
+      info.setClusterName(clusterDef.getName());
+      info.setDescription(serviceName + " configuration");
+      info.setGroupName(nodeDef.getName());
+      List<ApiHostInfo> hosts = new ArrayList<>();
+      ApiHostInfo hostInfo = new ApiHostInfo();
+      hostInfo.setHostName(nodeDef.getFqdn());
+      hosts.add(hostInfo);
+      info.setHosts(hosts);
+      info.setTag(serviceName);
+      List<ApiConfigGroupConfiguration> desiredConfigs = new ArrayList<>();
+      info.setDesiredConfigs(desiredConfigs);
+      return confGroup;
+   }
+
+   private boolean installComponents(AmClusterDef clusterDef,
+         ClusterReportQueue reports, ApiHostComponents apiHostComponents,
+         List<String> targetHostNames) throws Exception {
+      // add components to target hosts concurrently
+      apiManager.addComponents(clusterDef.getName(), targetHostNames, apiHostComponents);
+      ApiRequest request = apiManager.installComponents(clusterDef.getName());
+      ClusterOperationPoller poller =
+            new ClusterOperationPoller(apiManager, request,
+                  clusterDef.getName(), clusterDef.getCurrentReport(), reports,
+                  ProgressSplit.PROVISION_CLUSTER.getProgress());
+      poller.waitForComplete();
+
+      boolean success = false;
+      ApiRequest apiRequest =
+            apiManager.getRequest(clusterDef.getName(), request
+                  .getApiRequestInfo().getRequestId());
+      ClusterRequestStatus clusterRequestStatus =
+            ClusterRequestStatus.valueOf(apiRequest.getApiRequestInfo()
+                  .getRequestStatus());
+      if (!clusterRequestStatus.isFailedState()) {
+         success = true;
+      }
+      if (!success) {
+         throw SoftwareManagementPluginException.SCALE_OUT_CLUSTER_FAILED(
+               "Failed to install components.", null);
+      }
+      return success;
+   }
+
+   private ApiHostComponents createHostComponents(
+         Map<String, ApiComponentInfo> componentToInfo,
+         Set<String> serviceNames, AmNodeDef nodeDef) {
+      ApiHostComponents apiHostComponents = new ApiHostComponents();
+      List<ApiHostComponent> hostComponents = new ArrayList<>();
+      apiHostComponents.setHostComponents(hostComponents);
+      for (String componentName : nodeDef.getComponents()) {
+         ApiComponentInfo definedCompInfo = componentToInfo.get(componentName);
+         if (definedCompInfo == null) {
+            logger.error("Component " + componentName + " is not supported. This should not happen.");
+            continue;
+         }
+         String serviceName = definedCompInfo.getServiceName();
+         if (!serviceNames.contains(serviceName)) {
+            logger.info("Service " + serviceName + " is removed from Ambari, igonre component " + componentName);
+            continue;
+         }
+         ApiHostComponent component = new ApiHostComponent();
+         hostComponents.add(component);
+         ApiComponentInfo componentInfo = new ApiComponentInfo();
+         componentInfo.setComponentName(componentName);
+         component.setHostComponent(componentInfo);
+      }
+      return apiHostComponents;
+   }
+
+   private Set<String> getExistingClusterServices(AmClusterDef clusterDef) {
+      List<ApiService> services = apiManager.getClusterServices(clusterDef.getName());
+      Set<String> serviceNames = new HashSet<>();
+      for (ApiService service : services) {
+         serviceNames.add(service.getServiceInfo().getServiceName());
+      }
+      return serviceNames;
    }
 
    @Override

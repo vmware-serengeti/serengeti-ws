@@ -32,6 +32,8 @@ import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
 import com.vmware.bdd.plugin.ambari.api.manager.intf.IApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.ApiBody;
 import com.vmware.bdd.plugin.ambari.api.model.ApiErrorMessage;
+import com.vmware.bdd.plugin.ambari.api.model.ApiHostsRequest;
+import com.vmware.bdd.plugin.ambari.api.model.ApiHostsRequestInfo;
 import com.vmware.bdd.plugin.ambari.api.model.ApiPutRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRootServicesComponents;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
@@ -42,7 +44,10 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiAlert;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponents;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostStatus;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
@@ -63,6 +68,7 @@ import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionList;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
+import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 
 public class ApiManager implements IApiManager {
@@ -252,7 +258,7 @@ public class ApiManager implements IApiManager {
       Response response =
             apiResourceRootV1.getClustersResource().readCluster(clusterName);
       String clusterJson = handleAmbariResponse(response);
-      logger.debug("in getClusterServicesNames, cluster info is " + clusterJson);
+      logger.trace("in getClusterServicesNames, cluster info is " + clusterJson);
       ApiCluster apiCluster =
             ApiUtils.jsonToObject(ApiCluster.class, clusterJson);
       return apiCluster.getApiServices();
@@ -306,7 +312,7 @@ public class ApiManager implements IApiManager {
       Response response =
             apiResourceRootV1.getClustersResource().readCluster(clusterName);
       String clusterJson = handleAmbariResponse(response);
-      logger.debug("in getClusterServicesNames, cluster info is " + clusterJson);
+      logger.trace("in getClusterServicesNames, cluster info is " + clusterJson);
       ApiCluster apiCluster =
             ApiUtils.jsonToObject(ApiCluster.class, clusterJson);
       List<ApiService> apiServices = apiCluster.getApiServices();
@@ -596,6 +602,112 @@ public class ApiManager implements IApiManager {
       Response response = apiResourceRootV1.getClustersResource().getServicesResource(clusterName).deleteService(serviceName);
       handleAmbariResponse(response);
       return true;
+   }
+
+   public void addHostsToCluster(String clusterName,
+         List<String> hostNames) throws AmbariApiException {
+      logger.debug("Add hosts " + hostNames + " to cluster " + clusterName);
+      for (String hostName : hostNames) {
+         Response response =
+               apiResourceRootV1.getClustersResource()
+                     .getHostsResource(clusterName)
+                     .addHost(hostName);
+         handleAmbariResponse(response);
+      }
+   }
+
+   public ApiRequest startComponents(String clusterName,
+         List<String> hostNames, List<String> components)
+         throws AmbariApiException {
+      ApiHostsRequest hostsRequest = new ApiHostsRequest();
+      ApiHostComponents apiComponents = new ApiHostComponents();
+      hostsRequest.setBody(apiComponents);
+      ApiComponentInfo hostRoles = new ApiComponentInfo();
+      hostRoles.setState("STARTED");
+      apiComponents.setHostRoles(hostRoles);
+      ApiHostsRequestInfo requestInfo = new ApiHostsRequestInfo();
+      hostsRequest.setRequestInfo(requestInfo);
+      requestInfo.setContext("Staring all components");
+
+      StringBuilder builder = new StringBuilder();
+      builder.append("Hosts/host_name.in(");
+      for (String hostName : hostNames) {
+         builder.append(hostName).append(",");
+      }
+      builder.deleteCharAt(builder.length() - 1);
+      builder.append(")").append("&");
+      builder.append("HostRoles/component_name.in(");
+      for (String component : components) {
+         builder.append(component).append(",");
+      }
+      builder.deleteCharAt(builder.length() - 1);
+      builder.append(")");
+      requestInfo.setQueryString(builder.toString());
+      logger.debug("query string: " + requestInfo.getQueryString());
+      Response response =
+            apiResourceRootV1.getClustersResource()
+                  .getHostComponentsResource(clusterName)
+                  .actionOnomponentsWithFilter(ApiUtils.objectToJson(hostsRequest));
+      String startJson = handleAmbariResponse(response);
+      logger.debug("in install components, reponse is :" + startJson);
+      return ApiUtils.jsonToObject(ApiRequest.class, startJson);
+   }
+
+   public void createConfigGroups(String clusterName,
+         List<ApiConfigGroup> configGroups) throws AmbariApiException {
+      String confGroups = ApiUtils.objectToJson(configGroups);
+      logger.debug("Creating config groups: " + confGroups);
+      Response response =
+            apiResourceRootV1.getClustersResource()
+                  .getConfigGroupsResource(clusterName)
+                  .createConfigGroups(confGroups);
+      handleAmbariResponse(response);
+   }
+
+   public void addComponents(String clusterName, List<String> hostNames,
+         ApiHostComponents components) throws AmbariApiException {
+      logger.info("Adding components to hosts: " + hostNames);
+      ApiHostsRequest hostsRequest = new ApiHostsRequest();
+      hostsRequest.setBody(components);
+      ApiHostsRequestInfo requestInfo = new ApiHostsRequestInfo();
+      hostsRequest.setRequestInfo(requestInfo);
+      requestInfo.setContext("Adding components");
+
+      StringBuilder builder = new StringBuilder();
+      builder.append("Hosts/host_name.in(");
+      for (String hostName : hostNames) {
+         builder.append(hostName).append(",");
+      }
+      builder.deleteCharAt(builder.length() - 1);
+      builder.append(")");
+      requestInfo.setQueryString(builder.toString());
+      String json = ApiUtils.objectToJson(hostsRequest);
+      logger.debug("add json: " + json);
+      Response response =
+            apiResourceRootV1.getClustersResource()
+                  .getHostsResource(clusterName)
+                  .addComponentsToHosts(json);
+      handleAmbariResponse(response);
+   }
+
+   public ApiRequest installComponents(String clusterName) throws AmbariApiException {
+      ApiHostsRequest hostsRequest = AmUtils.createInstallComponentsRequest();
+      String json = ApiUtils.objectToJson(hostsRequest);
+      logger.debug("Request json: " + json);
+      Response response =
+            apiResourceRootV1
+                  .getClustersResource()
+                  .getHostComponentsResource(clusterName)
+                  .actionOnomponentsWithFilter(json);
+      String installJson = handleAmbariResponse(response);
+      logger.debug("in install components, reponse is :" + installJson);
+      return ApiUtils.jsonToObject(ApiRequest.class, installJson);
+   }
+
+   public ApiStackServiceList getStackWithCompAndConfigs(String stackName,
+         String stackVersion) throws AmbariApiException {
+      return getServicesWithFilter(stackName, stackVersion, 
+            "configurations/StackConfigurations,serviceComponents/StackServiceComponents");
    }
 
    private ApiStackServiceList getServicesWithFilter(String stackName,

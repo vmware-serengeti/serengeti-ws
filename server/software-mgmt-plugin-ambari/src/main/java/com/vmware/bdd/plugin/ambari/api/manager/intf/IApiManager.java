@@ -25,6 +25,8 @@ import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponents;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestList;
@@ -60,6 +62,24 @@ public interface IApiManager {
 
    public ApiStackService getStackService(String stackName, String stackVersion,
          String stackServiceName) throws AmbariApiException;
+
+   public void addHostsToCluster(String clusterName,
+         List<String> hostNames) throws AmbariApiException;
+
+   public void addComponents(String clusterName, List<String> hostNames,
+         ApiHostComponents components) throws AmbariApiException;
+
+   public ApiRequest installComponents(String clusterName) throws AmbariApiException;
+
+   public void createConfigGroups(String clusterName,
+         List<ApiConfigGroup> configGroups) throws AmbariApiException;
+
+   public ApiRequest startComponents(String clusterName,
+         List<String> hostNames, List<String> components)
+         throws AmbariApiException;
+
+   public ApiStackServiceList getStackWithCompAndConfigs(String stackName,
+         String stackVersion) throws AmbariApiException;
 
    public ApiStackComponentList getStackComponentList(String stackName,
          String stackVersion, String stackServiceName) throws AmbariApiException;

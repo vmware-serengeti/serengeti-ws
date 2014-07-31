@@ -43,6 +43,10 @@ public class ApiConfigurationInfo {
    @SerializedName("type")
    private String Type;
 
+   @Expose
+   @SerializedName("service_name")
+   private String serviceName;
+
    public String getPropertyDescription() {
       return propertyDescription;
    }
@@ -91,4 +95,11 @@ public class ApiConfigurationInfo {
       Type = type;
    }
 
+   public String getServiceName() {
+      return serviceName;
+   }
+
+   public void setServiceName(String serviceName) {
+      this.serviceName = serviceName;
+   }
 }

@@ -167,11 +167,19 @@ public class AmClusterDef implements Serializable {
    }
 
    public ApiBootstrap toApiBootStrap() {
+      return toApiBootStrap(null);
+   }
+
+   public ApiBootstrap toApiBootStrap(List<String> hostNames) {
       ApiBootstrap apiBootstrap = new ApiBootstrap();
       apiBootstrap.setVerbose(verbose);
       List<String> hosts = new ArrayList<String>();
       for (AmNodeDef node : getNodes()) {
-         hosts.add(node.getFqdn());
+         if (hostNames == null) {
+            hosts.add(node.getFqdn());
+         } else if (hostNames.contains(node.getName())) {
+            hosts.add(node.getFqdn());
+         }
       }
       apiBootstrap.setHosts(hosts);
       apiBootstrap.setSshKey(sshKey);

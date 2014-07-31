@@ -15,46 +15,18 @@
 package com.vmware.bdd.plugin.ambari.api.v1.resource.clusters;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.vmware.bdd.plugin.ambari.api.Parameters;
-
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
-      MediaType.TEXT_PLAIN })
-public interface HostsResource {
-
-   @GET
-   @Path("/")
-   public Response readHosts();
-
-   @GET
-   @Path("/")
-   public Response readHostsWithFilter(@QueryParam("fields") String fields);
-
-   @GET
-   @Path("/{hostFQDN}")
-   public Response readHost(@PathParam(Parameters.HOST_FQDN) String hostFQDN);
-
-   @DELETE
-   @Path("/{hostFQDN}")
-   public Response deleteHost(@PathParam(Parameters.HOST_FQDN) String hostFQDN);
-
-   @POST
-   @Path("/")
-   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
       MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.TEXT_XML })
-   public Response addComponentsToHosts(String hostComponentsWithFilter);
+public interface HostComponentsResource {
 
-   @POST
-   @Path("/{hostFQDN}")
-   public Response addHost(@PathParam(Parameters.HOST_FQDN) String hostFQDN);
+   @PUT
+   @Path("/")
+   public Response actionOnomponentsWithFilter(String roleRequest);
 }
