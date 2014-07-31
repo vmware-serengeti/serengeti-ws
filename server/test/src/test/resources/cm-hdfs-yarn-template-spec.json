@@ -1,0 +1,28 @@
+{
+  "groups":[
+    {
+      "name": "master",
+      "roles": [
+        "HDFS_NAMENODE",
+        "HDFS_SECONDARY_NAMENODE",
+        "YARN_RESOURCE_MANAGER",
+        "YARN_JOB_HISTORY"
+      ],
+      "instance_num": 1,
+      "cpu": 2,
+      "memory": 7500,
+      "ha": "on"
+    },
+    {
+      "name": "worker",
+      "roles": [
+        "HDFS_DATANODE",
+        "YARN_NODE_MANAGER"
+      ],
+      "instance_num": 3,
+      "cpu": 2,
+      "memory": 7500,
+      "ha":"off"
+    }
+  ]
+}

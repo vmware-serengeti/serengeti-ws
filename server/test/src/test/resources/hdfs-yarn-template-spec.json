@@ -1,0 +1,39 @@
+{
+  "groups":[
+    {
+      "name": "master",
+      "roles": [
+        "hadoop_namenode",
+        "hadoop_resourcemanager"
+      ],
+      "instance_num": 1,
+      "cpu": 2,
+      "memory": 7500,
+      "ha": "on"
+    },
+    {
+      "name": "worker",
+      "roles": [
+        "hadoop_datanode",
+        "hadoop_nodemanager"
+      ],
+      "instance_num": 3,
+      "cpu": 2,
+      "memory": 7500,
+      "ha":"off"
+    },
+    {
+      "name": "client",
+      "roles": [
+        "hadoop_client",
+        "hive",
+        "hive_server",
+        "pig"
+      ],
+      "instance_num": 1,
+      "cpu": 1,
+      "memory": 3748,
+      "ha":"off"
+    }
+  ]
+}

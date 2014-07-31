@@ -1,0 +1,25 @@
+{
+  "groups":[
+    {
+      "name":"master",
+      "roles":[
+        "HDFS_NAMENODE",
+        "HDFS_SECONDARY_NAMENODE",
+        "MAPREDUCE_JOBTRACKER"
+      ],
+      "instance_type":MEDIUM,
+      "instance_num":1,
+      "ha":"on"
+    },
+    {
+      "name":"worker",
+      "roles":[
+        "HDFS_DATANODE",
+        "MAPREDUCE_TASKTRACKER"
+      ],
+      "instance_type":SMALL,
+      "instance_num":3,
+      "ha":"off"
+    }
+  ]
+}
