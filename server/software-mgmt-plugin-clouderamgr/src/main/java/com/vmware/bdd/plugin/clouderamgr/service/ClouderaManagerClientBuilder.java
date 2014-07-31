@@ -18,6 +18,8 @@ import com.cloudera.api.ApiObjectMapper;
 import com.cloudera.api.ApiRootResource;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.google.common.annotations.VisibleForTesting;
+import com.vmware.bdd.utils.DefaultTrustManager;
+
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.feature.AbstractFeature;
 import org.apache.cxf.feature.LoggingFeature;
@@ -175,9 +177,8 @@ public class ClouderaManagerClientBuilder {
             tlsParams
                   .setTrustManagers(new TrustManager[] { new AcceptAllTrustManager() });
          } else {
-            //TODO add TrustManager to verify certificate
             tlsParams
-                  .setTrustManagers(new TrustManager[] { new AcceptAllTrustManager() });
+                  .setTrustManagers(new TrustManager[] { new DefaultTrustManager() });
          }
          tlsParams.setDisableCNCheck(!validateCn);
          conduit.setTlsClientParameters(tlsParams);

@@ -16,6 +16,7 @@ package com.vmware.bdd.utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,6 +27,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -271,6 +276,75 @@ public class CommonUtil {
 
    public static String getCurrentTimestamp() {
       return "[" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(Calendar.getInstance().getTime()) + "]";
+   }
+
+   private static final char[] HEXDIGITS = "0123456789abcdef".toCharArray();
+
+   /*
+    * transfer a byte array to a hexadecimal string
+    */
+   public static String toHexString(byte[] bytes) {
+      StringBuilder sb = new StringBuilder(bytes.length * 3);
+      for (int b : bytes) {
+         b &= 0xff;
+         sb.append(HEXDIGITS[b >> 4]);
+         sb.append(HEXDIGITS[b & 15]);
+         sb.append(':');
+      }
+      if (sb.length() > 0) {
+         sb.delete(sb.length() - 1, sb.length());
+      }
+      return sb.toString().toUpperCase();
+   }
+
+   public static KeyStore loadAppMgrKeyStore() {
+      File file =
+            new File(Constants.APPMANAGER_KEYSTORE_PATH
+                  + Constants.APPMANAGER_KEYSTORE_FILE);
+      if (file.isFile() == false) {
+         char SEP = File.separatorChar;
+         File dir =
+               new File(System.getProperty("java.home") + SEP + "lib" + SEP
+                     + "security");
+         file = new File(dir, Constants.APPMANAGER_KEYSTORE_FILE);
+         if (file.isFile() == false) {
+            file = new File(dir, "cacerts");
+         }
+      }
+
+      KeyStore keyStore = null;
+      try {
+         keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+      } catch (KeyStoreException e) {
+         logger.error("Can't get KeyStore instance. ", e);
+         return null;
+      }
+      InputStream in = null;
+      try {
+         in = new FileInputStream(file);
+         keyStore.load(in, Constants.APPMANAGER_KEYSTORE_PASSWORD);
+      } catch (FileNotFoundException e) {
+         logger.error("Can't find file " + file.getAbsolutePath(), e);
+         return null;
+      } catch (NoSuchAlgorithmException e) {
+         logger.error("No such algorithm error during loading keystore.", e);
+         return null;
+      } catch (CertificateException e) {
+         logger.error("Certificate exception during loading keystore.", e);
+         return null;
+      } catch (IOException e) {
+         logger.error("Caught IO Exception.", e);
+         return null;
+      } finally {
+         if (in != null) {
+            try {
+               in.close();
+            } catch (IOException e) {
+               logger.warn("Input stream of appmanagers.jks close failed.");
+            }
+         }
+      }
+      return keyStore;
    }
 
 }

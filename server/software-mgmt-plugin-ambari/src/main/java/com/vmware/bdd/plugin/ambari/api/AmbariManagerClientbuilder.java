@@ -37,6 +37,7 @@ import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.google.common.annotations.VisibleForTesting;
+import com.vmware.bdd.utils.DefaultTrustManager;
 
 public class AmbariManagerClientbuilder {
    public static final int DEFAULT_TCP_PORT = 8080;
@@ -182,9 +183,8 @@ public class AmbariManagerClientbuilder {
             tlsParams
                   .setTrustManagers(new TrustManager[] { new AcceptAllTrustManager() });
          } else {
-            //TODO add TrustManager to verify certificate
             tlsParams
-                  .setTrustManagers(new TrustManager[] { new AcceptAllTrustManager() });
+                  .setTrustManagers(new TrustManager[] { new DefaultTrustManager() });
          }
          tlsParams.setDisableCNCheck(!validateCn);
          conduit.setTlsClientParameters(tlsParams);

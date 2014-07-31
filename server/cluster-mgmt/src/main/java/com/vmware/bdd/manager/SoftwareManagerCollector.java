@@ -15,15 +15,27 @@
 
 package com.vmware.bdd.manager;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.plexus.util.Base64;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,6 +90,11 @@ public class SoftwareManagerCollector implements InitializingBean {
          logger.error("Name " + appManagerAdd.getName() + " already exists.");
          throw SoftwareManagerCollectorException.DUPLICATE_NAME(appManagerAdd
                .getName());
+      }
+
+      String sslCertificate = appManagerAdd.getSslCertificate();
+      if (!CommonUtil.isBlank(sslCertificate)) {
+         saveSslCertificate(sslCertificate);
       }
 
       SoftwareManager softwareManager = loadSoftwareManager(appManagerAdd);
@@ -331,6 +348,11 @@ public class SoftwareManagerCollector implements InitializingBean {
          throw SoftwareManagerCollectorException.APPMANAGER_NOT_FOUND(name);
       }
 
+      String sslCertificate = appManagerAdd.getSslCertificate();
+      if (!CommonUtil.isBlank(sslCertificate)) {
+         saveSslCertificate(sslCertificate);
+      }
+
       logger.info("Load software manager using new properties " + appManagerAdd);
       SoftwareManager softwareManager = loadSoftwareManager(appManagerAdd);
 
@@ -345,5 +367,66 @@ public class SoftwareManagerCollector implements InitializingBean {
       cache.put(name, softwareManager);
 
       logger.debug("successfully modified app manager " + appManagerAdd);
+   }
+
+   private void saveSslCertificate(String certificate) {
+      OutputStream out = null;
+      try {
+         KeyStore keyStore = CommonUtil.loadAppMgrKeyStore();
+         if (keyStore == null) {
+            logger.error("Cannot read appmanager keystore.");
+            return;
+         }
+
+         byte[] certBytes = Base64
+               .decodeBase64(certificate
+                     .replaceAll("-----BEGIN CERTIFICATE-----", "")
+                     .replaceAll("-----END CERTIFICATE-----", "")
+                     .getBytes());
+
+         CertificateFactory cf = CertificateFactory.getInstance("X.509");
+         Collection c =
+               cf.generateCertificates(new ByteArrayInputStream(certBytes));
+         Certificate[] certs = new Certificate[c.toArray().length];
+
+         if (c.size() == 1) {
+            certs[0] =
+                  cf.generateCertificate(new ByteArrayInputStream(certBytes));
+         } else {
+            certs = (Certificate[])c.toArray();
+         }
+
+         MessageDigest md5 = MessageDigest.getInstance("MD5");
+         String md5Fingerprint = "";
+         for (Certificate cert : certs) {
+            md5.update(cert.getEncoded());
+            md5Fingerprint = CommonUtil.toHexString(md5.digest());
+            logger.debug("md5 finger print: " + md5Fingerprint);
+            logger.debug("added cert: " + cert);
+            keyStore.setCertificateEntry(md5Fingerprint, cert);
+         }
+         out =
+               new FileOutputStream(Constants.APPMANAGER_KEYSTORE_PATH
+                     + Constants.APPMANAGER_KEYSTORE_FILE);
+         keyStore.store(out, Constants.APPMANAGER_KEYSTORE_PASSWORD);
+      } catch (CertificateException e) {
+         logger.info("Certificate exception: ", e);
+      } catch (FileNotFoundException e) {
+         logger.info("Cannot find file warning: ", e);
+      } catch (NoSuchAlgorithmException e) {
+         logger.info("SSL Algorithm error: ", e);
+      } catch (IOException e) {
+         logger.info("IOException - SSL Algorithm error: ", e);
+      } catch (KeyStoreException e) {
+         logger.info("Key store error: ", e);
+      } finally {
+         if (out != null) {
+            try {
+               out.close();
+            } catch (IOException e) {
+               logger.warn("Output stream of appmanagers.jks close failed.");
+            }
+         }
+      }
    }
 }

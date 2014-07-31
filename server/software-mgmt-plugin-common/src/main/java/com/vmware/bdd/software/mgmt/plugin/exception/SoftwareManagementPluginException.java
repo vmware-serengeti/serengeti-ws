@@ -20,7 +20,7 @@ package com.vmware.bdd.software.mgmt.plugin.exception;
  * exceptions that can be thrown during the normal operation of the software
  * management plugin.
  * <p>
- * 
+ *
  **/
 public class SoftwareManagementPluginException extends RuntimeException {
    private static final long serialVersionUID = -3167102179098077601L;
@@ -93,8 +93,13 @@ public class SoftwareManagementPluginException extends RuntimeException {
    }
 
    public static SoftwareManagementPluginException QUERY_CLUSTER_STATUS_FAILED(String clusterName, Throwable cause) {
-      return new SoftwareManagementPluginException("QUERY_CLUSTER_STATUS_FAILED", 
+      return new SoftwareManagementPluginException("QUERY_CLUSTER_STATUS_FAILED",
             "Failed to query status of cluster " + clusterName, cause);
+   }
+
+   public static SoftwareManagementPluginException UNKNOWN_CERTIFICATE(String cert) {
+      return new SoftwareManagementPluginException("UNKNOWN_CERTIFICATE",
+            "Unknown certificate " + cert, null);
    }
 
    public String getErrCode() {
