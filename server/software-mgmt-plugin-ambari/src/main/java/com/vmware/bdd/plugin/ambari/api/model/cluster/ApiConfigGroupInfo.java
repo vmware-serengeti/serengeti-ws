@@ -17,13 +17,16 @@ package com.vmware.bdd.plugin.ambari.api.model.cluster;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 public class ApiConfigGroupInfo {
 
    @Expose
+   @SerializedName("cluster_name")
    private String clusterName;
 
    @Expose
+   @SerializedName("group_name")
    private String groupName;
 
    @Expose
@@ -36,6 +39,7 @@ public class ApiConfigGroupInfo {
    private List<ApiHostInfo> hosts;
 
    @Expose
+   @SerializedName("desired_configs")
    private List<ApiConfigGroupConfiguration> desiredConfigs;
 
    public String getClusterName() {

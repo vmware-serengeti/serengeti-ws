@@ -50,6 +50,7 @@ public interface HostsResource {
 
    @POST
    @Path("/")
+   @Consumes({ MediaType.APPLICATION_XML })
    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
       MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.TEXT_XML })
    public Response addComponentsToHosts(String hostComponentsWithFilter);

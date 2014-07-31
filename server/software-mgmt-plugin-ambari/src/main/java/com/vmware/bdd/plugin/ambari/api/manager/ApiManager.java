@@ -627,10 +627,10 @@ public class ApiManager implements IApiManager {
       apiComponents.setHostRoles(hostRoles);
       ApiHostsRequestInfo requestInfo = new ApiHostsRequestInfo();
       hostsRequest.setRequestInfo(requestInfo);
-      requestInfo.setContext("Staring all components");
+      requestInfo.setContext("Start All Hosts components");
 
       StringBuilder builder = new StringBuilder();
-      builder.append("Hosts/host_name.in(");
+      builder.append("HostRoles/host_name.in(");
       for (String hostName : hostNames) {
          builder.append(hostName).append(",");
       }
@@ -643,14 +643,15 @@ public class ApiManager implements IApiManager {
       builder.deleteCharAt(builder.length() - 1);
       builder.append(")");
       requestInfo.setQueryString(builder.toString());
-      logger.debug("query string: " + requestInfo.getQueryString());
+      String startJson = ApiUtils.objectToJson(hostsRequest);
+      logger.debug("Start json: " + startJson);
       Response response =
             apiResourceRootV1.getClustersResource()
                   .getHostComponentsResource(clusterName)
-                  .actionOnomponentsWithFilter(ApiUtils.objectToJson(hostsRequest));
-      String startJson = handleAmbariResponse(response);
-      logger.debug("in install components, reponse is :" + startJson);
-      return ApiUtils.jsonToObject(ApiRequest.class, startJson);
+                  .installComponentsWithFilter(startJson);
+      String responseJson = handleAmbariResponse(response);
+      logger.debug("in install components, reponse is :" + responseJson);
+      return ApiUtils.jsonToObject(ApiRequest.class, responseJson);
    }
 
    public void createConfigGroups(String clusterName,
@@ -693,12 +694,12 @@ public class ApiManager implements IApiManager {
    public ApiRequest installComponents(String clusterName) throws AmbariApiException {
       ApiHostsRequest hostsRequest = AmUtils.createInstallComponentsRequest();
       String json = ApiUtils.objectToJson(hostsRequest);
-      logger.debug("Request json: " + json);
+      logger.debug("install component json: " + json);
       Response response =
             apiResourceRootV1
                   .getClustersResource()
                   .getHostComponentsResource(clusterName)
-                  .actionOnomponentsWithFilter(json);
+                  .installComponentsWithFilter(json);
       String installJson = handleAmbariResponse(response);
       logger.debug("in install components, reponse is :" + installJson);
       return ApiUtils.jsonToObject(ApiRequest.class, installJson);
@@ -719,8 +720,8 @@ public class ApiManager implements IApiManager {
                   .readServicesWithFilter(filter);
       String apiStackServicesWithComponentsJson =
             handleAmbariResponse(response);
-      logger.debug("Response of service list with components of stack from ambari server:");
-      logger.debug(apiStackServicesWithComponentsJson);
+      logger.trace("Response of service list with components of stack from ambari server:");
+      logger.trace(apiStackServicesWithComponentsJson);
       ApiStackServiceList apiStackServices =
             ApiUtils.jsonToObject(ApiStackServiceList.class,
                   apiStackServicesWithComponentsJson);

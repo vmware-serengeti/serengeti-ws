@@ -592,12 +592,13 @@ public class AmbariImpl implements SoftwareManager {
                ProgressSplit.PROVISION_SUCCESS.getProgress());
          clusterDef.getCurrentReport().setSuccess(true);
       } catch (Exception e) {
+         e.printStackTrace();
          clusterDef.getCurrentReport().setNodesError(
                "Failed to bootstrap nodes for " + e.getMessage(),
                addedNodeNames);
          clusterDef.getCurrentReport().setSuccess(false);
          String errorMessage = errorMessage("Failed to scale out cluster " + blueprint.getName(), e);
-         logger.error(errorMessage);
+         logger.error(errorMessage, e);
          throw SoftwareManagementPluginException.CREATE_CLUSTER_FAILED(
                errorMessage, e);
       } finally {
@@ -635,18 +636,18 @@ public class AmbariImpl implements SoftwareManager {
          return true;
       }
       apiManager.addHostsToCluster(clusterDef.getName(), targetHostNames);
-      installComponents(clusterDef, reports, apiHostComponents, targetHostNames);
-
       // add configurations
       createConfigGroups(clusterDef, configTypeToService, targetNodeDefs);
+      installComponents(clusterDef, reports, apiHostComponents, targetHostNames);
       return startAllComponents(clusterDef, componentToInfo, apiHostComponents,
-            targetHostNames);
+            targetHostNames, reports);
    }
 
    private boolean startAllComponents(AmClusterDef clusterDef,
          Map<String, ApiComponentInfo> componentToInfo,
-         ApiHostComponents apiHostComponents, List<String> targetHostNames) 
-         throws SoftwareManagementPluginException {
+         ApiHostComponents apiHostComponents, List<String> targetHostNames,
+         ClusterReportQueue reports) 
+         throws Exception {
       List<String> componentNames = new ArrayList<>();
       for (ApiHostComponent hostComponent : apiHostComponents.getHostComponents()) {
          String componentName = hostComponent.getHostComponent().getComponentName();
@@ -660,11 +661,20 @@ public class AmbariImpl implements SoftwareManager {
          logger.debug("Client only roles installed.");
          return true;
       }
-      boolean success = false;
       logger.debug("Starting roles: " + componentNames);
-      ApiRequest apiRequest =
+      ApiRequest apiRequestSummary =
             apiManager.startComponents(clusterDef.getName(), targetHostNames,
                   componentNames);
+      ClusterOperationPoller poller =
+            new ClusterOperationPoller(apiManager, apiRequestSummary,
+                  clusterDef.getName(), clusterDef.getCurrentReport(), reports,
+                  ProgressSplit.PROVISION_SUCCESS.getProgress());
+      poller.waitForComplete();
+
+      boolean success = false;
+      ApiRequest apiRequest =
+            apiManager.getRequest(clusterDef.getName(), apiRequestSummary
+                  .getApiRequestInfo().getRequestId());
       ClusterRequestStatus clusterRequestStatus =
             ClusterRequestStatus.valueOf(apiRequest.getApiRequestInfo()
                   .getRequestStatus());

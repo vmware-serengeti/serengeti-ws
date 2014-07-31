@@ -28,5 +28,8 @@ public interface ConfigGroupsResource {
 
    @POST
    @Path("/")
+   @Consumes({ MediaType.APPLICATION_XML })
+   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+      MediaType.TEXT_PLAIN })
    public Response createConfigGroups(String configGroups);
 }
