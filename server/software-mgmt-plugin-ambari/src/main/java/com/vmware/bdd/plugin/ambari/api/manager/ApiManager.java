@@ -62,7 +62,7 @@ import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponentList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceComponent;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionList;
@@ -150,7 +150,7 @@ public class ApiManager implements IApiManager {
       Response response =
             apiResourceRootV1.getStacks2Resource()
                   .getStackVersionsResource(stackName)
-                  .getStackServicesResource(stackVersion).readStackServices();
+                  .getStackServicesResource(stackVersion).readServices();
       String apiStackServicesJson = handleAmbariResponse(response);
       logger.debug("Response of service list of stack from ambari server:");
       logger.debug(apiStackServicesJson);
@@ -164,7 +164,7 @@ public class ApiManager implements IApiManager {
    public ApiStackServiceList getStackServiceListWithComponents(
          String stackName, String stackVersion) throws AmbariApiException {
       return getServicesWithFilter(stackName, stackVersion,
-            "serviceComponents/dependencies");
+            "serviceComponents/*,serviceComponents/dependencies");
    }
 
    @Override
@@ -175,6 +175,13 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
+   public ApiStackService getStackServiceWithComponents(String stackName,
+         String stackVersion, String serviceName) throws AmbariApiException {
+      return getServiceWithFilter(stackName, stackVersion, serviceName,
+            "serviceComponents/*,serviceComponents/dependencies");
+   }
+
+   @Override
    public ApiStackService getStackService(String stackName,
          String stackVersion, String stackServiceName)
          throws AmbariApiException {
@@ -182,7 +189,7 @@ public class ApiManager implements IApiManager {
             apiResourceRootV1.getStacks2Resource()
                   .getStackVersionsResource(stackName)
                   .getStackServicesResource(stackVersion)
-                  .readStackService(stackServiceName);
+                  .readService(stackServiceName);
       String apiStackServiceJson = handleAmbariResponse(response);
       logger.debug("Response of service of stack from ambari server:");
       logger.debug(apiStackServiceJson);
@@ -211,7 +218,7 @@ public class ApiManager implements IApiManager {
    }
 
    @Override
-   public ApiStackServiceComponent getStackComponent(String stackName,
+   public ApiStackComponent getStackComponent(String stackName,
          String stackVersion, String stackServiceName, String stackComponentName)
          throws AmbariApiException {
       Response response =
@@ -223,8 +230,8 @@ public class ApiManager implements IApiManager {
       String stackComponentJson = handleAmbariResponse(response);
       logger.debug("Response of component of service from ambari server:");
       logger.debug(stackComponentJson);
-      ApiStackServiceComponent apiServiceComponent =
-            ApiUtils.jsonToObject(ApiStackServiceComponent.class,
+      ApiStackComponent apiServiceComponent =
+            ApiUtils.jsonToObject(ApiStackComponent.class,
                   stackComponentJson);
       return apiServiceComponent;
    }
@@ -726,6 +733,23 @@ public class ApiManager implements IApiManager {
             ApiUtils.jsonToObject(ApiStackServiceList.class,
                   apiStackServicesWithComponentsJson);
       return apiStackServices;
+   }
+
+   private ApiStackService getServiceWithFilter(String stackName,
+         String stackVersion, String serviceName, String filter)
+         throws AmbariApiException {
+      Response response =
+            apiResourceRootV1.getStacks2Resource()
+                  .getStackVersionsResource(stackName)
+                  .getStackServicesResource(stackVersion)
+                  .readServiceWithFilter(serviceName, filter);
+      String apiStackServiceWithComponentsJson = handleAmbariResponse(response);
+      logger.debug("Response of service with components of stack from ambari server:");
+      logger.debug(apiStackServiceWithComponentsJson);
+      ApiStackService apiStackService =
+            ApiUtils.jsonToObject(ApiStackService.class,
+                  apiStackServiceWithComponentsJson);
+      return apiStackService;
    }
 
    private String handleAmbariResponse(Response response)

@@ -25,11 +25,16 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiComponentDependency;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiComponentDependencyInfo;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfiguration;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfigurationInfo;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceComponent;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ComponentCategory;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ComponentName;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
@@ -77,13 +82,12 @@ public class AmClusterValidator {
       validateConfigs(blueprint.getConfiguration(), unRecogConfigTypes,
             unRecogConfigKeys, stackVendor, stackVersion);
 
-      if (!unRecogConfigTypes.isEmpty()) { // point 2: add to warning list as will be ignored by creating logic
-         warningMsgList.add("Configurations for "
-               + unRecogConfigTypes.toString()
+      if (!unRecogConfigTypes.isEmpty()) {
+         errorMsgList.add("Configurations for " + unRecogConfigTypes.toString()
                + " are not available by distro " + distro);
       }
 
-      if (!unRecogConfigKeys.isEmpty()) { // point 3
+      if (!unRecogConfigKeys.isEmpty()) {
          errorMsgList.add("Configuration items " + unRecogConfigKeys.toString()
                + " are invalid");
       }
@@ -111,13 +115,13 @@ public class AmClusterValidator {
       }
 
       ApiStackServiceList servicesList =
-            apiManager
-                  .getStackServiceListWithComponents(stackVendor, stackVersion);
+            apiManager.getStackServiceListWithComponents(stackVendor,
+                  stackVersion);
 
-      List<ApiStackServiceComponent> apiStackComponents =
-            new ArrayList<ApiStackServiceComponent>();
+      List<ApiStackComponent> apiStackComponents =
+            new ArrayList<ApiStackComponent>();
       for (ApiStackService apiStackService : servicesList.getApiStackServices()) {
-         for (ApiStackServiceComponent apiStackComponent : apiStackService
+         for (ApiStackComponent apiStackComponent : apiStackService
                .getServiceComponents()) {
             apiStackComponents.add(apiStackComponent);
          }
@@ -129,8 +133,8 @@ public class AmClusterValidator {
 
          for (String roleName : group.getRoles()) {
             boolean isSupported = false;
-            for (ApiStackServiceComponent apiStackComponent : apiStackComponents) {
-               if (roleName.equals(apiStackComponent.getApiServiceComponent()
+            for (ApiStackComponent apiStackComponent : apiStackComponents) {
+               if (roleName.equals(apiStackComponent.getApiComponent()
                      .getComponentName())) {
                   isSupported = true;
                   if (isSupported) {
@@ -166,9 +170,134 @@ public class AmClusterValidator {
    }
 
    private void validateRoleDependencies(List<NodeGroupInfo> nodeGroups,
-         List<ApiStackServiceComponent> apiStackComponents,
+         List<ApiStackComponent> apiStackComponents,
          Map<String, Integer> definedRoles) {
-      // TODO
+      if (nodeGroups == null || nodeGroups.isEmpty()) {
+         return;
+      }
+
+      Set<String> allRoles = new HashSet<String>();
+      for (NodeGroupInfo group : nodeGroups) {
+         allRoles.addAll(group.getRoles());
+      }
+      for (String role : allRoles) {
+         List<String> NotExistDenpendencyNames = new ArrayList<String>();
+         for (ApiStackComponent apiStackComponent : apiStackComponents) {
+
+            List<ApiComponentDependency> apiComponentDependencies =
+                  apiStackComponent.getApiComponentDependencies();
+            if (apiComponentDependencies != null
+                  && !apiComponentDependencies.isEmpty()) {
+               for (ApiComponentDependency dependency : apiComponentDependencies) {
+                  ApiComponentDependencyInfo dependencyInfo =
+                        dependency.getApiComponentDependencyInfo();
+                  if (role.equals(dependencyInfo.getDependentComponentName())) {
+                     String denpendencyName = dependencyInfo.getComponentName();
+
+                     if (!allRoles.contains(denpendencyName)) {
+                        NotExistDenpendencyNames.add(denpendencyName);
+                     }
+                  }
+               }
+            }
+
+            ApiComponentInfo apiComponentInfo =
+                  apiStackComponent.getApiComponent();
+            if (role.equals(apiComponentInfo.getComponentName())) {
+               Set<String> roleCategoryDependencies =
+                     validateRoleCategoryDependencies(apiComponentInfo,
+                           allRoles);
+               if (roleCategoryDependencies != null
+                     && !roleCategoryDependencies.isEmpty()) {
+                  NotExistDenpendencyNames.addAll(roleCategoryDependencies);
+               }
+            }
+
+         }
+         if (!NotExistDenpendencyNames.isEmpty()) {
+            warningMsgList.add("Component " + role + " depends on "
+                  + NotExistDenpendencyNames.toString());
+         }
+      }
+   }
+
+   private Set<String> validateRoleCategoryDependencies(
+         ApiComponentInfo apiOriginComponentInfo, Set<String> allRoles) {
+      List<String> masterRoles = new ArrayList<String>();
+      List<String> slaveRoles = new ArrayList<String>();
+      Set<String> NotExistDenpendencies = new HashSet<String>();
+      ComponentCategory componentCategory =
+            ComponentCategory.valueOf(apiOriginComponentInfo
+                  .getComponentCategory());
+      if (componentCategory.isMaster()) {
+         return NotExistDenpendencies;
+      }
+
+      ApiStackService apiTargetService =
+            apiManager.getStackServiceWithComponents(
+                  apiOriginComponentInfo.getStackName(),
+                  apiOriginComponentInfo.getStackVersion(),
+                  apiOriginComponentInfo.getServiceName());
+      for (ApiStackComponent apiTargetComponent : apiTargetService
+            .getServiceComponents()) {
+         ApiComponentInfo apiTargetComponentInfo =
+               apiTargetComponent.getApiComponent();
+         ComponentCategory targetComponentCategory =
+               ComponentCategory.valueOf(apiTargetComponentInfo
+                     .getComponentCategory());
+         ComponentName componentName =
+               ComponentName.valueOf(apiTargetComponentInfo.getComponentName());
+         if (isNamenodeHa(allRoles)) {
+            if (componentName.isSecondaryNamenode()) {
+               continue;
+            }
+         } else {
+            if (componentName.isJournalnode() || componentName.isZkfc()) {
+               continue;
+            }
+         }
+         if (targetComponentCategory.isMaster()) {
+            masterRoles.add(componentName.toString());
+         }
+         if (targetComponentCategory.isSlave()) {
+            slaveRoles.add(componentName.toString());
+         }
+      }
+      if (componentCategory.isSlave()) {
+         for (String masterRole : masterRoles) {
+            if (!allRoles.contains(masterRole)) {
+               NotExistDenpendencies.add(masterRole);
+            }
+         }
+      }
+      if (componentCategory.isClient()) {
+         for (String masterRole : masterRoles) {
+            if (!allRoles.contains(masterRole)) {
+               NotExistDenpendencies.add(masterRole);
+            }
+         }
+         for (String slaveRole : slaveRoles) {
+            if (!allRoles.contains(slaveRole)) {
+               NotExistDenpendencies.add(slaveRole);
+            }
+         }
+      }
+      return NotExistDenpendencies;
+   }
+
+   private boolean isNamenodeHa(Set<String> allRoles) {
+      boolean isNamenodeHa = false;
+      int nameNodesCount = 0;
+      for (String role : allRoles) {
+         ComponentName componentName = ComponentName.valueOf(role);
+         if (componentName.isNamenode()) {
+            nameNodesCount++;
+         }
+      }
+      if (nameNodesCount > 1) {
+         isNamenodeHa = true;
+      }
+      return isNamenodeHa;
    }
 
    private void validateRacks(List<NodeGroupInfo> nodeGroups) {
@@ -265,7 +394,8 @@ public class AmClusterValidator {
             }
          } catch (Exception e) {
             notAvailableConfig.put(key, config.get(key));
-            errorMsgList.add("Configuration item " + notAvailableConfig.toString() + " is invalid");
+            errorMsgList.add("Configuration item "
+                  + notAvailableConfig.toString() + " is invalid");
          }
       }
    }

@@ -31,7 +31,7 @@ public interface ServicesResource {
 
    @GET
    @Path("/")
-   public Response readStackServices();
+   public Response readServices();
 
    @GET
    @Path("/")
@@ -39,7 +39,13 @@ public interface ServicesResource {
 
    @GET
    @Path("/{stackServiceName}")
-   public Response readStackService(@PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName);
+   public Response readService(@PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName);
+
+   @GET
+   @Path("/{stackServiceName}")
+   public Response readServiceWithFilter(
+         @PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName,
+         @QueryParam("fields") String fields);
 
    @Path("/{stackServiceName}/serviceComponents")
    public ComponentsResource getComponentsResource(@PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName);

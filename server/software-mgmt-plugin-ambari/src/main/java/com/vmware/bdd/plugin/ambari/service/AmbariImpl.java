@@ -53,7 +53,7 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ClusterRequestStatus;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceComponent;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionInfo;
@@ -182,9 +182,9 @@ public class AmbariImpl implements SoftwareManager {
                            hadoopStack.getFullVersion());
                for (ApiStackService apiStackService : apiStackServiceList
                      .getApiStackServices()) {
-                  for (ApiStackServiceComponent apiComponent : apiStackService
+                  for (ApiStackComponent apiComponent : apiStackService
                         .getServiceComponents()) {
-                     roles.add(apiComponent.getApiServiceComponent()
+                     roles.add(apiComponent.getApiComponent()
                            .getComponentName());
                   }
                }
@@ -567,7 +567,7 @@ public class AmbariImpl implements SoftwareManager {
    public boolean reconfigCluster(ClusterBlueprint blueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
-      return false;
+      return true;
    }
 
    @Override

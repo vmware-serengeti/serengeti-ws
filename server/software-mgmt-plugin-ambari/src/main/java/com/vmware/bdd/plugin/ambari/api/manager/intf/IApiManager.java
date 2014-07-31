@@ -35,7 +35,7 @@ import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponentList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceComponent;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionList;
@@ -81,10 +81,13 @@ public interface IApiManager {
    public ApiStackServiceList getStackWithCompAndConfigs(String stackName,
          String stackVersion) throws AmbariApiException;
 
+   public ApiStackService getStackServiceWithComponents(String stackName,
+         String stackVersion, String stackServiceName) throws AmbariApiException;
+
    public ApiStackComponentList getStackComponentList(String stackName,
          String stackVersion, String stackServiceName) throws AmbariApiException;
 
-   public ApiStackServiceComponent getStackComponent(String stackName, String stackVersion,
+   public ApiStackComponent getStackComponent(String stackName, String stackVersion,
          String stackServiceName, String stackComponentName) throws AmbariApiException;
 
    public ApiClusterList getClusterList() throws AmbariApiException;

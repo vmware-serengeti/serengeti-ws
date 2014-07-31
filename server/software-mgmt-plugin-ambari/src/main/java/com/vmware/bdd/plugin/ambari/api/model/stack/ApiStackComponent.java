@@ -20,14 +20,14 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 
-public class ApiStackServiceComponent {
+public class ApiStackComponent {
 
    @Expose
    private String href;
 
    @Expose
    @SerializedName("StackServiceComponents")
-   private ApiComponentInfo apiServiceComponent;
+   private ApiComponentInfo apiComponent;
 
    @Expose
    @SerializedName("dependencies")
@@ -41,12 +41,12 @@ public class ApiStackServiceComponent {
       this.href = href;
    }
 
-   public ApiComponentInfo getApiServiceComponent() {
-      return apiServiceComponent;
+   public ApiComponentInfo getApiComponent() {
+      return apiComponent;
    }
 
-   public void setApiServiceComponent(ApiComponentInfo apiServiceComponent) {
-      this.apiServiceComponent = apiServiceComponent;
+   public void setApiComponent(ApiComponentInfo apiComponent) {
+      this.apiComponent = apiComponent;
    }
 
    public List<ApiComponentDependency> getApiComponentDependencies() {

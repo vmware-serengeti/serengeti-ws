@@ -33,7 +33,7 @@ public class ApiStackService {
 
    @Expose
    @SerializedName("serviceComponents")
-   private List<ApiStackServiceComponent> serviceComponents;
+   private List<ApiStackComponent> serviceComponents;
 
    @Expose
    @SerializedName("configurations")
@@ -55,12 +55,11 @@ public class ApiStackService {
       this.apiStackServiceInfo = apiStackServiceInfo;
    }
 
-   public List<ApiStackServiceComponent> getServiceComponents() {
+   public List<ApiStackComponent> getServiceComponents() {
       return serviceComponents;
    }
 
-   public void setServiceComponents(
-         List<ApiStackServiceComponent> serviceComponents) {
+   public void setServiceComponents(List<ApiStackComponent> serviceComponents) {
       this.serviceComponents = serviceComponents;
    }
 
@@ -88,10 +87,11 @@ public class ApiStackService {
    public Map<String, ApiComponentInfo> componentToInfo() {
       Map<String, ApiComponentInfo> result = new HashMap<>();
       if (serviceComponents != null) {
-         for (ApiStackServiceComponent component : serviceComponents) {
-            if (!result.containsKey(component.getApiServiceComponent().getComponentName())) {
-               result.put(component.getApiServiceComponent().getComponentName(), 
-                     component.getApiServiceComponent());
+         for (ApiStackComponent component : serviceComponents) {
+            if (!result.containsKey(component.getApiComponent()
+                  .getComponentName())) {
+               result.put(component.getApiComponent().getComponentName(),
+                     component.getApiComponent());
             }
          }
       }
