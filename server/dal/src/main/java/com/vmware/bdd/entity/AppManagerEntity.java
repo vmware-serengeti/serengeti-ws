@@ -15,6 +15,9 @@
 
 package com.vmware.bdd.entity;
 
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.SequenceGenerator;
@@ -23,6 +26,7 @@ import javax.persistence.Table;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.apitypes.AppManagerAdd;
+import com.vmware.bdd.security.EncryptionGuard;
 
 /**
  * Author: Xiaoding Bian
@@ -56,7 +60,7 @@ public class AppManagerEntity extends EntityBase {
    @Column(name = "ssl_certificate")
    private String sslCertificate;
 
-   static final Logger logger = Logger.getLogger(ClusterEntity.class);
+   static final Logger logger = Logger.getLogger(AppManagerEntity.class);
 
    public AppManagerEntity() {
    }
@@ -67,7 +71,7 @@ public class AppManagerEntity extends EntityBase {
       this.type = type;
       this.url = url;
       this.username = username;
-      this.password = password;
+      this.setPassword(password);
       this.sslCertificate = sslCertificate;
    }
 
@@ -77,7 +81,7 @@ public class AppManagerEntity extends EntityBase {
       this.type = appManagerAdd.getType();
       this.url = appManagerAdd.getUrl();
       this.username = appManagerAdd.getUsername();
-      this.password = appManagerAdd.getPassword();
+      this.setPassword(appManagerAdd.getPassword());
       this.sslCertificate = appManagerAdd.getSslCertificate();
    }
 
@@ -122,11 +126,33 @@ public class AppManagerEntity extends EntityBase {
    }
 
    public String getPassword() {
+      if (this.password == "") {
+         return "";
+      }
+
+      String password = null;
+      try {
+         password = EncryptionGuard.decode(this.password);
+      } catch (UnsupportedEncodingException e) {
+         logger.warn("Unsupported Encoding Exception: ", e);
+      } catch (GeneralSecurityException e) {
+         logger.warn("General Security Exception: ", e);
+      }
       return password;
    }
 
    public void setPassword(String password) {
-      this.password = password;
+      if (password == "") {
+         this.password = "";
+         return;
+      }
+      try {
+         this.password = EncryptionGuard.encode(password);
+      } catch (UnsupportedEncodingException e) {
+         logger.warn("Unsupported Encoding Exception: ", e);
+      } catch (GeneralSecurityException e) {
+         logger.warn("General Security Exception: ", e);
+      }
    }
 
    public String getSslCertificate() {

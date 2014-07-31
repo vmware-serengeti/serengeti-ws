@@ -241,7 +241,7 @@ public class SoftwareManagerCollector implements InitializingBean {
          appManagerAdd.setType(Constants.IRONFAN);
          appManagerAdd.setUrl("http://localhost");
          appManagerAdd.setUsername("n/a");
-         appManagerAdd.setPassword("n/a");
+         appManagerAdd.setPassword("");
          appManagerAdd.setSslCertificate("n/a");
          appManagerService.addAppManager(appManagerAdd);
       }
