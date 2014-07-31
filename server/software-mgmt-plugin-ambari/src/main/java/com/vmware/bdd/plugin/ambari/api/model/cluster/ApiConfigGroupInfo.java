@@ -42,6 +42,9 @@ public class ApiConfigGroupInfo {
    @SerializedName("desired_configs")
    private List<ApiConfigGroupConfiguration> desiredConfigs;
 
+   @Expose
+   private String id;
+
    public String getClusterName() {
       return clusterName;
    }
@@ -88,5 +91,13 @@ public class ApiConfigGroupInfo {
 
    public void setDesiredConfigs(List<ApiConfigGroupConfiguration> desiredConfigs) {
       this.desiredConfigs = desiredConfigs;
+   }
+
+   public String getId() {
+      return id;
+   }
+
+   public void setId(String id) {
+      this.id = id;
    }
 }

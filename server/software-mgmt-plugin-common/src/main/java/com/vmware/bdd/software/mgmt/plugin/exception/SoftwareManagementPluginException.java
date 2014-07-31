@@ -55,6 +55,10 @@ public class SoftwareManagementPluginException extends RuntimeException {
       return new SoftwareManagementPluginException("SCALE_OUT_CLUSTER_FAILED", message, cause);
    }
 
+   public static SoftwareManagementPluginException DELETE_NODES_FAILED(String message, Throwable cause) {
+      return new SoftwareManagementPluginException("DELETE_NODES_FAILED", message, cause);
+   }
+
    public static SoftwareManagementPluginException RECONFIGURE_CLUSTER_FAILED(String message, Throwable cause) {
       return new SoftwareManagementPluginException("RECONFIGURE_CLUSTER_FAILED", message, cause);
    }

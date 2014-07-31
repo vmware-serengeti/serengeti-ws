@@ -25,11 +25,11 @@ import java.util.Set;
 
 import javax.ws.rs.NotFoundException;
 
-import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
+import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
@@ -592,14 +592,13 @@ public class AmbariImpl implements SoftwareManager {
                ProgressSplit.PROVISION_SUCCESS.getProgress());
          clusterDef.getCurrentReport().setSuccess(true);
       } catch (Exception e) {
-         e.printStackTrace();
          clusterDef.getCurrentReport().setNodesError(
                "Failed to bootstrap nodes for " + e.getMessage(),
                addedNodeNames);
          clusterDef.getCurrentReport().setSuccess(false);
          String errorMessage = errorMessage("Failed to scale out cluster " + blueprint.getName(), e);
          logger.error(errorMessage, e);
-         throw SoftwareManagementPluginException.CREATE_CLUSTER_FAILED(
+         throw SoftwareManagementPluginException.SCALE_OUT_CLUSTER_FAILED(
                errorMessage, e);
       } finally {
          clusterDef.getCurrentReport().setFinished(true);
@@ -631,16 +630,83 @@ public class AmbariImpl implements SoftwareManager {
             targetNodeDefs.add(nodeDef);
          }
       }
+      removeHosts(clusterDef, targetHostNames, reports);
+      apiManager.addHostsToCluster(clusterDef.getName(), targetHostNames);
       if (apiHostComponents.getHostComponents().isEmpty()) {
          logger.info("No roles need to install on hosts.");
          return true;
       }
-      apiManager.addHostsToCluster(clusterDef.getName(), targetHostNames);
       // add configurations
       createConfigGroups(clusterDef, configTypeToService, targetNodeDefs);
       installComponents(clusterDef, reports, apiHostComponents, targetHostNames);
       return startAllComponents(clusterDef, componentToInfo, apiHostComponents,
             targetHostNames, reports);
+   }
+
+   private void removeHosts(AmClusterDef clusterDef,
+         List<String> targetHostNames, ClusterReportQueue reports)
+         throws Exception {
+      List<String> existingHosts =
+            apiManager.getExistingHosts(clusterDef.getName(), targetHostNames);
+      if (existingHosts.isEmpty()) {
+         logger.debug("No host exists in cluster.");
+         return;
+      }
+      deleteAssociatedConfGroups(clusterDef, existingHosts);
+      stopAllComponents(clusterDef, existingHosts, reports);
+      removeHostsFromCluster(clusterDef, existingHosts);
+   }
+
+   private void deleteAssociatedConfGroups(AmClusterDef clusterDef,
+         List<String> existingHosts) {
+      for (String hostName : existingHosts) {
+         List<String> groups =
+               apiManager.getAssociatedConfigGroups(clusterDef.getName(),
+                     hostName);
+         for (String groupId : groups) {
+            apiManager.deleteConfigGroup(clusterDef.getName(), groupId);
+         }
+      }
+   }
+
+   private void removeHostsFromCluster(AmClusterDef clusterDef, List<String> existingHosts) {
+      for (String hostName : existingHosts) {
+         apiManager.deleteAllComponents(clusterDef.getName(), hostName);
+         apiManager.deleteHost(clusterDef.getName(), hostName);
+      }
+   }
+
+   private void stopAllComponents(AmClusterDef clusterDef,
+         List<String> existingHosts, ClusterReportQueue reports)
+               throws Exception {
+      ApiRequest apiRequestSummary =
+            apiManager.stopAllComponentsInHosts(clusterDef.getName(),
+                  existingHosts);
+      if (apiRequestSummary.getApiRequestInfo() == null) {
+         logger.debug("No components need to be stopped.");
+         return;
+      }
+
+      ClusterOperationPoller poller =
+            new ClusterOperationPoller(apiManager, apiRequestSummary,
+                  clusterDef.getName(), clusterDef.getCurrentReport(), reports,
+                  ProgressSplit.PROVISION_SUCCESS.getProgress());
+      poller.waitForComplete();
+
+      boolean success = false;
+      ApiRequest apiRequest =
+            apiManager.getRequest(clusterDef.getName(), apiRequestSummary
+                  .getApiRequestInfo().getRequestId());
+      ClusterRequestStatus clusterRequestStatus =
+            ClusterRequestStatus.valueOf(apiRequest.getApiRequestInfo()
+                  .getRequestStatus());
+      if (!clusterRequestStatus.isFailedState()) {
+         success = true;
+      }
+      if (!success) {
+         throw SoftwareManagementPluginException.SCALE_OUT_CLUSTER_FAILED(
+               "Failed to start components.", null);
+      }
    }
 
    private boolean startAllComponents(AmClusterDef clusterDef,
@@ -991,8 +1057,24 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public boolean onDeleteNodes(ClusterBlueprint blueprint, List<String> nodeNames) throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
-      return false;
+      AmClusterDef clusterDef = null;
+      try {
+         logger.info("Delete nodes " + nodeNames + " from cluster " + blueprint.getName());
+         clusterDef = new AmClusterDef(blueprint, privateKey);
+         List<String> targetHostNames = new ArrayList<>();
+         for (AmNodeDef nodeDef : clusterDef.getNodes()) {
+            if (nodeNames.contains(nodeDef.getName())) {
+               targetHostNames.add(nodeDef.getFqdn());
+            }
+         }
+         removeHosts(clusterDef, targetHostNames, null);
+      } catch (Exception e) {
+         clusterDef.getCurrentReport().setSuccess(false);
+         String errorMessage = errorMessage("Failed to delete nodes " + nodeNames + " from cluster " + blueprint.getName(), e);
+         logger.error(errorMessage, e);
+         throw SoftwareManagementPluginException.DELETE_NODES_FAILED(errorMessage, e);
+      }
+      return true;
    }
 
    @Override

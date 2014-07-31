@@ -12,27 +12,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.v1.resource.clusters;
+package com.vmware.bdd.plugin.ambari.api.model.cluster;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import java.util.List;
 
-@Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-public interface HostComponentsResource {
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
-   @PUT
-   @Path("/")
-   @Consumes({ MediaType.APPLICATION_XML })
-   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-   public Response operationWithFilter(String request);
+public class ApiConfigGroupList {
 
-   @DELETE
-   @Path("/")
-   public Response deleteAllComponents();
+   @Expose
+   private String href;
+
+   @Expose
+   @SerializedName("items")
+   private List<ApiConfigGroup> configGroups;
+
+   public String getHref() {
+      return href;
+   }
+
+   public void setHref(String href) {
+      this.href = href;
+   }
+
+   public List<ApiConfigGroup> getConfigGroups() {
+      return configGroups;
+   }
+
+   public void setConfigGroups(List<ApiConfigGroup> configGroups) {
+      this.configGroups = configGroups;
+   }
 }

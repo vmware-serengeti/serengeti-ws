@@ -58,4 +58,7 @@ public interface HostsResource {
    @POST
    @Path("/{hostFQDN}")
    public Response addHost(@PathParam(Parameters.HOST_FQDN) String hostFQDN);
+
+   @Path("/{hostFQDN}/host_components")
+   public HostComponentsResource getHostComponentsResource(@PathParam(Parameters.HOST_FQDN) String hostFQDN);
 }

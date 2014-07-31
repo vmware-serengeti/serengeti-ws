@@ -26,6 +26,7 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroupList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponents;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
@@ -63,6 +64,8 @@ public interface IApiManager {
    public ApiStackService getStackService(String stackName, String stackVersion,
          String stackServiceName) throws AmbariApiException;
 
+   public List<String> getExistingHosts(String clusterName, List<String> hostNames)
+         throws AmbariApiException;
    public void addHostsToCluster(String clusterName,
          List<String> hostNames) throws AmbariApiException;
 
@@ -77,6 +80,18 @@ public interface IApiManager {
    public ApiRequest startComponents(String clusterName,
          List<String> hostNames, List<String> components)
          throws AmbariApiException;
+
+   public ApiRequest stopAllComponentsInHosts(String clusterName,
+         List<String> hostNames)  throws AmbariApiException;
+
+   public void deleteAllComponents(String clusterName, String hostName)
+         throws AmbariApiException;
+
+   public List<String> getAssociatedConfigGroups(String clusterName,
+         String hostName) throws AmbariApiException;
+
+   public void deleteConfigGroup(String clusterName,
+         String groupId) throws AmbariApiException;
 
    public ApiStackServiceList getStackWithCompAndConfigs(String stackName,
          String stackVersion) throws AmbariApiException;

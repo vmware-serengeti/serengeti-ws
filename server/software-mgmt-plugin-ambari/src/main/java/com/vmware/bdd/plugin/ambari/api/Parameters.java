@@ -27,6 +27,7 @@ public final class Parameters {
    public static final String REQUEST_ID = "RequestId";
    public static final String SERVICE_NAME = "serviceName";
    public static final String HOST_FQDN = "hostFQDN";
+   public static final String CONFIG_GROUP_ID = "ConfigGroupId";
 
    /* Default values. */
    static public final String DATE_TIME_NOW = "now";

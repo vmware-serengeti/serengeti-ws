@@ -106,7 +106,9 @@ public class ClusterOperationPoller extends StatusPoller {
                      + " to complete.");
             }
             currentReport.setProgress(toProgress);
-            reportQueue.addClusterReport(currentReport.clone());
+            if (reportQueue != null) {
+               reportQueue.addClusterReport(currentReport.clone());
+            }
          }
       }
 

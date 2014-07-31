@@ -115,7 +115,7 @@ public class TestAmbariImpl {
 
    }
 
-   private void testScaleOutQuery() {
+   private void testScaleOut() {
       String sshKey = null;
       try {
          sshKey = CommonUtil.dataFromFile("/localpath");
@@ -172,14 +172,30 @@ public class TestAmbariImpl {
       node.setVolumes(volumes);
       nodes.add(node);
       node = new NodeInfo();
-      node.setHostname("wdc-vhadp-pub2-dhcp-73-083.eng.vmware.com");
-      node.setName("test_vm_5");
+      node.setHostname("wdc-vhadp-pub2-dhcp-72-198.eng.vmware.com");
+      node.setName("am3-worker-4");
+      nodes.add(node);
+      volumes = new ArrayList<>();
+      volumes.add("/mnt/scsi-36000c295951affd8a255d3201a7dd9dd-part1");
+      node.setVolumes(volumes);
+      node = new NodeInfo();
+      node.setHostname("wdc-vhadp-pub2-dhcp-73-178.eng.vmware.com");
+      node.setName("am3-worker-5");
+      nodes.add(node);
+      volumes = new ArrayList<>();
+      volumes.add("/mnt/scsi-36000c295951affd8a255d3201a7dd9dd-part1");
+      node.setVolumes(volumes);
+      node = new NodeInfo();
+      node.setHostname("wdc-vhadp-pub2-dhcp-73-157.eng.vmware.com");
+      node.setName("am3-worker-3");
       nodes.add(node);
       volumes = new ArrayList<>();
       volumes.add("/mnt/scsi-36000c295951affd8a255d3201a7dd9dd-part1");
       node.setVolumes(volumes);
       List<String> addedNodeNames = new ArrayList<String>();
-      addedNodeNames.add("test_vm_5");
+      addedNodeNames.add("am3-worker-4");
+      addedNodeNames.add("am3-worker-5");
+      addedNodeNames.add("am3-worker-3");
       ClusterReportQueue reports = new ClusterReportQueue();
       try {
          provider.scaleOutCluster(blueprint, addedNodeNames, reports);

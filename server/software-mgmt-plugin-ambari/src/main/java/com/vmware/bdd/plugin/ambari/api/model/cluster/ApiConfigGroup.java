@@ -20,6 +20,9 @@ import com.google.gson.annotations.SerializedName;
 public class ApiConfigGroup {
 
    @Expose
+   private String href;
+
+   @Expose
    @SerializedName("ConfigGroup")
    private ApiConfigGroupInfo apiConfigGroupInfo;
 
@@ -29,5 +32,13 @@ public class ApiConfigGroup {
 
    public void setApiConfigGroupInfo(ApiConfigGroupInfo apiConfigGroupInfo) {
       this.apiConfigGroupInfo = apiConfigGroupInfo;
+   }
+
+   public String getHref() {
+      return href;
+   }
+
+   public void setHref(String href) {
+      this.href = href;
    }
 }

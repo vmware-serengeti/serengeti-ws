@@ -20,6 +20,9 @@ import com.google.gson.annotations.SerializedName;
 public class ApiHostInfo {
 
    @Expose
+   private String href;
+
+   @Expose
    @SerializedName("cluster_name")
    private String clusterName;
 
@@ -30,6 +33,14 @@ public class ApiHostInfo {
    @Expose
    @SerializedName("host_status")
    private String state;
+
+   public String getHref() {
+      return href;
+   }
+
+   public void setHref(String href) {
+      this.href = href;
+   }
 
    public String getClusterName() {
       return clusterName;

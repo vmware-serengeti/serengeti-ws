@@ -15,11 +15,17 @@
 package com.vmware.bdd.plugin.ambari.api.v1.resource.clusters;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import com.vmware.bdd.plugin.ambari.api.Parameters;
 
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
@@ -32,4 +38,12 @@ public interface ConfigGroupsResource {
    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
       MediaType.TEXT_PLAIN })
    public Response createConfigGroups(String configGroups);
+
+   @GET
+   @Path("/")
+   public Response readConfigGroupsWithFields(@QueryParam("fields") String fields);
+
+   @DELETE
+   @Path("/{ConfigGroupId}")
+   public Response deleteConfigGroup(@PathParam(Parameters.CONFIG_GROUP_ID) String groupId);
 }
