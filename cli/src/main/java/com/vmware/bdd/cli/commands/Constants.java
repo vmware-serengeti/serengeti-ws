@@ -271,6 +271,7 @@ public class Constants {
    public static final String CLUSTER_NOT_EXIST = "Cluster doesn't exist";
    public static final String EXPORT_TYPE_SPEC = "spec";
    public static final String EXPORT_TYPE_RACK = "rack";
+   public static final String EXPORT_TYPE_IP = "ip";
    public static final String UNKNOWN_EXPORT_TYPE = "export type is unknown";
 
    public static final String LOGIN_USERNAME = "username";

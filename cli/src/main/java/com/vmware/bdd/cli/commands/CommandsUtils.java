@@ -57,8 +57,11 @@ import org.springframework.shell.core.JLineShell;
 import org.springframework.shell.support.util.OsUtils;
 import org.springframework.util.ClassUtils;
 
+import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.utils.CommonUtil;
 
 
@@ -560,12 +563,10 @@ public class CommandsUtils {
    }
 
    public static void gracefulRackTopologyOutput(
-         Map<String, String> racksTopology, String fileName, String delimeter)
+         Map<String, String> racksTopology, String filename, String delimeter)
          throws Exception {
-      StringBuffer buff = new StringBuffer();
-      if (CommonUtil.isBlank(delimeter)) {
-         delimeter = "\n";
-      }
+      List<Object> list = new ArrayList<Object>();
+
       if (racksTopology != null && racksTopology.size() > 0) {
          Iterator<Entry<String, String>> it =
                racksTopology.entrySet().iterator();
@@ -576,11 +577,30 @@ public class CommandsUtils {
             entry = (Map.Entry<String, String>) it.next();
             vmIP = entry.getKey();
             rackPath = entry.getValue();
-            buff.append(vmIP).append(" ").append(rackPath).append(delimeter);
+            StringBuffer buff = new StringBuffer();
+            list.add(buff.append(vmIP).append(" ").append(rackPath).toString());
          }
-         if (buff.length() > 0) {
-            buff.delete(buff.length() - delimeter.length(), buff.length());
+      }
+
+      prettyOutputStrings(list, filename, delimeter);
+   }
+
+   public static void prettyOutputStrings(List<Object> objs, String fileName, String delimeter) throws Exception {
+      StringBuffer buff = new StringBuffer();
+      if (CommonUtil.isBlank(delimeter)) {
+         delimeter = "\n";
+      }
+
+      for (Object obj : objs) {
+         if (obj != null) {
+            String str = obj.toString();
+            if (!CommandsUtils.isBlank(str)) {
+               buff.append(str).append(delimeter);
+            }
          }
+      }
+      if (buff.length() > 0) {
+         buff.delete(buff.length() - delimeter.length(), buff.length());
       }
 
       OutputStream out = null;
@@ -596,8 +616,9 @@ public class CommandsUtils {
          bw.flush();
          writeEndingMsgToScreen(fileName);
       } finally {
-         if (bw != null && !(out instanceof PrintStream)) {
+         if (bw != null && out != null && !(out instanceof PrintStream)) {
             bw.close();
+            out.close();
          }
       }
    }

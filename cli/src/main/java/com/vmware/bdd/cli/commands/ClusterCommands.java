@@ -518,7 +518,7 @@ public class ClusterCommands implements CommandMarker {
    public void exportClusterData(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
          @CliOption(key = { "specFile" }, mandatory = false, help = "The cluster spec file path") final String specFileName,
-         @CliOption(key = { "type" }, mandatory = false, help = "The data type to export: RACK or SPEC") final String type,
+         @CliOption(key = { "type" }, mandatory = false, help = "The data type to export: SPEC or RACK or IP") final String type,
          @CliOption(key = { "topology" }, mandatory = false, help = "The topology type: HVE or RACK_AS_RACK or HOST_AS_RACK") final String topology,
          @CliOption(key = { "delimiter" }, mandatory = false, help = "The string used to separate each line") final String delimeter,
          @CliOption(key = { "output" }, mandatory = false, help = "The path to the output file") final String output) {
@@ -547,14 +547,13 @@ public class ClusterCommands implements CommandMarker {
                !CommandsUtils.isBlank(specFileName) ||
                type.equalsIgnoreCase(Constants.EXPORT_TYPE_SPEC)) {
             ClusterCreate cluster = restClient.getSpec(name);
-            if (cluster == null) {
-               System.out.println(Constants.CLUSTER_NOT_EXIST);
-               return;
-            }
             CommandsUtils.prettyJsonOutput(cluster, path);
          } else if (type.equalsIgnoreCase(Constants.EXPORT_TYPE_RACK)) {
             Map<String, String> rackTopology = restClient.getRackTopology(name, topology);
             CommandsUtils.gracefulRackTopologyOutput(rackTopology, path, delimeter);
+         } else if (type.equalsIgnoreCase(Constants.EXPORT_TYPE_IP)) {
+            ClusterRead cluster = restClient.get(name, true);
+            prettyOutputClusterIPs(cluster, path, delimeter);
          } else {
             System.out.println(Constants.UNKNOWN_EXPORT_TYPE);
          }
@@ -1517,6 +1516,19 @@ public class ClusterCommands implements CommandMarker {
       }
       System.out.println(seperator.toString());
       System.out.println();
+   }
+
+   public static void prettyOutputClusterIPs(ClusterRead cluster, String filename, String delimeter) throws Exception  {
+      List<Object> list = new ArrayList<Object>();
+      for (NodeGroupRead nodegroup : cluster.getNodeGroups()) {
+         List<NodeRead> nodes = nodegroup.getInstances();
+         if (nodes != null && !nodes.isEmpty()) {
+            for (NodeRead node : nodes) {
+               list.add(node.fetchMgtIp());
+            }
+         }
+      }
+      CommandsUtils.prettyOutputStrings(list, filename, delimeter);
    }
 
    private void showFailedMsg(String name, String op, List<String> failedMsgList) {
