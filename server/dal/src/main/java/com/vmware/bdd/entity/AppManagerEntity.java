@@ -126,7 +126,7 @@ public class AppManagerEntity extends EntityBase {
    }
 
    public String getPassword() {
-      if (this.password == "") {
+      if (this.password == null || this.password.isEmpty()) {
          return "";
       }
 
