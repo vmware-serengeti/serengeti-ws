@@ -14,6 +14,13 @@
  ***************************************************************************/
 package com.vmware.bdd.software.mgmt.plugin.exception;
 
+
+/**
+ * @TODO use or remove, lixl
+ */
 public class ProgressMonitorException extends SoftwareManagementPluginException {
 
+   public ProgressMonitorException(String errCode, Throwable cause, String... details) {
+      super(errCode, cause, details);
+   }
 }

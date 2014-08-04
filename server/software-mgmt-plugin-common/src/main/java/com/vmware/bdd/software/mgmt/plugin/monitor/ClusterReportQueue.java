@@ -39,8 +39,7 @@ public class ClusterReportQueue {
       try {
          reports.put(report);
       } catch (Exception e) {
-         // TODO: refine the exception
-         throw new SoftwareManagementPluginException(null, e.getLocalizedMessage(), e);
+         throw SoftwareManagementPluginException.ADD_CLUSTER_REPORT_FAIL(e);
       }
    }
 

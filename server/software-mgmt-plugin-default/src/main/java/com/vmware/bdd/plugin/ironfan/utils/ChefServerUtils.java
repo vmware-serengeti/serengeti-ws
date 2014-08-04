@@ -29,7 +29,7 @@ package com.vmware.bdd.plugin.ironfan.utils;
  * limitations under the License.
  ***************************************************************************/
 
-import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
+import com.vmware.bdd.plugin.ironfan.IronFanPluginException;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -71,7 +71,7 @@ public class ChefServerUtils {
                 HashSet<String> roles = new HashSet<String>();
                 Process p = ChefServerUtils.execCommand(GET_ROLES_CMD);
                 if (p == null || p.exitValue() != 0) {
-                    throw new SoftwareManagementPluginException(String.valueOf(p.exitValue()), "Failed to get roles from chef server", null);
+                    IronFanPluginException.GET_ROLES_ERR_EXIT_CODE(p.exitValue());
                 }
 
                 try {
@@ -85,8 +85,8 @@ public class ChefServerUtils {
                     }
                     allRoles = roles;
                 } catch (IOException e) {
-                    logger.error("Failed to get all roles from Chef Server: " + e.getMessage());
-                    throw new SoftwareManagementPluginException("", "Cannot get roles from chef server", null);
+//                    logger.error("Failed to get all roles from Chef Server: " + e.getMessage());
+                    throw IronFanPluginException.GET_ROLES_EXCEPTION(e);
                 }
             }
             return allRoles;

@@ -33,6 +33,8 @@ import com.cloudera.api.model.ApiRoleState;
 import com.cloudera.api.model.ApiRoleConfigGroup;
 import com.cloudera.api.v7.RootResourceV7;
 import com.google.gson.GsonBuilder;
+import com.vmware.aurora.util.CommandExec;
+import com.vmware.bdd.plugin.clouderamgr.exception.CommandExecFailException;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
 import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
@@ -100,6 +102,7 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 public class ClouderaManagerImpl implements SoftwareManager {
 
    private static final Logger logger = Logger.getLogger(ClouderaManagerImpl.class);
+   public static final String CLOUDERA_MANAGER = "ClouderaManager";
 
    private final String UNKNOWN_VERSION = "UNKNOWN";
    private final String usernameForHosts = "serengeti";
@@ -238,7 +241,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          apiResourceRootV6.getClustersResource().deleteCluster(randomClusterName);
          return hadoopStacks;
       } catch (Exception e) {
-         throw SoftwareManagementPluginException.RETRIEVE_SUPPORTED_STACKS(e.getMessage(), e);
+         throw SoftwareManagementPluginException.RETRIEVE_SUPPORTED_STACKS_FAIL(e, CLOUDERA_MANAGER);
       }
    }
 
@@ -248,7 +251,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       try {
          return AvailableServiceRoleContainer.getSupportedConfigs(CmUtils.majorVersionOfHadoopStack(hadoopStack));
       } catch (IOException e) {
-         throw new SoftwareManagementPluginException(e.getMessage());
+         throw ClouderaManagerException.GET_SUPPORT_CONFIGS_EXCEPTION(e);
       }
    }
 
@@ -280,7 +283,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          clusterDef.getCurrentReport().setAction("Failed to Create Cluster");
          clusterDef.getCurrentReport().setSuccess(false);
          logger.error(e.getMessage());
-         throw SoftwareManagementPluginException.CREATE_CLUSTER_FAILED(e.getMessage(), e);
+         throw SoftwareManagementPluginException.CREATE_CLUSTER_EXCEPTION(e, CLOUDERA_MANAGER, clusterDef.getName());
       } finally {
          clusterDef.getCurrentReport().setFinished(true);
          reportQueue.addClusterReport(clusterDef.getCurrentReport().clone());
@@ -290,6 +293,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
+   /**
+    * @TODO better use a event-listener mode to decouple the reportQueue. lixl
+    */
    public boolean reconfigCluster(ClusterBlueprint blueprint,
          ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
       boolean success = false;
@@ -310,7 +316,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          clusterDef.getCurrentReport().setAction("Failed to Reconfigure Cluster");
          clusterDef.getCurrentReport().setSuccess(false);
          logger.error(e.getMessage());
-         throw SoftwareManagementPluginException.RECONFIGURE_CLUSTER_FAILED(e.getMessage(), e);
+         throw SoftwareManagementPluginException.RECONFIGURE_CLUSTER_FAILED(e, CLOUDERA_MANAGER, clusterDef.getName());
       } finally {
          clusterDef.getCurrentReport().setFinished(true);
          reportQueue.addClusterReport(clusterDef.getCurrentReport().clone());
@@ -335,9 +341,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
          clusterDef.getCurrentReport().setAction("");
          clusterDef.getCurrentReport().setClusterAndNodesServiceStatus(ServiceStatus.STARTED);
       } catch (SoftwareManagementPluginException ex) {
-         if (ex instanceof ClouderaManagerException
-               && ((ClouderaManagerException)ex).getRefHostId() != null) {
-            String hostId = ((ClouderaManagerException)ex).getRefHostId();
+         if (ex instanceof CommandExecFailException) {
+            String hostId = ((CommandExecFailException)ex).getRefHostId();
             CmNodeDef nodeDef = clusterDef.idToHosts().get(hostId);
             String errMsg = null;
             if (nodeDef != null) {
@@ -350,7 +355,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
                // set error message for specified node
                clusterDef.getCurrentReport().getNodeReports()
                      .get(nodeDef.getName()).setErrMsg(errMsg);
-               throw  SoftwareManagementPluginException.START_SERVICE_FAILED(errMsg, ex.getCause());
+               throw  SoftwareManagementPluginException.START_SERVICE_FAILED(ex, CLOUDERA_MANAGER, clusterDef.getName());
             }
          }
          clusterDef.getCurrentReport().setNodesError(ex.getMessage(), addedNodeNames);
@@ -360,7 +365,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          clusterDef.getCurrentReport().setNodesError(
                "Failed to bootstrap nodes for " + e.getMessage(), addedNodeNames);
          logger.error(e.getMessage());
-         throw SoftwareManagementPluginException.SCALE_OUT_CLUSTER_FAILED(e.getMessage(), e);
+         throw SoftwareManagementPluginException.SCALE_OUT_CLUSTER_FAILED(e, CLOUDERA_MANAGER, clusterDef.getName());
       } finally {
          clusterDef.getCurrentReport().setSuccess(success);
          clusterDef.getCurrentReport().setFinished(true);
@@ -453,7 +458,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       } catch (Exception e) {
          String errMsg = "Failed to configure services" + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
          logger.error(errMsg);
-         throw SoftwareManagementPluginException.CONFIGURE_SERVICE_FAILED(errMsg, e);
+         throw SoftwareManagementPluginException.CONFIGURE_SERVICE_FAILED(e);
       }
    }
 
@@ -489,7 +494,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          }
 
       } catch (Exception e) {
-         throw SoftwareManagementPluginException.DELETE_CLUSTER_FAILED(clusterName, e);
+         throw SoftwareManagementPluginException.DELETE_CLUSTER_FAILED(e, CLOUDERA_MANAGER, clusterName);
       }
       return true;
    }
@@ -685,7 +690,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
             }
          }
       } catch (Exception e) {
-         throw new SoftwareManagementPluginException(cluster.getName(), e); //TODO
+         throw ClouderaManagerException.DEPROVISION_EXCEPTION(e, cluster.getName());
       }
       return false;
    }
@@ -721,7 +726,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          }
 
       } catch (Exception e) {
-         throw SoftwareManagementPluginException.START_CLUSTER_FAILED(e.getMessage(), e);
+         throw SoftwareManagementPluginException.START_CLUSTER_FAILED(e, CLOUDERA_MANAGER, cluster.getName());
       }
       return servicesNotStarted.isEmpty();
    }
@@ -768,7 +773,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          report.setClusterAndNodesServiceStatus(ServiceStatus.STOP_FAILED);
          HashMap<String, Set<String>> unstoppedRoles = getFailedRoles(clusterName, ApiRoleState.STOPPED);
          setRolesErrorMsg(report, unstoppedRoles, "stopping");
-         throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(e.getMessage(), e);
+         throw SoftwareManagementPluginException.STOP_CLUSTER_EXCEPTION(e, CLOUDERA_MANAGER, clusterBlueprint.getName());
       } finally {
          if (clusterDef != null) {
             if (succeed) {
@@ -857,7 +862,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          logger.error("Got an exception when cloudera manager starting cluster", e);
          HashMap<String, Set<String>> unstartedRoles = getFailedRoles(clusterName, ApiRoleState.STARTED);
          setRolesErrorMsg(report, unstartedRoles, "starting");
-         throw SoftwareManagementPluginException.START_CLUSTER_FAILED(e.getMessage(), e);
+         throw SoftwareManagementPluginException.START_CLUSTER_FAILED(e, CLOUDERA_MANAGER, clusterDef.getName());
       } finally {
          if (clusterDef != null) {
             report.setFinished(true);
@@ -925,7 +930,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
             executed = true;
          }
       } catch (Exception e) {
-         throw new SoftwareManagementPluginException(cluster.getName(), e);
+         throw ClouderaManagerException.CHECK_CONFIGURED_EXCEPTION(e, cluster.getName());
       }
       return executed && servicesNotConfigured.size() == 0;
    }
@@ -949,7 +954,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
       } catch (Exception e) {
          logger.error("Cluster Initialize failed");
-         throw new SoftwareManagementPluginException(cluster.getName(), e);
+         throw ClouderaManagerException.INIT_EXCEPTION(e, cluster.getName());
       }
 
       return executed;
@@ -1096,7 +1101,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
             String errMsg = "Failed to install agents on nodes: " + failedIps.toString()
                   + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
             logger.error(errMsg);
-            throw ClouderaManagerException.INSTALL_AGENTS_FAIL(errMsg, e);
+            throw ClouderaManagerException.INSTALL_AGENTS_FAIL(e);
          }
       } else {
          cluster.getCurrentReport().setProgress(ProgressSplit.INSTALL_HOSTS_AGENT.getProgress());
@@ -1199,7 +1204,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
                         + " and in " + host.getHealthSummary() + " status");
                   continue;
                }
-               throw SoftwareManagementPluginException.CLUSTER_ALREADY_EXIST(cluster.getName(), null);
+               throw SoftwareManagementPluginException.CLUSTER_ALREADY_EXIST(cluster.getName());
             }
          }
 
@@ -1504,7 +1509,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       } catch (Exception e) {
          String errMsg = "Failed to configure services" + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
          logger.error(errMsg);
-         throw SoftwareManagementPluginException.CONFIGURE_SERVICE_FAILED(errMsg, e);
+         throw SoftwareManagementPluginException.CONFIGURE_SERVICE_FAILED(e);
       }
    }
 
@@ -1826,7 +1831,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       } catch (Exception e) {
          String errMsg = "Failed to start services" + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
          logger.error(errMsg);
-         throw SoftwareManagementPluginException.START_SERVICE_FAILED(errMsg, e);
+         throw SoftwareManagementPluginException.START_SERVICE_FAILED(e, CLOUDERA_MANAGER, cluster.getName());
       }
 
       return executed;
@@ -1974,7 +1979,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
             return cmServerHostId;
          }
       }
-      throw new SoftwareManagementPluginException("Cannot fetch the hostId of cloudera manager server");
+
+      throw ClouderaManagerException.FAIL_FETCH_CM_SERVER_HOST_ID();
    }
 
    private ApiCommand execute(final ApiBulkCommandList bulkCommand, boolean checkReturn) throws Exception {
@@ -2066,7 +2072,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          String errorMsg = getSummaryErrorMsg(command, domain);
          logger.error(errorMsg);
          String hostId = (commandReturn.getHostRef() == null) ? null : commandReturn.getHostRef().getHostId();
-         throw ClouderaManagerException.COMMAND_EXECUTION_FAILED(hostId, errorMsg);
+         throw CommandExecFailException.EXECUTE_COMMAND_FAIL(hostId, errorMsg);
       }
 
       if (endProgress != INVALID_PROGRESS) {

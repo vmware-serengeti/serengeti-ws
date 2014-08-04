@@ -93,10 +93,7 @@ public class AmClusterValidator {
       }
 
       if (!warningMsgList.isEmpty() || !errorMsgList.isEmpty()) {
-         ValidationException e = new ValidationException(null, null);
-         e.getFailedMsgList().addAll(errorMsgList);
-         e.getWarningMsgList().addAll(warningMsgList);
-         throw e;
+         throw ValidationException.VALIDATION_FAIL("Blueprint", errorMsgList, warningMsgList);
       }
 
       return true;

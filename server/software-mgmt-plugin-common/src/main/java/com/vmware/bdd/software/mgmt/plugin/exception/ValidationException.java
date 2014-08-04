@@ -15,27 +15,46 @@
 package com.vmware.bdd.software.mgmt.plugin.exception;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ValidationException extends SoftwareManagementPluginException {
    private static final long serialVersionUID = 1L;
 
-   private List<String> failedMsgList = new ArrayList<String>();
-   private List<String> warningMsgList = new ArrayList<String>();
-
-   public ValidationException() {
-      super();
+   private List<String> failedMsgList;
+   private List<String> warningMsgList;
+   /**
+    * The error code will be translated to pre-defined error message according to a message bundle.
+    *
+    * @param errCode predefined error code
+    * @param cause   cause exception
+    * @param details additional details
+    */
+   public ValidationException(String errCode, Throwable cause, Object... details) {
+      super(errCode, cause, details);
    }
 
-   public ValidationException(String errCode, String message) {
-      super(errCode, message, null);
-   }
 
    public List<String> getFailedMsgList() {
-       return failedMsgList;
+      return failedMsgList;
    }
 
    public List<String> getWarningMsgList() {
-       return warningMsgList;
+      return warningMsgList;
    }
+
+   public final static ValidationException VALIDATION_FAIL(String item, List<String> failedMsgList, List<String> warningMsgList) {
+      //temporarily.. lixl
+      StringBuilder detailsBuilder = new StringBuilder();
+      detailsBuilder.append(failedMsgList != null ? Arrays.toString(failedMsgList.toArray()) : "");
+      detailsBuilder.append(";");
+      detailsBuilder.append(warningMsgList != null ? Arrays.toString(warningMsgList.toArray()) : "");
+
+      ValidationException exception = new ValidationException("APP_MANAGER.VALIDATION_FAIL", null, item, detailsBuilder.toString());
+      exception.failedMsgList = failedMsgList;
+      exception.warningMsgList = warningMsgList;
+
+      return exception;
+   }
+
 }

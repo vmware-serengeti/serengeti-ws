@@ -22,42 +22,50 @@ import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginExc
  * Time: 1:13 PM
  */
 public class ClouderaManagerException extends SoftwareManagementPluginException {
-   private String hostId;
-
-   public String getRefHostId() {
-      return hostId;
+   /**
+    * The error code will be translated to pre-defined error message according to a message bundle.
+    *
+    * @param errCode predefined error code
+    * @param cause   cause exception
+    * @param details additional details
+    */
+   public ClouderaManagerException(String errCode, Throwable cause, Object... details) {
+      super(errCode, cause, details);
    }
 
-   public ClouderaManagerException() {
+   public final static ClouderaManagerException GET_SUPPORT_CONFIGS_EXCEPTION(Exception cause) {
+      return new ClouderaManagerException("CLOUDERA_MANAGER.GET_SUPPORT_CONFIGS_EXCEPTION", cause);
    }
 
-   public ClouderaManagerException(String errCode, String message, Throwable cause) {
-      super(errCode, message, cause);
-   }
-
-   public static ClouderaManagerException UNSURE_CLUSTER_EXIST(String clusterName) {
-      return new ClouderaManagerException("UNSURE_CLUSTER_EXIST", "not sure exist", null);
-   }
-
-   public static SoftwareManagementPluginException INSTALL_AGENTS_FAIL(String message, Throwable cause) {
-      return new SoftwareManagementPluginException("INSTALL_AGENTS_FAIL", message, cause);
+   public static ClouderaManagerException INSTALL_AGENTS_FAIL(Throwable cause) {
+      return new ClouderaManagerException("CLOUDERA_MANAGER.INSTALL_AGENTS_FAIL", cause);
    }
 
    public static ClouderaManagerException DOWNLOAD_PARCEL_FAIL(String product, String version, String refMsg) {
-      return new ClouderaManagerException("DOWN_PARCEL_FAIL", "Failed to download parcel " + product + " " + version + ", " + refMsg, null);
+      return new ClouderaManagerException("CLOUDERA_MANAGER.DOWNLOAD_PARCEL_FAIL", null, product, version, refMsg);
    }
 
    public static ClouderaManagerException DISTRIBUTE_PARCEL_FAIL(String product, String version,  String refMsg) {
-      return new ClouderaManagerException("DISTRIBUTE_PARCEL_FAIL", "Failed to distribute parcel " + product + " " + version + ", " + refMsg, null);
+      return new ClouderaManagerException("CLOUDERA_MANAGER.DISTRIBUTE_PARCEL_FAIL", null, product, version, refMsg);
    }
 
    public static ClouderaManagerException ACTIVATE_PARCEL_FAIL(String product, String version,  String refMsg) {
-      return new ClouderaManagerException("ACTIVATE_PARCEL_FAIL", "Failed to activate parcel " + product + " " + version + ", " + refMsg, null);
+      return new ClouderaManagerException("CLOUDERA_MANAGER.ACTIVATE_PARCEL_FAIL", null, product, version, refMsg);
    }
 
-   public static ClouderaManagerException COMMAND_EXECUTION_FAILED(String hostId,  String refMsg) {
-      ClouderaManagerException e = new ClouderaManagerException("COMMAND_EXECUTION_FAILED", refMsg, null);
-      e.hostId = hostId;
-      return e;
+   public static ClouderaManagerException DEPROVISION_EXCEPTION(Exception cause, String clusterName) {
+      return new ClouderaManagerException("CLOUDERA_MANAGER.DEPROVISION_EXCEPTION", cause, clusterName);
+   }
+
+   public static ClouderaManagerException CHECK_CONFIGURED_EXCEPTION(Exception cause, String clusterName) {
+      return new ClouderaManagerException("CLOUDERA_MANAGER.CHECK_CONFIGURED_EXCEPTION", cause, clusterName);
+   }
+
+   public static ClouderaManagerException INIT_EXCEPTION(Exception cause, String clusterName) {
+      return new ClouderaManagerException("CLOUDERA_MANAGER.INIT_EXCEPTION", cause, clusterName);
+   }
+
+   public static ClouderaManagerException FAIL_FETCH_CM_SERVER_HOST_ID() {
+      return new ClouderaManagerException("CLOUDERA_MANAGER.FAIL_FETCH_CM_SERVER_HOST_ID", null);
    }
 }

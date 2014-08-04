@@ -15,34 +15,40 @@
 package com.vmware.bdd.software.mgmt.plugin.exception;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class InfrastructureException extends SoftwareManagementPluginException {
    private static final long serialVersionUID = 1L;
-   private List<String> failedMsgList = new ArrayList<String>();
 
-   public InfrastructureException() {
-      super();
+   private List<String> failedMsgList;
+
+   /**
+    * The error code will be translated to pre-defined error message according to a message bundle.
+    *
+    * @param errCode predefined error code
+    * @param cause   cause exception
+    * @param details additional details
+    */
+   public InfrastructureException(String errCode, Throwable cause, Object... details) {
+      super(errCode, cause, details);
    }
 
-   public InfrastructureException(String errCode, String message) {
-      super(errCode, message, null);
-   }
 
    public List<String> getFailedMsgList() {
       return failedMsgList;
    }
 
-   public void setFailedMsgList(List<String> failedMsgList) {
-      this.failedMsgList = failedMsgList;
-   }
-
-   public static InfrastructureException DISK_FORTMAT_FAILED(
+   public static InfrastructureException FORMAT_DISK_FAIL(
          String clusterName, List<String> failedMsgList) {
+      String details = failedMsgList != null || failedMsgList.size() > 0 ? Arrays.toString(failedMsgList.toArray()) : "";
+
       InfrastructureException e =
-            new InfrastructureException("DISK_FORTMAT_FAILED",
-                  "Failed to format disk for cluster " + clusterName);
-      e.setFailedMsgList(failedMsgList);
+            new InfrastructureException("APP_MANAGER.FORMAT_DISK_FAIL",
+                  null, clusterName, details);
+      e.failedMsgList = failedMsgList;
+
       return e;
 
    }

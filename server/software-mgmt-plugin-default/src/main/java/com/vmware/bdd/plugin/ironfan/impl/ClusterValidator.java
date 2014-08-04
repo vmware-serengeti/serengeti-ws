@@ -82,11 +82,7 @@ public class ClusterValidator {
       boolean result = validateRoleDependency(failedMsgList, blueprint);
       validateGroupConfig(blueprint, failedMsgList, warningMsgList);
       if (!failedMsgList.isEmpty() || !warningMsgList.isEmpty()) {
-         ValidationException e =
-               new ValidationException(null, null);
-         e.getFailedMsgList().addAll(failedMsgList);
-         e.getWarningMsgList().addAll(warningMsgList);
-         throw e;
+         throw ValidationException.VALIDATION_FAIL("Roles", failedMsgList, warningMsgList);
       }
       return result;
    }
