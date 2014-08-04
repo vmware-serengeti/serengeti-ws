@@ -423,7 +423,7 @@ public class AppManagerCommands implements CommandMarker {
 
          if ((url != null && url.toLowerCase().startsWith("https"))
                || (url == null && changeCertificate && appManagerAdd
-                     .getSslCertificate().toLowerCase().startsWith("https"))) {
+                     .getUrl().toLowerCase().startsWith("https"))) {
             // new URL starts with https or
             // changeCertificate for old URL starts with https (no new URL)
             String sslCertificate = getSslCertificate();
@@ -434,10 +434,8 @@ public class AppManagerCommands implements CommandMarker {
                return;
             }
             appManagerAdd.setSslCertificate(sslCertificate);
-         } else if (url == null
-               && changeCertificate
-               && !appManagerAdd.getSslCertificate().toLowerCase()
-                     .startsWith("https")) {
+         } else if (url == null && changeCertificate
+               && !appManagerAdd.getUrl().toLowerCase().startsWith("https")) {
             // changeCertificate for old URL does not start with https (no new URL)
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
                   name, Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL,
