@@ -497,7 +497,7 @@ public class ClusterValidator {
    // For HDFS2, apache, mapr, and gphd distros do not have hdfs2 features.
    private boolean supportedWithHdfs2(ClusterBlueprint blueprint) {
       String vendor = blueprint.getHadoopStack().getVendor();
-      if (vendor != null && (vendor.equalsIgnoreCase(Constants.DEFAULT_VENDOR)
+      if (vendor != null && (vendor.equalsIgnoreCase(Constants.APACHE_VENDOR)
             || vendor.equalsIgnoreCase(Constants.MAPR_VENDOR)
             || vendor.equalsIgnoreCase(Constants.GPHD_VENDOR))){
          return false;
