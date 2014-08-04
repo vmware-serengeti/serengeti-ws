@@ -240,6 +240,21 @@ public class CmClusterValidator {
                   }
 
                   break;
+               case "OOZIE":
+                  if (definedRoles.get("OOZIE_SERVER") > 1) {
+                     errorMsgList.add("only one OOZIE_SERVER is allowed for OOZIE service");
+                  }
+                  break;
+               case "SENTRY":
+                  if (definedRoles.get("SENTRY_SERVER") > 1) {
+                     errorMsgList.add("only one SENTRY_SERVER is allowed for SENTRY service");
+                  }
+                  break;
+               case "SQOOP":
+                  if (definedRoles.get("SQOOP_SERVER") > 1) {
+                     errorMsgList.add("only one SQOOP_SERVER is allowed for SQOOP service");
+                  }
+                  break;
                default:
                   break;
             }

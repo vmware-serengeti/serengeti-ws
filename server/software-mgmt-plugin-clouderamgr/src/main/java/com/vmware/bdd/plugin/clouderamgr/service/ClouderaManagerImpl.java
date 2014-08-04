@@ -31,6 +31,7 @@ import java.util.UUID;
 import javax.ws.rs.NotFoundException;
 import com.cloudera.api.model.ApiRoleState;
 import com.cloudera.api.model.ApiRoleConfigGroup;
+import com.cloudera.api.v7.RootResourceV7;
 import com.google.gson.GsonBuilder;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
@@ -100,9 +101,11 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    private static final Logger logger = Logger.getLogger(ClouderaManagerImpl.class);
 
+   private final String UNKNOWN_VERSION = "UNKNOWN";
    private final String usernameForHosts = "serengeti";
    private String privateKey;
    private RootResourceV6 apiResourceRootV6;
+   private RootResourceV7 apiResourceRootV7;
    private String cmServerHostId;
    private String domain;
    private String cmServerHost;
@@ -142,7 +145,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       this.cmPassword = password;
       ApiRootResource apiRootResource = new ClouderaManagerClientBuilder().withHost(cmServerHost)
             .withPort(port).withUsernamePassword(user, password).build();
-      this.apiResourceRootV6 = apiRootResource.getRootV6();
+      initApiResource(apiRootResource);
       this.privateKey = privateKey;
    }
 
@@ -156,8 +159,37 @@ public class ClouderaManagerImpl implements SoftwareManager {
       ApiRootResource apiRootResource =
             new ClouderaManagerClientBuilder().withBaseURL(url)
                   .withUsernamePassword(user, password).build();
-      this.apiResourceRootV6 = apiRootResource.getRootV6();
+      initApiResource(apiRootResource);
       this.privateKey = privateKey;
+   }
+
+   private void initApiResource(ApiRootResource apiRootResource) {
+      String apiVersion = apiRootResource.getCurrentVersion();
+      logger.info("api version: " + apiVersion);
+      int apiVersionNum = apiVersion.charAt(1) - '0';
+      assert(apiVersionNum >= 6);
+      this.apiResourceRootV6 = apiRootResource.getRootV6();
+      String cmVersion = getVersion();
+      if (cmVersion.equals(UNKNOWN_VERSION)) {
+         return;
+      }
+      logger.info("cm version: " + cmVersion);
+      DefaultArtifactVersion cmVersionInfo = new DefaultArtifactVersion(cmVersion);
+      assert(cmVersionInfo.getMajorVersion() >= 5);
+
+      if (apiVersionNum >= 7 && isCmSupported(7, cmVersionInfo)) {
+         this.apiResourceRootV7 = apiRootResource.getRootV7();
+      }
+   }
+
+   private boolean isCmSupported(int apiVersion, DefaultArtifactVersion cmVersionInfo) {
+      DefaultArtifactVersion sinceVersion = new DefaultArtifactVersion(Constants.API_VERSION_SINCE_OF_CM_VERSION.get(apiVersion));
+      if (cmVersionInfo.getMajorVersion() > sinceVersion.getMajorVersion()
+            || (cmVersionInfo.getMajorVersion() == sinceVersion.getMajorVersion()
+            && cmVersionInfo.getMinorVersion() >= sinceVersion.getMinorVersion())) {
+         return true;
+      }
+      return false;
    }
 
    @Override
@@ -757,7 +789,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
     */
    private HashMap<String, Set<String>> getFailedRoles(String clusterName, ApiRoleState roleState) {
       HashMap<String, Set<String>> failedRoles = null;
-      ApiServiceList serviceList = apiResourceRootV6.getClustersResource().getServicesResource(clusterName).readServices(DataView.FULL);
+      ApiServiceList serviceList = apiResourceRootV6.getClustersResource().getServicesResource(clusterName).readServices(
+            DataView.FULL);
       if (serviceList != null && serviceList.getServices() != null && !serviceList.getServices().isEmpty()) {
          for (ApiService service : serviceList.getServices()) {
             for (ApiRole role : apiResourceRootV6.getClustersResource().getServicesResource(clusterName)
@@ -1739,24 +1772,37 @@ public class ClouderaManagerImpl implements SoftwareManager {
                      // Zookeeper and HDFS services may be already started in startNnHA()
                      continue;
                   }
-                  if (isFirstStart) {
+
+                  if (!isFirstStart) {
+                     startService(cluster, serviceDef, INVALID_PROGRESS, reportQueue);
+                  } else if (apiResourceRootV7 != null) {
+                     // TODO: CM's BUG here: the getServicesResource() should accept a cluster name instead of clusterName
+                     executeAndReport("Starting " + serviceDef.getType().getDisplayName() + " Service",
+                           apiResourceRootV7.getClustersResource().getServicesResource(serviceDef.getName())
+                           .firstRun(serviceDef.getName()), INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
+                  } else {
+                     if (serviceDef.getType().getVersionApiMin() > 6) {
+                        // just log, do not throw exception
+                        logger.error(serviceDef.getType().getDisplayName() + " service cannot be deployed by API version 6, "
+                              + "please upgrade CloudeManager to version " + Constants.API_VERSION_SINCE_OF_CM_VERSION.get(6) + " or higher");
+                        continue;
+                     }
                      // pre start
                      preStartServices(cluster, serviceDef, reportQueue);
                      for (CmRoleDef roleDef : serviceDef.getRoles()) {
                         preStartRoles(cluster, serviceDef, roleDef, reportQueue);
                      }
-                  }
 
-                  // start
-                  startService(cluster, serviceDef, INVALID_PROGRESS, reportQueue);
+                     // start
+                     startService(cluster, serviceDef, INVALID_PROGRESS, reportQueue);
 
-                  if (isFirstStart) {
                      // post start
                      postStartServices(cluster, serviceDef, reportQueue);
                      for (CmRoleDef roleDef : serviceDef.getRoles()) {
                         postStartRoles(cluster, serviceDef, roleDef, reportQueue);
                      }
                   }
+
                   if (leftServices > 0) {
                      int currentProgress = cluster.getCurrentReport().getProgress();
                      int toProgress = currentProgress + (endProgress - currentProgress) / leftServices;
@@ -1793,46 +1839,43 @@ public class ClouderaManagerImpl implements SoftwareManager {
             execute(apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                   .hiveCreateMetastoreDatabaseCommand(serviceDef.getName()), false);
                   */
-            execute(apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                  .hiveCreateMetastoreDatabaseTablesCommand(serviceDef.getName()), false);
-            execute(apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                  .createHiveUserDirCommand(serviceDef.getName()));
-            execute(apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                  .createHiveWarehouseCommand(serviceDef.getName()));
+            executeAndReport("Creating Hive Metastore Database Tables", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                  .hiveCreateMetastoreDatabaseTablesCommand(serviceDef.getName()), INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
+            executeAndReport("Creating Hive User Dir", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                  .createHiveUserDirCommand(serviceDef.getName()), INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
+            executeAndReport("Createing Hive Warehourse", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                  .createHiveWarehouseCommand(serviceDef.getName()), INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
             break;
          case "OOZIE":
-            execute(
-                  apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                        .installOozieShareLib(serviceDef.getName()), false);
-            execute(
-                  apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                        .createOozieDb(serviceDef.getName()), false);
+            executeAndReport("Creating Oozie Database", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                        .createOozieDb(serviceDef.getName()), INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
+            executeAndReport("Installing Oozie ShareLib", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                        .installOozieShareLib(serviceDef.getName()), INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
             break;
          case "HBASE":
             executeAndReport("Creating HBase Root Dir", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                   .createHBaseRootCommand(serviceDef.getName()),
-                  INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false);
+                  INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
             break;
          case "ZOOKEEPER":
             executeAndReport("Initializing Zookeeper", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                         .zooKeeperInitCommand(serviceDef.getName()),
-                  INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false
-            );
+                  INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false);
             break;
          case "SOLR":
-            execute(
+            executeAndReport("Init Solr Service",
                   apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                        .initSolrCommand(serviceDef.getName()), false);
-            execute(apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                  .createSolrHdfsHomeDirCommand(serviceDef.getName()));
+                        .initSolrCommand(serviceDef.getName()), INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
+            executeAndReport("Creating Solr HDFS Home Dir", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                  .createSolrHdfsHomeDirCommand(serviceDef.getName()), INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
             break;
          case "SQOOP":
-            execute(apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                  .createSqoopUserDirCommand(serviceDef.getName()));
+            executeAndReport("Creating Sqoop User Dir", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                  .createSqoopUserDirCommand(serviceDef.getName()), INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
             break;
          case "IMPALA":
-            execute(apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                  .createImpalaUserDirCommand(serviceDef.getName()));
+            executeAndReport("Creating Impala User Dir", apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+                  .createImpalaUserDirCommand(serviceDef.getName()), INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
             break;
          default:
             break;
@@ -1864,7 +1907,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
             executeAndReport("Syncing up Hue Database", apiResourceRootV6.getClustersResource()
                   .getServicesResource(cluster.getName()).getRoleCommandsResource(serviceDef.getName())
                   .syncHueDbCommand(new ApiRoleNameList(ImmutableList.<String>builder().add(roleDef.getName()).build())),
-                  INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false);
+                  INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
             break;
          default:
             break;
@@ -1890,6 +1933,10 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    private void startService(CmClusterDef cluster, CmServiceDef serviceDef, int toProgress, final ClusterReportQueue reportQueue) throws Exception {
+      if (apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+            .readService(serviceDef.getName()).getServiceState().equals(ApiServiceState.STARTED)) {
+         return;
+      }
       executeAndReport("Starting Service " + serviceDef.getType().getDisplayName(), apiResourceRootV6.getClustersResource()
             .getServicesResource(cluster.getName()).startCommand(serviceDef.getName()),
             toProgress, cluster.getCurrentReport(), reportQueue, true);
@@ -2130,7 +2177,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       try {
          return apiResourceRootV6.getClouderaManagerResource().getVersion().getVersion();
       } catch (Exception e) {
-         return "UNKNOWN";
+         return UNKNOWN_VERSION;
       }
    }
 

@@ -16,8 +16,10 @@ package com.vmware.bdd.plugin.clouderamgr.service;
 
 import com.cloudera.api.ApiRootResource;
 import com.cloudera.api.v6.RootResourceV6;
+import com.cloudera.api.v7.RootResourceV7;
 import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
 import com.vmware.bdd.plugin.clouderamgr.service.cm.FakeRootResource;
+import com.vmware.bdd.plugin.clouderamgr.service.cm.FakeRootResourceV7;
 import com.vmware.bdd.plugin.clouderamgr.utils.SerialUtils;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
@@ -50,6 +52,7 @@ public class TestClouderaManagerImpl {
 
    private static ApiRootResource apiRootResource;
    private static RootResourceV6 rootResourceV6;
+   private static RootResourceV7 rootResourceV7;
    private static ClouderaManagerImpl provider;
    private static ClusterBlueprint blueprint;
    private static ClusterReportQueue reportQueue;
@@ -114,7 +117,10 @@ public class TestClouderaManagerImpl {
       Mockit.setUpMock(MockReflectionUtils.class);
       apiRootResource = Mockito.mock(ApiRootResource.class);
       rootResourceV6 = new FakeRootResource();
+      rootResourceV7 = new FakeRootResourceV7();
       Mockito.when(apiRootResource.getRootV6()).thenReturn(rootResourceV6);
+      Mockito.when(apiRootResource.getRootV7()).thenReturn(rootResourceV7);
+      Mockito.when(apiRootResource.getCurrentVersion()).thenReturn("v7");
 
       provider = new ClouderaManagerImpl("127.0.0.1", 7180, "admin", "admin", "RSA_CERT");
       blueprint = SerialUtils.getObjectByJsonString(ClusterBlueprint.class, CommonUtil.readJsonFile("simple_blueprint.json"));

@@ -169,6 +169,9 @@ public class CmClusterDef implements Serializable {
                      roleDef.addConfig(Constants.CONFIG_ZOOKEEPER_SERVER_ID, zkIdIndex.toString());
                      zkIdIndex += 1;
                      break;
+                  case "SQOOP_SERVER":
+                     roleDef.addConfig(Constants.CONFIG_SQOOP_METASTORE_DATA_DIR, node.getVolumes().get(0) + "/sqoop2/metastore");
+                     break;
                   default:
                      break;
                }

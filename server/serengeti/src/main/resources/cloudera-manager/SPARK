@@ -1,18 +1,18 @@
 {
-  "name": "SQOOP",
-  "displayName": "SQOOP",
+  "name": "SPARK",
+  "displayName": "SPARK",
   "parent": "CLUSTER",
   "repository": "CDH",
-  "versionApiMin": 4,
+  "versionApiMin": 6,
   "versionApiMax": -1,
   "versionCdhMin": 4,
   "versionCdhMax": -1,
   "availableConfigurations" : [
   {
-    "name" : "mapreduce_yarn_service",
-    "required" : true,
-    "displayName" : "MapReduce Service",
-    "description" : "MapReduce jobs are run against this service.",
+    "name" : "hdfs_service",
+    "required" : false,
+    "displayName" : "HDFS Service",
+    "description" : "Name of the HDFS service that this Spark service instance depends on",
     "relatedName" : ""
   }, {
     "name" : "service_triggers",
@@ -29,12 +29,25 @@
     "description" : "When set, Cloudera Manager will send alerts when this entity's configuration changes.",
     "relatedName" : ""
   }, {
-    "name" : "sqoop_sqoop_server_health_enabled",
+    "name" : "spark_jar_hdfs_path",
     "required" : false,
-    "default" : "true",
-    "displayName" : "Sqoop 2 Server Role Health Test",
-    "description" : "When computing the overall SQOOP health, consider Sqoop 2 Server's health",
-    "relatedName" : ""
+    "default" : "/user/spark/share/lib/spark-assembly.jar",
+    "displayName" : "Spark Jar Location (HDFS)",
+    "description" : "The location of the Spark jar in HDFS",
+    "relatedName" : "spark_jar_hdfs_path"
+  }, {
+    "name" : "identity_string",
+    "required" : false,
+    "displayName" : "Identity String",
+    "description" : "The identity string of the Spark instance",
+    "relatedName" : "identity.string"
+  }, {
+    "name" : "spark_history_log_dir",
+    "required" : false,
+    "default" : "/user/spark/applicationHistory",
+    "displayName" : "Spark History Location (HDFS)",
+    "description" : "The location of Spark application history logs in HDFS. Changing this value will not move existing logs to the new location.",
+    "relatedName" : "spark.eventLog.dir"
   }, {
     "name" : "enable_alerts",
     "required" : false,
@@ -43,28 +56,28 @@
     "description" : "When set, Cloudera Manager will send alerts when the health of this service reaches the threshold specified by the EventServer setting eventserver_health_events_alert_threshold",
     "relatedName" : ""
   }, {
-    "name" : "sqoop_env_safety_valve",
-    "required" : false,
-    "displayName" : "Sqoop 2 Service Environment Advanced Configuration Snippet (Safety Valve)",
-    "description" : "For advanced use only, key-value pairs (one on each line) to be inserted into a role's environment. Applies to configurations of all roles in this service except client configuration.",
-    "relatedName" : ""
-  }, {
     "name" : "smon_derived_configs_safety_valve",
     "required" : false,
     "displayName" : "Service Monitor Derived Configs Advanced Configuration Snippet (Safety Valve)",
     "description" : "For advanced use only, a list of derived configuration properties that will be used by the Service Monitor instead of the default ones.",
     "relatedName" : ""
   }, {
+    "name" : "SPARK_service_env_safety_valve",
+    "required" : false,
+    "displayName" : "Spark Service Environment Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, key-value pairs (one on each line) to be inserted into a role's environment. Applies to configurations of all roles in this service except client configuration.",
+    "relatedName" : ""
+  }, {
     "name" : "process_groupname",
     "required" : false,
-    "default" : "sqoop",
+    "default" : "spark",
     "displayName" : "System Group",
     "description" : "The group that this service's processes should run as.",
     "relatedName" : ""
   }, {
     "name" : "process_username",
     "required" : false,
-    "default" : "sqoop2",
+    "default" : "spark",
     "displayName" : "System User",
     "description" : "The user that this service's processes should run as.",
     "relatedName" : ""

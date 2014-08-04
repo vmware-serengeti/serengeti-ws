@@ -1,0 +1,71 @@
+{
+  "nodeGroups":[
+  {
+    "name": "zookeeper",
+    "roles": [
+      "ZOOKEEPER_SERVER"
+      ],
+    "instanceNum": 3,
+    "cpuNum": 2,
+    "memCapacityMB": 3500,
+    "storage": {
+      "type": "LOCAL",
+      "sizeGB": 50
+    }
+  },
+  {
+    "name": "master",
+    "roles": [
+      "HDFS_NAMENODE",
+      "HDFS_SECONDARY_NAMENODE"
+      ],
+    "instanceNum": 1,
+    "cpuNum": 8,
+    "memCapacityMB": 15000,
+    "storage": {
+      "type": "LOCAL",
+      "sizeGB": 50
+    }
+  },
+  {
+    "name": "sql",
+    "roles": [
+      "HIVE_SERVER2",
+      "HIVE_METASTORE",
+      "OOZIE_SERVER",
+      "HUE_SERVER"
+      ],
+    "instanceNum": 1,
+    "cpuNum": 8,
+    "memCapacityMB": 15000,
+    "storage": {
+      "type": "LOCAL",
+      "sizeGB": 50
+    }
+  },
+  {
+    "name": "worker",
+    "roles": [
+      "HDFS_DATANODE",
+      "YARN_NODE_MANAGER"
+      ],
+    "instanceNum": 3,
+    "cpuNum": 2,
+    "memCapacityMB": 15000,  
+    "storage": {
+      "type": "LOCAL",
+      "sizeGB": 20
+    }
+  }
+  ],
+  "configuration": {
+    "HIVE": {
+      "hive_metastore_database_host": "192.168.0.1",
+      "hive_metastore_database_name": "hivemetastore",
+      "hive_metastore_database_password": "password",
+      "hive_metastore_database_port": "5432",
+      "hive_metastore_database_type": "postgresql",
+      "hive_metastore_database_user": "hive"
+    }
+  }
+}

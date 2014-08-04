@@ -174,7 +174,9 @@ public class FakeClouderaManagerResource implements ClouderaManagerResourceV6 {
 
    @Override
    public ApiVersionInfo getVersion() {
-      return null;
+      ApiVersionInfo versionInfo = new ApiVersionInfo();
+      versionInfo.setVersion("5.0.1");
+      return versionInfo;
    }
 
    @Override

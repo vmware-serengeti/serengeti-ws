@@ -1,0 +1,51 @@
+{
+  "nodeGroups":[
+    {
+      "name": "master",
+      "roles": [
+        "HDFS_NAMENODE",
+        "HDFS_SECONDARY_NAMENODE",
+        "SENTRY_SERVER"
+      ],
+      "instanceNum": 1,
+      "cpuNum": 2,
+      "memCapacityMB": 7500,
+      "storage": {
+        "type": "SHARED",
+        "sizeGB": 50
+      },
+      "haFlag": "on",
+    },
+    {
+      "name": "worker",
+      "roles": [
+        "HDFS_DATANODE"
+      ],
+      "instanceNum": 3,
+      "cpuNum": 2,
+      "memCapacityMB": 7500,	
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 50
+      },
+      "haFlag": "off"
+    }
+  ],
+  "configuration": {
+    "HDFS": {
+      // service level configurations
+      // check for all settings by running "appmanager list --name <name> --configurations"
+      // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample: 
+      // "hdfs_namenode_health_enabled": "true"
+
+    },
+    "SENTRY": {
+      "sentry_server_database_host" : "192.168.1.1",
+      "sentry_server_database_name" : "sentry",
+      "sentry_server_database_user" : "sentry",
+      "sentry_server_database_password" : "password",
+      "sentry_server_database_port" : "5432",
+      "sentry_server_database_type" : "postgresql"
+    }
+  }
+}

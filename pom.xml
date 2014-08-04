@@ -498,7 +498,7 @@
       <spring.version>3.2.3.RELEASE</spring.version>
       <spring.security.version>3.1.4.RELEASE</spring.security.version>
       <hadoop.version>1.2.1</hadoop.version>
-      <cm.version>5.0.1</cm.version>
+      <cm.version>5.1.0</cm.version>
       <vmware.vlsi.version>1.0.8</vmware.vlsi.version>
       <bdd.skipTests>true</bdd.skipTests>
       <cxf.version>2.7.4</cxf.version>

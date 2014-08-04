@@ -14,6 +14,9 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.clouderamgr.utils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Author: Xiaoding Bian
  * Date: 7/3/14
@@ -39,8 +42,20 @@ public interface Constants {
    public static final String CONFIG_DFS_FEDERATION_NAMESERVICE = "dfs_federation_namenode_nameservice";
    public static final String CONFIG_DFS_NAMENODE_QUORUM_JOURNAL_NAME = "dfs_namenode_quorum_journal_name";
    public static final String CONFIG_DFS_NAMESERVICE_MOUNTPOINTS = "nameservice_mountpoints";
-
+   public static final String CONFIG_SQOOP_METASTORE_DATA_DIR = "sqoop_metastore_data_dir";
    public static final String CONFIG_ZOOKEEPER_SERVER_ID = "serverId";
 
    public static final String ROLE_CONFIG_GROUP_UPDATE_NOTES = "Update Base Role Config Group By VMware Big Data Extention";
+
+   public static final Map<Integer, String> API_VERSION_SINCE_OF_CM_VERSION = new HashMap<Integer, String>(){
+      {
+         put(7, "5.1");
+         put(6, "5.0");
+         put(5, "4.7");
+         put(4, "4.6");
+         put(3, "4.5");
+         put(2, "4.1");
+         put(1, "4.0");
+      }
+   };
 }

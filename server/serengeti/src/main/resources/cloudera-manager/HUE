@@ -19,19 +19,12 @@
     "required" : true,
     "displayName" : "HDFS Web Interface Role",
     "description" : "HTTPFS role or Namenode (if webhdfs is enabled) that hue can use to communicate with HDFS.",
-    "relatedName" : "webhdfs_url",
-    "validationMessage" : "Web interface has been properly configured."
+    "relatedName" : "webhdfs_url"
   }, {
     "name" : "oozie_service",
     "required" : true,
     "displayName" : "Oozie Service",
     "description" : "Name of the Oozie service that this Hue service instance depends on",
-    "relatedName" : ""
-  }, {
-    "name" : "sqoop_service",
-    "required" : false,
-    "displayName" : "Sqoop Service",
-    "description" : "Name of the Sqoop service that this Hue service instance depends on",
     "relatedName" : ""
   }, {
     "name" : "zookeeper_service",
@@ -75,6 +68,12 @@
     "required" : false,
     "displayName" : "Service Monitor Derived Configs Advanced Configuration Snippet (Safety Valve)",
     "description" : "For advanced use only, a list of derived configuration properties that will be used by the Service Monitor instead of the default ones.",
+    "relatedName" : ""
+  }, {
+    "name" : "sqoop_service",
+    "required" : false,
+    "displayName" : "Sqoop Service",
+    "description" : "Name of the Sqoop service that this Hue service instance depends on",
     "relatedName" : ""
   }, {
     "name" : "hue_kt_renewer_health_enabled",
@@ -134,7 +133,7 @@
     "required" : false,
     "default" : "[]",
     "displayName" : "Service Triggers",
-    "description" : "<p>The configured triggers for this service. This is a JSON formatted list of triggers. These triggers are evaluated as part as the health system. Every trigger expression is parsed, and if the trigger condition is met, the list of actions provided in the trigger expression is executed.</p><p>Each trigger has all of the following fields:</p><ul><li><span class='code'>triggerName</span> <strong>(mandatory)</strong> - the name of the trigger. This value must be unique for the specific service. </li><li><span class='code'>triggerExpression</span> <strong>(mandatory)</strong> - a tsquery expression representing the trigger. <li><span class='code'>streamThreshold</span> <strong>(optional)</strong> - the maximum number of streams that can satisfy a condition of a trigger before the condition fires. By default set to 0, and any stream returned will cause the condition to fire. <li><span class='code'>enabled</span> <strong> (optional)</strong> - by default set to 'true'. If set to 'false' the trigger will not be evaluated.</p><p>For example, here is a JSON formatted trigger that fires if there are more than 10 DataNodes with more than 500 file-descriptors opened:</p><p><pre>[{\"triggerName\": \"sample-trigger\",\n  \"triggerExpression\": \"IF (SELECT fd_open WHERE roleType = DataNode and last(fd_open) > 500) DO health:red\",\n  \"streamThreshold\": 10, \"enabled\": \"true\"}]</pre></p><p>Consult the trigger rules documentation for more details on how to write triggers using tsquery.</p><p>The JSON format is evolving and may change in the future and as a result backward compatibility is not guaranteed between releases at this time.</p>",
+    "description" : "<p>The configured triggers for this service. This is a JSON formatted list of triggers. These triggers are evaluated as part as the health system. Every trigger expression is parsed, and if the trigger condition is met, the list of actions provided in the trigger expression is executed.</p><p>Each trigger has all of the following fields:</p><ul><li><code>triggerName</code> <strong>(mandatory)</strong> - the name of the trigger. This value must be unique for the specific service. </li><li><code>triggerExpression</code> <strong>(mandatory)</strong> - a tsquery expression representing the trigger. </li><li><code>streamThreshold</code> <strong>(optional)</strong> - the maximum number of streams that can satisfy a condition of a trigger before the condition fires. By default set to 0, and any stream returned will cause the condition to fire. </li><li><code>enabled</code> <strong> (optional)</strong> - by default set to 'true'. If set to 'false' the trigger will not be evaluated.</li></ul></p><p>For example, here is a JSON formatted trigger that fires if there are more than 10 DataNodes with more than 500 file-descriptors opened:</p><p><pre>[{\"triggerName\": \"sample-trigger\",\n  \"triggerExpression\": \"IF (SELECT fd_open WHERE roleType = DataNode and last(fd_open) > 500) DO health:bad\",\n  \"streamThreshold\": 10, \"enabled\": \"true\"}]</pre></p><p>Consult the trigger rules documentation for more details on how to write triggers using tsquery.</p><p>The JSON format is evolving and may change in the future and as a result backward compatibility is not guaranteed between releases at this time.</p>",
     "relatedName" : ""
   }, {
     "name" : "database_name",

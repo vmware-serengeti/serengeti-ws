@@ -1,0 +1,67 @@
+{
+  "nodeGroups":[
+    {
+      "name": "master",
+      "roles": [
+        "HDFS_NAMENODE",
+        "HDFS_SECONDARY_NAMENODE",
+        "SPARK_MASTER",
+        "SPARK_HISTORY_SERVER"
+      ],
+      "instanceNum": 1,
+      "cpuNum": 2,
+      "memCapacityMB": 7500,
+      "storage": {
+        "type": "SHARED",
+        "sizeGB": 50
+      },
+      "haFlag": "on",
+      "configuration": {
+        "HDFS_NAMENODE": {
+        }
+      }
+    },
+    {
+      "name": "worker",
+      "roles": [
+        "HDFS_DATANODE",
+        "SPARK_WORKER"
+      ],
+      "instanceNum": 3,
+      "cpuNum": 2,
+      "memCapacityMB": 7500,	
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 50
+      },
+      "haFlag": "off",
+      "configuration": {
+        "HDFS_DATANODE": {
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "HDFS": {
+      // service level configurations
+      // check for all settings by running "appmanager list --name <name> --configurations"
+      // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample: 
+      // "hdfs_namenode_health_enabled": "true"
+
+    },
+    "YARN": {
+      // service level configurations
+    },
+    "HDFS_NAMENODE": {
+      // role level configurations
+    },
+    "HDFS_DATANODE": {
+    },
+    "HDFS_SECONDARY_NAMENODE": {
+    },
+    "YARN_RESOURCE_MANAGER": {
+    },
+    "YARN_NODE_MANAGER": {
+    }
+  }
+}
