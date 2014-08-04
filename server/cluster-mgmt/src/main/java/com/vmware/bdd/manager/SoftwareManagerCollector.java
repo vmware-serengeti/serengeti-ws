@@ -32,7 +32,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.plexus.util.Base64;
@@ -76,6 +79,7 @@ public class SoftwareManagerCollector implements InitializingBean {
    private static String configurationPrefix = "appmanager.factoryclass.";
    private static String appmanagerTypesKey = "appmanager.types";
 
+   private static String appmgrConnTimeOutKey = "appmanager.connect.timeout.seconds";
    /**
     * Software manager name will be unique inside of BDE. Otherwise, creation
     * will fail. The appmanager information should be persisted in meta-db
@@ -176,11 +180,32 @@ public class SoftwareManagerCollector implements InitializingBean {
     * @param name
     * @param softwareManager
     */
-   private void validateSoftwareManager(String name, SoftwareManager softwareManager) {
+   private void validateSoftwareManager(String name, final SoftwareManager softwareManager) {
       logger.info("Check echo() of software manager.");
       // validate instance is reachable
       try {
-         if (!softwareManager.echo()) {
+         // if the target ip does not exist or the host is shutdown, it will take about 2 minutes
+         // for the socket connection to time out.
+         // here we fork a child thread to do the actual connecting action, if it does not succeed
+         // within given waiting time(default is 30s), we will consider it to be failure.
+         ExecutorService exec = Executors.newFixedThreadPool(1);
+         Future<Boolean> futureResult = exec.submit(new Callable<Boolean>(){
+            @Override
+            public Boolean call() throws Exception {
+               // TODO Auto-generated method stub
+               return softwareManager.echo();
+            }
+         });
+
+         boolean gotEcho = false;
+         Boolean result = (Boolean)waitForThreadResult(futureResult);
+         if ( null != result )
+         {
+            gotEcho = result;
+         }
+         exec.shutdown();
+
+         if ( !gotEcho ) {
             logger.error("Cannot connect to Software Manager "
                   + name + ", check the connection information.");
             throw SoftwareManagerCollectorException.ECHO_FAILURE(name);
@@ -291,6 +316,23 @@ public class SoftwareManagerCollector implements InitializingBean {
          setAppManagerReadDynamicProperties(appManagerRead);
       }
       return appManagerRead;
+   }
+
+   private Object waitForThreadResult(Future<?> result) {
+      // the default value for the wait time is 30 seconds
+      int defaultTime = Constants.APPMGR_CONNECT_TIMEOUT_SECONDS;
+      int waitTime = Configuration.getInt(appmgrConnTimeOutKey, defaultTime);
+      for ( int i=0; i<waitTime; i++ ) {
+         try {
+            if ( result.isDone() ) {
+               return result.get();
+            }
+            Thread.sleep(1000);
+         } catch (Exception e) {
+            logger.error("Unexpected error occurred with threading.");
+         }
+      }
+      return null;
    }
 
    /**

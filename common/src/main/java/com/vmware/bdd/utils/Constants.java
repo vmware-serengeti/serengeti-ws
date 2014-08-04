@@ -215,4 +215,5 @@ public class Constants {
    public static final String APPMANAGER_KEYSTORE_PATH = "/opt/serengeti/.certs/";
    public static final String APPMANAGER_KEYSTORE_FILE = "appmanagers.jks";
    public static final char[] APPMANAGER_KEYSTORE_PASSWORD = "changeit".toCharArray();
+   public static final int APPMGR_CONNECT_TIMEOUT_SECONDS = 30;
 }
