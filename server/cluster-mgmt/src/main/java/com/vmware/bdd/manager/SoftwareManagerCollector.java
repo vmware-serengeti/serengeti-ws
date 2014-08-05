@@ -302,9 +302,6 @@ public class SoftwareManagerCollector implements InitializingBean {
       logger.debug("get all app managers");
       List<AppManagerRead> appManagerReads =
             appManagerService.getAllAppManagerReads();
-      for (AppManagerRead appManagerRead : appManagerReads) {
-         setAppManagerReadDynamicProperties(appManagerRead);
-      }
       logger.debug("got all app managers");
       return appManagerReads;
    }
@@ -341,9 +338,30 @@ public class SoftwareManagerCollector implements InitializingBean {
    private void setAppManagerReadDynamicProperties(AppManagerRead appManagerRead) {
       appManagerRead.setManagedClusters(clusterEntityManager
             .findByAppManager(appManagerRead.getName()));
-      SoftwareManager softwareManager = this.getSoftwareManager(appManagerRead.getName());
+
+      String softMgrVersion = "UNKNOWN";
+
+      final SoftwareManager softwareManager = this.getSoftwareManager(appManagerRead.getName());
       if (softwareManager != null) {
-         appManagerRead.setVersion(softwareManager.getVersion());
+         // fork a child thread to do the actual connecting action
+         // this is to avoid the time out issue for the socket connection when the target host is shutdown
+         ExecutorService exec = Executors.newFixedThreadPool(1);
+         Future<String> futureResult = exec.submit(new Callable<String>(){
+            @Override
+            public String call() throws Exception {
+               // TODO Auto-generated method stub
+               return softwareManager.getVersion();
+            }
+         });
+
+         String result = (String)waitForThreadResult(futureResult);
+         if ( null != result )
+         {
+            softMgrVersion = result;
+         }
+         exec.shutdown();
+
+         appManagerRead.setVersion(softMgrVersion);
       }
    }
 

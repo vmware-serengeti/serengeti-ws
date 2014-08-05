@@ -1230,7 +1230,14 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public String getVersion() {
-      return apiManager.getVersion();
+      try {
+         return apiManager.getVersion();
+      } catch (Exception e) {
+         // we print the log here for user to check the cause.
+         String errMsg = "Cannot connect to the Software Manager, check the connection information.";
+         logger.error(errMsg, e);
+         return "UNKNOWN";
+      }
    }
 
    @Override

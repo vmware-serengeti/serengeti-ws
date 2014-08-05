@@ -2177,6 +2177,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
       try {
          return apiResourceRootV6.getClouderaManagerResource().getVersion().getVersion();
       } catch (Exception e) {
+         // we print the log here for user to check the cause.
+         String errMsg = "Cannot connect to the Software Manager, check the connection information.";
+         logger.error(errMsg, e);
          return UNKNOWN_VERSION;
       }
    }
