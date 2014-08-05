@@ -310,6 +310,23 @@ public class TestIpBlockEntity {
       setDiff = IpBlockEntity.subtract(setDiff, setB3);
 
       assertTrue(setDiff.isEmpty());
+
+      List<IpBlockEntity> setC = new ArrayList<IpBlockEntity>();
+      setC.add(new IpBlockEntity(network, 1L, BlockType.ASSIGNED, 3337306476L, 3337306480L));
+      List<IpBlockEntity> setD = new ArrayList<IpBlockEntity>();
+      setD.add(new IpBlockEntity(network, 1L, BlockType.ASSIGNED, 3337306476L, 3337306480L));
+      setD.add(new IpBlockEntity(network, 1L, BlockType.ASSIGNED, 3337306476L, 3337306476L));
+      setDiff = setC;
+      setD = ipBlockDao.merge(setD, true, true, true);
+      setDiff = IpBlockEntity.subtract(setDiff, setD);
+
+      assertTrue(setDiff.isEmpty());
+
+      setDiff = setC;
+      setD = ipBlockDao.merge(setD, true, true, true);
+      setDiff = IpBlockEntity.subtract(setD, setDiff);
+
+      assertTrue(setDiff.isEmpty());
    }
 
    /**

@@ -294,6 +294,9 @@ public class NetworkDAO extends BaseDAO<NetworkEntity> implements INetworkDAO {
       List<IpBlockEntity> currentFree = IpBlockEntity.filter(entity.getIpBlocks(),
             EqualBlockTypePredicate.IS_FREE);
 
+      //pre-processing the blocks of assigned to me to avoid subtract contained IP blocks
+      assignedToMe = iIpBlockDao.merge(assignedToMe, true, true, true);
+
       if (ConfigInfo.isDebugEnabled()) {
          AuAssert.check(
                IpBlockEntity.filter(ipBlocks, IsTransientPredicate.NEGATE_INSTANCE)
