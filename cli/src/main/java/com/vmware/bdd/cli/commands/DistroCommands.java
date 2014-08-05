@@ -42,10 +42,10 @@ public class DistroCommands implements CommandMarker {
       return true;
    }
 
-   @CliCommand(value = "distro list", help = "Get distro information")
+   @CliCommand(value = "distro list", help = "Get distribution information")
    public void getDistro(
-         @CliOption(key = { "name" }, mandatory = false, help = "The distro name") final String name,
-         @CliOption(key = { "appManager" }, mandatory = false, help = "The appmanager name") final String appManager,
+         @CliOption(key = { "name" }, mandatory = false, help = "The distribution name") final String name,
+         @CliOption(key = { "appManager" }, mandatory = false, help = "The application manager name") final String appManager,
          @CliOption(key = { "detail" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to show detail information") final boolean detail) {
 
       String appmanager;

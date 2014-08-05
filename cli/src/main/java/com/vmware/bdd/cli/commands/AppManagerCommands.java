@@ -69,7 +69,7 @@ public class AppManagerCommands implements CommandMarker {
       }
    }*/
 
-   @CliCommand(value = "appmanager add", help = "Add an app manager instance")
+   @CliCommand(value = "appmanager add", help = "Add an application manager instance")
    public void addAppManager(
          @CliOption(key = { "name" }, mandatory = true, help = "The instance name") final String name,
          @CliOption(key = { "description" }, mandatory = false, help = "The instance description") final String description,
@@ -96,7 +96,7 @@ public class AppManagerCommands implements CommandMarker {
          } else {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
                   name, Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
-                  "failed to read ssl certificate file.");
+                  "Failed to read ssl certificate file.");
             return;
          }
       }
@@ -183,11 +183,11 @@ public class AppManagerCommands implements CommandMarker {
     * @param name
     *           The appmanager name
     */
-   @CliCommand(value = "appmanager list", help = "Display app manager list.")
+   @CliCommand(value = "appmanager list", help = "Display list of application managers.")
    public void listAppManager(
-         @CliOption(key = { "name" }, mandatory = false, help = "The appmanager name") final String name,
-         @CliOption(key = { "distros" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "List the supported distros") final boolean distros,
-         @CliOption(key = { "distro" }, mandatory = false, help = "The distro name") final String distro,
+         @CliOption(key = { "name" }, mandatory = false, help = "The application manager name") final String name,
+         @CliOption(key = { "distros" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "List the supported distributions") final boolean distros,
+         @CliOption(key = { "distro" }, mandatory = false, help = "The distribution name") final String distro,
          @CliOption(key = { "roles" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "List the roles") final boolean roles,
          @CliOption(key = { "configurations" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "List the configurations") final boolean configurations) {
       // parameters validation
@@ -205,7 +205,7 @@ public class AppManagerCommands implements CommandMarker {
          CommandsUtils
                .printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER, name,
                      Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
-                     "--distro <distro name> must be used with --name <app manager name>.");
+                     "--distro <distro name> must be used with --name <application manager name>.");
          return;
       }
 
@@ -220,7 +220,7 @@ public class AppManagerCommands implements CommandMarker {
                      name,
                      Constants.OUTPUT_OP_LIST,
                      Constants.OUTPUT_OP_RESULT_FAIL,
-                     "--roles or --configurations must be used with --name <app manager name> and --distro <distro name>.");
+                     "--roles or --configurations must be used with --name <application manager name> and --distro <distro name>.");
          return;
       }
 
@@ -228,7 +228,7 @@ public class AppManagerCommands implements CommandMarker {
          // appmanager list --roles --configurations
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
                name, Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
-               "Cannot use --roles and --configurations at the same time.");
+               "Cannot use --roles and --configurations in the same command.");
          return;
       }
 
@@ -378,7 +378,7 @@ public class AppManagerCommands implements CommandMarker {
          prettyOutputAppManagerInfo(new AppManagerRead[] { appmanager });
    }
 
-   @CliCommand(value = "appmanager modify", help = "Modify an app manager instance")
+   @CliCommand(value = "appmanager modify", help = "Modify an application manager instance")
    public void modifyAppManager(
          @CliOption(key = { "name" }, mandatory = true, help = "The instance name") final String name,
          //@CliOption(key = { "description" }, mandatory = false, help = "The instance description") final String description,
@@ -460,9 +460,9 @@ public class AppManagerCommands implements CommandMarker {
 
    }
 
-   @CliCommand(value = "appmanager delete", help = "Delete an app manager instance")
+   @CliCommand(value = "appmanager delete", help = "Delete an application manager instance")
    public void deleteAppManager(
-         @CliOption(key = { "name" }, mandatory = true, help = "The app manager name") final String name) {
+         @CliOption(key = { "name" }, mandatory = true, help = "The application manager name") final String name) {
       try {
          restClient.delete(name);
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_APPMANAGER, name,
