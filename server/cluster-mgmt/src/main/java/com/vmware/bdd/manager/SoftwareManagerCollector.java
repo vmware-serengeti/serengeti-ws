@@ -29,14 +29,13 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
+
 import org.apache.log4j.Logger;
 import org.codehaus.plexus.util.Base64;
 import org.springframework.beans.factory.InitializingBean;
@@ -56,6 +55,7 @@ import com.vmware.bdd.service.resmgmt.IAppManagerService;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManagerFactory;
+import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
@@ -71,8 +71,8 @@ public class SoftwareManagerCollector implements InitializingBean {
    @Autowired
    private IClusterEntityManager clusterEntityManager;
 
-   private Map<String, SoftwareManager> cache =
-         new HashMap<String, SoftwareManager>();
+   private ConcurrentHashMap<String, SoftwareManager> cache =
+         new ConcurrentHashMap<String, SoftwareManager>();
 
    private String privateKey = null;
 
@@ -80,21 +80,16 @@ public class SoftwareManagerCollector implements InitializingBean {
    private static String appmanagerTypesKey = "appmanager.types";
 
    private static String appmgrConnTimeOutKey = "appmanager.connect.timeout.seconds";
+
    /**
     * Software manager name will be unique inside of BDE. Otherwise, creation
     * will fail. The appmanager information should be persisted in meta-db
     *
     * @param appManagerAdd
     */
-   public synchronized void createSoftwareManager(AppManagerAdd appManagerAdd) {
+   public void createSoftwareManager(AppManagerAdd appManagerAdd) {
 
-      logger.info("Start to create software manager for " + appManagerAdd.getName());
-
-      if (appManagerService.findAppManagerByName(appManagerAdd.getName()) != null) {
-         logger.error("Name " + appManagerAdd.getName() + " already exists.");
-         throw SoftwareManagerCollectorException.DUPLICATE_NAME(appManagerAdd
-               .getName());
-      }
+      logger.info("First we need check if the appmgr is valid for use.");
 
       String sslCertificate = appManagerAdd.getSslCertificate();
       if (!CommonUtil.isBlank(sslCertificate)) {
@@ -105,9 +100,33 @@ public class SoftwareManagerCollector implements InitializingBean {
 
       validateSoftwareManager(appManagerAdd.getName(), softwareManager);
 
+      logger.info("The appmgr can be reached and will be created.");
+      
+      // add to meta-db through AppManagerService
+      createSoftwareManagerInternal(appManagerAdd, softwareManager);
+   }
+
+   /**
+    * Software manager name will be unique inside of BDE. Otherwise, creation
+    * will fail. The appmanager information should be persisted in meta-db
+    *
+    * @param appManagerAdd, softwareManager
+    */
+   private synchronized void createSoftwareManagerInternal(AppManagerAdd appManagerAdd, 
+		   SoftwareManager softwareManager) {
+
+      logger.info("Start to create software manager for " + appManagerAdd.getName());
+
+      if (appManagerService.findAppManagerByName(appManagerAdd.getName()) != null) {
+         logger.error("Name " + appManagerAdd.getName() + " already exists.");
+         throw SoftwareManagerCollectorException.DUPLICATE_NAME(appManagerAdd
+               .getName());
+      }
+
       cache.put(appManagerAdd.getName(), softwareManager);
 
       logger.info("Add app manager to meta-db.");
+      
       // add to meta-db through AppManagerService
       appManagerService.addAppManager(appManagerAdd);
    }
@@ -224,7 +243,7 @@ public class SoftwareManagerCollector implements InitializingBean {
     * @param name
     * @return null if the name does not exist
     */
-   public synchronized SoftwareManager getSoftwareManager(String name) {
+   public SoftwareManager getSoftwareManager(String name) {
       if (CommonUtil.isBlank(name)) {
          return cache.get(Constants.IRONFAN);
       }
@@ -383,7 +402,7 @@ public class SoftwareManagerCollector implements InitializingBean {
       this.loadSoftwareManagers();
    }
 
-   public void deleteSoftwareManager(String appManagerName) {
+   public synchronized void deleteSoftwareManager(String appManagerName) {
       logger.debug("delete app manager " + appManagerName);
       if (Constants.IRONFAN.equals(appManagerName)) {
          logger.error("Cannot delete default software manager.");
@@ -395,7 +414,7 @@ public class SoftwareManagerCollector implements InitializingBean {
       logger.debug("app manager " + appManagerName + " removed from cache");
    }
 
-   public void modifySoftwareManager(AppManagerAdd appManagerAdd) {
+   public synchronized void modifySoftwareManager(AppManagerAdd appManagerAdd) {
       logger.debug("modify app manager " + appManagerAdd);
       String name = appManagerAdd.getName();
       if (Constants.IRONFAN.equals(name)) {
