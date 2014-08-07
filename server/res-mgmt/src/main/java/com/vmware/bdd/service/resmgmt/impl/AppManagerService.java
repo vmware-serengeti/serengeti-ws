@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.dal.IAppManagerDAO;
@@ -68,10 +67,10 @@ public class AppManagerService implements IAppManagerService{
    @Override
    @Transactional
    public synchronized void addAppManager(AppManagerAdd appManagerAdd) {
-      logger.info((new Gson()).toJson(appManagerAdd));
-      // TODO: validation
+      logger.debug("add app manager " + appManagerAdd);
       AppManagerEntity appManagerEntity = new AppManagerEntity(appManagerAdd);
       appManagerDAO.insert(appManagerEntity);
+      logger.debug("successfully added app manager " + appManagerAdd);
    }
 
    @Override
@@ -166,6 +165,7 @@ public class AppManagerService implements IAppManagerService{
     * @see com.vmware.bdd.service.resmgmt.IAppManagerService#modifyAppManager(com.vmware.bdd.apitypes.AppManagerAdd)
     */
    @Override
+   @Transactional
    public void modifyAppManager(AppManagerAdd appManagerAdd) {
       logger.debug("modify app manager " + appManagerAdd);
       String name = appManagerAdd.getName();
