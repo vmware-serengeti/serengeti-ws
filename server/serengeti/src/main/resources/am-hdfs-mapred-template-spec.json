@@ -1,0 +1,36 @@
+{
+  "groups":[
+    {
+      "name":"master",
+      "roles":[
+        "NAMENODE",
+        "SECONDARY_NAMENODE",
+        "JOBTRACKER",
+        "HISTORYSERVER"
+      ],
+      "instance_type":MEDIUM,
+      "instance_num":1,
+      "ha":"on"
+    },
+    {
+      "name":"worker",
+      "roles":[
+        "DATANODE",
+        "TASKTRACKER"
+      ],
+      "instance_type":SMALL,
+      "instance_num":3,
+      "ha":"off"
+    },
+    {
+      "name":"client",
+      "roles":[
+        "HDFS_CLIENT",
+        "MAPREDUCE_CLIENT"
+      ],
+      "instance_type":SMALL,
+      "instance_num":1,
+      "ha":"off"
+    }
+  ]
+}

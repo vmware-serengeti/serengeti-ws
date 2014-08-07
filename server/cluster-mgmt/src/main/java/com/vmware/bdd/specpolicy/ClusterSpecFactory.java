@@ -21,11 +21,11 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 
-import com.vmware.bdd.manager.SoftwareManagerCollector;
 import org.apache.commons.configuration.ConfigurationUtils;
 import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.exception.BddException;
@@ -38,6 +38,9 @@ public class ClusterSpecFactory {
       V1, V2
    }
 
+   private enum HDFS_VERSION {
+      V1, V2
+   }
    private static final Logger logger = Logger
          .getLogger(ClusterSpecFactory.class);
 
@@ -62,6 +65,20 @@ public class ClusterSpecFactory {
          "cm-hdfs-mapred-template-spec.json";
    private static final String CM_HDFS_YARN_TEMPLATE_SPEC =
          "cm-hdfs-yarn-template-spec.json";
+   private static final String AM_HDFS_V1_TEMPLATE_SPEC =
+         "am-hdfs-v1-template-spec.json";
+   private static final String AM_HDFS_V2_TEMPLATE_SPEC =
+         "am-hdfs-v2-template-spec.json";
+   private static final String AM_HDFS_MAPRED_TEMPLATE_SPEC =
+         "am-hdfs-mapred-template-spec.json";
+   private static final String AM_HDFS_YARN_TEMPLATE_SPEC =
+         "am-hdfs-yarn-template-spec.json";
+   private static final String AM_HDFS_V1_HBASE_TEMPLATE_SPEC =
+         "am-hdfs-v1-hbase-template-spec.json";
+   private static final String AM_HDFS_V2_HBASE_TEMPLATE_SPEC =
+         "am-hdfs-v2-hbase-template-spec.json";
+   private static final String AM_HDFS_PURE_HBASE_TEMPLATE_SPEC =
+         "am-hdfs-pure-hbase-template-spec.json";
 
    private static File locateSpecFile(String filename) {
       // try to locate file directly
@@ -150,10 +167,47 @@ public class ClusterSpecFactory {
          default:
             throw BddException.INVALID_PARAMETER("cluster type", type);
          }
+      } else if (vendor.trim().equalsIgnoreCase(Constants.HDP_VENDOR)) {
+         MAPREDUCE_VERSION mr =
+               getDefaultMapReduceVersion(vendor, distroVersion);
+         if (Constants.AMBARI_PLUGIN_TYPE.equals(appManagerType) && type == null) {
+            if (mr == MAPREDUCE_VERSION.V1) {
+               return loadFromFile(locateSpecFile(AM_HDFS_MAPRED_TEMPLATE_SPEC));
+            } else {
+               return loadFromFile(locateSpecFile(AM_HDFS_YARN_TEMPLATE_SPEC));
+            }
+         }
+         HDFS_VERSION hdfs = getDefaultHdfsVersion(vendor, distroVersion);
+         switch (type) {
+         case HDFS:
+            if (hdfs == HDFS_VERSION.V1) {
+               return loadFromFile(locateSpecFile(AM_HDFS_V1_TEMPLATE_SPEC));
+            } else {
+               return loadFromFile(locateSpecFile(AM_HDFS_V2_TEMPLATE_SPEC));
+            }
+         case HDFS_MAPRED:
+            if (mr == MAPREDUCE_VERSION.V1) {
+               return loadFromFile(locateSpecFile(AM_HDFS_MAPRED_TEMPLATE_SPEC));
+            } else {
+               return loadFromFile(locateSpecFile(AM_HDFS_YARN_TEMPLATE_SPEC));
+            }
+         case HDFS_HBASE:
+            if (Configuration.getBoolean(Constants.AMBARI_HBASE_DEPEND_ON_MAPREDUCE)) {
+               if (hdfs == HDFS_VERSION.V1) {
+                  return loadFromFile(locateSpecFile(AM_HDFS_V1_HBASE_TEMPLATE_SPEC));
+               } else {
+                  return loadFromFile(locateSpecFile(AM_HDFS_V2_HBASE_TEMPLATE_SPEC));
+               }
+            } else {
+               return loadFromFile(locateSpecFile(AM_HDFS_PURE_HBASE_TEMPLATE_SPEC));
+            }
+         default:
+            throw BddException.INVALID_PARAMETER("cluster type", type);
+         }
       } else {
          MAPREDUCE_VERSION mr =
                getDefaultMapReduceVersion(vendor, distroVersion);
-         if (Constants.CLOUDERA_MANAGER_PLUGIN_TYPE.equals(appManagerType)) {
+         if (Constants.CLOUDERA_MANAGER_PLUGIN_TYPE.equals(appManagerType) && type == null) {
             if (mr == MAPREDUCE_VERSION.V1) {
                return loadFromFile(locateSpecFile(CM_HDFS_MAPRED_TEMPLATE_SPEC));
             } else {
@@ -229,6 +283,21 @@ public class ClusterSpecFactory {
 
       logger.error("Unknown distro vendor, return default mapreduce version 2");
       return MAPREDUCE_VERSION.V2;
+   }
+
+   private static HDFS_VERSION getDefaultHdfsVersion(String vendor,
+         String distroVersion) {
+
+      if (vendor.trim().equalsIgnoreCase(Constants.HDP_VENDOR)) {
+         if (distroVersion.startsWith("2")) {
+            return HDFS_VERSION.V2;
+         } else {
+            return HDFS_VERSION.V1;
+         }
+      }
+
+      logger.error("Unknown distro vendor, return default hdfs version 2");
+      return HDFS_VERSION.V2;
    }
 
    /**

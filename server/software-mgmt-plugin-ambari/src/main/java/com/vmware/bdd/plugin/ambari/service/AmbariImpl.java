@@ -32,7 +32,6 @@ import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
 import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.TaskStatus;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
-
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
@@ -80,6 +79,7 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
+import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 
 public class AmbariImpl implements SoftwareManager {
 
@@ -505,11 +505,15 @@ public class AmbariImpl implements SoftwareManager {
 
          String clusterName = clusterDef.getName();
 
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, 120);
+
          // For cluster resume/resize, the blueprint is already exist, we need to delete this cluster first.
          if (isProvisioned(clusterName) && isClusterProvisionedByBDE(clusterDef)) {
             try {
-               ApiRequest apiRequestSummary = apiManager.stopAllServicesInCluster(clusterName);
-               doSoftwareOperation(clusterName, apiRequestSummary, clusterDef.getCurrentReport(), reportQueue);
+               if (hasHosts(clusterName)) {
+                  ApiRequest apiRequestSummary = apiManager.stopAllServicesInCluster(clusterName);
+                  doSoftwareOperation(clusterName, apiRequestSummary, clusterDef.getCurrentReport(), reportQueue);
+               }
             } catch (Exception e) {
                String errMsg = getErrorMsg("stop all services", e);
                logger.error(errMsg, e);
@@ -551,6 +555,10 @@ public class AmbariImpl implements SoftwareManager {
       } finally {
          reportQueue.addClusterReport(clusterDef.getCurrentReport().clone());
       }
+   }
+
+   private boolean hasHosts(String clusterName) {
+      return !apiManager.getClusterHostsList(clusterName).getApiHosts().isEmpty();
    }
 
    private String getErrorMsg(String action, Exception e) {

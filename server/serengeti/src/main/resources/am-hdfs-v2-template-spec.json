@@ -1,0 +1,42 @@
+{
+  "groups": [
+    {
+      "name":"zookeeper",
+      "roles":[
+        "ZOOKEEPER_SERVER"
+      ],
+      "instance_type":SMALL,
+      "instance_num":3,
+      "ha":"on"
+    },
+    {
+      "name": "master",
+      "roles": [
+        "NAMENODE",
+        "SECONDARY_NAMENODE"
+      ],
+      "instance_type":MEDIUM,
+      "instance_num": 1,
+      "ha" : "on"
+    },
+    {
+      "name": "worker",
+      "roles": [
+        "DATANODE"
+      ],
+      "instance_type":SMALL,
+      "instance_num":3,
+      "ha": "off"
+    },
+    {
+      "name":"client",
+      "roles":[
+        "HDFS_CLIENT",
+        "ZOOKEEPER_CLIENT"
+      ],
+      "instance_type":SMALL,
+      "instance_num":1,
+      "ha":"off"
+    }
+  ]
+}

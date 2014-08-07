@@ -73,6 +73,7 @@ public class AmClusterDef implements Serializable {
             AmUtils.toAmConfigurations(blueprint.getConfiguration());
 
       this.nodes = new ArrayList<AmNodeDef>();
+      HdfsVersion hdfs = getDefaultHdfsVersion(this.version);
       for (NodeGroupInfo group : blueprint.getNodeGroups()) {
          for (NodeInfo node : group.getNodes()) {
             AmNodeDef nodeDef = new AmNodeDef();
@@ -83,7 +84,7 @@ public class AmClusterDef implements Serializable {
             nodeDef.setConfigurations(AmUtils.toAmConfigurations(group
                   .getConfiguration()));
             nodeDef.setComponents(group.getRoles());
-            nodeDef.setVolumns(node.getVolumes());
+            nodeDef.setVolumns(node.getVolumes(), hdfs);
             this.nodes.add(nodeDef);
          }
       }
@@ -215,6 +216,14 @@ public class AmClusterDef implements Serializable {
       }
       apiClusterBlueprint.setApiHostGroups(apiHostGroups);
       return apiClusterBlueprint;
+   }
+
+   private static HdfsVersion getDefaultHdfsVersion(String distroVersion) {
+      if (distroVersion.startsWith("2")) {
+         return HdfsVersion.V2;
+      } else {
+         return HdfsVersion.V1;
+      }
    }
 
 }

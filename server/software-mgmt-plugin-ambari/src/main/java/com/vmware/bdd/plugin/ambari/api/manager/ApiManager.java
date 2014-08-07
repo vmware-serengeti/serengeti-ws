@@ -660,6 +660,16 @@ public class ApiManager implements IApiManager {
       }
    }
 
+   @Override
+   public ApiHostList getClusterHostsList(String clusterName) throws AmbariApiException {
+      Response response =
+            apiResourceRootV1.getClustersResource()
+            .getHostsResource(clusterName).readHosts();
+      String hostList = handleAmbariResponse(response);
+      ApiHostList apiHostList = ApiUtils.jsonToObject(ApiHostList.class, hostList);
+      return apiHostList;
+   }
+
    public ApiRequest stopAllComponentsInHosts(String clusterName,
          List<String> hostNames) throws AmbariApiException {
       ApiHostsRequest hostsRequest = new ApiHostsRequest();

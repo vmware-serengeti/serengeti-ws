@@ -20,4 +20,17 @@ public interface Constants {
    public static final String HEALTH_STATUS = "RUNNING";
    public static final String AMBARI_SSH_USER = "serengeti";
 
+   public static final String CONFIG_HDFS_SITE = "hdfs-site";
+   public static final String CONFIG_YARN_SITE = "yarn-site";
+   public static final String CONFIG_MAPRED_SITE = "mapred-site";
+
+   public static final String CONFIG_DFS_NAMENODE_NAME_DIR = "dfs.namenode.name.dir";
+   public static final String CONFIG_DFS_NAME_DIR = "dfs.name.dir";
+   public static final String CONFIG_DFS_DATANODE_DATA_DIR = "dfs.datanode.data.dir";
+   public static final String CONFIG_DFS_DATA_DIR = "dfs.data.dir";
+   public static final String CONFIG_DFS_NAMENODE_CHECKPOINT_DIR = "dfs.namenode.checkpoint.dir";
+   public static final String CONFIG_DFS_CHECKPOINT_DIR = "dfs.checkpoint.dir";
+   public static final String CONFIG_YARN_NODEMANAGER_LOCAL_DIRS = "yarn.nodemanager.local-dirs";
+   public static final String CONFIG_JOURNALNODE_EDITS_DIR = "dfs.journalnode.edits.dir";
+   public static final String CONFIG_MAPRED_LOCAL_DIR = "mapred.local.dir";
 }

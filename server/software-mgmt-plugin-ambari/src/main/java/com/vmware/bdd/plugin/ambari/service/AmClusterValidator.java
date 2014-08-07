@@ -391,8 +391,6 @@ public class AmClusterValidator {
             }
          } catch (Exception e) {
             notAvailableConfig.put(key, config.get(key));
-            errorMsgList.add("Configuration item "
-                  + notAvailableConfig.toString() + " is invalid");
          }
       }
    }

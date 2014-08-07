@@ -126,11 +126,13 @@ public class Constants {
    public static final String BIGTOP_VENDOR = "BIGTOP";
 
    public static final String CLOUDERA_MANAGER_PLUGIN_TYPE = "ClouderaManager"; // must match serengeti.properties
+   public static final String AMBARI_PLUGIN_TYPE = "Ambari";
    public static final String CURRENT_DISTRO_CAN_NOT_SUPPORT_HDFS2 =
          "The current Hadoop distribution does not support HDFS2 High Availability or federation.";
    public static final String CDH_PATTERN = "^[4-9](\\.\\w+)+";
    public static final String IP_PATTERN =
          "\\b((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\b";
+   public static final String AMBARI_HBASE_DEPEND_ON_MAPREDUCE = "ambari.hbase_depend_on_mapreduce";
 
    // rabbitMQ message format
    public static final String ERROR_CODE_FIELD = "error_code";

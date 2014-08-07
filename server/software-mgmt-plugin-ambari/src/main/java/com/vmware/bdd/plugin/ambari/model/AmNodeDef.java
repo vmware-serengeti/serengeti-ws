@@ -24,10 +24,10 @@ import org.apache.commons.lang.StringUtils;
 
 import com.google.gson.annotations.Expose;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
+import com.vmware.bdd.plugin.ambari.utils.Constants;
 
 public class AmNodeDef implements Serializable {
 
@@ -99,24 +99,47 @@ public class AmNodeDef implements Serializable {
       this.components = components;
    }
 
-   public void setVolumns(List<String> volumns) {
+   public void setVolumns(List<String> volumns, HdfsVersion hdfsVersion) {
       for (String component : components) {
          switch (component) {
          case "NAMENODE":
-            addConfiguration("hdfs-site", "dfs.namenode.name.dir",
+            String dfsNameDir = Constants.CONFIG_DFS_NAMENODE_NAME_DIR;
+            if (hdfsVersion.isHdfsV1()) {
+               dfsNameDir = Constants.CONFIG_DFS_NAME_DIR;
+            }
+            addConfiguration(Constants.CONFIG_HDFS_SITE, dfsNameDir,
                   dataDirs(volumns, "/hdfs/namenode"));
             break;
          case "SECONDARY_NAMENODE":
-            addConfiguration("hdfs-site", "dfs.namenode.checkpoint.dir",
-                  dataDirs(volumns, "/hdfs/namesecondary"));
+            String dfsCheckpointDir = Constants.CONFIG_DFS_NAMENODE_CHECKPOINT_DIR;
+            if (hdfsVersion.isHdfsV1()) {
+               dfsCheckpointDir = Constants.CONFIG_DFS_CHECKPOINT_DIR;
+            }
+            addConfiguration(Constants.CONFIG_HDFS_SITE, dfsCheckpointDir,
+                  volumns.get(0) + "/hdfs/namesecondary");
             break;
          case "DATANODE":
-            addConfiguration("hdfs-site", "dfs.datanode.data.dir",
+            String dfsDataDir = Constants.CONFIG_DFS_DATANODE_DATA_DIR;
+            if (hdfsVersion.isHdfsV1()) {
+               dfsDataDir = Constants.CONFIG_DFS_DATA_DIR;
+            }
+            addConfiguration(Constants.CONFIG_HDFS_SITE, dfsDataDir,
                   dataDirs(volumns, "/hdfs/data"));
             break;
          case "NODEMANAGER":
-            addConfiguration("yarn-site", "yarn.nodemanager.local-dirs",
+            addConfiguration(Constants.CONFIG_YARN_SITE,
+                  Constants.CONFIG_YARN_NODEMANAGER_LOCAL_DIRS,
                   dataDirs(volumns, "/yarn/local"));
+            break;
+         case "JOURNALNODE":
+            addConfiguration(Constants.CONFIG_HDFS_SITE,
+                  Constants.CONFIG_JOURNALNODE_EDITS_DIR,
+                  volumns.get(0) + "/hdfs/journalnode");
+            break;
+         case "TASKTRACKER":
+            addConfiguration(Constants.CONFIG_MAPRED_SITE,
+                  Constants.CONFIG_MAPRED_LOCAL_DIR,
+                  dataDirs(volumns, "/hadoop/mapred"));
             break;
          default:
             break;
