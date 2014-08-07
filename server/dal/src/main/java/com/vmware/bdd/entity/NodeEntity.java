@@ -143,6 +143,9 @@ public class NodeEntity extends EntityBase {
       List<String> mountPoints = new ArrayList<String>();
       for (DiskEntity disk : disks) {
          if (DiskType.DATA_DISK.getType().equals(disk.getDiskType())) {
+            if (disk.getHardwareUUID() == null) {
+               continue;
+            }
             mountPoints.add("/mnt/scsi-3" + disk.getHardwareUUID().toLowerCase().replace("-", "") + "-part1");
          }
       }
