@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -416,7 +417,7 @@ public class ClusterConfigManager {
       return netNamesInfo;
    }
 
-   private void validateMemorySize(Set<NodeGroupEntity> nodeGroups,
+   private void validateMemorySize(List<NodeGroupEntity> nodeGroups,
          List<String> failedMsgList) {
       boolean validated = true;
       StringBuilder invalidNodeGroupNames = new StringBuilder();
@@ -561,11 +562,10 @@ public class ClusterConfigManager {
       return valid;
    }
 
-   private Set<NodeGroupEntity> convertNodeGroupsToEntities(Gson gson,
+   private List<NodeGroupEntity> convertNodeGroupsToEntities(Gson gson,
          ClusterEntity clusterEntity, String distro, NodeGroupCreate[] groups,
          boolean validateWhiteList) {
-      Set<NodeGroupEntity> nodeGroups;
-      nodeGroups = new HashSet<NodeGroupEntity>();
+      List<NodeGroupEntity> nodeGroups = new LinkedList<NodeGroupEntity>();
       for (NodeGroupCreate group : groups) {
          NodeGroupEntity groupEntity =
                convertGroup(gson, clusterEntity, group, distro,
@@ -801,7 +801,7 @@ public class ClusterConfigManager {
 
       // TODO need more role checks
 
-      Set<NodeGroupEntity> nodeGroupEntities = clusterEntity.getNodeGroups();
+      List<NodeGroupEntity> nodeGroupEntities = clusterEntity.getNodeGroups();
       long instanceNum = 0;
 
       for (NodeGroupEntity ngEntity : nodeGroupEntities) {
@@ -1129,7 +1129,7 @@ public class ClusterConfigManager {
    private void updateNodegroupAppConfig(ClusterCreate clusterCreate,
          ClusterEntity cluster, boolean validateWhiteList) {
       Gson gson = new Gson();
-      Set<NodeGroupEntity> groupEntities = cluster.getNodeGroups();
+      List<NodeGroupEntity> groupEntities = cluster.getNodeGroups();
       Map<String, NodeGroupEntity> groupMap =
             new HashMap<String, NodeGroupEntity>();
       for (NodeGroupEntity entity : groupEntities) {

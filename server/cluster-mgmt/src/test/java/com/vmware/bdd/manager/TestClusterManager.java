@@ -198,7 +198,7 @@ public class TestClusterManager extends AbstractTestNGSpringContextTests {
       cluster.setStatus(ClusterStatus.RUNNING);
       cluster.setVhmMasterMoid("vm-001");
       int i = 0;
-      Set<NodeGroupEntity> groups = cluster.getNodeGroups();
+      List<NodeGroupEntity> groups = cluster.getNodeGroups();
       for (NodeGroupEntity group : groups) {
          List<NodeEntity> nodes = group.getNodes();
          for (NodeEntity node : nodes) {
@@ -224,7 +224,7 @@ public class TestClusterManager extends AbstractTestNGSpringContextTests {
       cluster.setStatus(ClusterStatus.RUNNING);
       cluster.setVhmMasterMoid("vm-001");
       int i = 0;
-      Set<NodeGroupEntity> groups = cluster.getNodeGroups();
+      List<NodeGroupEntity> groups = cluster.getNodeGroups();
       for (NodeGroupEntity group : groups) {
          List<NodeEntity> nodes = group.getNodes();
          for (NodeEntity node : nodes) {

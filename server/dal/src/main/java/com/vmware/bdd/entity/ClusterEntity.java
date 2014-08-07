@@ -17,7 +17,6 @@ package com.vmware.bdd.entity;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -84,7 +83,7 @@ public class ClusterEntity extends EntityBase {
    private boolean startAfterDeploy;
 
    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-   private Set<NodeGroupEntity> nodeGroups;
+   private List<NodeGroupEntity> nodeGroups;
 
    @Column(name = "password")
    private String password;
@@ -228,11 +227,11 @@ public class ClusterEntity extends EntityBase {
       this.startAfterDeploy = startAfterDeploy;
    }
 
-   public Set<NodeGroupEntity> getNodeGroups() {
+   public List<NodeGroupEntity> getNodeGroups() {
       return nodeGroups;
    }
 
-   public void setNodeGroups(Set<NodeGroupEntity> nodeGroups) {
+   public void setNodeGroups(List<NodeGroupEntity> nodeGroups) {
       this.nodeGroups = nodeGroups;
    }
 

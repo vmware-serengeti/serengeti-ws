@@ -76,7 +76,7 @@ public class TestClusterDAO extends AbstractTransactionalTestNGSpringContextTest
       cluster.setTopologyPolicy(TopologyType.NONE);
       cluster.setStatus(ClusterStatus.PROVISIONING);
 
-      Set<NodeGroupEntity> nodeGroups = new HashSet<NodeGroupEntity>();
+      List<NodeGroupEntity> nodeGroups = new LinkedList<NodeGroupEntity>();
       NodeGroupEntity hdfsGroup = new NodeGroupEntity(HDFS_GROUP);
 
       hdfsGroup.setCluster(cluster);

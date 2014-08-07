@@ -31,7 +31,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.gson.Gson;
-import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation.GroupAssociationType;
@@ -83,7 +82,7 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
       cluster.setStatus(ClusterStatus.PROVISIONING);
       cluster.setAutomationEnable(false);
 
-      Set<NodeGroupEntity> nodeGroups = new HashSet<NodeGroupEntity>();
+      List<NodeGroupEntity> nodeGroups = new LinkedList<NodeGroupEntity>();
       NodeGroupEntity hdfsGroup = new NodeGroupEntity(HDFS_GROUP);
 
       // add hdfs node group
