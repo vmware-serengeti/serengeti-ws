@@ -1,0 +1,75 @@
+{
+  "nodeGroups":[
+    {
+      "name":"master",
+      "roles":[
+        "NAMENODE",
+        "SECONDARY_NAMENODE",
+        "JOBTRACKER",
+        "HISTORYSERVER"
+      ],
+      "instanceType":"MEDIUM",
+      "instanceNum":1,
+      "storage": {
+        "type": "SHARED",
+        "sizeGB": 50
+      },
+      "haFlag":"on",
+      "configuration": {
+        "global": {
+          // service level configurations
+        },
+        "hdfs-site": {
+          // service level configurations
+        }
+      }
+    },
+    {
+      "name":"worker",
+      "roles":[
+        "DATANODE",
+        "TASKTRACKER"
+      ],
+      "instanceType":"SMALL",
+      "instanceNum":3,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 50
+      },
+      "haFlag":"off",
+      "configuration": {
+        "global": {
+          // service level configurations
+        },
+        "hdfs-site": {
+          // service level configurations
+        }
+      }
+    },
+    {
+      "name":"client",
+      "roles":[
+        "HDFS_CLIENT",
+        "MAPREDUCE_CLIENT"
+      ],
+      "instanceType":"SMALL",
+      "instanceNum":1,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 50
+      },
+      "haFlag":"off"
+    }
+  ],
+  "configuration": {
+    "global": {
+      // service level configurations
+    },
+    "core-site": {
+      // service level configurations
+    },
+    "hdfs-site": {
+      // service level configurations
+    }
+  }
+}

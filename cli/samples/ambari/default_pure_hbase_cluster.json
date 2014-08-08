@@ -1,0 +1,92 @@
+{
+  "nodeGroups":[
+    {
+      "name":"zookeeper",
+      "roles":[
+        "ZOOKEEPER_SERVER"
+      ],
+      "instanceType":"SMALL",
+      "instanceNum":3,
+      "storage" : {
+        "type" : "shared",
+        "sizeGB" : 20
+      },
+      "haFlag":"on"
+    },
+    {
+      "name":"master",
+      "roles":[
+        "NAMENODE",
+        "JOBTRACKER",
+        "SECONDARY_NAMENODE",
+        "HBASE_MASTER",
+        "HISTORYSERVER"
+      ],
+      "instanceType":"MEDIUM",
+      "instanceNum":1,
+      "storage": {
+        "type": "SHARED",
+        "sizeGB": 50
+      },
+      "haFlag":"on",
+      "configuration": {
+        "global": {
+          // service level configurations
+        },
+        "hdfs-site": {
+          // service level configurations
+        }
+      }
+    },
+    {
+      "name":"worker",
+      "roles":[
+        "DATANODE",
+        "TASKTRACKER",
+        "HBASE_REGIONSERVER"
+      ],
+      "instanceType":"SMALL",
+      "instanceNum":3,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 50
+      },
+      "haFlag":"off",
+      "configuration": {
+        "global": {
+          // service level configurations
+        },
+        "hdfs-site": {
+          // service level configurations
+        }
+      }
+    },
+    {
+      "name":"client",
+      "roles":[
+        "HDFS_CLIENT",
+        "HBASE_CLIENT",
+        "ZOOKEEPER_CLIENT",
+        "MAPREDUCE_CLIENT"
+      ],
+      "instanceType":"SMALL",
+      "instanceNum":1,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 50
+      },
+      "haFlag":"off"
+    }
+  ],
+  "configuration": {
+    "global": {
+      // service level configurations
+    },
+    "core-site": {
+      // service level configurations
+    },
+    "hdfs-site": {
+      // service level configurations
+    }
+  }
+}

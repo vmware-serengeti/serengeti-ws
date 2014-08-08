@@ -33,10 +33,10 @@ public class AmUtils {
             new ArrayList<Map<String, Object>>();
       if (configuration != null) {
          for (String configurationType : configuration.keySet()) {
-            configurations =
-                  toAmConfigurations(configurations, configurationType,
-                        (Map<String, String>) configuration
-                              .get(configurationType));
+            Map<String, String> properties = (Map<String, String>) configuration.get(configurationType);
+            if (!properties.keySet().isEmpty()) {
+               configurations = toAmConfigurations(configurations, configurationType, properties);
+            }
          }
       }
       return configurations;
