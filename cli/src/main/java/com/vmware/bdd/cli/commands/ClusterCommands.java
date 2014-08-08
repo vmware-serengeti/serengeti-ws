@@ -1289,12 +1289,11 @@ public class ClusterCommands implements CommandMarker {
       return allNetworks;
    }
 
-   private String[] getDistroNames(DistroRead[] distroReads) {
-      String[] distroNames = null;
+   private List<String> getDistroNames(DistroRead[] distroReads) {
+      List<String> distroNames = new ArrayList<String>();
       if(distroReads != null) {
-         distroNames = new String[distroReads.length];
-         for (int i = 0; i < distroNames.length; i++) {
-            distroNames[i] = distroReads[i].getName();
+         for (int i = 0; i < distroReads.length; i++) {
+            distroNames.add(distroReads[i].getName());
          }
       }
       return distroNames;
