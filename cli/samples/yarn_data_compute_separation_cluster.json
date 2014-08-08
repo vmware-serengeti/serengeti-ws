@@ -65,15 +65,15 @@
   "configuration": {
     "hadoop": {
       "core-site.xml": {
-        // check for all settings at http://hadoop.apache.org/docs/stable/core-default.html
+        // check for all settings at http://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/core-default.xml
         // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample: 
         // "io.file.buffer.size": "4096"
       },
       "hdfs-site.xml": {
-        // check for all settings at http://hadoop.apache.org/docs/stable/hdfs-default.html
+        // check for all settings at http://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml
       },
       "mapred-site.xml": {
-        // check for all settings at http://hadoop.apache.org/docs/stable/mapred-default.html
+        // check for all settings at http://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/mapred-default.xml
       },
       "hadoop-env.sh": {
         // "HADOOP_HEAPSIZE": "",
@@ -87,7 +87,7 @@
         // "PATH": ""
       },
       "yarn-site.xml": {
-        // check for all settings at http://rc.cloudera.com/cdh/4/hadoop/hadoop-yarn/hadoop-yarn-common/yarn-default.xml
+        // check for all settings at http://hadoop.apache.org/docs/stable/hadoop-yarn/hadoop-yarn-common/yarn-default.xml
       },
       "yarn-env.sh": {
         // "YARN_OPTS": "",
@@ -110,16 +110,11 @@
         // "hadoop.security.logger": "DEBUG,DRFA"
       },
       "fair-scheduler.xml": {
-        // check for all settings at http://hadoop.apache.org/docs/stable/fair_scheduler.html
+        // check for all settings at http://hadoop.apache.org/docs/stable/hadoop-yarn/hadoop-yarn-site/FairScheduler.html
         // "text": "the full content of fair-scheduler.xml in one line"
       },
       "capacity-scheduler.xml": {
-        // check for all settings at http://hadoop.apache.org/docs/stable/capacity_scheduler.html
-      },
-      "mapred-queue-acls.xml": {
-        // check for all settings at http://hadoop.apache.org/docs/stable/cluster_setup.html#Configuring+the+Hadoop+Daemons
-        // "mapred.queue.queue-name.acl-submit-job": "",
-        // "mapred.queue.queue-name.acl-administer-jobs": ""
+        // check for all settings at http://hadoop.apache.org/docs/stable/hadoop-yarn/hadoop-yarn-site/CapacityScheduler.html
       }
     }
   }

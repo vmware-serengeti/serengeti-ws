@@ -1,44 +1,8 @@
 {
+  "externalHDFS": "hdfs://hostname-of-namenode:8020",
   "nodeGroups":[
     {
-      "name": "zookeeper",
-      "roles": [
-        "zookeeper",
-        "hadoop_journalnode"
-      ],
-      "instanceNum": 3,
-      "cpuNum": 2,
-      "memCapacityMB": 7500,
-      "storage": {
-        "type": "SHARED",
-        "sizeGB": 20
-      },
-      "haFlag": "on",
-      "configuration": {
-        "hadoop": {
-        }
-      }
-    },
-    {
-      "name": "dataMaster",
-      "roles": [
-        "hadoop_namenode"
-      ],
-      "instanceNum": 2,
-      "cpuNum": 2,
-      "memCapacityMB": 7500,
-      "storage": {
-        "type": "SHARED",
-        "sizeGB": 20
-      },
-      "haFlag": "on",
-      "configuration": {
-        "hadoop": {
-        }
-      }
-    },
-    {
-      "name": "computeMaster",
+      "name": "master",
       "roles": [
         "hadoop_resourcemanager"
       ],
@@ -47,18 +11,13 @@
       "memCapacityMB": 7500,
       "storage": {
         "type": "SHARED",
-        "sizeGB": 20
+        "sizeGB": 50
       },
-      "haFlag": "on",
-      "configuration": {
-        "hadoop": {
-        }
-      }
+      "haFlag": "on"
     },
     {
       "name": "worker",
       "roles": [
-        "hadoop_datanode",
         "hadoop_nodemanager"
       ],
       "instanceNum": 3,
@@ -66,12 +25,7 @@
       "memCapacityMB": 7500,
       "storage": {
         "type": "LOCAL",
-        "sizeGB": 50
-      },
-      "haFlag": "off",
-      "configuration": {
-        "hadoop": {
-        }
+        "sizeGB": 20
       }
     },
     {
@@ -86,13 +40,8 @@
       "cpuNum": 1,
       "memCapacityMB": 3748,
       "storage": {
-        "type": "LOCAL",
+        "type": "SHARED",
         "sizeGB": 50
-      },
-      "haFlag": "off",
-      "configuration": {
-        "hadoop": {
-        }
       }
     }
   ],
@@ -122,7 +71,7 @@
         // "PATH": ""
       },
       "yarn-site.xml": {
-        // check for all settings at  http://hadoop.apache.org/docs/stable/hadoop-yarn/hadoop-yarn-common/yarn-default.xml
+        // check for all settings at http://hadoop.apache.org/docs/stable/hadoop-yarn/hadoop-yarn-common/yarn-default.xml
       },
       "yarn-env.sh": {
         // "YARN_OPTS": "",
@@ -154,4 +103,3 @@
     }
   }
 }
-
