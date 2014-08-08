@@ -167,10 +167,10 @@ public class ClusterSpecFactory {
          default:
             throw BddException.INVALID_PARAMETER("cluster type", type);
          }
-      } else if (vendor.trim().equalsIgnoreCase(Constants.HDP_VENDOR)) {
-         MAPREDUCE_VERSION mr =
-               getDefaultMapReduceVersion(vendor, distroVersion);
-         if (Constants.AMBARI_PLUGIN_TYPE.equals(appManagerType) && type == null) {
+      } else if (Constants.AMBARI_PLUGIN_TYPE.equals(appManagerType)
+            && vendor.trim().equalsIgnoreCase(Constants.HDP_VENDOR)) {
+         MAPREDUCE_VERSION mr = getDefaultMapReduceVersion(vendor, distroVersion);
+         if (type == null) {
             if (mr == MAPREDUCE_VERSION.V1) {
                return loadFromFile(locateSpecFile(AM_HDFS_MAPRED_TEMPLATE_SPEC));
             } else {
