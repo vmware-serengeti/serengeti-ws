@@ -13,7 +13,6 @@
       "name":"master",
       "roles":[
         "NAMENODE",
-        "JOBTRACKER",
         "SECONDARY_NAMENODE",
         "HBASE_MASTER",
         "HISTORYSERVER"
@@ -26,7 +25,6 @@
       "name":"worker",
       "roles":[
         "DATANODE",
-        "TASKTRACKER",
         "HBASE_REGIONSERVER"
       ],
       "instance_type":SMALL,
@@ -38,8 +36,7 @@
       "roles":[
         "HDFS_CLIENT",
         "HBASE_CLIENT",
-        "ZOOKEEPER_CLIENT",
-        "MAPREDUCE_CLIENT"
+        "ZOOKEEPER_CLIENT"
       ],
       "instance_type":SMALL,
       "instance_num":1,
