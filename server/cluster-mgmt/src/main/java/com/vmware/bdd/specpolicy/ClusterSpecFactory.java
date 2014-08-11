@@ -207,7 +207,7 @@ public class ClusterSpecFactory {
       } else {
          MAPREDUCE_VERSION mr =
                getDefaultMapReduceVersion(vendor, distroVersion);
-         if (Constants.CLOUDERA_MANAGER_PLUGIN_TYPE.equals(appManagerType) && type == null) {
+         if (Constants.CLOUDERA_MANAGER_PLUGIN_TYPE.equals(appManagerType)) {
             if (mr == MAPREDUCE_VERSION.V1) {
                return loadFromFile(locateSpecFile(CM_HDFS_MAPRED_TEMPLATE_SPEC));
             } else {
