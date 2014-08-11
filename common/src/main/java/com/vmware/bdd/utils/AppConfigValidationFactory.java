@@ -38,7 +38,7 @@ public class AppConfigValidationFactory {
 
    static final Logger logger = Logger.getLogger(AppConfigValidationFactory.class);
 
-   /* 
+   /*
     * Validate the config type if valid or not. Config type is a first nesting level in a configuration,
     * such as 'hadoop','hbase','zookeeper' etc.
     */
@@ -97,7 +97,7 @@ public class AppConfigValidationFactory {
    private static <T> void validateConfigType(Map<String, Object> config,
          List<Map<String, Map<String, List<T>>>> list,
          List<String> warningMsgList) {
-      if (warningMsgList != null) {
+      if ((config.size() > 0) && (warningMsgList != null)) {
          String configType = "";
          List<String> grayList = new ArrayList<String>();
          boolean found = false;
@@ -263,7 +263,7 @@ public class AppConfigValidationFactory {
                      int val = Integer.parseInt(text);
                   } catch (NumberFormatException e) {
                      validateResult.addFailureValue(text);
-                  }       
+                  }
                }
             }
          } else if ("userMaxJobsDefault".equals(element.getTagName())) {
@@ -272,7 +272,7 @@ public class AppConfigValidationFactory {
                int val = Integer.parseInt(text);
             } catch (NumberFormatException e) {
                validateResult.addFailureValue(text);
-            }  
+            }
          } else if ("poolMaxJobsDefault".equals(element.getTagName())) {
             String text = ((Text)element.getFirstChild()).getData().trim();
             try {
@@ -306,7 +306,7 @@ public class AppConfigValidationFactory {
          } else {
             validateResult.addFailureName(element.getTagName());
          }
-      } 
+      }
 }
 
    @SuppressWarnings("unchecked")

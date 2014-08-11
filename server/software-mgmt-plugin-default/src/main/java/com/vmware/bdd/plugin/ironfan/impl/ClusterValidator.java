@@ -45,13 +45,10 @@ public class ClusterValidator {
    public boolean validateBlueprint(ClusterBlueprint blueprint, List<String> distroRoles)
          throws ValidationException {
       logger.info("Start to validate bludprint for cluster " + blueprint.getName());
-      if (Constants.MAPR_VENDOR.equalsIgnoreCase(blueprint.getHadoopStack().getVendor())) {
-         return true;
-      }
-      return validateNoneMaprDistros(blueprint, distroRoles);
+      return validateDistros(blueprint, distroRoles);
    }
 
-   private boolean validateNoneMaprDistros(ClusterBlueprint blueprint,
+   private boolean validateDistros(ClusterBlueprint blueprint,
          List<String> distroRoles) throws ValidationException {
       validateClusterConfig(blueprint);
       return validateRoles(blueprint, distroRoles);
@@ -80,7 +77,10 @@ public class ClusterValidator {
       // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
       checkUnsupportedRoles(blueprint, distroRoles, failedMsgList);
       boolean result = validateRoleDependency(failedMsgList, blueprint);
-      validateGroupConfig(blueprint, failedMsgList, warningMsgList);
+      // only validate group config for non-mapr distros
+      if (!Constants.MAPR_VENDOR.equalsIgnoreCase(blueprint.getHadoopStack().getVendor())) {
+         validateGroupConfig(blueprint, failedMsgList, warningMsgList);
+      }
       if (!failedMsgList.isEmpty() || !warningMsgList.isEmpty()) {
          throw ValidationException.VALIDATION_FAIL("Roles", failedMsgList, warningMsgList);
       }
