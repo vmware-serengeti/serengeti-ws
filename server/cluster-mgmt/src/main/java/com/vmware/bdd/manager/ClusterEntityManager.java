@@ -360,7 +360,6 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
          case RUNNING:
          case SERVICE_ERROR:
          case SERVICE_WARNING:
-         case PROVISIONING: // in PROVISIONING stage, VM_READY -> SERVICE_READY. lixl
             switch (report.getStatus()) {
                case STARTED:
                   cluster.setStatus(ClusterStatus.RUNNING);
