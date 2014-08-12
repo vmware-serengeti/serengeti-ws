@@ -376,7 +376,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    private Map<String, List<ApiRole>> configureNodeServices(final CmClusterDef cluster,
-         final ClusterReportQueue reportQueue, List<String> addedNodeNames)
+         final ClusterReportQueue reportQueue, final List<String> addedNodeNames)
                throws SoftwareManagementPluginException {
 
       Map<String, String> nodeRefToName = cluster.hostIdToName();
@@ -452,9 +452,28 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
          preDeployConfig(cluster);
 
-         executeAndReport("Deploy client config", addedNodeNames,
-               apiResourceRootV6.getClustersResource().deployClientConfig(cluster.getName()),
-               ProgressSplit.CONFIGURE_SERVICES.getProgress(), cluster.getCurrentReport(), reportQueue, true);
+         // deploy client config for new added roles only
+         for (String serviceName : result.keySet()) {
+            final ApiRoleNameList roleNameList = new ApiRoleNameList();
+            final String sName = serviceName;
+            List<String> roleNames = new ArrayList<>();
+            for (ApiRole apiRole : result.get(serviceName)) {
+               roleNames.add(apiRole.getName());
+            }
+            roleNameList.setRoleNames(roleNames);
+            retry(5, new Retriable() {
+               @Override
+               public void doWork() throws Exception {
+                  executeAndReport("Deploy client config", addedNodeNames,
+                        apiResourceRootV6.getClustersResource()
+                              .getServicesResource(cluster.getName())
+                              .deployClientConfigCommand(sName, roleNameList),
+                        ProgressSplit.CONFIGURE_SERVICES.getProgress(),
+                        cluster.getCurrentReport(), reportQueue, true);
+               }
+            });
+         }
+
          return result;
       } catch (Exception e) {
          String errMsg = "Failed to configure services" + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
@@ -654,7 +673,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
                break;
             case BAD:
                logger.debug("Node " + nodeReport.getName() + " is not running well.");
-               nodeReport.setStatus(ServiceStatus.FAILED);
+               nodeReport.setStatus(ServiceStatus.ALERT);
                break;
             default:
                logger.debug("Node " + nodeReport.getName() + " is unknown.");
