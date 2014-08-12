@@ -19,8 +19,6 @@ import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLException;
 
-import org.apache.commons.codec.binary.Base64;
-
 import com.vmware.vim.binding.vim.ServiceInstance;
 import com.vmware.vim.binding.vim.ServiceInstanceContent;
 import com.vmware.vim.binding.vim.SessionManager;
@@ -97,11 +95,11 @@ public class AuthenticateVcUser {
          SessionManager sessionManager =
                vmomiClient.createStub(SessionManager.class,
                      instanceContent.getSessionManager());
-         Base64 base64 = new Base64();
          /* Some transmitters will change base64 encoded characters
             from "+" to whitespace, and add "\n" for every 76 characters. */
          name = name.replaceAll(" ", "+").replaceAll("\n", "");
-         name = new String(base64.decode(name.getBytes()), "UTF-8");
+         name = new String(name.getBytes(), "UTF-8");
+         password = new String(password.getBytes(), "UTF-8");
          sessionManager.login(name, password, sessionManager.getDefaultLocale());
          sessionManager.logout();
       } finally {

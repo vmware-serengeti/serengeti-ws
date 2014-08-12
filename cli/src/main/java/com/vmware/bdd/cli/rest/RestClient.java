@@ -50,7 +50,6 @@ import javax.net.ssl.X509TrustManager;
 
 import jline.console.ConsoleReader;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.fusesource.jansi.AnsiConsole;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -295,13 +294,10 @@ public class RestClient {
          @Override
          public void doWithRequest(ClientHttpRequest request)
                throws IOException {
-            Base64 base64 = new Base64();
-            String encodeUserName =
-                  new String(base64.encode(username.getBytes("UTF-8")));
             request.getBody()
                   .write(
-                        ("j_username=" + encodeUserName + "&j_password="
-                              + password + "").getBytes());
+                        ("j_username=" + username + "&j_password="
+                              + password + "").getBytes("UTF-8"));
          }
       }, new ResponseEntityResponseExtractor<T>(responseType));
    }
