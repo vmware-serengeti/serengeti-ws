@@ -35,6 +35,7 @@ import mockit.Mockit;
 import org.apache.log4j.Logger;
 import org.mockito.Mockito;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -124,6 +125,7 @@ public class TestClouderaManagerImpl {
       Mockit.setUpMock(MockHostInstallPoller.class);
       Mockit.setUpMock(MockReflectionUtils.class);
       Mockit.setUpMock(MockCmClusterValidator.class);
+
       apiRootResource = Mockito.mock(ApiRootResource.class);
       rootResourceV6 = new FakeRootResource();
       rootResourceV7 = new FakeRootResourceV7();
@@ -137,9 +139,9 @@ public class TestClouderaManagerImpl {
       reportQueue = new ClusterReportQueue();
    }
 
-   @BeforeClass( groups = { "TestClouderaManagerImpl" }, dependsOnGroups = { "TestClusterDef" })
+   @AfterClass( groups = { "TestClouderaManagerImpl" }, dependsOnGroups = { "TestClusterDef" })
    public static void tearDown() throws IOException, InterruptedException {
-
+      Mockit.tearDownMocks();
    }
 
    @BeforeMethod(groups = { "TestClouderaManagerImpl" })
