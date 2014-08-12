@@ -162,13 +162,12 @@ public class AmClusterValidator {
                + " are not available by distro " + distro);
       }
 
-      validateRoleDependencies(nodeGroups, apiStackComponents, definedRoles);
+      validateRoleDependencies(nodeGroups, apiStackComponents, unRecogRoles);
 
    }
 
    private void validateRoleDependencies(List<NodeGroupInfo> nodeGroups,
-         List<ApiStackComponent> apiStackComponents,
-         Map<String, Integer> definedRoles) {
+         List<ApiStackComponent> apiStackComponents, List<String> unRecogRoles) {
       if (nodeGroups == null || nodeGroups.isEmpty()) {
          return;
       }
@@ -203,7 +202,7 @@ public class AmClusterValidator {
             if (role.equals(apiComponentInfo.getComponentName())) {
                Set<String> roleCategoryDependencies =
                      validateRoleCategoryDependencies(apiComponentInfo,
-                           allRoles);
+                           allRoles, unRecogRoles);
                if (roleCategoryDependencies != null
                      && !roleCategoryDependencies.isEmpty()) {
                   NotExistDenpendencyNames.addAll(roleCategoryDependencies);
@@ -212,14 +211,14 @@ public class AmClusterValidator {
 
          }
          if (!NotExistDenpendencyNames.isEmpty()) {
-            warningMsgList.add("Component " + role + " depends on "
+            warningMsgList.add("Missing dependency: Component " + role + " depends on "
                   + NotExistDenpendencyNames.toString());
          }
       }
    }
 
    private Set<String> validateRoleCategoryDependencies(
-         ApiComponentInfo apiOriginComponentInfo, Set<String> allRoles) {
+         ApiComponentInfo apiOriginComponentInfo, Set<String> allRoles, List<String> unRecogRoles) {
       List<String> masterRoles = new ArrayList<String>();
       List<String> slaveRoles = new ArrayList<String>();
       Set<String> NotExistDenpendencies = new HashSet<String>();
@@ -244,7 +243,7 @@ public class AmClusterValidator {
                      .getComponentCategory());
          ComponentName componentName =
                ComponentName.valueOf(apiTargetComponentInfo.getComponentName());
-         if (isNamenodeHa(allRoles)) {
+         if (isNamenodeHa(allRoles, unRecogRoles)) {
             if (componentName.isSecondaryNamenode()) {
                continue;
             }
@@ -282,10 +281,13 @@ public class AmClusterValidator {
       return NotExistDenpendencies;
    }
 
-   private boolean isNamenodeHa(Set<String> allRoles) {
+   private boolean isNamenodeHa(Set<String> allRoles, List<String> unRecogRoles) {
       boolean isNamenodeHa = false;
       int nameNodesCount = 0;
       for (String role : allRoles) {
+         if (unRecogRoles != null && unRecogRoles.contains(role)) {
+            continue;
+         }
          ComponentName componentName = ComponentName.valueOf(role);
          if (componentName.isNamenode()) {
             nameNodesCount++;
