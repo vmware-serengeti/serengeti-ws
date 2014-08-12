@@ -287,6 +287,11 @@ public class ClouderaManagerImpl implements SoftwareManager {
          throw SoftwareManagementPluginException.CREATE_CLUSTER_EXCEPTION(e, CLOUDERA_MANAGER, clusterDef.getName());
       } finally {
          clusterDef.getCurrentReport().setFinished(true);
+
+         if(success) {
+            clusterDef.getCurrentReport().setClusterAndNodesServiceStatus(ServiceStatus.STARTED);
+         }
+
          reportQueue.addClusterReport(clusterDef.getCurrentReport().clone());
       }
 

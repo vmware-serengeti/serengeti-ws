@@ -357,30 +357,31 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       ClusterEntity cluster = findByName(clusterName);
       ClusterStatus oldState = cluster.getStatus();
       switch (oldState) {
-      case RUNNING:
-      case SERVICE_ERROR:
-      case SERVICE_WARNING:
-         switch (report.getStatus()) {
-         case STARTED:
-            cluster.setStatus(ClusterStatus.RUNNING);
-            break;
-         case ALERT:
-            cluster.setStatus(ClusterStatus.SERVICE_WARNING);
-            break;
-         case STOPPED:
-            cluster.setStatus(ClusterStatus.SERVICE_ERROR);
+         case RUNNING:
+         case SERVICE_ERROR:
+         case SERVICE_WARNING:
+         case PROVISIONING: // in PROVISIONING stage, VM_READY -> SERVICE_READY. lixl
+            switch (report.getStatus()) {
+               case STARTED:
+                  cluster.setStatus(ClusterStatus.RUNNING);
+                  break;
+               case ALERT:
+                  cluster.setStatus(ClusterStatus.SERVICE_WARNING);
+                  break;
+               case STOPPED:
+                  cluster.setStatus(ClusterStatus.SERVICE_ERROR);
+                  break;
+               default:
+                  break;
+            }
+            logger.info("Got status " + report.getStatus()
+                  + ", change cluster status from " + oldState
+                  + " to " + cluster.getStatus());
             break;
          default:
+            logger.debug("In status " + cluster.getStatus() +
+                  ". Do not change cluster status based on service status change.");
             break;
-         }
-         logger.info("Got status " + report.getStatus()
-               + ", change cluster status from " + oldState
-               + " to " + cluster.getStatus());
-         break;
-      default:
-         logger.debug("In status " + cluster.getStatus() +
-               ". Do not change cluster status based on service status change.");
-         break;
       }
    }
 
