@@ -562,8 +562,7 @@ public class ClusterManager {
 
       ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
-      if (cluster.getStatus() != ClusterStatus.PROVISION_ERROR
-            && cluster.getStatus() != ClusterStatus.SERVICE_ERROR) {
+      if (cluster.getStatus() != ClusterStatus.PROVISION_ERROR) {
          logger.error("can not resume creation of cluster: " + clusterName
                + ", " + cluster.getStatus());
          throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
@@ -980,7 +979,7 @@ public class ClusterManager {
          logger.error("Cannot change elasticity parameters, when cluster "
                + clusterName + " is in " + cluster.getStatus() + " status");
          throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
-               clusterName, "The cluster's status must be RUNNING, SERVICE_ERROR or STOPPED");
+               clusterName, "The cluster's status must be RUNNING, SERVICE_WARNING, SERVICE_ERROR or STOPPED");
       }
 
       clusterEntityMgr.update(cluster);

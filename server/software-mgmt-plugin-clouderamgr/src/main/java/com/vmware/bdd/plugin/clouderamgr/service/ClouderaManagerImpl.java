@@ -360,11 +360,12 @@ public class ClouderaManagerImpl implements SoftwareManager {
             }
          }
          clusterDef.getCurrentReport().setNodesError(ex.getMessage(), addedNodeNames);
-         clusterDef.getCurrentReport().setNodesStatus(ServiceStatus.STOPPED, addedNodeNames);
+         clusterDef.getCurrentReport().setNodesStatus(ServiceStatus.FAILED, addedNodeNames);
          throw ex;
       } catch (Exception e) {
          clusterDef.getCurrentReport().setNodesError(
                "Failed to bootstrap nodes for " + e.getMessage(), addedNodeNames);
+         clusterDef.getCurrentReport().setNodesStatus(ServiceStatus.FAILED, addedNodeNames);
          logger.error(e.getMessage());
          throw SoftwareManagementPluginException.SCALE_OUT_CLUSTER_FAILED(e, CLOUDERA_MANAGER, clusterDef.getName());
       } finally {
@@ -664,8 +665,27 @@ public class ClouderaManagerImpl implements SoftwareManager {
             ApiHealthSummary health = host.getHealthSummary();
             switch(health) {
             case GOOD:
-               nodeReport.setStatus(ServiceStatus.STARTED);
-               logger.debug("Node " + nodeReport.getName() + " is running well.");
+               List<ApiRoleRef> roleRefs = host.getRoleRefs();
+               boolean hasStarted = false;
+               boolean hasStopped = false;
+               for (ApiRoleRef roleRef : roleRefs) {
+                  if (isRoleStarted(roleRef.getClusterName(),
+                        roleRef.getServiceName(), roleRef.getRoleName())) {
+                     hasStarted = true;
+                  } else {
+                     hasStopped = true;
+                  }
+               }
+               if (hasStopped && !hasStarted) {
+                  nodeReport.setStatus(ServiceStatus.STOPPED);
+               } else if (hasStopped && hasStarted) {
+                  nodeReport.setStatus(ServiceStatus.ALERT);
+               } else if (!hasStopped && hasStarted){
+                  nodeReport.setStatus(ServiceStatus.STARTED);
+               } else {
+                  nodeReport.setStatus(ServiceStatus.STOPPED);
+               }
+               logger.debug("Node " + nodeReport.getName() + " is good.");
                break;
             case CONCERNING:
                nodeReport.setStatus(ServiceStatus.UNHEALTHY);
