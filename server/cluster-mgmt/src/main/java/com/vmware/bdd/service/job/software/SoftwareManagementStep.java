@@ -114,11 +114,13 @@ public class SoftwareManagementStep extends TrackableTasklet {
          return RepeatStatus.FINISHED;
       }
 
-      // Only check host time for configure (config, start, disk fix, scale up)
-      // operation and create (resume only) operation
+      // Only check host time for cluster config, disk fix, scale up (management
+      // operation configure), start (management operation start) and create
+      // (resume only)
       SoftwareManager softwareMgr =
             softwareMgrs.getSoftwareManagerByClusterName(clusterName);
       if (ManagementOperation.CONFIGURE.equals(managementOperation)
+            || ManagementOperation.START.equals(managementOperation)
             || JobConstants.RESUME_CLUSTER_JOB_NAME.equals(jobName)) {
          logger.info("Start to check host time.");
          List<NodeEntity> nodes =
