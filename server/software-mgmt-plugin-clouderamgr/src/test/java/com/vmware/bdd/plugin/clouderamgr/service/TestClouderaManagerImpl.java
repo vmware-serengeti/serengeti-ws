@@ -110,11 +110,20 @@ public class TestClouderaManagerImpl {
       }
    }
 
+   @MockClass(realClass = CmClusterValidator.class)
+   public static class MockCmClusterValidator {
+      @Mock
+      public boolean validateBlueprint(ClusterBlueprint blueprint) {
+         return true;
+      }
+   }
+
    @BeforeClass( groups = { "TestClouderaManagerImpl" }, dependsOnGroups = { "TestClusterDef" })
    public static void setup() throws IOException {
       Mockit.setUpMock(MockClouderaManagerClientBuilder.class);
       Mockit.setUpMock(MockHostInstallPoller.class);
       Mockit.setUpMock(MockReflectionUtils.class);
+      Mockit.setUpMock(MockCmClusterValidator.class);
       apiRootResource = Mockito.mock(ApiRootResource.class);
       rootResourceV6 = new FakeRootResource();
       rootResourceV7 = new FakeRootResourceV7();
@@ -169,4 +178,5 @@ public class TestClouderaManagerImpl {
          System.out.println("Action: " + report.getAction() + ", Progress: " + report.getProgress());
       }
    }
+
 }
