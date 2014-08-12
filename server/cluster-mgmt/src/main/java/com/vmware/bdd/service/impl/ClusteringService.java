@@ -111,11 +111,8 @@ import com.vmware.bdd.service.sp.SetAutoElasticitySP;
 import com.vmware.bdd.service.sp.StartVmPostPowerOn;
 import com.vmware.bdd.service.sp.StartVmSP;
 import com.vmware.bdd.service.sp.StopVmSP;
-import com.vmware.bdd.service.sp.UpdateVmProgressCallback;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
-import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
-import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.HadoopRole;
@@ -1197,9 +1194,7 @@ public class ClusteringService implements IClusteringService {
          specs.add(spec);
       }
 
-      UpdateVmProgressCallback callback =
-            new UpdateVmProgressCallback(getLockClusterEntityMgr(),
-                  statusUpdator, vNodes.get(0).getClusterName());
+      BaseProgressCallback callback = new BaseProgressCallback(statusUpdator);
 
       logger.info("ClusteringService, start to clone template.");
       AuAssert.check(specs.size() > 0);
@@ -1496,9 +1491,7 @@ public class ClusteringService implements IClusteringService {
                storeProcedures.toArray(new Callable[0]);
          // execute store procedures to start VMs
          logger.info("ClusteringService, start to start vms.");
-         UpdateVmProgressCallback callback =
-               new UpdateVmProgressCallback(lockClusterEntityMgr,
-                     statusUpdator, name);
+         BaseProgressCallback callback = new BaseProgressCallback(statusUpdator);
          ExecutionResult[] result =
                Scheduler
                      .executeStoredProcedures(
@@ -1590,9 +1583,8 @@ public class ClusteringService implements IClusteringService {
                storeProcedures.toArray(new Callable[0]);
          // execute store procedures to start VMs
          logger.info("ClusteringService, start to stop vms.");
-         UpdateVmProgressCallback callback =
-               new UpdateVmProgressCallback(lockClusterEntityMgr,
-                     statusUpdator, name);
+         BaseProgressCallback callback = new BaseProgressCallback(statusUpdator);
+
          ExecutionResult[] result =
                Scheduler
                      .executeStoredProcedures(
