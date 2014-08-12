@@ -1075,32 +1075,37 @@ public class AmbariImpl implements SoftwareManager {
          throws SoftwareManagementPluginException {
       try {
          String clusterName = clusterBlueprint.getName();
-         AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, null);
-         if (isProvisioned(clusterName) && isClusterProvisionedByBDE(clusterDef)) {
-            //Stop services if needed, when stop failed, we will try to forcely delete resource
-            //although we may also fail because of resource dependency. In that case, we will
-            //throw out the exception and fail
-            if (!onStopCluster(clusterBlueprint, reports)) {
-               logger.error("Ambari failed to stop services");
-            }
-            List<String> serviceNames = apiManager.getClusterServicesNames(clusterName);
-            if (serviceNames != null && !serviceNames.isEmpty()) {
-               for (String serviceName : serviceNames) {
-                  apiManager.deleteService(clusterName, serviceName);
-               }
-            }
-            if (apiManager.getHostsSummaryInfo(clusterName) != null) {
-               List<ApiHost> hosts = apiManager.getHostsSummaryInfo(clusterName).getApiHosts();
-               if (hosts != null && !hosts.isEmpty()) {
-                  for (ApiHost host : hosts) {
-                     assert(host.getApiHostInfo() != null);
-                     String hostName = host.getApiHostInfo().getHostName();
-                     apiManager.deleteHost(clusterName, hostName);
-                  }
-               }
-            }
-            apiManager.deleteCluster(clusterName);
+         if (!isProvisioned(clusterName)) {
+            return true;
          }
+         AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, null);
+         if (!isClusterProvisionedByBDE(clusterDef)) {
+            return true;
+         }
+         //Stop services if needed, when stop failed, we will try to forcely delete resource
+         //although we may also fail because of resource dependency. In that case, we will
+         //throw out the exception and fail
+         if (!onStopCluster(clusterBlueprint, reports)) {
+            logger.error("Ambari failed to stop services");
+         }
+         List<String> serviceNames = apiManager.getClusterServicesNames(clusterName);
+         if (serviceNames != null && !serviceNames.isEmpty()) {
+            for (String serviceName : serviceNames) {
+               apiManager.deleteService(clusterName, serviceName);
+            }
+         }
+         if (apiManager.getHostsSummaryInfo(clusterName) != null) {
+            List<ApiHost> hosts = apiManager.getHostsSummaryInfo(clusterName).getApiHosts();
+            if (hosts != null && !hosts.isEmpty()) {
+               for (ApiHost host : hosts) {
+                  assert (host.getApiHostInfo() != null);
+                  String hostName = host.getApiHostInfo().getHostName();
+                  apiManager.deleteHost(clusterName, hostName);
+               }
+            }
+         }
+         apiManager.deleteCluster(clusterName);
+
          if (isBlueprintCreated(clusterDef) && isBlueprintCreatedByBDE(clusterDef)) {
             apiManager.deleteBlueprint(clusterName);
          }
