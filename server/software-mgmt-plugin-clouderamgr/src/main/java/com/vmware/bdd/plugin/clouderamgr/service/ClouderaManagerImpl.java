@@ -267,6 +267,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       CmClusterDef clusterDef = null;
       try {
          clusterDef = new CmClusterDef(blueprint);
+         validateBlueprint(blueprint);
          provisionCluster(clusterDef, null, reportQueue);
          provisionParcels(clusterDef, null, reportQueue);
          configureServices(clusterDef, reportQueue, true);
