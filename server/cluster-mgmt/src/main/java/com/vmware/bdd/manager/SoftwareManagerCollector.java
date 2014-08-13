@@ -101,7 +101,7 @@ public class SoftwareManagerCollector implements InitializingBean {
       validateSoftwareManager(appManagerAdd.getName(), softwareManager);
 
       logger.info("The appmgr can be reached and will be created.");
-      
+
       // add to meta-db through AppManagerService
       createSoftwareManagerInternal(appManagerAdd, softwareManager);
    }
@@ -112,7 +112,7 @@ public class SoftwareManagerCollector implements InitializingBean {
     *
     * @param appManagerAdd, softwareManager
     */
-   private synchronized void createSoftwareManagerInternal(AppManagerAdd appManagerAdd, 
+   private synchronized void createSoftwareManagerInternal(AppManagerAdd appManagerAdd,
 		   SoftwareManager softwareManager) {
 
       logger.info("Start to create software manager for " + appManagerAdd.getName());
@@ -126,7 +126,7 @@ public class SoftwareManagerCollector implements InitializingBean {
       cache.put(appManagerAdd.getName(), softwareManager);
 
       logger.info("Add app manager to meta-db.");
-      
+
       // add to meta-db through AppManagerService
       appManagerService.addAppManager(appManagerAdd);
    }
@@ -308,7 +308,7 @@ public class SoftwareManagerCollector implements InitializingBean {
                SoftwareManager softwareManager =
                      loadSoftwareManager(appManagerAdd);
                cache.put(appManager.getName(), softwareManager);
-            } catch (SoftwareManagerCollectorException e) {
+            } catch (Exception e) {
                logger.error("Error loading Software Manager: " + appManagerAdd,
                      e);
             }
