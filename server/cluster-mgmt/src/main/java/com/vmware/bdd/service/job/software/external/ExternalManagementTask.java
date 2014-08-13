@@ -90,7 +90,13 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
                success = softwareManager.reconfigCluster(clusterBlueprint, queue);
                break;
             case PRE_DESTROY:
-               success = softwareManager.onDeleteCluster(clusterBlueprint, queue);
+               if (softwareManager == null) {
+                  logger.warn("Software manager was unavailable when deleting cluster " + clusterBlueprint.getName() + ", will skip it and delete vms forcely");
+                  logger.warn("You may need to delete related resource on software manager server manually.");
+                  success = true;
+               } else {
+                  success = softwareManager.onDeleteCluster(clusterBlueprint, queue);
+               }
                break;
             case DESTROY:
                success = softwareManager.deleteCluster(clusterBlueprint, queue);

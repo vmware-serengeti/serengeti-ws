@@ -137,10 +137,14 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public boolean echo() {
-      switch (apiManager.healthCheck()) {
-      case Constants.HEALTH_STATUS:
-         return true;
-      default:
+      try {
+         switch (apiManager.healthCheck()) {
+            case Constants.HEALTH_STATUS:
+               return true;
+            default:
+               return false;
+         }
+      } catch (Exception e) {
          return false;
       }
    }
@@ -1095,6 +1099,11 @@ public class AmbariImpl implements SoftwareManager {
          throws SoftwareManagementPluginException {
       try {
          String clusterName = clusterBlueprint.getName();
+         if (!echo()) {
+            logger.warn("Ambari server is unavailable when deleting cluster " + clusterName + ". Will delete VMs forcely.");
+            logger.warn("You may need to delete cluster resource on ambari server manually.");
+            return true;
+         }
          if (!isProvisioned(clusterName)) {
             return true;
          }

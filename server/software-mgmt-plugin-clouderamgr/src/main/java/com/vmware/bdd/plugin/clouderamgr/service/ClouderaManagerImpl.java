@@ -33,7 +33,6 @@ import com.cloudera.api.model.ApiRoleState;
 import com.cloudera.api.model.ApiRoleConfigGroup;
 import com.cloudera.api.v7.RootResourceV7;
 import com.google.gson.GsonBuilder;
-import com.vmware.aurora.util.CommandExec;
 import com.vmware.bdd.plugin.clouderamgr.exception.CommandExecFailException;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
@@ -507,6 +506,10 @@ public class ClouderaManagerImpl implements SoftwareManager {
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       String clusterName = clusterBlueprint.getName();
       try {
+         if (!echo()) {
+            logWarningWhenForceDeleteCluster(clusterName);
+            return true;
+         }
          if (!isProvisioned(clusterName)) {
             return true;
          }
@@ -531,9 +534,18 @@ public class ClouderaManagerImpl implements SoftwareManager {
       return stopServices(clusterBlueprint, reportQueue);
    }
 
+   private void logWarningWhenForceDeleteCluster(String clusterName) {
+      logger.warn("Cloudera manager server was unavailable when deleting cluster " + clusterName + ". Will delete VMs forcely.");
+      logger.warn("You may need to delete cluster resource on cloudera manager server manually.");
+   }
+
    @Override
    public boolean onDeleteCluster(ClusterBlueprint clusterBlueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
+      if (!echo()) {
+         logWarningWhenForceDeleteCluster(clusterBlueprint.getName());
+         return true;
+      }
       // just stop this cluster
       return onStopCluster(clusterBlueprint, reports);
    }

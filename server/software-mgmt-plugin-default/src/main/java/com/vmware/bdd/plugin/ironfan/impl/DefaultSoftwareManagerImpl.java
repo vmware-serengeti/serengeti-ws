@@ -187,8 +187,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    @Override
    public boolean onDeleteCluster(ClusterBlueprint clusterBlueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
-      return false;
+      return true;
    }
 
    @Override
