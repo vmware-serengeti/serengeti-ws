@@ -23,17 +23,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import javax.ws.rs.NotFoundException;
 
-import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
 import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.TaskStatus;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
-import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
@@ -54,6 +51,8 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTask;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTaskInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ClusterRequestStatus;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfiguration;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfigurationInfo;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
@@ -67,6 +66,7 @@ import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
 import com.vmware.bdd.plugin.ambari.model.AmNodeDef;
 import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
 import com.vmware.bdd.plugin.ambari.poller.HostBootstrapPoller;
+import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
@@ -205,8 +205,26 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public String getSupportedConfigs(HadoopStack stack) {
-      // TODO Auto-generated method stub
-      return null;
+      Map<String, Object> configs = new HashMap<String, Object>();
+      ApiStackServiceList apiStackServiceList = apiManager.getStackServiceListWithConfigurations(stack.getVendor(), stack.getFullVersion());
+      for (ApiStackService apiStackService : apiStackServiceList.getApiStackServices()) {
+         for (ApiConfiguration apiConfiguration : apiStackService.getApiConfigurations()) {
+            ApiConfigurationInfo apiConfigurationInfo = apiConfiguration.getApiConfigurationInfo();
+            String configType = apiConfigurationInfo.getType().split(".xml")[0];
+            String configProperty = apiConfigurationInfo.getPropertyName();
+            Set<String> configProperties = new HashSet<String>();
+            if (configs.isEmpty()) {
+               configProperties.add(configProperty);
+            } else {
+               if (configs.containsKey(configType)) {
+                  configProperties = (Set<String>) configs.get(configType);
+                  configProperties.add(configProperty);
+               }
+            }
+            configs.put(configType, configProperties);
+         }
+      }
+      return ApiUtils.objectToJson(configs);
    }
 
    @Override
