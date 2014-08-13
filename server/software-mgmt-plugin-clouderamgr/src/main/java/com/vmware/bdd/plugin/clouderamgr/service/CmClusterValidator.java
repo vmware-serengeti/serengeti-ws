@@ -137,7 +137,7 @@ public class CmClusterValidator {
                   continue;
                }
                if (dependency.getServices().size() == 1 && !definedServices.contains(dependency.getServices().get(0))) {
-                  errorMsgList.add(serviceName + " depends on " + dependency.getServices().get(0) + " service");
+                  warningMsgList.add(serviceName + " depends on " + dependency.getServices().get(0) + " service");
                } else {
                   boolean found = false;
                   for (String dependService : dependency.getServices()) {
@@ -146,7 +146,7 @@ public class CmClusterValidator {
                      }
                   }
                   if (!found) {
-                     errorMsgList.add(serviceName + " depends on one service of " + dependency.getServices().toString());
+                     warningMsgList.add(serviceName + " depends on one service of " + dependency.getServices().toString());
                   }
                }
             }
