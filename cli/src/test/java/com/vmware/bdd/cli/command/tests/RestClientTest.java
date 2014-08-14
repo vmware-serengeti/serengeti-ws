@@ -20,13 +20,29 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
+import com.vmware.bdd.cli.commands.ClusterCommands;
+import com.vmware.bdd.cli.rest.RestClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
 
 import com.vmware.bdd.cli.commands.Constants;
 
-public class RestClientTest {
+@Test
+@ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
+public class RestClientTest extends AbstractTestNGSpringContextTests {
    private String cli_property_file = "cli_test.properties";
+
+   @Autowired
+   private RestClient client;
+
+   @Test
+   public void testlogin() throws IOException {
+      client.login1("https://10.112.113.137:8443/serengeti", "/j_spring_security_check", "你好", "sss");
+   }
+
 
    @Test
    public void testGetHostUriProperty() {

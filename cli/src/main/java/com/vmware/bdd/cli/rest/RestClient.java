@@ -50,6 +50,11 @@ import javax.net.ssl.X509TrustManager;
 
 import jline.console.ConsoleReader;
 
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.http.client.protocol.RequestDefaultHeaders;
 import org.apache.log4j.Logger;
 import org.fusesource.jansi.AnsiConsole;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,6 +138,39 @@ public class RestClient {
       return hostUri;
    }
 
+   public void login1(final String host, String path, String userName, String password) throws IOException {
+      String url = host + path;
+      PostMethod loginPost = new PostMethod(url);
+
+      loginPost.addRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      NameValuePair[] loginCredentials = new NameValuePair[] {
+            new NameValuePair("j_username", userName) ,
+            new NameValuePair("j_password", password)
+      };
+
+      loginPost.setRequestBody(loginCredentials);
+
+
+      HttpClient client1 = new HttpClient();
+      client1.getHostConfiguration().setProxy("127.0.0.1", 8810);
+
+      int responseCode = client1.executeMethod(loginPost);
+
+      if (responseCode == org.apache.commons.httpclient.HttpStatus.SC_OK) {
+         //normal response
+         String cookieValue = loginPost.getResponseHeader("Set-Cookie").getValue();
+         if (cookieValue.contains(";")) {
+            cookieValue = cookieValue.split(";")[0];
+         }
+         writeCookieInfo(cookieValue);
+         System.out.println(Constants.CONNECT_SUCCESS);
+      } else {
+         //error
+         System.out.println(Constants.CONNECT_FAILURE);
+         //recover old hostUri
+      }
+   }
+
    /**
     * connect to a Serengeti server
     * 
@@ -152,47 +190,14 @@ public class RestClient {
                   + Constants.HTTPS_CONNECTION_LOGIN_SUFFIX;
 
       try {
-         ResponseEntity<String> response =
-               login(Constants.REST_PATH_LOGIN, String.class, username,
-                     password);
+         login1(hostUri, Constants.REST_PATH_LOGIN, username, password);
 
-         if (response.getStatusCode() == HttpStatus.OK) {
-            //normal response
-            updateHostproperty(host);
-            String cookieValue = response.getHeaders().getFirst("Set-Cookie");
-            if (cookieValue.contains(";")) {
-               cookieValue = cookieValue.split(";")[0];
-            }
-            writeCookieInfo(cookieValue);
-            System.out.println(Constants.CONNECT_SUCCESS);
-         } else {
-            //error
-            System.out.println(Constants.CONNECT_FAILURE);
-            //recover old hostUri
-            hostUri = oldHostUri;
-            return Connect.ConnectType.ERROR;
-         }
-      } catch (CliRestException cliRestException) {
-         if (cliRestException.getStatus() == HttpStatus.UNAUTHORIZED) {
-            System.out.println(Constants.CONNECT_UNAUTHORIZATION_CONNECT);
-            //recover old hostUri
-            hostUri = oldHostUri;
-            return Connect.ConnectType.UNAUTHORIZATION;
-         } else if (cliRestException.getStatus() == HttpStatus.INTERNAL_SERVER_ERROR) {
-            System.out.println(cliRestException.getMessage());
-            return Connect.ConnectType.ERROR;
-         } else {
-            System.out.println(Constants.CONNECT_FAILURE + ": "
-                  + cliRestException.getStatus() + " "
-                  + cliRestException.getMessage().toLowerCase());
-            return Connect.ConnectType.ERROR;
-         }
-      } catch (Exception e) {
-         System.out.println(Constants.CONNECT_FAILURE + ": "
-               + (CommandsUtils.getExceptionMessage(e)));
-         return Connect.ConnectType.ERROR;
+         return Connect.ConnectType.SUCCESS;
+      } catch (IOException e) {
+         e.printStackTrace();
       }
-      return Connect.ConnectType.SUCCESS;
+
+      return Connect.ConnectType.ERROR;
    }
 
    /**
