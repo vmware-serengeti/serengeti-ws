@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.vmware.bdd.utils.ListToStringConverter;
 import jline.console.ConsoleReader;
 
 import org.apache.commons.lang.StringUtils;
@@ -1537,12 +1538,10 @@ public class ClusterCommands implements CommandMarker {
       if (failedMsgList.size() > 1) {
          failedMsg.append("s");
       }
-      failedMsg.append(" ");
-      StringBuilder tmpMsg = new StringBuilder();
-      for (String msg : failedMsgList) {
-         tmpMsg.append(msg).append(" ");
-      }
-      failedMsg.append(tmpMsg);
+      failedMsg.append(".\n");
+
+      failedMsg.append(new ListToStringConverter<String>(failedMsgList, '\n'));
+
       CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
             op, Constants.OUTPUT_OP_RESULT_FAIL,
             failedMsg.toString());

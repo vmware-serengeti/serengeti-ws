@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.bdd.utils.*;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.exception.ClusterConfigException;
@@ -33,11 +34,7 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.NodeGroupRole;
 import com.vmware.bdd.spectypes.ServiceType;
-import com.vmware.bdd.utils.AppConfigValidationUtils;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
-import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.Constants;
-import com.vmware.bdd.utils.ValidateResult;
 
 public class ClusterValidator {
    private static final Logger logger = Logger.getLogger(ClusterValidator.class);
@@ -97,25 +94,37 @@ public class ClusterValidator {
       List<NodeGroupInfo> nodeGroupInfos = blueprint.getNodeGroups();
       assert (nodeGroupInfos != null && !nodeGroupInfos.isEmpty());
 
+      List<String> invalidRoleList = new ArrayList<>();
+      List<String> unspportedRoleList = new ArrayList<>();
+
       for (NodeGroupInfo nodeGroup : nodeGroupInfos) {
          List<String> roles = nodeGroup.getRoles();
          if (roles != null) {
             for (String role : roles) {
-               StringBuilder rolesMsg = new StringBuilder();
                if (!ChefServerUtils.isValidRole(role)) {
-                  rolesMsg.append("role ").append(role)
-                        .append(" doesn't exist");
+                  invalidRoleList.add(role);
                } else if (!distroRoles.contains(role)
                      && !HadoopRole.isCustomizedRole(role)) {
-                  rolesMsg.append("role ").append(role)
-                        .append(" is not supported by distro ")
-                        .append(blueprint.getHadoopStack().getDistro());
-               }
-               if (rolesMsg.length() > 0) {
-                  failedMsgList.add(rolesMsg.toString());
+                  unspportedRoleList.add(role);
+                  /*      .append(" is not supported by distro ")
+                        .append(blueprint.getHadoopStack().getDistro());*/
                }
             }
          }
+      }
+
+      if(invalidRoleList.size() > 0) {
+         String msgFormat = invalidRoleList.size() > 1 ? "roles: %1s are not invalid." : "role: %1s is invalid.";
+         failedMsgList.add(String.format(
+               msgFormat, new ListToStringConverter(invalidRoleList, ',')
+         ));
+      }
+
+      if(unspportedRoleList.size() > 0) {
+         String msgFormat = unspportedRoleList.size() > 1 ? "roles: %1s are not supported by %2s." : "role: %1s is not supported by %2s.";
+         failedMsgList.add(String.format(
+               msgFormat, new ListToStringConverter(unspportedRoleList, ','), blueprint.getHadoopStack().getDistro()
+         ));
       }
    }
 
@@ -184,18 +193,19 @@ public class ClusterValidator {
          EnumSet<ServiceType> serviceTypes = EnumSet.noneOf(ServiceType.class);
          for (ServiceType service : ServiceType.values()) {
             //identify partially match
-            int matched = 0;
+            List<HadoopRole> missingRoles = new ArrayList<>();
             for (HadoopRole role : service.getRoles()) {
-               if (roles.contains(role.toString())) {
-                  matched++;
+               if (!roles.contains(role.toString())) {
+                  missingRoles.add(role);
                }
             }
-            if (matched == service.getRoles().size()) {
+            if (missingRoles.size() == 0) {
                serviceTypes.add(service);
-            } else if (matched != 0) {
-               failedMsgList.add("Cannot find one or more roles in " + service
-                     + " " + service.getRoles()
-                     + " in the cluster specification file.");
+            } else {
+               failedMsgList.add(
+                     String.format("Missing role(s): %1s for service: %2s.",
+                           new ListToStringConverter(missingRoles, ','), service)
+               );
                valid = false;
             }
          }

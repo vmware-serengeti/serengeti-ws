@@ -15,14 +15,15 @@
 package com.vmware.bdd.utils;
 
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -68,8 +69,15 @@ public class AppConfigValidationFactory {
         return processAppConfigValidation(config,validateResult,whiteList,ValidationType.WHITE_LIST);
     }
 
-   /*
+   /**
     * Validate configure files of each config type.
+    *
+    * @param config
+    * @param validateResult
+    * @param list
+    * @param type
+    * @param <T>
+    * @return
     */
    @SuppressWarnings("unchecked")
    private static <T> ValidateResult processAppConfigValidation(Map<String, Object> config,
@@ -98,12 +106,9 @@ public class AppConfigValidationFactory {
          List<Map<String, Map<String, List<T>>>> list,
          List<String> warningMsgList) {
       if ((config.size() > 0) && (warningMsgList != null)) {
-         String configType = "";
          List<String> grayList = new ArrayList<String>();
-         boolean found = false;
-         for (Entry<String, Object> configTypeEntry : config.entrySet()) {
-            configType = configTypeEntry.getKey();
-            found = false;
+         for (String configType : config.keySet()) {
+            boolean found = false;
             for (Map<String, Map<String, List<T>>> listTypeMap : list) {
                if (listTypeMap.containsKey(configType)) {
                   found = true;
@@ -113,20 +118,12 @@ public class AppConfigValidationFactory {
                grayList.add(configType);
             }
          }
-         if (!found) {
-            StringBuffer errorMsg = new StringBuffer();
-            String be = " is ";
-            errorMsg.append(Constants.CLUSTER_CONFIG_TYPE_NOT_RAGULARLY_BEFORE);
-            for (String grayConfigType : grayList) {
-               errorMsg.append(grayConfigType);
-               errorMsg.append(", ");
-            }
-            if (grayList.size() > 1) {
-               be = " are ";
-            }
-            errorMsg.replace(errorMsg.length() - 2, errorMsg.length(), be
-                  + Constants.CLUSTER_CONFIG_TYPE_NOT_RAGULARLY_AFTER);
-            warningMsgList.add(errorMsg.toString());
+
+         if (grayList.size() > 0) {
+            String formatStr = grayList.size() > 1 ? Constants.CLUSTER_CONFIG_TYPES_NOT_REGULAR : Constants.CLUSTER_CONFIG_TYPE_NOT_REGULAR;
+            warningMsgList.add(
+               String.format(formatStr, new ListToStringConverter(grayList, ','))
+            );
          }
       }
    }

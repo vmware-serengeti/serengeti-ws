@@ -18,10 +18,15 @@ package com.vmware.bdd.utils;
 public class Constants {
    public static final String CLUSTER_CONFIG_FORMAT_ERROR =
          "The format of configuration is invalid !";
-   public static final String CLUSTER_CONFIG_TYPE_NOT_RAGULARLY_BEFORE =
+   /*public static final String CLUSTER_CONFIG_TYPE_NOT_RAGULARLY_BEFORE =
          "Warning: The configuration ";
    public static final String CLUSTER_CONFIG_TYPE_NOT_RAGULARLY_AFTER =
-         "not regular configuration type.";
+         "not regular configuration type.";*/
+
+   public final static String CLUSTER_CONFIG_TYPE_NOT_REGULAR = "Warning: The item: %1s is not a regular cluster configuration.";
+
+   public final static String CLUSTER_CONFIG_TYPES_NOT_REGULAR = "Warning: The items: %1s are not regular cluster configurations.";
+
    public static final String LIST_CONFIG_ERROR =
          "The blacklist or whitelist config error!";
    public static final String PRACK_NO_TOPOLOGY_TYPE_SPECIFIED =

@@ -14,9 +14,12 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
@@ -141,4 +144,43 @@ public class AppConfigValidationFactoryTest {
       assertEquals(validateResult.getFailureNames().get(2), "hbase.cluster.distributed");
    }
 
+   @Test
+   public void testConfigurationTypeValidation1() {
+      Map<String, Object> configurations = new HashMap<>();
+      configurations.put("hadoop", new Object());
+
+      List<String> warningMsgList = new ArrayList<>();
+      AppConfigValidationFactory.validateConfigType(configurations, warningMsgList);
+
+      assertEquals(0, warningMsgList.size());
+   }
+
+   @Test
+   public void testConfigurationTypeValidation2() {
+      Map<String, Object> configurations = new HashMap<>();
+      configurations.put("hadoop", new Object());
+      configurations.put("xyz", new Object());
+
+      List<String> warningMsgList = new ArrayList<>();
+      AppConfigValidationFactory.validateConfigType(configurations, warningMsgList);
+      assertEquals(1, warningMsgList.size());
+
+      assertEquals("Warning: The item: xyz is not a regular cluster configuration.",
+            warningMsgList.get(0));
+   }
+
+   @Test
+   public void testConfigurationTypeValidation3() {
+      Map<String, Object> configurations = new HashMap<>();
+      configurations.put("hadoop", new Object());
+      configurations.put("xyz", new Object());
+      configurations.put("abc", new Object());
+
+      List<String> warningMsgList = new ArrayList<>();
+      AppConfigValidationFactory.validateConfigType(configurations, warningMsgList);
+      assertEquals(1, warningMsgList.size());
+
+      assertEquals("Warning: The item: abc,xyz is not a regular cluster configuration.",
+            warningMsgList.get(0));
+   }
 }
