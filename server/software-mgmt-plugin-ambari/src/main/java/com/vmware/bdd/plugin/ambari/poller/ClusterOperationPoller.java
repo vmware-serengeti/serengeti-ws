@@ -57,9 +57,11 @@ public class ClusterOperationPoller extends StatusPoller {
 
    @Override
    public boolean poll() {
+      if (apiRequestSummary == null) {
+         return true;
+      }
       Long requestId = apiRequestSummary.getApiRequestInfo().getRequestId();
-      ApiRequest apiRequest =
-            apiManager.getRequestWithTasks(clusterName, requestId);
+      ApiRequest apiRequest = apiManager.getRequestWithTasks(clusterName, requestId);
 
       ClusterRequestStatus clusterRequestStatus =
             ClusterRequestStatus.valueOf(apiRequest.getApiRequestInfo()

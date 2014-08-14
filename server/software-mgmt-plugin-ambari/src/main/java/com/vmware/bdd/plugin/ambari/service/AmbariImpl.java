@@ -66,7 +66,6 @@ import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
 import com.vmware.bdd.plugin.ambari.model.AmNodeDef;
 import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
 import com.vmware.bdd.plugin.ambari.poller.HostBootstrapPoller;
-import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
@@ -1038,6 +1037,10 @@ public class AmbariImpl implements SoftwareManager {
 
    private boolean doSoftwareOperation(String clusterName, ApiRequest apiRequestSummary,
                                        ClusterReport clusterReport, ClusterReportQueue reports) throws Exception{
+
+      if (apiRequestSummary == null) {
+         return true;
+      }
       ClusterOperationPoller poller =
             new ClusterOperationPoller(apiManager, apiRequestSummary,
                   clusterName, clusterReport, reports,
@@ -1069,7 +1072,6 @@ public class AmbariImpl implements SoftwareManager {
                errMsg.get(taskInfo.getHostName()).add(taskErrMsg);
                logger.error("command: " + taskInfo.getCommandDetail() +
                      "role: " + taskInfo.getRole() +
-                     "StructuredOut: " + taskInfo.getStructuredOut() +
                      "stderr: " + taskInfo.getStderr() +
                      "status: " + taskInfo.getStatus());
             }

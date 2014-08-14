@@ -70,10 +70,6 @@ public class ApiTaskInfo {
    @Expose
    private String stderr;
 
-   @Expose
-   @SerializedName("structured_out")
-   private String structuredOut;
-
    public int getAttemptCnt() {
       return attemptCnt;
    }
@@ -184,14 +180,6 @@ public class ApiTaskInfo {
 
    public void setStderr(String stderr) {
       this.stderr = stderr;
-   }
-
-   public String getStructuredOut() {
-      return structuredOut;
-   }
-
-   public void setStructuredOut(String structuredOut) {
-      this.structuredOut = structuredOut;
    }
 
 }

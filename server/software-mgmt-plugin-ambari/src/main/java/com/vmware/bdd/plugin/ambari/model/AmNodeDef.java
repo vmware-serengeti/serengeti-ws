@@ -100,6 +100,9 @@ public class AmNodeDef implements Serializable {
    }
 
    public void setVolumns(List<String> volumns, HdfsVersion hdfsVersion) {
+      if (volumns.isEmpty()) {
+         return;
+      }
       for (String component : components) {
          switch (component) {
          case "NAMENODE":

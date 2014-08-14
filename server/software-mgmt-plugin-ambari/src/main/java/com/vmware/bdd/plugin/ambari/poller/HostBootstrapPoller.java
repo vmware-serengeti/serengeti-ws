@@ -50,8 +50,7 @@ public class HostBootstrapPoller extends StatusPoller {
       Long requestId = apiBootstrap.getRequestId();
       logger.info("Waiting for bootstrap hosts request " + requestId
             + " to complete.");
-      ApiBootstrapStatus apiBootstrapStatus =
-            apiManager.getBootstrapStatus(requestId);
+      ApiBootstrapStatus apiBootstrapStatus = apiManager.getBootstrapStatus(requestId);
 
       BootstrapStatus bootstrapStatus =
             BootstrapStatus.valueOf(apiBootstrapStatus.getStatus());
