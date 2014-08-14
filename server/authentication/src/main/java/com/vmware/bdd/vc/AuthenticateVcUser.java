@@ -77,6 +77,7 @@ public class AuthenticateVcUser {
    public void authenticateUser(String name, String password) throws Exception {
       Client vmomiClient = null;
       try {
+
          URI uri = new URI(serviceUrl);
          HttpConfiguration httpConfig = new HttpConfigurationImpl();
          httpConfig.setThumbprintVerifier(getThumbprintVerifier());
@@ -95,11 +96,7 @@ public class AuthenticateVcUser {
          SessionManager sessionManager =
                vmomiClient.createStub(SessionManager.class,
                      instanceContent.getSessionManager());
-         /* Some transmitters will change base64 encoded characters
-            from "+" to whitespace, and add "\n" for every 76 characters. */
-         name = name.replaceAll(" ", "+").replaceAll("\n", "");
-         name = new String(name.getBytes(), "UTF-8");
-         password = new String(password.getBytes(), "UTF-8");
+
          sessionManager.login(name, password, sessionManager.getDefaultLocale());
          sessionManager.logout();
       } finally {

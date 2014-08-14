@@ -39,12 +39,6 @@ public class RestClientTest extends AbstractTestNGSpringContextTests {
    private RestClient client;
 
    @Test
-   public void testlogin() throws IOException {
-      client.login1("https://10.112.113.137:8443/serengeti", "/j_spring_security_check", "你好", "sss");
-   }
-
-
-   @Test
    public void testGetHostUriProperty() {
       String host ="serengeti.com:9090";
       FileOutputStream hostFile = null;

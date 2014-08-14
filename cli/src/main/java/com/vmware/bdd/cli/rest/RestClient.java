@@ -48,13 +48,10 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import com.vmware.bdd.cli.auth.LoginClientImpl;
+import com.vmware.bdd.cli.auth.LoginResponse;
 import jline.console.ConsoleReader;
 
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.http.client.protocol.RequestDefaultHeaders;
 import org.apache.log4j.Logger;
 import org.fusesource.jansi.AnsiConsole;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,11 +61,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpMessageConverterExtractor;
-import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
@@ -96,6 +91,9 @@ public class RestClient {
 
    @Autowired
    private RestTemplate client;
+
+   @Autowired
+   private LoginClientImpl loginClient;
 
    static {
       trustSSLCertificate();
@@ -138,39 +136,6 @@ public class RestClient {
       return hostUri;
    }
 
-   public void login1(final String host, String path, String userName, String password) throws IOException {
-      String url = host + path;
-      PostMethod loginPost = new PostMethod(url);
-
-      loginPost.addRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-      NameValuePair[] loginCredentials = new NameValuePair[] {
-            new NameValuePair("j_username", userName) ,
-            new NameValuePair("j_password", password)
-      };
-
-      loginPost.setRequestBody(loginCredentials);
-
-
-      HttpClient client1 = new HttpClient();
-      client1.getHostConfiguration().setProxy("127.0.0.1", 8810);
-
-      int responseCode = client1.executeMethod(loginPost);
-
-      if (responseCode == org.apache.commons.httpclient.HttpStatus.SC_OK) {
-         //normal response
-         String cookieValue = loginPost.getResponseHeader("Set-Cookie").getValue();
-         if (cookieValue.contains(";")) {
-            cookieValue = cookieValue.split(";")[0];
-         }
-         writeCookieInfo(cookieValue);
-         System.out.println(Constants.CONNECT_SUCCESS);
-      } else {
-         //error
-         System.out.println(Constants.CONNECT_FAILURE);
-         //recover old hostUri
-      }
-   }
-
    /**
     * connect to a Serengeti server
     * 
@@ -189,12 +154,40 @@ public class RestClient {
             Constants.HTTPS_CONNECTION_PREFIX + host
                   + Constants.HTTPS_CONNECTION_LOGIN_SUFFIX;
 
-      try {
-         login1(hostUri, Constants.REST_PATH_LOGIN, username, password);
 
-         return Connect.ConnectType.SUCCESS;
-      } catch (IOException e) {
-         e.printStackTrace();
+      try {
+         LoginResponse response = loginClient.login(hostUri, username, password);
+
+         //200
+         if (response.getResponseCode() == HttpStatus.OK.value()) {
+            //normal response
+            updateHostProperty(host);
+
+            writeCookieInfo(response.getSessionId());
+            System.out.println(Constants.CONNECT_SUCCESS);
+         }
+         //302
+         else if(response.getResponseCode() == HttpStatus.UNAUTHORIZED.value()) {
+            System.out.println(Constants.CONNECT_UNAUTHORIZATION_CONNECT);
+            //recover old hostUri
+            hostUri = oldHostUri;
+            return Connect.ConnectType.UNAUTHORIZATION;
+         }
+         //500
+         else if(response.getResponseCode() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
+            System.out.println(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+            return Connect.ConnectType.ERROR;
+         } else {
+            //error
+            System.out.println(Constants.CONNECT_FAILURE);
+            //recover old hostUri
+            hostUri = oldHostUri;
+            return Connect.ConnectType.ERROR;
+         }
+      } catch (Exception e) {
+         System.out.println(Constants.CONNECT_FAILURE + ": "
+               + (CommandsUtils.getExceptionMessage(e)));
+         return Connect.ConnectType.ERROR;
       }
 
       return Connect.ConnectType.ERROR;
@@ -259,16 +252,6 @@ public class RestClient {
       return restGetByUri(targetUri, respEntityType);
    }
 
-   private <T> ResponseEntity<T> login(final String path,
-         final Class<T> respEntityType, final String username,
-         final String password) {
-      StringBuilder uriBuff = new StringBuilder();
-      uriBuff.append(hostUri).append(path);
-
-      return restPostByUri(uriBuff.toString(), username, password,
-            respEntityType, false);
-   }
-
    private <T> ResponseEntity<T> logout(final String path,
          final Class<T> respEntityType) {
       StringBuilder uriBuff = new StringBuilder();
@@ -282,29 +265,6 @@ public class RestClient {
       HttpEntity<String> entity = new HttpEntity<String>(headers);
 
       return client.exchange(uri, HttpMethod.GET, entity, respEntityType);
-   }
-
-   private <T> ResponseEntity<T> restPostByUri(final String uri,
-         final String username, final String password, Class<T> respEntityType,
-         boolean withCookie) {
-
-      return exchange(uri, username, password, HttpMethod.POST, respEntityType);
-   }
-
-   @SuppressWarnings({ "unchecked", "rawtypes" })
-   private <T> ResponseEntity<T> exchange(final String url,
-         final String username, final String password, HttpMethod method,
-         Class<T> responseType) {
-      return client.execute(url, HttpMethod.POST, new RequestCallback() {
-         @Override
-         public void doWithRequest(ClientHttpRequest request)
-               throws IOException {
-            request.getBody()
-                  .write(
-                        ("j_username=" + username + "&j_password="
-                              + password + "").getBytes("UTF-8"));
-         }
-      }, new ResponseEntityResponseExtractor<T>(responseType));
    }
 
    private HttpHeaders buildHeaders(boolean withCookie) {
@@ -329,7 +289,7 @@ public class RestClient {
    /*
     * Update host property file
     */
-   private void updateHostproperty(final String host) throws IOException {
+   private void updateHostProperty(final String host) throws IOException {
       FileOutputStream hostFile = null;
       try {
          Properties hostProperty = new Properties();
