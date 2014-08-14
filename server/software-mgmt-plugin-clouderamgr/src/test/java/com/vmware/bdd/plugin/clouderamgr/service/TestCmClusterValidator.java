@@ -14,18 +14,22 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.clouderamgr.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import junit.framework.Assert;
+import mockit.Mockit;
+
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
-import junit.framework.Assert;
-import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Author: Xiaoding Bian
@@ -34,7 +38,12 @@ import java.util.Map;
  */
 public class TestCmClusterValidator {
 
-   @Test
+   @BeforeClass(groups = {"TestCmClusterValidator"})
+   public static void setUp() {
+      Mockit.tearDownMocks();
+   }
+
+   @Test(groups = {"TestCmClusterValidator"})
    public void testSuccess() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();
@@ -46,7 +55,7 @@ public class TestCmClusterValidator {
       }
    }
 
-   @Test
+   @Test(groups = {"TestCmClusterValidator"})
    public void testUnrecogRolesOfDistro() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();
@@ -59,7 +68,7 @@ public class TestCmClusterValidator {
       }
    }
 
-   @Test
+   @Test(groups = {"TestCmClusterValidator"})
    public void testUnrecogRoles() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();
@@ -73,7 +82,7 @@ public class TestCmClusterValidator {
       }
    }
 
-   @Test
+   @Test(groups = {"TestCmClusterValidator"})
    public void testUnrecogConfigTypes() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();
@@ -86,7 +95,7 @@ public class TestCmClusterValidator {
       }
    }
 
-   @Test
+   @Test(groups = {"TestCmClusterValidator"})
    public void testBadConfigItems() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();
@@ -104,7 +113,7 @@ public class TestCmClusterValidator {
       }
    }
 
-   @Test
+   @Test(groups = {"TestCmClusterValidator"})
    public void testInvalidRack() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();
@@ -117,7 +126,7 @@ public class TestCmClusterValidator {
       }
    }
 
-   @Test
+   @Test(groups = {"TestCmClusterValidator"})
    public void testMissedRoles() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();
@@ -131,7 +140,7 @@ public class TestCmClusterValidator {
       }
    }
 
-   @Test
+   @Test(groups = {"TestCmClusterValidator"})
    public void testNnHA() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();
@@ -144,7 +153,7 @@ public class TestCmClusterValidator {
       }
    }
 
-   @Test
+   @Test(groups = {"TestCmClusterValidator"})
    public void testNnFederation() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();
@@ -157,7 +166,7 @@ public class TestCmClusterValidator {
       }
    }
 
-   @Test
+   @Test(groups = {"TestCmClusterValidator"})
    public void testServiceDependency01() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();
@@ -172,7 +181,7 @@ public class TestCmClusterValidator {
       }
    }
 
-   @Test
+   @Test(groups = {"TestCmClusterValidator"})
    public void testServiceDependency02() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();
@@ -189,7 +198,7 @@ public class TestCmClusterValidator {
       }
    }
 
-   @Test
+   @Test(groups = {"TestCmClusterValidator"})
    public void testBadInstanceNum01() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();
@@ -203,7 +212,7 @@ public class TestCmClusterValidator {
       }
    }
 
-   @Test
+   @Test(groups = {"TestCmClusterValidator"})
    public void testBadInstanceNum02() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();

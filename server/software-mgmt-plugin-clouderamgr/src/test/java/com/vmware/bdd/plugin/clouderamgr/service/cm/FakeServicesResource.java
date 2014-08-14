@@ -228,7 +228,11 @@ public class FakeServicesResource implements ServicesResourceV6 {
 
    @Override
    public ApiCommand deployClientConfigCommand(String s, ApiRoleNameList strings) {
-      return null;
+      System.out.println("calling " + this.getClass().getInterfaces()[0].getName() + "#" + Thread.currentThread().getStackTrace()[1].getMethodName());
+      ApiCommand command = new ApiCommand();
+      command.setName("deploy client config");
+      command.setId(1L);
+      return command;
    }
 
    @Override

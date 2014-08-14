@@ -42,11 +42,13 @@ public class FakeClustersResource implements ClustersResourceV6{
    public ApiClusterList clusters;
    public ParcelsResourceV5 parcelsResource;
    public ServicesResourceV6 servicesResource;
+   public FakeRootResource rootResource;
 
-   public FakeClustersResource() {
+   public FakeClustersResource(FakeRootResource root) {
       clusters = new ApiClusterList();
       parcelsResource = new FakeParcelsResource();
       servicesResource = new FakeServicesResource();
+      rootResource = root;
    }
 
    @Override
@@ -179,6 +181,7 @@ public class FakeClustersResource implements ClustersResourceV6{
 
    @Override
    public ApiHostRefList listHosts(String s) {
+      rootResource.getHostsResource().readHosts(DataView.SUMMARY);
       return new ApiHostRefList();
    }
 

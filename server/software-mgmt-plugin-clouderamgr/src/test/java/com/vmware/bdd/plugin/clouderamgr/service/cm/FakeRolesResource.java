@@ -94,6 +94,11 @@ public class FakeRolesResource implements RolesResourceV6 {
 
    @Override
    public ApiRole readRole(String s) {
+      for (ApiRole role : roles.getRoles()) {
+         if (role.getName().equals(s)) {
+            return role;
+         }
+      }
       return null;
    }
 

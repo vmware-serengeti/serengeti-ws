@@ -41,7 +41,7 @@ public class FakeRootResource implements RootResourceV6 {
    public CommandsResource commandsResource;
 
    public FakeRootResource() {
-      clustersResourceV6 = new FakeClustersResource();
+      clustersResourceV6 = new FakeClustersResource(this);
       hostsResourceV2 = new FakeHostsResource();
       clouderaManagerResourceV6 = new FakeClouderaManagerResource(hostsResourceV2);
       commandsResource = new FakeCommandsResource();

@@ -14,7 +14,30 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.clouderamgr.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import mockit.Mock;
+import mockit.MockClass;
+import mockit.Mockit;
+
+import org.apache.log4j.Logger;
+import org.mockito.Mockito;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
 import com.cloudera.api.ApiRootResource;
+import com.cloudera.api.DataView;
+import com.cloudera.api.model.ApiHealthSummary;
+import com.cloudera.api.model.ApiHost;
+import com.cloudera.api.model.ApiHostList;
+import com.cloudera.api.model.ApiRole;
+import com.cloudera.api.model.ApiRoleList;
+import com.cloudera.api.model.ApiRoleRef;
 import com.cloudera.api.v6.RootResourceV6;
 import com.cloudera.api.v7.RootResourceV7;
 import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
@@ -25,23 +48,12 @@ import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginExc
 import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 import com.vmware.bdd.utils.CommonUtil;
-import mockit.Mock;
-import mockit.MockClass;
-import mockit.Mockit;
-import org.apache.log4j.Logger;
-import org.mockito.Mockito;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Author: Xiaoding Bian
@@ -181,4 +193,70 @@ public class TestClouderaManagerImpl {
       }
    }
 
+   @Test( groups = { "TestClouderaManagerImpl" }, dependsOnMethods = { "testCreateCluster" })
+   public void testQueryClusterStatus() {
+      blueprint.getHadoopStack().setDistro("CDH-5.0.1");
+      ApiHostList hostList = rootResourceV6.getHostsResource().readHosts(DataView.SUMMARY);
+      List<ApiHost> hosts = hostList.getHosts();
+      hosts.get(0).setHealthSummary(ApiHealthSummary.BAD);
+      hosts.get(1).setHealthSummary(ApiHealthSummary.CONCERNING);
+      hosts.get(2).setHealthSummary(ApiHealthSummary.GOOD);
+      hosts.get(3).setHealthSummary(ApiHealthSummary.NOT_AVAILABLE);
+      List<ApiRoleRef> roleRefs = new ArrayList<>();
+      String hdfsServiceName = blueprint.getName() + "_HDFS";
+      String yarnServiceName = blueprint.getName() + "_YARN";
+      ApiRoleList roleList =
+            rootResourceV6.getClustersResource()
+                  .getServicesResource(blueprint.getName())
+                  .getRolesResource(hdfsServiceName).readRoles();
+      for (ApiRole role : roleList.getRoles()) {
+         if (role.getHostRef().getHostId().equals(hosts.get(2).getHostId())) {
+            ApiRoleRef roleRef = new ApiRoleRef();
+            roleRef.setClusterName(blueprint.getName());
+            roleRef.setServiceName(hdfsServiceName);
+            roleRef.setRoleName(role.getName());
+            roleRefs.add(roleRef);
+         }
+      }
+      roleList =
+            rootResourceV6.getClustersResource()
+                  .getServicesResource(blueprint.getName())
+                  .getRolesResource(yarnServiceName).readRoles();
+      for (ApiRole role : roleList.getRoles()) {
+         if (role.getHostRef().getHostId().equals(hosts.get(2).getHostId())) {
+            ApiRoleRef roleRef = new ApiRoleRef();
+            roleRef.setClusterName(blueprint.getName());
+            roleRef.setServiceName(yarnServiceName);
+            roleRef.setRoleName(role.getName());
+            roleRefs.add(roleRef);
+         }
+      }
+      hosts.get(2).setRoleRefs(roleRefs);
+      ClusterReport report = provider.queryClusterStatus(blueprint);
+      Assert.assertTrue(report.getStatus() != null
+            && report.getStatus() == ServiceStatus.STOPPED,
+            "Status should be stopped, but got " + report.getStatus());
+      System.out.println("Status: " + report.getStatus());
+   }
+
+   @Test( groups = { "TestClouderaManagerImpl" }, dependsOnMethods = { "testQueryClusterStatus" })
+   public void testScaleOutCluster() {
+      blueprint.getHadoopStack().setDistro("CDH-5.0.1");
+      // FakeParcelsResource#getParcelResource should print the right parcel version
+      List<String> addedNodeNames = new ArrayList<>();
+      for (NodeGroupInfo groupInfo : blueprint.getNodeGroups()) {
+         int instanceNum = groupInfo.getNodes().size();
+         if (instanceNum > 1) {
+            addedNodeNames.add(groupInfo.getNodes().get(instanceNum - 1).getName());
+         }
+      }
+      provider.scaleOutCluster(blueprint, addedNodeNames, reportQueue);
+      List<ClusterReport> reports = reportQueue.pollClusterReport();
+      for (ClusterReport report : reports) {
+         System.out.println("Action: " + report.getAction() + ", Progress: " + report.getProgress());
+         if (report.isFinished()) {
+            Assert.assertTrue(report.isSuccess(), "Should get success result.");
+         }
+      }
+   }
 }

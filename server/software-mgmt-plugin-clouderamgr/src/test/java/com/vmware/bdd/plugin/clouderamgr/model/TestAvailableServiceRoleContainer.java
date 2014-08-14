@@ -18,6 +18,8 @@ import com.google.gson.Gson;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
 import junit.framework.Assert;
+
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -34,6 +36,9 @@ import java.util.Set;
  * Time: 7:48 PM
  */
 public class TestAvailableServiceRoleContainer {
+   @BeforeClass(groups = { "TestAvailableServiceRoleContainer" }, dependsOnGroups = {"TestCmClusterValidator"})
+   public static void setup() throws IOException {
+   }
 
    @Test(groups = {"TestAvailableServiceRoleContainer"})
    public void testLoad() throws IOException {

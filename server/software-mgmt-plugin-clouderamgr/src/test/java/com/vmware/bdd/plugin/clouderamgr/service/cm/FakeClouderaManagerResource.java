@@ -20,6 +20,7 @@ import com.cloudera.api.model.ApiCommand;
 import com.cloudera.api.model.ApiCommandList;
 import com.cloudera.api.model.ApiConfigList;
 import com.cloudera.api.model.ApiDeployment;
+import com.cloudera.api.model.ApiHealthSummary;
 import com.cloudera.api.model.ApiHost;
 import com.cloudera.api.model.ApiHostInstallArguments;
 import com.cloudera.api.model.ApiHostList;
