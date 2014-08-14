@@ -607,23 +607,40 @@ public class ClouderaManagerImpl implements SoftwareManager {
       try {
          CmClusterDef cluster = new CmClusterDef(blueprint);
          syncHostsId(cluster);
-         if (isExistingServiceStarted(cluster.getName())) {
-            ApiHealthSummary summary = getExistingServiceHealthStatus(cluster.getName());
-            if (summary.ordinal() >= ApiHealthSummary.GOOD.ordinal()) {
-               if (summary.ordinal() == ApiHealthSummary.GOOD.ordinal()) {
-                  cluster.getCurrentReport().setStatus(ServiceStatus.STARTED);
-                  logger.debug("Cluster " + blueprint.getName() + " is healthy.");
-               } else {
-                  cluster.getCurrentReport().setStatus(ServiceStatus.ALERT);
-                  logger.debug("Cluster " + blueprint.getName() + " is concerning.");
-               }
+         boolean allStarted = true;
+         boolean allStopped = true;
+         for (ApiService apiService : apiResourceRootV6.getClustersResource()
+               .getServicesResource(cluster.getName()).readServices(DataView.SUMMARY)) {
+            ApiServiceState serviceState = apiService.getServiceState();
+            if (!ApiServiceState.STARTED.equals(serviceState)) {
+               allStarted = false;
             } else {
+               allStopped = false;
+            }
+         }
+         if (allStopped) {
+            logger.debug("Cluster " + blueprint.getName() + " services are stopped.");
+            cluster.getCurrentReport().setStatus(ServiceStatus.STOPPED);
+         } else if (allStarted) {
+            ApiHealthSummary summary = getExistingServiceHealthStatus(cluster.getName());
+            switch (summary) {
+            case GOOD:
                cluster.getCurrentReport().setStatus(ServiceStatus.STARTED);
-               logger.debug("Cluster " + blueprint.getName() + " is started, but health status is unknown.");
+               logger.debug("Cluster " + blueprint.getName() + " is healthy.");
+               break;
+            case BAD:
+            case CONCERNING:
+               cluster.getCurrentReport().setStatus(ServiceStatus.ALERT);
+               logger.debug("Cluster " + blueprint.getName() + " is concerning.");
+               break;
+            default:
+               cluster.getCurrentReport().setStatus(ServiceStatus.STARTED);
+               logger.debug("Cluster " + blueprint.getName() + " healthy is unavailable.");
+               break;
             }
          } else {
+            cluster.getCurrentReport().setStatus(ServiceStatus.ALERT);
             logger.debug("Cluster " + blueprint.getName() + " services are not all started yet.");
-            cluster.getCurrentReport().setStatus(ServiceStatus.STOPPED);
          }
          queryNodesStatus(cluster);
          return cluster.getCurrentReport().clone();

@@ -519,7 +519,7 @@ public class ClusterManager {
 
       if (!cluster.getStatus().isActiveServiceStatus()
             && !ClusterStatus.CONFIGURE_ERROR.equals(cluster.getStatus())
-            && !ClusterStatus.SERVICE_ERROR.equals(cluster.getStatus())) {
+            && !ClusterStatus.SERVICE_STOPPED.equals(cluster.getStatus())) {
          logger.error("can not config cluster: " + clusterName + ", "
                + cluster.getStatus());
          throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
@@ -753,7 +753,7 @@ public class ClusterManager {
       }
 
       if (!cluster.getStatus().isActiveServiceStatus()
-            && !ClusterStatus.SERVICE_ERROR.equals(cluster.getStatus())
+            && !ClusterStatus.SERVICE_STOPPED.equals(cluster.getStatus())
             && !ClusterStatus.ERROR.equals(cluster.getStatus())) {
          logger.error("cluster " + clusterName
                + " cannot be stopped, it is in " + cluster.getStatus()
@@ -974,7 +974,7 @@ public class ClusterManager {
                clusterName, "The cluster's status must be RUNNING");
       }
       if (!cluster.getStatus().isActiveServiceStatus()
-            && !ClusterStatus.SERVICE_ERROR.equals(cluster.getStatus())
+            && !ClusterStatus.SERVICE_STOPPED.equals(cluster.getStatus())
             && !ClusterStatus.STOPPED.equals(cluster.getStatus())) {
          logger.error("Cannot change elasticity parameters, when cluster "
                + clusterName + " is in " + cluster.getStatus() + " status");

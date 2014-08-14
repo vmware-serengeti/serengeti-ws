@@ -358,7 +358,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       ClusterStatus oldState = cluster.getStatus();
       switch (oldState) {
          case RUNNING:
-         case SERVICE_ERROR:
+         case SERVICE_STOPPED:
          case SERVICE_WARNING:
             switch (report.getStatus()) {
                case STARTED:
@@ -368,7 +368,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
                   cluster.setStatus(ClusterStatus.SERVICE_WARNING);
                   break;
                case STOPPED:
-                  cluster.setStatus(ClusterStatus.SERVICE_ERROR);
+                  cluster.setStatus(ClusterStatus.SERVICE_STOPPED);
                   break;
                default:
                   break;

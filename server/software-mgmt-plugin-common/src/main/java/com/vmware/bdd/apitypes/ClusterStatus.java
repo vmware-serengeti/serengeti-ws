@@ -34,21 +34,21 @@ public enum ClusterStatus {
    VMRECONFIGURING,
    MAINTENANCE,
    UPGRADE_ERROR,
-   SERVICE_ERROR,
+   SERVICE_STOPPED,
    SERVICE_WARNING;
 
    private static EnumSet<ClusterStatus> stableStatus = EnumSet.of(
          RUNNING, STOPPED,
          CONFIGURE_ERROR, ERROR,
          PROVISION_ERROR, UPGRADE_ERROR,
-         SERVICE_ERROR, SERVICE_WARNING);
+         SERVICE_STOPPED, SERVICE_WARNING);
 
    private static EnumSet<ClusterStatus> activeServiceStatus = EnumSet.of(
          RUNNING, SERVICE_WARNING);
 
    private static EnumSet<ClusterStatus> syncServiceStatus = EnumSet.of(
          RUNNING, SERVICE_WARNING,
-         SERVICE_ERROR, VHM_RUNNING);
+         SERVICE_STOPPED, VHM_RUNNING);
 
    public boolean isStableStatus() {
       return stableStatus.contains(this);
