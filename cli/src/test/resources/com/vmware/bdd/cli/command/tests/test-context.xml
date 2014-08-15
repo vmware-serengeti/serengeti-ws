@@ -9,6 +9,7 @@
 
  	<context:component-scan base-package="com.vmware.bdd.cli.commands" />
     <context:component-scan base-package="com.vmware.bdd.cli.rest"/>
+    <context:component-scan base-package="com.vmware.bdd.cli.rest"/>
     <bean id="client" class="org.springframework.web.client.RestTemplate">
         <property name="messageConverters">
             <list>
