@@ -204,6 +204,32 @@ public class RestResource {
       redirectRequest(jobExecutionId, request, response);
    }
 
+   //For ClouderaManager, Ambari, some ops are not supported in M9.
+   //https://wiki.eng.vmware.com/BigData/Releases/M9/CM#Operations_support_matrix_for_new_app_manager:_Cloudera_Manager_and_Ambari
+   private void blockUnsupportedOpsByCluster(String ops, String clusterName) {
+      ClusterRead clusterRead = clusterMgr.getClusterByName(clusterName, false);
+
+      AppManagerRead appMgr = appManagerService.getAppManagerRead(clusterRead.getAppManager());
+
+      String appMgrType = appMgr == null ? null : appMgr.getType();
+
+      blockUnsupportedOpsByAppMgr(ops, appMgrType);
+   }
+
+   private void blockUnsupportedOpsByAppMgr(String ops, String appMgr) {
+      if(!"Default".equals(appMgr)) {
+         throw BddException.UNSUPPORTED_OPS(ops, appMgr);
+      }
+   }
+
+   private void blockSetElasticity(String ops, ElasticityRequestBody request, String clusterName) {
+      //allow set ioshare only.
+      if(request.getEnableAuto() != null || request.getActiveComputeNodeNum() != null ||
+            request.getMaxComputeNodeNum() != null || request.getMinComputeNodeNum() != null) {
+         blockUnsupportedOpsByAppMgr(ops, clusterName);
+      }
+   }
+
    /**
     * Configure a hadoop or hbase cluster's properties
     * @param clusterName
@@ -216,10 +242,14 @@ public class RestResource {
    public void configCluster(@PathVariable("clusterName") String clusterName,
          @RequestBody ClusterCreate createSpec, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
+
       verifyInitialized();
       if (!CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
+
+      blockUnsupportedOpsByCluster("configCluster", clusterName);
+
       Long taskId = clusterMgr.configCluster(clusterName, createSpec);
       redirectRequest(taskId, request, response);
    }
@@ -373,6 +403,8 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
 
+      blockUnsupportedOpsByCluster("scale Up/Down", clusterName);
+
       if (CommonUtil.isBlank(groupName)
             || !CommonUtil.validateNodeGroupName(groupName)) {
          throw BddException.INVALID_PARAMETER("node group name", groupName);
@@ -403,6 +435,9 @@ public class RestResource {
          HttpServletResponse response) throws Exception {
       verifyInitialized();
       validateInput(clusterName, requestBody);
+
+      blockSetElasticity("asyncSetElasticity", requestBody, clusterName);
+
       ClusterRead cluster = clusterMgr.getClusterByName(clusterName, false);
       if (!cluster.needAsyncUpdateParam(requestBody)) {
             throw BddException.BAD_REST_CALL(null, "invalid input to cluster.");
@@ -429,6 +464,9 @@ public class RestResource {
          HttpServletResponse response) throws Exception {
       verifyInitialized();
       validateInput(clusterName, requestBody);
+
+      blockSetElasticity("syncSetElasticity", requestBody, clusterName);
+
       clusterMgr.syncSetParam(clusterName,
             requestBody.getActiveComputeNodeNum(),
             requestBody.getMinComputeNodeNum(),
@@ -474,6 +512,14 @@ public class RestResource {
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
       verifyInitialized();
+      clusterName = CommonUtil.decode(clusterName);
+      if (CommonUtil.isBlank(clusterName)
+            || !CommonUtil.validateClusterName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+
+      blockUnsupportedOpsByCluster("fixDisk", clusterName);
+
       Long taskId =
             clusterMgr.fixDiskFailures(clusterName,
                   fixDiskSpec.getNodeGroupName());

@@ -189,4 +189,8 @@ public class BddException extends RuntimeException {
       return new BddException(null, "BDD", "INIT_VC_FAIL");
    }
 
+   public static BddException UNSUPPORTED_OPS(String ops, String appMgr) {
+      return new BddException(null, "BDD", "UNSUPPORTED_OPS_FOR_APP_MGR", ops, appMgr);
+   }
+
 }
