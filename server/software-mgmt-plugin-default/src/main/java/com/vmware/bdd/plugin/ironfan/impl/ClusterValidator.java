@@ -114,7 +114,7 @@ public class ClusterValidator {
       }
 
       if(invalidRoleList.size() > 0) {
-         String msgFormat = invalidRoleList.size() > 1 ? "roles: %1s are not invalid." : "role: %1s is invalid.";
+         String msgFormat = invalidRoleList.size() > 1 ? "roles: %1s are invalid." : "role: %1s is invalid.";
          failedMsgList.add(String.format(
                msgFormat, new ListToStringConverter(invalidRoleList, ',')
          ));
@@ -199,15 +199,22 @@ public class ClusterValidator {
                   missingRoles.add(role);
                }
             }
+
+            //no missing roles, meaning this service is added in the spec
             if (missingRoles.size() == 0) {
                serviceTypes.add(service);
-            } else {
+            }
+            //if the roles for this service is not enough, we have to set it as failure.
+            else if(missingRoles.size() < service.getRoles().size()){
                failedMsgList.add(
                      String.format("Missing role(s): %1s for service: %2s.",
                            new ListToStringConverter(missingRoles, ','), service)
                );
                valid = false;
             }
+            //if all roles are missing, meaning this service is not added in the spec
+            //then later check service dependencies.
+            //lixl.
          }
 
          boolean isYarn = serviceTypes.contains(ServiceType.YARN);

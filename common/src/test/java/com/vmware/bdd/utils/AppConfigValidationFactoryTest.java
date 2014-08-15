@@ -165,7 +165,7 @@ public class AppConfigValidationFactoryTest {
       AppConfigValidationFactory.validateConfigType(configurations, warningMsgList);
       assertEquals(1, warningMsgList.size());
 
-      assertEquals("Warning: The item: xyz is not a regular cluster configuration.",
+      assertEquals("Warning: The type: xyz is not a regular cluster configuration.",
             warningMsgList.get(0));
    }
 
@@ -180,7 +180,7 @@ public class AppConfigValidationFactoryTest {
       AppConfigValidationFactory.validateConfigType(configurations, warningMsgList);
       assertEquals(1, warningMsgList.size());
 
-      assertEquals("Warning: The item: abc,xyz is not a regular cluster configuration.",
+      assertEquals("Warning: The types: abc,xyz are not regular cluster configurations.",
             warningMsgList.get(0));
    }
 }

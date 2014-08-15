@@ -21,9 +21,6 @@ import java.util.Map.Entry;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.ListUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -72,13 +69,7 @@ public class AppConfigValidationFactory {
    /**
     * Validate configure files of each config type.
     *
-    * @param config
-    * @param validateResult
-    * @param list
-    * @param type
-    * @param <T>
-    * @return
-    */
+    **/
    @SuppressWarnings("unchecked")
    private static <T> ValidateResult processAppConfigValidation(Map<String, Object> config,
          ValidateResult validateResult, List<Map<String, Map<String, List<T>>>> list, ValidationType type) {
@@ -102,6 +93,13 @@ public class AppConfigValidationFactory {
       return validateResult;
    }
 
+   /**
+    * validate configuration items against whitelist. If one item not found in the whitelist, add a warning message.
+    *
+    * @param config configuration items by module.
+    * @param list whitelist, all known good items by module
+    * @param <T> String
+    */
    private static <T> void validateConfigType(Map<String, Object> config,
          List<Map<String, Map<String, List<T>>>> list,
          List<String> warningMsgList) {
