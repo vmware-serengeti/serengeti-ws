@@ -38,8 +38,8 @@ public class ClusterSpecFactory {
       V1, V2
    }
 
-   private enum HDFS_VERSION {
-      V1, V2
+   private enum HDP_VERSION {
+      V1, V2_0, V2_1
    }
    private static final Logger logger = Logger
          .getLogger(ClusterSpecFactory.class);
@@ -71,8 +71,10 @@ public class ClusterSpecFactory {
          "am-hdfs-v2-template-spec.json";
    private static final String AM_HDFS_MAPRED_TEMPLATE_SPEC =
          "am-hdfs-mapred-template-spec.json";
-   private static final String AM_HDFS_YARN_TEMPLATE_SPEC =
-         "am-hdfs-yarn-template-spec.json";
+   private static final String AM_HDP_2_0_HDFS_YARN_TEMPLATE_SPEC =
+         "am-hdp-2-0-hdfs-yarn-template-spec.json";
+   private static final String AM_HDP_2_1_HDFS_YARN_TEMPLATE_SPEC =
+         "am-hdp-2-1-hdfs-yarn-template-spec.json";
    private static final String AM_HDFS_V1_HBASE_TEMPLATE_SPEC =
          "am-hdfs-v1-hbase-template-spec.json";
    private static final String AM_HDFS_V2_HBASE_TEMPLATE_SPEC =
@@ -170,17 +172,21 @@ public class ClusterSpecFactory {
       } else if (Constants.AMBARI_PLUGIN_TYPE.equals(appManagerType)
             && vendor.trim().equalsIgnoreCase(Constants.HDP_VENDOR)) {
          MAPREDUCE_VERSION mr = getDefaultMapReduceVersion(vendor, distroVersion);
+         HDP_VERSION hdpVersion = getDefaultHdfsVersion(vendor, distroVersion);
          if (type == null) {
             if (mr == MAPREDUCE_VERSION.V1) {
                return loadFromFile(locateSpecFile(AM_HDFS_MAPRED_TEMPLATE_SPEC));
             } else {
-               return loadFromFile(locateSpecFile(AM_HDFS_YARN_TEMPLATE_SPEC));
+               if (hdpVersion == HDP_VERSION.V2_0) {
+                  return loadFromFile(locateSpecFile(AM_HDP_2_0_HDFS_YARN_TEMPLATE_SPEC));
+               } else {
+                  return loadFromFile(locateSpecFile(AM_HDP_2_1_HDFS_YARN_TEMPLATE_SPEC));
+               }
             }
          }
-         HDFS_VERSION hdfs = getDefaultHdfsVersion(vendor, distroVersion);
          switch (type) {
          case HDFS:
-            if (hdfs == HDFS_VERSION.V1) {
+            if (hdpVersion == HDP_VERSION.V1) {
                return loadFromFile(locateSpecFile(AM_HDFS_V1_TEMPLATE_SPEC));
             } else {
                return loadFromFile(locateSpecFile(AM_HDFS_V2_TEMPLATE_SPEC));
@@ -189,11 +195,15 @@ public class ClusterSpecFactory {
             if (mr == MAPREDUCE_VERSION.V1) {
                return loadFromFile(locateSpecFile(AM_HDFS_MAPRED_TEMPLATE_SPEC));
             } else {
-               return loadFromFile(locateSpecFile(AM_HDFS_YARN_TEMPLATE_SPEC));
+               if (hdpVersion == HDP_VERSION.V2_0) {
+                  return loadFromFile(locateSpecFile(AM_HDP_2_0_HDFS_YARN_TEMPLATE_SPEC));
+               } else {
+                  return loadFromFile(locateSpecFile(AM_HDP_2_1_HDFS_YARN_TEMPLATE_SPEC));
+               }
             }
          case HDFS_HBASE:
             if (Configuration.getBoolean(Constants.AMBARI_HBASE_DEPEND_ON_MAPREDUCE)) {
-               if (hdfs == HDFS_VERSION.V1) {
+               if (hdpVersion == HDP_VERSION.V1) {
                   return loadFromFile(locateSpecFile(AM_HDFS_V1_HBASE_TEMPLATE_SPEC));
                } else {
                   return loadFromFile(locateSpecFile(AM_HDFS_V2_HBASE_TEMPLATE_SPEC));
@@ -285,19 +295,21 @@ public class ClusterSpecFactory {
       return MAPREDUCE_VERSION.V2;
    }
 
-   private static HDFS_VERSION getDefaultHdfsVersion(String vendor,
+   private static HDP_VERSION getDefaultHdfsVersion(String vendor,
          String distroVersion) {
 
       if (vendor.trim().equalsIgnoreCase(Constants.HDP_VENDOR)) {
-         if (distroVersion.startsWith("2")) {
-            return HDFS_VERSION.V2;
+         if (distroVersion.startsWith("2.1")) {
+            return HDP_VERSION.V2_1;
+         } else if (distroVersion.startsWith("2.0")) {
+            return HDP_VERSION.V2_0;
          } else {
-            return HDFS_VERSION.V1;
+            return HDP_VERSION.V1;
          }
       }
 
-      logger.error("Unknown distro vendor, return default hdfs version 2");
-      return HDFS_VERSION.V2;
+      logger.error("Unknown distro HDP version, return default HDP version 2.1");
+      return HDP_VERSION.V2_1;
    }
 
    /**
