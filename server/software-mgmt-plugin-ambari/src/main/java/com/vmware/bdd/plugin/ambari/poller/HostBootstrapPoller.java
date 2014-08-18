@@ -19,7 +19,10 @@ import org.apache.log4j.Logger;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
+import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapHostStatus;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapStatus;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostList;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
@@ -52,9 +55,19 @@ public class HostBootstrapPoller extends StatusPoller {
             + " to complete.");
       ApiBootstrapStatus apiBootstrapStatus = apiManager.getBootstrapStatus(requestId);
 
-      BootstrapStatus bootstrapStatus =
-            BootstrapStatus.valueOf(apiBootstrapStatus.getStatus());
-      if (bootstrapStatus.isCompletedState()) {
+      // wait for all hosts registration
+      int registeredHostsCount = 0;
+      ApiHostList apiHostList = apiManager.getRegisteredHosts();
+      for ( ApiBootstrapHostStatus apiBootstrapHostStatus : apiBootstrapStatus.getApiBootstrapHostStatus()) {
+         for (ApiHost apiHost : apiHostList.getApiHosts()) {
+            if (apiHost.getApiHostInfo().getHostName().equals(apiBootstrapHostStatus.getHostName())) {
+               registeredHostsCount++;
+            }
+         }
+      }
+      int bootstrapedHostCount = apiBootstrapStatus.getApiBootstrapHostStatus().size();
+      BootstrapStatus bootstrapStatus = BootstrapStatus.valueOf(apiBootstrapStatus.getStatus());
+      if (bootstrapStatus.isCompletedState() && bootstrapedHostCount == registeredHostsCount) {
          currentReport.setProgress(endProgress);
          reportQueue.addClusterReport(currentReport.clone());
          return true;

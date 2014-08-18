@@ -160,4 +160,6 @@ public interface IApiManager {
    public String healthCheck() throws AmbariApiException;
 
    public String getVersion() throws AmbariApiException;
+
+   public ApiHostList getRegisteredHosts() throws AmbariApiException;
 }

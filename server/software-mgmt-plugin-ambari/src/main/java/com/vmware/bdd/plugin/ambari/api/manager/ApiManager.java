@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 
 import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
+
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.http.HttpStatus;
 
@@ -838,8 +839,15 @@ public class ApiManager implements IApiManager {
 
    public ApiStackServiceList getStackWithCompAndConfigs(String stackName,
          String stackVersion) throws AmbariApiException {
-      return getServicesWithFilter(stackName, stackVersion, 
+      return getServicesWithFilter(stackName, stackVersion,
             "configurations/StackConfigurations,serviceComponents/StackServiceComponents");
+   }
+
+   @Override
+   public ApiHostList getRegisteredHosts() throws AmbariApiException {
+      Response response = apiResourceRootV1.getHostsResource().readHosts();
+      String apiHostListJson = handleAmbariResponse(response);
+      return ApiUtils.jsonToObject(ApiHostList.class, apiHostListJson);
    }
 
    private ApiStackServiceList getServicesWithFilter(String stackName,

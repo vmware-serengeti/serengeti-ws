@@ -49,4 +49,7 @@ public interface RootResourceV1 {
 
    @Path("/persist")
    public PersistResource getPersistResource();
+
+   @Path("/hosts")
+   public HostsResource getHostsResource();
 }
