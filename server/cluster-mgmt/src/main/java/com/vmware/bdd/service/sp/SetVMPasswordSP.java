@@ -169,7 +169,7 @@ public class SetVMPasswordSP implements Callable<Void> {
       String user = Configuration.getString(Constants.SSH_USER_CONFIG_NAME, Constants.DEFAULT_SSH_USER_NAME);
       String password = Configuration.getString(Constants.SERENGETI_DEFAULT_PASSWORD);
       String cmd = script + " " + hostIP + " " + user + " " + password;
-
+      int sleepTime = Configuration.getInt(Constants.SSH_SLEEP_TIME_BEFORE_RETRY, Constants.DEFAULT_SSH_SLEEP_TIME_BEFORE_RETRY);
       int timeoutCount = 0;
       for (int i = 0; i < Constants.SET_PASSWORD_MAX_RETRY_TIMES; i++) {
          try {
@@ -181,9 +181,9 @@ public class SetVMPasswordSP implements Callable<Void> {
                timeoutCount++;
             }
             logger.warn("Set passwordless login no. " + i + " and got exception: " + e.getMessage(), e);
-            //sometimes the sshd daemon may not ready, add sleep can avoid the race
+            //sometimes the sshd daemon may not ready, add sleep can avoid the race. Now, the longest wait time is 150s
             try {
-               Thread.sleep(3000);
+               Thread.sleep(sleepTime);
             } catch (InterruptedException ie) {
                logger.warn("Interrupted when waiting for setupPasswordlessLogin, retry immediately.", ie);
             }

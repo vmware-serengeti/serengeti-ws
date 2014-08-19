@@ -1110,11 +1110,15 @@ public class AmbariImpl implements SoftwareManager {
          if (!isClusterProvisionedByBDE(clusterDef)) {
             return true;
          }
-         //Stop services if needed, when stop failed, we will try to forcely delete resource
+         //Stop services if there is started services, when stop failed, we will try to forcely delete resource
          //although we may also fail because of resource dependency. In that case, we will
          //throw out the exception and fail
-         if (!onStopCluster(clusterBlueprint, reports)) {
-            logger.error("Ambari failed to stop services");
+         try {
+            if (!onStopCluster(clusterBlueprint, reports)) {
+               logger.error("Ambari failed to stop services");
+            }
+         } catch (Exception e) {
+            logger.error("Got exception when stop all services before delete cluster, try to delete cluster forcely", e);
          }
          List<String> serviceNames = apiManager.getClusterServicesNames(clusterName);
          if (serviceNames != null && !serviceNames.isEmpty()) {
