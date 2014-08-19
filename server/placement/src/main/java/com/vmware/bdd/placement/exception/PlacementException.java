@@ -36,7 +36,11 @@ public class PlacementException extends BddException {
    public static PlacementException PLACEMENT_ERROR(PlacementException cause, List<BaseNode> placedNodes,
          Map<String, List<String>> filteredHosts) {
       StringBuilder placedNodesStr = new StringBuilder();
-      if (!placedNodes.isEmpty()) placedNodesStr.append("\n");
+      if (!placedNodes.isEmpty()) {
+         placedNodesStr.append("\nCurrent node placement plan:\n");
+      } else {
+         placedNodesStr.append("\nNo nodes can be placed.\n");
+      }
       for (BaseNode baseNode : placedNodes) {
          placedNodesStr.append(BddException.getErrorMessage("PLACEMENT.NODE_PLACED_ON_HOST", baseNode.getVmName(), baseNode.getTargetHost()));
          placedNodesStr.append(" ");
@@ -59,7 +63,12 @@ public class PlacementException extends BddException {
          filteredHostsStr.append("\n");
          filteredHostsStr.append(BddException.getErrorMessage("PLACEMENT.NO_DATASTORE_HOSTS", noDatastoreHosts, noDatastoreHostsNodeGroup));
       }
-      return new PlacementException(cause, "PLACEMENT_ERROR", cause.getMessage(), placedNodesStr.toString(), filteredHostsStr.toString());
+
+      if(filteredHostsStr.length() > 0) {
+         filteredHostsStr.insert(0, " Possible fixes:");
+      }
+
+      return new PlacementException(cause, "PLACEMENT_ERROR", cause.getMessage(), filteredHostsStr.toString(),placedNodesStr.toString());
    }
 
    public static PlacementException OUT_OF_STORAGE_ON_HOST(String host) {
