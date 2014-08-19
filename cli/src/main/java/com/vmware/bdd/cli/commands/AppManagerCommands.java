@@ -346,8 +346,8 @@ public class AppManagerCommands implements CommandMarker {
                Constants.FORMAT_TABLE_COLUMN_TYPE, Arrays.asList("getType"));
          appManagerColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_URL, Arrays.asList("getUrl"));
-         appManagerColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_USERNAME, Arrays.asList("getUsername"));
+         //appManagerColumnNamesWithGetMethodNames.put(
+         //      Constants.FORMAT_TABLE_COLUMN_USERNAME, Arrays.asList("getUsername"));
          //appManagerColumnNamesWithGetMethodNames.put(
          //      Constants.FORMAT_TABLE_COLUMN_VERSION, Arrays.asList("getVersion"));
          //appManagerColumnNamesWithGetMethodNames.put(
@@ -374,8 +374,33 @@ public class AppManagerCommands implements CommandMarker {
    }
 
    private void prettyOutputAppManagerInfo(AppManagerRead appmanager) {
-      if (appmanager != null)
-         prettyOutputAppManagerInfo(new AppManagerRead[] { appmanager });
+      if (appmanager != null) {
+         AppManagerRead[] appmanagers = new AppManagerRead[] { appmanager };
+         LinkedHashMap<String, List<String>> appManagerColumnNamesWithGetMethodNames =
+               new LinkedHashMap<String, List<String>>();
+         appManagerColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_NAME, Arrays.asList("getName"));
+         appManagerColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_DESCRIPTION, Arrays.asList("getDescription"));
+         appManagerColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_TYPE, Arrays.asList("getType"));
+         appManagerColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_URL, Arrays.asList("getUrl"));
+         appManagerColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_USERNAME, Arrays.asList("getUsername"));
+         //appManagerColumnNamesWithGetMethodNames.put(
+         //      Constants.FORMAT_TABLE_COLUMN_VERSION, Arrays.asList("getVersion"));
+         //appManagerColumnNamesWithGetMethodNames.put(
+         //      Constants.FORMAT_TABLE_COLUMN_CLUSTER_NAME, Arrays.asList("getManagedClusters"));
+
+         try {
+            CommandsUtils.printInTableFormat(
+                  appManagerColumnNamesWithGetMethodNames, appmanagers,
+                  Constants.OUTPUT_INDENT);
+         } catch (Exception e) {
+            System.err.println(e.getMessage());
+         }
+      }
    }
 
    @CliCommand(value = "appmanager modify", help = "Modify an application manager instance")

@@ -283,10 +283,10 @@ public class SoftwareManagerCollector implements InitializingBean {
          appManagerAdd.setName(Constants.IRONFAN);
          appManagerAdd.setDescription(Constants.IRONFAN_DESCRIPTION);
          appManagerAdd.setType(Constants.IRONFAN);
-         appManagerAdd.setUrl("http://localhost");
-         appManagerAdd.setUsername("n/a");
+         appManagerAdd.setUrl("");
+         appManagerAdd.setUsername("");
          appManagerAdd.setPassword("");
-         appManagerAdd.setSslCertificate("n/a");
+         appManagerAdd.setSslCertificate("");
          appManagerService.addAppManager(appManagerAdd);
       }
       SoftwareManager ironfanSoftwareManager = new DefaultSoftwareManagerImpl();
