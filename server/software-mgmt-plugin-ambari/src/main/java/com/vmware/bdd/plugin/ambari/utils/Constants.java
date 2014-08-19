@@ -33,4 +33,7 @@ public interface Constants {
    public static final String CONFIG_YARN_NODEMANAGER_LOCAL_DIRS = "yarn.nodemanager.local-dirs";
    public static final String CONFIG_JOURNALNODE_EDITS_DIR = "dfs.journalnode.edits.dir";
    public static final String CONFIG_MAPRED_LOCAL_DIR = "mapred.local.dir";
+
+   public static final String HOST_BOOTSTRAP_FAILED = "FAILED";
+   public static final String HOST_BOOTSTRAP_MSG = "Failed to bootstrap host";
 }

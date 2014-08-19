@@ -32,10 +32,10 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.TaskStatus;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
-import com.vmware.bdd.plugin.ambari.api.model.blueprint.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapHostStatus;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapStatus;
+import com.vmware.bdd.plugin.ambari.api.model.bootstrap.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
@@ -254,7 +254,6 @@ public class AmbariImpl implements SoftwareManager {
                ProgressSplit.PROVISION_SUCCESS.getProgress());
          clusterDef.getCurrentReport().setSuccess(true);
       } catch (Exception e) {
-         clusterDef.getCurrentReport().setAction("Failed to create cluster");
          clusterDef.getCurrentReport().setSuccess(false);
          String errorMessage = errorMessage("Failed to create cluster " + blueprint.getName(), e);
          logger.error(errorMessage);
@@ -412,7 +411,7 @@ public class AmbariImpl implements SoftwareManager {
                }
             }
 
-            String actionFailure = "Failed to bootstrap host";
+            String actionFailure = Constants.HOST_BOOTSTRAP_MSG;
             if (addedHosts != null) {
                clusterDef.getCurrentReport().setNodesError(actionFailure, addedHosts);
             } else {
@@ -422,7 +421,7 @@ public class AmbariImpl implements SoftwareManager {
             throw AmException.BOOTSTRAP_FAILED(notBootstrapNodes != null? notBootstrapNodes.toArray() : null);
          }
       } catch (Exception e) {
-         clusterDef.getCurrentReport().setErrMsg("Failed to bootstrap host");
+         clusterDef.getCurrentReport().setAction(Constants.HOST_BOOTSTRAP_MSG);
          String errorMessage = errorMessage("Failed to bootstrap hosts of cluster " + clusterDef.getName(), e);
          logger.error(errorMessage);
          throw AmException.BOOTSTRAP_FAILED_EXCEPTION(e, clusterDef.getName());

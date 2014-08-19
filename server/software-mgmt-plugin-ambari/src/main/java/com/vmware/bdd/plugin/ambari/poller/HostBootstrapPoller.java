@@ -14,17 +14,22 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.poller;
 
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
-import com.vmware.bdd.plugin.ambari.api.model.blueprint.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapHostStatus;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapStatus;
+import com.vmware.bdd.plugin.ambari.api.model.bootstrap.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostList;
+import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
+import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
+import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 
 public class HostBootstrapPoller extends StatusPoller {
@@ -54,6 +59,9 @@ public class HostBootstrapPoller extends StatusPoller {
       logger.info("Waiting for bootstrap hosts request " + requestId
             + " to complete.");
       ApiBootstrapStatus apiBootstrapStatus = apiManager.getBootstrapStatus(requestId);
+      if (apiBootstrapStatus.getApiBootstrapHostStatus() == null) {
+         return false;
+      }
 
       // wait for all hosts registration
       int registeredHostsCount = 0;
@@ -67,7 +75,23 @@ public class HostBootstrapPoller extends StatusPoller {
       }
       int bootstrapedHostCount = apiBootstrapStatus.getApiBootstrapHostStatus().size();
       BootstrapStatus bootstrapStatus = BootstrapStatus.valueOf(apiBootstrapStatus.getStatus());
-      if (bootstrapStatus.isCompletedState() && bootstrapedHostCount == registeredHostsCount) {
+      if (bootstrapStatus.isFailedState()
+            || (bootstrapStatus.isSucceedState() && bootstrapedHostCount == registeredHostsCount)) {
+         if (bootstrapStatus.isFailedState()) {
+            Map<String, NodeReport> nodeReports = currentReport.getNodeReports();
+            for (String nodeReportKey : nodeReports.keySet()) {
+               for (ApiBootstrapHostStatus apiBootstrapHostStatus : apiBootstrapStatus.getApiBootstrapHostStatus()) {
+                  if (Constants.HOST_BOOTSTRAP_FAILED.equals(apiBootstrapHostStatus.getStatus())) {
+                     NodeReport nodeReport = nodeReports.get(nodeReportKey);
+                     nodeReport.setUseClusterMsg(false);
+                     nodeReport.setAction("Failed to bootstrap host");
+                     if (nodeReport.getHostname().equals(apiBootstrapHostStatus.getHostName())) {
+                        nodeReport.setErrMsg(apiBootstrapHostStatus.getLog());
+                     }
+                  }
+               }
+            }
+         }
          currentReport.setProgress(endProgress);
          reportQueue.addClusterReport(currentReport.clone());
          return true;

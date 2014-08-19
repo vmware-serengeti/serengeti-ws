@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.blueprint;
+package com.vmware.bdd.plugin.ambari.api.model.bootstrap;
 
 public enum BootstrapStatus {
 
@@ -51,6 +51,15 @@ public enum BootstrapStatus {
       switch (BootstrapStatus.values()[this.status]) {
       case SUCCESS:
       case ERROR:
+         return true;
+      default:
+         return false;
+      }
+   }
+
+   public boolean isSucceedState() {
+      switch (BootstrapStatus.values()[this.status]) {
+      case SUCCESS:
          return true;
       default:
          return false;
