@@ -139,6 +139,7 @@ public class TestClouderaManagerImpl {
       Mockit.setUpMock(MockCmClusterValidator.class);
 
       apiRootResource = Mockito.mock(ApiRootResource.class);
+
       rootResourceV6 = new FakeRootResource();
       rootResourceV7 = new FakeRootResourceV7();
       Mockito.when(apiRootResource.getRootV6()).thenReturn(rootResourceV6);
@@ -255,6 +256,77 @@ public class TestClouderaManagerImpl {
       for (ClusterReport report : reports) {
          System.out.println("Action: " + report.getAction() + ", Progress: " + report.getProgress());
          if (report.isFinished()) {
+            Assert.assertTrue(report.isSuccess(), "Should get success result.");
+         }
+      }
+   }
+
+   //Todo(qjin):check whether return in early stage
+   @Test( groups = { "TestClouderaManagerImpl" }, dependsOnMethods = { "testScaleOutCluster" })
+   public void testStartStartedCluster() {
+      Mockit.setUpMock(MockReflectionUtils.class);
+      blueprint.getHadoopStack().setDistro("CDH-5.0.1");
+      provider.startCluster(blueprint, reportQueue);
+      List<ClusterReport> reports = reportQueue.pollClusterReport();
+      for (ClusterReport report : reports) {
+         if (report.isFinished()) {
+            System.out.println("Starting Services finished.");
+            Assert.assertEquals(ServiceStatus.STARTED, report.getStatus(), "Cluster status should be STARTED");
+            Assert.assertEquals("", report.getAction(), "Cluster action should be empty");
+            Assert.assertTrue(report.isSuccess(), "Should get success result.");
+         }
+      }
+   }
+
+   @Test( groups = { "TestClouderaManagerImpl" }, dependsOnMethods = { "testStartStartedCluster" })
+   public void testStopStartedCluster() {
+      blueprint.getHadoopStack().setDistro("CDH-5.0.1");
+      provider.onStopCluster(blueprint, reportQueue);
+      List<ClusterReport> reports = reportQueue.pollClusterReport();
+      for (ClusterReport report : reports) {
+         if (!CommonUtil.isBlank(report.getAction())) {
+            Assert.assertEquals(reports.get(0).getAction(), "Stopping Services", "Should get Stopping Services action.");
+            System.out.println("BDE is Stopping Services");
+         }
+         if (report.isFinished()) {
+            System.out.println("Stopping Services finished.");
+            Assert.assertEquals(ServiceStatus.STOPPED, report.getStatus(), "Cluster status should be STOPPED");
+            Assert.assertEquals("", report.getAction(), "Cluster action should be empty");
+            Assert.assertTrue(report.isSuccess(), "Should get success result.");
+         }
+      }
+   }
+
+   @Test( groups = { "TestClouderaManagerImpl" }, dependsOnMethods = { "testStopStartedCluster" })
+   public void testStopStoppedCluster() {
+      blueprint.getHadoopStack().setDistro("CDH-5.0.1");
+      provider.onStopCluster(blueprint, reportQueue);
+      List<ClusterReport> reports = reportQueue.pollClusterReport();
+      for (ClusterReport report : reports) {
+         if (report.isFinished()) {
+            System.out.println("Stopping Services finished.");
+            Assert.assertEquals(ServiceStatus.STOPPED, report.getStatus(), "Cluster status should be STOPPED");
+            Assert.assertEquals("", report.getAction(), "Cluster action should be empty");
+            Assert.assertTrue(report.isSuccess(), "Should get success result.");
+         }
+      }
+   }
+
+   @Test( groups = { "TestClouderaManagerImpl" }, dependsOnMethods = { "testStopStoppedCluster" })
+   public void testStartStoppedCluster() {
+      Mockit.setUpMock(MockReflectionUtils.class);
+      blueprint.getHadoopStack().setDistro("CDH-5.0.1");
+      provider.startCluster(blueprint, reportQueue);
+      List<ClusterReport> reports = reportQueue.pollClusterReport();
+      for (ClusterReport report : reports) {
+         if (!CommonUtil.isBlank(report.getAction())) {
+            Assert.assertEquals(reports.get(0).getAction(), "Starting Services", "Should get Stopping Services action.");
+            System.out.println("BDE is Starting Services");
+         }
+         if (report.isFinished()) {
+            System.out.println("Starting Services finished.");
+            Assert.assertEquals(ServiceStatus.STARTED, report.getStatus(), "Cluster status should be STARTED");
+            Assert.assertEquals("", report.getAction(), "Cluster action should be empty");
             Assert.assertTrue(report.isSuccess(), "Should get success result.");
          }
       }

@@ -91,8 +91,9 @@ public class FakeClustersResource implements ClustersResourceV6{
    }
 
    @Override
+   //For start cluster command to avoid NPE in poller command.getId()
    public ApiCommand startCommand(String s) {
-      return null;
+      return new FakeApiCommand();
    }
 
    @Override
