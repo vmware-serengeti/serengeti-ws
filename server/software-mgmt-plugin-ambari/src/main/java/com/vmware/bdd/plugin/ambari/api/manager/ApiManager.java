@@ -22,8 +22,6 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
-import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
-
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.http.HttpStatus;
 
@@ -35,6 +33,7 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiBody;
 import com.vmware.bdd.plugin.ambari.api.model.ApiErrorMessage;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHostsRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHostsRequestInfo;
+import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import com.vmware.bdd.plugin.ambari.api.model.ApiPutRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRootServicesComponents;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
@@ -62,16 +61,17 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceAlertList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceStatus;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponentList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionList;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 
 public class ApiManager implements IApiManager {
@@ -523,12 +523,12 @@ public class ApiManager implements IApiManager {
       return apiRequest;
    }
 
-
-   public ServiceStatus getClusterStatus(String clusterName) throws AmbariApiException {
+   public ServiceStatus getClusterStatus(String clusterName, HadoopStack stack) throws AmbariApiException {
       ApiServiceAlertList serviceList = getServicesWithAlert(clusterName);
       if (serviceList.getApiServiceAlerts() != null) {
          boolean allStopped = true;
          boolean hasStartedAlert = false;
+         List<String> notStartedServiceNames = new ArrayList<>();
          for (ApiServiceAlert service : serviceList.getApiServiceAlerts()) {
             ApiServiceInfo info = service.getApiServiceInfo();
             ApiAlert alert = service.getApiAlert();
@@ -539,16 +539,56 @@ public class ApiManager implements IApiManager {
                      && alert.getSummary().getCritical() > 0) {
                   hasStartedAlert = true;
                }
+            } else {
+               notStartedServiceNames.add(service.getApiServiceInfo().getServiceName());
             }
          }
          if (allStopped) {
             return ServiceStatus.STOPPED;
          }
-         if (hasStartedAlert) {
+         if (notStartedServiceNames.isEmpty()) {
+            if(hasStartedAlert) {
+               return ServiceStatus.ALERT;
+            } else {
+               return ServiceStatus.STARTED;
+            }
+         }
+         // client service will not be started at any time, so this method is to check 
+         // if there is non-client service stopped. 
+         // if yes, return service alert status
+         boolean hasStoppedService =
+               hasNonClientServices(stack, notStartedServiceNames);
+         if (hasStoppedService) {
             return ServiceStatus.ALERT;
+         } else {
+            return ServiceStatus.STARTED;
          }
       }
-      return ServiceStatus.STARTED;
+      return ServiceStatus.UNKONWN;
+   }
+
+   // derect if input service names has non-client service
+   private boolean hasNonClientServices(HadoopStack stack,
+         List<String> notStartedServiceNames) {
+      for (String serviceName : notStartedServiceNames) {
+         ApiStackService stackService =
+               getStackServiceWithComponents(stack.getVendor(),
+                     stack.getFullVersion(), serviceName);
+         List<ApiStackComponent> components = stackService.getServiceComponents();
+         boolean allClients = true;
+         if (components != null) {
+            for (ApiStackComponent component : components) {
+               if (!component.getApiComponent().isClient()) {
+                  allClients = false;
+                  break;
+               }
+            }
+         }
+         if (!allClients) {
+            return true;
+         }
+      }
+      return false;
    }
 
    private ApiServiceAlertList getServicesWithAlert(String clusterName) throws AmbariApiException {

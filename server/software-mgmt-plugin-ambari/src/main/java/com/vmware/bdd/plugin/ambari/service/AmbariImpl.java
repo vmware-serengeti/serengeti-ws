@@ -1201,7 +1201,9 @@ public class AmbariImpl implements SoftwareManager {
    public ClusterReport queryClusterStatus(ClusterBlueprint blueprint) {
       AmClusterDef clusterDef = new AmClusterDef(blueprint, privateKey);
       try {
-         ServiceStatus status = apiManager.getClusterStatus(blueprint.getName());
+         ServiceStatus status =
+               apiManager.getClusterStatus(blueprint.getName(),
+                     blueprint.getHadoopStack());
          clusterDef.getCurrentReport().setStatus(status);
 
          Map<String, ServiceStatus> hostStates =

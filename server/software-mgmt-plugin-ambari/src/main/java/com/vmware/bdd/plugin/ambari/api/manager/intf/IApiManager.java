@@ -32,13 +32,14 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponentList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionList;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 
 public interface IApiManager {
@@ -147,7 +148,7 @@ public interface IApiManager {
 
    public ApiRequest getRequestWithTasks(String clusterName, Long requestId) throws AmbariApiException;
 
-   public ServiceStatus getClusterStatus(String clusterName) throws AmbariApiException;
+   public ServiceStatus getClusterStatus(String clusterName, HadoopStack stack) throws AmbariApiException;
 
    public ApiHostList getHostsSummaryInfo(String clusterName);
 
