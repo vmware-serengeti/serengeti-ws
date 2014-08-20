@@ -79,7 +79,28 @@ public class AppManagerCommands implements CommandMarker {
       AppManagerAdd appManagerAdd = new AppManagerAdd();
       appManagerAdd.setName(name);
       appManagerAdd.setDescription(description);
-      appManagerAdd.setType(type);
+
+      //validate appmanager type
+      String[] types = restClient.getTypes();
+      boolean found = false;
+      for (String t : types) {
+         if (type.equals(t)) {
+            found = true;
+            break;
+         }
+      }
+      if (found) {
+         appManagerAdd.setType(type);
+      } else {
+         CommandsUtils.printCmdFailure(
+               Constants.OUTPUT_OBJECT_APPMANAGER,
+               name,
+               Constants.OUTPUT_OP_ADD,
+               Constants.OUTPUT_OP_RESULT_FAIL,
+               "Invalid type " + type + ". Valid types are "
+                     + Arrays.asList(types) + ".");
+         return;
+      }
       appManagerAdd.setUrl(url);
 
       Map<String, String> loginInfo = getAccount();
