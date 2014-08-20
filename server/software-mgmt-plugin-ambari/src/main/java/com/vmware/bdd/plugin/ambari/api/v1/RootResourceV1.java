@@ -42,7 +42,7 @@ public interface RootResourceV1 {
    public Stacks2Resource getStacks2Resource();
 
    @Path("/check")
-   public HealthCheck getHealthCheck();
+   public HealthCheckResource getHealthCheckResource();
 
    @Path("/services")
    public RootServicesResource getRootServicesResource();

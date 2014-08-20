@@ -647,7 +647,7 @@ public class ApiManager implements IApiManager {
    }
 
    public String healthCheck() throws AmbariApiException {
-      Response response = apiResourceRootV1.getHealthCheck().check();
+      Response response = apiResourceRootV1.getHealthCheckResource().check();
       String healthStatus = handleAmbariResponse(response);
       return healthStatus;
    }
