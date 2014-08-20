@@ -22,6 +22,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 
+import com.vmware.bdd.exception.BddException;
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -651,6 +652,9 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    public ClusterRead toClusterRead(String clusterName,
          boolean ignoreObsoleteNode) {
       ClusterEntity cluster = findByName(clusterName);
+      if (cluster == null) {
+         throw BddException.NOT_FOUND("Cluster", clusterName);
+      }
       ClusterStatus clusterStatus = cluster.getStatus();
       ClusterRead clusterRead = new ClusterRead();
       clusterRead
