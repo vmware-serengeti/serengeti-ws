@@ -450,12 +450,31 @@ public class AppManagerCommands implements CommandMarker {
       if (url == null && !changeAccount && !changeCertificate) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
                name, Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL,
-               "Must use at least one of --url, --changeAccount or --changeCertificate.");
+               "Must use at least one of the following: --url, --changeAccount or --changeCertificate.");
+         return;
+      }
+
+      if (Constants.IRONFAN.equals(name)) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
+               name, Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL,
+               "Cannot modify default software manager.");
          return;
       }
 
       try {
          AppManagerRead appManagerRead = restClient.get(name);
+         // Display a warning if there is any cluster using this appmanager
+         List<String> clusters = appManagerRead.getManagedClusters();
+         if (clusters != null && clusters.size() > 0) {
+            List<String> warningMsgList = new ArrayList<String>(1);
+            warningMsgList.add("Application manager " + name
+                  + " is used by clusters " + clusters + ".");
+            if (!CommandsUtils.showWarningMsg(name,
+                  Constants.OUTPUT_OBJECT_APPMANAGER,
+                  Constants.OUTPUT_OP_MODIFY, warningMsgList, false)) {
+               return;
+            }
+         }
 
          AppManagerAdd appManagerAdd = new AppManagerAdd();
          appManagerAdd.setName(name);
