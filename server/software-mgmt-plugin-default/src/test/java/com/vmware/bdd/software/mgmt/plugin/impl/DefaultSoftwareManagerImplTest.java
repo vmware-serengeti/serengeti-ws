@@ -95,9 +95,7 @@ public class DefaultSoftwareManagerImplTest {
       blueprint.setNodeGroups(nodeGroupInfos);
       assertEquals(false, validator.validateRoleDependency(failedMsgList, blueprint));
       assertEquals(1, failedMsgList.size());
-      assertEquals("Cannot find one or more roles in " + ServiceType.MAPRED + " "
-            + ServiceType.MAPRED.getRoles()
-            + " in the cluster specification file.", failedMsgList.get(0));
+      assertEquals("Missing role(s): hadoop_jobtracker for service: MAPRED", failedMsgList.get(0));
       failedMsgList.clear();
       NodeGroupInfo master = new NodeGroupInfo();
       master.setRoles(Arrays.asList(HadoopRole.HADOOP_JOBTRACKER_ROLE

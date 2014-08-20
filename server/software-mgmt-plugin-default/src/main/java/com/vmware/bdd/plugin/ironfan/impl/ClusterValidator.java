@@ -94,8 +94,8 @@ public class ClusterValidator {
       List<NodeGroupInfo> nodeGroupInfos = blueprint.getNodeGroups();
       assert (nodeGroupInfos != null && !nodeGroupInfos.isEmpty());
 
-      List<String> invalidRoleList = new ArrayList<>();
-      List<String> unspportedRoleList = new ArrayList<>();
+      List<String> invalidRoleList = new ArrayList<String>();
+      List<String> unspportedRoleList = new ArrayList<String>();
 
       for (NodeGroupInfo nodeGroup : nodeGroupInfos) {
          List<String> roles = nodeGroup.getRoles();
