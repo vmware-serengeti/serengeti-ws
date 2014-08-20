@@ -20,6 +20,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vmware.bdd.apitypes.ClusterStatus;
@@ -47,8 +48,15 @@ public class ScaleManager {
    private IClusterEntityManager clusterEntityMgr;
    private JobManager jobManager;
 
+
+   @Autowired
+   private UnsupportedOpsBlocker opsBlocker;
+
    public long scaleNodeGroupResource(ResourceScale scale) throws Exception {
       String clusterName = scale.getClusterName();
+
+      opsBlocker.blockUnsupportedOpsByCluster("scale Up/Down", clusterName);
+
       ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
       ClusterStatus originalStatus =
             clusterEntityMgr.findByName(clusterName).getStatus();

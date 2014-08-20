@@ -98,6 +98,9 @@ public class ClusterManager {
    private IExecutionService executionService;
    private SoftwareManagerCollector softwareManagerCollector;
 
+   @Autowired
+   private UnsupportedOpsBlocker opsBlocker;
+
    public JobManager getJobManager() {
       return jobManager;
    }
@@ -507,6 +510,8 @@ public class ClusterManager {
 
    public Long configCluster(String clusterName, ClusterCreate createSpec)
          throws Exception {
+      opsBlocker.blockUnsupportedOpsByCluster("configCluster", clusterName);
+
       logger.info("ClusterManager, config cluster " + clusterName);
       ClusterEntity cluster;
 
@@ -916,6 +921,12 @@ public class ClusterManager {
          Integer activeComputeNodeNum, Integer minComputeNodeNum, Integer maxComputeNodeNum,
          Boolean enableAuto, Priority ioPriority) throws Exception {
 
+      //allow set ioshare only.
+      if(enableAuto != null || activeComputeNodeNum != null ||
+            maxComputeNodeNum != null || minComputeNodeNum != null) {
+         opsBlocker.blockUnsupportedOpsByCluster("syncSetElasticity", clusterName);
+      }
+
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       ClusterRead clusterRead = getClusterByName(clusterName, false);
       if (cluster == null) {
@@ -1020,6 +1031,11 @@ public class ClusterManager {
          Integer minComputeNodeNum, Integer maxComputeNodeNum, Boolean enableAuto,
          Priority ioPriority)
          throws Exception {
+      //allow set ioshare only.
+      if(enableAuto != null || activeComputeNodeNum != null ||
+            maxComputeNodeNum != null || minComputeNodeNum != null) {
+         opsBlocker.blockUnsupportedOpsByCluster("asyncSetElasticity", clusterName);
+      }
 
       ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
@@ -1136,6 +1152,8 @@ public class ClusterManager {
 
    public Long fixDiskFailures(String clusterName, String groupName)
          throws Exception {
+      opsBlocker.blockUnsupportedOpsByCluster("fixDisk", clusterName);
+
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");

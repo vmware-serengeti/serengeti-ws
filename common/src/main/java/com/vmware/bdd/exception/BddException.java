@@ -193,4 +193,15 @@ public class BddException extends RuntimeException {
       return new BddException(null, "BDD", "UNSUPPORTED_OPS_FOR_APP_MGR", ops, appMgr);
    }
 
+   public static BddException APP_MGR_TYPE_IS_BLANK(String appMgrName) {
+      return new BddException(null, "SOFTWARE_MANAGER_COLLECTOR", "APP_MGR_TYPE_IS_BLANK", appMgrName);
+   }
+
+   public static BddException CLUSTER_HAS_NO_APP_MGR(String clusterName) {
+      return new BddException(null, "CLUSTER", "CLUSTER_HAS_NO_APP_MGR", clusterName);
+   }
+
+   public static BddException APP_MGR_NOT_FOUND(String appMgrName) {
+      return new BddException(null, "SOFTWARE_MANAGER_COLLECTOR", "APP_MGR_NOT_FOUND", appMgrName);
+   }
 }
