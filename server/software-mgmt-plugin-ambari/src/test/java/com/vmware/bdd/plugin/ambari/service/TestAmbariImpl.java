@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
+import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import mockit.Mock;
 import mockit.MockClass;
 import mockit.Mockit;
@@ -184,4 +185,43 @@ public class TestAmbariImpl {
       ClusterReport report = provider.queryClusterStatus(blueprint);
       Assert.assertTrue(report.getStatus().equals(ServiceStatus.STARTED), "Should get started cluster status");
    }
+
+   private AmbariImpl testValidateServerVersionHelper(String version) {
+      AmbariImpl ambari = Mockito.mock(AmbariImpl.class);
+      Mockito.when(ambari.getVersion()).thenReturn(version);
+      Mockito.when(ambari.validateServerVersion()).thenCallRealMethod();
+      Mockito.when(ambari.getType()).thenCallRealMethod();
+      return  ambari;
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testValidateServerVersionFailed() {
+      String invalidVersion = "1.5.0";
+      AmbariImpl ambari = testValidateServerVersionHelper(invalidVersion);
+      boolean exceptionExist = false;
+      try {
+         ambari.validateServerVersion();
+      } catch (SoftwareManagementPluginException e) {
+         exceptionExist = true;
+         String errMsg = "The min supported version of software manager type " + ambari.getType()  + " is " + ambari.MIN_SUPPORTED_VERSION + " but got " + ambari.getVersion() + ".";
+         Assert.assertEquals(e.getMessage(), errMsg);
+      }
+      Assert.assertTrue(exceptionExist);
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testValidateServerVersionSucceed() {
+      String validVersion = "1.6.0";
+      AmbariImpl ambari = testValidateServerVersionHelper(validVersion);
+      boolean exceptionExist = false;
+      try {
+         ambari.validateServerVersion();
+      } catch (SoftwareManagementPluginException e) {
+         exceptionExist = true;
+         String errMsg = "The min supported version of software manager type " + ambari.getType() + " is " + ambari.MIN_SUPPORTED_VERSION + " but got " + ambari.getVersion() + ".";
+         Assert.assertEquals(e.getMessage(), errMsg);
+      }
+      Assert.assertTrue(!exceptionExist);
+   }
+
 }

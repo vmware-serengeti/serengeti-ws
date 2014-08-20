@@ -37,7 +37,7 @@ public class TestSWMgmtPluginException {
       exs.add(SoftwareManagementPluginException.DELETE_CLUSTER_FAILED(cause, appMgr, clusterName));
       exs.add(SoftwareManagementPluginException.DELETE_NODES_FAILED(cause, appMgr, new String[]{"node"}));
       exs.add(SoftwareManagementPluginException.INSTALL_COMPONENTS_FAIL(appMgr, clusterName));
-      exs.add(SoftwareManagementPluginException.INVALID_VERSION(cause, "1.0"));
+      exs.add(SoftwareManagementPluginException.INVALID_VERSION(cause, "Ambari", "1.6.0", "1.0"));
       exs.add(SoftwareManagementPluginException.QUERY_CLUSTER_STATUS_FAILED(clusterName, cause));
       exs.add(SoftwareManagementPluginException.RECONFIGURE_CLUSTER_FAILED(cause, appMgr, clusterName));
       exs.add(SoftwareManagementPluginException.RETRIEVE_SUPPORTED_STACKS_FAIL(cause, appMgr));

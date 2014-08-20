@@ -82,6 +82,11 @@ public class MockSoftwareManager implements SoftwareManager {
    }
 
    @Override
+   public boolean validateServerVersion() {
+      return true;
+   }
+
+   @Override
    public HealthStatus getStatus() throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return null;

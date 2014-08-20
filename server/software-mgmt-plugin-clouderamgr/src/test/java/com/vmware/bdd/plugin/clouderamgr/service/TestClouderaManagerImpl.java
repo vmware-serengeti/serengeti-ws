@@ -24,6 +24,8 @@ import mockit.Mockit;
 
 import org.apache.log4j.Logger;
 import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -330,5 +332,45 @@ public class TestClouderaManagerImpl {
             Assert.assertTrue(report.isSuccess(), "Should get success result.");
          }
       }
+   }
+
+   private ClouderaManagerImpl testValidateServerVersionHelper(String version) {
+      ClouderaManagerImpl mockedProvider = Mockito.mock(ClouderaManagerImpl.class);
+      Mockito.when(mockedProvider.getVersion()).thenReturn(version);
+      Mockito.when(mockedProvider.validateServerVersion()).thenCallRealMethod();
+      Mockito.when(mockedProvider.getType()).thenCallRealMethod();
+      return mockedProvider;
+   }
+
+   @Test( groups = { "TestClouderaManagerImpl" } )
+   public void testValidateServerVersionFailed() {
+      String invalidVersion = "4.9.0";
+      ClouderaManagerImpl mockedProvider = testValidateServerVersionHelper(invalidVersion);
+      boolean exceptionExists = false;
+      try {
+         mockedProvider.validateServerVersion();
+      } catch (SoftwareManagementPluginException e) {
+         exceptionExists = true;
+         String expectedErrMsg =  "The min supported version of software manager type " + mockedProvider.getType() +
+               " is " + mockedProvider.MIN_SUPPORTED_VERSION + " but got " + mockedProvider.getVersion() + ".";
+         Assert.assertEquals(e.getMessage(), expectedErrMsg);
+      }
+      Assert.assertTrue(exceptionExists);
+   }
+
+   @Test( groups = { "TestClouderaManagerImpl" } )
+   public void testValidateServerVersionSucceed() {
+      String validVersion = "5.0.0";
+      ClouderaManagerImpl mockedProvider = testValidateServerVersionHelper(validVersion);
+      boolean exceptionExists = false;
+      try {
+         mockedProvider.validateServerVersion();
+      } catch (SoftwareManagementPluginException e) {
+         exceptionExists = true;
+         String expectedErrMsg =  "The min supported version of software manager type " + mockedProvider.getType() +
+               " is " + mockedProvider.MIN_SUPPORTED_VERSION + " but got " + mockedProvider.getVersion() + ".";
+         Assert.assertEquals(e.getMessage(), expectedErrMsg);
+      }
+      Assert.assertFalse(exceptionExists);
    }
 }

@@ -66,6 +66,8 @@ public interface SoftwareManager {
 
    boolean echo() throws SoftwareManagementPluginException;
 
+   boolean validateServerVersion() throws SoftwareManagementPluginException;
+
    HealthStatus getStatus() throws SoftwareManagementPluginException;
 
    /**

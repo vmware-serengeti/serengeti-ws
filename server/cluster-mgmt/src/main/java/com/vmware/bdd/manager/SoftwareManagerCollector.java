@@ -265,6 +265,11 @@ public class SoftwareManagerCollector implements InitializingBean {
          throw SoftwareManagerCollectorException.CONNECT_FAILURE(name,
                e.getMessage());
       }
+      validateSoftwareManagerVersion(softwareManager);
+   }
+
+   private void validateSoftwareManagerVersion(SoftwareManager softwareManager) throws SoftwareManagementPluginException {
+      softwareManager.validateServerVersion();
    }
 
    /**

@@ -79,14 +79,18 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 public class AmbariImpl implements SoftwareManager {
 
    private static final Logger logger = Logger.getLogger(AmbariImpl.class);
    private static final int REQUEST_MAX_RETRY_TIMES = 10;
    public static final String AMBARI = "ambari";
+   public static final String MIN_SUPPORTED_VERSION = "1.6.0";
+   private static final String UNKNOWN_VERSION = "UNKNOWN";
 
    private String privateKey;
+
    private ApiManager apiManager;
 
    private enum ProgressSplit {
@@ -147,6 +151,21 @@ public class AmbariImpl implements SoftwareManager {
       } catch (Exception e) {
          return false;
       }
+   }
+
+   @Override
+   public boolean validateServerVersion() throws SoftwareManagementPluginException{
+      String version = getVersion();
+      DefaultArtifactVersion versionInfo = new DefaultArtifactVersion(version);
+      logger.info("Min supported version of " + getType() + " is: " + MIN_SUPPORTED_VERSION);
+      logger.info("Version of new software manager is: " + version);
+      //For ambari, we only support 1.6.0 and 1.6.1, its next version is 1.7.0, so only need to check major and minor version
+      if (version.equals(UNKNOWN_VERSION) || (versionInfo.getMajorVersion() != 1 || versionInfo.getMinorVersion() != 6)) {
+         logger.error("Validate server version failed.");
+         throw SoftwareManagementPluginException.INVALID_VERSION(null, Constants.AMBARI_PLUGIN_NAME, MIN_SUPPORTED_VERSION, version);
+      }
+      logger.info("Validate server version succeed.");
+      return true;
    }
 
    @Override
@@ -1284,7 +1303,7 @@ public class AmbariImpl implements SoftwareManager {
          // we print the log here for user to check the cause.
          String errMsg = "Cannot connect to the Software Manager, check the connection information.";
          logger.error(errMsg, e);
-         return "UNKNOWN";
+         return UNKNOWN_VERSION;
       }
    }
 
@@ -1302,5 +1321,13 @@ public class AmbariImpl implements SoftwareManager {
          errorMessage = e.getMessage();
       }
       return errorMessage;
+   }
+
+   public ApiManager getApiManager() {
+      return apiManager;
+   }
+
+   public void setApiManager(ApiManager apiManager) {
+      this.apiManager = apiManager;
    }
 }

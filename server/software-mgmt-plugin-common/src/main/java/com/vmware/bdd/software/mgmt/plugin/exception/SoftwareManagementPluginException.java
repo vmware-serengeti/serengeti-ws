@@ -89,8 +89,8 @@ public class SoftwareManagementPluginException extends RuntimeException {
       return new SoftwareManagementPluginException(errCode, cause, args);
    }
 
-   public static SoftwareManagementPluginException INVALID_VERSION(Throwable cause, String version) {
-      return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.INVALID_VERSION", cause, version);
+   public static SoftwareManagementPluginException INVALID_VERSION(Throwable cause, String type, String minSupportedVersion, String version) {
+      return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.INVALID_VERSION", cause, type, minSupportedVersion, version);
    }
 
    public static SoftwareManagementPluginException CREATE_CLUSTER_EXCEPTION(Throwable cause, String appMgr, String clusterName) {

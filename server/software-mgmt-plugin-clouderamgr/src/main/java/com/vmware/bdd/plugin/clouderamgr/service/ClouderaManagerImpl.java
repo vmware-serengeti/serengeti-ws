@@ -104,6 +104,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
    public static final String CLOUDERA_MANAGER = "ClouderaManager";
 
    private final String UNKNOWN_VERSION = "UNKNOWN";
+   public final String MIN_SUPPORTED_VERSION = "5.0.0";
    private final String usernameForHosts = "serengeti";
    private String privateKey;
    private RootResourceV6 apiResourceRootV6;
@@ -192,6 +193,18 @@ public class ClouderaManagerImpl implements SoftwareManager {
          return true;
       }
       return false;
+   }
+
+   @Override
+   public boolean validateServerVersion() throws SoftwareManagementPluginException {
+      String cmVersion = getVersion();
+      DefaultArtifactVersion cmVersionInfo = new DefaultArtifactVersion(cmVersion);
+      logger.info("Min supported version of " + getType() + " is: " + MIN_SUPPORTED_VERSION);
+      logger.info("Version of new software manager is: " + cmVersion);
+      if (cmVersion.equals(UNKNOWN_VERSION) || cmVersionInfo.getMajorVersion() < 5) {
+         throw SoftwareManagementPluginException.INVALID_VERSION(null, CLOUDERA_MANAGER, MIN_SUPPORTED_VERSION, cmVersion);
+      }
+      return true;
    }
 
    @Override

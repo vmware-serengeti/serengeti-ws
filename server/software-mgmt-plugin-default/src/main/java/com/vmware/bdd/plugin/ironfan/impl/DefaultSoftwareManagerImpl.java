@@ -82,6 +82,11 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    }
 
    @Override
+   public boolean validateServerVersion() {
+      return true;
+   }
+
+   @Override
    public HealthStatus getStatus() {
       // TODO Auto-generated method stub
       return null;
