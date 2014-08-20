@@ -17,6 +17,8 @@ package com.vmware.bdd.exception;
 
 import java.util.List;
 
+import com.vmware.bdd.utils.CommonUtil;
+
 public class SoftwareManagerCollectorException extends BddException {
    private static final long serialVersionUID = 1l;
 
@@ -94,6 +96,12 @@ public class SoftwareManagerCollectorException extends BddException {
 
    public static SoftwareManagerCollectorException CAN_NOT_MODIFY_DEFAULT() {
       return new SoftwareManagerCollectorException(null, "CAN_NOT_MODIFY_DEFAULT");
+   }
+
+   public static SoftwareManagerCollectorException INVALID_URL(
+         List<String> errorMsgs) {
+      return new SoftwareManagerCollectorException(null, "INVALID_URL",
+            CommonUtil.mergeErrorMsgList(errorMsgs));
    }
 
 }

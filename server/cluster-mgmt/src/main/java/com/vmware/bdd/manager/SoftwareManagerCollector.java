@@ -27,6 +27,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -90,6 +91,12 @@ public class SoftwareManagerCollector implements InitializingBean {
    public void createSoftwareManager(AppManagerAdd appManagerAdd) {
 
       logger.info("First we need check if the appmgr is valid for use.");
+
+      //validate url in appManagerAdd
+      List<String> errorMsgs = new ArrayList<String>();
+      if (!CommonUtil.validateUrl(appManagerAdd.getUrl(), errorMsgs)) {
+         throw SoftwareManagerCollectorException.INVALID_URL(errorMsgs);
+      }
 
       String sslCertificate = appManagerAdd.getSslCertificate();
       if (!CommonUtil.isBlank(sslCertificate)) {
@@ -425,6 +432,12 @@ public class SoftwareManagerCollector implements InitializingBean {
       if (null == appManager) {
          logger.error("Cannot find app manager " + name);
          throw SoftwareManagerCollectorException.APPMANAGER_NOT_FOUND(name);
+      }
+
+      //validate url in appManagerAdd
+      List<String> errorMsgs = new ArrayList<String>();
+      if (!CommonUtil.validateUrl(appManagerAdd.getUrl(), errorMsgs)) {
+         throw SoftwareManagerCollectorException.INVALID_URL(errorMsgs);
       }
 
       String sslCertificate = appManagerAdd.getSslCertificate();

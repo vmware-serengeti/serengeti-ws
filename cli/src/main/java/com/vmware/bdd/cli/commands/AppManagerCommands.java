@@ -17,6 +17,7 @@ package com.vmware.bdd.cli.commands;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -30,6 +31,7 @@ import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.cli.rest.AppManagerRestClient;
 import com.vmware.bdd.cli.rest.CliRestException;
+import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.utils.CommonUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,6 +101,18 @@ public class AppManagerCommands implements CommandMarker {
                Constants.OUTPUT_OP_RESULT_FAIL,
                "Invalid type " + type + ". Valid types are "
                      + Arrays.asList(types) + ".");
+         return;
+      }
+
+      //validate url in appManagerAdd
+      List<String> errorMsgs = new ArrayList<String>();
+      if (!CommonUtil.validateUrl(url, errorMsgs)) {
+         CommandsUtils.printCmdFailure(
+               Constants.OUTPUT_OBJECT_APPMANAGER,
+               name,
+               Constants.OUTPUT_OP_ADD,
+               Constants.OUTPUT_OP_RESULT_FAIL,
+               "Invalid URL: " + CommonUtil.mergeErrorMsgList(errorMsgs) + ".");
          return;
       }
       appManagerAdd.setUrl(url);
@@ -452,6 +466,17 @@ public class AppManagerCommands implements CommandMarker {
          if (url == null) {
             appManagerAdd.setUrl(appManagerRead.getUrl());
          } else {
+            //validate url in appManagerAdd
+            List<String> errorMsgs = new ArrayList<String>();
+            if (!CommonUtil.validateUrl(url, errorMsgs)) {
+               CommandsUtils.printCmdFailure(
+                     Constants.OUTPUT_OBJECT_APPMANAGER,
+                     name,
+                     Constants.OUTPUT_OP_ADD,
+                     Constants.OUTPUT_OP_RESULT_FAIL,
+                     "Invalid URL: " + CommonUtil.mergeErrorMsgList(errorMsgs) + ".");
+               return;
+            }
             appManagerAdd.setUrl(url);
          }
 

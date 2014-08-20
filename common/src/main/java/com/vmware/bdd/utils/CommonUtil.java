@@ -24,6 +24,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -345,6 +347,41 @@ public class CommonUtil {
          }
       }
       return keyStore;
+   }
+
+   public static boolean validateUrl(String url, List<String> errorMsgs) {
+      if (errorMsgs == null) {
+         errorMsgs = new ArrayList<String>();
+      }
+      boolean result = true;
+      try {
+         URI uri = new URI(url);
+         String schema = uri.getScheme();
+         if (!"https".equalsIgnoreCase(schema) && !"http".equalsIgnoreCase(schema)) {
+            errorMsgs.add("URL should starts with http or https");
+            result = false;
+         }
+         int port = uri.getPort();
+         if (port == -1) {
+            errorMsgs.add("port number is missing in URL");
+            result = false;
+         }
+      } catch (URISyntaxException e) {
+         logger.error("invalid URL syntax ", e);
+         errorMsgs.add("invalid URL syntax");
+         return false;
+      }
+
+      return result;
+   }
+
+   public static String mergeErrorMsgList(List<String> errorMsgs) {
+      StringBuilder errorMsg = new StringBuilder();
+      for (String msg : errorMsgs) {
+         errorMsg.append(msg);
+         errorMsg.append(", ");
+      }
+      return errorMsg.substring(0, errorMsg.length() - 2);
    }
 
 }
