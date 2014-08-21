@@ -14,20 +14,17 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
-
-import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.utils.AppConfigValidationFactory;
-import com.vmware.bdd.utils.ValidateResult;
 
 public class AppConfigValidationFactoryTest {
    private ClusterCreate cluster;
@@ -146,10 +143,10 @@ public class AppConfigValidationFactoryTest {
 
    @Test
    public void testConfigurationTypeValidation1() {
-      Map<String, Object> configurations = new HashMap<>();
+      Map<String, Object> configurations = new HashMap<String, Object>();
       configurations.put("hadoop", new Object());
 
-      List<String> warningMsgList = new ArrayList<>();
+      List<String> warningMsgList = new ArrayList<String>();
       AppConfigValidationFactory.validateConfigType(configurations, warningMsgList);
 
       assertEquals(0, warningMsgList.size());
@@ -157,11 +154,11 @@ public class AppConfigValidationFactoryTest {
 
    @Test
    public void testConfigurationTypeValidation2() {
-      Map<String, Object> configurations = new HashMap<>();
+      Map<String, Object> configurations = new HashMap<String, Object>();
       configurations.put("hadoop", new Object());
       configurations.put("xyz", new Object());
 
-      List<String> warningMsgList = new ArrayList<>();
+      List<String> warningMsgList = new ArrayList<String>();
       AppConfigValidationFactory.validateConfigType(configurations, warningMsgList);
       assertEquals(1, warningMsgList.size());
 
@@ -171,12 +168,12 @@ public class AppConfigValidationFactoryTest {
 
    @Test
    public void testConfigurationTypeValidation3() {
-      Map<String, Object> configurations = new HashMap<>();
+      Map<String, Object> configurations = new HashMap<String, Object>();
       configurations.put("hadoop", new Object());
       configurations.put("xyz", new Object());
       configurations.put("abc", new Object());
 
-      List<String> warningMsgList = new ArrayList<>();
+      List<String> warningMsgList = new ArrayList<String>();
       AppConfigValidationFactory.validateConfigType(configurations, warningMsgList);
       assertEquals(1, warningMsgList.size());
 
