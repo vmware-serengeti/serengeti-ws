@@ -105,10 +105,6 @@ public class SoftwareManagerCollector implements InitializingBean {
 
       SoftwareManager softwareManager = loadSoftwareManager(appManagerAdd);
 
-      validateSoftwareManager(appManagerAdd.getName(), softwareManager);
-
-      logger.info("The appmgr can be reached and will be created.");
-
       // add to meta-db through AppManagerService
       createSoftwareManagerInternal(appManagerAdd, softwareManager);
    }
@@ -129,8 +125,6 @@ public class SoftwareManagerCollector implements InitializingBean {
          throw SoftwareManagerCollectorException.DUPLICATE_NAME(appManagerAdd
                .getName());
       }
-
-      cache.put(appManagerAdd.getName(), softwareManager);
 
       logger.info("Add app manager to meta-db.");
 
@@ -167,11 +161,46 @@ public class SoftwareManagerCollector implements InitializingBean {
 
    /**
     *
+    * @param appManagerEntity
+    * @return
+    */
+   private SoftwareManager loadSoftwareManager(AppManagerEntity appManagerEntity) {
+      if (appManagerEntity.getName().equals(Constants.IRONFAN)) {
+         SoftwareManager ironfanSoftwareManager = new DefaultSoftwareManagerImpl();
+         cache.put(Constants.IRONFAN, ironfanSoftwareManager);
+         return ironfanSoftwareManager;
+      } else {
+         AppManagerAdd appManagerAdd = new AppManagerAdd();
+         appManagerAdd.setName(appManagerEntity.getName());
+         appManagerAdd.setDescription(appManagerEntity.getDescription());
+         appManagerAdd.setType(appManagerEntity.getType());
+         appManagerAdd.setUrl(appManagerEntity.getUrl());
+         appManagerAdd.setUsername(appManagerEntity.getUsername());
+         appManagerAdd.setPassword(appManagerEntity.getPassword());
+         appManagerAdd.setSslCertificate(appManagerEntity.getSslCertificate());
+         // Do not block initialization in case of Exception
+         try {
+            return loadSoftwareManager(appManagerAdd);
+         } catch (Exception e) {
+            logger.error("Error loading Software Manager: " + appManagerAdd,
+                  e);
+         }
+      }
+      return null;
+   }
+
+   /**
+    * wrap cache hit, instantiate, connection check and cache add together to simplify currency issue
     * @param appManagerAdd
     * @return
     */
-   private SoftwareManager loadSoftwareManager(AppManagerAdd appManagerAdd) {
+   private synchronized SoftwareManager loadSoftwareManager(AppManagerAdd appManagerAdd) {
       // Retrieve app manager factory class from serengeti.properties
+
+      if (cache.containsKey(appManagerAdd.getName())) {
+         return cache.get(appManagerAdd);
+      }
+
       String factoryClassName =
             Configuration.getString(configurationPrefix + appManagerAdd.getType());
       if (CommonUtil.isBlank(factoryClassName)) {
@@ -204,6 +233,12 @@ public class SoftwareManagerCollector implements InitializingBean {
          throw SoftwareManagerCollectorException.CONNECT_FAILURE(
                appManagerAdd.getName(), ExceptionUtils.getRootCauseMessage(ex));
       }
+
+      validateSoftwareManager(appManagerAdd.getName(), softwareManager);
+
+      logger.info("The appmgr " + appManagerAdd.getName() + " can be reached and will be created.");
+
+      cache.put(appManagerAdd.getName(), softwareManager);
 
       return softwareManager;
    }
@@ -266,19 +301,13 @@ public class SoftwareManagerCollector implements InitializingBean {
          return cache.get(name);
       }
 
-      // if meta-db has this name, which means it failed to load during
-      // tomcat init, try reload it
-      AppManagerEntity appManagerEntity =
-            appManagerService.findAppManagerByName(name);
+      AppManagerEntity appManagerEntity = appManagerService.findAppManagerByName(name);
       if (appManagerEntity != null) {
-         logger.info("Reload app manager " + name
-               + " which failed to load during init.");
-         SoftwareManager softwareMgr = loadSoftwareManager(name);
-         logger.info("Start to call echo() of app manager " + name);
-         validateSoftwareManager(name, softwareMgr);
-         cache.put(name, softwareMgr);
-         return softwareMgr;
+         return loadSoftwareManager(appManagerEntity);
       }
+
+      //TODO:
+      //it's either not defined or being initialized
       return null;
    }
 
@@ -290,7 +319,7 @@ public class SoftwareManagerCollector implements InitializingBean {
     * @return null if cluster name does not have a corresponding software
     *         manager instance
     */
-   public synchronized SoftwareManager getSoftwareManagerByClusterName(String name) {
+   public SoftwareManager getSoftwareManagerByClusterName(String name) {
       ClusterEntity clusterEntity = clusterEntityManager.findByName(name);
       if (clusterEntity == null) {
          logger.warn("Can't find cluster with name: " + name);
@@ -300,12 +329,10 @@ public class SoftwareManagerCollector implements InitializingBean {
    }
 
    public synchronized void loadSoftwareManagers() {
-      // TODO: load all software manager instances into memory while the Tomcat service is started
       // Should block request until initialized
       // temporarily load ironfan software manager instance here
-      AppManagerAdd appManagerAdd;
       if (appManagerService.findAppManagerByName(Constants.IRONFAN) == null) {
-         appManagerAdd = new AppManagerAdd();
+         AppManagerAdd appManagerAdd = new AppManagerAdd();
          appManagerAdd.setName(Constants.IRONFAN);
          appManagerAdd.setDescription(Constants.IRONFAN_DESCRIPTION);
          appManagerAdd.setType(Constants.IRONFAN);
@@ -315,25 +342,11 @@ public class SoftwareManagerCollector implements InitializingBean {
          appManagerAdd.setSslCertificate("");
          appManagerService.addAppManager(appManagerAdd);
       }
-      SoftwareManager ironfanSoftwareManager = new DefaultSoftwareManagerImpl();
-      cache.put(Constants.IRONFAN, ironfanSoftwareManager);
 
       List<AppManagerEntity> appManagers = appManagerService.findAll();
       for (AppManagerEntity appManager : appManagers) {
-         if (!appManager.getName().equals(Constants.IRONFAN)) {
-            appManagerAdd = toAppManagerAdd(appManager);
-            // Do not block initialization in case of Exception
-            try {
-               SoftwareManager softwareManager =
-                     loadSoftwareManager(appManagerAdd);
-               cache.put(appManager.getName(), softwareManager);
-            } catch (Exception e) {
-               logger.error("Error loading application manager: " + appManagerAdd,
-                     e);
-            }
-         }
+         loadSoftwareManager(appManager);
       }
-
    }
 
    /**
@@ -483,18 +496,12 @@ public class SoftwareManagerCollector implements InitializingBean {
          saveSslCertificate(sslCertificate);
       }
 
-      logger.info("Load application manager using new properties " + appManagerAdd);
-      SoftwareManager softwareManager = loadSoftwareManager(appManagerAdd);
-
-      logger.info("Validate the new application manager");
-      validateSoftwareManager(name, softwareManager);
+      logger.info("Load software manager using new properties " + appManagerAdd);
+      cache.remove(name);
+      loadSoftwareManager(appManagerAdd);
 
       logger.info("Modify meta db");
       appManagerService.modifyAppManager(appManagerAdd);
-      logger.info("Remove old application manager instance from cache");
-      cache.remove(name);
-      logger.info("Add new application manager instance into cache");
-      cache.put(name, softwareManager);
 
       logger.debug("successfully modified app manager " + appManagerAdd);
    }

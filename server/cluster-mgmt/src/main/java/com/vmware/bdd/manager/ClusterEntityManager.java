@@ -683,12 +683,16 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
                   .getSoftwareManager(cluster.getAppManager());
       if (softMgr == null) {
          logger.error("Failed to get softwareManger.");
-         throw ClusterConfigException.FAILED_TO_GET_SOFTWARE_MANAGER(cluster.getAppManager());
+         // do not throw exception for exporting cluster info
       }
       List<NodeGroupRead> groupList = new ArrayList<NodeGroupRead>();
       for (NodeGroupEntity group : cluster.getNodeGroups()) {
          NodeGroupRead groupRead = group.toNodeGroupRead(ignoreObsoleteNode);
-         groupRead.setComputeOnly(softMgr.isComputeOnlyRoles(groupRead.getRoles()));
+         groupRead.setComputeOnly(false);
+         try {
+            groupRead.setComputeOnly(softMgr.isComputeOnlyRoles(groupRead.getRoles()));
+         } catch (Exception e) {
+         }
          groupList.add(groupRead);
       }
 
