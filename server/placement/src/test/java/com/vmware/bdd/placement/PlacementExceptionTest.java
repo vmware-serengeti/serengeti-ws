@@ -3,6 +3,7 @@ package com.vmware.bdd.placement;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.placement.exception.PlacementException;
 import com.vmware.bdd.placement.util.PlacementUtil;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by admin on 8/19/14.
+ * Test Case for placement exception
  */
 public class PlacementExceptionTest {
    @Test
@@ -31,9 +32,16 @@ public class PlacementExceptionTest {
 
       filteredHosts.put(PlacementUtil.OUT_OF_SYNC_HOSTS, Arrays.asList("host3", "host4"));
 
-      System.out.println(
-      PlacementException.PLACEMENT_ERROR(PlacementException.OUT_OF_STORAGE_ON_HOST("host1"), placedNodes, filteredHosts).getMessage());
+      PlacementException pe = PlacementException.PLACEMENT_ERROR(
+            PlacementException.OUT_OF_STORAGE_ON_HOST("host1"), placedNodes, filteredHosts);
+      System.out.println(pe.getMessage());
 
-      System.out.println();
+      Assert.assertEquals(pe.getMessage(),
+            "Cannot find enough storage on host host1. Possible fixes:\n" +
+            "You must synchronize the time of the following hosts [host3, host4] with the Serengeti Management Server to use them.\n" +
+                  "You must add these hosts [hbase5-worker-01, hbase5-worker-02] to the network [defaultNetwork, dhcp] to use them.\n" +
+                  "You must add datastores on these hosts [host5] to use them with the node group [worker].\n" +
+                  "Current node placement plan:\n" +
+                  "Node hbase5-worker-1 placed on host host2. Node hbase5-worker-0 placed on host host1. ");
    }
 }
