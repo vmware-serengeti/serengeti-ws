@@ -117,7 +117,6 @@ public class AppManagerService implements IAppManagerService{
    public List<AppManagerRead> getAllAppManagerReads() {
       List<AppManagerEntity> entities = appManagerDAO.findAllSortByName();
       List<AppManagerRead> reads = new ArrayList<AppManagerRead>();
-      AppManagerRead read;
       for (AppManagerEntity entity : entities) {
          reads.add(toAppManagerRead(entity));
       }

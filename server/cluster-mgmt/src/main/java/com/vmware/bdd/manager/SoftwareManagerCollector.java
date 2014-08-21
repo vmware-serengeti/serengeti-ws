@@ -356,6 +356,9 @@ public class SoftwareManagerCollector implements InitializingBean {
       logger.debug("get all app managers");
       List<AppManagerRead> appManagerReads =
             appManagerService.getAllAppManagerReads();
+      for (AppManagerRead appManagerRead: appManagerReads) {
+         updateManagedClusters(appManagerRead);
+      }
       logger.debug("got all app managers");
       return appManagerReads;
    }
@@ -386,13 +389,12 @@ public class SoftwareManagerCollector implements InitializingBean {
       return null;
    }
 
-   /**
-    * @param appManagerRead
-    */
-   private void setAppManagerReadDynamicProperties(AppManagerRead appManagerRead) {
+   private void updateManagedClusters(AppManagerRead appManagerRead) {
       appManagerRead.setManagedClusters(clusterEntityManager
             .findByAppManager(appManagerRead.getName()));
+   }
 
+   private void updateVersion(AppManagerRead appManagerRead) {
       String softMgrVersion = "UNKNOWN";
 
       final SoftwareManager softwareManager = this.getSoftwareManager(appManagerRead.getName());
@@ -417,6 +419,14 @@ public class SoftwareManagerCollector implements InitializingBean {
 
          appManagerRead.setVersion(softMgrVersion);
       }
+   }
+
+   /**
+    * @param appManagerRead
+    */
+   private void setAppManagerReadDynamicProperties(AppManagerRead appManagerRead) {
+      updateManagedClusters(appManagerRead);
+      updateVersion(appManagerRead);
    }
 
    public List<String> getAllAppManagerTypes() {
