@@ -16,6 +16,7 @@ package com.vmware.bdd.plugin.ambari.api.model.cluster;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 
 public class ApiConfigGroup {
 
@@ -40,5 +41,9 @@ public class ApiConfigGroup {
 
    public void setHref(String href) {
       this.href = href;
+   }
+
+   public String toString() {
+      return ApiUtils.objectToJson(this);
    }
 }

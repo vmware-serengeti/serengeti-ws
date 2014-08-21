@@ -719,7 +719,7 @@ public class AmbariImpl implements SoftwareManager {
       ApiRequest apiRequestSummary =
             apiManager.stopAllComponentsInHosts(clusterDef.getName(),
                   existingHosts);
-      if (apiRequestSummary.getApiRequestInfo() == null) {
+      if (apiRequestSummary == null || apiRequestSummary.getApiRequestInfo() == null) {
          logger.debug("No components need to be stopped.");
          return;
       }
@@ -827,6 +827,10 @@ public class AmbariImpl implements SoftwareManager {
          }
          configGroups.addAll(serviceToGroup.values());
       }
+      if (configGroups.isEmpty()) {
+         return;
+      }
+      logger.debug("Start to create config groups: " + configGroups);
       apiManager.createConfigGroups(clusterDef.getName(), configGroups);
    }
 
