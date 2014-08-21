@@ -31,7 +31,6 @@ import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.cli.rest.AppManagerRestClient;
 import com.vmware.bdd.cli.rest.CliRestException;
-import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.utils.CommonUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -457,7 +456,7 @@ public class AppManagerCommands implements CommandMarker {
       if (Constants.IRONFAN.equals(name)) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
                name, Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL,
-               "Cannot modify default software manager.");
+               "Cannot modify default application manager.");
          return;
       }
 

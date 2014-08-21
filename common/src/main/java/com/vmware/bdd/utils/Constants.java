@@ -210,7 +210,7 @@ public class Constants {
    public static final String EXEC_COMMAND_FAILED = " failed.";
    public static final String NO_RESOURCE_POOL_IS_CREATED = "no resource pool is created.";
    public static final String IRONFAN = "Default";
-   public static final String IRONFAN_DESCRIPTION = "Default Software Manager";
+   public static final String IRONFAN_DESCRIPTION = "Default application manager";
    public static final String SERENGETI_PRIVATE_KEY_FILE = "/home/serengeti/.ssh/id_rsa";
    public static final String VM_DISK_FORMAT_STATUS_KEY = "guestinfo.DiskFormatCode";
    public static final String VM_DISK_FORMAT_ERROR_KEY = "guestinfo.disk.format.status";

@@ -37,6 +37,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.plexus.util.Base64;
 import org.springframework.beans.factory.InitializingBean;
@@ -48,7 +49,6 @@ import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.entity.ClusterEntity;
-import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.plugin.ironfan.impl.DefaultSoftwareManagerImpl;
@@ -122,7 +122,7 @@ public class SoftwareManagerCollector implements InitializingBean {
    private synchronized void createSoftwareManagerInternal(AppManagerAdd appManagerAdd,
 		   SoftwareManager softwareManager) {
 
-      logger.info("Start to create software manager for " + appManagerAdd.getName());
+      logger.info("Start to create application manager for " + appManagerAdd.getName());
 
       if (appManagerService.findAppManagerByName(appManagerAdd.getName()) != null) {
          logger.error("Name " + appManagerAdd.getName() + " already exists.");
@@ -159,6 +159,12 @@ public class SoftwareManagerCollector implements InitializingBean {
       return privateKey;
    }
 
+   public SoftwareManager loadSoftwareManager(String appManagerName) {
+      AppManagerEntity appManagerEntity =
+            appManagerService.findAppManagerByName(appManagerName);
+      return loadSoftwareManager(toAppManagerAdd(appManagerEntity)) ;
+   }
+
    /**
     *
     * @param appManagerAdd
@@ -186,7 +192,7 @@ public class SoftwareManagerCollector implements InitializingBean {
          throw SoftwareManagerCollectorException.CAN_NOT_INSTANTIATE(e, factoryClassName);
       }
 
-      logger.info("Start to invoke software manager factory to create software manager.");
+      logger.info("Start to invoke application manager factory to create application manager.");
       SoftwareManager softwareManager = null;
       try {
          softwareManager =
@@ -194,8 +200,9 @@ public class SoftwareManagerCollector implements InitializingBean {
                      .getUsername(), appManagerAdd.getPassword().toCharArray(),
                      getPrivateKey());
       } catch (Exception ex) {
-         logger.error("Create software manager failed: " + ex.getMessage());
-         throw BddException.INTERNAL(ex, "Create software manager failed.");
+         logger.error("Create application manager failed: " + ex.getMessage(), ex);
+         throw SoftwareManagerCollectorException.CONNECT_FAILURE(
+               appManagerAdd.getName(), ExceptionUtils.getRootCauseMessage(ex));
       }
 
       return softwareManager;
@@ -207,7 +214,7 @@ public class SoftwareManagerCollector implements InitializingBean {
     * @param softwareManager
     */
    private void validateSoftwareManager(String name, final SoftwareManager softwareManager) {
-      logger.info("Check echo() of software manager.");
+      logger.info("Check echo() of application manager.");
       // validate instance is reachable
       try {
          // if the target ip does not exist or the host is shutdown, it will take about 2 minutes
@@ -231,13 +238,14 @@ public class SoftwareManagerCollector implements InitializingBean {
          }
          exec.shutdown();
 
-         if ( !gotEcho ) {
-            logger.error("Cannot connect to Software Manager "
-                  + name + ", check the connection information.");
+         if (!gotEcho) {
+            logger.error("Application manager "
+                  + name
+                  + " status is unhealthy. Please check application manager console for more details.");
             throw SoftwareManagerCollectorException.ECHO_FAILURE(name);
          }
       } catch (SoftwareManagementPluginException e) {
-         logger.error("Cannot connect to Software Manager "
+         logger.error("Cannot connect to application manager "
                + name + ", check the connection information.", e);
          throw SoftwareManagerCollectorException.CONNECT_FAILURE(name,
                e.getMessage());
@@ -302,26 +310,35 @@ public class SoftwareManagerCollector implements InitializingBean {
       List<AppManagerEntity> appManagers = appManagerService.findAll();
       for (AppManagerEntity appManager : appManagers) {
          if (!appManager.getName().equals(Constants.IRONFAN)) {
-            appManagerAdd = new AppManagerAdd();
-            appManagerAdd.setName(appManager.getName());
-            appManagerAdd.setDescription(appManager.getDescription());
-            appManagerAdd.setType(appManager.getType());
-            appManagerAdd.setUrl(appManager.getUrl());
-            appManagerAdd.setUsername(appManager.getUsername());
-            appManagerAdd.setPassword(appManager.getPassword());
-            appManagerAdd.setSslCertificate(appManager.getSslCertificate());
+            appManagerAdd = toAppManagerAdd(appManager);
             // Do not block initialization in case of Exception
             try {
                SoftwareManager softwareManager =
                      loadSoftwareManager(appManagerAdd);
                cache.put(appManager.getName(), softwareManager);
             } catch (Exception e) {
-               logger.error("Error loading Software Manager: " + appManagerAdd,
+               logger.error("Error loading application manager: " + appManagerAdd,
                      e);
             }
          }
       }
 
+   }
+
+   /**
+    * @param appManager
+    * @return
+    */
+   private AppManagerAdd toAppManagerAdd(AppManagerEntity appManager) {
+      AppManagerAdd appManagerAdd = new AppManagerAdd();
+      appManagerAdd.setName(appManager.getName());
+      appManagerAdd.setDescription(appManager.getDescription());
+      appManagerAdd.setType(appManager.getType());
+      appManagerAdd.setUrl(appManager.getUrl());
+      appManagerAdd.setUsername(appManager.getUsername());
+      appManagerAdd.setPassword(appManager.getPassword());
+      appManagerAdd.setSslCertificate(appManager.getSslCertificate());
+      return appManagerAdd;
    }
 
    public List<AppManagerRead> getAllAppManagerReads() {
@@ -412,7 +429,7 @@ public class SoftwareManagerCollector implements InitializingBean {
    public synchronized void deleteSoftwareManager(String appManagerName) {
       logger.debug("delete app manager " + appManagerName);
       if (Constants.IRONFAN.equals(appManagerName)) {
-         logger.error("Cannot delete default software manager.");
+         logger.error("Cannot delete default application manager.");
          throw SoftwareManagerCollectorException.CAN_NOT_DELETE_DEFAULT();
       }
       appManagerService.deleteAppManager(appManagerName);
@@ -425,7 +442,7 @@ public class SoftwareManagerCollector implements InitializingBean {
       logger.debug("modify app manager " + appManagerAdd);
       String name = appManagerAdd.getName();
       if (Constants.IRONFAN.equals(name)) {
-         logger.error("Cannot delete default software manager.");
+         logger.error("Cannot delete default application manager.");
          throw SoftwareManagerCollectorException.CAN_NOT_MODIFY_DEFAULT();
       }
       AppManagerEntity appManager = appManagerService.findAppManagerByName(name);
@@ -445,17 +462,17 @@ public class SoftwareManagerCollector implements InitializingBean {
          saveSslCertificate(sslCertificate);
       }
 
-      logger.info("Load software manager using new properties " + appManagerAdd);
+      logger.info("Load application manager using new properties " + appManagerAdd);
       SoftwareManager softwareManager = loadSoftwareManager(appManagerAdd);
 
-      logger.info("Validate the new software manager");
+      logger.info("Validate the new application manager");
       validateSoftwareManager(name, softwareManager);
 
       logger.info("Modify meta db");
       appManagerService.modifyAppManager(appManagerAdd);
-      logger.info("Remove old software manager instance from cache");
+      logger.info("Remove old application manager instance from cache");
       cache.remove(name);
-      logger.info("Add new software manager instance into cache");
+      logger.info("Add new application manager instance into cache");
       cache.put(name, softwareManager);
 
       logger.debug("successfully modified app manager " + appManagerAdd);

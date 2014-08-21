@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.NestedRuntimeException;
@@ -61,6 +62,7 @@ import com.vmware.bdd.apitypes.ValidateResult;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
+import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.JobManager;
 import com.vmware.bdd.manager.RackInfoManager;
@@ -903,7 +905,27 @@ public class RestResource {
       if (softMgr == null) {
          throw BddException.NOT_FOUND("App Manager", appManagerName);
       }
-      List<HadoopStack> stacks = softMgr.getSupportedStacks();
+      List<HadoopStack> stacks = null;
+      try {
+         stacks = softMgr.getSupportedStacks();
+      } catch (Exception e) {
+         // call SoftwareManagerCollector.loadSoftwareManager() to detect connection issue
+         logger.error("Failed to get supported stacks from appmaanger "
+               + appManagerName, e);
+         SoftwareManager softwareManager =
+               softwareManagerCollector.loadSoftwareManager(appManagerName);
+         // if succeed, call getSupportedStacks() again
+         try {
+            logger.info("Call getSupportedStacks() again.");
+            stacks = softwareManager.getSupportedStacks();
+         } catch (Exception ex) {
+            logger.error("Failed to get supported stacks from appmanager "
+                  + appManagerName + " again.", ex);
+            throw SoftwareManagerCollectorException.CONNECT_FAILURE(
+                  appManagerName, ExceptionUtils.getRootCauseMessage(ex));
+         }
+      }
+
       List<DistroRead> distros = new ArrayList<DistroRead>(stacks.size());
       for (HadoopStack stack : stacks) {
          distros.add(new DistroRead(stack));
