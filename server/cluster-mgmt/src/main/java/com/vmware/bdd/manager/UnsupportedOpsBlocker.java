@@ -14,6 +14,7 @@ import com.vmware.bdd.service.resmgmt.IAppManagerService;
 import com.vmware.bdd.software.mgmt.thrift.SoftwareManagement;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class UnsupportedOpsBlocker {
+   private final static Logger LOGGER = Logger.getLogger(UnsupportedOpsBlocker.class);
 
    @Autowired
    private IClusterEntityManager clusterEntityManager;
@@ -34,17 +36,25 @@ public class UnsupportedOpsBlocker {
    public void blockUnsupportedOpsByCluster(String ops, String clusterName) {
       ClusterEntity clusterEntity = clusterEntityManager.findByName(clusterName);
 
+      if(clusterEntity == null) {
+         LOGGER.error(String.format("cluster %1s not found!", clusterName));
+         throw BddException.NOT_FOUND("Cluster", clusterName);
+      }
+
       if(CommonUtil.isBlank(clusterEntity.getAppManager())) {
+         LOGGER.error(String.format("cluster %1s has no app manager!", clusterName));
          throw BddException.CLUSTER_HAS_NO_APP_MGR(clusterName);
       }
 
       AppManagerEntity appMgrEntity = appManager.findByName(clusterEntity.getAppManager());
 
       if(appMgrEntity == null) {
+         LOGGER.error(String.format("app manager %1s not found!", clusterEntity.getAppManager()));
          throw BddException.APP_MGR_NOT_FOUND(clusterName);
       }
 
       if(CommonUtil.isBlank(appMgrEntity.getType())) {
+         LOGGER.error(String.format("app manager %1s has no type!", appMgrEntity.getName()));
          throw BddException.APP_MGR_TYPE_IS_BLANK(appMgrEntity.getName());
       }
 
@@ -53,6 +63,7 @@ public class UnsupportedOpsBlocker {
 
    public void blockUnsupportedOpsByAppMgr(String ops, String appMgr) {
       if(!Constants.IRONFAN.equals(appMgr)) {
+         LOGGER.error(String.format("Ops %1s is blocked for appMgr (%2s)", ops, appMgr));
          throw BddException.UNSUPPORTED_OPS(ops, appMgr);
       }
    }
