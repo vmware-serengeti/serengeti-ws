@@ -220,6 +220,7 @@ public class Constants {
    public static final int APPMGR_CONNECT_TIMEOUT_SECONDS = 30;
    public static final String SERENGETI_SETUP_LOGIN_TTY_SCRIPT = "serengeti.setup.login.tty.script";
    public static final String SERENGETI_DEFAULT_SETUP_LOGIN_TTY_SCRIPT = "setup-login-tty";
-   public static final int DEFAULT_SSH_SLEEP_TIME_BEFORE_RETRY = 15000;
+   public static final int DEFAULT_SSH_SLEEP_TIME_BEFORE_RETRY = 3000;
    public static final String SSH_SLEEP_TIME_BEFORE_RETRY = "serengeti.ssh.sleep.time.before.retry";
+   public static final String SSH_MAX_RETRY_TIMES = "serengeti.ssh.max.retry.times";
 }

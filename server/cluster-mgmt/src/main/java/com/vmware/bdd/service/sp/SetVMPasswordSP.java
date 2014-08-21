@@ -170,8 +170,9 @@ public class SetVMPasswordSP implements Callable<Void> {
       String password = Configuration.getString(Constants.SERENGETI_DEFAULT_PASSWORD);
       String cmd = script + " " + hostIP + " " + user + " " + password;
       int sleepTime = Configuration.getInt(Constants.SSH_SLEEP_TIME_BEFORE_RETRY, Constants.DEFAULT_SSH_SLEEP_TIME_BEFORE_RETRY);
+      int maxRetryTimes = Configuration.getInt(Constants.SSH_MAX_RETRY_TIMES, Constants.SET_PASSWORD_MAX_RETRY_TIMES);
       int timeoutCount = 0;
-      for (int i = 0; i < Constants.SET_PASSWORD_MAX_RETRY_TIMES; i++) {
+      for (int i = 0; i < maxRetryTimes; i++) {
          try {
             ShellCommandExecutor.execCmd(cmd, null, null, this.setupPasswordLessLoginTimeout, Constants.MSG_SETTING_UP_PASSWORDLESS_LOGIN + hostIP + ".");
             logger.info("Set passwordless login successfully for " + hostIP);
