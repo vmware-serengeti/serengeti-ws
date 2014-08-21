@@ -266,8 +266,19 @@ public class SoftwareManagerCollector implements InitializingBean {
          return cache.get(name);
       }
 
-      //TODO:
-      //it's either not defined or being initialized
+      // if meta-db has this name, which means it failed to load during
+      // tomcat init, try reload it
+      AppManagerEntity appManagerEntity =
+            appManagerService.findAppManagerByName(name);
+      if (appManagerEntity != null) {
+         logger.info("Reload app manager " + name
+               + " which failed to load during init.");
+         SoftwareManager softwareMgr = loadSoftwareManager(name);
+         logger.info("Start to call echo() of app manager " + name);
+         validateSoftwareManager(name, softwareMgr);
+         cache.put(name, softwareMgr);
+         return softwareMgr;
+      }
       return null;
    }
 
