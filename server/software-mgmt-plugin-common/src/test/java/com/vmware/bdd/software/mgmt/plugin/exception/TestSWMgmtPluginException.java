@@ -25,7 +25,7 @@ public class TestSWMgmtPluginException {
 
    @Test
    public void testLoadMessage() {
-      ArrayList<SoftwareManagementPluginException> exs = new ArrayList<>();
+      ArrayList<SoftwareManagementPluginException> exs = new ArrayList<SoftwareManagementPluginException>();
 
       exs.add(SoftwareManagementPluginException.ADD_CLUSTER_REPORT_FAIL(cause));
       exs.add(SoftwareManagementPluginException.CHECK_SERVICE_FAILED(clusterName, cause));

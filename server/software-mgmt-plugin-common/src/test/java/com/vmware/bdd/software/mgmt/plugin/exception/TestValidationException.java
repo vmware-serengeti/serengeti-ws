@@ -19,15 +19,15 @@ public class TestValidationException{
 
    @BeforeClass
    public static void beforeClass() {
-      failedMsgList = new ArrayList<>();
+      failedMsgList = new ArrayList<String>();
       failedMsgList.add("fail");
-      warningMsgList = new ArrayList<>();
+      warningMsgList = new ArrayList<String>();
       warningMsgList.add("warn");
    }
 
    @Test
    public void testLoadMsg() {
-      ArrayList<ValidationException> exs = new ArrayList<>();
+      ArrayList<ValidationException> exs = new ArrayList<ValidationException>();
       exs.add(ValidationException.VALIDATION_FAIL("item", failedMsgList, warningMsgList));
 
       for(ValidationException ex : exs) {

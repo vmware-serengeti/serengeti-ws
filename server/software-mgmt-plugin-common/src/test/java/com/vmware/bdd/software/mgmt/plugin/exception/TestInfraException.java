@@ -18,13 +18,13 @@ public class TestInfraException {
 
    @BeforeClass
    public static void beforeClass() {
-      failedMsgList = new ArrayList<>();
+      failedMsgList = new ArrayList<String>();
       failedMsgList.add("fail");
    }
 
    @Test
    public void testLoadMsg() {
-      ArrayList<InfrastructureException> exs = new ArrayList<>();
+      ArrayList<InfrastructureException> exs = new ArrayList<InfrastructureException>();
       exs.add(InfrastructureException.FORMAT_DISK_FAIL("cluster", failedMsgList));
 
       for(InfrastructureException ex : exs) {

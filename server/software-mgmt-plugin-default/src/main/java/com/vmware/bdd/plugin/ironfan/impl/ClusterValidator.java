@@ -193,7 +193,7 @@ public class ClusterValidator {
          EnumSet<ServiceType> serviceTypes = EnumSet.noneOf(ServiceType.class);
          for (ServiceType service : ServiceType.values()) {
             //identify partially match
-            List<HadoopRole> missingRoles = new ArrayList<>();
+            List<HadoopRole> missingRoles = new ArrayList<HadoopRole>();
             for (HadoopRole role : service.getRoles()) {
                if (!roles.contains(role.toString())) {
                   missingRoles.add(role);
