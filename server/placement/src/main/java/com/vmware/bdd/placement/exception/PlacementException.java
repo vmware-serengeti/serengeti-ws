@@ -15,12 +15,12 @@
 
 package com.vmware.bdd.placement.exception;
 
-import java.util.List;
-import java.util.Map;
-
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.placement.util.PlacementUtil;
+
+import java.util.List;
+import java.util.Map;
 
 public class PlacementException extends BddException {
 
@@ -37,9 +37,9 @@ public class PlacementException extends BddException {
          Map<String, List<String>> filteredHosts) {
       StringBuilder placedNodesStr = new StringBuilder();
       if (!placedNodes.isEmpty()) {
-         placedNodesStr.append("\nCurrent node placement plan:\n");
+         placedNodesStr.append(BddException.formatErrorMessage("PLACEMENT.CURRENT_NODE_PLACEMENT"));
       } else {
-         placedNodesStr.append("\nNo nodes can be placed.\n");
+         placedNodesStr.append(BddException.formatErrorMessage("PLACEMENT.NO_NODE_PLACED"));
       }
       for (BaseNode baseNode : placedNodes) {
          placedNodesStr.append(BddException.getErrorMessage("PLACEMENT.NODE_PLACED_ON_HOST", baseNode.getVmName(), baseNode.getTargetHost()));
@@ -65,7 +65,7 @@ public class PlacementException extends BddException {
       }
 
       if(filteredHostsStr.length() > 0) {
-         filteredHostsStr.insert(0, " Possible fixes:");
+         filteredHostsStr.insert(0, BddException.formatErrorMessage("PLACEMENT.POSSIBLE_FIXES"));
       }
 
       return new PlacementException(cause, "PLACEMENT_ERROR", cause.getMessage(), filteredHostsStr.toString(),placedNodesStr.toString());
