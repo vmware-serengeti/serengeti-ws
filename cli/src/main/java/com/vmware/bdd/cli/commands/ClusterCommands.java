@@ -107,7 +107,8 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume,
          @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation,
          @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes,
-         @CliOption(key = { "password" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Answer 'yes' to set password for all VMs in this cluster.") final boolean setClusterPassword) {
+         @CliOption(key = { "password" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Answer 'yes' to set password for all VMs in this cluster.") final boolean setClusterPassword,
+         @CliOption(key = { "localRepoURL" }, mandatory = false, help = "Local yum server url for 3rd party software managers like ClouderaManager/Ambari etc.") final String localRepoURL) {
       // validate the name
       if (name.indexOf("-") != -1) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
@@ -153,6 +154,11 @@ public class ClusterCommands implements CommandMarker {
          clusterCreate.setAppManager(Constants.IRONFAN);
       } else {
          clusterCreate.setAppManager(appManager);
+         
+         // local yum repo url for 3rd party app managers like ClouderaMgr, Ambari etc.
+         if (!CommandsUtils.isBlank(localRepoURL)) {
+             clusterCreate.setLocalRepoURL(localRepoURL);
+         } 
       }
 
       if (setClusterPassword) {

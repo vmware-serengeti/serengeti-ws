@@ -83,6 +83,11 @@ public class Constants {
    public static final String NODE_ACTION_WRONG_FT_STATUS = "Wrong FT status";
    public static final String NODE_ACTION_SET_PASSWORD_SUCCEED = "Set password succeed";
    public static final String NODE_ACTION_SET_PASSWORD_FAILED = "Set password failed";
+   public static final String NODE_ACTION_CHANGE_REPO_DIR_PERMISSION = "Remote add the write permission to repo dir";
+   public static final String NODE_ACTION_SCP_LOCALREPO_FILE = "Remote copy the local repo file";
+   public static final String NODE_ACTION_MAKE_BACKUP_DIR = "Make a backup dir /etc/yum.repos.d/backup";
+   public static final String NODE_ACTION_MOVE_CENTOS_REPO = "move all the CentOS*.repo to /etc/yum.repos.d/backup";
+   
    public static final int VM_POWER_ON_WAITING_SEC = 600;
    public static final int VM_SHUTDOWN_WAITING_SEC = 600;
    public static final int VM_FAST_SHUTDOWN_WAITING_SEC = 180;
@@ -223,4 +228,9 @@ public class Constants {
    public static final int DEFAULT_SSH_SLEEP_TIME_BEFORE_RETRY = 3000;
    public static final String SSH_SLEEP_TIME_BEFORE_RETRY = "serengeti.ssh.sleep.time.before.retry";
    public static final String SSH_MAX_RETRY_TIMES = "serengeti.ssh.max.retry.times";
+
+   public static final String NODE_APPMANAGER_YUM_REPO_DIR = "/etc/yum.repos.d";
+   public static final String NODE_APPMANAGER_YUM_LOCAL_REPO_FILE = "/etc/yum.repos.d/aaa-local-app-manager.repo";
+   public static final String NODE_APPMANAGER_YUM_CLOUDERA_MANAGER_REPO_ID = "cloudera-manager";
+   public static final String NODE_APPMANAGER_YUM_AMBARI_REPO_ID = "ambari";
 }

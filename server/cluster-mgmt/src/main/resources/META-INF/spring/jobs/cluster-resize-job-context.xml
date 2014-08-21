@@ -102,12 +102,18 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="postSetPasswordForClusterResizeStep" next="softwareResizeClusterStep">
+		<step id="postSetPasswordForClusterResizeStep" next="configLocalRepoResizeStep">
 			<tasklet ref="postSetPasswordTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
+        <step id="configLocalRepoResizeStep" next="softwareResizeClusterStep">
+           <tasklet ref="configLocalRepoTasklet" />
+           <listeners>
+              <listener ref="stepListener" />
+           </listeners>
+        </step>
 		<step id="softwareResizeClusterStep" >
 			<tasklet ref="softwareResizeClusterTasklet" />
 			<listeners>

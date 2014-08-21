@@ -62,24 +62,30 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-      <step id="postSetPasswordForCreateNodesStep" next="softwareCreateClusterStep">
-         <tasklet ref="postSetPasswordTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
-      <step id="softwareCreateClusterStep" next="setAutoElasticityStep">
-         <tasklet ref="softwareCreateClusterTasklet" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
-      <step id="setAutoElasticityStep">
-         <tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
-         <listeners>
-            <listener ref="stepListener" />
-         </listeners>
-      </step>
+        <step id="postSetPasswordForCreateNodesStep" next="configLocalRepoStep">
+           <tasklet ref="postSetPasswordTasklet" />
+           <listeners>
+              <listener ref="stepListener" />
+           </listeners>
+        </step>
+        <step id="configLocalRepoStep" next="softwareCreateClusterStep">
+           <tasklet ref="configLocalRepoTasklet" />
+           <listeners>
+              <listener ref="stepListener" />
+           </listeners>
+        </step>
+        <step id="softwareCreateClusterStep" next="setAutoElasticityStep">
+           <tasklet ref="softwareCreateClusterTasklet" />
+           <listeners>
+              <listener ref="stepListener" />
+           </listeners>
+        </step>
+        <step id="setAutoElasticityStep">
+           <tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
+           <listeners>
+              <listener ref="stepListener" />
+           </listeners>
+        </step>
         <!--
         <step id="cmCreateClusterStep">
             <tasklet ref="cmCreateClusterTasklet" />

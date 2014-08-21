@@ -30,6 +30,9 @@ public class ClusterRead implements Comparable<ClusterRead> {
    private String name;
    private String externalHDFS;
    private String externalMapReduce;
+   
+   private String localRepoURL;
+
    @Expose
    private String distro;
 
@@ -485,4 +488,13 @@ public class ClusterRead implements Comparable<ClusterRead> {
       }
       return true;
    }
+   
+   public String getLocalRepoURL() {
+	   return localRepoURL;
+   }
+
+   public void setLocalRepoURL(String localRepoURL) {
+	   this.localRepoURL = localRepoURL;
+   }
+   
 }

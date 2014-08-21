@@ -148,4 +148,11 @@
 		class="com.vmware.bdd.service.job.PostSetPasswordStep">
 		<beans:property name="setPasswordService" ref="setPasswordService"/>
 	</beans:bean>
+	<beans:bean name="configLocalRepoTasklet"
+		class="com.vmware.bdd.service.job.ConfigLocalRepoStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
+	</beans:bean>
+	
 </beans:beans>

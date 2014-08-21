@@ -139,10 +139,9 @@ public class SoftwareManagementStep extends TrackableTasklet {
                   getJobExecutionId(chunkContext));
 
       ISoftwareManagementTask task = null;
-      if (!Constants.IRONFAN.equals(softwareMgr.getName())) {
-         task =
-               createExternalTask(chunkContext, targetName, clusterName,
-                     statusUpdater);
+      String appMgrName = softwareMgr.getName();
+      if (!Constants.IRONFAN.equals( appMgrName )) {    	 
+         task = createExternalTask(chunkContext, targetName, clusterName, statusUpdater);
       } else {
          task = createThriftTask(chunkContext, targetName, statusUpdater);
       }

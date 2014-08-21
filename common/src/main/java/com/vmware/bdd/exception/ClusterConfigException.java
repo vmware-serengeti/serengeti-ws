@@ -152,4 +152,8 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException INSTANCE_SIZE_NOT_SET(String group) {
       return new ClusterConfigException(null, "INSTANCE_SIZE_NOT_SET", group);
    }
+   public static ClusterConfigException INVALID_LOCAL_REPO_URL(List<String> errors) {
+	  return new ClusterConfigException(null, "INVALID_LOCAL_REPO_URL", errors);
+   }
+   
 }

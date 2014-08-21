@@ -29,6 +29,11 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -233,7 +238,13 @@ public class ClusterConfigManager {
       if (!validateRacksInfo(cluster, failedMsgList)) {
          throw ClusterConfigException.INVALID_PLACEMENT_POLICIES(failedMsgList);
       }
-
+      
+      String localRepoURL = cluster.getLocalRepoURL();
+      if ( !CommonUtil.isBlank(localRepoURL) && !validateLocalRepoURL(localRepoURL) )
+      {
+          throw ClusterConfigException.INVALID_LOCAL_REPO_URL(failedMsgList);
+      }
+      
       try {
          ClusterEntity entity = clusterEntityMgr.findByName(name);
          if (entity != null) {
@@ -290,7 +301,9 @@ public class ClusterConfigManager {
 
             updateVhmJobTrackerPort(cluster, clusterEntity);
          }
-         setAdvancedProperties(cluster.getExternalHDFS(), cluster.getExternalMapReduce(), clusterEntity);
+         
+         setAdvancedProperties(cluster.getExternalHDFS(), cluster.getExternalMapReduce(), 
+        		 localRepoURL, clusterEntity);
          NodeGroupCreate[] groups = cluster.getNodeGroups();
          if (groups != null && groups.length > 0) {
             clusterEntity
@@ -339,12 +352,13 @@ public class ClusterConfigManager {
    }
 
    private void setAdvancedProperties(String externalHDFS,
-         String externalMapReduce, ClusterEntity clusterEntity) {
+         String externalMapReduce, String localRepoURL, ClusterEntity clusterEntity) {
       if (!CommonUtil.isBlank(externalHDFS)
-            || !CommonUtil.isBlank(externalMapReduce)) {
+            || !CommonUtil.isBlank(externalMapReduce) || !CommonUtil.isBlank(localRepoURL) ) {
          Map<String, String> advancedProperties = new HashMap<String, String>();
          advancedProperties.put("ExternalHDFS", externalHDFS);
          advancedProperties.put("ExternalMapReduce", externalMapReduce);
+         advancedProperties.put("LocalRepoURL", localRepoURL);
          Gson g = new Gson();
          clusterEntity.setAdvancedProperties(g.toJson(advancedProperties));
       }
@@ -831,6 +845,7 @@ public class ClusterConfigManager {
           Map<String, String> advancedProperties = gson.fromJson(clusterEntity.getAdvancedProperties(), Map.class);
           clusterConfig.setExternalHDFS(advancedProperties.get("ExternalHDFS"));
           clusterConfig.setExternalMapReduce(advancedProperties.get("ExternalMapReduce"));
+          clusterConfig.setLocalRepoURL(advancedProperties.get("LocalRepoURL"));
        }
    }
 
@@ -1099,8 +1114,8 @@ public class ClusterConfigManager {
          Map<String, String> advancedProperties =
                gson.fromJson(cluster.getAdvancedProperties(), Map.class);
          clusterCreate.setExternalHDFS(advancedProperties.get("ExternalHDFS"));
-         clusterCreate.setExternalMapReduce(advancedProperties
-               .get("ExternalMapReduce"));
+         clusterCreate.setExternalMapReduce(advancedProperties.get("ExternalMapReduce"));
+         clusterCreate.setLocalRepoURL(advancedProperties.get("LocalRepoURL"));
       }
       // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
       ClusterBlueprint blueprint = clusterCreate.toBlueprint();
@@ -1121,7 +1136,8 @@ public class ClusterConfigManager {
          logger.debug("cluster configuration is not set in cluster spec, so treat it as an empty configuration.");
          cluster.setHadoopConfig(null);
       }
-      setAdvancedProperties(clusterCreate.getExternalHDFS(), clusterCreate.getExternalMapReduce(), cluster);
+      setAdvancedProperties(clusterCreate.getExternalHDFS(), clusterCreate.getExternalMapReduce(), 
+    		  clusterCreate.getLocalRepoURL(), cluster);
       updateNodegroupAppConfig(clusterCreate, cluster,
             clusterCreate.isValidateConfig());
    }
@@ -1231,4 +1247,32 @@ public class ClusterConfigManager {
    public SoftwareManager getSoftwareManager(String appManager) {
       return softwareManagerCollector.getSoftwareManager(appManager);
    }
+   
+   private boolean validateLocalRepoURL(String localRepoURL) {
+	   boolean succ = true;
+	   HttpClientBuilder builder = HttpClientBuilder.create(); 
+	   CloseableHttpClient httpClient = builder.build();
+       HttpGet httpGet = new HttpGet(localRepoURL);  
+
+	   // test the connection to the given url
+	   try {
+	       HttpResponse resp = httpClient.execute(httpGet);  
+		   StatusLine status = resp.getStatusLine();
+		   if ( status.getStatusCode() >= 400 )
+		   {
+			   succ = false;
+		   }
+		   
+		   if ( null != httpClient ) {
+		      httpClient.close();
+		   }
+		   
+		} catch (Exception e) {
+			succ = false;
+			logger.error(e.getMessage());
+		}
+
+	    return succ;
+   }
+   
 }

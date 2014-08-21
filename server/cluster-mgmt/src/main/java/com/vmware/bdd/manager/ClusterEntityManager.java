@@ -22,7 +22,6 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 
-import com.vmware.bdd.exception.BddException;
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +48,7 @@ import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
-import com.vmware.bdd.exception.ClusterConfigException;
+import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
@@ -58,7 +57,6 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
-import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 import com.vmware.bdd.software.mgmt.thrift.GroupData;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
@@ -83,7 +81,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    private IServerInfoDAO serverInfoDao;
    private SoftwareManagerCollector softwareManagerCollector;
 
-   public IServerInfoDAO getServerInfoDao(){
+   public IServerInfoDAO getServerInfoDao() {
       return serverInfoDao;
    }
 
@@ -129,8 +127,9 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    }
 
    @Autowired
-   public void setSoftwareManagerCollector(SoftwareManagerCollector softwareManagerCollector) {
-        this.softwareManagerCollector = softwareManagerCollector;
+   public void setSoftwareManagerCollector(
+         SoftwareManagerCollector softwareManagerCollector) {
+      this.softwareManagerCollector = softwareManagerCollector;
    }
 
    public ClusterEntity findClusterById(Long id) {
@@ -318,7 +317,8 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
                         logger.debug("node status: "
                               + NodeStatus.fromString(serverData.getStatus()));
                         String errorMsg = serverData.getError_msg();
-                        if (lastUpdate && errorMsg != null && !errorMsg.isEmpty()) {
+                        if (lastUpdate && errorMsg != null
+                              && !errorMsg.isEmpty()) {
                            oldNode.setActionFailed(true);
                            oldNode.setErrMessage(errorMsg);
                            logger.debug("error message: " + errorMsg);
@@ -358,30 +358,31 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       ClusterEntity cluster = findByName(clusterName);
       ClusterStatus oldState = cluster.getStatus();
       switch (oldState) {
-         case RUNNING:
-         case SERVICE_STOPPED:
-         case SERVICE_WARNING:
-            switch (report.getStatus()) {
-               case STARTED:
-                  cluster.setStatus(ClusterStatus.RUNNING);
-                  break;
-               case ALERT:
-                  cluster.setStatus(ClusterStatus.SERVICE_WARNING);
-                  break;
-               case STOPPED:
-                  cluster.setStatus(ClusterStatus.SERVICE_STOPPED);
-                  break;
-               default:
-                  break;
-            }
-            logger.info("Got status " + report.getStatus()
-                  + ", change cluster status from " + oldState
-                  + " to " + cluster.getStatus());
+      case RUNNING:
+      case SERVICE_STOPPED:
+      case SERVICE_WARNING:
+         switch (report.getStatus()) {
+         case STARTED:
+            cluster.setStatus(ClusterStatus.RUNNING);
+            break;
+         case ALERT:
+            cluster.setStatus(ClusterStatus.SERVICE_WARNING);
+            break;
+         case STOPPED:
+            cluster.setStatus(ClusterStatus.SERVICE_STOPPED);
             break;
          default:
-            logger.debug("In status " + cluster.getStatus() +
-                  ". Do not change cluster status based on service status change.");
             break;
+         }
+         logger.info("Got status " + report.getStatus()
+               + ", change cluster status from " + oldState + " to "
+               + cluster.getStatus());
+         break;
+      default:
+         logger.debug("In status "
+               + cluster.getStatus()
+               + ". Do not change cluster status based on service status change.");
+         break;
       }
    }
 
@@ -404,10 +405,11 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
                continue;
             }
             if (nodeReport.getStatus() != null) {
-               if (!node.isDisconnected() 
-                     && node.getStatus().ordinal() >= NodeStatus.VM_READY.ordinal()) {
-                  logger.debug("Got node " + node.getVmName() 
-                        + " status " + nodeReport.getStatus().toString());
+               if (!node.isDisconnected()
+                     && node.getStatus().ordinal() >= NodeStatus.VM_READY
+                           .ordinal()) {
+                  logger.debug("Got node " + node.getVmName() + " status "
+                        + nodeReport.getStatus().toString());
                   NodeStatus oldStatus = node.getStatus();
                   switch (nodeReport.getStatus()) {
                   case STARTED:
@@ -446,11 +448,13 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
             }
             if (lastUpdate) {
                if (nodeReport.getErrMsg() != null) {
-                  logger.debug("set node error message to:" + report.getAction());
+                  logger.debug("set node error message to:"
+                        + report.getAction());
                   node.setErrMessage(nodeReport.getErrMsg());
                   node.setActionFailed(true);
                } else {
-                  logger.debug("clear node error message for node " + node.getHostName());
+                  logger.debug("clear node error message for node "
+                        + node.getHostName());
                   node.setErrMessage(null);
                   node.setActionFailed(false);
                }
@@ -554,7 +558,8 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       if (vcVm.isPoweredOn()) {
          //update ip address
          for (NicEntity nicEntity : node.getNics()) {
-            VcVmUtil.populateNicInfo(nicEntity, node.getMoId(), nicEntity.getNetworkEntity().getPortGroup());
+            VcVmUtil.populateNicInfo(nicEntity, node.getMoId(), nicEntity
+                  .getNetworkEntity().getPortGroup());
          }
 
          if (node.nicsReady()) {
@@ -583,7 +588,8 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       blueprint.setInstanceNum(clusterEntity.getRealInstanceNum(true));
       // TODO: topology
       if (clusterEntity.getHadoopConfig() != null) {
-         Map<String, Object> clusterConfigs = gson.fromJson(clusterEntity.getHadoopConfig(), Map.class);
+         Map<String, Object> clusterConfigs =
+               gson.fromJson(clusterEntity.getHadoopConfig(), Map.class);
          blueprint.setConfiguration(clusterConfigs);
       }
 
@@ -611,11 +617,12 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       nodeGroupInfo.setInstanceNum(group.getRealInstanceNum(true));
       nodeGroupInfo.setRoles(gson.fromJson(group.getRoles(), List.class));
       if (group.getHadoopConfig() != null) {
-         Map<String, Object> groupConfigs = gson.fromJson(group.getHadoopConfig(), Map.class);
+         Map<String, Object> groupConfigs =
+               gson.fromJson(group.getHadoopConfig(), Map.class);
          nodeGroupInfo.setConfiguration(groupConfigs);
       }
-      if (group.getHaFlag().equalsIgnoreCase(Constants.HA_FLAG_FT) ||
-            group.getHaFlag().equalsIgnoreCase(Constants.HA_FLAG_ON)) {
+      if (group.getHaFlag().equalsIgnoreCase(Constants.HA_FLAG_FT)
+            || group.getHaFlag().equalsIgnoreCase(Constants.HA_FLAG_ON)) {
          nodeGroupInfo.setHaEnabled(true);
       }
       nodeGroupInfo.setInstanceType(group.getNodeType());
@@ -673,14 +680,19 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       clusterRead.setVersion(cluster.getVersion());
       if (!CommonUtil.isBlank(cluster.getAdvancedProperties())) {
          Gson gson = new Gson();
-         Map<String, String> advancedProperties = gson.fromJson(cluster.getAdvancedProperties(), Map.class);
+         Map<String, String> advancedProperties =
+               gson.fromJson(cluster.getAdvancedProperties(), Map.class);
          clusterRead.setExternalHDFS(advancedProperties.get("ExternalHDFS"));
-         clusterRead.setExternalMapReduce(advancedProperties.get("ExternalMapReduce"));
+         clusterRead.setExternalMapReduce(advancedProperties
+               .get("ExternalMapReduce"));
+         clusterRead.setLocalRepoURL(advancedProperties.get("LocalRepoURL"));
       }
 
       SoftwareManager softMgr = null;
       try {
-         softMgr = softwareManagerCollector.getSoftwareManager(cluster.getAppManager());
+         softMgr =
+               softwareManagerCollector.getSoftwareManager(cluster
+                     .getAppManager());
       } catch (Exception e) {
          logger.error("Failed to get softwareManger.");
          // do not throw exception for exporting cluster info
@@ -691,7 +703,8 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
          NodeGroupRead groupRead = group.toNodeGroupRead(ignoreObsoleteNode);
          groupRead.setComputeOnly(false);
          try {
-            groupRead.setComputeOnly(softMgr.isComputeOnlyRoles(groupRead.getRoles()));
+            groupRead.setComputeOnly(softMgr.isComputeOnlyRoles(groupRead
+                  .getRoles()));
          } catch (Exception e) {
          }
          groupList.add(groupRead);
@@ -832,14 +845,15 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
             break;
          }
       }
-      return clusterVersion == null || !serverVersion.equals(clusterVersion) || !allNodesUpgraded;
+      return clusterVersion == null || !serverVersion.equals(clusterVersion)
+            || !allNodesUpgraded;
    }
 
    @Transactional
    @RetryTransaction
    public String getServerVersion() {
       List<ServerInfoEntity> serverInfoEntities = getServerInfoDao().findAll();
-      if (serverInfoEntities.isEmpty()){
+      if (serverInfoEntities.isEmpty()) {
          return null;
       }
       ServerInfoEntity serverInfoEntity = serverInfoEntities.get(0);
@@ -851,7 +865,8 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    @RetryTransaction
    public void storeClusterLastStatus(String clusterName) {
       ClusterStatus clusterStatus = clusterDao.getStatus(clusterName);
-      if (!ClusterStatus.UPGRADE_ERROR.equals(clusterStatus) && !ClusterStatus.UPGRADING.equals(clusterStatus)) {
+      if (!ClusterStatus.UPGRADE_ERROR.equals(clusterStatus)
+            && !ClusterStatus.UPGRADING.equals(clusterStatus)) {
          clusterDao.updateLastStatus(clusterName, clusterStatus);
       }
    }
@@ -864,6 +879,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
          node.cleanupErrorMessageForUpgrade();
       }
    }
+
    public void update(Observable o, Object arg) {
       // TODO
    }

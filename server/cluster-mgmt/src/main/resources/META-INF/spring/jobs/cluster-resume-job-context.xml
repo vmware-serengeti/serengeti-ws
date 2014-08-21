@@ -80,12 +80,18 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="postSetPasswordForAllNodesStep" next="softwareResumeClusterStep">
+		<step id="postSetPasswordForAllNodesStep" next="configLocalRepoResumeStep">
 			<tasklet ref="postSetPasswordTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
+        <step id="configLocalRepoResumeStep" next="softwareResumeClusterStep">
+           <tasklet ref="configLocalRepoTasklet" />
+           <listeners>
+              <listener ref="stepListener" />
+           </listeners>
+        </step>
 		<step id="softwareResumeClusterStep" next="setAutoElasticityResumeStep">
 			<tasklet ref="softwareCreateClusterTasklet" />
 			<listeners>
