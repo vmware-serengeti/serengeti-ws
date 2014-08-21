@@ -5,15 +5,25 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import mockit.Mock;
+import mockit.MockClass;
+import mockit.Mockit;
+
+import org.mockito.Mockito;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.vmware.bdd.plugin.ambari.api.model.ApiHostsRequest;
+import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
+import com.vmware.bdd.plugin.ambari.api.ApiRootResource;
+import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
+import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
+import com.vmware.bdd.plugin.ambari.service.am.FakeRootResourceV1;
+import com.vmware.bdd.plugin.ambari.service.am.FakeStacks2Resource;
+import com.vmware.bdd.plugin.ambari.utils.Constants;
+import com.vmware.bdd.plugin.ambari.utils.SerialUtils;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager.HealthStatus;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
@@ -26,32 +36,88 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 import com.vmware.bdd.utils.CommonUtil;
 
 public class TestAmbariImpl {
-   //   private static final Logger logger = Logger.getLogger(TestAmbariImpl.class);
+
+   private static ApiRootResource apiRootResource;
+   private static RootResourceV1 rootResourceV1;
    private static AmbariImpl provider;
+   private static ClusterBlueprint blueprint;
+   private static ClusterReportQueue reportQueue;
+   private static FakeStacks2Resource stacks2Resource;
 
-   @BeforeClass(groups = { "TestAmbariImpl" })
-   public static void setup() {
-      //provider = new AmbariImpl("10.141.73.103", 8080, "admin", "admin", null);
+   @MockClass(realClass = ApiManager.class)
+   public static class MockApiManager {
+
+      public void ApiManager(String amServerHost, int port, String user,
+            String password) {
+
+      }
+
+      @Mock
+      public ApiStackList getStackList() {
+         String stacks =
+               new FakeStacks2Resource().readStacks().readEntity(String.class);
+         return ApiUtils.jsonToObject(ApiStackList.class, stacks);
+      }
    }
 
-   @AfterClass(groups = { "TestAmbariImpl" })
-   public static void tearDown() {
+   @MockClass(realClass = AmbariManagerClientbuilder.class)
+   public static class MockAmbariManagerClientbuilder {
 
+      private AmbariManagerClientbuilder builder =
+            new AmbariManagerClientbuilder();
+
+      @Mock
+      public AmbariManagerClientbuilder withHost(String host) {
+         return builder;
+      }
+
+      @Mock
+      public AmbariManagerClientbuilder withPort(int port) {
+         return builder;
+      }
+
+      @Mock
+      public AmbariManagerClientbuilder withBaseURL(URL url) {
+         return builder;
+      }
+
+      @Mock
+      public AmbariManagerClientbuilder withUsernamePassword(String user,
+            String password) {
+         return builder;
+      }
+
+      @Mock
+      public ApiRootResource build() {
+         return apiRootResource;
+      }
    }
 
-   @BeforeMethod(groups = { "TestAmbariImpl" })
-   public void beforeMethod() {
-
+   @MockClass(realClass = AmClusterValidator.class)
+   public static class MockAmClusterValidator {
+      @Mock
+      public boolean validateBlueprint(ClusterBlueprint blueprint) {
+         return true;
+      }
    }
 
-   @AfterMethod(groups = { "TestAmbariImpl" })
-   public void afterMethod() {
+   @BeforeClass(groups = { "TestClouderaManagerImpl" }, dependsOnGroups = { "TestClusterDef" })
+   public static void setup() throws IOException {
+      Mockit.setUpMock(MockAmbariManagerClientbuilder.class);
+      Mockit.setUpMock(MockAmClusterValidator.class);
 
-   }
+      apiRootResource = Mockito.mock(ApiRootResource.class);
 
-   @Test(groups = { "TestAmbariImpl" })
-   public void testInitializeCluster() throws IOException {
+      rootResourceV1 = new FakeRootResourceV1();
+      Mockito.when(apiRootResource.getRootV1()).thenReturn(rootResourceV1);
 
+      provider =
+            new AmbariImpl("127.0.0.1", 8080, "admin", "admin", "RSA_CERT");
+      blueprint =
+            SerialUtils.getObjectByJsonString(ClusterBlueprint.class,
+                  CommonUtil.readJsonFile("simple_blueprint.json"));
+
+      reportQueue = new ClusterReportQueue();
    }
 
    private void testStatusQuery() {
@@ -103,23 +169,39 @@ public class TestAmbariImpl {
       }
    }
 
-   //@Test(groups = { "TestAmbariImpl" })
+   @Test(groups = { "TestAmbariImpl" })
+   public void testGetName() {
+      Assert.assertEquals(provider.getName(), Constants.AMBARI_PLUGIN_NAME);
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testGetDescription() {
+      // TODO
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testGetType() {
+      Assert.assertEquals(provider.getType(), Constants.AMBARI_PLUGIN_NAME);
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testGetSupportedStacks() {
+      // TODO
+      //provider.getSupportedStacks();
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
    public void testEcho() throws IOException {
       Assert.assertTrue(provider.echo());
    }
 
-   //@Test(groups = { "TestAmbariImpl" })
+   @Test(groups = { "TestAmbariImpl" })
    public void testGetStatus() throws IOException {
       Assert.assertTrue(provider.getStatus().equals(HealthStatus.Connected));
    }
 
    @Test(groups = { "TestAmbariImpl" })
    public void testGetSupportedRoles() throws IOException {
-
-   }
-
-   @Test(groups = { "TestAmbariImpl" })
-   public void testGetSupportedStacks() throws IOException {
 
    }
 
