@@ -79,7 +79,6 @@ public class AppConfigValidationFactoryTest {
       nodeGroup2.setConfiguration(zookeeperMap);
       nodeGroup3.setConfiguration(noExistingFileZookeeperMap);
       cluster.setNodeGroups(new NodeGroupCreate[]{nodeGroup1, nodeGroup2, nodeGroup3});
-      
    }
 
    @Test
