@@ -15,12 +15,12 @@
 
 package com.vmware.bdd.placement.exception;
 
-import java.util.List;
-import java.util.Map;
-
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.placement.util.PlacementUtil;
+
+import java.util.List;
+import java.util.Map;
 
 public class PlacementException extends BddException {
 
@@ -36,7 +36,11 @@ public class PlacementException extends BddException {
    public static PlacementException PLACEMENT_ERROR(PlacementException cause, List<BaseNode> placedNodes,
          Map<String, List<String>> filteredHosts) {
       StringBuilder placedNodesStr = new StringBuilder();
-      if (!placedNodes.isEmpty()) placedNodesStr.append("\n");
+      if (!placedNodes.isEmpty()) {
+         placedNodesStr.append(BddException.formatErrorMessage("PLACEMENT.CURRENT_NODE_PLACEMENT"));
+      } else {
+         placedNodesStr.append(BddException.formatErrorMessage("PLACEMENT.NO_NODE_PLACED"));
+      }
       for (BaseNode baseNode : placedNodes) {
          placedNodesStr.append(BddException.getErrorMessage("PLACEMENT.NODE_PLACED_ON_HOST", baseNode.getVmName(), baseNode.getTargetHost()));
          placedNodesStr.append(" ");
@@ -59,7 +63,12 @@ public class PlacementException extends BddException {
          filteredHostsStr.append("\n");
          filteredHostsStr.append(BddException.getErrorMessage("PLACEMENT.NO_DATASTORE_HOSTS", noDatastoreHosts, noDatastoreHostsNodeGroup));
       }
-      return new PlacementException(cause, "PLACEMENT_ERROR", cause.getMessage(), placedNodesStr.toString(), filteredHostsStr.toString());
+
+      if(filteredHostsStr.length() > 0) {
+         filteredHostsStr.insert(0, BddException.formatErrorMessage("PLACEMENT.POSSIBLE_FIXES"));
+      }
+
+      return new PlacementException(cause, "PLACEMENT_ERROR", cause.getMessage(), filteredHostsStr.toString(),placedNodesStr.toString());
    }
 
    public static PlacementException OUT_OF_STORAGE_ON_HOST(String host) {

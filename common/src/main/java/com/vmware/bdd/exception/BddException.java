@@ -14,10 +14,10 @@
  ***************************************************************************/
 package com.vmware.bdd.exception;
 
-import java.util.Locale;
-
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import java.util.Locale;
 
 public class BddException extends RuntimeException {
    private static final long serialVersionUID = 1L;
@@ -45,7 +45,7 @@ public class BddException extends RuntimeException {
       return section + "." + errorId;
    }
 
-   private static String formatErrorMessage(final String errorId,
+   protected static String formatErrorMessage(final String errorId,
          Object... args) {
       String msg = messageSource.getMessage(errorId, args, Locale.getDefault());
       if (msg == null) {
