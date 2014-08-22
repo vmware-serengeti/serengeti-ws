@@ -1,0 +1,182 @@
+{
+  "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/",
+  "Versions" : {
+    "active" : true,
+    "min_upgrade_version" : null,
+    "parent_stack_version" : "2.0.6",
+    "stack_name" : "HDP",
+    "stack_version" : "2.1"
+  },
+  "stackServices" : [
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/FALCON",
+      "StackServices" : {
+        "service_name" : "FALCON",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/FLUME",
+      "StackServices" : {
+        "service_name" : "FLUME",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/GANGLIA",
+      "StackServices" : {
+        "service_name" : "GANGLIA",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HBASE",
+      "StackServices" : {
+        "service_name" : "HBASE",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HCATALOG",
+      "StackServices" : {
+        "service_name" : "HCATALOG",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS",
+      "StackServices" : {
+        "service_name" : "HDFS",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HIVE",
+      "StackServices" : {
+        "service_name" : "HIVE",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/MAPREDUCE2",
+      "StackServices" : {
+        "service_name" : "MAPREDUCE2",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/NAGIOS",
+      "StackServices" : {
+        "service_name" : "NAGIOS",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/OOZIE",
+      "StackServices" : {
+        "service_name" : "OOZIE",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/PIG",
+      "StackServices" : {
+        "service_name" : "PIG",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/SQOOP",
+      "StackServices" : {
+        "service_name" : "SQOOP",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/STORM",
+      "StackServices" : {
+        "service_name" : "STORM",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/TEZ",
+      "StackServices" : {
+        "service_name" : "TEZ",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/WEBHCAT",
+      "StackServices" : {
+        "service_name" : "WEBHCAT",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/YARN",
+      "StackServices" : {
+        "service_name" : "YARN",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/ZOOKEEPER",
+      "StackServices" : {
+        "service_name" : "ZOOKEEPER",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    }
+  ],
+  "operatingSystems" : [
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/operatingSystems/debian12",
+      "OperatingSystems" : {
+        "os_type" : "debian12",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/operatingSystems/redhat5",
+      "OperatingSystems" : {
+        "os_type" : "redhat5",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/operatingSystems/redhat6",
+      "OperatingSystems" : {
+        "os_type" : "redhat6",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/operatingSystems/suse11",
+      "OperatingSystems" : {
+        "os_type" : "suse11",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    }
+  ]
+}

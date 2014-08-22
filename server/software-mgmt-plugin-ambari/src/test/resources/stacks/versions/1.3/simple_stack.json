@@ -1,0 +1,142 @@
+{
+  "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/",
+  "Versions" : {
+    "active" : true,
+    "min_upgrade_version" : null,
+    "parent_stack_version" : "1.3.3",
+    "stack_name" : "HDP",
+    "stack_version" : "1.3"
+  },
+  "stackServices" : [
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/stackServices/GANGLIA",
+      "StackServices" : {
+        "service_name" : "GANGLIA",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/stackServices/HBASE",
+      "StackServices" : {
+        "service_name" : "HBASE",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/stackServices/HCATALOG",
+      "StackServices" : {
+        "service_name" : "HCATALOG",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/stackServices/HDFS",
+      "StackServices" : {
+        "service_name" : "HDFS",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/stackServices/HIVE",
+      "StackServices" : {
+        "service_name" : "HIVE",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/stackServices/HUE",
+      "StackServices" : {
+        "service_name" : "HUE",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/stackServices/MAPREDUCE",
+      "StackServices" : {
+        "service_name" : "MAPREDUCE",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/stackServices/NAGIOS",
+      "StackServices" : {
+        "service_name" : "NAGIOS",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/stackServices/OOZIE",
+      "StackServices" : {
+        "service_name" : "OOZIE",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/stackServices/PIG",
+      "StackServices" : {
+        "service_name" : "PIG",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/stackServices/SQOOP",
+      "StackServices" : {
+        "service_name" : "SQOOP",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/stackServices/WEBHCAT",
+      "StackServices" : {
+        "service_name" : "WEBHCAT",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/stackServices/ZOOKEEPER",
+      "StackServices" : {
+        "service_name" : "ZOOKEEPER",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    }
+  ],
+  "operatingSystems" : [
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/operatingSystems/redhat5",
+      "OperatingSystems" : {
+        "os_type" : "redhat5",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/operatingSystems/redhat6",
+      "OperatingSystems" : {
+        "os_type" : "redhat6",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/1.3/operatingSystems/suse11",
+      "OperatingSystems" : {
+        "os_type" : "suse11",
+        "stack_name" : "HDP",
+        "stack_version" : "1.3"
+      }
+    }
+  ]
+}

@@ -15,33 +15,16 @@
 package com.vmware.bdd.plugin.ambari.service.am;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
-import com.vmware.bdd.plugin.ambari.api.v1.BlueprintsResource;
+import com.vmware.bdd.utils.CommonUtil;
 
-public class FakeBlueprintsResource implements BlueprintsResource {
+public class BuildResponse {
 
-   @Override
-   public Response readBlueprints() {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   @Override
-   public Response readBlueprint(String blueprintName) {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   @Override
-   public Response deleteBlueprint(String blueprintName) {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   @Override
-   public Response createBlueprint(String blueprintName, String blueprint) {
-      // TODO Auto-generated method stub
-      return null;
+   public static Response buildResponse(String filePath) {
+      String stacks = CommonUtil.readJsonFile(filePath);
+      ResponseBuilder builder = Response.ok(stacks, "text/plain");
+      return builder.build();
    }
 
 }

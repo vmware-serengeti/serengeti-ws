@@ -16,32 +16,45 @@ package com.vmware.bdd.plugin.ambari.service.am;
 
 import javax.ws.rs.core.Response;
 
-import com.vmware.bdd.plugin.ambari.api.v1.BlueprintsResource;
+import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks.ComponentsResource;
+import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks.ServicesResource;
 
-public class FakeBlueprintsResource implements BlueprintsResource {
+public class FakeServicesResource implements ServicesResource {
+
+   private String stackVersion;
+
+   public FakeServicesResource(String stackVersion) {
+      this.stackVersion = stackVersion;
+   }
 
    @Override
-   public Response readBlueprints() {
+   public Response readServices() {
       // TODO Auto-generated method stub
       return null;
    }
 
    @Override
-   public Response readBlueprint(String blueprintName) {
+   public Response readServicesWithFilter(String fields) {
+      return BuildResponse.buildResponse("stacks/versions/" + stackVersion + "/stackServices/simple_services.json");
+   }
+
+   @Override
+   public Response readService(String stackServiceName) {
       // TODO Auto-generated method stub
       return null;
    }
 
    @Override
-   public Response deleteBlueprint(String blueprintName) {
-      // TODO Auto-generated method stub
+   public Response readServiceWithFilter(String stackServiceName, String fields) {
+   // TODO Auto-generated method stub
       return null;
    }
 
    @Override
-   public Response createBlueprint(String blueprintName, String blueprint) {
+   public ComponentsResource getComponentsResource(String stackServiceName) {
       // TODO Auto-generated method stub
       return null;
    }
+
 
 }

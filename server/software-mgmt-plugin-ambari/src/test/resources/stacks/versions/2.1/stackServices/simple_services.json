@@ -1,0 +1,991 @@
+{
+  "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices?fields=serviceComponents/*,serviceComponents/dependencies",
+  "items" : [
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/FALCON",
+      "StackServices" : {
+        "service_name" : "FALCON",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/FALCON/serviceComponents/FALCON_CLIENT",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "CLIENT",
+            "component_name" : "FALCON_CLIENT",
+            "is_client" : true,
+            "is_master" : false,
+            "service_name" : "FALCON",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/FALCON/serviceComponents/FALCON_SERVER",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "MASTER",
+            "component_name" : "FALCON_SERVER",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "FALCON",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/FLUME",
+      "StackServices" : {
+        "service_name" : "FLUME",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/FLUME/serviceComponents/FLUME_HANDLER",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "SLAVE",
+            "component_name" : "FLUME_HANDLER",
+            "is_client" : false,
+            "is_master" : false,
+            "service_name" : "FLUME",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/GANGLIA",
+      "StackServices" : {
+        "service_name" : "GANGLIA",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/GANGLIA/serviceComponents/GANGLIA_MONITOR",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "SLAVE",
+            "component_name" : "GANGLIA_MONITOR",
+            "is_client" : false,
+            "is_master" : false,
+            "service_name" : "GANGLIA",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/GANGLIA/serviceComponents/GANGLIA_SERVER",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "MASTER",
+            "component_name" : "GANGLIA_SERVER",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "GANGLIA",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HBASE",
+      "StackServices" : {
+        "service_name" : "HBASE",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HBASE/serviceComponents/HBASE_CLIENT",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "CLIENT",
+            "component_name" : "HBASE_CLIENT",
+            "is_client" : true,
+            "is_master" : false,
+            "service_name" : "HBASE",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HBASE/serviceComponents/HBASE_MASTER",
+          "StackServiceComponents" : {
+            "cardinality" : "1",
+            "component_category" : "MASTER",
+            "component_name" : "HBASE_MASTER",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "HBASE",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HBASE/serviceComponents/HBASE_MASTER/dependencies/HDFS_CLIENT",
+              "Dependencies" : {
+                "component_name" : "HDFS_CLIENT",
+                "dependent_component_name" : "HBASE_MASTER",
+                "dependent_service_name" : "HBASE",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HBASE/serviceComponents/HBASE_MASTER/dependencies/ZOOKEEPER_SERVER",
+              "Dependencies" : {
+                "component_name" : "ZOOKEEPER_SERVER",
+                "dependent_component_name" : "HBASE_MASTER",
+                "dependent_service_name" : "HBASE",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            }
+          ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HBASE/serviceComponents/HBASE_REGIONSERVER",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "SLAVE",
+            "component_name" : "HBASE_REGIONSERVER",
+            "is_client" : false,
+            "is_master" : false,
+            "service_name" : "HBASE",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HCATALOG",
+      "StackServices" : {
+        "service_name" : "HCATALOG",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HCATALOG/serviceComponents/HCAT",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "CLIENT",
+            "component_name" : "HCAT",
+            "is_client" : true,
+            "is_master" : false,
+            "service_name" : "HCATALOG",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS",
+      "StackServices" : {
+        "service_name" : "HDFS",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS/serviceComponents/DATANODE",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "SLAVE",
+            "component_name" : "DATANODE",
+            "is_client" : false,
+            "is_master" : false,
+            "service_name" : "HDFS",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS/serviceComponents/HDFS_CLIENT",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "CLIENT",
+            "component_name" : "HDFS_CLIENT",
+            "is_client" : true,
+            "is_master" : false,
+            "service_name" : "HDFS",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS/serviceComponents/JOURNALNODE",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "MASTER",
+            "component_name" : "JOURNALNODE",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "HDFS",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS/serviceComponents/NAMENODE",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "MASTER",
+            "component_name" : "NAMENODE",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "HDFS",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS/serviceComponents/SECONDARY_NAMENODE",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "MASTER",
+            "component_name" : "SECONDARY_NAMENODE",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "HDFS",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS/serviceComponents/ZKFC",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "SLAVE",
+            "component_name" : "ZKFC",
+            "is_client" : false,
+            "is_master" : false,
+            "service_name" : "HDFS",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HIVE",
+      "StackServices" : {
+        "service_name" : "HIVE",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HIVE/serviceComponents/HIVE_CLIENT",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "CLIENT",
+            "component_name" : "HIVE_CLIENT",
+            "is_client" : true,
+            "is_master" : false,
+            "service_name" : "HIVE",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HIVE/serviceComponents/HIVE_METASTORE",
+          "StackServiceComponents" : {
+            "cardinality" : "1",
+            "component_category" : "MASTER",
+            "component_name" : "HIVE_METASTORE",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "HIVE",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "auto_deploy" : {
+            "enabled" : true,
+            "location" : "HIVE/HIVE_SERVER"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HIVE/serviceComponents/HIVE_SERVER",
+          "StackServiceComponents" : {
+            "cardinality" : "1",
+            "component_category" : "MASTER",
+            "component_name" : "HIVE_SERVER",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "HIVE",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HIVE/serviceComponents/HIVE_SERVER/dependencies/MAPREDUCE2_CLIENT",
+              "Dependencies" : {
+                "component_name" : "MAPREDUCE2_CLIENT",
+                "dependent_component_name" : "HIVE_SERVER",
+                "dependent_service_name" : "HIVE",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HIVE/serviceComponents/HIVE_SERVER/dependencies/TEZ_CLIENT",
+              "Dependencies" : {
+                "component_name" : "TEZ_CLIENT",
+                "dependent_component_name" : "HIVE_SERVER",
+                "dependent_service_name" : "HIVE",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HIVE/serviceComponents/HIVE_SERVER/dependencies/YARN_CLIENT",
+              "Dependencies" : {
+                "component_name" : "YARN_CLIENT",
+                "dependent_component_name" : "HIVE_SERVER",
+                "dependent_service_name" : "HIVE",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HIVE/serviceComponents/HIVE_SERVER/dependencies/ZOOKEEPER_SERVER",
+              "Dependencies" : {
+                "component_name" : "ZOOKEEPER_SERVER",
+                "dependent_component_name" : "HIVE_SERVER",
+                "dependent_service_name" : "HIVE",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            }
+          ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HIVE/serviceComponents/MYSQL_SERVER",
+          "StackServiceComponents" : {
+            "cardinality" : "1",
+            "component_category" : "MASTER",
+            "component_name" : "MYSQL_SERVER",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "HIVE",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "auto_deploy" : {
+            "enabled" : true,
+            "location" : "HIVE/HIVE_SERVER"
+          },
+          "dependencies" : [ ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/MAPREDUCE2",
+      "StackServices" : {
+        "service_name" : "MAPREDUCE2",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/MAPREDUCE2/serviceComponents/HISTORYSERVER",
+          "StackServiceComponents" : {
+            "cardinality" : "1",
+            "component_category" : "MASTER",
+            "component_name" : "HISTORYSERVER",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "MAPREDUCE2",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "auto_deploy" : {
+            "enabled" : true,
+            "location" : "YARN/RESOURCEMANAGER"
+          },
+          "dependencies" : [
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/MAPREDUCE2/serviceComponents/HISTORYSERVER/dependencies/HDFS_CLIENT",
+              "Dependencies" : {
+                "component_name" : "HDFS_CLIENT",
+                "dependent_component_name" : "HISTORYSERVER",
+                "dependent_service_name" : "MAPREDUCE2",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            }
+          ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/MAPREDUCE2/serviceComponents/MAPREDUCE2_CLIENT",
+          "StackServiceComponents" : {
+            "cardinality" : "0+",
+            "component_category" : "CLIENT",
+            "component_name" : "MAPREDUCE2_CLIENT",
+            "is_client" : true,
+            "is_master" : false,
+            "service_name" : "MAPREDUCE2",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/NAGIOS",
+      "StackServices" : {
+        "service_name" : "NAGIOS",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/NAGIOS/serviceComponents/NAGIOS_SERVER",
+          "StackServiceComponents" : {
+            "cardinality" : "1",
+            "component_category" : "MASTER",
+            "component_name" : "NAGIOS_SERVER",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "NAGIOS",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/NAGIOS/serviceComponents/NAGIOS_SERVER/dependencies/HCAT",
+              "Dependencies" : {
+                "component_name" : "HCAT",
+                "dependent_component_name" : "NAGIOS_SERVER",
+                "dependent_service_name" : "NAGIOS",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/NAGIOS/serviceComponents/NAGIOS_SERVER/dependencies/HDFS_CLIENT",
+              "Dependencies" : {
+                "component_name" : "HDFS_CLIENT",
+                "dependent_component_name" : "NAGIOS_SERVER",
+                "dependent_service_name" : "NAGIOS",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/NAGIOS/serviceComponents/NAGIOS_SERVER/dependencies/MAPREDUCE2_CLIENT",
+              "Dependencies" : {
+                "component_name" : "MAPREDUCE2_CLIENT",
+                "dependent_component_name" : "NAGIOS_SERVER",
+                "dependent_service_name" : "NAGIOS",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/NAGIOS/serviceComponents/NAGIOS_SERVER/dependencies/OOZIE_CLIENT",
+              "Dependencies" : {
+                "component_name" : "OOZIE_CLIENT",
+                "dependent_component_name" : "NAGIOS_SERVER",
+                "dependent_service_name" : "NAGIOS",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/NAGIOS/serviceComponents/NAGIOS_SERVER/dependencies/TEZ_CLIENT",
+              "Dependencies" : {
+                "component_name" : "TEZ_CLIENT",
+                "dependent_component_name" : "NAGIOS_SERVER",
+                "dependent_service_name" : "NAGIOS",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/NAGIOS/serviceComponents/NAGIOS_SERVER/dependencies/YARN_CLIENT",
+              "Dependencies" : {
+                "component_name" : "YARN_CLIENT",
+                "dependent_component_name" : "NAGIOS_SERVER",
+                "dependent_service_name" : "NAGIOS",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/OOZIE",
+      "StackServices" : {
+        "service_name" : "OOZIE",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/OOZIE/serviceComponents/OOZIE_CLIENT",
+          "StackServiceComponents" : {
+            "cardinality" : "0+",
+            "component_category" : "CLIENT",
+            "component_name" : "OOZIE_CLIENT",
+            "is_client" : true,
+            "is_master" : false,
+            "service_name" : "OOZIE",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/OOZIE/serviceComponents/OOZIE_CLIENT/dependencies/HDFS_CLIENT",
+              "Dependencies" : {
+                "component_name" : "HDFS_CLIENT",
+                "dependent_component_name" : "OOZIE_CLIENT",
+                "dependent_service_name" : "OOZIE",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/OOZIE/serviceComponents/OOZIE_CLIENT/dependencies/MAPREDUCE2_CLIENT",
+              "Dependencies" : {
+                "component_name" : "MAPREDUCE2_CLIENT",
+                "dependent_component_name" : "OOZIE_CLIENT",
+                "dependent_service_name" : "OOZIE",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            }
+          ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/OOZIE/serviceComponents/OOZIE_SERVER",
+          "StackServiceComponents" : {
+            "cardinality" : "1",
+            "component_category" : "MASTER",
+            "component_name" : "OOZIE_SERVER",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "OOZIE",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/OOZIE/serviceComponents/OOZIE_SERVER/dependencies/HDFS_CLIENT",
+              "Dependencies" : {
+                "component_name" : "HDFS_CLIENT",
+                "dependent_component_name" : "OOZIE_SERVER",
+                "dependent_service_name" : "OOZIE",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/OOZIE/serviceComponents/OOZIE_SERVER/dependencies/MAPREDUCE2_CLIENT",
+              "Dependencies" : {
+                "component_name" : "MAPREDUCE2_CLIENT",
+                "dependent_component_name" : "OOZIE_SERVER",
+                "dependent_service_name" : "OOZIE",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/OOZIE/serviceComponents/OOZIE_SERVER/dependencies/YARN_CLIENT",
+              "Dependencies" : {
+                "component_name" : "YARN_CLIENT",
+                "dependent_component_name" : "OOZIE_SERVER",
+                "dependent_service_name" : "OOZIE",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/PIG",
+      "StackServices" : {
+        "service_name" : "PIG",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/PIG/serviceComponents/PIG",
+          "StackServiceComponents" : {
+            "cardinality" : "0+",
+            "component_category" : "CLIENT",
+            "component_name" : "PIG",
+            "is_client" : true,
+            "is_master" : false,
+            "service_name" : "PIG",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/SQOOP",
+      "StackServices" : {
+        "service_name" : "SQOOP",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/SQOOP/serviceComponents/SQOOP",
+          "StackServiceComponents" : {
+            "cardinality" : "0+",
+            "component_category" : "CLIENT",
+            "component_name" : "SQOOP",
+            "is_client" : true,
+            "is_master" : false,
+            "service_name" : "SQOOP",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/SQOOP/serviceComponents/SQOOP/dependencies/HDFS_CLIENT",
+              "Dependencies" : {
+                "component_name" : "HDFS_CLIENT",
+                "dependent_component_name" : "SQOOP",
+                "dependent_service_name" : "SQOOP",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/SQOOP/serviceComponents/SQOOP/dependencies/MAPREDUCE2_CLIENT",
+              "Dependencies" : {
+                "component_name" : "MAPREDUCE2_CLIENT",
+                "dependent_component_name" : "SQOOP",
+                "dependent_service_name" : "SQOOP",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/STORM",
+      "StackServices" : {
+        "service_name" : "STORM",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/STORM/serviceComponents/DRPC_SERVER",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "MASTER",
+            "component_name" : "DRPC_SERVER",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "STORM",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/STORM/serviceComponents/NIMBUS",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "MASTER",
+            "component_name" : "NIMBUS",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "STORM",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/STORM/serviceComponents/STORM_REST_API",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "MASTER",
+            "component_name" : "STORM_REST_API",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "STORM",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/STORM/serviceComponents/STORM_UI_SERVER",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "MASTER",
+            "component_name" : "STORM_UI_SERVER",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "STORM",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/STORM/serviceComponents/SUPERVISOR",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "SLAVE",
+            "component_name" : "SUPERVISOR",
+            "is_client" : false,
+            "is_master" : false,
+            "service_name" : "STORM",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/TEZ",
+      "StackServices" : {
+        "service_name" : "TEZ",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/TEZ/serviceComponents/TEZ_CLIENT",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "CLIENT",
+            "component_name" : "TEZ_CLIENT",
+            "is_client" : true,
+            "is_master" : false,
+            "service_name" : "TEZ",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/WEBHCAT",
+      "StackServices" : {
+        "service_name" : "WEBHCAT",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/WEBHCAT/serviceComponents/WEBHCAT_SERVER",
+          "StackServiceComponents" : {
+            "cardinality" : "1",
+            "component_category" : "MASTER",
+            "component_name" : "WEBHCAT_SERVER",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "WEBHCAT",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/WEBHCAT/serviceComponents/WEBHCAT_SERVER/dependencies/HDFS_CLIENT",
+              "Dependencies" : {
+                "component_name" : "HDFS_CLIENT",
+                "dependent_component_name" : "WEBHCAT_SERVER",
+                "dependent_service_name" : "WEBHCAT",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/WEBHCAT/serviceComponents/WEBHCAT_SERVER/dependencies/MAPREDUCE2_CLIENT",
+              "Dependencies" : {
+                "component_name" : "MAPREDUCE2_CLIENT",
+                "dependent_component_name" : "WEBHCAT_SERVER",
+                "dependent_service_name" : "WEBHCAT",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/WEBHCAT/serviceComponents/WEBHCAT_SERVER/dependencies/YARN_CLIENT",
+              "Dependencies" : {
+                "component_name" : "YARN_CLIENT",
+                "dependent_component_name" : "WEBHCAT_SERVER",
+                "dependent_service_name" : "WEBHCAT",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/WEBHCAT/serviceComponents/WEBHCAT_SERVER/dependencies/ZOOKEEPER_CLIENT",
+              "Dependencies" : {
+                "component_name" : "ZOOKEEPER_CLIENT",
+                "dependent_component_name" : "WEBHCAT_SERVER",
+                "dependent_service_name" : "WEBHCAT",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            },
+            {
+              "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/WEBHCAT/serviceComponents/WEBHCAT_SERVER/dependencies/ZOOKEEPER_SERVER",
+              "Dependencies" : {
+                "component_name" : "ZOOKEEPER_SERVER",
+                "dependent_component_name" : "WEBHCAT_SERVER",
+                "dependent_service_name" : "WEBHCAT",
+                "stack_name" : "HDP",
+                "stack_version" : "2.1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/YARN",
+      "StackServices" : {
+        "service_name" : "YARN",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/YARN/serviceComponents/APP_TIMELINE_SERVER",
+          "StackServiceComponents" : {
+            "cardinality" : null,
+            "component_category" : "SLAVE",
+            "component_name" : "APP_TIMELINE_SERVER",
+            "is_client" : false,
+            "is_master" : false,
+            "service_name" : "YARN",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/YARN/serviceComponents/NODEMANAGER",
+          "StackServiceComponents" : {
+            "cardinality" : "1+",
+            "component_category" : "SLAVE",
+            "component_name" : "NODEMANAGER",
+            "is_client" : false,
+            "is_master" : false,
+            "service_name" : "YARN",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/YARN/serviceComponents/RESOURCEMANAGER",
+          "StackServiceComponents" : {
+            "cardinality" : "1",
+            "component_category" : "MASTER",
+            "component_name" : "RESOURCEMANAGER",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "YARN",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/YARN/serviceComponents/YARN_CLIENT",
+          "StackServiceComponents" : {
+            "cardinality" : "0+",
+            "component_category" : "CLIENT",
+            "component_name" : "YARN_CLIENT",
+            "is_client" : true,
+            "is_master" : false,
+            "service_name" : "YARN",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/ZOOKEEPER",
+      "StackServices" : {
+        "service_name" : "ZOOKEEPER",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "serviceComponents" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/ZOOKEEPER/serviceComponents/ZOOKEEPER_CLIENT",
+          "StackServiceComponents" : {
+            "cardinality" : "0+",
+            "component_category" : "CLIENT",
+            "component_name" : "ZOOKEEPER_CLIENT",
+            "is_client" : true,
+            "is_master" : false,
+            "service_name" : "ZOOKEEPER",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/ZOOKEEPER/serviceComponents/ZOOKEEPER_SERVER",
+          "StackServiceComponents" : {
+            "cardinality" : "1",
+            "component_category" : "MASTER",
+            "component_name" : "ZOOKEEPER_SERVER",
+            "is_client" : false,
+            "is_master" : true,
+            "service_name" : "ZOOKEEPER",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1"
+          },
+          "dependencies" : [ ]
+        }
+      ]
+    }
+  ]
+}
