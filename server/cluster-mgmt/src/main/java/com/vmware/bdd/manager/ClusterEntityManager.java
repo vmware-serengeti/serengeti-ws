@@ -678,13 +678,14 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
          clusterRead.setExternalMapReduce(advancedProperties.get("ExternalMapReduce"));
       }
 
-      SoftwareManager softMgr =
-            softwareManagerCollector
-                  .getSoftwareManager(cluster.getAppManager());
-      if (softMgr == null) {
+      SoftwareManager softMgr = null;
+      try {
+         softMgr = softwareManagerCollector.getSoftwareManager(cluster.getAppManager());
+      } catch (Exception e) {
          logger.error("Failed to get softwareManger.");
          // do not throw exception for exporting cluster info
       }
+
       List<NodeGroupRead> groupList = new ArrayList<NodeGroupRead>();
       for (NodeGroupEntity group : cluster.getNodeGroups()) {
          NodeGroupRead groupRead = group.toNodeGroupRead(ignoreObsoleteNode);

@@ -1229,11 +1229,6 @@ public class ClusterConfigManager {
    }
 
    public SoftwareManager getSoftwareManager(String appManager) {
-      SoftwareManager softwareManager = softwareManagerCollector.getSoftwareManager(appManager);
-      if (softwareManager == null) {
-         logger.error("Failed to get softwareManger.");
-         throw ClusterConfigException.FAILED_TO_GET_SOFTWARE_MANAGER(appManager);
-      }
-      return softwareManager;
+      return softwareManagerCollector.getSoftwareManager(appManager);
    }
 }

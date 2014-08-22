@@ -881,9 +881,6 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
       }
       AppManagerRead read = softwareManagerCollector.getAppManagerRead(appManagerName);
-      if (read == null) {
-         throw BddException.NOT_FOUND("App Manager", appManagerName);
-      }
       return read;
    }
 
@@ -902,9 +899,6 @@ public class RestResource {
       }
       SoftwareManager softMgr =
             softwareManagerCollector.getSoftwareManager(appManagerName);
-      if (softMgr == null) {
-         throw BddException.NOT_FOUND("App Manager", appManagerName);
-      }
       List<HadoopStack> stacks = null;
       try {
          stacks = softMgr.getSupportedStacks();
@@ -913,7 +907,7 @@ public class RestResource {
          logger.error("Failed to get supported stacks from appmaanger "
                + appManagerName, e);
          SoftwareManager softwareManager =
-               softwareManagerCollector.loadSoftwareManager(appManagerName);
+               softwareManagerCollector.getSoftwareManager(appManagerName);
          // if succeed, call getSupportedStacks() again
          try {
             logger.info("Call getSupportedStacks() again.");
@@ -951,9 +945,6 @@ public class RestResource {
       }
       SoftwareManager softMgr =
             softwareManagerCollector.getSoftwareManager(appManagerName);
-      if (softMgr == null) {
-         throw BddException.NOT_FOUND("App Manager", appManagerName);
-      }
       List<HadoopStack> stacks = softMgr.getSupportedStacks();
       HadoopStack hadoopStack = null;
       for (HadoopStack stack : stacks) {
@@ -988,9 +979,6 @@ public class RestResource {
 
       SoftwareManager softMgr =
             softwareManagerCollector.getSoftwareManager(appManagerName);
-      if (softMgr == null) {
-         throw BddException.NOT_FOUND("App Manager", appManagerName);
-      }
       List<HadoopStack> stacks = softMgr.getSupportedStacks();
       HadoopStack hadoopStack = null;
       for (HadoopStack stack : stacks) {
@@ -1016,9 +1004,6 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
       }
       SoftwareManager softMgr = softwareManagerCollector.getSoftwareManager(appManagerName);
-      if (softMgr == null) {
-         throw BddException.NOT_FOUND("App Manager", appManagerName);
-      }
       HadoopStack stack = softMgr.getDefaultStack();
       if (stack == null) {
          return null;
@@ -1039,9 +1024,6 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
       }
       SoftwareManager softMgr = softwareManagerCollector.getSoftwareManager(appManagerName);
-      if (softMgr == null) {
-         throw BddException.NOT_FOUND("App Manager", appManagerName);
-      }
       HadoopStack stack = clusterMgr.filterDistroFromAppManager(softMgr, distroName);
       if (stack == null) {
          return null;

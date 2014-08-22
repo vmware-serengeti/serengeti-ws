@@ -153,12 +153,6 @@ public class SoftwareManagerCollector implements InitializingBean {
       return privateKey;
    }
 
-   public SoftwareManager loadSoftwareManager(String appManagerName) {
-      AppManagerEntity appManagerEntity =
-            appManagerService.findAppManagerByName(appManagerName);
-      return loadSoftwareManager(toAppManagerAdd(appManagerEntity)) ;
-   }
-
    /**
     *
     * @param appManagerEntity
@@ -170,23 +164,9 @@ public class SoftwareManagerCollector implements InitializingBean {
          cache.put(Constants.IRONFAN, ironfanSoftwareManager);
          return ironfanSoftwareManager;
       } else {
-         AppManagerAdd appManagerAdd = new AppManagerAdd();
-         appManagerAdd.setName(appManagerEntity.getName());
-         appManagerAdd.setDescription(appManagerEntity.getDescription());
-         appManagerAdd.setType(appManagerEntity.getType());
-         appManagerAdd.setUrl(appManagerEntity.getUrl());
-         appManagerAdd.setUsername(appManagerEntity.getUsername());
-         appManagerAdd.setPassword(appManagerEntity.getPassword());
-         appManagerAdd.setSslCertificate(appManagerEntity.getSslCertificate());
          // Do not block initialization in case of Exception
-         try {
-            return loadSoftwareManager(appManagerAdd);
-         } catch (Exception e) {
-            logger.error("Error loading Software Manager: " + appManagerAdd,
-                  e);
-         }
+         return loadSoftwareManager(toAppManagerAdd(appManagerEntity));
       }
-      return null;
    }
 
    /**
@@ -302,13 +282,12 @@ public class SoftwareManagerCollector implements InitializingBean {
       }
 
       AppManagerEntity appManagerEntity = appManagerService.findAppManagerByName(name);
-      if (appManagerEntity != null) {
+      if (appManagerEntity == null) {
+         logger.error("Cannot find app manager " + name);
+         throw SoftwareManagerCollectorException.APPMANAGER_NOT_FOUND(name);
+      } else {
          return loadSoftwareManager(appManagerEntity);
       }
-
-      //TODO:
-      //it's either not defined or being initialized
-      return null;
    }
 
    /**
@@ -379,10 +358,13 @@ public class SoftwareManagerCollector implements InitializingBean {
    public AppManagerRead getAppManagerRead(String appManagerName) {
       AppManagerRead appManagerRead =
             appManagerService.getAppManagerRead(appManagerName);
-      if (appManagerRead != null) {
+      if (appManagerRead == null) {
+         logger.error("Cannot find app manager " + appManagerName);
+         throw SoftwareManagerCollectorException.APPMANAGER_NOT_FOUND(appManagerName);
+      } else {
          setAppManagerReadDynamicProperties(appManagerRead);
+         return appManagerRead;
       }
-      return appManagerRead;
    }
 
    private Object waitForThreadResult(Future<?> result) {
@@ -411,27 +393,24 @@ public class SoftwareManagerCollector implements InitializingBean {
       String softMgrVersion = "UNKNOWN";
 
       final SoftwareManager softwareManager = this.getSoftwareManager(appManagerRead.getName());
-      if (softwareManager != null) {
-         // fork a child thread to do the actual connecting action
-         // this is to avoid the time out issue for the socket connection when the target host is shutdown
-         ExecutorService exec = Executors.newFixedThreadPool(1);
-         Future<String> futureResult = exec.submit(new Callable<String>(){
-            @Override
-            public String call() throws Exception {
-               // TODO Auto-generated method stub
-               return softwareManager.getVersion();
-            }
-         });
-
-         String result = (String)waitForThreadResult(futureResult);
-         if ( null != result )
-         {
-            softMgrVersion = result;
+      // fork a child thread to do the actual connecting action
+      // this is to avoid the time out issue for the socket connection when the target host is shutdown
+      ExecutorService exec = Executors.newFixedThreadPool(1);
+      Future<String> futureResult = exec.submit(new Callable<String>(){
+         @Override
+         public String call() throws Exception {
+            // TODO Auto-generated method stub
+            return softwareManager.getVersion();
          }
-         exec.shutdown();
+      });
 
-         appManagerRead.setVersion(softMgrVersion);
+      String result = (String)waitForThreadResult(futureResult);
+      if (null != result) {
+         softMgrVersion = result;
       }
+      exec.shutdown();
+
+      appManagerRead.setVersion(softMgrVersion);
    }
 
    /**
