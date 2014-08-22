@@ -14,23 +14,16 @@
  ***************************************************************************/
 package com.vmware.bdd.placement;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.placement.Container;
-import com.vmware.bdd.placement.PlacementService;
 import com.vmware.bdd.placement.entity.AbstractDatacenter;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.placement.exception.PlacementException;
 import com.vmware.bdd.placement.util.PlacementUtil;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import java.util.*;
 
 public class TestPlacementService {
 
@@ -282,13 +275,13 @@ public class TestPlacementService {
          System.out.println(e.getMessage());
          String[] strs = e.getMessage().split("\n");
          Assert.assertEquals(strs[0],
-               "No host available for node [hadoop-worker-4, hadoop-worker-5] that meets the placement policy requirements specified for the number of instances per host.");
+               "No host available for node [hadoop-worker-4, hadoop-worker-5] that meets the placement policy requirements specified for the number of instances per host. Possible fixes:");
          // temporarily disabled, the placement order is different soemtime on Jenkins box
          //Assert.assertEquals(strs[1],
          //      "Node hadoop-worker-0 placed on host 10.1.1.2. Node hadoop-worker-1 placed on host 10.1.1.2. Node hadoop-worker-2 placed on host 10.1.1.3. Node hadoop-worker-3 placed on host 10.1.1.3. ");
-         Assert.assertEquals(strs[2],
+         Assert.assertEquals(strs[1],
                "You must synchronize the time of the following hosts [10.1.1.1] with the Serengeti Management Server to use them.");
-         Assert.assertEquals(strs[3],
+         Assert.assertEquals(strs[2],
                "You must add these hosts [10.1.1.1] to the network [VM Network] to use them.");
       }
    }
@@ -315,8 +308,8 @@ public class TestPlacementService {
          System.out.println(e.getMessage());
          String[] strs = e.getMessage().split("\n");
          Assert.assertEquals(strs[0],
-               "No host available on the racks [rack1] specified for the node [hadoop-data-0]. Review your topology rack-hosts mapping file and correct as necessary.");
-         Assert.assertEquals(strs[2], "You must add datastores on these hosts [10.1.1.3, 10.1.1.4] to use them with the node group [data].");
+               "No host available on the racks [rack1] specified for the node [hadoop-data-0]. Review your topology rack-hosts mapping file and correct as necessary. Possible fixes:");
+         Assert.assertEquals(strs[1], "You must add datastores on these hosts [10.1.1.3, 10.1.1.4] to use them with the node group [data].");
       }
    }
 }
