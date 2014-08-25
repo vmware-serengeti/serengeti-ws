@@ -127,8 +127,8 @@ public class ClusterCommands implements CommandMarker {
       // process resume
       if (resume && setClusterPassword) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
-               Constants.OUTPUT_OP_CREATE,
-               Constants.OUTPUT_OP_RESULT_FAIL, Constants.RESUME_DONOT_NEED_SET_PASSWORD);
+               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.RESUME_DONOT_NEED_SET_PASSWORD);
          return;
       } else if (resume) {
          resumeCreateCluster(name);
@@ -139,13 +139,18 @@ public class ClusterCommands implements CommandMarker {
       ClusterCreate clusterCreate = new ClusterCreate();
       clusterCreate.setName(name);
 
-      if (!CommandsUtils.isBlank(appManager) && !Constants.IRONFAN.equalsIgnoreCase(appManager)) {
+      if (!CommandsUtils.isBlank(appManager)
+            && !Constants.IRONFAN.equalsIgnoreCase(appManager)) {
          AppManagerRead appManagerRead = appManagerRestClient.get(appManager);
          if (appManagerRead == null) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  name, Constants.OUTPUT_OP_CREATE,
-                  Constants.OUTPUT_OP_RESULT_FAIL,
-                  appManager + " cannot be found in the list of application managers.");
+            CommandsUtils
+                  .printCmdFailure(
+                        Constants.OUTPUT_OBJECT_CLUSTER,
+                        name,
+                        Constants.OUTPUT_OP_CREATE,
+                        Constants.OUTPUT_OP_RESULT_FAIL,
+                        appManager
+                              + " cannot be found in the list of application managers.");
             return;
          }
       }
@@ -154,11 +159,11 @@ public class ClusterCommands implements CommandMarker {
          clusterCreate.setAppManager(Constants.IRONFAN);
       } else {
          clusterCreate.setAppManager(appManager);
-         
+
          // local yum repo url for 3rd party app managers like ClouderaMgr, Ambari etc.
          if (!CommandsUtils.isBlank(localRepoURL)) {
-             clusterCreate.setLocalRepoURL(localRepoURL);
-         } 
+            clusterCreate.setLocalRepoURL(localRepoURL);
+         }
       }
 
       if (setClusterPassword) {
@@ -202,19 +207,25 @@ public class ClusterCommands implements CommandMarker {
       DistroRead distroRead4Create;
       try {
          if (distro != null) {
-            DistroRead[] distroReads = appManagerRestClient.getDistros(clusterCreate.getAppManager());
+            DistroRead[] distroReads =
+                  appManagerRestClient
+                        .getDistros(clusterCreate.getAppManager());
             distroRead4Create = getDistroByName(distroReads, distro);
 
             if (distroRead4Create == null) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                      name, Constants.OUTPUT_OP_CREATE,
                      Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_DISTRO
-                           + Constants.PARAM_NOT_SUPPORTED + getDistroNames(distroReads));
+                           + Constants.PARAM_NOT_SUPPORTED
+                           + getDistroNames(distroReads));
                return;
             }
          } else {
-            distroRead4Create = appManagerRestClient.getDefaultDistro(clusterCreate.getAppManager());
-            if (distroRead4Create == null || CommandsUtils.isBlank(distroRead4Create.getName())) {
+            distroRead4Create =
+                  appManagerRestClient.getDefaultDistro(clusterCreate
+                        .getAppManager());
+            if (distroRead4Create == null
+                  || CommandsUtils.isBlank(distroRead4Create.getName())) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                      name, Constants.OUTPUT_OP_CREATE,
                      Constants.OUTPUT_OP_RESULT_FAIL,
@@ -266,13 +277,15 @@ public class ClusterCommands implements CommandMarker {
                         CommandsUtils.dataFromFile(specFilePath));
             clusterCreate.setSpecFile(true);
             clusterCreate.setExternalHDFS(clusterSpec.getExternalHDFS());
-            clusterCreate.setExternalMapReduce(clusterSpec.getExternalMapReduce());
+            clusterCreate.setExternalMapReduce(clusterSpec
+                  .getExternalMapReduce());
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
             // TODO: W'd better merge validateConfiguration with validateClusterSpec to avoid repeated validation.
-            if (CommandsUtils.isBlank(appManager) || Constants.IRONFAN.equalsIgnoreCase(appManager)) {
-                validateConfiguration(clusterCreate, skipConfigValidation,
-                        warningMsgList, failedMsgList);
+            if (CommandsUtils.isBlank(appManager)
+                  || Constants.IRONFAN.equalsIgnoreCase(appManager)) {
+               validateConfiguration(clusterCreate, skipConfigValidation,
+                     warningMsgList, failedMsgList);
             }
             clusterCreate.validateNodeGroupNames();
             if (!validateHAInfo(clusterCreate.getNodeGroups())) {
@@ -298,28 +311,32 @@ public class ClusterCommands implements CommandMarker {
          return;
       }
 
-      Map<NetTrafficType, List<String>> networkConfig = new HashMap<NetTrafficType, List<String>>();
+      Map<NetTrafficType, List<String>> networkConfig =
+            new HashMap<NetTrafficType, List<String>>();
       if (networkName == null) {
          if (allNetworkNames.size() == 1) {
-            networkConfig.put(NetTrafficType.MGT_NETWORK, new ArrayList<String>());
-            networkConfig.get(NetTrafficType.MGT_NETWORK).addAll(allNetworkNames);
+            networkConfig.put(NetTrafficType.MGT_NETWORK,
+                  new ArrayList<String>());
+            networkConfig.get(NetTrafficType.MGT_NETWORK).addAll(
+                  allNetworkNames);
          } else {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   name, Constants.OUTPUT_OP_CREATE,
-                  Constants.OUTPUT_OP_RESULT_FAIL,
-                  Constants.PARAM_NETWORK_NAME
+                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_NETWORK_NAME
                         + Constants.PARAM_NOT_SPECIFIED);
             return;
          }
       } else {
          if (!allNetworkNames.contains(networkName)
-               || (hdfsNetworkName != null && !allNetworkNames.contains(hdfsNetworkName))
-               || (mapredNetworkName != null && !allNetworkNames.contains(mapredNetworkName))) {
+               || (hdfsNetworkName != null && !allNetworkNames
+                     .contains(hdfsNetworkName))
+               || (mapredNetworkName != null && !allNetworkNames
+                     .contains(mapredNetworkName))) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   name, Constants.OUTPUT_OP_CREATE,
                   Constants.OUTPUT_OP_RESULT_FAIL,
-                  Constants.PARAM_NETWORK_NAME
-                  + Constants.PARAM_NOT_SUPPORTED + allNetworkNames.toString());
+                  Constants.PARAM_NETWORK_NAME + Constants.PARAM_NOT_SUPPORTED
+                        + allNetworkNames.toString());
             return;
          }
 
@@ -327,13 +344,16 @@ public class ClusterCommands implements CommandMarker {
          networkConfig.get(NetTrafficType.MGT_NETWORK).add(networkName);
 
          if (hdfsNetworkName != null) {
-            networkConfig.put(NetTrafficType.HDFS_NETWORK, new ArrayList<String>());
+            networkConfig.put(NetTrafficType.HDFS_NETWORK,
+                  new ArrayList<String>());
             networkConfig.get(NetTrafficType.HDFS_NETWORK).add(hdfsNetworkName);
          }
 
          if (mapredNetworkName != null) {
-            networkConfig.put(NetTrafficType.MAPRED_NETWORK, new ArrayList<String>());
-            networkConfig.get(NetTrafficType.MAPRED_NETWORK).add(mapredNetworkName);
+            networkConfig.put(NetTrafficType.MAPRED_NETWORK,
+                  new ArrayList<String>());
+            networkConfig.get(NetTrafficType.MAPRED_NETWORK).add(
+                  mapredNetworkName);
          }
       }
       notifyNetsUsage(networkConfig, warningMsgList);
@@ -354,7 +374,8 @@ public class ClusterCommands implements CommandMarker {
       }
 
       if (!failedMsgList.isEmpty()) {
-         showFailedMsg(clusterCreate.getName(), Constants.OUTPUT_OP_CREATE, failedMsgList);
+         showFailedMsg(clusterCreate.getName(), Constants.OUTPUT_OP_CREATE,
+               failedMsgList);
          return;
       }
 
@@ -375,8 +396,9 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   private DistroRead getDistroByName(DistroRead[] distroReads, String distroName) {
-      if(distroReads != null && distroName != null) {
+   private DistroRead getDistroByName(DistroRead[] distroReads,
+         String distroName) {
+      if (distroReads != null && distroName != null) {
          for (DistroRead distroRead : distroReads) {
             if (distroName.equals(distroRead.getName())) {
                return distroRead;
@@ -390,7 +412,8 @@ public class ClusterCommands implements CommandMarker {
          List<String> failedMsgList, List<String> warningMsgList) {
       clusterCreate.validateClusterCreate(failedMsgList, warningMsgList);
       //validate roles and configuration.
-      com.vmware.bdd.apitypes.ValidateResult vr = restClient.validateBlueprint(clusterCreate);
+      com.vmware.bdd.apitypes.ValidateResult vr =
+            restClient.validateBlueprint(clusterCreate);
       if (!vr.isValidated()) {
          failedMsgList.addAll(vr.getFailedMsgList());
          warningMsgList.addAll(vr.getWarningMsgList());
@@ -403,7 +426,8 @@ public class ClusterCommands implements CommandMarker {
     * @param networkConfig
     * @param warningMsgList
     */
-   private void notifyNetsUsage(Map<NetTrafficType, List<String>> networkConfig,
+   private void notifyNetsUsage(
+         Map<NetTrafficType, List<String>> networkConfig,
          List<String> warningMsgList) {
       if (!networkConfig.containsKey(NetTrafficType.HDFS_NETWORK)
             && !networkConfig.containsKey(NetTrafficType.MAPRED_NETWORK)) {
@@ -418,10 +442,12 @@ public class ClusterCommands implements CommandMarker {
       }
       if (networkConfig.containsKey(NetTrafficType.MAPRED_NETWORK)
             && !networkConfig.get(NetTrafficType.MAPRED_NETWORK).isEmpty()) {
-         mapredNetwork = networkConfig.get(NetTrafficType.MAPRED_NETWORK).get(0);
+         mapredNetwork =
+               networkConfig.get(NetTrafficType.MAPRED_NETWORK).get(0);
       }
 
-      StringBuffer netsUsage = new StringBuffer().append("The cluster will use network ")
+      StringBuffer netsUsage =
+            new StringBuffer().append("The cluster will use network ")
                   .append(mgtNetwork).append(" for management, ")
                   .append(hdfsNetwork).append(" for HDFS traffic, and ")
                   .append(mapredNetwork).append(" for MapReduce traffic.");
@@ -459,8 +485,9 @@ public class ClusterCommands implements CommandMarker {
             password = reader.readLine(Character.valueOf('*'));
          } catch (IllegalArgumentException e) {
             if (e.getMessage().contains("!")) {
-               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, null,
-                     Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                     null, Constants.OUTPUT_OP_CREATE,
+                     Constants.OUTPUT_OP_RESULT_FAIL,
                      Constants.PASSWORD_CHARACTER_REQUIREMENT);
                return null;
             } else {
@@ -550,14 +577,17 @@ public class ClusterCommands implements CommandMarker {
       }
 
       try {
-         if ((CommandsUtils.isBlank(specFileName) && CommandsUtils.isBlank(type)) ||
-               !CommandsUtils.isBlank(specFileName) ||
-               type.equalsIgnoreCase(Constants.EXPORT_TYPE_SPEC)) {
+         if ((CommandsUtils.isBlank(specFileName) && CommandsUtils
+               .isBlank(type))
+               || !CommandsUtils.isBlank(specFileName)
+               || type.equalsIgnoreCase(Constants.EXPORT_TYPE_SPEC)) {
             ClusterCreate cluster = restClient.getSpec(name);
             CommandsUtils.prettyJsonOutput(cluster, path);
          } else if (type.equalsIgnoreCase(Constants.EXPORT_TYPE_RACK)) {
-            Map<String, String> rackTopology = restClient.getRackTopology(name, topology);
-            CommandsUtils.gracefulRackTopologyOutput(rackTopology, path, delimeter);
+            Map<String, String> rackTopology =
+                  restClient.getRackTopology(name, topology);
+            CommandsUtils.gracefulRackTopologyOutput(rackTopology, path,
+                  delimeter);
          } else if (type.equalsIgnoreCase(Constants.EXPORT_TYPE_IP)) {
             ClusterRead cluster = restClient.get(name, true);
             prettyOutputClusterIPs(cluster, path, delimeter);
@@ -665,7 +695,7 @@ public class ClusterCommands implements CommandMarker {
                            Constants.OUTPUT_OP_RESULT_FAIL,
                            Constants.ZOOKEEPER_NOT_RESIZE);
                      return;
-                  }*/ // TODO emma: do not check as client do not know who is Zookeeper
+                  }*/// TODO emma: do not check as client do not know who is Zookeeper
                   break;
                }
             }
@@ -817,7 +847,8 @@ public class ClusterCommands implements CommandMarker {
             }
          } else if (ioShares == null) {
             // in this case, no parameter is specified excpet "cluster name", return directly
-            System.out.println("There is nothing to adjust, please specify more parameters.");
+            System.out
+                  .println("There is nothing to adjust, please specify more parameters.");
             return;
          }
 
@@ -890,11 +921,13 @@ public class ClusterCommands implements CommandMarker {
          if (mode != null) {
             if (mode == ElasticityMode.AUTO) {
                if (targetComputeNodeNum != null) {
-                  System.out.println("\'targetComputeNodeNum\' ignored. Parameter is not applicable to AUTO elasticity mode.");
+                  System.out
+                        .println("\'targetComputeNodeNum\' ignored. Parameter is not applicable to AUTO elasticity mode.");
                }
             } else {
                if (minComputeNodeNum != null || maxComputeNodeNum != null) {
-                  System.out.println("\'minComputeNodeNum\' and \'maxComputeNodeNum\' ignored. Parameters are not applicable to MANUAL elasticity mode.");
+                  System.out
+                        .println("\'minComputeNodeNum\' and \'maxComputeNodeNum\' ignored. Parameters are not applicable to MANUAL elasticity mode.");
                }
             }
          }
@@ -926,16 +959,16 @@ public class ClusterCommands implements CommandMarker {
                         + " does not exist.");
             return;
          }
-/* TODO emma: remove validation from client as client does not have knowledge about if it's compute only node group
-         //validate the node group type
-         if ((elasticityMode || minComputeNodeNum || maxComputeNodeNum || targetComputeNodeNum)
-               && !cluster.validateSetManualElasticity()) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_RESET_PARAM,
-                  Constants.OUTPUT_OP_RESULT_FAIL,
-                  Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
-            return;
-         }*/
+         /* TODO emma: remove validation from client as client does not have knowledge about if it's compute only node group
+                  //validate the node group type
+                  if ((elasticityMode || minComputeNodeNum || maxComputeNodeNum || targetComputeNodeNum)
+                        && !cluster.validateSetManualElasticity()) {
+                     CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                           clusterName, Constants.OUTPUT_OP_RESET_PARAM,
+                           Constants.OUTPUT_OP_RESULT_FAIL,
+                           Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
+                     return;
+                  }*/
 
          // reset Auto Elasticity parameters. The default values are:
          // elasticityMode: manual
@@ -1159,7 +1192,8 @@ public class ClusterCommands implements CommandMarker {
          }
 
          if (!failedMsgList.isEmpty()) {
-            showFailedMsg(clusterConfig.getName(), Constants.OUTPUT_OP_CONFIG, failedMsgList);
+            showFailedMsg(clusterConfig.getName(), Constants.OUTPUT_OP_CONFIG,
+                  failedMsgList);
             return;
          }
 
@@ -1212,7 +1246,8 @@ public class ClusterCommands implements CommandMarker {
    }
 
    @CliCommand(value = "cluster upgrade", help = "Upgrade an old cluster")
-   public void upgradeCluster(@CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name) {
+   public void upgradeCluster(
+         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name) {
       // validate the name
       if (name.indexOf("-") != -1) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
@@ -1298,7 +1333,7 @@ public class ClusterCommands implements CommandMarker {
 
    private List<String> getDistroNames(DistroRead[] distroReads) {
       List<String> distroNames = new ArrayList<String>();
-      if(distroReads != null) {
+      if (distroReads != null) {
          for (int i = 0; i < distroReads.length; i++) {
             distroNames.add(distroReads[i].getName());
          }
@@ -1395,7 +1430,8 @@ public class ClusterCommands implements CommandMarker {
       }
       //Burst out
       if (!CommandsUtils.isBlank(cluster.getExternalMapReduce())) {
-         clusterParams.put("EXTERNAL MAPREDUCE", cluster.getExternalMapReduce());
+         clusterParams
+               .put("EXTERNAL MAPREDUCE", cluster.getExternalMapReduce());
       }
       for (String key : clusterParams.keySet()) {
          System.out.printf(Constants.OUTPUT_INDENT + "%-26s:"
@@ -1449,55 +1485,51 @@ public class ClusterCommands implements CommandMarker {
       LinkedHashMap<String, List<String>> nColumnNamesWithGetMethodNames =
             new LinkedHashMap<String, List<String>>();
       nColumnNamesWithGetMethodNames.put(
-            Constants.FORMAT_TABLE_COLUMN_NODE_NAME,
-            Arrays.asList("getName"));
+            Constants.FORMAT_TABLE_COLUMN_NODE_NAME, Arrays.asList("getName"));
       nColumnNamesWithGetMethodNames.put(
             Constants.FORMAT_TABLE_COLUMN_NODE_VERSION,
             Arrays.asList("getVersion"));
-      nColumnNamesWithGetMethodNames.put(
-            Constants.FORMAT_TABLE_COLUMN_HOST,
+      nColumnNamesWithGetMethodNames.put(Constants.FORMAT_TABLE_COLUMN_HOST,
             Arrays.asList("getHostName"));
       if (topology == TopologyType.RACK_AS_RACK || topology == TopologyType.HVE) {
-         nColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_RACK,
+         nColumnNamesWithGetMethodNames.put(Constants.FORMAT_TABLE_COLUMN_RACK,
                Arrays.asList("getRack"));
       }
-      nColumnNamesWithGetMethodNames.put(
-            Constants.FORMAT_TABLE_COLUMN_IP,
+      nColumnNamesWithGetMethodNames.put(Constants.FORMAT_TABLE_COLUMN_IP,
             Arrays.asList("fetchMgtIp"));
-      nColumnNamesWithGetMethodNames.put(
-            Constants.FORMAT_TABLE_COLUMN_HDFS_IP,
+      nColumnNamesWithGetMethodNames.put(Constants.FORMAT_TABLE_COLUMN_HDFS_IP,
             Arrays.asList("fetchHdfsIp"));
       nColumnNamesWithGetMethodNames.put(
             Constants.FORMAT_TABLE_COLUMN_MAPRED_IP,
             Arrays.asList("fetchMapredIp"));
-      nColumnNamesWithGetMethodNames.put(
-            Constants.FORMAT_TABLE_COLUMN_STATUS,
+      nColumnNamesWithGetMethodNames.put(Constants.FORMAT_TABLE_COLUMN_STATUS,
             Arrays.asList("getStatus"));
-      nColumnNamesWithGetMethodNames.put(
-            Constants.FORMAT_TABLE_COLUMN_TASK,
+      nColumnNamesWithGetMethodNames.put(Constants.FORMAT_TABLE_COLUMN_TASK,
             Arrays.asList("getAction"));
 
       for (NodeGroupRead nodegroup : nodegroups) {
-         CommandsUtils.printInTableFormat(
-               ngColumnNamesWithGetMethodNames,
-               new NodeGroupRead[] { nodegroup },
-               Constants.OUTPUT_INDENT);
+         CommandsUtils.printInTableFormat(ngColumnNamesWithGetMethodNames,
+               new NodeGroupRead[] { nodegroup }, Constants.OUTPUT_INDENT);
          List<NodeRead> nodes = nodegroup.getInstances();
          if (nodes != null) {
             LinkedHashMap<String, List<String>> nColumnNamesWithGetMethodNamesClone =
-                  (LinkedHashMap<String, List<String>>) nColumnNamesWithGetMethodNames.clone();
-            if (!nodes.isEmpty() && (nodes.get(0).getIpConfigs() == null || (!nodes.get(0)
+                  (LinkedHashMap<String, List<String>>) nColumnNamesWithGetMethodNames
+                        .clone();
+            if (!nodes.isEmpty()
+                  && (nodes.get(0).getIpConfigs() == null || (!nodes.get(0)
                         .getIpConfigs()
                         .containsKey(NetTrafficType.HDFS_NETWORK) && !nodes
                         .get(0).getIpConfigs()
                         .containsKey(NetTrafficType.MAPRED_NETWORK)))) {
-               nColumnNamesWithGetMethodNamesClone.remove(Constants.FORMAT_TABLE_COLUMN_HDFS_IP);
-               nColumnNamesWithGetMethodNamesClone.remove(Constants.FORMAT_TABLE_COLUMN_MAPRED_IP);
+               nColumnNamesWithGetMethodNamesClone
+                     .remove(Constants.FORMAT_TABLE_COLUMN_HDFS_IP);
+               nColumnNamesWithGetMethodNamesClone
+                     .remove(Constants.FORMAT_TABLE_COLUMN_MAPRED_IP);
             }
             System.out.println();
             CommandsUtils.printInTableFormat(
-                  nColumnNamesWithGetMethodNamesClone, nodes.toArray(),
+                  nColumnNamesWithGetMethodNamesClone,
+                  nodes.toArray(),
                   new StringBuilder().append(Constants.OUTPUT_INDENT)
                         .append(Constants.OUTPUT_INDENT).toString());
          }
@@ -1524,7 +1556,8 @@ public class ClusterCommands implements CommandMarker {
       System.out.println();
    }
 
-   public static void prettyOutputClusterIPs(ClusterRead cluster, String filename, String delimeter) throws Exception  {
+   public static void prettyOutputClusterIPs(ClusterRead cluster,
+         String filename, String delimeter) throws Exception {
       List<Object> list = new ArrayList<Object>();
       for (NodeGroupRead nodegroup : cluster.getNodeGroups()) {
          List<NodeRead> nodes = nodegroup.getInstances();
@@ -1548,9 +1581,8 @@ public class ClusterCommands implements CommandMarker {
 
       failedMsg.append(new ListToStringConverter<String>(failedMsgList, '\n'));
 
-      CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
-            op, Constants.OUTPUT_OP_RESULT_FAIL,
-            failedMsg.toString());
+      CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, op,
+            Constants.OUTPUT_OP_RESULT_FAIL, failedMsg.toString());
    }
 
    private void validateConfiguration(ClusterCreate cluster,
@@ -1563,8 +1595,8 @@ public class ClusterCommands implements CommandMarker {
 
       if (!skipConfigValidation) {
          // validate config type
-         AppConfigValidationUtils.validateSupportType(cluster.getConfiguration(),
-               warningMsgList);
+         AppConfigValidationUtils.validateSupportType(
+               cluster.getConfiguration(), warningMsgList);
          // validate whitelist
          ValidateResult whiteListResult = validateWhiteList(cluster);
          addWhiteListWarningOrFailure(cluster.getName(), whiteListResult,
@@ -1779,15 +1811,16 @@ public class ClusterCommands implements CommandMarker {
       return true;
    }
 
-   private TopologyType validateTopologyValue(String clusterName, String topology) {
+   private TopologyType validateTopologyValue(String clusterName,
+         String topology) {
       TopologyType value = null;
       try {
          value = TopologyType.valueOf(topology);
       } catch (IllegalArgumentException ex) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                clusterName, Constants.OUTPUT_OP_CREATE,
-               Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
-                     + " " + "topologyType=" + topology);
+               Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE + " "
+                     + "topologyType=" + topology);
       }
       return value;
    }

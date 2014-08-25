@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2013-2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2012-2014 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,24 +25,28 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.bdd.entity.NodeEntity;
-import com.vmware.bdd.exception.SetPasswordException;
+import com.vmware.bdd.exception.SetLocalRepoException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
-import com.vmware.bdd.service.ISetPasswordService;
+import com.vmware.bdd.service.ISetLocalRepoService;
 import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
-import com.vmware.bdd.service.sp.SetVMPasswordSP;
+import com.vmware.bdd.service.sp.SetLocalRepoSP;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
 
-public class SetPasswordService implements ISetPasswordService {
-
+public class SetLocalRepoService implements ISetLocalRepoService {
    private static final Logger logger = Logger
-         .getLogger(SetPasswordService.class);
+         .getLogger(ExecutionService.class);
+
    private IClusterEntityManager clusterEntityMgr;
 
-   public boolean setPasswordForNodes(String clusterName,
-         List<NodeEntity> nodes, String password) {
+   public SetLocalRepoService() {
+   }
+
+   @Override
+   public boolean setLocalRepoForNodes(String clusterName,
+         List<NodeEntity> nodes, String repoId, String localRepoURL) {
       AuAssert.check(!nodes.isEmpty());
 
       logger.info("Setting password for " + clusterName);
@@ -53,8 +57,9 @@ public class SetPasswordService implements ISetPasswordService {
       boolean succeed = true;
       List<Callable<Void>> storeProcedures = new ArrayList<Callable<Void>>();
       for (NodeEntity node : nodes) {
-         SetVMPasswordSP setVMPasswordSP = new SetVMPasswordSP(node, password);
-         storeProcedures.add(setVMPasswordSP);
+         SetLocalRepoSP setLocalRepoSP =
+               new SetLocalRepoSP(node, repoId, localRepoURL);
+         storeProcedures.add(setLocalRepoSP);
       }
       AuAssert.check(!storeProcedures.isEmpty());
 
@@ -69,12 +74,12 @@ public class SetPasswordService implements ISetPasswordService {
                            storeProceduresArray, callback);
 
          for (int i = 0; i < storeProceduresArray.length; i++) {
-            SetVMPasswordSP sp = (SetVMPasswordSP) storeProceduresArray[i];
+            SetLocalRepoSP sp = (SetLocalRepoSP) storeProceduresArray[i];
             NodeEntity node = sp.getNodeEntity();
             String vmNameWithIP = node.getVmNameWithIP();
             if (result[i].finished && result[i].throwable == null) {
                updateNodeData(node, true, null, null);
-               logger.info("Set password store procedure succeed for "
+               logger.info("Set local repo: store procedure succeed for "
                      + vmNameWithIP);
             }
             if (!result[i].finished || result[i].throwable != null) {
@@ -83,7 +88,7 @@ public class SetPasswordService implements ISetPasswordService {
                   String errMsg = result[i].throwable.getMessage();
                   updateNodeData(node, false, errMsg,
                         CommonUtil.getCurrentTimestamp());
-                  logger.error("Set password store procedure failed for "
+                  logger.error("Set local repo: store procedure failed for "
                         + vmNameWithIP + ": " + errMsg);
                }
             }
@@ -92,61 +97,58 @@ public class SetPasswordService implements ISetPasswordService {
          //place holder in case of known error, in this case, we just log it and
          //throw cli exception, we don't set node task field
          String errMsg = " : " + e.getMessage();
-         logger.error("Unknown error in setting password for " + clusterName, e);
-         throw SetPasswordException.FAIL_TO_SET_PASSWORD(" cluster "
+         logger.error("Unknown error in setting local repo for " + clusterName,
+               e);
+         throw SetLocalRepoException.FAIL_TO_SET_LOCAL_REPO(" cluster "
                + clusterName, errMsg);
       }
+
       return succeed;
    }
 
    @Override
-   public boolean setPasswordForNode(String clusterName, NodeEntity node,
-         String password) {
+   public boolean setLocalRepoForNode(String clusterName, NodeEntity node,
+         String repoId, String localRepoURL) throws Exception {
       AuAssert.check(clusterName != null && node != null);
 
-      SetVMPasswordSP setVMPasswordSP = new SetVMPasswordSP(node, password);
+      SetLocalRepoSP setLocalRepoSP = new SetLocalRepoSP(node, repoId, localRepoURL);
       String vmNameWithIP = node.getVmNameWithIP();
       try {
-         if (setVMPasswordSP.setPasswordForNode()) {
+         if (setLocalRepoSP.setupNodeLocalRepo()) {
             updateNodeData(node, true, null, null);
-            logger.info("Set password for " + vmNameWithIP + " succeed.");
+            logger.info("Set local repo for " + vmNameWithIP + " succeed.");
             return true;
          }
          //we fail by throwing exceptions
          logger.error("Should not reach here");
          return false;
       } catch (Exception e) {
-         String errMsg =
-               (e.getCause() == null ? e.getMessage() : e.getCause()
-                     .getMessage());
+         String errMsg = (e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
          updateNodeData(node, false, errMsg, CommonUtil.getCurrentTimestamp());
-         logger.error("Set password for " + vmNameWithIP + " failed. ", e);
+         logger.error("Set local repo for " + vmNameWithIP + " failed. ", e);
          return false;
       }
    }
 
    @Transactional
-   public void updateNodeData(NodeEntity node, boolean passwordSetted,
-         String errorMessage, String errorTimestamp) {
+   public void updateNodeData(NodeEntity node, boolean localRepoSetted, String errorMessage, String errorTimestamp) {
       node = clusterEntityMgr.getNodeWithNicsByMobId(node.getMoId());
       String nodeNameWithIP = node.getVmNameWithIP();
-      if (passwordSetted) {
+      if (localRepoSetted) {
          if (node.canBeUpgrade()) {
-            node.setAction(Constants.NODE_ACTION_SET_PASSWORD_SUCCEED);
+            node.setAction(Constants.NODE_ACTION_SET_LOCAL_REPO_SUCCEED);
             node.setActionFailed(false);
             node.setErrMessage(null);
             clusterEntityMgr.update(node);
          }
       } else {
-         node.setAction(Constants.NODE_ACTION_SET_PASSWORD_FAILED);
+         node.setAction(Constants.NODE_ACTION_SET_LOCAL_REPO_FAILED);
          node.setActionFailed(true);
          String[] messages = errorMessage.split(":");
          if (messages != null && messages.length > 0) {
-            node.setErrMessage(errorTimestamp + " "
-                  + messages[messages.length - 1]);
+            node.setErrMessage(errorTimestamp + " " + messages[messages.length-1]);
          } else {
-            node.setErrMessage(errorTimestamp + " " + "Setting password for "
-                  + nodeNameWithIP + " failed.");
+            node.setErrMessage(errorTimestamp + " " + "Setting local repo for " + nodeNameWithIP + " failed.");
          }
          clusterEntityMgr.update(node);
       }
@@ -160,4 +162,5 @@ public class SetPasswordService implements ISetPasswordService {
    public void setClusterEntityMgr(IClusterEntityManager clusterEntityMgr) {
       this.clusterEntityMgr = clusterEntityMgr;
    }
+
 }

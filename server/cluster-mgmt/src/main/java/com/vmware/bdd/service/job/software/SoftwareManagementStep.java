@@ -140,8 +140,10 @@ public class SoftwareManagementStep extends TrackableTasklet {
 
       ISoftwareManagementTask task = null;
       String appMgrName = softwareMgr.getName();
-      if (!Constants.IRONFAN.equals( appMgrName )) {    	 
-         task = createExternalTask(chunkContext, targetName, clusterName, statusUpdater);
+      if (!Constants.IRONFAN.equals(appMgrName)) {
+         task =
+               createExternalTask(chunkContext, targetName, clusterName,
+                     statusUpdater);
       } else {
          task = createThriftTask(chunkContext, targetName, statusUpdater);
       }
@@ -166,8 +168,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
          String targetName, StatusUpdater statusUpdater) {
       ISoftwareManagementTask task;
       // get command work directory
-      File workDir =
-            CommandUtil.createWorkDir(getJobExecutionId(chunkContext));
+      File workDir = CommandUtil.createWorkDir(getJobExecutionId(chunkContext));
 
       // update work directory in job context
       putIntoJobExecutionContext(chunkContext,
@@ -180,8 +181,8 @@ public class SoftwareManagementStep extends TrackableTasklet {
       }
       String specFilePath = null;
 
-      if (!(ManagementOperation.DESTROY.equals(managementOperation)
-            || ManagementOperation.PRE_DESTROY.equals(managementOperation))) {
+      if (!(ManagementOperation.DESTROY.equals(managementOperation) || ManagementOperation.PRE_DESTROY
+            .equals(managementOperation))) {
          // write cluster spec file
          File specFile =
                clusterManager.writeClusterSpecFile(targetName, workDir,
@@ -203,13 +204,16 @@ public class SoftwareManagementStep extends TrackableTasklet {
       SoftwareManager softwareMgr =
             softwareMgrs.getSoftwareManagerByClusterName(clusterName);
 
-      ClusterBlueprint clusterBlueprint = getFromJobExecutionContext(chunkContext,
-            JobConstants.CLUSTER_BLUEPRINT_JOB_PARAM, ClusterBlueprint.class);
+      ClusterBlueprint clusterBlueprint =
+            getFromJobExecutionContext(chunkContext,
+                  JobConstants.CLUSTER_BLUEPRINT_JOB_PARAM,
+                  ClusterBlueprint.class);
       if (clusterBlueprint == null) {
-      clusterBlueprint =
-            lockClusterEntityMgr.getClusterEntityMgr().toClusterBluePrint(
-                  clusterName);
-         putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_BLUEPRINT_JOB_PARAM, clusterBlueprint);
+         clusterBlueprint =
+               lockClusterEntityMgr.getClusterEntityMgr().toClusterBluePrint(
+                     clusterName);
+         putIntoJobExecutionContext(chunkContext,
+               JobConstants.CLUSTER_BLUEPRINT_JOB_PARAM, clusterBlueprint);
       }
 
       task =

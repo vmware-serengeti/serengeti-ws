@@ -228,9 +228,19 @@ public class Constants {
    public static final int DEFAULT_SSH_SLEEP_TIME_BEFORE_RETRY = 3000;
    public static final String SSH_SLEEP_TIME_BEFORE_RETRY = "serengeti.ssh.sleep.time.before.retry";
    public static final String SSH_MAX_RETRY_TIMES = "serengeti.ssh.max.retry.times";
-
    public static final String NODE_APPMANAGER_YUM_REPO_DIR = "/etc/yum.repos.d";
    public static final String NODE_APPMANAGER_YUM_LOCAL_REPO_FILE = "/etc/yum.repos.d/aaa-local-app-manager.repo";
    public static final String NODE_APPMANAGER_YUM_CLOUDERA_MANAGER_REPO_ID = "cloudera-manager";
-   public static final String NODE_APPMANAGER_YUM_AMBARI_REPO_ID = "ambari";
+   public static final String NODE_APPMANAGER_YUM_AMBARI_REPO_ID = "ambari-1.x";
+   public static final String NODE_APPMANAGER_SETUP_LOCAL_REPO_SCRIPT = "node.appmgr.setup.local.repo.script";
+   public static final String NODE_APPMANAGER_SETUP_LOCAL_REPO_SCRIPT_DEFAULT = "set-local-repo";
+   public static final String NODE_SET_LOCAL_REPO_TIMEOUT_SECONDS = "node.set.local.repo.timeout";
+   public static final int NODE_SET_LOCAL_REPO_TIMEOUT_SECONDS_DEFAULT = 120;
+   public static final int SET_LOCAL_REPO_MAX_RETRY_TIMES = 5;
+   public static final String SERENGETI_NODE_YUM_CLOUDERA_MANAGER_REPO_ID = "node.appmgr.local.repo.id.cloudera";
+   public static final String SERENGETI_NODE_YUM_AMBARI_REPO_ID = "node.appmgr.local.repo.id.ambari";
+
+   public static final String NODE_ACTION_SET_LOCAL_REPO_SUCCEED = "Set local repo succeed";
+   public static final String NODE_ACTION_SET_LOCAL_REPO_FAILED = "Set local repo failed";
+
 }

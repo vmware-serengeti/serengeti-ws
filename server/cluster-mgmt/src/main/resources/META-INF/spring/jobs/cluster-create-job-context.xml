@@ -21,7 +21,14 @@
 	<beans:bean name="setPasswordForClusterCreateTasklet"
 		class="com.vmware.bdd.service.job.SetPasswordForNewNodesStep">
 		<beans:property name="configMgr" ref="clusterConfigMgr" />
-		<beans:property name="setPasswordService" ref="setPasswordService"/>
+		<beans:property name="setPasswordService" ref="setPasswordService" />
+		<beans:property name="managementOperation" value="CREATE" />
+	</beans:bean>
+	<beans:bean name="configLocalRepoForClusterCreateTasklet"
+		class="com.vmware.bdd.service.job.ConfigLocalRepoStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
+		<beans:property name="setLocalRepoService" ref="setNodeLocalRepoService"/>
 		<beans:property name="managementOperation" value="CREATE" />
 	</beans:bean>
 
@@ -62,38 +69,32 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-        <step id="postSetPasswordForCreateNodesStep" next="configLocalRepoStep">
-           <tasklet ref="postSetPasswordTasklet" />
-           <listeners>
-              <listener ref="stepListener" />
-           </listeners>
-        </step>
-        <step id="configLocalRepoStep" next="softwareCreateClusterStep">
-           <tasklet ref="configLocalRepoTasklet" />
-           <listeners>
-              <listener ref="stepListener" />
-           </listeners>
-        </step>
-        <step id="softwareCreateClusterStep" next="setAutoElasticityStep">
-           <tasklet ref="softwareCreateClusterTasklet" />
-           <listeners>
-              <listener ref="stepListener" />
-           </listeners>
-        </step>
-        <step id="setAutoElasticityStep">
-           <tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
-           <listeners>
-              <listener ref="stepListener" />
-           </listeners>
-        </step>
-        <!--
-        <step id="cmCreateClusterStep">
-            <tasklet ref="cmCreateClusterTasklet" />
-            <listeners>
-                <listener ref="stepListener" />
-            </listeners>
-        </step>
-        -->
+		<step id="postSetPasswordForCreateNodesStep" next="configLocalRepoStep">
+			<tasklet ref="postSetPasswordTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="configLocalRepoStep" next="softwareCreateClusterStep">
+			<tasklet ref="configLocalRepoForClusterCreateTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="softwareCreateClusterStep" next="setAutoElasticityStep">
+			<tasklet ref="softwareCreateClusterTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="setAutoElasticityStep">
+			<tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<!-- <step id="cmCreateClusterStep"> <tasklet ref="cmCreateClusterTasklet" 
+			/> <listeners> <listener ref="stepListener" /> </listeners> </step> -->
 		<listeners>
 			<listener ref="createClusterJobListener" />
 		</listeners>

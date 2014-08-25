@@ -163,8 +163,9 @@ public class ClusterConfigManager {
    }
 
    @Autowired
-   public void setSoftwareManagerCollector(SoftwareManagerCollector softwareManagerCollector) {
-        this.softwareManagerCollector = softwareManagerCollector;
+   public void setSoftwareManagerCollector(
+         SoftwareManagerCollector softwareManagerCollector) {
+      this.softwareManagerCollector = softwareManagerCollector;
    }
 
    private void applyInfraChanges(ClusterCreate cluster,
@@ -173,7 +174,7 @@ public class ClusterConfigManager {
       sortNodeGroups(cluster, blueprint);
       // as we've sorted node groups, so here we can assume node group are in same location in the array.
       for (int i = 0; i < blueprint.getNodeGroups().size(); i++) {
-         NodeGroupInfo group = blueprint.getNodeGroups() .get(i);
+         NodeGroupInfo group = blueprint.getNodeGroups().get(i);
          NodeGroupCreate groupCreate = cluster.getNodeGroups()[i];
          groupCreate.setConfiguration(group.getConfiguration());
          groupCreate.setRoles(group.getRoles());
@@ -188,10 +189,10 @@ public class ClusterConfigManager {
       cluster.setExternalMapReduce(blueprint.getExternalMapReduce());
    }
 
-   private void sortNodeGroups(ClusterCreate cluster,
-         ClusterBlueprint blueprint) {
-      NodeGroupCreate[] sortedGroups = new NodeGroupCreate[cluster.getNodeGroups().length];
-      for(int i = 0; i < blueprint.getNodeGroups().size(); i ++) {
+   private void sortNodeGroups(ClusterCreate cluster, ClusterBlueprint blueprint) {
+      NodeGroupCreate[] sortedGroups =
+            new NodeGroupCreate[cluster.getNodeGroups().length];
+      for (int i = 0; i < blueprint.getNodeGroups().size(); i++) {
          NodeGroupInfo groupInfo = blueprint.getNodeGroups().get(i);
          if (cluster.getNodeGroups()[i].getName().equals(groupInfo.getName())) {
             // to save query time
@@ -217,18 +218,19 @@ public class ClusterConfigManager {
          appManager = Constants.IRONFAN;
       }
       SoftwareManager softwareManager = getSoftwareManager(appManager);
-      HadoopStack stack = filterDistroFromAppManager(softwareManager, cluster.getDistro());
+      HadoopStack stack =
+            filterDistroFromAppManager(softwareManager, cluster.getDistro());
       if (cluster.getDistro() == null || stack == null) {
          throw BddException.INVALID_PARAMETER("distro", cluster.getDistro());
       }
-       // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
+      // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
       ClusterBlueprint blueprint = cluster.toBlueprint();
       try {
-          softwareManager.validateBlueprint(cluster.toBlueprint());
-          cluster.validateClusterCreate(failedMsgList, warningMsgList);
+         softwareManager.validateBlueprint(cluster.toBlueprint());
+         cluster.validateClusterCreate(failedMsgList, warningMsgList);
       } catch (ValidationException e) {
-          failedMsgList.addAll(e.getFailedMsgList());
-          warningMsgList.addAll(e.getWarningMsgList());
+         failedMsgList.addAll(e.getFailedMsgList());
+         warningMsgList.addAll(e.getWarningMsgList());
       }
 
       if (!failedMsgList.isEmpty()) {
@@ -238,13 +240,13 @@ public class ClusterConfigManager {
       if (!validateRacksInfo(cluster, failedMsgList)) {
          throw ClusterConfigException.INVALID_PLACEMENT_POLICIES(failedMsgList);
       }
-      
+
       String localRepoURL = cluster.getLocalRepoURL();
-      if ( !CommonUtil.isBlank(localRepoURL) && !validateLocalRepoURL(localRepoURL) )
-      {
-          throw ClusterConfigException.INVALID_LOCAL_REPO_URL(failedMsgList);
+      if (!CommonUtil.isBlank(localRepoURL)
+            && !validateLocalRepoURL(localRepoURL)) {
+         throw ClusterConfigException.INVALID_LOCAL_REPO_URL(failedMsgList);
       }
-      
+
       try {
          ClusterEntity entity = clusterEntityMgr.findByName(name);
          if (entity != null) {
@@ -291,8 +293,9 @@ public class ClusterConfigManager {
             logger.debug("no datastore name specified, use global configuration.");
          }
 
-         clusterEntity.setNetworkConfig(validateAndConvertNetNamesToNetConfigs(cluster
-               .getNetworkConfig(), cluster.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR)));
+         clusterEntity.setNetworkConfig(validateAndConvertNetNamesToNetConfigs(
+               cluster.getNetworkConfig(), cluster.getDistroVendor()
+                     .equalsIgnoreCase(Constants.MAPR_VENDOR)));
          clusterEntity.setVhmJobTrackerPort("50030");
          if (cluster.getConfiguration() != null
                && cluster.getConfiguration().size() > 0) {
@@ -301,15 +304,14 @@ public class ClusterConfigManager {
 
             updateVhmJobTrackerPort(cluster, clusterEntity);
          }
-         
-         setAdvancedProperties(cluster.getExternalHDFS(), cluster.getExternalMapReduce(), 
-        		 localRepoURL, clusterEntity);
+
+         setAdvancedProperties(cluster.getExternalHDFS(),
+               cluster.getExternalMapReduce(), localRepoURL, clusterEntity);
          NodeGroupCreate[] groups = cluster.getNodeGroups();
          if (groups != null && groups.length > 0) {
-            clusterEntity
-                  .setNodeGroups(convertNodeGroupsToEntities(gson,
-                        clusterEntity, cluster.getDistro(), groups,
-                        cluster.isValidateConfig()));
+            clusterEntity.setNodeGroups(convertNodeGroupsToEntities(gson,
+                  clusterEntity, cluster.getDistro(), groups,
+                  cluster.isValidateConfig()));
 
             //make sure memory size is no less than MIN_MEM_SIZE
             validateMemorySize(clusterEntity.getNodeGroups(), failedMsgList);
@@ -352,9 +354,11 @@ public class ClusterConfigManager {
    }
 
    private void setAdvancedProperties(String externalHDFS,
-         String externalMapReduce, String localRepoURL, ClusterEntity clusterEntity) {
+         String externalMapReduce, String localRepoURL,
+         ClusterEntity clusterEntity) {
       if (!CommonUtil.isBlank(externalHDFS)
-            || !CommonUtil.isBlank(externalMapReduce) || !CommonUtil.isBlank(localRepoURL) ) {
+            || !CommonUtil.isBlank(externalMapReduce)
+            || !CommonUtil.isBlank(localRepoURL)) {
          Map<String, String> advancedProperties = new HashMap<String, String>();
          advancedProperties.put("ExternalHDFS", externalHDFS);
          advancedProperties.put("ExternalMapReduce", externalMapReduce);
@@ -421,7 +425,8 @@ public class ClusterConfigManager {
 
    private Map<NetTrafficType, List<String>> convertNetConfigsToNetNames(
          Map<NetTrafficType, List<NetConfigInfo>> netConfigs) {
-      Map<NetTrafficType, List<String>> netNamesInfo = new HashMap<NetTrafficType, List<String>>();
+      Map<NetTrafficType, List<String>> netNamesInfo =
+            new HashMap<NetTrafficType, List<String>>();
       for (NetTrafficType type : netConfigs.keySet()) {
          netNamesInfo.put(type, new ArrayList<String>());
          for (NetConfigInfo config : netConfigs.get(type)) {
@@ -446,7 +451,9 @@ public class ClusterConfigManager {
          invalidNodeGroupNames.delete(invalidNodeGroupNames.length() - 1,
                invalidNodeGroupNames.length());
          failedMsgList.add(errorMsgBuff
-               .append("'memCapacityMB' cannot be less than "+ Constants.MIN_MEM_SIZE + " in group ")
+               .append(
+                     "'memCapacityMB' cannot be less than "
+                           + Constants.MIN_MEM_SIZE + " in group ")
                .append(invalidNodeGroupNames.toString())
                .append(" in order for nodes to run normally").toString());
       }
@@ -601,8 +608,8 @@ public class ClusterConfigManager {
       groupEntity.setCluster(clusterEntity);
       int cpuNum = group.getCpuNum() == null ? 0 : group.getCpuNum();
       if (!VcVmUtil.validateCPU(clusteringService.getTemplateVmId(), cpuNum)) {
-         throw VcProviderException.CPU_NUM_NOT_MULTIPLE_OF_CORES_PER_SOCKET(group.getName(),
-               clusteringService.getTemplateVmName());
+         throw VcProviderException.CPU_NUM_NOT_MULTIPLE_OF_CORES_PER_SOCKET(
+               group.getName(), clusteringService.getTemplateVmName());
       }
 
       groupEntity.setCpuNum(cpuNum);
@@ -657,8 +664,7 @@ public class ClusterConfigManager {
 
       if (group.getInstanceNum() <= 0) {
          logger.warn("Zero or negative instance number for group "
-               + group.getName()
-               + ", remove the group from cluster spec.");
+               + group.getName() + ", remove the group from cluster spec.");
          return null;
       }
 
@@ -831,22 +837,28 @@ public class ClusterConfigManager {
       List<String> networkNames = clusterEntity.fetchNetworkNameList();
 
       // TODO: refactor this function to support nodeGroup level networks
-      List<NetworkAdd> networkingAdds = allocatNetworkIp(networkNames, clusterEntity, instanceNum,
+      List<NetworkAdd> networkingAdds =
+            allocatNetworkIp(networkNames, clusterEntity, instanceNum,
                   needAllocIp);
       clusterConfig.setNetworkings(networkingAdds);
-      clusterConfig.setNetworkConfig(convertNetConfigsToNetNames(clusterEntity.getNetworkConfigInfo()));
+      clusterConfig.setNetworkConfig(convertNetConfigsToNetNames(clusterEntity
+            .getNetworkConfigInfo()));
 
       if (clusterEntity.getHadoopConfig() != null) {
-         Map<String, Object> hadoopConfig = (new Gson()).fromJson(clusterEntity.getHadoopConfig(), Map.class);
+         Map<String, Object> hadoopConfig =
+               (new Gson())
+                     .fromJson(clusterEntity.getHadoopConfig(), Map.class);
          clusterConfig.setConfiguration(hadoopConfig);
       }
       if (!CommonUtil.isBlank(clusterEntity.getAdvancedProperties())) {
-          Gson gson = new Gson(); 
-          Map<String, String> advancedProperties = gson.fromJson(clusterEntity.getAdvancedProperties(), Map.class);
-          clusterConfig.setExternalHDFS(advancedProperties.get("ExternalHDFS"));
-          clusterConfig.setExternalMapReduce(advancedProperties.get("ExternalMapReduce"));
-          clusterConfig.setLocalRepoURL(advancedProperties.get("LocalRepoURL"));
-       }
+         Gson gson = new Gson();
+         Map<String, String> advancedProperties =
+               gson.fromJson(clusterEntity.getAdvancedProperties(), Map.class);
+         clusterConfig.setExternalHDFS(advancedProperties.get("ExternalHDFS"));
+         clusterConfig.setExternalMapReduce(advancedProperties
+               .get("ExternalMapReduce"));
+         clusterConfig.setLocalRepoURL(advancedProperties.get("LocalRepoURL"));
+      }
    }
 
    private List<NetworkAdd> allocatNetworkIp(List<String> networkNames,
@@ -854,13 +866,15 @@ public class ClusterConfigManager {
       List<NetworkAdd> networkings = new ArrayList<NetworkAdd>();
 
       for (String networkName : networkNames) {
-         NetworkEntity networkEntity = networkMgr.getNetworkEntityByName(networkName);
+         NetworkEntity networkEntity =
+               networkMgr.getNetworkEntityByName(networkName);
 
          if (needAllocIp) {
             NetworkAdd network = new NetworkAdd();
             network.setPortGroup(networkEntity.getPortGroup());
             network.setName(networkName);
-            network.setDhcp(networkEntity.getAllocType() == NetworkEntity.AllocType.DHCP);
+            network
+                  .setDhcp(networkEntity.getAllocType() == NetworkEntity.AllocType.DHCP);
             if (!network.getIsDhcp()) {
                logger.debug("using static ip.");
                List<IpBlockEntity> ipBlockEntities =
@@ -870,7 +884,8 @@ public class ClusterConfigManager {
                if (allocatedIpNum < instanceNum) {
                   long newNum = instanceNum - allocatedIpNum;
                   List<IpBlockEntity> newIpBlockEntities =
-                        networkMgr.alloc(networkEntity, clusterEntity.getId(),newNum);
+                        networkMgr.alloc(networkEntity, clusterEntity.getId(),
+                              newNum);
                   ipBlockEntities.addAll(newIpBlockEntities);
                }
                network.setDns1(networkEntity.getDns1());
@@ -1023,7 +1038,8 @@ public class ClusterConfigManager {
       storage.setShares(ngEntity.getCluster().getIoShares());
 
       // set storage split policy based on group roles
-      SoftwareManager softwareManager = getSoftwareManager(ngEntity.getCluster().getAppManager());
+      SoftwareManager softwareManager =
+            getSoftwareManager(ngEntity.getCluster().getAppManager());
       if (softwareManager.twoDataDisksRequired(group.toNodeGroupInfo())) {
          logger.debug("use bi_sector disk layout for zookeeper only group.");
          storage.setSplitPolicy(DiskSplitPolicy.BI_SECTOR);
@@ -1105,7 +1121,8 @@ public class ClusterConfigManager {
          logger.error("cluster " + clusterName + " does not exist");
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
-      SoftwareManager softwareManager = getSoftwareManager(cluster.getAppManager());
+      SoftwareManager softwareManager =
+            getSoftwareManager(cluster.getAppManager());
       // read distro and distroVersion from ClusterEntity and set to ClusterCreate
       clusterCreate.setDistro(cluster.getDistro());
       clusterCreate.setDistroVersion(cluster.getDistroVersion());
@@ -1114,7 +1131,8 @@ public class ClusterConfigManager {
          Map<String, String> advancedProperties =
                gson.fromJson(cluster.getAdvancedProperties(), Map.class);
          clusterCreate.setExternalHDFS(advancedProperties.get("ExternalHDFS"));
-         clusterCreate.setExternalMapReduce(advancedProperties.get("ExternalMapReduce"));
+         clusterCreate.setExternalMapReduce(advancedProperties
+               .get("ExternalMapReduce"));
          clusterCreate.setLocalRepoURL(advancedProperties.get("LocalRepoURL"));
       }
       // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
@@ -1122,7 +1140,7 @@ public class ClusterConfigManager {
       try {
          softwareManager.validateBlueprint(blueprint);
       } catch (ValidationException e) {
-          throw ClusterConfigException.INVALID_SPEC(e.getFailedMsgList());
+         throw ClusterConfigException.INVALID_SPEC(e.getFailedMsgList());
       }
 
       updateInfrastructure(clusterCreate, softwareManager, blueprint);
@@ -1136,8 +1154,9 @@ public class ClusterConfigManager {
          logger.debug("cluster configuration is not set in cluster spec, so treat it as an empty configuration.");
          cluster.setHadoopConfig(null);
       }
-      setAdvancedProperties(clusterCreate.getExternalHDFS(), clusterCreate.getExternalMapReduce(), 
-    		  clusterCreate.getLocalRepoURL(), cluster);
+      setAdvancedProperties(clusterCreate.getExternalHDFS(),
+            clusterCreate.getExternalMapReduce(),
+            clusterCreate.getLocalRepoURL(), cluster);
       updateNodegroupAppConfig(clusterCreate, cluster,
             clusterCreate.isValidateConfig());
    }
@@ -1176,6 +1195,7 @@ public class ClusterConfigManager {
 
    /**
     * validate if rack topology of all hosts is uploaded
+    * 
     * @param hosts
     * @param topology
     */
@@ -1190,20 +1210,24 @@ public class ClusterConfigManager {
       }
       if (invalidHosts.size() > 0) {
          if (topology.equalsIgnoreCase(TopologyType.HVE.toString())
-               || topology.equalsIgnoreCase(TopologyType.RACK_AS_RACK.toString())) {
-            throw ClusterConfigException.TOPOLOGY_WITH_NO_MAPPING_INFO_EXIST(topology);
+               || topology.equalsIgnoreCase(TopologyType.RACK_AS_RACK
+                     .toString())) {
+            throw ClusterConfigException
+                  .TOPOLOGY_WITH_NO_MAPPING_INFO_EXIST(topology);
          }
       }
    }
 
    /**
     * build rack topology of the nodes according to the topology
+    * 
     * @param nodes
     * @param topology
     * @return
     */
    @Transactional
-   public Map<String, String> buildTopology(List<NodeRead> nodes, String topology) {
+   public Map<String, String> buildTopology(List<NodeRead> nodes,
+         String topology) {
       topology = topology.toUpperCase();
       Map<String, String> map = new HashMap<String, String>();
       Map<NetTrafficType, List<IpConfigInfo>> ipConfigMap = null;
@@ -1222,14 +1246,17 @@ public class ClusterConfigManager {
                   if (!CommonUtil.isBlank(ipConfig.getIpAddress())) {
                      switch (topology) {
                      case "HOST_AS_RACK":
-                        map.put(ipConfig.getIpAddress(), "/" + node.getHostName());
+                        map.put(ipConfig.getIpAddress(),
+                              "/" + node.getHostName());
                         break;
                      case "RACK_AS_RACK":
-                        map.put(ipConfig.getIpAddress(), "/" + hostRackMap.get(node.getHostName()));
+                        map.put(ipConfig.getIpAddress(),
+                              "/" + hostRackMap.get(node.getHostName()));
                         break;
                      case "HVE":
                         map.put(ipConfig.getIpAddress(),
-                              "/" + hostRackMap.get(node.getHostName()) + "/" + node.getHostName());
+                              "/" + hostRackMap.get(node.getHostName()) + "/"
+                                    + node.getHostName());
                         break;
                      case "NONE":
                      default:
@@ -1247,32 +1274,31 @@ public class ClusterConfigManager {
    public SoftwareManager getSoftwareManager(String appManager) {
       return softwareManagerCollector.getSoftwareManager(appManager);
    }
-   
+
    private boolean validateLocalRepoURL(String localRepoURL) {
-	   boolean succ = true;
-	   HttpClientBuilder builder = HttpClientBuilder.create(); 
-	   CloseableHttpClient httpClient = builder.build();
-       HttpGet httpGet = new HttpGet(localRepoURL);  
+      boolean succ = true;
+      HttpClientBuilder builder = HttpClientBuilder.create();
+      CloseableHttpClient httpClient = builder.build();
+      HttpGet httpGet = new HttpGet(localRepoURL);
 
-	   // test the connection to the given url
-	   try {
-	       HttpResponse resp = httpClient.execute(httpGet);  
-		   StatusLine status = resp.getStatusLine();
-		   if ( status.getStatusCode() >= 400 )
-		   {
-			   succ = false;
-		   }
-		   
-		   if ( null != httpClient ) {
-		      httpClient.close();
-		   }
-		   
-		} catch (Exception e) {
-			succ = false;
-			logger.error(e.getMessage());
-		}
+      // test the connection to the given url
+      try {
+         HttpResponse resp = httpClient.execute(httpGet);
+         StatusLine status = resp.getStatusLine();
+         if (status.getStatusCode() >= 400) {
+            succ = false;
+         }
 
-	    return succ;
+         if (null != httpClient) {
+            httpClient.close();
+         }
+
+      } catch (Exception e) {
+         succ = false;
+         logger.error(e.getMessage());
+      }
+
+      return succ;
    }
-   
+
 }

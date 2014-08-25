@@ -30,7 +30,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
    private String name;
    private String externalHDFS;
    private String externalMapReduce;
-   
+
    private String localRepoURL;
 
    @Expose
@@ -77,7 +77,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
    @SerializedName("disk_priority")
    private Priority ioShares;
 
-//   private boolean nodeGroupSorted;
+   //   private boolean nodeGroupSorted;
 
    private boolean dcSeperation;
 
@@ -252,6 +252,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
       }
       return count;
    }
+
    /*
    private NodeGroupRead matchNodeGroupByName(List<NodeGroupRead> nodeGroups,
          String nodeGroupName) {
@@ -269,54 +270,55 @@ public class ClusterRead implements Comparable<ClusterRead> {
     * Compare the order of node groups according to their roles
     *
     *
-    *//*
+    */
+   /*
    private class NodeGroupReadComparactor implements Comparator<NodeGroupRead> {
-      @Override
-      public int compare(NodeGroupRead ng1, NodeGroupRead ng2) {
-         if (ng1 == ng2) {
-            return 0;
-         }
-         //null elements will be sorted behind the list
-         if (ng1 == null) {
-            return 1;
-         } else if (ng2 == null) {
-            return -1;
-         }
-
-         List<String> ng1Roles = ng1.getRoles();
-         List<String> ng2Roles = ng2.getRoles();
-
-         return compareBasedOnRoles(ng1Roles, ng2Roles);
+   @Override
+   public int compare(NodeGroupRead ng1, NodeGroupRead ng2) {
+      if (ng1 == ng2) {
+         return 0;
+      }
+      //null elements will be sorted behind the list
+      if (ng1 == null) {
+         return 1;
+      } else if (ng2 == null) {
+         return -1;
       }
 
-      private int compareBasedOnRoles(List<String> ng1Roles, List<String> ng2Roles) {
-         if (ng1Roles == ng2Roles) {
-            return 0;
-         }
-         if (ng1Roles == null || ng1Roles.isEmpty()) {
-            return 1;
-         } else if (ng2Roles == null || ng2Roles.isEmpty()) {
-            return -1;
-         }
+      List<String> ng1Roles = ng1.getRoles();
+      List<String> ng2Roles = ng2.getRoles();
 
-         int ng1RolePos = findNodeGroupRoleMinIndex(ng1Roles);
-         int ng2RolePos = findNodeGroupRoleMinIndex(ng2Roles);
-         if (ng1RolePos < ng2RolePos) {
-            return -1;
-         } else if (ng1RolePos == ng2RolePos) {
-            return 0;
-         } else {
-            return 1;
-         }
+      return compareBasedOnRoles(ng1Roles, ng2Roles);
+   }
+
+   private int compareBasedOnRoles(List<String> ng1Roles, List<String> ng2Roles) {
+      if (ng1Roles == ng2Roles) {
+         return 0;
+      }
+      if (ng1Roles == null || ng1Roles.isEmpty()) {
+         return 1;
+      } else if (ng2Roles == null || ng2Roles.isEmpty()) {
+         return -1;
       }
 
-      private int findNodeGroupRoleMinIndex(List<String> ngRoles) {
-         Collections.sort(ngRoles, new RoleComparactor());
-         HadoopRole role = HadoopRole.fromString(ngRoles.get(0));
-         return (null != role) ? role.ordinal() : -1;
+      int ng1RolePos = findNodeGroupRoleMinIndex(ng1Roles);
+      int ng2RolePos = findNodeGroupRoleMinIndex(ng2Roles);
+      if (ng1RolePos < ng2RolePos) {
+         return -1;
+      } else if (ng1RolePos == ng2RolePos) {
+         return 0;
+      } else {
+         return 1;
       }
    }
-*/
+
+   private int findNodeGroupRoleMinIndex(List<String> ngRoles) {
+      Collections.sort(ngRoles, new RoleComparactor());
+      HadoopRole role = HadoopRole.fromString(ngRoles.get(0));
+      return (null != role) ? role.ordinal() : -1;
+   }
+   }
+   */
    @Override
    public int compareTo(ClusterRead cluster) {
       if (CommonUtil.isBlank(cluster.getName())) {
@@ -435,7 +437,7 @@ public class ClusterRead implements Comparable<ClusterRead> {
       String maxComputeNodeNumStr = "";
       if (maxComputeNodeNum == null) {
          if (vhmMaxNum != -1) {
-            maxComputeNodeNumStr = " (" + vhmMaxNum+ ")";
+            maxComputeNodeNumStr = " (" + vhmMaxNum + ")";
          }
       } else if (maxComputeNodeNum != -1) {
          maxComputeNodeNumStr = " (" + maxComputeNodeNum + ")";
@@ -443,58 +445,74 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
       //validate the input of minComputeNodeNum
       if (minComputeNodeNum != null && minComputeNodeNum < -1) {
-         throw BddException.INVALID_MIN_COMPUTE_NODE_NUM(minComputeNodeNum.toString(),
+         throw BddException.INVALID_MIN_COMPUTE_NODE_NUM(
+               minComputeNodeNum.toString(),
                Integer.toString(deployedComputeNodeNum), maxComputeNodeNumStr);
       }
 
       //validate the input of maxComputeNodeNum
       if (maxComputeNodeNum != null && maxComputeNodeNum < -1) {
-         throw BddException.INVALID_MAX_COMPUTE_NODE_NUM(maxComputeNodeNum.toString(),
+         throw BddException.INVALID_MAX_COMPUTE_NODE_NUM(
+               maxComputeNodeNum.toString(),
                Integer.toString(deployedComputeNodeNum), minComputeNodeNumStr);
       }
 
       //validate the input of targetComputeNodeNum
       if (targetComputeNodeNum != null && targetComputeNodeNum < 0) {
-         throw BddException.INVALID_TARGET_COMPUTE_NODE_NUM(targetComputeNodeNum.toString(),
+         throw BddException.INVALID_TARGET_COMPUTE_NODE_NUM(
+               targetComputeNodeNum.toString(),
                Integer.toString(deployedComputeNodeNum));
       }
 
       //validate min, max, targetComputeNodeNum should be less than deployed computeNodeNum
-      if (minComputeNodeNum != null && minComputeNodeNum > deployedComputeNodeNum) {
-         throw BddException.INVALID_MIN_COMPUTE_NODE_NUM(minComputeNodeNum.toString(),
+      if (minComputeNodeNum != null
+            && minComputeNodeNum > deployedComputeNodeNum) {
+         throw BddException.INVALID_MIN_COMPUTE_NODE_NUM(
+               minComputeNodeNum.toString(),
                Integer.toString(deployedComputeNodeNum), maxComputeNodeNumStr);
       }
-      if (maxComputeNodeNum != null && maxComputeNodeNum > deployedComputeNodeNum) {
-         throw BddException.INVALID_MAX_COMPUTE_NODE_NUM(maxComputeNodeNum.toString(),
+      if (maxComputeNodeNum != null
+            && maxComputeNodeNum > deployedComputeNodeNum) {
+         throw BddException.INVALID_MAX_COMPUTE_NODE_NUM(
+               maxComputeNodeNum.toString(),
                Integer.toString(deployedComputeNodeNum), minComputeNodeNumStr);
       }
-      if (targetComputeNodeNum != null && targetComputeNodeNum > deployedComputeNodeNum) {
-         throw BddException.INVALID_TARGET_COMPUTE_NODE_NUM(targetComputeNodeNum.toString(),
+      if (targetComputeNodeNum != null
+            && targetComputeNodeNum > deployedComputeNodeNum) {
+         throw BddException.INVALID_TARGET_COMPUTE_NODE_NUM(
+               targetComputeNodeNum.toString(),
                Integer.toString(deployedComputeNodeNum));
       }
 
       //validate minComputeNode <= maxComputeNode
-      if ((minComputeNodeNum != null && minComputeNodeNum != -1 && maxComputeNodeNum != null && maxComputeNodeNum != -1 && minComputeNodeNum > maxComputeNodeNum) ||
-          (minComputeNodeNum != null && minComputeNodeNum != -1 && maxComputeNodeNum == null && vhmMaxNum != -1         && minComputeNodeNum > vhmMaxNum) ||
-          (minComputeNodeNum == null && vhmMinNum != -1         && maxComputeNodeNum != null && maxComputeNodeNum != -1 && vhmMinNum > maxComputeNodeNum)) {
+      if ((minComputeNodeNum != null && minComputeNodeNum != -1
+            && maxComputeNodeNum != null && maxComputeNodeNum != -1 && minComputeNodeNum > maxComputeNodeNum)
+            || (minComputeNodeNum != null && minComputeNodeNum != -1
+                  && maxComputeNodeNum == null && vhmMaxNum != -1 && minComputeNodeNum > vhmMaxNum)
+            || (minComputeNodeNum == null && vhmMinNum != -1
+                  && maxComputeNodeNum != null && maxComputeNodeNum != -1 && vhmMinNum > maxComputeNodeNum)) {
          if (minComputeNodeNum != null && minComputeNodeNum != -1) {
-            throw BddException.INVALID_MIN_COMPUTE_NODE_NUM(minComputeNodeNum.toString(),
-                  Integer.toString(deployedComputeNodeNum), maxComputeNodeNumStr);
+            throw BddException.INVALID_MIN_COMPUTE_NODE_NUM(
+                  minComputeNodeNum.toString(),
+                  Integer.toString(deployedComputeNodeNum),
+                  maxComputeNodeNumStr);
          } else {
-            throw BddException.INVALID_MAX_COMPUTE_NODE_NUM(maxComputeNodeNum.toString(),
-                  Integer.toString(deployedComputeNodeNum), minComputeNodeNumStr);
+            throw BddException.INVALID_MAX_COMPUTE_NODE_NUM(
+                  maxComputeNodeNum.toString(),
+                  Integer.toString(deployedComputeNodeNum),
+                  minComputeNodeNumStr);
          }
 
       }
       return true;
    }
-   
+
    public String getLocalRepoURL() {
-	   return localRepoURL;
+      return localRepoURL;
    }
 
    public void setLocalRepoURL(String localRepoURL) {
-	   this.localRepoURL = localRepoURL;
+      this.localRepoURL = localRepoURL;
    }
-   
+
 }

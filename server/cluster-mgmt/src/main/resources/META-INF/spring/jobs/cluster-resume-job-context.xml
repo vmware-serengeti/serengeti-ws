@@ -21,7 +21,14 @@
 	<beans:bean name="setPasswordForClusterResumeTasklet"
 		class="com.vmware.bdd.service.job.SetPasswordForNewNodesStep">
 		<beans:property name="configMgr" ref="clusterConfigMgr" />
-		<beans:property name="setPasswordService" ref="setPasswordService"/>
+		<beans:property name="setPasswordService" ref="setPasswordService" />
+		<beans:property name="managementOperation" value="RESUME" />
+	</beans:bean>
+	<beans:bean name="configLocalRepoForClusterResumeTasklet"
+		class="com.vmware.bdd.service.job.ConfigLocalRepoStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
+		<beans:property name="setLocalRepoService" ref="setNodeLocalRepoService"/>
 		<beans:property name="managementOperation" value="RESUME" />
 	</beans:bean>
 
@@ -86,12 +93,12 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-        <step id="configLocalRepoResumeStep" next="softwareResumeClusterStep">
-           <tasklet ref="configLocalRepoTasklet" />
-           <listeners>
-              <listener ref="stepListener" />
-           </listeners>
-        </step>
+		<step id="configLocalRepoResumeStep" next="softwareResumeClusterStep">
+			<tasklet ref="configLocalRepoForClusterResumeTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
 		<step id="softwareResumeClusterStep" next="setAutoElasticityResumeStep">
 			<tasklet ref="softwareCreateClusterTasklet" />
 			<listeners>
