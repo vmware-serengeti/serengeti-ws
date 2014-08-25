@@ -25,6 +25,8 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
@@ -284,6 +286,7 @@ public class ClusterCreate implements Serializable {
       this.dsNames = dsNames;
    }
 
+   @JsonIgnore
    public List<String> getNetworkNames() {
       List<String> networks = new ArrayList<String>();
       if (getNetworkConfig() != null && !getNetworkConfig().isEmpty()) {

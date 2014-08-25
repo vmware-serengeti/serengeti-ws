@@ -67,8 +67,8 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException MORE_THAN_ONE_MASTER_NODE(String clusterName) {
       return new ClusterConfigException(null, "MORE_THAN_ONE_MASTER_NODE", clusterName);
    }
-   public static ClusterConfigException NETWORK_IS_NOT_SPECIFIED(String clusterName, int size ) {
-      return new ClusterConfigException(null, "NETWORK_IS_NOT_SPECIFIED", clusterName, size);
+   public static ClusterConfigException NETWORK_IS_NOT_SPECIFIED(String clusterName) {
+      return new ClusterConfigException(null, "NETWORK_IS_NOT_SPECIFIED", clusterName);
    }
    public static ClusterConfigException NETWORK_IS_NOT_FOUND(String networkName, String clusterName) {
       return new ClusterConfigException(null, "NETWORK_IS_NOT_FOUND", networkName, clusterName);

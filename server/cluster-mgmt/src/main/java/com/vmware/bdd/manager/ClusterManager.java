@@ -50,6 +50,7 @@ import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.BddException;
@@ -400,7 +401,7 @@ public class ClusterManager {
       }
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
-      validateNetworkAccessibility(createSpec.getNetworkNames(), vcClusters);
+      validateNetworkAccessibility(createSpec.getName(), createSpec.getNetworkNames(), vcClusters);
       //save configuration into meta-db, and extend configuration using default spec
       clusterConfigMgr.createClusterConfig(clusterSpec);
       clusterEntityMgr.updateClusterStatus(name, ClusterStatus.PROVISIONING);
@@ -431,12 +432,15 @@ public class ClusterManager {
       createSpec.setRpNames(rpNames);
    }
 
-   private void validateNetworkAccessibility(List<String> networkList,
-         List<VcCluster> clusters) {
-      AuAssert.check(networkList != null && !networkList.isEmpty());
+   private void validateNetworkAccessibility(final String clusterName,
+         List<String> networkList, List<VcCluster> clusters) {
+      if (networkList == null || networkList.isEmpty()) {
+         throw ClusterConfigException.NETWORK_IS_NOT_SPECIFIED(clusterName);
+      }
       Set<String> networkNames = new HashSet<String>();
       networkNames.addAll(networkList);
-
+      logger.info("start to validate network if exsit in db.");
+      verifyNetworkNamesExsitInDB(networkNames, clusterName);
       logger.info("start to validate network accessibility.");
       if (!resMgr.isNetworkAccessibleByCluster(networkList, clusters)) {
          List<String> clusterNames = new ArrayList<String>();
@@ -583,7 +587,7 @@ public class ClusterManager {
       }
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
-      validateNetworkAccessibility(cluster.fetchNetworkNameList(), vcClusters);
+      validateNetworkAccessibility(cluster.getName(), cluster.fetchNetworkNameList(), vcClusters);
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
             clusterName));
@@ -813,7 +817,7 @@ public class ClusterManager {
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
-      validateNetworkAccessibility(cluster.fetchNetworkNameList(), vcClusters);
+      validateNetworkAccessibility(cluster.getName(), cluster.fetchNetworkNameList(), vcClusters);
 
       NodeGroupEntity group =
             clusterEntityMgr.findByName(cluster, nodeGroupName);
@@ -1289,5 +1293,17 @@ public class ClusterManager {
          SoftwareManager softwareManager, String distroName) {
       return clusterConfigMgr.filterDistroFromAppManager(softwareManager,
             distroName);
+   }
+
+   private void verifyNetworkNamesExsitInDB(Set<String> networkNames,
+         String clusterName) {
+      NetworkEntity networkEntity = null;
+      for (String networkName : networkNames) {
+         networkEntity = networkManager.getNetworkEntityByName(networkName);
+         if (networkEntity == null) {
+            throw ClusterConfigException.NETWORK_IS_NOT_FOUND(networkName,
+                  clusterName);
+         }
+      }
    }
 }
