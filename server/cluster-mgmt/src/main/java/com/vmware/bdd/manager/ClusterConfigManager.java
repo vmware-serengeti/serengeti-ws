@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.manager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1288,14 +1289,17 @@ public class ClusterConfigManager {
          if (status.getStatusCode() >= 400) {
             succ = false;
          }
-
-         if (null != httpClient) {
-            httpClient.close();
-         }
-
       } catch (Exception e) {
          succ = false;
          logger.error(e.getMessage());
+      } finally {
+         if (null != httpClient) {
+            try {
+               httpClient.close();
+            } catch (IOException e) {
+               logger.error("Unknown errors in closing the http connection.");
+            }
+         }
       }
 
       return succ;

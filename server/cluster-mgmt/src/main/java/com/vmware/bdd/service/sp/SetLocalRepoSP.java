@@ -25,8 +25,7 @@ import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.ShellCommandExecutor;
 
 /**
- * Store Procedure of setting local repo on a vm for 3rd-party software
- * installation
+ * Store Procedure of setting local repository on a node vm for application managers like CM/Ambari.
  */
 public class SetLocalRepoSP implements Callable<Void> {
 
@@ -99,7 +98,7 @@ public class SetLocalRepoSP implements Callable<Void> {
          try {
             Thread.sleep(3000);
          } catch (InterruptedException e1) {
-            logger.info("Interrupted when waiting for setup login tty, retry immediately...");
+            logger.info("Interrupted when waiting for local repo setup, retry immediately...");
          }
       }
 
