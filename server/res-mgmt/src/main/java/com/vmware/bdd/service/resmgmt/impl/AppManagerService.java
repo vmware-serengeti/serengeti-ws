@@ -104,7 +104,10 @@ public class AppManagerService implements IAppManagerService{
       read.setType(entity.getType());
       read.setUrl(entity.getUrl());
       read.setUsername(entity.getUsername());
-      read.setPassword(entity.getPassword());
+      /*read.setPassword(entity.getPassword());*/
+      //the AppManagerRead will be returned to the CLIENT side.
+      //mask the value to avoid leakage.
+      read.setPassword("*****");
       read.setSslCertificate(entity.getSslCertificate());
       return read;
    }
