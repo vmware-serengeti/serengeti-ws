@@ -23,24 +23,40 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ws.rs.NotFoundException;
-
 import org.apache.log4j.Logger;
 
-import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
+import javax.ws.rs.NotFoundException;
+
 import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.TaskStatus;
+import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
+import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapHostStatus;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.BootstrapStatus;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.*;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroupConfiguration;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroupInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponent;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponents;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTask;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTaskInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ClusterRequestStatus;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfiguration;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfigurationInfo;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionInfo;
@@ -62,7 +78,6 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
-import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 
 public class AmbariImpl implements SoftwareManager {
