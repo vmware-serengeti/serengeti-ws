@@ -1,0 +1,67 @@
+{
+  "href" : "http://172.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices?fields=configurations/StackConfigurations/type",
+  "items" : [
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS",
+      "StackServices" :
+      {
+        "service_name" : "HDFS",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "configurations" :
+      [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS/configurations/namenode_heapsize",
+          "StackConfigurations" : {
+            "property_name" : "namenode_heapsize",
+            "service_name" : "HDFS",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1",
+            "type" : "global.xml"
+          }
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS/configurations/io.file.buffer.size",
+          "StackConfigurations" : {
+            "property_name" : "io.file.buffer.size",
+            "service_name" : "HDFS",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1",
+            "type" : "core-site.xml"
+          }
+        }
+      ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/NAGIOS",
+      "StackServices" : {
+        "service_name" : "NAGIOS",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "configurations" : [
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/NAGIOS/configurations/nagios_contact",
+          "StackConfigurations" : {
+            "property_name" : "nagios_contact",
+            "service_name" : "NAGIOS",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1",
+            "type" : "global.xml"
+          }
+        },
+        {
+          "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/NAGIOS/configurations/nagios_web_password",
+          "StackConfigurations" : {
+            "property_name" : "nagios_web_password",
+            "service_name" : "NAGIOS",
+            "stack_name" : "HDP",
+            "stack_version" : "2.1",
+            "type" : "global.xml"
+          }
+        }
+      ]
+    }
+  ]
+}

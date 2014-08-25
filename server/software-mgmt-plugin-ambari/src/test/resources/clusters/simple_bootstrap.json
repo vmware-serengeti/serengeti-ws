@@ -1,0 +1,30 @@
+{
+  "status":"SUCCESS",
+  "hostsStatus":[
+    {
+      "hostName":"host1",
+      "status":"DONE",
+      "statusCode":"0",
+      "log": ""
+    },
+    {
+      "hostName":"host2",
+      "status":"DONE",
+      "statusCode":"0",
+      "log": ""
+    },
+    {
+      "hostName":"host3",
+      "status":"DONE",
+      "statusCode":"0",
+      "log": ""
+    },
+    {
+      "hostName":"host4",
+      "status":"DONE",
+      "statusCode":"0",
+      "log": ""
+    }
+  ],
+  "log": ""
+}

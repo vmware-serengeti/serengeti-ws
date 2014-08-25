@@ -29,15 +29,17 @@ import org.testng.annotations.Test;
 
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
 import com.vmware.bdd.plugin.ambari.api.ApiRootResource;
-import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
 import com.vmware.bdd.plugin.ambari.service.am.FakeRootResourceV1;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.plugin.ambari.utils.SerialUtils;
+import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
+import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager.HealthStatus;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
+import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 import com.vmware.bdd.utils.CommonUtil;
 
 public class TestAmbariImpl {
@@ -89,10 +91,24 @@ public class TestAmbariImpl {
       }
    }
 
+   @MockClass(realClass = ReflectionUtils.class)
+   public static class MockReflectionUtils {
+      @Mock
+      public static PreStartServices getPreStartServicesHook() {
+         return new PreStartServices() {
+            @Override
+            public void preStartServices(String clusterName,
+                  int maxWaitingSeconds) throws SoftwareManagementPluginException {
+            }
+         };
+      }
+   }
+
    @BeforeClass(groups = { "TestClouderaManagerImpl" }, dependsOnGroups = { "TestClusterDef" })
    public static void setup() throws IOException {
       Mockit.setUpMock(MockAmbariManagerClientbuilder.class);
       Mockit.setUpMock(MockAmClusterValidator.class);
+      Mockit.setUpMock(MockReflectionUtils.class);
 
       apiRootResource = Mockito.mock(ApiRootResource.class);
 
@@ -136,18 +152,29 @@ public class TestAmbariImpl {
    }
 
    @Test(groups = { "TestAmbariImpl" })
-   public void testEcho() throws IOException {
+   public void testEcho() {
       Assert.assertTrue(provider.echo());
    }
 
    @Test(groups = { "TestAmbariImpl" })
-   public void testGetStatus() throws IOException {
+   public void testGetStatus() {
       Assert.assertTrue(provider.getStatus().equals(HealthStatus.Connected));
    }
 
    @Test(groups = { "TestAmbariImpl" })
-   public void testGetSupportedRoles() throws IOException {
+   public void testGetSupportedConfigs() {
+      System.out.println("Supported configurations: " + provider.getSupportedConfigs(blueprint.getHadoopStack()));
+      Assert.assertNotNull(provider.getSupportedConfigs(blueprint.getHadoopStack()));
+   }
 
+   @Test(groups = { "TestAmbariImpl" })
+   public void testCreateCluster() {
+      Assert.assertTrue(provider.createCluster(blueprint, reportQueue));
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testExportBlueprint() {
+      // TODO
    }
 
 }

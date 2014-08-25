@@ -1,0 +1,122 @@
+{
+  "href" : "http://127.0.0.1:8080/api/v1/blueprints/cluster01",
+  "configurations" : [
+    {
+      "global" : {
+        "namenode_heapsize" : "2048000000"
+      }
+    },
+    {
+      "core-site" : {
+        "io.file.buffer.size" : "131072"
+      }
+    }
+  ],
+  "host_groups" : [
+    {
+      "name" : "cluster01-worker-1",
+      "configurations" : [
+        {
+          "hdfs-site" : {
+            "dfs.datanode.data.dir" : "sdc1/hdfs/data,sdd1/hdfs/data"
+          }
+        },
+        {
+          "yarn-site" : {
+            "yarn.nodemanager.local-dirs" : "sdc1/yarn/local,sdd1/yarn/local"
+          }
+        },
+        {
+          "global" : {
+            "dtnode_heapsize" : "2048000000"
+          }
+        }
+      ],
+      "components" : [
+        {
+          "name" : "NODEMANAGER"
+        },
+        {
+          "name" : "DATANODE"
+        }
+      ],
+      "cardinality" : "1"
+    },
+    {
+      "name" : "cluster01-backup-0",
+      "configurations" : [
+        {
+          "hdfs-site" : {
+            "dfs.namenode.checkpoint.dir" : "sdc1/hdfs/namesecondary"
+          }
+        }
+      ],
+      "components" : [
+        {
+          "name" : "SECONDARY_NAMENODE"
+        }
+      ],
+      "cardinality" : "1"
+    },
+    {
+      "name" : "cluster01-worker-0",
+      "configurations" : [
+        {
+          "yarn-site" : {
+            "yarn.nodemanager.local-dirs" : "sdc1/yarn/local"
+          }
+        },
+        {
+          "hdfs-site" : {
+            "dfs.datanode.data.dir" : "sdc1/hdfs/data"
+          }
+        },
+        {
+          "global" : {
+            "dtnode_heapsize" : "2048000000"
+          }
+        }
+      ],
+      "components" : [
+        {
+          "name" : "NODEMANAGER"
+        },
+        {
+          "name" : "DATANODE"
+        }
+      ],
+      "cardinality" : "1"
+    },
+    {
+      "name" : "cluster01-master-0",
+      "configurations" : [
+        {
+          "global" : {
+            "nagios_web_password" : "password",
+            "namenode_heapsize" : "2048000000",
+            "nagios_contact" : "sample@vmware.com"
+          }
+        },
+        {
+          "hdfs-site" : {
+            "dfs.namenode.name.dir" : "sdc1/hdfs/namenode,sdc2/hdfs/namenode"
+          }
+        }
+      ],
+      "components" : [
+        {
+          "name" : "NAMENODE"
+        },
+        {
+          "name" : "RESOURCEMANAGER"
+        }
+      ],
+      "cardinality" : "1"
+    }
+  ],
+  "Blueprints" : {
+    "blueprint_name" : "cluster01",
+    "stack_name" : "HDP",
+    "stack_version" : "2.1"
+  }
+}

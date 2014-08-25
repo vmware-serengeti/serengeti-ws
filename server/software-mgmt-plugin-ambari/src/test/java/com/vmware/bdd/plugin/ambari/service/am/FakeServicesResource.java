@@ -35,7 +35,11 @@ public class FakeServicesResource implements ServicesResource {
 
    @Override
    public Response readServicesWithFilter(String fields) {
-      return BuildResponse.buildResponse("stacks/versions/" + stackVersion + "/stackServices/simple_services.json");
+      if ("configurations/StackConfigurations/type".equals(fields)) {
+         return BuildResponse.buildResponse("stacks/versions/" + stackVersion + "/stackServices/simple_configurations.json");
+      } else {
+         return BuildResponse.buildResponse("stacks/versions/" + stackVersion + "/stackServices/simple_services.json");
+      }
    }
 
    @Override

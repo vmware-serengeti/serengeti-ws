@@ -1,0 +1,29 @@
+{
+  "href" : "http://172.0.0.1:8080/api/v1/hosts",
+  "items" : [
+    {
+      "href" : "http://172.0.0.1:8080/api/v1/hosts/host1",
+      "Hosts" : {
+        "host_name" : "host1"
+      }
+    },
+    {
+      "href" : "http://172.0.0.1:8080/api/v1/hosts/host2",
+      "Hosts" : {
+        "host_name" : "host2"
+      }
+    },
+    {
+      "href" : "http://172.0.0.1:8080/api/v1/hosts/host3",
+      "Hosts" : {
+        "host_name" : "host3"
+      }
+    },
+    {
+      "href" : "http://172.0.0.1:8080/api/v1/hosts/host4",
+      "Hosts" : {
+        "host_name" : "host4"
+      }
+    }
+  ]
+}

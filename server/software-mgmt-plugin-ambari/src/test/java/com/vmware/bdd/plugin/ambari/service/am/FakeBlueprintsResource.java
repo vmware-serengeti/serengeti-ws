@@ -22,8 +22,7 @@ public class FakeBlueprintsResource implements BlueprintsResource {
 
    @Override
    public Response readBlueprints() {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("clusters/simple_blueprints.json");
    }
 
    @Override
@@ -40,8 +39,7 @@ public class FakeBlueprintsResource implements BlueprintsResource {
 
    @Override
    public Response createBlueprint(String blueprintName, String blueprint) {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("clusters/simple_blueprint.json");
    }
 
 }

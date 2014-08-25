@@ -27,8 +27,7 @@ public class FakeClustersResource implements ClustersResource {
 
    @Override
    public Response readClusters() {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("clusters/simple_clusters.json");
    }
 
    @Override
@@ -39,8 +38,7 @@ public class FakeClustersResource implements ClustersResource {
 
    @Override
    public Response createCluster(String clusterName, String clusterBlueprint) {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("clusters/simple_request.json");
    }
 
    @Override
@@ -51,8 +49,7 @@ public class FakeClustersResource implements ClustersResource {
 
    @Override
    public RequestsResource getRequestsResource(String clusterName) {
-      // TODO Auto-generated method stub
-      return null;
+      return new FakeRequestsResource();
    }
 
    @Override

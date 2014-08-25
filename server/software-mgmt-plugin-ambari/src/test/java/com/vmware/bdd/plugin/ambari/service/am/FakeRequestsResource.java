@@ -16,18 +16,24 @@ package com.vmware.bdd.plugin.ambari.service.am;
 
 import javax.ws.rs.core.Response;
 
-import com.vmware.bdd.plugin.ambari.api.v1.BootstrapResource;
+import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.RequestsResource;
 
-public class FakeBootstrapResource implements BootstrapResource {
+public class FakeRequestsResource implements RequestsResource {
 
    @Override
-   public Response createBootstrap(String bootstrap) {
-      return BuildResponse.buildResponse("clusters/simple_bootstrap.json");
+   public Response readRequests() {
+      // TODO Auto-generated method stub
+      return null;
    }
 
    @Override
-   public Response readBootstrapStatus(Long bootstrapId) {
-      return BuildResponse.buildResponse("clusters/simple_bootstrap.json");
+   public Response readRequest(Long RequestId) {
+      return BuildResponse.buildResponse("clusters/simple_request.json");
+   }
+
+   @Override
+   public Response readRequestWithTasks(Long RequestId, String fields) {
+      return BuildResponse.buildResponse("clusters/simple_request.json");
    }
 
 }

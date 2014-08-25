@@ -22,8 +22,7 @@ public class FakeHostsResource implements HostsResource {
 
    @Override
    public Response readHosts() {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("clusters/simple_registered_hosts.json");
    }
 
 }
