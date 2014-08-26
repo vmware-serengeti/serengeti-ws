@@ -1,11 +1,24 @@
 {
   "nodeGroups":[
     {
+      "name": "zookeeper",
+      "roles": [
+        "ZOOKEEPER_SERVER"
+        ],
+      "instanceNum": 3,
+      "cpuNum": 2,
+      "memCapacityMB": 3500,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 50
+      }
+    },
+    {
       "name": "master",
       "roles": [
         "HDFS_NAMENODE",
         "HDFS_SECONDARY_NAMENODE"
-      ],
+        ],
       "instanceNum": 1,
       "cpuNum": 2,
       "memCapacityMB": 7500,
@@ -13,17 +26,17 @@
         "type": "SHARED",
         "sizeGB": 50
       },
-      "haFlag": "on",
+      "haFlag": "on"
     },
     {
       "name": "worker",
       "roles": [
         "HDFS_DATANODE",
         "SOLR_SERVER"
-      ],
+        ],
       "instanceNum": 3,
       "cpuNum": 2,
-      "memCapacityMB": 7500,	
+      "memCapacityMB": 7500,
       "storage": {
         "type": "LOCAL",
         "sizeGB": 50
@@ -35,7 +48,7 @@
     "HDFS": {
       // service level configurations
       // check for all settings by running "appmanager list --name <name> --configurations"
-      // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample: 
+      // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample:
       // "hdfs_namenode_health_enabled": "true"
     }
   }

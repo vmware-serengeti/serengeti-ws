@@ -14,7 +14,7 @@
         "type": "SHARED",
         "sizeGB": 50
       },
-      "haFlag": "on",
+      "haFlag": "on"
     },
     {
       "name": "worker",

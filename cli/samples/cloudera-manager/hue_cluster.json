@@ -17,13 +17,15 @@
     "name": "master",
     "roles": [
       "HDFS_NAMENODE",
-      "HDFS_SECONDARY_NAMENODE"
+      "HDFS_SECONDARY_NAMENODE",
+      "YARN_RESOURCE_MANAGER",
+      "YARN_JOB_HISTORY"
       ],
     "instanceNum": 1,
     "cpuNum": 8,
     "memCapacityMB": 15000,
     "storage": {
-      "type": "LOCAL",
+      "type": "SHARED",
       "sizeGB": 50
     }
   },
