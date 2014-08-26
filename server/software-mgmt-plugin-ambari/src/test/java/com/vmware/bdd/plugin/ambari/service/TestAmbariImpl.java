@@ -23,9 +23,10 @@ import mockit.Mock;
 import mockit.MockClass;
 import mockit.Mockit;
 
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
@@ -47,53 +48,6 @@ import com.vmware.bdd.utils.CommonUtil;
 
 public class TestAmbariImpl {
 
-   private static ApiRootResource apiRootResource;
-   private static RootResourceV1 rootResourceV1;
-   private static AmbariImpl provider;
-   private static ClusterBlueprint blueprint;
-   private static ClusterReportQueue reportQueue;
-
-   @MockClass(realClass = AmbariManagerClientbuilder.class)
-   public static class MockAmbariManagerClientbuilder {
-
-      private AmbariManagerClientbuilder builder =
-            new AmbariManagerClientbuilder();
-
-      @Mock
-      public AmbariManagerClientbuilder withHost(String host) {
-         return builder;
-      }
-
-      @Mock
-      public AmbariManagerClientbuilder withPort(int port) {
-         return builder;
-      }
-
-      @Mock
-      public AmbariManagerClientbuilder withBaseURL(URL url) {
-         return builder;
-      }
-
-      @Mock
-      public AmbariManagerClientbuilder withUsernamePassword(String user,
-            String password) {
-         return builder;
-      }
-
-      @Mock
-      public ApiRootResource build() {
-         return apiRootResource;
-      }
-   }
-
-   @MockClass(realClass = AmClusterValidator.class)
-   public static class MockAmClusterValidator {
-      @Mock
-      public boolean validateBlueprint(ClusterBlueprint blueprint) {
-         return true;
-      }
-   }
-
    @MockClass(realClass = ReflectionUtils.class)
    public static class MockReflectionUtils {
       @Mock
@@ -101,29 +55,37 @@ public class TestAmbariImpl {
          return new PreStartServices() {
             @Override
             public void preStartServices(String clusterName,
-                  int maxWaitingSeconds) throws SoftwareManagementPluginException {
+                                         int maxWaitingSeconds) throws SoftwareManagementPluginException {
             }
          };
       }
    }
 
-   @BeforeClass(groups = { "TestClouderaManagerImpl" }, dependsOnGroups = { "TestClusterDef" })
-   public static void setup() throws IOException {
-      Mockit.setUpMock(MockAmbariManagerClientbuilder.class);
-      Mockit.setUpMock(MockAmClusterValidator.class);
-      Mockit.setUpMock(MockReflectionUtils.class);
+   private  AmbariImpl provider;
+   private  ClusterBlueprint blueprint;
+   private  ClusterReportQueue reportQueue;
 
-      apiRootResource = Mockito.mock(ApiRootResource.class);
-
-      rootResourceV1 = new FakeRootResourceV1();
+   @BeforeTest(groups = { "TestClouderaManagerImpl" }, dependsOnGroups = { "TestClusterDef" })
+   public void setup() throws IOException {
+      ApiRootResource apiRootResource = Mockito.mock(ApiRootResource.class);
+      RootResourceV1 rootResourceV1 = new FakeRootResourceV1();
       Mockito.when(apiRootResource.getRootV1()).thenReturn(rootResourceV1);
 
-      URL url = new URL("http://127.0.0.1:8080");
-      provider =
-            new AmbariImpl(url, "admin", "admin", "RSA_CERT");
-      blueprint =
-            SerialUtils.getObjectByJsonString(ClusterBlueprint.class,
-                  CommonUtil.readJsonFile("simple_blueprint.json"));
+      AmbariManagerClientbuilder clientbuilder = Mockito.mock(AmbariManagerClientbuilder.class);
+      Mockito.when(clientbuilder.withBaseURL(Matchers.any(URL.class))).thenReturn(clientbuilder);
+      Mockito.when(clientbuilder.withHost(Matchers.anyString())).thenReturn(clientbuilder);
+      Mockito.when(clientbuilder.withPort(Matchers.anyInt())).thenReturn(clientbuilder);
+      Mockito.when(clientbuilder.withUsernamePassword(Matchers.anyString(), Matchers.anyString())).thenReturn(clientbuilder);
+      Mockito.when(clientbuilder.build()).thenReturn(apiRootResource);
+
+      AmClusterValidator validator = Mockito.mock(AmClusterValidator.class);
+      Mockito.when(validator.validateBlueprint(blueprint)).thenReturn(true);
+
+      Mockit.setUpMock(MockReflectionUtils.class);
+
+      provider = new AmbariImpl(clientbuilder, "RSA_CERT");
+      blueprint = SerialUtils.getObjectByJsonString(ClusterBlueprint.class,
+            CommonUtil.readJsonFile("simple_blueprint.json"));
 
       reportQueue = new ClusterReportQueue();
    }

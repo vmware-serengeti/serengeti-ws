@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 
 import javax.ws.rs.NotFoundException;
 
+import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
 import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.TaskStatus;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
@@ -120,6 +121,11 @@ public class AmbariImpl implements SoftwareManager {
 
    public AmbariImpl(URL url, String username, String password, String privateKey) {
       this.apiManager = new ApiManager(url, username, password);
+      this.privateKey = privateKey;
+   }
+
+   protected AmbariImpl(AmbariManagerClientbuilder clientbuilder, String privateKey) {
+      this.apiManager = new ApiManager(clientbuilder);
       this.privateKey = privateKey;
    }
 
@@ -1257,6 +1263,11 @@ public class AmbariImpl implements SoftwareManager {
          throws ValidationException {
       AmClusterValidator amClusterValidator = new AmClusterValidator();
       amClusterValidator.setApiManager(apiManager);
+      return validateBlueprint(amClusterValidator, blueprint);
+   }
+
+   protected boolean validateBlueprint(AmClusterValidator amClusterValidator, ClusterBlueprint blueprint)
+         throws ValidationException {
       return amClusterValidator.validateBlueprint(blueprint);
    }
 

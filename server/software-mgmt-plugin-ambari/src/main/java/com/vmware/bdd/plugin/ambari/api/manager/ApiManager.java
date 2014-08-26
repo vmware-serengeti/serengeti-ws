@@ -81,20 +81,21 @@ public class ApiManager implements IApiManager {
    private RootResourceV1 apiResourceRootV1;
 
    public ApiManager(String amServerHost, int port, String user, String password) {
-      ApiRootResource amApiRootResource =
-            new AmbariManagerClientbuilder().withHost(amServerHost)
-                  .withPort(port).withUsernamePassword(user, password).build();
-
-      apiResourceRootV1 = amApiRootResource.getRootV1();
+      this(new AmbariManagerClientbuilder().withHost(amServerHost)
+                  .withPort(port).withUsernamePassword(user, password));
    }
 
    public ApiManager(URL baseUrl, String user, String password) {
-      ApiRootResource amApiRootResource =
-            new AmbariManagerClientbuilder().withBaseURL(baseUrl)
-                  .withUsernamePassword(user, password).build();
+      this(new AmbariManagerClientbuilder().withBaseURL(baseUrl)
+                  .withUsernamePassword(user, password));
+   }
+
+   public ApiManager(AmbariManagerClientbuilder clientbuilder) {
+      ApiRootResource amApiRootResource = clientbuilder.build();
 
       apiResourceRootV1 = amApiRootResource.getRootV1();
    }
+
 
    @Override
    public ApiStackList getStackList() throws AmbariApiException {
