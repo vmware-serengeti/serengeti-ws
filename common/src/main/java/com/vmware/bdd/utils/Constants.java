@@ -231,7 +231,7 @@ public class Constants {
    public static final String NODE_APPMANAGER_YUM_REPO_DIR = "/etc/yum.repos.d";
    public static final String NODE_APPMANAGER_YUM_LOCAL_REPO_FILE = "/etc/yum.repos.d/aaa-local-app-manager.repo";
    public static final String NODE_APPMANAGER_YUM_CLOUDERA_MANAGER_REPO_ID = "cloudera-manager";
-   public static final String NODE_APPMANAGER_YUM_AMBARI_REPO_ID = "ambari-1.x";
+   public static final String NODE_APPMANAGER_YUM_AMBARI_REPO_ID = "ambari";
    public static final String NODE_APPMANAGER_SETUP_LOCAL_REPO_SCRIPT = "node.appmgr.setup.local.repo.script";
    public static final String NODE_APPMANAGER_SETUP_LOCAL_REPO_SCRIPT_DEFAULT = "set-local-repo";
    public static final String NODE_SET_LOCAL_REPO_TIMEOUT_SECONDS = "node.set.local.repo.timeout";
