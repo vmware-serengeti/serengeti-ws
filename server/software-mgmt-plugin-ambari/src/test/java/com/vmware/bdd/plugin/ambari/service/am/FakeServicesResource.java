@@ -14,51 +14,70 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.service.am;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks.ComponentsResource;
-import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks.ServicesResource;
+import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.ServicesResource;
 
 public class FakeServicesResource implements ServicesResource {
 
-   private String stackVersion;
+   private String clusterName;
 
-   public FakeServicesResource(String stackVersion) {
-      this.stackVersion = stackVersion;
+   public FakeServicesResource(String clusterName) {
+      this.clusterName = clusterName;
    }
 
    @Override
-   public Response readServices() {
+   @PUT
+   @Path("/")
+   @Consumes("application/xml")
+   public Response stopAllServices(
+         @PathParam("clusterName") String clusterName,
+         @QueryParam("params/run_smoke_test") String runSmockTest,
+         String request) {
       // TODO Auto-generated method stub
       return null;
    }
 
    @Override
-   public Response readServicesWithFilter(String fields) {
-      if ("configurations/StackConfigurations/type".equals(fields)) {
-         return BuildResponse.buildResponse("stacks/versions/" + stackVersion + "/stackServices/simple_configurations.json");
-      } else {
-         return BuildResponse.buildResponse("stacks/versions/" + stackVersion + "/stackServices/simple_services.json");
-      }
-   }
-
-   @Override
-   public Response readService(String stackServiceName) {
+   @PUT
+   @Path("/")
+   @Consumes("application/xml")
+   public Response startAllServices(
+         @PathParam("clusterName") String clusterName,
+         @QueryParam("params/run_smoke_test") String runSmockTest,
+         String request) {
       // TODO Auto-generated method stub
       return null;
    }
 
    @Override
-   public Response readServiceWithFilter(String stackServiceName, String fields) {
-   // TODO Auto-generated method stub
-      return null;
+   @GET
+   @Path("/")
+   public Response readServicesWithFilter(@QueryParam("fields") String fields) {
+      return BuildResponse.buildResponse("clusters/simple_cluster_servicesWithAlert.json");
    }
 
    @Override
-   public ComponentsResource getComponentsResource(String stackServiceName) {
+   @DELETE
+   @Path("/{serviceName}")
+   public Response deleteService(@PathParam("serviceName") String serviceName) {
       // TODO Auto-generated method stub
       return null;
    }
 
+   @Override
+   @GET
+   @Path("/{serviceName}")
+   public Response readService(@PathParam("serviceName") String serviceName) {
+      // TODO Auto-generated method stub
+      return null;
+   }
 
 }

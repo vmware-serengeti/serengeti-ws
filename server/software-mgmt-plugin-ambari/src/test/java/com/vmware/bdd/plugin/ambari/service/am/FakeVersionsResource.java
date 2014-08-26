@@ -33,7 +33,7 @@ public class FakeVersionsResource implements VersionsResource {
 
    @Override
    public ServicesResource getStackServicesResource(String stackVersion) {
-      return new FakeServicesResource(stackVersion);
+      return new FakeStackServicesResource(stackVersion);
    }
 
 }

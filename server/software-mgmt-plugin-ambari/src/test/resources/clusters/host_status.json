@@ -1,0 +1,1150 @@
+{
+  "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/?fields=Hosts/host_status,host_components/HostRoles",
+  "items" : [
+    {
+      "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-155.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-72-155.eng.vmware.com",
+        "host_status" : "HEALTHY"
+      },
+      "host_components" : [
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-155.eng.vmware.com/host_components/DATANODE",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "DATANODE",
+            "desired_admin_state" : "INSERVICE",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "STARTED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-72-155.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "HDFS",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "STARTED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "overrides" : {
+                  "73" : "cluster01-worker-1"
+                },
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "overrides" : {
+                  "74" : "cluster01-worker-1"
+                },
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        },
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-155.eng.vmware.com/host_components/NODEMANAGER",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "NODEMANAGER",
+            "desired_admin_state" : "INSERVICE",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "STARTED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-72-155.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "YARN",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "STARTED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "overrides" : {
+                  "73" : "cluster01-worker-1"
+                },
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "overrides" : {
+                  "74" : "cluster01-worker-1"
+                },
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-166.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-72-166.eng.vmware.com",
+        "host_status" : "UNHEALTHY"
+      },
+      "host_components" : [
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-166.eng.vmware.com/host_components/HDFS_CLIENT",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "HDFS_CLIENT",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "INSTALLED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-72-166.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "HDFS",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "INSTALLED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        },
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-166.eng.vmware.com/host_components/MAPREDUCE2_CLIENT",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "MAPREDUCE2_CLIENT",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "INSTALLED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-72-166.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "MAPREDUCE2",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "INSTALLED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        },
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-166.eng.vmware.com/host_components/TEZ_CLIENT",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "TEZ_CLIENT",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "INSTALLED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-72-166.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "TEZ",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "INSTALLED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        },
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-166.eng.vmware.com/host_components/YARN_CLIENT",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "YARN_CLIENT",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "INSTALLED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-72-166.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "YARN",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "INSTALLED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        },
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-166.eng.vmware.com/host_components/ZOOKEEPER_CLIENT",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "ZOOKEEPER_CLIENT",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "INSTALLED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-72-166.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "ZOOKEEPER",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "INSTALLED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-216.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-72-216.eng.vmware.com",
+        "host_status" : "ALERT"
+      },
+      "host_components" : [
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-216.eng.vmware.com/host_components/DATANODE",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "DATANODE",
+            "desired_admin_state" : "INSERVICE",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "STARTED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-72-216.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "HDFS",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "STARTED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "overrides" : {
+                  "71" : "cluster01-worker-2"
+                },
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "overrides" : {
+                  "72" : "cluster01-worker-2"
+                },
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        },
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-216.eng.vmware.com/host_components/NODEMANAGER",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "NODEMANAGER",
+            "desired_admin_state" : "INSERVICE",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "STARTED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-72-216.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "YARN",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "STARTED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "overrides" : {
+                  "71" : "cluster01-worker-2"
+                },
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "overrides" : {
+                  "72" : "cluster01-worker-2"
+                },
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-064.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-73-064.eng.vmware.com",
+        "host_status" : "UNKONWN"
+      },
+      "host_components" : [
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-064.eng.vmware.com/host_components/ZOOKEEPER_SERVER",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "ZOOKEEPER_SERVER",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "STARTED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-73-064.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "ZOOKEEPER",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "STARTED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-065.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-73-065.eng.vmware.com",
+        "host_status" : "HEALTHY"
+      },
+      "host_components" : [
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-065.eng.vmware.com/host_components/ZOOKEEPER_SERVER",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "ZOOKEEPER_SERVER",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "STARTED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-73-065.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "ZOOKEEPER",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "STARTED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-173.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-73-173.eng.vmware.com",
+        "host_status" : "HEALTHY"
+      },
+      "host_components" : [
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-173.eng.vmware.com/host_components/ZOOKEEPER_SERVER",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "ZOOKEEPER_SERVER",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "STARTED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-73-173.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "ZOOKEEPER",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "STARTED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-197.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-73-197.eng.vmware.com",
+        "host_status" : "HEALTHY"
+      },
+      "host_components" : [
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-197.eng.vmware.com/host_components/APP_TIMELINE_SERVER",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "APP_TIMELINE_SERVER",
+            "desired_admin_state" : "INSERVICE",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "STARTED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-73-197.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "YARN",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "STARTED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "overrides" : {
+                  "77" : "cluster01-master-0"
+                },
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        },
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-197.eng.vmware.com/host_components/HISTORYSERVER",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "HISTORYSERVER",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "STARTED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-73-197.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "MAPREDUCE2",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "STARTED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "overrides" : {
+                  "77" : "cluster01-master-0"
+                },
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        },
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-197.eng.vmware.com/host_components/NAMENODE",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "NAMENODE",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "STARTED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-73-197.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "HDFS",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "STARTED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "overrides" : {
+                  "77" : "cluster01-master-0"
+                },
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        },
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-197.eng.vmware.com/host_components/RESOURCEMANAGER",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "RESOURCEMANAGER",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "STARTED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-73-197.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "YARN",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "STARTED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "overrides" : {
+                  "77" : "cluster01-master-0"
+                },
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        },
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-197.eng.vmware.com/host_components/SECONDARY_NAMENODE",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "SECONDARY_NAMENODE",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "STARTED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-73-197.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "HDFS",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "STARTED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "overrides" : {
+                  "77" : "cluster01-master-0"
+                },
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-216.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-73-216.eng.vmware.com",
+        "host_status" : "HEALTHY"
+      },
+      "host_components" : [
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-216.eng.vmware.com/host_components/DATANODE",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "DATANODE",
+            "desired_admin_state" : "INSERVICE",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "STARTED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-73-216.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "HDFS",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "STARTED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "overrides" : {
+                  "75" : "cluster01-worker-0"
+                },
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "overrides" : {
+                  "76" : "cluster01-worker-0"
+                },
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        },
+        {
+          "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-216.eng.vmware.com/host_components/NODEMANAGER",
+          "HostRoles" : {
+            "cluster_name" : "cluster01",
+            "component_name" : "NODEMANAGER",
+            "desired_admin_state" : "INSERVICE",
+            "desired_stack_id" : "HDP-2.1",
+            "desired_state" : "STARTED",
+            "host_name" : "wdc-vhadp-pub2-dhcp-73-216.eng.vmware.com",
+            "maintenance_state" : "OFF",
+            "service_name" : "YARN",
+            "stack_id" : "HDP-2.1",
+            "stale_configs" : false,
+            "state" : "STARTED",
+            "actual_configs" : {
+              "capacity-scheduler" : {
+                "default" : "1"
+              },
+              "core-site" : {
+                "default" : "1"
+              },
+              "global" : {
+                "default" : "1"
+              },
+              "hadoop-policy" : {
+                "default" : "1"
+              },
+              "hdfs-log4j" : {
+                "default" : "1"
+              },
+              "hdfs-site" : {
+                "overrides" : {
+                  "75" : "cluster01-worker-0"
+                },
+                "default" : "1"
+              },
+              "mapred-queue-acls" : {
+                "default" : "1"
+              },
+              "mapred-site" : {
+                "default" : "1"
+              },
+              "tez-site" : {
+                "default" : "1"
+              },
+              "yarn-log4j" : {
+                "default" : "1"
+              },
+              "yarn-site" : {
+                "overrides" : {
+                  "76" : "cluster01-worker-0"
+                },
+                "default" : "1"
+              },
+              "zookeeper-log4j" : {
+                "default" : "1"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

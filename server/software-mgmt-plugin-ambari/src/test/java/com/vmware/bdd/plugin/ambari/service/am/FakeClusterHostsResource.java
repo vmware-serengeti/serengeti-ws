@@ -14,63 +14,79 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.service.am;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.ClustersResource;
-import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.ConfigGroupsResource;
 import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.HostComponentsResource;
 import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.HostsResource;
-import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.RequestsResource;
-import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.ServicesResource;
 
-public class FakeClustersResource implements ClustersResource {
-
-   @Override
-   public Response readClusters() {
-      return BuildResponse.buildResponse("clusters/simple_clusters.json");
+public class FakeClusterHostsResource implements HostsResource {
+   private String clusterName;
+   public FakeClusterHostsResource(String clusterName) {
+      this.clusterName = clusterName;
    }
 
    @Override
-   public Response readCluster(String clusterName) {
+   @GET
+   @Path("/")
+   public Response readHosts() {
       // TODO Auto-generated method stub
       return null;
    }
 
    @Override
-   public Response createCluster(String clusterName, String clusterBlueprint) {
-      return BuildResponse.buildResponse("clusters/simple_request.json");
+   @GET
+   @Path("/")
+   public Response readHostsWithFilter(@QueryParam("fields") String fields) {
+      return BuildResponse.buildResponse("clusters/host_status.json");
    }
 
    @Override
-   public Response deleteCluster(String clusterName) {
+   @GET
+   @Path("/{hostFQDN}")
+   public Response readHost(@PathParam("hostFQDN") String hostFQDN) {
       // TODO Auto-generated method stub
       return null;
    }
 
    @Override
-   public RequestsResource getRequestsResource(String clusterName) {
-      return new FakeRequestsResource();
-   }
-
-   @Override
-   public ServicesResource getServicesResource(String clusterName) {
-      return new FakeServicesResource(clusterName);
-   }
-
-   @Override
-   public HostsResource getHostsResource(String clusterName) {
-      // TODO Auto-generated method stub
-      return new FakeClusterHostsResource(clusterName);
-   }
-
-   @Override
-   public HostComponentsResource getHostComponentsResource(String clusterName) {
+   @DELETE
+   @Path("/{hostFQDN}")
+   public Response deleteHost(@PathParam("hostFQDN") String hostFQDN) {
       // TODO Auto-generated method stub
       return null;
    }
 
    @Override
-   public ConfigGroupsResource getConfigGroupsResource(String clusterName) {
+   @POST
+   @Path("/")
+   @Consumes("application/xml")
+   @Produces({ "application/json", "application/xml", "text/plain",
+         "text/html", "text/xml" })
+   public Response addComponentsToHosts(String hostComponentsWithFilter) {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   @POST
+   @Path("/{hostFQDN}")
+   public Response addHost(@PathParam("hostFQDN") String hostFQDN) {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   @Path("/{hostFQDN}/host_components")
+   public HostComponentsResource getHostComponentsResource(
+         @PathParam("hostFQDN") String hostFQDN) {
       // TODO Auto-generated method stub
       return null;
    }

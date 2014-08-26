@@ -38,7 +38,9 @@ import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager.HealthStatus;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 import com.vmware.bdd.utils.CommonUtil;
 
@@ -177,4 +179,9 @@ public class TestAmbariImpl {
       // TODO
    }
 
+   @Test(groups = { "TestAmbariImpl" }, dependsOnMethods = { "testCreateCluster" })
+   public void testStatusQuery() {
+      ClusterReport report = provider.queryClusterStatus(blueprint);
+      Assert.assertTrue(report.getStatus().equals(ServiceStatus.STARTED), "Should get started cluster status");
+   }
 }

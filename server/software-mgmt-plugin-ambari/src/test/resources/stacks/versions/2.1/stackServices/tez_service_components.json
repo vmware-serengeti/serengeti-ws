@@ -1,0 +1,24 @@
+{
+  "href" : "http://10.141.73.95:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/TEZ/?fields=serviceComponents/*,serviceComponents/dependencies",
+  "StackServices" : {
+    "service_name" : "TEZ",
+    "stack_name" : "HDP",
+    "stack_version" : "2.1"
+  },
+  "serviceComponents" : [
+    {
+      "href" : "http://10.141.73.95:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/TEZ/serviceComponents/TEZ_CLIENT",
+      "StackServiceComponents" : {
+        "cardinality" : null,
+        "component_category" : "CLIENT",
+        "component_name" : "TEZ_CLIENT",
+        "is_client" : true,
+        "is_master" : false,
+        "service_name" : "TEZ",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "dependencies" : [ ]
+    }
+  ]
+}
