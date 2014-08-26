@@ -15,7 +15,6 @@
 package com.vmware.bdd.plugin.ambari.service;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
@@ -23,9 +22,9 @@ import mockit.Mock;
 import mockit.MockClass;
 import mockit.Mockit;
 
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -72,15 +71,12 @@ public class TestAmbariImpl {
       Mockito.when(apiRootResource.getRootV1()).thenReturn(rootResourceV1);
 
       AmbariManagerClientbuilder clientbuilder = Mockito.mock(AmbariManagerClientbuilder.class);
-      Mockito.when(clientbuilder.withBaseURL(Matchers.any(URL.class))).thenReturn(clientbuilder);
-      Mockito.when(clientbuilder.withHost(Matchers.anyString())).thenReturn(clientbuilder);
-      Mockito.when(clientbuilder.withPort(Matchers.anyInt())).thenReturn(clientbuilder);
-      Mockito.when(clientbuilder.withUsernamePassword(Matchers.anyString(), Matchers.anyString())).thenReturn(clientbuilder);
       Mockito.when(clientbuilder.build()).thenReturn(apiRootResource);
 
       AmClusterValidator validator = Mockito.mock(AmClusterValidator.class);
       Mockito.when(validator.validateBlueprint(blueprint)).thenReturn(true);
 
+      //Mock static utility using Mockit.
       Mockit.setUpMock(MockReflectionUtils.class);
 
       provider = new AmbariImpl(clientbuilder, "RSA_CERT");
@@ -88,6 +84,12 @@ public class TestAmbariImpl {
             CommonUtil.readJsonFile("simple_blueprint.json"));
 
       reportQueue = new ClusterReportQueue();
+   }
+
+   @AfterTest
+   public void tearDown() {
+      //clean mock static utility using Mockit.
+      Mockit.tearDownMocks(ReflectionUtils.class);
    }
 
    @Test(groups = { "TestAmbariImpl" })
