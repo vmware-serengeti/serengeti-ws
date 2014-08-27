@@ -46,7 +46,7 @@ public class TestSWMgmtPluginException {
       exs.add(SoftwareManagementPluginException.START_CLUSTER_FAILED_NOT_PROV_BY_BDE(clusterName));
       exs.add(SoftwareManagementPluginException.START_SERVICE_FAILED(cause, appMgr, clusterName));
       exs.add(SoftwareManagementPluginException.STOP_CLUSTER_EXCEPTION(cause, appMgr, clusterName));
-      exs.add(SoftwareManagementPluginException.STOP_CLUSTER_FAILED(appMgr, clusterName));
+      exs.add(SoftwareManagementPluginException.STOP_CLUSTER_FAILED(appMgr, clusterName, null));
       exs.add(SoftwareManagementPluginException.UNKNOWN_CERTIFICATE("cert"));
       exs.add(SoftwareManagementPluginException.UNSURE_CLUSTER_EXIST(appMgr, clusterName));
 

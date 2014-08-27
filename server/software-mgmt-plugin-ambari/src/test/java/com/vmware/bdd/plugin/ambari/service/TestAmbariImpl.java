@@ -18,6 +18,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
+import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestInfo;
+import com.vmware.bdd.plugin.ambari.exception.AmException;
+import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
+import com.vmware.bdd.plugin.ambari.service.am.FakeApiManager;
+import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import mockit.Mock;
 import mockit.MockClass;
 import mockit.Mockit;
@@ -34,7 +42,6 @@ import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
 import com.vmware.bdd.plugin.ambari.service.am.FakeRootResourceV1;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.plugin.ambari.utils.SerialUtils;
-import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager.HealthStatus;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
@@ -148,6 +155,176 @@ public class TestAmbariImpl {
    public void testStatusQuery() {
       ClusterReport report = provider.queryClusterStatus(blueprint);
       Assert.assertTrue(report.getStatus().equals(ServiceStatus.STARTED), "Should get started cluster status");
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testStopNotProvisioinedCluster() {
+      Assert.assertTrue(provider.onStopCluster(blueprint, reportQueue));
+   }
+
+   private AmbariManagerClientbuilder makeClientBuilder() {
+      ApiRootResource apiRootResource = Mockito.mock(ApiRootResource.class);
+      RootResourceV1 rootResourceV1 = new FakeRootResourceV1();
+      Mockito.when(apiRootResource.getRootV1()).thenReturn(rootResourceV1);
+
+      AmbariManagerClientbuilder clientbuilder = Mockito.mock(AmbariManagerClientbuilder.class);
+      Mockito.when(clientbuilder.build()).thenReturn(apiRootResource);
+      return clientbuilder;
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testStopClusterNotProvisionedByBDE() {
+      AmbariImpl ambari = Mockito.mock(AmbariImpl.class);
+      Mockito.when(ambari.isProvisioned(blueprint.getName())).thenReturn(true);
+      Mockito.when(ambari.onStopCluster(blueprint, reportQueue)).thenCallRealMethod();
+      try {
+         ambari.onStopCluster(blueprint, reportQueue);
+      } catch (SoftwareManagementPluginException e) {
+         Assert.assertNotNull(e.getCause());
+         String expectedErrMsg = "App_Manager (" + Constants.AMBARI_PLUGIN_NAME + ") fails to stop the cluster " +
+            blueprint.getName() + ": Cannot stop a cluster that is not provisioned by Big Data Extension.";
+         Assert.assertEquals(e.getCause().getMessage(), expectedErrMsg);
+      }
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testStopAlreadyStoppedCluster() {
+      AmbariImpl spy = Mockito.spy(provider);
+
+      AmbariManagerClientbuilder clientbuilder = makeClientBuilder();
+      ApiManager apiManager = new FakeApiManager(clientbuilder);
+
+      Mockito.when(spy.isProvisioned(blueprint.getName())).thenReturn(true);
+      provider.isProvisioned(blueprint.getName());
+      Mockito.doReturn(true).when(spy).isClusterProvisionedByBDE(Mockito.<AmClusterDef>any());
+
+      ApiManager backup = spy.getApiManager();
+      spy.setApiManager(apiManager);
+      Assert.assertTrue(spy.onStopCluster(blueprint, reportQueue));
+      spy.setApiManager(backup);
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testStopStartedCluster() {
+      AmbariImpl spy = Mockito.spy(provider);
+      AmbariManagerClientbuilder clientbuilder = makeClientBuilder();
+      ApiManager apiManager = new FakeApiManager(clientbuilder) {
+         @Override
+         public ApiRequest stopAllServicesInCluster(String clusterName) throws AmbariApiException {
+            ApiRequest apiRequest = new ApiRequest();
+            apiRequest.setApiRequestInfo(new ApiRequestInfo());
+            return apiRequest;
+         }
+      };
+
+      Mockito.when(spy.isProvisioned(blueprint.getName())).thenReturn(true);
+      Mockito.doReturn(true).when(spy).isClusterProvisionedByBDE(Mockito.<AmClusterDef>any());
+
+      ApiManager backup = spy.getApiManager();
+      spy.setApiManager(apiManager);
+      Assert.assertTrue(spy.onStopCluster(blueprint, reportQueue));
+      spy.setApiManager(backup);
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testForceDeleteClusterWithNoEcho() {
+      AmbariImpl spy = Mockito.spy(provider);
+      Mockito.when(spy.echo()).thenReturn(false);
+      Assert.assertTrue(spy.onDeleteCluster(blueprint, reportQueue));
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testDeleteUnprovisionedCluster() {
+      Assert.assertTrue(provider.onDeleteCluster(blueprint, reportQueue));
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testDeleteClusterNotProvisionedByBDE() {
+      AmbariImpl spy = Mockito.spy(provider);
+      Mockito.when(spy.echo()).thenReturn(false);
+      Mockito.when(spy.isProvisioned(Mockito.anyString())).thenReturn(true);
+      Assert.assertTrue(spy.onDeleteCluster(blueprint, reportQueue));
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testForceDeleteClusterWhenStopFailed() {
+      AmbariImpl spy = Mockito.spy(provider);
+      Mockito.when(spy.echo()).thenReturn(false);
+      Mockito.when(spy.isProvisioned(Mockito.anyString())).thenReturn(true);
+      Mockito.doReturn(false).when(spy).onStopCluster(Mockito.<ClusterBlueprint>any(), Mockito.<ClusterReportQueue>any());
+      Assert.assertTrue(spy.onDeleteCluster(blueprint, reportQueue));
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testForceDeleteClusterWhenStopSucceed() {
+      AmbariImpl spy = Mockito.spy(provider);
+      Mockito.when(spy.echo()).thenReturn(false);
+      Mockito.when(spy.isProvisioned(Mockito.anyString())).thenReturn(true);
+      Mockito.doReturn(true).when(spy).onStopCluster(Mockito.<ClusterBlueprint>any(), Mockito.<ClusterReportQueue>any());
+      Assert.assertTrue(spy.onDeleteCluster(blueprint, reportQueue));
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testStartUnprovisionedCluster() {
+      try {
+         provider.startCluster(blueprint, reportQueue);
+      } catch (AmException e) {
+         String expectedErrMsg = "The Cluster (" + blueprint.getName() + ") has not been provisioned.";
+         Assert.assertEquals(e.getMessage(), expectedErrMsg);
+      }
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testStartClusterNotProvisionedByBDE() {
+      AmbariImpl ambari = Mockito.mock(AmbariImpl.class);
+      Mockito.when(ambari.isProvisioned(blueprint.getName())).thenReturn(true);
+      Mockito.when(ambari.startCluster(blueprint, reportQueue)).thenCallRealMethod();
+      try {
+         ambari.startCluster(blueprint, reportQueue);
+      } catch (SoftwareManagementPluginException e) {
+         String expectedErrMsg = "Can not start a cluster (" + blueprint.getName() + ") that is not provisioned by Big Data Extension.";
+         Assert.assertEquals(e.getMessage(), expectedErrMsg);
+      }
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testStartAlreadyStartedCluster() {
+      AmbariImpl spy = Mockito.spy(provider);
+
+      AmbariManagerClientbuilder clientbuilder = makeClientBuilder();
+      ApiManager apiManager = new FakeApiManager(clientbuilder);
+
+      Mockito.when(spy.isProvisioned(blueprint.getName())).thenReturn(true);
+      provider.isProvisioned(blueprint.getName());
+      Mockito.doReturn(true).when(spy).isClusterProvisionedByBDE(Mockito.<AmClusterDef>any());
+
+      ApiManager backup = spy.getApiManager();
+      spy.setApiManager(apiManager);
+      Assert.assertTrue(spy.startCluster(blueprint, reportQueue));
+      spy.setApiManager(backup);
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testStartStoppedCluster() {
+      AmbariImpl spy = Mockito.spy(provider);
+
+      AmbariManagerClientbuilder clientbuilder = makeClientBuilder();
+      ApiManager apiManager = new FakeApiManager(clientbuilder) {
+         @Override
+         public ApiRequest startAllServicesInCluster(String clusterName) throws AmbariApiException {
+            ApiRequest apiRequest = new ApiRequest();
+            apiRequest.setApiRequestInfo(new ApiRequestInfo());
+            return apiRequest;
+         }
+      };
+
+      Mockito.when(spy.isProvisioned(blueprint.getName())).thenReturn(true);
+      Mockito.doReturn(true).when(spy).isClusterProvisionedByBDE(Mockito.<AmClusterDef>any());
+
+      ApiManager backup = spy.getApiManager();
+      spy.setApiManager(apiManager);
+      Assert.assertTrue(spy.startCluster(blueprint, reportQueue));
+      spy.setApiManager(backup);
    }
 
    private AmbariImpl testValidateServerVersionHelper(String version) {

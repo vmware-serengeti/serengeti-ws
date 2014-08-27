@@ -125,8 +125,8 @@ public class SoftwareManagementPluginException extends RuntimeException {
       return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.START_CLUSTER_FAILED", cause, appMgr, clusterName);
    }
 
-   public static SoftwareManagementPluginException STOP_CLUSTER_FAILED(String appMgr, String clusterName) {
-      return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.STOP_CLUSTER_FAILED", null, appMgr, clusterName);
+   public static SoftwareManagementPluginException STOP_CLUSTER_FAILED(String appMgr, String clusterName, String errMsg) {
+      return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.STOP_CLUSTER_FAILED", null, appMgr, clusterName, errMsg);
    }
 
    public static SoftwareManagementPluginException STOP_CLUSTER_EXCEPTION(Exception cause, String appMgr, String clusterName) {

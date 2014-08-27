@@ -86,7 +86,6 @@ public class AmbariImpl implements SoftwareManager {
 
    private static final Logger logger = Logger.getLogger(AmbariImpl.class);
    private static final int REQUEST_MAX_RETRY_TIMES = 10;
-   public static final String AMBARI = "ambari";
    public static final String MIN_SUPPORTED_VERSION = "1.6.0";
    private static final String UNKNOWN_VERSION = "UNKNOWN";
 
@@ -283,7 +282,7 @@ public class AmbariImpl implements SoftwareManager {
          String errorMessage = errorMessage("Failed to create cluster " + blueprint.getName(), e);
          logger.error(errorMessage);
 
-         throw SoftwareManagementPluginException.CREATE_CLUSTER_EXCEPTION(e, AMBARI, blueprint.getName());
+         throw SoftwareManagementPluginException.CREATE_CLUSTER_EXCEPTION(e, Constants.AMBARI_PLUGIN_NAME, blueprint.getName());
       } finally {
          clusterDef.getCurrentReport().setFinished(true);
 
@@ -302,7 +301,7 @@ public class AmbariImpl implements SoftwareManager {
       return null;
    }
 
-   private boolean isProvisioned(String clusterName)
+   protected boolean isProvisioned(String clusterName)
          throws SoftwareManagementPluginException {
       try {
          for (ApiCluster apiCluster : apiManager.getClusterList().getClusters()) {
@@ -312,7 +311,7 @@ public class AmbariImpl implements SoftwareManager {
             }
          }
       } catch (Exception e) {
-         throw AmException.UNSURE_CLUSTER_EXIST(AMBARI, clusterName);
+         throw AmException.UNSURE_CLUSTER_EXIST(Constants.AMBARI_PLUGIN_NAME, clusterName);
       }
       return false;
    }
@@ -341,11 +340,11 @@ public class AmbariImpl implements SoftwareManager {
          String errorMessage = errorMessage("Failed to provision cluster " + clusterDef.getName(), e);
          logger.error(errorMessage);
 
-         throw SoftwareManagementPluginException.CREATE_CLUSTER_EXCEPTION(e, AMBARI, clusterDef.getName());
+         throw SoftwareManagementPluginException.CREATE_CLUSTER_EXCEPTION(e, Constants.AMBARI_PLUGIN_NAME, clusterDef.getName());
       }
    }
 
-   private boolean isClusterProvisionedByBDE(final AmClusterDef clusterDef) {
+   protected boolean isClusterProvisionedByBDE(final AmClusterDef clusterDef) {
       /*
       For cluster resume/resize, the cluster is already exist, we need to check if this cluster is created by BDE.
       So far, just check if all hostnames exist in Ambari Cluster are included in given blueprint
@@ -567,7 +566,7 @@ public class AmbariImpl implements SoftwareManager {
             } catch (Exception e) {
                String errMsg = getErrorMsg("stop all services", e);
                logger.error(errMsg, e);
-               throw SoftwareManagementPluginException.STOP_CLUSTER_EXCEPTION(e, AMBARI, clusterName);
+               throw SoftwareManagementPluginException.STOP_CLUSTER_EXCEPTION(e, Constants.AMBARI_PLUGIN_NAME, clusterName);
             }
             apiManager.deleteCluster(clusterName);
          }
@@ -593,7 +592,7 @@ public class AmbariImpl implements SoftwareManager {
             success = true;
          }
          if (!success) {
-            throw SoftwareManagementPluginException.CREATE_CLUSTER_FAIL(AMBARI, clusterDef.getName());
+            throw SoftwareManagementPluginException.CREATE_CLUSTER_FAIL(Constants.AMBARI_PLUGIN_NAME, clusterDef.getName());
          }
 
       } catch (Exception e) {
@@ -666,7 +665,7 @@ public class AmbariImpl implements SoftwareManager {
          clusterDef.getCurrentReport().setSuccess(false);
          String errorMessage = errorMessage("Failed to scale out cluster " + blueprint.getName(), e);
          logger.error(errorMessage, e);
-         throw SoftwareManagementPluginException.SCALE_OUT_CLUSTER_FAILED(e, AMBARI, blueprint.getName());
+         throw SoftwareManagementPluginException.SCALE_OUT_CLUSTER_FAILED(e, Constants.AMBARI_PLUGIN_NAME, blueprint.getName());
       } finally {
          clusterDef.getCurrentReport().setFinished(true);
          reportStatus(clusterDef.getCurrentReport(), reports);
@@ -771,7 +770,7 @@ public class AmbariImpl implements SoftwareManager {
          success = true;
       }
       if (!success) {
-         throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(AMBARI, clusterDef.getName());
+         throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(Constants.AMBARI_PLUGIN_NAME, clusterDef.getName(), null);
       }
    }
 
@@ -814,7 +813,7 @@ public class AmbariImpl implements SoftwareManager {
          success = true;
       }
       if (!success) {
-         throw SoftwareManagementPluginException.START_CLUSTER_FAILED(null, AMBARI, clusterDef.getName());
+         throw SoftwareManagementPluginException.START_CLUSTER_FAILED(null, Constants.AMBARI_PLUGIN_NAME, clusterDef.getName());
       }
       return success;
    }
@@ -920,7 +919,7 @@ public class AmbariImpl implements SoftwareManager {
          success = true;
       }
       if (!success) {
-         throw SoftwareManagementPluginException.INSTALL_COMPONENTS_FAIL(AMBARI, clusterDef.getName());
+         throw SoftwareManagementPluginException.INSTALL_COMPONENTS_FAIL(Constants.AMBARI_PLUGIN_NAME, clusterDef.getName());
       }
       return success;
    }
@@ -991,7 +990,7 @@ public class AmbariImpl implements SoftwareManager {
                apiRequestSummary = apiManager.startAllServicesInCluster(clusterName);
                //when reach here, command is succeed. If ApiRequestInfo is null, it means the command has been
                //finished successfully, otherwise we need to wait for it using doSoftwareOperation
-               if (apiRequestSummary.getApiRequestInfo() == null) {
+               if (apiRequestSummary == null || apiRequestSummary.getApiRequestInfo() == null) {
                   success = true;
                   return true;
                }
@@ -1010,7 +1009,7 @@ public class AmbariImpl implements SoftwareManager {
          if (!success) {
             String errMsg = getErrorMsg("start all services", resultException);
             logger.error(errMsg, resultException);
-            throw SoftwareManagementPluginException.START_CLUSTER_FAILED(null, AMBARI, clusterName);
+            throw SoftwareManagementPluginException.START_CLUSTER_FAILED(null, Constants.AMBARI_PLUGIN_NAME, clusterName);
          }
 
          clusterReport.setClusterAndNodesServiceStatus(ServiceStatus.STARTED);
@@ -1019,16 +1018,6 @@ public class AmbariImpl implements SoftwareManager {
          reportStatus(clusterReport.clone(), reports);
          return true;
       }
-   }
-
-   private void waitServiceToStart(final String clusterName, final String serviceName) throws Exception {
-      StatusPoller servicePoller = new StatusPoller() {
-         @Override
-         public boolean poll() {
-            return apiManager.isServiceStarted(clusterName, serviceName);
-         }
-      };
-      servicePoller.waitForComplete();
    }
 
    @Override
@@ -1049,7 +1038,8 @@ public class AmbariImpl implements SoftwareManager {
             return true;
          }
          if (!isClusterProvisionedByBDE(clusterDef)) {
-            throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED("Cannot stop a cluster that is not provisioned by Big Data Extension", null);
+            throw SoftwareManagementPluginException.STOP_CLUSTER_FAILED(Constants.AMBARI_PLUGIN_NAME,
+                  clusterName, "Cannot stop a cluster that is not provisioned by Big Data Extension");
          }
          clusterReport.setAction("Ambari is stopping services");
          clusterReport.setProgress(ProgressSplit.OPERATION_BEGIN.getProgress());
@@ -1068,11 +1058,11 @@ public class AmbariImpl implements SoftwareManager {
       } catch (Exception e) {
          String errMsg = getErrorMsg("stop all services", e);
          logger.error(errMsg, e);
-         throw SoftwareManagementPluginException.STOP_CLUSTER_EXCEPTION(e, AMBARI, clusterName);
+         throw SoftwareManagementPluginException.STOP_CLUSTER_EXCEPTION(e, Constants.AMBARI_PLUGIN_NAME, clusterName);
       }
    }
 
-   private boolean doSoftwareOperation(String clusterName, ApiRequest apiRequestSummary,
+   protected boolean doSoftwareOperation(String clusterName, ApiRequest apiRequestSummary,
                                        ClusterReport clusterReport, ClusterReportQueue reports) throws Exception{
 
       if (apiRequestSummary == null) {
@@ -1180,7 +1170,7 @@ public class AmbariImpl implements SoftwareManager {
          return true;
       } catch (Exception e) {
          logger.error("Ambari got an exception when deleting cluster", e);
-         throw SoftwareManagementPluginException.DELETE_CLUSTER_FAILED(e, AMBARI,clusterBlueprint.getName());
+         throw SoftwareManagementPluginException.DELETE_CLUSTER_FAILED(e, Constants.AMBARI_PLUGIN_NAME,clusterBlueprint.getName());
       }
    }
 
@@ -1201,7 +1191,7 @@ public class AmbariImpl implements SoftwareManager {
          clusterDef.getCurrentReport().setSuccess(false);
          String errorMessage = errorMessage("Failed to delete nodes " + nodeNames + " from cluster " + blueprint.getName(), e);
          logger.error(errorMessage, e);
-         throw SoftwareManagementPluginException.DELETE_NODES_FAILED(e, AMBARI, nodeNames.toArray());
+         throw SoftwareManagementPluginException.DELETE_NODES_FAILED(e, Constants.AMBARI_PLUGIN_NAME, nodeNames.toArray());
       }
       return true;
    }
