@@ -31,7 +31,8 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.web.client.RestTemplate;
 
-@ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })public abstract class MockRestServer extends AbstractTestNGSpringContextTests {
+@ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
+public abstract class MockRestServer extends AbstractTestNGSpringContextTests {
    @Autowired
    private RestTemplate restTemplate;
    

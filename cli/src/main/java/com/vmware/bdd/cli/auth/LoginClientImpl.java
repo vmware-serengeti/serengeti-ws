@@ -1,6 +1,9 @@
 package com.vmware.bdd.cli.auth;
 
 import com.vmware.bdd.cli.commands.Constants;
+import com.vmware.bdd.utils.CommonUtil;
+
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -15,6 +18,7 @@ import java.io.IOException;
 @Component
 public class LoginClientImpl {
    private final static Logger LOGGER = Logger.getLogger(LoginClientImpl.class);
+   protected static final String SET_COOKIE_HEADER = "Set-Cookie";
 
    private HttpClient client1 = new HttpClient();
 
@@ -47,13 +51,18 @@ public class LoginClientImpl {
 
       LOGGER.debug("resp code is: " + responseCode);
 
-      LoginResponse loginResponse = null;
+      LoginResponse loginResponse;
       if (responseCode == org.apache.commons.httpclient.HttpStatus.SC_OK) {
          //normal response
-         String cookieValue = loginPost.getResponseHeader("Set-Cookie").getValue();
+         String cookieValue = null;
+         Header setCookieHeader = loginPost.getResponseHeader(SET_COOKIE_HEADER);
 
-         if (cookieValue.contains(";")) {
-            cookieValue = cookieValue.split(";")[0];
+         if(setCookieHeader != null) {
+            cookieValue = setCookieHeader.getValue();
+
+            if (!CommonUtil.isBlank(cookieValue) && cookieValue.contains(";")) {
+               cookieValue = cookieValue.split(";")[0];
+            }
          }
 
          loginResponse = new LoginResponse(responseCode, cookieValue);

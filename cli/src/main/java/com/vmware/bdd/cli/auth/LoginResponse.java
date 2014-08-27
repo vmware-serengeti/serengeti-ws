@@ -27,4 +27,9 @@ public class LoginResponse {
    public String getSessionId() {
       return sessionId;
    }
+
+   public String toString() {
+      return String.format("responseCode:%1s;sessionId:%2s", responseCode, sessionId);
+   }
+
 }

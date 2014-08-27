@@ -21,6 +21,8 @@ public class CookieCache {
 
    private static Map <String,String> cookieInfo = new ConcurrentHashMap <String, String> ();
 
+   public final static String COOKIE = "Cookie";
+
    public static void put(final String cookieName, final String cookieValue){
       if(!CommandsUtils.isBlank(cookieName)){
          cookieInfo.put(cookieName, cookieValue);         

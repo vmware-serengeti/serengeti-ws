@@ -155,42 +155,51 @@ public class RestClient {
                   + Constants.HTTPS_CONNECTION_LOGIN_SUFFIX;
 
 
+      Connect.ConnectType connectType = null;
       try {
          LoginResponse response = loginClient.login(hostUri, username, password);
 
          //200
          if (response.getResponseCode() == HttpStatus.OK.value()) {
-            //normal response
-            updateHostProperty(host);
+            if(CommonUtil.isBlank(response.getSessionId())) {
+               System.out.println(Constants.CONNECT_FAILURE_NO_SESSION_ID);
+               connectType = Connect.ConnectType.ERROR;
+            } else {
+               //normal response
+               updateHostProperty(host);
 
-            writeCookieInfo(response.getSessionId());
-            System.out.println(Constants.CONNECT_SUCCESS);
+               writeCookieInfo(response.getSessionId());
+               System.out.println(Constants.CONNECT_SUCCESS);
+               connectType = Connect.ConnectType.SUCCESS;
+            }
          }
-         //302
+         //401
          else if(response.getResponseCode() == HttpStatus.UNAUTHORIZED.value()) {
             System.out.println(Constants.CONNECT_UNAUTHORIZATION_CONNECT);
             //recover old hostUri
             hostUri = oldHostUri;
-            return Connect.ConnectType.UNAUTHORIZATION;
+            connectType = Connect.ConnectType.UNAUTHORIZATION;
          }
          //500
          else if(response.getResponseCode() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
             System.out.println(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-            return Connect.ConnectType.ERROR;
+            connectType = Connect.ConnectType.ERROR;
          } else {
             //error
-            System.out.println(Constants.CONNECT_FAILURE);
+            System.out.println(
+                  String.format(
+                  Constants.UNSUPPORTED_HTTP_RESPONSE_CODE, response.getResponseCode()));
             //recover old hostUri
             hostUri = oldHostUri;
-            return Connect.ConnectType.ERROR;
+            connectType = Connect.ConnectType.ERROR;
          }
       } catch (Exception e) {
          System.out.println(Constants.CONNECT_FAILURE + ": "
                + (CommandsUtils.getExceptionMessage(e)));
-         return Connect.ConnectType.ERROR;
+         connectType = Connect.ConnectType.ERROR;
       }
 
-      return Connect.ConnectType.ERROR;
+      return connectType;
    }
 
    /**
@@ -211,20 +220,20 @@ public class RestClient {
    }
 
    private void writeCookieInfo(String cookie) {
-      CookieCache.put("Cookie", cookie);
+      CookieCache.put(CookieCache.COOKIE, cookie);
       Properties properties = new Properties();
-      properties.put("Cookie", cookie);
+      properties.put(CookieCache.COOKIE, cookie);
       CommandsUtils.writeProperties(properties, Constants.PROPERTY_FILE);
    }
 
    private String readCookieInfo() {
       String cookieValue = "";
-      cookieValue = CookieCache.get("Cookie");
+      cookieValue = CookieCache.get(CookieCache.COOKIE);
       if (CommandsUtils.isBlank(cookieValue)) {
          Properties properties = null;
          properties = CommandsUtils.readProperties(Constants.PROPERTY_FILE);
          if (properties != null) {
-            return properties.getProperty("Cookie");
+            return properties.getProperty(CookieCache.COOKIE);
          } else {
             return null;
          }

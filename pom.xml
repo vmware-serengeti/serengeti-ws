@@ -420,6 +420,12 @@
            <version>9.2.2.v20140723</version>
          </dependency>
          <dependency>
+            <groupId>com.sun.net.httpserver</groupId>
+            <artifactId>http</artifactId>
+            <version>20070405</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>vmclone</artifactId>
             <version>${serengeti.version}</version>
