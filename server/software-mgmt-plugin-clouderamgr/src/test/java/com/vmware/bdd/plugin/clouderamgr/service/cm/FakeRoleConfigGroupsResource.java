@@ -38,7 +38,20 @@ public class FakeRoleConfigGroupsResource implements RoleConfigGroupsResource {
    @Override
    public ApiRoleConfigGroupList readRoleConfigGroups() {
       System.out.println("calling " + this.getClass().getInterfaces()[0].getName() + "#" + Thread.currentThread().getStackTrace()[1].getMethodName());
-      return new ApiRoleConfigGroupList();
+      ApiRoleConfigGroupList roleConfigGroups = new ApiRoleConfigGroupList();
+      ApiRoleConfigGroup group1 = new ApiRoleConfigGroup();
+      group1.setName("DefaultNamenode");
+      group1.setRoleType("NAMENODE");
+      ApiRoleConfigGroup group2 = new ApiRoleConfigGroup();
+      group2.setName("DefaultDatanode");
+      group2.setRoleType("DATANODE");
+      ApiRoleConfigGroup group3 = new ApiRoleConfigGroup();
+      group3.setName("DefaultNodeManager");
+      group3.setRoleType("NODEMANAGER");
+      roleConfigGroups.add(group1);
+      roleConfigGroups.add(group2);
+      roleConfigGroups.add(group3);
+      return roleConfigGroups;
    }
 
    @Override

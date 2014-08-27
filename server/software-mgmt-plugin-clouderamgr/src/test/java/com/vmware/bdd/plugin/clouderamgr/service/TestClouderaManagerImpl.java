@@ -23,6 +23,7 @@ import mockit.MockClass;
 import mockit.Mockit;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.JsonParseException;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -190,6 +191,19 @@ public class TestClouderaManagerImpl {
       blueprint.getHadoopStack().setDistro("CDH-5.0.1");
       // FakeParcelsResource#getParcelResource should print the right parcel version
       provider.createCluster(blueprint, reportQueue);
+      provider.reconfigCluster(blueprint, reportQueue);
+      provider.onDeleteCluster(blueprint, reportQueue);
+      provider.deleteCluster(blueprint, reportQueue);
+      List<ClusterReport> reports = reportQueue.pollClusterReport();
+      for (ClusterReport report : reports) {
+         System.out.println("Action: " + report.getAction() + ", Progress: " + report.getProgress());
+      }
+   }
+
+   @Test( groups = { "TestClouderaManagerImpl" })
+   public void testCreateNnHa() throws IOException {
+      ClusterBlueprint haSpec = SerialUtils.getObjectByJsonString(ClusterBlueprint.class, CommonUtil.readJsonFile("namenode_ha.json"));
+      provider.createCluster(haSpec, reportQueue);
       List<ClusterReport> reports = reportQueue.pollClusterReport();
       for (ClusterReport report : reports) {
          System.out.println("Action: " + report.getAction() + ", Progress: " + report.getProgress());

@@ -39,12 +39,14 @@ public class FakeRootResource implements RootResourceV6 {
    public ClouderaManagerResourceV6 clouderaManagerResourceV6;
    public HostsResourceV2 hostsResourceV2;
    public CommandsResource commandsResource;
+   public ToolsResource toolsResource;
 
    public FakeRootResource() {
       clustersResourceV6 = new FakeClustersResource(this);
       hostsResourceV2 = new FakeHostsResource();
       clouderaManagerResourceV6 = new FakeClouderaManagerResource(hostsResourceV2);
       commandsResource = new FakeCommandsResource();
+      toolsResource = new FakeToolsResource();
    }
 
    @Override
@@ -81,7 +83,7 @@ public class FakeRootResource implements RootResourceV6 {
 
    @Override
    public ToolsResource getToolsResource() {
-      return null;
+      return toolsResource;
    }
 
    @Override

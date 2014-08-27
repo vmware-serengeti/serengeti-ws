@@ -769,19 +769,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
       return HealthStatus.Connected;
    }
 
-   private boolean unprovision(CmClusterDef cluster) throws ClouderaManagerException {
-      try {
-         if (!cluster.isEmpty()) {
-            if (isProvisioned(cluster.getName())) {
-               apiResourceRootV6.getClustersResource().deleteCluster(cluster.getName());
-            }
-         }
-      } catch (Exception e) {
-         throw ClouderaManagerException.DEPROVISION_EXCEPTION(e, cluster.getName());
-      }
-      return false;
-   }
-
    private boolean isProvisioned(String clusterName) throws ClouderaManagerException {
       for (ApiCluster apiCluster : apiResourceRootV6.getClustersResource().readClusters(DataView.SUMMARY)) {
          if (apiCluster.getName().equals(clusterName)) {
@@ -1020,50 +1007,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
          throw ClouderaManagerException.CHECK_CONFIGURED_EXCEPTION(e, cluster.getName());
       }
       return executed && servicesNotConfigured.size() == 0;
-   }
-
-   public boolean initialize(CmClusterDef cluster) throws ClouderaManagerException {
-      boolean executed = false;
-      try {
-
-         logger.info("Cluster Initializing");
-
-         /*
-         Map<String, String> configuration = cluster.getServiceConfiguration(versionApi).get(
-               AvailableManagementService.CM.getId());
-         configuration.remove("cm_database_name");
-         configuration.remove("cm_database_type");
-         executed = AvailableManagementService.CM.getId() != null
-               && provisionCmSettings(configuration).size() >= configuration.size();
-               */
-
-         logger.info("Cluster Initialized");
-
-      } catch (Exception e) {
-         logger.error("Cluster Initialize failed");
-         throw ClouderaManagerException.INIT_EXCEPTION(e, cluster.getName());
-      }
-
-      return executed;
-   }
-
-   private Map<String, String> provisionCmSettings(Map<String, String> config) throws InterruptedException {
-
-      Map<String, String> configPostUpdate = new HashMap<String, String>();
-      ApiConfigList apiConfigList = new ApiConfigList();
-      if (config != null && !config.isEmpty()) {
-         for (String key : config.keySet()) {
-            apiConfigList.add(new ApiConfig(key, config.get(key)));
-         }
-         apiResourceRootV6.getClouderaManagerResource().updateConfig(apiConfigList);
-      }
-      apiConfigList = apiResourceRootV6.getClouderaManagerResource().getConfig(DataView.SUMMARY);
-      for (ApiConfig apiConfig : apiConfigList) {
-         configPostUpdate.put(apiConfig.getName(), apiConfig.getValue());
-      }
-
-      return configPostUpdate;
-
    }
 
    private void provisionManagement() {
@@ -2043,15 +1986,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
          }
       } catch (Exception e) {
          // ignore
-      }
-   }
-
-   public void unconfigureServices(final CmClusterDef cluster) throws Exception {
-      for (String serviceName : cluster.allServiceNames()) {
-         ServicesResourceV6 servicesResource = apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName());
-         if (servicesResource != null) {
-            servicesResource.deleteService(serviceName);
-         }
       }
    }
 

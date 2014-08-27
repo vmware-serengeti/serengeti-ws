@@ -52,7 +52,13 @@ public class FakeRoleCommandsResource implements RoleCommandsResourceV6{
 
    @Override
    public ApiBulkCommandList hdfsBootstrapStandByCommand(ApiRoleNameList strings) {
-      return null;
+      System.out.println("calling " + this.getClass().getInterfaces()[0].getName() + "#" + Thread.currentThread().getStackTrace()[1].getMethodName());
+      ApiBulkCommandList commands = new ApiBulkCommandList();
+      ApiCommand command = new ApiCommand();
+      command.setName("bootstrap standby namenode");
+      command.setId(1L);
+      commands.add(command);
+      return commands;
    }
 
    @Override
@@ -68,12 +74,24 @@ public class FakeRoleCommandsResource implements RoleCommandsResourceV6{
 
    @Override
    public ApiBulkCommandList hdfsInitializeAutoFailoverCommand(ApiRoleNameList strings) {
-      return null;
+      System.out.println("calling " + this.getClass().getInterfaces()[0].getName() + "#" + Thread.currentThread().getStackTrace()[1].getMethodName());
+      ApiBulkCommandList commands = new ApiBulkCommandList();
+      ApiCommand command = new ApiCommand();
+      command.setName("init auto failover");
+      command.setId(1L);
+      commands.add(command);
+      return commands;
    }
 
    @Override
    public ApiBulkCommandList hdfsInitializeSharedDirCommand(ApiRoleNameList strings) {
-      return null;
+      System.out.println("calling " + this.getClass().getInterfaces()[0].getName() + "#" + Thread.currentThread().getStackTrace()[1].getMethodName());
+      ApiBulkCommandList commands = new ApiBulkCommandList();
+      ApiCommand command = new ApiCommand();
+      command.setName("init share dir");
+      command.setId(1L);
+      commands.add(command);
+      return commands;
    }
 
    @Override

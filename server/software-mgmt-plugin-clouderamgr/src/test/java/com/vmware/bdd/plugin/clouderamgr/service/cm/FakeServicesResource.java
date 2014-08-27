@@ -242,7 +242,11 @@ public class FakeServicesResource implements ServicesResourceV6 {
 
    @Override
    public ApiCommand zooKeeperInitCommand(String s) {
-      return null;
+      System.out.println("calling " + this.getClass().getInterfaces()[0].getName() + "#" + Thread.currentThread().getStackTrace()[1].getMethodName());
+      ApiCommand command = new ApiCommand();
+      command.setName("init zookeeper");
+      command.setId(1L);
+      return command;
    }
 
    @Override
