@@ -1,8 +1,8 @@
 {
-  "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/services/?fields=alerts/summary,ServiceInfo/state",
+  "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/services/?fields=alerts/summary,ServiceInfo/state",
   "items" : [
     {
-      "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/services/HDFS",
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/services/HDFS",
       "ServiceInfo" : {
         "cluster_name" : "cluster01",
         "service_name" : "HDFS",
@@ -10,7 +10,7 @@
       }
     },
     {
-      "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/services/MAPREDUCE2",
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/services/MAPREDUCE2",
       "ServiceInfo" : {
         "cluster_name" : "cluster01",
         "service_name" : "MAPREDUCE2",
@@ -18,7 +18,7 @@
       }
     },
     {
-      "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/services/TEZ",
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/services/TEZ",
       "ServiceInfo" : {
         "cluster_name" : "cluster01",
         "service_name" : "TEZ",
@@ -26,7 +26,7 @@
       }
     },
     {
-      "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/services/YARN",
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/services/YARN",
       "ServiceInfo" : {
         "cluster_name" : "cluster01",
         "service_name" : "YARN",
@@ -34,7 +34,7 @@
       }
     },
     {
-      "href" : "http://10.141.73.95:8080/api/v1/clusters/cluster01/services/ZOOKEEPER",
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/services/ZOOKEEPER",
       "ServiceInfo" : {
         "cluster_name" : "cluster01",
         "service_name" : "ZOOKEEPER",

@@ -1,0 +1,103 @@
+{
+  "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01",
+  "Clusters" : {
+    "cluster_id" : 8,
+    "cluster_name" : "cluster01",
+    "version" : "HDP-2.1"
+  },
+  "services" : [
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/services/HDFS",
+      "ServiceInfo" : {
+        "cluster_name" : "cluster01",
+        "service_name" : "HDFS"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/services/MAPREDUCE2",
+      "ServiceInfo" : {
+        "cluster_name" : "cluster01",
+        "service_name" : "MAPREDUCE2"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/services/TEZ",
+      "ServiceInfo" : {
+        "cluster_name" : "cluster01",
+        "service_name" : "TEZ"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/services/YARN",
+      "ServiceInfo" : {
+        "cluster_name" : "cluster01",
+        "service_name" : "YARN"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/services/ZOOKEEPER",
+      "ServiceInfo" : {
+        "cluster_name" : "cluster01",
+        "service_name" : "ZOOKEEPER"
+      }
+    }
+  ],
+  "hosts" : [
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-142.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-72-142.eng.vmware.com"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-228.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-72-228.eng.vmware.com"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-234.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-72-234.eng.vmware.com"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-012.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-73-012.eng.vmware.com"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-082.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-73-082.eng.vmware.com"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-097.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-73-097.eng.vmware.com"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-214.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-73-214.eng.vmware.com"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-237.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "wdc-vhadp-pub2-dhcp-73-237.eng.vmware.com"
+      }
+    }
+  ]
+}

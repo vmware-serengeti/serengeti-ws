@@ -15,9 +15,9 @@
 package com.vmware.bdd.plugin.ambari.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import mockit.Mock;
 import mockit.MockClass;
 import mockit.Mockit;
@@ -188,4 +188,12 @@ public class TestAmbariImpl {
       Assert.assertTrue(!exceptionExist);
    }
 
+   @Test(groups = { "TestAmbariImpl" }, dependsOnMethods = { "testStatusQuery" })
+   public void testClusterScaleOut() {
+      ClusterReportQueue queue = new ClusterReportQueue();
+      List<String> addedNodeNames = new ArrayList<String>();
+      addedNodeNames.add("cluster01-backup-0");
+      addedNodeNames.add("cluster01-worker-0");
+      Assert.assertTrue(provider.scaleOutCluster(blueprint, addedNodeNames, queue));
+   }
 }

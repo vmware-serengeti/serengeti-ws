@@ -37,8 +37,7 @@ public class FakeClusterHostsResource implements HostsResource {
    @GET
    @Path("/")
    public Response readHosts() {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("clusters/cluster01_hosts.json");
    }
 
    @Override
@@ -60,8 +59,7 @@ public class FakeClusterHostsResource implements HostsResource {
    @DELETE
    @Path("/{hostFQDN}")
    public Response deleteHost(@PathParam("hostFQDN") String hostFQDN) {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("clusters/simple_request.json");
    }
 
    @Override
@@ -71,24 +69,20 @@ public class FakeClusterHostsResource implements HostsResource {
    @Produces({ "application/json", "application/xml", "text/plain",
          "text/html", "text/xml" })
    public Response addComponentsToHosts(String hostComponentsWithFilter) {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("clusters/simple_request.json");
    }
 
    @Override
    @POST
    @Path("/{hostFQDN}")
    public Response addHost(@PathParam("hostFQDN") String hostFQDN) {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("clusters/simple_request.json");
    }
 
    @Override
    @Path("/{hostFQDN}/host_components")
    public HostComponentsResource getHostComponentsResource(
          @PathParam("hostFQDN") String hostFQDN) {
-      // TODO Auto-generated method stub
-      return null;
+      return new FakeHostComponentsResource();
    }
-
 }

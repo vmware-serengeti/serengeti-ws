@@ -32,8 +32,7 @@ public class FakeClustersResource implements ClustersResource {
 
    @Override
    public Response readCluster(String clusterName) {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("clusters/simple_cluster01.json");
    }
 
    @Override
@@ -43,7 +42,6 @@ public class FakeClustersResource implements ClustersResource {
 
    @Override
    public Response deleteCluster(String clusterName) {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -59,20 +57,17 @@ public class FakeClustersResource implements ClustersResource {
 
    @Override
    public HostsResource getHostsResource(String clusterName) {
-      // TODO Auto-generated method stub
       return new FakeClusterHostsResource(clusterName);
    }
 
    @Override
    public HostComponentsResource getHostComponentsResource(String clusterName) {
-      // TODO Auto-generated method stub
-      return null;
+      return new FakeHostComponentsResource();
    }
 
    @Override
    public ConfigGroupsResource getConfigGroupsResource(String clusterName) {
-      // TODO Auto-generated method stub
-      return null;
+      return new FakeConfigureGroupResource();
    }
 
 }

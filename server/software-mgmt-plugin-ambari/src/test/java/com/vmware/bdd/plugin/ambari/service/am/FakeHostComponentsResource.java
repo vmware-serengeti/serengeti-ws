@@ -14,14 +14,32 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.service.am;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-import com.vmware.bdd.plugin.ambari.api.v1.HostsResource;
+import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.HostComponentsResource;
 
-public class FakeHostsResource implements HostsResource {
+public class FakeHostComponentsResource implements HostComponentsResource {
 
    @Override
-   public Response readHosts() {
-      return BuildResponse.buildResponse("clusters/simple_registered_hosts.json");
+   @PUT
+   @Path("/")
+   @Consumes("application/xml")
+   @Produces({ "application/json", "application/xml", "text/plain" })
+   public Response operationWithFilter(String request) {
+      return BuildResponse.buildResponse("clusters/simple_request.json");
    }
+
+   @Override
+   @DELETE
+   @Path("/")
+   public Response deleteAllComponents() {
+      return BuildResponse.buildResponse("clusters/simple_request.json");
+   }
+
+
 }

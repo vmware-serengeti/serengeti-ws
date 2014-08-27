@@ -1,0 +1,19 @@
+{
+  "status":"SUCCESS",
+  "requestId":10,
+  "hostsStatus":[
+    {
+      "hostName":"host2",
+      "status":"DONE",
+      "statusCode":"0",
+      "log": ""
+    },
+    {
+      "hostName":"host3",
+      "status":"DONE",
+      "statusCode":"0",
+      "log": ""
+    }
+  ],
+  "log": ""
+}

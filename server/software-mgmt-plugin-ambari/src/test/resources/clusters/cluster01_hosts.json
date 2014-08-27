@@ -1,0 +1,33 @@
+{
+  "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts",
+  "items" : [
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-142.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "host01"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-228.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "host02"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-72-234.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "host03"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/wdc-vhadp-pub2-dhcp-73-012.eng.vmware.com",
+      "Hosts" : {
+        "cluster_name" : "cluster01",
+        "host_name" : "host04"
+      }
+    }
+  ]
+}

@@ -16,17 +16,27 @@ package com.vmware.bdd.plugin.ambari.service.am;
 
 import javax.ws.rs.core.Response;
 
+import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
+import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.api.v1.BootstrapResource;
 
 public class FakeBootstrapResource implements BootstrapResource {
 
    @Override
    public Response createBootstrap(String bootstrap) {
-      return BuildResponse.buildResponse("clusters/simple_bootstrap.json");
+      ApiBootstrap apiBootstrap = ApiUtils.jsonToObject(ApiBootstrap.class, bootstrap);
+      if (apiBootstrap.getHosts().size() == 2) {
+         return BuildResponse.buildResponse("clusters/simple_hosts_bootstrap.json");
+      } else {
+         return BuildResponse.buildResponse("clusters/simple_bootstrap.json");
+      }
    }
 
    @Override
    public Response readBootstrapStatus(Long bootstrapId) {
+      if (bootstrapId != null && bootstrapId == 10) {
+         return BuildResponse.buildResponse("clusters/simple_hosts_bootstrap.json");
+      }
       return BuildResponse.buildResponse("clusters/simple_bootstrap.json");
    }
 
