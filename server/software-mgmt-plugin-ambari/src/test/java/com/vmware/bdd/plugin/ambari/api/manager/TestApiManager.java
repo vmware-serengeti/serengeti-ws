@@ -1,21 +1,42 @@
 package com.vmware.bdd.plugin.ambari.api.manager;
 
+import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
+import com.vmware.bdd.plugin.ambari.api.ApiRootResource;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
+import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
+import com.vmware.bdd.plugin.ambari.service.am.FakeRootResourceV1;
+
+import junit.framework.Assert;
+import mockit.Mockit;
+import org.mockito.Mockito;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import java.util.List;
 
 public class TestApiManager {
+   private ApiManager apiManager;
+   private ApiClusterBlueprint apiClusterBlueprint = new ApiClusterBlueprint();
+   private String clusterName = "cluster01";
 
    @BeforeMethod
    public void setUp() throws Exception {
-
+      ApiRootResource apiRootResource = Mockito.mock(ApiRootResource.class);
+      RootResourceV1 rootResourceV1 = new FakeRootResourceV1();
+      Mockito.when(apiRootResource.getRootV1()).thenReturn(rootResourceV1);
+      AmbariManagerClientbuilder clientbuilder = Mockito.mock(AmbariManagerClientbuilder.class);
+      Mockito.when(clientbuilder.build()).thenReturn(apiRootResource);
+      apiManager = new ApiManager(clientbuilder);
    }
 
    @AfterMethod
    public void tearDown() throws Exception {
-
+      Mockit.tearDownMocks();
    }
 
    @Test
@@ -30,7 +51,6 @@ public class TestApiManager {
 
    @Test
    public void testReadService() throws Exception {
-
    }
 
    @Test
@@ -70,7 +90,6 @@ public class TestApiManager {
 
    @Test
    public void testGetStackService() throws Exception {
-
    }
 
    @Test
@@ -85,42 +104,51 @@ public class TestApiManager {
 
    @Test
    public void testGetClusterList() throws Exception {
-
+      ApiClusterList apiClusterList = apiManager.getClusterList();
+      Assert.assertTrue(apiClusterList.getClusters().size() == 0);
    }
 
    @Test
    public void testGetCluster() throws Exception {
-
+      ApiCluster apiCluster = apiManager.getCluster(clusterName);
+      Assert.assertEquals(apiCluster.getClusterInfo().getClusterName(), clusterName);
    }
 
    @Test
    public void testGetClusterServices() throws Exception {
-
+      List<ApiService> services = apiManager.getClusterServices(clusterName);
+      Assert.assertNotNull(services);
+      Assert.assertTrue(!services.isEmpty());
    }
 
    @Test
    public void testStopAllServicesInCluster() throws Exception {
-
+      ApiRequest apiRequest = apiManager.stopAllServicesInCluster(clusterName);
+      Assert.assertNotNull(apiRequest);
    }
 
    @Test
    public void testStartAllServicesInCluster() throws Exception {
-
+      ApiRequest apiRequest = apiManager.startAllServicesInCluster(clusterName);
+      Assert.assertNotNull(apiRequest);
    }
 
    @Test
    public void testGetClusterServicesNames() throws Exception {
-
+      List<String> serviceNames = apiManager.getClusterServicesNames(clusterName);
+      Assert.assertTrue(!serviceNames.isEmpty());
    }
 
    @Test
    public void testProvisionCluster() throws Exception {
-
+      ApiRequest apiRequest = apiManager.provisionCluster(clusterName, apiClusterBlueprint);
+      Assert.assertNotNull(apiRequest);
+      Assert.assertEquals(apiRequest.getApiRequestInfo().getClusterName(), clusterName);
    }
 
    @Test
    public void testGetBlueprintList() throws Exception {
-
+      Assert.assertTrue(apiManager.getBlueprintList().getApiBlueprints().size() == 1);
    }
 
    @Test

@@ -23,6 +23,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
 import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.ServicesResource;
 
 public class FakeServicesResource implements ServicesResource {
@@ -41,8 +42,12 @@ public class FakeServicesResource implements ServicesResource {
          @PathParam("clusterName") String clusterName,
          @QueryParam("params/run_smoke_test") String runSmockTest,
          String request) {
-      // TODO Auto-generated method stub
-      return null;
+      String expectedRequest = "{\"Body\":{\"ServiceInfo\":{\"state\":\"INSTALLED\"}},\"RequestInfo\":{\"aborted_task_count\":0,\"completed_task_count\":0,\"create_time\":0,\"end_time\":0,\"failed_task_count\":0,\"progress_percent\":0.0,\"queued_task_count\":0,\"start_time\":0,\"task_count\":0,\"timed_out_task_count\":0,\"context\":\"Stop All Services\"}}";
+      if (expectedRequest.equals(request)) {
+         Response.ResponseBuilder builder = Response.ok(request, "text/plain");
+         return builder.build();
+      }
+      throw new AmbariApiException();
    }
 
    @Override
@@ -54,7 +59,13 @@ public class FakeServicesResource implements ServicesResource {
          @QueryParam("params/run_smoke_test") String runSmockTest,
          String request) {
       // TODO Auto-generated method stub
-      return null;
+
+      String expectedRequest = "{\"Body\":{\"ServiceInfo\":{\"state\":\"STARTED\"}},\"RequestInfo\":{\"aborted_task_count\":0,\"completed_task_count\":0,\"create_time\":0,\"end_time\":0,\"failed_task_count\":0,\"progress_percent\":0.0,\"queued_task_count\":0,\"start_time\":0,\"task_count\":0,\"timed_out_task_count\":0,\"context\":\"Start All Services\"}}";
+      if (expectedRequest.equals(request)) {
+         Response.ResponseBuilder builder = Response.ok(request, "text/plain");
+         return builder.build();
+      }
+      throw new AmbariApiException();
    }
 
    @Override
