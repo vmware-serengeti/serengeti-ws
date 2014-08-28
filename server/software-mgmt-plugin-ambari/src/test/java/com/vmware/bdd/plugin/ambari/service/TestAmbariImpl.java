@@ -196,7 +196,6 @@ public class TestAmbariImpl {
       ApiManager apiManager = new FakeApiManager(clientbuilder);
 
       Mockito.when(spy.isProvisioned(blueprint.getName())).thenReturn(true);
-      provider.isProvisioned(blueprint.getName());
       Mockito.doReturn(true).when(spy).isClusterProvisionedByBDE(Mockito.<AmClusterDef>any());
 
       ApiManager backup = spy.getApiManager();
@@ -220,7 +219,11 @@ public class TestAmbariImpl {
 
       Mockito.when(spy.isProvisioned(blueprint.getName())).thenReturn(true);
       Mockito.doReturn(true).when(spy).isClusterProvisionedByBDE(Mockito.<AmClusterDef>any());
-
+      try {
+         Mockito.when(spy.doSoftwareOperation(Mockito.anyString(), Mockito.<ApiRequest>any(),
+               Mockito.<ClusterReport>any(), Mockito.<ClusterReportQueue>any())).thenReturn(true);
+      } catch (Exception e) {
+      }
       ApiManager backup = spy.getApiManager();
       spy.setApiManager(apiManager);
       Assert.assertTrue(spy.onStopCluster(blueprint, reportQueue));
@@ -242,27 +245,38 @@ public class TestAmbariImpl {
    @Test(groups = { "TestAmbariImpl" })
    public void testDeleteClusterNotProvisionedByBDE() {
       AmbariImpl spy = Mockito.spy(provider);
-      Mockito.when(spy.echo()).thenReturn(false);
+      Mockito.when(spy.echo()).thenReturn(true);
       Mockito.when(spy.isProvisioned(Mockito.anyString())).thenReturn(true);
+      Mockito.doReturn(false).when(spy).isClusterProvisionedByBDE(Mockito.<AmClusterDef>any());
       Assert.assertTrue(spy.onDeleteCluster(blueprint, reportQueue));
    }
 
    @Test(groups = { "TestAmbariImpl" })
    public void testForceDeleteClusterWhenStopFailed() {
       AmbariImpl spy = Mockito.spy(provider);
-      Mockito.when(spy.echo()).thenReturn(false);
+      Mockito.when(spy.echo()).thenReturn(true);
       Mockito.when(spy.isProvisioned(Mockito.anyString())).thenReturn(true);
+      Mockito.doReturn(true).when(spy).isClusterProvisionedByBDE(Mockito.<AmClusterDef>any());
       Mockito.doReturn(false).when(spy).onStopCluster(Mockito.<ClusterBlueprint>any(), Mockito.<ClusterReportQueue>any());
+      ApiManager apiManager = new FakeApiManager(makeClientBuilder());
+      ApiManager backup = spy.getApiManager();
+      spy.setApiManager(apiManager);
       Assert.assertTrue(spy.onDeleteCluster(blueprint, reportQueue));
+      spy.setApiManager(backup);
    }
 
-   @Test(groups = { "TestAmbariImpl" })
+   @Test
    public void testForceDeleteClusterWhenStopSucceed() {
       AmbariImpl spy = Mockito.spy(provider);
-      Mockito.when(spy.echo()).thenReturn(false);
+      Mockito.when(spy.echo()).thenReturn(true);
       Mockito.when(spy.isProvisioned(Mockito.anyString())).thenReturn(true);
+      Mockito.doReturn(true).when(spy).isClusterProvisionedByBDE(Mockito.<AmClusterDef>any());
       Mockito.doReturn(true).when(spy).onStopCluster(Mockito.<ClusterBlueprint>any(), Mockito.<ClusterReportQueue>any());
+      ApiManager apiManager = new FakeApiManager(makeClientBuilder());
+      ApiManager backup = spy.getApiManager();
+      spy.setApiManager(apiManager);
       Assert.assertTrue(spy.onDeleteCluster(blueprint, reportQueue));
+      spy.setApiManager(backup);
    }
 
    @Test(groups = { "TestAmbariImpl" })
@@ -306,6 +320,31 @@ public class TestAmbariImpl {
    }
 
    @Test(groups = { "TestAmbariImpl" })
+   public void testStartClusterFailed() {
+      AmbariImpl spy = Mockito.spy(provider);
+
+      AmbariManagerClientbuilder clientbuilder = makeClientBuilder();
+      ApiManager apiManager = new FakeApiManager(clientbuilder) {
+         @Override
+         public ApiRequest startAllServicesInCluster(String clusterName) throws AmbariApiException {
+            throw AmbariApiException.RESPONSE_EXCEPTION(400, "Faked exception");
+         }
+      };
+
+      Mockito.when(spy.isProvisioned(blueprint.getName())).thenReturn(true);
+      Mockito.doReturn(true).when(spy).isClusterProvisionedByBDE(Mockito.<AmClusterDef>any());
+      Mockito.doReturn(1).when(spy).getRequestMaxRetryTimes();
+      ApiManager backup = spy.getApiManager();
+      spy.setApiManager(apiManager);
+      try {
+         spy.startCluster(blueprint, reportQueue);
+      } catch (SoftwareManagementPluginException e) {
+         Assert.assertEquals(e.getCause().getMessage(), "Faked exception");
+      }
+      spy.setApiManager(backup);
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
    public void testStartStoppedCluster() {
       AmbariImpl spy = Mockito.spy(provider);
 
@@ -318,13 +357,36 @@ public class TestAmbariImpl {
             return apiRequest;
          }
       };
-
+      try {
+         Mockito.when(spy.doSoftwareOperation(Mockito.anyString(), Mockito.<ApiRequest>any(),
+               Mockito.<ClusterReport>any(), Mockito.<ClusterReportQueue>any())).thenReturn(true);
+      } catch (Exception e) {
+      }
       Mockito.when(spy.isProvisioned(blueprint.getName())).thenReturn(true);
       Mockito.doReturn(true).when(spy).isClusterProvisionedByBDE(Mockito.<AmClusterDef>any());
-
+      Mockito.doReturn(1).when(spy).getRequestMaxRetryTimes();
       ApiManager backup = spy.getApiManager();
       spy.setApiManager(apiManager);
       Assert.assertTrue(spy.startCluster(blueprint, reportQueue));
+      spy.setApiManager(backup);
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testDoSoftwareOperation() {
+      ClusterReport clusterReport = new ClusterReport(blueprint);
+      AmbariImpl spy = Mockito.spy(provider);
+      ApiManager apiManager = new FakeApiManager(makeClientBuilder());
+      ApiManager backup = spy.getApiManager();
+      spy.setApiManager(apiManager);
+      ApiRequest request = new ApiRequest();
+      ApiRequestInfo requestInfo = new ApiRequestInfo();
+      request.setApiRequestInfo(requestInfo);
+      try {
+         spy.doSoftwareOperation(blueprint.getName(), request, clusterReport, reportQueue);
+      } catch (Exception e) {
+         e.printStackTrace();
+         Assert.assertTrue(e.getMessage().contains("Failed to execute request: "));
+      }
       spy.setApiManager(backup);
    }
 
@@ -334,6 +396,13 @@ public class TestAmbariImpl {
       Mockito.when(ambari.validateServerVersion()).thenCallRealMethod();
       Mockito.when(ambari.getType()).thenCallRealMethod();
       return  ambari;
+   }
+
+   @Test(groups = { "TestAmbariImpl" })
+   public void testOnDeleteNodes() {
+      List<String> nodesToDelete = new ArrayList<>();
+      nodesToDelete.add(blueprint.getNodeGroups().get(0).getNodes().get(0).getHostname());
+      Assert.assertTrue(provider.onDeleteNodes(blueprint, nodesToDelete));
    }
 
    @Test(groups = { "TestAmbariImpl" })

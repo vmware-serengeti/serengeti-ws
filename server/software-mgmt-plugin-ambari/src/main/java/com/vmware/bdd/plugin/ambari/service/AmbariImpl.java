@@ -85,7 +85,8 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 public class AmbariImpl implements SoftwareManager {
 
    private static final Logger logger = Logger.getLogger(AmbariImpl.class);
-   private static final int REQUEST_MAX_RETRY_TIMES = 10;
+
+   private final int REQUEST_MAX_RETRY_TIMES = 10;
    public static final String MIN_SUPPORTED_VERSION = "1.6.0";
    private static final String UNKNOWN_VERSION = "UNKNOWN";
 
@@ -567,8 +568,7 @@ public class AmbariImpl implements SoftwareManager {
                   doSoftwareOperation(clusterName, apiRequestSummary, clusterDef.getCurrentReport(), reportQueue);
                }
             } catch (Exception e) {
-               String errMsg = getErrorMsg("stop all services", e);
-               logger.error(errMsg, e);
+               logger.error("Failed to stop all services: ", e);
                throw SoftwareManagementPluginException.STOP_CLUSTER_EXCEPTION(e, Constants.AMBARI_PLUGIN_NAME, clusterName);
             }
             apiManager.deleteCluster(clusterName);
@@ -613,14 +613,6 @@ public class AmbariImpl implements SoftwareManager {
       return !apiManager.getClusterHostsList(clusterName).getApiHosts().isEmpty();
    }
 
-   private String getErrorMsg(String action, Exception e) {
-      StringBuilder errMsg = new StringBuilder();
-      errMsg.append("Failed to " + action);
-      if (e != null && e.getMessage() != null && !e.getMessage().isEmpty()) {
-         errMsg.append(": " + e.getMessage());
-      }
-      return errMsg.toString();
-   }
    @Override
    public List<String> validateScaling(NodeGroupInfo group) {
       // TODO Auto-generated method stub
@@ -989,7 +981,7 @@ public class AmbariImpl implements SoftwareManager {
       Exception resultException = null;
       try {
          ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, 120);
-         for (int i = 0; i < REQUEST_MAX_RETRY_TIMES; i++) {
+         for (int i = 0; i < getRequestMaxRetryTimes(); i++) {
             ApiRequest apiRequestSummary;
             try {
                apiRequestSummary = apiManager.startAllServicesInCluster(clusterName);
@@ -1012,9 +1004,8 @@ public class AmbariImpl implements SoftwareManager {
          }
       } finally {
          if (!success) {
-            String errMsg = getErrorMsg("start all services", resultException);
-            logger.error(errMsg, resultException);
-            throw SoftwareManagementPluginException.START_CLUSTER_FAILED(null, Constants.AMBARI_PLUGIN_NAME, clusterName);
+            logger.error("Failed to start all services: ", resultException);
+            throw SoftwareManagementPluginException.START_CLUSTER_FAILED(resultException, Constants.AMBARI_PLUGIN_NAME, clusterName);
          }
 
          clusterReport.setClusterAndNodesServiceStatus(ServiceStatus.STARTED);
@@ -1061,8 +1052,7 @@ public class AmbariImpl implements SoftwareManager {
          reportStatus(clusterReport.clone(), reports);
          return true;
       } catch (Exception e) {
-         String errMsg = getErrorMsg("stop all services", e);
-         logger.error(errMsg, e);
+         logger.error("Failed to stop all services: ", e);
          throw SoftwareManagementPluginException.STOP_CLUSTER_EXCEPTION(e, Constants.AMBARI_PLUGIN_NAME, clusterName);
       }
    }
@@ -1335,5 +1325,9 @@ public class AmbariImpl implements SoftwareManager {
 
    public void setApiManager(ApiManager apiManager) {
       this.apiManager = apiManager;
+   }
+
+   public int getRequestMaxRetryTimes() {
+      return REQUEST_MAX_RETRY_TIMES;
    }
 }
