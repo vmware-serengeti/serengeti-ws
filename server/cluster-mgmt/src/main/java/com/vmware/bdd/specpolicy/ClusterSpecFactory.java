@@ -65,6 +65,8 @@ public class ClusterSpecFactory {
          "cm-hdfs-mapred-template-spec.json";
    private static final String CM_HDFS_YARN_TEMPLATE_SPEC =
          "cm-hdfs-yarn-template-spec.json";
+   private static final String CM_HBASE_TEMPLATE_SPEC =
+         "cm-hbase-template-spec.json";
    private static final String AM_HDFS_V1_TEMPLATE_SPEC =
          "am-hdfs-v1-template-spec.json";
    private static final String AM_HDFS_V2_TEMPLATE_SPEC =
@@ -218,6 +220,9 @@ public class ClusterSpecFactory {
          MAPREDUCE_VERSION mr =
                getDefaultMapReduceVersion(vendor, distroVersion);
          if (Constants.CLOUDERA_MANAGER_PLUGIN_TYPE.equals(appManagerType)) {
+            if (type.equals(ClusterType.HDFS_HBASE)) {
+               return loadFromFile(locateSpecFile(CM_HBASE_TEMPLATE_SPEC));
+            }
             if (mr == MAPREDUCE_VERSION.V1) {
                return loadFromFile(locateSpecFile(CM_HDFS_MAPRED_TEMPLATE_SPEC));
             } else {

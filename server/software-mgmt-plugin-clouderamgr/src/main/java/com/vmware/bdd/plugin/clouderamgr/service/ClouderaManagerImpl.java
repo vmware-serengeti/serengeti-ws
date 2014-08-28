@@ -1008,66 +1008,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
       return executed && servicesNotConfigured.size() == 0;
    }
 
-   private void provisionManagement() {
-
-      boolean cmsProvisionRequired = false;
-      try {
-         cmsProvisionRequired = apiResourceRootV6.getClouderaManagerResource().getMgmtServiceResource()
-               .readService(DataView.SUMMARY) == null;
-         logger.info("cmsProvisionRequired: " + cmsProvisionRequired);
-      } catch (RuntimeException e) {
-         cmsProvisionRequired = true;
-      }
-
-      if (cmsProvisionRequired) {
-         // TODO: in the first stage, configure management services on Cloudera Manager Server
-         boolean licenseDeployed = false;
-
-         try {
-            licenseDeployed = apiResourceRootV6.getClouderaManagerResource().readLicense() != null;
-            logger.info("licenseDeployed: " + licenseDeployed);
-         } catch (Exception e) {
-            // ignore
-         }
-         if (!licenseDeployed) {
-            apiResourceRootV6.getClouderaManagerResource().beginTrial();
-            licenseDeployed = true;
-         }
-         final boolean enterpriseDeployed = licenseDeployed;
-
-         final ApiHostRef apiHostRef = new ApiHostRef(getCmServerHostId());
-         if (licenseDeployed) {
-            logger.info("Start provisioning CM mgmt services");
-            ApiService cmsServiceApi = new ApiService();
-            List<ApiRole> cmsRoleApis = new ArrayList<ApiRole>();
-            cmsServiceApi.setName(AvailableManagementService.MANAGEMENT.getName());
-            cmsServiceApi.setType(AvailableManagementService.MANAGEMENT.getId());
-
-            for (AvailableManagementService type : AvailableManagementService.values()) {
-               if (type.getParent() != null && (!type.requireEnterprise() || enterpriseDeployed)) {
-                  ApiRole cmsRoleApi = new ApiRole();
-                  cmsRoleApi.setName(type.getName());
-                  cmsRoleApi.setType(type.getId());
-                  cmsRoleApi.setHostRef(apiHostRef);
-                  cmsRoleApis.add(cmsRoleApi);
-               }
-            }
-            cmsServiceApi.setRoles(cmsRoleApis);
-            logger.info("cmsService to setup: " + cmsServiceApi.toString());
-            apiResourceRootV6.getClouderaManagerResource().getMgmtServiceResource().setupCMS(cmsServiceApi);
-            logger.info("Finished setup CMS service");
-
-            /* TODO: currently only use default "ApiRoleConfigGroup", support customized configGroup in future
-            A role config group contains roles of the same role type sharing the same configuration.
-            While each role has to belong to a group, a role config group may be empty. There exists
-            a default role config group for each role type. Default groups cannot be removed nor created.
-            The name of a role config group is unique and cannot be changed. The configuration of individual
-            roles may be overridden on role level.
-            */
-         }
-      }
-   }
-
    /**
     * install hosts agent, Reentrant
     * @param cluster
