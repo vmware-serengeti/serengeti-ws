@@ -80,9 +80,10 @@ public class ConfigLocalRepoStep extends TrackableTasklet {
                      Constants.SERENGETI_NODE_YUM_CLOUDERA_MANAGER_REPO_ID,
                      Constants.NODE_APPMANAGER_YUM_CLOUDERA_MANAGER_REPO_ID);
          if (appMgrName.equals(Constants.AMBARI_PLUGIN_TYPE)) {
-            Configuration.getString(
-                  Constants.SERENGETI_NODE_YUM_AMBARI_REPO_ID,
-                  Constants.NODE_APPMANAGER_YUM_AMBARI_REPO_ID);
+            appMgrRepoID =
+                  Configuration.getString(
+                        Constants.SERENGETI_NODE_YUM_AMBARI_REPO_ID,
+                        Constants.NODE_APPMANAGER_YUM_AMBARI_REPO_ID);
          }
 
          setLocalRepoService.setLocalRepoForNodes(clusterName, nodes,
