@@ -18,15 +18,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import mockit.Mock;
 import mockit.MockClass;
 import mockit.Mockit;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.JsonParseException;
 import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -363,7 +361,7 @@ public class TestClouderaManagerImpl {
       boolean exceptionExists = false;
       try {
          mockedProvider.validateServerVersion();
-      } catch (SoftwareManagementPluginException e) {
+      } catch (SoftwareManagerCollectorException e) {
          exceptionExists = true;
          String expectedErrMsg =  "The min supported version of software manager type " + mockedProvider.getType() +
                " is " + mockedProvider.MIN_SUPPORTED_VERSION + " but got " + mockedProvider.getVersion() + ".";
@@ -379,7 +377,7 @@ public class TestClouderaManagerImpl {
       boolean exceptionExists = false;
       try {
          mockedProvider.validateServerVersion();
-      } catch (SoftwareManagementPluginException e) {
+      } catch (SoftwareManagerCollectorException e) {
          exceptionExists = true;
          String expectedErrMsg =  "The min supported version of software manager type " + mockedProvider.getType() +
                " is " + mockedProvider.MIN_SUPPORTED_VERSION + " but got " + mockedProvider.getVersion() + ".";

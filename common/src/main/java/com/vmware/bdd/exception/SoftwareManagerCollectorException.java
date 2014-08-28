@@ -104,4 +104,7 @@ public class SoftwareManagerCollectorException extends BddException {
             CommonUtil.mergeErrorMsgList(errorMsgs));
    }
 
+   public static SoftwareManagerCollectorException INVALID_VERSION(String type, String minSupportedVersion, String version) {
+      return new SoftwareManagerCollectorException(null, "INVALID_VERSION", type, minSupportedVersion, version);
+   }
 }

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import org.apache.log4j.Logger;
 
 import javax.ws.rs.NotFoundException;
@@ -30,7 +31,6 @@ import javax.ws.rs.NotFoundException;
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
 import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.TaskStatus;
-import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
@@ -159,7 +159,7 @@ public class AmbariImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean validateServerVersion() throws SoftwareManagementPluginException{
+   public boolean validateServerVersion() throws SoftwareManagerCollectorException {
       String version = getVersion();
       DefaultArtifactVersion versionInfo = new DefaultArtifactVersion(version);
       logger.info("Min supported version of " + getType() + " is: " + MIN_SUPPORTED_VERSION);
@@ -167,7 +167,7 @@ public class AmbariImpl implements SoftwareManager {
       //For ambari, we only support 1.6.0 and 1.6.1, its next version is 1.7.0, so only need to check major and minor version
       if (version.equals(UNKNOWN_VERSION) || (versionInfo.getMajorVersion() != 1 || versionInfo.getMinorVersion() != 6)) {
          logger.error("Validate server version failed.");
-         throw SoftwareManagementPluginException.INVALID_VERSION(null, Constants.AMBARI_PLUGIN_NAME, MIN_SUPPORTED_VERSION, version);
+         throw SoftwareManagerCollectorException.INVALID_VERSION(Constants.AMBARI_PLUGIN_NAME, MIN_SUPPORTED_VERSION, version);
       }
       logger.info("Validate server version succeed.");
       return true;

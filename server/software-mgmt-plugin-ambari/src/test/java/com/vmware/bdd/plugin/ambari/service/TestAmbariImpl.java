@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
@@ -342,7 +343,7 @@ public class TestAmbariImpl {
       boolean exceptionExist = false;
       try {
          ambari.validateServerVersion();
-      } catch (SoftwareManagementPluginException e) {
+      } catch (SoftwareManagerCollectorException e) {
          exceptionExist = true;
          String errMsg = "The min supported version of software manager type " + ambari.getType()  + " is " + ambari.MIN_SUPPORTED_VERSION + " but got " + ambari.getVersion() + ".";
          Assert.assertEquals(e.getMessage(), errMsg);
@@ -357,7 +358,7 @@ public class TestAmbariImpl {
       boolean exceptionExist = false;
       try {
          ambari.validateServerVersion();
-      } catch (SoftwareManagementPluginException e) {
+      } catch (SoftwareManagerCollectorException e) {
          exceptionExist = true;
          String errMsg = "The min supported version of software manager type " + ambari.getType() + " is " + ambari.MIN_SUPPORTED_VERSION + " but got " + ambari.getVersion() + ".";
          Assert.assertEquals(e.getMessage(), errMsg);

@@ -33,12 +33,12 @@ import com.cloudera.api.model.ApiRoleState;
 import com.cloudera.api.model.ApiRoleConfigGroup;
 import com.cloudera.api.v7.RootResourceV7;
 import com.google.gson.GsonBuilder;
+import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.plugin.clouderamgr.exception.CommandExecFailException;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
 import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
 import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableManagementService;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableParcelStage;
 import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
 import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
@@ -195,13 +195,14 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean validateServerVersion() throws SoftwareManagementPluginException {
+   public boolean validateServerVersion() throws SoftwareManagerCollectorException {
       String cmVersion = getVersion();
       DefaultArtifactVersion cmVersionInfo = new DefaultArtifactVersion(cmVersion);
+      DefaultArtifactVersion minSupportedVersionInfo = new DefaultArtifactVersion(MIN_SUPPORTED_VERSION);
       logger.info("Min supported version of " + getType() + " is: " + MIN_SUPPORTED_VERSION);
       logger.info("Version of new software manager is: " + cmVersion);
-      if (cmVersion.equals(UNKNOWN_VERSION) || cmVersionInfo.getMajorVersion() < 5) {
-         throw SoftwareManagementPluginException.INVALID_VERSION(null, Constants.CDH_PLUGIN_NAME, MIN_SUPPORTED_VERSION, cmVersion);
+      if (cmVersion.equals(UNKNOWN_VERSION) || cmVersionInfo.getMajorVersion() < minSupportedVersionInfo.getMajorVersion()) {
+         throw SoftwareManagerCollectorException.INVALID_VERSION(Constants.CDH_PLUGIN_NAME, MIN_SUPPORTED_VERSION, cmVersion);
       }
       return true;
    }

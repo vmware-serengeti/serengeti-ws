@@ -268,7 +268,7 @@ public class SoftwareManagerCollector implements InitializingBean {
       validateSoftwareManagerVersion(softwareManager);
    }
 
-   private void validateSoftwareManagerVersion(SoftwareManager softwareManager) throws SoftwareManagementPluginException {
+   private void validateSoftwareManagerVersion(SoftwareManager softwareManager) throws SoftwareManagerCollectorException {
       softwareManager.validateServerVersion();
    }
 
