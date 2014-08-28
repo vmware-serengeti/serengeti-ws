@@ -763,12 +763,13 @@ public class ClusterManager {
 
       if (!cluster.getStatus().isActiveServiceStatus()
             && !ClusterStatus.SERVICE_STOPPED.equals(cluster.getStatus())
-            && !ClusterStatus.ERROR.equals(cluster.getStatus())) {
+            && !ClusterStatus.ERROR.equals(cluster.getStatus())
+            && !ClusterStatus.SERVICE_WARNING.equals(cluster.getStatus())) {
          logger.error("cluster " + clusterName
                + " cannot be stopped, it is in " + cluster.getStatus()
                + " status");
          throw ClusterManagerException.STOP_NOT_ALLOWED_ERROR(clusterName,
-               "To stop a cluster, its status must be RUNNING, ERROR or SERVICE_ERROR");
+               "To stop a cluster, its status must be RUNNING, ERROR, SERVICE_WARNING or SERVICE_STOPPED");
       }
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
