@@ -439,23 +439,26 @@ public class AmbariImpl implements SoftwareManager {
                   }
                }
             }
-
-            String actionFailure = Constants.HOST_BOOTSTRAP_MSG;
-            if (addedHosts != null) {
-               clusterDef.getCurrentReport().setNodesError(actionFailure, addedHosts);
-            } else {
-               clusterDef.getCurrentReport().setErrMsg(actionFailure);
-            }
-
+            setBootstrapNodeError(clusterDef, addedHosts);
             throw AmException.BOOTSTRAP_FAILED(notBootstrapNodes != null? notBootstrapNodes.toArray() : null);
          }
       } catch (Exception e) {
-         clusterDef.getCurrentReport().setAction(Constants.HOST_BOOTSTRAP_MSG);
+         setBootstrapNodeError(clusterDef, addedHosts);
          String errorMessage = errorMessage("Failed to bootstrap hosts of cluster " + clusterDef.getName(), e);
          logger.error(errorMessage);
          throw AmException.BOOTSTRAP_FAILED_EXCEPTION(e, clusterDef.getName());
       } finally {
          reportQueue.addClusterReport(clusterDef.getCurrentReport().clone());
+      }
+   }
+
+   private void setBootstrapNodeError(final AmClusterDef clusterDef,
+         final List<String> addedHosts) {
+      String actionFailure = Constants.HOST_BOOTSTRAP_MSG;
+      if (addedHosts != null) {
+         clusterDef.getCurrentReport().setNodesError(actionFailure, addedHosts);
+      } else {
+         clusterDef.getCurrentReport().setErrMsg(actionFailure);
       }
    }
 
@@ -659,6 +662,8 @@ public class AmbariImpl implements SoftwareManager {
                ProgressSplit.PROVISION_SUCCESS.getProgress());
          clusterDef.getCurrentReport().setSuccess(true);
       } catch (Exception e) {
+         clusterDef.getCurrentReport().clearAllNodesErrorMsg();
+         clusterDef.getCurrentReport().setAction("");
          clusterDef.getCurrentReport().setNodesError(
                "Failed to bootstrap nodes for " + e.getMessage(),
                addedNodeNames);
