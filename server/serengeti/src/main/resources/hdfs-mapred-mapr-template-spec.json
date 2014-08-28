@@ -2,6 +2,34 @@
   "distro":"mapr",
   "groups":[
     {
+      "name":"mysql",
+      "roles":[
+        "mapr_mysql_server"
+      ],
+      "instance_num":1,
+      "storage" : {
+      	"type" : "SHARED",
+        "sizeGB": 20
+      },
+      "cpu":1,
+      "memory":2048,
+      "ha":"off"
+    },
+    {
+      "name":"zookeeper",
+      "roles":[
+        "mapr_zookeeper"
+      ],
+      "instance_num":3,
+      "storage" : {
+      	"type" : "SHARED",
+        "sizeGB": 20
+      },
+      "cpu":1,
+      "memory":5120,
+      "ha":"on"
+    },
+    {
       "name":"master",
       "roles":[
         "mapr_cldb", 
@@ -12,12 +40,13 @@
         "mapr_webserver",
         "mapr_metrics"
       ],
+      "instance_num":3,
+      "storage" : {
+      	"type" : "LOCAL",
+        "sizeGB": 50
+      },
       "cpu":2,
       "memory":7680,
-      "storage" : {
-        "size": 50
-      },
-      "instance_num":3,
       "ha":"on"
     },
     {
@@ -27,12 +56,13 @@
         "mapr_fileserver",
         "mapr_tasktracker"
       ],
+      "instance_num":3,
+      "storage" : {
+      	"type" : "LOCAL",
+        "sizeGB": 50
+      },
       "cpu":2,
       "memory":5120,
-      "storage" : {
-        "size": 50
-      },
-      "instance_num":3,
       "ha":"off"
     },
     {
@@ -42,38 +72,13 @@
         "mapr_pig",
         "mapr_hive"
       ],
+      "instance_num":1,
+      "storage" : {
+      	"type" : "SHARED",
+        "sizeGB": 50
+      },
       "cpu":2,
       "memory":5120,
-      "storage" : {
-        "size": 50
-      },
-      "instance_num":1,
-      "ha":"off"
-    },
-    {
-      "name":"zookeeper",
-      "roles":[
-        "mapr_zookeeper"
-      ],
-      "cpu":1,
-      "memory":5120,
-      "storage" : {
-        "size": 20
-      },
-      "instance_num":3,
-      "ha":"on"
-    },
-    {
-      "name":"mysql",
-      "roles":[
-        "mapr_mysql_server"
-      ],
-      "cpu":1,
-      "memory":2048,
-      "storage" : {
-        "size": 20
-      },
-      "instance_num":1,
       "ha":"off"
     }
   ]

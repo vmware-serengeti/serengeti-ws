@@ -28,6 +28,7 @@ import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.spectypes.HadoopDistroMap;
+import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.IronfanStack;
 
 public class CommonClusterExpandPolicy {
@@ -79,7 +80,12 @@ public class CommonClusterExpandPolicy {
          
          DatastoreType storeType = null;
          if (softwareManager.hasMgmtRole(group.getRoles())) {
-            storeType = DatastoreType.SHARED;
+            if (group.getRoles().contains(
+                  HadoopRole.MAPR_FILESERVER_ROLE.toString())) {
+               storeType = DatastoreType.LOCAL;
+            } else {
+               storeType = DatastoreType.SHARED;
+            }
          } else {
             storeType = DatastoreType.LOCAL;
          }
