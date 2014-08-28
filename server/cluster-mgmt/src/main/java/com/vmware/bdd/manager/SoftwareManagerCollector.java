@@ -15,6 +15,7 @@
 
 package com.vmware.bdd.manager;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -50,6 +51,7 @@ import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
+import com.vmware.bdd.manager.i18n.Messages;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.plugin.ironfan.impl.DefaultSoftwareManagerImpl;
 import com.vmware.bdd.service.resmgmt.IAppManagerService;
@@ -100,7 +102,7 @@ public class SoftwareManagerCollector implements InitializingBean {
 
       String sslCertificate = appManagerAdd.getSslCertificate();
       if (!CommonUtil.isBlank(sslCertificate)) {
-         saveSslCertificate(sslCertificate);
+         saveAppMgrCertificate(sslCertificate);
       }
 
       SoftwareManager softwareManager = loadSoftwareManager(appManagerAdd);
@@ -460,7 +462,7 @@ public class SoftwareManagerCollector implements InitializingBean {
       logger.debug("modify app manager " + appManagerAdd);
       String name = appManagerAdd.getName();
       if (Constants.IRONFAN.equals(name)) {
-         logger.error("Cannot delete default application manager.");
+         logger.error("Cannot modify default application manager.");
          throw SoftwareManagerCollectorException.CAN_NOT_MODIFY_DEFAULT();
       }
       AppManagerEntity appManager = appManagerService.findAppManagerByName(name);
@@ -477,7 +479,7 @@ public class SoftwareManagerCollector implements InitializingBean {
 
       String sslCertificate = appManagerAdd.getSslCertificate();
       if (!CommonUtil.isBlank(sslCertificate)) {
-         saveSslCertificate(sslCertificate);
+         saveAppMgrCertificate(sslCertificate);
       }
 
       logger.info("Load software manager using new properties " + appManagerAdd);
@@ -490,13 +492,23 @@ public class SoftwareManagerCollector implements InitializingBean {
       logger.debug("successfully modified app manager " + appManagerAdd);
    }
 
-   private void saveSslCertificate(String certificate) {
-      OutputStream out = null;
+   private void saveAppMgrCertificate(String certificate) {
+      saveSslCertificate(certificate, Constants.APPMANAGER_KEYSTORE_PATH);
+   }
+
+   /**
+    * TODO this method has to be reverted:
+    * because if the target path is not accessible, it will load cert from the default keystore in java home,
+    * but still try to write it to the non accessible path.
+    * @param certificate
+    * @param keyStorePath
+    */
+   protected static void saveSslCertificate(String certificate, String keyStorePath) {
+      Certificate[] certs;
+      //parse certificates
       try {
-         KeyStore keyStore = CommonUtil.loadAppMgrKeyStore();
-         if (keyStore == null) {
-            logger.error("Cannot read appmanager keystore.");
-            return;
+         if (CommonUtil.isBlank(certificate)) {
+            throw SoftwareManagerCollectorException.BAD_CERT(null);
          }
 
          byte[] certBytes = Base64
@@ -506,15 +518,27 @@ public class SoftwareManagerCollector implements InitializingBean {
                      .getBytes());
 
          CertificateFactory cf = CertificateFactory.getInstance("X.509");
-         Collection c =
-               cf.generateCertificates(new ByteArrayInputStream(certBytes));
-         Certificate[] certs = new Certificate[c.toArray().length];
+         Collection c = cf.generateCertificates(new ByteArrayInputStream(certBytes));
+         certs = new Certificate[c.toArray().length];
 
-         if (c.size() == 1) {
-            certs[0] =
-                  cf.generateCertificate(new ByteArrayInputStream(certBytes));
+         if (c.size() == 0) {
+            throw SoftwareManagerCollectorException.BAD_CERT(null);
+         } else if (c.size() == 1) {
+            certs[0] = cf.generateCertificate(new ByteArrayInputStream(certBytes));
          } else {
-            certs = (Certificate[])c.toArray();
+            certs = (Certificate[]) c.toArray();
+         }
+      } catch (CertificateException e){
+         throw SoftwareManagerCollectorException.BAD_CERT(e);
+      }
+
+      //load & save keystore
+      OutputStream out = null;
+      try {
+         KeyStore keyStore = CommonUtil.loadAppMgrKeyStore(keyStorePath);
+         if (keyStore == null) {
+            logger.error(Messages.getString("SW_MGR_COLLECTOR.CANNT_READ_KEYSTORE"));
+            throw new SWMgrCollectorInternalException(Messages.getString("SW_MGR_COLLECTOR.CANNT_READ_KEYSTORE"));
          }
 
          MessageDigest md5 = MessageDigest.getInstance("MD5");
@@ -526,20 +550,11 @@ public class SoftwareManagerCollector implements InitializingBean {
             logger.debug("added cert: " + cert);
             keyStore.setCertificateEntry(md5Fingerprint, cert);
          }
-         out =
-               new FileOutputStream(Constants.APPMANAGER_KEYSTORE_PATH
-                     + Constants.APPMANAGER_KEYSTORE_FILE);
-         keyStore.store(out, Constants.APPMANAGER_KEYSTORE_PASSWORD);
-      } catch (CertificateException e) {
-         logger.info("Certificate exception: ", e);
-      } catch (FileNotFoundException e) {
-         logger.info("Cannot find file warning: ", e);
-      } catch (NoSuchAlgorithmException e) {
-         logger.info("SSL Algorithm error: ", e);
-      } catch (IOException e) {
-         logger.info("IOException - SSL Algorithm error: ", e);
-      } catch (KeyStoreException e) {
-         logger.info("Key store error: ", e);
+         out = new FileOutputStream(keyStorePath + Constants.APPMANAGER_KEYSTORE_FILE);
+         keyStore.store(new BufferedOutputStream(out), Constants.APPMANAGER_KEYSTORE_PASSWORD);
+      }catch (CertificateException | NoSuchAlgorithmException | IOException | KeyStoreException e) {
+         logger.error(Messages.getString("SW_MGR_COLLECTOR.FAIL_SAVE_CERT"), e);
+         throw new SWMgrCollectorInternalException(e, Messages.getString("SW_MGR_COLLECTOR.FAIL_SAVE_CERT"));
       } finally {
          if (out != null) {
             try {

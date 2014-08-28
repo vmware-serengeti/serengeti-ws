@@ -48,7 +48,7 @@ public class DefaultTrustManager implements X509TrustManager {
       logger.info("Starts to check server certificate.");
 
       try {
-         KeyStore keyStore = CommonUtil.loadAppMgrKeyStore();
+         KeyStore keyStore = CommonUtil.loadAppMgrKeyStore(Constants.APPMANAGER_KEYSTORE_PATH);
          if (keyStore == null) {
             logger.error("Cannot read appmanager keystore.");
             return;

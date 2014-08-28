@@ -66,6 +66,7 @@ import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.JobManager;
 import com.vmware.bdd.manager.RackInfoManager;
+import com.vmware.bdd.manager.SWMgrCollectorInternalException;
 import com.vmware.bdd.manager.ScaleManager;
 import com.vmware.bdd.manager.SoftwareManagerCollector;
 import com.vmware.bdd.service.impl.ClusteringService;
@@ -849,7 +850,13 @@ public class RestResource {
       if (appManagerAdd == null) {
          throw BddException.INVALID_PARAMETER("appManagerAdd", null);
       }
-      softwareManagerCollector.modifySoftwareManager(appManagerAdd);
+
+
+      try {
+         softwareManagerCollector.modifySoftwareManager(appManagerAdd);
+      } catch (SWMgrCollectorInternalException ex) {
+         throw BddException.wrapIfNeeded(ex, "App Manager Management Error");
+      }
    }
 
    /**
@@ -864,7 +871,12 @@ public class RestResource {
             || !CommonUtil.validateResourceName(appManagerName)) {
          throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
       }
-      softwareManagerCollector.deleteSoftwareManager(appManagerName);
+
+      try {
+         softwareManagerCollector.deleteSoftwareManager(appManagerName);
+      } catch (SWMgrCollectorInternalException ex) {
+         throw BddException.wrapIfNeeded(ex, "App Manager Management Error");
+      }
    }
 
    /**

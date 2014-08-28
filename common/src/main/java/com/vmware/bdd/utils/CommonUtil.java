@@ -299,9 +299,9 @@ public class CommonUtil {
       return sb.toString().toUpperCase();
    }
 
-   public static KeyStore loadAppMgrKeyStore() {
+   public static KeyStore loadAppMgrKeyStore(String keystorePath) {
       File file =
-            new File(Constants.APPMANAGER_KEYSTORE_PATH
+            new File(keystorePath
                   + Constants.APPMANAGER_KEYSTORE_FILE);
       if (file.isFile() == false) {
          char SEP = File.separatorChar;
