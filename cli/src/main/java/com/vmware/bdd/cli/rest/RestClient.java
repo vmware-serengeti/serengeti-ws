@@ -154,7 +154,6 @@ public class RestClient {
             Constants.HTTPS_CONNECTION_PREFIX + host
                   + Constants.HTTPS_CONNECTION_LOGIN_SUFFIX;
 
-
       Connect.ConnectType connectType = null;
       try {
          LoginResponse response = loginClient.login(hostUri, username, password);
@@ -162,8 +161,13 @@ public class RestClient {
          //200
          if (response.getResponseCode() == HttpStatus.OK.value()) {
             if(CommonUtil.isBlank(response.getSessionId())) {
-               System.out.println(Constants.CONNECT_FAILURE_NO_SESSION_ID);
-               connectType = Connect.ConnectType.ERROR;
+               if (isConnected()) {
+                  System.out.println(Constants.CONNECTION_ALREADY_ESTABLISHED);
+                  connectType = Connect.ConnectType.SUCCESS;
+               } else {
+                  System.out.println(Constants.CONNECT_FAILURE_NO_SESSION_ID);
+                  connectType = Connect.ConnectType.ERROR;
+               }
             } else {
                //normal response
                updateHostProperty(host);
@@ -200,6 +204,10 @@ public class RestClient {
       }
 
       return connectType;
+   }
+
+   private boolean isConnected() {
+      return (hostUri != null) && (!CommandsUtils.isBlank(readCookieInfo()));
    }
 
    /**

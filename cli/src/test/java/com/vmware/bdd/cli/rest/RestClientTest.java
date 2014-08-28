@@ -43,9 +43,10 @@ public class RestClientTest extends AbstractTestNGSpringContextTests {
       ArrayList<Object[]> dataList = new ArrayList<>();
 
       dataList.add(new Object[]{new LoginResponse(200, "JSESSIONID=B6926322AF4D8A8B9CEF3906D5735D41"), Connect.ConnectType.SUCCESS});
+      dataList.add(new Object[]{new LoginResponse(200, "JSESSIONID=B6926322AF4D8A8B9CEF3906D5735D41"), Connect.ConnectType.SUCCESS});
       dataList.add(new Object[]{new LoginResponse(401, null), Connect.ConnectType.UNAUTHORIZATION});
       dataList.add(new Object[]{new LoginResponse(500, null), Connect.ConnectType.ERROR});
-      dataList.add(new Object[]{new LoginResponse(200, null), Connect.ConnectType.ERROR});
+      dataList.add(new Object[]{new LoginResponse(200, null), Connect.ConnectType.SUCCESS});
       dataList.add(new Object[]{new LoginResponse(302, null), Connect.ConnectType.ERROR});
 
       DATA = new Object[dataList.size()][];
@@ -69,7 +70,6 @@ public class RestClientTest extends AbstractTestNGSpringContextTests {
    public void testLogin(LoginResponse loginResponse, Connect.ConnectType expectedConnectType) throws IOException {
       Mockito.when(loginClient.login(Matchers.anyString(), Matchers.anyString(), Matchers.anyString())).thenReturn(
             loginResponse);
-
       Connect.ConnectType connectType = restClient.connect("127.0.0.1:8443", "root", "vmware");
 
       Assert.assertEquals(connectType, expectedConnectType);
