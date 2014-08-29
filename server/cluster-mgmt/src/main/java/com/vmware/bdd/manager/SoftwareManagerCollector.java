@@ -331,7 +331,15 @@ public class SoftwareManagerCollector implements InitializingBean {
 
       List<AppManagerEntity> appManagers = appManagerService.findAll();
       for (AppManagerEntity appManager : appManagers) {
-         loadSoftwareManager(appManager);
+         // if any appmgr cannot be connected, we should not block the initialization, or
+         // the serengeti-ws server will fail startup
+         try {
+            loadSoftwareManager(appManager);
+         } catch (Exception e) {
+            // TODO Auto-generated catch block
+            logger.error("One of the appliation manager cannot be loaded: " + appManager.getName());
+            logger.error(e.getMessage());
+         }
       }
    }
 
