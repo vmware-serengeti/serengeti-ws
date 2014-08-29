@@ -350,6 +350,11 @@ public class ClusterSpecFactory {
          newSpec.setAppManager(spec.getAppManager());
       }
 
+      // --locaRepoURL
+      if(!CommonUtil.isBlank(spec.getLocalRepoURL())) {
+         newSpec.setLocalRepoURL(spec.getLocalRepoURL());
+      }
+
       // --distro
       if (spec.getDistro() != null) {
          newSpec.setDistro(spec.getDistro());
