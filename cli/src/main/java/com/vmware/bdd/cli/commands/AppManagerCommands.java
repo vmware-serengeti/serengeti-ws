@@ -453,6 +453,13 @@ public class AppManagerCommands implements CommandMarker {
          return;
       }
 
+      if(url != null && !changeAccount) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
+               name, Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL,
+               "--url must be used together with --changeAccount");
+         return;
+      }
+
       if (Constants.IRONFAN.equals(name)) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_APPMANAGER,
                name, Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL,
