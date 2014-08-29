@@ -170,5 +170,9 @@
          <groupId>asm</groupId>
          <artifactId>asm</artifactId>
       </dependency>
+      <dependency>
+         <groupId>org.apache.sshd</groupId>
+         <artifactId>sshd-core</artifactId>
+       </dependency>
    </dependencies>
 </project>
