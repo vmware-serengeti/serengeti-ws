@@ -284,7 +284,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          configureServices(clusterDef, reportQueue, true);
          startServices(clusterDef, reportQueue, true);
          success = true;
-         clusterDef.getCurrentReport().setAction("Successfully Create Cluster");
+         clusterDef.getCurrentReport().setAction("");
          clusterDef.getCurrentReport().setProgress(100);
          clusterDef.getCurrentReport().setSuccess(true);
       } catch (SoftwareManagementPluginException ex) {

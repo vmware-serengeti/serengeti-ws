@@ -273,7 +273,7 @@ public class AmbariImpl implements SoftwareManager {
          for (String nodeReportKey : nodeReports.keySet()) {
             nodeReports.get(nodeReportKey).setUseClusterMsg(true);
          }
-         clusterDef.getCurrentReport().setAction("Successfully create cluster");
+         clusterDef.getCurrentReport().setAction("");
          clusterDef.getCurrentReport().setProgress(
                ProgressSplit.PROVISION_SUCCESS.getProgress());
          clusterDef.getCurrentReport().setSuccess(success);
