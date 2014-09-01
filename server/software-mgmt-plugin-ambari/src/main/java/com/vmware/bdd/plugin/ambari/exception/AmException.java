@@ -64,7 +64,6 @@ public class AmException extends SoftwareManagementPluginException {
       return new AmException("AMBARI.PROVISION_WITH_BLUEPRINT_FAILED", cause, blueprintName);
    }
 
-
    public static AmException CLUSTER_NOT_PROVISIONED(String clusterName) {
       return new AmException("AMBARI.CLUSTER_NOT_PROVISIONED", null, clusterName);
    }

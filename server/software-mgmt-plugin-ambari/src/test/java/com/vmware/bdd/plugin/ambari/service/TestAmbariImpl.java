@@ -72,7 +72,7 @@ public class TestAmbariImpl {
    private  ClusterBlueprint blueprint;
    private  ClusterReportQueue reportQueue;
 
-   @BeforeTest(groups = { "TestClouderaManagerImpl" }, dependsOnGroups = { "TestClusterDef" })
+   @BeforeTest(groups = { "TestAmbariImpl" }, dependsOnGroups = { "TestClusterDef" })
    public void setup() throws IOException {
       ApiRootResource apiRootResource = Mockito.mock(ApiRootResource.class);
       RootResourceV1 rootResourceV1 = new FakeRootResourceV1();
@@ -339,7 +339,7 @@ public class TestAmbariImpl {
       try {
          spy.startCluster(blueprint, reportQueue);
       } catch (SoftwareManagementPluginException e) {
-         Assert.assertEquals(e.getCause().getMessage(), "Faked exception");
+         Assert.assertEquals(e.getCause().getMessage(), "Ambari server error: Faked exception.");
       }
       spy.setApiManager(backup);
    }

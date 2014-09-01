@@ -82,12 +82,12 @@ public class ApiManager implements IApiManager {
 
    public ApiManager(String amServerHost, int port, String user, String password) {
       this(new AmbariManagerClientbuilder().withHost(amServerHost)
-                  .withPort(port).withUsernamePassword(user, password));
+            .withPort(port).withUsernamePassword(user, password));
    }
 
    public ApiManager(URL baseUrl, String user, String password) {
       this(new AmbariManagerClientbuilder().withBaseURL(baseUrl)
-                  .withUsernamePassword(user, password));
+            .withUsernamePassword(user, password));
    }
 
    public ApiManager(AmbariManagerClientbuilder clientbuilder) {
@@ -99,7 +99,12 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiStackList getStackList() throws AmbariApiException {
-      Response response = apiResourceRootV1.getStacks2Resource().readStacks();
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getStacks2Resource().readStacks();
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String stacksJson = handleAmbariResponse(response);
       logger.debug("Response of stack list from ambari server:");
       logger.debug(stacksJson);
@@ -110,8 +115,12 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiStack getStack(String stackName) throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getStacks2Resource().readStack(stackName);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getStacks2Resource().readStack(stackName);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String stackJson = handleAmbariResponse(response);
       logger.debug("Response of stack from ambari server:");
       logger.debug(stackJson);
@@ -121,7 +130,13 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiService readService(String clusterName, String serviceName) throws AmbariApiException {
-      Response response = apiResourceRootV1.getClustersResource().getServicesResource(clusterName).readService(serviceName);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getServicesResource(clusterName).readService(serviceName);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String serviceJson = handleAmbariResponse(response);
       logger.debug("Service " + serviceName + " is: " + serviceJson);
       ApiService apiService = ApiUtils.jsonToObject(ApiService.class, serviceJson);
@@ -138,9 +153,13 @@ public class ApiManager implements IApiManager {
    @Override
    public ApiStackVersionList getStackVersionList(String stackName)
          throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getStacks2Resource()
-                  .getStackVersionsResource(stackName).readStackVersions();
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getStacks2Resource()
+                     .getStackVersionsResource(stackName).readStackVersions();
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String stackVersionsJson = handleAmbariResponse(response);
       logger.debug("Response of version list of stack from ambari server:");
       logger.debug(stackVersionsJson);
@@ -152,10 +171,14 @@ public class ApiManager implements IApiManager {
    @Override
    public ApiStackVersion getStackVersion(String stackName, String stackVersion)
          throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getStacks2Resource()
-                  .getStackVersionsResource(stackName)
-                  .readStackVersion(stackVersion);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getStacks2Resource()
+                     .getStackVersionsResource(stackName)
+                     .readStackVersion(stackVersion);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String stackVersionJson = handleAmbariResponse(response);
       logger.debug("Response of version of stack from ambari server:");
       logger.debug(stackVersionJson);
@@ -167,10 +190,14 @@ public class ApiManager implements IApiManager {
    @Override
    public ApiStackServiceList getStackServiceList(String stackName,
          String stackVersion) throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getStacks2Resource()
-                  .getStackVersionsResource(stackName)
-                  .getStackServicesResource(stackVersion).readServices();
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getStacks2Resource()
+                     .getStackVersionsResource(stackName)
+                     .getStackServicesResource(stackVersion).readServices();
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String apiStackServicesJson = handleAmbariResponse(response);
       logger.debug("Response of service list of stack from ambari server:");
       logger.debug(apiStackServicesJson);
@@ -205,11 +232,15 @@ public class ApiManager implements IApiManager {
    public ApiStackService getStackService(String stackName,
          String stackVersion, String stackServiceName)
          throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getStacks2Resource()
-                  .getStackVersionsResource(stackName)
-                  .getStackServicesResource(stackVersion)
-                  .readService(stackServiceName);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getStacks2Resource()
+                     .getStackVersionsResource(stackName)
+                     .getStackServicesResource(stackVersion)
+                     .readService(stackServiceName);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String apiStackServiceJson = handleAmbariResponse(response);
       logger.debug("Response of service of stack from ambari server:");
       logger.debug(apiStackServiceJson);
@@ -222,12 +253,15 @@ public class ApiManager implements IApiManager {
    public ApiStackComponentList getStackComponentList(String stackName,
          String stackVersion, String stackServiceName)
          throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getStacks2Resource()
-                  .getStackVersionsResource(stackName)
-                  .getStackServicesResource(stackVersion)
-                  .getComponentsResource(stackServiceName)
-                  .readComponents();
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getStacks2Resource()
+                     .getStackVersionsResource(stackName)
+                     .getStackServicesResource(stackVersion)
+                     .getComponentsResource(stackServiceName).readComponents();
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String stackComponentsJson = handleAmbariResponse(response);
       logger.debug("Response of component list of service from ambari server:");
       logger.debug(stackComponentsJson);
@@ -241,25 +275,32 @@ public class ApiManager implements IApiManager {
    public ApiStackComponent getStackComponent(String stackName,
          String stackVersion, String stackServiceName, String stackComponentName)
          throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getStacks2Resource()
-                  .getStackVersionsResource(stackName)
-                  .getStackServicesResource(stackVersion)
-                  .getComponentsResource(stackServiceName)
-                  .readComponent(stackComponentName);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getStacks2Resource()
+                     .getStackVersionsResource(stackName)
+                     .getStackServicesResource(stackVersion)
+                     .getComponentsResource(stackServiceName)
+                     .readComponent(stackComponentName);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String stackComponentJson = handleAmbariResponse(response);
       logger.debug("Response of component of service from ambari server:");
       logger.debug(stackComponentJson);
       ApiStackComponent apiServiceComponent =
-            ApiUtils.jsonToObject(ApiStackComponent.class,
-                  stackComponentJson);
+            ApiUtils.jsonToObject(ApiStackComponent.class, stackComponentJson);
       return apiServiceComponent;
    }
 
    @Override
    public ApiClusterList getClusterList() throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getClustersResource().readClusters();
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource().readClusters();
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String clustersJson = handleAmbariResponse(response);
       logger.debug("Response of cluster list from ambari server:");
       logger.debug(clustersJson);
@@ -270,8 +311,12 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiCluster getCluster(String clusterName) throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getClustersResource().readCluster(clusterName);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource().readCluster(clusterName);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String clusterJson = handleAmbariResponse(response);
       logger.debug("Response of cluster from ambari server:");
       logger.debug(clusterJson);
@@ -282,8 +327,12 @@ public class ApiManager implements IApiManager {
 
    @Override
    public List<ApiService> getClusterServices(String clusterName) throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getClustersResource().readCluster(clusterName);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource().readCluster(clusterName);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String clusterJson = handleAmbariResponse(response);
       logger.trace("in getClusterServicesNames, cluster info is " + clusterJson);
       ApiCluster apiCluster =
@@ -304,10 +353,14 @@ public class ApiManager implements IApiManager {
       String request = ApiUtils.objectToJson(stopRequest);
       logger.debug("The request in stop cluster is :" + request);
 
-      Response response =
-            apiResourceRootV1.getClustersResource()
-                  .getServicesResource(clusterName)
-                  .stopAllServices(clusterName, "true", request);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getServicesResource(clusterName)
+                     .stopAllServices(clusterName, "true", request);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String stopServicesJson = handleAmbariResponse(response);
       logger.debug("The response when ambari stop cluster is :"
             + stopServicesJson);
@@ -326,10 +379,14 @@ public class ApiManager implements IApiManager {
       String request = ApiUtils.objectToJson(stopRequest);
       logger.debug("The request in start cluster is :" + request);
 
-      Response response =
-            apiResourceRootV1.getClustersResource()
-                  .getServicesResource(clusterName)
-                  .startAllServices(clusterName, "true", request);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getServicesResource(clusterName)
+                     .startAllServices(clusterName, "true", request);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String startServicesJson = handleAmbariResponse(response);
       logger.debug("The reponse when startAllService is :" + startServicesJson);
       return ApiUtils.jsonToObject(ApiRequest.class, startServicesJson);
@@ -337,8 +394,12 @@ public class ApiManager implements IApiManager {
 
    @Override
    public List<String> getClusterServicesNames(String clusterName) throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getClustersResource().readCluster(clusterName);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource().readCluster(clusterName);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String clusterJson = handleAmbariResponse(response);
       logger.trace("in getClusterServicesNames, cluster info is " + clusterJson);
       ApiCluster apiCluster =
@@ -369,9 +430,13 @@ public class ApiManager implements IApiManager {
          ApiClusterBlueprint apiClusterBlueprint) throws AmbariApiException {
       logger.info("ApiClusterBlueprint:");
       logger.info(ApiUtils.objectToJson(apiClusterBlueprint));
-      Response response =
-            apiResourceRootV1.getClustersResource().createCluster(clusterName,
-                  ApiUtils.objectToJson(apiClusterBlueprint));
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .createCluster(clusterName, ApiUtils.objectToJson(apiClusterBlueprint));
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String requestJson = handleAmbariResponse(response);
       logger.debug("Response of provision cluster with blueprint from ambari server:");
       logger.debug(requestJson);
@@ -382,8 +447,12 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiBlueprintList getBlueprintList() throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getBlueprintsResource().readBlueprints();
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getBlueprintsResource().readBlueprints();
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String blueprintsJson = handleAmbariResponse(response);
       logger.debug("Response of blueprint list from ambari server:");
       logger.debug(blueprintsJson);
@@ -394,9 +463,12 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiBlueprint getBlueprint(String blueprintName) throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getBlueprintsResource().readBlueprint(
-                  blueprintName);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getBlueprintsResource().readBlueprint(blueprintName);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String blueprintJson = handleAmbariResponse(response);
       logger.debug("Response of blueprint from ambari server:");
       logger.debug(blueprintJson);
@@ -410,9 +482,13 @@ public class ApiManager implements IApiManager {
          ApiBlueprint apiBlueprint) throws AmbariApiException {
       logger.info("ApiBlueprint:");
       logger.info(ApiUtils.objectToJson(apiBlueprint));
-      Response response =
-            apiResourceRootV1.getBlueprintsResource().createBlueprint(
-                  blueprintName, ApiUtils.objectToJson(apiBlueprint));
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getBlueprintsResource().createBlueprint(
+                     blueprintName, ApiUtils.objectToJson(apiBlueprint));
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String blueprintJson = handleAmbariResponse(response);
       logger.debug("Response of blueprint creation from ambari server:");
       logger.debug(blueprintJson);
@@ -424,7 +500,12 @@ public class ApiManager implements IApiManager {
    public boolean updatePersist(ApiPersist persist) throws AmbariApiException {
       String persistJson = ApiUtils.objectToJson(persist);
       logger.info("Updating persist to:" + persistJson);
-      Response response = apiResourceRootV1.getPersistResource().updatePersist(persistJson);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getPersistResource().updatePersist(persistJson);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       handleAmbariResponse(response);
       return true;
    }
@@ -432,16 +513,25 @@ public class ApiManager implements IApiManager {
    @Override
    public ApiRequest deleteHost(String clusterName, String fqdn) throws AmbariApiException {
       logger.info("Deleting host " + fqdn + " in cluster " + clusterName);
-      Response response = apiResourceRootV1.getClustersResource().getHostsResource(clusterName).deleteHost(fqdn);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getHostsResource(clusterName).deleteHost(fqdn);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String deleteHostJson = handleAmbariResponse(response);
       return ApiUtils.jsonToObject(ApiRequest.class, deleteHostJson);
    }
 
    public boolean deleteBlueprint(String blueprintName) throws AmbariApiException {
       logger.info("Delete apiBlueprint " + blueprintName);
-      Response response =
-            apiResourceRootV1.getBlueprintsResource().deleteBlueprint(
-                  blueprintName);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getBlueprintsResource().deleteBlueprint(blueprintName);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       handleAmbariResponse(response);
       return true;
    }
@@ -449,17 +539,25 @@ public class ApiManager implements IApiManager {
    @Override
    public boolean deleteCluster(String clusterName) throws AmbariApiException {
       logger.info("Ambari is deleting cluster " + clusterName);
-      Response response =
-            apiResourceRootV1.getClustersResource().deleteCluster(clusterName);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource().deleteCluster(clusterName);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       handleAmbariResponse(response);
       return HttpStatus.isSuccess(response.getStatus());
    }
 
    @Override
    public ApiRequestList getRequestList(String clusterName) throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getClustersResource()
-                  .getRequestsResource(clusterName).readRequests();
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getRequestsResource(clusterName).readRequests();
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String requestsJson = handleAmbariResponse(response);
       logger.debug("Response of request list from ambari server:");
       logger.debug(requestsJson);
@@ -470,9 +568,13 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiRequest getRequest(String clusterName, Long requestId) throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getClustersResource()
-                  .getRequestsResource(clusterName).readRequest(requestId);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getRequestsResource(clusterName).readRequest(requestId);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String requestJson = handleAmbariResponse(response);
       logger.debug("Response of request from ambari server:");
       logger.debug(requestJson);
@@ -485,9 +587,13 @@ public class ApiManager implements IApiManager {
    public ApiBootstrap createBootstrap(ApiBootstrap bootstrap) throws AmbariApiException {
       logger.info("ApiBootstrap:");
       logger.info(ApiUtils.objectToJson(bootstrap));
-      Response response =
-            apiResourceRootV1.getBootstrapResource().createBootstrap(
-                  ApiUtils.objectToJson(bootstrap));
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getBootstrapResource().createBootstrap(
+                     ApiUtils.objectToJson(bootstrap));
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String bootstrapJson = handleAmbariResponse(response);
       logger.debug("Response of bootstrap creation from ambari server:");
       logger.debug(bootstrapJson);
@@ -498,24 +604,29 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiBootstrapStatus getBootstrapStatus(Long bootstrapId) throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getBootstrapResource().readBootstrapStatus(
-                  bootstrapId);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getBootstrapResource().readBootstrapStatus(bootstrapId);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String bootstrapStatusJson = handleAmbariResponse(response);
       logger.debug("Response of bootstrap status from ambari server:");
       logger.debug(bootstrapStatusJson);
-      ApiBootstrapStatus apiBootstrapRequest =
-            ApiUtils
-                  .jsonToObject(ApiBootstrapStatus.class, bootstrapStatusJson);
+      ApiBootstrapStatus apiBootstrapRequest = ApiUtils.jsonToObject(ApiBootstrapStatus.class, bootstrapStatusJson);
       return apiBootstrapRequest;
    }
 
    @Override
    public ApiRequest getRequestWithTasks(String clusterName, Long requestId) throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getClustersResource()
-                  .getRequestsResource(clusterName)
-                  .readRequestWithTasks(requestId, "*,tasks/Tasks/*");
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getRequestsResource(clusterName)
+                     .readRequestWithTasks(requestId, "*,tasks/Tasks/*");
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String requestWithTasksJson = handleAmbariResponse(response);
       logger.debug("Response of request with tasks from ambari server:");
       logger.debug(requestWithTasksJson);
@@ -548,7 +659,7 @@ public class ApiManager implements IApiManager {
             return ServiceStatus.STOPPED;
          }
          if (notStartedServiceNames.isEmpty()) {
-            if(hasStartedAlert) {
+            if (hasStartedAlert) {
                return ServiceStatus.ALERT;
             } else {
                return ServiceStatus.STARTED;
@@ -594,10 +705,14 @@ public class ApiManager implements IApiManager {
 
    private ApiServiceAlertList getServicesWithAlert(String clusterName) throws AmbariApiException {
       String fields = "alerts/summary,ServiceInfo/state";
-      Response response =
-            apiResourceRootV1.getClustersResource()
-                  .getServicesResource(clusterName)
-                  .readServicesWithFilter(fields);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getServicesResource(clusterName)
+                     .readServicesWithFilter(fields);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String servicesWithAlert = handleAmbariResponse(response);
       ApiServiceAlertList serviceList =
             ApiUtils.jsonToObject(ApiServiceAlertList.class, servicesWithAlert);
@@ -630,7 +745,13 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiHostList getHostsSummaryInfo(String clusterName) {
-      Response response = apiResourceRootV1.getClustersResource().getHostsResource(clusterName).readHosts();
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getHostsResource(clusterName).readHosts();
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String hostListInfo = handleAmbariResponse(response);
       logger.info("All hosts in cluster " + clusterName + " is " + hostListInfo);
       return ApiUtils.jsonToObject(ApiHostList.class, hostListInfo);
@@ -638,9 +759,13 @@ public class ApiManager implements IApiManager {
 
    private ApiHostList getHostsWithRoleState(String clusterName) throws AmbariApiException {
       String fields = "Hosts/host_status,host_components/HostRoles";
-      Response response =
-            apiResourceRootV1.getClustersResource()
-                  .getHostsResource(clusterName).readHostsWithFilter(fields);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getHostsResource(clusterName).readHostsWithFilter(fields);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String hostsWithState = handleAmbariResponse(response);
       ApiHostList hostList =
             ApiUtils.jsonToObject(ApiHostList.class, hostsWithState);
@@ -648,16 +773,24 @@ public class ApiManager implements IApiManager {
    }
 
    public String healthCheck() throws AmbariApiException {
-      Response response = apiResourceRootV1.getHealthCheckResource().check();
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getHealthCheckResource().check();
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String healthStatus = handleAmbariResponse(response);
       return healthStatus;
    }
 
    @Override
    public String getVersion() throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getRootServicesResource()
-                  .readRootServiceComponents();
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getRootServicesResource().readRootServiceComponents();
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String requestJson = handleAmbariResponse(response);
       ApiRootServicesComponents apiRequest =
             ApiUtils.jsonToObject(ApiRootServicesComponents.class, requestJson);
@@ -667,16 +800,26 @@ public class ApiManager implements IApiManager {
    @Override
    public boolean deleteService(String clusterName, String serviceName) {
       logger.info("Deleting service " + serviceName + " in cluster " + clusterName);
-      Response response = apiResourceRootV1.getClustersResource().getServicesResource(clusterName).deleteService(serviceName);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getServicesResource(clusterName).deleteService(serviceName);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       handleAmbariResponse(response);
       return true;
    }
 
-   public List<String> getExistingHosts(String clusterName, List<String> hostNames)
-   throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getClustersResource()
-                  .getHostsResource(clusterName).readHosts();
+   public List<String> getExistingHosts(String clusterName,
+         List<String> hostNames) throws AmbariApiException {
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getHostsResource(clusterName).readHosts();
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String hostList = handleAmbariResponse(response);
       ApiHostList apiHostList = ApiUtils.jsonToObject(ApiHostList.class, hostList);
       List<String> existingHosts = new ArrayList<>();
@@ -690,25 +833,32 @@ public class ApiManager implements IApiManager {
       return existingHosts;
    }
 
-   public void addHostsToCluster(String clusterName,
-         List<String> hostNames) throws AmbariApiException {
+   public void addHostsToCluster(String clusterName, List<String> hostNames) throws AmbariApiException {
       logger.debug("Add hosts " + hostNames + " to cluster " + clusterName);
       for (String hostName : hostNames) {
-         Response response =
-               apiResourceRootV1.getClustersResource()
-                     .getHostsResource(clusterName)
-                     .addHost(hostName);
+         Response response = null;
+         try {
+            response = apiResourceRootV1.getClustersResource()
+                        .getHostsResource(clusterName).addHost(hostName);
+         } catch (Exception e) {
+            throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+         }
          handleAmbariResponse(response);
       }
    }
 
    @Override
    public ApiHostList getClusterHostsList(String clusterName) throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getClustersResource()
-            .getHostsResource(clusterName).readHosts();
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getHostsResource(clusterName).readHosts();
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String hostList = handleAmbariResponse(response);
-      ApiHostList apiHostList = ApiUtils.jsonToObject(ApiHostList.class, hostList);
+      ApiHostList apiHostList =
+            ApiUtils.jsonToObject(ApiHostList.class, hostList);
       return apiHostList;
    }
 
@@ -734,10 +884,14 @@ public class ApiManager implements IApiManager {
       requestInfo.setQueryString(builder.toString());
       String startJson = ApiUtils.objectToJson(hostsRequest);
       logger.debug("Stop json: " + startJson);
-      Response response =
-            apiResourceRootV1.getClustersResource()
-                  .getHostComponentsResource(clusterName)
-                  .operationWithFilter(startJson);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getHostComponentsResource(clusterName)
+                     .operationWithFilter(startJson);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String responseJson = handleAmbariResponse(response);
       logger.debug("in stop components, reponse is :" + responseJson);
       return ApiUtils.jsonToObject(ApiRequest.class, responseJson);
@@ -745,23 +899,31 @@ public class ApiManager implements IApiManager {
 
    public void deleteAllComponents(String clusterName, String hostName)
          throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getClustersResource()
-            .getHostsResource(clusterName)
-            .getHostComponentsResource(hostName)
-            .deleteAllComponents();
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getHostsResource(clusterName)
+                     .getHostComponentsResource(hostName).deleteAllComponents();
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       handleAmbariResponse(response);
    }
 
    public List<String> getAssociatedConfigGroups(String clusterName,
          String hostName) throws AmbariApiException {
       String fields = "ConfigGroup/hosts";
-      Response response =
-            apiResourceRootV1.getClustersResource()
-                  .getConfigGroupsResource(clusterName)
-                  .readConfigGroupsWithFields(fields);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getConfigGroupsResource(clusterName)
+                     .readConfigGroupsWithFields(fields);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String strConfGroups = handleAmbariResponse(response);
-      ApiConfigGroupList apiConfGroupList = ApiUtils.jsonToObject(ApiConfigGroupList.class, strConfGroups);
+      ApiConfigGroupList apiConfGroupList =
+            ApiUtils.jsonToObject(ApiConfigGroupList.class, strConfGroups);
       List<String> result = new ArrayList<>();
       if (apiConfGroupList.getConfigGroups() == null) {
          return result;
@@ -780,12 +942,16 @@ public class ApiManager implements IApiManager {
       return result;
    }
 
-   public void deleteConfigGroup(String clusterName,
-         String groupId) throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getClustersResource()
-                  .getConfigGroupsResource(clusterName)
-                  .deleteConfigGroup(groupId);
+   public void deleteConfigGroup(String clusterName, String groupId)
+         throws AmbariApiException {
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getConfigGroupsResource(clusterName)
+                     .deleteConfigGroup(groupId);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       handleAmbariResponse(response);
    }
 
@@ -818,10 +984,14 @@ public class ApiManager implements IApiManager {
       requestInfo.setQueryString(builder.toString());
       String startJson = ApiUtils.objectToJson(hostsRequest);
       logger.debug("Start json: " + startJson);
-      Response response =
-            apiResourceRootV1.getClustersResource()
-                  .getHostComponentsResource(clusterName)
-                  .operationWithFilter(startJson);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getHostComponentsResource(clusterName)
+                     .operationWithFilter(startJson);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String responseJson = handleAmbariResponse(response);
       logger.debug("in start components, reponse is :" + responseJson);
       return ApiUtils.jsonToObject(ApiRequest.class, responseJson);
@@ -831,10 +1001,14 @@ public class ApiManager implements IApiManager {
          List<ApiConfigGroup> configGroups) throws AmbariApiException {
       String confGroups = ApiUtils.objectToJson(configGroups);
       logger.debug("Creating config groups: " + confGroups);
-      Response response =
-            apiResourceRootV1.getClustersResource()
-                  .getConfigGroupsResource(clusterName)
-                  .createConfigGroups(confGroups);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getConfigGroupsResource(clusterName)
+                     .createConfigGroups(confGroups);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       handleAmbariResponse(response);
    }
 
@@ -857,10 +1031,13 @@ public class ApiManager implements IApiManager {
       requestInfo.setQueryString(builder.toString());
       String json = ApiUtils.objectToJson(hostsRequest);
       logger.debug("add json: " + json);
-      Response response =
-            apiResourceRootV1.getClustersResource()
-                  .getHostsResource(clusterName)
-                  .addComponentsToHosts(json);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getHostsResource(clusterName).addComponentsToHosts(json);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       handleAmbariResponse(response);
    }
 
@@ -868,11 +1045,14 @@ public class ApiManager implements IApiManager {
       ApiHostsRequest hostsRequest = AmUtils.createInstallComponentsRequest();
       String json = ApiUtils.objectToJson(hostsRequest);
       logger.debug("install component json: " + json);
-      Response response =
-            apiResourceRootV1
-                  .getClustersResource()
-                  .getHostComponentsResource(clusterName)
-                  .operationWithFilter(json);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getHostComponentsResource(clusterName)
+                     .operationWithFilter(json);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String installJson = handleAmbariResponse(response);
       logger.debug("in install components, reponse is :" + installJson);
       return ApiUtils.jsonToObject(ApiRequest.class, installJson);
@@ -886,18 +1066,27 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiHostList getRegisteredHosts() throws AmbariApiException {
-      Response response = apiResourceRootV1.getHostsResource().readHosts();
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getHostsResource().readHosts();
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String apiHostListJson = handleAmbariResponse(response);
       return ApiUtils.jsonToObject(ApiHostList.class, apiHostListJson);
    }
 
    private ApiStackServiceList getServicesWithFilter(String stackName,
          String stackVersion, String filter) throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getStacks2Resource()
-                  .getStackVersionsResource(stackName)
-                  .getStackServicesResource(stackVersion)
-                  .readServicesWithFilter(filter);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getStacks2Resource()
+                     .getStackVersionsResource(stackName)
+                     .getStackServicesResource(stackVersion)
+                     .readServicesWithFilter(filter);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String apiStackServicesWithComponentsJson =
             handleAmbariResponse(response);
       logger.trace("Response of service list with components of stack from ambari server:");
@@ -911,11 +1100,15 @@ public class ApiManager implements IApiManager {
    private ApiStackService getServiceWithFilter(String stackName,
          String stackVersion, String serviceName, String filter)
          throws AmbariApiException {
-      Response response =
-            apiResourceRootV1.getStacks2Resource()
-                  .getStackVersionsResource(stackName)
-                  .getStackServicesResource(stackVersion)
-                  .readServiceWithFilter(serviceName, filter);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getStacks2Resource()
+                     .getStackVersionsResource(stackName)
+                     .getStackServicesResource(stackVersion)
+                     .readServiceWithFilter(serviceName, filter);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
       String apiStackServiceWithComponentsJson = handleAmbariResponse(response);
       logger.debug("Response of service with components of stack from ambari server:");
       logger.debug(apiStackServiceWithComponentsJson);
@@ -933,9 +1126,9 @@ public class ApiManager implements IApiManager {
          String errMessage = null;
          if (result != null && !result.isEmpty()) {
             ApiErrorMessage apiErrorMessage = ApiUtils.jsonToObject(ApiErrorMessage.class, result);
-            errMessage = "status: " + apiErrorMessage.getStatus() + ", message: " + apiErrorMessage.getMessage();
+            errMessage = apiErrorMessage.getStatus() + " " + apiErrorMessage.getMessage();
          } else {
-            errMessage = "status: " + errCode + ", message: " + HttpStatus.getMessage(errCode);
+            errMessage = errCode + " " + HttpStatus.getMessage(errCode);
          }
          throw AmbariApiException.RESPONSE_EXCEPTION(errCode, errMessage);
       }
