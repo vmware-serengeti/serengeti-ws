@@ -25,7 +25,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -39,7 +39,7 @@ import com.vmware.bdd.cli.commands.CookieCache;
  * Created By xiaoliangl on 8/27/14.
  */
 @ContextConfiguration(locations = {"classpath:com/vmware/bdd/cli/command/tests/restclient-test-context.xml"})
-@DirtiesContext( classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext( classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD) // reset spring context after each test method.
 public class RestClientTest extends AbstractTestNGSpringContextTests {
    private static Object[][] DATA = null;
 
@@ -50,7 +50,7 @@ public class RestClientTest extends AbstractTestNGSpringContextTests {
       dataList.add(new Object[]{new LoginResponse(200, "JSESSIONID=B6926322AF4D8A8B9CEF3906D5735D41"), Connect.ConnectType.SUCCESS});
       dataList.add(new Object[]{new LoginResponse(401, null), Connect.ConnectType.UNAUTHORIZATION});
       dataList.add(new Object[]{new LoginResponse(500, null), Connect.ConnectType.ERROR});
-      dataList.add(new Object[]{new LoginResponse(200, null), Connect.ConnectType.SUCCESS});
+      dataList.add(new Object[]{new LoginResponse(200, null), Connect.ConnectType.ERROR});
       dataList.add(new Object[]{new LoginResponse(302, null), Connect.ConnectType.ERROR});
 
       DATA = new Object[dataList.size()][];
@@ -83,9 +83,10 @@ public class RestClientTest extends AbstractTestNGSpringContextTests {
       }
    }
 
-   @AfterTest
+   @AfterMethod
    public void tearDown() {
       new File("cli.properties").delete();
+      CookieCache.clear();
    }
 
    @Test
@@ -98,5 +99,22 @@ public class RestClientTest extends AbstractTestNGSpringContextTests {
 
       Assert.assertEquals(connectType, Connect.ConnectType.ERROR);
 
+   }
+
+   @Test
+   public void testRelogin() throws IOException {
+      Mockito.when(loginClient.login(Matchers.anyString(), Matchers.anyString(), Matchers.anyString())).thenReturn(
+            new LoginResponse(200, "JSESSIONID=B6926322AF4D8A8B9CEF3906D5735D41"));
+
+      Connect.ConnectType connectType = restClient.connect("127.0.0.1:8443", "root", "vmware");
+
+      Assert.assertEquals(connectType, Connect.ConnectType.SUCCESS);
+
+      Mockito.when(loginClient.login(Matchers.anyString(), Matchers.anyString(), Matchers.anyString())).thenReturn(
+            new LoginResponse(200, null));
+
+      connectType = restClient.connect("127.0.0.1:8443", "root", "vmware");
+
+      Assert.assertEquals(connectType, Connect.ConnectType.SUCCESS);
    }
 }
