@@ -14,15 +14,18 @@
  *****************************************************************************/
 package com.vmware.bdd.cli.rest;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -36,6 +39,7 @@ import com.vmware.bdd.cli.commands.CookieCache;
  * Created By xiaoliangl on 8/27/14.
  */
 @ContextConfiguration(locations = {"classpath:com/vmware/bdd/cli/command/tests/restclient-test-context.xml"})
+@DirtiesContext( classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class RestClientTest extends AbstractTestNGSpringContextTests {
    private static Object[][] DATA = null;
 
@@ -77,6 +81,11 @@ public class RestClientTest extends AbstractTestNGSpringContextTests {
       if(loginResponse.getSessionId() != null) {
          Assert.assertEquals(loginResponse.getSessionId(), CookieCache.get(CookieCache.COOKIE));
       }
+   }
+
+   @AfterTest
+   public void tearDown() {
+      new File("cli.properties").delete();
    }
 
    @Test
