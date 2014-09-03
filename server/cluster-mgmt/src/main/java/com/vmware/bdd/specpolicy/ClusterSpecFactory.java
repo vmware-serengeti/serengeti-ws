@@ -77,10 +77,12 @@ public class ClusterSpecFactory {
          "am-hdp-2-0-hdfs-yarn-template-spec.json";
    private static final String AM_HDP_2_1_HDFS_YARN_TEMPLATE_SPEC =
          "am-hdp-2-1-hdfs-yarn-template-spec.json";
-   private static final String AM_HDFS_V1_HBASE_TEMPLATE_SPEC =
-         "am-hdfs-v1-hbase-template-spec.json";
-   private static final String AM_HDFS_V2_HBASE_TEMPLATE_SPEC =
-         "am-hdfs-v2-hbase-template-spec.json";
+   private static final String AM_HDP_V1_HBASE_TEMPLATE_SPEC =
+         "am-hdp-1-hbase-template-spec.json";
+   private static final String AM_HDP_2_0_HBASE_TEMPLATE_SPEC =
+         "am-hdp-2-0-hbase-template-spec.json";
+   private static final String AM_HDP_2_1_HBASE_TEMPLATE_SPEC =
+         "am-hdp-2-1-hbase-template-spec.json";
    private static final String AM_HDFS_PURE_HBASE_TEMPLATE_SPEC =
          "am-hdfs-pure-hbase-template-spec.json";
 
@@ -206,9 +208,13 @@ public class ClusterSpecFactory {
          case HDFS_HBASE:
             if (Configuration.getBoolean(Constants.AMBARI_HBASE_DEPEND_ON_MAPREDUCE)) {
                if (hdpVersion == HDP_VERSION.V1) {
-                  return loadFromFile(locateSpecFile(AM_HDFS_V1_HBASE_TEMPLATE_SPEC));
+                  return loadFromFile(locateSpecFile(AM_HDP_V1_HBASE_TEMPLATE_SPEC));
                } else {
-                  return loadFromFile(locateSpecFile(AM_HDFS_V2_HBASE_TEMPLATE_SPEC));
+                  if (hdpVersion == HDP_VERSION.V2_0) {
+                     return loadFromFile(locateSpecFile(AM_HDP_2_0_HBASE_TEMPLATE_SPEC));
+                  } else {
+                     return loadFromFile(locateSpecFile(AM_HDP_2_1_HBASE_TEMPLATE_SPEC));
+                  }
                }
             } else {
                return loadFromFile(locateSpecFile(AM_HDFS_PURE_HBASE_TEMPLATE_SPEC));
