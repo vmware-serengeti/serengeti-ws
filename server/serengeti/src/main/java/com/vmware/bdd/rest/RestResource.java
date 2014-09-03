@@ -153,7 +153,6 @@ public class RestResource {
 
    /**
     * Get REST api version
-    * 
     * @return REST api version
     */
    @RequestMapping(value = "/hello", method = RequestMethod.GET)
@@ -177,7 +176,6 @@ public class RestResource {
 
    /**
     * Get a specific task by its id
-    * 
     * @param taskId
     *           The identity returned as part of uri in the response(Accepted
     *           status) header of Location, such as
@@ -268,7 +266,6 @@ public class RestResource {
 
    /**
     * Configure a hadoop or hbase cluster's properties
-    * 
     * @param clusterName
     * @param createSpec
     *           The existing create specification plus the configuration map
@@ -306,7 +303,6 @@ public class RestResource {
 
    /**
     * Delete a cluster
-    * 
     * @param clusterName
     * @param request
     * @return Return a response with Accepted status and put task uri in the
@@ -330,7 +326,6 @@ public class RestResource {
    /**
     * Start or stop a normal cluster, or resume a failed cluster after adjusting
     * the resources allocated to this cluster
-    * 
     * @param clusterName
     * @param state
     *           Can be start, stop, or resume
@@ -370,7 +365,6 @@ public class RestResource {
 
    /**
     * Expand the number of nodes in a node group
-    * 
     * @param clusterName
     * @param groupName
     * @param instanceNum
@@ -410,7 +404,6 @@ public class RestResource {
 
    /**
     * Upgrade a cluster
-    * 
     * @param clusterName
     * @param request
     * @return Return a response with Accepted status and put task uri in the
@@ -432,7 +425,6 @@ public class RestResource {
 
    /**
     * Scale up or down the cpu and memory of each node in a node group
-    * 
     * @param clusterName
     * @param groupName
     * @param scale
@@ -474,7 +466,6 @@ public class RestResource {
 
    /**
     * Turn on or off some compute nodes
-    * 
     * @param clusterName
     * @param requestBody
     * @param request
@@ -506,7 +497,6 @@ public class RestResource {
    /**
     * Change elasticity mode, IO priority, and maximum or minimum number of
     * powered on compute nodes under auto mode
-    * 
     * @param clusterName
     * @param requestBody
     * @param request
@@ -556,7 +546,6 @@ public class RestResource {
 
    /**
     * Replace some failed disks with new disks
-    * 
     * @param clusterName
     * @param fixDiskSpec
     * @param request
@@ -578,7 +567,6 @@ public class RestResource {
 
    /**
     * Retrieve a cluster information by its name
-    * 
     * @param clusterName
     * @param details
     *           not used by this version
@@ -600,7 +588,6 @@ public class RestResource {
 
    /**
     * Retrieve a cluster's specification by its name
-    * 
     * @param clusterName
     * @return The cluster specification
     */
@@ -631,7 +618,6 @@ public class RestResource {
 
    /**
     * Get all clusters' information
-    * 
     * @param details
     *           not used by this version
     * @return A list of cluster information
@@ -646,7 +632,6 @@ public class RestResource {
    // cloud provider API
    /**
     * Add a VC resourcepool into BDE
-    * 
     * @param rpSpec
     */
    @RequestMapping(value = "/resourcepools", method = RequestMethod.POST, consumes = "application/json")
@@ -681,7 +666,6 @@ public class RestResource {
 
    /**
     * Get all BDE resource pools' information
-    * 
     * @return a list of BDE resource pool information
     */
    @RequestMapping(value = "/resourcepools", method = RequestMethod.GET, produces = "application/json")
@@ -692,7 +676,6 @@ public class RestResource {
 
    /**
     * Get a BDE resource pool's information by its name
-    * 
     * @param rpName
     * @return The resource pool information
     */
@@ -714,7 +697,6 @@ public class RestResource {
    /**
     * Delete a BDE resource pool, and the corresponding VC resource pool will
     * still keep there
-    * 
     * @param rpName
     */
    @RequestMapping(value = "/resourcepool/{rpName}", method = RequestMethod.DELETE)
@@ -731,7 +713,6 @@ public class RestResource {
 
    /**
     * Add a VC datastore, or multiple VC datastores When regex is true into BDE
-    * 
     * @param dsSpec
     */
    @RequestMapping(value = "/datastores", method = RequestMethod.POST, consumes = "application/json")
@@ -756,7 +737,6 @@ public class RestResource {
 
    /**
     * Get a BDE datastore information
-    * 
     * @param dsName
     * @return The BDE datastore information
     */
@@ -777,7 +757,6 @@ public class RestResource {
 
    /**
     * Get all BDE datastores' information
-    * 
     * @return A list of BDE datastore information
     */
    @RequestMapping(value = "/datastores", method = RequestMethod.GET, produces = "application/json")
@@ -789,7 +768,6 @@ public class RestResource {
    /**
     * Delete a BDE datastore, and the corresponding VC datastore will still keep
     * there
-    * 
     * @param dsName
     */
    @RequestMapping(value = "/datastore/{dsName}", method = RequestMethod.DELETE)
@@ -807,7 +785,6 @@ public class RestResource {
    /**
     * Delete a BDE network, and the corresponding VC network will still keep
     * there
-    * 
     * @param networkName
     */
    @RequestMapping(value = "/network/{networkName}", method = RequestMethod.DELETE)
@@ -825,7 +802,6 @@ public class RestResource {
 
    /**
     * Get the BDE network information by its name
-    * 
     * @param networkName
     * @param details
     *           true will return information about allocated ips to cluster
@@ -853,7 +829,6 @@ public class RestResource {
 
    /**
     * Get all BDE networks' information
-    * 
     * @param details
     *           true will return information about allocated ips to cluster
     *           nodes
@@ -868,7 +843,6 @@ public class RestResource {
 
    /**
     * Add a VC network into BDE
-    * 
     * @param na
     */
    @RequestMapping(value = "/networks", method = RequestMethod.POST, consumes = "application/json")
@@ -911,7 +885,6 @@ public class RestResource {
 
    /**
     * Add ips into an existing BDE network
-    * 
     * @param networkName
     * @param network
     * @param request
@@ -932,7 +905,6 @@ public class RestResource {
 
    /**
     * Get all appmanager types supported by BDE
-    * 
     * @return The list of Application Manager types in BDE
     */
    @RequestMapping(value = "/appmanagers/types", method = RequestMethod.GET, produces = "application/json")
@@ -943,7 +915,6 @@ public class RestResource {
 
    /**
     * Add an appmanager to BDE
-    * 
     * @param appManagerAdd
     */
    @RequestMapping(value = "/appmanagers", method = RequestMethod.POST, consumes = "application/json")
@@ -962,7 +933,6 @@ public class RestResource {
 
    /**
     * Modify an app manager
-    * 
     * @param appManagerAdd
     * @param request
     * @param response
@@ -985,7 +955,6 @@ public class RestResource {
 
    /**
     * Delete an app manager
-    * 
     * @param appManagerName
     */
    @RequestMapping(value = "/appmanager/{appManagerName}", method = RequestMethod.DELETE)
@@ -1008,7 +977,6 @@ public class RestResource {
 
    /**
     * Get a BDE appmanager information
-    * 
     * @param appManagerName
     * @return The BDE appmanager information
     */
@@ -1029,7 +997,6 @@ public class RestResource {
 
    /**
     * Get supported distro information of a BDE appmanager
-    * 
     * @param appManagerName
     * @return The list of supported distros
     */
@@ -1075,7 +1042,6 @@ public class RestResource {
 
    /**
     * Get supported role information of a distro of a BDE appmanager
-    * 
     * @param appManagerName
     * @param distroName
     * @return The list of supported roles
@@ -1110,7 +1076,6 @@ public class RestResource {
 
    /**
     * Get supported configuration information of a distro of a BDE appmanager
-    * 
     * @param appManagerName
     * @param distroName
     * @return The list of supported configurations
@@ -1190,7 +1155,6 @@ public class RestResource {
 
    /**
     * Get all BDE appmanagers' information
-    * 
     * @return The list of Application Managers in BDE
     */
    @RequestMapping(value = "/appmanagers", method = RequestMethod.GET, produces = "application/json")
@@ -1202,7 +1166,6 @@ public class RestResource {
    /**
     * Store rack list information into BDE for rack related support, such as
     * hadoop rack awareness and node placement policies
-    * 
     * @param racksInfo
     *           A list of rack information
     */
@@ -1222,7 +1185,6 @@ public class RestResource {
 
    /**
     * Get the rack list
-    * 
     * @return A list of rack information
     */
    @RequestMapping(value = "/racks", method = RequestMethod.GET, produces = "application/json")
@@ -1233,7 +1195,6 @@ public class RestResource {
 
    /**
     * Get available distributions information
-    * 
     * @return A list of distribution information
     */
    @RequestMapping(value = "/distros", method = RequestMethod.GET, produces = "application/json")
@@ -1253,7 +1214,6 @@ public class RestResource {
    /**
     * Get the distribution information by its name such as apache, bigtop, cdh,
     * intel, gphd, hdp, mapr, phd,etc.
-    * 
     * @param distroName
     * @return The distribution information
     */
