@@ -348,7 +348,10 @@ public class VmEventManager implements IEventProcessor {
       if (external) {
          if (processExternalEvent(type, e, moId)) {
             VcVirtualMachine vm = VcCache.getIgnoreMissing(e.getVm().getVm());
-            String newId = switchMobId(moId, vm);
+            String newId = moId;
+            if (vm != null) {
+               newId = switchMobId(moId, vm);
+            }
             processEvent(type, e, newId, true);
          }
       } else {
