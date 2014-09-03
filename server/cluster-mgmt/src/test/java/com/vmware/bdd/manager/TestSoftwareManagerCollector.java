@@ -16,10 +16,20 @@ package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
 
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.vmware.bdd.apitypes.AppManagerAdd;
+import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.service.resmgmt.IAppManagerService;
+import com.vmware.bdd.utils.Constants;
 
 /**
  * Created By xiaoliangl on 8/28/14.
@@ -47,6 +57,15 @@ public class TestSoftwareManagerCollector {
          "dmgbEbcol0S/wLL9o5VacuVsBQGI22WkzHIHqjkrAT+lHNk=\n" +
          "-----END CERTIFICATE-----";
    private static Object[][] BAD_CERT_DATA = null;
+
+   @Mock
+   private IAppManagerService appManagerService;
+
+   @Mock
+   private IClusterEntityManager clusterEntityManager;
+
+   @InjectMocks
+   private SoftwareManagerCollector softwareManagerCollector = new SoftwareManagerCollector();
 
    static {
       ArrayList<Object[]> bad_certs = new ArrayList<>();
@@ -96,5 +115,34 @@ public class TestSoftwareManagerCollector {
    public void testSaveCertificate3() {
       SoftwareManagerCollector.saveSslCertificate(GOOD_CERT, "/");
    }
+
+   @BeforeMethod
+   public void setup() {
+      MockitoAnnotations.initMocks(this);
+   }
+
+   @Test
+   public void testLoadAppManagers() {
+      AppManagerEntity appManagerAdd = new AppManagerEntity();
+      appManagerAdd.setName(Constants.IRONFAN);
+      appManagerAdd.setDescription(Constants.IRONFAN_DESCRIPTION);
+      appManagerAdd.setType(Constants.IRONFAN);
+      appManagerAdd.setUrl("");
+      appManagerAdd.setUsername("");
+      appManagerAdd.setPassword("");
+      appManagerAdd.setSslCertificate("");
+
+      Mockito.when(appManagerService.findAppManagerByName(Constants.IRONFAN)).thenReturn(appManagerAdd);
+
+      softwareManagerCollector.loadSoftwareManagers();
+   }
+
+   @Test
+   public void testLoadAppManagerByValueObject() {
+
+   }
+
+
+
 
 }
