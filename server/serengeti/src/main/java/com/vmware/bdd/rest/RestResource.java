@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.rest;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -108,6 +110,8 @@ public class RestResource {
    private static final String ERR_CODE_FILE = "serengeti-errcode.properties";
    private static final int DEFAULT_HTTP_ERROR_CODE = 500;
 
+   private static boolean extraPackagesExisted = false;
+
    /* HTTP status code read from a config file. */
    private static org.apache.commons.configuration.Configuration httpStatusCodes =
          init();
@@ -199,6 +203,31 @@ public class RestResource {
          if (appManager == null) {
             throw BddException.NOT_FOUND("application manager",
                   createSpec.getAppManager());
+         }
+      }
+      
+      // check if the 2 packages(mailx and wsdl4j) have been installed on the serengeti management server.
+      // they are needed by cluster creation for Ironfan.
+      if ( createSpec.getAppManager().equals(Constants.IRONFAN) ) {
+         if ( !extraPackagesExisted ) {
+            File yumRepoPath = new File(Constants.SERENGETI_YUM_REPO_PATH);
+            File[] rpmList = yumRepoPath.listFiles(new FileFilter(){
+               public boolean accept(File f) {
+                  String fname = f.getName();
+                  if ( fname.startsWith("mailx-") || fname.startsWith("wsdl4j-") )
+                  {
+                     return true;
+                  }
+                  return false;
+               }
+            });
+            
+            if ( rpmList.length != 2 )
+            {
+               throw BddException.EXTRA_PACKAGES_NOT_FOUND();
+            }
+            
+            extraPackagesExisted = true;
          }
       }
       long jobExecutionId = clusterMgr.createCluster(createSpec);
