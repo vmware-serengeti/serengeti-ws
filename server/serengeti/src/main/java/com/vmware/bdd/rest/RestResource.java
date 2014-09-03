@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -114,8 +115,9 @@ public class RestResource {
    private static final int DEFAULT_HTTP_ERROR_CODE = 500;
 
    private static boolean extraPackagesExisted = false;
-   private static HashSet<String> extraRequiredPackages =
-         getExtraRequiredPackages();
+   private static HashSet<String> extraRequiredPackages = getExtraRequiredPackages();
+   private static final String commRegex = "-[0-9]+\\.[0-9]+.*\\.rpm";
+
 
    /* HTTP status code read from a config file. */
    private static org.apache.commons.configuration.Configuration httpStatusCodes =
@@ -225,32 +227,7 @@ public class RestResource {
       // check if the 2 packages(mailx and wsdl4j) have been installed on the serengeti management server.
       // they are needed by cluster creation for Ironfan.
       if (createSpec.getAppManager().equals(Constants.IRONFAN)) {
-         logger.info("check if extra needed packages(mailx and wsdl4j) have been installed for Ironfan.");
-         if (!extraPackagesExisted) {
-            File yumRepoPath = new File(Constants.SERENGETI_YUM_REPO_PATH);
-            File[] rpmList = yumRepoPath.listFiles(new FileFilter() {
-               public boolean accept(File f) {
-                  String fname = f.getName();
-                  int idx = fname.indexOf("-");
-
-                  if (idx > 0) {
-                     String packName = fname.substring(0, idx);
-                     if (extraRequiredPackages.contains(packName)) {
-                        return true;
-                     }
-                  }
-                  return false;
-               }
-            });
-
-            if (rpmList.length != extraRequiredPackages.size()) {
-               logger.info("cannot find all the needed packages, stop and return error now. ");
-               throw BddException.EXTRA_PACKAGES_NOT_FOUND(extraRequiredPackages.toString());
-            }
-
-            logger.info("the check is successful: all needed packages are there.");
-            extraPackagesExisted = true;
-         }
+         checkExtraRequiredPackages();
       }
 
       long jobExecutionId = clusterMgr.createCluster(createSpec);
@@ -1222,6 +1199,46 @@ public class RestResource {
    private void verifyInitialized() {
       if (!ClusteringService.isInitialized()) {
          throw BddException.INIT_VC_FAIL();
+      }
+   }
+
+   private void checkExtraRequiredPackages() {
+      logger.info("check if extra needed packages(mailx and wsdl4j) have been installed for Ironfan.");
+      if ( !extraPackagesExisted ) {
+         File yumRepoPath = new File(Constants.SERENGETI_YUM_REPO_PATH);
+         
+         // use hs to record the packages that have not been added
+         final HashSet<String> hs = new HashSet<String>();
+         hs.addAll(extraRequiredPackages);
+         
+         // scan the files under the serengeti yum repo directory
+         File[] rpmList = yumRepoPath.listFiles(new FileFilter() {
+            public boolean accept(File f) {
+               String fname = f.getName();
+               int idx = fname.indexOf("-");
+
+               if (idx > 0) {
+                  String packName = fname.substring(0, idx);
+                  if ( extraRequiredPackages.contains(packName) ) {
+                     String regx = packName + commRegex;
+                     Pattern pat = Pattern.compile(regx);
+                     if ( pat.matcher(fname).matches() ) {
+                        hs.remove(packName);
+                        return true;
+                     }
+                  }
+               }
+               return false;
+            }
+         });
+
+         if ( rpmList.length != extraRequiredPackages.size() ) {
+            logger.info("cannot find all the needed packages, stop and return error now. ");
+            throw BddException.EXTRA_PACKAGES_NOT_FOUND(hs.toString());
+         }
+
+         logger.info("the check is successful: all needed packages are there.");
+         extraPackagesExisted = true;
       }
    }
 }
