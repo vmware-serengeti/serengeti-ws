@@ -1206,11 +1206,11 @@ public class RestResource {
       logger.info("check if extra needed packages(mailx and wsdl4j) have been installed for Ironfan.");
       if ( !extraPackagesExisted ) {
          File yumRepoPath = new File(Constants.SERENGETI_YUM_REPO_PATH);
-         
+
          // use hs to record the packages that have not been added
          final HashSet<String> hs = new HashSet<String>();
          hs.addAll(extraRequiredPackages);
-         
+
          // scan the files under the serengeti yum repo directory
          File[] rpmList = yumRepoPath.listFiles(new FileFilter() {
             public boolean accept(File f) {
