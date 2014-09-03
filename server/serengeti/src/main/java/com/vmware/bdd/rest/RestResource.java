@@ -1232,7 +1232,7 @@ public class RestResource {
             }
          });
 
-         if ( rpmList.length != extraRequiredPackages.size() ) {
+         if ( !hs.isEmpty() ) {
             logger.info("cannot find all the needed packages, stop and return error now. ");
             throw BddException.EXTRA_PACKAGES_NOT_FOUND(hs.toString());
          }
