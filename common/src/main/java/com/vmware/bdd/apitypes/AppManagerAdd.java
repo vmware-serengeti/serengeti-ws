@@ -16,6 +16,8 @@
 package com.vmware.bdd.apitypes;
 
 import com.google.gson.annotations.Expose;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /**
  * Author: Xiaoding Bian
@@ -109,5 +111,27 @@ public class AppManagerAdd {
       return "AppManagerAdd [name=" + name + ", description=" + description
             + ", type=" + type + ", url=" + url + ", username=" + username
             + ", sslCertificate=" + sslCertificate + "]";
+   }
+
+
+   @Override
+   public boolean equals(Object another){
+      if(another != null && another instanceof AppManagerAdd) {
+         AppManagerAdd anotherAppMgrAdd = (AppManagerAdd) another;
+
+         return new EqualsBuilder().append(name, anotherAppMgrAdd.name)
+         .append(type, anotherAppMgrAdd.type).append(url, anotherAppMgrAdd.url)
+         .append(username, anotherAppMgrAdd.username).append(password, anotherAppMgrAdd.password)
+         .append(sslCertificate, anotherAppMgrAdd.sslCertificate).isEquals();
+      } else {
+         return false;
+      }
+   }
+
+   @Override
+   public int hashCode() {
+      return new HashCodeBuilder().append(name)
+            .append(this.type).append(url)
+            .append(username).append(password).append(sslCertificate).toHashCode();
    }
 }

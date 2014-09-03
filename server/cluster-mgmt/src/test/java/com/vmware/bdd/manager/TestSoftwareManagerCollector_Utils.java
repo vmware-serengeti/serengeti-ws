@@ -16,25 +16,20 @@ package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
 
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.testng.annotations.BeforeMethod;
+import junit.framework.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
-import com.vmware.bdd.manager.intf.IClusterEntityManager;
-import com.vmware.bdd.service.resmgmt.IAppManagerService;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.utils.Constants;
 
 /**
  * Created By xiaoliangl on 8/28/14.
  */
-public class TestSoftwareManagerCollector {
+public class TestSoftwareManagerCollector_Utils {
    private final static String GOOD_CERT = "-----BEGIN CERTIFICATE-----\n" +
          "MIIDfzCCAmegAwIBAgIED9k4BTANBgkqhkiG9w0BAQsFADBwMRAwDgYDVQQGEwdV\n" +
          "bmtub3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYD\n" +
@@ -57,15 +52,6 @@ public class TestSoftwareManagerCollector {
          "dmgbEbcol0S/wLL9o5VacuVsBQGI22WkzHIHqjkrAT+lHNk=\n" +
          "-----END CERTIFICATE-----";
    private static Object[][] BAD_CERT_DATA = null;
-
-   @Mock
-   private IAppManagerService appManagerService;
-
-   @Mock
-   private IClusterEntityManager clusterEntityManager;
-
-   @InjectMocks
-   private SoftwareManagerCollector softwareManagerCollector = new SoftwareManagerCollector();
 
    static {
       ArrayList<Object[]> bad_certs = new ArrayList<>();
@@ -116,33 +102,26 @@ public class TestSoftwareManagerCollector {
       SoftwareManagerCollector.saveSslCertificate(GOOD_CERT, "/");
    }
 
-   @BeforeMethod
-   public void setup() {
-      MockitoAnnotations.initMocks(this);
+   @Test(expectedExceptions = SWMgrCollectorInternalException.class,
+         expectedExceptionsMessageRegExp = "Failed to read the private key file: key-file.")
+   public void testLoadPrivateKey_Exceptional() {
+      SoftwareManagerCollector.loadPrivateKey("key-file");
    }
 
    @Test
-   public void testLoadAppManagers() {
-      AppManagerEntity appManagerAdd = new AppManagerEntity();
-      appManagerAdd.setName(Constants.IRONFAN);
-      appManagerAdd.setDescription(Constants.IRONFAN_DESCRIPTION);
-      appManagerAdd.setType(Constants.IRONFAN);
-      appManagerAdd.setUrl("");
-      appManagerAdd.setUsername("");
-      appManagerAdd.setPassword("");
-      appManagerAdd.setSslCertificate("");
+   public void testToAppManagerAdd() {
+      AppManagerAdd appManagerAddDefault1 = new AppManagerAdd();
+      appManagerAddDefault1.setName(Constants.IRONFAN);
+      appManagerAddDefault1.setDescription(Constants.IRONFAN_DESCRIPTION);
+      appManagerAddDefault1.setType(Constants.IRONFAN);
+      appManagerAddDefault1.setUrl("ftp://address");
+      appManagerAddDefault1.setUsername("");
+      appManagerAddDefault1.setPassword("");
+      appManagerAddDefault1.setSslCertificate("");
 
-      Mockito.when(appManagerService.findAppManagerByName(Constants.IRONFAN)).thenReturn(appManagerAdd);
-
-      softwareManagerCollector.loadSoftwareManagers();
+      AppManagerAdd appManagerAdd = SoftwareManagerCollector.toAppManagerAdd(new AppManagerEntity(appManagerAddDefault1));
+      Assert.assertEquals(appManagerAddDefault1, appManagerAdd);
+      Assert.assertEquals(appManagerAddDefault1.hashCode(), appManagerAdd.hashCode());
    }
-
-   @Test
-   public void testLoadAppManagerByValueObject() {
-
-   }
-
-
-
 
 }

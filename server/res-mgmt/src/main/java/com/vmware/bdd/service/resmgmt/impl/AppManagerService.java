@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,7 +70,14 @@ public class AppManagerService implements IAppManagerService{
    public synchronized void addAppManager(AppManagerAdd appManagerAdd) {
       logger.debug("add app manager " + appManagerAdd);
       AppManagerEntity appManagerEntity = new AppManagerEntity(appManagerAdd);
-      appManagerDAO.insert(appManagerEntity);
+
+
+      try {
+         appManagerDAO.insert(appManagerEntity);
+      } catch (ConstraintViolationException cve) {
+         throw SoftwareManagerCollectorException.DUPLICATE_NAME(appManagerAdd.getName());
+      }
+
       logger.debug("successfully added app manager " + appManagerAdd);
    }
 

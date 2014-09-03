@@ -12,19 +12,18 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *****************************************************************************/
-package com.vmware.bdd.manager;
+package com.vmware.bdd.manager.mocks;
 
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import com.vmware.bdd.plugin.ironfan.impl.DefaultSoftwareManagerImpl;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManagerFactory;
 
 /**
  * Created By xiaoliangl on 9/3/14.
  */
-@ContextConfiguration(locations = {"classpath:spring/TestSWMgrCollector-context.xml"})
-@DirtiesContext( classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD) // reset spring context after each test method.
-public class TestSWMgrCollectorWithSpring extends AbstractTestNGSpringContextTests {
-   private SoftwareManagerCollector softwareManagerCollector;
-
-
+public class DefaultSWMgrFactory implements SoftwareManagerFactory {
+   @Override
+   public SoftwareManager getSoftwareManager(String URL, String username, char[] password, String certificate) {
+      return new DefaultSoftwareManagerImpl();
+   }
 }

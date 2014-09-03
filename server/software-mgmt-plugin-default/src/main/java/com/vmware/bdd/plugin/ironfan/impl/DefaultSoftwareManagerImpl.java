@@ -70,8 +70,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
 
    @Override
    public String getType() {
-      // TODO Auto-generated method stub
-      return null;
+      return Constants.IRONFAN;
    }
 
    @Override

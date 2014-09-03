@@ -79,11 +79,18 @@ public class SoftwareManagerCollector implements InitializingBean {
 
    private String privateKey = null;
 
-   private static String configurationPrefix = "appmanager.factoryclass.";
+   protected static String configurationPrefix = "appmanager.factoryclass.";
    private static String appmanagerTypesKey = "appmanager.types";
 
    private static String appmgrConnTimeOutKey = "appmanager.connect.timeout.seconds";
 
+   public void setAppManagerService(IAppManagerService appManagerService) {
+      this.appManagerService = appManagerService;
+   }
+
+   public void setClusterEntityManager(IClusterEntityManager clusterEntityManager) {
+      this.clusterEntityManager = clusterEntityManager;
+   }
    /**
     * Software manager name will be unique inside of BDE. Otherwise, creation
     * will fail. The appmanager information should be persisted in meta-db
@@ -100,59 +107,51 @@ public class SoftwareManagerCollector implements InitializingBean {
          throw SoftwareManagerCollectorException.INVALID_URL(errorMsgs);
       }
 
+      logger.info("Check AppManager already exist: " + appManagerAdd.getName());
+
+      if (appManagerService.findAppManagerByName(appManagerAdd.getName()) != null) {
+         logger.error("Name " + appManagerAdd.getName() + " already exists.");
+         throw SoftwareManagerCollectorException.DUPLICATE_NAME(appManagerAdd.getName());
+      }
+
       String sslCertificate = appManagerAdd.getSslCertificate();
       if (!CommonUtil.isBlank(sslCertificate)) {
          saveAppMgrCertificate(sslCertificate);
       }
 
-      SoftwareManager softwareManager = loadSoftwareManager(appManagerAdd);
+      loadSoftwareManager(appManagerAdd);
 
       // add to meta-db through AppManagerService
-      createSoftwareManagerInternal(appManagerAdd, softwareManager);
-   }
-
-   /**
-    * Software manager name will be unique inside of BDE. Otherwise, creation
-    * will fail. The appmanager information should be persisted in meta-db
-    *
-    * @param appManagerAdd, softwareManager
-    */
-   private synchronized void createSoftwareManagerInternal(AppManagerAdd appManagerAdd,
-		   SoftwareManager softwareManager) {
-
-      logger.info("Start to create application manager for " + appManagerAdd.getName());
-
-      if (appManagerService.findAppManagerByName(appManagerAdd.getName()) != null) {
-         logger.error("Name " + appManagerAdd.getName() + " already exists.");
-         throw SoftwareManagerCollectorException.DUPLICATE_NAME(appManagerAdd
-               .getName());
-      }
-
       logger.info("Add app manager to meta-db.");
 
       // add to meta-db through AppManagerService
       appManagerService.addAppManager(appManagerAdd);
    }
 
+
    private String getPrivateKey() {
       if (privateKey == null) {
-         try {
-            privateKey =
-                  CommonUtil.dataFromFile(Constants.SERENGETI_PRIVATE_KEY_FILE);
-         } catch (FileNotFoundException e) {
-            logger.error("Serengeti private key file "
-                  + Constants.SERENGETI_PRIVATE_KEY_FILE + " does not exist.",
-                  e);
-            throw SoftwareManagerCollectorException.PRIVATE_KEY_NOT_FOUND(e,
-                  Constants.SERENGETI_PRIVATE_KEY_FILE);
-         } catch (IOException e) {
-            logger.error("Error in reading Serengeti private key file "
-                  + Constants.SERENGETI_PRIVATE_KEY_FILE + ".", e);
-            throw SoftwareManagerCollectorException.PRIVATE_KEY_READ_ERROR(e,
-                  Constants.SERENGETI_PRIVATE_KEY_FILE);
-         }
+         privateKey = loadPrivateKey(Constants.SERENGETI_PRIVATE_KEY_FILE);
       }
       return privateKey;
+   }
+
+   protected static String loadPrivateKey(String path) {
+      try {
+         return CommonUtil.dataFromFile(path);
+      } catch (IOException e) {
+         String errMsg = String.format(
+               Messages.getString("SW_MGR_COLLECTOR.FAIL_READ_PRI_KEY"), path);
+         logger.error(errMsg, e);
+
+         //should be an internal exception instead of an external one. lixl
+         throw new SWMgrCollectorInternalException(e,errMsg);
+//            throw SoftwareManagerCollectorException.PRIVATE_KEY_READ_ERROR(e,Constants.SERENGETI_PRIVATE_KEY_FILE);
+      }
+   }
+
+   protected void setPrivateKey(String value) {
+      privateKey = value;
    }
 
    /**
@@ -176,20 +175,21 @@ public class SoftwareManagerCollector implements InitializingBean {
     * @param appManagerAdd
     * @return
     */
-   private synchronized SoftwareManager loadSoftwareManager(AppManagerAdd appManagerAdd) {
+   protected synchronized SoftwareManager loadSoftwareManager(AppManagerAdd appManagerAdd) {
       // Retrieve app manager factory class from serengeti.properties
 
       if (cache.containsKey(appManagerAdd.getName())) {
          return cache.get(appManagerAdd);
       }
 
-      String factoryClassName =
-            Configuration.getString(configurationPrefix + appManagerAdd.getType());
+      String factoryClassName = Configuration.getString(configurationPrefix + appManagerAdd.getType());
       if (CommonUtil.isBlank(factoryClassName)) {
-         logger.error("Factory class for " + appManagerAdd.getType()
-               + " is not defined in serengeti.properties");
-         throw SoftwareManagerCollectorException.CLASS_NOT_DEFINED(appManagerAdd
-               .getType());
+         String errMsg = String.format(Messages.getString("SW_MGR_COLLECTOR.APP_MGR_FACTORY_UNDEFINED"), appManagerAdd.getType());
+
+         logger.error(errMsg);
+         throw new SWMgrCollectorInternalException(null, errMsg);
+         //should be internal exception, lixl
+//         throw SoftwareManagerCollectorException.CLASS_NOT_DEFINED(appManagerAdd.getType());
       }
       logger.info("Factory class name is " + factoryClassName);
 
@@ -199,8 +199,10 @@ public class SoftwareManagerCollector implements InitializingBean {
          logger.info("Factory class loaded.");
          softwareManagerFactory = ReflectionUtils.newInstance(clazz);
       } catch (Exception e) {
-         logger.error(e.getMessage());
-         throw SoftwareManagerCollectorException.CAN_NOT_INSTANTIATE(e, factoryClassName);
+         String errMsg = String.format(Messages.getString("SW_MGR_COLLECTOR.CANNT_INSTANTIATE_APP_MGR_FACTORY"), factoryClassName);
+         logger.error(errMsg, e);
+         throw new SWMgrCollectorInternalException(e, errMsg);
+//         throw SoftwareManagerCollectorException.CAN_NOT_INSTANTIATE(e, factoryClassName);
       }
 
       logger.info("Start to invoke application manager factory to create application manager.");
@@ -211,6 +213,7 @@ public class SoftwareManagerCollector implements InitializingBean {
                      .getUsername(), appManagerAdd.getPassword().toCharArray(),
                      getPrivateKey());
       } catch (Exception ex) {
+         //TODO the handling is not clear: was it a connection failure (external), or some instantiating error (internal). lixl
          logger.error("Create application manager failed: " + ex.getMessage(), ex);
          throw SoftwareManagerCollectorException.CONNECT_FAILURE(
                appManagerAdd.getName(), ExceptionUtils.getRootCauseMessage(ex));
@@ -262,6 +265,7 @@ public class SoftwareManagerCollector implements InitializingBean {
             throw SoftwareManagerCollectorException.ECHO_FAILURE(name);
          }
       } catch (SoftwareManagementPluginException e) {
+         //TODO we won't catch anything here! consider to remove it, lixl
          logger.error("Cannot connect to application manager "
                + name + ", check the connection information.", e);
          throw SoftwareManagerCollectorException.CONNECT_FAILURE(name,
@@ -315,19 +319,6 @@ public class SoftwareManagerCollector implements InitializingBean {
    }
 
    public synchronized void loadSoftwareManagers() {
-      // Should block request until initialized
-      // temporarily load ironfan software manager instance here
-      if (appManagerService.findAppManagerByName(Constants.IRONFAN) == null) {
-         AppManagerAdd appManagerAdd = new AppManagerAdd();
-         appManagerAdd.setName(Constants.IRONFAN);
-         appManagerAdd.setDescription(Constants.IRONFAN_DESCRIPTION);
-         appManagerAdd.setType(Constants.IRONFAN);
-         appManagerAdd.setUrl("");
-         appManagerAdd.setUsername("");
-         appManagerAdd.setPassword("");
-         appManagerAdd.setSslCertificate("");
-         appManagerService.addAppManager(appManagerAdd);
-      }
 
       boolean defaultMgrExists = false;
       List<AppManagerEntity> appManagers = appManagerService.findAll();
@@ -340,13 +331,27 @@ public class SoftwareManagerCollector implements InitializingBean {
          try {
             loadSoftwareManager(appManager);
          } catch (Exception e) {
-            logger.error("One of the appliation manager cannot be loaded: " + appManager.getName());
-            logger.error(e.getMessage());
+            logger.error("One of the appliation manager cannot be loaded: " + appManager.getName(), e);
          }
       }
 
       if(!defaultMgrExists) {
+         AppManagerAdd appManagerAdd = new AppManagerAdd();
+         appManagerAdd.setName(Constants.IRONFAN);
+         appManagerAdd.setDescription(Constants.IRONFAN_DESCRIPTION);
+         appManagerAdd.setType(Constants.IRONFAN);
+         appManagerAdd.setUrl("");
+         appManagerAdd.setUsername("");
+         appManagerAdd.setPassword("");
+         appManagerAdd.setSslCertificate("");
 
+         appManagerService.addAppManager(appManagerAdd);
+
+         try {
+            loadSoftwareManager(new AppManagerEntity(appManagerAdd));
+         } catch (Exception e) {
+            logger.error("One of the appliation manager cannot be loaded: " + appManagerAdd.getName(), e);
+         }
       }
    }
 
@@ -354,7 +359,7 @@ public class SoftwareManagerCollector implements InitializingBean {
     * @param appManager
     * @return
     */
-   private AppManagerAdd toAppManagerAdd(AppManagerEntity appManager) {
+   public static AppManagerAdd toAppManagerAdd(AppManagerEntity appManager) {
       AppManagerAdd appManagerAdd = new AppManagerAdd();
       appManagerAdd.setName(appManager.getName());
       appManagerAdd.setDescription(appManager.getDescription());
