@@ -242,6 +242,9 @@ public class Constants {
 
    public static final String NODE_ACTION_SET_LOCAL_REPO_SUCCEED = "Set local repo succeed";
    public static final String NODE_ACTION_SET_LOCAL_REPO_FAILED = "Set local repo failed";
+   
    public static final String SERENGETI_YUM_REPO_PATH = "/opt/serengeti/www/yum/repos/centos/6/base/RPMS/";
+   public static final String SERENGETI_YUM_EXTRA_PACKAGES = "mailx,wsdl4j";
+   public static final String SERENGETI_YUM_EXTRA_PACKAGES_CONFIG = "serengeti.yum.extra.pakcages.config";
 
 }

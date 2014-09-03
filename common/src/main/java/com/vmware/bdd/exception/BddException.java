@@ -205,8 +205,8 @@ public class BddException extends RuntimeException {
       return new BddException(null, "SOFTWARE_MANAGER_COLLECTOR", "APP_MGR_NOT_FOUND", appMgrName);
    }
    
-   public static BddException EXTRA_PACKAGES_NOT_FOUND() {
-      return new BddException(null, "CLUSTER", "EXTRA_PACKAGES_NOT_FOUND");
+   public static BddException EXTRA_PACKAGES_NOT_FOUND(String extraPackages) {
+      return new BddException(null, "CLUSTER", "EXTRA_PACKAGES_NOT_FOUND", extraPackages);
    }
 
 }

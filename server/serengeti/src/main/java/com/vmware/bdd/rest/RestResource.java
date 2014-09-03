@@ -17,6 +17,8 @@ package com.vmware.bdd.rest;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.apitypes.BddErrorMessage;
@@ -111,6 +114,8 @@ public class RestResource {
    private static final int DEFAULT_HTTP_ERROR_CODE = 500;
 
    private static boolean extraPackagesExisted = false;
+   private static HashSet<String> extraRequiredPackages =
+         getExtraRequiredPackages();
 
    /* HTTP status code read from a config file. */
    private static org.apache.commons.configuration.Configuration httpStatusCodes =
@@ -135,8 +140,20 @@ public class RestResource {
       return httpStatusCodes.getInteger(errorId, DEFAULT_HTTP_ERROR_CODE);
    }
 
+   private static HashSet<String> getExtraRequiredPackages() {
+      String extraPackStr =
+            Configuration.getString(
+                  Constants.SERENGETI_YUM_EXTRA_PACKAGES_CONFIG,
+                  Constants.SERENGETI_YUM_EXTRA_PACKAGES);
+      String[] packs = extraPackStr.split(",");
+      HashSet<String> hs = new HashSet<String>();
+      hs.addAll(Arrays.asList(packs));
+      return hs;
+   }
+
    /**
     * Get REST api version
+    * 
     * @return REST api version
     */
    @RequestMapping(value = "/hello", method = RequestMethod.GET)
@@ -149,6 +166,7 @@ public class RestResource {
    // task API
    /**
     * Get latest tasks of exiting clusters
+    * 
     * @return A list of task information
     */
    @RequestMapping(value = "/tasks", method = RequestMethod.GET, produces = "application/json")
@@ -159,7 +177,11 @@ public class RestResource {
 
    /**
     * Get a specific task by its id
-    * @param taskId The identity returned as part of uri in the response(Accepted status) header of Location, such as https://hostname:8443/serengeti/api/task/taskId
+    * 
+    * @param taskId
+    *           The identity returned as part of uri in the response(Accepted
+    *           status) header of Location, such as
+    *           https://hostname:8443/serengeti/api/task/taskId
     * @return Task information
     */
    @RequestMapping(value = "/task/{taskId}", method = RequestMethod.GET, produces = "application/json")
@@ -180,9 +202,12 @@ public class RestResource {
    // cluster API
    /**
     * Create a cluster
-    * @param createSpec create specification
+    * 
+    * @param createSpec
+    *           create specification
     * @param request
-    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @return Return a response with Accepted status and put task uri in the
+    *         Location of header that can be used to monitor the progress
     */
    @RequestMapping(value = "/clusters", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.ACCEPTED)
@@ -205,41 +230,53 @@ public class RestResource {
                   createSpec.getAppManager());
          }
       }
-      
+
       // check if the 2 packages(mailx and wsdl4j) have been installed on the serengeti management server.
       // they are needed by cluster creation for Ironfan.
-      if ( createSpec.getAppManager().equals(Constants.IRONFAN) ) {
-         if ( !extraPackagesExisted ) {
+      if (createSpec.getAppManager().equals(Constants.IRONFAN)) {
+         logger.info("check if extra needed packages(mailx and wsdl4j) have been installed for Ironfan.");
+         if (!extraPackagesExisted) {
             File yumRepoPath = new File(Constants.SERENGETI_YUM_REPO_PATH);
-            File[] rpmList = yumRepoPath.listFiles(new FileFilter(){
+            File[] rpmList = yumRepoPath.listFiles(new FileFilter() {
                public boolean accept(File f) {
                   String fname = f.getName();
-                  if ( fname.startsWith("mailx-") || fname.startsWith("wsdl4j-") )
-                  {
-                     return true;
+                  int idx = fname.indexOf("-");
+
+                  if (idx > 0) {
+                     String packName = fname.substring(0, idx);
+                     if (extraRequiredPackages.contains(packName)) {
+                        return true;
+                     }
                   }
                   return false;
                }
             });
-            
-            if ( rpmList.length != 2 )
-            {
-               throw BddException.EXTRA_PACKAGES_NOT_FOUND();
+
+            if (rpmList.length != extraRequiredPackages.size()) {
+               logger.info("cannot find all the needed packages, stop and return error now. ");
+               throw BddException.EXTRA_PACKAGES_NOT_FOUND(extraRequiredPackages.toString());
             }
-            
+
+            logger.info("the check is successful: all needed packages are there.");
             extraPackagesExisted = true;
          }
       }
+
       long jobExecutionId = clusterMgr.createCluster(createSpec);
       redirectRequest(jobExecutionId, request, response);
    }
 
    /**
     * Configure a hadoop or hbase cluster's properties
+    * 
     * @param clusterName
-    * @param createSpec The existing create specification plus the configuration map supported in cluster and node group levels(please refer to a sample specification file)
+    * @param createSpec
+    *           The existing create specification plus the configuration map
+    *           supported in cluster and node group levels(please refer to a
+    *           sample specification file)
     * @param request
-    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @return Return a response with Accepted status and put task uri in the
+    *         Location of header that can be used to monitor the progress
     */
    @RequestMapping(value = "/cluster/{clusterName}/config", method = RequestMethod.PUT, consumes = "application/json")
    @ResponseStatus(HttpStatus.ACCEPTED)
@@ -269,9 +306,11 @@ public class RestResource {
 
    /**
     * Delete a cluster
+    * 
     * @param clusterName
     * @param request
-    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @return Return a response with Accepted status and put task uri in the
+    *         Location of header that can be used to monitor the progress
     */
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.ACCEPTED)
@@ -289,11 +328,15 @@ public class RestResource {
    }
 
    /**
-    * Start or stop a normal cluster, or resume a failed cluster after adjusting the resources allocated to this cluster
+    * Start or stop a normal cluster, or resume a failed cluster after adjusting
+    * the resources allocated to this cluster
+    * 
     * @param clusterName
-    * @param state Can be start, stop, or resume
+    * @param state
+    *           Can be start, stop, or resume
     * @param request
-    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @return Return a response with Accepted status and put task uri in the
+    *         Location of header that can be used to monitor the progress
     */
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
@@ -327,11 +370,15 @@ public class RestResource {
 
    /**
     * Expand the number of nodes in a node group
+    * 
     * @param clusterName
     * @param groupName
-    * @param instanceNum The target instance number after resize. It must be larger than existing instance number in this node group
+    * @param instanceNum
+    *           The target instance number after resize. It must be larger than
+    *           existing instance number in this node group
     * @param request
-    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @return Return a response with Accepted status and put task uri in the
+    *         Location of header that can be used to monitor the progress
     */
    @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}/instancenum", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
@@ -363,9 +410,11 @@ public class RestResource {
 
    /**
     * Upgrade a cluster
+    * 
     * @param clusterName
     * @param request
-    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @return Return a response with Accepted status and put task uri in the
+    *         Location of header that can be used to monitor the progress
     * @throws Exception
     */
    @RequestMapping(value = "/cluster/{clusterName}/upgrade", method = RequestMethod.PUT)
@@ -383,11 +432,14 @@ public class RestResource {
 
    /**
     * Scale up or down the cpu and memory of each node in a node group
+    * 
     * @param clusterName
     * @param groupName
-    * @param scale The new cpu and memory allocated to each node in this node group
+    * @param scale
+    *           The new cpu and memory allocated to each node in this node group
     * @param request
-    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @return Return a response with Accepted status and put task uri in the
+    *         Location of header that can be used to monitor the progress
     */
    @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}/scale", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
@@ -408,34 +460,38 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("node group name", groupName);
       }
 
-	  if (scale.getCpuNumber() <= 0
-			&& scale.getMemory() < Constants.MIN_MEM_SIZE) {
-		 throw BddException.INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(
-						"node group scale parameter. The number of CPUs must be greater than zero, and the memory size in MB must be greater than or equal to "
-								+ Constants.MIN_MEM_SIZE + ":", scale);
-		}
+      if (scale.getCpuNumber() <= 0
+            && scale.getMemory() < Constants.MIN_MEM_SIZE) {
+         throw BddException
+               .INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(
+                     "node group scale parameter. The number of CPUs must be greater than zero, and the memory size in MB must be greater than or equal to "
+                           + Constants.MIN_MEM_SIZE + ":", scale);
+      }
       logger.info("scale cluster: " + scale.toString());
-      Long taskId =
-            scaleMgr.scaleNodeGroupResource(scale);
+      Long taskId = scaleMgr.scaleNodeGroupResource(scale);
       redirectRequest(taskId, request, response);
    }
 
    /**
     * Turn on or off some compute nodes
+    * 
     * @param clusterName
     * @param requestBody
     * @param request
-    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @return Return a response with Accepted status and put task uri in the
+    *         Location of header that can be used to monitor the progress
     */
    @RequestMapping(value = "/cluster/{clusterName}/param_wait_for_result", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
-   public void asyncSetParam(@PathVariable("clusterName") String clusterName, @RequestBody ElasticityRequestBody requestBody, HttpServletRequest request,
-         HttpServletResponse response) throws Exception {
+   public void asyncSetParam(@PathVariable("clusterName") String clusterName,
+         @RequestBody ElasticityRequestBody requestBody,
+         HttpServletRequest request, HttpServletResponse response)
+         throws Exception {
       verifyInitialized();
       validateInput(clusterName, requestBody);
       ClusterRead cluster = clusterMgr.getClusterByName(clusterName, false);
       if (!cluster.needAsyncUpdateParam(requestBody)) {
-            throw BddException.BAD_REST_CALL(null, "invalid input to cluster.");
+         throw BddException.BAD_REST_CALL(null, "invalid input to cluster.");
       }
 
       Long taskId =
@@ -448,54 +504,64 @@ public class RestResource {
    }
 
    /**
-    * Change elasticity mode, IO priority, and maximum or minimum number of powered on compute nodes under auto mode
+    * Change elasticity mode, IO priority, and maximum or minimum number of
+    * powered on compute nodes under auto mode
+    * 
     * @param clusterName
     * @param requestBody
     * @param request
     */
    @RequestMapping(value = "/cluster/{clusterName}/param", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.OK)
-   public void syncSetParam(@PathVariable("clusterName") String clusterName, @RequestBody ElasticityRequestBody requestBody, HttpServletRequest request,
-         HttpServletResponse response) throws Exception {
+   public void syncSetParam(@PathVariable("clusterName") String clusterName,
+         @RequestBody ElasticityRequestBody requestBody,
+         HttpServletRequest request, HttpServletResponse response)
+         throws Exception {
       verifyInitialized();
       validateInput(clusterName, requestBody);
       clusterMgr.syncSetParam(clusterName,
             requestBody.getActiveComputeNodeNum(),
             requestBody.getMinComputeNodeNum(),
-            requestBody.getMaxComputeNodeNum(),
-            requestBody.getEnableAuto(),
+            requestBody.getMaxComputeNodeNum(), requestBody.getEnableAuto(),
             requestBody.getIoPriority());
    }
 
-   private void validateInput(String clusterName, ElasticityRequestBody requestBody) {
-      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateClusterName(clusterName)) {
+   private void validateInput(String clusterName,
+         ElasticityRequestBody requestBody) {
+      if (CommonUtil.isBlank(clusterName)
+            || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
 
       Integer minComputeNodeNum = requestBody.getMinComputeNodeNum();
       if (minComputeNodeNum != null && minComputeNodeNum < -1) {
-         throw BddException.INVALID_PARAMETER("min compute node num", minComputeNodeNum.toString());
+         throw BddException.INVALID_PARAMETER("min compute node num",
+               minComputeNodeNum.toString());
       }
 
       Integer maxComputeNodeNum = requestBody.getMaxComputeNodeNum();
       if (maxComputeNodeNum != null && maxComputeNodeNum < -1) {
-         throw BddException.INVALID_PARAMETER("max compute node num", maxComputeNodeNum.toString());
+         throw BddException.INVALID_PARAMETER("max compute node num",
+               maxComputeNodeNum.toString());
       }
 
       Integer activeComputeNodeNum = requestBody.getActiveComputeNodeNum();
       // The active compute node number must be a positive number or -1.
       if (activeComputeNodeNum != null && activeComputeNodeNum < -1) {
          logger.error("Invalid instance number: " + activeComputeNodeNum + " !");
-         throw BddException.INVALID_PARAMETER("instance number", activeComputeNodeNum.toString());
+         throw BddException.INVALID_PARAMETER("instance number",
+               activeComputeNodeNum.toString());
       }
    }
 
    /**
     * Replace some failed disks with new disks
+    * 
     * @param clusterName
     * @param fixDiskSpec
     * @param request
-    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    * @return Return a response with Accepted status and put task uri in the
+    *         Location of header that can be used to monitor the progress
     */
    @RequestMapping(value = "/cluster/{clusterName}/fix/disk", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
@@ -512,8 +578,10 @@ public class RestResource {
 
    /**
     * Retrieve a cluster information by its name
+    * 
     * @param clusterName
-    * @param details not used by this version
+    * @param details
+    *           not used by this version
     * @return The cluster information
     */
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.GET, produces = "application/json")
@@ -532,6 +600,7 @@ public class RestResource {
 
    /**
     * Retrieve a cluster's specification by its name
+    * 
     * @param clusterName
     * @return The cluster specification
     */
@@ -562,7 +631,9 @@ public class RestResource {
 
    /**
     * Get all clusters' information
-    * @param details not used by this version
+    * 
+    * @param details
+    *           not used by this version
     * @return A list of cluster information
     */
    @RequestMapping(value = "/clusters", method = RequestMethod.GET, produces = "application/json")
@@ -575,6 +646,7 @@ public class RestResource {
    // cloud provider API
    /**
     * Add a VC resourcepool into BDE
+    * 
     * @param rpSpec
     */
    @RequestMapping(value = "/resourcepools", method = RequestMethod.POST, consumes = "application/json")
@@ -609,6 +681,7 @@ public class RestResource {
 
    /**
     * Get all BDE resource pools' information
+    * 
     * @return a list of BDE resource pool information
     */
    @RequestMapping(value = "/resourcepools", method = RequestMethod.GET, produces = "application/json")
@@ -619,6 +692,7 @@ public class RestResource {
 
    /**
     * Get a BDE resource pool's information by its name
+    * 
     * @param rpName
     * @return The resource pool information
     */
@@ -638,7 +712,9 @@ public class RestResource {
    }
 
    /**
-    * Delete a BDE resource pool, and the corresponding VC resource pool will still keep there
+    * Delete a BDE resource pool, and the corresponding VC resource pool will
+    * still keep there
+    * 
     * @param rpName
     */
    @RequestMapping(value = "/resourcepool/{rpName}", method = RequestMethod.DELETE)
@@ -655,6 +731,7 @@ public class RestResource {
 
    /**
     * Add a VC datastore, or multiple VC datastores When regex is true into BDE
+    * 
     * @param dsSpec
     */
    @RequestMapping(value = "/datastores", method = RequestMethod.POST, consumes = "application/json")
@@ -669,7 +746,8 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("datestore name",
                dsSpec.getName());
       }
-      if (!dsSpec.getRegex() && !CommonUtil.validateVcDataStoreNames(dsSpec.getSpec())) {
+      if (!dsSpec.getRegex()
+            && !CommonUtil.validateVcDataStoreNames(dsSpec.getSpec())) {
          throw BddException.INVALID_PARAMETER("vCenter Server datastore name",
                dsSpec.getSpec().toString());
       }
@@ -678,6 +756,7 @@ public class RestResource {
 
    /**
     * Get a BDE datastore information
+    * 
     * @param dsName
     * @return The BDE datastore information
     */
@@ -698,6 +777,7 @@ public class RestResource {
 
    /**
     * Get all BDE datastores' information
+    * 
     * @return A list of BDE datastore information
     */
    @RequestMapping(value = "/datastores", method = RequestMethod.GET, produces = "application/json")
@@ -707,7 +787,9 @@ public class RestResource {
    }
 
    /**
-    * Delete a BDE datastore, and the corresponding VC datastore will still keep there
+    * Delete a BDE datastore, and the corresponding VC datastore will still keep
+    * there
+    * 
     * @param dsName
     */
    @RequestMapping(value = "/datastore/{dsName}", method = RequestMethod.DELETE)
@@ -723,7 +805,9 @@ public class RestResource {
    }
 
    /**
-    * Delete a BDE network, and the corresponding VC network will still keep there
+    * Delete a BDE network, and the corresponding VC network will still keep
+    * there
+    * 
     * @param networkName
     */
    @RequestMapping(value = "/network/{networkName}", method = RequestMethod.DELETE)
@@ -741,8 +825,11 @@ public class RestResource {
 
    /**
     * Get the BDE network information by its name
+    * 
     * @param networkName
-    * @param details true will return information about allocated ips to cluster nodes
+    * @param details
+    *           true will return information about allocated ips to cluster
+    *           nodes
     * @return The BDE network information
     */
    @RequestMapping(value = "/network/{networkName}", method = RequestMethod.GET, produces = "application/json")
@@ -766,7 +853,10 @@ public class RestResource {
 
    /**
     * Get all BDE networks' information
-    * @param details true will return information about allocated ips to cluster nodes
+    * 
+    * @param details
+    *           true will return information about allocated ips to cluster
+    *           nodes
     * @return A list of BDE network information
     */
    @RequestMapping(value = "/networks", method = RequestMethod.GET, produces = "application/json")
@@ -778,6 +868,7 @@ public class RestResource {
 
    /**
     * Add a VC network into BDE
+    * 
     * @param na
     */
    @RequestMapping(value = "/networks", method = RequestMethod.POST, consumes = "application/json")
@@ -800,8 +891,9 @@ public class RestResource {
             throw BddException.INVALID_PARAMETER("netmask", na.getNetmask());
          }
          long netmask = IpAddressUtil.getAddressAsLong(na.getNetmask());
-         if (na.getGateway() != null && !IpAddressUtil.isValidIp(netmask,
-               IpAddressUtil.getAddressAsLong(na.getGateway()))) {
+         if (na.getGateway() != null
+               && !IpAddressUtil.isValidIp(netmask,
+                     IpAddressUtil.getAddressAsLong(na.getGateway()))) {
             throw BddException.INVALID_PARAMETER("gateway", na.getGateway());
          }
          if (na.getDns1() != null && !IpAddressUtil.isValidIp(na.getDns1())) {
@@ -819,6 +911,7 @@ public class RestResource {
 
    /**
     * Add ips into an existing BDE network
+    * 
     * @param networkName
     * @param network
     * @param request
@@ -839,6 +932,7 @@ public class RestResource {
 
    /**
     * Get all appmanager types supported by BDE
+    * 
     * @return The list of Application Manager types in BDE
     */
    @RequestMapping(value = "/appmanagers/types", method = RequestMethod.GET, produces = "application/json")
@@ -849,6 +943,7 @@ public class RestResource {
 
    /**
     * Add an appmanager to BDE
+    * 
     * @param appManagerAdd
     */
    @RequestMapping(value = "/appmanagers", method = RequestMethod.POST, consumes = "application/json")
@@ -867,6 +962,7 @@ public class RestResource {
 
    /**
     * Modify an app manager
+    * 
     * @param appManagerAdd
     * @param request
     * @param response
@@ -874,8 +970,7 @@ public class RestResource {
    @RequestMapping(value = "/appmanagers", method = RequestMethod.PUT, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
    public void modifyAppManager(@RequestBody AppManagerAdd appManagerAdd,
-         HttpServletRequest request,
-         HttpServletResponse response) {
+         HttpServletRequest request, HttpServletResponse response) {
       if (appManagerAdd == null) {
          throw BddException.INVALID_PARAMETER("appManagerAdd", null);
       }
@@ -890,15 +985,18 @@ public class RestResource {
 
    /**
     * Delete an app manager
+    * 
     * @param appManagerName
     */
    @RequestMapping(value = "/appmanager/{appManagerName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
-   public void deleteAppManager(@PathVariable("appManagerName") String appManagerName) {
+   public void deleteAppManager(
+         @PathVariable("appManagerName") String appManagerName) {
       appManagerName = CommonUtil.decode(appManagerName);
       if (CommonUtil.isBlank(appManagerName)
             || !CommonUtil.validateResourceName(appManagerName)) {
-         throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
+         throw BddException
+               .INVALID_PARAMETER("appmanager name", appManagerName);
       }
 
       try {
@@ -910,33 +1008,40 @@ public class RestResource {
 
    /**
     * Get a BDE appmanager information
+    * 
     * @param appManagerName
     * @return The BDE appmanager information
     */
    @RequestMapping(value = "/appmanager/{appManagerName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   public AppManagerRead getAppManager(@PathVariable("appManagerName") String appManagerName) {
+   public AppManagerRead getAppManager(
+         @PathVariable("appManagerName") String appManagerName) {
       appManagerName = CommonUtil.decode(appManagerName);
       if (CommonUtil.isBlank(appManagerName)
             || !CommonUtil.validateResourceName(appManagerName)) {
-         throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
+         throw BddException
+               .INVALID_PARAMETER("appmanager name", appManagerName);
       }
-      AppManagerRead read = softwareManagerCollector.getAppManagerRead(appManagerName);
+      AppManagerRead read =
+            softwareManagerCollector.getAppManagerRead(appManagerName);
       return read;
    }
 
    /**
     * Get supported distro information of a BDE appmanager
+    * 
     * @param appManagerName
     * @return The list of supported distros
     */
    @RequestMapping(value = "/appmanager/{appManagerName}/distros", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   public List<DistroRead> getAppManagerDistros(@PathVariable("appManagerName") String appManagerName) {
+   public List<DistroRead> getAppManagerDistros(
+         @PathVariable("appManagerName") String appManagerName) {
       appManagerName = CommonUtil.decode(appManagerName);
       if (CommonUtil.isBlank(appManagerName)
             || !CommonUtil.validateResourceName(appManagerName)) {
-         throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
+         throw BddException
+               .INVALID_PARAMETER("appmanager name", appManagerName);
       }
       SoftwareManager softMgr =
             softwareManagerCollector.getSoftwareManager(appManagerName);
@@ -970,6 +1075,7 @@ public class RestResource {
 
    /**
     * Get supported role information of a distro of a BDE appmanager
+    * 
     * @param appManagerName
     * @param distroName
     * @return The list of supported roles
@@ -982,7 +1088,8 @@ public class RestResource {
       appManagerName = CommonUtil.decode(appManagerName);
       if (CommonUtil.isBlank(appManagerName)
             || !CommonUtil.validateResourceName(appManagerName)) {
-         throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
+         throw BddException
+               .INVALID_PARAMETER("appmanager name", appManagerName);
       }
       SoftwareManager softMgr =
             softwareManagerCollector.getSoftwareManager(appManagerName);
@@ -1003,6 +1110,7 @@ public class RestResource {
 
    /**
     * Get supported configuration information of a distro of a BDE appmanager
+    * 
     * @param appManagerName
     * @param distroName
     * @return The list of supported configurations
@@ -1015,7 +1123,8 @@ public class RestResource {
       appManagerName = CommonUtil.decode(appManagerName);
       if (CommonUtil.isBlank(appManagerName)
             || !CommonUtil.validateResourceName(appManagerName)) {
-         throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
+         throw BddException
+               .INVALID_PARAMETER("appmanager name", appManagerName);
       }
 
       SoftwareManager softMgr =
@@ -1038,13 +1147,16 @@ public class RestResource {
 
    @RequestMapping(value = "/appmanager/{appManagerName}/defaultdistro", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   public DistroRead getDefaultStack(@PathVariable("appManagerName") String appManagerName) {
+   public DistroRead getDefaultStack(
+         @PathVariable("appManagerName") String appManagerName) {
       appManagerName = CommonUtil.decode(appManagerName);
       if (CommonUtil.isBlank(appManagerName)
             || !CommonUtil.validateResourceName(appManagerName)) {
-         throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
+         throw BddException
+               .INVALID_PARAMETER("appmanager name", appManagerName);
       }
-      SoftwareManager softMgr = softwareManagerCollector.getSoftwareManager(appManagerName);
+      SoftwareManager softMgr =
+            softwareManagerCollector.getSoftwareManager(appManagerName);
       HadoopStack stack = softMgr.getDefaultStack();
       if (stack == null) {
          return null;
@@ -1062,10 +1174,13 @@ public class RestResource {
       appManagerName = CommonUtil.decode(appManagerName);
       if (CommonUtil.isBlank(appManagerName)
             || !CommonUtil.validateResourceName(appManagerName)) {
-         throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
+         throw BddException
+               .INVALID_PARAMETER("appmanager name", appManagerName);
       }
-      SoftwareManager softMgr = softwareManagerCollector.getSoftwareManager(appManagerName);
-      HadoopStack stack = clusterMgr.filterDistroFromAppManager(softMgr, distroName);
+      SoftwareManager softMgr =
+            softwareManagerCollector.getSoftwareManager(appManagerName);
+      HadoopStack stack =
+            clusterMgr.filterDistroFromAppManager(softMgr, distroName);
       if (stack == null) {
          return null;
       } else {
@@ -1075,6 +1190,7 @@ public class RestResource {
 
    /**
     * Get all BDE appmanagers' information
+    * 
     * @return The list of Application Managers in BDE
     */
    @RequestMapping(value = "/appmanagers", method = RequestMethod.GET, produces = "application/json")
@@ -1084,8 +1200,11 @@ public class RestResource {
    }
 
    /**
-    * Store rack list information into BDE for rack related support, such as hadoop rack awareness and node placement policies
-    * @param racksInfo A list of rack information
+    * Store rack list information into BDE for rack related support, such as
+    * hadoop rack awareness and node placement policies
+    * 
+    * @param racksInfo
+    *           A list of rack information
     */
    @RequestMapping(value = "/racks", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.OK)
@@ -1103,6 +1222,7 @@ public class RestResource {
 
    /**
     * Get the rack list
+    * 
     * @return A list of rack information
     */
    @RequestMapping(value = "/racks", method = RequestMethod.GET, produces = "application/json")
@@ -1113,6 +1233,7 @@ public class RestResource {
 
    /**
     * Get available distributions information
+    * 
     * @return A list of distribution information
     */
    @RequestMapping(value = "/distros", method = RequestMethod.GET, produces = "application/json")
@@ -1130,7 +1251,9 @@ public class RestResource {
    }
 
    /**
-    * Get the distribution information by its name such as apache, bigtop, cdh, intel, gphd, hdp, mapr, phd,etc.
+    * Get the distribution information by its name such as apache, bigtop, cdh,
+    * intel, gphd, hdp, mapr, phd,etc.
+    * 
     * @param distroName
     * @return The distribution information
     */
