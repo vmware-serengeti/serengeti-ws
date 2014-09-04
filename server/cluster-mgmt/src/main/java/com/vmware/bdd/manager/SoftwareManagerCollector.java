@@ -50,6 +50,7 @@ import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.manager.i18n.Messages;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
@@ -124,8 +125,16 @@ public class SoftwareManagerCollector implements InitializingBean {
       // add to meta-db through AppManagerService
       logger.info("Add app manager to meta-db.");
 
-      // add to meta-db through AppManagerService
-      appManagerService.addAppManager(appManagerAdd);
+      try {
+         appManagerService.addAppManager(appManagerAdd);
+      } catch (SoftwareManagerCollectorException ex) {
+         cache.remove(appManagerAdd.getName());
+         throw ex;
+      }
+      catch (Exception ex) {
+         cache.remove(appManagerAdd.getName());
+         throw BddException.wrapIfNeeded(ex, Messages.getString("SW_MGR_COLLECTOR.FAILED_WRITE_META_DB"));
+      }
    }
 
 
@@ -207,6 +216,7 @@ public class SoftwareManagerCollector implements InitializingBean {
 
       logger.info("Start to invoke application manager factory to create application manager.");
       SoftwareManager softwareManager = null;
+
       try {
          softwareManager =
                softwareManagerFactory.getSoftwareManager(appManagerAdd.getUrl(), appManagerAdd

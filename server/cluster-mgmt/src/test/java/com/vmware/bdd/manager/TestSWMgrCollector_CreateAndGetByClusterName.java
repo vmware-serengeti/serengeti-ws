@@ -26,6 +26,7 @@ import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.utils.Constants;
@@ -71,10 +72,34 @@ public class TestSWMgrCollector_CreateAndGetByClusterName extends TestSWMgrColle
       softwareManagerCollector.createSoftwareManager(defaultAppManagerAdd);
    }
 
+   @Test(expectedExceptions = BddException.class,
+         expectedExceptionsMessageRegExp = "Internal error: Failed to write AppManager to META-DB.")
+   public void testCreateAppManager_FailedWriteMetaDB() {
+      Mockito.doThrow(new RuntimeException()).when(appManagerService).addAppManager(appManagerAddFoo);
+
+      Configuration.setString(SoftwareManagerCollector.configurationPrefix + appManagerAddFoo.getType(), "com.vmware.bdd.manager.mocks.FooSWMgrFactory");
+      softwareManagerCollector.setPrivateKey("mock-key");
+
+      softwareManagerCollector.createSoftwareManager(appManagerAddFoo);
+   }
+
+   @Test(expectedExceptions = SoftwareManagerCollectorException.class,
+         expectedExceptionsMessageRegExp = "Name fooAppMgr already exists.")
+   public void testCreateAppManager_DuplicateInMetaDB() {
+      Mockito.doThrow(SoftwareManagerCollectorException.DUPLICATE_NAME(appManagerAddFoo.getName())).when(appManagerService).addAppManager(appManagerAddFoo);
+
+      Configuration.setString(SoftwareManagerCollector.configurationPrefix + appManagerAddFoo.getType(), "com.vmware.bdd.manager.mocks.FooSWMgrFactory");
+      softwareManagerCollector.setPrivateKey("mock-key");
+
+      softwareManagerCollector.createSoftwareManager(appManagerAddFoo);
+   }
+
    @Test(expectedExceptions = SWMgrCollectorInternalException.class,
          expectedExceptionsMessageRegExp = "AppManager factory class for fooAppMgr is not defined in serengeti.properties.")
    public void testGetAppManager_FactoryUndefined() {
       Mockito.when(appManagerService.findAppManagerByName(Matchers.anyString())).thenReturn(appManagerEntityFoo);
+
+      softwareManagerCollector.setPrivateKey("mock-key");
 
       softwareManagerCollector.getSoftwareManager("fooAppMgr");
    }
