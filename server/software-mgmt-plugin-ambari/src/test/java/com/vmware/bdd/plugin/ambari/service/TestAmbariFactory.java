@@ -37,11 +37,10 @@ public class TestAmbariFactory {
 
    @MockClass(realClass = ApiManager.class)
    public static class MockApiManager {
-
-      public MockApiManager(String amServerHost, int port, String user, String password) {
-
+      @Mock
+      public String healthCheck(){
+         return "succeed";
       }
-
    }
 
    @MockClass(realClass = AmbariManagerClientbuilder.class)
@@ -85,5 +84,4 @@ public class TestAmbariFactory {
                   "http://127.0.0.1:8080", "admin", "admin".toCharArray(), "RSA_CERT");
       Assert.assertEquals(Constants.AMBARI_PLUGIN_NAME, softwareManager.getName());
    }
-
 }

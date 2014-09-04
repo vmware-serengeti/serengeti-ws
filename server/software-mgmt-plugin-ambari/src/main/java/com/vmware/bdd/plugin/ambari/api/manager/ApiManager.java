@@ -94,6 +94,7 @@ public class ApiManager implements IApiManager {
       ApiRootResource amApiRootResource = clientbuilder.build();
 
       apiResourceRootV1 = amApiRootResource.getRootV1();
+      healthCheck();
    }
 
 
