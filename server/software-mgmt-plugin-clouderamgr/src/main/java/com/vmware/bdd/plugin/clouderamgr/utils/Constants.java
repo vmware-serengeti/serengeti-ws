@@ -44,7 +44,7 @@ public interface Constants {
    public static final String CONFIG_DFS_NAMESERVICE_MOUNTPOINTS = "nameservice_mountpoints";
    public static final String CONFIG_SQOOP_METASTORE_DATA_DIR = "sqoop_metastore_data_dir";
    public static final String CONFIG_ZOOKEEPER_SERVER_ID = "serverId";
-
+   public static final String CONFIG_HUE__WEBHDFS = "hue_webhdfs";
    public static final String ROLE_CONFIG_GROUP_UPDATE_NOTES = "Update Base Role Config Group By VMware Big Data Extention";
 
    public static final Map<Integer, String> API_VERSION_SINCE_OF_CM_VERSION = new HashMap<Integer, String>(){

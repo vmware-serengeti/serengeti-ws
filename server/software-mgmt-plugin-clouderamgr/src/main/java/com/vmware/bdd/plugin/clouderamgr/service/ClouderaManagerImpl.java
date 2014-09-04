@@ -1396,91 +1396,135 @@ public class ClouderaManagerImpl implements SoftwareManager {
       String action = "Configuring cluster services";
       cluster.getCurrentReport().setAction(action);
       reportQueue.addClusterReport(cluster.getCurrentReport().clone());
-      ApiServiceList serviceList = new ApiServiceList();
 
-      for (CmServiceDef serviceDef : cluster.getServices()) {
-         ApiService apiService = new ApiService();
-         apiService.setType(serviceDef.getType().getName());
-         apiService.setName(serviceDef.getName());
-         apiService.setDisplayName(serviceDef.getDisplayName());
+      Collections.sort(cluster.getServices(), new Comparator<CmServiceDef>() {
+         @Override
+         public int compare(CmServiceDef o1, CmServiceDef o2) {
+            return o1.getType().compareTo(o2.getType());
+         }
+      });
 
-         ApiServiceConfig apiServiceConfig = new ApiServiceConfig();
-
-         Set<String> serviceTypes = cluster.allServiceTypes();
-         if (serviceDef.getType().getDependencies() != null) {
-            for (AvailableServiceRole.Dependency dependency : serviceDef.getType().getDependencies()) {
-               for (String dependService : dependency.getServices()) {
-                  if (serviceDef.getType().getDisplayName().equals("IMPALA") && dependService.equals("YARN")) {
-                     // Impala needs Llama role to be able to use YARN for resource management, but this
-                     // is a new added role and not yet supported well
-                     continue;
-                  }
-                  if (serviceTypes.contains(dependService)) {
-                     apiServiceConfig.add(new ApiConfig(dependency.getConfigKey(), cluster.serviceNameOfType(dependService)));
+      Iterator<CmServiceDef> serviceDefIterator = cluster.getServices().iterator();
+      CmServiceDef hueService = null;
+      while (serviceDefIterator.hasNext() || hueService != null) {
+         ApiServiceList serviceList = new ApiServiceList();
+         try {
+            if (hueService != null) {
+               CmServiceDef hdfsService = cluster.serviceDefOfType("HDFS");
+               CmRoleDef namenodeRole = null;
+               for (CmRoleDef roleDef : hdfsService.getRoles()) {
+                  if (roleDef.getType().getDisplayName().equals("HDFS_NAMENODE")) {
+                     namenodeRole = roleDef;
+                     break;
                   }
                }
-            }
-         }
-
-         if (serviceDef.getConfiguration() != null) {
-            for (String key : serviceDef.getConfiguration().keySet()) {
-               apiServiceConfig.add(new ApiConfig(key, serviceDef.getConfiguration().get(key)));
-            }
-         }
-
-         // update configs if service already exist
-         if (servicesConfigured
-               && apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).readService(serviceDef.getName()) != null) {
-            apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
-                  .updateServiceConfig(serviceDef.getName(), "update configs for role " + serviceDef.getName(), apiServiceConfig);
-            logger.info("Finished reconfigure service " + serviceDef.getName());
-         }
-
-         apiService.setConfig(apiServiceConfig);
-
-         List<ApiRole> apiRoles = new ArrayList<ApiRole>();
-         for (CmRoleDef roleDef : serviceDef.getRoles()) {
-            ApiRole apiRole = createApiRole(roleDef);
-
-            /*
-            update configs of this role if services already exist,
-            the roleDef's roleName is already synced up at the beginning of this function
-             */
-            if (servicesConfigured
-                  && apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).readService(serviceDef.getName()) != null
-                  && apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).getRolesResource(serviceDef.getName()).readRole(roleDef.getName()) != null) {
-               apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).getRolesResource(serviceDef.getName())
-                     .updateRoleConfig(roleDef.getName(), "update config for role " + roleDef.getDisplayName(), apiRole.getConfig());
-               logger.info("Finished reconfigure role " + roleDef.getDisplayName());
+               if (namenodeRole != null) {
+                  // namenode role def should already synced the role ID from CM
+                  hueService.addConfig(Constants.CONFIG_HUE__WEBHDFS, namenodeRole.getName());
+                  addApiService(serviceList, cluster, hueService, servicesConfigured);
+               }
+               hueService = null;
             }
 
-            apiRoles.add(apiRole);
-         }
+            while (serviceDefIterator.hasNext()) {
+               CmServiceDef serviceDef = serviceDefIterator.next();
+               if (serviceDef.getType().getDisplayName().equals("HUE")) {
+                  hueService = serviceDef;
+                  break;
+               }
+               addApiService(serviceList, cluster, serviceDef, servicesConfigured);
+            }
 
-         apiService.setRoles(apiRoles);
-         serviceList.add(apiService);
+            if (!servicesConfigured) {
+               apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).createServices(serviceList);
+               logger.info("Finished create services");
+
+               syncRolesId(cluster);
+            }
+         } catch (Exception e) {
+            String errMsg = "Failed to configure services" + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
+            logger.error(errMsg);
+            throw SoftwareManagementPluginException.CONFIGURE_SERVICE_FAILED(e);
+         }
       }
 
       try {
-         if (!servicesConfigured) {
-            apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).createServices(serviceList);
-            logger.info("Finished create services");
-
-            updateRoleConfigGroups(cluster.getName());
-            logger.info("Updated roles config groups");
-
-            syncRolesId(cluster);
-         }
+         updateRoleConfigGroups(cluster.getName());
+         logger.info("Updated roles config groups");
 
          preDeployConfig(cluster);
 
          executeAndReport("Deploy client config", apiResourceRootV6.getClustersResource().deployClientConfig(cluster.getName()),
                ProgressSplit.CONFIGURE_SERVICES.getProgress(), cluster.getCurrentReport(), reportQueue);
+
       } catch (Exception e) {
          String errMsg = "Failed to configure services" + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
          logger.error(errMsg);
          throw SoftwareManagementPluginException.CONFIGURE_SERVICE_FAILED(e);
       }
+   }
+
+   private void addApiService(ApiServiceList serviceList, CmClusterDef cluster, CmServiceDef serviceDef, boolean servicesConfigured) {
+      ApiService apiService = new ApiService();
+      apiService.setType(serviceDef.getType().getName());
+      apiService.setName(serviceDef.getName());
+      apiService.setDisplayName(serviceDef.getDisplayName());
+
+      ApiServiceConfig apiServiceConfig = new ApiServiceConfig();
+
+      Set<String> serviceTypes = cluster.allServiceTypes();
+      if (serviceDef.getType().getDependencies() != null) {
+         for (AvailableServiceRole.Dependency dependency : serviceDef.getType().getDependencies()) {
+            for (String dependService : dependency.getServices()) {
+               if (serviceDef.getType().getDisplayName().equals("IMPALA") && dependService.equals("YARN")) {
+                  // Impala needs Llama role to be able to use YARN for resource management, but this
+                  // is a new added role and not yet supported well
+                  continue;
+               }
+               if (serviceTypes.contains(dependService)) {
+                  apiServiceConfig.add(new ApiConfig(dependency.getConfigKey(), cluster.serviceNameOfType(dependService)));
+               }
+            }
+         }
+      }
+
+      if (serviceDef.getConfiguration() != null) {
+         for (String key : serviceDef.getConfiguration().keySet()) {
+            apiServiceConfig.add(new ApiConfig(key, serviceDef.getConfiguration().get(key)));
+         }
+      }
+
+      // update configs if service already exist
+      if (servicesConfigured
+            && apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).readService(serviceDef.getName()) != null) {
+         apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
+               .updateServiceConfig(serviceDef.getName(), "update configs for role " + serviceDef.getName(), apiServiceConfig);
+         logger.info("Finished reconfigure service " + serviceDef.getName());
+      }
+
+      apiService.setConfig(apiServiceConfig);
+
+      List<ApiRole> apiRoles = new ArrayList<ApiRole>();
+      for (CmRoleDef roleDef : serviceDef.getRoles()) {
+         ApiRole apiRole = createApiRole(roleDef);
+
+            /*
+            update configs of this role if services already exist,
+            the roleDef's roleName is already synced up at the beginning of this function
+             */
+         if (servicesConfigured
+               && apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).readService(serviceDef.getName()) != null
+               && apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).getRolesResource(serviceDef.getName()).readRole(roleDef.getName()) != null) {
+            apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).getRolesResource(serviceDef.getName())
+                  .updateRoleConfig(roleDef.getName(), "update config for role " + roleDef.getDisplayName(), apiRole.getConfig());
+            logger.info("Finished reconfigure role " + roleDef.getDisplayName());
+         }
+
+         apiRoles.add(apiRole);
+      }
+
+      apiService.setRoles(apiRoles);
+      serviceList.add(apiService);
    }
 
    private void preDeployConfig(final CmClusterDef cluster) throws Exception {
