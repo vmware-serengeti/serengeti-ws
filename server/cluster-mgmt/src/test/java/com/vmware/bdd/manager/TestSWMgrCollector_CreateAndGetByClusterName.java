@@ -79,8 +79,12 @@ public class TestSWMgrCollector_CreateAndGetByClusterName extends TestSWMgrColle
 
       Configuration.setString(SoftwareManagerCollector.configurationPrefix + appManagerAddFoo.getType(), "com.vmware.bdd.manager.mocks.FooSWMgrFactory");
       softwareManagerCollector.setPrivateKey("mock-key");
-
-      softwareManagerCollector.createSoftwareManager(appManagerAddFoo);
+      try {
+         softwareManagerCollector.createSoftwareManager(appManagerAddFoo);
+      } catch (Exception ex) {
+         Assert.assertEquals(softwareManagerCollector.getCacheSize(), 0);
+         throw ex;
+      }
    }
 
    @Test(expectedExceptions = SoftwareManagerCollectorException.class,
@@ -91,7 +95,12 @@ public class TestSWMgrCollector_CreateAndGetByClusterName extends TestSWMgrColle
       Configuration.setString(SoftwareManagerCollector.configurationPrefix + appManagerAddFoo.getType(), "com.vmware.bdd.manager.mocks.FooSWMgrFactory");
       softwareManagerCollector.setPrivateKey("mock-key");
 
-      softwareManagerCollector.createSoftwareManager(appManagerAddFoo);
+      try {
+         softwareManagerCollector.createSoftwareManager(appManagerAddFoo);
+      } catch (Exception ex) {
+         Assert.assertEquals(softwareManagerCollector.getCacheSize(), 0);
+         throw ex;
+      }
    }
 
    @Test(expectedExceptions = SWMgrCollectorInternalException.class,

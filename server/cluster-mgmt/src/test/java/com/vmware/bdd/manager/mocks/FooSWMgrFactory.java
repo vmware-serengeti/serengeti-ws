@@ -22,16 +22,19 @@ import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManagerFactory;
  * Created By xiaoliangl on 9/3/14.
  */
 public class FooSWMgrFactory implements SoftwareManagerFactory {
+
+   public static final String FOO_APP_MGR = "fooAppMgr";
+
    @Override
    public SoftwareManager getSoftwareManager(final String URL, String username, char[] password, String certificate) {
       return new DefaultSoftwareManagerImpl() {
 
          public String getName() {
-            return "fooAppMgr";
+            return FOO_APP_MGR;
          }
 
          public String getType() {
-            return "fooAppMgr";
+            return FOO_APP_MGR;
          }
       };
    }

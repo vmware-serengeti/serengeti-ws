@@ -17,10 +17,12 @@ package com.vmware.bdd.manager;
 import org.mockito.Mockito;
 import org.testng.annotations.BeforeMethod;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.manager.mocks.FooSWMgrFactory;
 import com.vmware.bdd.service.resmgmt.IAppManagerService;
 import com.vmware.bdd.utils.Constants;
 
@@ -49,6 +51,8 @@ public class TestSWMgrCollectorBase {
       softwareManagerCollector.setAppManagerService(appManagerService);
       softwareManagerCollector.setClusterEntityManager(clusterEntityManager);
 
+      Configuration.setString(SoftwareManagerCollector.configurationPrefix + Constants.IRONFAN, "");
+      Configuration.setString(SoftwareManagerCollector.configurationPrefix + FooSWMgrFactory.FOO_APP_MGR, "");
    }
 
    static {

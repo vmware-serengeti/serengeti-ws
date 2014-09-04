@@ -89,6 +89,10 @@ public class SoftwareManagerCollector implements InitializingBean {
       this.appManagerService = appManagerService;
    }
 
+   protected int getCacheSize() {
+      return cache.size();
+   }
+
    public void setClusterEntityManager(IClusterEntityManager clusterEntityManager) {
       this.clusterEntityManager = clusterEntityManager;
    }
