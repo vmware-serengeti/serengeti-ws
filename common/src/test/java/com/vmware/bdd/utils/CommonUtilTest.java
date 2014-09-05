@@ -34,7 +34,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class CommonUtilTest {
-    @Test
+
+   @Test
    public void testValidateVcResourceName() {
       assertFalse(CommonUtil.validateVcResourceName(""));
       assertTrue(CommonUtil
