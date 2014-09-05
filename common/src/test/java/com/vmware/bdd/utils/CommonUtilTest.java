@@ -19,17 +19,22 @@ import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertTrue;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class CommonUtilTest {
-
-   @Test
+    @Test
    public void testValidateVcResourceName() {
       assertFalse(CommonUtil.validateVcResourceName(""));
       assertTrue(CommonUtil
@@ -204,4 +209,73 @@ public class CommonUtilTest {
       assertTrue(CommonUtil.passwordContainInvalidCharacter("?"));
       assertFalse(CommonUtil.passwordContainInvalidCharacter("1a_@#$%^&*"));
    }
+
+   @Test
+   public void testReadJsonFileSucc() throws ParseException {
+      String fileName = "whitelist.json";
+      try {
+         FileInputStream fis = new FileInputStream(fileName);
+         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+         StringBuilder sb = new StringBuilder();
+         String line = br.readLine();
+         while ( null != line ) {
+            sb.append(line);
+         }
+         br.close();
+         String contentRead = CommonUtil.readJsonFile(fileName);
+         Assert.assertEquals(contentRead, sb.toString());
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+   }
+
+   @Test
+   public void testReadJsonFileNotExisted() throws ParseException {
+      String contentRead = CommonUtil.readJsonFile("Not_Existed");
+      Assert.assertEquals(contentRead, "");
+   }
+
+   @Test
+   public void testInputsConvert() throws ParseException {
+      String[] sa = { "ab", "123", "*&^" };
+      List<String> ls = CommonUtil.inputsConvert("ab,123,*&^");
+      for ( int i=0; i<sa.length; i++ ) {
+         Assert.assertEquals(ls.get(i), sa[i]);
+      }
+   }
+
+   @Test
+   public void testExecCommand() throws ParseException {
+      String tmpDir = System.getProperty("java.io.tmpdir");
+      if ( tmpDir.endsWith(File.separator) ) {
+         tmpDir = tmpDir.substring(0, tmpDir.length()-1);
+      }
+      String filePathName = tmpDir + File.separator + "abc";
+      String cmd = "touch " + filePathName;
+      Process p = CommonUtil.execCommand(cmd);
+      File f = new File(filePathName);
+
+      Assert.assertNotNull(p);
+      Assert.assertTrue(f.exists());
+
+      f.delete();
+   }
+
+   @Test
+   public void testValidateUrl() throws ParseException {
+      List<String> errorMsgs = new ArrayList<String>();
+      boolean valid = CommonUtil.validateUrl("http://10.141.73.8:8080", errorMsgs);
+      Assert.assertTrue(valid);
+
+      errorMsgs.clear();
+      valid = CommonUtil.validateUrl("ftp://10.141.73.8:8080", errorMsgs);
+      Assert.assertFalse(valid);
+      Assert.assertEquals(errorMsgs.get(0), "URL should starts with http or https");
+
+      errorMsgs.clear();
+      valid = CommonUtil.validateUrl("http://10.141.73.8/cloudera", errorMsgs);
+      Assert.assertFalse(valid);
+      Assert.assertEquals(errorMsgs.get(0), "port number is missing in URL");
+   }
+
 }
