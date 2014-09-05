@@ -14,11 +14,12 @@
  *****************************************************************************/
 package com.vmware.bdd.dal;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.entity.AppManagerEntity;
@@ -27,11 +28,12 @@ import com.vmware.bdd.entity.AppManagerEntity;
  * Created By xiaoliangl on 9/3/14.
  */
 @ContextConfiguration(locations = {"classpath:/META-INF/spring/*-context.xml"})
-public class TestAppMgrDao extends AbstractTestNGSpringContextTests {
+public class TestAppMgrDao extends AbstractTransactionalTestNGSpringContextTests {
    @Autowired
    IAppManagerDAO appManagerDAO;
 
-   @Test(expectedExceptions = ConstraintViolationException.class)
+   @Test(expectedExceptions = DataIntegrityViolationException.class)
+   @Transactional(propagation = Propagation.NEVER) //simulate two concurrent TXs: one user is inserting a APPManager, which another is doing the same.
    public void testPrimaryKeyViolation() {
       AppManagerEntity appManagerAddDefault = new AppManagerEntity();
       appManagerAddDefault.setName("fooAppMgr");
@@ -41,8 +43,11 @@ public class TestAppMgrDao extends AbstractTestNGSpringContextTests {
       appManagerAddDefault.setUsername("");
       appManagerAddDefault.setPassword("");
       appManagerAddDefault.setSslCertificate("");
+
+      //TX1
       appManagerDAO.insert(appManagerAddDefault);
 
+      //TX2
       appManagerDAO.insert(appManagerAddDefault);
    }
 

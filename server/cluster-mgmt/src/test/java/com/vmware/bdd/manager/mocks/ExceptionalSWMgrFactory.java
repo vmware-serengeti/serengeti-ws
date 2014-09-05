@@ -14,17 +14,16 @@
  *****************************************************************************/
 package com.vmware.bdd.manager.mocks;
 
-import java.io.IOException;
-
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManagerFactory;
 
 /**
  * Created By xiaoliangl on 9/3/14.
  */
+@SuppressWarnings("unused")
 public class ExceptionalSWMgrFactory implements SoftwareManagerFactory {
    @Override
    public SoftwareManager getSoftwareManager(String URL, String username, char[] password, String certificate) {
-      throw new RuntimeException();
+      throw new RuntimeException("Problem with ExceptionalSWMgrFactory");
    }
 }

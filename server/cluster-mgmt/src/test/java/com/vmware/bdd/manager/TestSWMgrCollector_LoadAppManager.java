@@ -112,7 +112,7 @@ public class TestSWMgrCollector_LoadAppManager extends TestSWMgrCollectorBase{
    }
 
    @Test(expectedExceptions = SoftwareManagerCollectorException.class,
-         expectedExceptionsMessageRegExp = "Cannot connect to application manager Default with error RuntimeException: , check the connection information.")
+         expectedExceptionsMessageRegExp = "Cannot connect to application manager Default with error RuntimeException: Problem with ExceptionalSWMgrFactory")
    public void testLoadAppManager_CantInstantiateAppMgr() {
       Mockito.when(appManagerService.findAll()).thenReturn(new ArrayList<AppManagerEntity>());
 
