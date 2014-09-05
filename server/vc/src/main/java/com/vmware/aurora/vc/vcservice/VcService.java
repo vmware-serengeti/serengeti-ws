@@ -279,52 +279,6 @@ public class VcService {
          }
       }
 
-      /*
-       * Login once using VC extension key (stored in cms keystore)
-       * and retrieve the session ticket.
-       */
-      private String loginAndGetSessionTicket() {
-         URI sdkUri = null;
-         if (!vcExtensionRegistered) {
-            return null;
-         }
-         try {
-            sdkUri = new URI("https://sdkTunnel:8089/sdk/vimService");
-         } catch (URISyntaxException e) {
-            logger.error(e);
-            return null;
-         }
-         HttpConfigurationImpl httpConfig = new HttpConfigurationImpl();
-         httpConfig.setTimeoutMs(SESSION_TIME_OUT);
-         httpConfig.setKeyStore(CmsKeyStore.getKeyStore());
-         httpConfig.setDefaultProxy(vcHost, 80, "http");
-         httpConfig.getKeyStoreConfig().setKeyAlias(CmsKeyStore.VC_EXT_KEY);
-         httpConfig.getKeyStoreConfig().setKeyPassword(CmsKeyStore.getVCExtPassword());
-         httpConfig.setThumbprintVerifier(getThumbprintVerifier());
-         HttpClientConfiguration clientConfig = HttpClientConfiguration.Factory.newInstance();
-         clientConfig.setHttpConfiguration(httpConfig);
-         Client client = Client.Factory.createClient(sdkUri, version, clientConfig);
-         SessionManager sm = null;
-         try {
-            ManagedObjectReference svcRef = new ManagedObjectReference();
-            svcRef.setType("ServiceInstance");
-            svcRef.setValue("ServiceInstance");
-            ServiceInstance si = client.createStub(ServiceInstance.class, svcRef);
-            sm = client.createStub(SessionManager.class,
-                  si.getContent().getSessionManager());
-            sm.loginExtensionByCertificate(extKey, "en");
-            String ticket = sm.acquireSessionTicket(null);
-            logger.info("got session ticket using extension");
-            return ticket;
-         } catch (Exception e) {
-            logger.error("failed to get session ticket using extension", e);
-            return null;
-         } finally {
-            VcContext.getVcCleaner().logout("VcExtensionLogin", client, sm,
-                  executor, httpConfig);
-         }
-      }
-
       /**
        * Initialize a new vmomiClient, including all required resources, thread
        * pool, etc. Thread names will include service name, generation count and
@@ -541,6 +495,53 @@ public class VcService {
       return service != null;
    }
 
+
+   /*
+    * Login once using VC extension key (stored in cms keystore)
+    * and retrieve the session ticket.
+    */
+   private String loginAndGetSessionTicket() {
+      URI sdkUri = null;
+      if (!vcExtensionRegistered) {
+         return null;
+      }
+      try {
+         sdkUri = new URI("https://sdkTunnel:8089/sdk/vimService");
+      } catch (URISyntaxException e) {
+         logger.error(e);
+         return null;
+      }
+      HttpConfigurationImpl httpConfig = new HttpConfigurationImpl();
+      httpConfig.setTimeoutMs(SESSION_TIME_OUT);
+      httpConfig.setKeyStore(CmsKeyStore.getKeyStore());
+      httpConfig.setDefaultProxy(vcHost, 80, "http");
+      httpConfig.getKeyStoreConfig().setKeyAlias(CmsKeyStore.VC_EXT_KEY);
+      httpConfig.getKeyStoreConfig().setKeyPassword(CmsKeyStore.getVCExtPassword());
+      httpConfig.setThumbprintVerifier(getThumbprintVerifier());
+      HttpClientConfiguration clientConfig = HttpClientConfiguration.Factory.newInstance();
+      clientConfig.setHttpConfiguration(httpConfig);
+      Client client = Client.Factory.createClient(sdkUri, version, clientConfig);
+      SessionManager sm = null;
+      try {
+         ManagedObjectReference svcRef = new ManagedObjectReference();
+         svcRef.setType("ServiceInstance");
+         svcRef.setValue("ServiceInstance");
+         ServiceInstance si = client.createStub(ServiceInstance.class, svcRef);
+         sm = client.createStub(SessionManager.class,
+               si.getContent().getSessionManager());
+         sm.loginExtensionByCertificate(extKey, "en");
+         String ticket = sm.acquireSessionTicket(null);
+         logger.info("got session ticket using extension");
+         return ticket;
+      } catch (Exception e) {
+         logger.error("failed to get session ticket using extension", e);
+         return null;
+      } finally {
+         VcContext.getVcCleaner().logout("VcExtensionLogin", client, sm,
+               null, httpConfig);
+      }
+   }
+
    /**
     * Initializes the VC session. Each session gets a separate vmomi client
     * (http session cookie is kept in vmomi client).
@@ -554,6 +555,22 @@ public class VcService {
           * Make sure our VC extension has been registered.
           */
          boolean justRegistered = false;
+         if (!vcExtensionRegistered) {
+            registerExtensionVService();
+            justRegistered = true;
+         }
+         if (vcExtensionRegistered) {
+            String ticket = null;
+            try {
+               ticket = loginAndGetSessionTicket();
+            } catch (Exception e) {
+               logger.debug("Got exception during login");
+            }
+            if (ticket == null) {
+               logger.info("Failed to login using certificate, try to regist extension once again");
+               vcExtensionRegistered = false;
+            }
+         }
          if (!vcExtensionRegistered) {
             registerExtensionVService();
             justRegistered = true;
@@ -661,12 +678,12 @@ public class VcService {
             logger.debug("Response: " + str);
          }
          vcExtensionRegistered = true;
-         Configuration.setBoolean(SERENGETI_EXTENSION_REGISTERED, true);
-         Configuration.save();
          logger.debug("Extension registration request sent successfully");
       } catch (Exception e) {
          logger.error("Failed Extension registration to " + evsURL, e);
       } finally {
+         Configuration.setBoolean(SERENGETI_EXTENSION_REGISTERED, true);
+         Configuration.save();
          if (output != null) {
             try {
                output.close();
