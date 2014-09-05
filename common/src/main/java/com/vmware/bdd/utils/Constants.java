@@ -81,6 +81,7 @@ public class Constants {
    public static final String NODE_ACTION_UPGRADE_FAILED = "Upgrade Failed";
    public static final String NODE_ACTION_UPGRADE_SUCCESS = "Upgrade Success";
    public static final String NODE_ACTION_WRONG_FT_STATUS = "Wrong FT status";
+   public static final String NODE_ACTION_SETTING_PASSWORD = "Setting Password";
    public static final String NODE_ACTION_SET_PASSWORD_SUCCEED = "Set password succeed";
    public static final String NODE_ACTION_SET_PASSWORD_FAILED = "Set password failed";
    public static final String NODE_ACTION_CHANGE_REPO_DIR_PERMISSION = "Remote add the write permission to repo dir";

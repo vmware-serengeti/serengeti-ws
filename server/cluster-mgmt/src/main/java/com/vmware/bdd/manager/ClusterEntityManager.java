@@ -234,16 +234,16 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
 
    @Transactional
    @RetryTransaction
-   public void updateNodesAction(String clusterName, String action) {
+   public void updateNodesActionForUpgrade(String clusterName, String action) {
       List<NodeEntity> nodes = clusterDao.getAllNodes(clusterName);
       for (NodeEntity node : nodes) {
-         updateNodeAction(node, action);
+         updateNodeActionForUpgrade(node, action);
       }
    }
 
    @Transactional
    @RetryTransaction
-   public void updateNodeAction(NodeEntity node, String action) {
+   public void updateNodeActionForUpgrade(NodeEntity node, String action) {
       if (node.needUpgrade(getServerVersion()) && node.canBeUpgrade()) {
          nodeDao.updateAction(node.getMoId(), action);
       }
@@ -878,6 +878,18 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       for (NodeEntity node : nodes) {
          node.cleanupErrorMessageForUpgrade();
       }
+   }
+
+   @Transactional
+   @RetryTransaction
+   //Sometimes, set password may take long time to finish, we'd better display the action on the cli
+   //so that user will know the progress
+   public void updateNodeAction(NodeEntity node, String action) {
+      node = getNodeWithNicsByMobId(node.getMoId());
+      node.setAction(action);
+      node.setActionFailed(false);
+      node.setErrMessage(null);
+      update(node);
    }
 
    public void update(Observable o, Object arg) {

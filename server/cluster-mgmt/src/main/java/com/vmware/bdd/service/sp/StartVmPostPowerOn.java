@@ -136,7 +136,7 @@ public class StartVmPostPowerOn implements IPrePostPowerOn {
       String vmName = node.getVmName();
       if (node.needUpgrade(serverVersion) && node.canBeUpgrade()) {
          logger.debug("vm " + vmName + "is going to upgrade");
-         clusterEntityMgr.updateNodeAction(node, Constants.NODE_ACTION_UPGRADING);
+         clusterEntityMgr.updateNodeActionForUpgrade(node, Constants.NODE_ACTION_UPGRADING);
          NodeUpgradeSP nodeUpgrade = new NodeUpgradeSP(node, serverVersion);
          try {
             nodeUpgrade.call();

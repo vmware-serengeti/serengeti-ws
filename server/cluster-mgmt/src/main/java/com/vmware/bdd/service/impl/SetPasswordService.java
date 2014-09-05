@@ -55,6 +55,7 @@ public class SetPasswordService implements ISetPasswordService {
       for (NodeEntity node : nodes) {
          SetVMPasswordSP setVMPasswordSP = new SetVMPasswordSP(node, password);
          storeProcedures.add(setVMPasswordSP);
+         clusterEntityMgr.updateNodeAction(node, Constants.NODE_ACTION_SETTING_PASSWORD);
       }
       AuAssert.check(!storeProcedures.isEmpty());
 
@@ -107,6 +108,7 @@ public class SetPasswordService implements ISetPasswordService {
       SetVMPasswordSP setVMPasswordSP = new SetVMPasswordSP(node, password);
       String vmNameWithIP = node.getVmNameWithIP();
       try {
+         clusterEntityMgr.updateNodeAction(node, Constants.NODE_ACTION_SETTING_PASSWORD);
          if (setVMPasswordSP.setPasswordForNode()) {
             updateNodeData(node, true, null, null);
             logger.info("Set password for " + vmNameWithIP + " succeed.");

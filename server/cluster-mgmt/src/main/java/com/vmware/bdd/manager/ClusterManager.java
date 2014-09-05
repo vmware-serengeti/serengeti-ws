@@ -681,7 +681,7 @@ public class ClusterManager {
       JobParameters jobParameters = new JobParameters(param);
       clusterEntityMgr.storeClusterLastStatus(clusterName);
       clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.UPGRADING);
-      clusterEntityMgr.updateNodesAction(clusterName, Constants.NODE_ACTION_UPGRADING);
+      clusterEntityMgr.updateNodesActionForUpgrade(clusterName, Constants.NODE_ACTION_UPGRADING);
       clusterEntityMgr.cleanupErrorForClusterUpgrade(clusterName);
       try {
          return jobManager.runJob(JobConstants.UPGRADE_CLUSTER_JOB_NAME,
