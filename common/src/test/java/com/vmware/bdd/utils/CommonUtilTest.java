@@ -243,6 +243,10 @@ public class CommonUtilTest {
       for ( int i=0; i<sa.length; i++ ) {
          Assert.assertEquals(ls.get(i), sa[i]);
       }
+
+      // add a case for a string without ","
+      ls = CommonUtil.inputsConvert("abc123-xyz");
+      Assert.assertEquals(ls.get(0), "abc123-xyz");
    }
 
    @Test
@@ -252,13 +256,17 @@ public class CommonUtilTest {
          tmpDir = tmpDir.substring(0, tmpDir.length()-1);
       }
       String filePathName = tmpDir + File.separator + "abc";
+      File f = new File(filePathName);
+      Assert.assertFalse(f.exists());
+
+      // call the api method
       String cmd = "touch " + filePathName;
       Process p = CommonUtil.execCommand(cmd);
-      File f = new File(filePathName);
 
       Assert.assertNotNull(p);
       Assert.assertTrue(f.exists());
 
+      // delete the file after test
       f.delete();
    }
 
@@ -272,11 +280,6 @@ public class CommonUtilTest {
       valid = CommonUtil.validateUrl("ftp://10.141.73.8:8080", errorMsgs);
       Assert.assertFalse(valid);
       Assert.assertEquals(errorMsgs.get(0), "URL should starts with http or https");
-
-      errorMsgs.clear();
-      valid = CommonUtil.validateUrl("http://10.141.73.8/cloudera", errorMsgs);
-      Assert.assertFalse(valid);
-      Assert.assertEquals(errorMsgs.get(0), "port number is missing in URL");
    }
 
 }
