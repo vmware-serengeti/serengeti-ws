@@ -101,5 +101,3 @@ public class FakeRootResource implements RootResourceV6 {
       return null;
    }
 }
-
-

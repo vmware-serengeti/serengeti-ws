@@ -15,10 +15,28 @@
 package com.vmware.bdd.plugin.clouderamgr.service;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cloudera.api.model.ApiCluster;
+import com.cloudera.api.model.ApiClusterList;
+import com.cloudera.api.model.ApiCommand;
+import com.cloudera.api.model.ApiHostRef;
+import com.cloudera.api.model.ApiRoleState;
+import com.cloudera.api.model.ApiService;
+import com.cloudera.api.model.ApiServiceList;
+import com.cloudera.api.model.ApiServiceState;
+import com.cloudera.api.v1.CommandsResource;
+import com.cloudera.api.v6.ClustersResourceV6;
+import com.cloudera.api.v6.RolesResourceV6;
+import com.cloudera.api.v6.ServicesResourceV6;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
+import com.vmware.bdd.plugin.clouderamgr.service.cm.FakeClustersResource;
+import com.vmware.bdd.plugin.clouderamgr.service.cm.FakeHostsResource;
+import com.vmware.bdd.plugin.clouderamgr.service.cm.FakeRolesResource;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import mockit.Mock;
 import mockit.MockClass;
 import mockit.Mockit;
@@ -55,6 +73,9 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 import com.vmware.bdd.utils.CommonUtil;
+
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
 
 /**
  * Author: Xiaoding Bian
@@ -346,6 +367,123 @@ public class TestClouderaManagerImpl {
       }
    }
 
+   @Test (groups = { "TestClouderaManagerImpl" }, dependsOnMethods = { "testStartStoppedCluster" })
+   public void testStopClusterGotException() {
+      blueprint.getHadoopStack().setDistro("CDH-5.0.1");
+      ClustersResourceV6 resourceV6 = Mockito.mock(FakeClustersResource.class);
+      Mockito.when(resourceV6.stopCommand(blueprint.getName())).thenThrow(
+            SoftwareManagementPluginException.STOP_CLUSTER_FAILED(null, null, blueprint.getName()));
+      ServicesResourceV6 servicesResourceV6 = Mockito.mock(ServicesResourceV6.class);
+      List<ApiService> serviceList = new ArrayList<>();
+      ApiService hdfs = new ApiService();
+      hdfs.setName("HDFS");
+      hdfs.setServiceState(ApiServiceState.STARTED);
+      serviceList.add(hdfs);
+      ApiServiceList apiServiceList = new ApiServiceList();
+      apiServiceList.setServices(serviceList);
+      Mockito.when(servicesResourceV6.readServices((DataView) anyObject())).thenReturn(apiServiceList);
+
+      List<ApiRole> roleList = new ArrayList<>();
+      ApiRole role = new ApiRole();
+      role.setName("NAMENODE");
+      role.setRoleState(ApiRoleState.STARTED);
+      role.setType(role.getName());
+      ApiHostRef hostRef = new ApiHostRef("host1");
+      role.setHostRef(hostRef);
+      roleList.add(role);
+      RolesResourceV6 rolesResourceV6 = new FakeRolesResource(roleList);
+      Mockito.when(servicesResourceV6.getRolesResource(hdfs.getName())).thenReturn(rolesResourceV6);
+      Mockito.when(resourceV6.getServicesResource(blueprint.getName())).thenReturn(servicesResourceV6);
+
+      ApiClusterList apiClusterList = new ApiClusterList();
+      ApiCluster apiCluster = new ApiCluster();
+      apiCluster.setName(blueprint.getName());
+      apiClusterList.add(apiCluster);
+      Mockito.when(resourceV6.readClusters((DataView) anyObject())).thenReturn(apiClusterList);
+
+      RootResourceV6 fakeRootResourceV6 = Mockito.mock(FakeRootResource.class);
+      Mockito.when(fakeRootResourceV6.getClustersResource()).thenReturn(resourceV6);
+
+      FakeHostsResource fakeHostsResource = Mockito.mock(FakeHostsResource.class);
+      ApiHost apiHost = Mockito.mock(ApiHost.class);
+      Mockito.when(apiHost.getIpAddress()).thenReturn("127.0.0.1");
+      Mockito.when(fakeHostsResource.readHost(anyString())).thenReturn(apiHost);
+      Mockito.when(fakeRootResourceV6.getHostsResource()).thenReturn(fakeHostsResource);
+
+      Mockito.when(apiRootResource.getRootV6()).thenReturn(fakeRootResourceV6);
+
+      boolean exceptionExist = false;
+      try {
+         ClouderaManagerImpl mockedProvider = new ClouderaManagerImpl("127.0.0.1", 7180, "admin", "admin", "RSA_CERT");
+         mockedProvider.onStopCluster(blueprint, reportQueue);
+      } catch (SoftwareManagementPluginException e) {
+         exceptionExist = true;
+         Assert.assertEquals(e.getMessage(), "An exception happens when App_Manager (ClouderaManager) tries to stop the cluster: cluster01.");
+      }
+      Assert.assertTrue(exceptionExist);
+      Mockito.when(apiRootResource.getRootV6()).thenReturn(rootResourceV6);
+   }
+
+   @Test (groups = { "TestClouderaManagerImpl" }, dependsOnMethods = { "testStopClusterGotException" })
+   public void testStartClusterGotException() {
+      blueprint.getHadoopStack().setDistro("CDH-5.0.1");
+      provider.onStopCluster(blueprint, reportQueue);
+
+      blueprint.getHadoopStack().setDistro("CDH-5.0.1");
+      ClustersResourceV6 resourceV6 = Mockito.mock(FakeClustersResource.class);
+      Mockito.when(resourceV6.startCommand(blueprint.getName())).thenThrow(
+            SoftwareManagementPluginException.START_CLUSTER_FAILED(null, null, blueprint.getName()));
+      ServicesResourceV6 servicesResourceV6 = Mockito.mock(ServicesResourceV6.class);
+      List<ApiService> serviceList = new ArrayList<>();
+      ApiService hdfs = new ApiService();
+      hdfs.setName("HDFS");
+      hdfs.setServiceState(ApiServiceState.STOPPED);
+      serviceList.add(hdfs);
+      ApiServiceList apiServiceList = new ApiServiceList();
+      apiServiceList.setServices(serviceList);
+      Mockito.when(servicesResourceV6.readServices((DataView) anyObject())).thenReturn(apiServiceList);
+
+      List<ApiRole> roleList = new ArrayList<>();
+      ApiRole role = new ApiRole();
+      role.setName("NAMENODE");
+      role.setRoleState(ApiRoleState.STOPPED);
+      role.setType(role.getName());
+      ApiHostRef hostRef = new ApiHostRef("host1");
+      role.setHostRef(hostRef);
+      roleList.add(role);
+      RolesResourceV6 rolesResourceV6 = new FakeRolesResource(roleList);
+      Mockito.when(servicesResourceV6.getRolesResource(hdfs.getName())).thenReturn(rolesResourceV6);
+      Mockito.when(resourceV6.getServicesResource(blueprint.getName())).thenReturn(servicesResourceV6);
+
+      ApiClusterList apiClusterList = new ApiClusterList();
+      ApiCluster apiCluster = new ApiCluster();
+      apiCluster.setName(blueprint.getName());
+      apiClusterList.add(apiCluster);
+      Mockito.when(resourceV6.readClusters((DataView) anyObject())).thenReturn(apiClusterList);
+
+      RootResourceV6 fakeRootResourceV6 = Mockito.mock(FakeRootResource.class);
+      Mockito.when(fakeRootResourceV6.getClustersResource()).thenReturn(resourceV6);
+
+      FakeHostsResource fakeHostsResource = Mockito.mock(FakeHostsResource.class);
+      ApiHost apiHost = Mockito.mock(ApiHost.class);
+      Mockito.when(apiHost.getIpAddress()).thenReturn("127.0.0.1");
+      Mockito.when(fakeHostsResource.readHost(anyString())).thenReturn(apiHost);
+      Mockito.when(fakeRootResourceV6.getHostsResource()).thenReturn(fakeHostsResource);
+
+      Mockito.when(apiRootResource.getRootV6()).thenReturn(fakeRootResourceV6);
+
+      boolean exceptionExist = false;
+      try {
+         ClouderaManagerImpl mockedProvider = new ClouderaManagerImpl("127.0.0.1", 7180, "admin", "admin", "RSA_CERT");
+         mockedProvider.startCluster(blueprint, reportQueue);
+      } catch (SoftwareManagementPluginException e) {
+         exceptionExist = true;
+         Assert.assertEquals(e.getMessage(), "App_Manager (ClouderaManager) fails to start the cluster: cluster01.");
+      }
+      Assert.assertTrue(exceptionExist);
+      Mockito.when(apiRootResource.getRootV6()).thenReturn(rootResourceV6);
+   }
+
    private ClouderaManagerImpl testValidateServerVersionHelper(String version) {
       ClouderaManagerImpl mockedProvider = Mockito.mock(ClouderaManagerImpl.class);
       Mockito.when(mockedProvider.getVersion()).thenReturn(version);
@@ -385,4 +523,64 @@ public class TestClouderaManagerImpl {
       }
       Assert.assertFalse(exceptionExists);
    }
+
+   @Test ( groups = {"TestClouderaManagerImpl"}, dependsOnMethods = { "testStartStoppedCluster" } )
+   public void testOnDeleteNodes() {
+      List<String> nodeNames = new ArrayList<>();
+      List<NodeGroupInfo> nodeGroupInfos = blueprint.getNodeGroups();
+      for (NodeGroupInfo info : nodeGroupInfos) {
+         List<NodeInfo> nodeInfos = info.getNodes();
+         for (NodeInfo nodeInfo : nodeInfos) {
+            if (!CommonUtil.isBlank(nodeInfo.getName())) {
+               nodeNames.add(nodeInfo.getName());
+            }
+         }
+      }
+      Assert.assertTrue(!nodeNames.isEmpty());
+      Assert.assertTrue(provider.onDeleteNodes(blueprint, nodeNames));
+   }
+
+   @Test (groups = { "TestClouderaManagerImpl" })
+   public void testGetSummaryErrorMsg() {
+      Method method = null;
+      try {
+         method = ClouderaManagerImpl.class.getDeclaredMethod("getSummaryErrorMsg", ApiCommand.class, String.class);
+         method.setAccessible(true);
+         ApiCommand apiCommand = new ApiCommand();
+         apiCommand.setId(new Long(1));
+         CommandsResource fakeCommandResource = new CommandsResource() {
+            @Override
+            public ApiCommand readCommand(long commandId) {
+               ApiCommand command = new ApiCommand();
+               command.setId(new Long(1));
+               command.setResultMessage("TestGetSummaryErrorMsg");
+               return command;
+            }
+            @Override
+            public ApiCommand abortCommand(long commandId) {
+               return null;
+            }
+         };
+         RootResourceV6 mockRootResourceV6 = Mockito.mock(RootResourceV6.class);
+         Mockito.when(mockRootResourceV6.getCommandsResource()).thenReturn(fakeCommandResource);
+         Mockito.when(apiRootResource.getRootV6()).thenReturn(mockRootResourceV6);
+         ClouderaManagerImpl localProvider = new ClouderaManagerImpl("127.0.0.1", 7180, "admin", "admin", "RSA_CERT");
+         Object errMsg = method.invoke(localProvider, apiCommand, "http://domain");
+         Assert.assertTrue(errMsg instanceof String);
+         Assert.assertEquals(errMsg, "TestGetSummaryErrorMsg. Please refer to http://domain/cmf/command/1/details for details");
+         //should not throw exception, if got exception, use assertTrue(false) to break ut actively
+      } catch (NoSuchMethodException e) {
+         Assert.assertTrue(false);
+      } catch (InvocationTargetException e) {
+         Assert.assertTrue(false);
+      } catch (IllegalAccessException e) {
+         Assert.assertTrue(false);
+      } finally {
+         if (method != null) {
+            method.setAccessible(false);
+         }
+         Mockito.when(apiRootResource.getRootV6()).thenReturn(rootResourceV6);
+      }
+   }
+
 }
