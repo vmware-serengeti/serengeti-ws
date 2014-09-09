@@ -96,17 +96,6 @@ public class CmClusterValidator {
                   definedServices.add(AvailableServiceRoleContainer.load(roleName).getParent().getDisplayName());
                }
             }
-
-            if (group.getNodes() != null) {
-               for (NodeInfo node : group.getNodes()) {
-                  if (node.getRack() != null && !CmUtils.isValidRack(node.getRack())) {
-                     if (invalidRacks == null) {
-                        invalidRacks = new HashSet<String>();
-                     }
-                     invalidRacks.add(node.getRack());
-                  }
-               }
-            }
          }
 
          if (nnGroupsNum > 1) {

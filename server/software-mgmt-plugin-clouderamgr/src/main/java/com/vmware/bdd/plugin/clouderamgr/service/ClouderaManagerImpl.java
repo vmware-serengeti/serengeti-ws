@@ -918,6 +918,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
       ClusterReport report = null;
       boolean succeed = false;
       try {
+         if (!isProvisioned(clusterName)) {
+            return true;
+         }
          clusterDef = new CmClusterDef(clusterBlueprint);
          report = clusterDef.getCurrentReport();
          if (isExistingServiceStarted(clusterName)) {
@@ -1103,7 +1106,11 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private void updateRackId(final CmClusterDef clusterDef) {
       for (CmNodeDef node : clusterDef.getNodes()) {
          ApiHost host = apiResourceRootV6.getHostsResource().readHost(node.getNodeId());
-         host.setRackId(node.getRackId());
+         // ClouderaManager requires its rack to begin with / in order to seperate different rack level. However, rackinfo in BDE
+         // is in different format. In BDE, we use raw rack_name rather than / seperated topology.
+         // To convert BDE rackinfo to ClouderaManager type, we add a / in the begining of BDE rackinfo
+         String rackId = node.getRackId().startsWith("/") ? node.getRackId() : ("/" + node.getRackId());
+         host.setRackId(rackId);
          apiResourceRootV6.getHostsResource().updateHost(host.getHostId(), host);
       }
    }
