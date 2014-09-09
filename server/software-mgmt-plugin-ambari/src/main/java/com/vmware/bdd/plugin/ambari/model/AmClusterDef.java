@@ -63,6 +63,10 @@ public class AmClusterDef implements Serializable {
    private List<Map<String, Object>> configurations;
 
    public AmClusterDef(ClusterBlueprint blueprint, String privateKey) {
+      this(blueprint, privateKey, null);
+   }
+
+   public AmClusterDef(ClusterBlueprint blueprint, String privateKey, String ambariServerVersion) {
       this.name = blueprint.getName();
       this.version = blueprint.getHadoopStack().getFullVersion();
       this.verbose = true;
@@ -84,7 +88,7 @@ public class AmClusterDef implements Serializable {
             nodeDef.setConfigurations(AmUtils.toAmConfigurations(group
                   .getConfiguration()));
             nodeDef.setComponents(group.getRoles());
-            nodeDef.setVolumns(node.getVolumes(), hdfs);
+            nodeDef.setVolumns(node.getVolumes(), hdfs, ambariServerVersion);
             this.nodes.add(nodeDef);
          }
       }

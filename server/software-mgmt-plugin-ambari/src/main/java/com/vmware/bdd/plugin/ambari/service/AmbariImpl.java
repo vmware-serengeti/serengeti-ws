@@ -265,7 +265,8 @@ public class AmbariImpl implements SoftwareManager {
          logger.info("Blueprint:");
          logger.info(ApiUtils.objectToJson(blueprint));
          logger.info("Start cluster " + blueprint.getName() + " creation.");
-         clusterDef = new AmClusterDef(blueprint, privateKey);
+         String ambariServerVersion = getVersion();
+         clusterDef = new AmClusterDef(blueprint, privateKey, ambariServerVersion);
          provisionCluster(clusterDef, reportQueue);
          success = true;
 

@@ -99,7 +99,7 @@ public class AmNodeDef implements Serializable {
       this.components = components;
    }
 
-   public void setVolumns(List<String> volumns, HdfsVersion hdfsVersion) {
+   public void setVolumns(List<String> volumns, HdfsVersion hdfsVersion, String ambariServerVersion) {
       if (volumns.isEmpty()) {
          return;
       }
@@ -120,6 +120,12 @@ public class AmNodeDef implements Serializable {
             }
             addConfiguration(Constants.CONFIG_HDFS_SITE, dfsCheckpointDir,
                   volumns.get(0) + "/hdfs/namesecondary");
+            break;
+         case "APP_TIMELINE_SERVER":
+            if (ambariServerVersion !=  null && !ambariServerVersion.equals(Constants.AMBARI_SERVER_VERSION_1_6_0)) {
+               String timelineStorePath = Constants.CONFIG_LEVELDB_TIMELINE_STORE_PATH;
+               addConfiguration(Constants.CONFIG_YARN_SITE, timelineStorePath, volumns.get(0) + "/hadoop/yarn/timeline");
+            }
             break;
          case "DATANODE":
             String dfsDataDir = Constants.CONFIG_DFS_DATANODE_DATA_DIR;

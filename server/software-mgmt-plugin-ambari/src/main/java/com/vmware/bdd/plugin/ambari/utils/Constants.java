@@ -19,6 +19,7 @@ public interface Constants {
    public static final String AMBARI_PLUGIN_NAME = "Ambari";
    public static final String HEALTH_STATUS = "RUNNING";
    public static final String AMBARI_SSH_USER = "serengeti";
+   public static final String AMBARI_SERVER_VERSION_1_6_0 = "1.6.0";
 
    public static final String CONFIG_HDFS_SITE = "hdfs-site";
    public static final String CONFIG_YARN_SITE = "yarn-site";
@@ -33,6 +34,7 @@ public interface Constants {
    public static final String CONFIG_YARN_NODEMANAGER_LOCAL_DIRS = "yarn.nodemanager.local-dirs";
    public static final String CONFIG_JOURNALNODE_EDITS_DIR = "dfs.journalnode.edits.dir";
    public static final String CONFIG_MAPRED_LOCAL_DIR = "mapred.local.dir";
+   public static final String CONFIG_LEVELDB_TIMELINE_STORE_PATH = "yarn.timeline-service.leveldb-timeline-store.path";
 
    public static final String HOST_BOOTSTRAP_FAILED = "FAILED";
    public static final String HOST_BOOTSTRAP_MSG = "Failed to bootstrap host";
