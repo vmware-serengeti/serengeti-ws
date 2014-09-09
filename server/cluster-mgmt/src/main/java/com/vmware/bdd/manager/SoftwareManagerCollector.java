@@ -17,10 +17,13 @@ package com.vmware.bdd.manager;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
@@ -218,6 +221,11 @@ public class SoftwareManagerCollector implements InitializingBean {
 //         throw SoftwareManagerCollectorException.CAN_NOT_INSTANTIATE(e, factoryClassName);
       }
 
+      // check the server connection before do the real connection to the application manager.
+      // this is to avoid long time waiting of socket connect when the server is shutdown or
+      // even does not exist at all.
+      checkServerConnection( appManagerAdd.getName(), appManagerAdd.getUrl() );
+
       logger.info("Start to invoke application manager factory to create application manager.");
       SoftwareManager softwareManager = null;
 
@@ -251,28 +259,7 @@ public class SoftwareManagerCollector implements InitializingBean {
       logger.info("Check echo() of application manager.");
       // validate instance is reachable
       try {
-         // if the target ip does not exist or the host is shutdown, it will take about 2 minutes
-         // for the socket connection to time out.
-         // here we fork a child thread to do the actual connecting action, if it does not succeed
-         // within given waiting time(default is 30s), we will consider it to be failure.
-         ExecutorService exec = Executors.newFixedThreadPool(1);
-         Future<Boolean> futureResult = exec.submit(new Callable<Boolean>(){
-            @Override
-            public Boolean call() throws Exception {
-               // TODO Auto-generated method stub
-               return softwareManager.echo();
-            }
-         });
-
-         boolean gotEcho = false;
-         Boolean result = (Boolean)waitForThreadResult(futureResult);
-         if ( null != result )
-         {
-            gotEcho = result;
-         }
-         exec.shutdown();
-
-         if (!gotEcho) {
+         if ( !softwareManager.echo() ) {
             logger.error("Application manager "
                   + name
                   + " status is unhealthy. Please check application manager console for more details.");
@@ -599,4 +586,55 @@ public class SoftwareManagerCollector implements InitializingBean {
          }
       }
    }
+
+   /**
+   *
+   * @param name
+   * @param urlStr
+   */
+  private void checkServerConnection(String name, String urlStr) {
+     URL url = null;
+     try {
+        url = new URL(urlStr);
+     } catch (MalformedURLException e) {
+        logger.error("Url parse error: " + e.getMessage());
+        throw SoftwareManagerCollectorException.CONNECT_FAILURE(name,
+              e.getMessage());
+     }
+
+     final String host = url.getHost();
+     final int port = url.getPort();
+
+     logger.info("Check the connection to the application manager.");
+     // validate the server is reachable
+     try {
+        // if the target ip does not exist or the host is shutdown, it will take about 2 minutes
+        // for the socket connection to time out.
+        // here we fork a child thread to do the actual connecting action, if it does not succeed
+        // within given waiting time(default is 30s), we will consider it to be failure.
+        ExecutorService exec = Executors.newFixedThreadPool(1);
+        Future<Boolean> futureResult = exec.submit(new Callable<Boolean>(){
+           @Override
+           public Boolean call() throws Exception {
+              try {
+                 new Socket(host, port);
+                 return true;
+              } catch (UnknownHostException e) {
+                 throw e;
+              } catch (IOException e) {
+                 throw e;
+              }
+           }
+        });
+
+        waitForThreadResult(futureResult);
+     } catch (Exception e) {
+        //TODO we won't catch anything here! consider to remove it, lixl
+        logger.error("Cannot connect to application manager "
+              + name + ", check the connection information.", e);
+        throw SoftwareManagerCollectorException.CONNECT_FAILURE(name,
+              e.getMessage());
+     }
+  }
+
 }
