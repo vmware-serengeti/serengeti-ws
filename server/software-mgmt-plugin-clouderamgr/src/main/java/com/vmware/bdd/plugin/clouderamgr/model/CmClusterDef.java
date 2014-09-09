@@ -24,6 +24,7 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import java.io.IOException;
@@ -41,6 +42,8 @@ import java.util.Set;
  * Time: 4:45 PM
  */
 public class CmClusterDef implements Serializable {
+
+   private static final Logger logger = Logger.getLogger(CmClusterDef.class);
 
    private static final long serialVersionUID = -2922528263257124521L;
 
@@ -151,7 +154,11 @@ public class CmClusterDef implements Serializable {
                      roleDef.addConfig(Constants.CONFIG_DFS_DATA_DIR_LIST, dataDirs(node.getVolumes(), "/dfs/dn"));
                      break;
                   case "HDFS_JOURNALNODE":
-                     roleDef.addConfig(Constants.CONFIG_DFS_JOURNALNODE_EDITS_DIR, node.getVolumes().get(0) + "/dfs/jn");
+                     if (!node.getVolumes().isEmpty()) {
+                        roleDef.addConfig(Constants.CONFIG_DFS_JOURNALNODE_EDITS_DIR, node.getVolumes().get(0) + "/dfs/jn");
+                     } else {
+                        logger.warn("No disk volumes found in node " + node.getName());
+                     }
                      break;
                   case "HDFS_SECONDARY_NAMENODE":
                      roleDef.addConfig(Constants.CONFIG_FS_CHECKPOINT_DIR_LIST, dataDirs(node.getVolumes(), "/dfs/snn"));

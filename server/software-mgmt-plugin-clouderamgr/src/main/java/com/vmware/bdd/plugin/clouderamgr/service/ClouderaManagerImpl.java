@@ -830,6 +830,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
       ClusterReport report = null;
       boolean succeed = false;
       try {
+         if (!isProvisioned(clusterName)) {
+            return true;
+         }
          clusterDef = new CmClusterDef(clusterBlueprint);
          report = clusterDef.getCurrentReport();
          if (isStopped(clusterName) || !needStop(clusterName)) {
