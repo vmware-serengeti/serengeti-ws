@@ -114,19 +114,6 @@ public class TestCmClusterValidator {
    }
 
    @Test(groups = {"TestCmClusterValidator"})
-   public void testInvalidRack() {
-      try {
-         ClusterBlueprint blueprint = generateBlueprint();
-         blueprint.getNodeGroups().get(0).getNodes().get(0).setRack("bad_rack");
-         CmClusterValidator validator = new CmClusterValidator();
-         Assert.assertFalse(validator.validateBlueprint(blueprint));
-      } catch (ValidationException e) {
-         System.out.println("warning_msg_list: " + e.getWarningMsgList());
-         System.out.println("error_msg_list: " + e.getFailedMsgList());
-      }
-   }
-
-   @Test(groups = {"TestCmClusterValidator"})
    public void testMissedRoles() {
       try {
          ClusterBlueprint blueprint = generateBlueprint();
