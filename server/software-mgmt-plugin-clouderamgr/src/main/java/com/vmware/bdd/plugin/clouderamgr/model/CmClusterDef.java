@@ -98,11 +98,18 @@ public class CmClusterDef implements Serializable {
             CmNodeDef nodeDef = new CmNodeDef();
             nodeDef.setIpAddress(node.getMgtIpAddress());
             nodeDef.setFqdn(node.getMgtIpAddress());
+            nodeDef.setName(node.getName());
             /*
              Rack names are slash-separated identifiers, like Unix paths. For example, "/rack1" and "/cabinet3/rack4" are both valid.
-             */
-            nodeDef.setName(node.getName());
-            nodeDef.setRackId(node.getRack());
+             ClouderaManager requires its rack to begin with / in order to seperate different rack level. However, rackinfo in BDE
+             is in different format. In BDE, we use raw rack_name rather than / seperated topology.
+             To convert BDE rackinfo to ClouderaManager type, we add a / in the begining of BDE rackinfo
+            */
+            if (node.getRack() == null || node.getRack().startsWith("/")) {
+               nodeDef.setRackId(node.getRack());
+            } else {
+               nodeDef.setRackId("/" + node.getRack());
+            }
             nodeDef.setNodeId(node.getName()); // temp id, will be updated when installed.
             nodeDef.setConfigs(null);
             this.nodes.add(nodeDef);

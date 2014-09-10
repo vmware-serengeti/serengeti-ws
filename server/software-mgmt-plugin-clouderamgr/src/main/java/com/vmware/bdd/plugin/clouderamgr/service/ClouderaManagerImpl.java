@@ -1109,11 +1109,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private void updateRackId(final CmClusterDef clusterDef) {
       for (CmNodeDef node : clusterDef.getNodes()) {
          ApiHost host = apiResourceRootV6.getHostsResource().readHost(node.getNodeId());
-         // ClouderaManager requires its rack to begin with / in order to seperate different rack level. However, rackinfo in BDE
-         // is in different format. In BDE, we use raw rack_name rather than / seperated topology.
-         // To convert BDE rackinfo to ClouderaManager type, we add a / in the begining of BDE rackinfo
-         String rackId = node.getRackId().startsWith("/") ? node.getRackId() : ("/" + node.getRackId());
-         host.setRackId(rackId);
+         host.setRackId(node.getRackId());
          apiResourceRootV6.getHostsResource().updateHost(host.getHostId(), host);
       }
    }
@@ -1855,8 +1851,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
             reportQueue.addClusterReport(cluster.getCurrentReport().clone());
          }
       } catch (Exception e) {
-         String errMsg = "Failed to start services" + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
-         logger.error(errMsg);
+         String errMsg = "Failed to start services";
+         logger.error(errMsg, e);
          throw SoftwareManagementPluginException.START_SERVICE_FAILED(e, Constants.CDH_PLUGIN_NAME, cluster.getName());
       }
 
