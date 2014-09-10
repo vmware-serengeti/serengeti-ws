@@ -24,6 +24,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -40,11 +42,17 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 
 public class CommonUtil {
 
@@ -385,5 +393,70 @@ public class CommonUtil {
       }
       return errorMsg.substring(0, errorMsg.length() - 2);
    }
+
+   /**
+   *
+   * @param host
+   * @param port
+   * @param waitTime
+   */
+  public static boolean checkServerConnection(final String host, final int port, int waitTime) {
+     logger.info("Check the socket connection to the server.");
+     boolean connectResult = false;
+
+     // validate the server is reachable
+     ExecutorService exec = Executors.newFixedThreadPool(1);
+     try {
+        // if the target ip does not exist or the host is shutdown, it will take about 2 minutes
+        // for the socket connection to time out.
+        // here we fork a child thread to do the actual connecting action, if it does not succeed
+        // within given waitTime, we will consider it to be failure.
+        Future<Boolean> futureResult = exec.submit(new Callable<Boolean>(){
+           @Override
+           public Boolean call() throws Exception {
+              try {
+                 new Socket(host, port);
+                 return true;
+              } catch (Exception e) {
+              }
+              return false;
+           }
+        });
+
+        // wait for the thread to finish within given waitTime
+        Boolean result = (Boolean)waitForThreadResult(futureResult, waitTime);
+
+        // result==null means the time out occurs
+        if ( null != result ) {
+           connectResult = result;
+        }
+     } catch (Exception e) {
+        logger.error("Unexpected error occurred with threading.");
+     } finally {
+        if ( null != exec ) {
+           exec.shutdown();
+        }
+     }
+
+     return connectResult;
+  }
+
+  public static Object waitForThreadResult(Future<?> result, int waitTime) {
+     for ( int i=0; i<waitTime; i++ ) {
+        try {
+           if ( result.isDone() ) {
+              return result.get();
+           }
+
+           // sleep 1 second here
+           Thread.sleep(1000);
+        } catch (Exception e) {
+           logger.error("Unexpected error occurred with threading.");
+        }
+     }
+
+     // time out now
+     return null;
+  }
 
 }

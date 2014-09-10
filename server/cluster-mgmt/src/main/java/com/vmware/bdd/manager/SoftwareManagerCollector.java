@@ -87,6 +87,9 @@ public class SoftwareManagerCollector implements InitializingBean {
    private static String appmanagerTypesKey = "appmanager.types";
 
    private static String appmgrConnTimeOutKey = "appmanager.connect.timeout.seconds";
+   
+   // the value of wait time to connect to application manager, with default 30 seconds
+   private static int waitTimeForAppMgrConn = Configuration.getInt(appmgrConnTimeOutKey, Constants.APPMGR_CONNECT_TIMEOUT_SECONDS);
 
    public void setAppManagerService(IAppManagerService appManagerService) {
       this.appManagerService = appManagerService;
@@ -192,7 +195,16 @@ public class SoftwareManagerCollector implements InitializingBean {
     * @return
     */
    protected synchronized SoftwareManager loadSoftwareManager(AppManagerAdd appManagerAdd) {
-      // Retrieve app manager factory class from serengeti.properties
+      // we need to check the server connection each time we get a application manager, otherwise
+      // it will cause a lot of trouble later when accessing it.
+      String appMgrType = appManagerAdd.getType();
+      String name = appManagerAdd.getName();
+      if ( !appMgrType.equals(Constants.IRONFAN) ) {
+         // check the server connection before do the real connection to the application manager.
+         // this is to avoid long time waiting of socket connect when the server is shutdown or
+         // even does not exist at all.
+         checkServerConnection( name, appManagerAdd.getUrl() );
+      }
 
       if (cache.containsKey(appManagerAdd.getName())) {
          return cache.get(appManagerAdd);
@@ -220,11 +232,6 @@ public class SoftwareManagerCollector implements InitializingBean {
          throw new SWMgrCollectorInternalException(e, errMsg);
 //         throw SoftwareManagerCollectorException.CAN_NOT_INSTANTIATE(e, factoryClassName);
       }
-
-      // check the server connection before do the real connection to the application manager.
-      // this is to avoid long time waiting of socket connect when the server is shutdown or
-      // even does not exist at all.
-      checkServerConnection( appManagerAdd.getName(), appManagerAdd.getUrl() );
 
       logger.info("Start to invoke application manager factory to create application manager.");
       SoftwareManager softwareManager = null;
@@ -289,15 +296,23 @@ public class SoftwareManagerCollector implements InitializingBean {
       if (CommonUtil.isBlank(name)) {
          return cache.get(Constants.IRONFAN);
       }
-      if (cache.containsKey(name)) {
-         return cache.get(name);
-      }
 
       AppManagerEntity appManagerEntity = appManagerService.findAppManagerByName(name);
       if (appManagerEntity == null) {
          logger.error("Cannot find app manager " + name);
          throw SoftwareManagerCollectorException.APPMANAGER_NOT_FOUND(name);
       } else {
+         String appMgrType = appManagerEntity.getType();
+         if ( !appMgrType.equals(Constants.IRONFAN) ) {
+            // check the server connection before do the real connection to the application manager.
+            // this is to avoid long time waiting of socket connect when the server is shutdown or
+            // even does not exist at all.
+            checkServerConnection( name, appManagerEntity.getUrl() );
+         }
+
+         if (cache.containsKey(name)) {
+            return cache.get(name);
+         }
          return loadSoftwareManager(appManagerEntity);
       }
    }
@@ -395,23 +410,6 @@ public class SoftwareManagerCollector implements InitializingBean {
       }
    }
 
-   private Object waitForThreadResult(Future<?> result) {
-      // the default value for the wait time is 30 seconds
-      int defaultTime = Constants.APPMGR_CONNECT_TIMEOUT_SECONDS;
-      int waitTime = Configuration.getInt(appmgrConnTimeOutKey, defaultTime);
-      for ( int i=0; i<waitTime; i++ ) {
-         try {
-            if ( result.isDone() ) {
-               return result.get();
-            }
-            Thread.sleep(1000);
-         } catch (Exception e) {
-            logger.error("Unexpected error occurred with threading.");
-         }
-      }
-      return null;
-   }
-
    private void updateManagedClusters(AppManagerRead appManagerRead) {
       appManagerRead.setManagedClusters(clusterEntityManager
             .findByAppManager(appManagerRead.getName()));
@@ -432,7 +430,7 @@ public class SoftwareManagerCollector implements InitializingBean {
          }
       });
 
-      String result = (String)waitForThreadResult(futureResult);
+      String result = (String)CommonUtil.waitForThreadResult(futureResult, waitTimeForAppMgrConn);
       if (null != result) {
          softMgrVersion = result;
       }
@@ -589,16 +587,16 @@ public class SoftwareManagerCollector implements InitializingBean {
 
    /**
    *
-   * @param name
+   * @param appMgrName
    * @param urlStr
    */
-  private void checkServerConnection(String name, String urlStr) {
+  private void checkServerConnection(String appMgrName, String urlStr) {
      URL url = null;
      try {
         url = new URL(urlStr);
      } catch (MalformedURLException e) {
         logger.error("Url parse error: " + e.getMessage());
-        throw SoftwareManagerCollectorException.CONNECT_FAILURE(name,
+        throw SoftwareManagerCollectorException.CONNECT_FAILURE(appMgrName,
               e.getMessage());
      }
 
@@ -606,34 +604,12 @@ public class SoftwareManagerCollector implements InitializingBean {
      final int port = url.getPort();
 
      logger.info("Check the connection to the application manager.");
-     // validate the server is reachable
-     try {
-        // if the target ip does not exist or the host is shutdown, it will take about 2 minutes
-        // for the socket connection to time out.
-        // here we fork a child thread to do the actual connecting action, if it does not succeed
-        // within given waiting time(default is 30s), we will consider it to be failure.
-        ExecutorService exec = Executors.newFixedThreadPool(1);
-        Future<Boolean> futureResult = exec.submit(new Callable<Boolean>(){
-           @Override
-           public Boolean call() throws Exception {
-              try {
-                 new Socket(host, port);
-                 return true;
-              } catch (UnknownHostException e) {
-                 throw e;
-              } catch (IOException e) {
-                 throw e;
-              }
-           }
-        });
-
-        waitForThreadResult(futureResult);
-     } catch (Exception e) {
-        //TODO we won't catch anything here! consider to remove it, lixl
+     boolean connectOK = CommonUtil.checkServerConnection(host, port, waitTimeForAppMgrConn);
+     if ( !connectOK ) {
         logger.error("Cannot connect to application manager "
-              + name + ", check the connection information.", e);
-        throw SoftwareManagerCollectorException.CONNECT_FAILURE(name,
-              e.getMessage());
+              + appMgrName + ", check the connection information.");
+        throw SoftwareManagerCollectorException.CONNECT_FAILURE(appMgrName,
+              "Failed to connect to the server.");
      }
   }
 
