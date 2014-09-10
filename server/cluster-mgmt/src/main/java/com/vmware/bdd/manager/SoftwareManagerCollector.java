@@ -87,7 +87,7 @@ public class SoftwareManagerCollector implements InitializingBean {
    private static String appmanagerTypesKey = "appmanager.types";
 
    private static String appmgrConnTimeOutKey = "appmanager.connect.timeout.seconds";
-   
+
    // the value of wait time to connect to application manager, with default 30 seconds
    private static int waitTimeForAppMgrConn = Configuration.getInt(appmgrConnTimeOutKey, Constants.APPMGR_CONNECT_TIMEOUT_SECONDS);
 
