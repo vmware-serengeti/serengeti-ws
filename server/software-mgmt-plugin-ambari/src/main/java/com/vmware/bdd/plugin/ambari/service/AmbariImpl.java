@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
+
 import org.apache.log4j.Logger;
 
 import javax.ws.rs.NotFoundException;
@@ -80,6 +81,8 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
+import com.vmware.bdd.plugin.ambari.spectypes.HadoopRole;
+
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 public class AmbariImpl implements SoftwareManager {
@@ -616,8 +619,29 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public List<String> validateScaling(NodeGroupInfo group) {
-      // TODO Auto-generated method stub
-      return new ArrayList<String>();
+      // resize of job tracker and name node is not supported
+      List<String> roles = group.getRoles();
+      List<String> unsupportedRoles = new ArrayList<String>();
+      if (roles.isEmpty()) {
+         // no unsupported roles
+         return new ArrayList<String>();
+      }
+      if (roles.contains(HadoopRole.HADOOP_NAMENODE_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.HADOOP_NAMENODE_ROLE.toString());
+      }
+      if (roles.contains(HadoopRole.HADOOP_SECONDARY_NAMENODE_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.HADOOP_SECONDARY_NAMENODE_ROLE.toString());
+      }
+      if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString());
+      }
+      if (roles.contains(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString());
+      }
+      if (roles.contains(HadoopRole.ZOOKEEPER_SERVER_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.ZOOKEEPER_SERVER_ROLE.toString());
+      }
+      return unsupportedRoles;
    }
 
    @Override

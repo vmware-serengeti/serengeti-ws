@@ -256,6 +256,9 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
       if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
          unsupportedRoles.add(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString());
       }
+      if (roles.contains(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString());
+      }
       if (roles.contains(HadoopRole.ZOOKEEPER_ROLE.toString())) {
          unsupportedRoles.add(HadoopRole.ZOOKEEPER_ROLE.toString());
       }

@@ -29,11 +29,13 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.ws.rs.NotFoundException;
+
 import com.cloudera.api.model.ApiRoleState;
 import com.cloudera.api.model.ApiRoleConfigGroup;
 import com.cloudera.api.v7.RootResourceV7;
 import com.google.gson.GsonBuilder;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
+import com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole;
 import com.vmware.bdd.plugin.clouderamgr.exception.CommandExecFailException;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
@@ -2139,8 +2141,29 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public List<String> validateScaling(NodeGroupInfo group) {
-      // TODO Auto-generated method stub
-      return new ArrayList<String>();
+      // resize of job tracker and name node is not supported
+      List<String> roles = group.getRoles();
+      List<String> unsupportedRoles = new ArrayList<String>();
+      if (roles.isEmpty()) {
+         // no unsupported roles
+         return new ArrayList<String>();
+      }
+      if (roles.contains(HadoopRole.HADOOP_NAMENODE_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.HADOOP_NAMENODE_ROLE.toString());
+      }
+      if (roles.contains(HadoopRole.HADOOP_SECONDARY_NAMENODE_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.HADOOP_SECONDARY_NAMENODE_ROLE.toString());
+      }
+      if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString());
+      }
+      if (roles.contains(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString());
+      }
+      if (roles.contains(HadoopRole.ZOOKEEPER_SERVER_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.ZOOKEEPER_SERVER_ROLE.toString());
+      }
+      return unsupportedRoles;
    }
 
    @Override
