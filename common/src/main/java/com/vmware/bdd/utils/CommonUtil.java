@@ -369,13 +369,10 @@ public class CommonUtil {
             errorMsgs.add("URL should starts with http or https");
             result = false;
          }
-         /*port is not a mandatory part of a URL.
-         int port = uri.getPort();
-         if (port == -1) {
-            errorMsgs.add("port number is missing in URL");
+         if ("https".equalsIgnoreCase(schema) && uri.getHost().matches(Constants.IP_PATTERN)) {
+            errorMsgs.add("You should use FQDN instead of ip address when using https protocol");
             result = false;
          }
-         */
       } catch (URISyntaxException e) {
          logger.error("invalid URL syntax ", e);
          errorMsgs.add("invalid URL syntax");
