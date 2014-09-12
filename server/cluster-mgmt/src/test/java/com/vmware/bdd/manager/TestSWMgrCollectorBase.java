@@ -28,11 +28,7 @@ import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.mocks.FooSWMgrFactory;
-import com.vmware.bdd.plugin.ambari.service.TestAmbariImpl.MockReflectionUtils;
 import com.vmware.bdd.service.resmgmt.IAppManagerService;
-import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
-import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
-import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 

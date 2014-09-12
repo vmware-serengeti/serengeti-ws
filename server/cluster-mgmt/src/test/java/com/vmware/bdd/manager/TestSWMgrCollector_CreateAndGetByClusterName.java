@@ -15,7 +15,6 @@
 package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -29,7 +28,6 @@ import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
-import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
 /**

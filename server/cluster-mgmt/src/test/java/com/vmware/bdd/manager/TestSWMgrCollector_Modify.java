@@ -23,7 +23,6 @@ import org.testng.annotations.Test;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
-import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 
 /**
  * Created By xiaoliangl on 9/4/14.
