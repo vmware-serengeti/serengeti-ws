@@ -220,7 +220,7 @@ public class ClusterManager {
       String jsonStr = gson.toJson(clusterConfig);
 
       AuAssert.check(jsonStr != null);
-      logger.info("writing cluster manifest in json " + jsonStr + " to file "
+      logger.debug("writing cluster manifest in json " + jsonStr + " to file "
             + file);
       BufferedWriter out = null;
       try {
