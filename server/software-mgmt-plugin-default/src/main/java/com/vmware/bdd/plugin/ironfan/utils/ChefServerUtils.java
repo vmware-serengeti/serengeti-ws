@@ -70,8 +70,11 @@ public class ChefServerUtils {
             if (allRoles == null) {
                 HashSet<String> roles = new HashSet<String>();
                 Process p = ChefServerUtils.execCommand(GET_ROLES_CMD);
-                if (p == null || p.exitValue() != 0) {
-                    IronFanPluginException.GET_ROLES_ERR_EXIT_CODE(p.exitValue());
+                if (p == null) {
+                   throw IronFanPluginException.GET_ROLES_EXCEPTION(null);
+                }
+                else if(p.exitValue() != 0) {
+                    throw IronFanPluginException.GET_ROLES_ERR_EXIT_CODE(p.exitValue());
                 }
 
                 try {

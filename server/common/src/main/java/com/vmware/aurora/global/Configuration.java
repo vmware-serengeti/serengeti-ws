@@ -75,7 +75,9 @@ public class Configuration {
          serengetiCfg.load();
          config = (PropertiesConfiguration) serengetiCfg.clone();
       } catch (ConfigurationException ex) {
-         logger.info("Failed to load serengeti.properties file.");
+         String message = "Failed to load serengeti.properties file.";
+         logger.fatal(message, ex);
+         throw AuroraException.APP_INIT_ERROR(ex, message);
       }
 
       String propertyFilePrefix =

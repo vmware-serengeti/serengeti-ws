@@ -127,7 +127,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
       }
       List<String> roles = stack.getRoles();
       if (roles.contains(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString())
-            || roles.contains(HadoopRole.HADOOP_NODEMANAGER_ROLE)) {
+            || roles.contains(HadoopRole.HADOOP_NODEMANAGER_ROLE.toString())) {
          return yarnConfigs;
       } else {
          return mapredConfigs;

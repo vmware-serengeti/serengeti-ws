@@ -14,13 +14,15 @@
  ***************************************************************************/
 package com.vmware.bdd.security;
 
+import java.io.File;
 import java.util.Arrays;
 
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.NonStrictExpectations;
-
 import org.springframework.security.core.Authentication;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.vmware.aurora.global.Configuration;
@@ -34,6 +36,16 @@ import com.vmware.bdd.vc.AuthenticateVcUser;
 public class TestUserAuthenticationProvider {
 
    public static final String UsersFile = "Users.xml";
+
+   @BeforeClass
+   public static void createFile() {
+      System.getProperties().setProperty("serengeti.home.dir", "src/test/resources");
+   }
+
+   @AfterClass
+   public static void deleteFile() {
+      System.getProperties().remove("serengeti.home.dir");
+   }
 
    @Test
    public void testAuthenticate() throws Exception {
@@ -82,13 +94,18 @@ public class TestUserAuthenticationProvider {
       User user = new User();
       user.setName("serengeti");
       users.setUsers(Arrays.asList(user));
-      TestFileUtils.createXMLFile(users, FileUtils.getConfigFile(UsersFile, "Users"));
+
+      String confPath = System.getProperties().get("serengeti.home.dir") + File.separator + "conf";
+      new File(confPath).mkdir();
+      String userXmlPath = confPath + File.separator + UsersFile;
+      File usrXmlFile = new File(userXmlPath);
+      TestFileUtils.createXMLFile(users, usrXmlFile);
 
       UserAuthenticationProvider provider = new UserAuthenticationProvider();
       provider.setUserService(new UserService());
       provider.authenticate(authentication);
 
-      TestFileUtils.deleteXMLFile(FileUtils.getConfigFile(UsersFile, "Users"));
+      TestFileUtils.deleteXMLFile(usrXmlFile);
    }
 
 }

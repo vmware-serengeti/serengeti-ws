@@ -46,7 +46,7 @@ public class ResourceManager {
 
       if (bundle == null) {
          bundle = ResourceBundle.getBundle(bundleName, locale);
-         bundles.putIfAbsent(bundleKey, bundle);
+         bundle = bundles.putIfAbsent(bundleKey, bundle);
       }
 
       return bundle;

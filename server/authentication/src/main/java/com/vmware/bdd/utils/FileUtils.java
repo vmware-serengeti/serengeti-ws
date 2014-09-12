@@ -55,7 +55,7 @@ public class FileUtils {
       if (!specFile.exists()) {
          String errorMsg = "Can not find file" + filename;
          logger.fatal(errorMsg);
-         new RuntimeException(errorMsg);
+         throw new RuntimeException(errorMsg);
       }
 
       return specFile;

@@ -236,7 +236,9 @@ public class HostInstallPoller extends StatusPoller{
                   break;
                } finally {
                   try {
-                     response.close();
+                     if(response != null) {
+                        response.close();
+                     }
                   } catch (IOException e) {
                   }
                }
