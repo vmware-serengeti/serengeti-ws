@@ -18,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractCluster;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractDatastore;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
+import com.vmware.bdd.placement.entity.VirtualNode;
 import com.vmware.bdd.placement.util.PlacementUtil;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
@@ -296,4 +298,27 @@ public class TestPlacementUtil {
          index = PlacementUtil.getNextValidParaVirtualScsiIndex(index);
       }
    }
+
+   @Test
+   public void testGetBaseNodeNames() {
+      VirtualNode vNode = new VirtualNode();
+      vNode.addNode(new BaseNode("base1"));
+      vNode.addNode(new BaseNode("base2"));
+      Assert.assertEquals(
+            PlacementUtil.getBaseNodeNames(vNode), Arrays.asList("base1", "base2")
+      );
+   }
+
+   @Test
+   public void testGetNextValidParaVirtualScsiIndex() {
+      Assert.assertEquals(
+      PlacementUtil.getNextValidParaVirtualScsiIndex(21), 25);
+   }
+
+   @Test
+   public void testGetVMName() {
+      Assert.assertEquals(
+            PlacementUtil.getVmName("cluster", "group",0), "cluster-group-0");
+   }
+
 }

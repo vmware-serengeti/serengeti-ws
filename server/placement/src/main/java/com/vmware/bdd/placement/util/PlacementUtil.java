@@ -56,17 +56,6 @@ public class PlacementUtil {
       return Integer.parseInt(node.getVmName().split("-")[2]);
    }
 
-   public static String[] wildCardToRegex(String[] wildCards) {
-      String[] regexs = new String[wildCards.length];
-      for (int i = 0; i < wildCards.length; i++) {
-         regexs[i] =
-               CommonUtil.escapePattern(wildCards[i]).replaceAll("\\*", ".*")
-                     .replaceAll("\\?", ".[1]");
-      }
-
-      return regexs;
-   }
-
    public static ArrayList<String> getBaseNodeNames(VirtualNode vNode) {
       ArrayList<String> names = new ArrayList<String>();
 
