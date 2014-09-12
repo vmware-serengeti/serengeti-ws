@@ -17,6 +17,7 @@ package com.vmware.bdd.plugin.ambari.service;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -139,7 +140,6 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public String getDescription() {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -302,7 +302,6 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public String exportBlueprint(String clusterName) {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -626,17 +625,17 @@ public class AmbariImpl implements SoftwareManager {
          // no unsupported roles
          return new ArrayList<String>();
       }
-      if (roles.contains(HadoopRole.HADOOP_NAMENODE_ROLE.toString())) {
-         unsupportedRoles.add(HadoopRole.HADOOP_NAMENODE_ROLE.toString());
+      if (roles.contains(HadoopRole.NAMENODE_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.NAMENODE_ROLE.toString());
       }
-      if (roles.contains(HadoopRole.HADOOP_SECONDARY_NAMENODE_ROLE.toString())) {
-         unsupportedRoles.add(HadoopRole.HADOOP_SECONDARY_NAMENODE_ROLE.toString());
+      if (roles.contains(HadoopRole.SECONDARY_NAMENODE_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.SECONDARY_NAMENODE_ROLE.toString());
       }
-      if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
-         unsupportedRoles.add(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString());
+      if (roles.contains(HadoopRole.JOBTRACKER_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.JOBTRACKER_ROLE.toString());
       }
-      if (roles.contains(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString())) {
-         unsupportedRoles.add(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString());
+      if (roles.contains(HadoopRole.RESOURCEMANAGER_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.RESOURCEMANAGER_ROLE.toString());
       }
       if (roles.contains(HadoopRole.ZOOKEEPER_SERVER_ROLE.toString())) {
          unsupportedRoles.add(HadoopRole.ZOOKEEPER_SERVER_ROLE.toString());
@@ -1219,28 +1218,24 @@ public class AmbariImpl implements SoftwareManager {
    @Override
    public boolean decomissionNodes(String clusterName, List<NodeInfo> nodes,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
       return false;
    }
 
    @Override
    public boolean comissionNodes(String clusterName, List<NodeInfo> nodes,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
       return false;
    }
 
    @Override
    public boolean startNodes(String clusterName, List<NodeInfo> nodes,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
       return false;
    }
 
    @Override
    public boolean stopNodes(String clusterName, List<NodeInfo> nodes,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
       return false;
    }
 
@@ -1283,31 +1278,39 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public boolean hasHbase(ClusterBlueprint blueprint) {
-      // TODO Auto-generated method stub
-      return false;
+      boolean hasHbase = false;
+      for (NodeGroupInfo group : blueprint.getNodeGroups()) {
+         if (HadoopRole.hasHBaseRole(group.getRoles())) {
+            hasHbase = true;
+            break;
+         }
+      }
+      return hasHbase;
    }
 
    @Override
    public boolean hasMgmtRole(List<String> roles) {
-      // TODO Auto-generated method stub
-      return false;
+      return HadoopRole.hasMgmtRole(roles);
    }
 
    @Override
    public boolean isComputeOnlyRoles(List<String> roles) {
-      // TODO Auto-generated method stub
       return false;
    }
 
    @Override
    public boolean twoDataDisksRequired(NodeGroupInfo group) {
-      // TODO Auto-generated method stub
+      EnumSet<HadoopRole> enumRoles = HadoopRole.getEnumRoles(group.getRoles());
+      if ((enumRoles.size() == 1 || (enumRoles.size() == 2 && enumRoles
+            .contains(HadoopRole.JOURNALNODE_ROLE)))
+            && (enumRoles.contains(HadoopRole.ZOOKEEPER_SERVER_ROLE))) {
+         return true;
+      }
       return false;
    }
 
    @Override
    public boolean hasComputeMasterGroup(ClusterBlueprint blueprint) {
-      // TODO Auto-generated method stub
       return false;
    }
 

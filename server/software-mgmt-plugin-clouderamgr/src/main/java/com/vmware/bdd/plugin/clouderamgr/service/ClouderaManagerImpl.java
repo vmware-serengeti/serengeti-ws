@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -2154,17 +2155,17 @@ public class ClouderaManagerImpl implements SoftwareManager {
          // no unsupported roles
          return new ArrayList<String>();
       }
-      if (roles.contains(HadoopRole.HADOOP_NAMENODE_ROLE.toString())) {
-         unsupportedRoles.add(HadoopRole.HADOOP_NAMENODE_ROLE.toString());
+      if (roles.contains(HadoopRole.HDFS_NAMENODE_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.HDFS_NAMENODE_ROLE.toString());
       }
-      if (roles.contains(HadoopRole.HADOOP_SECONDARY_NAMENODE_ROLE.toString())) {
-         unsupportedRoles.add(HadoopRole.HADOOP_SECONDARY_NAMENODE_ROLE.toString());
+      if (roles.contains(HadoopRole.HDFS_SECONDARY_NAMENODE_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.HDFS_SECONDARY_NAMENODE_ROLE.toString());
       }
-      if (roles.contains(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString())) {
-         unsupportedRoles.add(HadoopRole.HADOOP_JOBTRACKER_ROLE.toString());
+      if (roles.contains(HadoopRole.MAPREDUCE_JOBTRACKER_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.MAPREDUCE_JOBTRACKER_ROLE.toString());
       }
-      if (roles.contains(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString())) {
-         unsupportedRoles.add(HadoopRole.HADOOP_RESOURCEMANAGER_ROLE.toString());
+      if (roles.contains(HadoopRole.YARN_RESOURCE_MANAGER_ROLE.toString())) {
+         unsupportedRoles.add(HadoopRole.YARN_RESOURCE_MANAGER_ROLE.toString());
       }
       if (roles.contains(HadoopRole.ZOOKEEPER_SERVER_ROLE.toString())) {
          unsupportedRoles.add(HadoopRole.ZOOKEEPER_SERVER_ROLE.toString());
@@ -2181,31 +2182,39 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public boolean hasHbase(ClusterBlueprint blueprint) {
-      // TODO Auto-generated method stub
-      return false;
+      boolean hasHbase = false;
+      for (NodeGroupInfo group : blueprint.getNodeGroups()) {
+         if (HadoopRole.hasHBaseRole(group.getRoles())) {
+            hasHbase = true;
+            break;
+         }
+      }
+      return hasHbase;
    }
 
    @Override
    public boolean hasMgmtRole(List<String> roles) {
-      // TODO Auto-generated method stub
-      return false;
+      return HadoopRole.hasMgmtRole(roles);
    }
 
    @Override
    public boolean isComputeOnlyRoles(List<String> roles) {
-      // TODO Auto-generated method stub
       return false;
    }
 
    @Override
    public boolean twoDataDisksRequired(NodeGroupInfo group) {
-      // TODO Auto-generated method stub
+      EnumSet<HadoopRole> enumRoles = HadoopRole.getEnumRoles(group.getRoles());
+      if ((enumRoles.size() == 1 || (enumRoles.size() == 2 && enumRoles
+            .contains(HadoopRole.HDFS_JOURNALNODE_ROLE)))
+            && (enumRoles.contains(HadoopRole.ZOOKEEPER_SERVER_ROLE))) {
+         return true;
+      }
       return false;
    }
 
    @Override
    public boolean hasComputeMasterGroup(ClusterBlueprint blueprint) {
-      // TODO Auto-generated method stub
       return false;
    }
 
