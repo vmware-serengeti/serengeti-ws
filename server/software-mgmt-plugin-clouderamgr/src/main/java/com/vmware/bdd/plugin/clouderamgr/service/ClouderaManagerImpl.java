@@ -898,7 +898,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
             }
          }
       }
-      logger.info("Roles not in " + roleState + " state are: " + failedRoles.toString());
+      if(failedRoles != null) {
+         logger.info("Roles not in " + roleState + " state are: " + failedRoles.toString());
+      }
       return failedRoles;
    }
 

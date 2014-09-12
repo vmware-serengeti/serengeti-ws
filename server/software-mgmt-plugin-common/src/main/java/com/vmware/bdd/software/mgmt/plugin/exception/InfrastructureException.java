@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+
 public class InfrastructureException extends SoftwareManagementPluginException {
    private static final long serialVersionUID = 1L;
 
@@ -42,7 +43,7 @@ public class InfrastructureException extends SoftwareManagementPluginException {
 
    public static InfrastructureException FORMAT_DISK_FAIL(
          String clusterName, List<String> failedMsgList) {
-      String details = failedMsgList != null || failedMsgList.size() > 0 ? Arrays.toString(failedMsgList.toArray()) : "";
+      String details = failedMsgList != null && failedMsgList.size() > 0 ? Arrays.toString(failedMsgList.toArray()) : "";
 
       InfrastructureException e =
             new InfrastructureException("APP_MANAGER.FORMAT_DISK_FAIL",

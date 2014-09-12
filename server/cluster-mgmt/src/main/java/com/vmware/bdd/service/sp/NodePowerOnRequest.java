@@ -80,7 +80,8 @@ public class NodePowerOnRequest extends SimpleRequest {
       String serverVersion = clusterEntityMgr.getServerVersion();
       NodeEntity nodeEntity = clusterEntityMgr.getNodeWithNicsByMobId(vmId);
       if (nodeEntity == null) {
-         logger.info("Node " + nodeEntity.getVmName() + " is deleted.");
+         logger.info("VM " + vmId + " is deleted.");
+         return true;
       }
       boolean needBootstrap = nodeEntity.needUpgrade(serverVersion);
       StartVmPostPowerOn query =

@@ -207,7 +207,7 @@ public class SoftwareManagerCollector implements InitializingBean {
       }
 
       if (cache.containsKey(appManagerAdd.getName())) {
-         return cache.get(appManagerAdd);
+         return cache.get(appManagerAdd.getName());
       }
 
       String factoryClassName = Configuration.getString(configurationPrefix + appManagerAdd.getType());
@@ -452,6 +452,8 @@ public class SoftwareManagerCollector implements InitializingBean {
             Configuration.getStrings(appmanagerTypesKey, "");
       if (appmanagerTypes != null) {
          types = appmanagerTypes.split(",");
+      } else {
+         types = new String[0];
       }
       return Arrays.asList(types);
    }
@@ -544,7 +546,7 @@ public class SoftwareManagerCollector implements InitializingBean {
          } else if (c.size() == 1) {
             certs[0] = cf.generateCertificate(new ByteArrayInputStream(certBytes));
          } else {
-            certs = (Certificate[]) c.toArray();
+            certs = (Certificate[]) c.toArray(certs);
          }
       } catch (CertificateException e){
          throw SoftwareManagerCollectorException.BAD_CERT(e);
