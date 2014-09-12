@@ -29,6 +29,7 @@ import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
 /**
@@ -46,6 +47,7 @@ public class TestSWMgrCollector_CreateAndGetByClusterName extends TestSWMgrColle
 
       softwareManagerCollector.createSoftwareManager(defaultAppManagerAdd);
 
+      Mockito.when(appManagerService.findAppManagerByName(Matchers.anyString())).thenReturn(defaultAppManagerEntity);
       TestSWMgrCollector_LoadAppManager.assertSoftwareManagers(softwareManagerCollector.getSoftwareManager(Constants.IRONFAN), defaultAppManagerAdd);
    }
 

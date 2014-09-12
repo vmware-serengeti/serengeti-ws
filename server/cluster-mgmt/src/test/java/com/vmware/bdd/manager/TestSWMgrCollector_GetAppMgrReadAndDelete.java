@@ -36,6 +36,7 @@ public class TestSWMgrCollector_GetAppMgrReadAndDelete extends TestSWMgrCollecto
    @Test
    public void testGetAppMgrRead_Success() {
       Mockito.when(appManagerService.findAll()).thenReturn(Arrays.asList(defaultAppManagerEntity));
+      Mockito.when(appManagerService.findAppManagerByName(Matchers.anyString())).thenReturn(defaultAppManagerEntity);
 
       softwareManagerCollector.loadSoftwareManagers();
 

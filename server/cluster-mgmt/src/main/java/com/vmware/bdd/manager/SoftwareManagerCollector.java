@@ -293,7 +293,7 @@ public class SoftwareManagerCollector implements InitializingBean {
     * @return null if the name does not exist
     */
    public SoftwareManager getSoftwareManager(String name) {
-      if (CommonUtil.isBlank(name)) {
+      if (CommonUtil.isBlank(name) || Constants.IRONFAN.equals(name)) {
          return cache.get(Constants.IRONFAN);
       }
 
@@ -302,15 +302,14 @@ public class SoftwareManagerCollector implements InitializingBean {
          logger.error("Cannot find app manager " + name);
          throw SoftwareManagerCollectorException.APPMANAGER_NOT_FOUND(name);
       } else {
-         String appMgrType = appManagerEntity.getType();
-         if ( !appMgrType.equals(Constants.IRONFAN) ) {
-            // check the server connection before do the real connection to the application manager.
-            // this is to avoid long time waiting of socket connect when the server is shutdown or
-            // even does not exist at all.
-            checkServerConnection( name, appManagerEntity.getUrl() );
-         }
-
          if (cache.containsKey(name)) {
+            String appMgrType = appManagerEntity.getType();
+            if ( !appMgrType.equals(Constants.IRONFAN) ) {
+               // check the server connection before do the real connection to the application manager.
+               // this is to avoid long time waiting of socket connect when the server is shutdown or
+               // even does not exist at all.
+               checkServerConnection( name, appManagerEntity.getUrl() );
+            }
             return cache.get(name);
          }
          return loadSoftwareManager(appManagerEntity);

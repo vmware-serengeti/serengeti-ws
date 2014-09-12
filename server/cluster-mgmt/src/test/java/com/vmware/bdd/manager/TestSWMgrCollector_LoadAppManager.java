@@ -17,6 +17,7 @@ package com.vmware.bdd.manager;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -36,6 +37,7 @@ public class TestSWMgrCollector_LoadAppManager extends TestSWMgrCollectorBase{
    @Test
    public void testLoadAppManagers_Default() {
       Mockito.when(appManagerService.findAll()).thenReturn(Arrays.asList(defaultAppManagerEntity));
+      Mockito.when(appManagerService.findAppManagerByName(Matchers.anyString())).thenReturn(defaultAppManagerEntity);
 
       softwareManagerCollector.loadSoftwareManagers();
 
@@ -45,6 +47,7 @@ public class TestSWMgrCollector_LoadAppManager extends TestSWMgrCollectorBase{
    @Test
    public void testLoadAppManagers_Upgrade() {
       Mockito.when(appManagerService.findAll()).thenReturn(new ArrayList<AppManagerEntity>());
+      Mockito.when(appManagerService.findAppManagerByName(Matchers.anyString())).thenReturn(defaultAppManagerEntity);
 
       softwareManagerCollector.loadSoftwareManagers();
 
@@ -65,10 +68,10 @@ public class TestSWMgrCollector_LoadAppManager extends TestSWMgrCollectorBase{
    @Test
    public void testLoadAppManager_Success() {
       Mockito.when(appManagerService.findAll()).thenReturn(new ArrayList<AppManagerEntity>());
+      Mockito.when(appManagerService.findAppManagerByName(Matchers.anyString())).thenReturn(defaultAppManagerEntity);
 
       Configuration.setString(SoftwareManagerCollector.configurationPrefix + defaultAppManagerAdd.getType(), "com.vmware.bdd.manager.mocks.DefaultSWMgrFactory");
       softwareManagerCollector.setPrivateKey("mock-key");
-
 
       softwareManagerCollector.loadSoftwareManager(defaultAppManagerAdd);
 
@@ -83,7 +86,6 @@ public class TestSWMgrCollector_LoadAppManager extends TestSWMgrCollectorBase{
       Configuration.setString(SoftwareManagerCollector.configurationPrefix + Constants.IRONFAN, "");
       softwareManagerCollector.setPrivateKey("mock-key");
 
-
       softwareManagerCollector.loadSoftwareManager(defaultAppManagerAdd);
    }
 
@@ -94,7 +96,6 @@ public class TestSWMgrCollector_LoadAppManager extends TestSWMgrCollectorBase{
 
       Configuration.setString(SoftwareManagerCollector.configurationPrefix + Constants.IRONFAN, "com.vmware.bdd.manager.mocks.UnhealthySoftwareManagerFactory");
       softwareManagerCollector.setPrivateKey("mock-key");
-
 
       softwareManagerCollector.loadSoftwareManager(defaultAppManagerAdd);
    }
@@ -107,7 +108,6 @@ public class TestSWMgrCollector_LoadAppManager extends TestSWMgrCollectorBase{
       Configuration.setString(SoftwareManagerCollector.configurationPrefix + defaultAppManagerAdd.getType(), "com.vmware.foo");
       softwareManagerCollector.setPrivateKey("mock-key");
 
-
       softwareManagerCollector.loadSoftwareManager(defaultAppManagerAdd);
    }
 
@@ -118,7 +118,6 @@ public class TestSWMgrCollector_LoadAppManager extends TestSWMgrCollectorBase{
 
       Configuration.setString(SoftwareManagerCollector.configurationPrefix + defaultAppManagerAdd.getType(), "com.vmware.bdd.manager.mocks.ExceptionalSWMgrFactory");
       softwareManagerCollector.setPrivateKey("mock-key");
-
 
       softwareManagerCollector.loadSoftwareManager(defaultAppManagerAdd);
 

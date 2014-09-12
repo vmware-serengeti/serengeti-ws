@@ -14,7 +14,12 @@
  *****************************************************************************/
 package com.vmware.bdd.manager;
 
+import mockit.Mock;
+import mockit.MockClass;
+import mockit.Mockit;
+
 import org.mockito.Mockito;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
 
 import com.vmware.aurora.global.Configuration;
@@ -23,7 +28,12 @@ import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.mocks.FooSWMgrFactory;
+import com.vmware.bdd.plugin.ambari.service.TestAmbariImpl.MockReflectionUtils;
 import com.vmware.bdd.service.resmgmt.IAppManagerService;
+import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
+import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
+import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
 /**
@@ -41,6 +51,14 @@ public class TestSWMgrCollectorBase {
    protected SoftwareManagerCollector softwareManagerCollector;
    protected IClusterEntityManager clusterEntityManager;
 
+   @MockClass(realClass = CommonUtil.class)
+   public static class MockCommonUtil {
+      @Mock
+      public static boolean checkServerConnection(final String host, final int port, int waitTime) {
+         return true;
+      }
+   }
+
    @BeforeMethod
    public void setUp() {
       softwareManagerCollector = new SoftwareManagerCollector();
@@ -53,6 +71,15 @@ public class TestSWMgrCollectorBase {
 
       Configuration.setString(SoftwareManagerCollector.configurationPrefix + Constants.IRONFAN, "");
       Configuration.setString(SoftwareManagerCollector.configurationPrefix + FooSWMgrFactory.FOO_APP_MGR, "");
+
+      //Mock static utility using Mockit.
+      Mockit.setUpMock(MockCommonUtil.class);
+   }
+
+   @AfterTest
+   public void tearDown() {
+      //clean mock static utility using Mockit.
+      Mockit.tearDownMocks(MockCommonUtil.class);
    }
 
    static {
