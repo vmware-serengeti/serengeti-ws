@@ -1657,7 +1657,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
             ApiRoleNameList nnRoles = new ApiRoleNameList();
             nnRoles.add(roleDef.getName());
             try {
-               executeAndReport("Formating Active Namenode",
+               executeAndReport("Formatting Active Namenode",
                      apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                            .getRoleCommandsResource(hdfsService.getName()).formatCommand(nnRoles),
                      INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, false);
@@ -1916,7 +1916,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
       switch (roleDef.getType().getDisplayName()) {
          case "HDFS_NAMENODE":
-            executeAndReport("Formating Namenode",
+            executeAndReport("Formatting Namenode",
                   apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName())
                         .getRoleCommandsResource(serviceDef.getName()).formatCommand(
                         new ApiRoleNameList(ImmutableList.<String>builder().add(roleDef.getName()).build())),
