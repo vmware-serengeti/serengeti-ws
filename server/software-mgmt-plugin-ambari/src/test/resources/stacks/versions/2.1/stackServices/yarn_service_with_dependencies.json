@@ -1,0 +1,66 @@
+{
+  "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/YARN?fields=serviceComponents/*,serviceComponents/dependencies",
+  "StackServices" : {
+    "service_name" : "YARN",
+    "stack_name" : "HDP",
+    "stack_version" : "2.1"
+  },
+  "serviceComponents" : [
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/YARN/serviceComponents/APP_TIMELINE_SERVER",
+      "StackServiceComponents" : {
+        "cardinality" : null,
+        "component_category" : "SLAVE",
+        "component_name" : "APP_TIMELINE_SERVER",
+        "is_client" : false,
+        "is_master" : false,
+        "service_name" : "YARN",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "dependencies" : [ ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/YARN/serviceComponents/NODEMANAGER",
+      "StackServiceComponents" : {
+        "cardinality" : "1+",
+        "component_category" : "SLAVE",
+        "component_name" : "NODEMANAGER",
+        "is_client" : false,
+        "is_master" : false,
+        "service_name" : "YARN",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "dependencies" : [ ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/YARN/serviceComponents/RESOURCEMANAGER",
+      "StackServiceComponents" : {
+        "cardinality" : "1",
+        "component_category" : "MASTER",
+        "component_name" : "RESOURCEMANAGER",
+        "is_client" : false,
+        "is_master" : true,
+        "service_name" : "YARN",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "dependencies" : [ ]
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/YARN/serviceComponents/YARN_CLIENT",
+      "StackServiceComponents" : {
+        "cardinality" : "0+",
+        "component_category" : "CLIENT",
+        "component_name" : "YARN_CLIENT",
+        "is_client" : true,
+        "is_master" : false,
+        "service_name" : "YARN",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      },
+      "dependencies" : [ ]
+    }
+  ]
+}

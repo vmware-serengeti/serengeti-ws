@@ -20,10 +20,15 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
+import org.mockito.Mockito;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
+import com.vmware.bdd.plugin.ambari.api.ApiRootResource;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
+import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
+import com.vmware.bdd.plugin.ambari.service.am.FakeRootResourceV1;
 import com.vmware.bdd.plugin.ambari.utils.SerialUtils;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
@@ -32,24 +37,27 @@ import com.vmware.bdd.utils.CommonUtil;
 public class TestAmClusterValidator {
 
    private static ClusterBlueprint blueprint = null;
-   private static ApiManager apiManager;
    private static AmClusterValidator validator;
 
    @BeforeClass(groups = { "TestClusterDef" })
    public static void setup() throws IOException {
 
+      ApiRootResource apiRootResource = Mockito.mock(ApiRootResource.class);
+      RootResourceV1 rootResourceV1 = new FakeRootResourceV1();
+      Mockito.when(apiRootResource.getRootV1()).thenReturn(rootResourceV1);
+
+      AmbariManagerClientbuilder clientbuilder = Mockito.mock(AmbariManagerClientbuilder.class);
+      Mockito.when(clientbuilder.build()).thenReturn(apiRootResource);
+
       String content = CommonUtil.readJsonFile("simple_blueprint.json");
 
-      blueprint =
-            SerialUtils.getObjectByJsonString(ClusterBlueprint.class, content);
-
-      //apiManager = new ApiManager("10.141.73.103", 8080, "admin", "admin");
+      blueprint = SerialUtils.getObjectByJsonString(ClusterBlueprint.class, content);
 
       validator = new AmClusterValidator();
-      validator.setApiManager(apiManager);
+      validator.setApiManager(new ApiManager(clientbuilder));
    }
 
-   //@Test(groups = { "TestAmClusterValidator" })
+   @Test(groups = { "TestAmClusterValidator" })
    public void testSuccess() {
       try {
          Assert.assertTrue(validator.validateBlueprint(blueprint));
@@ -59,7 +67,7 @@ public class TestAmClusterValidator {
       }
    }
 
-   //@Test(groups = { "TestAmClusterValidator" })
+   @Test(groups = { "TestAmClusterValidator" })
    public void testUnrecogConfigTypes() {
       try {
          blueprint.getConfiguration().put("hdfs-site.xml",
@@ -71,7 +79,7 @@ public class TestAmClusterValidator {
       }
    }
 
-   //@Test(groups = { "TestAmClusterValidator" })
+   @Test(groups = { "TestAmClusterValidator" })
    public void testRecogConfigTypes() {
       try {
          Map<String, String> configItem = new HashMap<String, String>();
@@ -85,7 +93,7 @@ public class TestAmClusterValidator {
       }
    }
 
-   //@Test(groups = { "TestAmClusterValidator" })
+   @Test(groups = { "TestAmClusterValidator" })
    public void testBadConfigItems() {
       try {
          Map<String, String> configItem = new HashMap<String, String>();
@@ -99,12 +107,12 @@ public class TestAmClusterValidator {
       }
    }
 
-   //@Test(groups = { "TestAmClusterValidator" })
+   @Test(groups = { "TestAmClusterValidator" })
    public void testMissedRoles() {
       try {
          blueprint.getNodeGroups().get(1).getRoles().remove("HDFS_DATANODE");
          blueprint.getNodeGroups().get(0).getRoles()
-               .remove("YARN_RESOURCE_MANAGER");
+         .remove("YARN_RESOURCE_MANAGER");
          Assert.assertFalse(validator.validateBlueprint(blueprint));
       } catch (ValidationException e) {
          System.out.println("warning_msg_list: " + e.getWarningMsgList());

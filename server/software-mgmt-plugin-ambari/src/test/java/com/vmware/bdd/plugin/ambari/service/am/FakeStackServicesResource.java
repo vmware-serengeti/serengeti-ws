@@ -54,7 +54,8 @@ public class FakeStackServicesResource implements ServicesResource {
          return BuildResponse.buildResponse("stacks/versions/" + stackVersion
                + "/stackServices/tez_service_components.json");
       } else {
-         return null;
+         return BuildResponse.buildResponse("stacks/versions/" + stackVersion
+               + "/stackServices/yarn_service_with_dependencies.json");
       }
    }
 
