@@ -1280,10 +1280,10 @@ public class ClusterConfigManager {
       boolean succ = true;
       HttpClientBuilder builder = HttpClientBuilder.create();
       CloseableHttpClient httpClient = builder.build();
-      HttpGet httpGet = new HttpGet(localRepoURL);
 
       // test the connection to the given url
       try {
+         HttpGet httpGet = new HttpGet(localRepoURL);
          HttpResponse resp = httpClient.execute(httpGet);
          StatusLine status = resp.getStatusLine();
          if (status.getStatusCode() >= 400) {
