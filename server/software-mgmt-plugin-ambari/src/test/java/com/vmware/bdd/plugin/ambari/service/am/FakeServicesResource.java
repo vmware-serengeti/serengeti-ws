@@ -87,8 +87,7 @@ public class FakeServicesResource implements ServicesResource {
    @GET
    @Path("/{serviceName}")
    public Response readService(@PathParam("serviceName") String serviceName) {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("clusters/cluster01_HDFS_service.json");
    }
 
 }

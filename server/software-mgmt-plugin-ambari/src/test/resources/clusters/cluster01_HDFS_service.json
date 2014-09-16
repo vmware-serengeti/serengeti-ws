@@ -1,0 +1,43 @@
+{
+  "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster_2/services/HDFS",
+  "ServiceInfo" : {
+    "cluster_name" : "cluster_2",
+    "maintenance_state" : "OFF",
+    "service_name" : "HDFS",
+    "state" : "STARTED"
+  },
+  "components" : [
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster_2/services/HDFS/components/DATANODE",
+      "ServiceComponentInfo" : {
+        "cluster_name" : "cluster_2",
+        "component_name" : "DATANODE",
+        "service_name" : "HDFS"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster_2/services/HDFS/components/HDFS_CLIENT",
+      "ServiceComponentInfo" : {
+        "cluster_name" : "cluster_2",
+        "component_name" : "HDFS_CLIENT",
+        "service_name" : "HDFS"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster_2/services/HDFS/components/NAMENODE",
+      "ServiceComponentInfo" : {
+        "cluster_name" : "cluster_2",
+        "component_name" : "NAMENODE",
+        "service_name" : "HDFS"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster_2/services/HDFS/components/SECONDARY_NAMENODE",
+      "ServiceComponentInfo" : {
+        "cluster_name" : "cluster_2",
+        "component_name" : "SECONDARY_NAMENODE",
+        "service_name" : "HDFS"
+      }
+    }
+  ]
+}

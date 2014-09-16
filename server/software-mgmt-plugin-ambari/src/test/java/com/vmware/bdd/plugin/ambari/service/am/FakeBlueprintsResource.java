@@ -27,8 +27,7 @@ public class FakeBlueprintsResource implements BlueprintsResource {
 
    @Override
    public Response readBlueprint(String blueprintName) {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("clusters/simple_blueprint.json");
    }
 
    @Override

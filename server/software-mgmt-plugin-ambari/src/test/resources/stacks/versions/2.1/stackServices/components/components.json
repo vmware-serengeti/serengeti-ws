@@ -1,0 +1,59 @@
+{
+  "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS/serviceComponents",
+  "items" : [
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS/serviceComponents/DATANODE",
+      "StackServiceComponents" : {
+        "component_name" : "DATANODE",
+        "service_name" : "HDFS",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS/serviceComponents/HDFS_CLIENT",
+      "StackServiceComponents" : {
+        "component_name" : "HDFS_CLIENT",
+        "service_name" : "HDFS",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS/serviceComponents/JOURNALNODE",
+      "StackServiceComponents" : {
+        "component_name" : "JOURNALNODE",
+        "service_name" : "HDFS",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS/serviceComponents/NAMENODE",
+      "StackServiceComponents" : {
+        "component_name" : "NAMENODE",
+        "service_name" : "HDFS",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS/serviceComponents/SECONDARY_NAMENODE",
+      "StackServiceComponents" : {
+        "component_name" : "SECONDARY_NAMENODE",
+        "service_name" : "HDFS",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    },
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/stacks2/HDP/versions/2.1/stackServices/HDFS/serviceComponents/ZKFC",
+      "StackServiceComponents" : {
+        "component_name" : "ZKFC",
+        "service_name" : "HDFS",
+        "stack_name" : "HDP",
+        "stack_version" : "2.1"
+      }
+    }
+  ]
+}

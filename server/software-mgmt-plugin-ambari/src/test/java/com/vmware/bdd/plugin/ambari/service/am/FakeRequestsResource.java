@@ -22,8 +22,7 @@ public class FakeRequestsResource implements RequestsResource {
 
    @Override
    public Response readRequests() {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("clusters/simple_requests.json");
    }
 
    @Override

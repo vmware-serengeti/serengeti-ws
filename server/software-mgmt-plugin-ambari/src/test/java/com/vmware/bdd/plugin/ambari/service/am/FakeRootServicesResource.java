@@ -28,8 +28,7 @@ public class FakeRootServicesResource implements RootServicesResource {
 
    @Override
    public Response readRootServiceComponents() {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("services/ambari_server.json");
    }
 
 }

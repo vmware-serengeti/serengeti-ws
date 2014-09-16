@@ -1,0 +1,12 @@
+{
+  "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/requests",
+  "items" : [
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/requests/1",
+      "Requests" : {
+        "cluster_name" : "cluster01",
+        "id" : 1
+      }
+    }
+  ]
+}

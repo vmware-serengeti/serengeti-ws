@@ -28,8 +28,7 @@ public class FakeStacks2Resource implements Stacks2Resource {
 
    @Override
    public Response readStack(String stackName) {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("stacks/HDP_stack.json");
    }
 
    @Override

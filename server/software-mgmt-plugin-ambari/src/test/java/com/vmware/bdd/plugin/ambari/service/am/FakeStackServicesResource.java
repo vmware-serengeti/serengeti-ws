@@ -29,8 +29,7 @@ public class FakeStackServicesResource implements ServicesResource {
 
    @Override
    public Response readServices() {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("stacks/versions/" + stackVersion + "/stackServices/simple_services.json");
    }
 
    @Override
@@ -44,8 +43,8 @@ public class FakeStackServicesResource implements ServicesResource {
 
    @Override
    public Response readService(String stackServiceName) {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("stacks/versions/" + stackVersion
+            + "/stackServices/yarn_service_with_dependencies.json");
    }
 
    @Override
@@ -61,8 +60,7 @@ public class FakeStackServicesResource implements ServicesResource {
 
    @Override
    public ComponentsResource getComponentsResource(String stackServiceName) {
-      // TODO Auto-generated method stub
-      return null;
+      return new FakeComponentsResource(stackVersion);
    }
 
 

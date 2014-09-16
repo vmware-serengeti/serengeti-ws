@@ -23,9 +23,11 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
 import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
 import com.vmware.bdd.plugin.ambari.service.am.FakeRootResourceV1;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 
 import junit.framework.Assert;
 import mockit.Mockit;
+
 import org.mockito.Mockito;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -55,16 +57,17 @@ public class TestApiManager {
 
    @Test
    public void testGetStackList() throws Exception {
-
+      Assert.assertTrue(apiManager.getStackList().getApiStacks().size() != 0);
    }
 
    @Test
    public void testGetStack() throws Exception {
-
+      Assert.assertEquals("HDP", apiManager.getStack("HDP").getApiStackName().getStackName());
    }
 
    @Test
    public void testReadService() throws Exception {
+      Assert.assertEquals("HDFS", apiManager.readService("cluster_01", "HDFS").getServiceInfo().getServiceName());
    }
 
    @Test
@@ -74,46 +77,47 @@ public class TestApiManager {
 
    @Test
    public void testGetStackVersionList() throws Exception {
-
+      Assert.assertNotNull(apiManager.getStackVersionList("HDP"));
    }
 
    @Test
    public void testGetStackVersion() throws Exception {
-
+      Assert.assertEquals("2.1", apiManager.getStackVersion("HDP", "2.1").getApiStackVersionInfo().getStackVersion());
    }
 
    @Test
    public void testGetStackServiceList() throws Exception {
-
+      Assert.assertNotNull(apiManager.getStackServiceList("HDP", "2.1"));
    }
 
    @Test
    public void testGetStackServiceListWithComponents() throws Exception {
-
+      Assert.assertNotNull(apiManager.getStackServiceListWithComponents("HDP", "2.1"));
    }
 
    @Test
    public void testGetStackServiceListWithConfigurations() throws Exception {
-
+      Assert.assertNotNull(apiManager.getStackServiceListWithConfigurations("HDP", "2.1"));
    }
 
    @Test
    public void testGetStackServiceWithComponents() throws Exception {
-
+      Assert.assertNotNull(apiManager.getStackServiceWithComponents("HDP", "2.1", "HDFS"));
    }
 
    @Test
    public void testGetStackService() throws Exception {
+      Assert.assertEquals("YARN", apiManager.getStackService("HDP", "2.1", "YARN").getApiStackServiceInfo().getServiceName());
    }
 
    @Test
    public void testGetStackComponentList() throws Exception {
-
+      Assert.assertNotNull(apiManager.getStackComponentList("HDP", "2.1", "YARN").getApiStackServices());
    }
 
    @Test
    public void testGetStackComponent() throws Exception {
-
+      Assert.assertEquals("DATANODE", apiManager.getStackComponent("HDP", "2.1", "YARN", "DATANODE").getApiComponent().getComponentName());
    }
 
    @Test
@@ -167,12 +171,12 @@ public class TestApiManager {
 
    @Test
    public void testGetBlueprint() throws Exception {
-
+      Assert.assertEquals("cluster01", apiManager.getBlueprint("cluster01").getApiBlueprintInfo().getBlueprintName());
    }
 
    @Test
    public void testCreateBlueprint() throws Exception {
-
+      Assert.assertEquals("cluster01", apiManager.createBlueprint("cluster01", null).getApiBlueprintInfo().getBlueprintName());
    }
 
    @Test
@@ -197,32 +201,35 @@ public class TestApiManager {
 
    @Test
    public void testGetRequestList() throws Exception {
-
+      Assert.assertNotNull(apiManager.getRequestList(clusterName));
    }
 
    @Test
    public void testGetRequest() throws Exception {
-
+      Assert.assertNotNull(apiManager.getRequest(clusterName, 1L));
    }
 
    @Test
    public void testCreateBootstrap() throws Exception {
-
+      Assert.assertEquals(clusterName, apiManager.createBlueprint(clusterName, null).getApiBlueprintInfo().getBlueprintName());
    }
 
    @Test
    public void testGetBootstrapStatus() throws Exception {
-
+      Assert.assertEquals("SUCCESS", apiManager.getBootstrapStatus(1L).getStatus());
    }
 
    @Test
    public void testGetRequestWithTasks() throws Exception {
-
+      Assert.assertNotNull(apiManager.getRequestWithTasks(clusterName, 1L).getApiTasks());
    }
 
    @Test
    public void testGetClusterStatus() throws Exception {
-
+      HadoopStack stack = new HadoopStack();
+      stack.setVendor("HDP");
+      stack.setFullVersion("2.1");
+      Assert.assertEquals("Started", apiManager.getClusterStatus(clusterName, stack).toString());
    }
 
    @Test
@@ -237,12 +244,12 @@ public class TestApiManager {
 
    @Test
    public void testHealthCheck() throws Exception {
-
+      Assert.assertEquals("RUNNING", apiManager.healthCheck());
    }
 
    @Test
    public void testGetVersion() throws Exception {
-
+      Assert.assertEquals("1.6.0", apiManager.getVersion());
    }
 
    @Test
