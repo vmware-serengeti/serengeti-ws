@@ -155,19 +155,7 @@ public class TestClouderaManagerImpl {
 
    @BeforeClass( groups = { "TestClouderaManagerImpl" }, dependsOnGroups = { "TestClusterDef" })
    public static void setup() throws IOException {
-      Mockit.setUpMock(MockClouderaManagerClientBuilder.class);
-      Mockit.setUpMock(MockHostInstallPoller.class);
-      Mockit.setUpMock(MockReflectionUtils.class);
-      Mockit.setUpMock(MockCmClusterValidator.class);
-
-      apiRootResource = Mockito.mock(ApiRootResource.class);
-
-      rootResourceV6 = new FakeRootResource();
-      rootResourceV7 = new FakeRootResourceV7();
-      Mockito.when(apiRootResource.getRootV6()).thenReturn(rootResourceV6);
-      Mockito.when(apiRootResource.getRootV7()).thenReturn(rootResourceV7);
-      Mockito.when(apiRootResource.getCurrentVersion()).thenReturn("v7");
-
+      setupMocks();
       provider = new ClouderaManagerImpl("127.0.0.1", 7180, "admin", "admin", "RSA_CERT");
       blueprint = SerialUtils.getObjectByJsonString(ClusterBlueprint.class, CommonUtil.readJsonFile("simple_blueprint.json"));
 
@@ -367,8 +355,27 @@ public class TestClouderaManagerImpl {
       }
    }
 
+   //add this helper function to fix strange ut failure in testStopClusterGotException and testStartClusterGotException
+   //when use mvn to do unit test. In my IntelliJ IDEA, the above
+   //two UTs works fine, but it cannot work in mvn test
+   private static void setupMocks() {
+      Mockit.setUpMock(MockClouderaManagerClientBuilder.class);
+      Mockit.setUpMock(MockHostInstallPoller.class);
+      Mockit.setUpMock(MockReflectionUtils.class);
+      Mockit.setUpMock(MockCmClusterValidator.class);
+
+      apiRootResource = Mockito.mock(ApiRootResource.class);
+
+      rootResourceV6 = new FakeRootResource();
+      rootResourceV7 = new FakeRootResourceV7();
+      Mockito.when(apiRootResource.getRootV6()).thenReturn(rootResourceV6);
+      Mockito.when(apiRootResource.getRootV7()).thenReturn(rootResourceV7);
+      Mockito.when(apiRootResource.getCurrentVersion()).thenReturn("v7");
+   }
+
    @Test (groups = { "TestClouderaManagerImpl" }, dependsOnMethods = { "testStartStoppedCluster" })
    public void testStopClusterGotException() {
+      setupMocks();
       blueprint.getHadoopStack().setDistro("CDH-5.0.1");
       ClustersResourceV6 resourceV6 = Mockito.mock(FakeClustersResource.class);
       Mockito.when(resourceV6.stopCommand(blueprint.getName())).thenThrow(
@@ -426,6 +433,7 @@ public class TestClouderaManagerImpl {
 
    @Test (groups = { "TestClouderaManagerImpl" }, dependsOnMethods = { "testStopClusterGotException" })
    public void testStartClusterGotException() {
+      setupMocks();
       blueprint.getHadoopStack().setDistro("CDH-5.0.1");
       provider.onStopCluster(blueprint, reportQueue);
 
