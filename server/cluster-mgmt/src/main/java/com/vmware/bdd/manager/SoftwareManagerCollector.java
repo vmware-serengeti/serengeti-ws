@@ -604,7 +604,7 @@ public class SoftwareManagerCollector implements InitializingBean {
      final String host = url.getHost();
      final int port = url.getPort();
 
-     logger.info("Check the connection to the application manager.");
+     logger.debug("Check the connection to the application manager.");
      boolean connectOK = CommonUtil.checkServerConnection(host, port, waitTimeForAppMgrConn);
      if ( !connectOK ) {
         logger.error("Cannot connect to application manager "
