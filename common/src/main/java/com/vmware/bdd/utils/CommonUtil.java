@@ -398,7 +398,6 @@ public class CommonUtil {
    * @param waitTime
    */
   public static boolean checkServerConnection(final String host, final int port, int waitTime) {
-     logger.info("Check the socket connection to the server.");
      boolean connectResult = false;
 
      // validate the server is reachable
