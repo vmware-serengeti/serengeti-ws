@@ -14,6 +14,12 @@
       <property name="url" value="${jdbc.url}" />
       <property name="username" value="${jdbc.username}" />
       <property name="password" value="${jdbc.password}" />
+
+      <property name="maxWait" value="30000"/> <!-- 30 seconds wait, default is infinite wait, which causes deadlocks -->
+      <property name="maxActive" value="50" /> <!-- default is 8, which is too small. max postgres connection capacity is 200, so give half to tomcat -->
+
+      <property name="removeAbandoned" value="true" /> <!-- pool manager will remove abandoned connections if they exceed the removeAbandonedTimout.-->
+      <property name="removeAbandonedTimeout" value="60" /> <!-- seconds -->
    </bean>
 
    <bean id="sessionFactory"
