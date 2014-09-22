@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -117,8 +118,16 @@ public class SoftwareManagementStep extends TrackableTasklet {
       // Only check host time for cluster config, disk fix, scale up (management
       // operation configure), start (management operation start) and create
       // (resume only)
-      SoftwareManager softwareMgr =
-            softwareMgrs.getSoftwareManagerByClusterName(clusterName);
+      SoftwareManager softwareMgr = null;
+      try {
+         softwareMgr = softwareMgrs.getSoftwareManagerByClusterName(clusterName);
+      } catch (SoftwareManagerCollectorException e) {
+         if (ManagementOperation.PRE_DESTROY.equals(managementOperation) ||
+               ManagementOperation.DESTROY.equals(managementOperation)) {
+            return RepeatStatus.FINISHED;
+         }
+         throw e;
+      }
       if (ManagementOperation.CONFIGURE.equals(managementOperation)
             || ManagementOperation.START.equals(managementOperation)
             || JobConstants.RESUME_CLUSTER_JOB_NAME.equals(jobName)) {
