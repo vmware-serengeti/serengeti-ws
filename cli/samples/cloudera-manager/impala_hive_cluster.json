@@ -73,6 +73,9 @@
         "hive_metastore_database_port": "5432",
         "hive_metastore_database_type": "postgresql",
         "hive_metastore_database_user": "hive"
+      },
+      "HDFS_DATANODE":{
+        "dfs_datanode_du_reserved":"1024000000"
       }
     }
 }
