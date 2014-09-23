@@ -53,10 +53,10 @@
       ],
     "instanceNum": 3,
     "cpuNum": 2,
-    "memCapacityMB": 15000,  
+    "memCapacityMB": 15000,
     "storage": {
       "type": "LOCAL",
-      "sizeGB": 20
+      "sizeGB": 50
     }
   }
   ],
