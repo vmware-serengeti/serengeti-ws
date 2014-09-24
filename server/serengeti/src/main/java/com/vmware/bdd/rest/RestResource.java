@@ -857,8 +857,9 @@ public class RestResource {
       if (appManagerAdd == null) {
          throw BddException.INVALID_PARAMETER("appManagerAdd", null);
       }
-      if (CommonUtil.isBlank(appManagerAdd.getName())) {
-         throw BddException.INVALID_PARAMETER("App Manager instance name",
+      if (CommonUtil.isBlank(appManagerAdd.getName())
+            || !CommonUtil.validateResourceName(appManagerAdd.getName())) {
+         throw BddException.INVALID_PARAMETER("appmanager name",
                appManagerAdd.getName());
       }
       softwareManagerCollector.createSoftwareManager(appManagerAdd);
