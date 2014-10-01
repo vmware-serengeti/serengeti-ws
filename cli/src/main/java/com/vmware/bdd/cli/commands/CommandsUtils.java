@@ -80,7 +80,7 @@ public class CommandsUtils {
 
    public static String dataFromFile(String filePath) throws IOException,
          FileNotFoundException {
-      StringBuffer dataStringBuffer = new StringBuffer();
+      StringBuilder dataStringBuffer = new StringBuilder();
       FileInputStream fis = null;
       InputStreamReader inputStreamReader = null;
       BufferedReader bufferedReader = null;
@@ -490,11 +490,11 @@ public class CommandsUtils {
             }
             // Read user input
             readMsg = reader.readLine();
-            if (readMsg.trim().equalsIgnoreCase("yes")
-                  || readMsg.trim().equalsIgnoreCase("y")) {
+            if ("yes".equalsIgnoreCase(readMsg.trim())
+                  || "y".equalsIgnoreCase(readMsg.trim())) {
                continueLoop = false;
-            } else if (readMsg.trim().equalsIgnoreCase("no")
-                  || readMsg.trim().equalsIgnoreCase("n")) {
+            } else if ("no".equalsIgnoreCase(readMsg.trim())
+                  || "n".equalsIgnoreCase(readMsg.trim())) {
                continueLoop = false;
                continueCreate = false;
             } else {
@@ -566,7 +566,7 @@ public class CommandsUtils {
             entry = (Map.Entry<String, String>) it.next();
             vmIP = entry.getKey();
             rackPath = entry.getValue();
-            StringBuffer buff = new StringBuffer();
+            StringBuilder buff = new StringBuilder();
             list.add(buff.append(vmIP).append(" ").append(rackPath).toString());
          }
       }
@@ -575,7 +575,7 @@ public class CommandsUtils {
    }
 
    public static void prettyOutputStrings(List<Object> objs, String fileName, String delimeter) throws Exception {
-      StringBuffer buff = new StringBuffer();
+      StringBuilder buff = new StringBuilder();
       if (CommonUtil.isBlank(delimeter)) {
          delimeter = "\n";
       }

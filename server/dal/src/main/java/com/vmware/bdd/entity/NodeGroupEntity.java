@@ -430,9 +430,9 @@ public class NodeGroupEntity extends EntityBase {
       storage.setSizeGB(this.storageSize);
 
       // set dsNames/dsNames4Data/dsNames4System
-      if (getVcDatastoreNameList() != null
-            && !getVcDatastoreNameList().isEmpty())
-         storage.setDsNames(getVcDatastoreNameList());
+      List<String> datastoreNameList = getVcDatastoreNameList();
+      if (datastoreNameList != null && !datastoreNameList.isEmpty())
+         storage.setDsNames(datastoreNameList);
       if (getSdDatastoreNameList() != null
             && !getSdDatastoreNameList().isEmpty())
          storage.setDsNames4System(getSdDatastoreNameList());

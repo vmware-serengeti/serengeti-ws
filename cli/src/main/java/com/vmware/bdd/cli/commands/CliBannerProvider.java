@@ -35,7 +35,7 @@ public class CliBannerProvider implements BannerProvider, CommandMarker {
 	 */
 	//@CliCommand(value = { "version" }, help = "Displays current CLI version")
 	public String getBanner() {
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		buf.append("=================================================" + OsUtils.LINE_SEPARATOR);
 		buf.append("*  _____                                 _   _  *" + OsUtils.LINE_SEPARATOR);
 		buf.append("* / ____|  ___ _ __ ___ _ __   __ _  ___| |_(_) *" + OsUtils.LINE_SEPARATOR);

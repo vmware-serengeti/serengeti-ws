@@ -83,7 +83,7 @@ public class NicEntity extends EntityBase{
    }
 
    public boolean isReady() {
-      return (connected && ipv4Address != null && !ipv4Address.equals(Constants.NULL_IPV4_ADDRESS));
+      return (connected && ipv4Address != null && !Constants.NULL_IPV4_ADDRESS.equals(ipv4Address));
    }
 
    public String getIpv4Address() {

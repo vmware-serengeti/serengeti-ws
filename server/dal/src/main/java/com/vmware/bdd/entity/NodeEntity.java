@@ -260,7 +260,7 @@ public class NodeEntity extends EntityBase {
    }
 
    public void setAction(String action) {
-      if (this.action != action) {
+      if ((this.action == null && action != null) || !this.action.equals(action)) {
          logger.debug("node " + getVmName() + " action changed to " + action);
          this.action = action;
       }

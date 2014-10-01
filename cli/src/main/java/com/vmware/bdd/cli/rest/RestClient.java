@@ -897,8 +897,8 @@ public class RestClient {
                } else {
                   readMsg = "yes";
                }
-               if (!readMsg.trim().equalsIgnoreCase("yes")
-                     && !readMsg.trim().equalsIgnoreCase("y")) {
+               if (!"yes".equalsIgnoreCase(readMsg.trim())
+                     && !"y".equalsIgnoreCase(readMsg.trim())) {
                   if (i == chain.length - 1) {
                      throw new CertificateException(
                            "Not find a valid certificate.");

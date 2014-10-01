@@ -580,15 +580,15 @@ public class ClusterCommands implements CommandMarker {
          if ((CommandsUtils.isBlank(specFileName) && CommandsUtils
                .isBlank(type))
                || !CommandsUtils.isBlank(specFileName)
-               || type.equalsIgnoreCase(Constants.EXPORT_TYPE_SPEC)) {
+               || Constants.EXPORT_TYPE_SPEC.equalsIgnoreCase(type)) {
             ClusterCreate cluster = restClient.getSpec(name);
             CommandsUtils.prettyJsonOutput(cluster, path);
-         } else if (type.equalsIgnoreCase(Constants.EXPORT_TYPE_RACK)) {
+         } else if (Constants.EXPORT_TYPE_RACK.equalsIgnoreCase(type)) {
             Map<String, String> rackTopology =
                   restClient.getRackTopology(name, topology);
             CommandsUtils.gracefulRackTopologyOutput(rackTopology, path,
                   delimeter);
-         } else if (type.equalsIgnoreCase(Constants.EXPORT_TYPE_IP)) {
+         } else if (Constants.EXPORT_TYPE_IP.equalsIgnoreCase(type)) {
             ClusterRead cluster = restClient.get(name, true);
             prettyOutputClusterIPs(cluster, path, delimeter);
          } else {
@@ -1067,7 +1067,7 @@ public class ClusterCommands implements CommandMarker {
                boolean hasHiveServer = false;
                for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {
                   for (String role : nodeGroup.getRoles()) {
-                     if (role.equals("hadoop_namenode")) {
+                     if ("hadoop_namenode".equals(role)) {
                         List<NodeRead> nodes = nodeGroup.getInstances();
                         if (nodes != null && nodes.size() > 0) {
                            String nameNodeIP = nodes.get(0).fetchMgtIp();
@@ -1077,7 +1077,7 @@ public class ClusterCommands implements CommandMarker {
                            throw new CliRestException("no name node available");
                         }
                      }
-                     if (role.equals("hadoop_jobtracker")) {
+                     if ("hadoop_jobtracker".equals(role)) {
                         List<NodeRead> nodes = nodeGroup.getInstances();
                         if (nodes != null && nodes.size() > 0) {
                            String jobTrackerIP = nodes.get(0).fetchMgtIp();
@@ -1087,7 +1087,7 @@ public class ClusterCommands implements CommandMarker {
                                  "no job tracker available");
                         }
                      }
-                     if (role.equals("hive_server")) {
+                     if ("hive_server".equals(role)) {
                         List<NodeRead> nodes = nodeGroup.getInstances();
                         if (nodes != null && nodes.size() > 0) {
                            String hiveServerIP = nodes.get(0).fetchMgtIp();

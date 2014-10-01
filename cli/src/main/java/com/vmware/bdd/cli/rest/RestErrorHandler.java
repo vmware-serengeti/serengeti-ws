@@ -79,7 +79,7 @@ public class RestErrorHandler implements ResponseErrorHandler {
    }
 
    private String getVCConnectErrorMsg(InputStream is) {
-      StringBuffer buffer = new StringBuffer();
+      StringBuilder buffer = new StringBuilder();
       InputStreamReader inputStreamReader = null;
       BufferedReader bufferedReader = null;
       try {

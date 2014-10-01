@@ -142,7 +142,7 @@ public class AppManagerEntity extends EntityBase {
    }
 
    public void setPassword(String password) {
-      if (password == "") {
+      if ("".equals(password)) {
          this.password = "";
          return;
       }
