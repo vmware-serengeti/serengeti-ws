@@ -33,6 +33,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.apitypes.IpConfigInfo;
@@ -260,7 +261,7 @@ public class NodeEntity extends EntityBase {
    }
 
    public void setAction(String action) {
-      if ((this.action == null && action != null) || !this.action.equals(action)) {
+      if (!(new EqualsBuilder().append(this.action, action).isEquals())) {
          logger.debug("node " + getVmName() + " action changed to " + action);
          this.action = action;
       }
