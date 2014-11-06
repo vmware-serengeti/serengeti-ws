@@ -664,7 +664,7 @@ public class ClusterCommands implements CommandMarker {
    public void resizeCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
          @CliOption(key = { "nodeGroup" }, mandatory = true, help = "The node group name") final String nodeGroup,
-         @CliOption(key = { "instanceNum" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The resized number of instances. It should be larger that existing one") final int instanceNum,
+         @CliOption(key = { "instanceNum" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The new instance number, should be larger than 0") final int instanceNum,
          @CliOption(key = { "cpuNumPerNode" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The number of vCPU for the nodes in this group") final int cpuNumber,
          @CliOption(key = { "memCapacityMbPerNode" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The number of memory size in Mb for the nodes in this group") final long memory) {
 
@@ -742,7 +742,7 @@ public class ClusterCommands implements CommandMarker {
                         name,
                         Constants.OUTPUT_OP_RESIZE,
                         Constants.OUTPUT_OP_RESULT_FAIL,
-                        "Can not scale out and scale up/down at the same time, you have to run those commands separately");
+                        "Can not scale out/in and scale up/down at the same time, you have to run those commands separately");
          } else if (instanceNum == 0 && cpuNumber == 0 && memory == 0) {
             CommandsUtils
                   .printCmdFailure(
@@ -750,7 +750,7 @@ public class ClusterCommands implements CommandMarker {
                         name,
                         Constants.OUTPUT_OP_RESIZE,
                         Constants.OUTPUT_OP_RESULT_FAIL,
-                        "You must specify at least one positive value for instanceNum, cpuNumPerNode, or memCapacityMbPerNode");
+                        "You must specify one positive value for instanceNum/cpuNumPerNode/memCapacityMbPerNode");
 
          } else {
             List<String> invalidParams = new ArrayList<String>();

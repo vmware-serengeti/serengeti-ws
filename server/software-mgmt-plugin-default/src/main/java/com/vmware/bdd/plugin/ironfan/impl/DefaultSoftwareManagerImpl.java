@@ -17,8 +17,12 @@ package com.vmware.bdd.plugin.ironfan.impl;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
@@ -36,7 +40,6 @@ import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.IronfanStack;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
-
 
 public class DefaultSoftwareManagerImpl implements SoftwareManager {
    private static final Logger logger = Logger.getLogger(DefaultSoftwareManagerImpl.class);
@@ -208,6 +211,16 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    }
 
    @Override
+   public boolean decomissionNode(ClusterBlueprint blueprint, String nodeGroupName, String nodeName, ClusterReportQueue reportQueue) {
+      return true;
+   }
+
+   @Override
+   public boolean recomissionNode(String clusterName, NodeInfo node, ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
+      return true;
+   }
+
+   @Override
    public boolean comissionNodes(String clusterName, List<NodeInfo> nodes,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
@@ -241,7 +254,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public List<String> validateScaling(NodeGroupInfo group)
+   public List<String> validateRolesForScaleOut(NodeGroupInfo group)
    throws SoftwareManagementPluginException {
       // resize of job tracker and name node is not supported
       List<String> roles = group.getRoles();
@@ -263,6 +276,28 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
          unsupportedRoles.add(HadoopRole.ZOOKEEPER_ROLE.toString());
       }
       return unsupportedRoles;
+   }
+
+   @Override
+   public void validateRolesForShrink(NodeGroupInfo groupInfo) throws SoftwareManagementPluginException {
+      String jsonStr = CommonUtil.readJsonFile("shrink_cluster_roles_blacklist.json");
+      Gson gson = new Gson();
+      Set<String> blacklist = new HashSet(gson.fromJson(jsonStr, List.class));
+      logger.info("roles in blackList are: " + blacklist.toString());
+
+      List<String> roles = groupInfo.getRoles();
+      List<String> invalidRoles = null;
+      for (String role: roles) {
+         if (blacklist.contains(role)) {
+            if (invalidRoles == null) {
+               invalidRoles = new ArrayList<String>();
+            }
+            invalidRoles.add(role);
+         }
+      }
+      if (invalidRoles != null) {
+         throw SoftwareManagementPluginException.INVALID_ROLES_TO_SHRINK(invalidRoles.toString());
+      }
    }
 
    @Override

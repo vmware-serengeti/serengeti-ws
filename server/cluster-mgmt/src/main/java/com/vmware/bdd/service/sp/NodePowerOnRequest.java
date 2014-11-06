@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.aurora.util.CmsWorker.SimpleRequest;
@@ -33,8 +32,6 @@ import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.SoftwareManagerCollector;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
-import com.vmware.bdd.service.job.JobConstants;
-import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.software.ISoftwareManagementTask;
 import com.vmware.bdd.service.job.software.ManagementOperation;
 import com.vmware.bdd.service.job.software.SoftwareManagementTaskFactory;
@@ -164,8 +161,7 @@ public class NodePowerOnRequest extends SimpleRequest {
 
    private ISoftwareManagementTask createThriftCommandTask(String targetName) {
       // get command work directory
-      File workDir = CommandUtil.createWorkDir((int) Math.random() * 1000);
-
+      File workDir = CommandUtil.createWorkDir((int)(Math.random() * 1000));
       // write cluster spec file
       String specFilePath = null;
       File specFile =

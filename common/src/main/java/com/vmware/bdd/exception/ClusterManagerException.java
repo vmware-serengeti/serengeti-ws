@@ -78,12 +78,6 @@ public class ClusterManagerException extends BddException {
             nodeGroupName);
    }
 
-   public static ClusterManagerException SHRINK_OP_NOT_SUPPORTED(
-         String nodeGroupName, int newInstanceNum, int definedInstanceNum) {
-      return new ClusterManagerException(null, "SHRINK_OP_NOT_SUPPORTED",
-            nodeGroupName, definedInstanceNum, newInstanceNum);
-   }
-
    public static ClusterManagerException ROLES_NOT_SUPPORTED(List<String> roles) {
       return new ClusterManagerException(null, "ROLES_NOT_SUPPORTED", roles);
    }
@@ -122,5 +116,9 @@ public class ClusterManagerException extends BddException {
 
    public static ClusterManagerException OLD_VERSION_ERROR(String clusterName) {
       return new ClusterManagerException(null, "OLD_VERSION", clusterName);
+   }
+
+   public static ClusterManagerException NO_NEED_TO_RESIZE(String clusterName, String nodeGroupName, int instanceNum) {
+      return new ClusterManagerException(null, "NO_NEED_TO_RESIZE", clusterName, nodeGroupName, instanceNum);
    }
 }

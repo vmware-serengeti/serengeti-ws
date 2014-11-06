@@ -43,7 +43,9 @@ public class SetPasswordService implements ISetPasswordService {
 
    public boolean setPasswordForNodes(String clusterName,
          List<NodeEntity> nodes, String password) {
-      AuAssert.check(!nodes.isEmpty());
+      if (nodes == null || nodes.isEmpty()) {
+         return true;
+      }
 
       logger.info("Setting password for " + clusterName);
       ArrayList<String> ipsOfNodes =

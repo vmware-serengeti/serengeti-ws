@@ -169,4 +169,12 @@ public class SoftwareManagementPluginException extends RuntimeException {
    public static SoftwareManagementPluginException UNSURE_CLUSTER_EXIST(String appMgr, String clusterName) {
       return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.UNSURE_CLUSTER_EXIST", null, appMgr, clusterName);
    }
+
+   public static SoftwareManagementPluginException DECOMISSION_FAILED(String name, String nodeGroupName, String nodeName, String error) {
+      return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.DECOMMISSION_FAILED", null, name, nodeGroupName, nodeName, error);
+   }
+
+   public static SoftwareManagementPluginException INVALID_ROLES_TO_SHRINK(String invalidRoles) {
+      return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.INVALID_ROLES_TO_SHRINK", null, invalidRoles);
+   }
 }

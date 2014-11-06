@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -98,6 +99,8 @@ public class ClusterManager {
 
    private IExecutionService executionService;
    private SoftwareManagerCollector softwareManagerCollector;
+
+   private ShrinkManager shrinkManager;
 
    @Autowired
    private UnsupportedOpsBlocker opsBlocker;
@@ -183,6 +186,11 @@ public class ClusterManager {
    @Autowired
    public void setSoftwareManagerCollector(SoftwareManagerCollector softwareManagerCollector) {
         this.softwareManagerCollector = softwareManagerCollector;
+   }
+
+   @Autowired
+   public void setShrinkManager(ShrinkManager shrinkManager) {
+      this.shrinkManager = shrinkManager;
    }
 
    public Map<String, Object> getClusterConfigManifest(String clusterName,
@@ -832,9 +840,8 @@ public class ClusterManager {
       SoftwareManager softMgr =
             softwareManagerCollector
                   .getSoftwareManager(cluster.getAppManager());
-      List<String> unsupportedRoles =
-            softMgr.validateScaling(clusterEntityMgr
-                  .toNodeGroupInfo(clusterName, nodeGroupName));
+      NodeGroupInfo groupInfo = clusterEntityMgr.toNodeGroupInfo(clusterName, nodeGroupName);
+      List<String> unsupportedRoles = softMgr.validateRolesForScaleOut(groupInfo);
       if (!unsupportedRoles.isEmpty()) {
          logger.info("can not resize node group with role: " + unsupportedRoles);
          throw ClusterManagerException.ROLES_NOT_SUPPORTED(unsupportedRoles);
@@ -848,12 +855,21 @@ public class ClusterManager {
                "To update a cluster, its status must be RUNNING");
       }
 
-      if (instanceNum <= group.getDefineInstanceNum()) {
-         logger.error("node group " + nodeGroupName
-               + " cannot be shrinked from " + group.getDefineInstanceNum()
-               + " to " + instanceNum + " nodes");
-         throw ClusterManagerException.SHRINK_OP_NOT_SUPPORTED(nodeGroupName,
-               instanceNum, group.getDefineInstanceNum());
+      if (instanceNum < group.getDefineInstanceNum()) {
+         try {
+            softMgr.validateRolesForShrink(groupInfo);
+            return shrinkManager.shrinkNodeGroup(clusterName, nodeGroupName, instanceNum);
+         } catch (Exception e) {
+            if (!(e instanceof ShrinkException)) {
+               logger.error("Failed to shrink cluster " + clusterName, e);
+               throw ShrinkException.SHRINK_NODE_GROUP_FAILED(e, clusterName, e.getMessage());
+            }
+         }
+      }
+
+      if (instanceNum == group.getDefineInstanceNum()) {
+         logger.error("the new instanceNum " + instanceNum + " shouldn't be the same as the old one ");
+         throw ClusterManagerException.NO_NEED_TO_RESIZE(clusterName, nodeGroupName, instanceNum);
       }
 
       Integer instancePerHost = group.getInstancePerHost();
@@ -1307,4 +1323,5 @@ public class ClusterManager {
          }
       }
    }
+
 }

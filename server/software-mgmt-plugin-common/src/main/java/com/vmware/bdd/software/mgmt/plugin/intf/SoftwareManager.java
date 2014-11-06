@@ -210,6 +210,11 @@ public interface SoftwareManager {
    boolean decomissionNodes(String clusterName, List<NodeInfo> nodes,
          ClusterReportQueue reports) throws SoftwareManagementPluginException;
 
+   boolean decomissionNode(ClusterBlueprint blueprint, String nodeGroupName, String nodeName, ClusterReportQueue reportQueue)
+         throws SoftwareManagementPluginException;
+
+   boolean recomissionNode(String clusterName, NodeInfo node, ClusterReportQueue reportQueue)
+         throws SoftwareManagementPluginException;
    /**
     * Sync call Plugin should update ClusterOperationReports to notify operation
     * status change for this cluster, otherwise, client cannot get information
@@ -271,9 +276,11 @@ public interface SoftwareManager {
     * @param group
     * @return
     */
-   List<String> validateScaling(NodeGroupInfo group)
+   List<String> validateRolesForScaleOut(NodeGroupInfo group)
          throws SoftwareManagementPluginException;
 
+   void validateRolesForShrink(NodeGroupInfo groupInfo)
+         throws SoftwareManagementPluginException;
    /**
     * Plugin has a chance to update infrastructure setting here. Specifically,
     * plugin can set default disk type

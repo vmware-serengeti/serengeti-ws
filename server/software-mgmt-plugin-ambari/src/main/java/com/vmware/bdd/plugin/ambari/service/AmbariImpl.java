@@ -617,7 +617,7 @@ public class AmbariImpl implements SoftwareManager {
    }
 
    @Override
-   public List<String> validateScaling(NodeGroupInfo group) {
+   public List<String> validateRolesForScaleOut(NodeGroupInfo group) {
       // resize of job tracker and name node is not supported
       List<String> roles = group.getRoles();
       List<String> unsupportedRoles = new ArrayList<String>();
@@ -642,6 +642,9 @@ public class AmbariImpl implements SoftwareManager {
       }
       return unsupportedRoles;
    }
+
+   public void validateRolesForShrink(NodeGroupInfo groupInfo)
+         throws SoftwareManagementPluginException {};
 
    @Override
    public void updateInfrastructure(ClusterBlueprint blueprint) {
@@ -1218,6 +1221,17 @@ public class AmbariImpl implements SoftwareManager {
    @Override
    public boolean decomissionNodes(String clusterName, List<NodeInfo> nodes,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
+      return false;
+   }
+
+   @Override
+   public boolean decomissionNode(ClusterBlueprint blueprint, String nodeGroupName, String nodeName, ClusterReportQueue reportQueue)
+         throws SoftwareManagementPluginException {
+      return false;
+   }
+
+   @Override
+   public boolean recomissionNode(String clusterName, NodeInfo node, ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
       return false;
    }
 

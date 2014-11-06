@@ -44,11 +44,9 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
       String newPassword = clusterSpec.getPassword();
 
       List<NodeEntity> nodes = getNodesToBeSetPassword(chunkContext);
-
       if (nodes == null || nodes.isEmpty()) {
          throw TaskException.EXECUTION_FAILED("No nodes needed to set password for");
       }
-
       boolean success = setPasswordService.setPasswordForNodes(clusterName, nodes, newPassword);
       putIntoJobExecutionContext(chunkContext, JobConstants.SET_PASSWORD_SUCCEED_JOB_PARAM, success);
 
@@ -66,7 +64,6 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
          List<NodeEntity> nodesInGroup = clusterEntityMgr.findAllNodes(clusterName, groupName);
          long oldInstanceNum = getJobParameters(chunkContext).getLong(
                JobConstants.GROUP_INSTANCE_OLD_NUMBER_JOB_PARAM);
-
          for (NodeEntity node : nodesInGroup) {
             long index = CommonUtil.getVmIndex(node.getVmName());
             if (index < oldInstanceNum) {

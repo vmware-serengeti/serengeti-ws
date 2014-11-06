@@ -132,9 +132,10 @@ public class ClusterCommandsTest extends MockRestServer {
                 HttpMethod.PUT, HttpStatus.NO_CONTENT, "5");
 
         //invalid instance num
+        clusterCommands.resizeCluster("cluster1", "NodeGroup1", -1,0,0);
         clusterCommands.resizeCluster("cluster1", "NodeGroup1", 0,0,0);
 
-        //normal case
+       //normal case
         clusterCommands.resizeCluster("cluster1", "NodeGroup1", 5,0,0);
 
         //zookeeper resize case

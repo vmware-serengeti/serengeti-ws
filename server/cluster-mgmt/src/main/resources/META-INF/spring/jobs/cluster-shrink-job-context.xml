@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+             xmlns:beans="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
+   http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/batch
+   http://www.springframework.org/schema/batch/spring-batch.xsd
+   http://www.springframework.org/schema/aop
+   http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+<beans:import resource="classpath*:/META-INF/spring/jobs/common-job-context.xml" />
+<beans:bean name="decommissionSingleVMTasklet"
+            class="com.vmware.bdd.service.job.vm.DecommissionSingleVMStep">
+    <beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+    <beans:property name="clusterEntityManager" ref="clusterEntityManager" />
+    <beans:property name="softwareManagerCollector" ref="softwareManagerCollector" />
+    <beans:property name="jobManager" ref="jobManager" />
+</beans:bean>
+<beans:bean name="deleteSingleVMTasklet"
+            class="com.vmware.bdd.service.job.vm.DeleteSingleVMStep">
+    <beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+    <beans:property name="clusterEntityManager" ref="clusterEntityManager" />
+</beans:bean>
+
+<job id="shrinkClusterJob" job-repository="jobRepository">
+    <step id="decommissionSingleNode" next="deleteSingleVMStep">
+        <tasklet ref="decommissionSingleVMTasklet" />
+        <listeners>
+            <listener ref="stepListener" />
+        </listeners>
+    </step>
+    <step id="deleteSingleVMStep">
+        <tasklet ref="deleteSingleVMTasklet" />
+        <listeners>
+            <listener ref="stepListener" />
+        </listeners>
+    </step>
+    <listeners>
+        <listener ref="singleNodeJobListener" />
+    </listeners>
+</job>
+
+</beans:beans>

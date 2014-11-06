@@ -177,6 +177,16 @@ public class MockSoftwareManager implements SoftwareManager {
    }
 
    @Override
+   public boolean decomissionNode(ClusterBlueprint blueprint, String nodeGroupName, String nodeName, ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
+      return false;
+   }
+
+   @Override
+   public boolean recomissionNode(String clusterName, NodeInfo node, ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
+      return false;
+   }
+
+   @Override
    public boolean comissionNodes(String clusterName, List<NodeInfo> nodes,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
@@ -211,10 +221,15 @@ public class MockSoftwareManager implements SoftwareManager {
    }
 
    @Override
-   public List<String> validateScaling(NodeGroupInfo group)
+   public List<String> validateRolesForScaleOut(NodeGroupInfo group)
          throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return null;
+   }
+
+   @Override
+   public void validateRolesForShrink(NodeGroupInfo groupInfo) throws SoftwareManagementPluginException {
+
    }
 
    @Override

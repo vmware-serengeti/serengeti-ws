@@ -329,7 +329,7 @@ public class RestResource {
     * Expand the number of nodes in a node group
     * @param clusterName
     * @param groupName
-    * @param instanceNum The target instance number after resize. It must be larger than existing instance number in this node group
+    * @param instanceNum The target instance number after resize. It can be larger/smaller than existing instance number in this node group
     * @param request
     * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
     */

@@ -75,6 +75,14 @@
 			<ref bean="clusterEntityManager" />
 		</property>
 	</bean>
+    <bean id="shrinkManager" class="com.vmware.bdd.manager.ShrinkManager">
+        <property name="jobManager">
+            <ref bean="jobManager" />
+        </property>
+        <property name="clusterEntityMgr">
+            <ref bean="clusterEntityManager" />
+        </property>
+    </bean>
 	<bean id="elasticityScheduleManager" class="com.vmware.bdd.manager.ElasticityScheduleManager">
 		<property name="clusterManager">
 			<ref bean="clusterManager" />
