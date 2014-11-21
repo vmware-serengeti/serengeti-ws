@@ -207,6 +207,9 @@ public class Constants {
    public static final String MSG_SETTING_UP_PASSWORDLESS_LOGIN = "Setting up passwordless login to ";
    public static final String SERENGETI_TTY_NAME = "serengeti.tty.name";
    public static final String SERENGETI_DEFAULT_TTY_NAME = "tty1";
+   public static final String SERENGETI_CLONE_MODE = "serengeti.clone.mode";
+   public static final String SERENGETI_CONCURRENT_JOB_ENABLED = "serengeti.concurrent.job.enabled";
+   public static final String SERENGETI_USE_DEFAULT_PASSWORD = "serengeti.use.default.password";
    public static final String SERENGETI_DEFAULT_PASSWORD = "serengeti.default.password";
    public static final String SERENGETI_SBIN_DIR = "serengeti.sbin.dir";
    public static final String DEFAULT_SERENGETI_SBIN_DIR = "/opt/serengeti/sbin";

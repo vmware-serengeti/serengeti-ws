@@ -69,17 +69,26 @@ public class SetVMPasswordSP implements Callable<Void> {
 
       setupPasswordLessLogin(nodeIP);
 
-      // if user set customized password, set the customized password for it
-      // if user didn't set customized password, set random password for it
-      if (this.password == null) {
-         setRandomPassword();
-      } else {
-         if (CommonUtil.passwordContainInvalidCharacter(password)) {
-            logger.error("Set customized password for " + nodeIP + " failed. Password contains invalid characters");
-            throw SetPasswordException.PASSWORD_CONTAIN_INVALID_CHARACTER();
+      boolean useDefaultPassword = Configuration.getBoolean(Constants.SERENGETI_USE_DEFAULT_PASSWORD, false);
+      logger.info("defaultpassword: " + useDefaultPassword);
+      logger.info("serengeti.extension.registered: " + Configuration.getBoolean("serengeti.extension.registered", false));
+      logger.info("serengeti.default.password: " + Configuration.getString("serengeti.default.password", "abc"));
+      if (!useDefaultPassword) {
+         // if user set customized password, set the customized password for it
+         // if user didn't set customized password, set random password for it
+         if (this.password == null) {
+            setRandomPassword();
+         } else {
+            if (CommonUtil.passwordContainInvalidCharacter(password)) {
+               logger.error("Set customized password for " + nodeIP + " failed. Password contains invalid characters");
+               throw SetPasswordException.PASSWORD_CONTAIN_INVALID_CHARACTER();
+            }
+            setCustomizedPassword(password);
          }
-         setCustomizedPassword(password);
+      } else {
+         logger.info("use default password for " + nodeIP);
       }
+
       removeSSHLimit();
 
       return true;
