@@ -238,7 +238,7 @@ public class Constants {
          "not allowed to customize in Serengeti.";
    public static final String PARAM_CLUSTER_NOT_TAKE_EFFECT = "Your settings will not take effect.";
    public static final String PARAM_CLUSTER_NOT_IN_WHITE_LIST_WARNING =
-         "not regular configuration properties in Apache Hadoop. ";
+         "not regular configuration properties. ";
    public static final String PARAM_CLUSTER_CONFIG_RUNNING_JOB_WARNING =
          "Applying new Hadoop configuration will restart Hadoop processes and may lead to termination of running jobs.";
    public static final String PARAM_CLUSTER_SPEC_HA_ERROR = "the ha property must be 'off', 'on' or 'ft' in specification file ";

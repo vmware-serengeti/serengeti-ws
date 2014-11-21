@@ -23,9 +23,9 @@ public class Constants {
    public static final String CLUSTER_CONFIG_TYPE_NOT_RAGULARLY_AFTER =
          "not regular configuration type.";*/
 
-   public final static String CLUSTER_CONFIG_TYPE_NOT_REGULAR = "Warning: The type: %1s is not a regular cluster configuration.";
+   public final static String CLUSTER_CONFIG_TYPE_NOT_REGULAR = "Warning: The type %1s is not a regular cluster configuration.";
 
-   public final static String CLUSTER_CONFIG_TYPES_NOT_REGULAR = "Warning: The types: %1s are not regular cluster configurations.";
+   public final static String CLUSTER_CONFIG_TYPES_NOT_REGULAR = "Warning: The types %1s are not regular cluster configurations.";
 
    public static final String LIST_CONFIG_ERROR =
          "The blacklist or whitelist config error!";
