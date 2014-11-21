@@ -1,0 +1,64 @@
+{
+  "nodeGroups":[
+    {
+      "name": "workstation",
+      "roles": [
+        "kubernetes_workstation"
+      ],
+      "instanceNum": 1,
+      "cpuNum": 1,
+      "memCapacityMB": 7500,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 1
+      },
+      "haFlag": "off"
+    },
+    {
+      "name": "master",
+      "roles": [
+        "kubernetes_master"
+      ],
+      "instanceNum": 1,
+      "cpuNum": 1,
+      "memCapacityMB": 7500,
+      "storage": {
+        "type": "SHARED",
+        "sizeGB": 1
+      },
+      "haFlag": "on"
+    },
+    {
+      "name": "minion",
+      "roles": [
+        "kubernetes_minion"
+      ],
+      "instanceNum": 4,
+      "cpuNum": 1,
+      "memCapacityMB": 7500,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 1
+      },
+      "haFlag": "off"
+    }
+  ],
+  "configuration": {
+    "kubernetes": {
+      "env": {
+        "GOPATH": "/opt/kubernetes/src/go",
+        "GOVC_INSECURE": "1",
+        "GOVC_URL": "https://<user:password>@<vCenter_Server_IP>/sdk",
+        "GOVC_DATACENTER": "<Datacenter_Name>",
+        "GOVC_RESOURCE_POOL": "/${GOVC_DATACENTER}/host/<vCenter_Cluster_Name>/Resources",
+        "INSTANCE_RESOURCE_POOL": "/${GOVC_DATACENTER}/vm/SERENGETI-vApp-<vApp_Name>",
+        // When Serengeti is deployed in vCenter Standard Edition, INSTANCE_RESOURCE_POOL should be:
+        //"INSTANCE_RESOURCE_POOL": "/${GOVC_DATACENTER}/vm/<Folder_of_Serengeti_Server_VM>",
+        // The vlan name for the VMs of the cluster created by Serengeti
+        "GOVC_NETWORK": "<VLAN_Name>",
+        "GOVC_GUEST_LOGIN": "serengeti:password",
+        "KUBE_USER": "serengeti"
+      }
+    }
+  }
+}

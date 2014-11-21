@@ -46,6 +46,7 @@ public class ClusterSpecFactory {
    private static final Logger logger = Logger
          .getLogger(ClusterSpecFactory.class);
 
+   private static final String DEFAULT_TEMPLATE_SPEC_SUFFIX = "-default-template-spec.json";
    private static final String HDFS_TEMPLATE_SPEC = "hdfs-template-spec.json";
    private static final String HDFS_MAPRED_TEMPLATE_SPEC =
          "hdfs-mapred-template-spec.json";
@@ -108,23 +109,23 @@ public class ClusterSpecFactory {
       if (homeDir != null && !homeDir.trim().isEmpty()) {
          StringBuilder builder = new StringBuilder();
          builder.append(homeDir).append(File.separator).append("conf")
-               .append(File.separator).append(appManagerType).append(File.separator).append("spec-templates").append(File.separator).append(filename);
+               .append(File.separator).append(appManagerType).append(File.separator)
+               .append("spec-templates").append(File.separator).append(filename);
          specFile = new File(builder.toString());
 
          if (!specFile.exists()) {
             logger.warn("template cluster file does not exist: " + builder);
-         } else {
-            return specFile;
+            // search in class paths
+            URL filePath = ConfigurationUtils.locate(filename);
+            if (filePath != null) {
+               specFile = ConfigurationUtils.fileFromURL(filePath);
+            }
          }
       }
 
-      // search in class paths
-      URL filePath = ConfigurationUtils.locate(filename);
-      if (filePath != null) {
-         specFile = ConfigurationUtils.fileFromURL(filePath);
+      if (!specFile.exists()) {
+         throw BddException.INTERNAL(null, "Can not find template cluster spec file " + filename);
       }
-
-      AuAssert.check(specFile.exists(), "spec file not found: " + specFile.getAbsolutePath());
 
       return specFile;
    }
@@ -257,6 +258,7 @@ public class ClusterSpecFactory {
                return loadFromFile(locateSpecFile(CM_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
             }
          }
+
          switch (type) {
          case HDFS:
             return loadFromFile(locateSpecFile(HDFS_TEMPLATE_SPEC, appManagerType));
@@ -269,7 +271,7 @@ public class ClusterSpecFactory {
          case HDFS_HBASE:
             return loadFromFile(locateSpecFile(HDFS_HBASE_TEMPLATE_SPEC, appManagerType));
          default:
-            throw BddException.INVALID_PARAMETER("cluster type", type);
+            return loadFromFile(locateSpecFile(vendor.toLowerCase() + DEFAULT_TEMPLATE_SPEC_SUFFIX, appManagerType));
          }
       }
    }
@@ -361,8 +363,7 @@ public class ClusterSpecFactory {
     */
    public static ClusterCreate getCustomizedSpec(ClusterCreate spec, String appManagerType)
          throws FileNotFoundException {
-      if ((spec.getType() == null)
-            || (spec.getType() != null && spec.isSpecFile())) {
+      if (spec.isSpecFile()) {
          return spec;
       }
 

@@ -2294,5 +2294,41 @@
         }
       ]
     }
+  },
+  {
+    "kubernetes": {
+      "env": [
+        {
+          "name": "GOPATH"
+        },
+        {
+          "name": "GOVC_URL"
+        },
+        {
+          "name": "GOVC_DATACENTER"
+        },
+        {
+          "name": "GOVC_DATASTORE"
+        },
+        {
+          "name": "GOVC_RESOURCE_POOL"
+        },
+        {
+          "name": "GOVC_NETWORK"
+        },
+        {
+          "name": "GOVC_GUEST_LOGIN"
+        },
+        {
+          "name": "GOVC_INSECURE"
+        },
+        {
+          "name": "KUBE_USER"
+        },
+        {
+          "name": "INSTANCE_RESOURCE_POOL"
+        }
+      ]
+    }
   }
 ]

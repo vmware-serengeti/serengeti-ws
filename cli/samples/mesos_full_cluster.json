@@ -1,0 +1,60 @@
+{
+  "nodeGroups" : [
+    {
+      "name" : "zookeeper",
+      "roles" : [
+        "zookeeper"
+      ],
+      "instanceNum" : 3,
+      "instanceType" : "SMALL",
+      "storage" : {
+        "type" : "shared",
+        "sizeGB" : 2
+      },
+      "cpuNum" : 1,
+      "memCapacityMB" : 3748,
+      "haFlag" : "on",
+      "configuration" : {
+      }
+    },
+    {
+      "name" : "master",
+      "roles" : [
+        "mesos_master",
+        "mesos_chronos",
+        "mesos_marathon"
+      ],
+      "instanceNum" : 2,
+      "instanceType" : "MEDIUM",
+      "storage" : {
+        "type" : "shared",
+        "sizeGB" : 1
+      },
+      "cpuNum" : 2,
+      "memCapacityMB" : 7500,
+      "haFlag" : "on",
+      "configuration" : {
+      }
+    },
+    {
+      "name" : "slave",
+      "roles" : [
+        "mesos_slave",
+        "mesos_docker"
+      ],
+      "instanceNum" : 3,
+      "instanceType" : "MEDIUM",
+      "storage" : {
+        "type" : "local",
+        "sizeGB" : 1 
+      },
+      "cpuNum" : 2,
+      "memCapacityMB" : 7500,
+      "haFlag" : "off",
+      "configuration" : {
+      }
+    }
+  ],
+  "configuration" : {
+  }
+}

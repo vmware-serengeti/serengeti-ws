@@ -1,0 +1,34 @@
+{
+  "groups" : [
+    {
+      "name" : "zookeeper",
+      "roles" : [
+        "zookeeper"
+      ],
+      "instance_num" : 3,
+      "instance_type" : "SMALL",
+      "ha" : "on"
+    },
+    {
+      "name" : "master",
+      "roles" : [
+        "mesos_master",
+        "mesos_chronos",
+        "mesos_marathon"
+      ],
+      "instance_num" : 2,
+      "instance_type" : "MEDIUM",
+      "ha" : "on"
+    },
+    {
+      "name" : "slave",
+      "roles" : [
+        "mesos_slave",
+        "mesos_docker"
+      ],
+      "instance_num" : 3,
+      "instance_type" : "MEDIUM",
+      "ha" : "off"
+    }
+  ]
+}

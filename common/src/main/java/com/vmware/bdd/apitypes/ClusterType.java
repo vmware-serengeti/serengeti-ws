@@ -18,6 +18,8 @@ package com.vmware.bdd.apitypes;
  * This class is the common enum of cluster command.
  */
 public enum ClusterType {
+   DEFAULT("DEFAULT"),
+
    // hdfs cluster
    HDFS("HDFS"),
 

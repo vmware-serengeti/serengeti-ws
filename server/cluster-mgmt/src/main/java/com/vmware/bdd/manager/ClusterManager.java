@@ -50,6 +50,7 @@ import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterStatus;
+import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.LimitInstruction;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
@@ -407,6 +408,9 @@ public class ClusterManager {
       }
       createSpec.setDistroVendor(stack.getVendor());
       createSpec.setDistroVersion(stack.getFullVersion());
+      if (createSpec.getType() == null) {
+         createSpec.setType(ClusterType.DEFAULT);
+      }
 
       // create auto rps if vc cluster/rp is specified
       createAutoRps(createSpec);
