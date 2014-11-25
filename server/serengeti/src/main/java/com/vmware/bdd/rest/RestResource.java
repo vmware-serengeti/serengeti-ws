@@ -57,6 +57,7 @@ import com.vmware.bdd.apitypes.ElasticityRequestBody;
 import com.vmware.bdd.apitypes.FixDiskRequestBody;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetworkRead;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.RackInfo;
 import com.vmware.bdd.apitypes.RackInfoList;
 import com.vmware.bdd.apitypes.ResourcePoolAdd;
@@ -224,9 +225,25 @@ public class RestResource {
          }
       }
 
+      // check if the cluster is hadoop cluster, to differentiate from other cluster with customized roles
+      boolean isHadoopCluster = false;
+      NodeGroupCreate[] ngcs = createSpec.getNodeGroups();
+      for (NodeGroupCreate nodeGroup : ngcs) {
+         List<String> roles = nodeGroup.getRoles();
+         for (String role : roles) {
+            if (role.indexOf("hadoop") == 0 || role.indexOf("hbase") == 0 || role.indexOf("mapr") == 0) {
+               isHadoopCluster = true;
+               break;
+            }
+         }
+         if (isHadoopCluster) {
+            break;
+         }
+      }
+
       // check if the 2 packages(mailx and wsdl4j) have been installed on the serengeti management server.
       // they are needed by cluster creation for Ironfan.
-      if (createSpec.getAppManager().equals(Constants.IRONFAN)) {
+      if (isHadoopCluster && createSpec.getAppManager().equals(Constants.IRONFAN)) {
          checkExtraRequiredPackages();
       }
 
