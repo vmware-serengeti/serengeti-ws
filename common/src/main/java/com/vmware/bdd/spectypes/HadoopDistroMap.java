@@ -20,6 +20,9 @@ import com.google.gson.annotations.SerializedName;
 public class HadoopDistroMap {
    private String name;
    @Expose
+   @SerializedName("tarball")
+   private String tarballUrl;
+   @Expose
    @SerializedName("hadoop")
    private String hadoopUrl;
    @Expose
@@ -70,6 +73,12 @@ public class HadoopDistroMap {
    }
    public void setZookeeperUrl(String zookeeperUrl) {
       this.zookeeperUrl = zookeeperUrl;
+   }
+   public String getTarballUrl() {
+      return tarballUrl;
+   }
+   public void setTarballUrl(String tarballUrl) {
+      this.tarballUrl = tarballUrl;
    }
 
 }
