@@ -117,6 +117,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
          packagesExistStatus = distroManager.checkPackagesExistStatus(distro.getName()).toString();
          stack.setPackagesExistStatus(packagesExistStatus);
          hadoopDistroMap = new HashMap<String, String>();
+         hadoopDistroMap.put("TarballUrl", distroManager.getPackageUrlByDistroRole(distro.getName(), HadoopRole.CUSTOMIZED_ROLE.toString()));
          hadoopDistroMap.put("HadoopUrl", distroManager.getPackageUrlByDistroRole(distro.getName(), HadoopRole.HADOOP_NAMENODE_ROLE.toString()));
          hadoopDistroMap.put("HiveUrl", distroManager.getPackageUrlByDistroRole(distro.getName(), HadoopRole.HIVE_ROLE.toString()));
          hadoopDistroMap.put("PigUrl", distroManager.getPackageUrlByDistroRole(distro.getName(), HadoopRole.PIG_ROLE.toString()));

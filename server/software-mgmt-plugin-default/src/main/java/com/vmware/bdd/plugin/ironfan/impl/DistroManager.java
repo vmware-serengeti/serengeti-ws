@@ -46,6 +46,7 @@ import com.google.gson.reflect.TypeToken;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
@@ -291,7 +292,7 @@ public class DistroManager {
       if (distro != null) {
          for (RolePackageMapping pkg : distro.getPackages()) {
             for (String r : pkg.getRoles()) {
-               if (r.equals(role)) {
+               if (r.equals(role) || HadoopRole.isCustomizedRole(role)) {
                   return distroRootUrl + "/" + pkg.getTarball();
                }
             }

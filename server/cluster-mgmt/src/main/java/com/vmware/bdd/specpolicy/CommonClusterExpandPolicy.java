@@ -125,6 +125,7 @@ public class CommonClusterExpandPolicy {
       case "TARBALL":
          HadoopDistroMap map = new HadoopDistroMap();
          Map<String, String> distroMap = stack.getHadoopDistroMap();
+         map.setTarballUrl(distroMap.get("TarballUrl"));
          map.setHadoopUrl(distroMap.get("HadoopUrl"));
          map.setHiveUrl(distroMap.get("HiveUrl"));
          map.setPigUrl(distroMap.get("PigUrl"));
