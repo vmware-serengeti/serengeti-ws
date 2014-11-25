@@ -14,14 +14,9 @@
  ***************************************************************************/
 package com.vmware.bdd.rest;
 
-import java.io.File;
-import java.io.FileFilter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,7 +41,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.apitypes.BddErrorMessage;
@@ -116,10 +110,6 @@ public class RestResource {
    private static final String ERR_CODE_FILE = "serengeti-errcode.properties";
    private static final int DEFAULT_HTTP_ERROR_CODE = 500;
 
-   private static boolean extraPackagesExisted = false;
-   private static HashSet<String> extraRequiredPackages = getExtraRequiredPackages();
-   private static final String commRegex = "-[0-9]+\\.[0-9]+.*\\.rpm";
-
 
    /* HTTP status code read from a config file. */
    private static org.apache.commons.configuration.Configuration httpStatusCodes =
@@ -142,17 +132,6 @@ public class RestResource {
 
    private static int getHttpErrorCode(String errorId) {
       return httpStatusCodes.getInteger(errorId, DEFAULT_HTTP_ERROR_CODE);
-   }
-
-   private static HashSet<String> getExtraRequiredPackages() {
-      String extraPackStr =
-            Configuration.getString(
-                  Constants.SERENGETI_YUM_EXTRA_PACKAGES_CONFIG,
-                  Constants.SERENGETI_YUM_EXTRA_PACKAGES);
-      String[] packs = extraPackStr.split(",");
-      HashSet<String> hs = new HashSet<String>();
-      hs.addAll(Arrays.asList(packs));
-      return hs;
    }
 
    /**
@@ -224,12 +203,6 @@ public class RestResource {
             throw BddException.NOT_FOUND("application manager",
                   createSpec.getAppManager());
          }
-      }
-
-      // check if the 2 packages(mailx and wsdl4j) have been installed on the serengeti management server.
-      // they are needed by cluster creation for Ironfan.
-      if (createSpec.getAppManager().equals(Constants.IRONFAN)) {
-         checkExtraRequiredPackages();
       }
 
       long jobExecutionId = clusterMgr.createCluster(createSpec);
@@ -1259,46 +1232,6 @@ public class RestResource {
    private void verifyInitialized() {
       if (!ClusteringService.isInitialized()) {
          throw BddException.INIT_VC_FAIL();
-      }
-   }
-
-   private void checkExtraRequiredPackages() {
-      logger.info("check if extra needed packages(mailx and wsdl4j) have been installed for Ironfan.");
-      if ( !extraPackagesExisted ) {
-         File yumRepoPath = new File(Constants.SERENGETI_YUM_REPO_PATH);
-
-         // use hs to record the packages that have not been added
-         final HashSet<String> hs = new HashSet<String>();
-         hs.addAll(extraRequiredPackages);
-
-         // scan the files under the serengeti yum repo directory
-         File[] rpmList = yumRepoPath.listFiles(new FileFilter() {
-            public boolean accept(File f) {
-               String fname = f.getName();
-               int idx = fname.indexOf("-");
-
-               if (idx > 0) {
-                  String packName = fname.substring(0, idx);
-                  if ( extraRequiredPackages.contains(packName) ) {
-                     String regx = packName + commRegex;
-                     Pattern pat = Pattern.compile(regx);
-                     if ( pat.matcher(fname).matches() ) {
-                        hs.remove(packName);
-                        return true;
-                     }
-                  }
-               }
-               return false;
-            }
-         });
-
-         if ( !hs.isEmpty() ) {
-            logger.info("cannot find all the needed packages, stop and return error now. ");
-            throw BddException.EXTRA_PACKAGES_NOT_FOUND(hs.toString());
-         }
-
-         logger.info("the check is successful: all needed packages are there.");
-         extraPackagesExisted = true;
       }
    }
 }
