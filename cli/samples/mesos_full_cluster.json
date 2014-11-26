@@ -20,7 +20,9 @@
     {
       "name" : "master",
       "roles" : [
-        "mesos_master"
+        "mesos_master",
+        "mesos_chronos",
+        "mesos_marathon"
       ],
       "instanceNum" : 2,
       "instanceType" : "MEDIUM",
@@ -37,7 +39,8 @@
     {
       "name" : "slave",
       "roles" : [
-        "mesos_slave_docker"
+        "mesos_slave",
+        "mesos_docker"
       ],
       "instanceNum" : 3,
       "instanceType" : "MEDIUM",
@@ -46,7 +49,7 @@
         "sizeGB" : 1 
       },
       "cpuNum" : 2,
-      "memCapacityMB" : 3748,
+      "memCapacityMB" : 7500,
       "haFlag" : "off",
       "configuration" : {
       }
