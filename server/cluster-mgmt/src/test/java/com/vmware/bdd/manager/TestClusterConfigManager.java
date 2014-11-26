@@ -174,7 +174,7 @@ public class TestClusterConfigManager {
       distro.setRoles(roles);
       Mockito.when(clusteringService.getTemplateVmId()).thenReturn("vm-1234");
       Mockito.when(clusteringService.getTemplateVmName()).thenReturn(
-            "hadoop-template");
+            "node-template");
       Mockito.when(distroMgr.getDistroByName("apache")).thenReturn(distro);
       Mockito.when(distroMgr.checkPackagesExistStatus("apache")).thenReturn(
             PackagesExistStatus.TARBALL);
