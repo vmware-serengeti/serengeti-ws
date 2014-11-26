@@ -1,0 +1,93 @@
+{
+    "name": "cluster01",
+    "instanceNum": 5,
+    "hadoopStack": {
+        "distro": "CDH-5.2.0"
+    },
+    "nodeGroups":[
+        {
+            "name": "master",
+            "roles": [
+                "YARN_RESOURCE_MANAGER",
+                "YARN_JOB_HISTORY"
+            ],
+            "instanceNum": 1,
+            "configuration": {},
+            "nodes": [
+                {
+                    "name": "cluster01-master-0",
+                    "rack": "/rack1",
+                    "hostname": "host01",
+                    "ipConfigs": {
+                        "MGT_NETWORK": [
+                            {
+                                "ipAddress": "192.168.0.1",
+                                "portGroupName": "pub1-10g",
+                                "networkName": "defaultNetwork",
+                                "trafficType": "MGT_NETWORK"
+                            }
+                        ]
+                    },
+                    "volumes": ["sdc1", "sdc2"]
+                }
+            ]
+        },
+        {
+            "name": "worker",
+            "roles": [
+                "YARN_NODE_MANAGER",
+                "GATEWAY"
+            ],
+            "instanceNum": 3,
+            "configuration": {},
+            "nodes": [
+                {
+                    "name": "cluster01-worker-0",
+                    "rack": "/rack2",
+                    "hostname": "host02",
+                    "ipConfigs": {
+                        "MGT_NETWORK": [
+                            {
+                                "ipAddress": "192.168.0.2",
+                                "portGroupName": "pub1-10g",
+                                "networkName": "defaultNetwork",
+                                "trafficType": "MGT_NETWORK"
+                            }
+                        ]
+                    },
+                    "volumes": ["sdc1"]
+                },
+                {
+                    "name": "cluster01-worker-1",
+                    "rack": "/rack2",
+                    "hostname": "host02",
+                    "ipConfigs": {
+                        "MGT_NETWORK": [
+                            {
+                                "ipAddress": "192.168.0.3", // TODO: deserialize name
+                                "portGroupName": "pub1-10g",
+                                "networkName": "defaultNetwork",
+                                "trafficType": "MGT_NETWORK"
+                            }
+                        ]
+                    },
+                    "volumes": ["sdc1", "sdd1"]
+                }
+            ]
+        }
+    ],
+    "configuration": {
+        "YARN": { // service
+            "admin_application_list_settings": "ALL",
+            "yarn_scheduler_fair_allow_undeclared_pools": "true"
+        },
+        "YARN_RESOURCE_MANAGER": {
+            "yarn_scheduler_maximum_allocation_mb": "1024000",
+            "resource_manager_java_heapsize": "2048000000"
+        },
+        "YARN_NODE_MANAGER": {
+            "yarn_nodemanager_heartbeat_interval_ms": "1000",
+            "yarn_nodemanager_resource_cpu_vcores": "8"
+        }
+    }
+}

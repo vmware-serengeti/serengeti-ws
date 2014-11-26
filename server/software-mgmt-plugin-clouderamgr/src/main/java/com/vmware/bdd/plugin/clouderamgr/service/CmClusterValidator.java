@@ -14,18 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.clouderamgr.service;
 
-import com.google.gson.Gson;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
-import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
-import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
-import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
-import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
-import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
-import com.vmware.bdd.utils.Constants;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +21,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
+import com.google.gson.Gson;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
+import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
+import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
+import com.vmware.bdd.utils.Constants;
 
 /**
  * Author: Xiaoding Bian
@@ -126,6 +126,9 @@ public class CmClusterValidator {
                   continue;
                }
                if (dependency.getServices().size() == 1 && !definedServices.contains(dependency.getServices().get(0))) {
+                  if (serviceName.equals("YARN") && isComputeOnly(definedServices)) {
+                     continue;
+                  }
                   warningMsgList.add(serviceName + " depends on " + dependency.getServices().get(0) + " service");
                } else {
                   boolean found = false;
@@ -143,8 +146,10 @@ public class CmClusterValidator {
             Set<String> requiredRoles = new HashSet<String>();
             switch (serviceName) {
                case "HDFS":
-                  requiredRoles.add("HDFS_NAMENODE");
-                  requiredRoles.add("HDFS_DATANODE");
+                  if (!isComputeOnly(definedServices)) {
+                     requiredRoles.add("HDFS_NAMENODE");
+                     requiredRoles.add("HDFS_DATANODE");
+                  }
                   if (checkRequiredRoles(serviceName, requiredRoles, definedRoles.keySet(), errorMsgList)) {
                      if (nnGroupsNum == 1) {
                         if (definedRoles.get("HDFS_NAMENODE") < 2 && !definedRoles.containsKey("HDFS_SECONDARY_NAMENODE")) {
@@ -244,6 +249,12 @@ public class CmClusterValidator {
                      errorMsgList.add("only one SQOOP_SERVER is allowed for SQOOP service");
                   }
                   break;
+               case "ISILON":
+                  requiredRoles.add("YARN_RESOURCE_MANAGER");
+                  requiredRoles.add("YARN_JOB_HISTORY");
+                  requiredRoles.add("YARN_NODE_MANAGER");
+                  requiredRoles.add("GATEWAY");
+                  break;
                default:
                   break;
             }
@@ -304,5 +315,13 @@ public class CmClusterValidator {
       message.put("WarningMsgList", this.warningMsgList);
       message.put("ErrorMsgList", this.errorMsgList);
       return (new Gson()).toJson(message);
+   }
+
+   private boolean isComputeOnly(Set<String> definedServices) {
+      boolean isComputeOnly = false;
+      if (definedServices.contains("ISILON")) {
+         isComputeOnly = true;
+      }
+      return isComputeOnly;
    }
 }

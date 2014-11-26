@@ -210,6 +210,16 @@ public class CmClusterDef implements Serializable {
             }
          }
       }
+
+      // Compute only requires special settings for YARN service
+      if (isComputeOnly()) {
+         for (CmServiceDef serviceDef : services) {
+            if (serviceDef.getType().getDisplayName().equals("YARN")) {
+               serviceDef.addConfig("hdfs_service", name + "_ISILON");
+            }
+         }
+      }
+
    }
 
    public boolean isFailoverEnabled() {
@@ -416,4 +426,17 @@ public class CmClusterDef implements Serializable {
 
       return nodeRefToRolesMap;
    }
+
+   public boolean isComputeOnly() {
+      boolean isComputeOnly = false;
+      Set<String> services = new HashSet<String>();
+      for (CmServiceDef service : this.services) {
+         services.add(service.getType().getDisplayName());
+      }
+      if (services.contains("ISILON")) {
+         isComputeOnly = true;
+      }
+      return isComputeOnly;
+   }
+
 }

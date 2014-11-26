@@ -291,4 +291,65 @@ public class TestCmClusterValidator {
 
       return blueprint;
    }
+
+   @Test(groups = {"TestCmClusterValidator"})
+   public void testComputeOnly() {
+      ClusterBlueprint blueprint = generateBlueprint();
+      CmClusterValidator validator = new CmClusterValidator();
+      Assert.assertTrue(validator.validateBlueprint(blueprint));
+   }
+
+   private ClusterBlueprint generateBluprintForComputeOnly() {
+      ClusterBlueprint blueprint = new ClusterBlueprint();
+      blueprint.setName("cluster01");
+      HadoopStack hadoopStack = new HadoopStack();
+      hadoopStack.setDistro("CDH-5.2.0");
+      blueprint.setHadoopStack(hadoopStack);
+
+      List<NodeGroupInfo> groups = new ArrayList<NodeGroupInfo>();
+
+      NodeGroupInfo group01 = new NodeGroupInfo();
+      group01.setName("master");
+      List<String> roles01 = new ArrayList<String>();
+      roles01.add("YARN_RESOURCE_MANAGER");
+      roles01.add("YARN_JOB_HISTORY");
+      group01.setRoles(roles01);
+      group01.setInstanceNum(1);
+
+      NodeInfo node01 = new NodeInfo();
+      node01.setRack("/rack01");
+      List<NodeInfo> nodes01 = new ArrayList<>();
+      nodes01.add(node01);
+      group01.setNodes(nodes01);
+
+      NodeGroupInfo group02 = new NodeGroupInfo();
+      group02.setName("worker");
+      List<String> roles02 = new ArrayList<>();
+      roles02.add("YARN_NODE_MANAGER");
+      roles02.add("GATEWAY");
+      group02.setRoles(roles02);
+
+      NodeInfo node02 = new NodeInfo();
+      node02.setRack("/rack02");
+      List<NodeInfo> nodes02 = new ArrayList<>();
+      nodes02.add(node02);
+      group02.setNodes(nodes02);
+      group02.setInstanceNum(3);
+
+      groups.add(group01);
+      groups.add(group02);
+      blueprint.setNodeGroups(groups);
+
+      Map<String, Object> clusterConfig = new HashMap<String, Object>();
+
+      Map<String, String> isilonConfig = new HashMap<String, String>();
+      isilonConfig.put("default_fs_name", "hdfs://FQDN:8020");
+      isilonConfig.put("webhdfs_url", "hdfs://FQDN:8020/webhdfs/v1");
+      clusterConfig.put("ISILON", isilonConfig);
+
+      blueprint.setConfiguration(clusterConfig);
+
+      return blueprint;
+   }
+
 }

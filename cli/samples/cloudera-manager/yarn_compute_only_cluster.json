@@ -1,0 +1,55 @@
+{
+  "nodeGroups":[
+    {
+      "name": "master",
+      "roles": [
+        "YARN_RESOURCE_MANAGER",
+        "YARN_JOB_HISTORY"
+      ],
+      "instanceNum": 1,
+      "cpuNum": 2,
+      "memCapacityMB": 7500,
+      "storage": {
+        "type": "SHARED",
+        "sizeGB": 50
+      },
+      "haFlag": "on",
+      "configuration": {
+      }
+    },
+    {
+      "name": "worker",
+      "roles": [
+        "YARN_NODE_MANAGER",
+        "GATEWAY"
+      ],
+      "instanceNum": 3,
+      "cpuNum": 2,
+      "memCapacityMB": 7500,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 50
+      },
+      "haFlag": "off",
+      "configuration": {
+      }
+    }
+  ],
+  "configuration": {
+    "ISILON": {
+      // service level configurations
+      // check for all settings by running "appmanager list --name <name> --configurations"
+      // note: any value (int, float, boolean, string) must be enclosed in double quotes and here is a sample:
+      "default_fs_name": "hdfs://FQDN:8020",
+      "webhdfs_url": "hdfs://FQDN:8020/webhdfs/v1"
+    },
+    "YARN": {
+      // service level configurations
+    },
+    "YARN_RESOURCE_MANAGER": {
+    },
+    "YARN_NODE_MANAGER": {
+      "yarn_nodemanager_local_dirs": "/yarn/nm"
+    }
+  }
+}
