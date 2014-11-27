@@ -3,16 +3,18 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
+   <artifactId>frontend</artifactId>
+   <packaging>war</packaging>
+   <name>frontend</name>
+   <url>http://maven.apache.org</url>
+
 	<parent>
 		<groupId>com.vmware.bdd</groupId>
 		<artifactId>serengeti-master</artifactId>
-		<version>${serengeti.version}</version>
+		<version>2.2.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<artifactId>frontend</artifactId>
-	<packaging>war</packaging>
-	<name>frontend</name>
-	<url>http://maven.apache.org</url>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -111,6 +113,4 @@
 		</plugins>
 		<finalName>frontend</finalName>
 	</build>
-	<groupId>com.vmware.bdd</groupId>
-	<version>${serengeti.version}</version>
 </project>

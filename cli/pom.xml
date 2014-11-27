@@ -5,7 +5,6 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>com.vmware.bdd.cli.commands</groupId>
    <artifactId>serengeti-cli</artifactId>
-   <version>${serengeti.version}</version>
    <packaging>jar</packaging>
    <name>Serengeti CLI</name>
    <url>http://maven.apache.org</url>
@@ -13,7 +12,7 @@
    <parent>
       <groupId>com.vmware.bdd</groupId>
       <artifactId>serengeti-master</artifactId>
-      <version>${serengeti.version}</version>
+      <version>2.2.0</version>
       <relativePath>../pom.xml</relativePath>
    </parent>
 

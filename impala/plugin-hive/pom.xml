@@ -4,13 +4,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.vmware.bdd.impala.plugin.hive</groupId>
 	<artifactId>serengeti-impala-plugin-hive</artifactId>
-	<version>${serengeti.version}</version>
+	<version>2.2.0</version>
 	<packaging>jar</packaging>
 	<name>Serengeti Impala plugin-hive project POM</name>
 	<parent>
 		<groupId>com.vmware.bdd.impala</groupId>
 		<artifactId>serengeti-impala</artifactId>
-		<version>${serengeti.version}</version>
+		<version>2.2.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>	
 	<properties>

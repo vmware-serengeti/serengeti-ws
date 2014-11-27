@@ -4,7 +4,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>com.vmware.bdd</groupId>
    <artifactId>serengeti-master</artifactId>
-   <version>${serengeti.version}</version>
+   <version>2.2.0</version>
    <packaging>pom</packaging>
    <name>Serengeti Master project POM</name>
 
@@ -43,14 +43,20 @@
    <dependencyManagement>
       <dependencies>
          <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>1.1.0.Final</version>
+         </dependency>
+         <dependency>
             <groupId>com.cloudera.api</groupId>
             <artifactId>cloudera-manager-api</artifactId>
             <version>${cm.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>com.vmware.bdd</groupId>
-            <artifactId>commons-serengeti</artifactId>
-            <version>${serengeti.version}</version>
+            <exclusions>
+               <exclusion>
+                  <groupId>javax.servlet</groupId>
+                  <artifactId>servlet-api</artifactId>
+               </exclusion>
+            </exclusions>
          </dependency>
          <dependency>
             <groupId>org.apache.hadoop</groupId>
@@ -61,40 +67,6 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-examples</artifactId>
             <version>${hadoop.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>com.vmware.bdd.impala.plugin.hdfs</groupId>
-            <artifactId>serengeti-impala-plugin-hdfs</artifactId>
-            <version>${serengeti.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>com.vmware.bdd.impala.plugin.mapreduce</groupId>
-            <artifactId>serengeti-impala-plugin-mapreduce</artifactId>
-            <version>${serengeti.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>com.vmware.bdd.impala.plugin.pig</groupId>
-            <artifactId>serengeti-impala-plugin-pig</artifactId>
-            <version>${serengeti.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>com.vmware.bdd.impala.plugin.hive</groupId>
-            <artifactId>serengeti-impala-plugin-hive</artifactId>
-            <version>${serengeti.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>org.antlr</groupId>
-                  <artifactId>antlr-runtime</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>org.antlr</groupId>
-                  <artifactId>antlr</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>jline</groupId>
-                  <artifactId>jline</artifactId>
-               </exclusion>
-            </exclusions>
          </dependency>
          <dependency>
             <groupId>org.apache.sshd</groupId>
@@ -122,12 +94,22 @@
          <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>3.6.10.Final</version>
+            <version>4.0.1.Final</version>
+         </dependency>
+         <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>4.2.0.Final</version>
+         </dependency>
+         <dependency>
+            <groupId>org.hibernate.common</groupId>
+            <artifactId>hibernate-commons-annotations</artifactId>
+            <version>4.0.1.Final</version>
          </dependency>
          <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
-            <version>3.6.10.Final</version>
+            <version>4.0.1.Final</version>
          </dependency>
          <dependency>
             <groupId>org.slf4j</groupId>
@@ -143,6 +125,11 @@
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>9.1-901.jdbc4</version>
+         </dependency>
+         <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+            <version>3.1.0.CR2</version>
          </dependency>
          <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -263,6 +250,11 @@
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <version>2.5</version>
+         </dependency>
+         <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.servlet</artifactId>
+            <version>3.0</version>
          </dependency>
          <dependency>
             <groupId>org.testng</groupId>
@@ -386,6 +378,16 @@
            <version>${fasterxml.jackson.version}</version>
          </dependency>
          <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${fasterxml.jackson.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-joda</artifactId>
+            <version>${fasterxml.jackson.version}</version>
+         </dependency>
+         <dependency>
            <groupId>com.fasterxml.jackson.core</groupId>
            <artifactId>jackson-core</artifactId>
            <version>${fasterxml.jackson.version}</version>
@@ -431,83 +433,125 @@
             <version>20070405</version>
             <scope>test</scope>
          </dependency>
+
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>vmclone</artifactId>
-            <version>${serengeti.version}</version>
+            <version>2.2.0</version>
          </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>dal</artifactId>
-            <version>${serengeti.version}</version>
+            <version>2.2.0</version>
          </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>serengeti-aop</artifactId>
-            <version>${serengeti.version}</version>
+            <version>2.2.0</version>
          </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>vc</artifactId>
-            <version>${serengeti.version}</version>
+            <version>2.2.0</version>
          </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>placement</artifactId>
-            <version>${serengeti.version}</version>
+            <version>2.2.0</version>
          </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>cluster-mgmt</artifactId>
-            <version>${serengeti.version}</version>
+            <version>2.2.0</version>
          </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>res-mgmt</artifactId>
-            <version>${serengeti.version}</version>
+            <version>2.2.0</version>
          </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>software-management</artifactId>
-            <version>${serengeti.version}</version>
+            <version>2.2.0</version>
          </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>authentication</artifactId>
-            <version>${serengeti.version}</version>
+            <version>2.2.0</version>
          </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>commons-aurora</artifactId>
-            <version>${serengeti.version}</version>
+            <version>2.2.0</version>
          </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>software-mgmt-plugin-common</artifactId>
-            <version>${serengeti.version}</version>
+            <version>2.2.0</version>
          </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>software-mgmt-plugin-default</artifactId>
-            <version>${serengeti.version}</version>
+            <version>2.2.0</version>
          </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>software-mgmt-plugin-clouderamgr</artifactId>
-            <version>${serengeti.version}</version>
+            <version>2.2.0</version>
          </dependency>
          <dependency>
             <groupId>com.vmware.bdd</groupId>
             <artifactId>software-mgmt-plugin-ambari</artifactId>
-            <version>${serengeti.version}</version>
+            <version>2.2.0</version>
+         </dependency>
+
+
+         <dependency>
+            <groupId>com.vmware.bdd</groupId>
+            <artifactId>commons-serengeti</artifactId>
+            <version>2.2.0</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd.impala.plugin.hdfs</groupId>
+            <artifactId>serengeti-impala-plugin-hdfs</artifactId>
+            <version>2.2.0</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd.impala.plugin.mapreduce</groupId>
+            <artifactId>serengeti-impala-plugin-mapreduce</artifactId>
+            <version>2.2.0</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd.impala.plugin.pig</groupId>
+            <artifactId>serengeti-impala-plugin-pig</artifactId>
+            <version>2.2.0</version>
+         </dependency>
+         <dependency>
+            <groupId>com.vmware.bdd.impala.plugin.hive</groupId>
+            <artifactId>serengeti-impala-plugin-hive</artifactId>
+            <version>2.2.0</version>
+            <exclusions>
+               <exclusion>
+                  <groupId>org.antlr</groupId>
+                  <artifactId>antlr-runtime</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>org.antlr</groupId>
+                  <artifactId>antlr</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>jline</groupId>
+                  <artifactId>jline</artifactId>
+               </exclusion>
+            </exclusions>
          </dependency>
       </dependencies>
    </dependencyManagement>
+
    <properties>
-      <serengeti.version>2.1.0</serengeti.version>
       <java.source.version>1.7</java.source.version>
       <java.target.version>1.7</java.target.version>
-      <spring.version>3.2.3.RELEASE</spring.version>
+      <spring.version>3.2.11.RELEASE</spring.version>
       <spring.security.version>3.1.4.RELEASE</spring.security.version>
       <hadoop.version>1.2.1</hadoop.version>
       <cm.version>5.1.0</cm.version>
@@ -516,6 +560,7 @@
       <cxf.version>2.7.4</cxf.version>
       <fasterxml.jackson.version>2.1.0</fasterxml.jackson.version>
    </properties>
+
    <build>
       <pluginManagement>
          <plugins>
@@ -549,6 +594,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-surefire-plugin</artifactId>
+               <version>2.18</version>
             </plugin>
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
@@ -569,6 +615,11 @@
                      <addMavenDescriptor>false</addMavenDescriptor>
                   </archive>
                </configuration>
+            </plugin>
+            <plugin>
+               <groupId>org.apache.tomcat.maven</groupId>
+               <artifactId>tomcat6-maven-plugin</artifactId>
+               <version>2.2</version>
             </plugin>
          </plugins>
       </pluginManagement>

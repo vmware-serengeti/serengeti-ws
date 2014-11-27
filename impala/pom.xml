@@ -4,14 +4,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.vmware.bdd.impala</groupId>
 	<artifactId>serengeti-impala</artifactId>
-	<version>${serengeti.version}</version>
 	<packaging>pom</packaging>
 	<name>Serengeti Impala project POM</name>
 
 	<parent>
 		<groupId>com.vmware.bdd</groupId>
 		<artifactId>serengeti-master</artifactId>
-		<version>${serengeti.version}</version>
+		<version>2.2.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -28,7 +27,7 @@
 			<dependency>
 				<groupId>com.vmware.bdd.impala.plugin.common</groupId>
 				<artifactId>serengeti-impala-plugin-common</artifactId>
-				<version>${serengeti.version}</version>
+				<version>2.2.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.data</groupId>
