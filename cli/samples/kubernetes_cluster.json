@@ -48,12 +48,14 @@
       "env": {
         "GOPATH": "/opt/kubernetes/src/go",
         "GOVC_INSECURE": "1",
-        "GOVC_URL": "https://<user:password>@<IP>/sdk",
-        "GOVC_DATACENTER": "<DatacenterName>",
-        "GOVC_DATASTORE": "kubernetes",
-        "GOVC_RESOURCE_POOL": "/<DatacenterName>/host/<ClusterName>/Resources/",
-        "INSTANCE_RESOURCE_POOL": "/<DatacenterName>/vm/SERENGETI-vApp-<BDE_vApp_Name>",
-        "GOVC_NETWORK": "<vlan_name>",
+        "GOVC_URL": "https://<user:password>@<vCenter_Server_IP>/sdk",
+        "GOVC_DATACENTER": "<Datacenter_Name>",
+        "GOVC_RESOURCE_POOL": "/${GOVC_DATACENTER}/host/<vCenter_Cluster_Name>/Resources",
+        "INSTANCE_RESOURCE_POOL": "/${GOVC_DATACENTER}/vm/SERENGETI-vApp-<vApp_Name>",
+        // When Serengeti is deployed in vCenter Standard Edition, INSTANCE_RESOURCE_POOL should be:
+        //"INSTANCE_RESOURCE_POOL": "/${GOVC_DATACENTER}/vm/<Folder_of_Serengeti_Server_VM>",
+        // The vlan name for the VMs of the cluster created by Serengeti
+        "GOVC_NETWORK": "<VLAN_Name>",
         "GOVC_GUEST_LOGIN": "serengeti:password",
         "KUBE_USER": "serengeti"
       }
