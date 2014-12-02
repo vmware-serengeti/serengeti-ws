@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.Gson;
+import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
@@ -211,8 +212,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean decomissionNode(ClusterBlueprint blueprint, String nodeGroupName, String nodeName, ClusterReportQueue reportQueue) {
-      return true;
+   public void decommissionNode(ClusterBlueprint blueprint, String nodeGroupName, String nodeName, ClusterReportQueue reportQueue) {
    }
 
    @Override
@@ -281,23 +281,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    @Override
    public void validateRolesForShrink(NodeGroupInfo groupInfo) throws SoftwareManagementPluginException {
       String jsonStr = CommonUtil.readJsonFile("shrink_cluster_roles_blacklist.json");
-      Gson gson = new Gson();
-      Set<String> blacklist = new HashSet(gson.fromJson(jsonStr, List.class));
-      logger.info("roles in blackList are: " + blacklist.toString());
-
-      List<String> roles = groupInfo.getRoles();
-      List<String> invalidRoles = null;
-      for (String role: roles) {
-         if (blacklist.contains(role)) {
-            if (invalidRoles == null) {
-               invalidRoles = new ArrayList<String>();
-            }
-            invalidRoles.add(role);
-         }
-      }
-      if (invalidRoles != null) {
-         throw SoftwareManagementPluginException.INVALID_ROLES_TO_SHRINK(invalidRoles.toString());
-      }
+      ValidateRolesUtil.validateRolesForShrink(jsonStr, groupInfo);
    }
 
    @Override

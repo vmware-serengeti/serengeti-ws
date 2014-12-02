@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import javax.ws.rs.NotFoundException;
 
+import com.cloudera.api.model.ApiHostNameList;
 import com.cloudera.api.model.ApiRoleState;
 import com.cloudera.api.model.ApiRoleConfigGroup;
 import com.cloudera.api.v7.RootResourceV7;
@@ -49,6 +50,9 @@ import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 
+import com.vmware.bdd.software.mgmt.plugin.utils.SSHUtil;
+import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
+import com.vmware.bdd.utils.CommonUtil;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -108,6 +112,10 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private final String UNKNOWN_VERSION = "UNKNOWN";
    public final String MIN_SUPPORTED_VERSION = "5.0.0";
    private final String usernameForHosts = "serengeti";
+   private final int sshPort = 22;
+   private final String stopAgentCmd = "sudo service cloudera-scm-agent stop";
+   private final String privateKeyFile = "/home/serengeti/.ssh/id_rsa";
+   private final String rolesBlacklistForShrink = "shrink_cloudera_manager_roles_blacklist.json";
    private String privateKey;
    private RootResourceV6 apiResourceRootV6;
    private RootResourceV7 apiResourceRootV7;
@@ -603,10 +611,72 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean decomissionNode(ClusterBlueprint blueprint, String nodeGroupName, String nodeName, ClusterReportQueue reportQueue)
+   public void decommissionNode(ClusterBlueprint blueprint, String nodeGroupName, String nodeName, ClusterReportQueue reportQueue)
          throws SoftwareManagementPluginException {
-      return false;
+      //decommissionNode host
+      CmClusterDef clusterDef = null;
+      List<String> hostNames = new ArrayList<String>();
+      CmNodeDef nodeDef;
+      ApiHost apiHost;
+      try {
+         clusterDef = new CmClusterDef(blueprint);
+         syncHostsId(clusterDef);
+         nodeDef = null;
+         for (CmNodeDef nodeDefIter: clusterDef.getNodes()) {
+            if (nodeDefIter.getName().equals(nodeName)) {
+               nodeDef = nodeDefIter;
+            }
+         }
+         assert (nodeDef != null);
+         apiHost = apiResourceRootV6.getHostsResource().readHost(nodeDef.getNodeId());
+         if (apiHost == null) {
+            return;
+         }
+         String hostName = apiHost.getHostname();
+         hostNames.add(hostName);
+         ClusterReport report = clusterDef.getCurrentReport();
+         executeAndReport("Decommission node",
+               apiResourceRootV6.getClouderaManagerResource().hostsDecommissionCommand(new ApiHostNameList(hostNames)), ProgressSplit.STOP_SERVICES.getProgress(),
+               report,
+               reportQueue,
+               true);
+         logger.info("Decommission node " + hostName + " successed");
+      } catch (Exception e) {
+         logger.error("Failed to decommissionNode node " + nodeName, e);
+         throw SoftwareManagementPluginException.DECOMISSION_FAILED(clusterDef.getName(), nodeGroupName, nodeName, e.getMessage());
+      }
+
+      //stop agent on that vm
+      SSHUtil sshUtil = new SSHUtil();
+      String hostIP = nodeDef.getIpAddress();
+      boolean stopAgentSucceed = false;
+      String errMsg = null;
+      try {
+         stopAgentSucceed = sshUtil.execCmd(usernameForHosts, privateKeyFile, hostIP, sshPort, stopAgentCmd, null, null);
+      } catch (Exception e) {
+         logger.error("Got exception when stop agent on " + hostIP, e);
+         errMsg = e.getMessage();
+      } finally {
+         if (!stopAgentSucceed) {
+            logger.error("Stop agent failed");
+            throw SoftwareManagementPluginException.STOP_AGENT_FAILED("ClouderaManager", nodeName, errMsg);
+         } else {
+            logger.info("Stop agent succeed");
+         }
+      }
+
+      //delete host from the cluster
+      logger.info("Start to remove host " + nodeName + " " + hostIP + " " + nodeDef.getNodeId());
+      try {
+         List<ApiHost> hosts = new ArrayList<>();
+         hosts.add(apiHost);
+         removeHosts(clusterDef, hosts);
+      } catch (Exception e) {
+         logger.error( "Faield to delete host " + nodeName, e);
+         throw SoftwareManagementPluginException.DELETE_HOST_FAILED(clusterDef.getName(), nodeGroupName, nodeName, e);
+      }
    }
+
    @Override
    public boolean recomissionNode(String clusterName, NodeInfo node, ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
       return false;
@@ -2186,7 +2256,10 @@ public class ClouderaManagerImpl implements SoftwareManager {
    }
 
    public void validateRolesForShrink(NodeGroupInfo groupInfo)
-         throws SoftwareManagementPluginException {};
+         throws SoftwareManagementPluginException {
+      String blacklistStr = CommonUtil.readJsonFile(rolesBlacklistForShrink);
+      ValidateRolesUtil.validateRolesForShrink(blacklistStr, groupInfo);
+   };
 
    @Override
    public void updateInfrastructure(ClusterBlueprint blueprint)

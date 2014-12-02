@@ -210,7 +210,7 @@ public interface SoftwareManager {
    boolean decomissionNodes(String clusterName, List<NodeInfo> nodes,
          ClusterReportQueue reports) throws SoftwareManagementPluginException;
 
-   boolean decomissionNode(ClusterBlueprint blueprint, String nodeGroupName, String nodeName, ClusterReportQueue reportQueue)
+   void decommissionNode(ClusterBlueprint blueprint, String nodeGroupName, String nodeName, ClusterReportQueue reportQueue)
          throws SoftwareManagementPluginException;
 
    boolean recomissionNode(String clusterName, NodeInfo node, ClusterReportQueue reportQueue)

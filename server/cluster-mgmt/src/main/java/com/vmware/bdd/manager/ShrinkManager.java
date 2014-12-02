@@ -20,7 +20,7 @@ import java.util.List;
  * Created by qjin on 11/14/14.
  */
 public class ShrinkManager {
-   private static final Logger logger = Logger.getLogger(ScaleManager.class);
+   private static final Logger logger = Logger.getLogger(ShrinkManager.class);
 
    private IClusterEntityManager clusterEntityMgr;
    private JobManager jobManager;

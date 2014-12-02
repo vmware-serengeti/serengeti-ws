@@ -170,11 +170,19 @@ public class SoftwareManagementPluginException extends RuntimeException {
       return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.UNSURE_CLUSTER_EXIST", null, appMgr, clusterName);
    }
 
-   public static SoftwareManagementPluginException DECOMISSION_FAILED(String name, String nodeGroupName, String nodeName, String error) {
-      return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.DECOMMISSION_FAILED", null, name, nodeGroupName, nodeName, error);
+   public static SoftwareManagementPluginException DECOMISSION_FAILED(String clusterName, String nodeGroupName, String nodeName, String error) {
+      return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.DECOMMISSION_FAILED", null, clusterName, nodeGroupName, nodeName, error);
    }
 
    public static SoftwareManagementPluginException INVALID_ROLES_TO_SHRINK(String invalidRoles) {
       return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.INVALID_ROLES_TO_SHRINK", null, invalidRoles);
+   }
+
+   public static SoftwareManagementPluginException STOP_AGENT_FAILED(String appManagerType, String nodeName, String errmsg) {
+      return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.STOP_AGENT_FAILED", null, appManagerType, nodeName, errmsg);
+   }
+
+   public static SoftwareManagementPluginException DELETE_HOST_FAILED(String clusterName, String nodeGroupName, String nodeName, Throwable cause) {
+      return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.DELETE_HOST_FAILED", cause, clusterName, nodeGroupName, nodeName, cause.getMessage());
    }
 }

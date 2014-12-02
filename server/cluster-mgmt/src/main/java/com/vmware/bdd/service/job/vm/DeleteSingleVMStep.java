@@ -1,6 +1,5 @@
-package com.vmware.bdd.service.job.vm;
 /***************************************************************************
- * Copyright (c) 2012-2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +12,7 @@ package com.vmware.bdd.service.job.vm;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
+package com.vmware.bdd.service.job.vm;
 
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
@@ -48,6 +48,7 @@ public class DeleteSingleVMStep extends TrackableTasklet {
       String nodeName =
             getJobParameters(chunkContext).getString(
                   JobConstants.SUB_JOB_NODE_NAME);
+      String nodeGroupName = getJobParameters(chunkContext).getString(JobConstants.GROUP_NAME_JOB_PARAM);
       NodeEntity nodeEntity = clusterEntityManager.findNodeByName(nodeName);
       if ((nodeEntity != null) && (nodeEntity.getMoId() != null)) {
          String moId = nodeEntity.getMoId();
@@ -63,6 +64,9 @@ public class DeleteSingleVMStep extends TrackableTasklet {
             throw ShrinkException.DELETE_VM_FAILED(e, clusterName, nodeName);
          }
       }
+      NodeGroupEntity nodeGroupEntity = clusterEntityManager.findByName(clusterName, nodeGroupName);
+      nodeGroupEntity.setDefineInstanceNum(nodeGroupEntity.getDefineInstanceNum() - 1);
+      clusterEntityManager.update(nodeGroupEntity);
       clusterEntityManager.delete(nodeEntity);
       logger.info("VM " + nodeName + " has been deleted ? " + (clusterEntityManager.getNodeByVmName(nodeName) == null ? "YES" : "NO" ));
       putIntoJobExecutionContext(chunkContext,

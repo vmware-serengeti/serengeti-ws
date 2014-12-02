@@ -44,9 +44,6 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
       String newPassword = clusterSpec.getPassword();
 
       List<NodeEntity> nodes = getNodesToBeSetPassword(chunkContext);
-      if (nodes == null || nodes.isEmpty()) {
-         throw TaskException.EXECUTION_FAILED("No nodes needed to set password for");
-      }
       boolean success = setPasswordService.setPasswordForNodes(clusterName, nodes, newPassword);
       putIntoJobExecutionContext(chunkContext, JobConstants.SET_PASSWORD_SUCCEED_JOB_PARAM, success);
 

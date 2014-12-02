@@ -1225,9 +1225,8 @@ public class AmbariImpl implements SoftwareManager {
    }
 
    @Override
-   public boolean decomissionNode(ClusterBlueprint blueprint, String nodeGroupName, String nodeName, ClusterReportQueue reportQueue)
+   public void decommissionNode(ClusterBlueprint blueprint, String nodeGroupName, String nodeName, ClusterReportQueue reportQueue)
          throws SoftwareManagementPluginException {
-      return false;
    }
 
    @Override
