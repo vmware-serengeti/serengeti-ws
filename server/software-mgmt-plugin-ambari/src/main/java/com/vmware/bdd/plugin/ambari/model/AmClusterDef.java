@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gson.annotations.Expose;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
@@ -62,6 +63,14 @@ public class AmClusterDef implements Serializable {
    @Expose
    private List<Map<String, Object>> configurations;
 
+   private boolean isComputeOnly = false;
+
+   private String externalNamenode;
+
+   private String externalSecondaryNamenode;
+
+   private Set<String> externalDatanodes;
+
    public AmClusterDef(ClusterBlueprint blueprint, String privateKey) {
       this(blueprint, privateKey, null);
    }
@@ -90,6 +99,46 @@ public class AmClusterDef implements Serializable {
             nodeDef.setComponents(group.getRoles());
             nodeDef.setVolumns(node.getVolumes(), hdfs, ambariServerVersion);
             this.nodes.add(nodeDef);
+         }
+      }
+      if (blueprint.getExternalNamenode() != null && blueprint.getExternalDatanodes() != null) {
+         this.isComputeOnly = true;
+
+         this.externalNamenode = blueprint.getExternalNamenode();
+         this.externalSecondaryNamenode = blueprint.getExternalSecondaryNamenode();
+         this.externalDatanodes = blueprint.getExternalDatanodes();
+
+         AmNodeDef namenodeDef = new AmNodeDef();
+         namenodeDef.setName(name+"-external-namenode");
+         namenodeDef.setFqdn(externalNamenode);
+         List<String> namenodeRoles = new ArrayList<String>();
+         namenodeRoles.add("NAMENODE");
+         if (externalSecondaryNamenode == null || externalNamenode.equals(externalSecondaryNamenode)) {
+            namenodeRoles.add("SECONDARY_NAMENODE");
+         }
+         namenodeDef.setComponents(namenodeRoles);
+         this.nodes.add(namenodeDef);
+
+         if (externalSecondaryNamenode !=  null && !externalNamenode.equals(externalSecondaryNamenode)) {
+            AmNodeDef secondaryNamenodeDef = new AmNodeDef();
+            secondaryNamenodeDef.setName(name+"-external-secondaryNamenode");
+            secondaryNamenodeDef.setFqdn(externalSecondaryNamenode);
+            List<String> secondaryNamenodeRoles = new ArrayList<String>();
+            secondaryNamenodeRoles.add("SECONDARY_NAMENODE");
+            secondaryNamenodeDef.setComponents(secondaryNamenodeRoles);
+            this.nodes.add(secondaryNamenodeDef);
+         }
+
+         int datanodeIndex = 0;
+         for (String externalDatanode : externalDatanodes) {
+            AmNodeDef datanodeDef = new AmNodeDef();
+            datanodeDef.setName(name + "-external-datanode-" + datanodeIndex);
+            datanodeDef.setFqdn(externalDatanode);
+            List<String> datanodeDefRoles = new ArrayList<String>();
+            datanodeDefRoles.add("DATANODE");
+            datanodeDef.setComponents(datanodeDefRoles);
+            this.nodes.add(datanodeDef);
+            datanodeIndex ++;
          }
       }
 
@@ -169,6 +218,38 @@ public class AmClusterDef implements Serializable {
 
    public void setConfigurations(List<Map<String, Object>> configurations) {
       this.configurations = configurations;
+   }
+
+   public boolean isComputeOnly() {
+      return isComputeOnly;
+   }
+
+   public void setComputeOnly(boolean isComputeOnly) {
+      this.isComputeOnly = isComputeOnly;
+   }
+
+   public String getExternalNamenode() {
+      return externalNamenode;
+   }
+
+   public void setExternalNamenode(String externalNamenode) {
+      this.externalNamenode = externalNamenode;
+   }
+
+   public String getExternalSecondaryNamenode() {
+      return externalSecondaryNamenode;
+   }
+
+   public void setExternalSecondaryNamenode(String externalSecondaryNamenode) {
+      this.externalSecondaryNamenode = externalSecondaryNamenode;
+   }
+
+   public Set<String> getExternalDatanodes() {
+      return externalDatanodes;
+   }
+
+   public void setExternalDatanodes(Set<String> externalDatanodes) {
+      this.externalDatanodes = externalDatanodes;
    }
 
    public ApiBootstrap toApiBootStrap() {

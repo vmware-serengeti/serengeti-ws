@@ -1,0 +1,96 @@
+{
+  "externalNamenode": "FQDN-of-namenode",
+  "externalSecondaryNamenode": "FQDN-of-secondarynamenode",
+  "externalDatanodes": [
+    "FQDN-of-datanode",
+    "FQDN-of-datanode"
+  ],
+  "nodeGroups": [
+    {
+      "name" : "zookeeper",
+      "roles" : [
+        "ZOOKEEPER_SERVER"
+      ],
+      "instanceType":"SMALL",
+      "instanceNum":3,
+      "storage" : {
+        "type" : "shared",
+        "sizeGB" : 20
+      },
+      "haFlag":"on"
+    },
+    {
+      "name": "master",
+      "roles": [
+        "RESOURCEMANAGER",
+        "HISTORYSERVER",
+        "APP_TIMELINE_SERVER"
+      ],
+      "instanceType":"MEDIUM",
+      "instanceNum":1,
+      "storage": {
+        "type": "SHARED",
+        "sizeGB": 50
+      },
+      "haFlag":"on",
+      "configuration": {
+        "global": {
+          // service level configurations
+        },
+        "hdfs-site": {
+          // service level configurations
+        }
+      }
+    },
+    {
+      "name": "worker",
+      "roles": [
+        "DATANODE",
+        "NODEMANAGER"
+      ],
+      "instanceType":"SMALL",
+      "instanceNum":3,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 50
+      },
+      "haFlag":"off",
+      "configuration": {
+        "global": {
+          // service level configurations
+        },
+        "hdfs-site": {
+          // service level configurations
+        }
+      }
+    },
+    {
+      "name": "client",
+      "roles": [
+        "HDFS_CLIENT",
+        "YARN_CLIENT",
+        "MAPREDUCE2_CLIENT",
+        "ZOOKEEPER_CLIENT",
+        "TEZ_CLIENT"
+      ],
+      "instanceType":"SMALL",
+      "instanceNum":1,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 50
+      },
+      "haFlag":"off"
+    }
+  ],
+  "configuration": {
+    "global": {
+      // service level configurations
+    },
+    "core-site": {
+      // service level configurations
+    },
+    "hdfs-site": {
+      // service level configurations
+    }
+  }
+}

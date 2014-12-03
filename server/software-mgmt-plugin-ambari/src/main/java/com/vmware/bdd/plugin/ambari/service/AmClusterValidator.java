@@ -15,6 +15,7 @@
 package com.vmware.bdd.plugin.ambari.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
@@ -46,6 +48,7 @@ public class AmClusterValidator {
 
    private static final Logger logger = Logger
          .getLogger(AmClusterValidator.class);
+   private static final Set<String> hdfsRoles = new HashSet<String>(Arrays.asList("NAMENODE", "SECONDARY_NAMENODE", "DATANODE"));
    private List<String> warningMsgList;
    private List<String> errorMsgList;
    private ApiManager apiManager;
@@ -81,6 +84,8 @@ public class AmClusterValidator {
 
       validateConfigs(blueprint.getConfiguration(), unRecogConfigTypes,
             unRecogConfigKeys, stackVendor, stackVersion);
+
+      validateSupportComputeOnly(blueprint);
 
       if (!unRecogConfigTypes.isEmpty()) {
          errorMsgList.add("Configurations for " + unRecogConfigTypes.toString()
@@ -162,12 +167,13 @@ public class AmClusterValidator {
                + " are not available by distro " + distro);
       }
 
-      validateRoleDependencies(nodeGroups, apiStackComponents, unRecogRoles);
+      validateRoleDependencies(nodeGroups, apiStackComponents, unRecogRoles, blueprint.getExternalNamenode(), blueprint.getExternalDatanodes());
 
    }
 
    private void validateRoleDependencies(List<NodeGroupInfo> nodeGroups,
-         List<ApiStackComponent> apiStackComponents, List<String> unRecogRoles) {
+         List<ApiStackComponent> apiStackComponents, List<String> unRecogRoles,
+         String externalNamenode, Set<String> externalDatanodes) {
       if (nodeGroups == null || nodeGroups.isEmpty()) {
          return;
       }
@@ -202,7 +208,8 @@ public class AmClusterValidator {
             if (role.equals(apiComponentInfo.getComponentName())) {
                Set<String> roleCategoryDependencies =
                      validateRoleCategoryDependencies(apiComponentInfo,
-                           allRoles, unRecogRoles);
+                           allRoles, unRecogRoles, externalNamenode,
+                           externalDatanodes);
                if (roleCategoryDependencies != null
                      && !roleCategoryDependencies.isEmpty()) {
                   NotExistDenpendencyNames.addAll(roleCategoryDependencies);
@@ -211,14 +218,16 @@ public class AmClusterValidator {
 
          }
          if (!NotExistDenpendencyNames.isEmpty()) {
-            warningMsgList.add("Missing dependency: Component " + role + " depends on "
-                  + NotExistDenpendencyNames.toString());
+            warningMsgList.add("Missing dependency: Component " + role
+                  + " depends on " + NotExistDenpendencyNames.toString());
          }
       }
    }
 
    private Set<String> validateRoleCategoryDependencies(
-         ApiComponentInfo apiOriginComponentInfo, Set<String> allRoles, List<String> unRecogRoles) {
+         ApiComponentInfo apiOriginComponentInfo, Set<String> allRoles,
+         List<String> unRecogRoles, String externalNamenode,
+         Set<String> externalDatanodes) {
       List<String> masterRoles = new ArrayList<String>();
       List<String> slaveRoles = new ArrayList<String>();
       Set<String> NotExistDenpendencies = new HashSet<String>();
@@ -262,19 +271,25 @@ public class AmClusterValidator {
       if (componentCategory.isSlave()) {
          for (String masterRole : masterRoles) {
             if (!allRoles.contains(masterRole)) {
-               NotExistDenpendencies.add(masterRole);
+               if (!(isComputeOnly(externalNamenode, externalDatanodes) && hdfsRoles.contains(masterRole))) {
+                  NotExistDenpendencies.add(masterRole);
+               }
             }
          }
       }
       if (componentCategory.isClient()) {
          for (String masterRole : masterRoles) {
             if (!allRoles.contains(masterRole)) {
-               NotExistDenpendencies.add(masterRole);
+               if (!(isComputeOnly(externalNamenode, externalDatanodes) && hdfsRoles.contains(masterRole))) {
+                  NotExistDenpendencies.add(masterRole);
+               }
             }
          }
          for (String slaveRole : slaveRoles) {
             if (!allRoles.contains(slaveRole)) {
-               NotExistDenpendencies.add(slaveRole);
+               if (!(isComputeOnly(externalNamenode, externalDatanodes) && hdfsRoles.contains(slaveRole))) {
+                  NotExistDenpendencies.add(slaveRole);
+               }
             }
          }
       }
@@ -403,6 +418,24 @@ public class AmClusterValidator {
       message.put("WarningMsgList", this.warningMsgList);
       message.put("ErrorMsgList", this.errorMsgList);
       return (new Gson()).toJson(message);
+   }
+
+   private boolean isComputeOnly(String externalNamenode, Set<String> externalDatanodes) {
+      boolean isComputeOnly = false;
+      if (externalNamenode != null && externalDatanodes != null) {
+         isComputeOnly = true;
+      }
+      return isComputeOnly;
+   }
+
+   private void validateSupportComputeOnly(ClusterBlueprint blueprint) {
+      if (isComputeOnly(blueprint.getExternalNamenode(), blueprint.getExternalDatanodes())) {
+         String hdpVersion = blueprint.getHadoopStack().getFullVersion();
+         DefaultArtifactVersion hdpVersionInfo = new DefaultArtifactVersion(hdpVersion);
+         if (!((hdpVersionInfo.getMajorVersion() >= 2 && hdpVersionInfo.getMinorVersion() >= 1) || hdpVersionInfo.getMajorVersion() > 2)) {
+            warningMsgList.add("Compute only cluster does not support in HDP " + hdpVersion +" of Ambari yet");
+         }
+      }
    }
 
 }

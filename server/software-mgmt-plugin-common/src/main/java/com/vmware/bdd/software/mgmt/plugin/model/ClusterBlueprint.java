@@ -17,6 +17,7 @@ package com.vmware.bdd.software.mgmt.plugin.model;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gson.annotations.Expose;
 
@@ -42,6 +43,9 @@ public class ClusterBlueprint implements Serializable {
    private String externalHDFS;
    private String externalMapReduce;
    private boolean needToValidateConfig;
+   private String externalNamenode;
+   private String externalSecondaryNamenode;
+   private Set<String> externalDatanodes;
 
 
    public String getName() {
@@ -107,4 +111,29 @@ public class ClusterBlueprint implements Serializable {
    public void setNeedToValidateConfig(boolean needToValidateConfig) {
       this.needToValidateConfig = needToValidateConfig;
    }
+
+   public String getExternalNamenode() {
+      return externalNamenode;
+   }
+
+   public void setExternalNamenode(String externalNamenode) {
+      this.externalNamenode = externalNamenode;
+   }
+
+   public String getExternalSecondaryNamenode() {
+      return externalSecondaryNamenode;
+   }
+
+   public void setExternalSecondaryNamenode(String externalSecondaryNamenode) {
+      this.externalSecondaryNamenode = externalSecondaryNamenode;
+   }
+
+   public Set<String> getExternalDatanodes() {
+      return externalDatanodes;
+   }
+
+   public void setExternalDatanodes(Set<String> externalDatanodes) {
+      this.externalDatanodes = externalDatanodes;
+   }
+
 }

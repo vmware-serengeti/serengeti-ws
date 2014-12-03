@@ -57,6 +57,9 @@ public class ClusterCreate implements Serializable {
    private ClusterType type;
    private String externalHDFS;
    private String externalMapReduce;
+   private String externalNamenode;
+   private String externalSecondaryNamenode;
+   private Set<String> externalDatanodes;
    @Expose
    @SerializedName("groups")
    private NodeGroupCreate[] nodeGroups;
@@ -144,6 +147,9 @@ public class ClusterCreate implements Serializable {
       this.distroVersion = cluster.distroVersion;
       this.externalHDFS = cluster.externalHDFS;
       this.externalMapReduce = cluster.externalMapReduce;
+      this.externalNamenode = cluster.externalNamenode;
+      this.externalSecondaryNamenode = cluster.externalSecondaryNamenode;
+      this.externalDatanodes = cluster.externalDatanodes;
       this.networkConfig = cluster.networkConfig;
       this.networkings = cluster.networkings;
       this.nodeGroups = cluster.nodeGroups;
@@ -208,6 +214,30 @@ public class ClusterCreate implements Serializable {
 
    public void setExternalMapReduce(String externalMapReduce) {
       this.externalMapReduce = externalMapReduce;
+   }
+
+   public String getExternalNamenode() {
+      return externalNamenode;
+   }
+
+   public void setExternalNamenode(String externalNamenode) {
+      this.externalNamenode = externalNamenode;
+   }
+
+   public String getExternalSecondaryNamenode() {
+      return externalSecondaryNamenode;
+   }
+
+   public void setExternalSecondaryNamenode(String externalSecondaryNamenode) {
+      this.externalSecondaryNamenode = externalSecondaryNamenode;
+   }
+
+   public Set<String> getExternalDatanodes() {
+      return externalDatanodes;
+   }
+
+   public void setExternalDatanodes(Set<String> externalDatanodes) {
+      this.externalDatanodes = externalDatanodes;
    }
 
    public String getDistro() {
@@ -793,6 +823,9 @@ public class ClusterCreate implements Serializable {
       blueprint.setConfiguration(configuration);
       blueprint.setExternalHDFS(externalHDFS);
       blueprint.setExternalMapReduce(externalMapReduce);
+      blueprint.setExternalNamenode(externalNamenode);
+      blueprint.setExternalSecondaryNamenode(externalSecondaryNamenode);
+      blueprint.setExternalDatanodes(externalDatanodes);
 
       // set HadoopStack
       HadoopStack hadoopStack = new HadoopStack();

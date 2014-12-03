@@ -15,6 +15,7 @@
 package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -607,6 +608,19 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
          nodeGroupInfos.add(nodeGroupInfo);
       }
       blueprint.setNodeGroups(nodeGroupInfos);
+
+      // set external HDFS, Mapreduce, Namenode, Datanodes
+      Map<String, String> advancedProperties = gson.fromJson(clusterEntity.getAdvancedProperties(), Map.class);
+      if (advancedProperties != null) {
+         blueprint.setExternalHDFS(advancedProperties.get("ExternalHDFS"));
+         blueprint.setExternalHDFS(advancedProperties.get("ExternalMapReduce"));
+         blueprint.setExternalNamenode(advancedProperties.get("ExternalNamenode"));
+         blueprint.setExternalSecondaryNamenode(advancedProperties.get("ExternalSecondaryNamenode"));
+         if (advancedProperties.get("ExternalDatanodes") != null) {
+            blueprint.setExternalDatanodes(gson.fromJson(gson.toJson(advancedProperties.get("ExternalDatanodes")), HashSet.class));
+         }
+      }
+
       return blueprint;
    }
 
@@ -686,6 +700,11 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
          clusterRead.setExternalMapReduce(advancedProperties
                .get("ExternalMapReduce"));
          clusterRead.setLocalRepoURL(advancedProperties.get("LocalRepoURL"));
+         clusterRead.setExternalNamenode(advancedProperties.get("ExternalNamenode"));
+         clusterRead.setExternalSecondaryNamenode(advancedProperties.get("ExternalSecondaryNamenode"));
+         if (advancedProperties.get("ExternalDatanodes") != null) {
+            clusterRead.setExternalDatanodes(gson.fromJson(gson.toJson(advancedProperties.get("ExternalDatanodes")), HashSet.class));
+         }
       }
 
       SoftwareManager softMgr = null;

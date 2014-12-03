@@ -277,8 +277,10 @@ public class ClusterCommands implements CommandMarker {
                         CommandsUtils.dataFromFile(specFilePath));
             clusterCreate.setSpecFile(true);
             clusterCreate.setExternalHDFS(clusterSpec.getExternalHDFS());
-            clusterCreate.setExternalMapReduce(clusterSpec
-                  .getExternalMapReduce());
+            clusterCreate.setExternalMapReduce(clusterSpec.getExternalMapReduce());
+            clusterCreate.setExternalNamenode(clusterSpec.getExternalNamenode());
+            clusterCreate.setExternalSecondaryNamenode(clusterSpec.getExternalSecondaryNamenode());
+            clusterCreate.setExternalDatanodes(clusterSpec.getExternalDatanodes());
             clusterCreate.setNodeGroups(clusterSpec.getNodeGroups());
             clusterCreate.setConfiguration(clusterSpec.getConfiguration());
             // TODO: W'd better merge validateConfiguration with validateClusterSpec to avoid repeated validation.

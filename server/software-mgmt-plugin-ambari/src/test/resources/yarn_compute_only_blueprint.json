@@ -1,0 +1,134 @@
+{
+    "externalNamenode": "namenode",
+    "externalSecondaryNamenode": "secondaryNamenode",
+    "externalDatanodes":
+    [
+      "datanode-1",
+      "datanode-2",
+      "datanode-3"
+    ]
+    ,
+    "name": "cluster01",
+    "instanceNum": 5,
+    "hadoopStack": {
+        "distro": "HDP-2.1",
+        "fullVersion": "2.1",
+        "vendor": "HDP"
+    },
+    "nodeGroups":[
+        {
+            "name": "master",
+            "roles": [
+                "RESOURCEMANAGER"
+            ],
+            "instanceNum": 1,
+            "configuration": {
+                "global": {
+                    "namenode_heapsize": "2048000000",
+                    "nagios_contact": "sample@vmware.com",
+                    "nagios_web_password": "password"
+                }
+            }
+            ,
+            "nodes": [
+                {
+                    "name": "cluster01-master-0",
+                    "rack": "/rack1",
+                    "hostname": "host01",
+                    "ipConfigs": {
+                        "MGT_NETWORK": [
+                            {
+                                "ipAddress": "192.168.0.1",
+                                "portGroupName": "pub1-10g",
+                                "networkName": "defaultNetwork",
+                                "trafficType": "MGT_NETWORK"
+                            }
+                        ]
+                    },
+                    "volumes": ["sdc1", "sdc2"]
+                }
+            ]
+        },
+        {
+            "name": "worker",
+            "roles": [
+                "NODEMANAGER"
+            ],
+            "instanceNum": 3,
+            "configuration": {
+                "global" : {
+                    "dtnode_heapsize": "2048000000"
+                }
+            },
+            "nodes": [
+                {
+                    "name": "cluster01-worker-0",
+                    "rack": "/rack2",
+                    "hostname": "host02",
+                    "ipConfigs": {
+                        "MGT_NETWORK": [
+                            {
+                                "ipAddress": "192.168.0.2",
+                                "portGroupName": "pub1-10g",
+                                "networkName": "defaultNetwork",
+                                "trafficType": "MGT_NETWORK"
+                            }
+                        ]
+                    },
+                    "volumes": ["sdc1"]
+                },
+                {
+                    "name": "cluster01-worker-1",
+                    "rack": "/rack2",
+                    "hostname": "host02",
+                    "ipConfigs": {
+                        "MGT_NETWORK": [
+                            {
+                                "ipAddress": "192.168.0.3", // TODO: deserialize name
+                                "portGroupName": "pub1-10g",
+                                "networkName": "defaultNetwork",
+                                "trafficType": "MGT_NETWORK"
+                            }
+                        ]
+                    },
+                    "volumes": ["sdc1", "sdd1"]
+                }
+            ]
+        },
+        {
+            "name": "backup",
+            "roles": [
+                "HDFS_CLIENT"
+            ],
+            "instanceNum": 1,
+            "nodes": [
+                {
+                    "name": "cluster01-backup-0",
+                    "rack": "/rack3",
+                    "hostname": "host03",
+                    "ipConfigs": {
+                        "MGT_NETWORK": [
+                            {
+                                "ipAddress": "192.168.0.4",
+                                "portGroupName": "pub1-10g",
+                                "networkName": "defaultNetwork",
+                                "trafficType": "MGT_NETWORK"
+                            }
+                        ]
+                    },
+                    "volumes": ["sdc1", "sdd1", "sde1"]
+                }
+            ]
+        }
+    ],
+    "configuration": {
+        "global":
+        {
+            "namenode_heapsize": "2048000000"
+        },
+        "core-site":
+        {
+            "io.file.buffer.size": "131072"
+        }
+    }
+}

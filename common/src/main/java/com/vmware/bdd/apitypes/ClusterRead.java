@@ -15,6 +15,7 @@
 package com.vmware.bdd.apitypes;
 
 import java.util.List;
+import java.util.Set;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -30,6 +31,9 @@ public class ClusterRead implements Comparable<ClusterRead> {
    private String name;
    private String externalHDFS;
    private String externalMapReduce;
+   private String externalNamenode;
+   private String externalSecondaryNamenode;
+   private Set<String> externalDatanodes;
 
    private String localRepoURL;
 
@@ -513,6 +517,30 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
    public void setLocalRepoURL(String localRepoURL) {
       this.localRepoURL = localRepoURL;
+   }
+
+   public String getExternalNamenode() {
+      return externalNamenode;
+   }
+
+   public void setExternalNamenode(String externalNamenode) {
+      this.externalNamenode = externalNamenode;
+   }
+
+   public String getExternalSecondaryNamenode() {
+      return externalSecondaryNamenode;
+   }
+
+   public void setExternalSecondaryNamenode(String externalSecondaryNamenode) {
+      this.externalSecondaryNamenode = externalSecondaryNamenode;
+   }
+
+   public Set<String> getExternalDatanodes() {
+      return externalDatanodes;
+   }
+
+   public void setExternalDatanodes(Set<String> externalDatanodes) {
+      this.externalDatanodes = externalDatanodes;
    }
 
 }

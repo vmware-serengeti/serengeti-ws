@@ -307,7 +307,10 @@ public class ClusterConfigManager {
          }
 
          setAdvancedProperties(cluster.getExternalHDFS(),
-               cluster.getExternalMapReduce(), localRepoURL, clusterEntity);
+               cluster.getExternalMapReduce(), localRepoURL,
+               cluster.getExternalNamenode(),
+               cluster.getExternalSecondaryNamenode(),
+               cluster.getExternalDatanodes(), clusterEntity);
          NodeGroupCreate[] groups = cluster.getNodeGroups();
          if (groups != null && groups.length > 0) {
             clusterEntity.setNodeGroups(convertNodeGroupsToEntities(gson,
@@ -356,14 +359,21 @@ public class ClusterConfigManager {
 
    private void setAdvancedProperties(String externalHDFS,
          String externalMapReduce, String localRepoURL,
-         ClusterEntity clusterEntity) {
+         String externalNamenode, String externalSecondaryNamenode,
+         Set<String> externalDatanodes, ClusterEntity clusterEntity) {
       if (!CommonUtil.isBlank(externalHDFS)
             || !CommonUtil.isBlank(externalMapReduce)
-            || !CommonUtil.isBlank(localRepoURL)) {
-         Map<String, String> advancedProperties = new HashMap<String, String>();
+            || !CommonUtil.isBlank(localRepoURL)
+            || !CommonUtil.isBlank(externalNamenode)
+            || !CommonUtil.isBlank(externalSecondaryNamenode)
+            || (externalDatanodes != null && !externalDatanodes.isEmpty())) {
+         Map<String, Object> advancedProperties = new HashMap<String, Object>();
          advancedProperties.put("ExternalHDFS", externalHDFS);
          advancedProperties.put("ExternalMapReduce", externalMapReduce);
          advancedProperties.put("LocalRepoURL", localRepoURL);
+         advancedProperties.put("ExternalNamenode", externalNamenode);
+         advancedProperties.put("ExternalSecondaryNamenode", externalSecondaryNamenode);
+         advancedProperties.put("ExternalDatanodes", externalDatanodes);
          Gson g = new Gson();
          clusterEntity.setAdvancedProperties(g.toJson(advancedProperties));
       }
@@ -859,6 +869,11 @@ public class ClusterConfigManager {
          clusterConfig.setExternalMapReduce(advancedProperties
                .get("ExternalMapReduce"));
          clusterConfig.setLocalRepoURL(advancedProperties.get("LocalRepoURL"));
+         clusterConfig.setExternalNamenode(advancedProperties.get("ExternalNamenode"));
+         clusterConfig.setExternalSecondaryNamenode(advancedProperties.get("ExternalSecondaryNamenode"));
+         if (advancedProperties.get("ExternalDatanodes") != null) {
+            clusterConfig.setExternalDatanodes(gson.fromJson(gson.toJson(advancedProperties.get("ExternalDatanodes")), HashSet.class));
+         }
       }
    }
 
@@ -1157,7 +1172,10 @@ public class ClusterConfigManager {
       }
       setAdvancedProperties(clusterCreate.getExternalHDFS(),
             clusterCreate.getExternalMapReduce(),
-            clusterCreate.getLocalRepoURL(), cluster);
+            clusterCreate.getLocalRepoURL(),
+            clusterCreate.getExternalNamenode(),
+            clusterCreate.getExternalSecondaryNamenode(),
+            clusterCreate.getExternalDatanodes(), cluster);
       updateNodegroupAppConfig(clusterCreate, cluster,
             clusterCreate.isValidateConfig());
    }
