@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <parent>
+      <artifactId>serengeti-master</artifactId>
+      <groupId>com.vmware.bdd</groupId>
+      <version>2.2.0</version>
+      <relativePath>../../pom.xml</relativePath>
+   </parent>
+   <modelVersion>4.0.0</modelVersion>
+
+   <artifactId>user-mgmt</artifactId>
+   <name>Serengeti User Management</name>
+
+   <dependencies>
+      <dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-core</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-beans</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.batch</groupId>
+         <artifactId>spring-batch-core</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>com.google.code.gson</groupId>
+         <artifactId>gson</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.testng</groupId>
+         <artifactId>testng</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.mockito</groupId>
+         <artifactId>mockito-core</artifactId>
+      </dependency>
+
+      <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>cluster-mgmt</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>dal</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>commons-aurora</artifactId>
+      </dependency>
+
+   </dependencies>
+
+
+</project>

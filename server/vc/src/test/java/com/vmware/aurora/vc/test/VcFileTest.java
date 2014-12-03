@@ -99,141 +99,141 @@ public class VcFileTest extends AbstractVcTest {
       System.out.println(VcFileManager.searchFile(d2, testDir + "/VcFileTest3"));
    }
 
-   @Test
-   public void uploadVmTemplate() throws Exception {
-      init();
-      System.out.println("upload VM template to " + myRP + d1 + net1 + net2);
-      VcVirtualMachine vm = null, vm1 = null;
-      String vmName = "junit-VcFileTest-VM-" + VcTestConfig.testPostfix;
-      String vm1Name = "junit-VcFileTest-VM%1-" + VcTestConfig.testPostfix;
-      VcDatacenter dc = d1.getDatacenter();
-      try {
-         /*
-          * Always clean up VMs from previous runs.
-          */
-         if ((vm = dc.getVirtualMachine(vmName)) != null) {
-            vm.destroy();
-         }
-         if ((vm1 = dc.getVirtualMachine(vm1Name)) != null) {
-            vm1.destroy();
-         }
-         /*
-          * Import a VM from OVF.
-          */
-         vm = VcFileManager.importVm(vmName, myRP, d1, net1, VcTestConfig.ovfPath);
-         System.out.println(vm);
-         vm = dc.getVirtualMachine(vmName);
-         System.out.println(vm);
-         vm.dumpDevices();
-         System.out.println(VcFileManager.getDsPath(vm, ""));
-
-         /* test device identification */
-         DeviceId diskId = new DeviceId("VirtualLsiLogicController:0:0");
-         VirtualDevice scsi1 = vm.getVirtualController(diskId);
-         VirtualDevice disk1 = vm.getVirtualDevice(diskId);
-         DeviceId genDiskId = new DeviceId(scsi1, disk1);
-         if (!diskId.equals(genDiskId)) {
-            throw new Exception("unmatched disk id " + diskId + " " + genDiskId);
-         }
-
-         VirtualDevice.BackingInfo disk1Bk = vm.getVirtualDevice(diskId).getBacking();
-         System.out.println("Remove a disk");
-         vm.detachVirtualDisk(diskId, false);
-         vm.dumpDevices();
-
-         System.out.println("Attach a new disk");
-         vm.attachVirtualDisk(new DeviceId("VirtualLsiLogicController", 0, 2),
-               VmConfigUtil.createVmdkBackingInfo(vm, "data.vmdk", DiskMode.persistent),
-               true, DiskSize.sizeFromGB(8));
-         vm.dumpDevices();
-
-         /* test setting extra config */
-         Map<String, String> map = new HashMap<String, String>();
-         map.put("vmid", "junit-test-vm");
-         vm.setDbvmConfig(map);
-         map = vm.getDbvmConfig();
-         System.out.println(map);
-
-         if(VmConfigUtil.isDetachDiskEnabled()) {
-            System.out.println("Attach a disk");
-            vm.attachVirtualDisk(diskId, disk1Bk, false, null);
-            vm.dumpDevices();
-         }
-
-         // create a snapshot so that we can do linked clone
-         vm.createSnapshot("snap1", "snap1");
-         // test finding snapshots
-         vm.createSnapshot("snap2", "snap2");
-         VcSnapshot snap1 = vm.getSnapshotByName("snap1");
-         AuAssert.check(snap1 != null);
-         VcSnapshot snap2 = vm.getSnapshotByName("snap2");
-         AuAssert.check(snap2 != null);
-         System.out.println("snap1: " + snap1 + " snap2: " + snap2);
-
-         System.out.println("Mark the VM as template");
-         vm.markAsTemplate();
-         System.out.println(dc.getVirtualMachine(vmName).getInfo());
-
-         /*
-          * Test file operations using data.vmdk
-          */
-         System.out.println("data.vmdk uuid=" +
-               VcFileManager.queryVirtualDiskUuid(
-                     VcFileManager.getDsPath(vm, "data.vmdk"), dc));
-         testFileOp(VcFileManager.getDsPath(vm, "data.vmdk"));
-
-         /*
-          * Clone the template VM.
-          */
-         System.out.println("clone the template VM to a VM");
-         ConfigSpec spec = new ConfigSpecImpl();
-         vm1 = vm.cloneTemplate(vm1Name, myRP, d1, spec);
-         System.out.println(vm1.getInfo());
-         vm1.dumpDevices();
-         map = vm1.getDbvmConfig();
-         System.out.println(map);
-
-         System.out.println("Attach a new disk");
-         DeviceId archiveDiskId = new DeviceId("VirtualLsiLogicController:0:3");
-         DeviceId tempDiskId = new DeviceId("VirtualLsiLogicController:0:4");
-         vm1.attachVirtualDisk(archiveDiskId,
-               VmConfigUtil.createVmdkBackingInfo(vm1, d1, "archive.vmdk", DiskMode.persistent, true),
-               true, DiskSize.sizeFromGB(2));
-         // test copying and attaching a new disk
-         System.out.println("Copy and attach a new disk");
-         vm1.copyAttachVirtualDisk(tempDiskId, vm1, archiveDiskId,
-                                   "temp.vmdk", DiskMode.persistent);
-
-         List<VirtualDeviceSpec> changes = new ArrayList<VirtualDeviceSpec>();
-         changes.add(vm1.reconfigNetworkSpec("Network adapter 1", net1));
-         changes.add(vm1.reconfigNetworkSpec("Network adapter 2", net2));
-         vm1.reconfigure(VmConfigUtil.createConfigSpec(changes));
-
-         /*
-          * Start the VM and reconfigure online.
-          */
-         vm1.powerOn();
-         Thread.sleep(1000);
-         // extend the disk online
-         vm1.extendVirtualDisk(tempDiskId, DiskSize.sizeFromGB(3));
-         vm1.dumpDevices();
-         vm1.powerOff();
-
-         /*
-          * Clean up.
-          */
-         vm.destroy();
-         vm1.destroy();
-      } catch (Exception e) {
-         System.out.println(e);
-         if (vm != null) {
-            vm.destroy();
-         }
-         if (vm1 != null) {
-            vm1.destroy();
-         }
-         throw e;
-      }
-   }
+//   @Test
+//   public void uploadVmTemplate() throws Exception {
+//      init();
+//      System.out.println("upload VM template to " + myRP + d1 + net1 + net2);
+//      VcVirtualMachine vm = null, vm1 = null;
+//      String vmName = "junit-VcFileTest-VM-" + VcTestConfig.testPostfix;
+//      String vm1Name = "junit-VcFileTest-VM%1-" + VcTestConfig.testPostfix;
+//      VcDatacenter dc = d1.getDatacenter();
+//      try {
+//         /*
+//          * Always clean up VMs from previous runs.
+//          */
+//         if ((vm = dc.getVirtualMachine(vmName)) != null) {
+//            vm.destroy();
+//         }
+//         if ((vm1 = dc.getVirtualMachine(vm1Name)) != null) {
+//            vm1.destroy();
+//         }
+//         /*
+//          * Import a VM from OVF.
+//          */
+//         vm = VcFileManager.importVm(vmName, myRP, d1, net1, VcTestConfig.ovfPath);
+//         System.out.println(vm);
+//         vm = dc.getVirtualMachine(vmName);
+//         System.out.println(vm);
+//         vm.dumpDevices();
+//         System.out.println(VcFileManager.getDsPath(vm, ""));
+//
+//         /* test device identification */
+//         DeviceId diskId = new DeviceId("VirtualLsiLogicController:0:0");
+//         VirtualDevice scsi1 = vm.getVirtualController(diskId);
+//         VirtualDevice disk1 = vm.getVirtualDevice(diskId);
+//         DeviceId genDiskId = new DeviceId(scsi1, disk1);
+//         if (!diskId.equals(genDiskId)) {
+//            throw new Exception("unmatched disk id " + diskId + " " + genDiskId);
+//         }
+//
+//         VirtualDevice.BackingInfo disk1Bk = vm.getVirtualDevice(diskId).getBacking();
+//         System.out.println("Remove a disk");
+//         vm.detachVirtualDisk(diskId, false);
+//         vm.dumpDevices();
+//
+//         System.out.println("Attach a new disk");
+//         vm.attachVirtualDisk(new DeviceId("VirtualLsiLogicController", 0, 2),
+//               VmConfigUtil.createVmdkBackingInfo(vm, "data.vmdk", DiskMode.persistent),
+//               true, DiskSize.sizeFromGB(8));
+//         vm.dumpDevices();
+//
+//         /* test setting extra config */
+//         Map<String, String> map = new HashMap<String, String>();
+//         map.put("vmid", "junit-test-vm");
+//         vm.setDbvmConfig(map);
+//         map = vm.getDbvmConfig();
+//         System.out.println(map);
+//
+//         if(VmConfigUtil.isDetachDiskEnabled()) {
+//            System.out.println("Attach a disk");
+//            vm.attachVirtualDisk(diskId, disk1Bk, false, null);
+//            vm.dumpDevices();
+//         }
+//
+//         // create a snapshot so that we can do linked clone
+//         vm.createSnapshot("snap1", "snap1");
+//         // test finding snapshots
+//         vm.createSnapshot("snap2", "snap2");
+//         VcSnapshot snap1 = vm.getSnapshotByName("snap1");
+//         AuAssert.check(snap1 != null);
+//         VcSnapshot snap2 = vm.getSnapshotByName("snap2");
+//         AuAssert.check(snap2 != null);
+//         System.out.println("snap1: " + snap1 + " snap2: " + snap2);
+//
+//         System.out.println("Mark the VM as template");
+//         vm.markAsTemplate();
+//         System.out.println(dc.getVirtualMachine(vmName).getInfo());
+//
+//         /*
+//          * Test file operations using data.vmdk
+//          */
+//         System.out.println("data.vmdk uuid=" +
+//               VcFileManager.queryVirtualDiskUuid(
+//                     VcFileManager.getDsPath(vm, "data.vmdk"), dc));
+//         testFileOp(VcFileManager.getDsPath(vm, "data.vmdk"));
+//
+//         /*
+//          * Clone the template VM.
+//          */
+//         System.out.println("clone the template VM to a VM");
+//         ConfigSpec spec = new ConfigSpecImpl();
+//         vm1 = vm.cloneTemplate(vm1Name, myRP, d1, spec);
+//         System.out.println(vm1.getInfo());
+//         vm1.dumpDevices();
+//         map = vm1.getDbvmConfig();
+//         System.out.println(map);
+//
+//         System.out.println("Attach a new disk");
+//         DeviceId archiveDiskId = new DeviceId("VirtualLsiLogicController:0:3");
+//         DeviceId tempDiskId = new DeviceId("VirtualLsiLogicController:0:4");
+//         vm1.attachVirtualDisk(archiveDiskId,
+//               VmConfigUtil.createVmdkBackingInfo(vm1, d1, "archive.vmdk", DiskMode.persistent, true),
+//               true, DiskSize.sizeFromGB(2));
+//         // test copying and attaching a new disk
+//         System.out.println("Copy and attach a new disk");
+//         vm1.copyAttachVirtualDisk(tempDiskId, vm1, archiveDiskId,
+//                                   "temp.vmdk", DiskMode.persistent);
+//
+//         List<VirtualDeviceSpec> changes = new ArrayList<VirtualDeviceSpec>();
+//         changes.add(vm1.reconfigNetworkSpec("Network adapter 1", net1));
+//         changes.add(vm1.reconfigNetworkSpec("Network adapter 2", net2));
+//         vm1.reconfigure(VmConfigUtil.createConfigSpec(changes));
+//
+//         /*
+//          * Start the VM and reconfigure online.
+//          */
+//         vm1.powerOn();
+//         Thread.sleep(1000);
+//         // extend the disk online
+//         vm1.extendVirtualDisk(tempDiskId, DiskSize.sizeFromGB(3));
+//         vm1.dumpDevices();
+//         vm1.powerOff();
+//
+//         /*
+//          * Clean up.
+//          */
+//         vm.destroy();
+//         vm1.destroy();
+//      } catch (Exception e) {
+//         System.out.println(e);
+//         if (vm != null) {
+//            vm.destroy();
+//         }
+//         if (vm1 != null) {
+//            vm1.destroy();
+//         }
+//         throw e;
+//      }
+//   }
 
 }

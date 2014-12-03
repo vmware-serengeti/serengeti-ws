@@ -49,7 +49,6 @@ import com.vmware.aurora.exception.VcException;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.security.CmsKeyStore;
 import com.vmware.aurora.util.AuAssert;
-import com.vmware.aurora.util.HttpsConnectionUtil;
 import com.vmware.aurora.vc.vcservice.VcService.MyThreadPoolExecutor.MyBlockingQueue;
 import com.vmware.vim.binding.impl.vim.DescriptionImpl;
 import com.vmware.vim.binding.impl.vim.ExtensionImpl;
@@ -437,7 +436,6 @@ public class VcService {
       password = Configuration.getString("vim.password", null);
       locale = Configuration.getString("vim.locale", "en");
 
-      HttpsConnectionUtil.init(vcThumbprint);
       configured = true;
    }
 

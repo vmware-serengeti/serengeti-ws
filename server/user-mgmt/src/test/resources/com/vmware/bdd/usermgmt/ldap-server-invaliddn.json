@@ -1,0 +1,9 @@
+{
+    "name": "default ad server",
+    "type": "LDAP",
+    "primaryUrl": "ldap://pek2-aurora-dev-01-113-dhcp137.eng.vmware.com",
+    "baseUserDn": "ou=users,dxyz=bde,dc=vmware,dc=com",
+    "baseGroupDn": "ou=groups,dxyz=bde,dc=vmware,dc=com",
+    "userName": "cn=Manager,dc=bde,dc=vmware,dc=com",
+    "password": "openldap"
+}

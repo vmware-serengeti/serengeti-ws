@@ -64,9 +64,9 @@ public class HttpsConnectionUtil {
       try {
          tm = new ThumbprintTrustManager();
          tm.add(thumbprint);
-         sc.init(null, new TrustManager[]{tm}, new java.security.SecureRandom());
-         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-         SSLContext.setDefault(sc);
+//         sc.init(null, new TrustManager[]{tm}, new java.security.SecureRandom());
+//         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+//         SSLContext.setDefault(sc);
       } catch (Exception e) {
          logger.error("Failed setup SSL trust manager", e);
       }

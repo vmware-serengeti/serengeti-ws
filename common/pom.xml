@@ -16,6 +16,15 @@
 
    <dependencies>
       <dependency>
+         <groupId>org.bouncycastle</groupId>
+         <artifactId>bcprov-jdk15on</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.bouncycastle</groupId>
+         <artifactId>bcpkix-jdk15on</artifactId>
+      </dependency>
+
+      <dependency>
          <groupId>javax.validation</groupId>
          <artifactId>validation-api</artifactId>
       </dependency>
@@ -56,6 +65,7 @@
          <groupId>com.vmware.bdd</groupId>
          <artifactId>commons-aurora</artifactId>
       </dependency>
+
    </dependencies>
 
     <build>

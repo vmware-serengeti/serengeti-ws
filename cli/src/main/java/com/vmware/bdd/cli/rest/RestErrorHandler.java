@@ -59,7 +59,7 @@ public class RestErrorHandler implements ResponseErrorHandler {
 
    public void handleError(ClientHttpResponse response) throws IOException {
       MediaType contentType = response.getHeaders().getContentType();
-      if (contentType.equals(MediaType.APPLICATION_JSON)) {
+      if (MediaType.APPLICATION_JSON.includes(contentType)) {
          throw new CliRestException(delegate.extractData(response).getMessage());
       } else {
          HttpStatus statusCode = response.getStatusCode();

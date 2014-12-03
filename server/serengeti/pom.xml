@@ -24,6 +24,11 @@
 		<artifactId>authentication</artifactId>
 	  </dependency>
       <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>user-mgmt</artifactId>
+      </dependency>
+
+      <dependency>
          <groupId>com.fasterxml.jackson.core</groupId>
          <artifactId>jackson-core</artifactId>
       </dependency>

@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,26 +36,15 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.exception.BaseVMException;
-import com.vmware.aurora.exception.VcException;
-import com.vmware.aurora.security.ThumbprintTrustManager;
 import com.vmware.aurora.util.AuAssert;
-import com.vmware.aurora.util.HttpsConnectionUtil;
 import com.vmware.aurora.vc.VcTask.TaskType;
 import com.vmware.aurora.vc.VcTaskMgr.IVcTaskBody;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcService;
-import com.vmware.vim.binding.impl.vim.OvfManager_Impl.CreateImportSpecParamsImpl;
-import com.vmware.vim.binding.impl.vim.OvfManager_Impl.NetworkMappingImpl;
 import com.vmware.vim.binding.impl.vim.host.DatastoreBrowser_Impl;
 import com.vmware.vim.binding.vim.Datastore;
 import com.vmware.vim.binding.vim.FileManager;
 import com.vmware.vim.binding.vim.HttpNfcLease;
-import com.vmware.vim.binding.vim.HttpNfcLease.DeviceUrl;
-import com.vmware.vim.binding.vim.HttpNfcLease.State;
-import com.vmware.vim.binding.vim.OvfManager.CreateImportSpecParams;
-import com.vmware.vim.binding.vim.OvfManager.CreateImportSpecResult;
-import com.vmware.vim.binding.vim.OvfManager.FileItem;
-import com.vmware.vim.binding.vim.OvfManager.NetworkMapping;
 import com.vmware.vim.binding.vim.VirtualDiskManager;
 import com.vmware.vim.binding.vim.VirtualDiskManager.VirtualDiskSpec;
 import com.vmware.vim.binding.vim.fault.FileNotFound;
@@ -65,9 +53,6 @@ import com.vmware.vim.binding.vim.host.DatastoreBrowser;
 import com.vmware.vim.binding.vim.host.DatastoreBrowser.FileInfo;
 import com.vmware.vim.binding.vim.host.DatastoreBrowser.SearchResults;
 import com.vmware.vim.binding.vim.host.DatastoreBrowser.SearchSpec;
-import com.vmware.vim.binding.vim.vApp.IPAssignmentInfo.IpAllocationPolicy;
-import com.vmware.vim.binding.vim.vm.VmImportSpec;
-import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 
 /**
  * This is a collection of utility functions to do
@@ -343,91 +328,94 @@ public class VcFileManager {
     * @return the imported VM
     * @throws Exception
     */
-   static public VcVirtualMachine
-   importVm(String name, VcResourcePool rp, VcDatastore ds,
-            VcNetwork network, String ovfPath)
-   throws Exception {
-      ManagedObjectReference vmRef;
-      AuAssert.check(VcContext.isInTaskSession());
-      VcService vcs = VcContext.getService();
-
-      CreateImportSpecParams importParams = new CreateImportSpecParamsImpl();
-      importParams.setDeploymentOption("");
-      importParams.setLocale("");
-      importParams.setEntityName(name);
-      NetworkMapping[] nets = {
-            new NetworkMappingImpl("Network 1", network.getMoRef()),
-            new NetworkMappingImpl("Network 2", network.getMoRef())
-      };
-      importParams.setNetworkMapping(nets);
-      importParams.setIpAllocationPolicy(IpAllocationPolicy.transientPolicy.toString());
-      importParams.setDiskProvisioning("thin");
-
-      // create import spec from ovf
-      CreateImportSpecResult specResult = vcs.getOvfManager().createImportSpec(
-            loadOvfContents(ovfPath), rp.getMoRef(), ds.getMoRef(), importParams);
-      AuAssert.check(specResult.getError() == null && specResult.getWarning() == null);
-      VmImportSpec importSpec = (VmImportSpec)specResult.getImportSpec();
-      // start importing the vApp and get the lease to upload vmdks
-      HttpNfcLease nfcLease = rp.importVApp(importSpec);
-
-      // total bytes to be imported
-      long importTotal = 0;
-      // map: deviceId -> File
-      HashMap<String, File> fileMap = new HashMap<String, File>();
-      String basePath = new File(ovfPath).getParent();
-      for (FileItem item : specResult.getFileItem()) {
-         File f = new File(basePath + File.separator + item.getPath());
-         fileMap.put(item.getDeviceId(), f);
-         importTotal += f.length();
-      }
-
-      try {
-         // wait for nfc lease to become ready
-         State state = nfcLease.getState();
-         while (state != State.ready) {
-            Thread.sleep(1000);
-            state = nfcLease.getState();
-            if (state == State.error) {
-               Exception e = nfcLease.getError();
-               logger.error(e.getMessage(), e.getCause());
-               throw e;
-            }
-         }
-
-        nfcLease.progress(0);
-        ProgressListener listener = new ProgressListener(nfcLease, importTotal);
-        vmRef = nfcLease.getInfo().getEntity();
-        ThumbprintTrustManager tm = HttpsConnectionUtil.getThumbprintTrustManager();
-         // upload all files
-         for(DeviceUrl deviceUrl : nfcLease.getInfo().getDeviceUrl()) {
-            File f = fileMap.get(deviceUrl.getImportKey());
-            String thumbprint = deviceUrl.getSslThumbprint();
-            tm.add(thumbprint.toString(), Thread.currentThread());
-            try {
-               uploadFileLoop(deviceUrl.getUrl(), f, ds,
-                              name + "/" + f.getName(), listener);
-            } finally {
-               tm.remove(thumbprint.toString(), Thread.currentThread());
-            }
-         }
-         nfcLease.progress(100);
-         nfcLease.complete();
-      } catch (Exception e) {
-         logger.error(e.getCause());
-         try {
-            /*
-             * By aborting the lease, VC also deletes the VM.
-             */
-            nfcLease.abort(null);
-         } catch (Exception e1) {
-            logger.error("got exception trying to abort nfcLease", e1);
-         }
-         throw VcException.UPLOAD_ERROR(e);
-      }
-
-      return VcCache.get(vmRef);
-   }
+//   static public VcVirtualMachine
+//   importVm(String name, VcResourcePool rp, VcDatastore ds,
+//            VcNetwork network, String ovfPath)
+//   throws Exception {
+//      ManagedObjectReference vmRef;
+//      AuAssert.check(VcContext.isInTaskSession());
+//      VcService vcs = VcContext.getService();
+//
+//      CreateImportSpecParams importParams = new CreateImportSpecParamsImpl();
+//      importParams.setDeploymentOption("");
+//      importParams.setLocale("");
+//      importParams.setEntityName(name);
+//      NetworkMapping[] nets = {
+//            new NetworkMappingImpl("Network 1", network.getMoRef()),
+//            new NetworkMappingImpl("Network 2", network.getMoRef())
+//      };
+//      importParams.setNetworkMapping(nets);
+//      importParams.setIpAllocationPolicy(IpAllocationPolicy.transientPolicy.toString());
+//      importParams.setDiskProvisioning("thin");
+//
+//      // create import spec from ovf
+//      CreateImportSpecResult specResult = vcs.getOvfManager().createImportSpec(
+//            loadOvfContents(ovfPath), rp.getMoRef(), ds.getMoRef(), importParams);
+//      AuAssert.check(specResult.getError() == null && specResult.getWarning() == null);
+//      VmImportSpec importSpec = (VmImportSpec)specResult.getImportSpec();
+//      // start importing the vApp and get the lease to upload vmdks
+//      HttpNfcLease nfcLease = rp.importVApp(importSpec);
+//
+//      // total bytes to be imported
+//      long importTotal = 0;
+//      // map: deviceId -> File
+//      HashMap<String, File> fileMap = new HashMap<String, File>();
+//      String basePath = new File(ovfPath).getParent();
+//      for (FileItem item : specResult.getFileItem()) {
+//         File f = new File(basePath + File.separator + item.getPath());
+//         fileMap.put(item.getDeviceId(), f);
+//         importTotal += f.length();
+//      }
+//
+//      try {
+//         // wait for nfc lease to become ready
+//         State state = nfcLease.getState();
+//         while (state != State.ready) {
+//            Thread.sleep(1000);
+//            state = nfcLease.getState();
+//            if (state == State.error) {
+//               Exception e = nfcLease.getError();
+//               logger.error(e.getMessage(), e.getCause());
+//               throw e;
+//            }
+//         }
+//
+//        nfcLease.progress(0);
+//        ProgressListener listener = new ProgressListener(nfcLease, importTotal);
+//        vmRef = nfcLease.getInfo().getEntity();
+//         //@TODO 1. if this method will be used in future, the TrustManager need to be refactored.
+//        //ThumbprintTrustManager tm = HttpsConnectionUtil.getThumbprintTrustManager();
+//         // upload all files
+//         for(DeviceUrl deviceUrl : nfcLease.getInfo().getDeviceUrl()) {
+//            File f = fileMap.get(deviceUrl.getImportKey());
+//            String thumbprint = deviceUrl.getSslThumbprint();
+//            //@TODO 2. if this method will be used in future, the TrustManager need to be refactored.
+//            //tm.add(thumbprint.toString(), Thread.currentThread());
+//            try {
+//               uploadFileLoop(deviceUrl.getUrl(), f, ds,
+//                              name + "/" + f.getName(), listener);
+//            } finally {
+//               //@TODO 3. if this method will be used in future, the TrustManager need to be refactored.
+//               //tm.remove(thumbprint.toString(), Thread.currentThread());
+//            }
+//         }
+//         nfcLease.progress(100);
+//         nfcLease.complete();
+//      } catch (Exception e) {
+//         logger.error(e.getCause());
+//         try {
+//            /*
+//             * By aborting the lease, VC also deletes the VM.
+//             */
+//            nfcLease.abort(null);
+//         } catch (Exception e1) {
+//            logger.error("got exception trying to abort nfcLease", e1);
+//         }
+//         throw VcException.UPLOAD_ERROR(e);
+//      }
+//
+//      return VcCache.get(vmRef);
+//   }
 
    public static void uploadFile(String localPath, VcDatastore datastore, String datastorePath)
          throws Exception {
