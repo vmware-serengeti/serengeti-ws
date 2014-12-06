@@ -72,6 +72,7 @@ public class ShrinkManager {
                         .addString(JobConstants.SUB_JOB_NODE_NAME, nodeName)
                         .addString(JobConstants.GROUP_NAME_JOB_PARAM, nodeGroupName)
                         .addString(JobConstants.CLUSTER_NAME_JOB_PARAM,clusterName)
+                        .addString(JobConstants.TARGET_NAME_JOB_PARAM, nodeName)
                         .toJobParameters();
             jobParametersList.add(nodeParameters);
          } else {

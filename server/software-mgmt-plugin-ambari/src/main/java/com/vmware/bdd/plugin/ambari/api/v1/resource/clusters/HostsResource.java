@@ -51,14 +51,24 @@ public interface HostsResource {
    @POST
    @Path("/")
    @Consumes({ MediaType.APPLICATION_XML })
-   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
-      MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.TEXT_XML })
+   @Produces({  MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+         MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.TEXT_XML })
    public Response addComponentsToHosts(String hostComponentsWithFilter);
 
    @POST
    @Path("/{hostFQDN}")
    public Response addHost(@PathParam(Parameters.HOST_FQDN) String hostFQDN);
 
+   @GET
    @Path("/{hostFQDN}/host_components")
    public HostComponentsResource getHostComponentsResource(@PathParam(Parameters.HOST_FQDN) String hostFQDN);
+
+   @DELETE
+   @Path("/{hostFQDN}/host_components")
+   public Response deleteHostComponentsResource(@PathParam(Parameters.HOST_FQDN) String hostFQDN);
+
+   @GET
+   @Path("/{hostFQDN}/host_components")
+   public Response getHostComponents(@PathParam(Parameters.HOST_FQDN) String hostFQDN);
+
 }

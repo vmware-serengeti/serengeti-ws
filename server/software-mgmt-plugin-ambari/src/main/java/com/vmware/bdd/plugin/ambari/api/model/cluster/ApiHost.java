@@ -17,6 +17,8 @@ package com.vmware.bdd.plugin.ambari.api.model.cluster;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 public class ApiHost {
 
    @Expose
@@ -28,6 +30,10 @@ public class ApiHost {
 
    @Expose
    private String fqdn;
+
+   @Expose
+   @SerializedName("host_components")
+   private List<ApiHostComponent> hostComponentList;
 
    public String getHref() {
       return href;
@@ -51,5 +57,13 @@ public class ApiHost {
 
    public void setFqdn(String fqdn) {
       this.fqdn = fqdn;
+   }
+
+   public List<ApiHostComponent> getHostComponentList() {
+      return hostComponentList;
+   }
+
+   public void setHostComponentList(List<ApiHostComponent> hostComponentList) {
+      this.hostComponentList = hostComponentList;
    }
 }

@@ -48,7 +48,6 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroupList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponents;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostStatus;
@@ -60,6 +59,10 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceAlert;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceAlertList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceStatus;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponent;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponents;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponentsRequest;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestsResourceFilter;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponentList;
@@ -73,6 +76,7 @@ import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
+
 
 public class ApiManager implements IApiManager {
 
@@ -393,6 +397,38 @@ public class ApiManager implements IApiManager {
       return ApiUtils.jsonToObject(ApiRequest.class, startServicesJson);
    }
 
+   public ApiRequest decommissionComponent(String clusterName, String host, String serviceName, String managementRoleName, String slaveRoleName) {
+      ApiRequestInfo requestInfo = new ApiRequestInfo();
+      requestInfo.setCommand("DECOMMISSION");
+      requestInfo.setContext("Decommission " + slaveRoleName);
+      HashMap<String, String> parameters = new HashMap<>();
+      parameters.put("slave_type", slaveRoleName);
+      parameters.put("excluded_hosts", host);
+      requestInfo.setParameters(parameters);
+
+      ApiRequestsResourceFilter requestsResourceFilter = new ApiRequestsResourceFilter();
+      requestsResourceFilter.setServiceName(serviceName);
+      requestsResourceFilter.setComponentName(managementRoleName);
+      List<ApiRequestsResourceFilter> requestsResourceFilters = new ArrayList<ApiRequestsResourceFilter>();
+      requestsResourceFilters.add(requestsResourceFilter);
+
+      HashMap<String, Object> requestBodyMap = new HashMap<>();
+      requestBodyMap.put("RequestInfo", requestInfo);
+      requestBodyMap.put("Requests/resource_filters", requestsResourceFilters);
+      Response response = null;
+      try {
+         String request = ApiUtils.objectToJson(requestBodyMap);
+         logger.info("When decommission component, cmd is " + request);
+         response = apiResourceRootV1.getClustersResource().getRequestsResource(clusterName).postRequest(request);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
+
+      String decommissionComponentJson = handleAmbariResponse(response);
+      logger.info("The reponse when decommission component is :" + decommissionComponentJson);
+      return ApiUtils.jsonToObject(ApiRequest.class, decommissionComponentJson);
+   }
+
    @Override
    public List<String> getClusterServicesNames(String clusterName) throws AmbariApiException {
       Response response = null;
@@ -486,7 +522,7 @@ public class ApiManager implements IApiManager {
       Response response = null;
       try {
          response = apiResourceRootV1.getBlueprintsResource().createBlueprint(
-                     blueprintName, ApiUtils.objectToJson(apiBlueprint));
+               blueprintName, ApiUtils.objectToJson(apiBlueprint));
       } catch (Exception e) {
          throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
       }
@@ -591,7 +627,7 @@ public class ApiManager implements IApiManager {
       Response response = null;
       try {
          response = apiResourceRootV1.getBootstrapResource().createBootstrap(
-                     ApiUtils.objectToJson(bootstrap));
+               ApiUtils.objectToJson(bootstrap));
       } catch (Exception e) {
          throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
       }
@@ -773,6 +809,20 @@ public class ApiManager implements IApiManager {
       return hostList;
    }
 
+   public List<ApiHostComponent> getHostComponents(String clusterName, String hostName) throws AmbariApiException {
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource().getHostsResource(clusterName).getHostComponents(hostName);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
+      String hostComponents = handleAmbariResponse(response);
+      logger.info("HostComponents are " + hostComponents);
+      ApiHostComponents components =
+            ApiUtils.jsonToObject(ApiHostComponents.class, hostComponents);
+      return components.getHostComponents();
+   }
+
    public String healthCheck() throws AmbariApiException {
       Response response = null;
       try {
@@ -866,7 +916,7 @@ public class ApiManager implements IApiManager {
    public ApiRequest stopAllComponentsInHosts(String clusterName,
          List<String> hostNames) throws AmbariApiException {
       ApiHostsRequest hostsRequest = new ApiHostsRequest();
-      ApiHostComponents apiComponents = new ApiHostComponents();
+      ApiHostComponentsRequest apiComponents = new ApiHostComponentsRequest();
       hostsRequest.setBody(apiComponents);
       ApiComponentInfo hostRoles = new ApiComponentInfo();
       hostRoles.setState("INSTALLED");
@@ -904,7 +954,7 @@ public class ApiManager implements IApiManager {
       try {
          response = apiResourceRootV1.getClustersResource()
                      .getHostsResource(clusterName)
-                     .getHostComponentsResource(hostName).deleteAllComponents();
+                     .deleteHostComponentsResource(hostName);
       } catch (Exception e) {
          throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
       }
@@ -960,7 +1010,7 @@ public class ApiManager implements IApiManager {
          List<String> hostNames, List<String> components)
          throws AmbariApiException {
       ApiHostsRequest hostsRequest = new ApiHostsRequest();
-      ApiHostComponents apiComponents = new ApiHostComponents();
+      ApiHostComponentsRequest apiComponents = new ApiHostComponentsRequest();
       hostsRequest.setBody(apiComponents);
       ApiComponentInfo hostRoles = new ApiComponentInfo();
       hostRoles.setState("STARTED");
@@ -1014,7 +1064,7 @@ public class ApiManager implements IApiManager {
    }
 
    public void addComponents(String clusterName, List<String> hostNames,
-         ApiHostComponents components) throws AmbariApiException {
+         ApiHostComponentsRequest components) throws AmbariApiException {
       logger.info("Adding components to hosts: " + hostNames);
       ApiHostsRequest hostsRequest = new ApiHostsRequest();
       hostsRequest.setBody(components);

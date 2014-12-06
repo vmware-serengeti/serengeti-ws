@@ -19,15 +19,15 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Created by qjin on 12/7/14.
+ */
 public class ApiHostComponents {
 
    @Expose
-   @SerializedName("host_components")
+   @SerializedName("items")
    private List<ApiHostComponent> hostComponents;
 
-   @Expose
-   @SerializedName("HostRoles")
-   private ApiComponentInfo hostRoles;
 
    public List<ApiHostComponent> getHostComponents() {
       return hostComponents;
@@ -36,12 +36,8 @@ public class ApiHostComponents {
    public void setHostComponents(List<ApiHostComponent> hostComponents) {
       this.hostComponents = hostComponents;
    }
-
-   public ApiComponentInfo getHostRoles() {
-      return hostRoles;
-   }
-
-   public void setHostRoles(ApiComponentInfo hostRoles) {
-      this.hostRoles = hostRoles;
-   }
 }
+
+
+
+

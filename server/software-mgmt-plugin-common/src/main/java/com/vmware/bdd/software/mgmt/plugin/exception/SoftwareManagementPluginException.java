@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * <code>SoftwareManagementPluginException</code> is the superclass of those
@@ -184,5 +185,9 @@ public class SoftwareManagementPluginException extends RuntimeException {
 
    public static SoftwareManagementPluginException DELETE_HOST_FAILED(String clusterName, String nodeGroupName, String nodeName, Throwable cause) {
       return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.DELETE_HOST_FAILED", cause, clusterName, nodeGroupName, nodeName, cause.getMessage());
+   }
+
+   public static SoftwareManagementPluginException CLUSTER_IS_NOT_COMPUTE_ONLY_CLUSTER(String clusterName, String externalNamenode, Set<String> externalDatanodes) {
+      return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.CLUSTER_IS_NOT_COMPUTE_ONLY_CLUSTER", null, clusterName, externalNamenode, externalDatanodes.toString());
    }
 }

@@ -19,7 +19,7 @@ package com.vmware.bdd.plugin.ambari.api.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponents;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponentsRequest;
 
 /**
  * Created by qjin on 7/7/14.
@@ -27,17 +27,17 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponents;
 public class ApiHostsRequest {
    @Expose
    @SerializedName("Body")
-   private ApiHostComponents body;
+   private ApiHostComponentsRequest body;
 
    @Expose
    @SerializedName("RequestInfo")
    private ApiHostsRequestInfo requestInfo;
 
-   public ApiHostComponents getBody() {
+   public ApiHostComponentsRequest getBody() {
       return body;
    }
 
-   public void setBody(ApiHostComponents body) {
+   public void setBody(ApiHostComponentsRequest body) {
       this.body = body;
    }
 

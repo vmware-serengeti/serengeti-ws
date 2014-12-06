@@ -26,7 +26,7 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponents;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponentsRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestList;
@@ -77,7 +77,7 @@ public interface IApiManager {
    public ApiHostList getClusterHostsList(String clusterName) throws AmbariApiException;
 
    public void addComponents(String clusterName, List<String> hostNames,
-         ApiHostComponents components) throws AmbariApiException;
+         ApiHostComponentsRequest components) throws AmbariApiException;
 
    public ApiRequest installComponents(String clusterName) throws AmbariApiException;
 

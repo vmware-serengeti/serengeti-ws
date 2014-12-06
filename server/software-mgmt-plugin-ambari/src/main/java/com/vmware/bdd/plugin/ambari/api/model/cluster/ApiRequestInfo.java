@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.model.cluster;
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
@@ -99,6 +100,14 @@ public class ApiRequestInfo {
    @Expose
    @SerializedName("context")
    private String context;
+
+   @Expose
+   @SerializedName("command")
+   private String command;
+
+   @Expose
+   @SerializedName("parameters")
+   private HashMap<String, String> parameters;
 
    public Long getRequestId() {
       return requestId;
@@ -258,5 +267,21 @@ public class ApiRequestInfo {
 
    public void setStatus(String status) {
       this.status = status;
+   }
+
+   public String getCommand() {
+      return command;
+   }
+
+   public void setCommand(String command) {
+      this.command = command;
+   }
+
+   public HashMap<String, String> getParameters() {
+      return parameters;
+   }
+
+   public void setParameters(HashMap<String, String> parameters) {
+      this.parameters = parameters;
    }
 }

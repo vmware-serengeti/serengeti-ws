@@ -85,4 +85,15 @@ public class FakeClusterHostsResource implements HostsResource {
          @PathParam("hostFQDN") String hostFQDN) {
       return new FakeHostComponentsResource();
    }
+
+   @Override
+   public Response deleteHostComponentsResource(String hostFQDN) {
+      return null;
+   }
+
+   @Override
+   public Response getHostComponents(String hostFQDN) {
+      return null;
+   }
+
 }

@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHostsRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHostsRequestInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponents;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponentsRequest;
 
 public class AmUtils {
 
@@ -77,7 +77,7 @@ public class AmUtils {
 
    public static ApiHostsRequest createInstallComponentsRequest() {
       ApiHostsRequest hostsRequest = new ApiHostsRequest();
-      ApiHostComponents components = new ApiHostComponents();
+      ApiHostComponentsRequest components = new ApiHostComponentsRequest();
       hostsRequest.setBody(components);
       ApiComponentInfo hostRoles = new ApiComponentInfo();
       hostRoles.setState("INSTALLED");

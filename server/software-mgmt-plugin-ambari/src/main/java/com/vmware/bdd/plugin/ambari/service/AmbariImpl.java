@@ -26,6 +26,9 @@ import java.util.Set;
 
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponentsRequest;
+import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
+import com.vmware.bdd.utils.CommonUtil;
 import org.apache.log4j.Logger;
 
 import javax.ws.rs.NotFoundException;
@@ -46,7 +49,6 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroupConfiguratio
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroupInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponent;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponents;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
@@ -93,6 +95,7 @@ public class AmbariImpl implements SoftwareManager {
    private final int REQUEST_MAX_RETRY_TIMES = 10;
    public static final String MIN_SUPPORTED_VERSION = "1.6.0";
    private static final String UNKNOWN_VERSION = "UNKNOWN";
+   private static final String rolesBlacklistForShrink = "shrink_ambari_roles_blacklist.json";
 
    private String privateKey;
 
@@ -644,7 +647,10 @@ public class AmbariImpl implements SoftwareManager {
    }
 
    public void validateRolesForShrink(NodeGroupInfo groupInfo)
-         throws SoftwareManagementPluginException {};
+         throws SoftwareManagementPluginException {
+      String blacklistStr = CommonUtil.readJsonFile(rolesBlacklistForShrink);
+      ValidateRolesUtil.validateRolesForShrink(blacklistStr, groupInfo);
+   };
 
    @Override
    public void updateInfrastructure(ClusterBlueprint blueprint) {
@@ -705,14 +711,14 @@ public class AmbariImpl implements SoftwareManager {
                   .getName(), clusterDef.getAmStack().getVersion());
       Map<String, String> configTypeToService = stackServiceList.configTypeToService();
       Map<String, ApiComponentInfo> componentToInfo = stackServiceList.componentToInfo();
-      ApiHostComponents apiHostComponents = null;
+      ApiHostComponentsRequest apiHostComponentsRequest = null;
       Set<String> serviceNames = getExistingClusterServices(clusterDef);
       List<String> targetHostNames = new ArrayList<>();
       List<AmNodeDef> targetNodeDefs = new ArrayList<>();
       for (AmNodeDef nodeDef : clusterDef.getNodes()) {
          if (addedNodeNames.contains(nodeDef.getName())) {
-            if (apiHostComponents == null) {
-               apiHostComponents =
+            if (apiHostComponentsRequest == null) {
+               apiHostComponentsRequest =
                      createHostComponents(componentToInfo, serviceNames,
                            nodeDef);
             }
@@ -722,14 +728,14 @@ public class AmbariImpl implements SoftwareManager {
       }
       removeHosts(clusterDef, targetHostNames, reports);
       apiManager.addHostsToCluster(clusterDef.getName(), targetHostNames);
-      if (apiHostComponents.getHostComponents().isEmpty()) {
+      if (apiHostComponentsRequest.getHostComponents().isEmpty()) {
          logger.info("No roles need to install on hosts.");
          return true;
       }
       // add configurations
       createConfigGroups(clusterDef, configTypeToService, targetNodeDefs);
-      installComponents(clusterDef, reports, apiHostComponents, targetHostNames);
-      return startAllComponents(clusterDef, componentToInfo, apiHostComponents,
+      installComponents(clusterDef, reports, apiHostComponentsRequest, targetHostNames);
+      return startAllComponents(clusterDef, componentToInfo, apiHostComponentsRequest,
             targetHostNames, reports);
    }
 
@@ -800,11 +806,11 @@ public class AmbariImpl implements SoftwareManager {
 
    private boolean startAllComponents(AmClusterDef clusterDef,
          Map<String, ApiComponentInfo> componentToInfo,
-         ApiHostComponents apiHostComponents, List<String> targetHostNames,
+         ApiHostComponentsRequest apiHostComponentsRequest, List<String> targetHostNames,
          ClusterReportQueue reports) 
          throws Exception {
       List<String> componentNames = new ArrayList<>();
-      for (ApiHostComponent hostComponent : apiHostComponents.getHostComponents()) {
+      for (ApiHostComponent hostComponent : apiHostComponentsRequest.getHostComponents()) {
          String componentName = hostComponent.getHostComponent().getComponentName();
          ApiComponentInfo compInfo = componentToInfo.get(componentName);
          if (compInfo.isClient()) {
@@ -921,10 +927,10 @@ public class AmbariImpl implements SoftwareManager {
    }
 
    private boolean installComponents(AmClusterDef clusterDef,
-         ClusterReportQueue reports, ApiHostComponents apiHostComponents,
+         ClusterReportQueue reports, ApiHostComponentsRequest apiHostComponentsRequest,
          List<String> targetHostNames) throws Exception {
       // add components to target hosts concurrently
-      apiManager.addComponents(clusterDef.getName(), targetHostNames, apiHostComponents);
+      apiManager.addComponents(clusterDef.getName(), targetHostNames, apiHostComponentsRequest);
       ApiRequest request = apiManager.installComponents(clusterDef.getName());
       ClusterOperationPoller poller =
             new ClusterOperationPoller(apiManager, request,
@@ -948,12 +954,12 @@ public class AmbariImpl implements SoftwareManager {
       return success;
    }
 
-   private ApiHostComponents createHostComponents(
+   private ApiHostComponentsRequest createHostComponents(
          Map<String, ApiComponentInfo> componentToInfo,
          Set<String> serviceNames, AmNodeDef nodeDef) {
-      ApiHostComponents apiHostComponents = new ApiHostComponents();
+      ApiHostComponentsRequest apiHostComponentsRequest = new ApiHostComponentsRequest();
       List<ApiHostComponent> hostComponents = new ArrayList<>();
-      apiHostComponents.setHostComponents(hostComponents);
+      apiHostComponentsRequest.setHostComponents(hostComponents);
       for (String componentName : nodeDef.getComponents()) {
          ApiComponentInfo definedCompInfo = componentToInfo.get(componentName);
          if (definedCompInfo == null) {
@@ -971,7 +977,7 @@ public class AmbariImpl implements SoftwareManager {
          componentInfo.setComponentName(componentName);
          component.setHostComponent(componentInfo);
       }
-      return apiHostComponents;
+      return apiHostComponentsRequest;
    }
 
    private Set<String> getExistingClusterServices(AmClusterDef clusterDef) {
@@ -1192,7 +1198,7 @@ public class AmbariImpl implements SoftwareManager {
          return true;
       } catch (Exception e) {
          logger.error("Ambari got an exception when deleting cluster", e);
-         throw SoftwareManagementPluginException.DELETE_CLUSTER_FAILED(e, Constants.AMBARI_PLUGIN_NAME,clusterBlueprint.getName());
+         throw SoftwareManagementPluginException.DELETE_CLUSTER_FAILED(e, Constants.AMBARI_PLUGIN_NAME, clusterBlueprint.getName());
       }
    }
 
@@ -1227,8 +1233,113 @@ public class AmbariImpl implements SoftwareManager {
    @Override
    public void decommissionNode(ClusterBlueprint blueprint, String nodeGroupName, String nodeName, ClusterReportQueue reportQueue)
          throws SoftwareManagementPluginException {
+      String clusterName = blueprint.getName();
+      boolean succeed = false;
+      AmClusterDef clusterDef = null;
+      String errMsg = null;
+
+      logger.info("Begin decommission host " + nodeName);
+      try {
+         clusterDef = new AmClusterDef(blueprint, privateKey);
+
+         logger.info("validating computing only cluster");
+
+         //check if it is compute only cluster
+         validateComputeOnlyCluster(blueprint);
+
+         //decommission components
+         logger.info("decommission components");
+         updateNodeAction(clusterDef, "Decommission components", nodeName, reportQueue);
+         String hostFQDN = getNodeFQDN(clusterDef, nodeName);
+         decommissionComponentsOnHost(clusterName, hostFQDN);
+         updateNodeAction(clusterDef, "Decommission components succeed", nodeName, reportQueue);
+         logger.info("Decommission components succeed");
+
+         //stop components on host, remove components and host
+         logger.info("Stopping components, removing components and host");
+         List<String> hostNames = new ArrayList<>();
+         hostNames.add(hostFQDN);
+         updateNodeAction(clusterDef, "Removing components and host", nodeName, reportQueue);
+
+         stopAllComponentsInHost(clusterDef, hostNames, reportQueue);
+         apiManager.deleteAllComponents(clusterDef.getName(), hostFQDN);
+         apiManager.deleteHost(clusterDef.getName(), hostFQDN);
+
+         //TODO(qjin): For improvement, restart ZOOKEEPER_SERVER and NAGIOS_SERVER on each host if necessary
+         succeed = true;
+      } catch (Exception e) {
+         errMsg = e.getMessage();
+         logger.error("Got exception when decommission node " + nodeName, e);
+         throw SoftwareManagementPluginException.DECOMISSION_FAILED(clusterName, nodeGroupName, nodeName, errMsg);
+      } finally {
+         if (succeed) {
+            logger.info("Decommission node " + nodeName + " succeed");
+            updateNodeAction(clusterDef, "Host decommissioned", nodeName, reportQueue);
+         } else {
+            if (clusterDef != null) {
+               updateNodeAction(clusterDef, "Host decommission failed", nodeName, reportQueue);
+               updateNodeErrorMsg(clusterDef, errMsg, nodeName, reportQueue);
+               logger.error("Decommission node " + nodeName + " failed.");
+            }
+         }
+      }
    }
 
+   private void stopAllComponentsInHost(AmClusterDef clusterDef, List<String> hostNames, ClusterReportQueue reportQueue) throws Exception {
+      List<String> existingHosts =
+            apiManager.getExistingHosts(clusterDef.getName(), hostNames);
+      if (existingHosts.isEmpty()) {
+         logger.debug("No host exists in cluster.");
+         return;
+      }
+      deleteAssociatedConfGroups(clusterDef, existingHosts);
+      stopAllComponents(clusterDef, existingHosts, reportQueue);
+   }
+
+   private void validateComputeOnlyCluster(ClusterBlueprint blueprint) {
+      String externalNamenode = blueprint.getExternalNamenode();
+      Set<String> externalDatanodes = blueprint.getExternalDatanodes();
+      if (externalNamenode == null || externalDatanodes == null) {
+         throw SoftwareManagementPluginException.CLUSTER_IS_NOT_COMPUTE_ONLY_CLUSTER(blueprint.getName(), externalNamenode, externalDatanodes);
+      }
+   }
+
+   private String getNodeFQDN(AmClusterDef clusterDef, String nodeName) {
+      List<AmNodeDef> nodes = clusterDef.getNodes();
+      AmNodeDef node = null;
+      for (AmNodeDef nodeDef: nodes) {
+         if (nodeDef.getName().equals(nodeName)) {
+            node = nodeDef;
+         }
+      }
+      return node.getFqdn();
+   }
+
+   private void updateNodeAction(AmClusterDef clusterDef, String action, String nodeName, ClusterReportQueue reportQueue) {
+      List<String> nodeNames = new ArrayList<>();
+      nodeNames.add(nodeName);
+      clusterDef.getCurrentReport().setNodesAction(action, nodeNames);
+      reportQueue.addClusterReport(clusterDef.getCurrentReport().clone());
+   }
+
+   private void updateNodeErrorMsg(AmClusterDef clusterDef, String errMsg, String nodeName, ClusterReportQueue reportQueue) {
+      List<String> nodeNames = new ArrayList<>();
+      nodeNames.add(nodeName);
+      clusterDef.getCurrentReport().setNodesError(errMsg, nodeNames);
+      reportQueue.addClusterReport(clusterDef.getCurrentReport().clone());
+   }
+   private void decommissionComponentsOnHost(String clusterName, String hostFQDN) {
+      List<ApiHostComponent> apiHostComponents = apiManager.getHostComponents(clusterName, hostFQDN);
+      for (ApiHostComponent hostComponent: apiHostComponents) {
+         String componentName = hostComponent.getHostComponent().getComponentName();
+         if (componentName.equals("NODEMANAGER")) {
+            apiManager.decommissionComponent(clusterName, hostFQDN, "YARN", "RESOURCEMANAGER", "NODEMANAGER");
+         }
+         if (componentName.equals("DATANODE")) {
+            apiManager.decommissionComponent(clusterName, hostFQDN, "HDFS", "NAMENODE", "DATANODE");
+         }
+      }
+   }
    @Override
    public boolean recomissionNode(String clusterName, NodeInfo node, ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
       return false;

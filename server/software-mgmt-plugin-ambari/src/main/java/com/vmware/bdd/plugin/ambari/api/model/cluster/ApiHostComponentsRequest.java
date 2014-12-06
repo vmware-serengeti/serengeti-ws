@@ -12,32 +12,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.service.am;
+package com.vmware.bdd.plugin.ambari.api.model.cluster;
 
-import javax.ws.rs.core.Response;
+import java.util.List;
 
-import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.RequestsResource;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
-public class FakeRequestsResource implements RequestsResource {
+public class ApiHostComponentsRequest {
 
-   @Override
-   public Response readRequests() {
-      return BuildResponse.buildResponse("clusters/simple_requests.json");
+   @Expose
+   @SerializedName("host_components")
+   private List<ApiHostComponent> hostComponents;
+
+   @Expose
+   @SerializedName("HostRoles")
+   private ApiComponentInfo hostRoles;
+
+   public List<ApiHostComponent> getHostComponents() {
+      return hostComponents;
    }
 
-   @Override
-   public Response postRequest(String request) {
-      return null;
+   public void setHostComponents(List<ApiHostComponent> hostComponents) {
+      this.hostComponents = hostComponents;
    }
 
-   @Override
-   public Response readRequest(Long RequestId) {
-      return BuildResponse.buildResponse("clusters/simple_request.json");
+   public ApiComponentInfo getHostRoles() {
+      return hostRoles;
    }
 
-   @Override
-   public Response readRequestWithTasks(Long RequestId, String fields) {
-      return BuildResponse.buildResponse("clusters/simple_request.json");
+   public void setHostRoles(ApiComponentInfo hostRoles) {
+      this.hostRoles = hostRoles;
    }
-
 }
