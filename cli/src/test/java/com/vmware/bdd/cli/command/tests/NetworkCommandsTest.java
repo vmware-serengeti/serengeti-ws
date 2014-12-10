@@ -140,7 +140,7 @@ public class NetworkCommandsTest extends MockRestServer {
             HttpStatus.NO_CONTENT, "");
       networkCommands.addNetwork("name", "portGroup", false, "192.168.0.12",
             "192.168.0.13", "192.168.0.1,192.167.0.4-100", "192.168.1.1",
-            "255.255.255.0");
+            "255.255.255.0", null, false);
       CookieCache.clear();
    }
    
@@ -157,7 +157,7 @@ public class NetworkCommandsTest extends MockRestServer {
       
       networkCommands.addNetwork("name", "portGroup", false, "192.168.0.12",
             "192.168.0.13", "192.168.0.1,192.168.3.4-100", "192.168.7.1",
-            "255.255.255.0");
+            "255.255.255.0", null, false);
       CookieCache.clear();
    }
 

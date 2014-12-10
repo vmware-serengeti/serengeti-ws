@@ -85,7 +85,7 @@ public class TestNetworkDAO {
       final String dns2 = "4.4.4.4";
 
       NetworkEntity network = new NetworkEntity(portGroup, portGroup, allocType,
-            netmask, gateway, dns1, dns2);
+            netmask, gateway, dns1, dns2, dns2, false);
       networkDao.insert(network);
       Long ipBase = IpAddressUtil.getAddressAsLong(InetAddress.getByName("192.168.1.1"));
       List<IpBlockEntity> ipBlocks = new ArrayList<IpBlockEntity>();
@@ -134,7 +134,7 @@ public class TestNetworkDAO {
             .getAddressAsLong(InetAddress.getByName("0.2.0.0"));
 
       NetworkEntity network = new NetworkEntity(portGroup, portGroup, allocType,
-            netmask, gateway, dns1, dns2);
+            netmask, gateway, dns1, dns2, dns2, false);
       IpBlockEntity originalBlock = new IpBlockEntity(network,
             IpBlockEntity.FREE_BLOCK_OWNER_ID, BlockType.FREE, beginIp, endIp);
       networkDao.insert(network);

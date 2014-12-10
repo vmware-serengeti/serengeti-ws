@@ -243,7 +243,7 @@ public class TestClusteringJobs extends
          logger.error("ignore create datastore exception. ", e);
       }
       try {
-         netSvc.addDhcpNetwork(TEST_DHCP_NETWORK_NAME, dhcpPortgroup);
+         netSvc.addDhcpNetwork(TEST_DHCP_NETWORK_NAME, dhcpPortgroup, null, false);
       } catch (Exception e) {
          logger.error("ignore create network exception. ", e);
       }
@@ -254,7 +254,7 @@ public class TestClusteringJobs extends
       ipBlocks.add(ipBlock);
       try {
          netSvc.addIpPoolNetwork(TEST_STATIC_NETWORK_NAME, staticPortgroup,
-               staticNetMask, staticGateway, staticDns1, staticDns2, ipBlocks);
+               staticNetMask, staticGateway, staticDns1, staticDns2, ipBlocks, null, false);
       } catch (Exception e) {
          logger.error("ignore create ip pool exception. ", e);
       }

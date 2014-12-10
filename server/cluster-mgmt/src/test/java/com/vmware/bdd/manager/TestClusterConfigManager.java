@@ -244,7 +244,7 @@ public class TestClusterConfigManager {
          logger.error("ignore create resource pool myRp6 exception. ", e);
       }
       try {
-         netSvc.addDhcpNetwork("dhcpNet1", "CFNetwork");
+         netSvc.addDhcpNetwork("dhcpNet1", "CFNetwork", null, false);
       } catch (Exception e) {
          logger.error("ignore create network dhcpNet1 exception. ", e);
       }
@@ -281,7 +281,7 @@ public class TestClusterConfigManager {
       ipBlocks.add(ip3);
       try {
          netSvc.addIpPoolNetwork("ipPool1", "CFNetwork1", "255.255.0.0",
-               "192.168.1.254", "2.2.2.2", null, ipBlocks);
+               "192.168.1.254", "2.2.2.2", null, ipBlocks, null, false);
       } catch (Exception e) {
          logger.error("ignore create network ipPool1 exception. ", e);
       }
