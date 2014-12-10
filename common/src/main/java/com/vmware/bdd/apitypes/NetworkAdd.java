@@ -54,6 +54,14 @@ public class NetworkAdd {
    @SerializedName("ip")
    private List<String> ipStrings;
 
+   @Expose
+   @SerializedName("dns_type")
+   private String dnsType;
+
+   @Expose
+   @SerializedName("generate_hostname")
+   private boolean generateHostname;
+
    @RestRequired
    public String getName() {
       return name;
@@ -161,6 +169,22 @@ public class NetworkAdd {
 
    public void setNetmask(String netmask) {
       this.netmask = netmask;
+   }
+
+   public String getDnsType() {
+      return dnsType;
+   }
+
+   public void setDnsType(String dnsType) {
+      this.dnsType = dnsType;
+   }
+
+   public boolean isGenerateHostname() {
+      return generateHostname;
+   }
+
+   public void setGenerateHostname(boolean generateHostname) {
+      this.generateHostname = generateHostname;
    }
 
    @Override

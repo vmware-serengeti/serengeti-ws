@@ -188,7 +188,7 @@ public class ResourceInitializerService implements IResourceInitializerService {
       logger.info("added datastore. " + dsNames);
 
       if (networkName != null) {
-         networkSvc.addDhcpNetwork(DEFAULT_NETWORK, networkName);
+         networkSvc.addDhcpNetwork(DEFAULT_NETWORK, networkName, null, false);
          logger.info("added network:" + networkName);
       }
    }

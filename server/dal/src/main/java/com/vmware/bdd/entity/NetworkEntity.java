@@ -95,11 +95,17 @@ public class NetworkEntity extends EntityBase implements Comparable<NetworkEntit
    @Column(name = "free")
    private Long free;
 
+   @Column(name = "dns_type")
+   private String dnsType;
+
+   @Column(name = "is_generate_hostname")
+   private Boolean isGenerateHostname;
+
    public NetworkEntity() {
    }
 
    public NetworkEntity(String name, String portGroup,
-         AllocType allocType, String netmask, String gateway, String dns1, String dns2) {
+         AllocType allocType, String netmask, String gateway, String dns1, String dns2, String dnsType, boolean isGenerateHostname) {
       this.name = name;
       this.portGroup = portGroup;
       this.ipBlocks = new ArrayList<IpBlockEntity>();
@@ -110,6 +116,8 @@ public class NetworkEntity extends EntityBase implements Comparable<NetworkEntit
       this.dns2 = dns2;
       this.total = 0L;
       this.free = 0L;
+      this.dnsType = dnsType;
+      this.isGenerateHostname = isGenerateHostname;
 
       validate();
    }

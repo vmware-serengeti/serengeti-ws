@@ -93,12 +93,14 @@ public class NetworkCommands implements CommandMarker {
    public void addNetwork(
          @CliOption(key = { "name" }, mandatory = true, help = "Customize the network's name") final String name,
          @CliOption(key = { "portGroup" }, mandatory = true, help = "The port group name") final String portGroup,
-         @CliOption(key = { "dhcp" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "The dhcp information") final boolean dhcp,
-         @CliOption(key = { "dns" }, mandatory = false, help = "The first dns information") final String dns,
-         @CliOption(key = { "secondDNS" }, mandatory = false, help = "The second dns information") final String sedDNS,
-         @CliOption(key = { "ip" }, mandatory = false, help = "The ip information") final String ip,
-         @CliOption(key = { "gateway" }, mandatory = false, help = "The gateway information") final String gateway,
-         @CliOption(key = { "mask" }, mandatory = false, help = "The mask information") final String mask) {
+         @CliOption(key = { "dhcp" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Use DHCP if specified") final boolean dhcp,
+         @CliOption(key = { "dns" }, mandatory = false, help = "The master DNS server IP") final String dns,
+         @CliOption(key = { "secondDNS" }, mandatory = false, help = "The secondary DNS server IP") final String sedDNS,
+         @CliOption(key = { "ip" }, mandatory = false, help = "The IP address") final String ip,
+         @CliOption(key = { "gateway" }, mandatory = false, help = "The gateway IP") final String gateway,
+         @CliOption(key = { "mask" }, mandatory = false, help = "The subnet mask") final String mask,
+         @CliOption(key = { "dnsType" }, mandatory = false, specifiedDefaultValue = "normal", unspecifiedDefaultValue = "normal", help = "The type of DNS server: normal, dynamic or others") final String dnsType,
+         @CliOption(key = { "generateHostname" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Generate hostname for each VMs. This option only applies to normal DNS.") final boolean generateHostname) {
 
       NetworkType operType = null;
       if (!CommandsUtils.isBlank(ip) && dhcp) {
@@ -119,7 +121,7 @@ public class NetworkCommands implements CommandMarker {
       }
 
       addNetwork(operType, name, portGroup, ip, dhcp, dns, sedDNS, gateway,
-               mask);
+               mask, dnsType, generateHostname);
    }
 
    /**
@@ -202,13 +204,13 @@ public class NetworkCommands implements CommandMarker {
    private void addNetwork(NetworkType operType, final String name,
          final String portGroup, final String ip, final boolean dhcp,
          final String dns, final String sedDNS, final String gateway,
-         final String mask) {
+         final String mask, final String dnsType, final boolean generateHostname) {
 
       switch (operType) {
       case IP:
          try {
             addNetworkByIPModel(operType, name, portGroup, ip, dns, sedDNS,
-                  gateway, mask);
+                  gateway, mask, dnsType, generateHostname);
          } catch (UnknownHostException e) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                   name, Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
@@ -216,17 +218,19 @@ public class NetworkCommands implements CommandMarker {
          }
          break;
       case DHCP:
-         addNetworkByDHCPModel(operType, name, portGroup, dhcp);
+         addNetworkByDHCPModel(operType, name, portGroup, dhcp, dnsType, generateHostname);
       }
 
    }
 
    private void addNetworkByDHCPModel(NetworkType operType, final String name,
-         final String portGroup, final boolean dhcp) {
+         final String portGroup, final boolean dhcp, final String dnsType, final boolean generateHostname) {
       NetworkAdd networkAdd = new NetworkAdd();
       networkAdd.setName(name);
       networkAdd.setPortGroup(portGroup);
       networkAdd.setDhcp(true);
+      networkAdd.setDnsType(dnsType);
+      networkAdd.setGenerateHostname(generateHostname);
 
       //rest invocation
       try {
@@ -243,7 +247,7 @@ public class NetworkCommands implements CommandMarker {
 
    private void addNetworkByIPModel(NetworkType operType, final String name,
          final String portGroup, final String ip, final String dns,
-         final String sedDNS, final String gateway, final String mask)
+         final String sedDNS, final String gateway, final String mask, final String dnsType, final boolean generateHostname)
          throws UnknownHostException {
 
       // validate the network add command option.
@@ -257,6 +261,8 @@ public class NetworkCommands implements CommandMarker {
          networkAdd.setDns2(sedDNS);
          networkAdd.setGateway(gateway);
          networkAdd.setNetmask(mask);
+         networkAdd.setDnsType(dnsType);
+         networkAdd.setGenerateHostname(generateHostname);
 
          //rest invocation
          try {

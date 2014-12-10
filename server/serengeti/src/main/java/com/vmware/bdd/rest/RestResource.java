@@ -794,7 +794,7 @@ public class RestResource {
       }
 
       if (na.getIsDhcp()) {
-         networkSvc.addDhcpNetwork(na.getName(), na.getPortGroup());
+         networkSvc.addDhcpNetwork(na.getName(), na.getPortGroup(), na.getDnsType(), na.isGenerateHostname());
       } else {
          if (!IpAddressUtil.isValidNetmask(na.getNetmask())) {
             throw BddException.INVALID_PARAMETER("netmask", na.getNetmask());
@@ -813,7 +813,7 @@ public class RestResource {
          IpAddressUtil.verifyIPBlocks(na.getIpBlocks(), netmask);
          networkSvc.addIpPoolNetwork(na.getName(), na.getPortGroup(),
                na.getNetmask(), na.getGateway(), na.getDns1(), na.getDns2(),
-               na.getIpBlocks());
+               na.getIpBlocks(), na.getDnsType(), na.isGenerateHostname());
       }
    }
 

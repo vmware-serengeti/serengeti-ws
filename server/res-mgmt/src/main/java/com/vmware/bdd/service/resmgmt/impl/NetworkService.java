@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vmware.bdd.apitypes.IpAllocEntryRead;
 import com.vmware.bdd.apitypes.IpBlock;
+import com.vmware.bdd.apitypes.NetworkDnsType;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.dal.IClusterDAO;
 import com.vmware.bdd.dal.IIpBlockDAO;
@@ -109,15 +110,18 @@ public class NetworkService implements Serializable, INetworkService {
    @Override
    @Transactional
    public synchronized NetworkEntity addDhcpNetwork(final String name,
-         final String portGroup) {
+         final String portGroup, final String dnsType, boolean isGenerateHostname) {
       validateNetworkName(name);
       if (!resService.isNetworkExistInVc(portGroup)) {
          throw VcProviderException.NETWORK_NOT_FOUND(portGroup);
       }
       try {
+         if (NetworkDnsType.isOthers(dnsType) || NetworkDnsType.isDynamic(dnsType)) {
+            isGenerateHostname = true;
+         }
          NetworkEntity network =
                new NetworkEntity(name, portGroup, AllocType.DHCP, null, null,
-                     null, null);
+                     null, null, dnsType, isGenerateHostname);
          networkDao.insert(network);
          network.validate();
          return network;
@@ -139,15 +143,19 @@ public class NetworkService implements Serializable, INetworkService {
    @Transactional
    public synchronized NetworkEntity addIpPoolNetwork(final String name,
          final String portGroup, final String netmask, final String gateway,
-         final String dns1, final String dns2, final List<IpBlock> ipBlocks) {
+         final String dns1, final String dns2, final List<IpBlock> ipBlocks,
+         final String dnsType, boolean isGenerateHostname) {
       try {
          validateNetworkName(name);
          if (!resService.isNetworkExistInVc(portGroup)) {
             throw VcProviderException.NETWORK_NOT_FOUND(portGroup);
          }
+         if (NetworkDnsType.isOthers(dnsType) || NetworkDnsType.isDynamic(dnsType)) {
+            isGenerateHostname = true;
+         }
          NetworkEntity network =
                new NetworkEntity(name, portGroup, AllocType.IP_POOL, netmask,
-                     gateway, dns1, dns2);
+                     gateway, dns1, dns2, dnsType, isGenerateHostname);
          networkDao.insert(network);
          List<IpBlockEntity> blocks =
                new ArrayList<IpBlockEntity>(ipBlocks.size());
@@ -417,7 +425,7 @@ public class NetworkService implements Serializable, INetworkService {
    }
 
    @Transactional(readOnly = true)
-   private List<ClusterEntity> findRelevantClusters(NetworkEntity net){
+   private List<ClusterEntity> findRelevantClusters(NetworkEntity net) {
       List<ClusterEntity> relevantClusters = new ArrayList<ClusterEntity>();
       for (ClusterEntity clusterEntity : clusterDAO.findAll()) {
          if (clusterEntity.fetchNetworkNameList().contains(net.getName())) {
@@ -473,8 +481,7 @@ public class NetworkService implements Serializable, INetworkService {
       if (withDetails) {
          List<IpAllocEntryRead> ipAllocEntries =
                new ArrayList<IpAllocEntryRead>();
-         List<NodeEntity> nodes =
-               nodeDao.findByNodeGroups(nodeGroupDao.findAllByClusters(findRelevantClusters(net)));
+         List<NodeEntity> nodes = nodeDao.findByNodeGroups(nodeGroupDao.findAllByClusters(findRelevantClusters(net)));
 
          for (NodeEntity node : nodes) {
             String ip = node.findNic(net).getIpv4Address();

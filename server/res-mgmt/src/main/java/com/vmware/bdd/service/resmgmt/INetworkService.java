@@ -23,11 +23,12 @@ import com.vmware.bdd.entity.NetworkEntity;
 
 public interface INetworkService {
 
-   NetworkEntity addDhcpNetwork(final String name, final String portGroup);
+   NetworkEntity addDhcpNetwork(final String name, final String portGroup, final String dnsType, final boolean isGenerateHostname);
 
    NetworkEntity addIpPoolNetwork(final String name, final String portGroup,
          final String netmask, final String gateway, final String dns1,
-         final String dns2, final List<IpBlock> ipBlocks);
+         final String dns2, final List<IpBlock> ipBlocks, final String dnsType,
+         final boolean isGenerateHostname);
 
    NetworkEntity getNetworkEntityByName(final String name);
 
