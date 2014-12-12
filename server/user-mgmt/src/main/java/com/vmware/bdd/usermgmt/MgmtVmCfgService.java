@@ -99,7 +99,7 @@ public class MgmtVmCfgService {
       UserMgmtMode newMode = UserMgmtMode.valueOf(newCfg.get(VMCONFIG_MGMTVM_CUM_MODE));
 
       if(currentMode == newMode) {
-         return;
+         throw new BddException(null, "MGMTVM_CUM_CFG", "ALREADY_IN_TARGET_MODE", newMode);
       }
 
       Map<UserMgmtMode, TransitAction> targets = getAllowedTransitions().get(currentMode);

@@ -30,6 +30,7 @@ import com.vmware.bdd.apitypes.UserMgmtServer;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.manager.JobManager;
 import com.vmware.bdd.service.job.JobConstants;
+import com.vmware.bdd.usermgmt.SssdLdapConstantMappings;
 
 /**
  * Created By xiaoliangl on 11/28/14.
@@ -39,10 +40,13 @@ public class MgmtVmConfigJobService {
    private final static Logger LOGGER = Logger.getLogger(MgmtVmConfigJobService.class);
 
    @Autowired
+   private SssdLdapConstantMappings sssdLdapConstantMappings;
+
+   @Autowired
    private JobManager jobManager;
 
-   public long enableLdap(UserMgmtServer usrMgmtServer) {
-      Gson gson = new Gson();
+   public void enableLdap(UserMgmtServer usrMgmtServer) {
+      /*Gson gson = new Gson();
 
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
@@ -56,7 +60,10 @@ public class MgmtVmConfigJobService {
          return jobManager.runJob("MgmtVMUserMgmtServerCfgJob", jobParameters);
       } catch (Exception e) {
          throw new BddException(e, "BDD.MgmtVMConfig", "EXCEPTION");
-      }
+      }*/
+
+      CfgUserMgmtOnMgmtVMExecutor cfgExecutor = new CfgUserMgmtOnMgmtVMExecutor();
+      cfgExecutor.execute(usrMgmtServer, sssdLdapConstantMappings);
    }
 
    public long disableLocalAccount() {

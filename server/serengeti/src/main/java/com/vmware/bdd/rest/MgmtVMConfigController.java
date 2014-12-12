@@ -42,10 +42,8 @@ public class MgmtVMConfigController {
 
    @RequestMapping(method = RequestMethod.PUT, consumes = "application/json")
    @ResponseBody
-   public int modify(@RequestBody Map<String, String> config) {
+   public void modify(@RequestBody Map<String, String> config) {
       mgmtVmCfgService.config(config);
-
-      return -1; //taskId
    }
 
    /*
