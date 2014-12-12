@@ -19,8 +19,8 @@ import java.util.List;
 
 import static org.testng.AssertJUnit.assertNotNull;
 
-import org.codehaus.jackson.map.ObjectMapper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.testng.annotations.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;

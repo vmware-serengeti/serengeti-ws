@@ -22,9 +22,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.codehaus.jackson.map.ObjectMapper;
 
 import static org.testng.AssertJUnit.assertEquals;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.testng.annotations.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;

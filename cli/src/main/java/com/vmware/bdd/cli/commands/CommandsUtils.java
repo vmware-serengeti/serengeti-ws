@@ -26,31 +26,24 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jline.console.ConsoleReader;
 import jline.internal.Configuration;
-
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.impl.Indenter;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
-import org.codehaus.jackson.util.DefaultPrettyPrinter;
-import org.codehaus.jackson.util.DefaultPrettyPrinter.Lf2SpacesIndenter;
 import org.fusesource.jansi.internal.Kernel32;
 import org.springframework.shell.core.JLineShell;
 import org.springframework.shell.support.util.OsUtils;
 import org.springframework.util.ClassUtils;
 
-import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.utils.CommonUtil;
 
 
@@ -127,10 +120,10 @@ public class CommandsUtils {
          JsonFactory factory = new JsonFactory();
          JsonGenerator generator = factory.createJsonGenerator(out);
          ObjectMapper mapper = getMapper();
-         mapper.setSerializationInclusion(Inclusion.NON_NULL);
+         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
          generator.setCodec(mapper);
          DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
-         Indenter indenter = new Lf2SpacesIndenter();
+         DefaultPrettyPrinter.Indenter indenter = new DefaultPrettyPrinter.Lf2SpacesIndenter();
          prettyPrinter.indentArraysWith(indenter);
          generator.setPrettyPrinter(prettyPrinter);
          generator.writeObject(object);

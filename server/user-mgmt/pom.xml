@@ -40,6 +40,11 @@
       </dependency>
 
       <dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-test</artifactId>
+      </dependency>
+
+      <dependency>
          <groupId>com.vmware.bdd</groupId>
          <artifactId>cluster-mgmt</artifactId>
       </dependency>
