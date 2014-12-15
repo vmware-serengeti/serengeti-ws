@@ -27,9 +27,20 @@ import javax.net.ssl.TrustManager;
  * enabled.
  */
 public class TlsTcpClient {
+   private boolean pspCompliant = false;
+
    private SimpleServerTrustManager trustManager;
+
    public TrustManager getTrustManager() {
       return trustManager;
+   }
+
+   public boolean isPspCompliant() {
+      return pspCompliant;
+   }
+
+   public void setPspCompliant(boolean pspCompliant) {
+      this.pspCompliant = pspCompliant;
    }
 
    public void setTrustManager(SimpleServerTrustManager trustManager) {
@@ -84,24 +95,27 @@ public class TlsTcpClient {
          throw new TlsInitException(e);
       }
 
-      /**
-       * Build connection configuration and pass to socket
-       */
-      SSLParameters params = new SSLParameters();
-      params.setCipherSuites(config.getSupportedCipherSuites());
-      params.setProtocols(config.getSupportedProtocols());
-//      params.setEndpointIdentificationAlgorithm(config.getEndpointIdentificationAlgorithm());
-
       try {
          secureSocket = (SSLSocket) socketFactory.createSocket();
 
-         InetSocketAddress addr = new InetSocketAddress(host, port);
-         secureSocket.setSSLParameters(params);
+         InetSocketAddress address = new InetSocketAddress(host, port);
+
+         if(isPspCompliant()) {
+            /**
+             * Build connection configuration and pass to socket
+             */
+            SSLParameters params = new SSLParameters();
+            params.setCipherSuites(config.getSupportedCipherSuites());
+            params.setProtocols(config.getSupportedProtocols());
+//          params.setEndpointIdentificationAlgorithm(config.getEndpointIdentificationAlgorithm());
+            secureSocket.setSSLParameters(params);
+         }
+
          /**
           * Set socket options
           */
          secureSocket.setSoTimeout(10000);
-         secureSocket.connect(addr, 10000);
+         secureSocket.connect(address, 10000);
          secureSocket.startHandshake();
 
       } catch (ConnectException ex) {
