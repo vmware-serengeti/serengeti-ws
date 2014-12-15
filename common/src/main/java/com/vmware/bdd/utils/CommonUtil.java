@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -40,6 +39,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -48,15 +49,51 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
+import org.apache.commons.configuration.ConfigurationUtils;
 import org.apache.log4j.Logger;
 
-import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 
 public class CommonUtil {
 
    static final Logger logger = Logger.getLogger(CommonUtil.class);
+
+   public static File getConfigurationFile(final String filename, final String typeName) {
+      // try to locate file directly
+      File specFile = new File(filename);
+      if (specFile.exists()) {
+         return specFile;
+      }
+
+      // search ${serengeti.home.dir}/conf directory
+      String homeDir = System.getProperties().getProperty("serengeti.home.dir");
+      if (homeDir != null && !homeDir.trim().isEmpty()) {
+         StringBuilder builder = new StringBuilder();
+         builder.append(homeDir).append(File.separator).append("conf")
+               .append(File.separator).append(filename);
+         specFile = new File(builder.toString());
+
+         if (!specFile.exists()) {
+            logger.warn(typeName + " file does not exist: " + builder);
+         } else {
+            return specFile;
+         }
+      }
+
+      // search in class paths
+      URL filePath = ConfigurationUtils.locate(filename);
+      if (filePath != null) {
+         specFile = ConfigurationUtils.fileFromURL(filePath);
+      }
+
+      if (!specFile.exists()) {
+         String errorMsg = "Can not find file" + filename;
+         logger.fatal(errorMsg);
+         throw new RuntimeException(errorMsg);
+      }
+
+      return specFile;
+   }
 
    public static String readJsonFile(final String fileName) {
       StringBuilder jsonBuff = new StringBuilder();
@@ -123,6 +160,31 @@ public class CommonUtil {
          }
       }
       return names;
+   }
+
+   public static String inputsConvert(Set<String> words) {
+      String newWordStr = "";
+      if (words != null && !words.isEmpty()) {
+         StringBuffer wordsBuff = new StringBuffer();
+         for (String word : words) {
+            wordsBuff.append(word).append(",");
+         }
+         wordsBuff.delete(wordsBuff.length()-1, wordsBuff.length());
+         newWordStr = wordsBuff.toString();
+      }
+      return newWordStr;
+   }
+
+   public static <K, V> String inputsConvert(Map<K, V> wordsMap) {
+      StringBuffer wordsBuff = new StringBuffer();
+      if (wordsMap != null && !wordsMap.isEmpty()) {
+         for (Entry<K, V> entry : wordsMap.entrySet()) {
+            wordsBuff.append(entry.getKey()).append(":")
+                  .append(entry.getValue()).append(",");
+         }
+         wordsBuff.delete(wordsBuff.length() - 1, wordsBuff.length());
+      }
+      return wordsBuff.toString();
    }
 
    public static boolean isBlank(final String str) {

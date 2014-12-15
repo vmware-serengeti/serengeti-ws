@@ -58,6 +58,7 @@ public interface VcHost extends VcObject {
    abstract boolean isConnected();
    abstract boolean isInMaintenanceMode();
    abstract boolean isUnavailbleForManagement();
+   abstract String  getVersion();
 }
 
 @SuppressWarnings("serial")
@@ -69,6 +70,7 @@ class VcHostImpl extends VcObjectImpl implements VcHost {
    private ManagedObjectReference[] network;
    private ManagedObjectReference[] datastore;
    private RuntimeInfo runtime;
+   private String version;
 
    protected VcHostImpl(HostSystem host) throws Exception {
       super(host);
@@ -84,6 +86,9 @@ class VcHostImpl extends VcObjectImpl implements VcHost {
       network = checkReady(host.getNetwork());
       datastore = checkReady(host.getDatastore());
       runtime = checkReady(host.getRuntime());
+      if (host.getConfig() != null && host.getConfig().getProduct() != null) {
+         version = host.getConfig().getProduct().getVersion();
+      }
    }
 
    /* (non-Javadoc)
@@ -133,13 +138,11 @@ class VcHostImpl extends VcObjectImpl implements VcHost {
 
    @Override
    public List<VcVirtualMachine> getVMs() throws Exception {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public boolean isConnected() {
-      // TODO Auto-generated method stub
       return ConnectionState.connected.equals(runtime.getConnectionState());
    }
 
@@ -151,5 +154,10 @@ class VcHostImpl extends VcObjectImpl implements VcHost {
    @Override
    public boolean isUnavailbleForManagement() {
       return (runtime.isInMaintenanceMode() || !isConnected());
+   }
+
+   @Override
+   public String getVersion() {
+      return version;
    }
 }

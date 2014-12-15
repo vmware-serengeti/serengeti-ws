@@ -33,7 +33,7 @@ import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class CommonUtilTest {
+public class TestCommonUtil {
 
    @Test
    public void testValidateVcResourceName() {

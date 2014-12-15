@@ -208,7 +208,9 @@ public class ResourceInitializerServiceTest extends BaseResourceTest{
       }.getMockInstance();
       networkSvc = new MockUp<INetworkService>() {
          @Mock
-         NetworkEntity addDhcpNetwork(final String name, final String portGroup) {
+         NetworkEntity addDhcpNetwork(final String name,
+               final String portGroup, final String dnsType,
+               final boolean isGenerateHostname) {
             Assert.assertEquals(name, "defaultNetwork");
             Assert.assertEquals(portGroup, "serengetiNet");
             return new NetworkEntity();

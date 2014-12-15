@@ -26,7 +26,7 @@ import java.util.Map;
 
 import static org.testng.AssertJUnit.assertEquals;
 
-public class AppConfigValidationFactoryTest {
+public class TestAppConfigValidationFactory {
    private ClusterCreate cluster;
    @BeforeMethod
    public void setup(){

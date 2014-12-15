@@ -44,7 +44,7 @@ public class UserService implements UserDetailsService {
          jaxbContext = JAXBContext.newInstance(Users.class);
          Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
          Users users =
-               (Users) jaxbUnmarshaller.unmarshal(FileUtils.getConfigFile(
+               (Users) jaxbUnmarshaller.unmarshal(FileUtils.getConfigurationFile(
                      UserService.UsersFile, "Users"));
          User userDTO = null;
          boolean exsiting = false;

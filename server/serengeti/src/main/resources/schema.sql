@@ -223,5 +223,7 @@ create sequence server_info_seq;
 create table server_info (
   id           bigint       not null unique DEFAULT nextval('server_info_seq'::regclass),
   resource_initialized boolean not null DEFAULT false,
-  version      varchar(255)
+  version      varchar(255),
+  instance_id  varchar(255),
+  deploy_time  timestamp(0) without time zone
 );

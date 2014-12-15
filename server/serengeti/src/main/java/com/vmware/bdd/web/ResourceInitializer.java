@@ -14,6 +14,10 @@
  ***************************************************************************/
 package com.vmware.bdd.web;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -25,6 +29,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.bdd.service.IClusteringService;
+import com.vmware.bdd.service.collection.ICollectionInitializerService;
 import com.vmware.bdd.service.resmgmt.IResourceInitializerService;
 
 /**
@@ -50,6 +55,7 @@ public class ResourceInitializer implements ServletContextListener {
          WebApplicationContext wac =
                WebApplicationContextUtils.getWebApplicationContext(sc);
          initService(wac);
+         initDataCollection(wac);
          IResourceInitializerService resInitializerSvc =
                wac.getBean(IResourceInitializerService.class);
          if (!resInitializerSvc.isResourceInitialized()) {
@@ -87,4 +93,15 @@ public class ResourceInitializer implements ServletContextListener {
       clusterSvc.init();
    }
 
+   private void initDataCollection(WebApplicationContext wac)
+         throws ParseException {
+      logger.info("========init data collection start======");
+      ICollectionInitializerService collectionInitializerService =
+            wac.getBean("collectionInitializerService",
+                  ICollectionInitializerService.class);
+      SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      Date deployTime = df.parse(Configuration.getString("serengeti.deploy_time"));
+      collectionInitializerService.setDeployTime(deployTime);
+      collectionInitializerService.generateInstanceId();
+   }
 }

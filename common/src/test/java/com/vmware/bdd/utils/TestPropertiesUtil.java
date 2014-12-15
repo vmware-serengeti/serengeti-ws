@@ -14,12 +14,22 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
-import java.io.File;
+import org.testng.annotations.Test;
 
-public class FileUtils {
+public class TestPropertiesUtil {
 
-   public static File getConfigurationFile(final String filename, final String typeName) {
-      return CommonUtil.getConfigurationFile(filename, typeName);
+   @Test
+   public void testLoadProperties() {
+
    }
 
+   @Test
+   public void testGetPropertie() {
+
+   }
+
+   @Test
+   public void testSaveLastKey() {
+
+   }
 }

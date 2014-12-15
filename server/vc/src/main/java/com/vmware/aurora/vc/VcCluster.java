@@ -168,6 +168,12 @@ public interface VcCluster extends VcObject {
     * @throws Exception
     */
    abstract boolean reconfigure(final ConfigSpecEx spec) throws Exception;
+
+   abstract int getTotalCpu ();
+
+   abstract long getTotalMemory();
+
+   abstract int getNumberOfHost();
 }
 
 @SuppressWarnings("serial")
@@ -569,5 +575,29 @@ class VcClusterImpl extends VcObjectImpl implements VcCluster {
       VcTask task = reconfigure(spec, VcCache.getRefreshVcTaskCB(this));
       task.waitForCompletion();
       return task.taskCompleted();
+   }
+
+   @Override
+   public int getTotalCpu() {
+      if (summary == null) {
+         throw VcException.INIT_ERROR();
+      }
+      return summary.getTotalCpu();
+   }
+
+   @Override
+   public long getTotalMemory() {
+      if (summary == null) {
+         throw VcException.INIT_ERROR();
+      }
+      return summary.getTotalMemory();
+   }
+
+   @Override
+   public int getNumberOfHost() {
+      if (host == null) {
+         throw VcException.INIT_ERROR();
+      }
+      return host.length;
    }
 }

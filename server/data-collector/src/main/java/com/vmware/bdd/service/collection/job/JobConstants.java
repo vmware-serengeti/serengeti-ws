@@ -12,14 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.utils;
+package com.vmware.bdd.service.collection.job;
 
-import java.io.File;
+public interface JobConstants {
 
-public class FileUtils {
-
-   public static File getConfigurationFile(final String filename, final String typeName) {
-      return CommonUtil.getConfigurationFile(filename, typeName);
-   }
-
+   public static final String COLLECT_DATA_JOB_NAME = "collectDataJob";
 }

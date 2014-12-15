@@ -16,18 +16,21 @@
 
    <dependencies>
       <dependency>
-         <groupId>com.vmware.bdd</groupId>
-         <artifactId>cluster-mgmt</artifactId>
+        <groupId>com.vmware.bdd</groupId>
+        <artifactId>cluster-mgmt</artifactId>
       </dependency>
 	  <dependency>
-	  	<groupId>com.vmware.bdd</groupId>
-		<artifactId>authentication</artifactId>
+	    <groupId>com.vmware.bdd</groupId>
+        <artifactId>authentication</artifactId>
 	  </dependency>
       <dependency>
          <groupId>com.vmware.bdd</groupId>
          <artifactId>user-mgmt</artifactId>
       </dependency>
-
+      <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>data-collector</artifactId>
+      </dependency>
       <dependency>
          <groupId>com.fasterxml.jackson.core</groupId>
          <artifactId>jackson-core</artifactId>

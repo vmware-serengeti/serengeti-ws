@@ -56,7 +56,7 @@ public class TestFileUtils {
    @Test
    public void testGetConfigFile() {
       File testFile =
-            FileUtils.getConfigFile(TestFileUtils.TestFile, "Test file");
+            FileUtils.getConfigurationFile(TestFileUtils.TestFile, "Test file");
       Assert.assertNotNull(testFile);
       assertEquals(testFile.getName(), TestFileUtils.TestFile);
    }

@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.entity;
 
+import java.sql.Timestamp;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.SequenceGenerator;
@@ -36,6 +38,12 @@ public class ServerInfoEntity extends EntityBase{
    @Column(name = "version")
    private String version;
 
+   @Column(name = "instance_id")
+   private String instanceId;
+
+   @Column(name = "deploy_time")
+   private Timestamp deployTime;
+
    /**
     * @return the resourceInitalized
     */
@@ -57,4 +65,21 @@ public class ServerInfoEntity extends EntityBase{
    public void setVersion(String version) {
       this.version = version;
    }
+
+   public String getInstanceId() {
+      return instanceId;
+   }
+
+   public void setInstanceId(String instanceId) {
+      this.instanceId = instanceId;
+   }
+
+   public Timestamp getDeployTime() {
+      return deployTime;
+   }
+
+   public void setDeployTime(Timestamp deployTime) {
+      this.deployTime = deployTime;
+   }
+
 }

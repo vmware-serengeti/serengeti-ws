@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012-2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,14 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.utils;
+package com.vmware.bdd.manager.collection;
 
-import java.io.File;
+import org.apache.log4j.Logger;
 
-public class FileUtils {
+import com.vmware.bdd.service.collection.ITimelyCollectionService;
 
-   public static File getConfigurationFile(final String filename, final String typeName) {
-      return CommonUtil.getConfigurationFile(filename, typeName);
+public class CollectOperationManager {
+   private static final Logger logger = Logger.getLogger(CollectOperationManager.class);
+   ITimelyCollectionService timelyCollectionService;
+
+   public ITimelyCollectionService getTimelyCollectionService() {
+      return timelyCollectionService;
    }
 
+   public void setTimelyCollectionService(
+         ITimelyCollectionService timelyCollectionService) {
+      this.timelyCollectionService = timelyCollectionService;
+   }
 }
