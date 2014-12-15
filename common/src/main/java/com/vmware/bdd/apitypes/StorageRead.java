@@ -16,7 +16,7 @@ package com.vmware.bdd.apitypes;
 
 import java.util.List;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Storage get output

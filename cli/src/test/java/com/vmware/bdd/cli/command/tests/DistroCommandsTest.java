@@ -17,8 +17,8 @@ package com.vmware.bdd.cli.command.tests;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.jackson.map.ObjectMapper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.testng.annotations.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;

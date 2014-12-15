@@ -217,6 +217,7 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
             <version>${spring.version}</version>
+            <scope>test</scope>
          </dependency>
          <dependency>
             <groupId>org.springframework</groupId>
@@ -247,11 +248,6 @@
             <groupId>org.springframework.batch</groupId>
             <artifactId>spring-batch-core</artifactId>
             <version>2.1.9.RELEASE</version>
-         </dependency>
-         <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.9.5</version>
          </dependency>
          <dependency>
             <groupId>c3p0</groupId>
