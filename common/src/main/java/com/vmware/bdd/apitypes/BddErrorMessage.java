@@ -14,9 +14,19 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
+
+import java.util.Map;
+
+import com.vmware.bdd.security.tls.CertificateInfo;
+import com.vmware.bdd.validation.ValidationError;
+
 public class BddErrorMessage {
    private String code;
    private String message;
+
+   private CertificateInfo certInfo;
+
+   private Map<String, ValidationError> errors;
 
    public BddErrorMessage() {
 
@@ -43,6 +53,23 @@ public class BddErrorMessage {
    public void setMessage(String message) {
       this.message = message;
    }
+
+   public CertificateInfo getCertInfo() {
+      return certInfo;
+   }
+
+   public void setCertInfo(CertificateInfo certInfo) {
+      this.certInfo = certInfo;
+   }
+
+   public Map<String, ValidationError> getErrors() {
+      return errors;
+   }
+
+   public void setErrors(Map<String, ValidationError> errors) {
+      this.errors = errors;
+   }
+
 
    @Override
    public String toString() {

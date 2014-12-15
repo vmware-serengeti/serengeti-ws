@@ -205,4 +205,33 @@ public class TestUserMgmtServerValidService_Ldap extends AbstractTestNGSpringCon
          throw ve;
       }
    }
+
+   private UserMgmtServer fromJsonResource(String resourceName) {
+      Gson gson = new Gson();
+
+      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/" + resourceName);
+
+      return gson.fromJson(new InputStreamReader(ris), UserMgmtServer.class);
+   }
+
+
+   @Test
+   public void testValidateServerInfo_goodAd() {
+      UserMgmtServer userMgmtServer = fromJsonResource("ad-server.json");
+
+      try {
+         validService.searchGroupDn(userMgmtServer, userMgmtServer.getMgmtVMUserGroupDn());
+      } catch (ValidationException ve) {
+         Assert.assertFalse(ve.getErrors().isEmpty());
+
+         Map<String, ValidationError> errorMap = ve.getErrors();
+         Assert.assertEquals(errorMap.size(), 1);
+
+         ValidationError validationError = errorMap.get("PrimaryUrl");
+         Assert.assertNotNull(validationError);
+         Assert.assertEquals(validationError.getPrimaryCode(), "PrimaryUrl.CannotConnect");
+
+         throw ve;
+      }
+   }
 }

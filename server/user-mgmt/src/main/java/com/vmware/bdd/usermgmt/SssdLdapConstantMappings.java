@@ -32,32 +32,34 @@ public class SssdLdapConstantMappings {
    public static final String LDAP_USER_GID_NUMBER = "ldap_user_gid_number";
    public static final String LDAP_USER_UID_NUMBER = "ldap_user_uid_number";
    public static final String LDAP_GROUP_OBJECT_CLASS = "ldap_group_object_class";
+   public static final String LDAP = UserMgmtServer.Type.LDAP.name()+ '.';
+   public static final String AD = UserMgmtServer.Type.AD_AS_LDAP.name()+'.';
 
    private Properties mapping = null;
 
    public SssdLdapConstantMappings() {
       mapping = new Properties();
 
-      mapping.setProperty("LDAP." + LDAP_GROUP_OBJECT_CLASS, "posixGroup");
-      mapping.setProperty("AD." + LDAP_GROUP_OBJECT_CLASS, "Group");
+      mapping.setProperty(LDAP + LDAP_GROUP_OBJECT_CLASS, "posixGroup");
+      mapping.setProperty(AD + LDAP_GROUP_OBJECT_CLASS, "Group");
 
-      mapping.setProperty("LDAP." + LDAP_USER_OBJECT_CLASS, "posixAccount");
-      mapping.setProperty("AD." + LDAP_USER_OBJECT_CLASS, "User");
+      mapping.setProperty(LDAP + LDAP_USER_OBJECT_CLASS, "posixAccount");
+      mapping.setProperty(AD + LDAP_USER_OBJECT_CLASS, "User");
 
-      mapping.setProperty("LDAP." + LDAP_SCHEMA, "rfc2307");
-      mapping.setProperty("AD." + LDAP_SCHEMA, "rfc2307bis");
+      mapping.setProperty(LDAP + LDAP_SCHEMA, "rfc2307");
+      mapping.setProperty(AD + LDAP_SCHEMA, "rfc2307bis");
 
-      mapping.setProperty("LDAP." + LDAP_USER_NAME, "uid");
-      mapping.setProperty("AD." + LDAP_USER_NAME, "msSFU30Name");
+      mapping.setProperty(LDAP + LDAP_USER_NAME, "uid");
+      mapping.setProperty(AD + LDAP_USER_NAME, "msSFU30Name");
 
-      mapping.setProperty("LDAP." + LDAP_GROUP_GID_NUMBER, "gidNumber");
-      mapping.setProperty("AD." + LDAP_GROUP_GID_NUMBER, "gidNumber");
+      mapping.setProperty(LDAP + LDAP_GROUP_GID_NUMBER, "gidNumber");
+      mapping.setProperty(AD + LDAP_GROUP_GID_NUMBER, "gidNumber");
 
-      mapping.setProperty("LDAP." + LDAP_USER_GID_NUMBER, "gidNumber");
-      mapping.setProperty("AD." + LDAP_USER_GID_NUMBER, "gidNumber");
+      mapping.setProperty(LDAP + LDAP_USER_GID_NUMBER, "gidNumber");
+      mapping.setProperty(AD + LDAP_USER_GID_NUMBER, "gidNumber");
 
-      mapping.setProperty("LDAP." + LDAP_USER_UID_NUMBER, "uidNumber");
-      mapping.setProperty("AD." + LDAP_USER_UID_NUMBER, "uidNumber");
+      mapping.setProperty(LDAP + LDAP_USER_UID_NUMBER, "uidNumber");
+      mapping.setProperty(AD + LDAP_USER_UID_NUMBER, "uidNumber");
    }
 
    public interface Getter {

@@ -1,5 +1,5 @@
 /******************************************************************************
- *   Copyright (c) 2012-2014 VMware, Inc. All Rights Reserved.
+ *   Copyright (c) 2014 VMware, Inc. All Rights Reserved.
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
@@ -12,23 +12,13 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *****************************************************************************/
-package com.vmware.bdd.security.tls;
-
-import com.vmware.bdd.apitypes.BddErrorMessage;
+package com.vmware.bdd.usermgmt;
 
 /**
- * Created By xiaoliangl on 12/2/14.
+ * Created By xiaoliangl on 12/15/14.
  */
-public class UntrustedCertErrorMessage extends BddErrorMessage {
-   private CertificateInfo certInfo;
-
-   public UntrustedCertErrorMessage(String code, String message, CertificateInfo certInfo1) {
-      super(code, message);
-
-      this.certInfo = certInfo1;
-   }
-
-   public CertificateInfo getCertInfo() {
-      return certInfo;
-   }
+public interface UserMgmtConstants {
+   String VMCONFIG_MGMTVM_CUM_MODE = "vmconfig.mgmtvm.cum.mode";
+   String VMCONFIG_MGMTVM_CUM_SERVERNAME = "vmconfig.mgmtvm.cum.servername";
+   String DEFAULT_USERMGMT_SERVER_NAME = "default";
 }

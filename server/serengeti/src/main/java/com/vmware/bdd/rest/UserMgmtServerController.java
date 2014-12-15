@@ -15,8 +15,10 @@
 package com.vmware.bdd.rest;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.vmware.bdd.apitypes.UserMgmtServer;
 import com.vmware.bdd.usermgmt.UserMgmtServerService;
@@ -44,19 +47,23 @@ public class UserMgmtServerController {
    public void add(@RequestBody @Valid UserMgmtServer serverInfo,
                                       @RequestParam(value = "testonly", required = false) boolean testOnly,
                                       @RequestParam(value = "forceTrustCert", required = false) boolean certConfirmed) {
-
       userMgmtServerService.add(serverInfo, testOnly, certConfirmed);
-
    }
 
 
    @RequestMapping(value = "/{name}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   public UserMgmtServer getByName(@PathVariable("name") String name) {
+   public UserMgmtServer getByName(@PathVariable("name") @Valid @NotNull String name) {
 //      UserMgmtServer userMgmtServer = new UserMgmtServer("ldap1", UserMgmtServer.Type.valueOf("LDAP"), "cn=groups,dn=vmware,dn=com",
 //            "cn=users,dn=vmware,dn=com", "ldaps://10.112.113.137:389", "ldaps://10.112.113.182:389", "xiaoliangl", "password");
 
       return userMgmtServerService.getByName(name, true);
+   }
+
+   @RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
+   @ResponseStatus(HttpStatus.OK)
+   public void delete(@PathVariable("name") @Valid @NotNull String name) {
+      userMgmtServerService.deleteByName(name);
    }
 
 

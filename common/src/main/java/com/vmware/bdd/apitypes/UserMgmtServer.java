@@ -81,7 +81,7 @@ public class UserMgmtServer {
     * @param userName
     * @param password
     */
-   public UserMgmtServer(String name, Type type, String baseGroupDn, String baseUserDn, String primaryUrl, String secondaryUrl, String userName, String password) {
+   public UserMgmtServer(String name, Type type, String baseGroupDn, String baseUserDn, String primaryUrl, String secondaryUrl, String userName, String password, String mgmtVMUserGroupDn) {
       this.name = name;
       this.type = type;
       this.baseGroupDn = baseGroupDn;
@@ -90,6 +90,7 @@ public class UserMgmtServer {
       this.secondaryUrl = secondaryUrl;
       this.userName = userName;
       this.password = password;
+      this.mgmtVMUserGroupDn = mgmtVMUserGroupDn;
    }
 
    public String getName() {

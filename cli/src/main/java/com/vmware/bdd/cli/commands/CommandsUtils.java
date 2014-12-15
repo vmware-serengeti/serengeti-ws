@@ -449,12 +449,13 @@ public class CommandsUtils {
 
    public static boolean showWarningMsg(final String name,
          final String targetObject, final String operateType,
-         final List<String> warningMsgList, final boolean alwaysAnswerYes) {
+         final List<String> warningMsgList, final boolean alwaysAnswerYes, String promptMsg) {
       if (warningMsgList != null && !warningMsgList.isEmpty()) {
          for (String message : warningMsgList) {
             System.out.println(message);
          }
-         if (!isContinue(name, targetObject, operateType, Constants.PARAM_PROMPT_CONTINUE_MESSAGE, alwaysAnswerYes)) {
+         if (!isContinue(name, targetObject, operateType,
+               promptMsg != null ? promptMsg : Constants.PARAM_PROMPT_CONTINUE_MESSAGE, alwaysAnswerYes)) {
             return false;
          }
       }

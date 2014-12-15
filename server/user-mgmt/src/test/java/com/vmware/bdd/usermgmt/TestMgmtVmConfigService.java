@@ -73,8 +73,8 @@ public class TestMgmtVmConfigService  {
 
       Map<String,String> mgmtVmCfg1 = mgmtVmCfgService.get();
 
-      Assert.assertEquals(mgmtVmCfg1.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_MODE), mgmtVmCfg.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_MODE));
-      Assert.assertEquals(mgmtVmCfg1.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_SERVERNAME), mgmtVmCfg.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_SERVERNAME));
+      Assert.assertEquals(mgmtVmCfg1.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE), mgmtVmCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE));
+      Assert.assertEquals(mgmtVmCfg1.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME), mgmtVmCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME));
    }
 
    @Test
@@ -93,8 +93,8 @@ public class TestMgmtVmConfigService  {
 
       Map<String,String> finalCfg = mgmtVmCfgService.get();
 
-      Assert.assertEquals(finalCfg.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_MODE), newCfg.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_MODE));
-      Assert.assertEquals(finalCfg.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_SERVERNAME), initCfg.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_SERVERNAME));
+      Assert.assertEquals(finalCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE), newCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE));
+      Assert.assertEquals(finalCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME), initCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME));
    }
 
    @Test(expectedExceptions = {BddException.class})
@@ -114,8 +114,8 @@ public class TestMgmtVmConfigService  {
       } catch (BddException bdde) {
          Map<String,String> finalCfg = mgmtVmCfgService.get();
 
-         Assert.assertEquals(finalCfg.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_MODE), initCfg.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_MODE));
-         Assert.assertEquals(finalCfg.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_SERVERNAME), initCfg.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_SERVERNAME));
+         Assert.assertEquals(finalCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE), initCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE));
+         Assert.assertEquals(finalCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME), initCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME));
 
          throw bdde;
       }
@@ -139,7 +139,7 @@ public class TestMgmtVmConfigService  {
          mgmtVmCfgService.config(mgmtVmCfg);
       } catch (ValidationException ve) {
 
-         Assert.assertNotNull(ve.getErrors().get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_SERVERNAME));
+         Assert.assertNotNull(ve.getErrors().get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME));
          throw ve;
       }
    }
@@ -161,7 +161,7 @@ public class TestMgmtVmConfigService  {
          mgmtVmCfgService.config(mgmtVmCfg);
       } catch (ValidationException ve) {
 
-         Assert.assertNotNull(ve.getErrors().get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_SERVERNAME));
+         Assert.assertNotNull(ve.getErrors().get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME));
          throw ve;
       }
    }
@@ -184,7 +184,7 @@ public class TestMgmtVmConfigService  {
 
       Map<String,String> mgmtVmCfg1 = mgmtVmCfgService.get();
 
-      Assert.assertEquals(mgmtVmCfg1.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_MODE), mgmtVmCfg.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_MODE));
-      Assert.assertEquals(mgmtVmCfg1.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_SERVERNAME), mgmtVmCfg.get(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_SERVERNAME));
+      Assert.assertEquals(mgmtVmCfg1.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE), mgmtVmCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE));
+      Assert.assertEquals(mgmtVmCfg1.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME), mgmtVmCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME));
    }
 }

@@ -32,9 +32,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.exception.ValidationErrorsMessage;
 import com.vmware.bdd.exception.ValidationException;
-import com.vmware.bdd.security.tls.UntrustedCertErrorMessage;
 import com.vmware.bdd.security.tls.UntrustedCertificateException;
 import com.vmware.bdd.validation.ValidationError;
 import com.vmware.bdd.validation.ValidationErrors;
@@ -54,25 +52,33 @@ public class RestValidationErrorHandler {
    @ExceptionHandler(MethodArgumentNotValidException.class)
    @ResponseStatus(HttpStatus.BAD_REQUEST)
    @ResponseBody
-   public ValidationErrorsMessage processValidationError(MethodArgumentNotValidException ex) {
+   public BddErrorMessage processValidationError(MethodArgumentNotValidException ex) {
       BindingResult result = ex.getBindingResult();
       List<FieldError> fieldErrors = result.getFieldErrors();
 
-      return new ValidationErrorsMessage("BDD.INVALID_PARAMS", "", processFieldErrors(fieldErrors).getErrors());
+      BddErrorMessage validationErrMsg = new BddErrorMessage("BDD.INVALID_PARAMS", "");
+      validationErrMsg.setErrors(processFieldErrors(fieldErrors).getErrors());
+      return validationErrMsg;
    }
 
    @ExceptionHandler(ValidationException.class)
    @ResponseStatus(HttpStatus.BAD_REQUEST)
    @ResponseBody
-   public ValidationErrorsMessage processValidationError(ValidationException ex) {
-      return new ValidationErrorsMessage(ex.getFullErrorId(), ex.getMessage(), ex.getErrors());
+   public BddErrorMessage processValidationError(ValidationException ex) {
+      BddErrorMessage validationErrMsg = new BddErrorMessage(ex.getFullErrorId(), ex.getMessage());
+      validationErrMsg.setErrors(ex.getErrors());
+
+      return validationErrMsg;
    }
 
    @ExceptionHandler(UntrustedCertificateException.class)
    @ResponseStatus(HttpStatus.BAD_REQUEST)
    @ResponseBody
-   public UntrustedCertErrorMessage processUntrustedCertificate(UntrustedCertificateException ex) {
-      return new UntrustedCertErrorMessage(ex.getFullErrorId(), ex.getMessage(), ex.getCertInfo());
+   public BddErrorMessage processUntrustedCertificate(UntrustedCertificateException ex) {
+      BddErrorMessage validationErrMsg = new BddErrorMessage("BDD.INVALID_PARAMS", "");
+      validationErrMsg.setCertInfo(ex.getCertInfo());
+
+      return validationErrMsg;
    }
 
    @ExceptionHandler(BddException.class)

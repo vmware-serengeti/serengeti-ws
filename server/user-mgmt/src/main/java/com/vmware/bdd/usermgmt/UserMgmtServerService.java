@@ -56,4 +56,8 @@ public class UserMgmtServerService {
 
       return userMgmtServer;
    }
+
+   public void deleteByName(String name) {
+      serverEao.delete(name);
+   }
 }

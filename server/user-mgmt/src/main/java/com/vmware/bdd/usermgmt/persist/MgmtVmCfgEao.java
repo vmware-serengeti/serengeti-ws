@@ -19,7 +19,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.vmware.bdd.usermgmt.MgmtVmCfgService;
+import com.vmware.bdd.usermgmt.UserMgmtConstants;
 
 /**
  * @TODO add persistence
@@ -32,8 +32,8 @@ public class MgmtVmCfgEao {
 
 
    public MgmtVmCfgEao() {
-      cfg1.put(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_MODE, "LOCAL"); //mixed, ldap
-      cfg1.put(MgmtVmCfgService.VMCONFIG_MGMTVM_CUM_SERVERNAME, "");
+      cfg1.put(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE, "LOCAL"); //mixed, ldap
+      cfg1.put(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME, "");
    }
 
    public Map<String, String> findAll() {

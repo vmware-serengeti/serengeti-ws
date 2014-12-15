@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.log4j.Logger;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -38,6 +39,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.UserMgmtServer;
 import com.vmware.bdd.validation.ValidationError;
 import com.vmware.bdd.validation.ValidationErrors;
@@ -51,6 +53,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @WebAppConfiguration
 @ActiveProfiles("webapp")
 public class TestUserMgmtServerControllerValidation extends AbstractTestNGSpringContextTests {
+   private final static Logger LOGGER = Logger.getLogger(TestUserMgmtServerControllerValidation.class);
+
 
    @Resource
    private WebApplicationContext webAppCtx;
@@ -67,10 +71,10 @@ public class TestUserMgmtServerControllerValidation extends AbstractTestNGSpring
    private static Object[][] DATAs = {};
 
    private static final String[][] UMS_FIELDS= {
-         {null, null, null, null, null, null, null, null},
-         {"", null, "ou=users,dc=bde,dc=vmware,dc=com", "ou=groups,dc=bde,dc=vmware,dc=com", "", "", "", ""},
-         {"ldapserver1", "LDAP", "ou=users,dc=bde,dc=vmware,dc=com", "ou=groups,dc=bde,dc=vmware,dc=com", "http://10.112.113.137:8080", "http://10.112.113.137:8080", "xiaoliangl", "password"},
-         {"ldapserver1", "LDAP", "ou=users,,dc=bde,dc=vmware,dc=com", "ou=groups-=,dc=bde,dc=vmware,dc=com", "ldap://10.112.113.137:8080", "", "xiaoliangl", "password"},
+         {null, null, null, null, null, null, null, null, null},
+         {"", null, "ou=users,dc=bde,dc=vmware,dc=com", "ou=groups,dc=bde,dc=vmware,dc=com", "", "", "", "", ""},
+         {"ldapserver1", "LDAP", "ou=users,dc=bde,dc=vmware,dc=com", "ou=groups,dc=bde,dc=vmware,dc=com", "http://10.112.113.137:8080", "http://10.112.113.137:8080", "xiaoliangl", "password", "cn=hadoop-users,ou=groups,dc=bde,dc=vmware,dc=com"},
+         {"ldapserver1", "LDAP", "ou=users,,dc=bde,dc=vmware,dc=com", "ou=groups-=,dc=bde,dc=vmware,dc=com", "ldap://10.112.113.137:8080", "", "xiaoliangl", "password", "cn=hadoop-users,ou=groups,dc=bde,dc=vmware,dc=com"},
    };
 
    private static final String[][][] ERRORS_FIELDS = {
@@ -81,14 +85,16 @@ public class TestUserMgmtServerControllerValidation extends AbstractTestNGSpring
                {"password", "NotNull.userMgmtServer.password", "may not be null"},
                {"baseGroupDn", "NotNull.userMgmtServer.baseGroupDn", "may not be null"},
                {"baseUserDn", "NotNull.userMgmtServer.baseUserDn", "may not be null"},
-               {"type", "NotNull.userMgmtServer.type", "may not be null"}
+               {"type", "NotNull.userMgmtServer.type", "may not be null"},
+               {"mgmtVMUserGroupDn", "NotNull.userMgmtServer.mgmtVMUserGroupDn", "may not be null"}
          },
          {
                {"name", "Size.userMgmtServer.name", "size must be between 1 and 50"},
-               {"primaryUrl", "Size.userMgmtServer.primaryUrl", "size must be between 7 and 50"},
+               {"primaryUrl", "Size.userMgmtServer.primaryUrl", "size must be between 7 and 200"},
                {"userName", "Size.userMgmtServer.userName", "size must be between 1 and 50"},
                {"password", "Size.userMgmtServer.password", "size must be between 1 and 50"},
-               {"type", "NotNull.userMgmtServer.type", "may not be null"}
+               {"type", "NotNull.userMgmtServer.type", "may not be null"},
+               {"mgmtVMUserGroupDn", "Size.userMgmtServer.mgmtVMUserGroupDn", "size must be between 1 and 100"}
          },
          {
                {"secondaryUrl", "LdapUrlFormat.userMgmtServer.secondaryUrl", "Bad LDAP URL"},
@@ -110,7 +116,7 @@ public class TestUserMgmtServerControllerValidation extends AbstractTestNGSpring
 
       for (int i = 0; i < UMS_FIELDS.length; i++) {
          String[] umsFields = UMS_FIELDS[i];
-         userMgmtServer = new UserMgmtServer(umsFields[0], umsFields[1] == null ? null : UserMgmtServer.Type.valueOf(umsFields[1]), umsFields[2], umsFields[3], umsFields[4], umsFields[5], umsFields[6], umsFields[7]);
+         userMgmtServer = new UserMgmtServer(umsFields[0], umsFields[1] == null ? null : UserMgmtServer.Type.valueOf(umsFields[1]), umsFields[2], umsFields[3], umsFields[4], umsFields[5], umsFields[6], umsFields[7], umsFields[8]);
 
          validationErrors = new ValidationErrors();
 
@@ -140,7 +146,9 @@ public class TestUserMgmtServerControllerValidation extends AbstractTestNGSpring
          public void handle(MvcResult result) throws Exception {
             String jsonResponse = result.getResponse().getContentAsString();
 
-            ValidationErrors actualValidationErrors = objectMapper.readValue(jsonResponse, ValidationErrors.class);
+            LOGGER.info("response code is: " + result.getResponse().getStatus());
+
+            BddErrorMessage actualValidationErrors = objectMapper.readValue(jsonResponse, BddErrorMessage.class);
 
             Map<String, ValidationError> actualErrors = actualValidationErrors.getErrors();
             Map<String, ValidationError> expectErrors = validationErrors.getErrors();
@@ -160,6 +168,8 @@ public class TestUserMgmtServerControllerValidation extends AbstractTestNGSpring
       for(Map.Entry<K, V> actualEntry : actualErrors.entrySet()) {
          if(actualEntry.getValue().equals(expectErrors.get(actualEntry.getKey()))) {
             equals ++;
+         } else {
+            LOGGER.error("found not equals: " + actualEntry.getValue() + " VS. " + expectErrors.get(actualEntry.getKey()));
          }
       }
 

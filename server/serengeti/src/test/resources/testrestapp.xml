@@ -13,5 +13,26 @@
    <mvc:annotation-driven />
    <mvc:default-servlet-handler />
 
-   <context:component-scan base-package="com.vmware.bdd.rest.vmcfg" />
+   <context:component-scan base-package="com.vmware.bdd.rest" >
+      <context:exclude-filter type="regex" expression="com\.vmware\.bdd\.rest\.RestResource" />
+      <context:exclude-filter type="regex" expression="com\.vmware\.bdd\.rest\.MgmtVMConfigController" />
+   </context:component-scan>
+
+   <bean name="userMgmtServerService" class="org.mockito.Mockito" factory-method="mock">
+      <constructor-arg value="com.vmware.bdd.usermgmt.UserMgmtServerService"/>
+   </bean>
+
+   <bean name="userMgmtServerEao" class="org.mockito.Mockito" factory-method="mock">
+      <constructor-arg value="com.vmware.bdd.usermgmt.persist.UserMgmtServerEao"/>
+   </bean>
+
+   <bean name="userMgmtServerValidService" class="org.mockito.Mockito" factory-method="mock">
+      <constructor-arg value="com.vmware.bdd.usermgmt.UserMgmtServerValidService"/>
+   </bean>
+
+   <bean name="tcpClient" class="org.mockito.Mockito" factory-method="mock">
+      <constructor-arg value="com.vmware.bdd.security.tls.TlsTcpClient"/>
+   </bean>
+
+   <bean class="com.vmware.bdd.usermgmt.SssdLdapConstantMappings" />
 </beans>

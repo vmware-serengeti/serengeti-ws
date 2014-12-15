@@ -23,6 +23,8 @@ import com.vmware.bdd.validation.ValidationErrors;
  * Created By xiaoliangl on 12/2/14.
  */
 public final class ValidationException extends BddException {
+   private final Map<String, ValidationError> errors;
+
    public ValidationException(Map<String, ValidationError> validationErrors) {
       super(null, "BDD", "INVALID_PARAMS");
       errors = validationErrors;
@@ -31,9 +33,4 @@ public final class ValidationException extends BddException {
    public final Map<String, ValidationError> getErrors() {
       return errors;
    }
-
-
-   private final Map<String, ValidationError> errors;
-
-
 }

@@ -29,6 +29,9 @@ public class UntrustedCertificateException extends BddException{
       certInfo = certInfo1;
    }
 
+   public UntrustedCertificateException() {
+   }
+
    public CertificateInfo getCertInfo() {
       return certInfo;
    }
