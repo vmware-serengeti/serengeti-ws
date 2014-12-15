@@ -48,7 +48,7 @@ public class PspConfiguration {
        */
       this.setSupportedCipherSuites(CIPHER_SUITES);
       this.setSupportedProtocols(SSL_PROTOCOLS);
-      this.setSSLContextAlgorithm("SSL");
+      this.setSSLContextAlgorithm("TLS");
    }
 
 
