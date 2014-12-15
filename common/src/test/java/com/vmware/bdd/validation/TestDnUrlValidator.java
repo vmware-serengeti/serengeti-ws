@@ -28,6 +28,7 @@ public class TestDnUrlValidator {
          {false, "dc=bde,,dc=vmware,dc=com"},
          {false, "dc=b=de,dc=vmware,dc=com"},
          {false, "this is a test"},
+         {true, "cn=Users,dc=bde,dc=vmware,dc=com"},
          {true, "   "},
          {true, null},
    };

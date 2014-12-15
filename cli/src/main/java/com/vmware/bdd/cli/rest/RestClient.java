@@ -76,6 +76,7 @@ import com.vmware.bdd.cli.commands.Constants;
 import com.vmware.bdd.cli.commands.CookieCache;
 import com.vmware.bdd.cli.config.RunWayConfig;
 import com.vmware.bdd.cli.config.RunWayConfig.RunType;
+import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.CommonUtil;
 
 /**
@@ -358,6 +359,14 @@ public class RestClient {
          }
 
       } catch (Exception e) {
+         if(e instanceof CliRestException) {
+            throw (CliRestException)e;
+         }
+
+         if(e instanceof BddException) {
+            throw (BddException)e;
+         }
+
          throw new CliRestException(CommandsUtils.getExceptionMessage(e));
       }
    }

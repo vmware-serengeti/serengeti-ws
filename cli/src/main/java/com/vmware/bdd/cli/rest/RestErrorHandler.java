@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatus.Series;
@@ -35,6 +36,8 @@ import org.springframework.web.client.ResponseErrorHandler;
 
 import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.cli.commands.Constants;
+import com.vmware.bdd.exception.ValidationException;
+import com.vmware.bdd.security.tls.UntrustedCertificateException;
 import com.vmware.bdd.utils.CommonUtil;
 
 public class RestErrorHandler implements ResponseErrorHandler {
@@ -60,7 +63,19 @@ public class RestErrorHandler implements ResponseErrorHandler {
    public void handleError(ClientHttpResponse response) throws IOException {
       MediaType contentType = response.getHeaders().getContentType();
       if (MediaType.APPLICATION_JSON.includes(contentType)) {
-         throw new CliRestException(delegate.extractData(response).getMessage());
+
+         ObjectMapper objectMapper = new ObjectMapper();
+         BddErrorMessage errorMessage = objectMapper.readValue(response.getBody(), BddErrorMessage.class);
+
+         if(errorMessage.getErrors() != null) {
+            throw new ValidationException(errorMessage.getErrors());
+         }
+
+         if(errorMessage.getCertInfo() != null) {
+            throw new UntrustedCertificateException(errorMessage.getCertInfo());
+         }
+
+         throw new CliRestException(errorMessage.getMessage());
       } else {
          HttpStatus statusCode = response.getStatusCode();
          String errorMsg = "";

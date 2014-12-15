@@ -56,7 +56,7 @@ public class TopologyCommands implements CommandMarker {
             }
             if (CommandsUtils.showWarningMsg(null,
                   Constants.OUTPUT_OBJECT_TOPOLOGY, Constants.OUTPUT_OP_UPLOAD,
-                  warningMsgList, alwaysAnswerYes)) {
+                  warningMsgList, alwaysAnswerYes, null)) {
                topologyRestClient.upload(racks);
                CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_TOPOLOGY, null,
                   Constants.OUTPUT_OP_RESULT_UPLOAD);

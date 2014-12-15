@@ -46,4 +46,16 @@ public class UserMgmtServerEao {
    public UserMgmtServer findByName(String name) {
       return usrMgmtServerMap.get(name);
    }
+
+   public void delete(String name) {
+      if(usrMgmtServerMap.containsKey(name)) {
+         usrMgmtServerMap.remove(name);
+      } else {
+         ValidationError validationError = new ValidationError("NAME.NOT_FOUND", "given name not found.");
+         ValidationErrors errors = new ValidationErrors();
+         errors.addError("Name", validationError);
+         throw new ValidationException(errors.getErrors());
+      }
+
+   }
 }

@@ -385,7 +385,7 @@ public class ClusterCommands implements CommandMarker {
       try {
          if (!CommandsUtils.showWarningMsg(clusterCreate.getName(),
                Constants.OUTPUT_OBJECT_CLUSTER, Constants.OUTPUT_OP_CREATE,
-               warningMsgList, alwaysAnswerYes)) {
+               warningMsgList, alwaysAnswerYes, null)) {
             return;
          }
          restClient.create(clusterCreate);
@@ -1189,7 +1189,7 @@ public class ClusterCommands implements CommandMarker {
                + Constants.PARAM_CLUSTER_CONFIG_RUNNING_JOB_WARNING);
          if (!CommandsUtils.showWarningMsg(clusterConfig.getName(),
                Constants.OUTPUT_OBJECT_CLUSTER, Constants.OUTPUT_OP_CONFIG,
-               warningMsgList, alwaysAnswerYes)) {
+               warningMsgList, alwaysAnswerYes, null)) {
             return;
          }
 

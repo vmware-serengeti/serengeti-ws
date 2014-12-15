@@ -477,7 +477,7 @@ public class AppManagerCommands implements CommandMarker {
                   + " is used by clusters " + clusters + ".");
             if (!CommandsUtils.showWarningMsg(name,
                   Constants.OUTPUT_OBJECT_APPMANAGER,
-                  Constants.OUTPUT_OP_MODIFY, warningMsgList, false)) {
+                  Constants.OUTPUT_OP_MODIFY, warningMsgList, false, null)) {
                return;
             }
          }

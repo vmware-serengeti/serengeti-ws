@@ -34,8 +34,6 @@ import com.vmware.bdd.usermgmt.persist.MgmtVmCfgEao;
  */
 @Component
 public class MgmtVmCfgService {
-   public static final String VMCONFIG_MGMTVM_CUM_MODE = "vmconfig.mgmtvm.cum.mode";
-   public static final String VMCONFIG_MGMTVM_CUM_SERVERNAME = "vmconfig.mgmtvm.cum.servername";
 
    @Autowired
    private MgmtVmCfgEao mgmtVmCfgEao;
@@ -81,7 +79,7 @@ public class MgmtVmCfgService {
    public void config(Map<String, String> newConfig) {
       Map<String, String> currentCfg = mgmtVmCfgEao.findAll();
 
-      if (newConfig.containsKey(VMCONFIG_MGMTVM_CUM_MODE)) {
+      if (newConfig.containsKey(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE)) {
          configUserMgmtService(currentCfg, newConfig);
          mgmtVmCfgEao.update(newConfig);
       } else {
@@ -95,8 +93,8 @@ public class MgmtVmCfgService {
 
 
    private void configUserMgmtService(Map<String, String> currentCfg, Map<String, String> newCfg) {
-      UserMgmtMode currentMode = UserMgmtMode.valueOf(currentCfg.get(VMCONFIG_MGMTVM_CUM_MODE));
-      UserMgmtMode newMode = UserMgmtMode.valueOf(newCfg.get(VMCONFIG_MGMTVM_CUM_MODE));
+      UserMgmtMode currentMode = UserMgmtMode.valueOf(currentCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE));
+      UserMgmtMode newMode = UserMgmtMode.valueOf(newCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE));
 
       if(currentMode == newMode) {
          throw new BddException(null, "MGMTVM_CUM_CFG", "ALREADY_IN_TARGET_MODE", newMode);
@@ -120,18 +118,18 @@ public class MgmtVmCfgService {
    }
 
    private void enableLdap(Map<String, String> newCfg) {
-      String userMgmtServerName = newCfg.get(VMCONFIG_MGMTVM_CUM_SERVERNAME);
+      String userMgmtServerName = newCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME);
 
       ValidationErrors errors = new ValidationErrors();
       if(userMgmtServerName == null || userMgmtServerName.length() == 0) {
          ValidationError validationErr = new ValidationError("MGMTVM_CUM_CFG.USER_MGMT_SERVER_NAME_MISSING", "UserMgmtServerName missing");
-         errors.addError(VMCONFIG_MGMTVM_CUM_SERVERNAME, validationErr);
+         errors.addError(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME, validationErr);
       }
 
       UserMgmtServer userMgmtServer = userMgmtServerService.getByName(userMgmtServerName, false);
       if(userMgmtServer == null) {
          ValidationError validationErr = new ValidationError("MGMTVM_CUM_CFG.NOT_FOUND", "Can't find a server with given UserMgmtServerName.");
-         errors.addError(VMCONFIG_MGMTVM_CUM_SERVERNAME, validationErr);
+         errors.addError(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME, validationErr);
       }
 
       if(!errors.getErrors().isEmpty()) {
