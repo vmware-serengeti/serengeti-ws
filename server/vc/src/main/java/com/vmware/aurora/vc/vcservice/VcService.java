@@ -18,19 +18,15 @@ package com.vmware.aurora.vc.vcservice;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
@@ -40,14 +36,23 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
+import javax.net.ssl.TrustManager;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.RequestEntity;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.log4j.Logger;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
 import com.vmware.aurora.exception.VcException;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.security.CmsKeyStore;
+import com.vmware.aurora.security.ThumbprintTrustManager;
 import com.vmware.aurora.util.AuAssert;
 import com.vmware.aurora.vc.vcservice.VcService.MyThreadPoolExecutor.MyBlockingQueue;
 import com.vmware.vim.binding.impl.vim.DescriptionImpl;
@@ -642,41 +647,54 @@ public class VcService {
       Writer output = null;
       BufferedReader input = null;
       try {
+         /**
+          *  Initialize our own trust manager
+          */
+         ThumbprintTrustManager thumbprintTrustManager = new ThumbprintTrustManager();
+         thumbprintTrustManager.add(vcThumbprint);
+
+         TrustManager[] trustManagers = new TrustManager[]{thumbprintTrustManager};
+
+         HttpClient httpClient = new HttpClient();
+
+         TlsSocketFactory tlsSocketFactory = new TlsSocketFactory(trustManagers);
+
+         Protocol.registerProtocol("https", new Protocol("https", (ProtocolSocketFactory)tlsSocketFactory, 443));
+
+         PostMethod method = new PostMethod(evsURL);
+         method.setRequestHeader("evs-token", evsToken);
+
          Certificate cert = CmsKeyStore.getCertificate(CmsKeyStore.VC_EXT_KEY);
-         URL url = new URL(evsURL);
-         URLConnection connection = url.openConnection();
-         connection.setRequestProperty("evs-token", evsToken);
-         connection.setDoInput(true);
-         connection.setDoOutput(true); // POST
-         connection.setUseCaches(false);
-         output = new OutputStreamWriter(connection.getOutputStream());
          String evsSchema = "http://www.vmware.com/schema/vservice/ExtensionVService";
          String payload =
-            "<RegisterExtension xmlns=\"" + evsSchema + "\">\n" +
-            "  <Key>" + extKey + "</Key>\n" +
-            "  <Certificate>\n" +
-            CertificateToPem(cert) + "\n" +
-            "  </Certificate>\n" +
-            "</RegisterExtension>\n";
-         output.write(payload);
-         output.flush();
-         connection.connect();
+               "<RegisterExtension xmlns=\"" + evsSchema + "\">\n" +
+                     "  <Key>" + extKey + "</Key>\n" +
+                     "  <Certificate>\n" +
+                     CertificateToPem(cert) + "\n" +
+                     "  </Certificate>\n" +
+                     "</RegisterExtension>\n";
 
-         // Read response headers
-         Map<String, List<String>> headers = connection.getHeaderFields();
-         for (Map.Entry<String, List<String>> e: headers.entrySet()) {
-            for (String val: e.getValue()) {
-               logger.info("Response Header: " + e.getKey() + " :" + val);
-            }
+         RequestEntity requestEntity = new StringRequestEntity(payload, "text/plain", "UTF-8");
+         method.setRequestEntity(requestEntity);
+         int statusCode = httpClient.executeMethod(method);
+
+         logger.info("status code: " + statusCode);
+         for (Header e: method.getResponseHeaders()) {
+               logger.debug("Response Header: " + e.getName() + " :" + e.getValue());
          }
-         // Read response
+
          input = new BufferedReader(
-               new InputStreamReader(connection.getInputStream()));
+               new InputStreamReader(method.getResponseBodyAsStream()));
          for (String str = input.readLine(); str != null; str = input.readLine()) {
             logger.debug("Response: " + str);
          }
-         vcExtensionRegistered = true;
-         logger.debug("Extension registration request sent successfully");
+
+         if(statusCode == 200) {
+            vcExtensionRegistered = true;
+            logger.info("Extension registration request sent successfully");
+         } else {
+            logger.error("Extension registration request sent error");
+         }
       } catch (Exception e) {
          logger.error("Failed Extension registration to " + evsURL, e);
       } finally {
