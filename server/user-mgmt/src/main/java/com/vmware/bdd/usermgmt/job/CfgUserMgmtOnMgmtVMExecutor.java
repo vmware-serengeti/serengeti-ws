@@ -31,6 +31,7 @@ import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.log4j.Logger;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.UserMgmtServer;
 import com.vmware.bdd.command.CommandUtil;
 import com.vmware.bdd.usermgmt.SssdLdapConstantMappings;
@@ -40,6 +41,8 @@ import com.vmware.bdd.usermgmt.SssdLdapConstantMappings;
  */
 public class CfgUserMgmtOnMgmtVMExecutor {
    private final static Logger LOGGER = Logger.getLogger(CfgUserMgmtOnMgmtVMExecutor.class);
+
+   private final static int TIMEOUT = Configuration.getInt("usermgmt.command.exec.timeout", 120);
 
    public void execute(UserMgmtServer userMgmtServer, SssdLdapConstantMappings sssdLdapConstantMappings) {
       File workDir = CommandUtil.createWorkDir(System.currentTimeMillis());
@@ -72,8 +75,7 @@ public class CfgUserMgmtOnMgmtVMExecutor {
                   new ExecOutputLogger(LOGGER, true)) //error logger
       );
 
-      //@TODO make it configurable
-      executor.setWatchdog(new ExecuteWatchdog(120l * 1000l));
+      executor.setWatchdog(new ExecuteWatchdog(1000l * TIMEOUT));
 
       try {
          int exitVal = executor.execute(cmdLine);

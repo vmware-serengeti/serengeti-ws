@@ -14,22 +14,11 @@
  *****************************************************************************/
 package com.vmware.bdd.usermgmt.job;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.TreeMap;
-
-import com.google.gson.Gson;
 import org.apache.log4j.Logger;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.UserMgmtServer;
-import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.manager.JobManager;
-import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.usermgmt.SssdLdapConstantMappings;
 
 /**
@@ -42,42 +31,13 @@ public class MgmtVmConfigJobService {
    @Autowired
    private SssdLdapConstantMappings sssdLdapConstantMappings;
 
-   @Autowired
-   private JobManager jobManager;
-
    public void enableLdap(UserMgmtServer usrMgmtServer) {
-      /*Gson gson = new Gson();
-
-      Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
-      param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
-      param.put(JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM, new JobParameter(ClusterStatus.RUNNING.name()));
-      param.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM, new JobParameter(ClusterStatus.CONFIGURE_ERROR.name()));
-      param.put("UserMgmtServer", new JobParameter(gson.toJson(usrMgmtServer)));
-
-      JobParameters jobParameters = new JobParameters(param);
-
-      try {
-         return jobManager.runJob("MgmtVMUserMgmtServerCfgJob", jobParameters);
-      } catch (Exception e) {
-         throw new BddException(e, "BDD.MgmtVMConfig", "EXCEPTION");
-      }*/
-
       CfgUserMgmtOnMgmtVMExecutor cfgExecutor = new CfgUserMgmtOnMgmtVMExecutor();
       cfgExecutor.execute(usrMgmtServer, sssdLdapConstantMappings);
    }
 
-   public long disableLocalAccount() {
-      Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
-      param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
-      param.put(JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM, new JobParameter(ClusterStatus.RUNNING.name()));
-      param.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM, new JobParameter(ClusterStatus.CONFIGURE_ERROR.name()));
-
-      JobParameters jobParameters = new JobParameters(param);
-
-      try {
-         return jobManager.runJob("MgmtVMDisableLocalAccountJob", jobParameters);
-      } catch (Exception e) {
-         throw new BddException(e, "BDD.MgmtVMConfig", "EXCEPTION");
-      }
+   public void changeLocalAccountState(boolean enabled) {
+      ChangeLocalAccountStateExecutor executor = new ChangeLocalAccountStateExecutor();
+      executor.execute(enabled);
    }
 }

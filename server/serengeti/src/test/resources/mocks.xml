@@ -26,6 +26,25 @@
 
    <bean class="com.vmware.bdd.usermgmt.SssdLdapConstantMappings" />
 
-
    <bean class="com.vmware.bdd.usermgmt.LdapsTrustStoreConfig" />
+
+   <bean name="modificationHandler" class="org.mockito.Mockito" factory-method="mock" >
+      <constructor-arg value="com.vmware.bdd.usermgmt.UserMgmtServerModificationHandler" />
+   </bean>
+
+   <bean class="org.mockito.Mockito" factory-method="mock">
+      <constructor-arg value="com.vmware.bdd.usermgmt.MgmtVmCfgService" />
+   </bean>
+
+   <bean class="org.mockito.Mockito" factory-method="mock">
+      <constructor-arg value="com.vmware.bdd.usermgmt.persist.MgmtVmCfgEao" />
+   </bean>
+
+   <bean name="mgmtVmCfgDao" class="org.mockito.Mockito" factory-method="mock">
+      <constructor-arg value="com.vmware.bdd.dal.IBaseDAO"/>
+   </bean>
+
+   <bean class="org.mockito.Mockito" factory-method="mock">
+      <constructor-arg value="com.vmware.bdd.usermgmt.job.MgmtVmConfigJobService" />
+   </bean>
 </beans>

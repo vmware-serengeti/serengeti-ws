@@ -59,16 +59,30 @@ public class MgmtVmCfgService {
          }
       });
 
+      //LOCAL -> MIXED
       allowedTransitions.put(UserMgmtMode.LOCAL, Collections.unmodifiableMap(target));
 
       target = new HashMap<>();
       target.put(UserMgmtMode.LDAP, new TransitAction() {
          @Override
          public void perform(Map<String, String> newCfg) {
-            MgmtVmCfgService.this.disableLocalAccount(newCfg);
+            mgmtVmConfigJobService.changeLocalAccountState(false);
          }
       });
+
+      //MIXED -> LDAP_ONLY
       allowedTransitions.put(UserMgmtMode.MIXED, Collections.unmodifiableMap(target));
+
+      target = new HashMap<>();
+      target.put(UserMgmtMode.MIXED, new TransitAction() {
+         @Override
+         public void perform(Map<String, String> newCfg) {
+            mgmtVmConfigJobService.changeLocalAccountState(true);
+         }
+      });
+
+      //LDAP_ONLY -> MIXED
+      allowedTransitions.put(UserMgmtMode.LDAP, Collections.unmodifiableMap(target));
 
       allowedTransitions = Collections.unmodifiableMap(allowedTransitions);
    }
@@ -128,10 +142,6 @@ public class MgmtVmCfgService {
       }
 
       targetAction.perform(newCfg);
-   }
-
-   private void disableLocalAccount(Map<String, String> newCfg) {
-      mgmtVmConfigJobService.disableLocalAccount();
    }
 
    private void enableLdap(Map<String, String> newCfg) {
