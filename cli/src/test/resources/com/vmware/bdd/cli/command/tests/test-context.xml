@@ -11,13 +11,8 @@
     <context:component-scan base-package="com.vmware.bdd.cli.rest"/>
     <context:component-scan base-package="com.vmware.bdd.cli.auth"/>
     <bean id="client" class="org.springframework.web.client.RestTemplate">
-        <property name="messageConverters">
-            <list>
-                <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter" />
-            </list>
-        </property>
         <property name="errorHandler">
-        	<bean class="com.vmware.bdd.cli.rest.RestErrorHandler"></bean>
+        	<bean class="com.vmware.bdd.cli.rest.RestErrorHandler" />
         </property>
     </bean>
     <bean id="hadoopConfiguration" class="org.apache.hadoop.conf.Configuration"/>
