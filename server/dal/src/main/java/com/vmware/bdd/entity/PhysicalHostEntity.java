@@ -16,8 +16,6 @@ package com.vmware.bdd.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
@@ -27,7 +25,6 @@ import javax.persistence.Table;
 @SequenceGenerator(name = "IdSequence", sequenceName = "physical_host_seq", allocationSize = 1)
 @Table(name = "physical_host")
 public class PhysicalHostEntity extends EntityBase {
-   @Enumerated(EnumType.STRING)
    @Column(name = "name", nullable = false)
    private String name;
 

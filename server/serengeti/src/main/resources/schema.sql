@@ -227,3 +227,22 @@ create table server_info (
   instance_id  varchar(255),
   deploy_time  timestamp(0) without time zone
 );
+
+CREATE TABLE usermgmtserver (
+  name        VARCHAR(50),
+  type        VARCHAR(30) not null ,
+  baseGroupDn VARCHAR(200) not null ,
+  baseUserDn  VARCHAR(200) not null ,
+  primaryUrl  VARCHAR(200) not null ,
+  userName    VARCHAR(200) not null ,
+  password VARCHAR(512) not null ,
+  primary key (name)
+);
+
+CREATE TABLE mgmtvmcfg (
+  name varchar (200),
+  value varchar (1000),
+  primary key (name)
+);
+
+insert into mgmtvmcfg values ('vmconfig.mgmtvm.cum.mode','LOCAL');

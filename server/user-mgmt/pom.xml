@@ -23,27 +23,9 @@
          <artifactId>spring-beans</artifactId>
       </dependency>
       <dependency>
-         <groupId>org.springframework.batch</groupId>
-         <artifactId>spring-batch-core</artifactId>
+         <groupId>org.hibernate</groupId>
+         <artifactId>hibernate-entitymanager</artifactId>
       </dependency>
-      <dependency>
-         <groupId>com.google.code.gson</groupId>
-         <artifactId>gson</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.testng</groupId>
-         <artifactId>testng</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.mockito</groupId>
-         <artifactId>mockito-core</artifactId>
-      </dependency>
-
-      <dependency>
-         <groupId>org.springframework</groupId>
-         <artifactId>spring-test</artifactId>
-      </dependency>
-
       <dependency>
          <groupId>com.vmware.bdd</groupId>
          <artifactId>cluster-mgmt</artifactId>
@@ -57,6 +39,18 @@
          <artifactId>commons-aurora</artifactId>
       </dependency>
 
+      <dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-test</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.testng</groupId>
+         <artifactId>testng</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.mockito</groupId>
+         <artifactId>mockito-core</artifactId>
+      </dependency>
    </dependencies>
 
 

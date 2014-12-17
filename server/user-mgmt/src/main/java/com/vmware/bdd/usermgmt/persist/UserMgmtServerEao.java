@@ -14,42 +14,56 @@
  *****************************************************************************/
 package com.vmware.bdd.usermgmt.persist;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vmware.bdd.apitypes.UserMgmtServer;
+import com.vmware.bdd.dal.IBaseDAO;
 import com.vmware.bdd.exception.ValidationException;
 import com.vmware.bdd.validation.ValidationError;
 import com.vmware.bdd.validation.ValidationErrors;
 
 /**
- * @TODO add persistence
  * Created By xiaoliangl on 11/28/14.
  */
 @Component
+@Transactional(propagation = Propagation.REQUIRED)
 public class UserMgmtServerEao {
-   Map<String, UserMgmtServer> usrMgmtServerMap = new HashMap<>();
+   @Autowired
+   @Qualifier(value = "userMgmtServerDao")
+   private IBaseDAO<UserMgmtServerEntity> userMgmtServerDao;
 
    public void persist(UserMgmtServer usrMgmtServer) {
-      if(usrMgmtServerMap.containsKey(usrMgmtServer.getName())) {
+      UserMgmtServerEntity userMgmtServerEntity = userMgmtServerDao.findById(usrMgmtServer.getName());
+
+      if (userMgmtServerEntity != null) {
          ValidationError validationError = new ValidationError("NAME.DUPLICATION", "Same name already exists");
          ValidationErrors errors = new ValidationErrors();
          errors.addError("Name", validationError);
          throw new ValidationException(errors.getErrors());
       }
 
-      usrMgmtServerMap.put(usrMgmtServer.getName(), usrMgmtServer);
+      userMgmtServerEntity = new UserMgmtServerEntity();
+      userMgmtServerEntity.copyFrom(usrMgmtServer);
+
+      userMgmtServerDao.insert(userMgmtServerEntity);
    }
 
+   @Transactional(propagation = Propagation.SUPPORTS)
    public UserMgmtServer findByName(String name) {
-      return usrMgmtServerMap.get(name);
+      UserMgmtServerEntity userMgmtServerEntity = userMgmtServerDao.findById(name);
+
+      return userMgmtServerEntity == null ? null : userMgmtServerEntity.copyTo();
    }
 
    public void delete(String name) {
-      if(usrMgmtServerMap.containsKey(name)) {
-         usrMgmtServerMap.remove(name);
+      UserMgmtServerEntity userMgmtServerEntity = userMgmtServerDao.findById(name);
+
+      if (userMgmtServerEntity != null) {
+         userMgmtServerDao.delete(userMgmtServerEntity);
       } else {
          ValidationError validationError = new ValidationError("NAME.NOT_FOUND", "given name not found.");
          ValidationErrors errors = new ValidationErrors();

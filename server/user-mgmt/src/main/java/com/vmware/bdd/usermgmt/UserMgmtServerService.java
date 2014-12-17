@@ -14,10 +14,15 @@
  *****************************************************************************/
 package com.vmware.bdd.usermgmt;
 
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.vmware.bdd.apitypes.UserMgmtServer;
+import com.vmware.bdd.security.EncryptionGuard;
+import com.vmware.bdd.usermgmt.persist.UserMgmtPersistException;
 import com.vmware.bdd.usermgmt.persist.UserMgmtServerEao;
 
 /**
@@ -31,27 +36,33 @@ public class UserMgmtServerService {
    @Autowired
    private UserMgmtServerValidService serverValidService;
 
-   public void setServerEao(UserMgmtServerEao serverEao) {
-      this.serverEao = serverEao;
-   }
-
-   public void setServerValidService(UserMgmtServerValidService serverValidService) {
-      this.serverValidService = serverValidService;
-   }
-
    public void add(UserMgmtServer userMgtServer, boolean testOnly, boolean forceTrustCert) {
       serverValidService.validateServerInfo(userMgtServer, forceTrustCert);
 
       if (!testOnly) {
+         String encryptedPassword = null;
+         try {
+            encryptedPassword = EncryptionGuard.encode(userMgtServer.getPassword());
+         } catch (GeneralSecurityException | UnsupportedEncodingException e) {
+            throw new UserMgmtPersistException("USER_MGMT_SERVER.PASSWORD_ENCRYPT_FAIL", e);
+         }
+         userMgtServer.setPassword(encryptedPassword);
+
          serverEao.persist(userMgtServer);
       }
    }
 
-   public UserMgmtServer getByName(String name, boolean secure) {
+   public UserMgmtServer getByName(String name, boolean safely) {
       UserMgmtServer userMgmtServer = serverEao.findByName(name);
 
-      if(secure) {
-         //@TODO handle password masking
+      if(!safely) {
+         try {
+            if (userMgmtServer != null) {
+               userMgmtServer.setPassword(EncryptionGuard.decode(userMgmtServer.getPassword()));
+            }
+         } catch (GeneralSecurityException | UnsupportedEncodingException e) {
+            throw new UserMgmtPersistException("USER_MGMT_SERVER.PASSWORD_DECRYPT_FAIL", e);
+         }
       }
 
       return userMgmtServer;

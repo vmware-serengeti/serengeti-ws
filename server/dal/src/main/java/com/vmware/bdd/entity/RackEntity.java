@@ -19,8 +19,6 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
@@ -33,7 +31,6 @@ import org.hibernate.annotations.CascadeType;
 @SequenceGenerator(name = "IdSequence", sequenceName = "rack_seq", allocationSize = 1)
 @Table(name = "rack")
 public class RackEntity extends EntityBase {
-   @Enumerated(EnumType.STRING)
    @Column(name = "name", nullable = false)
    private String name;
 

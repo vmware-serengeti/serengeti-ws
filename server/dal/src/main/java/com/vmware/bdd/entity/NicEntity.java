@@ -15,23 +15,22 @@
 package com.vmware.bdd.entity;
 
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.vmware.bdd.apitypes.NetConfigInfo;
-import com.vmware.bdd.spectypes.NicSpec;
-import com.vmware.bdd.utils.Constants;
-import org.hibernate.annotations.Type;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.util.HashSet;
-import java.util.Set;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import org.hibernate.annotations.Type;
+
+import com.vmware.bdd.spectypes.NicSpec;
+import com.vmware.bdd.utils.Constants;
 
 /**
  * Author: Xiaoding Bian

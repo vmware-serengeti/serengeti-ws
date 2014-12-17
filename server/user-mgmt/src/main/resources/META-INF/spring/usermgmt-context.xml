@@ -22,4 +22,8 @@
       </property>
    </bean>
 
+   <bean class="org.springframework.context.support.ResourceBundleMessageSource" >
+      <property name="basename" value="com.vmware.bdd.usermgmt.persist.messages"/>
+   </bean>
+
 </beans>

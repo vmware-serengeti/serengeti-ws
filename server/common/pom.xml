@@ -117,10 +117,6 @@
          <artifactId>hibernate-core</artifactId>
       </dependency>
       <dependency>
-         <groupId>org.hibernate.common</groupId>
-         <artifactId>hibernate-commons-annotations</artifactId>
-      </dependency>
-      <dependency>
          <groupId>commons-configuration</groupId>
          <artifactId>commons-configuration</artifactId>
       </dependency>

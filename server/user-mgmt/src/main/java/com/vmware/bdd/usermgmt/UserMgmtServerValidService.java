@@ -28,6 +28,7 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchResult;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,6 +44,7 @@ import com.vmware.bdd.validation.ValidationErrors;
  */
 @Component
 public class UserMgmtServerValidService {
+   private  Logger LOGGER = Logger.getLogger(UserMgmtServerValidService.class);
 
    public void setTlsClient(TlsTcpClient tlsClient) {
       this.tlsClient = tlsClient;
@@ -87,6 +89,12 @@ public class UserMgmtServerValidService {
 
    protected void searchGroupDn(UserMgmtServer userMgmtServer, String groupDn) {
       // Set up the environment for creating the initial context
+      // -Djavax.net.ssl.trustStoreType=JKS -Djavax.net.ssl.trustStore=/opt/serengeti/.certs/serengeti.jks -Djavax.net.ssl.trustStorePassword=R5/u96F2"
+
+      LOGGER.warn(System.getProperty("javax.net.ssl.trustStoreType"));
+      LOGGER.warn(System.getProperty("javax.net.ssl.trustStore"));
+      LOGGER.warn(System.getProperty("javax.net.ssl.trustStorePassword"));
+
       Hashtable<String, Object> env = new Hashtable<>();
       env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
 
@@ -147,6 +155,9 @@ public class UserMgmtServerValidService {
       } catch (InvalidNameException ine) {
          validationErrors.addError("UserName", new ValidationError("USERNAME.INVALID_DN", "UserName is not a valid DN."));
       } catch (CommunicationException ce) {
+         LOGGER.warn(ce.getMessage());
+         LOGGER.warn(ce.getCause().getMessage());
+         ce.printStackTrace();
          validationErrors.addError("PrimaryUrl", new ValidationError("PrimaryUrl.CannotConnect", "Can not connect to the primary URL."));
       } catch (NamingException e) {
          throw new UserMgmtServerValidException(e);

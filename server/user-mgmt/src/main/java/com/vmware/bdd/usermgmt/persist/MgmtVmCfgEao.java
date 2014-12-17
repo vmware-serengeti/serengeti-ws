@@ -15,34 +15,58 @@
 package com.vmware.bdd.usermgmt.persist;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.vmware.bdd.usermgmt.UserMgmtConstants;
+import com.vmware.bdd.dal.IBaseDAO;
 
 /**
- * @TODO add persistence
  * Created By xiaoliangl on 11/28/14.
  */
 @Component
+@Transactional(propagation = Propagation.REQUIRED)
 public class MgmtVmCfgEao {
 
-   HashMap<String, String> cfg1 = new HashMap<>();
-
-
-   public MgmtVmCfgEao() {
-      cfg1.put(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE, "LOCAL"); //mixed, ldap
-      cfg1.put(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME, "");
-   }
+   @Autowired
+   @Qualifier(value = "mgmtVmCfgDao")
+   private IBaseDAO<MgmtVmCfgItemEntity> mgmtVmCfgDao;
 
    public Map<String, String> findAll() {
-      return cfg1;
+      List<MgmtVmCfgItemEntity> cfgItemList = mgmtVmCfgDao.findAll();
+
+      Map<String, String> cfgMap = null;
+
+      if (cfgItemList != null && !cfgItemList.isEmpty()) {
+         cfgMap = new HashMap<>();
+         for (MgmtVmCfgItemEntity mgmtVmCfgItemEntity : cfgItemList) {
+            cfgMap.put(mgmtVmCfgItemEntity.getName(), mgmtVmCfgItemEntity.getValue());
+         }
+      } else {
+         throw new UserMgmtPersistException("MGMT_VM_CFG.CFG_NOT_FOUND", null);
+      }
+
+
+      return cfgMap;
    }
 
    public void update(Map<String, String> newConfig) {
-      if(newConfig != null) {
-         cfg1.putAll(newConfig);
+      for (Map.Entry<String, String> cfgEntry : newConfig.entrySet()) {
+         MgmtVmCfgItemEntity cfgItemEntity = mgmtVmCfgDao.findById(cfgEntry.getKey());
+         if (cfgItemEntity != null) {
+            cfgItemEntity.setValue(cfgEntry.getValue());
+            mgmtVmCfgDao.update(cfgItemEntity);
+         } else {
+            cfgItemEntity = new MgmtVmCfgItemEntity();
+            cfgItemEntity.setName(cfgEntry.getKey());
+            cfgItemEntity.setValue(cfgEntry.getValue());
+            mgmtVmCfgDao.insert(cfgItemEntity);
+         }
       }
    }
 }

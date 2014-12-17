@@ -50,5 +50,6 @@
             <value>com.vmware.bdd.entity.ServerInfoEntity</value>
          </list>
       </property>
+      <property name="packagesToScan" value="com.vmware.bdd"/>
    </bean>
 </beans>
