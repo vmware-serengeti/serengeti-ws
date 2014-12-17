@@ -125,7 +125,7 @@ public class TestTlsClient {
       helper.checkCertificateFirstly("pek2-aurora-dev-01-113-dhcp137.eng.vmware.com", 636, true);
    }
 
-   @Test(expectedExceptions = {KeystoreException.class})
+   @Test(expectedExceptions = {TruststoreException.class})
    public void testCheckCertFirstly_wrongPassphrase()  {
       trustManager.setPassword(new Password() {
          @Override
@@ -141,7 +141,7 @@ public class TestTlsClient {
       helper.checkCertificateFirstly("wiki.eng.vmware.com", 443, false);
    }
 
-   @Test(expectedExceptions = {KeystoreException.class})
+   @Test(expectedExceptions = {TruststoreException.class})
    public void test_keystoreNotFound()  {
       trustManager.setTrustStorePath("filenotfound");
       helper.checkCertificateFirstly("wiki.eng.vmware.com", 443, false);

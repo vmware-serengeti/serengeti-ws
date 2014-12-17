@@ -101,11 +101,11 @@ public class SimpleServerTrustManager implements X509TrustManager {
          keyStore = KeyStore.getInstance(trustStoreType);
          keyStore.load(in, password.getPlainChars());
       } catch (IOException e) {
-         throw new KeystoreException(e);
+         throw new TruststoreException("TRUSTSTORE_READ_ERR", e);
       } catch (NoSuchAlgorithmException e) {
-         throw new KeystoreException(e);
+         throw new TruststoreException("TRUSTSTORE_READ_ERR", e);
       } catch (KeyStoreException e) {
-         throw new KeystoreException(e);
+         throw new TruststoreException("TRUSTSTORE_READ_ERR", e);
       } finally {
          if (in != null) {
             try {
@@ -126,9 +126,9 @@ public class SimpleServerTrustManager implements X509TrustManager {
             trusted = false;
          }
       } catch (NoSuchAlgorithmException e) {
-         throw new TlsInitException(e);
+         throw new TlsInitException("CERT_DIGEST_ERR", e);
       } catch (KeyStoreException e) {
-         throw new TlsInitException(e);
+         throw new TlsInitException("CERT_DIGEST_ERR", e);
       }
 
       if (!trusted) {
@@ -163,10 +163,15 @@ public class SimpleServerTrustManager implements X509TrustManager {
          keyStoreFile = new FileOutputStream(trustStorePath);
          keyStore.store(keyStoreFile, password.getPlainChars());
       } catch (FileNotFoundException e) {
+         throw new TruststoreException("TRUSTSTORE_WRITE_ERR", e);
       } catch (CertificateException e) {
+         throw new TruststoreException("TRUSTSTORE_WRITE_ERR", e);
       } catch (NoSuchAlgorithmException e) {
+         throw new TruststoreException("TRUSTSTORE_WRITE_ERR", e);
       } catch (KeyStoreException e) {
+         throw new TruststoreException("TRUSTSTORE_WRITE_ERR", e);
       } catch (IOException e) {
+         throw new TruststoreException("TRUSTSTORE_WRITE_ERR", e);
       } finally {
          if(keyStoreFile != null) {
             try {

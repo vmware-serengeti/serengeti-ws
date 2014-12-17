@@ -90,9 +90,9 @@ public class TlsTcpClient {
          socketFactory = customSSLContext.getSocketFactory();
 
       } catch (NoSuchAlgorithmException e) {
-         throw new TlsInitException(e);
+         throw new TlsInitException("SSLContext_INIT_ERR", e);
       } catch (KeyManagementException e) {
-         throw new TlsInitException(e);
+         throw new TlsInitException("SSLContext_INIT_ERR", e);
       }
 
       try {

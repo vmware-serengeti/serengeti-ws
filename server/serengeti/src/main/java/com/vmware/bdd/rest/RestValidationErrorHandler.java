@@ -75,7 +75,7 @@ public class RestValidationErrorHandler {
    @ResponseStatus(HttpStatus.BAD_REQUEST)
    @ResponseBody
    public BddErrorMessage processUntrustedCertificate(UntrustedCertificateException ex) {
-      BddErrorMessage validationErrMsg = new BddErrorMessage("BDD.INVALID_PARAMS", "");
+      BddErrorMessage validationErrMsg = new BddErrorMessage("BDD.SECURITY.TLS_CERT_UNTRUSTED", "");
       validationErrMsg.setCertInfo(ex.getCertInfo());
 
       return validationErrMsg;

@@ -17,8 +17,8 @@ package com.vmware.bdd.security.tls;
 /**
  * Created By xiaoliangl on 12/11/14.
  */
-public class KeystoreException extends TlsInitException {
-   public KeystoreException(Throwable throwable) {
-      super(throwable);
+public class TruststoreException extends TlsInitException {
+   public TruststoreException(String errorId, Throwable throwable, Object ... details) {
+      super(errorId, throwable, details);
    }
 }
