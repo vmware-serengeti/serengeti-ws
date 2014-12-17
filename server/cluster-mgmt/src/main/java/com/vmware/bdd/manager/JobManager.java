@@ -312,6 +312,8 @@ public class JobManager {
          jobStatus.setType(Type.VHM);
       } else if (jobName.equals(JobConstants.DELETE_CLUSTER_JOB_NAME)) {
          jobStatus.setType(Type.DELETE);
+      } else if (jobName.contains(JobConstants.SHRINK_CLUSTER_JOB_NAME)) {
+         jobStatus.setType(Type.SHRINK);
       }
 
       JobParameters jobParameters =

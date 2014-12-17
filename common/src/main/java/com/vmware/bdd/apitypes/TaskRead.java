@@ -27,7 +27,7 @@ public class TaskRead {
    }
 
    public enum Type {
-      INNER, VHM, DELETE
+      INNER, VHM, DELETE, SHRINK
    }
 
    private Long id;

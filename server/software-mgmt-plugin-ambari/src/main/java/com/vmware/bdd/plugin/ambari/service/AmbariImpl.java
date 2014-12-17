@@ -1300,7 +1300,7 @@ public class AmbariImpl implements SoftwareManager {
       String externalNamenode = blueprint.getExternalNamenode();
       Set<String> externalDatanodes = blueprint.getExternalDatanodes();
       if (externalNamenode == null || externalDatanodes == null) {
-         throw SoftwareManagementPluginException.CLUSTER_IS_NOT_COMPUTE_ONLY_CLUSTER(blueprint.getName(), externalNamenode, externalDatanodes);
+         throw SoftwareManagementPluginException.CLUSTER_IS_NOT_COMPUTE_ONLY_CLUSTER(blueprint.getName());
       }
    }
 

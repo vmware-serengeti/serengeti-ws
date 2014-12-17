@@ -187,7 +187,7 @@ public class SoftwareManagementPluginException extends RuntimeException {
       return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.DELETE_HOST_FAILED", cause, clusterName, nodeGroupName, nodeName, cause.getMessage());
    }
 
-   public static SoftwareManagementPluginException CLUSTER_IS_NOT_COMPUTE_ONLY_CLUSTER(String clusterName, String externalNamenode, Set<String> externalDatanodes) {
-      return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.CLUSTER_IS_NOT_COMPUTE_ONLY_CLUSTER", null, clusterName, externalNamenode, externalDatanodes.toString());
+   public static SoftwareManagementPluginException CLUSTER_IS_NOT_COMPUTE_ONLY_CLUSTER(String clusterName) {
+      return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.CLUSTER_IS_NOT_COMPUTE_ONLY_CLUSTER", null, clusterName);
    }
 }

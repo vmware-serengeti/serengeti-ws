@@ -30,8 +30,6 @@ import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import org.apache.log4j.Logger;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,10 +73,6 @@ public class DecommissionSingleVMStep extends TrackableTasklet {
          logger.error("Got exception when decommissioning " + nodeName + " :", e);
          logger.info("Recommissioning " + nodeName);
          softwareManager.recomissionNode(clusterName, nodeInfo, null);
-         //TODO(qjin): can be improved
-         JobExecution jobExecution = jobManager.getJobExplorer().getJobExecution(getJobExecutionId(chunkContext));
-         jobExecution.setStatus(BatchStatus.FAILED);
-
          throw ShrinkException.DECOMISSION_FAILED(e, e.getMessage());
       }
       return RepeatStatus.FINISHED;
