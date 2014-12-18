@@ -12,16 +12,15 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *****************************************************************************/
-package com.vmware.bdd.usermgmt.persist;
+package com.vmware.bdd.security.tls;
 
-import com.vmware.bdd.usermgmt.UserMgmtException;
-import com.vmware.bdd.usermgmt.i18n.Messages;
+import com.vmware.bdd.apitypes.Password;
 
 /**
- * Created By xiaoliangl on 12/17/14.
+ * Created By xiaoliangl on 12/18/14.
  */
-public class UserMgmtPersistException extends UserMgmtException {
-   public UserMgmtPersistException(String errorId, Throwable throwable) {
-      super(errorId, throwable);
-   }
+public interface TrustStoreConfig {
+   String getType();
+   String getPath();
+   Password getPassword();
 }

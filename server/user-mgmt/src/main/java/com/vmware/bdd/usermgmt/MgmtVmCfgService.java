@@ -24,10 +24,10 @@ import org.springframework.stereotype.Component;
 import com.vmware.bdd.apitypes.UserMgmtServer;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ValidationException;
-import com.vmware.bdd.validation.ValidationError;
-import com.vmware.bdd.validation.ValidationErrors;
 import com.vmware.bdd.usermgmt.job.MgmtVmConfigJobService;
 import com.vmware.bdd.usermgmt.persist.MgmtVmCfgEao;
+import com.vmware.bdd.validation.ValidationError;
+import com.vmware.bdd.validation.ValidationErrors;
 
 /**
  * Created By xiaoliangl on 11/28/14.
@@ -46,7 +46,7 @@ public class MgmtVmCfgService {
 
    private Map<UserMgmtMode, Map<UserMgmtMode, TransitAction>> allowedTransitions;
 
-   public MgmtVmCfgService(){
+   public MgmtVmCfgService() {
       allowedTransitions = new HashMap<>();
 
       Map<UserMgmtMode, TransitAction> target = new HashMap<>();
@@ -91,12 +91,27 @@ public class MgmtVmCfgService {
       return mgmtVmCfgEao.findAll();
    }
 
-
    private void configUserMgmtService(Map<String, String> currentCfg, Map<String, String> newCfg) {
-      UserMgmtMode currentMode = UserMgmtMode.valueOf(currentCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE));
-      UserMgmtMode newMode = UserMgmtMode.valueOf(newCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE));
+      String currentModeStr = currentCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE);
+      if (currentModeStr == null) {
+         throw new UserMgmtException("CURRENT_USER_MGMT_MODE_IS_NULL", null);
+      }
 
-      if(currentMode == newMode) {
+      UserMgmtMode currentMode = null;
+      try {
+         currentMode = UserMgmtMode.valueOf(currentModeStr);
+      } catch (IllegalArgumentException iae) {
+         throw new UserMgmtException("INVALID_CURRENT_USER_MGMT_MODE", null, currentModeStr);
+      }
+
+      UserMgmtMode newMode = null;
+      try {
+         newMode = UserMgmtMode.valueOf(newCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE));
+      } catch (IllegalArgumentException iae) {
+         throw new BddException(null, "MGMTVM_CUM_CFG", "INVALID_MODE", currentModeStr);
+      }
+
+      if (currentMode == newMode) {
          throw new BddException(null, "MGMTVM_CUM_CFG", "ALREADY_IN_TARGET_MODE", newMode);
       }
 
@@ -106,7 +121,7 @@ public class MgmtVmCfgService {
       }
 
       TransitAction targetAction = targets.get(newMode);
-      if(targetAction == null) {
+      if (targetAction == null) {
          throw new BddException(null, "MGMTVM_CUM_CFG", "MODE_TRANS_NOT_ALLOWED", currentMode, newMode);
       }
 
@@ -121,18 +136,18 @@ public class MgmtVmCfgService {
       String userMgmtServerName = newCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME);
 
       ValidationErrors errors = new ValidationErrors();
-      if(userMgmtServerName == null || userMgmtServerName.length() == 0) {
+      if (userMgmtServerName == null || userMgmtServerName.length() == 0) {
          ValidationError validationErr = new ValidationError("MGMTVM_CUM_CFG.USER_MGMT_SERVER_NAME_MISSING", "UserMgmtServerName missing");
          errors.addError(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME, validationErr);
       }
 
       UserMgmtServer userMgmtServer = userMgmtServerService.getByName(userMgmtServerName, false);
-      if(userMgmtServer == null) {
+      if (userMgmtServer == null) {
          ValidationError validationErr = new ValidationError("MGMTVM_CUM_CFG.NOT_FOUND", "Can't find a server with given UserMgmtServerName.");
          errors.addError(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME, validationErr);
       }
 
-      if(!errors.getErrors().isEmpty()) {
+      if (!errors.getErrors().isEmpty()) {
          throw new ValidationException(errors.getErrors());
       }
 

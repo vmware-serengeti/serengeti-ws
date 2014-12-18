@@ -40,13 +40,12 @@ import com.vmware.bdd.utils.ByteArrayUtils;
 public class SimpleServerTrustManager implements X509TrustManager {
    private final static Logger LOGGER = Logger.getLogger(SimpleServerTrustManager.class);
 
-   private String trustStorePath;
-   private Password password;
-   private String trustStoreType;
+   private TrustStoreConfig trustStoreConfig;
 
-   public TrustCertCallBack getTrustCertCallBack() {
-      return trustCertCallBack;
+   public void setTrustStoreConfig(TrustStoreConfig trustStoreConfig1) {
+      trustStoreConfig = trustStoreConfig1;
    }
+
 
    public void setTrustCertCallBack(TrustCertCallBack trustCertCallBack) {
       this.trustCertCallBack = trustCertCallBack;
@@ -54,30 +53,6 @@ public class SimpleServerTrustManager implements X509TrustManager {
 
    private TrustCertCallBack trustCertCallBack;
 
-
-   public String getTrustStoreType() {
-      return trustStoreType;
-   }
-
-   public void setTrustStoreType(String trustStoreType) {
-      this.trustStoreType = trustStoreType;
-   }
-
-   public String getTrustStorePath() {
-      return trustStorePath;
-   }
-
-   public void setTrustStorePath(String trustStorePath) {
-      this.trustStorePath = trustStorePath;
-   }
-
-   public Password getPassword() {
-      return password;
-   }
-
-   public void setPassword(Password password) {
-      this.password = password;
-   }
 
    @Override
    public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
@@ -97,9 +72,9 @@ public class SimpleServerTrustManager implements X509TrustManager {
             KeyStore keyStore = null;
       InputStream in = null;
       try {
-         in = new FileInputStream(trustStorePath);
-         keyStore = KeyStore.getInstance(trustStoreType);
-         keyStore.load(in, password.getPlainChars());
+         in = new FileInputStream(trustStoreConfig.getPath());
+         keyStore = KeyStore.getInstance(trustStoreConfig.getType());
+         keyStore.load(in, trustStoreConfig.getPassword().getPlainChars());
       } catch (IOException e) {
          throw new TruststoreException("TRUSTSTORE_READ_ERR", e);
       } catch (NoSuchAlgorithmException e) {
@@ -160,8 +135,8 @@ public class SimpleServerTrustManager implements X509TrustManager {
       FileOutputStream keyStoreFile = null;
       try {
          keyStore.setCertificateEntry(sha1Fingerprint, cert);
-         keyStoreFile = new FileOutputStream(trustStorePath);
-         keyStore.store(keyStoreFile, password.getPlainChars());
+         keyStoreFile = new FileOutputStream(trustStoreConfig.getPath());
+         keyStore.store(keyStoreFile, trustStoreConfig.getPassword().getPlainChars());
       } catch (FileNotFoundException e) {
          throw new TruststoreException("TRUSTSTORE_WRITE_ERR", e);
       } catch (CertificateException e) {

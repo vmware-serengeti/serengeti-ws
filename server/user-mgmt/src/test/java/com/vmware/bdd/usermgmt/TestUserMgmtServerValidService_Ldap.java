@@ -14,10 +14,12 @@
  *****************************************************************************/
 package com.vmware.bdd.usermgmt;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -32,35 +34,31 @@ import com.vmware.bdd.validation.ValidationError;
 /**
  * Created By xiaoliangl on 12/1/14.
  */
-@ContextConfiguration(classes = {TestUserMgmtServerValidServiceContext.class})
+@ContextConfiguration(locations = "classpath:/com/vmware/bdd/usermgmt/userMgmtServerValidService-test-context.xml")
 public class TestUserMgmtServerValidService_Ldap extends AbstractTestNGSpringContextTests {
 
    @Autowired
    private UserMgmtServerValidService validService;
 
+   public static UserMgmtServer loadTestData(String fileName) throws IOException {
+      ObjectMapper objectMapper = new ObjectMapper();
+      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/" + fileName);
+      return objectMapper.readValue(new InputStreamReader(ris), UserMgmtServer.class);
+   }
+
    @Test
-   public void testValidateServerInfo() {
-      Gson gson = new Gson();
+   public void testValidateServerInfo() throws IOException {
+      UserMgmtServer userMgmtServer = loadTestData("ldap-server.json");
 
-      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/ldap-server.json");
-
-      UserMgmtServer userMgmtServer = gson.fromJson(new InputStreamReader(ris), UserMgmtServer.class);
-
-      validService.searchGroupDn(userMgmtServer, userMgmtServer.getMgmtVMUserGroupDn());
+      validService.validateServerInfo(userMgmtServer, false);
    }
 
    @Test(expectedExceptions = {ValidationException.class})
-   public void testValidateServerInfo_DnNotFound() {
-      Gson gson = new Gson();
-
-      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/ldap-server-dnnotfound.json");
-
-      UserMgmtServer userMgmtServer = gson.fromJson(new InputStreamReader(ris), UserMgmtServer.class);
-
-      System.out.println(new Gson().toJson(userMgmtServer));
+   public void testValidateServerInfo_DnNotFound() throws IOException {
+      UserMgmtServer userMgmtServer = loadTestData("ldap-server-dnnotfound.json");
 
       try {
-         validService.searchGroupDn(userMgmtServer, userMgmtServer.getMgmtVMUserGroupDn());
+         validService.validateServerInfo(userMgmtServer, false);
       } catch (ValidationException ve) {
          Assert.assertFalse(ve.getErrors().isEmpty());
 
@@ -81,14 +79,8 @@ public class TestUserMgmtServerValidService_Ldap extends AbstractTestNGSpringCon
    }
 
    @Test(expectedExceptions = {ValidationException.class})
-   public void testValidateServerInfo_AdmGroupNotFound() {
-      Gson gson = new Gson();
-
-      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/ldap-server-admgroupnotfound.json");
-
-      UserMgmtServer userMgmtServer = gson.fromJson(new InputStreamReader(ris), UserMgmtServer.class);
-
-      System.out.println(new Gson().toJson(userMgmtServer));
+   public void testValidateServerInfo_AdmGroupNotFound() throws IOException {
+      UserMgmtServer userMgmtServer = loadTestData("ldap-server-admgroupnotfound.json");
 
       try {
          validService.validateServerInfo(userMgmtServer, false);
@@ -115,7 +107,7 @@ public class TestUserMgmtServerValidService_Ldap extends AbstractTestNGSpringCon
       UserMgmtServer userMgmtServer = gson.fromJson(new InputStreamReader(ris), UserMgmtServer.class);
 
       try {
-         validService.searchGroupDn(userMgmtServer, userMgmtServer.getMgmtVMUserGroupDn());
+         validService.validateServerInfo(userMgmtServer, false);
       } catch (ValidationException ve) {
          Assert.assertFalse(ve.getErrors().isEmpty());
 
@@ -131,15 +123,11 @@ public class TestUserMgmtServerValidService_Ldap extends AbstractTestNGSpringCon
    }
 
    @Test(expectedExceptions = {ValidationException.class})
-   public void testValidateServerInfo_invalidUserName() {
-      Gson gson = new Gson();
-
-      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/ldap-server-invalidusername.json");
-
-      UserMgmtServer userMgmtServer = gson.fromJson(new InputStreamReader(ris), UserMgmtServer.class);
+   public void testValidateServerInfo_invalidUserName() throws IOException {
+      UserMgmtServer userMgmtServer = loadTestData("ldap-server-invalidusername.json");
 
       try {
-         validService.searchGroupDn(userMgmtServer, userMgmtServer.getMgmtVMUserGroupDn());
+         validService.validateServerInfo(userMgmtServer, false);
       } catch (ValidationException ve) {
          Assert.assertFalse(ve.getErrors().isEmpty());
 
@@ -155,15 +143,11 @@ public class TestUserMgmtServerValidService_Ldap extends AbstractTestNGSpringCon
    }
 
    @Test(expectedExceptions = {ValidationException.class})
-   public void testValidateServerInfo_invalidDn() {
-      Gson gson = new Gson();
-
-      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/ldap-server-invaliddn.json");
-
-      UserMgmtServer userMgmtServer = gson.fromJson(new InputStreamReader(ris), UserMgmtServer.class);
+   public void testValidateServerInfo_invalidDn() throws IOException {
+      UserMgmtServer userMgmtServer = loadTestData("ldap-server-invaliddn.json");
 
       try {
-         validService.searchGroupDn(userMgmtServer, userMgmtServer.getMgmtVMUserGroupDn());
+         validService.validateServerInfo(userMgmtServer, false);
       } catch (ValidationException ve) {
          Assert.assertFalse(ve.getErrors().isEmpty());
 
@@ -183,15 +167,11 @@ public class TestUserMgmtServerValidService_Ldap extends AbstractTestNGSpringCon
    }
 
    @Test(expectedExceptions = {ValidationException.class})
-   public void testValidateServerInfo_badUrl() {
-      Gson gson = new Gson();
-
-      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/ldap-server-badurl.json");
-
-      UserMgmtServer userMgmtServer = gson.fromJson(new InputStreamReader(ris), UserMgmtServer.class);
+   public void testValidateServerInfo_badUrl() throws IOException {
+      UserMgmtServer userMgmtServer = loadTestData("ldap-server-badurl.json");
 
       try {
-         validService.searchGroupDn(userMgmtServer, userMgmtServer.getMgmtVMUserGroupDn());
+         validService.validateServerInfo(userMgmtServer, false);
       } catch (ValidationException ve) {
          Assert.assertFalse(ve.getErrors().isEmpty());
 
@@ -206,21 +186,12 @@ public class TestUserMgmtServerValidService_Ldap extends AbstractTestNGSpringCon
       }
    }
 
-   private UserMgmtServer fromJsonResource(String resourceName) {
-      Gson gson = new Gson();
-
-      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/" + resourceName);
-
-      return gson.fromJson(new InputStreamReader(ris), UserMgmtServer.class);
-   }
-
-
    @Test
-   public void testValidateServerInfo_goodAd() {
-      UserMgmtServer userMgmtServer = fromJsonResource("ad-server.json");
+   public void testValidateServerInfo_goodAd() throws IOException {
+      UserMgmtServer userMgmtServer = loadTestData("ad-server.json");
 
       try {
-         validService.searchGroupDn(userMgmtServer, userMgmtServer.getMgmtVMUserGroupDn());
+         validService.validateServerInfo(userMgmtServer, false);
       } catch (ValidationException ve) {
          Assert.assertFalse(ve.getErrors().isEmpty());
 

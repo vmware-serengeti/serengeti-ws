@@ -18,10 +18,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Map;
 
-import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -33,22 +31,23 @@ import org.testng.annotations.Test;
 import com.vmware.bdd.apitypes.UserMgmtServer;
 import com.vmware.bdd.exception.ValidationException;
 import com.vmware.bdd.security.tls.UntrustedCertificateException;
+import com.vmware.bdd.usermgmt.mocks.LdapsTrustStoreConfigMock;
 import com.vmware.bdd.validation.ValidationError;
 
 /**
  * Created By xiaoliangl on 12/1/14.
  */
-@ContextConfiguration(classes = {TestUserMgmtServerValidServiceContext.class})
-public class TestUserMgmtServerVldService_Ldaps extends AbstractTestNGSpringContextTests {
+@ContextConfiguration(locations = "classpath:/com/vmware/bdd/usermgmt/userMgmtServerValidService-test-context.xml")
+public class TestUserMgmtServerValidService_Ldaps extends AbstractTestNGSpringContextTests {
 
    @Autowired
    private UserMgmtServerValidService validService;
 
    @BeforeMethod
    public void beforeMethod() throws IOException {
-      InputStream is = TestUserMgmtServerVldService_Ldaps.class.getResourceAsStream("/com/vmware/bdd/usermgmt/keystore.jks");
+      InputStream is = TestUserMgmtServerValidService_Ldaps.class.getResourceAsStream("/com/vmware/bdd/usermgmt/keystore.jks");
 
-      FileOutputStream fos = new FileOutputStream(TestUserMgmtServerValidServiceContext.KEY_STORE_PATH);
+      FileOutputStream fos = new FileOutputStream(LdapsTrustStoreConfigMock.KEY_STORE_PATH);
 
       try {
          byte[] temp = new byte[512];
@@ -70,50 +69,29 @@ public class TestUserMgmtServerVldService_Ldaps extends AbstractTestNGSpringCont
 
    @AfterMethod
    public void afterMethod() {
-      new File(TestUserMgmtServerValidServiceContext.KEY_STORE_PATH).delete();
-   }
-
-   @Test(expectedExceptions = {UntrustedCertificateException.class})
-   public void testValidateCertificate_UntrustedCert() {
-      Gson gson = new Gson();
-
-      InputStream ris = TestUserMgmtServerVldService_Ldaps.class.getResourceAsStream("/com/vmware/bdd/usermgmt/ldaps-server.json");
-
-      UserMgmtServer userMgmtServer = gson.fromJson(new InputStreamReader(ris), UserMgmtServer.class);
-
-      System.out.println(new Gson().toJson(userMgmtServer));
-
-      validService.validateCertificate(userMgmtServer, false);
+      new File(LdapsTrustStoreConfigMock.KEY_STORE_PATH).delete();
    }
 
    @Test
-   public void testValidateCertificate_UntrustedCert1() {
-      Gson gson = new Gson();
+   public void testValidateCertificate_forceTrust() throws IOException {
+      UserMgmtServer userMgmtServer = TestUserMgmtServerValidService_Ldap.loadTestData("ldaps-server.json");
 
-      InputStream ris = TestUserMgmtServerVldService_Ldaps.class.getResourceAsStream("/com/vmware/bdd/usermgmt/ldaps-server.json");
-
-      UserMgmtServer userMgmtServer = gson.fromJson(new InputStreamReader(ris), UserMgmtServer.class);
-
-      System.out.println(new Gson().toJson(userMgmtServer));
-
-      System.setProperty("javax.net.ssl.trustStore", TestUserMgmtServerValidServiceContext.KEY_STORE_PATH);
-      System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
-
+      //expect no exception
       validService.validateServerInfo(userMgmtServer, true);
    }
 
+   @Test(expectedExceptions = UntrustedCertificateException.class)
+   public void testValidateCertificate_untrustedCert() throws IOException {
+      UserMgmtServer userMgmtServer = TestUserMgmtServerValidService_Ldap.loadTestData("ldaps-server.json");
+
+      //expect untrusted cert exception
+      validService.validateServerInfo(userMgmtServer, false);
+   }
+
    @Test(expectedExceptions = {ValidationException.class})
-   public void testValidateCertificate_BadUrl() {
-      Gson gson = new Gson();
+   public void testValidateCertificate_BadUrl() throws IOException {
+      UserMgmtServer userMgmtServer = TestUserMgmtServerValidService_Ldap.loadTestData("ldaps-server-badurl.json");
 
-      InputStream ris = TestUserMgmtServerVldService_Ldaps.class.getResourceAsStream("/com/vmware/bdd/usermgmt/ldaps-server-badurl.json");
-
-      UserMgmtServer userMgmtServer = gson.fromJson(new InputStreamReader(ris), UserMgmtServer.class);
-
-      System.out.println(new Gson().toJson(userMgmtServer));
-
-      System.setProperty("javax.net.ssl.trustStore", TestUserMgmtServerValidServiceContext.KEY_STORE_PATH);
-      System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
       try {
          validService.validateServerInfo(userMgmtServer, true);
 

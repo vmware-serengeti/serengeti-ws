@@ -9,21 +9,4 @@
         http://www.springframework.org/schema/context/spring-context.xsd">
 
    <context:component-scan base-package="com.vmware.bdd.usermgmt"/>
-
-   <bean name="tlsTCPClient" class="com.vmware.bdd.security.tls.TlsTcpClient">
-      <property name="trustManager" ref="ldapsTrustMgr"/>
-   </bean>
-
-   <bean name="ldapsTrustMgr" class="com.vmware.bdd.security.tls.SimpleServerTrustManager">
-      <property name="trustStorePath" value="/opt/serengeti/.certs/serengeti.jks"/>
-      <property name="trustStoreType" value="JKS" />
-      <property name="password">
-         <bean class="com.vmware.bdd.usermgmt.LdapsTrustStorePassword" />
-      </property>
-   </bean>
-
-   <bean class="org.springframework.context.support.ResourceBundleMessageSource" >
-      <property name="basename" value="com.vmware.bdd.usermgmt.persist.messages"/>
-   </bean>
-
 </beans>

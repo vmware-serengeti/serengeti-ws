@@ -14,30 +14,35 @@
  *****************************************************************************/
 package com.vmware.bdd.usermgmt;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.UserMgmtServer;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ValidationException;
-import com.vmware.bdd.manager.JobManager;
 import com.vmware.bdd.usermgmt.job.MgmtVmConfigJobService;
+import com.vmware.bdd.usermgmt.mocks.MgmtVmCfgEaoMock;
 import com.vmware.bdd.usermgmt.persist.MgmtVmCfgEao;
 
 /**
  * Created By xiaoliangl on 12/3/14.
  */
-public class TestMgmtVmConfigService  {
+public class TestMgmtVmConfigService {
 
    @InjectMocks
    private MgmtVmCfgService mgmtVmCfgService;
@@ -45,8 +50,8 @@ public class TestMgmtVmConfigService  {
    @Mock
    private MgmtVmConfigJobService mockMgmtVmConfigJobService;
 
-   @Mock
-   private JobManager mockJobManager;
+//   @Mock
+//   private JobManager mockJobManager;
 
    @Mock
    public UserMgmtServerService mockUserMgmtServerService;
@@ -54,20 +59,30 @@ public class TestMgmtVmConfigService  {
    @BeforeMethod
    public void init() {
       MockitoAnnotations.initMocks(this);
+
+      HashMap<String, String> cfgMap = new HashMap<>();
+      cfgMap.put(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE, UserMgmtMode.LOCAL.name());
+      MgmtVmCfgEaoMock mgmtVmCfgEaoMock = new MgmtVmCfgEaoMock(cfgMap);
+
+      mgmtVmCfgService.setMgmtVmCfgEao(mgmtVmCfgEaoMock);
    }
 
+   @AfterMethod
+   public void clean() {
+
+   }
+
+   private final static Map<String, String> loadTestData(String fileName) throws IOException {
+      ObjectMapper objectMapper = new ObjectMapper();
+      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/" + fileName);
+      return objectMapper.readValue(new InputStreamReader(ris), Map.class);
+   }
+
+
    @Test
-   public  void testCfgMixedMode() {
+   public  void testCfgMixedMode() throws IOException {
       Mockito.when(mockUserMgmtServerService.getByName("default", false)).thenReturn(new UserMgmtServer());
-
-      Gson gson = new Gson();
-
-      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/mgmtvm-cfgMixed.json");
-
-      Map<String,String> mgmtVmCfg = gson.fromJson(new InputStreamReader(ris), Map.class);
-
-      MgmtVmCfgEao mockMgmtVmCfgEao = new MgmtVmCfgEao();
-      mgmtVmCfgService.setMgmtVmCfgEao(mockMgmtVmCfgEao);
+      Map<String,String> mgmtVmCfg = loadTestData("mgmtvm-cfgMixed.json");
 
       mgmtVmCfgService.config(mgmtVmCfg);
 
@@ -78,16 +93,13 @@ public class TestMgmtVmConfigService  {
    }
 
    @Test
-   public  void testCfgLdapMode() {
+   public  void testCfgLdapMode() throws IOException {
       Mockito.when(mockUserMgmtServerService.getByName("default", false)).thenReturn(new UserMgmtServer());
 
       testCfgMixedMode();
       Map<String,String> initCfg = mgmtVmCfgService.get();
 
-      Gson gson = new Gson();
-      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/mgmtvm-cfgLdap.json");
-
-      Map<String,String> newCfg = gson.fromJson(new InputStreamReader(ris), Map.class);
+      Map<String,String> newCfg = loadTestData("mgmtvm-cfgLdap.json");
 
       mgmtVmCfgService.config(newCfg);
 
@@ -98,15 +110,9 @@ public class TestMgmtVmConfigService  {
    }
 
    @Test(expectedExceptions = {BddException.class})
-   public  void testCfgLdapMode_NotAllowed() {
-      Gson gson = new Gson();
+   public  void testCfgLdapMode_NotAllowed() throws IOException {
+      Map<String,String> mgmtVmCfg = loadTestData("mgmtvm-cfgLdap.json");
 
-      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/mgmtvm-cfgLdap.json");
-
-      Map<String,String> mgmtVmCfg = gson.fromJson(new InputStreamReader(ris), Map.class);
-
-      MgmtVmCfgEao mockMgmtVmCfgEao = new MgmtVmCfgEao();
-      mgmtVmCfgService.setMgmtVmCfgEao(mockMgmtVmCfgEao);
       Map<String,String> initCfg = mgmtVmCfgService.get();
 
       try {
@@ -123,17 +129,10 @@ public class TestMgmtVmConfigService  {
    }
 
    @Test(expectedExceptions = {ValidationException.class})
-   public  void testCfgMixedMode_WrongUserMgmtServerName() {
+   public  void testCfgMixedMode_WrongUserMgmtServerName() throws IOException {
       Mockito.when(mockUserMgmtServerService.getByName("not_default", false)).thenReturn(new UserMgmtServer());
 
-      Gson gson = new Gson();
-
-      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/mgmtvm-cfgMixed.json");
-
-      Map<String,String> mgmtVmCfg = gson.fromJson(new InputStreamReader(ris), Map.class);
-
-      MgmtVmCfgEao mockMgmtVmCfgEao = new MgmtVmCfgEao();
-      mgmtVmCfgService.setMgmtVmCfgEao(mockMgmtVmCfgEao);
+      Map<String,String> mgmtVmCfg = loadTestData("mgmtvm-cfgMixed.json");
 
       try {
          mgmtVmCfgService.config(mgmtVmCfg);
@@ -145,17 +144,10 @@ public class TestMgmtVmConfigService  {
    }
 
    @Test(expectedExceptions = {ValidationException.class})
-   public  void testCfgMixedMode_EmptyUserMgmtServerName() {
+   public  void testCfgMixedMode_EmptyUserMgmtServerName() throws IOException {
       Mockito.when(mockUserMgmtServerService.getByName("not_default", false)).thenReturn(new UserMgmtServer());
 
-      Gson gson = new Gson();
-
-      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/mgmtvm-cfgMixed-emptyname.json");
-
-      Map<String,String> mgmtVmCfg = gson.fromJson(new InputStreamReader(ris), Map.class);
-
-      MgmtVmCfgEao mockMgmtVmCfgEao = new MgmtVmCfgEao();
-      mgmtVmCfgService.setMgmtVmCfgEao(mockMgmtVmCfgEao);
+      Map<String,String> mgmtVmCfg = loadTestData("mgmtvm-cfgMixed-emptyname.json");
 
       try {
          mgmtVmCfgService.config(mgmtVmCfg);
@@ -166,25 +158,19 @@ public class TestMgmtVmConfigService  {
       }
    }
 
-   @Test
-   public  void testCfgMixedModeAgain() {
+   @Test(expectedExceptions = {BddException.class})
+   public  void testCfgMixedModeAgain() throws IOException {
       Mockito.when(mockUserMgmtServerService.getByName("default", false)).thenReturn(new UserMgmtServer());
 
-      Gson gson = new Gson();
-
-      InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/mgmtvm-cfgMixed.json");
-
-      Map<String,String> mgmtVmCfg = gson.fromJson(new InputStreamReader(ris), Map.class);
-
-      MgmtVmCfgEao mockMgmtVmCfgEao = new MgmtVmCfgEao();
-      mgmtVmCfgService.setMgmtVmCfgEao(mockMgmtVmCfgEao);
+      Map<String,String> mgmtVmCfg = loadTestData("mgmtvm-cfgMixed.json");
 
       mgmtVmCfgService.config(mgmtVmCfg);
-      mgmtVmCfgService.config(mgmtVmCfg);
 
-      Map<String,String> mgmtVmCfg1 = mgmtVmCfgService.get();
-
-      Assert.assertEquals(mgmtVmCfg1.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE), mgmtVmCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE));
-      Assert.assertEquals(mgmtVmCfg1.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME), mgmtVmCfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME));
+      try {
+         mgmtVmCfgService.config(mgmtVmCfg);
+      } catch (BddException bdde) {
+         Assert.assertEquals("MGMTVM_CUM_CFG.ALREADY_IN_TARGET_MODE", bdde.getFullErrorId());
+         throw bdde;
+      }
    }
 }

@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.vmware.bdd.apitypes.UserMgmtServer;
+import com.vmware.bdd.exception.EncryptionException;
 import com.vmware.bdd.security.EncryptionGuard;
 import com.vmware.bdd.usermgmt.persist.UserMgmtPersistException;
 import com.vmware.bdd.usermgmt.persist.UserMgmtServerEao;
@@ -43,7 +44,7 @@ public class UserMgmtServerService {
          String encryptedPassword = null;
          try {
             encryptedPassword = EncryptionGuard.encode(userMgtServer.getPassword());
-         } catch (GeneralSecurityException | UnsupportedEncodingException e) {
+         } catch (EncryptionException | GeneralSecurityException | UnsupportedEncodingException e) {
             throw new UserMgmtPersistException("USER_MGMT_SERVER.PASSWORD_ENCRYPT_FAIL", e);
          }
          userMgtServer.setPassword(encryptedPassword);
@@ -60,7 +61,7 @@ public class UserMgmtServerService {
             if (userMgmtServer != null) {
                userMgmtServer.setPassword(EncryptionGuard.decode(userMgmtServer.getPassword()));
             }
-         } catch (GeneralSecurityException | UnsupportedEncodingException e) {
+         } catch (EncryptionException | GeneralSecurityException | UnsupportedEncodingException e) {
             throw new UserMgmtPersistException("USER_MGMT_SERVER.PASSWORD_DECRYPT_FAIL", e);
          }
       }

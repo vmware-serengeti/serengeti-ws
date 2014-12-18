@@ -12,23 +12,30 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *****************************************************************************/
-package com.vmware.bdd.usermgmt;
+package com.vmware.bdd.usermgmt.mocks;
 
-import com.vmware.aurora.global.Configuration;
-import com.vmware.aurora.security.CmsKeyStore;
-import com.vmware.bdd.apitypes.Password;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.vmware.bdd.usermgmt.persist.MgmtVmCfgEao;
 
 /**
- * Created By xiaoliangl on 12/11/14.
+ * Created By xiaoliangl on 12/19/14.
  */
-public class LdapsTrustStorePassword implements Password{
-   @Override
-   public String getPlainString() {
-      return Configuration.getString(CmsKeyStore.CMS_KEYSTORE_PSWD);
+public class MgmtVmCfgEaoMock extends MgmtVmCfgEao {
+   private HashMap<String, String> map = new HashMap<>();
+
+   public MgmtVmCfgEaoMock(Map<String, String> initMap) {
+      map.putAll(initMap);
    }
 
    @Override
-   public char[] getPlainChars() {
-      return getPlainString().toCharArray();
+   public Map<String, String> findAll() {
+      return map;
+   }
+
+   @Override
+   public void update(Map<String, String> newConfig) {
+      map.putAll(newConfig);
    }
 }

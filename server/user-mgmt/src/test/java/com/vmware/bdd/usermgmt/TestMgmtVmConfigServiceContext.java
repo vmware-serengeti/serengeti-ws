@@ -14,19 +14,34 @@
  *****************************************************************************/
 package com.vmware.bdd.usermgmt;
 
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.test.context.ContextConfiguration;
+
+import com.vmware.bdd.usermgmt.persist.MgmtVmCfgDao;
+import com.vmware.bdd.usermgmt.persist.MgmtVmCfgEao;
+import com.vmware.bdd.usermgmt.persist.UserMgmtServerDao;
 
 /**
  * Created By xiaoliangl on 12/3/14.
  */
 @Configuration
+@ComponentScan(basePackages = "com.vmware.bdd.usermgmt",
+      includeFilters = {
+            @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = MgmtVmCfgService.class)
+      }
+
+)
 public class TestMgmtVmConfigServiceContext {
 
    @Bean
-   public MgmtVmCfgService mgmtVmConfigService() {
-      return new MgmtVmCfgService();
+   @Autowired
+   public MgmtVmCfgEao mgmtVmCfgEao() {
+      return Mockito.mock(MgmtVmCfgEao.class);
    }
-
 
 }

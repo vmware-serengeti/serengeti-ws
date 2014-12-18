@@ -12,16 +12,22 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *****************************************************************************/
-package com.vmware.bdd.usermgmt.persist;
+package com.vmware.bdd.usermgmt;
 
-import com.vmware.bdd.usermgmt.UserMgmtException;
 import com.vmware.bdd.usermgmt.i18n.Messages;
 
 /**
- * Created By xiaoliangl on 12/17/14.
+ * Created By xiaoliangl on 12/19/14.
  */
-public class UserMgmtPersistException extends UserMgmtException {
-   public UserMgmtPersistException(String errorId, Throwable throwable) {
-      super(errorId, throwable);
+public class UserMgmtException extends RuntimeException {
+   private String errorId = null;
+
+   public UserMgmtException(String errId, Throwable throwable, Object... details) {
+      super(Messages.getString(errId, details), throwable);
+      errorId = errId;
+   }
+
+   public String getErrorId() {
+      return errorId;
    }
 }

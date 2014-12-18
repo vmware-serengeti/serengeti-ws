@@ -34,6 +34,8 @@ import org.springframework.stereotype.Component;
 
 import com.vmware.bdd.apitypes.UserMgmtServer;
 import com.vmware.bdd.exception.ValidationException;
+import com.vmware.bdd.security.tls.SimpleServerTrustManager;
+import com.vmware.bdd.security.tls.SimpleSeverTrustTlsSocketFactory;
 import com.vmware.bdd.security.tls.TlsConnectionException;
 import com.vmware.bdd.security.tls.TlsTcpClient;
 import com.vmware.bdd.validation.ValidationError;
@@ -44,67 +46,78 @@ import com.vmware.bdd.validation.ValidationErrors;
  */
 @Component
 public class UserMgmtServerValidService {
-   private  Logger LOGGER = Logger.getLogger(UserMgmtServerValidService.class);
-
-   public void setTlsClient(TlsTcpClient tlsClient) {
-      this.tlsClient = tlsClient;
-   }
+   private final static Logger LOGGER = Logger.getLogger(UserMgmtServerValidService.class);
 
    @Autowired
-   private TlsTcpClient tlsClient;
+   private LdapsTrustStoreConfig ldapsTrustStoreConfig;
 
    @Autowired
    private SssdLdapConstantMappings sssdLdapConstantMappings;
 
 
    public void validateServerInfo(UserMgmtServer userMgmtServer, boolean forceTrustCert) {
-      validateCertificate(userMgmtServer, forceTrustCert);
+      String[] ldapUrlElements = getLdapProtocol(userMgmtServer.getPrimaryUrl());
 
-      searchGroupDn(userMgmtServer, userMgmtServer.getMgmtVMUserGroupDn());
+      boolean isLdaps = "LDAPS".equalsIgnoreCase(ldapUrlElements[0]);
+      if (isLdaps) {
+         validateCertificate(ldapUrlElements, forceTrustCert);
+      }
+
+      searchGroupDn(userMgmtServer, userMgmtServer.getMgmtVMUserGroupDn(), isLdaps);
 
    }
 
-   public void validateCertificate(UserMgmtServer userMgmtServer, boolean forceTrustCert) {
+   private String[] getLdapProtocol(String ldapUrl) {
       Pattern pattern = Pattern.compile("^(ldap(?:s?))\\:\\/\\/([-.\\w]*)(?:\\:([0-9]*))?(\\/.*)?$");
 
-      Matcher matcher = pattern.matcher(userMgmtServer.getPrimaryUrl());
+      Matcher matcher = pattern.matcher(ldapUrl);
 
       if (matcher.matches()) {
-         if ("ldaps".equals(matcher.group(1))) {
-            String host = matcher.group(2);
-            String port = matcher.group(3);
-            int portNum = port == null ? 636 : Integer.parseInt(port);
+         return new String[]{matcher.group(1), matcher.group(2), matcher.group(3)};
+      }
 
-            try {
-               tlsClient.checkCertificateFirstly(host, portNum, forceTrustCert);
-            } catch (TlsConnectionException tlse) {
-               ValidationError error = new ValidationError("PrimaryUrl.CannotConnect", "Can not connect to the primary URL.");
-               ValidationErrors errors = new ValidationErrors();
-               errors.addError("PrimaryUrl", error);
-               throw new ValidationException(errors.getErrors());
-            }
+      return null;
+   }
+
+   public void validateCertificate(String[] ldapUrlElements, boolean forceTrustCert) {
+      if ("LDAPS".equalsIgnoreCase(ldapUrlElements[0])) {
+         String host = ldapUrlElements[1];
+         String port = ldapUrlElements[2];
+         int portNum = port == null ? 636 : Integer.parseInt(port);
+
+         TlsTcpClient tlsTcpClient = new TlsTcpClient();
+         SimpleServerTrustManager simpleServerTrustManager = new SimpleServerTrustManager();
+         simpleServerTrustManager.setTrustStoreConfig(ldapsTrustStoreConfig);
+         tlsTcpClient.setTrustManager(simpleServerTrustManager);
+         try {
+            tlsTcpClient.checkCertificateFirstly(host, portNum, forceTrustCert);
+         } catch (TlsConnectionException tlse) {
+            ValidationError error = new ValidationError("PrimaryUrl.CannotConnect", "Can not connect to the primary URL.");
+            ValidationErrors errors = new ValidationErrors();
+            errors.addError("PrimaryUrl", error);
+            throw new ValidationException(errors.getErrors());
          }
       }
    }
 
-   protected void searchGroupDn(UserMgmtServer userMgmtServer, String groupDn) {
-      // Set up the environment for creating the initial context
-      // -Djavax.net.ssl.trustStoreType=JKS -Djavax.net.ssl.trustStore=/opt/serengeti/.certs/serengeti.jks -Djavax.net.ssl.trustStorePassword=R5/u96F2"
-
-      LOGGER.warn(System.getProperty("javax.net.ssl.trustStoreType"));
-      LOGGER.warn(System.getProperty("javax.net.ssl.trustStore"));
-      LOGGER.warn(System.getProperty("javax.net.ssl.trustStorePassword"));
-
+   protected void searchGroupDn(UserMgmtServer userMgmtServer, String groupDn, boolean isLdaps) {
       Hashtable<String, Object> env = new Hashtable<>();
       env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
 
       // Specify LDAPS URL
       env.put(Context.PROVIDER_URL, userMgmtServer.getPrimaryUrl());
 
-      // Authenticate as S. User and password "mysecret"
+      // Authenticate as Simple username and password
       env.put(Context.SECURITY_AUTHENTICATION, "simple");
       env.put(Context.SECURITY_PRINCIPAL, userMgmtServer.getUserName());
       env.put(Context.SECURITY_CREDENTIALS, userMgmtServer.getPassword());
+
+      if (isLdaps) {
+         //@TODO it's interesting to add a custom socket factory to set SO_TIMEOUT
+         SimpleSeverTrustTlsSocketFactory.init(ldapsTrustStoreConfig);
+         env.put("java.naming.ldap.factory.socket", "com.vmware.bdd.security.tls.SimpleSeverTrustTlsSocketFactory");
+      }
+
       //  env.put(Context.SECURITY_PROTOCOL, "ssl");
 
       DirContext ctx = null;

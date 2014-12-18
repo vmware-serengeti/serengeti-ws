@@ -12,7 +12,7 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *****************************************************************************/
-package com.vmware.bdd.usermgmt.persist;
+package com.vmware.bdd.usermgmt.i18n;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -21,18 +21,25 @@ import java.util.ResourceBundle;
  * Created By xiaoliangl on 12/18/14.
  */
 public class Messages {
-   private static final String BUNDLE_NAME = "com.vmware.bdd.usermgmt.persist.messages"; //$NON-NLS-1$
+   private static final String BUNDLE_NAME = "com.vmware.bdd.usermgmt.i18n.messages"; //$NON-NLS-1$
 
    private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
    private Messages() {
    }
 
-   public static String getString(String key) {
+   public static String getString(String key, Object... details) {
+      String msg = null;
       try {
-         return RESOURCE_BUNDLE.getString(key);
+         msg = RESOURCE_BUNDLE.getString(key);
       } catch (MissingResourceException e) {
          return '!' + key + '!';
       }
+
+      if(details != null) {
+         return String.format(msg, details);
+      }
+
+      return msg;
    }
 }

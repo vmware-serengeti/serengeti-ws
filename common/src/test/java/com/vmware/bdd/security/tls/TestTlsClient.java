@@ -57,19 +57,33 @@ public class TestTlsClient {
 
 
       trustManager = new SimpleServerTrustManager();
-      trustManager.setTrustStorePath(KEY_STORE_PATH);
-      trustManager.setPassword(new Password() {
+
+      trustManager.setTrustStoreConfig(new TrustStoreConfig() {
          @Override
-         public String getPlainString() {
-            return "changeit";
+         public String getType() {
+            return "JKS";
          }
 
          @Override
-         public char[] getPlainChars() {
-            return getPlainString().toCharArray();
+         public String getPath() {
+            return KEY_STORE_PATH;
+         }
+
+         @Override
+         public Password getPassword() {
+            return new Password() {
+               @Override
+               public String getPlainString() {
+                  return "changeit";
+               }
+
+               @Override
+               public char[] getPlainChars() {
+                  return getPlainString().toCharArray();
+               }
+            };
          }
       });
-      trustManager.setTrustStoreType("JKS");
 
       helper.setTrustManager(trustManager);
    }
@@ -127,23 +141,65 @@ public class TestTlsClient {
 
    @Test(expectedExceptions = {TruststoreException.class})
    public void testCheckCertFirstly_wrongPassphrase()  {
-      trustManager.setPassword(new Password() {
+      trustManager.setTrustStoreConfig(new TrustStoreConfig() {
          @Override
-         public String getPlainString() {
-            return "badpassword";
+         public String getType() {
+            return "JKS";
          }
 
          @Override
-         public char[] getPlainChars() {
-            return getPlainString().toCharArray();
+         public String getPath() {
+            return KEY_STORE_PATH;
+         }
+
+         @Override
+         public Password getPassword() {
+            return new Password() {
+               @Override
+               public String getPlainString() {
+                  return "badpassword";
+               }
+
+               @Override
+               public char[] getPlainChars() {
+                  return getPlainString().toCharArray();
+               }
+            };
          }
       });
+
       helper.checkCertificateFirstly("wiki.eng.vmware.com", 443, false);
    }
 
    @Test(expectedExceptions = {TruststoreException.class})
    public void test_keystoreNotFound()  {
-      trustManager.setTrustStorePath("filenotfound");
+      trustManager.setTrustStoreConfig(new TrustStoreConfig() {
+         @Override
+         public String getType() {
+            return "JKS";
+         }
+
+         @Override
+         public String getPath() {
+            return "filenotfound";
+         }
+
+         @Override
+         public Password getPassword() {
+            return new Password() {
+               @Override
+               public String getPlainString() {
+                  return "changeit";
+               }
+
+               @Override
+               public char[] getPlainChars() {
+                  return getPlainString().toCharArray();
+               }
+            };
+         }
+      });
+
       helper.checkCertificateFirstly("wiki.eng.vmware.com", 443, false);
    }
 
