@@ -75,6 +75,14 @@ public class TestVcResourceUtils {
    }
 
    @Test
+   public void testFindAllHostInVcResourcePool() {
+      List<VcHost> host = VcResourceUtils.findAllHostInVcResourcePool("cluster1", "rp1");
+      Assert.assertEquals(host.size(), 1);
+      host = VcResourceUtils.findAllHostInVcResourcePool("cluster2", "rp2");
+      Assert.assertEquals(host.size(), 0);
+   }
+
+   @Test
    public void testFindRPInVCCluster() {
       VcResourcePool rp = VcResourceUtils.findRPInVCCluster("cluster2", "rp1");
       Assert.assertNull(rp);

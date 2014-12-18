@@ -17,8 +17,10 @@ package com.vmware.bdd.service.utils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -113,6 +115,35 @@ public class VcResourceUtils {
             return null;
          }
       });
+   }
+
+   public static List<VcHost> findAllHostInVcResourcePool(
+         final String vcClusterName, final String vcRpName) {
+      Set<VcHost> vcHosts = new HashSet<>();
+      VcResourcePool vcResourcePool =
+            findRPInVCCluster(vcClusterName, vcRpName);
+      collectVcHostFromVcRps(vcHosts, vcResourcePool);
+      List<VcHost> hosts = new ArrayList<>();
+      hosts.addAll(vcHosts);
+      return hosts;
+   }
+
+   private static void collectVcHostFromVcRps(Set<VcHost> vcHosts,
+         VcResourcePool vcResourcePool) {
+      if (vcResourcePool != null) {
+         List<VcVirtualMachine> vms = vcResourcePool.getChildVMs();
+         if (vms != null && !vms.isEmpty()) {
+            for (VcVirtualMachine vm : vms) {
+               vcHosts.add(vm.getHost());
+            }
+         }
+         List<VcResourcePool> vcRps = vcResourcePool.getChildren();
+         if (vcRps != null && !vcRps.isEmpty()) {
+            for (VcResourcePool vcRp : vcRps) {
+               collectVcHostFromVcRps(vcHosts, vcRp);
+            }
+         }
+      }
    }
 
    public static List<VcHost> findAllHostsInVCCluster(final String clusterName) {

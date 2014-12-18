@@ -27,8 +27,13 @@ import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -247,6 +252,15 @@ public class TestCommonUtil {
       // add a case for a string without ","
       ls = CommonUtil.inputsConvert("abc123-xyz");
       Assert.assertEquals(ls.get(0), "abc123-xyz");
+
+      Set<String> words = new TreeSet<String>();
+      words.addAll(Arrays.asList("ab", "123", "*&^"));
+      Assert.assertEquals("*&^,123,ab", CommonUtil.inputsConvert(words));
+
+      Map<String, String> map = new TreeMap<String, String>();
+      map.put("name", "name1");
+      map.put("value", "value1");
+      Assert.assertEquals("name:name1,value:value1", CommonUtil.inputsConvert(map));
    }
 
    @Test

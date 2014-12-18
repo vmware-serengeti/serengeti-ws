@@ -352,8 +352,9 @@ public class ResourceService implements IResourceService {
    public List<VcHost> getHostsByRpName(String rpName)
          throws VcProviderException {
       VcResourcePoolEntity rp = rpDao.findByName(rpName);
-      final String clusterName = rp.getVcCluster();
-      return VcResourceUtils.findAllHostsInVCCluster(clusterName);
+      final String vcClusterName = rp.getVcCluster();
+      final String vcRpName = rp.getVcResourcePool();
+      return VcResourceUtils.findAllHostInVcResourcePool(vcClusterName, vcRpName);
    }
 
 

@@ -41,6 +41,7 @@ import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.DataObjectType;
 import com.vmware.bdd.apitypes.NodeGroupRead;
+import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.manager.ClusterManager;
@@ -210,6 +211,9 @@ public class PeriodCollectionService implements IPeriodCollectionService {
             }
          }
       }
+      if (totalMemory != 0) {
+         totalMemory = totalMemory >> 20;
+      }
       return totalMemory;
    }
 
@@ -282,7 +286,7 @@ public class PeriodCollectionService implements IPeriodCollectionService {
          }
       }
       if (memoryLimit != 0) {
-         memoryLimit = memoryLimit/1024/1024;
+         memoryLimit = memoryLimit >> 20;
       }
       return memoryLimit;
    }
@@ -366,17 +370,24 @@ public class PeriodCollectionService implements IPeriodCollectionService {
       int numberOfHost = 0;
       List<ClusterRead> clusters = clusterMgr.getClusters(false);
       if (clusters != null && !clusters.isEmpty()) {
-         List<ResourcePoolRead> resourcePools = null;
-         List<VcHost> vcHosts = null;
-         Set<String> hostNames = new HashSet<> ();
+         List<NodeRead> nodes = null;
+         VcVirtualMachine vm = null;
+         VcHost host = null;
+         Set<String> hostNames = new HashSet<>();
          for (ClusterRead cluster : clusters) {
-            resourcePools = cluster.getResourcePools();
-            if (resourcePools != null && !resourcePools.isEmpty()) {
-               for (ResourcePoolRead resourcePool : resourcePools) {
-                  vcHosts = resourceService.getHostsByRpName(resourcePool.getRpName());
-                  if (vcHosts != null) {
-                     for (VcHost vcHost : vcHosts) {
-                        hostNames.add(vcHost.getName());
+            List<NodeGroupRead> nodeGroups = cluster.getNodeGroups();
+            if (nodeGroups != null && !nodeGroups.isEmpty()) {
+               for (NodeGroupRead nodeGroup : nodeGroups) {
+                  nodes = nodeGroup.getInstances();
+                  if (nodes != null && !nodes.isEmpty()) {
+                     for (NodeRead node : nodes) {
+                        vm = VcCache.getIgnoreMissing(node.getMoId());
+                        if (vm != null) {
+                           host = vm.getHost();
+                           if (host != null) {
+                              hostNames.add(host.getName());
+                           }
+                        }
                      }
                   }
                }

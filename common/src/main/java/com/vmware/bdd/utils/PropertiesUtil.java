@@ -44,7 +44,9 @@ public class PropertiesUtil {
          ips = new FileInputStream(file);
          properties.load(ips);
       } finally {
-         ips.close();
+         if (ips != null) {
+            ips.close();
+         }
       }
    }
 
