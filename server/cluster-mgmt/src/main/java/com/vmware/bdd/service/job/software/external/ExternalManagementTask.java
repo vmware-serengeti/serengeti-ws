@@ -95,7 +95,14 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
                   logger.warn("You may need to delete related resource on software manager server manually.");
                   success = true;
                } else {
-                  success = softwareManager.onDeleteCluster(clusterBlueprint, queue);
+                  //When failed to delete cluster on software side, we will delete node vm in force
+                  try {
+                     softwareManager.onDeleteCluster(clusterBlueprint, queue);
+                  } catch (Exception e) {
+                     String errMsg = "Got exception when AppManager " + softwareManager.getName() + " delete cluster";
+                     logger.error(errMsg, e);
+                  }
+                  success = true;
                }
                break;
             case DESTROY:
