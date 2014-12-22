@@ -617,8 +617,13 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
 
       blueprint.setName(clusterEntity.getName());
       blueprint.setInstanceNum(clusterEntity.getRealInstanceNum(true));
-      // TODO: topology
+
+      // set rack topology
+      blueprint.setTopologyPolicy(clusterEntity.getTopologyPolicy());
+
+      // set cluster software configuration
       if (clusterEntity.getHadoopConfig() != null) {
+         @SuppressWarnings("unchecked")
          Map<String, Object> clusterConfigs =
                gson.fromJson(clusterEntity.getHadoopConfig(), Map.class);
          blueprint.setConfiguration(clusterConfigs);

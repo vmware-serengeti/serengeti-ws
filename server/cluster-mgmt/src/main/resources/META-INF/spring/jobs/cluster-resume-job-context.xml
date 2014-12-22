@@ -28,22 +28,36 @@
 		<beans:property name="setLocalRepoService" ref="setNodeLocalRepoService"/>
 		<beans:property name="managementOperation" value="RESUME" />
 	</beans:bean>
-   <beans:bean name="EnableLdapForNewNodesResumeStep"
-               class="com.vmware.bdd.service.job.EnableLdapForNewNodesStep">
-      <beans:property name="clusterLdapUserMgmtCfgService" >
-         <beans:ref bean="clusterLdapUserMgmtCfgService"/>
-      </beans:property>
-      <beans:property name="clusterEntityMgr" ref="clusterEntityManager"/>
-      <beans:property name="managementOperation" value="RESUME" />
-   </beans:bean>
-   <beans:bean name="generateHostnameWhenClusterResumeTasklet"
-               class="com.vmware.bdd.service.job.GenerateHostnameStep">
-      <beans:property name="generateHostnameSerivce" ref="generateHostnameService"/>
-   </beans:bean>
-   <beans:bean name="generateHostnameFailedWhenClusterResumeTasklet"
-               class="com.vmware.bdd.service.job.GenerateHostnameFailedStep">
-      <beans:property name="generateHostnameSerivce" ref="generateHostnameService"/>
-   </beans:bean>
+	<beans:bean name="EnableLdapForNewNodesResumeStep"
+		class="com.vmware.bdd.service.job.EnableLdapForNewNodesStep">
+		<beans:property name="clusterLdapUserMgmtCfgService">
+			<beans:ref bean="clusterLdapUserMgmtCfgService" />
+		</beans:property>
+		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
+		<beans:property name="managementOperation" value="RESUME" />
+	</beans:bean>
+	<beans:bean name="generateHostnameWhenClusterResumeTasklet"
+		class="com.vmware.bdd.service.job.GenerateHostnameStep">
+		<beans:property name="generateHostnameSerivce" ref="generateHostnameService" />
+	</beans:bean>
+	<beans:bean name="generateHostnameFailedWhenClusterResumeTasklet"
+		class="com.vmware.bdd.service.job.GenerateHostnameFailedStep">
+		<beans:property name="generateHostnameSerivce" ref="generateHostnameService" />
+	</beans:bean>
+	<beans:bean name="preSoftwareProvisionWhenResumeTasklet"
+		class="com.vmware.bdd.service.job.ClusterOperationCallbackStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="clusterOperationCallbackService" ref="clusterOperationCallbackService" />
+		<beans:property name="managementOperation" value="RESUME" />
+		<beans:property name="phase" value="pre-software-provision" />
+	</beans:bean>
+	<beans:bean name="postSoftwareProvisionWhenResumeTasklet"
+		class="com.vmware.bdd.service.job.ClusterOperationCallbackStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="clusterOperationCallbackService" ref="clusterOperationCallbackService" />
+		<beans:property name="managementOperation" value="RESUME" />
+		<beans:property name="phase" value="post-software-provision" />
+	</beans:bean>
 
 	<job id="resumeClusterJob" job-repository="jobRepository">
 		<step id="removeBadNodeStep" next="updateResumeClusterDataStep1">
@@ -124,21 +138,32 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-      <step id="configLdapUserMgmtResumeStep" next="softwareResumeClusterStep">
-         <tasklet ref="EnableLdapForNewNodesResumeStep">
-            <listeners>
-               <listener ref="stepListener"/>
-            </listeners>
-         </tasklet>
-      </step>
+		<step id="configLdapUserMgmtResumeStep" next="preSoftwareProvisionWhenResumeStep">
+			<tasklet ref="EnableLdapForNewNodesResumeStep" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="preSoftwareProvisionWhenResumeStep" next="softwareResumeClusterStep">
+			<tasklet ref="preSoftwareProvisionWhenResumeTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
 		<step id="softwareResumeClusterStep" next="setAutoElasticityResumeStep">
 			<tasklet ref="softwareCreateClusterTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="setAutoElasticityResumeStep">
+		<step id="setAutoElasticityResumeStep" next="postSoftwareProvisionWhenResumeStep">
 			<tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="postSoftwareProvisionWhenResumeStep">
+			<tasklet ref="postSoftwareProvisionWhenResumeTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

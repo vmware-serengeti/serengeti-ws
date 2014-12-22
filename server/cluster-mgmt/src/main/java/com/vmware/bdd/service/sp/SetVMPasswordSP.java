@@ -65,21 +65,27 @@ public class SetVMPasswordSP implements Callable<Void> {
    }
 
    public boolean setPasswordForNode() throws Exception {
-      logger.info("Setting password of " + nodeIP);
+      logger.info("Setting password for node " + nodeIP);
 
       setupPasswordLessLogin(nodeIP);
 
-      // if user set customized password, set the customized password for it
-      // if user didn't set customized password, set random password for it
-      if (this.password == null) {
-         setRandomPassword();
-      } else {
-         if (!CommonUtil.validateClusterPassword(password)) {
-            logger.error("Set customized password for " + nodeIP + " failed. Password contains invalid characters");
-            throw SetPasswordException.INVALID_PASSWORD(Constants.PASSWORD_REQUIREMENT);
+      boolean useDefaultPassword = Configuration.getBoolean(Constants.SERENGETI_USE_DEFAULT_PASSWORD, false);
+      if (!useDefaultPassword) {
+         // if user set customized password, set the customized password for it
+         // if user didn't set customized password, set random password for it
+         if (this.password == null) {
+            setRandomPassword();
+         } else {
+            if (!CommonUtil.validateClusterPassword(password)) {
+               logger.error("Set customized password for " + nodeIP + " failed. Password contains invalid characters");
+               throw SetPasswordException.INVALID_PASSWORD(Constants.PASSWORD_REQUIREMENT);
+            }
+            setCustomizedPassword(password);
          }
-         setCustomizedPassword(password);
+      } else {
+         logger.info("use default password for node " + nodeIP);
       }
+
       removeSSHLimit();
 
       return true;

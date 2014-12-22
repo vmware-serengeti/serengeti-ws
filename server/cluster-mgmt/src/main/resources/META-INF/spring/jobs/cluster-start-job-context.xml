@@ -30,6 +30,20 @@
 		class="com.vmware.bdd.service.job.GenerateHostnameFailedStep">
 		<beans:property name="generateHostnameSerivce" ref="generateHostnameService"/>
 	</beans:bean>
+	<beans:bean name="preSoftwareProvisionWhenStartTasklet"
+		class="com.vmware.bdd.service.job.ClusterOperationCallbackStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="clusterOperationCallbackService" ref="clusterOperationCallbackService" />
+		<beans:property name="managementOperation" value="START" />
+		<beans:property name="phase" value="pre-software-provision" />
+	</beans:bean>
+	<beans:bean name="postSoftwareProvisionWhenStartTasklet"
+		class="com.vmware.bdd.service.job.ClusterOperationCallbackStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="clusterOperationCallbackService" ref="clusterOperationCallbackService" />
+		<beans:property name="managementOperation" value="START" />
+		<beans:property name="phase" value="post-software-provision" />
+	</beans:bean>
 
 	<job id="startClusterJob" job-repository="jobRepository">
 		<step id="startClusterVM" next="startClusterNodeSyncup">
@@ -56,14 +70,26 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="generateHostnameFailedWhenClusterStartStep" next="softwareBootstrapStartClusterStep">
+		<step id="preSoftwareProvisionWhenStartStep" next="softwareBootstrapStartClusterStep">
+			<tasklet ref="preSoftwareProvisionWhenStartTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="generateHostnameFailedWhenClusterStartStep" next="preSoftwareProvisionWhenStartStep">
 			<tasklet ref="generateHostnameFailedWhenClusterStartTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="softwareBootstrapStartClusterStep">
+		<step id="softwareBootstrapStartClusterStep" next="postSoftwareProvisionWhenStartStep">
 			<tasklet ref="softwareBootstrapStartClusterTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="postSoftwareProvisionWhenStartStep">
+			<tasklet ref="postSoftwareProvisionWhenStartTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

@@ -16,12 +16,17 @@ package com.vmware.bdd.utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
@@ -38,11 +43,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -151,6 +157,70 @@ public class CommonUtil {
          }
       }
       return dataStringBuffer.toString();
+   }
+
+
+   public static void gracefulRackTopologyOutput(
+         Map<String, String> racksTopology, String filename, String delimeter)
+         throws Exception {
+      List<Object> list = new ArrayList<Object>();
+
+      if (racksTopology != null && racksTopology.size() > 0) {
+         Iterator<Entry<String, String>> it =
+               racksTopology.entrySet().iterator();
+         Map.Entry<String, String> entry = null;
+         String vmIP = "";
+         String rackPath = "";
+         while (it.hasNext()) {
+            entry = (Map.Entry<String, String>) it.next();
+            vmIP = entry.getKey();
+            rackPath = entry.getValue();
+            StringBuffer buff = new StringBuffer();
+            list.add(buff.append(vmIP).append(" ").append(rackPath).toString());
+         }
+      }
+
+      prettyOutputStrings(list, filename, delimeter);
+   }
+
+   /*
+    * throws IO Exception
+    */
+   public static void prettyOutputStrings(List<Object> objs, String fileName, String delimeter) throws Exception {
+      StringBuffer buff = new StringBuffer();
+      if (isBlank(delimeter)) {
+         delimeter = "\n";
+      }
+
+      for (Object obj : objs) {
+         if (obj != null) {
+            String str = obj.toString();
+            if (!isBlank(str)) {
+               buff.append(str).append(delimeter);
+            }
+         }
+      }
+      if (buff.length() > 0) {
+         buff.delete(buff.length() - delimeter.length(), buff.length());
+      }
+
+      OutputStream out = null;
+      BufferedWriter bw = null;
+      try {
+         if (!isBlank(fileName)) {
+            out = new FileOutputStream(fileName);
+         } else {
+            out = System.out;
+         }
+         bw = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+         bw.write(buff.toString());
+         bw.flush();
+      } finally {
+         if (bw != null && out != null && !(out instanceof PrintStream)) {
+            bw.close();
+            out.close();
+         }
+      }
    }
 
    public static List<String> inputsConvert(String inputs) {

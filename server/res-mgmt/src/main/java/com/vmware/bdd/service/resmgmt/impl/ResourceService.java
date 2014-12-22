@@ -29,6 +29,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.VcCluster;
 import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;
@@ -364,7 +365,12 @@ public class ResourceService implements IResourceService {
    @Override
    public synchronized UUID reserveResoruce(ResourceReservation resReservation)
          throws VcProviderException {
-      if (reservedResource.keySet().size() == 0) {
+
+      boolean concurrentJobEnabled = Configuration.getBoolean(Constants.SERENGETI_CONCURRENT_JOB_ENABLED, false);
+      if (reservedResource.keySet().size() == 0 || concurrentJobEnabled) {
+         if (concurrentJobEnabled) {
+            logger.info("concurrent cluster create is performed.");
+         }
          UUID result = UUID.randomUUID();
          reservedResource.put(result, resReservation);
          return result;
@@ -372,7 +378,7 @@ public class ResourceService implements IResourceService {
          ResourceReservation[] reservations =
                reservedResource.values().toArray(new ResourceReservation[0]);
          String clusterName = reservations[0].getClusterName();
-         logger.error("concurrent cluster create.");
+         logger.error("concurrent cluster create is not allowed.");
          throw VcProviderException
                .CONCURRENT_CLUSTER_CREATING(clusterName != null ? clusterName
                      : "unkown cluster");

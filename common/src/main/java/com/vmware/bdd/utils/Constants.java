@@ -212,6 +212,9 @@ public class Constants {
    public static final String MSG_SETTING_UP_PASSWORDLESS_LOGIN = "Setting up passwordless login to ";
    public static final String SERENGETI_TTY_NAME = "serengeti.tty.name";
    public static final String SERENGETI_DEFAULT_TTY_NAME = "tty1";
+   public static final String SERENGETI_CLONE_MODE = "serengeti.clone.mode";
+   public static final String SERENGETI_CONCURRENT_JOB_ENABLED = "serengeti.concurrent.job.enabled";
+   public static final String SERENGETI_USE_DEFAULT_PASSWORD = "serengeti.use.default.password";
    public static final String SERENGETI_DEFAULT_PASSWORD = "serengeti.default.password";
    public static final String SERENGETI_SBIN_DIR = "serengeti.sbin.dir";
    public static final String DEFAULT_SERENGETI_SBIN_DIR = "/opt/serengeti/sbin";
@@ -261,6 +264,13 @@ public class Constants {
    public static final String BDE_SERVER_VM_MOBID = "vim.cms_moref";
    public static final String VC_EXT_PREFIX = "ext.prefix";
 
-
    public static final String RESPONSE_HEADER_LOCATION = "Location";
+
+   public static final String CLUSTER_OPERATION_CALLBACK_TIMEOUT_SECONDS = "cluster.operation.callback.timeout";
+   public static final int CLUSTER_OPERATION_CALLBACK_TIMEOUT_SECONDS_DEFAULT = 3600;
+   public static final String CLUSTER_OPERATION_CALLBACK_DESCRIPTION = "cluster operation callback";
+   public static final String CLUSTER_OPERATION_CALLBACK_SCRIPT_FILE_NAME = "/opt/serengeti/sbin/serengeti-provision-hook.sh";
+
+   public static final String CLUSTER_RACK_TOPOLOGY_FILE_PATH = "/opt/serengeti/www/topology/";
+   public static final String CLUSTER_RACK_TOPOLOGY_FILE_SUFFIX = ".topology.data";
 }

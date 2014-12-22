@@ -340,6 +340,7 @@ public class AmClusterValidator {
       }
    }
 
+   @SuppressWarnings("unchecked")
    private void validateConfigs(Map<String, Object> config,
          List<String> unRecogConfigTypes, List<String> unRecogConfigKeys,
          String stackVendor, String stackVersion) {
@@ -358,21 +359,22 @@ public class AmClusterValidator {
                   apiConfiguration.getApiConfigurationInfo();
             String configType = apiConfigurationInfo.getType();
             String propertyName = apiConfigurationInfo.getPropertyName();
-            List<String> propertyNames = new ArrayList<String>();
-            if (supportedConfigs.isEmpty()) {
-               propertyNames.add(propertyName);
+            List<String> propertyNames;
+
+            if (supportedConfigs.containsKey(configType)) {
+               propertyNames = (List<String>) supportedConfigs.get(configType);
             } else {
-               if (supportedConfigs.containsKey(configType)) {
-                  propertyNames =
-                        (List<String>) supportedConfigs.get(configType);
-                  propertyNames.add(propertyName);
-               } else {
-                  propertyNames.add(propertyName);
-               }
+               propertyNames = new ArrayList<String>();
             }
+            propertyNames.add(propertyName);
             supportedConfigs.put(configType, propertyNames);
          }
       }
+      // FIXME
+      List<String> propertyNames = (List<String>) supportedConfigs.get("core-site");
+      propertyNames.add("topology.script.file.name");
+      propertyNames.add("net.topology.script.file.name");
+      supportedConfigs.put("core-site", propertyNames);
 
       Map<String, Object> notAvailableConfig = new HashMap<String, Object>();
       for (String key : config.keySet()) {

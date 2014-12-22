@@ -38,6 +38,7 @@ import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
+import com.vmware.bdd.utils.CommonUtil;
 
 public class CommandsUtilsTest {
 

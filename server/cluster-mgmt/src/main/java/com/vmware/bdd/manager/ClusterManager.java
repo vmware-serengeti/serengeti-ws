@@ -1350,12 +1350,10 @@ public class ClusterManager {
    public Map<String, String> getRackTopology(String clusterName, String topology) {
      ClusterRead cluster = clusterEntityMgr.toClusterRead(clusterName);
       Set<String> hosts = new HashSet<String>();
-      Set<String> racks = new HashSet<String>();
       List<NodeRead> nodes = new ArrayList<NodeRead>();
       for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {
          for (NodeRead node : nodeGroup.getInstances()) {
             hosts.add(node.getHostName());
-            racks.add(node.getRack());
             nodes.add(node);
          }
       }

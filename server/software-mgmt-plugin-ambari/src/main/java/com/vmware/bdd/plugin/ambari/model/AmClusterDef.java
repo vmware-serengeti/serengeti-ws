@@ -16,6 +16,7 @@ package com.vmware.bdd.plugin.ambari.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,11 +83,14 @@ public class AmClusterDef implements Serializable {
       this.sshKey = privateKey;
       this.user = Constants.AMBARI_SSH_USER;
       this.currentReport = new ClusterReport(blueprint);
-      this.configurations =
-            AmUtils.toAmConfigurations(blueprint.getConfiguration());
 
       this.nodes = new ArrayList<AmNodeDef>();
       HdfsVersion hdfs = getDefaultHdfsVersion(this.version);
+      if (blueprint.hasTopologyPolicy()) {
+         setRackTopologyFileName(blueprint);
+      }
+      this.configurations =
+            AmUtils.toAmConfigurations(blueprint.getConfiguration());
       for (NodeGroupInfo group : blueprint.getNodeGroups()) {
          for (NodeInfo node : group.getNodes()) {
             AmNodeDef nodeDef = new AmNodeDef();
@@ -311,4 +315,25 @@ public class AmClusterDef implements Serializable {
       }
    }
 
+   @SuppressWarnings("unchecked")
+   private void setRackTopologyFileName(ClusterBlueprint blueprint) {
+      String rackTopologyFileName = "/etc/hadoop/conf/topology.sh";
+      Map<String, Object> conf = blueprint.getConfiguration();
+      if (conf == null) {
+         conf = new HashMap<String, Object>();
+         blueprint.setConfiguration(conf);
+      }
+
+      Map<String, Object> confCoreSite = (Map<String, Object>) conf.get("core-site");
+      if (confCoreSite == null) {
+         confCoreSite = new HashMap<String, Object>();
+         conf.put("core-site", confCoreSite);
+      }
+      if (confCoreSite.get("net.topology.script.file.name") == null) {
+         confCoreSite.put("net.topology.script.file.name", rackTopologyFileName);
+      }
+      if (confCoreSite.get("topology.script.file.name") == null) {
+         confCoreSite.put("topology.script.file.name", rackTopologyFileName);
+      }
+   }
 }

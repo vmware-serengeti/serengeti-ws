@@ -17,9 +17,23 @@
 		class="com.vmware.bdd.service.job.GenerateHostnameFailedStep">
 		<beans:property name="generateHostnameSerivce" ref="generateHostnameService"/>
 	</beans:bean>
+	<beans:bean name="preSoftwareProvisionWhenConfigureTasklet"
+		class="com.vmware.bdd.service.job.ClusterOperationCallbackStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="clusterOperationCallbackService" ref="clusterOperationCallbackService" />
+		<beans:property name="managementOperation" value="CONFIGURE" />
+		<beans:property name="phase" value="pre-software-provision" />
+	</beans:bean>
+	<beans:bean name="postSoftwareProvisionWhenConfigureTasklet"
+		class="com.vmware.bdd.service.job.ClusterOperationCallbackStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="clusterOperationCallbackService" ref="clusterOperationCallbackService" />
+		<beans:property name="managementOperation" value="CONFIGURE" />
+		<beans:property name="phase" value="post-software-provision" />
+	</beans:bean>
 
 	<job id="configClusterJob" job-repository="jobRepository">
-		<step id="setAutoElasticityConfigStep" next="generateHostnameWhenClusterConfigStep">
+		<step id="setAutoElasticityConfigStep" next="preSoftwareProvisionWhenConfigureStep">
 			<tasklet ref="setAutoElasticityTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
@@ -31,14 +45,26 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="generateHostnameFailedWhenClusterConfigStep" next="softwareConfigClusterStep">
+		<step id="generateHostnameFailedWhenClusterConfigStep" next="preSoftwareProvisionWhenConfigureStep">
 			<tasklet ref="generateHostnameFailedWhenClusterConfigTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="softwareConfigClusterStep">
+		<step id="preSoftwareProvisionWhenConfigureStep" next="softwareConfigClusterStep">
+			<tasklet ref="preSoftwareProvisionWhenConfigureTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="softwareConfigClusterStep" next="postSoftwareProvisionWhenConfigureStep">
 			<tasklet ref="softwareBootstrapTargetTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="postSoftwareProvisionWhenConfigureStep">
+			<tasklet ref="postSoftwareProvisionWhenConfigureTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
