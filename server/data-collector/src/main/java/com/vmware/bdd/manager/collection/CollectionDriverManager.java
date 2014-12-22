@@ -26,8 +26,8 @@ import com.vmware.bdd.utils.PropertiesUtil;
 public class CollectionDriverManager {
 
    static final Logger logger = Logger.getLogger(CollectionDriverManager.class);
-   private CollectionDriver driver;
-   private static File file;
+   protected CollectionDriver driver;
+   protected static File file;
 
    public CollectionDriverManager() {}
    public CollectionDriverManager(String driverClass, ICollectionInitializerService collectionInitializerService) {
@@ -86,13 +86,13 @@ public class CollectionDriverManager {
 
    public boolean getCollectionSwitchStatus() {
       boolean collectionSwitchStatus = false;
-      if (driver != null) {
+      if (getDriver() != null) {
          File file = getConfigurationFile();
          if (file != null) {
             PropertiesUtil propertiesUtil = new PropertiesUtil(file);
             if (propertiesUtil != null) {
                String status =
-                     propertiesUtil.getProperty(driver
+                     propertiesUtil.getProperty(getDriver()
                            .getCollectionSwitchName());
                if (status.equalsIgnoreCase("true")) {
                   collectionSwitchStatus = true;

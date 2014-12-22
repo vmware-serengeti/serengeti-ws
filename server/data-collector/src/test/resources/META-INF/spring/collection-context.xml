@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<bean id="collectionDriverManager" class="com.vmware.bdd.manager.collection.CollectionDriverManager">
+		<constructor-arg value = "com.vmware.bdd.manager.ph.PhoneHomeCollectionDriver" index = "0"/>
+		<constructor-arg ref = "collectionInitializerService"  index = "1"/>
+	</bean>
+	<bean id="collectionInitializerService" class="com.vmware.bdd.service.collection.impl.CollectionInitializerService" />
+</beans>

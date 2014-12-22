@@ -63,15 +63,15 @@ public class PeriodCollectionService implements IPeriodCollectionService {
          .getLogger(PeriodCollectionService.class);
    private ICollectionInitializerService collectionInitializerService;
    @Autowired
-   private IResourceInitializerService resourceInitializerService;
+   protected IResourceInitializerService resourceInitializerService;
    @Autowired
-   private ClusterManager clusterMgr;
+   protected ClusterManager clusterMgr;
    @Autowired
-   private IResourceService resourceService;
+   protected IResourceService resourceService;
    @Autowired
-   private IResourcePoolService resourcePoolService;
+   protected IResourcePoolService resourcePoolService;
    @Autowired
-   private SoftwareManagerCollector softwareManagerCollector;
+   protected SoftwareManagerCollector softwareManagerCollector;
 
    @Override
    public Map<String, Map<String, ?>> collectData(DataObjectType dataObjectType) {

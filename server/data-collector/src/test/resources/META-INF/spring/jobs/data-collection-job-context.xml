@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+   http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/batch
+   http://www.springframework.org/schema/batch/spring-batch.xsd
+   http://www.springframework.org/schema/aop
+   http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<beans:bean name="periodCollectionService" class="com.vmware.bdd.service.collection.impl.PeriodCollectionService">
+		<beans:property name="collectionInitializerService" ref="collectionInitializerService" />
+	</beans:bean>
+	<beans:bean name="collectBDEFootprintTasklet"
+		class="com.vmware.bdd.service.collection.job.CollectBDEFootprintStep">
+		<beans:property name="collectionDriverManager" ref="collectionDriverManager" />
+		<beans:property name="periodCollectionService" ref="periodCollectionService" />
+	</beans:bean>
+	<beans:bean name="collectEnvironmentalInfoTasklet"
+		class="com.vmware.bdd.service.collection.job.CollectEnvironmentalInfoStep">
+		<beans:property name="collectionDriverManager" ref="collectionDriverManager" />
+		<beans:property name="periodCollectionService" ref="periodCollectionService" />
+	</beans:bean>
+	<beans:bean name="collectCommonReportsDataTasklet"
+		class="com.vmware.bdd.service.collection.job.CollectCommonReportsDataStep">
+		<beans:property name="collectionDriverManager" ref="collectionDriverManager" />
+		<beans:property name="periodCollectionService" ref="periodCollectionService" />
+	</beans:bean>
+	<job id="collectDataJob" job-repository="jobRepository">
+		<split id="collectionSplit" task-executor="taskExecutor">
+			<flow>
+				<step id="collectBDEFootprintStep">
+					<tasklet ref="collectBDEFootprintTasklet" />
+				</step>
+			</flow>
+			<flow>
+				<step id="collectEnvironmentalInfoStep">
+					<tasklet ref="collectEnvironmentalInfoTasklet" />
+				</step>
+			</flow>
+			<flow>
+				<step id="collectCommonReportsDataStep">
+					<tasklet ref="collectCommonReportsDataTasklet" />
+				</step>
+			</flow>
+		</split>
+	</job>
+</beans:beans>

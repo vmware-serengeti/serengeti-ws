@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<bean id="dataCollectionQuartzJob" class="com.vmware.bdd.manager.collection.quartz.DataCollectionQuartzJob">
+		<property name="scheduler" ref="schedulerFactory" />
+		<property name="jobManager">
+			<ref bean="jobManager" />
+		</property>
+		<property name="collectionDriverManager">
+		    <ref bean="collectionDriverManager" />
+		</property>
+	</bean>
+	<bean id="dataCollectionJobDetail"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="dataCollectionQuartzJob" />
+		</property>
+		<property name="targetMethod">
+			<value>execute</value>
+		</property>
+	</bean>
+	<bean id="dataCollectionCronTriggerFactory" class="com.vmware.bdd.manager.collection.quartz.InitializingCronTriggerFactoryBean">
+		<constructor-arg ref = "collectionDriverManager" index="0"/>
+		<!-- execute job in 2025, that is it will be executing barely  -->
+		<constructor-arg value = "0 15 10 * * ? 2025" index="1"/>
+		<property name="jobDetail">
+			<ref bean="dataCollectionJobDetail" />
+		</property>
+	</bean>
+	<bean name="schedulerFactory"
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="dataCollectionCronTriggerFactory" />
+			</list>
+		</property>
+	</bean>
+</beans>
