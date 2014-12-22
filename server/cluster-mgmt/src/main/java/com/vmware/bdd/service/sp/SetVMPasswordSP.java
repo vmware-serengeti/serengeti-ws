@@ -74,9 +74,9 @@ public class SetVMPasswordSP implements Callable<Void> {
       if (this.password == null) {
          setRandomPassword();
       } else {
-         if (CommonUtil.passwordContainInvalidCharacter(password)) {
+         if (!CommonUtil.validateClusterPassword(password)) {
             logger.error("Set customized password for " + nodeIP + " failed. Password contains invalid characters");
-            throw SetPasswordException.PASSWORD_CONTAIN_INVALID_CHARACTER();
+            throw SetPasswordException.INVALID_PASSWORD(Constants.PASSWORD_REQUIREMENT);
          }
          setCustomizedPassword(password);
       }

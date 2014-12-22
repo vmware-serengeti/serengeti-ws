@@ -258,15 +258,10 @@ public class Constants {
    public static final String OUTPUT_OBJECT_CONNECT = "connect";
    public static final String NODE_RUNNING_STATUS = "Service Ready";
    public static final String AT_LEAST_ONE_OPTION = "You must use at least one option.";
-   public static final String PASSWORD_LENGTH_REQUIREMENT = "Password must be from 8 to 128 characters.";
    public static final String ENTER_PASSWORD = "Enter the password: ";
    public static final String CONFIRM_PASSWORD = "Confirm the password: ";
-   public static final int PASSWORD_MIN_LENGTH = 8;
-   public static final int PASSWORD_MAX_LENGTH = 128;
    public static final String PASSWORD_CONFIRMATION_FAILED = "Password confirmation failed. The passwords must match.";
    public static final String RESUME_DONOT_NEED_SET_PASSWORD = "Run the 'cluster create --resume' command, but do not include the '--password' parameter.";
-   public static final String PASSWORD_CHARACTER_REQUIREMENT = "Passwords can include only alphanumeric characters ([0-9, a-z, A-Z]) and the following special characters: _, @, #, $, %, ^, &, *";
-   public static final String PASSWORD_HINT = "Password are from " + PASSWORD_MIN_LENGTH + " to " + PASSWORD_MAX_LENGTH + " characters, and can include alphanumeric characters ([0-9, a-z, A-Z]) and the following special characters: _, @, #, $, %, ^, &, *";
    public static final String FAILED_NODES_MESSAGE = "The failed nodes: ";
    public static final String IRONFAN = "Default";
    public static final String CANNOT_SPECIFY_TWO_PATH_FOR_EXPORT = "You cannot specify 2 paths for spec file.";

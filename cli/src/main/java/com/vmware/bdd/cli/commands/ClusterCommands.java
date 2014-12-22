@@ -457,7 +457,7 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private String getPassword() {
-      System.out.println("Hint: " + Constants.PASSWORD_HINT);
+      System.out.println("Hint: " + com.vmware.bdd.utils.Constants.PASSWORD_REQUIREMENT);
       String firstPassword = getInputedPassword(Constants.ENTER_PASSWORD);
       if (firstPassword == null) {
          return null;
@@ -490,7 +490,7 @@ public class ClusterCommands implements CommandMarker {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                      null, Constants.OUTPUT_OP_CREATE,
                      Constants.OUTPUT_OP_RESULT_FAIL,
-                     Constants.PASSWORD_CHARACTER_REQUIREMENT);
+                     com.vmware.bdd.utils.Constants.PASSWORD_REQUIREMENT);
                return null;
             } else {
                throw e;
@@ -507,17 +507,10 @@ public class ClusterCommands implements CommandMarker {
    }
 
    private boolean isValidPassword(String password) {
-      if (password.length() < Constants.PASSWORD_MIN_LENGTH
-            || password.length() > Constants.PASSWORD_MAX_LENGTH) {
+      if (!CommonUtil.validateClusterPassword(password)) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, null,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.PASSWORD_LENGTH_REQUIREMENT);
-         return false;
-      }
-      if (CommonUtil.passwordContainInvalidCharacter(password)) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, null,
-               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.PASSWORD_CHARACTER_REQUIREMENT);
+               com.vmware.bdd.utils.Constants.PASSWORD_REQUIREMENT);
          return false;
       }
       return true;

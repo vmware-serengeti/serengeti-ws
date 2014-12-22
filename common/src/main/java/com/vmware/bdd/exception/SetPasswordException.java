@@ -37,8 +37,8 @@ public class SetPasswordException extends BddException{
       return new SetPasswordException(null, "FAILED_TO_SET_PASSWORD", nodeIP, msg);
    }
 
-   public static SetPasswordException PASSWORD_CONTAIN_INVALID_CHARACTER() {
-      return new SetPasswordException(null, "PASSWORD_CONTAIN_INVALID_CHARACTER");
+   public static SetPasswordException INVALID_PASSWORD(String errMsg) {
+      return new SetPasswordException(null, "INVALID_PASSWORD", errMsg);
    }
 
    public static SetPasswordException FAIL_TO_REMOVE_SSH_LIMIT(String nodeIP) {

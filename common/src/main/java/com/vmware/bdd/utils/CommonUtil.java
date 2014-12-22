@@ -279,6 +279,14 @@ public class CommonUtil {
       }
    }
 
+   public static boolean validateClusterPassword(String password) {
+      Pattern pattern = Pattern.compile("((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[_@#$%^&*]).{8,20})");
+      if (pattern.matcher(password).matches()) {
+         return true;
+      }
+      return false;
+   }
+
    public static boolean passwordContainInvalidCharacter(String password) {
       Pattern pattern = Pattern.compile("[a-zA-Z0-9_@#$%^&*]+");
       if (!pattern.matcher(password).matches()) {

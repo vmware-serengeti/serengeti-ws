@@ -36,6 +36,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class TestCommonUtil {
@@ -207,13 +208,27 @@ public class TestCommonUtil {
    }
 
    @Test
-   public void testPasswordContainInvalidCharacter() {
-      assertTrue(CommonUtil.passwordContainInvalidCharacter("!"));
-      assertTrue(CommonUtil.passwordContainInvalidCharacter("~"));
-      assertTrue(CommonUtil.passwordContainInvalidCharacter(" "));
-      assertTrue(CommonUtil.passwordContainInvalidCharacter("<"));
-      assertTrue(CommonUtil.passwordContainInvalidCharacter("?"));
-      assertFalse(CommonUtil.passwordContainInvalidCharacter("1a_@#$%^&*"));
+   public void testValidateClusterPassword() {
+      //length less than 8
+      assertFalse(CommonUtil.validateClusterPassword("P@ssw0r"));
+
+      //length more than 20
+      assertFalse(CommonUtil.validateClusterPassword("P@ssw0rdP@ssw0rdP@ssw0rd"));
+
+      //no special character
+      assertFalse(CommonUtil.validateClusterPassword("Passw0rd"));
+
+      //no digit
+      assertFalse(CommonUtil.validateClusterPassword("P@ssword"));
+
+      //no upper case letter
+      assertFalse(CommonUtil.validateClusterPassword("p@ssw0rd"));
+
+      //no lower case letter
+      assertFalse(CommonUtil.validateClusterPassword("P@SSW0RD"));
+
+      //valid one
+      assertTrue(CommonUtil.validateClusterPassword("P@ssw0rd"));
    }
 
    @Test
