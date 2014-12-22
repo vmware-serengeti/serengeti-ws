@@ -586,8 +586,9 @@ public class ClusterCommands implements CommandMarker {
          } else if (type.equalsIgnoreCase(Constants.EXPORT_TYPE_RACK)) {
             Map<String, String> rackTopology =
                   restClient.getRackTopology(name, topology);
-            CommandsUtils.gracefulRackTopologyOutput(rackTopology, path,
+            CommonUtil.gracefulRackTopologyOutput(rackTopology, path,
                   delimeter);
+            CommandsUtils.writeEndingMsgToScreen(path);
          } else if (type.equalsIgnoreCase(Constants.EXPORT_TYPE_IP)) {
             ClusterRead cluster = restClient.get(name, true);
             prettyOutputClusterIPs(cluster, path, delimeter);

@@ -152,5 +152,8 @@
 		class="com.vmware.bdd.service.impl.SetLocalRepoService">
 		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
 	</beans:bean>
+	<beans:bean name="clusterOperationCallbackService"
+		class="com.vmware.bdd.service.impl.ClusterOperationCallbackService">
+	</beans:bean>
 
 </beans:beans>

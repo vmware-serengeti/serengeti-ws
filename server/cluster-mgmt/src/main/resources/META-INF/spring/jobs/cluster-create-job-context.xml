@@ -31,6 +31,20 @@
 		<beans:property name="setLocalRepoService" ref="setNodeLocalRepoService"/>
 		<beans:property name="managementOperation" value="CREATE" />
 	</beans:bean>
+	<beans:bean name="preSoftwareProvisionWhenCreateTasklet"
+		class="com.vmware.bdd.service.job.ClusterOperationCallbackStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="clusterOperationCallbackService" ref="clusterOperationCallbackService" />
+		<beans:property name="managementOperation" value="CREATE" />
+		<beans:property name="phase" value="pre-software-provision" />
+	</beans:bean>
+	<beans:bean name="postSoftwareProvisionWhenCreateTasklet"
+		class="com.vmware.bdd.service.job.ClusterOperationCallbackStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="clusterOperationCallbackService" ref="clusterOperationCallbackService" />
+		<beans:property name="managementOperation" value="CREATE" />
+		<beans:property name="phase" value="post-software-provision" />
+	</beans:bean>
 
 	<job id="createClusterJob" job-repository="jobRepository">
 		<step id="createClusterPlanStep" next="updateClusterDataStep1">
@@ -75,8 +89,14 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="configLocalRepoStep" next="softwareCreateClusterStep">
+		<step id="configLocalRepoStep" next="preSoftwareProvisionWhenCreateStep">
 			<tasklet ref="configLocalRepoForClusterCreateTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="preSoftwareProvisionWhenCreateStep" next="softwareCreateClusterStep">
+			<tasklet ref="preSoftwareProvisionWhenCreateTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
@@ -87,8 +107,14 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="setAutoElasticityStep">
+		<step id="setAutoElasticityStep" next="postSoftwareProvisionWhenCreateStep">
 			<tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="postSoftwareProvisionWhenCreateStep">
+			<tasklet ref="postSoftwareProvisionWhenCreateTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

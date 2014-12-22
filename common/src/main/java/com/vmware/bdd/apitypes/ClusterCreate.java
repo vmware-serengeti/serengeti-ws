@@ -789,7 +789,8 @@ public class ClusterCreate implements Serializable {
 
       blueprint.setName(name);
       blueprint.setInstanceNum(totalInstances()); // TODO: check
-      // TODO: topology
+
+      blueprint.setTopologyPolicy(topologyPolicy);
       blueprint.setConfiguration(configuration);
       blueprint.setExternalHDFS(externalHDFS);
       blueprint.setExternalMapReduce(externalMapReduce);
