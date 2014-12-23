@@ -252,4 +252,7 @@ public class Constants {
    public static final int PASSWORD_MAX_LENGTH = 20;
    public static final String PASSWORD_REQUIREMENT = "Password must be from " + PASSWORD_MIN_LENGTH + " to " + PASSWORD_MAX_LENGTH + " characters and must contain at least one uppercase character, one lowercase character, one digit and one of the following special characters: _, @, #, $, %, ^, &, *";
 
+   public static final String DNS_TYPE_NORMAL = "Normal";
+   public static final String DNS_TYPE_DYNAMIC = "Dynamic";
+   public static final String DNS_TYPE_OTHERS = "Others";
 }

@@ -793,6 +793,10 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("port group", na.getPortGroup());
       }
 
+      if (!CommonUtil.validateDnsType(na.getDnsType())) {
+         throw BddException.INVALID_DNS_TYPE(na.getDnsType());
+      }
+
       if (na.getIsDhcp()) {
          networkSvc.addDhcpNetwork(na.getName(), na.getPortGroup(), na.getDnsType(), na.isGenerateHostname());
       } else {

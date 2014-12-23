@@ -198,7 +198,9 @@ public class NetworkAdd {
             .append(this.dns1).append(",").append("dns2:").append(this.dns2)
             .append(",").append("ip:").append(ipBlocks).append(",")
             .append("gateway:").append(this.gateway).append(",")
-            .append("netmask:").append(this.netmask);
+            .append("netmask:").append(this.netmask).append(",")
+            .append("dnsType:").append(this.dnsType).append(",")
+            .append("isGenerateHostname:").append(this.isGenerateHostname());
       return sb.toString();
    }
 

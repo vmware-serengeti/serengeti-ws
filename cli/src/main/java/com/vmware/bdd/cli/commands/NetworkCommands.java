@@ -99,7 +99,7 @@ public class NetworkCommands implements CommandMarker {
          @CliOption(key = { "ip" }, mandatory = false, help = "The IP address") final String ip,
          @CliOption(key = { "gateway" }, mandatory = false, help = "The gateway IP") final String gateway,
          @CliOption(key = { "mask" }, mandatory = false, help = "The subnet mask") final String mask,
-         @CliOption(key = { "dnsType" }, mandatory = false, specifiedDefaultValue = "normal", unspecifiedDefaultValue = "normal", help = "The type of DNS server: normal, dynamic or others") final String dnsType,
+         @CliOption(key = { "dnsType" }, mandatory = false, specifiedDefaultValue = "Normal", unspecifiedDefaultValue = "Normal", help = "The type of DNS server: Normal, Dynamic or Others") final String dnsType,
          @CliOption(key = { "generateHostname" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Generate hostname for each VMs. This option only applies to normal DNS.") final boolean generateHostname) {
 
       NetworkType operType = null;

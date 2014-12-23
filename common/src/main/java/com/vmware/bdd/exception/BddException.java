@@ -209,4 +209,8 @@ public class BddException extends RuntimeException {
       return new BddException(null, "CLUSTER", "EXTRA_PACKAGES_NOT_FOUND", extraPackages);
    }
 
+   public static BddException INVALID_DNS_TYPE(String dnsType) {
+      return new BddException(null, "NETWORK", "INVALID_DNS_TYPE", dnsType);
+   }
+
 }
