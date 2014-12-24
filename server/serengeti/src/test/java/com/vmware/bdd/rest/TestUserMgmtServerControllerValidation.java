@@ -49,7 +49,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 /**
  * Created By xiaoliangl on 11/27/14.
  */
-@ContextConfiguration(locations = "classpath:testrestapp.xml")
+@ContextConfiguration(locations = {"classpath:mocks.xml", "classpath:test-usermgmtserver-controller.xml"})
 @WebAppConfiguration
 @ActiveProfiles("webapp")
 public class TestUserMgmtServerControllerValidation extends AbstractTestNGSpringContextTests {

@@ -31,16 +31,23 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.web.client.RestTemplate;
 
+import com.vmware.bdd.cli.commands.ConnectionCommands;
+import com.vmware.bdd.cli.rest.RestClient;
+
 @ContextConfiguration(locations = { "classpath:com/vmware/bdd/cli/command/tests/test-context.xml" })
 public abstract class MockRestServer extends AbstractTestNGSpringContextTests {
    @Autowired
    private RestTemplate restTemplate;
    
    protected MockRestServiceServer mockServer;
-   
+
+   @Autowired
+   RestClient restClient;
+
    @BeforeMethod
    public void setup() {
       mockServer = MockRestServiceServer.createServer(restTemplate);
+      restClient.connect("127.0.0.1:8443", "serengeti", "password");
    }
    
    protected void buildReqRespWithoutReqBody(final String restUrl,

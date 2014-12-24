@@ -99,7 +99,7 @@ public class TestMgmtVmConfigService {
       testCfgMixedMode();
       Map<String,String> initCfg = mgmtVmCfgService.get();
 
-      Map<String,String> newCfg = loadTestData("mgmtvm-cfgLdap.json");
+      Map<String,String> newCfg = loadTestData("mgmtvm-cfgLDAP.json");
 
       mgmtVmCfgService.config(newCfg);
 
@@ -111,7 +111,7 @@ public class TestMgmtVmConfigService {
 
    @Test(expectedExceptions = {BddException.class})
    public  void testCfgLdapMode_NotAllowed() throws IOException {
-      Map<String,String> mgmtVmCfg = loadTestData("mgmtvm-cfgLdap.json");
+      Map<String,String> mgmtVmCfg = loadTestData("mgmtvm-cfgLDAP.json");
 
       Map<String,String> initCfg = mgmtVmCfgService.get();
 
