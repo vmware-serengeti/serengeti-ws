@@ -24,15 +24,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.apitypes.UserMgmtServer;
 import com.vmware.bdd.command.CommandUtil;
-import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.usermgmt.SssdLdapConstantMappings;
-import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.ShellCommandExecutor;
 
 /**
  * Created By xiaoliangl on 12/12/14.
@@ -42,26 +43,68 @@ public class CfgUserMgmtOnMgmtVMExecutor {
 
    public void execute(UserMgmtServer userMgmtServer, SssdLdapConstantMappings sssdLdapConstantMappings) {
       File workDir = CommandUtil.createWorkDir(System.currentTimeMillis());
-      File specFile = new File(workDir, "CfgUserMgmtServerOnMgmtVMStep.json");
+      File specFile = new File(workDir, "enableUserMgmt.json");
 
       writeJsonFile(userMgmtServer, specFile, sssdLdapConstantMappings);
 
       String specFilePath = specFile.getAbsolutePath();
 
-      // Copy node upgrade tarball to node
-      String chefCmd = "sudo chef-client -z -j \"" + specFilePath + "\"";
-      //@todo handle errors
-      ShellCommandExecutor.execCmd(chefCmd, null, null,
-            120, "CfgUserMgmtServerOnMgmtVMStep");
+      try {
+         execChefClient(specFilePath);
+         LOGGER.info("execute ChefClient for enable_LDAP is finished.");
+      } finally {
+         workDir.delete();
+         LOGGER.info("enable_LDAP spec file is deleted successful.");
+      }
+   }
 
-      LOGGER.info("CfgUserMgmtOnMgmtVM finished");
-      workDir.delete();
+   private void execChefClient(String specFilePath) {
+      CommandLine cmdLine = new CommandLine("sudo")
+            .addArgument("chef-client")
+            .addArgument("-z")
+            .addArgument("-j")
+            .addArgument("\"" + specFilePath + "\"");
+
+      DefaultExecutor executor = new DefaultExecutor();
+
+      executor.setStreamHandler(new PumpStreamHandler(
+                  new ExecOutputLogger(LOGGER, false), //output logger
+                  new ExecOutputLogger(LOGGER, true)) //error logger
+      );
+
+      //@TODO make it configurable
+      executor.setWatchdog(new ExecuteWatchdog(120l * 1000l));
+
+      try {
+         int exitVal = executor.execute(cmdLine);
+         if(exitVal != 0) {
+            throw new UserMgmtExecException("CFG_LDAP_FAIL", null);
+         }
+      } catch (IOException e) {
+         throw new UserMgmtExecException("CFG_LDAP_FAIL", e);
+      }
    }
 
 
    class SssdLdapParam {
       private Map<String, String> sssd_ldap = new HashMap<>();
       private List<String> run_list = new ArrayList<>();
+
+      public Map<String, String> getSssd_ldap() {
+         return sssd_ldap;
+      }
+
+      public void setSssd_ldap(Map<String, String> sssd_ldap) {
+         this.sssd_ldap = sssd_ldap;
+      }
+
+      public List<String> getRun_list() {
+         return run_list;
+      }
+
+      public void setRun_list(List<String> run_list) {
+         this.run_list = run_list;
+      }
    }
 
    private void writeJsonFile(UserMgmtServer userMgmtServer, File file, SssdLdapConstantMappings sssdLdapConstantMappings) {
@@ -89,19 +132,20 @@ public class CfgUserMgmtOnMgmtVMExecutor {
 
       sssdLdapParam.run_list.add("recipe[sssd_ldap]");
 
-      Gson gson = new Gson();
-      String json = gson.toJson(sssdLdapParam);
-      AuAssert.check(json != null);
-      LOGGER.debug("writing Configuration manifest in json " + json + " to file " + file);
       BufferedWriter out = null;
       try {
-         out =
-               new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-                     file), "UTF-8"));
+         ObjectMapper objectMapper = new ObjectMapper();
+         String json = objectMapper.writeValueAsString(sssdLdapParam);
+
+         if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("writing Configuration manifest in json " + json + " to file " + file);
+         }
+
+         out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
          out.write(json);
       } catch (IOException ex) {
-         LOGGER.error(ex.getMessage() + "\n failed to write cluster manifest to file " + file);
-         throw BddException.INTERNAL(ex, "Failed to write cluster manifest.");
+         LOGGER.error(ex.getMessage() + "\n failed to write enable_LDAP spec file " + file);
+         throw new UserMgmtExecException("WRITE_CFG_LDAP_JSON_FAIL", ex);
       } finally {
          if (out != null) {
             try {
