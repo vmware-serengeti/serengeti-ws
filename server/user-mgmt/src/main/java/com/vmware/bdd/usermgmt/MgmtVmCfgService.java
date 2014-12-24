@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +35,7 @@ import com.vmware.bdd.validation.ValidationErrors;
  */
 @Component
 public class MgmtVmCfgService {
+   private final static Logger LOGGER = Logger.getLogger(MgmtVmCfgService.class);
 
    @Autowired
    private MgmtVmCfgEao mgmtVmCfgEao;
@@ -166,4 +168,14 @@ public class MgmtVmCfgService {
       this.userMgmtServerService = userMgmtServerService;
    }
 
+   public void reconfigUserMgmtServer(UserMgmtServer userMgmtServer) {
+      String currentServerName = get().get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME);
+      if (userMgmtServer.getName().equals(currentServerName)) {
+         mgmtVmConfigJobService.enableLdap(userMgmtServer);
+      } else {
+         LOGGER.info(
+               String.format("current ad/ldap server used by management VM is %1s, the modified one is %2s, so no need to reconfig management vm",
+                     currentServerName, userMgmtServer.getName()));
+      }
+   }
 }

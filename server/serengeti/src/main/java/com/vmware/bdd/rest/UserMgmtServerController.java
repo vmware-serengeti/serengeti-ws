@@ -45,11 +45,22 @@ public class UserMgmtServerController {
    @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
    @ResponseBody
    public void add(@RequestBody @Valid UserMgmtServer serverInfo,
-                                      @RequestParam(value = "testonly", required = false) boolean testOnly,
-                                      @RequestParam(value = "forceTrustCert", required = false) boolean certConfirmed) {
+                   @RequestParam(value = "testonly", required = false) boolean testOnly,
+                   @RequestParam(value = "forceTrustCert", required = false) boolean certConfirmed) {
       userMgmtServerService.add(serverInfo, testOnly, certConfirmed);
    }
 
+   @RequestMapping(value = "/{name}", method = RequestMethod.PUT, consumes = "application/json", produces = "application/json")
+   @ResponseBody
+   public void modify(
+         @PathVariable("name") @Valid @NotNull String name,
+         @RequestBody @Valid UserMgmtServer serverInfo,
+         @RequestParam(value = "testonly", required = false) boolean testOnly,
+         @RequestParam(value = "forceTrustCert", required = false) boolean certConfirmed) {
+      serverInfo.setName(name);
+
+      userMgmtServerService.modify(serverInfo, testOnly, certConfirmed);
+   }
 
    @RequestMapping(value = "/{name}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody

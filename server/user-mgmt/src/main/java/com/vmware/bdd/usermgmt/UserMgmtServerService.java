@@ -37,39 +37,36 @@ public class UserMgmtServerService {
    @Autowired
    private UserMgmtServerValidService serverValidService;
 
+   @Autowired
+   private UserMgmtServerModificationHandler modificationHandler;
+
    public void add(UserMgmtServer userMgtServer, boolean testOnly, boolean forceTrustCert) {
       serverValidService.validateServerInfo(userMgtServer, forceTrustCert);
 
       if (!testOnly) {
-         String encryptedPassword = null;
-         try {
-            encryptedPassword = EncryptionGuard.encode(userMgtServer.getPassword());
-         } catch (EncryptionException | GeneralSecurityException | UnsupportedEncodingException e) {
-            throw new UserMgmtPersistException("USER_MGMT_SERVER.PASSWORD_ENCRYPT_FAIL", e);
-         }
-         userMgtServer.setPassword(encryptedPassword);
-
          serverEao.persist(userMgtServer);
       }
    }
 
    public UserMgmtServer getByName(String name, boolean safely) {
-      UserMgmtServer userMgmtServer = serverEao.findByName(name);
-
-      if(!safely) {
-         try {
-            if (userMgmtServer != null) {
-               userMgmtServer.setPassword(EncryptionGuard.decode(userMgmtServer.getPassword()));
-            }
-         } catch (EncryptionException | GeneralSecurityException | UnsupportedEncodingException e) {
-            throw new UserMgmtPersistException("USER_MGMT_SERVER.PASSWORD_DECRYPT_FAIL", e);
-         }
-      }
+      UserMgmtServer userMgmtServer = serverEao.findByName(name, safely);
 
       return userMgmtServer;
    }
 
    public void deleteByName(String name) {
       serverEao.delete(name);
+   }
+
+   public void modify(UserMgmtServer userMgtServer, boolean testOnly, boolean forceTrustCert) {
+      serverEao.checkServerChanged(userMgtServer);
+
+      serverValidService.validateServerInfo(userMgtServer, forceTrustCert);
+
+      if (!testOnly) {
+         serverEao.modify(userMgtServer);
+
+         modificationHandler.onModification(userMgtServer);
+      }
    }
 }

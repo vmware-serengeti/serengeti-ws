@@ -17,6 +17,9 @@ package com.vmware.bdd.apitypes;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.vmware.bdd.validation.DnFormat;
 import com.vmware.bdd.validation.LdapUrlFormat;
 
@@ -71,7 +74,6 @@ public class UserMgmtServer {
    }
 
    /**
-    *
     * @param name
     * @param type
     * @param baseGroupDn
@@ -164,5 +166,44 @@ public class UserMgmtServer {
 
    public void setMgmtVMUserGroupDn(String mgmtVMUserGroupDn) {
       this.mgmtVMUserGroupDn = mgmtVMUserGroupDn;
+   }
+
+
+   @Override
+   public int hashCode() {
+      HashCodeBuilder hashCodeBuilder = new HashCodeBuilder();
+      hashCodeBuilder.append(name)
+            .append(type)
+            .append(baseGroupDn)
+            .append(baseUserDn)
+            .append(primaryUrl)
+            .append(secondaryUrl)
+            .append(userName)
+            .append(password)
+            .append(mgmtVMUserGroupDn);
+
+      return hashCodeBuilder.hashCode();
+   }
+
+   @Override
+   public boolean equals(Object obj) {
+      if (obj == null || !(obj instanceof UserMgmtServer)) {
+         return false;
+      }
+
+      UserMgmtServer another = (UserMgmtServer) obj;
+
+      EqualsBuilder equalsBuilder = new EqualsBuilder();
+      equalsBuilder.append(name, another.name)
+            .append(type, another.type)
+            .append(baseGroupDn, another.baseGroupDn)
+            .append(baseUserDn, another.baseUserDn)
+            .append(primaryUrl, another.primaryUrl)
+            .append(secondaryUrl, another.secondaryUrl)
+            .append(userName, another.userName)
+            .append(password, another.password)
+            .append(mgmtVMUserGroupDn, another.mgmtVMUserGroupDn);
+
+      return equalsBuilder.isEquals();
    }
 }
