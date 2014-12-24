@@ -53,6 +53,8 @@ create table network (
    dns2         varchar(255),
    total        bigint,
    free         bigint,
+   dns_type     varchar(255) not null,
+   is_generate_hostname boolean not null,
    primary key (id)
 );
 
