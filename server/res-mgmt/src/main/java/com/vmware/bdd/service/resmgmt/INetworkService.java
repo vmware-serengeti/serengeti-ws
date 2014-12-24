@@ -17,17 +17,19 @@ package com.vmware.bdd.service.resmgmt;
 import java.util.List;
 
 import com.vmware.bdd.apitypes.IpBlock;
+import com.vmware.bdd.apitypes.NetworkAdd;
+import com.vmware.bdd.apitypes.NetworkDnsType;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.entity.IpBlockEntity;
 import com.vmware.bdd.entity.NetworkEntity;
 
 public interface INetworkService {
 
-   NetworkEntity addDhcpNetwork(final String name, final String portGroup, final String dnsType, final boolean isGenerateHostname);
+   NetworkEntity addDhcpNetwork(final String name, final String portGroup, final NetworkDnsType dnsType, final boolean isGenerateHostname);
 
    NetworkEntity addIpPoolNetwork(final String name, final String portGroup,
          final String netmask, final String gateway, final String dns1,
-         final String dns2, final List<IpBlock> ipBlocks, final String dnsType,
+         final String dns2, final List<IpBlock> ipBlocks, final NetworkDnsType dnsType,
          final boolean isGenerateHostname);
 
    NetworkEntity getNetworkEntityByName(final String name);
@@ -40,7 +42,7 @@ public interface INetworkService {
 
    List<NetworkRead> getAllNetworks(final boolean withDetails);
 
-   void increaseIPs(String networkName, List<IpBlock> ipBlocks);
+   void updateNetwork(String networkName, NetworkAdd networkAdd);
 
    void removeNetwork(NetworkEntity network);
 

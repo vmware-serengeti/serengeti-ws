@@ -48,7 +48,7 @@ public class NetworkRestClient {
     * 
     * @param networkAdd
     */
-   public void increaseIPs(NetworkAdd networkAdd) {
+   public void update(NetworkAdd networkAdd) {
       String networkName = CommonUtil.encode(networkAdd.getName());
       final String path = Constants.REST_PATH_NETWORK + "/" + networkName;
       final HttpMethod httpverb = HttpMethod.PUT;

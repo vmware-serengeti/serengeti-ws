@@ -218,6 +218,8 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_DNS2 = "DNS2";
    public static final String FORMAT_TABLE_COLUMN_GATEWAY = "GATEWAY";
    public static final String FORMAT_TABLE_COLUMN_MASK = "MASK";
+   public static final String FORMAT_TABLE_COLUMN_DNS_TYPE = "DNS_TYPE";
+   public static final String FORMAT_TABLE_COLUMN_GENERATE_HOSTNAME = "GENERATE_HOSTNAME";
    public static final String FORMAT_TABLE_COLUMN_NODE = "NODE";
    public static final String FORMAT_TABLE_COLUMN_NODE_GROUP_NAME = "NODEGROUP";
    public static final String FORMAT_TABLE_COLUMN_CLUSTER_NAME = "CLUSTER";

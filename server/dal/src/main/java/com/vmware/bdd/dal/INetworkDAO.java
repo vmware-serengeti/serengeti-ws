@@ -16,6 +16,7 @@ package com.vmware.bdd.dal;
 
 import java.util.List;
 
+import com.vmware.bdd.apitypes.NetworkDnsType;
 import com.vmware.bdd.entity.IpBlockEntity;
 import com.vmware.bdd.entity.NetworkEntity;
 
@@ -57,4 +58,8 @@ public interface INetworkDAO extends IBaseDAO<NetworkEntity> {
    void free(NetworkEntity entity, long clusterId, List<IpBlockEntity> ipBlocks);
 
    void free(NetworkEntity entity, long clusterId);
+
+   void setDnsType(NetworkEntity entity, NetworkDnsType dnsType);
+
+   void setIsGenerateHostname(NetworkEntity entity, Boolean isGenerateHostname);
 }

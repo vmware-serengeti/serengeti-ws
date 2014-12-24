@@ -31,11 +31,14 @@ import javax.persistence.Table;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Cascade;
+
+import com.vmware.bdd.apitypes.NetworkDnsType;
 import com.vmware.bdd.dal.impl.IpBlockDAO.EqualBlockTypePredicate;
 import com.vmware.bdd.exception.NetworkException;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.IpAddressUtil;
+
 import org.hibernate.annotations.CascadeType;
 
 @Entity
@@ -95,17 +98,18 @@ public class NetworkEntity extends EntityBase implements Comparable<NetworkEntit
    @Column(name = "free")
    private Long free;
 
-   @Column(name = "dns_type")
-   private String dnsType;
+   @Enumerated(EnumType.STRING)
+   @Column(name = "dns_type", nullable = false)
+   private NetworkDnsType dnsType;
 
-   @Column(name = "is_generate_hostname")
+   @Column(name = "is_generate_hostname", nullable = false)
    private Boolean isGenerateHostname;
 
    public NetworkEntity() {
    }
 
    public NetworkEntity(String name, String portGroup,
-         AllocType allocType, String netmask, String gateway, String dns1, String dns2, String dnsType, boolean isGenerateHostname) {
+         AllocType allocType, String netmask, String gateway, String dns1, String dns2, NetworkDnsType dnsType, Boolean isGenerateHostname) {
       this.name = name;
       this.portGroup = portGroup;
       this.ipBlocks = new ArrayList<IpBlockEntity>();
@@ -307,5 +311,20 @@ public class NetworkEntity extends EntityBase implements Comparable<NetworkEntit
       return this.total - this.free;
    }
 
+   public NetworkDnsType getDnsType() {
+      return dnsType;
+   }
+
+   public void setDnsType(NetworkDnsType dnsType) {
+      this.dnsType = dnsType;
+   }
+
+   public Boolean getIsGenerateHostname() {
+      return isGenerateHostname;
+   }
+
+   public void setIsGenerateHostname(Boolean isGenerateHostname) {
+      this.isGenerateHostname = isGenerateHostname;
+   }
 
 }

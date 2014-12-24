@@ -52,6 +52,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.configuration.ConfigurationUtils;
 import org.apache.log4j.Logger;
 
+import com.vmware.bdd.apitypes.NetworkDnsType;
 import com.vmware.bdd.exception.BddException;
 
 public class CommonUtil {
@@ -525,8 +526,8 @@ public class CommonUtil {
      return null;
   }
 
-  public static boolean validateDnsType(String dnsType){
-     if(Constants.DNS_TYPE_NORMAL.equals(dnsType) || Constants.DNS_TYPE_DYNAMIC.equals(dnsType) || Constants.DNS_TYPE_OTHERS.equals(dnsType)) {
+  public static boolean validateDnsType(NetworkDnsType dnsType){
+     if(NetworkDnsType.isDynamic(dnsType) || NetworkDnsType.isNormal(dnsType) || NetworkDnsType.isOthers(dnsType)) {
         return true;
      } else {
         return false;

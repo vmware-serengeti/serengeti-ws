@@ -14,8 +14,11 @@
  ***************************************************************************/
 package com.vmware.bdd.exception;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.vmware.bdd.apitypes.NetworkDnsType;
 
 import java.util.Locale;
 
@@ -209,8 +212,12 @@ public class BddException extends RuntimeException {
       return new BddException(null, "CLUSTER", "EXTRA_PACKAGES_NOT_FOUND", extraPackages);
    }
 
-   public static BddException INVALID_DNS_TYPE(String dnsType) {
-      return new BddException(null, "NETWORK", "INVALID_DNS_TYPE", dnsType);
+   public static BddException INVALID_DNS_TYPE(NetworkDnsType dnsType) {
+      return new BddException(null, "NETWORK", "INVALID_DNS_TYPE", dnsType.toString());
+   }
+
+   public static BddException INVALID_OPTIONS_WHEN_UPDATE_NETWORK(String[] options) {
+      return new BddException(null, "NETWORK", "INVALID_OPTIONS", StringUtils.join(options, ", "));
    }
 
 }

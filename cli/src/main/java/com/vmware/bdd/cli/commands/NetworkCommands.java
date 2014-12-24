@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
 import com.vmware.bdd.apitypes.IpAllocEntryRead;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
+import com.vmware.bdd.apitypes.NetworkDnsType;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.NetworkRestClient;
@@ -99,8 +100,8 @@ public class NetworkCommands implements CommandMarker {
          @CliOption(key = { "ip" }, mandatory = false, help = "The IP address") final String ip,
          @CliOption(key = { "gateway" }, mandatory = false, help = "The gateway IP") final String gateway,
          @CliOption(key = { "mask" }, mandatory = false, help = "The subnet mask") final String mask,
-         @CliOption(key = { "dnsType" }, mandatory = false, specifiedDefaultValue = "Normal", unspecifiedDefaultValue = "Normal", help = "The type of DNS server: Normal, Dynamic or Others") final String dnsType,
-         @CliOption(key = { "generateHostname" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Generate hostname for each VMs. This option only applies to normal DNS.") final boolean generateHostname) {
+         @CliOption(key = { "dnsType" }, mandatory = false, specifiedDefaultValue = "NORMAL", unspecifiedDefaultValue = "NORMAL", help = "The type of DNS server: NORMAL, DYNAMIC or OTHERS") final String dnsType,
+         @CliOption(key = { "generateHostname" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Generate hostname for each VMs. This option only applies to normal DNS.") final Boolean generateHostname) {
 
       NetworkType operType = null;
       if (!CommandsUtils.isBlank(ip) && dhcp) {
@@ -120,8 +121,14 @@ public class NetworkCommands implements CommandMarker {
          return;
       }
 
-      addNetwork(operType, name, portGroup, ip, dhcp, dns, sedDNS, gateway,
-               mask, dnsType, generateHostname);
+      try {
+         addNetwork(operType, name, portGroup, ip, dhcp, dns, sedDNS, gateway,
+               mask, NetworkDnsType.valueOf(dnsType.toUpperCase()), generateHostname);
+      } catch (IllegalArgumentException ex) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK, name,
+               Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.INVALID_VALUE + " " + "dnsType=" + dnsType);
+      }
    }
 
    /**
@@ -183,17 +190,32 @@ public class NetworkCommands implements CommandMarker {
    @CliCommand(value = "network modify", help = "Modify a network from Serengeti by name")
    public void modifyNetwork(
          @CliOption(key = { "name" }, mandatory = true, help = "Customize the network's name") final String name,
-         @CliOption(key = { "addIP" }, mandatory = true, help = "The ip information") final String ip) {
-      if (!validateIP(ip, Constants.OUTPUT_OP_MODIFY)) {
-         return;
-      }
+         @CliOption(key = { "addIP" }, mandatory = false, help = "The ip information") final String ip,
+         @CliOption(key = { "dnsType" }, mandatory = false, specifiedDefaultValue = "NORMAL", help = "The type of DNS server: NORMAL, DYNAMIC or OTHERS") final String dnsType,
+         @CliOption(key = { "generateHostname" }, mandatory = false, specifiedDefaultValue = "true", help = "Generate hostname for each VMs. This option only applies to normal DNS.") final Boolean generateHostname) {
+
       NetworkAdd networkAdd = new NetworkAdd();
       networkAdd.setName(name);
       try {
-         networkAdd.setIpBlocks(transferIpInfo(ip));
-         networkRestClient.increaseIPs(networkAdd);
+         if (ip != null) {
+            if (!validateIP(ip, Constants.OUTPUT_OP_MODIFY)) {
+               return;
+            }
+            networkAdd.setIpBlocks(transferIpInfo(ip));
+         }
+         if (dnsType != null) {
+            networkAdd.setDnsType(NetworkDnsType.valueOf(dnsType.toUpperCase()));
+         }
+         if (generateHostname != null) {
+            networkAdd.setIsGenerateHostname(generateHostname);
+         }
+         networkRestClient.update(networkAdd);
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NETWORK, name,
                Constants.OUTPUT_OP_RESULT_MODIFY);
+      } catch (IllegalArgumentException ex) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK, name,
+               Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.INVALID_VALUE + " " + "dnsType=" + dnsType);
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK, name,
                Constants.OUTPUT_OP_MODIFY,
@@ -204,7 +226,7 @@ public class NetworkCommands implements CommandMarker {
    private void addNetwork(NetworkType operType, final String name,
          final String portGroup, final String ip, final boolean dhcp,
          final String dns, final String sedDNS, final String gateway,
-         final String mask, final String dnsType, final boolean generateHostname) {
+         final String mask, final NetworkDnsType dnsType, final Boolean generateHostname) {
 
       switch (operType) {
       case IP:
@@ -224,13 +246,13 @@ public class NetworkCommands implements CommandMarker {
    }
 
    private void addNetworkByDHCPModel(NetworkType operType, final String name,
-         final String portGroup, final boolean dhcp, final String dnsType, final boolean generateHostname) {
+         final String portGroup, final boolean dhcp, final NetworkDnsType dnsType, final Boolean generateHostname) {
       NetworkAdd networkAdd = new NetworkAdd();
       networkAdd.setName(name);
       networkAdd.setPortGroup(portGroup);
       networkAdd.setDhcp(true);
       networkAdd.setDnsType(dnsType);
-      networkAdd.setGenerateHostname(generateHostname);
+      networkAdd.setIsGenerateHostname(generateHostname);
 
       //rest invocation
       try {
@@ -247,7 +269,7 @@ public class NetworkCommands implements CommandMarker {
 
    private void addNetworkByIPModel(NetworkType operType, final String name,
          final String portGroup, final String ip, final String dns,
-         final String sedDNS, final String gateway, final String mask, final String dnsType, final boolean generateHostname)
+         final String sedDNS, final String gateway, final String mask, final NetworkDnsType dnsType, final Boolean generateHostname)
          throws UnknownHostException {
 
       // validate the network add command option.
@@ -262,7 +284,7 @@ public class NetworkCommands implements CommandMarker {
          networkAdd.setGateway(gateway);
          networkAdd.setNetmask(mask);
          networkAdd.setDnsType(dnsType);
-         networkAdd.setGenerateHostname(generateHostname);
+         networkAdd.setIsGenerateHostname(generateHostname);
 
          //rest invocation
          try {
@@ -456,6 +478,10 @@ public class NetworkCommands implements CommandMarker {
                Arrays.asList("getGateway"));
          networkIpColumnNamesWithGetMethodNames.put(
                Constants.FORMAT_TABLE_COLUMN_MASK, Arrays.asList("getNetmask"));
+         networkIpColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_DNS_TYPE, Arrays.asList("getDnsType"));
+         networkIpColumnNamesWithGetMethodNames.put(
+               Constants.FORMAT_TABLE_COLUMN_GENERATE_HOSTNAME, Arrays.asList("getIsGenerateHostname"));
          try {
             if (detail) {
                LinkedHashMap<String, List<String>> networkDhcpColumnNamesWithGetMethodNames =
@@ -469,6 +495,10 @@ public class NetworkCommands implements CommandMarker {
                networkDhcpColumnNamesWithGetMethodNames.put(
                      Constants.FORMAT_TABLE_COLUMN_TYPE,
                      Arrays.asList("findDhcpOrIp"));
+               networkDhcpColumnNamesWithGetMethodNames.put(
+                     Constants.FORMAT_TABLE_COLUMN_DNS_TYPE, Arrays.asList("getDnsType"));
+               networkDhcpColumnNamesWithGetMethodNames.put(
+                     Constants.FORMAT_TABLE_COLUMN_GENERATE_HOSTNAME, Arrays.asList("getIsGenerateHostname"));
                for (NetworkRead network : networks) {
                   if (network.isDhcp())
                      CommandsUtils.printInTableFormat(

@@ -56,11 +56,11 @@ public class NetworkAdd {
 
    @Expose
    @SerializedName("dns_type")
-   private String dnsType;
+   private NetworkDnsType dnsType;
 
    @Expose
-   @SerializedName("generate_hostname")
-   private boolean generateHostname;
+   @SerializedName("is_generate_hostname")
+   private Boolean isGenerateHostname;
 
    @RestRequired
    public String getName() {
@@ -171,20 +171,20 @@ public class NetworkAdd {
       this.netmask = netmask;
    }
 
-   public String getDnsType() {
+   public NetworkDnsType getDnsType() {
       return dnsType;
    }
 
-   public void setDnsType(String dnsType) {
+   public void setDnsType(NetworkDnsType dnsType) {
       this.dnsType = dnsType;
    }
 
-   public boolean isGenerateHostname() {
-      return generateHostname;
+   public Boolean getIsGenerateHostname() {
+      return isGenerateHostname;
    }
 
-   public void setGenerateHostname(boolean generateHostname) {
-      this.generateHostname = generateHostname;
+   public void setIsGenerateHostname(Boolean isGenerateHostname) {
+      this.isGenerateHostname = isGenerateHostname;
    }
 
    @Override
@@ -200,7 +200,7 @@ public class NetworkAdd {
             .append("gateway:").append(this.gateway).append(",")
             .append("netmask:").append(this.netmask).append(",")
             .append("dnsType:").append(this.dnsType).append(",")
-            .append("isGenerateHostname:").append(this.isGenerateHostname());
+            .append("isGenerateHostname:").append(this.isGenerateHostname);
       return sb.toString();
    }
 

@@ -22,12 +22,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-
 import static org.testng.AssertJUnit.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.testng.annotations.Test;
 
+import org.testng.annotations.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -36,6 +35,7 @@ import org.springframework.test.context.ContextConfiguration;
 import com.vmware.bdd.apitypes.BddErrorMessage;
 import com.vmware.bdd.apitypes.IpAllocEntryRead;
 import com.vmware.bdd.apitypes.IpBlock;
+import com.vmware.bdd.apitypes.NetworkDnsType;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.CookieCache;
@@ -141,24 +141,24 @@ public class NetworkCommandsTest extends MockRestServer {
             HttpStatus.NO_CONTENT, "");
       networkCommands.addNetwork("name", "portGroup", false, "192.168.0.12",
             "192.168.0.13", "192.168.0.1,192.167.0.4-100", "192.168.1.1",
-            "255.255.255.0", null, false);
+            "255.255.255.0", NetworkDnsType.NORMAL.toString(), false);
       CookieCache.clear();
    }
-   
+
    @Test
    public void testAddNetworkFailure() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("already exists");
       ObjectMapper mapper = new ObjectMapper();
-      
+
       buildReqRespWithoutReqBody(
             "https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.POST,
             HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
       
       networkCommands.addNetwork("name", "portGroup", false, "192.168.0.12",
             "192.168.0.13", "192.168.0.1,192.168.3.4-100", "192.168.7.1",
-            "255.255.255.0", null, false);
+            "255.255.255.0", NetworkDnsType.NORMAL.toString(), false);
       CookieCache.clear();
    }
 
@@ -168,7 +168,7 @@ public class NetworkCommandsTest extends MockRestServer {
       buildReqRespWithoutReqBody(
             "https://127.0.0.1:8443/serengeti/api/network/staticNetwork", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
-      networkCommands.modifyNetwork("staticNetwork","192.168.0.2-100");
+      networkCommands.modifyNetwork("staticNetwork","192.168.0.2-100", NetworkDnsType.NORMAL.toString(), false);
       CookieCache.clear();
    }
 
@@ -228,6 +228,8 @@ public class NetworkCommandsTest extends MockRestServer {
       networkRead1.setAssignedIpBlocks(assignedIpBlocks);
       networkRead1.setGateway("192.1.1.0");
       networkRead1.setNetmask("255.255.0.0");
+      networkRead1.setDnsType(NetworkDnsType.DYNAMIC);
+      networkRead1.setIsGenerateHostname(false);
       List<IpAllocEntryRead> ipAllocEntries1 =
             new ArrayList<IpAllocEntryRead>();
       IpAllocEntryRead ipAllocEntry1 = new IpAllocEntryRead();
@@ -248,6 +250,8 @@ public class NetworkCommandsTest extends MockRestServer {
       networkRead2.setName("name2");
       networkRead2.setPortGroup("portGroup2");
       networkRead2.setDhcp(true);
+      networkRead2.setDnsType(NetworkDnsType.NORMAL);
+      networkRead2.setIsGenerateHostname(true);
       List<IpAllocEntryRead> ipAllocEntries2 =
             new ArrayList<IpAllocEntryRead>();
       IpAllocEntryRead ipAllocEntry3 = new IpAllocEntryRead();

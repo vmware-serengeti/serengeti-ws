@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vmware.bdd.apitypes.NetworkDnsType;
 import com.vmware.bdd.dal.IIpBlockDAO;
 import com.vmware.bdd.dal.INetworkDAO;
 import com.vmware.bdd.dal.impl.IpBlockDAO.EqualBlockTypePredicate;
@@ -360,5 +361,15 @@ public class NetworkDAO extends BaseDAO<NetworkEntity> implements INetworkDAO {
          this.free(entity, clusterId, IpBlockEntity.dup(toBeFreed));
          logger.info("free all request success: cluster " + clusterId);
       }
+   }
+
+   @Override
+   public void setDnsType(NetworkEntity entity, NetworkDnsType dnsType) {
+      entity.setDnsType(dnsType);
+   }
+
+   @Override
+   public void setIsGenerateHostname(NetworkEntity entity, Boolean isGenerateHostname) {
+      entity.setIsGenerateHostname(isGenerateHostname);
    }
 }

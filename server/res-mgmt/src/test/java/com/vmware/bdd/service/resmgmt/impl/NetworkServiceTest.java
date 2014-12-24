@@ -26,6 +26,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.IpBlock;
+import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.dal.IClusterDAO;
 import com.vmware.bdd.dal.INetworkDAO;
@@ -194,7 +195,9 @@ public class NetworkServiceTest {
             networkDao.addIpBlocks(network, network.getIpBlocks());
          }
       };
-      networkSvc.increaseIPs("staticNetwork", ipBlocks);
+      NetworkAdd networkAdd = new NetworkAdd();
+      networkAdd.setIpBlocks(ipBlocks);
+      networkSvc.updateNetwork("staticNetwork", networkAdd);
    }
 
    @Test(groups = { "res-mgmt" })

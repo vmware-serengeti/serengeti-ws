@@ -20,25 +20,25 @@ public enum NetworkDnsType {
    NORMAL,
    DYNAMIC;
 
-   public static boolean isOthers(String dnsType) {
+   public static boolean isOthers(NetworkDnsType dnsType) {
       boolean isOthers = false;
-      if (NetworkDnsType.valueOf("OTHERS").toString().equalsIgnoreCase(dnsType)) {
+      if (NetworkDnsType.OTHERS.equals(dnsType) ) {
          isOthers = true;
       }
       return isOthers;
    }
 
-   public static boolean isNormal(String dnsType) {
+   public static boolean isNormal(NetworkDnsType dnsType) {
       boolean isNormal = false;
-      if (NetworkDnsType.valueOf("NORMAL").toString().equalsIgnoreCase(dnsType)) {
+      if (NetworkDnsType.NORMAL.equals(dnsType)) {
          isNormal = true;
       }
       return isNormal;
    }
 
-   public static boolean isDynamic(String dnsType) {
+   public static boolean isDynamic(NetworkDnsType dnsType) {
       boolean isDynamic = false;
-      if (NetworkDnsType.valueOf("DYNAMIC").toString().equalsIgnoreCase(dnsType)) {
+      if (NetworkDnsType.DYNAMIC.equals(dnsType)) {
          isDynamic = true;
       }
       return isDynamic;

@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vmware.bdd.apitypes.IpAllocEntryRead;
 import com.vmware.bdd.apitypes.IpBlock;
+import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetworkDnsType;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.dal.IClusterDAO;
@@ -110,7 +111,7 @@ public class NetworkService implements Serializable, INetworkService {
    @Override
    @Transactional
    public synchronized NetworkEntity addDhcpNetwork(final String name,
-         final String portGroup, final String dnsType, boolean isGenerateHostname) {
+         final String portGroup, final NetworkDnsType dnsType, boolean isGenerateHostname) {
       validateNetworkName(name);
       if (!resService.isNetworkExistInVc(portGroup)) {
          throw VcProviderException.NETWORK_NOT_FOUND(portGroup);
@@ -144,7 +145,7 @@ public class NetworkService implements Serializable, INetworkService {
    public synchronized NetworkEntity addIpPoolNetwork(final String name,
          final String portGroup, final String netmask, final String gateway,
          final String dns1, final String dns2, final List<IpBlock> ipBlocks,
-         final String dnsType, boolean isGenerateHostname) {
+         final NetworkDnsType dnsType, boolean isGenerateHostname) {
       try {
          validateNetworkName(name);
          if (!resService.isNetworkExistInVc(portGroup)) {
@@ -283,28 +284,46 @@ public class NetworkService implements Serializable, INetworkService {
     */
    @Override
    @Transactional
-   public synchronized void increaseIPs(String networkName,
-         List<IpBlock> ipBlocks) {
+   public synchronized void updateNetwork(String networkName, NetworkAdd networkAdd) {
       NetworkEntity network = getNetworkEntityByName(networkName);
       if (network == null) {
          throw NetworkException.NOT_FOUND("Network", networkName);
       }
-      if (network.getAllocType().equals(AllocType.DHCP)) {
-         throw NetworkException.IP_CONFIG_NOT_USED_FOR_DHCP();
+
+      // Add IP block when the type is static
+      List<IpBlock> ipBlocks = networkAdd.getIpBlocks();
+      if (ipBlocks != null) {
+         if (network.getAllocType().equals(AllocType.DHCP)) {
+            throw NetworkException.IP_CONFIG_NOT_USED_FOR_DHCP();
+         }
+         long netmask = IpAddressUtil.getAddressAsLong(network.getNetmask());
+         IpAddressUtil.verifyIPBlocks(ipBlocks, netmask);
+         List<IpBlockEntity> blocks =
+               new ArrayList<IpBlockEntity>(ipBlocks.size());
+         for (IpBlock ib : ipBlocks) {
+            IpBlockEntity blk =
+                  new IpBlockEntity(network, IpBlockEntity.FREE_BLOCK_OWNER_ID,
+                        BlockType.FREE, IpAddressUtil.getAddressAsLong(ib
+                              .getBeginIp()), IpAddressUtil.getAddressAsLong(ib
+                                    .getEndIp()));
+            blocks.add(blk);
+         }
+         networkDao.addIpBlocks(network, blocks);
       }
-      long netmask = IpAddressUtil.getAddressAsLong(network.getNetmask());
-      IpAddressUtil.verifyIPBlocks(ipBlocks, netmask);
-      List<IpBlockEntity> blocks =
-            new ArrayList<IpBlockEntity>(ipBlocks.size());
-      for (IpBlock ib : ipBlocks) {
-         IpBlockEntity blk =
-               new IpBlockEntity(network, IpBlockEntity.FREE_BLOCK_OWNER_ID,
-                     BlockType.FREE, IpAddressUtil.getAddressAsLong(ib
-                           .getBeginIp()), IpAddressUtil.getAddressAsLong(ib
-                           .getEndIp()));
-         blocks.add(blk);
+
+      NetworkDnsType dnsType = networkAdd.getDnsType();
+      if (dnsType != null) {
+         networkDao.setDnsType(network, dnsType);
+         if (NetworkDnsType.isOthers(dnsType) || NetworkDnsType.isDynamic(dnsType)) {
+            networkAdd.setIsGenerateHostname(true);
+         }
+
+         Boolean isGenerateHostname = networkAdd.getIsGenerateHostname();
+         if (isGenerateHostname != null) {
+            networkDao.setIsGenerateHostname(network, isGenerateHostname);
+         }
       }
-      networkDao.addIpBlocks(network, blocks);
+
       network.validate();
    }
 
@@ -440,6 +459,8 @@ public class NetworkService implements Serializable, INetworkService {
       NetworkRead nr = new NetworkRead();
       nr.setName(net.getName());
       nr.setPortGroup(net.getPortGroup());
+      nr.setDnsType(net.getDnsType());
+      nr.setIsGenerateHostname(net.getIsGenerateHostname());
       if (net.getAllocType() == AllocType.IP_POOL) {
          nr.setDhcp(false);
          nr.setDns1(net.getDns1());

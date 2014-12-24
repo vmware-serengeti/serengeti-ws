@@ -798,7 +798,7 @@ public class RestResource {
       }
 
       if (na.getIsDhcp()) {
-         networkSvc.addDhcpNetwork(na.getName(), na.getPortGroup(), na.getDnsType(), na.isGenerateHostname());
+         networkSvc.addDhcpNetwork(na.getName(), na.getPortGroup(), na.getDnsType(), na.getIsGenerateHostname());
       } else {
          if (!IpAddressUtil.isValidNetmask(na.getNetmask())) {
             throw BddException.INVALID_PARAMETER("netmask", na.getNetmask());
@@ -817,7 +817,7 @@ public class RestResource {
          IpAddressUtil.verifyIPBlocks(na.getIpBlocks(), netmask);
          networkSvc.addIpPoolNetwork(na.getName(), na.getPortGroup(),
                na.getNetmask(), na.getGateway(), na.getDns1(), na.getDns2(),
-               na.getIpBlocks(), na.getDnsType(), na.isGenerateHostname());
+               na.getIpBlocks(), na.getDnsType(), na.getIsGenerateHostname());
       }
    }
 
@@ -829,8 +829,8 @@ public class RestResource {
     */
    @RequestMapping(value = "/network/{networkName}", method = RequestMethod.PUT, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
-   public void increaseIPs(@PathVariable("networkName") String networkName,
-         @RequestBody NetworkAdd network, HttpServletRequest request,
+   public void updateNetwork(@PathVariable("networkName") String networkName,
+         @RequestBody NetworkAdd networkAdd, HttpServletRequest request,
          HttpServletResponse response) {
       verifyInitialized();
       networkName = CommonUtil.decode(networkName);
@@ -838,7 +838,13 @@ public class RestResource {
             || !CommonUtil.validateResourceName(networkName)) {
          throw BddException.INVALID_PARAMETER("network name", networkName);
       }
-      networkSvc.increaseIPs(networkName, network.getIpBlocks());
+      if (networkAdd.getIpBlocks() == null && networkAdd.getDnsType() == null) {
+         throw BddException.INVALID_OPTIONS_WHEN_UPDATE_NETWORK(new String[]{"addIP", "dnsType"});
+      }
+      if (networkAdd.getDnsType() != null && !CommonUtil.validateDnsType(networkAdd.getDnsType())) {
+         throw BddException.INVALID_DNS_TYPE(networkAdd.getDnsType());
+      }
+      networkSvc.updateNetwork(networkName, networkAdd);
    }
 
    /**

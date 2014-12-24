@@ -45,6 +45,9 @@ public class NetworkRead {
 
    private String netmask;
 
+   private NetworkDnsType dnsType;
+
+   private Boolean isGenerateHostname;
    /**
     * valid when "show details" option is on
     */
@@ -140,4 +143,21 @@ public class NetworkRead {
    public String findDhcpOrIp(){
       return isDhcp() ? "dhcp" : "static ip";
    }
+
+   public NetworkDnsType getDnsType() {
+      return dnsType;
+   }
+
+   public void setDnsType(NetworkDnsType dnsType) {
+      this.dnsType = dnsType;
+   }
+
+   public Boolean getIsGenerateHostname() {
+      return isGenerateHostname;
+   }
+
+   public void setIsGenerateHostname(Boolean isGenerateHostname) {
+      this.isGenerateHostname = isGenerateHostname;
+   }
+
 }
