@@ -36,17 +36,9 @@ public class MgmtVMCfgClient {
    @Autowired
    private RestClient restClient;
 
-   public void enableLdapOnMgmtVM() {
+   public void config(String mode) {
       Map<String, Object> mgmtVMcfg = new HashMap<>();
-      mgmtVMcfg.put(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE, UserMgmtMode.MIXED);
-      mgmtVMcfg.put(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME, UserMgmtConstants.DEFAULT_USERMGMT_SERVER_NAME);
-
-      restClient.update(mgmtVMcfg, mgmtVMCfgURL, HttpMethod.PUT);
-   }
-
-   public void disableLocalAccountOnMgmtVM() {
-      Map<String, Object> mgmtVMcfg = new HashMap<>();
-      mgmtVMcfg.put(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE, UserMgmtMode.LDAP);
+      mgmtVMcfg.put(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE, mode);
       mgmtVMcfg.put(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_SERVERNAME, UserMgmtConstants.DEFAULT_USERMGMT_SERVER_NAME);
 
       restClient.update(mgmtVMcfg, mgmtVMCfgURL, HttpMethod.PUT);

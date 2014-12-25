@@ -30,17 +30,24 @@ import com.vmware.bdd.usermgmt.UserMgmtMode;
 import com.vmware.bdd.utils.CommonUtil;
 
 @Component
-public class UserMgmtRestClient {
+public class UserMgmtServerRestClient {
    private final static String USERMGMTSERVER_URL = "vmconfig/usermgmtservers";
 
    @Autowired
    private RestClient restClient;
 
    public void addUserMgmtServer(UserMgmtServer userMgmtServer, boolean forceTrustCert) {
-      StringBuilder queryBuilder = new StringBuilder(USERMGMTSERVER_URL).append("?");
-      queryBuilder.append("forceTrustCert").append('=').append(forceTrustCert);
+      StringBuilder queryBuilder = new StringBuilder(USERMGMTSERVER_URL)
+            .append("?").append("forceTrustCert").append('=').append(forceTrustCert);
 
       restClient.createObject(userMgmtServer, queryBuilder.toString(), HttpMethod.POST);
+   }
+
+   public void modifyUserMgmtServer(UserMgmtServer userMgmtServer, boolean forceTrustCert) {
+      StringBuilder queryBuilder = new StringBuilder(USERMGMTSERVER_URL)
+            .append("/").append(userMgmtServer.getName())
+            .append("?").append("forceTrustCert").append('=').append(forceTrustCert);
+      restClient.update(userMgmtServer, queryBuilder.toString(), HttpMethod.PUT);
    }
 
    public UserMgmtServer get(String name) {
@@ -50,4 +57,5 @@ public class UserMgmtRestClient {
    public void removeUserMgmtServer(String name) {
       restClient.deleteObject(name, USERMGMTSERVER_URL, HttpMethod.DELETE);
    }
+
 }

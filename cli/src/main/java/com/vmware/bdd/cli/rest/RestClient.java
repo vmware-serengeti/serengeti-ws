@@ -528,6 +528,14 @@ public class RestClient {
             throw new Exception(Constants.HTTP_VERB_ERROR);
          }
       } catch (Exception e) {
+         if(e instanceof CliRestException) {
+            throw (CliRestException)e;
+         }
+
+         if(e instanceof BddException) {
+            throw (BddException)e;
+         }
+
          throw new CliRestException(CommandsUtils.getExceptionMessage(e));
       }
    }
@@ -547,6 +555,14 @@ public class RestClient {
             throw new Exception(Constants.HTTP_VERB_ERROR);
          }
       } catch (Exception e) {
+         if(e instanceof CliRestException) {
+            throw (CliRestException)e;
+         }
+
+         if(e instanceof BddException) {
+            throw (BddException)e;
+         }
+
          throw new CliRestException(CommandsUtils.getExceptionMessage(e));
       }
    }
@@ -575,6 +591,14 @@ public class RestClient {
             throw new Exception(Constants.HTTP_VERB_ERROR);
          }
       } catch (Exception e) {
+         if(e instanceof CliRestException) {
+            throw (CliRestException)e;
+         }
+
+         if(e instanceof BddException) {
+            throw (BddException)e;
+         }
+
          throw new CliRestException(CommandsUtils.getExceptionMessage(e));
       }
    }
@@ -638,6 +662,14 @@ public class RestClient {
          }
 
       } catch (Exception e) {
+         if(e instanceof CliRestException) {
+            throw (CliRestException)e;
+         }
+
+         if(e instanceof BddException) {
+            throw (BddException)e;
+         }
+
          throw new CliRestException(CommandsUtils.getExceptionMessage(e));
       }
    }
@@ -746,6 +778,14 @@ public class RestClient {
          }
 
       } catch (Exception e) {
+         if(e instanceof CliRestException) {
+            throw (CliRestException)e;
+         }
+
+         if(e instanceof BddException) {
+            throw (BddException)e;
+         }
+
          throw new CliRestException(CommandsUtils.getExceptionMessage(e));
       }
    }

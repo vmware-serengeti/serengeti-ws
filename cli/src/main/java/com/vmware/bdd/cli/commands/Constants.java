@@ -83,7 +83,7 @@ public class Constants {
    public static final String OUTPUT_OBJECT_CLUSTER = "cluster";
    public static final String OUTPUT_OBJECT_NODES_IN_CLUSTER = "Nodes in cluster";
    public static final String OUTPUT_OBJECT_DATASTORE = "datastore";
-   public static final String OUTPUT_OBJECT_USERMGMT = "usermgmt";
+   public static final String OUTPUT_OBJECT_USERMGMT = "AD/LDAP server";
    public static final String OUTPUT_OBJECT_DISTRO = "distro";
    public static final String OUTPUT_OBJECT_NETWORK = "network";
    public static final String OUTPUT_OBJECT_APPMANAGER = "appmanager";
@@ -277,8 +277,10 @@ public class Constants {
 
    public static final String LOGIN_USERNAME = "username";
    public static final String LOGIN_PASSWORD = "password";
-   public static final String OUTPUT_OP_ENABLE_LDAP = "enable AD/LDAP";
-   public static final String OUTPUT_OP_RESULT_HALT = "Halted";
+   public static final String OUTPUT_OP_RESULT_SUCCEEDED = "succeeded";
+   public static final String OUTPUT_OP_RESULT_WARN = "warning";
+   public static final String OUTPUT_OBJECT_MGMTVMCFG = "Management VM configuration";
+   public static final String OUTPUT_OP_GET = "get";
 
    enum YES_NO {
       yes, no
