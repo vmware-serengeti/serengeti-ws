@@ -36,6 +36,7 @@ import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.aop.annotation.RetryTransaction;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
+import com.vmware.bdd.apitypes.NetworkDnsType;
 import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.exception.VcProviderException;
@@ -188,7 +189,7 @@ public class ResourceInitializerService implements IResourceInitializerService {
       logger.info("added datastore. " + dsNames);
 
       if (networkName != null) {
-         networkSvc.addDhcpNetwork(DEFAULT_NETWORK, networkName, null, false);
+         networkSvc.addDhcpNetwork(DEFAULT_NETWORK, networkName, NetworkDnsType.NORMAL, false);
          logger.info("added network:" + networkName);
       }
    }
