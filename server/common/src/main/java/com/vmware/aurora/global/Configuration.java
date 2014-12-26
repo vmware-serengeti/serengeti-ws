@@ -26,6 +26,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 
 import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.ConversionException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
 
@@ -135,7 +136,13 @@ public class Configuration {
     * @return The property value.
     */
    public static int getInt(String key, int defaultValue) {
-      return config.getInt(key, defaultValue);
+      try {
+         return config.getInt(key, defaultValue);
+      } catch (ConversionException ce) {
+         logger.error(key + " in serengeti.properties is not an integer!");
+      }
+
+      return defaultValue;
    }
 
    /**
@@ -161,7 +168,13 @@ public class Configuration {
     * @return The property value.
     */
    public static Boolean getBoolean(String key, Boolean defaultValue) {
-      return config.getBoolean(key, defaultValue);
+      try {
+         return config.getBoolean(key, defaultValue);
+      } catch (ConversionException ce) {
+         logger.error(key + " in serengeti.properties is not a boolean!");
+      }
+
+      return defaultValue;
    }
 
    /**
@@ -225,7 +238,13 @@ public class Configuration {
     * @return The property value.
     */
    public static Double getDouble(String key, Double defaultValue) {
-      return config.getDouble(key, defaultValue);
+      try {
+         return config.getDouble(key, defaultValue);
+      } catch (ConversionException ce) {
+         logger.error(key + " in serengeti.properties is not a double!");
+      }
+
+      return defaultValue;
    }
 
    /**
@@ -251,7 +270,13 @@ public class Configuration {
     * @return The property value.
     */
    public static long getLong(String key, long defaultValue) {
-      return config.getLong(key, defaultValue);
+      try {
+         return config.getLong(key, defaultValue);
+      } catch (ConversionException ce) {
+         logger.error(key + " in serengeti.properties is not a long!");
+      }
+
+      return defaultValue;
    }
 
    /**
