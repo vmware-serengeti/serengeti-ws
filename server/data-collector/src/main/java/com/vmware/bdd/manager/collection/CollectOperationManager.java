@@ -17,10 +17,17 @@ package com.vmware.bdd.manager.collection;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.service.collection.ITimelyCollectionService;
+import org.aspectj.lang.JoinPoint;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class CollectOperationManager {
    private static final Logger logger = Logger.getLogger(CollectOperationManager.class);
    ITimelyCollectionService timelyCollectionService;
+
+   //restCallId to joinPoint
+   private static Map<String, JoinPoint> restCallRawData = new HashMap<>();
 
    public ITimelyCollectionService getTimelyCollectionService() {
       return timelyCollectionService;
@@ -29,5 +36,9 @@ public class CollectOperationManager {
    public void setTimelyCollectionService(
          ITimelyCollectionService timelyCollectionService) {
       this.timelyCollectionService = timelyCollectionService;
+   }
+
+   public static void setRestCallRawData(String restCallId, JoinPoint joinPoint) {
+      restCallRawData.put(restCallId, joinPoint);
    }
 }

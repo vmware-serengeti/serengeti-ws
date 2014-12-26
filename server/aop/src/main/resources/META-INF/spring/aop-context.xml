@@ -11,7 +11,7 @@
 	<bean id="readLock" class="com.vmware.bdd.aop.lock.ClusterEntityConcurentWriteLockAdvice"></bean>
 	<bean id="writeLock" class="com.vmware.bdd.aop.lock.ClusterEntityExclusiveWriteLockAdvice"></bean>
 
-	<aop:config>
+    <aop:config>
 		<aop:pointcut id="rertryTransactionOperation"
 			expression="execution(* com.vmware.bdd.service..*.*(..)) and @annotation(com.vmware.bdd.aop.annotation.RetryTransaction)" />
 		<aop:aspect id="retryAspect" ref="retryTransaction">
@@ -19,14 +19,13 @@
 		</aop:aspect>
 	</aop:config>
 
-	<aop:config>
+    <aop:config>
 		<aop:pointcut id="logExceptionPointcut"
-			expression="execution(* com.vmware.bdd.service..*.*(..)) and not @annotation(com.vmware.bdd.aop.annotation.DisableExceptionLogging)" />			
+            expression="execution(* com.vmware.bdd.service..*.*(..)) and not @annotation(com.vmware.bdd.aop.annotation.DisableExceptionLogging)" />
 		<aop:aspect id="log" ref="loggingAspectBean">
 			<aop:after-throwing method="logException" throwing="t" pointcut-ref="logExceptionPointcut"/>
 		</aop:aspect>
 	</aop:config>
-
 	<aop:config>
 		<aop:pointcut id="readLockClusterEntityLock"
 			expression="execution(* com.vmware.bdd.manager..*.*(..)) and @annotation(com.vmware.bdd.aop.annotation.ClusterEntityConcurrentWriteLock)" />
