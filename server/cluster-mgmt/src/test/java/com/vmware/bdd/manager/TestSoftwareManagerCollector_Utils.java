@@ -23,7 +23,6 @@ import org.testng.annotations.Test;
 import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
-import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.utils.Constants;
 
 /**

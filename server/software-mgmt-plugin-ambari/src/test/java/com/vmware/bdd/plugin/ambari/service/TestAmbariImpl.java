@@ -35,6 +35,7 @@ import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
@@ -405,16 +406,28 @@ public class TestAmbariImpl {
       Assert.assertTrue(provider.onDeleteNodes(blueprint, nodesToDelete));
    }
 
-   @Test(groups = { "TestAmbariImpl" })
-   public void testValidateServerVersionFailed() {
-      String invalidVersion = "1.5.0";
+   private final static String[][] invalidServerVersion = new String[][] {
+         {"0.0.0"},
+         {"1.1.0"},
+         {"1.5.0"},
+         {"1.8.0"},
+         {"4.9.0"}
+   };
+
+   @DataProvider(name = "TestAmbariImpl.InvalidServerVersion")
+   public String[][] getInvalidServerVersion() {
+      return invalidServerVersion;
+   }
+
+   @Test( groups = { "TestAmbariImpl" }, dataProvider = "TestAmbariImpl.InvalidServerVersion")
+   public void testValidateServerVersionFailed(String invalidVersion) {
       AmbariImpl ambari = testValidateServerVersionHelper(invalidVersion);
       boolean exceptionExist = false;
       try {
          ambari.validateServerVersion();
       } catch (SoftwareManagerCollectorException e) {
          exceptionExist = true;
-         String errMsg = "The min supported version of software manager type " + ambari.getType()  + " is " + ambari.MIN_SUPPORTED_VERSION + " but got " + ambari.getVersion() + ".";
+         String errMsg = "The software manager type " + ambari.getType() + " version " + invalidVersion  + " is not supported yet.";
          Assert.assertEquals(e.getMessage(), errMsg);
       }
       Assert.assertTrue(exceptionExist);
@@ -429,7 +442,7 @@ public class TestAmbariImpl {
          ambari.validateServerVersion();
       } catch (SoftwareManagerCollectorException e) {
          exceptionExist = true;
-         String errMsg = "The min supported version of software manager type " + ambari.getType() + " is " + ambari.MIN_SUPPORTED_VERSION + " but got " + ambari.getVersion() + ".";
+         String errMsg = "The software manager type " + ambari.getType() + " version " + validVersion  + " is not supported yet.";
          Assert.assertEquals(e.getMessage(), errMsg);
       }
       Assert.assertTrue(!exceptionExist);

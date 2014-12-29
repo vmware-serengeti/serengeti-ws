@@ -47,6 +47,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.cloudera.api.ApiRootResource;
@@ -500,17 +501,26 @@ public class TestClouderaManagerImpl {
       return mockedProvider;
    }
 
-   @Test( groups = { "TestClouderaManagerImpl" } )
-   public void testValidateServerVersionFailed() {
-      String invalidVersion = "4.9.0";
+   private final static String[][] invalidServerVersion = new String[][] {
+         {"0.0.0"},
+         {"1.1.0"},
+         {"4.9.0"}
+   };
+
+   @DataProvider(name = "TestClouderaManagerImpl.InvalidServerVersion")
+   public String[][] getInvalidServerVersion() {
+      return invalidServerVersion;
+   }
+
+   @Test( groups = { "TestClouderaManagerImpl" }, dataProvider = "TestClouderaManagerImpl.InvalidServerVersion")
+   public void testValidateServerVersionFailed(String invalidVersion) {
       ClouderaManagerImpl mockedProvider = testValidateServerVersionHelper(invalidVersion);
       boolean exceptionExists = false;
       try {
          mockedProvider.validateServerVersion();
       } catch (SoftwareManagerCollectorException e) {
          exceptionExists = true;
-         String expectedErrMsg =  "The min supported version of software manager type " + mockedProvider.getType() +
-               " is " + mockedProvider.MIN_SUPPORTED_VERSION + " but got " + mockedProvider.getVersion() + ".";
+         String expectedErrMsg = "The software manager type " + mockedProvider.getType() + " version " + invalidVersion + " is not supported yet.";
          Assert.assertEquals(e.getMessage(), expectedErrMsg);
       }
       Assert.assertTrue(exceptionExists);
@@ -525,8 +535,7 @@ public class TestClouderaManagerImpl {
          mockedProvider.validateServerVersion();
       } catch (SoftwareManagerCollectorException e) {
          exceptionExists = true;
-         String expectedErrMsg =  "The min supported version of software manager type " + mockedProvider.getType() +
-               " is " + mockedProvider.MIN_SUPPORTED_VERSION + " but got " + mockedProvider.getVersion() + ".";
+         String expectedErrMsg = "The software manager type " + mockedProvider.getType() + " version " + validVersion + " is not supported yet.";
          Assert.assertEquals(e.getMessage(), expectedErrMsg);
       }
       Assert.assertFalse(exceptionExists);

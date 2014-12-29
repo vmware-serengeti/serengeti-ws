@@ -213,7 +213,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       logger.info("Min supported version of " + getType() + " is: " + MIN_SUPPORTED_VERSION);
       logger.info("Version of new software manager is: " + cmVersion);
       if (cmVersion.equals(UNKNOWN_VERSION) || cmVersionInfo.getMajorVersion() < minSupportedVersionInfo.getMajorVersion()) {
-         throw SoftwareManagerCollectorException.INVALID_VERSION(Constants.CDH_PLUGIN_NAME, MIN_SUPPORTED_VERSION, cmVersion);
+         throw SoftwareManagerCollectorException.INVALID_VERSION(Constants.CDH_PLUGIN_NAME, cmVersion);
       }
       return true;
    }

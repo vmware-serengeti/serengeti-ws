@@ -88,7 +88,9 @@ public class FakeClusterHostsResource implements HostsResource {
 
    @Override
    public Response deleteHostComponentsResource(String hostFQDN) {
-      return null;
+      //As this function is not our test point and we didn't check the response content,
+      // so just reuse the simple_request.json.
+      return BuildResponse.buildResponse("clusters/simple_request.json");
    }
 
    @Override
