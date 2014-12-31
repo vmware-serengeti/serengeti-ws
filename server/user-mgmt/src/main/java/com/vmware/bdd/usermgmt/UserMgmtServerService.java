@@ -64,9 +64,10 @@ public class UserMgmtServerService {
       serverValidService.validateServerInfo(userMgtServer, forceTrustCert);
 
       if (!testOnly) {
-         serverEao.modify(userMgtServer);
-
          modificationHandler.onModification(userMgtServer);
+
+         //password is encrypted here.
+         serverEao.modify(userMgtServer);
       }
    }
 }
