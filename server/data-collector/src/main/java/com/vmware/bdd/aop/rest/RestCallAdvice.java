@@ -19,6 +19,7 @@ import com.vmware.bdd.utils.CommonUtil;
 
 import org.apache.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
+import org.springframework.aop.aspectj.MethodInvocationProceedingJoinPoint;
 
 /**
  * Created by qjin on 12/23/14.
@@ -29,7 +30,7 @@ public class RestCallAdvice {
 
    public void afterRestCall(JoinPoint joinPoint) throws Throwable {
       String restCallId = CommonUtil.getUUID();
-      CollectOperationManager.setRestCallRawData(restCallId, joinPoint);
+      CollectOperationManager.setRestCallRawData(restCallId, (MethodInvocationProceedingJoinPoint)joinPoint);
       logger.info("save restCallId: " + restCallId + ",joinPoint " + joinPoint + " to CollectOperationjManager");
    }
 }

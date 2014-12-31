@@ -17,7 +17,8 @@ package com.vmware.bdd.apitypes;
 public enum DataObjectType {
    FOOTPRINT("bde.footprint"),
    ENVIRONMENTAL_INFORMATION("bde.environmental_information"),
-   COMMONREPORTS("bde.product_instance");
+   COMMONREPORTS("bde.product_instance"),
+   BDE_OPERATION("bde.operation");
 
    private String name;
 

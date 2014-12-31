@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.vmware.bdd.aop.annotation.RestCall;
+import com.vmware.bdd.manager.collection.CollectOperationManager;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -267,7 +268,7 @@ public class RestResource {
       int subLength = url.length() - pathInfo.length();
       url.setLength(subLength);
       url.append("/task/").append(Long.toString(taskId));
-      response.setHeader("Location", url.toString());
+      response.setHeader(Constants.RESPONSE_HEADER_LOCATION, url.toString());
    }
 
    /**
