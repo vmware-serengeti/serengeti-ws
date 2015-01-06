@@ -18,7 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +46,7 @@ import com.vmware.bdd.utils.CommonUtil;
 @Repository
 @Transactional(readOnly = true)
 public class ClusterDAO extends BaseDAO<ClusterEntity> implements IClusterDAO {
+   private final static Logger LOGGER = Logger.getLogger(ClusterDAO.class);
 
    @Override
    public ClusterEntity findByName(String name) {
@@ -134,6 +139,18 @@ public class ClusterDAO extends BaseDAO<ClusterEntity> implements IClusterDAO {
       ClusterEntity cluster = findByName(clusterName);
       AuAssert.check(cluster != null);
       cluster.setLastStatus(status);
+   }
+
+   @Override
+   public String findInfraConfig(String clusterName) {
+      Session session = getSessionFactory().getCurrentSession();
+
+      Criteria criteria = session.createCriteria(ClusterEntity.class);
+      criteria.add(Restrictions.eq("name", clusterName));
+
+      criteria.setProjection(Projections.property("infraConfig"));
+
+      return (String) criteria.uniqueResult();
    }
 
 }

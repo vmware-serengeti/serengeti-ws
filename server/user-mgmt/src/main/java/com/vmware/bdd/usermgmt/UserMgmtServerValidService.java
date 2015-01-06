@@ -100,6 +100,85 @@ public class UserMgmtServerValidService {
       }
    }
 
+   public void searchGroup(UserMgmtServer userMgmtServer, String[] groupNames) {
+      String[] ldapUrlElements = getLdapProtocol(userMgmtServer.getPrimaryUrl());
+
+      boolean isLdaps = "LDAPS".equalsIgnoreCase(ldapUrlElements[0]);
+
+//      String[] groupDns = new String[groupNames.length];
+//      for(int i = 0; i < groupNames.length; i ++) {
+//         groupDns[i] = "cn=" + groupNames[i] + "," + userMgmtServer.getBaseGroupDn();
+//      }
+
+      Hashtable<String, Object> env = new Hashtable<>();
+      env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+
+      // Specify LDAPS URL
+      env.put(Context.PROVIDER_URL, userMgmtServer.getPrimaryUrl());
+
+      // Authenticate as Simple username and password
+      env.put(Context.SECURITY_AUTHENTICATION, "simple");
+      env.put(Context.SECURITY_PRINCIPAL, userMgmtServer.getUserName());
+      env.put(Context.SECURITY_CREDENTIALS, userMgmtServer.getPassword());
+
+      if (isLdaps) {
+         //@TODO it's interesting to add a custom socket factory to set SO_TIMEOUT
+         SimpleSeverTrustTlsSocketFactory.init(ldapsTrustStoreConfig);
+         env.put("java.naming.ldap.factory.socket", "com.vmware.bdd.security.tls.SimpleSeverTrustTlsSocketFactory");
+      }
+
+      // env.put(Context.SECURITY_PROTOCOL, "ssl");
+
+      DirContext ctx = null;
+      ValidationErrors validationErrors = new ValidationErrors();
+      try {
+         // Create the initial context
+         ctx = new InitialDirContext(env);
+         NamingEnumeration<SearchResult> answer = null;
+         //validateServerInfo mgmt server default admin group
+         for(String groupName : groupNames) {
+            try {
+                  answer = ctx.search(
+                        userMgmtServer.getBaseGroupDn(),
+                        "(&(objectClass={0}) (cn={1}))",
+                        new Object[]{sssdLdapConstantMappings.get(userMgmtServer.getType(),
+                              SssdLdapConstantMappings.LDAP_GROUP_OBJECT_CLASS), groupName}, null);
+                  if (!answer.hasMoreElements()) {
+                     validationErrors.addError(groupName, new ValidationError("GROUP.NOT_FOUND", String.format("Group (%1s) not found.", groupName)));
+                  }
+//            }
+            } catch (NameNotFoundException nnf) {
+               validationErrors.addError("BaseGroupDn", new ValidationError("BASE_GROUP_DN.NOT_FOUND", "BaseGroupDn not found."));
+            } catch (InvalidNameException ine) {
+               validationErrors.addError("BaseGroupDn", new ValidationError("BASE_GROUP_DN.INVALID_DN", "BaseGroupDn is not a valid DN."));
+            }
+         }
+      } catch (AuthenticationException e) {
+         validationErrors.addError("UserCredential", new ValidationError("UserCredential.Invalid", "invalid username or password."));
+      } catch (InvalidNameException ine) {
+         validationErrors.addError("UserName", new ValidationError("USERNAME.INVALID_DN", "UserName is not a valid DN."));
+      } catch (CommunicationException ce) {
+         LOGGER.warn(ce.getMessage());
+         LOGGER.warn(ce.getCause().getMessage());
+         ce.printStackTrace();
+         validationErrors.addError("PrimaryUrl", new ValidationError("PrimaryUrl.CannotConnect", "Can not connect to the primary URL."));
+      } catch (NamingException e) {
+         throw new UserMgmtServerValidException(e);
+      } finally {
+         if (ctx != null) {
+            try {
+               ctx.close();
+            } catch (NamingException e) {
+               //
+            }
+         }
+
+         if (!validationErrors.getErrors().isEmpty()) {
+            throw new ValidationException(validationErrors.getErrors());
+         }
+      }
+   }
+
    protected void searchGroupDn(UserMgmtServer userMgmtServer, String groupDn, boolean isLdaps) {
       Hashtable<String, Object> env = new Hashtable<>();
       env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");

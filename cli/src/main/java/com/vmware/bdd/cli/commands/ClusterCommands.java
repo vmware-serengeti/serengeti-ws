@@ -25,9 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.vmware.bdd.utils.ListToStringConverter;
 import jline.console.ConsoleReader;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,31 +36,19 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
-import com.vmware.bdd.apitypes.AppManagerRead;
-import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.ClusterRead;
-import com.vmware.bdd.apitypes.ClusterType;
-import com.vmware.bdd.apitypes.DistroRead;
-import com.vmware.bdd.apitypes.ElasticityRequestBody;
+import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityMode;
-import com.vmware.bdd.apitypes.FixDiskRequestBody;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
-import com.vmware.bdd.apitypes.NetworkRead;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.apitypes.NodeGroupRead;
-import com.vmware.bdd.apitypes.NodeRead;
-import com.vmware.bdd.apitypes.Priority;
-import com.vmware.bdd.apitypes.ResourceScale;
-import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.NodeStatus;
-import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.cli.rest.AppManagerRestClient;
 import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.ClusterRestClient;
 import com.vmware.bdd.cli.rest.NetworkRestClient;
+import com.vmware.bdd.usermgmt.UserMgmtConstants;
 import com.vmware.bdd.utils.AppConfigValidationUtils;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.ListToStringConverter;
 import com.vmware.bdd.utils.ValidateResult;
 
 @Component
@@ -108,7 +94,11 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "skipConfigValidation" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Skip cluster configuration validation. ") final boolean skipConfigValidation,
          @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes,
          @CliOption(key = { "password" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Answer 'yes' to set password for all VMs in this cluster.") final boolean setClusterPassword,
-         @CliOption(key = { "localRepoURL" }, mandatory = false, help = "Local yum server URL for application managers, ClouderaManager/Ambari.") final String localRepoURL) {
+         @CliOption(key = { "localRepoURL" }, mandatory = false, help = "Local yum server URL for application managers, ClouderaManager/Ambari.") final String localRepoURL,
+         @CliOption(key = { "adminGroupName" }, mandatory = false, help = "AD/LDAP Admin Group Name.") final String adminGroupName,
+         @CliOption(key = { "userGroupName" }, mandatory = false, help = "AD/LDAP User Group Name.") final String userGroupName,
+         @CliOption(key = { "disableLocalUsers" }, mandatory = false, help = "flag to disable local users") final Boolean disableLocalUsersFlag
+      ) {
       // validate the name
       if (name.indexOf("-") != -1) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
@@ -239,6 +229,29 @@ public class ClusterCommands implements CommandMarker {
                e.getMessage());
          return;
       }
+
+      Map<String, Map<String, String>> infraConfigs = new HashMap<String, Map<String, String>>();
+
+
+      if(StringUtils.isBlank(adminGroupName) && StringUtils.isBlank(userGroupName)) {
+         //both adminGroupName and userGroupName are null, supposes no need to enable ldap.
+      } else if(!StringUtils.isBlank(adminGroupName) && !StringUtils.isBlank(userGroupName)) {
+         Map<String, String> userMgmtConfig = new HashMap<String, String>();
+         userMgmtConfig.put(UserMgmtConstants.ADMIN_GROUP_NAME, adminGroupName);
+         userMgmtConfig.put(UserMgmtConstants.USER_GROUP_NAME, userGroupName);
+         //disable local account by default.
+         userMgmtConfig.put(UserMgmtConstants.DISABLE_LOCAL_USER_FLAG,
+               disableLocalUsersFlag == null ? Boolean.TRUE.toString() : disableLocalUsersFlag.toString());
+
+         infraConfigs.put(UserMgmtConstants.LDAP_USER_MANAGEMENT, userMgmtConfig);
+         clusterCreate.setInfraConfig(infraConfigs);
+      } else {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+               "You need to supply both AdminGroupName and UserGroupName.");
+         return;
+      }
+
       clusterCreate.setDistro(distroRead4Create.getName());
       clusterCreate.setDistroVendor(distroRead4Create.getVendor());
       clusterCreate.setDistroVersion(distroRead4Create.getVersion());
@@ -296,6 +309,16 @@ public class ClusterCommands implements CommandMarker {
                      Constants.OUTPUT_OP_RESULT_FAIL,
                      Constants.PARAM_CLUSTER_SPEC_HA_ERROR + specFilePath);
                return;
+            }
+
+            Map<String, Map<String, String>> specInfraConfigs = clusterSpec.getInfraConfig();
+            if(specInfraConfigs != null && !specInfraConfigs.isEmpty()) //spec infra configu is not empty
+            {
+               if(infraConfigs != null && !infraConfigs.isEmpty()) {
+                  System.out.println("adminGroup and userGroup has been specified as commandline parameters, so the values inside spec file will be ignored.");
+               } else {
+                  clusterCreate.setInfraConfig(infraConfigs);
+               }
             }
          }
          allNetworkNames = getAllNetworkNames();

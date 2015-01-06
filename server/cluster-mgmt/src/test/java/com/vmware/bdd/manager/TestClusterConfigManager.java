@@ -40,19 +40,12 @@ import org.testng.annotations.Test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.ClusterRead;
-import com.vmware.bdd.apitypes.ClusterType;
+
+import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
-import com.vmware.bdd.apitypes.DistroRead;
-import com.vmware.bdd.apitypes.InstanceType;
-import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.apitypes.PlacementPolicy;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation.GroupAssociationType;
-import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.ServerInfoEntity;
@@ -321,6 +314,44 @@ public class TestClusterConfigManager {
       netConfig.add("dhcpNet1");
       netConfigs.put(NetTrafficType.MGT_NETWORK, netConfig);
       return netConfigs;
+   }
+
+   @Test(groups = { "TestClusterConfigManager" })
+   public void testCreateClusterConfigWithInfraConfig() throws Exception {
+      ClusterCreate spec = new ClusterCreate();
+      spec.setName("my-cluster");
+      List<String> rps = new ArrayList<String>();
+      rps.add("myRp1");
+      spec.setRpNames(rps);
+      spec.setNetworkConfig(createNetConfigs());
+      spec.setDistro("bigtop");
+      spec.setDistroVendor(Constants.DEFAULT_VENDOR);
+      spec.setType(ClusterType.HDFS_MAPRED);
+      spec = ClusterSpecFactory.getCustomizedSpec(spec, null);
+
+      Map<String, Map<String, String>> infraConfigArrayList = new HashMap<String, Map<String, String>>();
+
+      Map<String, String> userMgmtConfig = new HashMap<String, String>();
+      userMgmtConfig.put("admin_group_name", "admgroup");
+      userMgmtConfig.put("user_group_name", "usrgroup");
+
+      infraConfigArrayList.put("user_management", userMgmtConfig);
+      spec.setInfraConfig(infraConfigArrayList);
+
+      clusterConfigMgr.createClusterConfig(spec);
+
+      ClusterEntity cluster = clusterEntityMgr.findClusterById(1l);
+      List<ClusterEntity> cs = clusterEntityMgr.findAllClusters();
+      for (ClusterEntity c : cs) {
+         System.out.println(c.getId());
+      }
+      cluster = clusterEntityMgr.findByName("my-cluster");
+      Assert.assertTrue(cluster != null);
+      ClusterCreate attrs = clusterConfigMgr.getClusterConfig("my-cluster");
+      String manifest = gson.toJson(attrs);
+      System.out.println(manifest);
+      Assert.assertTrue(manifest.indexOf("master") != -1,
+            "manifest should contains nodegroups");
    }
 
    @Test(groups = { "TestClusterConfigManager" })

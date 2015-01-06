@@ -30,7 +30,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.vmware.bdd.service.impl.ClusterUserMgmtValidService;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
+
+import org.apache.commons.collections.MapUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -73,6 +76,7 @@ import com.vmware.bdd.specpolicy.ClusterSpecFactory;
 import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
 import com.vmware.bdd.spectypes.IronfanStack;
 import com.vmware.bdd.spectypes.VcCluster;
+import com.vmware.bdd.usermgmt.UserMgmtConstants;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
@@ -81,6 +85,7 @@ import com.vmware.bdd.utils.ValidationUtils;
 
 public class ClusterManager {
    static final Logger logger = Logger.getLogger(ClusterManager.class);
+
    private ClusterConfigManager clusterConfigMgr;
 
    private INetworkService networkManager;
@@ -101,6 +106,9 @@ public class ClusterManager {
    private SoftwareManagerCollector softwareManagerCollector;
 
    private ShrinkManager shrinkManager;
+
+   @Autowired
+   private ClusterUserMgmtValidService clusterUserMgmtValidService;
 
    @Autowired
    private UnsupportedOpsBlocker opsBlocker;
@@ -397,6 +405,9 @@ public class ClusterManager {
          }
       }
       String name = clusterSpec.getName();
+
+      validateInfraConfig(clusterSpec);
+
       logger.info("ClusteringService, creating cluster " + name);
 
       List<String> dsNames = getUsedDS(clusterSpec.getDsNames());
@@ -426,6 +437,25 @@ public class ClusterManager {
       JobParameters jobParameters = new JobParameters(param);
       return jobManager.runJob(JobConstants.CREATE_CLUSTER_JOB_NAME,
             jobParameters);
+   }
+
+   private void validateInfraConfig(ClusterCreate clusterSpec) {
+      Map<String, Map<String,String>> infraConfig = clusterSpec.getInfraConfig();
+
+      if(MapUtils.isEmpty(infraConfig)) {
+         logger.info("no infra configuration in cluster create spec!");
+         return;
+      }
+
+      Map<String, String> userMgmtCfg = infraConfig.get(UserMgmtConstants.LDAP_USER_MANAGEMENT);
+
+      if(MapUtils.isEmpty(userMgmtCfg)) {
+         logger.debug("no user management configuration section.");
+      } else {
+         clusterUserMgmtValidService.validateUserMgmtConfig(userMgmtCfg);
+
+         logger.info("user management configuration validated successfully!");
+      }
    }
 
    private void createAutoRps(ClusterCreate createSpec) {
@@ -481,7 +511,7 @@ public class ClusterManager {
             vcClusterNames.add(vcCluster.getName());
          }
          throw ClusterConfigException.DATASTORE_UNACCESSIBLE(vcClusterNames,
-        		 dsNames);
+               dsNames);
       }
    }
 
@@ -558,6 +588,30 @@ public class ClusterManager {
       clusterEntityMgr.cleanupActionError(clusterName);
       try {
          return jobManager.runJob(JobConstants.CONFIG_CLUSTER_JOB_NAME,
+               jobParameters);
+      } catch (Exception e) {
+         logger.error("Failed to configure cluster " + clusterName, e);
+         clusterEntityMgr.updateClusterStatus(clusterName,
+               ClusterStatus.CONFIGURE_ERROR);
+         throw e;
+      }
+   }
+
+   public long enableLdap(String clusterName) throws Exception {
+      Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
+      param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
+            clusterName));
+      param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
+      param.put(JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM,
+            new JobParameter(ClusterStatus.RUNNING.name()));
+      param.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM,
+            new JobParameter(ClusterStatus.CONFIGURE_ERROR.name()));
+      JobParameters jobParameters = new JobParameters(param);
+      clusterEntityMgr.updateClusterStatus(clusterName,
+            ClusterStatus.CONFIGURING);
+      clusterEntityMgr.cleanupActionError(clusterName);
+      try {
+         return jobManager.runJob("configLdapUserMgmtJob",
                jobParameters);
       } catch (Exception e) {
          logger.error("Failed to configure cluster " + clusterName, e);

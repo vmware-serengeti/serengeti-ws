@@ -47,6 +47,14 @@
 		<beans:property name="setLocalRepoService" ref="setNodeLocalRepoService"/>
 		<beans:property name="managementOperation" value="RESIZE" />
 	</beans:bean>
+   <beans:bean name="EnableLdapForNewNodesForResizeStep"
+               class="com.vmware.bdd.service.job.EnableLdapForNewNodesStep">
+      <beans:property name="clusterLdapUserMgmtCfgService" >
+         <beans:ref bean="clusterLdapUserMgmtCfgService"/>
+      </beans:property>
+      <beans:property name="clusterEntityMgr" ref="clusterEntityManager"/>
+      <beans:property name="managementOperation" value="RESIZE" />
+   </beans:bean>
 
 	<job id="resizeClusterJob" job-repository="jobRepository">
 		<step id="resizeRemoveBadNodesStep" next="updateResizeClusterDataStep1">
@@ -115,12 +123,19 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="configLocalRepoResizeStep" next="softwareResizeClusterStep">
+		<step id="configLocalRepoResizeStep" next="configLdapUserMgmtStep">
 			<tasklet ref="configLocalRepoForClusterResizeTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
+      <step id="configLdapUserMgmtStep" next="softwareResizeClusterStep">
+         <tasklet ref="EnableLdapForNewNodesForResizeStep">
+            <listeners>
+               <listener ref="stepListener"/>
+            </listeners>
+         </tasklet>
+      </step>
 		<step id="softwareResizeClusterStep">
 			<tasklet ref="softwareResizeClusterTasklet" />
 			<listeners>

@@ -63,6 +63,10 @@
          <artifactId>software-mgmt-plugin-ambari</artifactId>
       </dependency>
       <dependency>
+         <groupId>com.vmware.bdd</groupId>
+         <artifactId>user-mgmt</artifactId>
+      </dependency>
+      <dependency>
          <groupId>postgresql</groupId>
          <artifactId>postgresql</artifactId>
       </dependency>
@@ -168,6 +172,10 @@
       <dependency>
          <groupId>org.apache.sshd</groupId>
          <artifactId>sshd-core</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>com.jcraft</groupId>
+         <artifactId>jsch</artifactId>
       </dependency>
    </dependencies>
 </project>

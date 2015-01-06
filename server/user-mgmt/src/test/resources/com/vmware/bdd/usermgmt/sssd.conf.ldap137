@@ -1,0 +1,39 @@
+[sssd]
+config_file_version = 2
+services = nss, pam
+domains = LDAP
+
+[nss]
+filter_users = root,named,avahi,haldaemon,dbus,radiusd,news,nscd
+
+[pam]
+
+[domain/LDAP]
+auth_provider = ldap
+id_provider = ldap
+cache_credentials = false
+enumerate = true
+
+ldap_schema = rfc2307
+ldap_uri = ldap://pek2-aurora-dev-01-113-dhcp137.eng.vmware.com
+
+ldap_tls_reqcert = never
+ldap_tls_cacertdir = /etc/pki/tls/certs
+ldap_id_use_start_tls = true
+
+ldap_user_search_base = ou=users,dc=bde,dc=vmware,dc=com
+ldap_user_object_class = posixAccount
+ldap_user_name = uid
+shell_fallback = /bin/bash
+
+ldap_group_search_base = ou=groups,dc=bde,dc=vmware,dc=com
+ldap_group_object_class = posixGroup
+
+ldap_default_bind_dn = cn=Manager,dc=bde,dc=vmware,dc=com
+ldap_default_authtok = openldap
+
+access_provider = ldap
+ldap_access_filter = memberOf=cn=ldap-users,ou=groups,dc=bde,dc=vmware,dc=com
+
+min_id = 1
+max_id = 0

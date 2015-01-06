@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.manager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,12 +24,14 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.gson.Gson;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.aop.annotation.RetryTransaction;
@@ -61,6 +64,7 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.thrift.GroupData;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
+import com.vmware.bdd.usermgmt.UserMgmtConstants;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
@@ -147,6 +151,32 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
 
    public ClusterEntity findByName(String clusterName) {
       return clusterDao.findByName(clusterName);
+   }
+
+   public Map<String, Map<String, String>> findInfraConfig(String clusterName) {
+      String infraCfgStr = clusterDao.findInfraConfig(clusterName);
+
+      if(!StringUtils.isBlank(infraCfgStr)) {
+         ObjectMapper objectMapper = new ObjectMapper();
+         try {
+            return objectMapper.readValue(infraCfgStr, Map.class);
+         } catch (IOException e) {
+            throw new RuntimeException("failed to parse infra config string from cluster table!");
+         }
+      }
+
+      return null;
+   }
+
+   public Map<String, String> findUserMgmtCfg(String clusterName) {
+      Map<String, Map<String, String>> infraCfg = findInfraConfig(clusterName);
+
+      if(infraCfg != null) {
+         return infraCfg.get(UserMgmtConstants.LDAP_USER_MANAGEMENT);
+      } else {
+         return null;
+      }
+
    }
 
    public NodeGroupEntity findByName(String clusterName, String groupName) {

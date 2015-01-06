@@ -30,7 +30,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.vmware.bdd.apitypes.UserMgmtServer;
+import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.usermgmt.UserMgmtServerService;
+import com.vmware.bdd.utils.CommonUtil;
 
 /**
  * Created By xiaoliangl on 11/24/14.
@@ -86,4 +89,21 @@ public class UserMgmtServerController {
    public List<UserMgmtServer> list() {
       return null;
    }*/
+
+   @Autowired
+   private ClusterManager clusterMgr;
+
+   @RequestMapping(value = "/enableLdap/{clusterName}", method = RequestMethod.POST, consumes = "application/json")
+   @ResponseBody
+   @RestCall
+   public void enableLdap(@PathVariable("clusterName") String clusterName) {
+      if (!CommonUtil.validateClusterName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+      try {
+         Long taskId = clusterMgr.enableLdap(clusterName);
+      } catch (Exception e) {
+         throw new RuntimeException(e);
+      }
+   }
 }

@@ -150,6 +150,9 @@ public class ClusterEntity extends EntityBase {
    @Column(name = "last_status")
    private ClusterStatus lastStatus;
 
+   @Column(name = "infrastructure_config")
+   private String infraConfig;
+
    static final Logger logger = Logger.getLogger(ClusterEntity.class);
 
    ClusterEntity() {
@@ -462,5 +465,14 @@ public class ClusterEntity extends EntityBase {
 
    public void setAdvancedProperties(String advancedProperties) {
       this.advancedProperties = advancedProperties;
+   }
+
+
+   public void setInfraConfig(String infraConfig) {
+      this.infraConfig = infraConfig;
+   }
+
+   public String getInfraConfig() {
+      return infraConfig;
    }
 }

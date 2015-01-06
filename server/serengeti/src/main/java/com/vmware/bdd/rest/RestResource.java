@@ -852,7 +852,6 @@ public class RestResource {
    /**
     * Add ips into an existing BDE network
     * @param networkName
-    * @param network
     * @param request
     */
    @RequestMapping(value = "/network/{networkName}", method = RequestMethod.PUT, consumes = "application/json")

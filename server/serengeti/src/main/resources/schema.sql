@@ -110,6 +110,7 @@ create table cluster (
    last_status         varchar(255),
    appmanager          varchar(255),
    advanced_properties text,
+  infrastructure_config text,
    primary key (id)
 );
 

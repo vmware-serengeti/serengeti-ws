@@ -136,6 +136,10 @@
          <groupId>com.google.code.gson</groupId>
          <artifactId>gson</artifactId>
       </dependency>
+      <dependency>
+         <groupId>net.schmizz</groupId>
+         <artifactId>sshj</artifactId>
+      </dependency>
    </dependencies>
 
    <reporting>

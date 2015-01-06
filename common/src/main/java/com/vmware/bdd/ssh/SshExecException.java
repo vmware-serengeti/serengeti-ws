@@ -12,19 +12,13 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *****************************************************************************/
-package com.vmware.bdd.usermgmt;
+package com.vmware.bdd.ssh;
 
 /**
- * Created By xiaoliangl on 12/15/14.
+ * Created By xiaoliangl on 1/5/15.
  */
-public interface UserMgmtConstants {
-   String VMCONFIG_MGMTVM_CUM_MODE = "vmconfig.mgmtvm.cum.mode";
-   String VMCONFIG_MGMTVM_CUM_SERVERNAME = "vmconfig.mgmtvm.cum.servername";
-   String DEFAULT_USERMGMT_SERVER_NAME = "default";
-
-   String ADMIN_GROUP_NAME = "admin_group_name";
-   String USER_GROUP_NAME = "user_group_name";
-
-   String LDAP_USER_MANAGEMENT = "ldap_user_management";
-   String DISABLE_LOCAL_USER_FLAG = "disable_local_user";
+public class SshExecException extends RuntimeException {
+   public SshExecException(String message, Throwable cause) {
+      super(message, cause);
+   }
 }

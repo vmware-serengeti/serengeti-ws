@@ -15,6 +15,7 @@
 package com.vmware.bdd.manager.intf;
 
 import java.util.List;
+import java.util.Map;
 
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterStatus;
@@ -143,4 +144,6 @@ public interface IClusterEntityManager {
    public void cleanupErrorForClusterUpgrade(String clusterName);
 
    public void updateNodeAction(NodeEntity node, String action);
+
+   public Map<String, String> findUserMgmtCfg(String clusterName);
    }

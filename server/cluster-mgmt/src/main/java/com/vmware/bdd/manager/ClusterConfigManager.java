@@ -30,6 +30,9 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpGet;
@@ -43,24 +46,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.DiskSpec.AllocationType;
-import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
-import com.vmware.bdd.apitypes.DiskSplitPolicy;
-import com.vmware.bdd.apitypes.IpBlock;
-import com.vmware.bdd.apitypes.IpConfigInfo;
-import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
-import com.vmware.bdd.apitypes.NetworkAdd;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.apitypes.NodeRead;
-import com.vmware.bdd.apitypes.PlacementPolicy;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks.GroupRacksType;
-import com.vmware.bdd.apitypes.RackInfo;
-import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
-import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.IpBlockEntity;
 import com.vmware.bdd.entity.NetworkEntity;
@@ -306,6 +298,9 @@ public class ClusterConfigManager {
             updateVhmJobTrackerPort(cluster, clusterEntity);
          }
 
+
+         setInfraConfig(cluster, clusterEntity);
+
          setAdvancedProperties(cluster.getExternalHDFS(),
                cluster.getExternalMapReduce(), localRepoURL,
                cluster.getExternalNamenode(),
@@ -354,6 +349,22 @@ public class ClusterConfigManager {
          logger.info("can not create cluster " + name
                + ", which is already existed.");
          throw BddException.ALREADY_EXISTS(ex, "Cluster", name);
+      }
+   }
+
+   private void setInfraConfig(ClusterCreate cluster, ClusterEntity clusterEntity) {
+      Map<String, Map<String, String>> infraConfigs = cluster.getInfraConfig();
+
+      if(infraConfigs != null && !infraConfigs.isEmpty()) {
+         ObjectMapper objectMapper = new ObjectMapper();
+
+         String json = null;
+         try {
+            json = objectMapper.writeValueAsString(infraConfigs);
+         } catch (JsonProcessingException e) {
+            throw new SWMgrCollectorInternalException("Failed to serialized Infra Configuration");
+         }
+         clusterEntity.setInfraConfig(json);
       }
    }
 
@@ -874,6 +885,19 @@ public class ClusterConfigManager {
          if (advancedProperties.get("ExternalDatanodes") != null) {
             clusterConfig.setExternalDatanodes(gson.fromJson(gson.toJson(advancedProperties.get("ExternalDatanodes")), HashSet.class));
          }
+      }
+
+      if(!CommonUtil.isBlank(clusterEntity.getInfraConfig())) {
+         ObjectMapper objectMapper = new ObjectMapper();
+
+         Map<String, Map<String, String>> infraConfigList = null;
+         try {
+            infraConfigList = objectMapper.readValue(clusterEntity.getInfraConfig(), Map.class);
+         } catch (IOException e) {
+            throw new SWMgrCollectorInternalException("failed to deserialize Infrastructure Configuration");
+         }
+
+         clusterConfig.setInfraConfig(infraConfigList);
       }
    }
 

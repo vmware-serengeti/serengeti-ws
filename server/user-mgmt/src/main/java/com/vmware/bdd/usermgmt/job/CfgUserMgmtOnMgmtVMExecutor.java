@@ -33,7 +33,6 @@ import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.UserMgmtServer;
-import com.vmware.bdd.command.CommandUtil;
 import com.vmware.bdd.usermgmt.SssdLdapConstantMappings;
 
 /**
@@ -45,7 +44,11 @@ public class CfgUserMgmtOnMgmtVMExecutor {
    private final static int TIMEOUT = Configuration.getInt("usermgmt.command.exec.timeout", 120);
 
    public void execute(UserMgmtServer userMgmtServer, SssdLdapConstantMappings sssdLdapConstantMappings) {
-      File workDir = CommandUtil.createWorkDir(System.currentTimeMillis());
+
+      String taskDir = System.getProperty("serengeti.home.dir") + File.separator + "log" + File.separator + "task";
+
+      File workDir = new File(taskDir + File.separator + System.currentTimeMillis());
+      workDir.mkdirs();
       File specFile = new File(workDir, "enableUserMgmt.json");
 
       writeJsonFile(userMgmtServer, specFile, sssdLdapConstantMappings);

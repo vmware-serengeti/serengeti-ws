@@ -33,10 +33,6 @@
 
       <dependency>
          <groupId>com.vmware.bdd</groupId>
-         <artifactId>cluster-mgmt</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>com.vmware.bdd</groupId>
          <artifactId>dal</artifactId>
       </dependency>
       <dependency>

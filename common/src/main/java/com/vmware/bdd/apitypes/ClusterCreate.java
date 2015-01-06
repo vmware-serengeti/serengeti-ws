@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
@@ -125,6 +126,10 @@ public class ClusterCreate implements Serializable {
    @SerializedName("cluster_configuration")
    private Map<String, Object> configuration;
 
+   @Expose
+   @SerializedName("infrastructure_config")
+   private Map<String, Map<String, String>> infraConfig;
+
    private Boolean validateConfig = true;
 
    private Boolean specFile = false;
@@ -162,6 +167,16 @@ public class ClusterCreate implements Serializable {
       this.hostToRackMap = cluster.hostToRackMap;
       this.password = cluster.password;
       this.localRepoURL = cluster.localRepoURL;
+      this.infraConfig = cluster.infraConfig;
+   }
+
+   @JsonProperty("infrastructure_config")
+   public Map<String, Map<String, String>> getInfraConfig() {
+      return infraConfig;
+   }
+
+   public void setInfraConfig(Map<String, Map<String, String>> infraConfig) {
+      this.infraConfig = infraConfig;
    }
 
    public Map<String, Object> getConfiguration() {
