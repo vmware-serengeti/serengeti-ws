@@ -998,4 +998,17 @@ public class VcService {
    public String getExtensionKey() {
       return extKey;
    }
+
+   public ExtensionManager getExtensionManager() {
+      return getServiceContents().extensionManager;
+   }
+
+   public SessionManager getSessionManager() {
+      return getServiceContents().sessionManager;
+   }
+
+   public String getLocale() {
+      return locale;
+   }
+
 }

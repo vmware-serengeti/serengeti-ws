@@ -251,6 +251,9 @@ public class Constants {
    public static final int PASSWORD_MIN_LENGTH = 8;
    public static final int PASSWORD_MAX_LENGTH = 20;
    public static final String PASSWORD_REQUIREMENT = "Password must be from " + PASSWORD_MIN_LENGTH + " to " + PASSWORD_MAX_LENGTH + " characters and must contain at least one uppercase character, one lowercase character, one digit and one of the following special characters: _, @, #, $, %, ^, &, *";
+   public static final String BDE_SERVER_VM_MOBID = "vim.cms_moref";
+   public static final String VC_EXT_PREFIX = "ext.prefix";
+
 
    public static final String RESPONSE_HEADER_LOCATION = "Location";
 }

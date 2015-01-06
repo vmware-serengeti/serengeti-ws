@@ -18,9 +18,11 @@ import java.io.IOException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateEncodingException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -48,7 +50,9 @@ public class CmsKeyStore {
    static private String cmsKeyPswd;
    static private String vcExtPswd;
 
+   private static String cmsKeyAlias;
    private static final String CMS_KEYSTORE = "cms.keystore";
+   private static final String CMS_KEYSTORE_ALIAS = "cms.keystore_alias";
    public static final String CMS_KEYSTORE_PSWD = "cms.keystore_pswd";
 
    static final public String VC_EXT_KEY = "vc_ext";
@@ -60,13 +64,23 @@ public class CmsKeyStore {
    static {
       try {
          cmsKeyStorePath = Configuration.getString(CMS_KEYSTORE, "/opt/aurora/cms/cms.key");
+         logger.info("cmsKeyStorePath ========"+cmsKeyStorePath);
          keyStorePswd = Configuration.getString(CMS_KEYSTORE_PSWD);
+         logger.info("keyStorePswd ========"+keyStorePswd);
          cmsKeyPswd = Configuration.getString(CMS_KEYSTORE_PSWD);
+         logger.info("cmsKeyPswd ========"+cmsKeyPswd);
          vcExtPswd = Configuration.getString(CMS_KEYSTORE_PSWD);
+         logger.info("vcExtPswd ========"+vcExtPswd);
+         cmsKeyAlias = Configuration.getString(CMS_KEYSTORE_ALIAS);
+         logger.info("cmsKeyAlias ========"+cmsKeyAlias);
          keyStore = loadKeyStore();
       } catch (Exception e) {
          logger.info("cannot load cms keystore", e);
       }
+   }
+
+   public static String getCmsKeyAlias() {
+      return cmsKeyAlias;
    }
 
    public static Lock getWriteLock() {
@@ -170,5 +184,33 @@ public class CmsKeyStore {
    static public Certificate getCertificate(String alias) throws KeyStoreException {
       AuAssert.check(keyStore != null);
       return keyStore.getCertificate(alias);
+   }
+
+   public static String parseThumbPrint(Certificate cert)
+         throws NoSuchAlgorithmException, CertificateEncodingException {
+      MessageDigest md = MessageDigest.getInstance("SHA-1");
+      byte[] der = cert.getEncoded();
+      md.update(der);
+      byte[] digest = md.digest();
+      return hexify(digest);
+   }
+
+   private static String hexify (byte bytes[]) {
+      char[] hexDigits = {'0', '1', '2', '3', '4', '5', '6', '7',
+            '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+      char separator = ':';
+
+      StringBuffer buf = new StringBuffer(bytes.length * 2);
+      int length = bytes.length;
+
+      for (int i = 0; i < length; ++i) {
+         buf.append(hexDigits[(bytes[i] & 0xf0) >> 4]);
+         buf.append(hexDigits[bytes[i] & 0x0f]);
+
+         if (i != length - 1) {
+            buf.append(separator);
+         }
+      }
+      return buf.toString();
    }
 }

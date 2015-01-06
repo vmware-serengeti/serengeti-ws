@@ -50,6 +50,8 @@ public class Configuration {
    private static PropertiesConfiguration serengetiCfg;
    private static PropertiesConfiguration vcCfg;
    private static String storedCmsInstanceId;
+   private static final String NGC_PROP_FILE = "ngc_registrar.properties";
+   private static PropertiesConfiguration ngcCfg;
 
    /**
     * 
@@ -59,11 +61,13 @@ public class Configuration {
       PropertiesConfiguration config = null;
 
       String homeDir = System.getProperties().getProperty("serengeti.home.dir");
+      String ngcConfigFile = NGC_PROP_FILE;
       if (homeDir != null && homeDir.length() > 0) {
          StringBuilder builder = new StringBuilder();
          builder.append(homeDir).append(File.separator).append("conf")
-               .append(File.separator).append("serengeti.properties");
-         configFileName = builder.toString();
+               .append(File.separator);
+         configFileName = builder.toString() + "serengeti.properties";
+         ngcConfigFile = builder.toString() + NGC_PROP_FILE;
       } else {
          configFileName = "serengeti.properties";
       }
@@ -96,6 +100,22 @@ public class Configuration {
       } catch (ConfigurationException ex) {
          // error out if the configuration file is not there
          String message = "Failed to load vc.properties file.";
+         logger.fatal(message, ex);
+         throw AuroraException.APP_INIT_ERROR(ex, message);
+      }
+   // load ngc_registrar.properties
+      try {
+         logger.info("Reading properties file " + ngcConfigFile);
+         ngcCfg = new PropertiesConfiguration(ngcConfigFile);
+         ngcCfg.setEncoding("UTF-8");
+         Iterator<?> keys = ngcCfg.getKeys();
+         while (keys.hasNext()) {
+            String key = (String) keys.next();
+            config.setProperty(key, ngcCfg.getProperty(key));
+         }
+      } catch (ConfigurationException ex) {
+         // error out if the configuration file is not there
+         String message = "Failed to load file " + NGC_PROP_FILE;
          logger.fatal(message, ex);
          throw AuroraException.APP_INIT_ERROR(ex, message);
       }

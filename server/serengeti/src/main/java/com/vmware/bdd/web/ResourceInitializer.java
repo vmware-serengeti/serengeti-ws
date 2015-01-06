@@ -28,6 +28,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.vcservice.VcContext;
+import com.vmware.bdd.plugin.NgcBDERegistrar;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.collection.ICollectionInitializerService;
 import com.vmware.bdd.service.resmgmt.IResourceInitializerService;
@@ -91,6 +92,12 @@ public class ResourceInitializer implements ServletContextListener {
       clusterSvc = wac.getBean("clusteringService",IClusteringService.class);
       logger.info("got bean");
       clusterSvc.init();
+      boolean regWebPlugin = Configuration.getBoolean("reg_web_plugin");
+      if(regWebPlugin) {
+         NgcBDERegistrar ngc = new NgcBDERegistrar();
+         ngc.initNgcRegistration();
+      }
+
    }
 
    private void initDataCollection(WebApplicationContext wac)
