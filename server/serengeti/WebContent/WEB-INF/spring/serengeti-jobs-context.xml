@@ -18,4 +18,18 @@
       class="com.vmware.bdd.service.job.InMemoryJobExecutionStatusHolder"/>      
    <beans:bean id="jobParametersExtractor"
       class="com.vmware.bdd.service.job.SubJobParametersExtractor"/>
+
+    <beans:bean id="dataCollectorAdvice" class="com.vmware.bdd.aop.rest.DataCollectorAdvice"/>
+
+    <aop:config>
+        <aop:pointcut id="clusterManagerPointcut"
+                      expression="@annotation(com.vmware.bdd.aop.annotation.ClusterManagerPointcut)" />
+        <aop:aspect id="dataCollectorAspect" ref="dataCollectorAdvice" >
+            <aop:after-returning method="afterClusterManagerMethod" returning="returnValue" pointcut-ref="clusterManagerPointcut" />
+        </aop:aspect>
+    </aop:config>
+    <aop:aspectj-autoproxy>
+        <aop:include name="dataCollectorAdvice"/>
+    </aop:aspectj-autoproxy>
+
 </beans:beans>

@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,10 +20,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by qjin on 12/23/14.
+ * Created by qjin on 1/7/15.
  */
 
 @Target({ ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RestCall {
+public @interface ClusterManagerPointcut {
 }

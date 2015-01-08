@@ -17,6 +17,7 @@ package com.vmware.bdd.manager;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vmware.bdd.aop.annotation.ClusterManagerPointcut;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -52,6 +53,7 @@ public class ScaleManager {
    @Autowired
    private UnsupportedOpsBlocker opsBlocker;
 
+   @ClusterManagerPointcut
    public long scaleNodeGroupResource(ResourceScale scale) throws Exception {
       String clusterName = scale.getClusterName();
 

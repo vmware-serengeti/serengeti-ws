@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.vmware.bdd.aop.annotation.RestCall;
+import com.vmware.bdd.aop.annotation.RestCallPointcut;
 import com.vmware.bdd.manager.collection.CollectOperationManager;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -206,7 +206,6 @@ public class RestResource {
     */
    @RequestMapping(value = "/clusters", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.ACCEPTED)
-   @RestCall
    public void createCluster(@RequestBody ClusterCreate createSpec,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
@@ -246,7 +245,6 @@ public class RestResource {
     */
    @RequestMapping(value = "/cluster/{clusterName}/config", method = RequestMethod.PUT, consumes = "application/json")
    @ResponseStatus(HttpStatus.ACCEPTED)
-   @RestCall
    public void configCluster(@PathVariable("clusterName") String clusterName,
          @RequestBody ClusterCreate createSpec, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
@@ -279,7 +277,6 @@ public class RestResource {
     */
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.ACCEPTED)
-   @RestCall
    public void deleteCluster(@PathVariable("clusterName") String clusterName,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
@@ -302,7 +299,6 @@ public class RestResource {
     */
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
-   @RestCall
    public void startStopResumeCluster(
          @PathVariable("clusterName") String clusterName,
          @RequestParam(value = "state", required = true) String state,
@@ -341,7 +337,6 @@ public class RestResource {
     */
    @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}/instancenum", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
-   @RestCall
    public void resizeCluster(@PathVariable("clusterName") String clusterName,
          @PathVariable("groupName") String groupName,
          @RequestBody Integer instanceNum, HttpServletRequest request,
@@ -377,7 +372,6 @@ public class RestResource {
     */
    @RequestMapping(value = "/cluster/{clusterName}/upgrade", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
-   @RestCall
    public void upgradeCluster(@PathVariable("clusterName") String clusterName,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
@@ -399,7 +393,6 @@ public class RestResource {
     */
    @RequestMapping(value = "/cluster/{clusterName}/nodegroup/{groupName}/scale", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
-   @RestCall
    public void scale(@PathVariable("clusterName") String clusterName,
          @PathVariable("groupName") String groupName,
          @RequestBody ResourceScale scale, HttpServletRequest request,
@@ -438,7 +431,6 @@ public class RestResource {
     */
    @RequestMapping(value = "/cluster/{clusterName}/param_wait_for_result", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
-   @RestCall
    public void asyncSetParam(@PathVariable("clusterName") String clusterName, @RequestBody ElasticityRequestBody requestBody, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
       verifyInitialized();
@@ -465,7 +457,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/cluster/{clusterName}/param", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.OK)
-   @RestCall
+   @RestCallPointcut
    public void syncSetParam(@PathVariable("clusterName") String clusterName, @RequestBody ElasticityRequestBody requestBody, HttpServletRequest request,
          HttpServletResponse response) throws Exception {
       verifyInitialized();
@@ -510,7 +502,6 @@ public class RestResource {
     */
    @RequestMapping(value = "/cluster/{clusterName}/fix/disk", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
-   @RestCall
    public void fixCluster(@PathVariable("clusterName") String clusterName,
          @RequestBody FixDiskRequestBody fixDiskSpec,
          HttpServletRequest request, HttpServletResponse response)
@@ -530,7 +521,6 @@ public class RestResource {
     */
    @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
    public ClusterRead getCluster(
          @PathVariable("clusterName") String clusterName,
          @RequestParam(value = "details", required = false) Boolean details) {
@@ -550,7 +540,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/cluster/{clusterName}/spec", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public ClusterCreate getClusterSpec(
          @PathVariable("clusterName") String clusterName) {
       clusterName = CommonUtil.decode(clusterName);
@@ -563,7 +553,7 @@ public class RestResource {
 
    @RequestMapping(value = "/cluster/{clusterName}/rack", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public Map<String, String> getClusterRackTopology(
          @PathVariable("clusterName") String clusterName,
          @RequestParam(value = "topology", required = false) String topology) {
@@ -582,7 +572,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/clusters", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public List<ClusterRead> getClusters(
          @RequestParam(value = "details", required = false) Boolean details) {
       return clusterMgr.getClusters((details == null) ? false : details);
@@ -595,7 +585,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/resourcepools", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
-   @RestCall
+   @RestCallPointcut
    public void addResourcePool(@RequestBody ResourcePoolAdd rpSpec) {
       verifyInitialized();
       if (rpSpec == null) {
@@ -630,7 +620,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/resourcepools", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public List<ResourcePoolRead> getResourcePools() {
       return vcRpSvc.getAllResourcePoolForRest();
    }
@@ -642,7 +632,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/resourcepool/{rpName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public ResourcePoolRead getResourcePool(@PathVariable("rpName") String rpName) {
       rpName = CommonUtil.decode(rpName);
       if (CommonUtil.isBlank(rpName)
@@ -662,7 +652,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/resourcepool/{rpName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
-   @RestCall
+   @RestCallPointcut
    public void deleteResourcePool(@PathVariable("rpName") String rpName) {
       verifyInitialized();
       rpName = CommonUtil.decode(rpName);
@@ -679,7 +669,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/datastores", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
-   @RestCall
+   @RestCallPointcut
    public void addDatastore(@RequestBody DatastoreAdd dsSpec) {
       verifyInitialized();
       if (dsSpec == null) {
@@ -704,7 +694,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/datastore/{dsName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public DatastoreRead getDatastore(@PathVariable("dsName") String dsName) {
       dsName = CommonUtil.decode(dsName);
       if (CommonUtil.isBlank(dsName)
@@ -724,7 +714,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/datastores", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public List<DatastoreRead> getDatastores() {
       return datastoreSvc.getAllDatastoreReads();
    }
@@ -735,7 +725,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/datastore/{dsName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
-   @RestCall
+   @RestCallPointcut
    public void deleteDatastore(@PathVariable("dsName") String dsName) {
       verifyInitialized();
       dsName = CommonUtil.decode(dsName);
@@ -752,7 +742,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/network/{networkName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
-   @RestCall
+   @RestCallPointcut
    public void deleteNetworkByName(
          @PathVariable("networkName") String networkName) {
       verifyInitialized();
@@ -772,7 +762,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/network/{networkName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public NetworkRead getNetworkByName(
          @PathVariable("networkName") String networkName,
          @RequestParam(value = "details", required = false, defaultValue = "false") final Boolean details) {
@@ -797,7 +787,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/networks", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public List<NetworkRead> getNetworks(
          @RequestParam(value = "details", required = false, defaultValue = "false") final Boolean details) {
       return networkSvc.getAllNetworks(details != null ? details : false);
@@ -809,7 +799,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/networks", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
-   @RestCall
+   @RestCallPointcut
    public void addNetworks(@RequestBody final NetworkAdd na) {
       verifyInitialized();
       if (CommonUtil.isBlank(na.getName())
@@ -856,7 +846,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/network/{networkName}", method = RequestMethod.PUT, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
-   @RestCall
+   @RestCallPointcut
    public void updateNetwork(@PathVariable("networkName") String networkName,
          @RequestBody NetworkAdd networkAdd, HttpServletRequest request,
          HttpServletResponse response) {
@@ -881,7 +871,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/appmanagers/types", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public List<String> getAppManagerTypes() {
       return softwareManagerCollector.getAllAppManagerTypes();
    }
@@ -892,7 +882,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/appmanagers", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
-   @RestCall
+   @RestCallPointcut
    public void addAppManager(@RequestBody final AppManagerAdd appManagerAdd) {
       if (appManagerAdd == null) {
          throw BddException.INVALID_PARAMETER("appManagerAdd", null);
@@ -914,7 +904,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/appmanagers", method = RequestMethod.PUT, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
-   @RestCall
+   @RestCallPointcut
    public void modifyAppManager(@RequestBody AppManagerAdd appManagerAdd,
          HttpServletRequest request,
          HttpServletResponse response) {
@@ -936,7 +926,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/appmanager/{appManagerName}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
-   @RestCall
+   @RestCallPointcut
    public void deleteAppManager(@PathVariable("appManagerName") String appManagerName) {
       appManagerName = CommonUtil.decode(appManagerName);
       if (CommonUtil.isBlank(appManagerName)
@@ -958,7 +948,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/appmanager/{appManagerName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public AppManagerRead getAppManager(@PathVariable("appManagerName") String appManagerName) {
       appManagerName = CommonUtil.decode(appManagerName);
       if (CommonUtil.isBlank(appManagerName)
@@ -976,7 +966,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/appmanager/{appManagerName}/distros", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public List<DistroRead> getAppManagerDistros(@PathVariable("appManagerName") String appManagerName) {
       appManagerName = CommonUtil.decode(appManagerName);
       if (CommonUtil.isBlank(appManagerName)
@@ -1021,7 +1011,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/appmanager/{appManagerName}/distro/{distroName}/roles", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public List<String> getAppManagerDistroRoles(
          @PathVariable("appManagerName") String appManagerName,
          @PathVariable("distroName") String distroName) {
@@ -1055,7 +1045,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/appmanager/{appManagerName}/distro/{distroName}/configurations", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public String getAppManagerStackConfigurations(
          @PathVariable("appManagerName") String appManagerName,
          @PathVariable("distroName") String distroName) {
@@ -1085,7 +1075,7 @@ public class RestResource {
 
    @RequestMapping(value = "/appmanager/{appManagerName}/defaultdistro", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public DistroRead getDefaultStack(@PathVariable("appManagerName") String appManagerName) {
       appManagerName = CommonUtil.decode(appManagerName);
       if (CommonUtil.isBlank(appManagerName)
@@ -1104,7 +1094,7 @@ public class RestResource {
 
    @RequestMapping(value = "/appmanager/{appManagerName}/distro/{distroName:.+}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public DistroRead getDistroByName(
          @PathVariable("appManagerName") String appManagerName,
          @PathVariable("distroName") String distroName) {
@@ -1128,7 +1118,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/appmanagers", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public List<AppManagerRead> getAppManagers() {
       return softwareManagerCollector.getAllAppManagerReads();
    }
@@ -1139,7 +1129,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/racks", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.OK)
-   @RestCall
+   @RestCallPointcut
    public void importRacks(@RequestBody final RackInfoList racksInfo)
          throws Exception {
 
@@ -1158,7 +1148,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/racks", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public List<RackInfo> exportRacks() throws Exception {
       return rackInfoManager.exportRackInfo();
    }
@@ -1169,7 +1159,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/distros", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public List<DistroRead> getDistros() {
       //TODO handle appmanager case
       SoftwareManager softMgr =
@@ -1189,7 +1179,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/distro/{distroName}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public DistroRead getDistroByName(
          @PathVariable("distroName") String distroName) {
       if (CommonUtil.isBlank(distroName)

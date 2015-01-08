@@ -17,7 +17,7 @@ package com.vmware.bdd.rest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import com.vmware.bdd.aop.annotation.RestCall;
+import com.vmware.bdd.aop.annotation.RestCallPointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -48,7 +48,7 @@ public class UserMgmtServerController {
 
    @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public void add(@RequestBody @Valid UserMgmtServer serverInfo,
                    @RequestParam(value = "testonly", required = false) boolean testOnly,
                    @RequestParam(value = "forceTrustCert", required = false) boolean certConfirmed) {
@@ -69,7 +69,7 @@ public class UserMgmtServerController {
 
    @RequestMapping(value = "/{name}", method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public UserMgmtServer getByName(@PathVariable("name") @Valid @NotNull String name) {
 //      UserMgmtServer userMgmtServer = new UserMgmtServer("ldap1", UserMgmtServer.Type.valueOf("LDAP"), "cn=groups,dn=vmware,dn=com",
 //            "cn=users,dn=vmware,dn=com", "ldaps://10.112.113.137:389", "ldaps://10.112.113.182:389", "xiaoliangl", "password");
@@ -79,7 +79,7 @@ public class UserMgmtServerController {
 
    @RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
-   @RestCall
+   @RestCallPointcut
    public void delete(@PathVariable("name") @Valid @NotNull String name) {
       userMgmtServerService.deleteByName(name);
    }
@@ -95,7 +95,7 @@ public class UserMgmtServerController {
 
    @RequestMapping(value = "/enableLdap/{clusterName}", method = RequestMethod.POST, consumes = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public void enableLdap(@PathVariable("clusterName") String clusterName) {
       if (!CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);

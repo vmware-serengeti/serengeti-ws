@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import com.vmware.bdd.service.impl.ClusterUserMgmtValidService;
+import com.vmware.bdd.aop.annotation.ClusterManagerPointcut;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 
 import org.apache.commons.collections.MapUtils;
@@ -375,6 +376,7 @@ public class ClusterManager {
       return clusters;
    }
 
+   @ClusterManagerPointcut
    public Long createCluster(ClusterCreate createSpec) throws Exception {
       SoftwareManager softMgr = softwareManagerCollector.getSoftwareManager(createSpec.getAppManager());
       // @ Todo if specify hadoop stack, we can get hadoop stack by stack name. Otherwise, we will get a default hadoop stack.
@@ -550,6 +552,7 @@ public class ClusterManager {
       return clusters;
    }
 
+   @ClusterManagerPointcut
    public Long configCluster(String clusterName, ClusterCreate createSpec)
          throws Exception {
       opsBlocker.blockUnsupportedOpsByCluster("configCluster", clusterName);
@@ -674,6 +677,7 @@ public class ClusterManager {
       }
    }
 
+   @ClusterManagerPointcut
    public Long deleteClusterByName(String clusterName) throws Exception {
       logger.info("ClusterManager, deleting cluster " + clusterName);
 
@@ -714,6 +718,7 @@ public class ClusterManager {
       }
    }
 
+   @ClusterManagerPointcut
    public Long upgradeClusterByName(String clusterName) throws Exception {
       logger.info("ClusterManager, upgrading cluster " + clusterName);
 
@@ -759,6 +764,7 @@ public class ClusterManager {
       }
    }
 
+   @ClusterManagerPointcut
    public Long startCluster(String clusterName) throws Exception {
       logger.info("ClusterManager, starting cluster " + clusterName);
 
@@ -807,6 +813,7 @@ public class ClusterManager {
       }
    }
 
+   @ClusterManagerPointcut
    public Long stopCluster(String clusterName) throws Exception {
       logger.info("ClusterManager, stopping cluster " + clusterName);
 
@@ -854,6 +861,7 @@ public class ClusterManager {
       }
    }
 
+   @ClusterManagerPointcut
    public Long resizeCluster(String clusterName, String nodeGroupName,
          int instanceNum) throws Exception {
       logger.info("ClusterManager, updating node group " + nodeGroupName
@@ -1102,6 +1110,7 @@ public class ClusterManager {
     * @return
     * @throws Exception
     */
+   @ClusterManagerPointcut
    public Long asyncSetParam(String clusterName, Integer activeComputeNodeNum,
          Integer minComputeNodeNum, Integer maxComputeNodeNum, Boolean enableAuto,
          Priority ioPriority)
@@ -1225,6 +1234,7 @@ public class ClusterManager {
       clusterEntityMgr.update(cluster);
    }
 
+   @ClusterManagerPointcut
    public Long fixDiskFailures(String clusterName, String groupName)
          throws Exception {
       opsBlocker.blockUnsupportedOpsByCluster("fixDisk", clusterName);

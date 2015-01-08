@@ -14,17 +14,17 @@
    <mvc:annotation-driven />
    <context:component-scan base-package="com.vmware.bdd.rest" />
 
-    <bean id="restCall" class="com.vmware.bdd.aop.rest.RestCallAdvice"></bean>
+    <bean id="dataCollectorAdvice" class="com.vmware.bdd.aop.rest.DataCollectorAdvice"></bean>
 
     <aop:config>
-        <aop:pointcut id="restCallPointCut"
-                      expression="execution(* com.vmware.bdd.rest..*.*(..)) and @annotation(com.vmware.bdd.aop.annotation.RestCall)" />
-        <aop:aspect id="restCallAspect" ref="restCall" >
-            <aop:after method="afterRestCall" pointcut-ref="restCallPointCut" />
+        <aop:pointcut id="restCallPointcut"
+                      expression="@annotation(com.vmware.bdd.aop.annotation.RestCallPointcut)" />
+        <aop:aspect id="dataCollectorAspect" ref="dataCollectorAdvice" >
+            <aop:after method="afterRestCallMethod" pointcut-ref="restCallPointcut" />
         </aop:aspect>
     </aop:config>
     <aop:aspectj-autoproxy>
-        <aop:include name="restCall"/>
+        <aop:include name="dataCollectorAdvice"/>
     </aop:aspectj-autoproxy>
 
 </beans>

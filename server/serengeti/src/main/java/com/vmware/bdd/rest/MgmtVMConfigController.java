@@ -16,7 +16,7 @@ package com.vmware.bdd.rest;
 
 import java.util.Map;
 
-import com.vmware.bdd.aop.annotation.RestCall;
+import com.vmware.bdd.aop.annotation.RestCallPointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,14 +37,14 @@ public class MgmtVMConfigController {
 
    @RequestMapping(method = RequestMethod.GET, produces = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public Map<String, String> get() {
       return mgmtVmCfgService.get();
    }
 
    @RequestMapping(method = RequestMethod.PUT, consumes = "application/json")
    @ResponseBody
-   @RestCall
+   @RestCallPointcut
    public void modify(@RequestBody Map<String, String> config) {
       mgmtVmCfgService.config(config);
    }

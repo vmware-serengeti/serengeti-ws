@@ -15,7 +15,6 @@
 package com.vmware.bdd.aop.rest;
 
 import com.vmware.bdd.manager.collection.CollectOperationManager;
-import com.vmware.bdd.utils.CommonUtil;
 
 import org.apache.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -24,13 +23,17 @@ import org.springframework.aop.aspectj.MethodInvocationProceedingJoinPoint;
 /**
  * Created by qjin on 12/23/14.
  */
-public class RestCallAdvice {
+public class DataCollectorAdvice {
    private static final Logger logger = Logger
-         .getLogger(RestCallAdvice.class);
+         .getLogger(DataCollectorAdvice.class);
 
-   public void afterRestCall(JoinPoint joinPoint) throws Throwable {
-      String restCallId = CommonUtil.getUUID();
-      CollectOperationManager.setRestCallRawData(restCallId, (MethodInvocationProceedingJoinPoint)joinPoint);
-      logger.info("save restCallId: " + restCallId + ",joinPoint " + joinPoint + " to CollectOperationjManager");
+   //TODO(qjin): check if there is multi-thread problem for joinpoint
+   public void afterRestCallMethod(JoinPoint joinPoint) throws Throwable {
+      CollectOperationManager.storeOperationParameters((MethodInvocationProceedingJoinPoint)joinPoint);
+      logger.info("save joinPoint " + joinPoint + " to CollectOperationjManager");
+   }
+
+   public void afterClusterManagerMethod(JoinPoint joinPoint, Long returnValue) {
+      CollectOperationManager.storeOperationParameters((MethodInvocationProceedingJoinPoint)joinPoint, returnValue);
    }
 }
