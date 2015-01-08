@@ -160,7 +160,7 @@ public class StartVmPostPowerOn implements IPrePostPowerOn {
       if (upgraded) {
          logger.info("Successfully upgrade cluster node " + nodeVmName);
          node.setVersion(serverVersion);
-         node.setAction(Constants.NODE_ACTION_UPGRADE_SUCCESS);
+         node.setAction(Constants.NODE_ACTION_UPGRADE_SUCCEED);
          node.setActionFailed(false);
          node.setErrMessage(null);
       } else {

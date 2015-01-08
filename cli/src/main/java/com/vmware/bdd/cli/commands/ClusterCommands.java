@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import jline.console.ConsoleReader;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,15 @@ import org.springframework.stereotype.Component;
 
 import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityMode;
+import com.vmware.bdd.apitypes.FixDiskRequestBody;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.apitypes.NetworkRead;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.NodeGroupRead;
+import com.vmware.bdd.apitypes.NodeRead;
+import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.apitypes.ResourceScale;
+import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.NodeStatus;
 import com.vmware.bdd.cli.rest.AppManagerRestClient;
 import com.vmware.bdd.cli.rest.CliRestException;

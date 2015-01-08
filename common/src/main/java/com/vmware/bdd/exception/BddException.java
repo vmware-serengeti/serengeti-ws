@@ -220,4 +220,20 @@ public class BddException extends RuntimeException {
       return new BddException(null, "NETWORK", "INVALID_OPTIONS", StringUtils.join(options, ", "));
    }
 
+   public static BddException FAILED_TO_GENERATE_HOSTNAME(Throwable ex, String detail) {
+      return new BddException(ex, "BDD", "GENERATING_HOSTNAME_ERROR", detail);
+   }
+
+   public static BddException FAILED_TO_GENERATE_SCRIPT_FOR_UPDATING_ETC_HOSTS(Throwable ex, String detail) {
+      return new BddException(ex, "BDD", "FAILED_TO_GENERATE_SCRIPT_FOR_UPDATING_ETC_HOSTS", detail);
+   }
+
+   public static BddException SCRIPT_FOR_UPDATING_ETC_HOSTS_TEMPLATE_NOT_FOUND() {
+      return new BddException(null, "BDD", "SCRIPT_FOR_UPDATING_ETC_HOSTS_TEMPLATE_NOT_FOUND");
+   }
+
+   public static BddException SCRIPT_FOR_UPDATING_ETC_HOSTS_TEMPLATE_READ_ERR(Throwable ex, String detail) {
+      return new BddException(ex, "BDD", "SCRIPT_FOR_UPDATING_ETC_HOSTS_TEMPLATE_READ_ERR", detail);
+   }
+
 }

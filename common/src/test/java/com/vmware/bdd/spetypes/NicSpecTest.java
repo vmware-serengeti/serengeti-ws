@@ -18,10 +18,7 @@ import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.spectypes.NicSpec;
 import org.testng.annotations.Test;
 
-import java.util.HashSet;
-import java.util.Set;
 
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 

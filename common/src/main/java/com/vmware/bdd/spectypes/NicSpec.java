@@ -15,6 +15,7 @@
 package com.vmware.bdd.spectypes;
 
 import com.google.gson.Gson;
+import com.vmware.bdd.apitypes.ClusterNetConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo;
 
 import java.util.HashSet;
@@ -41,13 +42,13 @@ public class NicSpec {
 
    public static class NetTrafficDefinition {
 
-      private NetConfigInfo.NetTrafficType trafficType;
+      private ClusterNetConfigInfo.NetTrafficType trafficType;
 
       private int index;
 
       public NetTrafficDefinition() {}
 
-      public NetTrafficDefinition(NetConfigInfo.NetTrafficType trafficType, int index) {
+      public NetTrafficDefinition(ClusterNetConfigInfo.NetTrafficType trafficType, int index) {
          this.trafficType = trafficType;
          this.index = index;
       }
@@ -79,11 +80,11 @@ public class NicSpec {
          return result;
       }
 
-      public NetConfigInfo.NetTrafficType getTrafficType() {
+      public ClusterNetConfigInfo.NetTrafficType getTrafficType() {
          return trafficType;
       }
 
-      public void setTrafficType(NetConfigInfo.NetTrafficType trafficType) {
+      public void setTrafficType(ClusterNetConfigInfo.NetTrafficType trafficType) {
          this.trafficType = trafficType;
       }
 
@@ -149,7 +150,7 @@ public class NicSpec {
       this.netTrafficDefinitionSet = netTrafficDefinitionSet;
    }
 
-   public void addToNetDefs(NetConfigInfo.NetTrafficType trafficType, int index) {
+   public void addToNetDefs(ClusterNetConfigInfo.NetTrafficType trafficType, int index) {
       NetTrafficDefinition netDef = new NetTrafficDefinition(trafficType, index);
       if (netTrafficDefinitionSet == null) {
          netTrafficDefinitionSet = new HashSet<NetTrafficDefinition>();

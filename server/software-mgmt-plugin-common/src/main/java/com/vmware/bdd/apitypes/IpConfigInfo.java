@@ -16,7 +16,6 @@ package com.vmware.bdd.apitypes;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 
 /**
  * Author: Xiaoding Bian
@@ -24,6 +23,7 @@ import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
  * Time: 5:03 PM
  */
 public class IpConfigInfo extends NetConfigInfo{
+
    @Expose
    @SerializedName("ip_address")
    private String ipAddress;
@@ -44,7 +44,7 @@ public class IpConfigInfo extends NetConfigInfo{
       this.ipAddress = ipAddress;
    }
 
-   public IpConfigInfo(NetConfigInfo netConfig, String ipAddress) {
+   public IpConfigInfo(ClusterNetConfigInfo netConfig, String ipAddress) {
       this(netConfig.getTrafficType(), netConfig.getNetworkName(), netConfig.getPortGroupName(), ipAddress);
    }
 }

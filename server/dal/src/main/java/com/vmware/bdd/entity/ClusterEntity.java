@@ -40,7 +40,7 @@ import org.hibernate.annotations.Type;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.ClusterStatus;
-import com.vmware.bdd.apitypes.NetConfigInfo;
+import com.vmware.bdd.apitypes.ClusterNetConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.TopologyType;
@@ -268,8 +268,8 @@ public class ClusterEntity extends EntityBase {
 
    public List<String> fetchNetworkNameList() {
       List<String> networkNames = new ArrayList<String>();
-      for (Entry<NetTrafficType, List<NetConfigInfo>> netConfig : getNetworkConfigInfo().entrySet()) {
-         for (NetConfigInfo net : netConfig.getValue()) {
+      for (Entry<NetTrafficType, List<ClusterNetConfigInfo>> netConfig : getNetworkConfigInfo().entrySet()) {
+         for (ClusterNetConfigInfo net : netConfig.getValue()) {
             if (!networkNames.contains(net.getNetworkName())) {
                networkNames.add(net.getNetworkName());
             }
@@ -283,16 +283,16 @@ public class ClusterEntity extends EntityBase {
    }
 
    @SuppressWarnings("unchecked")
-   public Map<NetTrafficType, List<NetConfigInfo>> getNetworkConfigInfo() {
+   public Map<NetTrafficType, List<ClusterNetConfigInfo>> getNetworkConfigInfo() {
       return (new Gson()).fromJson(networkConfig,
-            new TypeToken<HashMap<NetTrafficType, List<NetConfigInfo>>>() {}.getType());
+            new TypeToken<HashMap<NetTrafficType, List<ClusterNetConfigInfo>>>() {}.getType());
    }
 
    public void setNetworkConfig(String networkConfig) {
       this.networkConfig = networkConfig;
    }
 
-   public void setNetworkConfig(Map<NetTrafficType, List<NetConfigInfo>> networkConfig) {
+   public void setNetworkConfig(Map<NetTrafficType, List<ClusterNetConfigInfo>> networkConfig) {
       this.networkConfig = (new Gson()).toJson(networkConfig);
    }
 

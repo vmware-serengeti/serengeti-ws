@@ -47,7 +47,7 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.IpConfigInfo;
-import com.vmware.bdd.apitypes.NetConfigInfo;
+import com.vmware.bdd.apitypes.ClusterNetConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
@@ -293,7 +293,7 @@ public class TestClusterManager extends AbstractTestNGSpringContextTests {
          @Mock
          public Map<String, String> buildTopology(List<NodeRead> nodes, String topology) {
             Map<String, String> rackTopology = new HashMap<String, String>();
-            Iterator<Map.Entry<NetConfigInfo.NetTrafficType, List<IpConfigInfo>>> ipConfigIt =
+            Iterator<Map.Entry<ClusterNetConfigInfo.NetTrafficType, List<IpConfigInfo>>> ipConfigIt =
                   nodes.get(0).getIpConfigs().entrySet().iterator();
             while (ipConfigIt.hasNext()) {
                Entry<NetTrafficType, List<IpConfigInfo>> entry = ipConfigIt.next();

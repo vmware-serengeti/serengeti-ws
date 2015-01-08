@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -e;
+
+ETC_HOSTS_PATH="/etc/hosts"
+
+hosts_content=ETC_HOSTS_CONTENT
+
+ip_to_fqdn_mappings=(${hosts_content//\,/ })
+for mapping in ${ip_to_fqdn_mappings[@]}
+do
+  arr_mapping=(${mapping//\:/ })
+  ip_addr=${arr_mapping[0]}
+  fqdn=${arr_mapping[1]}
+  if grep -q ${fqdn} ${ETC_HOSTS_PATH}
+  then
+    sed -i "s/.*${fqdn}$/${ip_addr} ${fqdn}/g" ${ETC_HOSTS_PATH}
+  else
+    echo "${ip_addr} ${fqdn}" >> ${ETC_HOSTS_PATH}
+  fi
+done
+
+set +e;

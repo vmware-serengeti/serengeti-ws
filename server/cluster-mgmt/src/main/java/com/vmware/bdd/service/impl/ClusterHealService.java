@@ -39,7 +39,7 @@ import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.NetConfigInfo;
+import com.vmware.bdd.apitypes.ClusterNetConfigInfo;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;

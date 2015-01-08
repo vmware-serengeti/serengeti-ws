@@ -22,6 +22,14 @@
 		<beans:property name="managementOperation" value="START" />
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 	</beans:bean>
+	<beans:bean name="generateHostnameWhenClusterStartTasklet"
+		class="com.vmware.bdd.service.job.GenerateHostnameStep">
+		<beans:property name="generateHostnameSerivce" ref="generateHostnameService"/>
+	</beans:bean>
+	<beans:bean name="generateHostnameFailedWhenClusterStartTasklet"
+		class="com.vmware.bdd.service.job.GenerateHostnameFailedStep">
+		<beans:property name="generateHostnameSerivce" ref="generateHostnameService"/>
+	</beans:bean>
 
 	<job id="startClusterJob" job-repository="jobRepository">
 		<step id="startClusterVM" next="startClusterNodeSyncup">
@@ -36,8 +44,20 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="startClusterVerifyNodeStatus" next="softwareBootstrapStartClusterStep">
+		<step id="startClusterVerifyNodeStatus" next="generateHostnameWhenClusterStartStep">
 			<tasklet ref="startClusterNodeStatusVerifyTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="generateHostnameWhenClusterStartStep" next="generateHostnameFailedWhenClusterStartStep">
+			<tasklet ref="generateHostnameWhenClusterStartTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="generateHostnameFailedWhenClusterStartStep" next="softwareBootstrapStartClusterStep">
+			<tasklet ref="generateHostnameFailedWhenClusterStartTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

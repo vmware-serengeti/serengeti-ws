@@ -9,9 +9,30 @@
 
 	<beans:import resource="classpath*:/META-INF/spring/jobs/common-job-context.xml" />
 
+	<beans:bean name="generateHostnameWhenClusterConfigTasklet"
+		class="com.vmware.bdd.service.job.GenerateHostnameStep">
+		<beans:property name="generateHostnameSerivce" ref="generateHostnameService"/>
+	</beans:bean>
+	<beans:bean name="generateHostnameFailedWhenClusterConfigTasklet"
+		class="com.vmware.bdd.service.job.GenerateHostnameFailedStep">
+		<beans:property name="generateHostnameSerivce" ref="generateHostnameService"/>
+	</beans:bean>
+
 	<job id="configClusterJob" job-repository="jobRepository">
-		<step id="setAutoElasticityConfigStep" next="softwareConfigClusterStep">
+		<step id="setAutoElasticityConfigStep" next="generateHostnameWhenClusterConfigStep">
 			<tasklet ref="setAutoElasticityTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="generateHostnameWhenClusterConfigStep" next="generateHostnameFailedWhenClusterConfigStep">
+			<tasklet ref="generateHostnameWhenClusterConfigTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="generateHostnameFailedWhenClusterConfigStep" next="softwareConfigClusterStep">
+			<tasklet ref="generateHostnameFailedWhenClusterConfigTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

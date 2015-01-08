@@ -64,6 +64,8 @@ public class Constants {
    public static final String GUEST_VARIABLE_NIC_DEVICES = "nics";
    public static final String GUEST_VARIABLE_RESERVE_RAW_DISKS = "reserveRawDisks";
    public static final String GUEST_VARIABLE_VOLUMES = "volumes";
+   public static final String GUEST_VARIABLE_DNS_TYPE = "dnsType";
+   public static final String GUEST_VARIABLE_DHCP_HOSTNAME = "dhcpHostname";
 
    public static final String MANAGEMENT_SERVER_IP = "managementServerIP";
    public static final String NULL_IPV4_ADDRESS = "0.0.0.0";
@@ -79,7 +81,7 @@ public class Constants {
    public static final String NODE_ACTION_DOWNLOAD_PACKAGES = "Downloading upgrade packages";
    public static final String NODE_ACTION_INSTALL_PACKAGES = "Installing upgrade packages";
    public static final String NODE_ACTION_UPGRADE_FAILED = "Upgrade Failed";
-   public static final String NODE_ACTION_UPGRADE_SUCCESS = "Upgrade Success";
+   public static final String NODE_ACTION_UPGRADE_SUCCEED = "Upgrade Succeeded";
    public static final String NODE_ACTION_WRONG_FT_STATUS = "Wrong FT status";
    public static final String NODE_ACTION_SETTING_PASSWORD = "Setting Password";
    public static final String NODE_ACTION_SET_PASSWORD_SUCCEED = "Set password succeed";
@@ -88,7 +90,10 @@ public class Constants {
    public static final String NODE_ACTION_SCP_LOCALREPO_FILE = "Remote copy the local repo file";
    public static final String NODE_ACTION_MAKE_BACKUP_DIR = "Make a backup dir /etc/yum.repos.d/backup";
    public static final String NODE_ACTION_MOVE_CENTOS_REPO = "move all the CentOS*.repo to /etc/yum.repos.d/backup";
-   
+   public static final String NODE_ACTION_GENERATE_HOSTNAME_SUCCEED = "Generating Hostname Succeeded";
+   public static final String NODE_ACTION_GENERATE_HOSTNAME_FAILED = "Generating Hostname Failed";
+   public static final String NODE_ACTION_GENERATE_HOSTNAME = "Generating Hostname";
+
    public static final int VM_POWER_ON_WAITING_SEC = 600;
    public static final int VM_SHUTDOWN_WAITING_SEC = 600;
    public static final int VM_FAST_SHUTDOWN_WAITING_SEC = 180;
@@ -240,6 +245,8 @@ public class Constants {
    public static final int SET_LOCAL_REPO_MAX_RETRY_TIMES = 5;
    public static final String SERENGETI_NODE_YUM_CLOUDERA_MANAGER_REPO_ID = "node.appmgr.local.repo.id.cloudera";
    public static final String SERENGETI_NODE_YUM_AMBARI_REPO_ID = "node.appmgr.local.repo.id.ambari";
+   public static final String SERENGETI_TMP_DIR = "/opt/serengeti/tmp";
+   public static final String SRCIPT_FOR_UPDATING_ETC_HOSTS_DIR = SERENGETI_TMP_DIR + "/.script-for-updating-etc-hosts/";
 
    public static final String NODE_ACTION_SET_LOCAL_REPO_SUCCEED = "Set local repo succeed";
    public static final String NODE_ACTION_SET_LOCAL_REPO_FAILED = "Set local repo failed";

@@ -152,5 +152,9 @@
 		class="com.vmware.bdd.service.impl.SetLocalRepoService">
 		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
 	</beans:bean>
+	<beans:bean name="generateHostnameService"
+		class="com.vmware.bdd.service.impl.GenerateHostnameService">
+		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
+	</beans:bean>
 
 </beans:beans>

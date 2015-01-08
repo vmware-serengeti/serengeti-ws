@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2013-2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,8 @@ package com.vmware.bdd.apitypes;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Author: Xiaoding Bian
- * Date: 10/15/13
- * Time: 11:13 AM
- */
 public class NetConfigInfo {
+
    @Expose
    @SerializedName("port_group_name")
    private String portGroupName;
@@ -35,7 +31,8 @@ public class NetConfigInfo {
    @SerializedName("traffic_type")
    private NetTrafficType trafficType;
 
-   public NetConfigInfo() {
+   public NetConfigInfo(){
+
    }
 
    public NetConfigInfo(NetTrafficType trafficType, String networkName, String portGroupName) {

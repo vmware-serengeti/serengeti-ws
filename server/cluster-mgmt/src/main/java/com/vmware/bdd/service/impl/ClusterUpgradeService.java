@@ -138,7 +138,7 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
          if (node.canBeUpgrade()) {
             logger.info("Successfully upgrade cluster node " + nodeVmName);
             node.setVersion(serverVersion);
-            node.setAction(Constants.NODE_ACTION_UPGRADE_SUCCESS);
+            node.setAction(Constants.NODE_ACTION_UPGRADE_SUCCEED);
             node.setActionFailed(false);
             node.setErrMessage(null);
             clusterEntityMgr.update(node);

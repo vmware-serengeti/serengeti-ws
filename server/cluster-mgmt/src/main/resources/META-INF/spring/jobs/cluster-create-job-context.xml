@@ -36,6 +36,14 @@
       <beans:property name="clusterEntityMgr" ref="clusterEntityManager"/>
       <beans:property name="managementOperation" value="CREATE" />
    </beans:bean>
+   <beans:bean name="generateHostnameWhenClusterCreateTasklet"
+               class="com.vmware.bdd.service.job.GenerateHostnameStep">
+      <beans:property name="generateHostnameSerivce" ref="generateHostnameService"/>
+   </beans:bean>
+   <beans:bean name="generateHostnameFailedWhenClusterCreateTasklet"
+               class="com.vmware.bdd.service.job.GenerateHostnameFailedStep">
+      <beans:property name="generateHostnameSerivce" ref="generateHostnameService"/>
+   </beans:bean>
 
 	<job id="createClusterJob" job-repository="jobRepository">
 		<step id="createClusterPlanStep" next="updateClusterDataStep1">
@@ -74,8 +82,20 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="postSetPasswordForCreateNodesStep" next="configLocalRepoStep">
+		<step id="postSetPasswordForCreateNodesStep" next="generateHostnameWhenClusterCreateStep">
 			<tasklet ref="postSetPasswordTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="generateHostnameWhenClusterCreateStep" next="generateHostnameFailedWhenClusterCreateStep">
+			<tasklet ref="generateHostnameWhenClusterCreateTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="generateHostnameFailedWhenClusterCreateStep" next="configLocalRepoStep">
+			<tasklet ref="generateHostnameFailedWhenClusterCreateTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>

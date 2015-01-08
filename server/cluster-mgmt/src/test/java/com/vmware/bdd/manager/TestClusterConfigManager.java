@@ -44,6 +44,12 @@ import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.apitypes.DistroRead;
+import com.vmware.bdd.apitypes.InstanceType;
+import com.vmware.bdd.apitypes.IpBlock;
+import com.vmware.bdd.apitypes.NetworkDnsType;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.PlacementPolicy;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.dal.IServerInfoDAO;
@@ -237,7 +243,7 @@ public class TestClusterConfigManager {
          logger.error("ignore create resource pool myRp6 exception. ", e);
       }
       try {
-         netSvc.addDhcpNetwork("dhcpNet1", "CFNetwork", null, false);
+         netSvc.addDhcpNetwork("dhcpNet1", "CFNetwork", NetworkDnsType.NORMAL, false);
       } catch (Exception e) {
          logger.error("ignore create network dhcpNet1 exception. ", e);
       }
@@ -274,7 +280,7 @@ public class TestClusterConfigManager {
       ipBlocks.add(ip3);
       try {
          netSvc.addIpPoolNetwork("ipPool1", "CFNetwork1", "255.255.0.0",
-               "192.168.1.254", "2.2.2.2", null, ipBlocks, null, false);
+               "192.168.1.254", "2.2.2.2", null, ipBlocks, NetworkDnsType.NORMAL, false);
       } catch (Exception e) {
          logger.error("ignore create network ipPool1 exception. ", e);
       }

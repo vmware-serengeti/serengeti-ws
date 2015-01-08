@@ -856,8 +856,8 @@ public class RestResource {
             || !CommonUtil.validateResourceName(networkName)) {
          throw BddException.INVALID_PARAMETER("network name", networkName);
       }
-      if (networkAdd.getIpBlocks() == null && networkAdd.getDnsType() == null) {
-         throw BddException.INVALID_OPTIONS_WHEN_UPDATE_NETWORK(new String[]{"addIP", "dnsType"});
+      if (networkAdd.getIpBlocks() == null && networkAdd.getDnsType() == null && networkAdd.getIsGenerateHostname() == null) {
+         throw BddException.INVALID_OPTIONS_WHEN_UPDATE_NETWORK(new String[]{"addIP", "dnsType", "generateHostname"});
       }
       if (networkAdd.getDnsType() != null && !CommonUtil.validateDnsType(networkAdd.getDnsType())) {
          throw BddException.INVALID_DNS_TYPE(networkAdd.getDnsType());

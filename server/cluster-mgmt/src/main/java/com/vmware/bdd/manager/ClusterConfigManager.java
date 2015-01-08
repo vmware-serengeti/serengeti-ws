@@ -47,7 +47,15 @@ import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.DiskSpec.AllocationType;
 import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
+import com.vmware.bdd.apitypes.DiskSplitPolicy;
+import com.vmware.bdd.apitypes.IpBlock;
+import com.vmware.bdd.apitypes.IpConfigInfo;
+import com.vmware.bdd.apitypes.ClusterNetConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.apitypes.NetworkAdd;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.NodeRead;
+import com.vmware.bdd.apitypes.PlacementPolicy;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks.GroupRacksType;
@@ -410,17 +418,22 @@ public class ClusterConfigManager {
       applyInfraChanges(cluster, blueprint);
    }
 
-   private Map<NetTrafficType, List<NetConfigInfo>> validateAndConvertNetNamesToNetConfigs(
+   private Map<NetTrafficType, List<ClusterNetConfigInfo>> validateAndConvertNetNamesToNetConfigs(
          Map<NetTrafficType, List<String>> netNamesInfo, boolean isMaprDistro) {
-      Map<NetTrafficType, List<NetConfigInfo>> netConfigs =
-            new HashMap<NetTrafficType, List<NetConfigInfo>>();
+      Map<NetTrafficType, List<ClusterNetConfigInfo>> netConfigs =
+            new HashMap<NetTrafficType, List<ClusterNetConfigInfo>>();
       Map<String, Set<String>> port2names = new HashMap<String, Set<String>>();
 
       for (NetTrafficType type : netNamesInfo.keySet()) {
-         netConfigs.put(type, new ArrayList<NetConfigInfo>());
+         netConfigs.put(type, new ArrayList<ClusterNetConfigInfo>());
          for (String name : netNamesInfo.get(type)) {
-            String pg = networkMgr.getNetworkEntityByName(name).getPortGroup();
-            NetConfigInfo netConfig = new NetConfigInfo(type, name, pg);
+            NetworkEntity networkEntity = networkMgr.getNetworkEntityByName(name);
+
+            String pg = networkEntity.getPortGroup();
+            Boolean isGenerateHostname = networkEntity.getIsGenerateHostname();
+            String hostnamePrefix = HostnameManager.getHostnamePrefix();
+
+            ClusterNetConfigInfo netConfig = new ClusterNetConfigInfo(type, name, pg, networkEntity.getDnsType(), isGenerateHostname, hostnamePrefix);
             netConfigs.get(type).add(netConfig);
 
             if (!port2names.containsKey(pg)) {
@@ -445,12 +458,12 @@ public class ClusterConfigManager {
    }
 
    private Map<NetTrafficType, List<String>> convertNetConfigsToNetNames(
-         Map<NetTrafficType, List<NetConfigInfo>> netConfigs) {
+         Map<NetTrafficType, List<ClusterNetConfigInfo>> netConfigs) {
       Map<NetTrafficType, List<String>> netNamesInfo =
             new HashMap<NetTrafficType, List<String>>();
       for (NetTrafficType type : netConfigs.keySet()) {
          netNamesInfo.put(type, new ArrayList<String>());
-         for (NetConfigInfo config : netConfigs.get(type)) {
+         for (ClusterNetConfigInfo config : netConfigs.get(type)) {
             netNamesInfo.get(type).add(config.getNetworkName());
          }
       }

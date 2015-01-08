@@ -17,7 +17,6 @@ package com.vmware.bdd.dal.entity;
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.NodeStatus;
-import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.dal.INodeDAO;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NicEntity;
@@ -30,11 +29,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import sun.swing.BakedArrayList;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @ContextConfiguration(locations = {"classpath:/META-INF/spring/*-context.xml"})
