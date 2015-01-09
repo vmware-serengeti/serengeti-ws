@@ -244,7 +244,7 @@ public class ClusterCommands implements CommandMarker {
                disableLocalUsersFlag == null ? Boolean.TRUE.toString() : disableLocalUsersFlag.toString());
 
          infraConfigs.put(UserMgmtConstants.LDAP_USER_MANAGEMENT, userMgmtConfig);
-         clusterCreate.setInfraConfig(infraConfigs);
+         clusterCreate.setInfrastructure_config(infraConfigs);
       } else {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
@@ -311,13 +311,13 @@ public class ClusterCommands implements CommandMarker {
                return;
             }
 
-            Map<String, Map<String, String>> specInfraConfigs = clusterSpec.getInfraConfig();
+            Map<String, Map<String, String>> specInfraConfigs = clusterSpec.getInfrastructure_config();
             if(specInfraConfigs != null && !specInfraConfigs.isEmpty()) //spec infra configu is not empty
             {
                if(infraConfigs != null && !infraConfigs.isEmpty()) {
                   System.out.println("adminGroup and userGroup has been specified as commandline parameters, so the values inside spec file will be ignored.");
                } else {
-                  clusterCreate.setInfraConfig(infraConfigs);
+                  clusterCreate.setInfrastructure_config(infraConfigs);
                }
             }
          }

@@ -336,7 +336,7 @@ public class TestClusterConfigManager {
       userMgmtConfig.put("user_group_name", "usrgroup");
 
       infraConfigArrayList.put("user_management", userMgmtConfig);
-      spec.setInfraConfig(infraConfigArrayList);
+      spec.setInfrastructure_config(infraConfigArrayList);
 
       clusterConfigMgr.createClusterConfig(spec);
 

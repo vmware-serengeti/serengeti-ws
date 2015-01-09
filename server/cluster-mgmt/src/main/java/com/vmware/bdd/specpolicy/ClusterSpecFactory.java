@@ -396,8 +396,8 @@ public class ClusterSpecFactory {
          newSpec.setTopologyPolicy(spec.getTopologyPolicy());
       }
 
-      if(spec.getInfraConfig() != null && !spec.getInfraConfig().isEmpty()) {
-         newSpec.setInfraConfig(spec.getInfraConfig());
+      if(spec.getInfrastructure_config() != null && !spec.getInfrastructure_config().isEmpty()) {
+         newSpec.setInfrastructure_config(spec.getInfrastructure_config());
       }
 
       return newSpec;

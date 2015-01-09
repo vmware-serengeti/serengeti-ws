@@ -32,7 +32,6 @@ import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpGet;
@@ -353,7 +352,7 @@ public class ClusterConfigManager {
    }
 
    private void setInfraConfig(ClusterCreate cluster, ClusterEntity clusterEntity) {
-      Map<String, Map<String, String>> infraConfigs = cluster.getInfraConfig();
+      Map<String, Map<String, String>> infraConfigs = cluster.getInfrastructure_config();
 
       if(infraConfigs != null && !infraConfigs.isEmpty()) {
          ObjectMapper objectMapper = new ObjectMapper();
@@ -897,7 +896,7 @@ public class ClusterConfigManager {
             throw new SWMgrCollectorInternalException("failed to deserialize Infrastructure Configuration");
          }
 
-         clusterConfig.setInfraConfig(infraConfigList);
+         clusterConfig.setInfrastructure_config(infraConfigList);
       }
    }
 

@@ -128,7 +128,7 @@ public class ClusterCreate implements Serializable {
 
    @Expose
    @SerializedName("infrastructure_config")
-   private Map<String, Map<String, String>> infraConfig;
+   private Map<String, Map<String, String>> infrastructure_config;
 
    private Boolean validateConfig = true;
 
@@ -167,16 +167,16 @@ public class ClusterCreate implements Serializable {
       this.hostToRackMap = cluster.hostToRackMap;
       this.password = cluster.password;
       this.localRepoURL = cluster.localRepoURL;
-      this.infraConfig = cluster.infraConfig;
+      this.infrastructure_config = cluster.infrastructure_config;
    }
 
    @JsonProperty("infrastructure_config")
-   public Map<String, Map<String, String>> getInfraConfig() {
-      return infraConfig;
+   public Map<String, Map<String, String>> getInfrastructure_config() {
+      return infrastructure_config;
    }
 
-   public void setInfraConfig(Map<String, Map<String, String>> infraConfig) {
-      this.infraConfig = infraConfig;
+   public void setInfrastructure_config(Map<String, Map<String, String>> infrastructure_config) {
+      this.infrastructure_config = infrastructure_config;
    }
 
    public Map<String, Object> getConfiguration() {

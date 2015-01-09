@@ -442,7 +442,7 @@ public class ClusterManager {
    }
 
    private void validateInfraConfig(ClusterCreate clusterSpec) {
-      Map<String, Map<String,String>> infraConfig = clusterSpec.getInfraConfig();
+      Map<String, Map<String,String>> infraConfig = clusterSpec.getInfrastructure_config();
 
       if(MapUtils.isEmpty(infraConfig)) {
          logger.info("no infra configuration in cluster create spec!");
