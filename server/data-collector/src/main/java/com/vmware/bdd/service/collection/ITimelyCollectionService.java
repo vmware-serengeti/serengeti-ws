@@ -14,6 +14,16 @@
  ***************************************************************************/
 package com.vmware.bdd.service.collection;
 
+import java.util.Map;
+
+import com.vmware.bdd.apitypes.DataObjectType;
+
 public interface ITimelyCollectionService extends ICollectionService {
+
+   Map<String, Map<String, Object>> collectData(Map<String, Object> data,
+         DataObjectType operation);
+
+   Map<String, Map<String, ?>> mergeData(Map<String, Map<String, Object>> operationdata,
+         Map<String, Map<String, Object>> clusterSnapshotData);
 
 }

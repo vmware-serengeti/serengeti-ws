@@ -22,6 +22,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import com.vmware.bdd.utils.CommonUtil;
 import org.apache.log4j.Logger;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -102,12 +103,18 @@ public class ResourceInitializer implements ServletContextListener {
 
    private void initDataCollection(WebApplicationContext wac)
          throws ParseException {
-      logger.info("========init data collection start======");
+      logger.info("ResourceInitializer::initDataCollection started");
       ICollectionInitializerService collectionInitializerService =
             wac.getBean("collectionInitializerService",
                   ICollectionInitializerService.class);
-      SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-      Date deployTime = df.parse(Configuration.getString("serengeti.deploy_time"));
+      String deployTimeStr = Configuration.getString("serengeti.deploy_time");
+      Date deployTime = null;
+      if (CommonUtil.isBlank(deployTimeStr)) {
+         deployTime = new Date();
+      } else {
+         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+         deployTime = df.parse(deployTimeStr);
+      }
       collectionInitializerService.setDeployTime(deployTime);
       collectionInitializerService.generateInstanceId();
    }

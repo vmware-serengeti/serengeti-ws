@@ -15,10 +15,12 @@
 package com.vmware.bdd.apitypes;
 
 public enum DataObjectType {
+
    FOOTPRINT("bde.footprint"),
    ENVIRONMENTAL_INFORMATION("bde.environmental_information"),
    COMMONREPORTS("bde.product_instance"),
-   BDE_OPERATION("bde.operation");
+   OPERATION("bde.operation"),
+   CLUSTER_SNAPSHOT("bde.cluster_snapshot");
 
    private String name;
 

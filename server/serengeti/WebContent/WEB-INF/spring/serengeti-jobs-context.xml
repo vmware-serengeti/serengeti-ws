@@ -15,10 +15,10 @@
    <beans:bean id="mainJobExecutionStatusHolder"
       class="com.vmware.bdd.service.job.InMemoryJobExecutionStatusHolder"/>
    <beans:bean id="jobExecutionStatusHolder"
-      class="com.vmware.bdd.service.job.InMemoryJobExecutionStatusHolder"/>      
+      class="com.vmware.bdd.service.job.InMemoryJobExecutionStatusHolder"/>
    <beans:bean id="jobParametersExtractor"
       class="com.vmware.bdd.service.job.SubJobParametersExtractor"/>
-
+    
     <beans:bean id="dataCollectorAdvice" class="com.vmware.bdd.aop.rest.DataCollectorAdvice"/>
 
     <aop:config>
@@ -32,4 +32,20 @@
         <aop:include name="dataCollectorAdvice"/>
     </aop:aspectj-autoproxy>
 
+	<beans:bean id="jobListenerAdvice"
+		class="com.vmware.bdd.aop.collection.JobListenerAdvice" >
+		<beans:property name="collectionDriverManager" ref = "collectionDriverManager" />
+        <beans:property name="dataContainer" ref = "dataContainer" />
+	</beans:bean>
+
+	<aop:config>
+		<aop:pointcut id="jobListenerPointCut"
+			expression="execution(* com.vmware.bdd.service.job.*Listener.afterJob(..))" />
+		<aop:aspect id="jobListenerAspect" ref="jobListenerAdvice">
+			<aop:after method="jobAfter" pointcut-ref="jobListenerPointCut" />
+		</aop:aspect>
+	</aop:config>
+	<aop:aspectj-autoproxy>
+		<aop:include name="jobListenerAdvice" />
+	</aop:aspectj-autoproxy>
 </beans:beans>

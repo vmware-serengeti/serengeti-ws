@@ -29,8 +29,8 @@ import com.vmware.bdd.service.job.TrackableTasklet;
 public class CollectBDEFootprintStep extends TrackableTasklet {
 
    private static final Logger logger = Logger.getLogger(CollectBDEFootprintStep.class);
-   CollectionDriverManager collectionDriverManager;
-   IPeriodCollectionService periodCollectionService;
+   private CollectionDriverManager collectionDriverManager;
+   private IPeriodCollectionService periodCollectionService;
 
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,

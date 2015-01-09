@@ -14,7 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.manager.collection;
 
-import com.vmware.bdd.plugin.ambari.api.model.cluster.TaskStatus;
 import com.vmware.bdd.utils.CommonUtil;
 import org.apache.log4j.Logger;
 
@@ -27,9 +26,53 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.bdd.apitypes.DataObjectType;
+import org.springframework.batch.core.ExitStatus;
+
 public class CollectOperationManager {
+
    private static final Logger logger = Logger.getLogger(CollectOperationManager.class);
-   ITimelyCollectionService timelyCollectionService;
+
+   private CollectionDriverManager collectionDriverManager;
+   private ITimelyCollectionService timelyCollectionService;
+
+   public void sendData(Map<String, Object> rawOperationData) {
+      if (collectionDriverManager != null && timelyCollectionService != null) {
+         Map<String, Map<String, ?>> data = null;
+         Map<String, Map<String, Object>> operationData =
+                 timelyCollectionService.collectData(rawOperationData, DataObjectType.OPERATION);
+         if (operationData == null) {
+            return;
+         }
+         if (isClusterRelated(rawOperationData)) {
+            Map<String, Map<String, Object>> clusterSnapshotData =
+                    timelyCollectionService.collectData(rawOperationData, DataObjectType.CLUSTER_SNAPSHOT);
+            if (clusterSnapshotData != null) {
+               data = timelyCollectionService.mergeData(operationData, clusterSnapshotData);
+            }
+         } else {
+            data =  new HashMap<String, Map<String, ?>>();
+            data.putAll(operationData);
+         }
+         if (data != null && !data.isEmpty()) {
+            collectionDriverManager.getDriver().send(data);
+         }
+      }
+   }
+
+   private boolean isClusterRelated(Map<String, ?> operationData) {
+      if (!operationData.containsKey("operation_name")) {
+         return false;
+      }
+      String operationName = (String) operationData.get("operation_name");
+      if (operationName.trim().equals("createCluster")
+            || operationName.trim().equals("configCluster")
+            || operationName.trim().equals("resizeCluster")
+            || operationName.trim().equals("scaleNodeGroupResource")) {
+         return true;
+      }
+      return false;
+   }
 
    private static List<Map<String, Object>> operations = new LinkedList<>();
 
@@ -45,7 +88,6 @@ public class CollectOperationManager {
    public static void storeOperationParameters(MethodInvocationProceedingJoinPoint joinPoint, Long returnValue) {
       try {
          Map<String, Object> operation = getCommonParameters(joinPoint);
-         operation.put("operation_status", TaskStatus.IN_PROGRESS);
          operation.put("task_id", returnValue);
          synchronized (operations) {
             operations.add(operation);
@@ -59,7 +101,7 @@ public class CollectOperationManager {
       try {
          Map<String, Object> operation = getCommonParameters(joinPoint);
          operation.put("end_time", operation.get("begin_time"));
-         operation.put("operation_status", TaskStatus.COMPLETED);
+         operation.put("operation_status", ExitStatus.COMPLETED.getExitCode());
          synchronized (operations) {
             operations.add(operation);
          }
@@ -92,4 +134,21 @@ public class CollectOperationManager {
       return  operation;
    }
 
+   public CollectionDriverManager getCollectionDriverManager() {
+      return collectionDriverManager;
+   }
+
+   public void setCollectionDriverManager(
+         CollectionDriverManager collectionDriverManager) {
+      this.collectionDriverManager = collectionDriverManager;
+   }
+
+    public static List<Map<String, Object>> consumeOperations () {
+        List<Map<String, Object>> consumptionOperations = new LinkedList<>();
+        synchronized (operations) {
+            consumptionOperations.addAll(operations);
+            operations.clear();
+        }
+        return consumptionOperations;
+    }
 }

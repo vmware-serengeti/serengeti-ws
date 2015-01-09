@@ -16,6 +16,10 @@ package com.vmware.bdd.manager.collection;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -28,10 +32,14 @@ public class CollectionDriverManager {
    static final Logger logger = Logger.getLogger(CollectionDriverManager.class);
    protected CollectionDriver driver;
    protected static File file;
+   private CollectOperationManager collectOperationManager;
+   private DataContainer dataContainer;
 
    public CollectionDriverManager() {}
-   public CollectionDriverManager(String driverClass, ICollectionInitializerService collectionInitializerService) {
+   public CollectionDriverManager(String driverClass, ICollectionInitializerService collectionInitializerService
+         , CollectOperationManager collectOperationMgr, DataContainer container) {
       init(driverClass, collectionInitializerService);
+      startCollection(collectOperationMgr, container);
    }
 
    private void init(String driverClass, ICollectionInitializerService collectionInitializerService) {
@@ -50,6 +58,19 @@ public class CollectionDriverManager {
          logger.error("Failed to instance class " + driverClass + ": "
                + e.getLocalizedMessage());
       }
+   }
+
+   private void startCollection(CollectOperationManager collectOperationMgr, DataContainer container) {
+      collectOperationManager = collectOperationMgr;
+      collectOperationManager.setCollectionDriverManager(this);
+      dataContainer = container;
+      ScheduledExecutorService service = Executors.newScheduledThreadPool(2);
+      TimelyDataConsumer timelyDataConsumer = new TimelyDataConsumer(dataContainer, getDriver());
+      timelyDataConsumer.setCollectOperationManager(collectOperationManager);
+      TimelyDataProducer timelyDataProducer = new TimelyDataProducer(dataContainer, getDriver());
+      timelyDataProducer.setCollectOperationManager(collectOperationManager);
+      service.scheduleAtFixedRate(timelyDataConsumer, 20, 10, TimeUnit.SECONDS);
+      service.scheduleAtFixedRate(timelyDataProducer, 20, 10, TimeUnit.SECONDS);
    }
 
    private void registerDriver(CollectionDriver collectionDriver) {

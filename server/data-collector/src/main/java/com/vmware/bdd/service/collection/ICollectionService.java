@@ -14,10 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.service.collection;
 
-import java.util.Map;
-
-import com.vmware.bdd.apitypes.DataObjectType;
-
 public interface ICollectionService {
-   public Map<String, Map<String, ?>> collectData(DataObjectType dataObjectType);
- }
+
+}

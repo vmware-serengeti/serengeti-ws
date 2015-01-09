@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
+import com.vmware.bdd.manager.collection.*;
 import mockit.Mock;
 import mockit.MockClass;
 import mockit.Mockit;
@@ -36,9 +37,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.manager.JobManager;
-import com.vmware.bdd.manager.collection.CollectionDriver;
-import com.vmware.bdd.manager.collection.CollectionDriverManager;
-import com.vmware.bdd.manager.collection.FakeCollectionDriverManager;
 import com.vmware.bdd.service.collection.ICollectionInitializerService;
 import com.vmware.bdd.service.collection.impl.FakeCollectionInitializerService;
 import com.vmware.bdd.service.collection.job.JobConstants;
@@ -104,10 +102,13 @@ public class TestDataCollectionQuartzJob {
       CollectionDriver collectionDriver = mock(CollectionDriver.class);
       ICollectionInitializerService collectionInitializerService =
             Mockito.mock(FakeCollectionInitializerService.class);
+      CollectOperationManager collectOperationManager = mock(CollectOperationManager.class);
+      DataContainer dataContainer = mock(DataContainer.class);
       CollectionDriverManager collectionDriverManager =
             new FakeCollectionDriverManager(
                   "com.vmware.bdd.manager.ph.PhoneHomeCollectionDriver",
-                  collectionInitializerService, collectionDriver, file);
+                  collectionInitializerService, collectionDriver,
+                  collectOperationManager, dataContainer, file);
       DataCollectionQuartzJob dataCollectionQuartzJob =
             new DataCollectionQuartzJob();
       dataCollectionQuartzJob

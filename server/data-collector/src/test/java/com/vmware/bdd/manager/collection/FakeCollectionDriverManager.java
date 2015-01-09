@@ -22,8 +22,10 @@ public class FakeCollectionDriverManager extends CollectionDriverManager {
 
    public FakeCollectionDriverManager(String driverClass,
          ICollectionInitializerService collectionInitializerService,
-         CollectionDriver collectionDirver, File configurationFile) {
-      super(driverClass, collectionInitializerService);
+         CollectionDriver collectionDirver,
+         CollectOperationManager collectOperationManager,
+         DataContainer container, File configurationFile) {
+      super(driverClass, collectionInitializerService, collectOperationManager, container);
       setDriver(collectionDirver);
       setFile(configurationFile);
    }

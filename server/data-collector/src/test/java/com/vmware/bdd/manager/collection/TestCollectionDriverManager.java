@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.manager.collection;
 
+import static org.mockito.Mockito.mock;
 import static org.testng.AssertJUnit.assertTrue;
 
 import java.io.File;
@@ -39,6 +40,8 @@ public class TestCollectionDriverManager {
    private CollectionDriverManager collectionDriverManager;
    private static CollectionDriver collectionDriver;
    private ICollectionInitializerService collectionInitializerService;
+   private CollectOperationManager collectOperationManager;
+   private DataContainer dataContainer;
    private static File file;
    private static String FILE_PATH = "/tmp/test.properties";
 
@@ -79,10 +82,13 @@ public class TestCollectionDriverManager {
       collectionDriver = Mockito.mock(FakeCollectionDriver.class);
       collectionInitializerService =
             Mockito.mock(FakeCollectionInitializerService.class);
+      collectOperationManager = mock(CollectOperationManager.class);
+      dataContainer = mock(DataContainer.class);
       collectionDriverManager =
             new FakeCollectionDriverManager(
                   "com.vmware.bdd.manager.ph.PhoneHomeCollectionDriver",
-                  collectionInitializerService, collectionDriver, file);
+                  collectionInitializerService, collectionDriver,
+                  collectOperationManager, dataContainer, file);
       Mockito.when(collectionDriver.getCollectionSwitchName()).thenReturn(
             "serengeti.ph.enable");
    }

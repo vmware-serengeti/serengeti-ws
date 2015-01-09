@@ -10,6 +10,13 @@
 	<bean id="collectionDriverManager" class="com.vmware.bdd.manager.collection.CollectionDriverManager">
 		<constructor-arg value = "com.vmware.bdd.manager.ph.PhoneHomeCollectionDriver" index = "0"/>
 		<constructor-arg ref = "collectionInitializerService"  index = "1"/>
+		<constructor-arg ref = "collectOperationManager"  index = "2"/>
+		<constructor-arg ref = "dataContainer"  index = "3"/>
 	</bean>
 	<bean id="collectionInitializerService" class="com.vmware.bdd.service.collection.impl.CollectionInitializerService" />
+	<bean id="timelyCollectionService" class="com.vmware.bdd.service.collection.impl.TimelyCollectionService" />
+	<bean id="collectOperationManager" class="com.vmware.bdd.manager.collection.CollectOperationManager">
+		<property name="timelyCollectionService" ref="timelyCollectionService" />
+	</bean>
+	<bean id="dataContainer" class="com.vmware.bdd.manager.collection.DataContainer" />
 </beans>
