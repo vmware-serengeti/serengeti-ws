@@ -34,7 +34,7 @@ public class CollectionRestResource {
    @Autowired
    private CollectionDriverManager collectionDriverManager;
 
-   @RequestMapping(value = "/datacollector/", method = RequestMethod.GET)
+   @RequestMapping(value = "/datacollector", method = RequestMethod.GET)
    @ResponseStatus(HttpStatus.OK)
    @ResponseBody
    public boolean getCollectionSwitchStatus() {
@@ -45,7 +45,7 @@ public class CollectionRestResource {
       }
    }
 
-   @RequestMapping(value = "/datacollector/", method = RequestMethod.PUT)
+   @RequestMapping(value = "/datacollector", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void changeCollectionSwitchStatus(
          @RequestParam(value = "enabled", required = true) Boolean enabled) {
