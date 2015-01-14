@@ -58,7 +58,7 @@ public class MgmtVmCfgCommands implements CommandMarker {
       }
    }
 
-   @CliCommand(value = "mgmtvmcfg get", help = "get management VM's user management Configuration.")
+   @CliCommand(value = "mgmtvmcfg get", help = "get management VM's Configuration.")
    public void getMgmtVMCfg() {
       try {
          Map<String, String> mgmtVMcfg = mgmtCfgOnMgmtVMClient.get();

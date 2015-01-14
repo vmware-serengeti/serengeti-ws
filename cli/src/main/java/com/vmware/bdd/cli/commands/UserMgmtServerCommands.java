@@ -50,7 +50,7 @@ public class UserMgmtServerCommands implements CommandMarker {
    @Autowired
    private MgmtVMCfgClient mgmtCfgOnMgmtVMClient;
 
-   @CliAvailabilityIndicator({"usermgmt help"})
+   @CliAvailabilityIndicator({"usermgmtserver help"})
    public boolean isCommandAvailable() {
       return true;
    }
