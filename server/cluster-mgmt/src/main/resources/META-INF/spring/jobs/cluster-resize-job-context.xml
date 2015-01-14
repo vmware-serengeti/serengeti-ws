@@ -143,13 +143,13 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="configLocalRepoResizeStep" next="configLdapUserMgmtStep">
+		<step id="configLocalRepoResizeStep" next="configLdapUserMgmtResizeStep">
 			<tasklet ref="configLocalRepoForClusterResizeTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-      <step id="configLdapUserMgmtStep" next="softwareResizeClusterStep">
+      <step id="configLdapUserMgmtResizeStep" next="softwareResizeClusterStep">
          <tasklet ref="EnableLdapForNewNodesForResizeStep">
             <listeners>
                <listener ref="stepListener"/>

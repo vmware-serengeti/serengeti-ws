@@ -100,13 +100,13 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="configLocalRepoStep" next="configLdapUserMgmtStep">
+		<step id="configLocalRepoStep" next="configLdapUserMgmtCreateStep">
 			<tasklet ref="configLocalRepoForClusterCreateTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-      <step id="configLdapUserMgmtStep" next="softwareCreateClusterStep">
+      <step id="configLdapUserMgmtCreateStep" next="softwareCreateClusterStep">
          <tasklet ref="EnableLdapForNewNodesForCreateStep">
             <listeners>
                <listener ref="stepListener"/>

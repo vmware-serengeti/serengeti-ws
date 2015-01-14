@@ -118,13 +118,13 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="configLocalRepoResumeStep" next="configLdapUserMgmtStep">
+		<step id="configLocalRepoResumeStep" next="configLdapUserMgmtResumeStep">
 			<tasklet ref="configLocalRepoForClusterResumeTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-      <step id="configLdapUserMgmtStep" next="softwareResumeClusterStep">
+      <step id="configLdapUserMgmtResumeStep" next="softwareResumeClusterStep">
          <tasklet ref="EnableLdapForNewNodesResumeStep">
             <listeners>
                <listener ref="stepListener"/>
