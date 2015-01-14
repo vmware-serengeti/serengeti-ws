@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.aop.collection;
 
+import com.vmware.bdd.util.collection.CollectionConstants;
 import org.apache.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
 import org.springframework.batch.core.ExitStatus;
@@ -41,19 +42,19 @@ public class JobListenerAdvice {
                      CollectionDriverManager.getConfigurationFile())
                      .getProperty(driver.getCollectionSwitchName());
          if (datacollectionEnable.trim().equalsIgnoreCase("true")) {
-            logger.info("jobAfter() of JobListenerAdvice is running!");
-            logger.info("hijacked : " + joinPoint.getSignature().getName());
+            logger.debug("jobAfter() of JobListenerAdvice is running!");
+            logger.debug("hijacked : " + joinPoint.getSignature().getName());
             Object[] args = joinPoint.getArgs();
             if (args != null) {
                JobExecution jobExecution = (JobExecution) args[0];
                if (jobExecution != null) {
                   //
-                  String id = "asynchronization_" + jobExecution.getId();
-                  dataContainer.push(id, "end_time", System.currentTimeMillis(),
+                  String id = CollectionConstants.ASYNCHRONIZATION_PREFIX + jobExecution.getId();
+                  dataContainer.push(id, CollectionConstants.OPERATION_END_TIME, System.currentTimeMillis(),
                         true);
                   ExitStatus exitStatus = jobExecution.getExitStatus();
                   if (exitStatus != null) {
-                     dataContainer.push(id, "operation_status",
+                     dataContainer.push(id, CollectionConstants.OPERATION_STATUS,
                            exitStatus.getExitCode(), true);
                   }
                }

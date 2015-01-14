@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -233,18 +234,21 @@ public class TestCommonUtil {
 
    @Test
    public void testReadJsonFileSucc() throws ParseException {
-      String fileName = "whitelist.json";
+      String fileName = "/whitelist.json";
       try {
-         FileInputStream fis = new FileInputStream(fileName);
+         URL url = this.getClass().getResource(fileName);
+         FileInputStream fis = new FileInputStream(url.getPath());
          BufferedReader br = new BufferedReader(new InputStreamReader(fis));
          StringBuilder sb = new StringBuilder();
-         String line = br.readLine();
-         while ( null != line ) {
+         String line = "";
+         while ( (line = br.readLine()) != null ) {
             sb.append(line);
          }
          br.close();
-         String contentRead = CommonUtil.readJsonFile(fileName);
-         Assert.assertEquals(contentRead, sb.toString());
+         String contentRead = CommonUtil.readJsonFile(url);
+         String testString = sb.toString();
+         contentRead = contentRead.replaceAll("\n", "");
+         Assert.assertEquals(contentRead, testString);
       } catch (IOException e) {
          e.printStackTrace();
       }

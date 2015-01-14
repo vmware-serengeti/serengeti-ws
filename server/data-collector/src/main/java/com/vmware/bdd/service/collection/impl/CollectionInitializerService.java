@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +37,7 @@ public class CollectionInitializerService implements
    private static final Logger logger = Logger
          .getLogger(CollectionInitializerService.class);
    private IServerInfoDAO serverInfoDao;
-   private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+   private SimpleDateFormat df = new SimpleDateFormat(Constants.DEPLOY_TIME_FORMAT);
 
    @Override
    @Transactional

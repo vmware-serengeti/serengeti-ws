@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.vmware.bdd.util.collection.CollectionConstants;
 import org.apache.log4j.Logger;
 import org.quartz.Scheduler;
 import org.springframework.batch.core.JobParameter;
@@ -62,10 +63,7 @@ public class DataCollectionQuartzJob {
             param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(
                   new Date()));
             JobParameters jobParameters = new JobParameters(param);
-            jobManager
-                  .runJob(
-                        com.vmware.bdd.service.collection.job.JobConstants.COLLECT_DATA_JOB_NAME,
-                        jobParameters);
+            jobManager.runJob(CollectionConstants.COLLECT_DATA_JOB_NAME, jobParameters);
          }
       }
    }

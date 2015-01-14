@@ -27,38 +27,69 @@ public class TestDataContainer {
    public void testPop() {
       final DataContainer dataContainer = new DataContainer();
       Runnable t = new Runnable() {
-
-         @Override
-         public void run() {
-            while(true) {
-               Map<String, Map<String, Object>> data = dataContainer.pop();
-                assertEquals(data.size(), 2);
-                assertEquals(data.get("1").size(), 6);
-                assertEquals(data.get("2").size(), 6);
-                if (data.size() == 2) {
-                    break;
-                }
+          @Override
+          public void run() {
+              while(true) {
+                  Map<String, Map<String, Object>> data = dataContainer.pop();
+                  assertEquals(data.size(), 2);
+                  assertEquals(data.get("1").size(), 6);
+                  assertEquals(data.get("2").size(), 6);
+                  if (data.size() == 2) {
+                      break;
+                  }
             }
-         }};
+          }};
+       Thread tr = new Thread(t);
+       tr.start();
+       dataContainer.push("1", "aa", "01");
+       dataContainer.push("1", "bb", "02");
+       dataContainer.push("1", "cc", "03");
+       dataContainer.push("1", "dd", "04");
+       dataContainer.push("1", "ee", "05");
+       dataContainer.push("1", "ff", "06");
+
+       dataContainer.push("2", "aa", "01");
+       dataContainer.push("2", "bb", "02");
+       dataContainer.push("2", "cc", "03");
+       dataContainer.push("2", "dd", "04");
+       dataContainer.push("2", "ee", "05");
+       dataContainer.push("2", "ff", "06");
+       try {
+           tr.join();
+       } catch (InterruptedException e) {
+           e.printStackTrace();
+       }
+   }
+
+    @Test
+    public void testSetMaxLength () {
+        final DataContainer dataContainer = new DataContainer();
+        Runnable t = new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
+                    Map<String, Map<String, Object>> data = dataContainer.pop();
+                    assertEquals(data.size(), 1);
+                    assertEquals(data.get("1").size(), 7);
+                    if (data.get("1").size() == 7) {
+                        break;
+                    }
+                }
+            }};
         Thread tr = new Thread(t);
         tr.start();
-        dataContainer.push("1", "aa", "01");
-        dataContainer.push("1", "bb", "02");
-        dataContainer.push("1", "cc", "03");
-        dataContainer.push("1", "dd", "04");
-        dataContainer.push("1", "ee", "05");
-        dataContainer.push("1", "ff", "06");
-
-        dataContainer.push("2", "aa", "01");
-        dataContainer.push("2", "bb", "02");
-        dataContainer.push("2", "cc", "03");
-        dataContainer.push("2", "dd", "04");
-        dataContainer.push("2", "ee", "05");
-        dataContainer.push("2", "ff", "06");
+        dataContainer.push("1", "ff", "07");
+        dataContainer.setMaxLength(7);
+        dataContainer.push("1", "gg", "01");
+        dataContainer.push("1", "hh", "02");
+        dataContainer.push("1", "ii", "03");
+        dataContainer.push("1", "jj", "04");
+        dataContainer.push("1", "kk", "05");
+        dataContainer.push("1", "ll", "06");
         try {
-         tr.join();
-      } catch (InterruptedException e) {
-         e.printStackTrace();
-      }
-   }
+            tr.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }

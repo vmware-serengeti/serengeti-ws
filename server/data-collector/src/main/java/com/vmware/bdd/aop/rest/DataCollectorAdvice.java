@@ -30,7 +30,7 @@ public class DataCollectorAdvice {
    //TODO(qjin): check if there is multi-thread problem for joinpoint
    public void afterRestCallMethod(JoinPoint joinPoint) throws Throwable {
       CollectOperationManager.storeOperationParameters((MethodInvocationProceedingJoinPoint)joinPoint);
-      logger.info("save joinPoint " + joinPoint + " to CollectOperationjManager");
+      logger.debug("save joinPoint " + joinPoint + " to CollectOperationjManager");
    }
 
    public void afterClusterManagerMethod(JoinPoint joinPoint, Long returnValue) {

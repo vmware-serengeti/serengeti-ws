@@ -23,6 +23,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -112,7 +113,7 @@ public class ResourceInitializer implements ServletContextListener {
       if (CommonUtil.isBlank(deployTimeStr)) {
          deployTime = new Date();
       } else {
-         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+         SimpleDateFormat df = new SimpleDateFormat(Constants.DEPLOY_TIME_FORMAT);
          deployTime = df.parse(deployTimeStr);
       }
       collectionInitializerService.setDeployTime(deployTime);

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.bdd.util.collection.CollectionConstants;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -96,44 +97,40 @@ public class PeriodCollectionService implements IPeriodCollectionService {
 
    private Map<String, Object> getFootprintData() {
       Map<String, Object> footPrintData = new HashMap<String, Object>();
-      footPrintData.put("id", CommonUtil.getUUID());
-      footPrintData.put("version", getBDEVersion());
-      footPrintData.put("deploy_time", getDeployTime());
-      footPrintData.put("vc_cpu_quota_size", getCpuQuotaSizeOfVC());
-      footPrintData.put("vc_mem_quota_size", getMemoryQuotaSizeOfVC());
-      footPrintData.put("resourcepool_cpu_quota_size",
-            getCpuQuotaSizeOfResourcePool());
-      footPrintData.put("resourcepool_mem_quota_size",
-            getMemoryQuotaSizeOfResourcePool());
-      footPrintData.put("datastore_quota_size", getDatastoreQuotaSizeInBDE());
-      footPrintData.put("is_init_resource",
-            Boolean.toString(isResourceInitialized()));
-      footPrintData.put("host_num_of_vc", numberOfHostInVC());
-      footPrintData.put("host_num_of_resource_pools",
-            numberOfHostInResourcePools());
-      footPrintData.put("host_num_of_clusters", numberOfHostInClusters());
-      footPrintData.put("num_of_hadoop_clusters", getNumberOfClusters());
-      footPrintData.put("num_of_hadoop_nodes", getNumberOfNodes());
+      footPrintData.put(CollectionConstants.OBJECT_ID, CommonUtil.getUUID());
+      footPrintData.put(CollectionConstants.FOOTPRINT_VERSION, getBDEVersion());
+      footPrintData.put(CollectionConstants.FOOTPRINT_DEPLOY_TIME, getDeployTime());
+      footPrintData.put(CollectionConstants.FOOTPRINT_VC_CPU_QUOTA_SIZE, getCpuQuotaSizeOfVC());
+      footPrintData.put(CollectionConstants.FOOTPRINT_VC_MEM_QUOTA_SIZE, getMemoryQuotaSizeOfVC());
+      footPrintData.put(CollectionConstants.FOOTPRINT_RESOURCEPOOL_CPU_QUOTA_SIZE, getCpuQuotaSizeOfResourcePool());
+      footPrintData.put(CollectionConstants.FOOTPRINT_RESOURCEPOOL_MEM_QUOTA_SIZE, getMemoryQuotaSizeOfResourcePool());
+      footPrintData.put(CollectionConstants.FOOTPRINT_DATASTORE_QUOTA_SIZE, getDatastoreQuotaSizeInBDE());
+      footPrintData.put(CollectionConstants.FOOTPRINT_IS_INIT_RESOURCE, Boolean.toString(isResourceInitialized()));
+      footPrintData.put(CollectionConstants.FOOTPRINT_HOST_NUM_OF_VC, numberOfHostInVC());
+      footPrintData.put(CollectionConstants.FOOTPRINT_HOST_NUM_OF_RESOURCE_POOLS, numberOfHostInResourcePools());
+      footPrintData.put(CollectionConstants.FOOTPRINT_HOST_NUM_OF_CLUSTERS, numberOfHostInClusters());
+      footPrintData.put(CollectionConstants.FOOTPRINT_NUM_OF_HADOOP_CLUSTERS, getNumberOfClusters());
+      footPrintData.put(CollectionConstants.FOOTPRINT_NUM_OF_HADOOP_NODES, getNumberOfNodes());
       return footPrintData;
    }
 
    private Map<String, Object> getEnvironmentalInfo() {
       Map<String, Object> environmentalInfoData = new HashMap<String, Object>();
-      environmentalInfoData.put("id", CommonUtil.getUUID());
-      environmentalInfoData.put("version_of_vCenter", getVersionOfVCenter());
-      environmentalInfoData.put("version_of_ESXi", getVersionsOfESXi());
-      environmentalInfoData.put("type_of_storage", typesOfStorages());
-      environmentalInfoData.put("distros_of_hadoop", getDistrosOfHadoop());
-      environmentalInfoData.put("app_managers", getAppManagers());
+      environmentalInfoData.put(CollectionConstants.OBJECT_ID, CommonUtil.getUUID());
+      environmentalInfoData.put(CollectionConstants.ENVIRONMENTAL_INFO_VERSION_OF_VCENTER, getVersionOfVCenter());
+      environmentalInfoData.put(CollectionConstants.ENVIRONMENTAL_INFO_VERSION_OF_ESXI, getVersionsOfESXi());
+      environmentalInfoData.put(CollectionConstants.ENVIRONMENTAL_INFO_TYPE_OF_STORAGE, typesOfStorages());
+      environmentalInfoData.put(CollectionConstants.ENVIRONMENTAL_INFO_DISTROS_OF_HADOOP, getDistrosOfHadoop());
+      environmentalInfoData.put(CollectionConstants.ENVIRONMENTAL_INFO_APP_MANAGERS, getAppManagers());
       return environmentalInfoData;
    }
 
    private Map<String, Object> getCommonReportsData() {
       Map<String, Object> commonReportsData = new HashMap<String, Object>();
-      commonReportsData.put("id", collectionInitializerService.getInstanceId());
-      commonReportsData.put("name", "vSphere Big Data Extensions");
-      commonReportsData.put("version", Constants.VERSION);
-      commonReportsData.put("edition", "Enterprise");
+      commonReportsData.put(CollectionConstants.OBJECT_ID, collectionInitializerService.getInstanceId());
+      commonReportsData.put(CollectionConstants.PRODUCT_INSTANCE_NAME, CollectionConstants.PRODUCT_INSTANCE_NAME_VALUE);
+      commonReportsData.put(CollectionConstants.PRODUCT_INSTANCE_VERSION, Constants.VERSION);
+      commonReportsData.put(CollectionConstants.PRODUCT_INSTANCE_EDITION, CollectionConstants.PRODUCT_INSTANCE_EDITION_VALUE);
       return commonReportsData;
    }
 
@@ -147,7 +144,7 @@ public class PeriodCollectionService implements IPeriodCollectionService {
 
    private String getDeployTime() {
       String deployTimeStr = "";
-      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      SimpleDateFormat sdf = new SimpleDateFormat(Constants.DEPLOY_TIME_FORMAT);
       Date deployTime = collectionInitializerService.getDeployTime();
       if (deployTime != null) {
          deployTimeStr = sdf.format(deployTime);

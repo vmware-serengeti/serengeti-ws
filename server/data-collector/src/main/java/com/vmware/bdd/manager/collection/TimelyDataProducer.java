@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.vmware.bdd.util.collection.CollectionConstants;
 import com.vmware.bdd.utils.PropertiesUtil;
 import org.apache.log4j.Logger;
 
@@ -47,13 +48,13 @@ public class TimelyDataProducer implements Runnable {
       }
       List<Map<String, Object>> restData = null;
       boolean asynchronous;
-      restData = CollectOperationManager.consumeOperations();
+      restData = collectOperationManager.consumeOperations();
       logger.debug("TimelyDataProducer is producing data: " + restData);
       if (restData != null && !restData.isEmpty()) {
          for (Map<String, Object> data : restData) {
             asynchronous = false;
-            if (data.containsKey("task_id")
-                    && !CommonUtil.isBlank(String.valueOf((Long) data.get("task_id")))) {
+            if (data.containsKey(CollectionConstants.TASK_ID)
+                    && !CommonUtil.isBlank(String.valueOf((Long) data.get(CollectionConstants.TASK_ID)))) {
                   asynchronous = true;
                }
             collect(data, asynchronous);
@@ -65,18 +66,18 @@ public class TimelyDataProducer implements Runnable {
       if (data != null && !data.isEmpty()) {
          String id = "";
          if (asynchronous) {
-            id = String.valueOf((Long) data.get("task_id"));
+            id = String.valueOf((Long) data.get(CollectionConstants.TASK_ID));
             if (!CommonUtil.isBlank(id)) {
-               id = "asynchronization_" + id;
+               id = CollectionConstants.ASYNCHRONIZATION_PREFIX + id;
             }
          } else {
-            id = (String) data.get("id");
+            id = (String) data.get(CollectionConstants.OBJECT_ID);
             if (!CommonUtil.isBlank(id)) {
-               id = "synchronization_" + id;
+               id = CollectionConstants.SYNCHRONIZATION_PREFIX + id;
             }
          }
-         data.remove("id");
-         data.put("id", id);
+         data.remove(CollectionConstants.OBJECT_ID);
+         data.put(CollectionConstants.OBJECT_ID, id);
          if (!CommonUtil.isBlank(id)) {
             for (Entry<String, ?> field : data.entrySet()) {
                dataContainer.push(id, field.getKey(), field.getValue());

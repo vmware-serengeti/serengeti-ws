@@ -14,15 +14,11 @@
  ***************************************************************************/
 package com.vmware.bdd.service.collection.impl;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import com.vmware.bdd.apitypes.*;
+import com.vmware.bdd.util.collection.CollectionConstants;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -37,54 +33,114 @@ import com.vmware.bdd.utils.CommonUtil;
 
 public class TimelyCollectionService implements ITimelyCollectionService {
 
-   private static final Logger logger = Logger.getLogger(TimelyCollectionService.class);
+    private static final Logger logger = Logger.getLogger(TimelyCollectionService.class);
 
-   @Autowired
-   protected ClusterManager clusterMgr;
-   @Autowired
-   private IClusterEntityManager clusterEntityMgr;
-   @Autowired
-   protected SoftwareManagerCollector softwareManagerCollector;
-   @Autowired
-   private INetworkService networkService;
+    @Autowired
+    protected ClusterManager clusterMgr;
+    @Autowired
+    private IClusterEntityManager clusterEntityMgr;
+    @Autowired
+    protected SoftwareManagerCollector softwareManagerCollector;
+    @Autowired
+    private INetworkService networkService;
 
-   @Override
-   public Map<String, Map<String, Object>> collectData(Map<String, Object> rawdata,
-         DataObjectType operation) {
-      Map<String, Map<String, Object>> data = new HashMap<String, Map<String, Object>>();
-      switch (operation) {
-      case OPERATION :
-         return packagingOperationData(data, rawdata);
-      case CLUSTER_SNAPSHOT:
-         return collectClusterSnapshotData(data, rawdata);
-      default :
-         return null;
-      }
-   }
+    private static Map<String, List<String>> productRolesMap = new HashMap<>();
+
+    static {
+        productRolesMap = generateProductRolesMap();
+    }
+
+    private static Map<String, List<String>> generateProductRolesMap() {
+        Map<String, List<String>> productRolesMap = new HashMap<>();
+        String[] pigRoles = new String[] {
+                HadoopRole.PIG_ROLE.toString(),
+                HadoopRole.MAPR_PIG_ROLE.toString()
+        };
+        String[] hiveRoles = new String[] {
+                HadoopRole.HIVE_ROLE.toString(),
+                HadoopRole.HIVE_SERVER_ROLE.toString(),
+                HadoopRole.MAPR_HIVE_ROLE.toString(),
+                HadoopRole.MAPR_HIVE_SERVER_ROLE.toString(),
+                com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.HIVE_SERVER_ROLE.toString(),
+                com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.HIVE_METASTORE_ROLE.toString(),
+                com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.HIVE_METASTORE_ROLE.toString(),
+                com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.HIVE_SERVER2_ROLE.toString()
+        };
+        String[] oozieRoles = new String[] {
+                com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.OOZIE_SERVER_ROLE.toString(),
+                com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.OOZIE_SERVER_ROLE.toString()
+        };
+        String[] gangliaRoles = new String[] {
+                com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.GANGLIA_SERVER_ROLE.toString()
+        };
+        String[] nagiosRoles = new String[] {
+                com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.NAGIOS_SERVER_ROLE.toString()
+        };
+        String[] stormRoles = new String[] {
+                com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.NIMBUS_ROLE.toString(),
+                com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.STORM_REST_API_ROLE.toString(),
+                com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.STORM_UI_SERVER_ROLE.toString()
+        };
+        String[] impalaRoles = new String[] {
+                com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.IMPALA_CATALOG_SERVER_ROLE.toString()
+        };
+        String[] sqoopRoles = new String[] {
+                com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.SQOOP_SERVER_ROLE.toString()
+        };
+        String[] sparkRoles = new String[] {
+                com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.SPARK_MASTER_ROLE.toString(),
+                com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.SPARK_HISTORY_SERVER_ROLE.toString()
+        };
+        String[] solrRoles = new String[] {
+                com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.SOLR_SERVER_ROLE.toString()
+        };
+        productRolesMap.put(CollectionConstants.PIG, Arrays.asList(pigRoles));
+        productRolesMap.put(CollectionConstants.HIVE, Arrays.asList(hiveRoles));
+        productRolesMap.put(CollectionConstants.OOZIE, Arrays.asList(oozieRoles));
+        productRolesMap.put(CollectionConstants.GANGLIA, Arrays.asList(gangliaRoles));
+        productRolesMap.put(CollectionConstants.NAGIOS, Arrays.asList(nagiosRoles));
+        productRolesMap.put(CollectionConstants.STORM, Arrays.asList(stormRoles));
+        productRolesMap.put(CollectionConstants.IMPALA, Arrays.asList(impalaRoles));
+        productRolesMap.put(CollectionConstants.SQOOP, Arrays.asList(sqoopRoles));
+        productRolesMap.put(CollectionConstants.SPARK, Arrays.asList(sparkRoles));
+        productRolesMap.put(CollectionConstants.SOLR, Arrays.asList(solrRoles));
+        return productRolesMap;
+    }
+
+    @Override
+    public Map<String, Map<String, Object>> collectData(
+            Map<String, Object> rawdata, DataObjectType operation) {
+        Map<String, Map<String, Object>> data = new HashMap<String, Map<String, Object>>();
+        switch (operation) {
+            case OPERATION :
+                return packagingOperationData(data, rawdata);
+            case CLUSTER_SNAPSHOT:
+                return collectClusterSnapshotData(data, rawdata);
+            default :
+                return null;
+        }
+    }
 
    private Map<String, Map<String, Object>> collectClusterSnapshotData(
          Map<String, Map<String, Object>> data, Map<String, Object> rawdata) {
-      String operationName = (String) rawdata.get("operation_name");
-      Map<String, Map<Class, Object>> operationParameters =
-              (Map<String, Map<Class, Object>>) rawdata.get("operation_parameters");
+      String operationName = (String) rawdata.get(CollectionConstants.OPERATION_NAME);
+       List<Object> operationParameters = (List<Object>) rawdata.get(CollectionConstants.OPERATION_PARAMETERS);
       if (!CommonUtil.isBlank(operationName) && !operationParameters.isEmpty()) {
           String clusterName = "";
-          Map<Class, Object> args = operationParameters.get("arg0");
-          if (args != null) {
-              for (Entry<Class, Object> arg : args.entrySet()) {
-                  switch (operationName.trim()) {
-                      case "createCluster" :
-                          ClusterCreate spec = (ClusterCreate) arg.getValue();
-                          clusterName = spec.getName();
-                          break;
-                      case "scaleNodeGroupResource" :
-                          ResourceScale scale = (ResourceScale) arg.getValue();
-                          clusterName = scale.getClusterName();
-                          break;
-                      default:
-                          clusterName = (String) arg.getValue();
+          Object arg = operationParameters.get(0);
+          if (arg != null) {
+              switch (operationName.trim()) {
+                  case CollectionConstants.METHOD_CREATE_CLUSTER :
+                      ClusterCreate spec = (ClusterCreate) arg;
+                      clusterName = spec.getName();
+                      break;
+                  case CollectionConstants.METHOD_SCALE_NODE_GROUP_RESOURCE :
+                      ResourceScale scale = (ResourceScale) arg;
+                      clusterName = scale.getClusterName();
+                      break;
+                  default:
+                      clusterName = (String) arg;
                   }
-              }
           }
           if (!CommonUtil.isBlank(clusterName)) {
               Map<String, Object> clusterSnapshotData = new HashMap<>();
@@ -102,21 +158,21 @@ public class TimelyCollectionService implements ITimelyCollectionService {
               Long memorySize = getTotalMemorySize(clusterRead.getNodeGroups());
               Long datastoreSize =
                       getTotalDatastoreSize(clusterRead.getNodeGroups());
-              clusterSnapshotData.put("id", uuid);
-              clusterSnapshotData.put("use_external_hdfs", usedExternalHDFS);
-              clusterSnapshotData.put("hadoop_ecosystem_information",
+              clusterSnapshotData.put(CollectionConstants.OBJECT_ID, uuid);
+              clusterSnapshotData.put(CollectionConstants.CLUSTER_SNAPSHOT_USE_EXTERNAL_HDFS, usedExternalHDFS);
+              clusterSnapshotData.put(CollectionConstants.CLUSTER_SNAPSHOT_HADOOP_ECOSYSTEM_INFORMATION,
                       hadoopEcosystemInformation);
-              clusterSnapshotData.put("distro", clusterEntity.getDistro());
-              clusterSnapshotData.put("distro_version",
+              clusterSnapshotData.put(CollectionConstants.CLUSTER_SNAPSHOT_DISTRO, clusterEntity.getDistro());
+              clusterSnapshotData.put(CollectionConstants.CLUSTER_SNAPSHOT_DISTRO_VERSION,
                       clusterEntity.getDistroVersion());
-              clusterSnapshotData.put("distro_vendor",
+              clusterSnapshotData.put(CollectionConstants.CLUSTER_SNAPSHOT_DISTRO_VENDOR,
                       clusterEntity.getDistroVendor());
-              clusterSnapshotData.put("type_of_network", typeOfNetwork);
-              clusterSnapshotData.put("node_number", clusterRead.getInstanceNum());
-              clusterSnapshotData.put("cpu_number", cpuNumber);
-              clusterSnapshotData.put("memory_size", memorySize);
-              clusterSnapshotData.put("datastore_size", datastoreSize);
-              clusterSnapshotData.put("cluster_spec", getClusterSpec(clusterRead.getName()));
+              clusterSnapshotData.put(CollectionConstants.CLUSTER_SNAPSHOT_TYPE_OF_NETWORK, typeOfNetwork);
+              clusterSnapshotData.put(CollectionConstants.CLUSTER_SNAPSHOT_NODE_NUMBER, clusterRead.getInstanceNum());
+              clusterSnapshotData.put(CollectionConstants.CLUSTER_SNAPSHOT_CPU_NUMBER, cpuNumber);
+              clusterSnapshotData.put(CollectionConstants.CLUSTER_SNAPSHOT_MEMORY_SIZE, memorySize);
+              clusterSnapshotData.put(CollectionConstants.CLUSTER_SNAPSHOT_DATASTORE_SIZE, datastoreSize);
+              clusterSnapshotData.put(CollectionConstants.CLUSTER_SNAPSHOT_CLUSTER_SPEC, getClusterSpec(clusterRead.getName()));
               data.put(DataObjectType.CLUSTER_SNAPSHOT.getName(), clusterSnapshotData);
           }
 
@@ -133,9 +189,9 @@ public class TimelyCollectionService implements ITimelyCollectionService {
                    networkService.getNetworkByName(networkName, false);
            if (network != null) {
                if (!network.isDhcp()) {
-                   typeSet.add("STATIC IP");
+                   typeSet.add(CollectionConstants.STATIC_IP);
                } else {
-                   typeSet.add("DHCP");
+                   typeSet.add(CollectionConstants.DHCP);
                }
            }
        }
@@ -157,7 +213,7 @@ public class TimelyCollectionService implements ITimelyCollectionService {
          for (NodeGroupRead nodeGroup : nodeGroups) {
             storageRead = nodeGroup.getStorage();
             if (storageRead != null) {
-               datastoreSize += storageRead.getSizeGB();
+               datastoreSize += (storageRead.getSizeGB() * nodeGroup.getInstanceNum());
             }
          }
       }
@@ -168,7 +224,7 @@ public class TimelyCollectionService implements ITimelyCollectionService {
       long memorySize = 0L;
       if (nodeGroups != null && !nodeGroups.isEmpty()) {
          for (NodeGroupRead nodeGroup : nodeGroups) {
-            memorySize += nodeGroup.getMemCapacityMB();
+            memorySize += (nodeGroup.getMemCapacityMB() * nodeGroup.getInstanceNum());
          }
       }
       return memorySize;
@@ -178,7 +234,7 @@ public class TimelyCollectionService implements ITimelyCollectionService {
       int cpuNum = 0;
       if (nodeGroups != null && !nodeGroups.isEmpty()) {
          for (NodeGroupRead nodeGroup : nodeGroups) {
-            cpuNum += nodeGroup.getCpuNum();
+            cpuNum += (nodeGroup.getCpuNum() * nodeGroup.getInstanceNum());
          }
       }
       return cpuNum;
@@ -187,115 +243,21 @@ public class TimelyCollectionService implements ITimelyCollectionService {
    private String getHadoopEcosystemInformation(List<NodeGroupRead> nodeGroups) {
       Set<String> nameSet = new HashSet<String>();
       if (nodeGroups != null && !nodeGroups.isEmpty()) {
-         for (NodeGroupRead nodeGroup : nodeGroups) {
-            if (nodeGroup.getRoles().contains(HadoopRole.PIG_ROLE.toString())
-                  || nodeGroup.getRoles().contains(HadoopRole.MAPR_PIG_ROLE)) {
-               nameSet.add("Pig");
-            }
-            if (nodeGroup.getRoles().contains(HadoopRole.HIVE_ROLE.toString())
-                  || nodeGroup.getRoles().contains(
-                        HadoopRole.HIVE_SERVER_ROLE.toString())
-                  || nodeGroup.getRoles().contains(
-                        HadoopRole.MAPR_HIVE_ROLE.toString())
-                  || nodeGroup.getRoles().contains(
-                        HadoopRole.MAPR_HIVE_SERVER_ROLE.toString())
-                  || nodeGroup
-                        .getRoles()
-                        .contains(
-                              com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.HIVE_SERVER_ROLE
-                                    .toString())
-                  || nodeGroup
-                        .getRoles()
-                        .contains(
-                              com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.HIVE_METASTORE_ROLE
-                                    .toString())
-                  || nodeGroup
-                        .getRoles()
-                        .contains(
-                              com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.HIVE_METASTORE_ROLE
-                                    .toString())
-                  || nodeGroup
-                        .getRoles()
-                        .contains(
-                              com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.HIVE_SERVER2_ROLE
-                                    .toString())) {
-               nameSet.add("Hive");
-            }
-            if (nodeGroup
-                  .getRoles()
-                  .contains(
-                        com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.OOZIE_SERVER_ROLE
-                              .toString())
-                  || nodeGroup
-                        .getRoles()
-                        .contains(
-                              com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.OOZIE_SERVER_ROLE
-                                    .toString())) {
-               nameSet.add("Oozie");
-            }
-            if (nodeGroup
-                  .getRoles()
-                  .contains(
-                        com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.GANGLIA_SERVER_ROLE
-                              .toString())) {
-               nameSet.add("Ganglia");
-            }
-            if (nodeGroup
-                  .getRoles()
-                  .contains(
-                        com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.NAGIOS_SERVER_ROLE
-                              .toString())) {
-               nameSet.add("Nagios");
-            }
-            if (nodeGroup.getRoles().contains(
-                  com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.NIMBUS_ROLE
-                        .toString())
-                  || nodeGroup
-                        .getRoles()
-                        .contains(
-                              com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.STORM_REST_API_ROLE
-                                    .toString())
-                  || nodeGroup
-                        .getRoles()
-                        .contains(
-                              com.vmware.bdd.plugin.ambari.spectypes.HadoopRole.STORM_UI_SERVER_ROLE
-                                    .toString())) {
-               nameSet.add("Storm");
-            }
-            if (nodeGroup
-                  .getRoles()
-                  .contains(
-                        com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.IMPALA_CATALOG_SERVER_ROLE
-                              .toString())) {
-               nameSet.add("Impala");
-            }
-            if (nodeGroup
-                  .getRoles()
-                  .contains(
-                        com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.SQOOP_SERVER_ROLE
-                              .toString())) {
-               nameSet.add("Sqoop");
-            }
-            if (nodeGroup
-                  .getRoles()
-                  .contains(
-                        com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.SPARK_MASTER_ROLE
-                              .toString())
-                  || nodeGroup
-                        .getRoles()
-                        .contains(
-                              com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.SPARK_HISTORY_SERVER_ROLE
-                                    .toString())) {
-               nameSet.add("Spark");
-            }
-            if (nodeGroup
-                  .getRoles()
-                  .contains(
-                        com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole.SOLR_SERVER_ROLE
-                              .toString())) {
-               nameSet.add("Solr");
-            }
-         }
+          List<String> groupRoles = null;
+          String product = "";
+          List<String> roles = null;
+          for (NodeGroupRead nodeGroup : nodeGroups) {
+              groupRoles = nodeGroup.getRoles();
+              for (Entry<String, List<String>> entry : productRolesMap.entrySet()) {
+                  roles = entry.getValue();
+                  for (String role : groupRoles) {
+                      if (roles.contains(role)) {
+                          product = entry.getKey();
+                          nameSet.add(product);
+                      }
+                  }
+              }
+          }
       }
       return CommonUtil.inputsConvert(nameSet);
    }
@@ -304,25 +266,22 @@ public class TimelyCollectionService implements ITimelyCollectionService {
          Map<String, Map<String, Object>> data, Map<String, Object> rawdata) {
        Map<String, Object> modifydata = new HashMap<>();
        modifydata.putAll(rawdata);
-       modifydata.remove("task_id");
-       modifydata.put("id", CommonUtil.getUUID());
-       Map<String, Map<Class, Object>> operationParameters =
-               (Map<String, Map<Class, Object>>) rawdata.get("operation_parameters");
+       modifydata.remove(CollectionConstants.TASK_ID);
+       modifydata.put(CollectionConstants.OBJECT_ID, CommonUtil.getUUID());
+       List<Object> operationParameters =
+               (List<Object>) rawdata.get(CollectionConstants.OPERATION_PARAMETERS);
        if (!operationParameters.isEmpty()) {
            MethodParameter methodParameter = new MethodParameter();
-           for (Entry<String, Map<Class, Object>> parameterEntry : operationParameters.entrySet()) {
-               Map<Class, Object> parameter = parameterEntry.getValue();
+           int index = 0;
+           for (Object parameter : operationParameters) {
                if (parameter != null) {
-                   Iterator<Entry<Class, Object>> it = parameter.entrySet().iterator();
-                   if (it.hasNext()) {
-                       Entry<Class, Object> argV = it.next();
-                       methodParameter.setParameter(parameterEntry.getKey(), argV.getValue());
-                   }
+                   methodParameter.setParameter("arg" + index, parameter);
+                   index ++;
                }
-         }
-           modifydata.put("operation_parameters", methodParameter);
-      } else {
-           modifydata.put("operation_parameters", "");
+           }
+           modifydata.put(CollectionConstants.OPERATION_PARAMETERS, methodParameter);
+       } else {
+           modifydata.put(CollectionConstants.OPERATION_PARAMETERS, "");
       }
        data.put(DataObjectType.OPERATION.getName(), modifydata);
        return data;
@@ -333,11 +292,11 @@ public class TimelyCollectionService implements ITimelyCollectionService {
          Map<String, Map<String, Object>> operationData,
          Map<String, Map<String, Object>> clusterSnapshotData) {
       Map<String, Map<String, ?>> data = new HashMap<String, Map<String, ?>>();
-      String clusterId =
-              (String) clusterSnapshotData.get(DataObjectType.CLUSTER_SNAPSHOT.getName()).get("id");
+      String clusterId = (String) clusterSnapshotData
+              .get(DataObjectType.CLUSTER_SNAPSHOT.getName()).get(CollectionConstants.OBJECT_ID);
       Map<String, Object> relatedObject = new HashMap<>();
-      relatedObject.put("cluster_id", clusterId);
-      operationData.get(DataObjectType.OPERATION.getName()).put("cluster_id", relatedObject);
+      relatedObject.put(CollectionConstants.CLUSTER_ID, clusterId);
+      operationData.get(DataObjectType.OPERATION.getName()).put(CollectionConstants.CLUSTER_ID, relatedObject);
       data.putAll(operationData);
       data.putAll(clusterSnapshotData);
       return data;

@@ -14,13 +14,15 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
+import com.vmware.bdd.util.collection.CollectionConstants;
+
 public enum DataObjectType {
 
-   FOOTPRINT("bde.footprint"),
-   ENVIRONMENTAL_INFORMATION("bde.environmental_information"),
-   COMMONREPORTS("bde.product_instance"),
-   OPERATION("bde.operation"),
-   CLUSTER_SNAPSHOT("bde.cluster_snapshot");
+   FOOTPRINT(CollectionConstants.BDE_FOOTPRINT),
+   ENVIRONMENTAL_INFORMATION(CollectionConstants.BDE_ENVIRONMENTAL_INFORMATION),
+   COMMONREPORTS(CollectionConstants.BDE_PRODUCT_INSTANCE),
+   OPERATION(CollectionConstants.BDE_OPERATION),
+   CLUSTER_SNAPSHOT(CollectionConstants.BDE_CLUSTER_SNAPSHOT);
 
    private String name;
 

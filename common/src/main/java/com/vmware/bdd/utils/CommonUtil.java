@@ -14,21 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -94,7 +80,7 @@ public class CommonUtil {
       }
 
       if (!specFile.exists()) {
-         String errorMsg = "Can not find file" + filename;
+         String errorMsg = "Can not find file " + filename;
          logger.fatal(errorMsg);
          throw new RuntimeException(errorMsg);
       }
@@ -102,31 +88,36 @@ public class CommonUtil {
       return specFile;
    }
 
-   public static String readJsonFile(final String fileName) {
+   public static String readJsonFile(URL fileURL) {
       StringBuilder jsonBuff = new StringBuilder();
-      URL fileURL = CommonUtil.class.getClassLoader().getResource(fileName);
+      String fileName = fileURL.getFile();
       if (fileURL != null) {
-          InputStream in = null;
-          try {
-              in = new BufferedInputStream(fileURL.openStream());
-              Reader rd = new InputStreamReader(in, "UTF-8");
-              int c = 0;
-              while ((c = rd.read()) != -1) {
-                  jsonBuff.append((char) c);
-              }
-          } catch (IOException e) {
-              logger.error(e.getMessage() + "\n Can not find " + fileName + " or IO read error.");
-          } finally {
-              try {
-            	  if (in != null) {
-            		  in.close();
-            	  }
-              } catch (IOException e) {
-                  logger.error(e.getMessage() + "\n Can not close " + fileName + ".");
-              }
-          }
+         InputStream in = null;
+         try {
+            in = new BufferedInputStream(fileURL.openStream());
+            Reader rd = new InputStreamReader(in, "UTF-8");
+            int c = 0;
+            while ((c = rd.read()) != -1) {
+               jsonBuff.append((char) c);
+            }
+         } catch (IOException e) {
+            logger.error(e.getMessage() + "\n Can not find " + fileName + " or IO read error.");
+         } finally {
+            try {
+               if (in != null) {
+                  in.close();
+               }
+            } catch (IOException e) {
+               logger.error(e.getMessage() + "\n Can not close " + fileName + ".");
+            }
+         }
       }
       return jsonBuff.toString();
+   }
+
+   public static String readJsonFile(final String fileName) {
+      URL fileURL = CommonUtil.class.getClassLoader().getResource(fileName);
+      return readJsonFile(fileURL);
    }
 
    //TODO this is copied from CLI CommandsUtils
@@ -603,4 +594,26 @@ public class CommonUtil {
         return false;
      }
   }
+
+   public static void writeFile(File file, String content) {
+      OutputStream out = null;
+      BufferedWriter bw = null;
+      try {
+         out = new FileOutputStream(file);
+         bw = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+         bw.write(content);
+         bw.flush();
+      } catch (IOException e) {
+         logger.warn("Write file failed : " + e.getMessage());
+      } finally {
+         if (bw != null && out != null) {
+            try {
+               bw.close();
+               out.close();
+            } catch (IOException e) {
+               logger.warn("Close file failed : " + e.getMessage());
+            }
+         }
+      }
+   }
 }

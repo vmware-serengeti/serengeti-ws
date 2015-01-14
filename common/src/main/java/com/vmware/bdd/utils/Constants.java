@@ -275,4 +275,7 @@ public class Constants {
    public static final String CLUSTER_RACK_TOPOLOGY_FILE_SUFFIX = ".topology.data";
 
    public static final String MAINTENANCE_MODE_FLAG_FILE = "/opt/serengeti/etc/maintenance";
+
+   public static final String DEPLOY_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
 }

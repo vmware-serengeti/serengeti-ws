@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import com.vmware.bdd.manager.collection.*;
+import com.vmware.bdd.util.collection.CollectionConstants;
 import mockit.Mock;
 import mockit.MockClass;
 import mockit.Mockit;
@@ -39,7 +40,6 @@ import org.testng.annotations.Test;
 import com.vmware.bdd.manager.JobManager;
 import com.vmware.bdd.service.collection.ICollectionInitializerService;
 import com.vmware.bdd.service.collection.impl.FakeCollectionInitializerService;
-import com.vmware.bdd.service.collection.job.JobConstants;
 import com.vmware.bdd.utils.PropertiesUtil;
 
 public class TestDataCollectionQuartzJob {
@@ -116,7 +116,7 @@ public class TestDataCollectionQuartzJob {
       dataCollectionQuartzJob.setJobManager(jobManager);
       dataCollectionQuartzJob.setScheduler(scheduler);
       dataCollectionQuartzJob.execute();
-      verify(jobManager).runJob(eq(JobConstants.COLLECT_DATA_JOB_NAME),
+      verify(jobManager).runJob(eq(CollectionConstants.COLLECT_DATA_JOB_NAME),
             isA(JobParameters.class));
       verify(collectionDriver, times(1)).getCollectionSwitchName();
    }

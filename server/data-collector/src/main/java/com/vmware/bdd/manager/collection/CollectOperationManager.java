@@ -14,17 +14,17 @@
  ***************************************************************************/
 package com.vmware.bdd.manager.collection;
 
+import com.vmware.aurora.global.Configuration;
+import com.vmware.bdd.util.collection.CollectionConstants;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.PropertiesUtil;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.service.collection.ITimelyCollectionService;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.aop.aspectj.MethodInvocationProceedingJoinPoint;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.vmware.bdd.apitypes.DataObjectType;
 import org.springframework.batch.core.ExitStatus;
@@ -61,14 +61,14 @@ public class CollectOperationManager {
    }
 
    private boolean isClusterRelated(Map<String, ?> operationData) {
-      if (!operationData.containsKey("operation_name")) {
+      if (!operationData.containsKey(CollectionConstants.OPERATION_NAME)) {
          return false;
       }
-      String operationName = (String) operationData.get("operation_name");
-      if (operationName.trim().equals("createCluster")
-            || operationName.trim().equals("configCluster")
-            || operationName.trim().equals("resizeCluster")
-            || operationName.trim().equals("scaleNodeGroupResource")) {
+      String operationName = (String) operationData.get(CollectionConstants.OPERATION_NAME);
+      if (operationName.trim().equals(CollectionConstants.METHOD_CREATE_CLUSTER)
+            || operationName.trim().equals(CollectionConstants.METHOD_CONFIG_CLUSTER)
+            || operationName.trim().equals(CollectionConstants.METHOD_RESIZE_CLUSTER)
+            || operationName.trim().equals(CollectionConstants.METHOD_SCALE_NODE_GROUP_RESOURCE)) {
          return true;
       }
       return false;
@@ -86,9 +86,12 @@ public class CollectOperationManager {
    }
 
    public static void storeOperationParameters(MethodInvocationProceedingJoinPoint joinPoint, Long returnValue) {
+      if (!enabledDataCollection()) {
+         return;
+      }
       try {
          Map<String, Object> operation = getCommonParameters(joinPoint);
-         operation.put("task_id", returnValue);
+         operation.put(CollectionConstants.TASK_ID, returnValue);
          synchronized (operations) {
             operations.add(operation);
          }
@@ -98,10 +101,14 @@ public class CollectOperationManager {
    }
 
    public static void storeOperationParameters(MethodInvocationProceedingJoinPoint joinPoint) {
+      if (!enabledDataCollection()) {
+         return;
+      }
       try {
          Map<String, Object> operation = getCommonParameters(joinPoint);
-         operation.put("end_time", operation.get("begin_time"));
-         operation.put("operation_status", ExitStatus.COMPLETED.getExitCode());
+         operation.put(CollectionConstants.OPERATION_END_TIME,
+                 operation.get(CollectionConstants.OPERATION_BEGIN_TIME));
+         operation.put(CollectionConstants.OPERATION_STATUS, ExitStatus.COMPLETED.getExitCode());
          synchronized (operations) {
             operations.add(operation);
          }
@@ -110,28 +117,33 @@ public class CollectOperationManager {
       }
    }
 
+   private static boolean enabledDataCollection() {
+      String enabled =
+              new PropertiesUtil(CollectionDriverManager.getConfigurationFile())
+                      .getProperty(CommonUtil.notNull(Configuration.getString(CollectionConstants.DEFAULT_SWITCH_NAME),
+                              CollectionConstants.PHONE_HOME_SWITCH_NAME));
+      return true == Boolean.parseBoolean(enabled.trim());
+   }
+
    private static Map<String, Object> getCommonParameters(MethodInvocationProceedingJoinPoint joinPoint) {
       HashMap<String, Object> operation = new HashMap<>();
-      operation.put("id", CommonUtil.getUUID());
+      operation.put(CollectionConstants.OBJECT_ID, CommonUtil.getUUID());
       Object[] args = joinPoint.getArgs();
       MethodSignature methodSignature = (MethodSignature)joinPoint.getSignature();
-      operation.put("operation_name", methodSignature.getName());
+      operation.put(CollectionConstants.OPERATION_NAME, methodSignature.getName());
       long timeStamp = System.currentTimeMillis();
-      operation.put("begin_time", timeStamp);
-
-      Class[] paramTypes = methodSignature.getParameterTypes();
-      Map<String, Map> parameters = new HashMap<>();
-      for (int i = 0; i < paramTypes.length; i++) {
-         Object arg = args[i];
-         if (arg == null) {
-            continue;
+      operation.put(CollectionConstants.OPERATION_BEGIN_TIME, timeStamp);
+      List<Object> parameters = new ArrayList<>();
+      if(args != null) {
+         for (Object arg : args) {
+            if (arg == null) {
+               continue;
+            }
+            parameters.add(arg);
          }
-         HashMap<Class, Object> parameter = new HashMap();
-         parameter.put(paramTypes[i], args[i]);
-         parameters.put("arg" + i, parameter);
       }
-      operation.put("operation_parameters", parameters);
-      return  operation;
+      operation.put(CollectionConstants.OPERATION_PARAMETERS, parameters);
+      return operation;
    }
 
    public CollectionDriverManager getCollectionDriverManager() {
@@ -143,12 +155,12 @@ public class CollectOperationManager {
       this.collectionDriverManager = collectionDriverManager;
    }
 
-    public static List<Map<String, Object>> consumeOperations () {
-        List<Map<String, Object>> consumptionOperations = new LinkedList<>();
-        synchronized (operations) {
-            consumptionOperations.addAll(operations);
-            operations.clear();
-        }
-        return consumptionOperations;
-    }
+   public List<Map<String, Object>> consumeOperations () {
+      List<Map<String, Object>> consumptionOperations = new LinkedList<>();
+      synchronized (operations) {
+         consumptionOperations.addAll(operations);
+         operations.clear();
+      }
+      return consumptionOperations;
+   }
 }

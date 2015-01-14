@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.vmware.bdd.util.collection.CollectionConstants;
 import org.apache.log4j.Logger;
 
 public class DataContainer {
@@ -59,21 +60,6 @@ public class DataContainer {
       logger.info("key: " + key + ", value: " + t
             + " have been put in operation " + id + " .");
       this.notify();
-   }
-
-   public synchronized Map<String, Object> pop(String id) {
-      Map<String, Object> object = null;
-      try {
-         while (!dataQueue.containsKey(id)) {
-            this.wait();
-         }
-      } catch (InterruptedException e) {
-         logger.warn("Wait push data failed: " + e.getMessage());
-      }
-      object = dataQueue.get(id);
-      dataQueue.remove(object);
-      this.notify();
-      return object;
    }
 
    public synchronized Map<String, Map<String, Object>> pop() {
@@ -130,7 +116,7 @@ public class DataContainer {
       if (!dataQueue.containsKey(id)) {
          return false;
       }
-      if (id.startsWith("asynchronization_")) {
+      if (id.startsWith(CollectionConstants.ASYNCHRONIZATION_PREFIX)) {
          return (getMaxLength() + 1) == dataQueue.get(id).size();
       } else {
          return getMaxLength() == dataQueue.get(id).size();

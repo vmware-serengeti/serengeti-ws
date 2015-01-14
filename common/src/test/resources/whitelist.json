@@ -1,0 +1,27 @@
+[
+  {
+    "hadoop": {
+      "yarn-site.xml": [
+        {
+          "name": "yarn.application.classpath"
+        }
+      ],
+      "mapred-site.xml": [
+        {
+          "name": "mapred\\.queue\\.[0-9a-zA-Z-_]+\\.acl-administer-jobs",
+          "nameIsPattern": "true"
+        }
+      ],
+      "topology.data": [
+        {
+          "name": "text"
+        }
+      ],
+      "fair-scheduler.xml": [
+        {
+          "name": "text"
+        }
+      ]
+    }
+  }
+]
