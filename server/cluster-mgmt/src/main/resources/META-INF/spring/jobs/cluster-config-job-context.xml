@@ -33,7 +33,7 @@
 	</beans:bean>
 
 	<job id="configClusterJob" job-repository="jobRepository">
-		<step id="setAutoElasticityConfigStep" next="preSoftwareProvisionWhenConfigureStep">
+		<step id="setAutoElasticityConfigStep" next="generateHostnameWhenClusterConfigStep">
 			<tasklet ref="setAutoElasticityTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
