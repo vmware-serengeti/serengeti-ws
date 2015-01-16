@@ -14,6 +14,9 @@
  *****************************************************************************/
 package com.vmware.bdd.cli.commands;
 
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,16 +64,31 @@ public class MgmtVmCfgCommands implements CommandMarker {
    @CliCommand(value = "mgmtvmcfg get", help = "get management VM's Configuration.")
    public void getMgmtVMCfg() {
       try {
-         Map<String, String> mgmtVMcfg = mgmtCfgOnMgmtVMClient.get();
+         final Map<String, String> mgmtVMcfg = mgmtCfgOnMgmtVMClient.get();
 
-         StringBuilder cfgStrBuilder = new StringBuilder("Management VM's configuration: ").append('\n');
-         cfgStrBuilder.append("User management mode: ").append(mgmtVMcfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE));
+         MgmtVmCfg mgmtVmCfgBean = new MgmtVmCfg();
+         mgmtVmCfgBean.mgmtVMcfg = mgmtVMcfg;
 
-         System.out.println(cfgStrBuilder.toString());
+         LinkedHashMap<String, List<String>> distroColumnNamesWithGetMethodNames = new LinkedHashMap<String, List<String>>();
+         distroColumnNamesWithGetMethodNames.put(
+               "USER MANAGEMENT MODE", Arrays.asList("getUserMgmtMode"));
 
-         CommandOutputHelper.GET_MGMTVMCFG_OUTPUT.printSuccess();
+         try {
+            CommandsUtils.printInTableFormat(
+                  distroColumnNamesWithGetMethodNames, new Object[]{mgmtVmCfgBean},
+                  Constants.OUTPUT_INDENT);
+         } catch (Exception e) {
+            e.printStackTrace();
+         }
       } catch (CliRestException e) {
          CommandOutputHelper.GET_MGMTVMCFG_OUTPUT.printFailure("", e);
+      }
+   }
+
+   class MgmtVmCfg {
+      private  Map<String, String> mgmtVMcfg;
+      public String getUserMgmtMode() {
+         return mgmtVMcfg.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE);
       }
    }
 

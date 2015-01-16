@@ -19,6 +19,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -57,17 +59,43 @@ public class UserMgmtServerCommands implements CommandMarker {
 
 
    @CliCommand(value = "usermgmtserver get", help = "get the default AD/LDAP server info.")
-   public void modifyUserMgmtServer() {
+   public void getUserMgmtServer(
+   ) {
       try {
          UserMgmtServer userMgmtServer = userMgmtServerRestClient.get(UserMgmtConstants.DEFAULT_USERMGMT_SERVER_NAME);
 
-         ObjectMapper objectMapper = new ObjectMapper();
+         if(userMgmtServer == null) {
+            System.out.println("The AD/LDAP server is not added.");
+            return;
+         }
 
-         System.out.println(
-               objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(userMgmtServer));
+
+         LinkedHashMap<String, List<String>> distroColumnNamesWithGetMethodNames =
+               new LinkedHashMap<String, List<String>>();
+         distroColumnNamesWithGetMethodNames.put(
+               "TYPE", Arrays.asList("getType"));
+         distroColumnNamesWithGetMethodNames
+               .put("PRIMARY URL", Arrays.asList("getPrimaryUrl"));
+         distroColumnNamesWithGetMethodNames
+               .put("LOGIN", Arrays.asList("getUserName"));
+         distroColumnNamesWithGetMethodNames
+               .put("PASSWORD", Arrays.asList("getPassword"));
+         distroColumnNamesWithGetMethodNames.put(
+               "GROUP SEARCH BASE", Arrays.asList("getBaseGroupDn"));
+         distroColumnNamesWithGetMethodNames.put(
+               "USER SEARCH BASE", Arrays.asList("getBaseUserDn"));
+         distroColumnNamesWithGetMethodNames.put(
+               "MANAGEMENT VM USER GROUP", Arrays.asList("getMgmtVMUserGroupDn"));
+
+         userMgmtServer.setPassword("******");
+         try {
+            CommandsUtils.printInTableFormat(
+                  distroColumnNamesWithGetMethodNames, new Object[]{userMgmtServer},
+                  Constants.OUTPUT_INDENT);
+         } catch (Exception e) {
+            e.printStackTrace();
+         }
       } catch (CliRestException e) {
-         CommandOutputHelper.GET_LDAP_OUTPUT.printFailure("", e);
-      } catch (IOException e) {
          CommandOutputHelper.GET_LDAP_OUTPUT.printFailure("", e);
       }
    }
