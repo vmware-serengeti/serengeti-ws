@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2013-2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,19 +17,28 @@ package com.vmware.bdd.apitypes;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Author: Xiaoding Bian
- * Date: 10/14/13
- * Time: 5:03 PM
- */
-public class IpConfigInfo extends NetConfigInfo{
+public class VcVmNicInfo {
 
    @Expose
-   @SerializedName("ip_address")
+   private String portgroup;
+
+   @Expose
+   @SerializedName("ipaddr")
    private String ipAddress;
 
    @Expose
    private String fqdn;
+
+   @Expose
+   private String device;
+
+   public String getPortgroup() {
+      return portgroup;
+   }
+
+   public void setPortgroup(String portgroup) {
+      this.portgroup = portgroup;
+   }
 
    public String getIpAddress() {
       return ipAddress;
@@ -47,20 +56,12 @@ public class IpConfigInfo extends NetConfigInfo{
       this.fqdn = fqdn;
    }
 
-   public IpConfigInfo() {
+   public String getDevice() {
+      return device;
    }
 
-   public IpConfigInfo(NetTrafficType trafficType, String networkName, String portGroupName, String ipAddress, String fqdn) {
-      this(trafficType, networkName, portGroupName, ipAddress);
-      this.fqdn = fqdn;
+   public void setDevice(String device) {
+      this.device = device;
    }
 
-   public IpConfigInfo(NetTrafficType trafficType, String networkName, String portGroupName, String ipAddress) {
-      super(trafficType, networkName, portGroupName);
-      this.ipAddress = ipAddress;
-   }
-
-   public IpConfigInfo(ClusterNetConfigInfo netConfig, String ipAddress, String fqdn) {
-      this(netConfig.getTrafficType(), netConfig.getNetworkName(), netConfig.getPortGroupName(), ipAddress);
-   }
 }

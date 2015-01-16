@@ -140,7 +140,7 @@ public class NodeRead {
       return fetchIpOf(NetTrafficType.MAPRED_NETWORK);
    }
 
-   private String fetchIpOf(NetTrafficType type) {
+   public String fetchIpOf(NetTrafficType type) {
       if (ipConfigs == null) {
          return null;
       }
@@ -156,6 +156,33 @@ public class NodeRead {
          return null;
       }
       return ipConfigs.get(type).get(0).getIpAddress();
+   }
+
+   public String fetchMgtFqdn() {
+      return fetchFqdnOf(NetTrafficType.MGT_NETWORK);
+   }
+
+   public String fetchHdfsFqdn() {
+      return fetchFqdnOf(NetTrafficType.HDFS_NETWORK);
+   }
+
+   public String fetchMapredFqdn() {
+      return fetchFqdnOf(NetTrafficType.MAPRED_NETWORK);
+   }
+
+   public String fetchFqdnOf(NetTrafficType type) {
+      if (ipConfigs == null) {
+         return null;
+      }
+      if (!ipConfigs.containsKey(type)) {
+         if (type.equals(NetTrafficType.MGT_NETWORK)) {
+            return null;
+         } else {
+            // in this case, by default use MGT_NETWORK
+            return fetchFqdnOf(NetTrafficType.MGT_NETWORK);
+         }
+      }
+      return ipConfigs.get(type).get(0).getFqdn();
    }
 
    public String getStatus() {

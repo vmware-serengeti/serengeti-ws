@@ -197,6 +197,7 @@ create table nic (
    ipv4_address   varchar(255),
    ipv6_address   varchar(255),
    mac_address    varchar(255),
+   fqdn           varchar(255),
    connected      boolean,
    net_traffic_definition  text,
    node_id        bigint,

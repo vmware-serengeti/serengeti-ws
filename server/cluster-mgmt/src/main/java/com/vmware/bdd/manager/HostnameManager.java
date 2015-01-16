@@ -17,9 +17,12 @@ package com.vmware.bdd.manager;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NicEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
@@ -27,6 +30,8 @@ import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.spectypes.NicSpec.NetTrafficDefinition;
 
 public class HostnameManager{
+
+   private static final Logger logger = Logger.getLogger(HostnameManager.class);
 
    public static String getHostnamePrefix() {
       String hostnamePrefix = "";
@@ -70,13 +75,14 @@ public class HostnameManager{
    }
 
    // TODO To consider multiple traffic definitions in feature
-   public static String generateHostname(NetworkAdd networkAdd, BaseNode vNode) throws BddException {
+   public static String generateHostname(NetworkEntity networkEntity, BaseNode vNode) throws BddException {
       String vNodeName = vNode.getVmName();
       Map<NetTrafficType, List<String>> networkConfig = vNode.getCluster().getNetworkConfig();
       String hostname = "";
-      for (NetTrafficType netTrafficType : networkConfig.keySet()) {
-         if (networkConfig.get(netTrafficType).contains(networkAdd.getName())) {
-            hostname = generateHostnameWithTrafficType(netTrafficType, vNodeName);
+      for (Map.Entry<NetTrafficType, List<String>> networkConfigEntry : networkConfig.entrySet()) {
+         if (networkConfigEntry.getValue().contains(networkEntity.getName()) && networkEntity.getIsGenerateHostname()) {
+            hostname = generateHostnameWithTrafficType(networkConfigEntry.getKey(), vNodeName);
+            break;
          }
       }
       return hostname;

@@ -56,6 +56,9 @@ public class NicEntity extends EntityBase{
    @Column(name = "mac_address")
    private String macAddress;
 
+   @Column(name = "fqdn")
+   private String fqdn;
+
    @Column(name = "connected")
    private Boolean connected;
 
@@ -144,5 +147,13 @@ public class NicEntity extends EntityBase{
    public Set<NicSpec.NetTrafficDefinition> getNetTrafficDefs() {
       return (new Gson()).fromJson(netTrafficDefs,
             new TypeToken<HashSet<NicSpec.NetTrafficDefinition>>() {}.getType());
+   }
+
+   public String getFqdn() {
+      return fqdn;
+   }
+
+   public void setFqdn(String fqdn) {
+      this.fqdn = fqdn;
    }
 }

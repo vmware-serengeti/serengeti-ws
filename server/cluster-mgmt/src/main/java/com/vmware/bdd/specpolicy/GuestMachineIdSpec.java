@@ -190,8 +190,8 @@ public class GuestMachineIdSpec {
 
       public NicDeviceConfigSpec(NetworkAdd networkAdd, Map<String, String> ipInfo, BaseNode vNode, INetworkService networkMgr) {
          this(networkAdd, ipInfo);
-         this.dhcpHostname = HostnameManager.generateHostname(networkAdd, vNode);
          NetworkEntity networkEntity = networkMgr.getNetworkEntityByName(networkAdd.getName());
+         this.dhcpHostname = HostnameManager.generateHostname(networkEntity, vNode);
          this.dnsType = networkEntity.getDnsType();
       }
 

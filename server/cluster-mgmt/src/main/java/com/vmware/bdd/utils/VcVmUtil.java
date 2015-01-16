@@ -25,6 +25,7 @@ import java.util.concurrent.Callable;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.StorageRead;
+
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.DiskSchema;
@@ -52,6 +53,8 @@ import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.apitypes.VcVmNetworkInfo;
+import com.vmware.bdd.apitypes.VcVmNicInfo;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NicEntity;
 import com.vmware.bdd.entity.NodeEntity;
@@ -170,6 +173,13 @@ public class VcVmUtil {
       GuestInfo guestInfo = vcVm.queryGuest();
       NicInfo[] nicInfos = guestInfo.getNet();
 
+      VcVmNetworkInfo vcVmNetworkInfo = null;
+      String guestNetworkInfo = vcVm.getGuestVariables().get("guestinfo.network_info");
+      if (guestNetworkInfo != null && !guestNetworkInfo.isEmpty()) {
+         Gson gson = new Gson();
+         vcVmNetworkInfo = gson.fromJson(guestNetworkInfo, VcVmNetworkInfo.class);
+      }
+
       String ipaddress = Constants.NULL_IPV4_ADDRESS;
       /*
        * We do not know when VC can retrieve vm's guestinfo from vmtools, so it's better
@@ -190,6 +200,14 @@ public class VcVmUtil {
          if (nicEntity != null) {
             nicEntity.setMacAddress(nicInfo.getMacAddress());
             nicEntity.setConnected(nicInfo.isConnected());
+            if (vcVmNetworkInfo != null) {
+               for (VcVmNicInfo vcVmNicInfo : vcVmNetworkInfo.getNics()) {
+                  if (nicEntity.getNetworkEntity().getPortGroup().equals(vcVmNicInfo.getPortgroup())) {
+                     nicEntity.setFqdn(vcVmNicInfo.getFqdn());
+                     logger.info("Nic FQDN is " + vcVmNicInfo.getFqdn());
+                  }
+               }
+            }
          }
 
          /*
@@ -1042,4 +1060,5 @@ public class VcVmUtil {
          }
       });
    }
+
 }

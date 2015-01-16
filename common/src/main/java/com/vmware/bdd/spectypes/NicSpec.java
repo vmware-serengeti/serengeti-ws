@@ -38,6 +38,8 @@ public class NicSpec {
 
    private String ipv6Address;
 
+   private String fqdn;
+
    private Set<NetTrafficDefinition> netTrafficDefinitionSet;
 
    public static class NetTrafficDefinition {
@@ -140,6 +142,14 @@ public class NicSpec {
 
    public void setIpv6Address(String ipv6Address) {
       this.ipv6Address = ipv6Address;
+   }
+
+   public String getFqdn() {
+      return fqdn;
+   }
+
+   public void setFqdn(String fqdn) {
+      this.fqdn = fqdn;
    }
 
    public Set<NetTrafficDefinition> getNetTrafficDefinitionSet() {

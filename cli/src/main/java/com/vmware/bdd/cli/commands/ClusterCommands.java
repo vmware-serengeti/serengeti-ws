@@ -579,7 +579,7 @@ public class ClusterCommands implements CommandMarker {
    public void exportClusterData(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
          @CliOption(key = { "specFile" }, mandatory = false, help = "The cluster spec file path") final String specFileName,
-         @CliOption(key = { "type" }, mandatory = false, help = "The data type to export: SPEC or RACK or IP") final String type,
+         @CliOption(key = { "type" }, mandatory = false, help = "The data type to export: SPEC or RACK or IP2FQDN") final String type,
          @CliOption(key = { "topology" }, mandatory = false, help = "The topology type: HVE or RACK_AS_RACK or HOST_AS_RACK") final String topology,
          @CliOption(key = { "delimiter" }, mandatory = false, help = "The string used to separate each line") final String delimeter,
          @CliOption(key = { "output" }, mandatory = false, help = "The path to the output file") final String output) {
@@ -618,6 +618,9 @@ public class ClusterCommands implements CommandMarker {
          } else if (Constants.EXPORT_TYPE_IP.equalsIgnoreCase(type)) {
             ClusterRead cluster = restClient.get(name, true);
             prettyOutputClusterIPs(cluster, path, delimeter);
+         } else if (Constants.EXPORT_TYPE_IP_2_FQDN.equalsIgnoreCase(type)) {
+            ClusterRead cluster = restClient.get(name, true);
+            prettyOutputClusterIp2FqdnMapping(cluster, path, delimeter);
          } else {
             System.out.println(Constants.UNKNOWN_EXPORT_TYPE);
          }
@@ -1850,5 +1853,23 @@ public class ClusterCommands implements CommandMarker {
                      + "topologyType=" + topology);
       }
       return value;
+   }
+
+   public static void prettyOutputClusterIp2FqdnMapping(ClusterRead cluster,
+         String filename, String delimeter) throws Exception {
+      List<Object> list = new ArrayList<Object>();
+      for (NodeGroupRead nodegroup : cluster.getNodeGroups()) {
+         List<NodeRead> nodes = nodegroup.getInstances();
+         if (nodes != null && !nodes.isEmpty()) {
+            for (NodeRead node : nodes) {
+               if (node.getIpConfigs() != null) {
+                  for (NetTrafficType trafficType : node.getIpConfigs().keySet()) {
+                     list.add(String.format("%-15s", node.fetchIpOf(trafficType)) + " " + node.fetchFqdnOf(trafficType));
+                  }
+               }
+            }
+         }
+      }
+      CommandsUtils.prettyOutputStrings(list, filename, delimeter);
    }
 }

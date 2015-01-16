@@ -515,7 +515,7 @@ public class NodeEntity extends EntityBase {
                List<IpConfigInfo> ipInfo = ipConfigInfo.get(netDef.getTrafficType());
                IpConfigInfo newIpConfig = new IpConfigInfo(netDef.getTrafficType(), 
                      nicEntity.getNetworkEntity().getName(), nicEntity.getNetworkEntity().getPortGroup(),
-                     nicEntity.getIpv4Address());
+                     nicEntity.getIpv4Address(), nicEntity.getFqdn());
                if (netDef.getIndex() + 1 > ipInfo.size()) {
                   while (ipInfo.size() < netDef.getIndex() + 1) {
                      ipInfo.add(null);
