@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
 
 import com.vmware.aurora.composition.TestSP.TakeSnapshotSP;
+import com.vmware.aurora.vc.VcVmCloneType;
 import com.vmware.vim.binding.vim.Folder;
 
 /**
@@ -87,7 +88,8 @@ public class CompositionLayerTest extends AbstractTmTest {
       vmSchema.diskSchema.setParentSnap(snapshotName);
 
       CreateVmSP vm1SP =
-            new CreateVmSP("testCompLayer", vmSchema, rp, ds, null, new QueryGuestInfo(3 * 60), null, true, vmFolder);
+            new CreateVmSP("testCompLayer", vmSchema, rp, ds, null, new QueryGuestInfo(3 * 60),
+                  null, VcVmCloneType.LINKED, vmFolder);
       vm1SP.call();
       logger.info("Created VM: " + vm1SP.getVM().getName());
 
@@ -102,7 +104,7 @@ public class CompositionLayerTest extends AbstractTmTest {
 
       CreateVmSP vm2SP =
             new CreateVmSP("testCloneCompLayer", vmCloneSchema, rp, ds, null,
-                  null, null, false, vmFolder);
+                  null, null, VcVmCloneType.FULL, vmFolder);
       vm2SP.call();
 
       VmSchema vmFullCloneSchema =
@@ -115,7 +117,7 @@ public class CompositionLayerTest extends AbstractTmTest {
 
       CreateVmSP fullCloneVmSP =
             new CreateVmSP("testFullCloneCompLayer", vmFullCloneSchema, rp, ds,
-                  null, null, null, true, vmFolder);
+                  null, null, null, VcVmCloneType.LINKED, vmFolder);
       fullCloneVmSP.call();
 
       util.testRemoveSnapshot(templateId, snapshotName);

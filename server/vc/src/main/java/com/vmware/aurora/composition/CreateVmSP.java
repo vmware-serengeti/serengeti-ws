@@ -25,16 +25,8 @@ import java.util.concurrent.Callable;
 import com.vmware.aurora.composition.DiskSchema.Disk;
 import com.vmware.aurora.exception.VcException;
 import com.vmware.aurora.global.DiskSize;
-import com.vmware.aurora.vc.DeviceId;
-import com.vmware.aurora.vc.DiskType;
-import com.vmware.aurora.vc.VcCache;
-import com.vmware.aurora.vc.VcDatastore;
-import com.vmware.aurora.vc.VcHost;
-import com.vmware.aurora.vc.VcResourcePool;
-import com.vmware.aurora.vc.VcSnapshot;
-import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.aurora.vc.*;
 import com.vmware.aurora.vc.VcVirtualMachine.DiskCreateSpec;
-import com.vmware.aurora.vc.VmConfigUtil;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.vim.binding.impl.vim.vApp.ProductSpecImpl;
@@ -65,7 +57,7 @@ public class CreateVmSP implements Callable<Void> {
    final IPrePostPowerOn prePowerOn;
    final IPrePostPowerOn postPowerOn;
    final Map<String, String> bootupConfigs;
-   final boolean linkedClone;
+   final VcVmCloneType cloneType;
    final Folder vmFolder; /* optional */
    final VcHost host; /* optinal */
 
@@ -74,15 +66,15 @@ public class CreateVmSP implements Callable<Void> {
    public CreateVmSP(String newVmName, VmSchema vmSchema,
          VcResourcePool targetRp, VcDatastore targetDs,
          IPrePostPowerOn prePowerOn, IPrePostPowerOn postPowerOn,
-         Map<String, String> bootupConfigs, boolean linkedClone, Folder vmFolder) {
+         Map<String, String> bootupConfigs, VcVmCloneType cloneType, Folder vmFolder) {
       this(newVmName, vmSchema, targetRp, targetDs, prePowerOn, postPowerOn,
-            bootupConfigs, linkedClone, vmFolder, null);
+            bootupConfigs, cloneType, vmFolder, null);
    }
 
    public CreateVmSP(String newVmName, VmSchema vmSchema,
          VcResourcePool targetRp, VcDatastore targetDs,
          IPrePostPowerOn prePowerOn, IPrePostPowerOn postPowerOn,
-         Map<String, String> bootupConfigs, boolean linkedClone,
+         Map<String, String> bootupConfigs, VcVmCloneType cloneType,
          Folder vmFolder, VcHost host) {
       this.newVmName = newVmName;
       this.vmSchema = vmSchema;
@@ -91,7 +83,7 @@ public class CreateVmSP implements Callable<Void> {
       this.prePowerOn = prePowerOn;
       this.postPowerOn = postPowerOn;
       this.bootupConfigs = bootupConfigs;
-      this.linkedClone = linkedClone;
+      this.cloneType = cloneType;
       this.vmFolder = vmFolder;
       this.host = host;
    }
@@ -99,7 +91,7 @@ public class CreateVmSP implements Callable<Void> {
    public CreateVmSP(VcVirtualMachine vcVm, VmSchema vmSchema,
          VcResourcePool targetRp, VcDatastore targetDs,
          IPrePostPowerOn prePowerOn, IPrePostPowerOn postPowerOn,
-         Map<String, String> bootupConfigs, boolean linkedClone,
+         Map<String, String> bootupConfigs, VcVmCloneType cloneType,
          Folder vmFolder, VcHost host) {
       this.vcVm = vcVm;
       this.newVmName = vcVm.getName();
@@ -109,7 +101,7 @@ public class CreateVmSP implements Callable<Void> {
       this.prePowerOn = prePowerOn;
       this.postPowerOn = postPowerOn;
       this.bootupConfigs = bootupConfigs;
-      this.linkedClone = linkedClone;
+      this.cloneType = cloneType;
       this.vmFolder = vmFolder;
       this.host = host;
    }
@@ -260,7 +252,7 @@ public class CreateVmSP implements Callable<Void> {
          vcVm.reconfigure(VmConfigUtil.createConfigSpec(deviceChange));
       }
 
-      if (linkedClone) {
+      if (cloneType == VcVmCloneType.LINKED) {
          // Promote necessary disks
          ArrayList<DeviceId> disksToPromote = new ArrayList<DeviceId>();
          for (Entry<String, Disk.Operation> entry : diskMap.entrySet()) {
@@ -304,7 +296,7 @@ public class CreateVmSP implements Callable<Void> {
       if (requireClone()) {
          VcVirtualMachine.CreateSpec vmSpec =
                new VcVirtualMachine.CreateSpec(newVmName, snap, targetRp,
-                     targetDs, vmFolder, host, linkedClone, configSpec);
+                     targetDs, vmFolder, host, cloneType, configSpec);
          // Clone from the template
          vcVm = template.cloneVm(vmSpec, null);
       } else {

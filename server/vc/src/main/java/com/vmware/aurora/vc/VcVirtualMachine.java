@@ -2372,7 +2372,7 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
       if (hostMoRef != null) {
          relocSpec.setHost(hostMoRef);
       }
-      if (cloneType == VcVmCloneType.LINK) {
+      if (cloneType == VcVmCloneType.LINKED) {
          relocSpec.setDiskMoveType("createNewChildDiskBacking");
       }
       spec.setLocation(relocSpec);
@@ -2413,7 +2413,7 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
        * To support link-clone, a snapshot of the VM must have be taken
        * before being marked as a template. We then use the snapshot to clone.
        */
-      return cloneWork(dc, rp.getMoRef(), ds.getMoRef(), currentSnapshot, null, null, VcVmCloneType.LINK,
+      return cloneWork(dc, rp.getMoRef(), ds.getMoRef(), currentSnapshot, null, null, VcVmCloneType.LINKED,
                        name, config, callback);
    }
 
@@ -2436,7 +2436,7 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
          VcVmCloneType cloneType, IVcTaskCallback callback) throws Exception {
       VcDatacenter dc = rp.getVcCluster().getDatacenter();
       ManagedObjectReference snapMoRef = null;
-      if (cloneType == VcVmCloneType.LINK) {
+      if (cloneType == VcVmCloneType.LINKED) {
          // To support link-clone, a snapshot of the VM must have been taken.
          // We use the current snapshot to clone.
          snapMoRef = currentSnapshot;

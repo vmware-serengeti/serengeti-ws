@@ -28,6 +28,7 @@ import com.vmware.aurora.composition.compensation.CompensateCreateVmSP;
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.composition.concurrent.Scheduler.ProgressCallback;
+import com.vmware.aurora.vc.VcVmCloneType;
 import com.vmware.bdd.clone.spec.VmCreateResult;
 import com.vmware.bdd.clone.spec.VmCreateSpec;
 import com.vmware.bdd.exception.BddException;
@@ -60,7 +61,7 @@ public class SimpleClusterCloningService implements IClusterCloneService {
                new CreateVmSP(consumer.getVmName(), consumer.getSchema(),
                      consumer.getTargetRp(), consumer.getTargetDs(),
                      consumer.getPrePowerOn(), consumer.getPostPowerOn(),
-                     consumer.getBootupConfigs(), false,
+                     consumer.getBootupConfigs(), VcVmCloneType.FULL,
                      consumer.getTargetFolder(), consumer.getTargetHost());
          CompensateCreateVmSP deleteVmSp = new CompensateCreateVmSP(cloneVmSp);
          storeProcedures[i] =

@@ -36,6 +36,7 @@ import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.aurora.vc.VcVmCloneType;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.ClusterCreate;
@@ -365,7 +366,7 @@ public class ClusterHealService implements IClusterHealService {
       return new CreateVmSP(node.getVmName() + RECOVERY_VM_NAME_POSTFIX,
             createSchema, VcVmUtil.getTargetRp(clusterSpec.getName(),
                   groupName, node), getTargetDatastore(fullDiskSet),
-            prePowerOn, null, guestVariable, false, getTargetFolder(node),
+            prePowerOn, null, guestVariable, VcVmCloneType.FULL, getTargetFolder(node),
             getTargetHost(node));
    }
 

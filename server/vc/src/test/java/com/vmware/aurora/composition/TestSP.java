@@ -25,6 +25,7 @@ import com.vmware.aurora.vc.VcSnapshot;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.VcVirtualMachine.CreateSpec;
 import com.vmware.aurora.vc.VcVirtualMachine.DiskCreateSpec;
+import com.vmware.aurora.vc.VcVmCloneType;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 
@@ -100,7 +101,7 @@ public class TestSP {
                VcSnapshot snap = template.getSnapshotByName(snapName);
 
                CreateSpec vmSpec =
-                     new CreateSpec(newVmName, snap, targetRp, targetDs, true, null);
+                     new CreateSpec(newVmName, snap, targetRp, targetDs, VcVmCloneType.LINKED, null);
 
                DeviceId[] removeSet = removeDisks;
                VcVirtualMachine newVm = template.cloneVm(vmSpec, removeSet);
