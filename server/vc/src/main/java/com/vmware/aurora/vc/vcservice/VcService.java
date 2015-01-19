@@ -26,6 +26,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -61,8 +62,11 @@ import com.vmware.vim.binding.impl.vim.KeyValueImpl;
 import com.vmware.vim.binding.impl.vim.ext.ExtendedProductInfoImpl;
 import com.vmware.vim.binding.impl.vim.ext.ManagedEntityInfoImpl;
 import com.vmware.vim.binding.impl.vim.ext.SolutionManagerInfoImpl;
+import com.vmware.vim.binding.vim.AuthorizationManager;
+import com.vmware.vim.binding.vim.AuthorizationManager.Role;
 import com.vmware.vim.binding.vim.Description;
 import com.vmware.vim.binding.vim.Extension;
+import com.vmware.vim.binding.vim.Extension.PrivilegeInfo;
 import com.vmware.vim.binding.vim.ExtensionManager;
 import com.vmware.vim.binding.vim.FileManager;
 import com.vmware.vim.binding.vim.KeyValue;
@@ -104,7 +108,9 @@ public class VcService {
    private static final Class<?> version = version8.class;
    private static final int SESSION_TIME_OUT = Configuration.getInt(
          "vc.session_time_out", 120000);
-
+   private static final String SERENGETI_PRIVILEGE_GROUP_NAME = "Serengeti";
+   private static final String SERENGETI_PRIVILEGE_ID = "Serengeti.access";
+   private static final String SERENGETI_PERMISSION_ROLE = "serengeti-users";
    /*
     * The following fields are VC login info, initialized once.
     */
@@ -215,6 +221,7 @@ public class VcService {
       private PropertyCollector propertyCollector = null;
       private ExtensionManager extensionManager = null;
       private AlarmManager alarmManager = null;
+      private AuthorizationManager authorizationManager = null;
 
       /*
        * A map that caches all managed object proxy objects.
@@ -270,6 +277,7 @@ public class VcService {
             propertyCollector = getManagedObject(instanceContent.getPropertyCollector());
             extensionManager = getManagedObject(instanceContent.getExtensionManager());
             alarmManager = getManagedObject(instanceContent.getAlarmManager());
+            authorizationManager = getManagedObject(instanceContent.getAuthorizationManager());
 
             logger.info("VC login on behalf of {" + Thread.currentThread().getName() +
                   ":" + serviceName + "{" + genCount + "}} " +
@@ -720,6 +728,7 @@ public class VcService {
    private void configureExtensionVService() throws Exception {
       ExtensionManager em = service.extensionManager;
 
+
       Extension us = em.findExtension(extKey);
       AuAssert.check(us != null);
 
@@ -750,7 +759,7 @@ public class VcService {
       extensionResourceInfo.setLocale("en");
       extensionResourceInfo.setModule("extension");
 
-      KeyValue localizedExt[] = new KeyValue[2];
+      KeyValue localizedExt[] = new KeyValue[6];
       localizedExt[0] = new KeyValueImpl();
       localizedExt[0].setKey(us.getKey() + ".label");
       localizedExt[0].setValue(us.getDescription().getLabel());
@@ -758,6 +767,22 @@ public class VcService {
       localizedExt[1] = new KeyValueImpl();
       localizedExt[1].setKey(us.getKey() + ".summary");
       localizedExt[1].setValue(us.getDescription().getSummary());
+
+      localizedExt[2] = new KeyValueImpl();
+      localizedExt[2].setKey("privilege.Serengeti.label");
+      localizedExt[2].setValue("Serengeti");
+
+      localizedExt[3] = new KeyValueImpl();
+      localizedExt[3].setKey("privilege.Serengeti.summary");
+      localizedExt[3].setValue("Serengeti users");
+
+      localizedExt[4] = new KeyValueImpl();
+      localizedExt[4].setKey("privilege.Serengeti.access.label");
+      localizedExt[4].setValue("Access");
+
+      localizedExt[5] = new KeyValueImpl();
+      localizedExt[5].setKey("privilege.Serengeti.access.summary");
+      localizedExt[5].setValue("Access Big Data Extension");
 
       extensionResourceInfo.setData(localizedExt);
 
@@ -800,9 +825,28 @@ public class VcService {
       SolutionManagerInfo sm = new SolutionManagerInfoImpl();
       sm.setSmallIconUrl("http://www.vmware.com");
       us.setSolutionManagerInfo(sm);
-      
+      //register a privilege for serengeti web client
+      PrivilegeInfo loginBDE = new ExtensionImpl.PrivilegeInfoImpl();
+      loginBDE.setPrivGroupName(SERENGETI_PRIVILEGE_GROUP_NAME);
+      loginBDE.setPrivID(SERENGETI_PRIVILEGE_ID);
+      Collection<PrivilegeInfo> privileges = new ArrayList<PrivilegeInfo>();
+      privileges.add(loginBDE);
+      us.setPrivilegeList(privileges.toArray(new PrivilegeInfo[0]));
+
       // Push this info into VC
       em.updateExtension(us);
+      //register a serengeti role for serengeti web client users
+      AuthorizationManager am = service.authorizationManager;
+      Role[] roles = am.getRoleList();
+      for(int i=0; i < roles.length; i++){
+         if(SERENGETI_PERMISSION_ROLE.equals(roles[i].getName())){
+            break;
+         }
+         if(i == roles.length-1){
+            logger.info("add a serengeti role:"+SERENGETI_PERMISSION_ROLE);
+            am.addRole(SERENGETI_PERMISSION_ROLE, new String[]{SERENGETI_PRIVILEGE_ID});
+         }
+      }
    }
 
 
