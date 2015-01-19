@@ -78,7 +78,7 @@ public class MgmtVmCfgCommands implements CommandMarker {
                   distroColumnNamesWithGetMethodNames, new Object[]{mgmtVmCfgBean},
                   Constants.OUTPUT_INDENT);
          } catch (Exception e) {
-            e.printStackTrace();
+            CommandOutputHelper.GET_MGMTVMCFG_OUTPUT.printFailure("", e);
          }
       } catch (CliRestException e) {
          CommandOutputHelper.GET_MGMTVMCFG_OUTPUT.printFailure("", e);

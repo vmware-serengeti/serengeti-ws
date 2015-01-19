@@ -93,7 +93,7 @@ public class UserMgmtServerCommands implements CommandMarker {
                   distroColumnNamesWithGetMethodNames, new Object[]{userMgmtServer},
                   Constants.OUTPUT_INDENT);
          } catch (Exception e) {
-            e.printStackTrace();
+            CommandOutputHelper.GET_LDAP_OUTPUT.printFailure("", e);
          }
       } catch (CliRestException e) {
          CommandOutputHelper.GET_LDAP_OUTPUT.printFailure("", e);
