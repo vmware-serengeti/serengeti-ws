@@ -38,7 +38,7 @@ public class VcTask extends VcObjectImpl {
     * All VC tasks. The "targetClass" is the {@link VcObject} class
     * corresponding to the (new) {@link ManagedObject} as the result of
     * the task. If there is no result, set it to "Void" and
-    * {@link getResult()} will always return null.
+    * {@link VcTask.getResult()} will always return null.
     */
    static public enum TaskType {
       PowerOn   (Void.class),
@@ -65,7 +65,8 @@ public class VcTask extends VcObjectImpl {
       TurnOnFT (Void.class),
       TurnOffFT (Void.class),
       EnableFT (Void.class),
-      DisableFT (Void.class);
+      DisableFT (Void.class),
+      CreateForkChild(VcVirtualMachine.class);
 
       private Class<?> targetClass;
       private TaskType(Class<?> clazz) {
@@ -230,7 +231,7 @@ public class VcTask extends VcObjectImpl {
     * However, java makes it impossible to tell if wait() was notified or
     * finished because of timeout expiration. Use notified flag for that.
     *
-    * @param normalComplection
+    * @param normalCompletion
     * @throws Exception
     */
    private void verifyWaitCompletion(boolean normalCompletion) throws Exception {
@@ -340,7 +341,7 @@ public class VcTask extends VcObjectImpl {
     * a notification of a task completion by VcEventListener thread.
     *
     * @return the VC object as a result of this task.
-    * @exception on failure
+    * @exception Exception failure
     */
    public synchronized VcObject waitForCompletion() throws Exception {
       totalWaitTimeNanos = 0;

@@ -55,6 +55,7 @@ import com.vmware.vim.binding.impl.vim.cluster.DrsVmConfigSpecImpl;
 import com.vmware.vim.binding.impl.vim.option.OptionValueImpl;
 import com.vmware.vim.binding.impl.vim.vm.CloneSpecImpl;
 import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
+import com.vmware.vim.binding.impl.vim.vm.CreateChildSpecImpl;
 import com.vmware.vim.binding.impl.vim.vm.RelocateSpecImpl;
 import com.vmware.vim.binding.impl.vim.vm.device.VirtualDeviceSpecImpl;
 import com.vmware.vim.binding.vim.ClusterComputeResource;
@@ -733,16 +734,27 @@ public interface VcVirtualMachine extends VcVmBase {
     * @param ds datastore for the new VM
     * @param folder The VM folder to hold the new VM. If null, the new VM
     * will be put into the root VM folder of the datacenter, in which the resource pool lives
-    * @param cloneType true for the linked clone, false for the full clone
+    * @param isLinked true for the linked clone, false for the full clone
     * @param callback (optional) call-back function for the task
     * @return a task object for the clone operation
     * @throws Exception
     */
    abstract VcTask cloneVm(String name, VcResourcePool rp, VcDatastore ds, Folder folder,
-         VcVmCloneType cloneType, IVcTaskCallback callback) throws Exception;
+                           boolean isLinked, IVcTaskCallback callback) throws Exception;
 
+   /**
+    * Clone a VM
+    * @param name new VM's name
+    * @param rp resource pool for the new VM
+    * @param ds datastore for the new VM
+    * @param folder The VM folder to hold the new VM. If null, the new VM
+    * will be put into the root VM folder of the datacenter, in which the resource pool lives
+    * @param isLinked true for the linked clone, false for the full clone
+    * @return a task object for the clone operation
+    * @throws Exception
+    */
    abstract VcVirtualMachine cloneVm(String name, VcResourcePool rp,
-         VcDatastore ds, Folder folder, VcVmCloneType cloneType) throws Exception;
+         VcDatastore ds, Folder folder, boolean isLinked) throws Exception;
 
    /**
     * Clone a new VM from a snapshot of the VM
@@ -752,14 +764,14 @@ public interface VcVirtualMachine extends VcVmBase {
     * @param snap snapshot of the VM to create the clone
     * @param folder The VM folder to hold the new VM. If null, the new VM
     * will be put into the root VM folder of the datacenter, in which the resource pool lives
-    * @param cloneType true for the linked clone, false for the full clone
+    * @param linked true for the linked clone, false for the full clone
     * @param config (optional) VM configuration change
     * @param callback (optional) call-back function for the task
     * @return a task object for the clone operation
     * @throws Exception
     */
    abstract VcTask cloneSnapshot(String name, VcResourcePool rp, VcDatastore ds,
-         VcSnapshot snap, Folder folder, VcHost host, VcVmCloneType cloneType, ConfigSpec config,
+         VcSnapshot snap, Folder folder, VcHost host, boolean linked, ConfigSpec config,
          IVcTaskCallback callback) throws Exception;
 
    /**
@@ -767,9 +779,9 @@ public interface VcVirtualMachine extends VcVmBase {
     * @return the new VM.
     */
    abstract VcVirtualMachine cloneSnapshot(String name, VcResourcePool rp, VcDatastore ds,
-         VcSnapshot snap, Folder folder, VcHost host, VcVmCloneType cloneType, ConfigSpec config) throws Exception;
+         VcSnapshot snap, Folder folder, VcHost host, boolean linked, ConfigSpec config) throws Exception;
    abstract VcVirtualMachine cloneSnapshot(String name, VcResourcePool rp,
-         VcSnapshot snap, Folder folder, VcHost host, VcVmCloneType cloneType, ConfigSpec config) throws Exception;
+         VcSnapshot snap, Folder folder, VcHost host, boolean linked, ConfigSpec config) throws Exception;
 
    /**
     * Create a snapshot of the VM
@@ -1152,7 +1164,35 @@ public interface VcVirtualMachine extends VcVmBase {
    public VcVirtualMachine cloneVm(final CreateSpec vmSpec,
                        final DeviceId[] removeDisks) throws Exception;
 
+   /**
+    *
+    * @param vmSpec      specification of the new VM's configuration
+    * @param removeDisks disks to be removed from the new VM
+    * @return VMTask cloning the VM.
+    * @throws Exception
+    */
    public VcTask cloneVmAsync(final CreateSpec vmSpec, final DeviceId[] removeDisks) throws Exception;
+
+
+   /**
+    *
+    * @param name new VM's name
+    * @param rp new VM's resource pool
+    * @param ds new VM's datastore
+    * @param folder new VM's datastore folder.
+    * @param persisted
+    * @param callback
+    * @return
+    * @throws Exception
+    */
+   VcTask createForkChild(String name, VcResourcePool rp, VcDatastore ds, Folder folder,
+                             boolean persisted, IVcTaskCallback callback) throws Exception;
+
+   /**
+    * if the VM is ready for forking child.
+    * @return
+    */
+   boolean isQuiescedForkParent();
 
    /**
     * Change the VM disks layout.
@@ -2363,7 +2403,7 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
    private VcTask cloneWork(final VcDatacenter dc,
          ManagedObjectReference rpMoRef, ManagedObjectReference dsMoRef,
          ManagedObjectReference snapMoRef, final ManagedObjectReference folderMoRef,
-         ManagedObjectReference hostMoRef, VcVmCloneType cloneType, final String name,
+         ManagedObjectReference hostMoRef, boolean isLinked, final String name,
          ConfigSpec config, final IVcTaskCallback callback) throws Exception {
       final CloneSpec spec = new CloneSpecImpl();
       RelocateSpec relocSpec = new RelocateSpecImpl();
@@ -2372,7 +2412,7 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
       if (hostMoRef != null) {
          relocSpec.setHost(hostMoRef);
       }
-      if (cloneType == VcVmCloneType.LINKED) {
+      if (isLinked) {
          relocSpec.setDiskMoveType("createNewChildDiskBacking");
       }
       spec.setLocation(relocSpec);
@@ -2413,7 +2453,7 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
        * To support link-clone, a snapshot of the VM must have be taken
        * before being marked as a template. We then use the snapshot to clone.
        */
-      return cloneWork(dc, rp.getMoRef(), ds.getMoRef(), currentSnapshot, null, null, VcVmCloneType.LINKED,
+      return cloneWork(dc, rp.getMoRef(), ds.getMoRef(), currentSnapshot, null, null, true,
                        name, config, callback);
    }
 
@@ -2433,16 +2473,16 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
     */
    @Override
    public VcTask cloneVm(String name, VcResourcePool rp, VcDatastore ds, Folder folder,
-         VcVmCloneType cloneType, IVcTaskCallback callback) throws Exception {
+         boolean isLinked, IVcTaskCallback callback) throws Exception {
       VcDatacenter dc = rp.getVcCluster().getDatacenter();
       ManagedObjectReference snapMoRef = null;
-      if (cloneType == VcVmCloneType.LINKED) {
+      if (isLinked) {
          // To support link-clone, a snapshot of the VM must have been taken.
          // We use the current snapshot to clone.
          snapMoRef = currentSnapshot;
       }
       return cloneWork(dc, rp.getMoRef(), ds.getMoRef(), snapMoRef,
-            folder == null ? null : folder._getRef(), null, cloneType, name, null, callback);
+            folder == null ? null : folder._getRef(), null, isLinked, name, null, callback);
    }
 
    /* (non-Javadoc)
@@ -2450,8 +2490,8 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
     */
    @Override
    public VcVirtualMachine cloneVm(String name, VcResourcePool rp,
-         VcDatastore ds, Folder folder, VcVmCloneType cloneType) throws Exception {
-      VcTask task = cloneVm(name, rp, ds, folder, cloneType, VcCache.getRefreshVcTaskCB(rp));
+         VcDatastore ds, Folder folder, boolean isLinked) throws Exception {
+      VcTask task = cloneVm(name, rp, ds, folder, isLinked, VcCache.getRefreshVcTaskCB(rp));
       task.waitForCompletion();
       return (VcVirtualMachine)task.getResult();
    }
@@ -2461,7 +2501,7 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
     */
    @Override
    public VcTask cloneSnapshot(String name, VcResourcePool rp, VcDatastore ds, VcSnapshot snap, Folder folder,
-         VcHost host, VcVmCloneType cloneType, ConfigSpec config, IVcTaskCallback callback) throws Exception {
+         VcHost host, boolean isLinked, ConfigSpec config, IVcTaskCallback callback) throws Exception {
       // no change to ds
       AuAssert.check(!isTemplate());
       AuAssert.check(snap != null);
@@ -2471,7 +2511,7 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
          dsMoRef = ds.getMoRef();
       }
       return cloneWork(dc, rp.getMoRef(), dsMoRef, snap.getMoRef(),
-            folder == null ? null : folder._getRef(), host == null ? null : host.getMoRef(), cloneType, name, config, callback);
+            folder == null ? null : folder._getRef(), host == null ? null : host.getMoRef(), isLinked, name, config, callback);
    }
 
    /* (non-Javadoc)
@@ -2479,8 +2519,8 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
     */
    @Override
    public VcVirtualMachine cloneSnapshot(String name, VcResourcePool rp, VcDatastore ds, VcSnapshot snap,
-         Folder folder, VcHost host, VcVmCloneType cloneType, ConfigSpec config) throws Exception {
-      VcTask task = cloneSnapshot(name, rp, ds, snap, folder, host, cloneType, config,
+         Folder folder, VcHost host, boolean isLinked, ConfigSpec config) throws Exception {
+      VcTask task = cloneSnapshot(name, rp, ds, snap, folder, host, isLinked, config,
                                   VcCache.getRefreshVcTaskCB(rp));
       return (VcVirtualMachine)task.waitForCompletion();
    }
@@ -2490,8 +2530,8 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
     */
    @Override
    public VcVirtualMachine cloneSnapshot(String name, VcResourcePool rp, VcSnapshot snap, Folder folder,
-         VcHost host, VcVmCloneType cloneType, ConfigSpec config) throws Exception {
-      return cloneSnapshot(name, rp, null, snap, folder, host, cloneType, config);
+         VcHost host, boolean isLinked, ConfigSpec config) throws Exception {
+      return cloneSnapshot(name, rp, null, snap, folder, host, isLinked, config);
    }
 
 
@@ -3082,6 +3122,7 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
          public void completeCB(VcTask task) {
             VcCache.refresh(moRef);
          }
+
          @Override
          public void syncCB() {
             VcCache.sync(moRef);
@@ -3493,8 +3534,7 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
        */
       if (configSpec.getDeviceChange() != null &&
            configSpec.getDeviceChange().length > 0) {
-         AuAssert.INTERNAL();
-         return null;
+         throw AuAssert.INTERNAL();
       }
       /*
        * Append config for removing disks.
@@ -3508,13 +3548,101 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
          }
       }
       if (!devChanges.isEmpty()) {
-         configSpec.setDeviceChange(
-               devChanges.toArray(new VirtualDeviceSpec[devChanges.size()]));
+         AuAssert.check(vmSpec.cloneType == VcVmCloneType.VMFORK, "Vmfork doesn't allow change disks.");
+         configSpec.setDeviceChange(devChanges.toArray(new VirtualDeviceSpec[devChanges.size()]));
       }
 
-      return vmSpec.getParentVm().cloneSnapshot(vmSpec.name, vmSpec.rp, vmSpec.ds,
-            parentVcSnap, vmSpec.folder, vmSpec.host, vmSpec.cloneType, configSpec, VcCache.getRefreshVcTaskCB(vmSpec.rp));
+      switch (vmSpec.cloneType) {
+         case VMFORK:
+            //if vm is not quiesced, abort.
+            AuAssert.check(isQuiescedForkParent(), "VM is not quiesced.");
+            return createForkChild(vmSpec.name, vmSpec.rp, vmSpec.ds,
+                  vmSpec.folder, true, VcCache.getRefreshVcTaskCB(vmSpec.rp));
+         case FULL:
+            return vmSpec.getParentVm().cloneSnapshot(vmSpec.name, vmSpec.rp, vmSpec.ds,
+                  parentVcSnap, vmSpec.folder, vmSpec.host, false/*not linked*/, configSpec, VcCache.getRefreshVcTaskCB(vmSpec.rp));
+         case LINKED:
+            return vmSpec.getParentVm().cloneSnapshot(vmSpec.name, vmSpec.rp, vmSpec.ds,
+                  parentVcSnap, vmSpec.folder, vmSpec.host, true/*linked*/, configSpec, VcCache.getRefreshVcTaskCB(vmSpec.rp));
+         default:
+            throw AuAssert.INTERNAL(new RuntimeException("Unsupported Clone Type: " + vmSpec.cloneType));
+      }
    }
+
+   @Override
+   public VcTask createForkChild(final String name, VcResourcePool rp, VcDatastore ds, final Folder folder,
+                                    boolean persisted, final IVcTaskCallback callback) throws Exception {
+      // no change to ds
+      AuAssert.check(!isTemplate());
+
+      RelocateSpec relocSpec = new RelocateSpecImpl();
+      relocSpec.setPool(rp.getMoRef());
+      relocSpec.setDatastore(ds != null ? ds.getMoRef() : null);
+      relocSpec.setFolder(folder == null ? getDatacenter().getVmFolderMoRef() : folder._getRef());
+
+      final CreateChildSpec spec = new CreateChildSpecImpl();
+      spec.setLocation(relocSpec);
+      spec.setPersistent(persisted);
+
+      final VirtualMachine vm = getManagedObject();
+      VcTask task = VcContext.getTaskMgr().execute(new IVcTaskBody() {
+         public VcTask body() throws Exception {
+            return new VcTask(TaskType.CreateForkChild, vm.createForkChild(name, spec), callback);
+         }
+      });
+
+      return task;
+   }
+
+
+
+   public void enableForkParent(int maxWaitSeconds) {
+      VirtualMachine vm = this.getManagedObject();
+      vm.enableForkParent();
+
+      waitReady(maxWaitSeconds);
+   }
+
+   private void waitReady(int maxWaitSeconds) {
+      if(this.isQuiescedForkParent()) {
+         logger.debug("VM is quiesced.");
+         return;
+      }
+
+      long remainWaitMilSecs = maxWaitSeconds * 1000;
+      boolean quiesced = false;
+      do{
+         logger.debug("Parent is not quiesced, wait 5 seconds to check.");
+         try {
+            Thread.sleep(5000);
+         } catch (InterruptedException e) {
+            logger.error(e);
+         }
+         remainWaitMilSecs -= 5000;
+
+         quiesced = this.isQuiescedForkParent();
+         logger.debug("Is VM quiesced? " + quiesced);
+      }  while (!quiesced && remainWaitMilSecs > 0);
+
+
+
+
+      AuAssert.check(quiesced, "VM is not quiesced.");
+   }
+
+   /* (non-Javadoc)
+ * @see com.vmware.aurora.vc.VcVirtualMachine#isQuiescedForkParent()
+ */
+   @Override
+   public boolean isQuiescedForkParent() {
+      VirtualMachine vm = this.getManagedObject();
+      RuntimeInfo runtime = vm.getRuntime();
+      Boolean quiesced = runtime.getQuiescedForkParent();
+
+      return (quiesced == null ? false : quiesced);
+   }
+
+
 
    /**
     * Change the VM disks layout.

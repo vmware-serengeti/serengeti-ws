@@ -323,7 +323,7 @@ public class VmConfigUtil {
     * @return backing object
     */
    public static VirtualDevice.BackingInfo createCdromBackingInfo(String isoPath) {
-      return new VirtualCdromImpl.IsoBackingInfoImpl(isoPath, null);
+      return new VirtualCdromImpl.IsoBackingInfoImpl(isoPath, null, null);
    }
 
    /**
@@ -354,7 +354,7 @@ public class VmConfigUtil {
     *           slot number under the adapter
     * @param backing
     *           backing of the virtual device
-    * @param capacity
+    * @param size
     *           size of the disk
     * @return virtual disk object
     */
@@ -552,7 +552,7 @@ public class VmConfigUtil {
 
    public static VirtualDevice.BackingInfo createFloppyBackingInfo(
          String flpPath) {
-      return new VirtualFloppyImpl.ImageBackingInfoImpl(flpPath, null);
+      return new VirtualFloppyImpl.ImageBackingInfoImpl(flpPath, null, null);
    }
 
    public static VirtualDevice createFloppyDevice(
