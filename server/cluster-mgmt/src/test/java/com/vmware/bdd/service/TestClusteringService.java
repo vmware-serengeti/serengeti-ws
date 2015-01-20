@@ -16,6 +16,7 @@ package com.vmware.bdd.service;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,12 +41,14 @@ import com.vmware.aurora.composition.concurrent.Scheduler.ProgressCallback;
 import com.vmware.aurora.vc.VcDatacenter;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.clone.spec.VmCreateResult;
 import com.vmware.bdd.clone.spec.VmCreateSpec;
 import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.exception.VcProviderException;
@@ -53,8 +56,10 @@ import com.vmware.bdd.manager.MockResourceManager;
 import com.vmware.bdd.manager.SoftwareManagerCollector;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.placement.entity.BaseNode;
+import com.vmware.bdd.plugin.ironfan.impl.DefaultSoftwareManagerImpl;
 import com.vmware.bdd.service.MockTmScheduler.VmOperation;
 import com.vmware.bdd.service.impl.ClusteringService;
+import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.vmclone.service.intf.IClusterCloneService;
 
 public class TestClusteringService {
@@ -156,7 +161,7 @@ public class TestClusteringService {
       }
    }
 
-//   @Test(groups = { "TestClusteringService" }, dependsOnMethods = { "testCreateDhcpVmNullResult" })
+   @Test(groups = { "TestClusteringService" }, dependsOnMethods = { "testCreateDhcpVmNullResult" })
    public void testCreateDhcpVmCreateVmFail() throws Exception {
       List<NetworkAdd> networkAdds = createNetworkAdd();
       List<BaseNode> vNodes = new ArrayList<BaseNode>();
@@ -187,6 +192,19 @@ public class TestClusteringService {
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, true);
       MockTmScheduler.setFlag(VmOperation.CREATE_VM, false);
       MockVcCache.setGetFlag(false);
+
+      SoftwareManagerCollector smcMock = Mockito.mock(SoftwareManagerCollector.class);
+      Mockito.when(smcMock.getSoftwareManager("test")).thenReturn(new DefaultSoftwareManagerImpl());
+      service.setSoftwareManagerCollector(smcMock);
+
+      NetworkEntity networkEntity = new NetworkEntity();
+      INetworkService nsMock = Mockito.mock(INetworkService.class);
+      Mockito.when(nsMock.getNetworkEntityByName(Mockito.anyString())).thenReturn(networkEntity);
+      service.setNetworkMgr(nsMock);
+
+      Map<NetConfigInfo.NetTrafficType, List<String>> networkConfig = new HashMap<>();
+      networkConfig.put(NetConfigInfo.NetTrafficType.MGT_NETWORK, Arrays.asList("network1"));
+      spec.setNetworkConfig(networkConfig);
 
       // mock clone service
       IClusterCloneService cloneService = Mockito.mock(IClusterCloneService.class);
@@ -237,7 +255,7 @@ public class TestClusteringService {
       return spec;
    }
 
-//   @Test(groups = { "TestClusteringService" }, dependsOnMethods = { "testCreateDhcpVmCreateVmFail" })
+   @Test(groups = { "TestClusteringService" })
    public void testCreateDhcpVmCreateVmPass() throws Exception {
       List<NetworkAdd> networkAdds = createNetworkAdd();
       List<BaseNode> vNodes = new ArrayList<BaseNode>();
@@ -268,6 +286,19 @@ public class TestClusteringService {
       MockTmScheduler.setFlag(VmOperation.CREATE_VM, true);
       MockVcCache.setGetFlag(true);
 
+      SoftwareManagerCollector smcMock = Mockito.mock(SoftwareManagerCollector.class);
+      Mockito.when(smcMock.getSoftwareManager("test")).thenReturn(new DefaultSoftwareManagerImpl());
+      service.setSoftwareManagerCollector(smcMock);
+
+      NetworkEntity networkEntity = new NetworkEntity();
+      INetworkService nsMock = Mockito.mock(INetworkService.class);
+      Mockito.when(nsMock.getNetworkEntityByName(Mockito.anyString())).thenReturn(networkEntity);
+      service.setNetworkMgr(nsMock);
+
+      Map<NetConfigInfo.NetTrafficType, List<String>> networkConfig = new HashMap<>();
+      networkConfig.put(NetConfigInfo.NetTrafficType.MGT_NETWORK, Arrays.asList("network1"));
+      spec.setNetworkConfig(networkConfig);
+
       // mock clone service
       int i = 0;
       List<VmCreateResult<?>> nodes = new ArrayList<VmCreateResult<?>>();
@@ -292,7 +323,7 @@ public class TestClusteringService {
       Assert.assertTrue(success, "should get create vm success.");
    }
 
-//   @Test(groups = { "TestClusteringService" }, dependsOnMethods = { "testCreateDhcpVmCreateVmPass" })
+   @Test(groups = { "TestClusteringService" }, dependsOnMethods = { "testCreateDhcpVmCreateVmPass" })
    public void testConfigIOShares() {
       List<NodeEntity> targetNodes = new ArrayList<NodeEntity>();
       NodeEntity node1 = new NodeEntity();
