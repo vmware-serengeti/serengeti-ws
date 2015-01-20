@@ -556,7 +556,7 @@ public class VcFileManager {
             final VirtualDiskManager mgr = VcContext.getService().getVirtualDiskManager();
             return new VcTask(TaskType.CopyVmdk,
                mgr.moveVirtualDisk(srcDsPath, srcDc.getMoRef(),
-                                   dstDsPath, dstDc.getMoRef(), true),
+                                   dstDsPath, dstDc.getMoRef(), true, null),
                callback);
          }
       });
