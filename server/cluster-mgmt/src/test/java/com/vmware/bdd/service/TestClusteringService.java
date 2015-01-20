@@ -16,6 +16,7 @@ package com.vmware.bdd.service;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -194,7 +195,10 @@ public class TestClusteringService {
                   Mockito.anyInt(), Mockito.anyList(),
                   Mockito.<ProgressCallback> any())).thenReturn(
             new ArrayList<VmCreateResult<?>>());
-      service.setCloneService(cloneService);
+
+      HashMap<String, IClusterCloneService> cloneServiceMap = new HashMap<>();
+      cloneServiceMap.put("mockClusterCloneService", cloneService);
+      service.setCloneService(cloneServiceMap);
 
       boolean success = service.createVcVms(networkAdds, vNodes, null, false, null);
       Assert.assertTrue(!success, "should get create vm failed.");
@@ -280,7 +284,9 @@ public class TestClusteringService {
             cloneService.createCopies(Mockito.<VmCreateSpec> any(),
                   Mockito.anyInt(), Mockito.anyList(),
                   Mockito.<ProgressCallback> any())).thenReturn(nodes);
-      service.setCloneService(cloneService);
+      HashMap<String, IClusterCloneService> cloneServiceMap = new HashMap<>();
+      cloneServiceMap.put("mockClusterCloneService", cloneService);
+      service.setCloneService(cloneServiceMap);
 
       boolean success = service.createVcVms(networkAdds, vNodes, null, false, null);
       Assert.assertTrue(success, "should get create vm success.");

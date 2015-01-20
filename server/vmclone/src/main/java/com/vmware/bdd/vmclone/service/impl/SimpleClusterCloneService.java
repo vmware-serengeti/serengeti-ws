@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.internal.Pair;
@@ -41,6 +42,7 @@ import com.vmware.vim.binding.vim.fault.VmFaultToleranceOpIssuesList;
  *
  */
 @Service
+@Qualifier("simpleClusterCloneService")
 public class SimpleClusterCloneService implements IClusterCloneService {
    private static final Logger logger = Logger
          .getLogger(SimpleClusterCloneService.class);

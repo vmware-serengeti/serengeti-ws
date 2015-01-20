@@ -31,6 +31,7 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -150,7 +151,7 @@ public class ClusteringService implements IClusteringService {
    private int cloneConcurrency;
    private VmEventManager processor;
 
-   private IClusterCloneService cloneService;
+   private Map<String, IClusterCloneService> cloneServiceMap;
 
    private ClusterManager clusterManager;
 
@@ -237,13 +238,18 @@ public class ClusteringService implements IClusteringService {
       return templateVm.getName();
    }
 
-   public IClusterCloneService getCloneService() {
-      return cloneService;
+   public Map<String, IClusterCloneService> getCloneService() {
+      return cloneServiceMap;
    }
 
+   /**
+    *
+    * @param cloneServiceMap clone service qualifier to clone service map.
+    * 3 clone services so far: simpleClusterCloneService, fastClusterCloneService, forkClusterCloneService
+    */
    @Autowired
-   public void setCloneService(IClusterCloneService cloneService) {
-      this.cloneService = cloneService;
+   public void setCloneService(Map<String, IClusterCloneService> cloneServiceMap) {
+      this.cloneServiceMap = cloneServiceMap;
    }
 
    public ElasticityScheduleManager getElasticityScheduleManager() {
@@ -1202,7 +1208,7 @@ public class ClusteringService implements IClusteringService {
 
       // call clone service to copy templates
       List<VmCreateResult<?>> results =
-            cloneService.createCopies(sourceSpec, cloneConcurrency, specs,
+            chooseClusterCloneService().createCopies(sourceSpec, cloneConcurrency, specs,
                   callback);
       if (results == null || results.isEmpty()) {
          for (VmCreateSpec spec : specs) {
@@ -1237,6 +1243,23 @@ public class ClusteringService implements IClusteringService {
       }
       logger.info(total + " VMs are successfully created.");
       return success;
+   }
+
+   private IClusterCloneService chooseClusterCloneService() {
+      String type = Configuration.getString("cluster.clone.service");
+
+      AuAssert.check(StringUtils.isNotBlank(type), "cluster.clone.service in serengeti.properties can not be null.");
+
+      return chooseClusterCloneService(type);
+   }
+
+   private IClusterCloneService chooseClusterCloneService(String type) {
+      String qualifier = type+"ClusterCloneService";
+      IClusterCloneService clusterCloneService = this.cloneServiceMap.get(qualifier);
+
+      AuAssert.check(clusterCloneService != null, "ClusterCloneService not found: " + type);
+
+      return clusterCloneService;
    }
 
    private void setPersistentDiskMode(BaseNode vNode) {
