@@ -1864,7 +1864,10 @@ public class ClusterCommands implements CommandMarker {
             for (NodeRead node : nodes) {
                if (node.getIpConfigs() != null) {
                   for (NetTrafficType trafficType : node.getIpConfigs().keySet()) {
-                     list.add(String.format("%-15s", node.fetchIpOf(trafficType)) + " " + node.fetchFqdnOf(trafficType));
+                     String ip2Fqdn = String.format("%-15s", node.fetchIpOf(trafficType)) + " " + node.fetchFqdnOf(trafficType);
+                     if (!list.contains(ip2Fqdn)) {
+                        list.add(ip2Fqdn);
+                     }
                   }
                }
             }
