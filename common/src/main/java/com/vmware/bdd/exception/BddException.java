@@ -236,4 +236,7 @@ public class BddException extends RuntimeException {
       return new BddException(ex, "BDD", "SCRIPT_FOR_UPDATING_ETC_HOSTS_TEMPLATE_READ_ERR", detail);
    }
 
+   public static BddException ACCESS_NOT_ALLOWED_IN_MAINTENANCE_MODE() {
+      return new BddException(null, "BDD", "ACCESS_NOT_ALLOWED_IN_MAINTENANCE_MODE");
+   }
 }

@@ -62,10 +62,20 @@
       <url-pattern>/*</url-pattern>
    </filter-mapping>
 
+	<filter>
+		<filter-name>maintenanceModeAccessFilter</filter-name>
+		<filter-class>com.vmware.bdd.web.servlet.filter.MaintenanceModeAccessFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>maintenanceModeAccessFilter</filter-name>
+		<url-pattern>/api/*</url-pattern>
+	</filter-mapping>
+
 	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>		
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
-	
+
 	<listener>
 		<listener-class>com.vmware.bdd.web.ResourceInitializer</listener-class>
 	</listener>

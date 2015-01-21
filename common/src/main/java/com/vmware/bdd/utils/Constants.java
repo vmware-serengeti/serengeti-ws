@@ -273,4 +273,6 @@ public class Constants {
 
    public static final String CLUSTER_RACK_TOPOLOGY_FILE_PATH = "/opt/serengeti/www/topology/";
    public static final String CLUSTER_RACK_TOPOLOGY_FILE_SUFFIX = ".topology.data";
+
+   public static final String MAINTENANCE_MODE_FLAG_FILE = "/opt/serengeti/etc/maintenance";
 }

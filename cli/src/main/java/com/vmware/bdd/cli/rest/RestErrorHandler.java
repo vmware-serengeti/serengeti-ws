@@ -62,19 +62,17 @@ public class RestErrorHandler implements ResponseErrorHandler {
 
    public void handleError(ClientHttpResponse response) throws IOException {
       MediaType contentType = response.getHeaders().getContentType();
+      String body = getResponseContent(response.getBody());
+
       if (MediaType.APPLICATION_JSON.includes(contentType)) {
-
          ObjectMapper objectMapper = new ObjectMapper();
-         BddErrorMessage errorMessage = objectMapper.readValue(response.getBody(), BddErrorMessage.class);
-
+         BddErrorMessage errorMessage = objectMapper.readValue(body, BddErrorMessage.class);
          if(errorMessage.getErrors() != null) {
             throw new ValidationException(errorMessage.getErrors());
          }
-
          if(errorMessage.getCertInfo() != null) {
             throw new UntrustedCertificateException(errorMessage.getCertInfo());
          }
-
          throw new CliRestException(errorMessage.getMessage());
       } else {
          HttpStatus statusCode = response.getStatusCode();
@@ -84,7 +82,12 @@ public class RestErrorHandler implements ResponseErrorHandler {
          } else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR) {
             errorMsg =
                   "vCenter Server connect command failed: "
-                        + getVCConnectErrorMsg(response.getBody());
+                        + getVCConnectErrorMsg(body);
+         } else if (statusCode == HttpStatus.METHOD_NOT_ALLOWED) {
+            errorMsg = body;
+            if (errorMsg.isEmpty()) {
+               errorMsg = statusCode.getReasonPhrase();
+            }
          } else {
             errorMsg = statusCode.getReasonPhrase();
          }
@@ -93,7 +96,7 @@ public class RestErrorHandler implements ResponseErrorHandler {
       }
    }
 
-   private String getVCConnectErrorMsg(InputStream is) {
+   private String getResponseContent(InputStream is) {
       StringBuilder buffer = new StringBuilder();
       InputStreamReader inputStreamReader = null;
       BufferedReader bufferedReader = null;
@@ -134,7 +137,12 @@ public class RestErrorHandler implements ResponseErrorHandler {
             }
          }
       }
-      return findErrorMsg(buffer.toString(), "(Connection(.)*</h1>)+");
+
+      return buffer.toString();
+   }
+
+   private String getVCConnectErrorMsg(String content) {
+      return findErrorMsg(content, "(Connection(.)*</h1>)+");
    }
 
    private static String findErrorMsg(final String input, final String regex) {
