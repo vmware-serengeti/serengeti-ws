@@ -63,6 +63,7 @@ import com.vmware.vim.binding.impl.vim.ext.ExtendedProductInfoImpl;
 import com.vmware.vim.binding.impl.vim.ext.ManagedEntityInfoImpl;
 import com.vmware.vim.binding.impl.vim.ext.SolutionManagerInfoImpl;
 import com.vmware.vim.binding.vim.AuthorizationManager;
+import com.vmware.vim.binding.vim.AuthorizationManager.Privilege;
 import com.vmware.vim.binding.vim.AuthorizationManager.Role;
 import com.vmware.vim.binding.vim.Description;
 import com.vmware.vim.binding.vim.Extension;
@@ -110,7 +111,7 @@ public class VcService {
          "vc.session_time_out", 120000);
    private static final String SERENGETI_PRIVILEGE_GROUP_NAME = "Serengeti";
    private static final String SERENGETI_PRIVILEGE_ID = "Serengeti.access";
-   private static final String SERENGETI_PERMISSION_ROLE = "serengeti-users";
+   private static final String SERENGETI_PERMISSION_ROLE = "BDE users";
    /*
     * The following fields are VC login info, initialized once.
     */
@@ -770,11 +771,11 @@ public class VcService {
 
       localizedExt[2] = new KeyValueImpl();
       localizedExt[2].setKey("privilege.Serengeti.label");
-      localizedExt[2].setValue("Serengeti");
+      localizedExt[2].setValue("Big Data Extensions");
 
       localizedExt[3] = new KeyValueImpl();
       localizedExt[3].setKey("privilege.Serengeti.summary");
-      localizedExt[3].setValue("Serengeti users");
+      localizedExt[3].setValue("Big Data Extensions related privileges");
 
       localizedExt[4] = new KeyValueImpl();
       localizedExt[4].setKey("privilege.Serengeti.access.label");
@@ -782,7 +783,7 @@ public class VcService {
 
       localizedExt[5] = new KeyValueImpl();
       localizedExt[5].setKey("privilege.Serengeti.access.summary");
-      localizedExt[5].setValue("Access Big Data Extension");
+      localizedExt[5].setValue("Access Big Data Extensions");
 
       extensionResourceInfo.setData(localizedExt);
 
