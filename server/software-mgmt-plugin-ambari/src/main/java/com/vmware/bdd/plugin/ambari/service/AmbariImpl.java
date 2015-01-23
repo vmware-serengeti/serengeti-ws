@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.service;
 
+import javax.ws.rs.NotFoundException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,18 +26,9 @@ import java.util.Map;
 import java.util.Set;
 
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
-
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponentsRequest;
-import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
-import com.vmware.bdd.utils.CommonUtil;
-import org.apache.log4j.Logger;
-
-import javax.ws.rs.NotFoundException;
-
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
-import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.TaskStatus;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
+import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapHostStatus;
@@ -49,6 +41,7 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroupConfiguratio
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroupInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponent;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponentsRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
@@ -56,12 +49,13 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTask;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTaskInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ClusterRequestStatus;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.TaskStatus;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfiguration;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfigurationInfo;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionInfo;
@@ -71,6 +65,7 @@ import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
 import com.vmware.bdd.plugin.ambari.model.AmNodeDef;
 import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
 import com.vmware.bdd.plugin.ambari.poller.HostBootstrapPoller;
+import com.vmware.bdd.plugin.ambari.spectypes.HadoopRole;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
@@ -84,8 +79,9 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
-import com.vmware.bdd.plugin.ambari.spectypes.HadoopRole;
-
+import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
+import com.vmware.bdd.utils.CommonUtil;
+import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 public class AmbariImpl implements SoftwareManager {
@@ -273,6 +269,7 @@ public class AmbariImpl implements SoftwareManager {
          logger.info("Start cluster " + blueprint.getName() + " creation.");
          String ambariServerVersion = getVersion();
          clusterDef = new AmClusterDef(blueprint, privateKey, ambariServerVersion);
+         logger.info("Cluster def after modification: " + ApiUtils.objectToJson(clusterDef));
          provisionCluster(clusterDef, reportQueue);
          success = true;
 

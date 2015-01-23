@@ -14,19 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.clouderamgr.model;
 
-import com.cloudera.api.model.ApiClusterVersion;
-import com.google.gson.annotations.Expose;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
-import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
-import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
-import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
-import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
-import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -35,6 +22,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.cloudera.api.model.ApiClusterVersion;
+import com.google.gson.Gson;
+import com.google.gson.annotations.Expose;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
+import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
+import com.vmware.bdd.usermgmt.UserMgmtConstants;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 /**
  * Author: Xiaoding Bian
@@ -220,6 +223,56 @@ public class CmClusterDef implements Serializable {
          }
       }
 
+      // Config customized service user and group
+      configServiceUserAndGroups(blueprint);
+   }
+
+   private void configServiceUserAndGroups(ClusterBlueprint blueprint) {
+      logger.info("reached configServiceUserAndGroups");
+      if (services == null || services.isEmpty() || blueprint == null || blueprint.getConfiguration() == null) {
+         return;
+      }
+      logger.info("going to check serviceUserConfigs");
+      Map<String, Map<String, String>> serviceUserConfigs = (Map<String, Map<String, String>>)
+            blueprint.getConfiguration().get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
+      if (MapUtils.isEmpty(serviceUserConfigs)) {
+         return;
+      }
+      logger.info("serviceUserConfigs not empty");
+      validateServiceUserConfigs(serviceUserConfigs);
+
+      // Todo(qjin:) Here we suppose all services which configured user have config in spec file, need to consider
+      // if user configured service user but doesn't config that role in the specfile
+      for (CmServiceDef service: services) {
+         Map<String, String> serviceUserConfig = serviceUserConfigs.get(service.getType().getName());
+         logger.info("serviceUserConfig is: " + new Gson().toJson(serviceUserConfig));
+         if (!MapUtils.isEmpty(serviceUserConfig)) {
+            String userName = serviceUserConfig.get(UserMgmtConstants.SERVICE_USER_NAME);
+            String groupName = serviceUserConfig.get(UserMgmtConstants.SERVICE_USER_GROUP);
+            service.setProcessUserName(userName);
+            service.setProcessGroupName(groupName);
+            logger.info("service info are: " + new Gson().toJson(service));
+         }
+      }
+   }
+
+   //validate if all services in serviceUserConfig appear in spec file. In spec file, service appear in role format.
+   //From these roles, we can know how many services the user has configured, let's call it contained service list. The serivce user config should not contain
+   //service that not in the contained service list
+   protected void validateServiceUserConfigs(Map<String, Map<String, String>> serviceUserConfigs) {
+      Set<String> serviceTypeNames = new HashSet<>();
+      Set<String> unsupportedTypeNames = new HashSet<>();
+      for (CmServiceDef service: services) {
+         serviceTypeNames.add(service.getType().getName());
+      }
+      for (String serviceTypeName: serviceUserConfigs.keySet()) {
+         if (!serviceTypeNames.contains(serviceTypeName)) {
+            unsupportedTypeNames.add(serviceTypeName);
+         }
+      }
+      if (!unsupportedTypeNames.isEmpty()) {
+         //Todo(qjin): need to give out errors
+      }
    }
 
    public boolean isFailoverEnabled() {

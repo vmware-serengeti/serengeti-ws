@@ -40,6 +40,12 @@ public class CmServiceDef extends AbstractCmServiceRole{
    @Expose
    private List<String> snapshotPolicies;
 
+   @Expose
+   private String processUserName;
+
+   @Expose
+   private String processGroupName;
+
    public CmServiceDef() {}
 
    public CmServiceDef(String name, AvailableServiceRole type, String displayName, Map<String, String> configs,
@@ -101,5 +107,21 @@ public class CmServiceDef extends AbstractCmServiceRole{
    @Override
    public boolean isRole() {
       return false;
+   }
+
+   public String getProcessUserName() {
+      return processUserName;
+   }
+
+   public void setProcessUserName(String processUserName) {
+      this.processUserName = processUserName;
+   }
+
+   public String getProcessGroupName() {
+      return processGroupName;
+   }
+
+   public void setProcessGroupName(String processGroupName) {
+      this.processGroupName = processGroupName;
    }
 }

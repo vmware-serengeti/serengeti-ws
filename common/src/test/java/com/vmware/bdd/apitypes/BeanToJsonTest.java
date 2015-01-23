@@ -15,7 +15,6 @@
 package com.vmware.bdd.apitypes;
 
 import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;

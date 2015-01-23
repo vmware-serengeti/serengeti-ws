@@ -151,6 +151,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
 
       ISoftwareManagementTask task = null;
       String appMgrName = softwareMgr.getName();
+      validateUserExistense();
       if (!Constants.IRONFAN.equals(appMgrName)) {
          task =
                createExternalTask(chunkContext, targetName, clusterName,
@@ -173,6 +174,12 @@ public class SoftwareManagementStep extends TrackableTasklet {
       }
 
       return RepeatStatus.FINISHED;
+   }
+
+   //validate whether all services users configured in spec file exist in node
+   // throws exception if some users don't exist
+   private void validateUserExistense() throws BddException {
+      //TODO(qjin): implement
    }
 
    private ISoftwareManagementTask createThriftTask(ChunkContext chunkContext,

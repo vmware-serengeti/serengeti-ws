@@ -22,10 +22,9 @@ import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.transport.verification.HostKeyVerifier;
+
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
-
-import com.vmware.aurora.global.Configuration;
 
 /**
  * Created By xiaoliangl on 1/4/15.

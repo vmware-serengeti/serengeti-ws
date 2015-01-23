@@ -409,6 +409,7 @@ public class ClusterManager {
       String name = clusterSpec.getName();
 
       validateInfraConfig(clusterSpec);
+      validateServiceUserAndGroups(clusterSpec);
 
       logger.info("ClusteringService, creating cluster " + name);
 
@@ -441,8 +442,14 @@ public class ClusterManager {
             jobParameters);
    }
 
+   private void validateServiceUserAndGroups(ClusterCreate clusterSpec) {
+      //Todo(qjin): implement
+//      clusterUserMgmtValidService.validateGroups();
+//      clusterUserMgmtValidService.validateGroupUsers(UserMgmtConstants.DEFAULT_USERMGMT_SERVER_NAME, );
+   }
+
    private void validateInfraConfig(ClusterCreate clusterSpec) {
-      Map<String, Map<String,String>> infraConfig = clusterSpec.getInfrastructure_config();
+      Map<String, Map<String, String>> infraConfig = clusterSpec.getInfrastructure_config();
 
       if(MapUtils.isEmpty(infraConfig)) {
          logger.info("no infra configuration in cluster create spec!");

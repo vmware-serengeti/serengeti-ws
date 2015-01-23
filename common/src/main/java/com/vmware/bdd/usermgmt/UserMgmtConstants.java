@@ -24,7 +24,13 @@ public interface UserMgmtConstants {
 
    String ADMIN_GROUP_NAME = "admin_group_name";
    String USER_GROUP_NAME = "user_group_name";
+   String USERMGMT_SERVER_NAME = "user_management_server_name";
 
    String LDAP_USER_MANAGEMENT = "ldap_user_management";
    String DISABLE_LOCAL_USER_FLAG = "disable_local_user";
+
+   String SERVICE_USER_TYPE = "user_type";
+   String SERVICE_USER_CONFIG_IN_SPEC_FILE = "service_user";
+   String SERVICE_USER_NAME = "user_name";
+   String SERVICE_USER_GROUP = "user_group";
 }

@@ -13,10 +13,6 @@ package com.vmware.bdd.usermgmt; /**********************************************
  *   limitations under the License.
  *****************************************************************************/
 
-import java.util.Hashtable;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.naming.AuthenticationException;
 import javax.naming.CommunicationException;
 import javax.naming.Context;
@@ -27,10 +23,10 @@ import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchResult;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.vmware.bdd.apitypes.UserMgmtServer;
 import com.vmware.bdd.exception.ValidationException;
@@ -40,6 +36,9 @@ import com.vmware.bdd.security.tls.TlsConnectionException;
 import com.vmware.bdd.security.tls.TlsTcpClient;
 import com.vmware.bdd.validation.ValidationError;
 import com.vmware.bdd.validation.ValidationErrors;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Created By xiaoliangl on 11/27/14.
@@ -77,6 +76,15 @@ public class UserMgmtServerValidService {
       }
 
       return null;
+   }
+
+
+   public void validateGroupUsers(UserMgmtServer userMgmtServer, Map<String, String[]> groupUsers) {
+      for (String group: groupUsers.keySet()) {
+         String[] groupNames = {group};
+         searchGroup(userMgmtServer, groupNames);
+         //Todo(qjin): validate user existense in group
+      }
    }
 
    public void validateCertificate(String[] ldapUrlElements, boolean forceTrustCert) {

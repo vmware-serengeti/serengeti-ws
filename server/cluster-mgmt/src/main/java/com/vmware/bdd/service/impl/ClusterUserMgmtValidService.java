@@ -14,21 +14,19 @@
  *****************************************************************************/
 package com.vmware.bdd.service.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-import org.apache.commons.collections.MapUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.UserMgmtServer;
-import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ValidationException;
-import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.usermgmt.SssdConfigurationGenerator;
 import com.vmware.bdd.usermgmt.UserMgmtConstants;
@@ -57,7 +55,7 @@ public class ClusterUserMgmtValidService {
    @Autowired
    private SssdConfigurationGenerator sssdConfigurationGenerator;
 
-   protected void validateGroups(String[] groupNames) {
+   public void validateGroups(String[] groupNames) {
       UserMgmtServer userMgmtServer = userMgmtServerService.getByName(UserMgmtConstants.DEFAULT_USERMGMT_SERVER_NAME, false);
 
       if(userMgmtServer == null) {
@@ -67,30 +65,53 @@ public class ClusterUserMgmtValidService {
       userMgmtServerValidService.searchGroup(userMgmtServer, groupNames);
    }
 
+   public void validateGroupUsers(String userMgmtServerName, Map<String, String[]> groupUsers) {
+      UserMgmtServer userMgmtServer = userMgmtServerService.getByName(userMgmtServerName, false);
+      if(userMgmtServer == null) {
+         throw new BddException(null, "CLUSTER_LDAP_USER_MGMT", "LDAP_NOT_ENABLED");
+      }
+      userMgmtServerValidService.validateGroupUsers(userMgmtServer, groupUsers);
+   }
+
    protected String[] getGroupNames(Map<String, String> userMgmtCfg) {
-      ArrayList<String> validGroupNameList = new ArrayList<>();
+      Set<String> validGroupNameSet = new HashSet<>();
 
       String adminGroupName = userMgmtCfg.get(UserMgmtConstants.ADMIN_GROUP_NAME);
       if (!CommonUtil.isBlank(adminGroupName)) {
-         validGroupNameList.add(adminGroupName);
+         validGroupNameSet.add(adminGroupName);
       }
 
       String userGroupName = userMgmtCfg.get(UserMgmtConstants.USER_GROUP_NAME);
       if (!CommonUtil.isBlank(userGroupName)) {
-         validGroupNameList.add(userGroupName);
+         validGroupNameSet.add(userGroupName);
       }
 
-      if (validGroupNameList.isEmpty()) {
+      if (validGroupNameSet.isEmpty()) {
          ValidationError validationError = new ValidationError("BOTH_GROUPS_EMPTY", "Both admin and user groups are empty!");
          ValidationErrors errors = new ValidationErrors();
          errors.addError("groupNames", validationError);
          throw new ValidationException(errors.getErrors());
       }
 
-      String[] groupNames = new String[validGroupNameList.size()];
-      validGroupNameList.toArray(groupNames);
-
+      String[] groupNames = new String[validGroupNameSet.size()];
+      validGroupNameSet.toArray(groupNames);
       return groupNames;
+   }
+
+   protected HashSet<String> getServiceUserGroups(ClusterCreate clusterSpec) {
+      Map<String, Map<String, String>> serviceUserGroup = (Map<String, Map<String, String>>) clusterSpec.getConfiguration().get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
+      HashSet<String> serviceUserGroups = null;
+      for (Map<String, String> serviceUserConfig: serviceUserGroup.values()) {
+         //ambari doesn't have serivce group config
+         String userGroup = serviceUserConfig.get(UserMgmtConstants.SERVICE_USER_GROUP);
+         if (!CommonUtil.isBlank(userGroup)) {
+            if (serviceUserGroups == null) {
+               serviceUserGroups = new HashSet<>();
+            }
+            serviceUserGroups.add(userGroup);
+         }
+      }
+      return serviceUserGroups;
    }
 
    public void validateUserMgmtConfig(Map<String, String> userMgmtCfg) {

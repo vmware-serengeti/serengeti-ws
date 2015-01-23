@@ -27,6 +27,7 @@ import java.util.Set;
 
 import jline.console.ConsoleReader;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,12 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
 
-import com.vmware.bdd.apitypes.*;
+import com.vmware.bdd.apitypes.AppManagerRead;
+import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.ClusterRead;
+import com.vmware.bdd.apitypes.ClusterType;
+import com.vmware.bdd.apitypes.DistroRead;
+import com.vmware.bdd.apitypes.ElasticityRequestBody;
 import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityMode;
 import com.vmware.bdd.apitypes.FixDiskRequestBody;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
@@ -49,6 +55,7 @@ import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.NodeStatus;
+import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.cli.rest.AppManagerRestClient;
 import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.ClusterRestClient;
@@ -158,7 +165,6 @@ public class ClusterCommands implements CommandMarker {
          clusterCreate.setAppManager(Constants.IRONFAN);
       } else {
          clusterCreate.setAppManager(appManager);
-
          // local yum repo url for 3rd party app managers like ClouderaMgr, Ambari etc.
          if (!CommandsUtils.isBlank(localRepoURL)) {
             clusterCreate.setLocalRepoURL(localRepoURL);
@@ -248,6 +254,8 @@ public class ClusterCommands implements CommandMarker {
          Map<String, String> userMgmtConfig = new HashMap<String, String>();
          userMgmtConfig.put(UserMgmtConstants.ADMIN_GROUP_NAME, adminGroupName);
          userMgmtConfig.put(UserMgmtConstants.USER_GROUP_NAME, userGroupName);
+         //TODO(qjin:) can also add a command line option here together with specfile to specify user management server
+
          //disable local account by default.
          userMgmtConfig.put(UserMgmtConstants.DISABLE_LOCAL_USER_FLAG,
                disableLocalUsersFlag == null ? Boolean.TRUE.toString() : disableLocalUsersFlag.toString());
@@ -321,14 +329,17 @@ public class ClusterCommands implements CommandMarker {
             }
 
             Map<String, Map<String, String>> specInfraConfigs = clusterSpec.getInfrastructure_config();
-            if(specInfraConfigs != null && !specInfraConfigs.isEmpty()) //spec infra configu is not empty
+            if(!MapUtils.isEmpty(specInfraConfigs)) //spec infra config is not empty
             {
                if(infraConfigs != null && !infraConfigs.isEmpty()) {
                   System.out.println("adminGroup and userGroup has been specified as commandline parameters, so the values inside spec file will be ignored.");
                } else {
-                  clusterCreate.setInfrastructure_config(infraConfigs);
+                  clusterCreate.setInfrastructure_config(specInfraConfigs);
                }
             }
+            Map<String, Map<String, String>> serviceUserConfigs = (Map<String, Map<String, String>>)
+                  clusterSpec.getConfiguration().get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
+            validateServiceUserConfigs(appManager, serviceUserConfigs, failedMsgList);
          }
          allNetworkNames = getAllNetworkNames();
       } catch (Exception e) {
@@ -427,6 +438,44 @@ public class ClusterCommands implements CommandMarker {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                CommandsUtils.getExceptionMessage(e));
+      }
+   }
+
+   protected void validateServiceUserConfigs(String appMangerName, Map<String, Map<String, String>> serviceUserConfigs, List<String> failedMsgList) {
+      if (MapUtils.isEmpty(serviceUserConfigs)) {
+         return;
+      }
+      String appManagerType = appManagerRestClient.get(appMangerName).getType();
+      String[] ambariSupportedConfigs = {
+            UserMgmtConstants.SERVICE_USER_NAME,
+            UserMgmtConstants.SERVICE_USER_TYPE};
+      String[] clouderaSupportedConfigs = {
+            UserMgmtConstants.SERVICE_USER_NAME,
+            UserMgmtConstants.SERVICE_USER_TYPE,
+            UserMgmtConstants.SERVICE_USER_GROUP
+      };
+      if (appManagerType.equals(Constants.IRONFAN)) {
+         failedMsgList.add("Ironfan deployed cluster doesn't support config service user");
+      } else if (appManagerType.equals(com.vmware.bdd.utils.Constants.AMBARI_PLUGIN_TYPE)) {
+         validateServiceUserConfigHelper(appManagerType, serviceUserConfigs, Arrays.asList(ambariSupportedConfigs), failedMsgList);
+      } else if (appManagerType.equals(com.vmware.bdd.utils.Constants.CLOUDERA_MANAGER_PLUGIN_TYPE)) {
+         validateServiceUserConfigHelper(appManagerType, serviceUserConfigs, Arrays.asList(clouderaSupportedConfigs), failedMsgList);
+      }
+   }
+
+   private void validateServiceUserConfigHelper(String appManagerType, Map<String, Map<String, String>> serviceUserConfigs,
+                                                List<String> supportedConfigs, List<String> failedMsgList) {
+      ArrayList<String> unSupportedKeys = new ArrayList<>();
+      for (Map<String, String> config : serviceUserConfigs.values()) {
+         for (String key: config.keySet()) {
+            if (!supportedConfigs.contains(key) && !unSupportedKeys.contains(key)) {
+               unSupportedKeys.add(key);
+            }
+         }
+      }
+      if (!unSupportedKeys.isEmpty()) {
+         failedMsgList.add(appManagerType + " deployed cluster doesn't support following keys when config service user: "
+               + unSupportedKeys.toString());
       }
    }
 

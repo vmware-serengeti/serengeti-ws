@@ -22,9 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
 import com.google.gson.Gson;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
@@ -32,7 +29,10 @@ import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
+import com.vmware.bdd.usermgmt.UserMgmtConstants;
 import com.vmware.bdd.utils.Constants;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 /**
  * Author: Xiaoding Bian
@@ -291,6 +291,9 @@ public class CmClusterValidator {
 
       for (String key : config.keySet()) {
          try {
+            if (key.equals(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE)) {
+               continue;
+            }
             AvailableServiceRole def = AvailableServiceRoleContainer.load(key);
             if (!AvailableServiceRoleContainer.isSupported(majorVersion, def)) {
                unRecogConfigTypes.add(key);

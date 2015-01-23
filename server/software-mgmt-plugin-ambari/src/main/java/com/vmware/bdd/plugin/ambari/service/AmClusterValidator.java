@@ -22,9 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-
 import com.google.gson.Gson;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
@@ -32,8 +29,8 @@ import com.vmware.bdd.plugin.ambari.api.model.stack.ApiComponentDependency;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiComponentDependencyInfo;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfiguration;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfigurationInfo;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
+import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ComponentCategory;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ComponentName;
@@ -43,6 +40,8 @@ import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+import org.apache.log4j.Logger;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 public class AmClusterValidator {
 
@@ -377,7 +376,7 @@ public class AmClusterValidator {
          propertyNames.add("net.topology.script.file.name");
          supportedConfigs.put("core-site.xml", propertyNames);
       }
-
+      //Todo(qjin:) need to bypass the service_user and other four golobal in configs that ambari cannot recognize
       Map<String, Object> notAvailableConfig = new HashMap<String, Object>();
       for (String key : config.keySet()) {
          boolean isSupportedType = false;

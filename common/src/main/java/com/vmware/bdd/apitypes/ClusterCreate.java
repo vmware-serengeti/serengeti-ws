@@ -26,7 +26,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -161,7 +160,6 @@ public class ClusterCreate implements Serializable {
       this.networkings = cluster.networkings;
       this.nodeGroups = cluster.nodeGroups;
       this.rpNames = cluster.rpNames;
-      this.templateId = cluster.templateId;
       this.vcClusters = cluster.vcClusters;
       this.configuration = cluster.configuration;
       this.validateConfig = cluster.validateConfig;

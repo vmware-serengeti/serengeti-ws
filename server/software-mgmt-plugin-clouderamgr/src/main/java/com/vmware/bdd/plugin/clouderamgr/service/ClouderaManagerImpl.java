@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.clouderamgr.service;
 
+import javax.ws.rs.NotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -29,30 +30,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.ws.rs.NotFoundException;
-
-import com.cloudera.api.model.ApiHostNameList;
-import com.cloudera.api.model.ApiRoleState;
-import com.cloudera.api.model.ApiRoleConfigGroup;
-import com.cloudera.api.v7.RootResourceV7;
-import com.google.gson.GsonBuilder;
-import com.vmware.bdd.exception.SoftwareManagerCollectorException;
-import com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole;
-import com.vmware.bdd.plugin.clouderamgr.exception.CommandExecFailException;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
-import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
-import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
-import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableParcelStage;
-import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
-import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
-import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
-import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
-import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
-
-import com.vmware.bdd.software.mgmt.plugin.utils.SSHUtil;
-import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
-import com.vmware.bdd.utils.CommonUtil;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -69,13 +46,16 @@ import com.cloudera.api.model.ApiConfigStalenessStatus;
 import com.cloudera.api.model.ApiHealthSummary;
 import com.cloudera.api.model.ApiHost;
 import com.cloudera.api.model.ApiHostInstallArguments;
+import com.cloudera.api.model.ApiHostNameList;
 import com.cloudera.api.model.ApiHostRef;
 import com.cloudera.api.model.ApiHostRefList;
 import com.cloudera.api.model.ApiParcel;
 import com.cloudera.api.model.ApiRole;
+import com.cloudera.api.model.ApiRoleConfigGroup;
 import com.cloudera.api.model.ApiRoleList;
 import com.cloudera.api.model.ApiRoleNameList;
 import com.cloudera.api.model.ApiRoleRef;
+import com.cloudera.api.model.ApiRoleState;
 import com.cloudera.api.model.ApiService;
 import com.cloudera.api.model.ApiServiceConfig;
 import com.cloudera.api.model.ApiServiceList;
@@ -83,11 +63,25 @@ import com.cloudera.api.model.ApiServiceState;
 import com.cloudera.api.v3.ParcelResource;
 import com.cloudera.api.v6.RootResourceV6;
 import com.cloudera.api.v6.ServicesResourceV6;
+import com.cloudera.api.v7.RootResourceV7;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.GsonBuilder;
+
+import com.vmware.bdd.exception.SoftwareManagerCollectorException;
+import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
+import com.vmware.bdd.plugin.clouderamgr.exception.CommandExecFailException;
 import com.vmware.bdd.plugin.clouderamgr.model.CmClusterDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmNodeDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmRoleDef;
 import com.vmware.bdd.plugin.clouderamgr.model.CmServiceDef;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableParcelStage;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
+import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
+import com.vmware.bdd.plugin.clouderamgr.poller.ParcelProvisionPoller;
+import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
+import com.vmware.bdd.plugin.clouderamgr.spectypes.HadoopRole;
+import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
+import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -99,6 +93,11 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
+import com.vmware.bdd.software.mgmt.plugin.monitor.StatusPoller;
+import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
+import com.vmware.bdd.software.mgmt.plugin.utils.SSHUtil;
+import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
+import com.vmware.bdd.utils.CommonUtil;
 
 /**
  * Author: Xiaoding Bian
@@ -127,6 +126,11 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private String cmPassword;
 
    private final static int INVALID_PROGRESS = -1;
+
+   public RootResourceV6 getApiResourceRootV6() {
+      return apiResourceRootV6;
+   }
+
    private enum ProgressSplit {
       INSPECT_HOSTS(10),
       INSTALL_HOSTS_AGENT(40),
@@ -1585,6 +1589,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
          }
       }
 
+      //add service user and group to service config
+      addServiceUserConfig(serviceDef, apiServiceConfig);
+
       // update configs if service already exist
       if (servicesConfigured
             && apiResourceRootV6.getClustersResource().getServicesResource(cluster.getName()).readService(serviceDef.getName()) != null) {
@@ -1616,6 +1623,17 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
       apiService.setRoles(apiRoles);
       serviceList.add(apiService);
+   }
+
+   //Todo(qjin): add service user config to each configured service
+   private void addServiceUserConfig(CmServiceDef serviceDef, ApiServiceConfig apiServiceConfig) {
+      logger.info("in addServiceUserGonfig, userName is " + serviceDef.getProcessUserName() + ", groupName is " + serviceDef.getProcessGroupName());
+      if (!CommonUtil.isBlank(serviceDef.getProcessUserName())) {
+            apiServiceConfig.add(new ApiConfig("process_username", serviceDef.getProcessUserName()));
+      }
+      if (!CommonUtil.isBlank(serviceDef.getProcessGroupName())) {
+         apiServiceConfig.add(new ApiConfig("process_groupname", "hadoop_group"));
+      }
    }
 
    private void preDeployConfig(final CmClusterDef cluster) throws Exception {
