@@ -21,6 +21,7 @@ import com.vmware.aurora.composition.VmSchema;
 import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcResourcePool;
+import com.vmware.aurora.vc.VcVmCloneType;
 import com.vmware.vim.binding.vim.Folder;
 
 /**
@@ -46,7 +47,7 @@ public class VmCreateSpec implements Location {
 
    private Map<String, String> bootupConfigs;
 
-   private boolean linkedClone;
+   private VcVmCloneType cloneType;
 
    private IPrePostPowerOn prePowerOn;
 
@@ -117,11 +118,7 @@ public class VmCreateSpec implements Location {
    }
 
    public boolean isLinkedClone() {
-      return linkedClone;
-   }
-
-   public void setLinkedClone(boolean linkedClone) {
-      this.linkedClone = linkedClone;
+      return cloneType == VcVmCloneType.LINKED;
    }
 
    public IPrePostPowerOn getPrePowerOn() {
@@ -148,5 +145,14 @@ public class VmCreateSpec implements Location {
    @Override
    public String getLocation() {
       return targetHost.getName();
+   }
+
+
+   public VcVmCloneType getCloneType() {
+      return cloneType;
+   }
+
+   public void setCloneType(VcVmCloneType cloneType) {
+      this.cloneType = cloneType;
    }
 }
