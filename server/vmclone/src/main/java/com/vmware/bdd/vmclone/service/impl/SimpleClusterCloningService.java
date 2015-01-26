@@ -45,7 +45,7 @@ import com.vmware.vim.binding.vim.fault.VmFaultToleranceOpIssuesList;
 @Qualifier("simpleClusterCloneService")
 public class SimpleClusterCloningService implements IClusterCloneService {
    private static final Logger logger = Logger
-         .getLogger(SimpleClusterCloneService.class);
+         .getLogger(SimpleClusterCloningService.class);
 
    @Override
    public List<VmCreateResult<?>> createCopies(VmCreateSpec resource,
