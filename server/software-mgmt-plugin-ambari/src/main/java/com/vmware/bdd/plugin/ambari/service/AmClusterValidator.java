@@ -371,10 +371,12 @@ public class AmClusterValidator {
          }
       }
       // FIXME
-      List<String> propertyNames = (List<String>) supportedConfigs.get("core-site");
-      propertyNames.add("topology.script.file.name");
-      propertyNames.add("net.topology.script.file.name");
-      supportedConfigs.put("core-site", propertyNames);
+      List<String> propertyNames = (List<String>) supportedConfigs.get("core-site.xml");
+      if (propertyNames != null) {
+         propertyNames.add("topology.script.file.name");
+         propertyNames.add("net.topology.script.file.name");
+         supportedConfigs.put("core-site.xml", propertyNames);
+      }
 
       Map<String, Object> notAvailableConfig = new HashMap<String, Object>();
       for (String key : config.keySet()) {
