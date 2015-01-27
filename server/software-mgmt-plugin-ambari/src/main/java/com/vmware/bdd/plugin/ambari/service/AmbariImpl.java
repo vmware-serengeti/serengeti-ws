@@ -169,7 +169,7 @@ public class AmbariImpl implements SoftwareManager {
       logger.info("Min supported version of " + getType() + " is: " + MIN_SUPPORTED_VERSION);
       logger.info("Version of new software manager is: " + version);
       //For ambari, we only support 1.6.0 and 1.6.1, its next version is 1.7.0, so only need to check major and minor version
-      if (version.equals(UNKNOWN_VERSION) || (versionInfo.getMajorVersion() != 1 || versionInfo.getMinorVersion() != 6)) {
+      if (version.equals(UNKNOWN_VERSION)) {
          logger.error("Validate server version failed.");
          throw SoftwareManagerCollectorException.INVALID_VERSION(Constants.AMBARI_PLUGIN_NAME, MIN_SUPPORTED_VERSION, version);
       }

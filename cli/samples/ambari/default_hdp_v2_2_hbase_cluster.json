@@ -1,12 +1,27 @@
 {
   "nodeGroups":[
     {
+      "name":"zookeeper",
+      "roles":[
+        "ZOOKEEPER_SERVER"
+      ],
+      "instanceType":"SMALL",
+      "instanceNum":3,
+      "storage" : {
+        "type" : "shared",
+        "sizeGB" : 20
+      },
+      "haFlag":"on"
+    },
+    {
       "name":"master",
       "roles":[
         "NAMENODE",
+        "RESOURCEMANAGER",
         "SECONDARY_NAMENODE",
-        "JOBTRACKER",
-        "HISTORYSERVER"
+        "HBASE_MASTER",
+        "HISTORYSERVER",
+        "APP_TIMELINE_SERVER"
       ],
       "instanceType":"MEDIUM",
       "instanceNum":1,
@@ -25,7 +40,8 @@
       "name":"worker",
       "roles":[
         "DATANODE",
-        "TASKTRACKER"
+        "NODEMANAGER",
+        "HBASE_REGIONSERVER"
       ],
       "instanceType":"SMALL",
       "instanceNum":3,
@@ -44,7 +60,10 @@
       "name":"client",
       "roles":[
         "HDFS_CLIENT",
-        "MAPREDUCE_CLIENT"
+        "HBASE_CLIENT",
+        "MAPREDUCE2_CLIENT",
+        "ZOOKEEPER_CLIENT",
+        "YARN_CLIENT"
       ],
       "instanceType":"SMALL",
       "instanceNum":1,
