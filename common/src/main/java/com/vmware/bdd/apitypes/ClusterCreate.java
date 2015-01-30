@@ -139,6 +139,8 @@ public class ClusterCreate implements Serializable {
    @Expose
    private String localRepoURL;
 
+   private String hostnamePrefix;
+
    public ClusterCreate() {
    }
 
@@ -870,6 +872,14 @@ public class ClusterCreate implements Serializable {
 
    public void setLocalRepoURL(String localRepoURL) {
       this.localRepoURL = localRepoURL;
+   }
+
+   public String getHostnamePrefix() {
+      return hostnamePrefix;
+   }
+
+   public void setHostnamePrefix(String hostnamePrefix) {
+      this.hostnamePrefix = hostnamePrefix;
    }
 
 }

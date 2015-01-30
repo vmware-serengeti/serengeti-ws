@@ -784,6 +784,13 @@ public class ClusterConfigManager {
       clusterConfig.setName(clusterEntity.getName());
       clusterConfig.setAppManager(clusterEntity.getAppManager());
       clusterConfig.setDistro(clusterEntity.getDistro());
+      Map<NetTrafficType, List<ClusterNetConfigInfo>> networkConfigInfo = clusterEntity.getNetworkConfigInfo();
+      if (networkConfigInfo != null && !networkConfigInfo.isEmpty()) {
+         for (NetTrafficType trafficType : networkConfigInfo.keySet()) {
+            clusterConfig.setHostnamePrefix(networkConfigInfo.get(trafficType).get(0).getHostnamePrefix());
+            break;
+         }
+      }
       convertClusterConfig(clusterEntity, clusterConfig, needAllocIp);
 
       Gson gson =

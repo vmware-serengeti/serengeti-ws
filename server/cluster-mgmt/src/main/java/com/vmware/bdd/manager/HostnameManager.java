@@ -20,7 +20,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
-import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NicEntity;
@@ -69,7 +68,7 @@ public class HostnameManager{
       String vNodeName = node.getVmName();
       String hostname = "";
       for (NetTrafficDefinition trafficDef : nic.getNetTrafficDefs()) {
-         hostname = generateHostnameWithTrafficType(trafficDef.getTrafficType(), vNodeName);
+         hostname = generateHostnameWithTrafficType(trafficDef.getTrafficType(), vNodeName, null);
       }
       return hostname;
    }
@@ -81,15 +80,18 @@ public class HostnameManager{
       String hostname = "";
       for (Map.Entry<NetTrafficType, List<String>> networkConfigEntry : networkConfig.entrySet()) {
          if (networkConfigEntry.getValue().contains(networkEntity.getName()) && networkEntity.getIsGenerateHostname()) {
-            hostname = generateHostnameWithTrafficType(networkConfigEntry.getKey(), vNodeName);
+            hostname = generateHostnameWithTrafficType(networkConfigEntry.getKey(), vNodeName, vNode.getCluster().getHostnamePrefix());
             break;
          }
       }
       return hostname;
    }
 
-   private static String generateHostnameWithTrafficType(NetTrafficType netTrafficType, String vNodeName) throws BddException {
+   private static String generateHostnameWithTrafficType(NetTrafficType netTrafficType, String vNodeName, String hostnamePrefix) throws BddException {
       String prefix = getHostnamePrefix();
+      if (hostnamePrefix != null) {
+         prefix = hostnamePrefix;
+      }
       String hdfsSuffix = getHostnameHdfsSuffix();
       String mapredSuffix = getHostnameMapredSuffix();
       String hostname = "";
