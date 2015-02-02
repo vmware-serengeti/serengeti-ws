@@ -7,6 +7,7 @@
   "password",
   "mgmtVMUserGroupDn",
   "port_group",
+  "dns",
   "dns1",
   "dns2",
   "gateway",

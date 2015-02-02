@@ -24,6 +24,7 @@ import com.vmware.bdd.service.collection.ITimelyCollectionService;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.aop.aspectj.MethodInvocationProceedingJoinPoint;
 
+import java.io.File;
 import java.util.*;
 
 import com.vmware.bdd.apitypes.DataObjectType;
@@ -118,10 +119,13 @@ public class CollectOperationManager {
    }
 
    private static boolean enabledDataCollection() {
-      String enabled =
-              new PropertiesUtil(CollectionDriverManager.getConfigurationFile())
-                      .getProperty(CommonUtil.notNull(Configuration.getString(CollectionConstants.DEFAULT_SWITCH_NAME),
-                              CollectionConstants.PHONE_HOME_SWITCH_NAME));
+      File file = CollectionDriverManager.getConfigurationFile();
+      if (file == null) {
+         return false;
+      }
+      String enabled = new PropertiesUtil(file)
+              .getProperty(CommonUtil.notNull(Configuration.getString(CollectionConstants.DEFAULT_SWITCH_NAME),
+                      CollectionConstants.PHONE_HOME_SWITCH_NAME));
       return true == Boolean.parseBoolean(enabled.trim());
    }
 
