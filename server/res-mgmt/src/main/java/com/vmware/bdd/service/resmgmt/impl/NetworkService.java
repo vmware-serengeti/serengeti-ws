@@ -290,6 +290,13 @@ public class NetworkService implements Serializable, INetworkService {
          throw NetworkException.NOT_FOUND("Network", networkName);
       }
 
+      // Do not allow updating dnsType and isGenerateHostname if the network has been used
+      NetworkDnsType dnsType = networkAdd.getDnsType();
+      Boolean isGenerateHostname = networkAdd.getIsGenerateHostname();
+      if (dnsType !=  null || isGenerateHostname != null) {
+         assertNetworkNotUsed(network);
+      }
+
       // Add IP block when the type is static
       List<IpBlock> ipBlocks = networkAdd.getIpBlocks();
       if (ipBlocks != null) {
@@ -311,18 +318,20 @@ public class NetworkService implements Serializable, INetworkService {
          networkDao.addIpBlocks(network, blocks);
       }
 
-      NetworkDnsType dnsType = networkAdd.getDnsType();
-      if (dnsType != null) {
+      if (dnsType == null) {
+         dnsType = network.getDnsType();
+      } else {
          networkDao.setDnsType(network, dnsType);
-         if (NetworkDnsType.isOthers(dnsType) || NetworkDnsType.isDynamic(dnsType)) {
-            networkAdd.setIsGenerateHostname(true);
-         }
+      }
 
-         Boolean isGenerateHostname = networkAdd.getIsGenerateHostname();
-         if (isGenerateHostname != null) {
-            networkDao.setIsGenerateHostname(network, isGenerateHostname);
+      if (NetworkDnsType.isOthers(dnsType) || NetworkDnsType.isDynamic(dnsType)) {
+         isGenerateHostname = true;
+      } else {
+         if (isGenerateHostname == null) {
+            isGenerateHostname = network.getIsGenerateHostname();
          }
       }
+      networkDao.setIsGenerateHostname(network, isGenerateHostname);
 
       network.validate();
    }
