@@ -28,15 +28,15 @@ ldap_user_object_class = User
 ldap_user_name = msSFU30Name
 ldap_group_object_class = Group
 
-ldap_user_search_base = cn=Users,dc=bde,dc=vmware,dc=com
-ldap_group_search_base = cn=Builtin,dc=bde,dc=vmware,dc=com
+ldap_user_search_base = LDAP_USER_SEARCH_BASE_VALUE
+ldap_group_search_base = LDAP_GROUP_SEARCH_BASE_VALUE
 
-ldap_uri = ldap://10.112.113.181
-ldap_default_bind_dn = xiaoliangl@bde.vmware.com
-ldap_default_authtok = VMware123
+ldap_uri = LDAP_URI_VALUE
+ldap_default_bind_dn = LDAP_DEFAULT_BIND_DN_VALUE
+ldap_default_authtok = LDAP_DEFAULT_AUTHTOK_VALUE
 
 
-ldap_access_filter = (|(memberOf=cn=Administrators,cn=Builtin,dc=bde,dc=vmware,dc=com)(memberOf=cn=Users,cn=Builtin,dc=bde,dc=vmware,dc=com))
+ldap_access_filter = LDAP_ACCESS_FILTER_VALUE
 
 min_id = 1
 max_id = 0

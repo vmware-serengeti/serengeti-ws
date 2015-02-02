@@ -15,11 +15,16 @@
 package com.vmware.bdd.usermgmt;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.FileSystemUtils;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -33,9 +38,34 @@ public class TestSssdConfigurationGenerator {
 
 
    @BeforeClass
-   public void setup() {
+   public void setup() throws IOException {
+      String tmpDirPath = System.getProperty("java.io.tmpdir");
+
+      System.setProperty("serengeti.home.dir.bak", System.getProperty("serengeti.home.dir"));
+      System.setProperty("serengeti.home.dir", tmpDirPath);
+
+      File usermgmrConfDir = new File(System.getProperty("serengeti.home.dir") + File.separator + "conf"
+            + File.separator + "usermgmt");
+      usermgmrConfDir.mkdirs();
+      usermgmrConfDir.deleteOnExit();
+
+      File tmpFile = new File(usermgmrConfDir, "sssd.conf.template.LDAP");
+      tmpFile.createNewFile();
+      tmpFile.deleteOnExit();
+      FileCopyUtils.copy(readResource("sssd.conf.template.LDAP"), new FileWriter(tmpFile));
+
+      tmpFile = new File(usermgmrConfDir, "sssd.conf.template.AD_AS_LDAP");
+      tmpFile.createNewFile();
+      tmpFile.deleteOnExit();
+      FileCopyUtils.copy(readResource("sssd.conf.template.AD_AS_LDAP"), new FileWriter(tmpFile));
+
       sssdConfigurationGenerator = new SssdConfigurationGenerator();
-      sssdConfigurationGenerator.setSssdLdapConstantMappings(new SssdLdapConstantMappings());
+   }
+
+   @AfterClass
+   public void teardown() {
+      System.setProperty("serengeti.home.dir", System.getProperty("serengeti.home.dir.bak"));
+      System.out.println(System.getProperty("serengeti.home.dir"));
    }
 
    public String readResource(String fileName) throws IOException {
@@ -74,9 +104,9 @@ public class TestSssdConfigurationGenerator {
 
    @Test
    public void testGenerate1() throws IOException {
-      UserMgmtServer userMgmtServer = TestUserMgmtServerValidService_Ldap.loadTestData("ldaps-server.json");
+      UserMgmtServer userMgmtServer = TestUserMgmtServerValidService_Ldap.loadTestData("ad-server.json");
 
-      String actual = sssdConfigurationGenerator.getConfigurationContent(userMgmtServer, new String[]{"ldap-users", "ldap-admins"});
+      String actual = sssdConfigurationGenerator.getConfigurationContent(userMgmtServer, new String[]{"Administrators", "Users"});
 
       System.out.println(actual);
 

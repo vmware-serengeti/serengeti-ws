@@ -28,15 +28,15 @@ ldap_user_object_class = posixAccount
 ldap_user_name = uid
 ldap_group_object_class = posixGroup
 
-ldap_user_search_base = ou=users,dc=bde,dc=vmware,dc=com
-ldap_group_search_base = ou=groups,dc=bde,dc=vmware,dc=com
+ldap_user_search_base = LDAP_USER_SEARCH_BASE_VALUE
+ldap_group_search_base = LDAP_GROUP_SEARCH_BASE_VALUE
 
-ldap_uri = ldap://pek2-aurora-dev-01-113-dhcp137.eng.vmware.com
-ldap_default_bind_dn = cn=Manager,dc=bde,dc=vmware,dc=com
-ldap_default_authtok = openldap
+ldap_uri = LDAP_URI_VALUE
+ldap_default_bind_dn = LDAP_DEFAULT_BIND_DN_VALUE
+ldap_default_authtok = LDAP_DEFAULT_AUTHTOK_VALUE
 
 
-ldap_access_filter = memberOf=cn=ldap-users,ou=groups,dc=bde,dc=vmware,dc=com
+ldap_access_filter = LDAP_ACCESS_FILTER_VALUE
 
 min_id = 1
 max_id = 0
