@@ -1444,6 +1444,9 @@ public class ClusteringService implements IClusteringService {
          }
       }
 
+      //pre-placement task
+      chooseClusterCloneService().preCalculatePlacements(container, clusterSpec, existedNodes);
+
       List<BaseNode> baseNodes =
             placementService.getPlacementPlan(container, clusterSpec,
                   existedNodes, filteredHosts);

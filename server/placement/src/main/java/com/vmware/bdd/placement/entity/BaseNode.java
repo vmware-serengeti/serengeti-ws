@@ -297,6 +297,8 @@ public class BaseNode {
          if (disk.isSystemDisk()) {
             size = disk.getSize();
             found = true;
+            //@TODO only one system disk is supported. Xiaoliangl
+            break;
          }
       }
 

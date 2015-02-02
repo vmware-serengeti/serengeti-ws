@@ -37,6 +37,8 @@ public interface IContainer {
     */
    public void SetTemplateNode(BaseNode template);
 
+   BaseNode getTemplateNode();
+
    /**
     * add resource into the container
     *

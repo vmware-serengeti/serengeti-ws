@@ -62,6 +62,7 @@ public class Container implements IContainer {
       this.templateNode = template;
    }
 
+   @Override
    public BaseNode getTemplateNode() {
       return templateNode;
    }
