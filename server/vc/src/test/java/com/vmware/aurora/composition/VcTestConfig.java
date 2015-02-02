@@ -92,9 +92,7 @@ public class VcTestConfig {
 
    public static void init() throws Exception {
       Properties properties = new Properties();
-      FileInputStream in = new FileInputStream("./src/test/resources/test.properties");
-      properties.load(in);
-      in.close();
+      properties.load(VcTestConfig.class.getResourceAsStream("/test.properties"));
 
       testRpPath = properties.getProperty("testRpPath");
       testPostfix = properties.getProperty("testPostfix");

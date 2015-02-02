@@ -29,9 +29,12 @@ import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.composition.concurrent.Scheduler.ProgressCallback;
 import com.vmware.aurora.vc.VcVmCloneType;
+import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.clone.spec.VmCreateResult;
 import com.vmware.bdd.clone.spec.VmCreateSpec;
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.placement.entity.BaseNode;
+import com.vmware.bdd.placement.interfaces.IContainer;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.vmclone.service.intf.IClusterCloneService;
 import com.vmware.vim.binding.vim.fault.VmFaultToleranceOpIssuesList;
@@ -136,5 +139,11 @@ public class SimpleClusterCloningService implements IClusterCloneService {
             }
          }
       }
+   }
+
+
+   @Override
+   public void preCalculatePlacements(IContainer container, ClusterCreate cluster, List<BaseNode> existedNodes) {
+      //nothing to do
    }
 }

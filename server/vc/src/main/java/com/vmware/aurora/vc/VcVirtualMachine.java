@@ -1203,6 +1203,8 @@ public interface VcVirtualMachine extends VcVmBase {
    public void changeDisks(final DeviceId[] removeDisks, final DiskCreateSpec[] addDisks) throws Exception;
 
    public Folder getParentFolder();
+
+   public void enableForkParent(int maxWaitSeconds);
 }
 
 @SuppressWarnings("serial")
@@ -3596,6 +3598,7 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
 
 
 
+   @Override
    public void enableForkParent(int maxWaitSeconds) {
       VirtualMachine vm = this.getManagedObject();
       vm.enableForkParent();

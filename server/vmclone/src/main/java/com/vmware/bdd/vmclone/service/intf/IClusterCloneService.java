@@ -17,8 +17,11 @@ package com.vmware.bdd.vmclone.service.intf;
 import java.util.List;
 
 import com.vmware.aurora.composition.concurrent.Scheduler.ProgressCallback;
+import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.clone.spec.VmCreateResult;
 import com.vmware.bdd.clone.spec.VmCreateSpec;
+import com.vmware.bdd.placement.entity.BaseNode;
+import com.vmware.bdd.placement.interfaces.IContainer;
 
 /**
  * vm clone service interface
@@ -43,5 +46,15 @@ public interface IClusterCloneService {
     */
    public List<VmCreateResult<?>> createCopies(VmCreateSpec resource, int maxConcurrentCopy,
          List<VmCreateSpec> consumer, ProgressCallback callback);
+
+   /**
+    * if the cloning service will impact the placement place... this hookmethod can help. it will be
+    * executed before calculating placement.
+    * @param container
+    * @param cluster
+    * @param existedNodes
+    */
+   public void preCalculatePlacements(IContainer container,
+                                      ClusterCreate cluster, List<BaseNode> existedNodes);
 
 }

@@ -22,7 +22,10 @@ import com.vmware.aurora.composition.ImportVmSP;
 import com.vmware.aurora.composition.TestSP.CloneVmSP;
 import com.vmware.aurora.composition.TestSP.TakeSnapshotSP;
 import com.vmware.aurora.vc.DeviceId;
+import com.vmware.aurora.vc.VcCluster;
 import com.vmware.aurora.vc.VcVirtualMachine.DiskCreateSpec;
+import com.vmware.aurora.vc.vcservice.VcContext;
+import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 /**
@@ -117,5 +120,52 @@ public class CloneTest extends AbstractTmTest {
 
       new TestUtil().testCleanupVm(sp3.getResult());
       logger.info("Deleted VM: " + sp3.getResult());
+   }
+
+
+   @Test
+   public void testVMFork() throws Exception {
+      DeviceId slot1 = new DeviceId("VirtualLsiLogicController", 0, 1);
+      DeviceId slot2 = new DeviceId("VirtualLsiLogicController", 0, 2);
+      DeviceId slot3 = new DeviceId("VirtualLsiLogicController", 0, 3);
+
+      DeviceId[] removeDisks = { slot1 };
+
+      DiskCreateSpec[] addDisks =
+            { new DiskCreateSpec(slot2, ds, "data",
+                  DiskMode.persistent, DiskSize.sizeFromGB(10)) };
+
+      DiskCreateSpec[] addDisks1 =
+            { new DiskCreateSpec(slot3, ds, "data",
+                  DiskMode.persistent, DiskSize.sizeFromGB(20)) };
+
+
+      //Import vm -- "PlatformTestVM" as the target test vm.
+      ImportVmSP sp0 = new TestUtil().testImportVM(vmName, rp);
+
+      //Take a snapshot for test vm -- snap0
+      final String snapshotName = "snap";
+      TakeSnapshotSP sp1 =
+            new TestUtil().testTakeSnapshot(sp0.getResult().getId(), snapshotName, "snapshot of PlatformTestVM");
+
+      //Clone from imported vm's snapshot -- "snap0".
+      String newVmName1 = "clonedVM1";
+      final CloneVmSP sp2 =
+            new TestUtil().testCloneVm(newVmName1, sp0.getResult().getId(),
+                  snapshotName, rp, ds, removeDisks, addDisks);
+      logger.info("Cloned VM: " + sp2.getResult());
+
+      VcContext.inVcSessionDo(new VcSession<Void>() {
+         @Override
+         protected Void body() throws Exception {
+            sp2.getVM().enableForkParent(120);
+
+            return null;
+         }
+      });
+
+
+      new TestUtil().testCleanupVm(sp2.getResult());
+      logger.info("Deleted VM: " + sp2.getResult());
    }
 }
