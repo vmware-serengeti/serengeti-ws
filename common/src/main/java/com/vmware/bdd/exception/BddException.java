@@ -20,6 +20,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.vmware.bdd.apitypes.NetworkDnsType;
 
+import java.util.List;
 import java.util.Locale;
 
 public class BddException extends RuntimeException {
@@ -159,6 +160,10 @@ public class BddException extends RuntimeException {
    public static BddException INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(
          String field, Object value) {
       return INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(null, field, value);
+   }
+
+   public static BddException MISSING_PARAMETER(List<String> missingParameters) {
+      return new BddException(null, "BDD", "MISSING_PARAMETER", StringUtils.join(missingParameters, ", "));
    }
 
    public static BddException BAD_REST_CALL(Throwable ex, String reason) {

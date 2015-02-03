@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.vmware.bdd.aop.annotation.RestCallPointcut;
+
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -801,13 +802,29 @@ public class RestResource {
    @RestCallPointcut
    public void addNetworks(@RequestBody final NetworkAdd na) {
       verifyInitialized();
-      if (CommonUtil.isBlank(na.getName())
-            || !CommonUtil.validateResourceName(na.getName())) {
+
+      List<String> missingParameters = new ArrayList<String>();
+      if (CommonUtil.isBlank(na.getName())) {
+         missingParameters.add("name");
+      }
+      if (CommonUtil.isBlank(na.getPortGroup())) {
+         missingParameters.add("portGroup");
+      }
+      if (na.getDnsType() == null) {
+         missingParameters.add("dnsType");
+      }
+      if (na.getIsGenerateHostname() == null) {
+         missingParameters.add("generateHostname");
+      }
+      if (!missingParameters.isEmpty()) {
+         throw BddException.MISSING_PARAMETER(missingParameters);
+      }
+
+      if (!CommonUtil.validateResourceName(na.getName())) {
          throw BddException.INVALID_PARAMETER("name", na.getName());
       }
-      if (CommonUtil.isBlank(na.getPortGroup())
-            || !CommonUtil.validateVcResourceName(na.getPortGroup())) {
-         throw BddException.INVALID_PARAMETER("port group", na.getPortGroup());
+      if (!CommonUtil.validateVcResourceName(na.getPortGroup())) {
+         throw BddException.INVALID_PARAMETER("portGroup", na.getPortGroup());
       }
 
       if (!CommonUtil.validateDnsType(na.getDnsType())) {
