@@ -61,7 +61,8 @@
         "HDFS_CLIENT",
         "HBASE_CLIENT",
         "MAPREDUCE2_CLIENT",
-        "ZOOKEEPER_CLIENT"
+        "ZOOKEEPER_CLIENT",
+        "YARN_CLIENT"
       ],
       "instanceType":"SMALL",
       "instanceNum":1,

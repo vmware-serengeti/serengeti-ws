@@ -39,7 +39,7 @@ public class ClusterSpecFactory {
    }
 
    private enum HDP_VERSION {
-      V1, V2_0, V2_1
+      V1, V2_0, V2_1, V2_2, UNKNOWN
    }
    private static final Logger logger = Logger
          .getLogger(ClusterSpecFactory.class);
@@ -77,16 +77,24 @@ public class ClusterSpecFactory {
          "am-hdp-2-0-hdfs-yarn-template-spec.json";
    private static final String AM_HDP_2_1_HDFS_YARN_TEMPLATE_SPEC =
          "am-hdp-2-1-hdfs-yarn-template-spec.json";
+   private static final String AM_HDP_2_2_HDFS_YARN_TEMPLATE_SPEC =
+         "am-hdp-2-2-hdfs-yarn-template-spec.json";
+   private static final String AM_HDP_CUSTOMIZED_HDFS_YARN_TEMPLATE_SPEC =
+         "am-hdp-customized-hdfs-yarn-template-spec.json";
    private static final String AM_HDP_V1_HBASE_TEMPLATE_SPEC =
          "am-hdp-1-hbase-template-spec.json";
    private static final String AM_HDP_2_0_HBASE_TEMPLATE_SPEC =
          "am-hdp-2-0-hbase-template-spec.json";
    private static final String AM_HDP_2_1_HBASE_TEMPLATE_SPEC =
          "am-hdp-2-1-hbase-template-spec.json";
+   private static final String AM_HDP_2_2_HBASE_TEMPLATE_SPEC =
+         "am-hdp-2-2-hbase-template-spec.json";
+   private static final String AM_HDP_CUSTOMIZED_HBASE_TEMPLATE_SPEC =
+         "am-hdp-customized-hbase-template-spec.json";
    private static final String AM_HDFS_PURE_HBASE_TEMPLATE_SPEC =
          "am-hdfs-pure-hbase-template-spec.json";
 
-   private static File locateSpecFile(String filename) {
+   private static File locateSpecFile(String filename, String appManagerType) {
       // try to locate file directly
       File specFile = new File(filename);
       if (specFile.exists()) {
@@ -98,7 +106,7 @@ public class ClusterSpecFactory {
       if (homeDir != null && !homeDir.trim().isEmpty()) {
          StringBuilder builder = new StringBuilder();
          builder.append(homeDir).append(File.separator).append("conf")
-               .append(File.separator).append(filename);
+               .append(File.separator).append(appManagerType).append(File.separator).append("spec-templates").append(File.separator).append(filename);
          specFile = new File(builder.toString());
 
          if (!specFile.exists()) {
@@ -156,20 +164,20 @@ public class ClusterSpecFactory {
       if (vendor.trim().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
          switch (type) {
          case HDFS_MAPRED:
-            return loadFromFile(locateSpecFile(HDFS_MAPRED_MAPR_TEMPLATE_SPEC));
+            return loadFromFile(locateSpecFile(HDFS_MAPRED_MAPR_TEMPLATE_SPEC, appManagerType));
          case HDFS_HBASE:
-            return loadFromFile(locateSpecFile(HDFS_HBASE_MAPR_TEMPLATE_SPEC));
+            return loadFromFile(locateSpecFile(HDFS_HBASE_MAPR_TEMPLATE_SPEC, appManagerType));
          default:
             throw BddException.INVALID_PARAMETER("cluster type", type);
          }
       } else if (vendor.trim().equalsIgnoreCase(Constants.GPHD_VENDOR)) {
          switch (type) {
          case HDFS:
-            return loadFromFile(locateSpecFile(HDFS_GPHD_TEMPLATE_SPEC));
+            return loadFromFile(locateSpecFile(HDFS_GPHD_TEMPLATE_SPEC, appManagerType));
          case HDFS_MAPRED:
-            return loadFromFile(locateSpecFile(HDFS_MAPRED_GPHD_TEMPLATE_SPEC));
+            return loadFromFile(locateSpecFile(HDFS_MAPRED_GPHD_TEMPLATE_SPEC, appManagerType));
          case HDFS_HBASE:
-            return loadFromFile(locateSpecFile(HDFS_HBASE_GPHD_TEMPLATE_SPEC));
+            return loadFromFile(locateSpecFile(HDFS_HBASE_GPHD_TEMPLATE_SPEC, appManagerType));
          default:
             throw BddException.INVALID_PARAMETER("cluster type", type);
          }
@@ -179,45 +187,57 @@ public class ClusterSpecFactory {
          HDP_VERSION hdpVersion = getDefaultHdfsVersion(vendor, distroVersion);
          if (type == null) {
             if (mr == MAPREDUCE_VERSION.V1) {
-               return loadFromFile(locateSpecFile(AM_HDFS_MAPRED_TEMPLATE_SPEC));
+               return loadFromFile(locateSpecFile(AM_HDFS_MAPRED_TEMPLATE_SPEC, appManagerType));
             } else {
                if (hdpVersion == HDP_VERSION.V2_0) {
-                  return loadFromFile(locateSpecFile(AM_HDP_2_0_HDFS_YARN_TEMPLATE_SPEC));
+                  return loadFromFile(locateSpecFile(AM_HDP_2_0_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
+               } else if (hdpVersion == HDP_VERSION.V2_1) {
+                  return loadFromFile(locateSpecFile(AM_HDP_2_1_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
+               } else if (hdpVersion == HDP_VERSION.V2_2) {
+                  return loadFromFile(locateSpecFile(AM_HDP_2_2_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
                } else {
-                  return loadFromFile(locateSpecFile(AM_HDP_2_1_HDFS_YARN_TEMPLATE_SPEC));
+                  return loadFromFile(locateSpecFile(AM_HDP_CUSTOMIZED_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
                }
             }
          }
          switch (type) {
          case HDFS:
             if (hdpVersion == HDP_VERSION.V1) {
-               return loadFromFile(locateSpecFile(AM_HDFS_V1_TEMPLATE_SPEC));
+               return loadFromFile(locateSpecFile(AM_HDFS_V1_TEMPLATE_SPEC, appManagerType));
             } else {
-               return loadFromFile(locateSpecFile(AM_HDFS_V2_TEMPLATE_SPEC));
+               return loadFromFile(locateSpecFile(AM_HDFS_V2_TEMPLATE_SPEC, appManagerType));
             }
          case HDFS_MAPRED:
             if (mr == MAPREDUCE_VERSION.V1) {
-               return loadFromFile(locateSpecFile(AM_HDFS_MAPRED_TEMPLATE_SPEC));
+               return loadFromFile(locateSpecFile(AM_HDFS_MAPRED_TEMPLATE_SPEC, appManagerType));
             } else {
                if (hdpVersion == HDP_VERSION.V2_0) {
-                  return loadFromFile(locateSpecFile(AM_HDP_2_0_HDFS_YARN_TEMPLATE_SPEC));
+                  return loadFromFile(locateSpecFile(AM_HDP_2_0_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
+               } else if (hdpVersion == HDP_VERSION.V2_1) {
+                  return loadFromFile(locateSpecFile(AM_HDP_2_1_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
+               } else if (hdpVersion == HDP_VERSION.V2_2) {
+                  return loadFromFile(locateSpecFile(AM_HDP_2_2_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
                } else {
-                  return loadFromFile(locateSpecFile(AM_HDP_2_1_HDFS_YARN_TEMPLATE_SPEC));
+                  return loadFromFile(locateSpecFile(AM_HDP_CUSTOMIZED_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
                }
             }
          case HDFS_HBASE:
             if (Configuration.getBoolean(Constants.AMBARI_HBASE_DEPEND_ON_MAPREDUCE)) {
                if (hdpVersion == HDP_VERSION.V1) {
-                  return loadFromFile(locateSpecFile(AM_HDP_V1_HBASE_TEMPLATE_SPEC));
+                  return loadFromFile(locateSpecFile(AM_HDP_V1_HBASE_TEMPLATE_SPEC, appManagerType));
                } else {
                   if (hdpVersion == HDP_VERSION.V2_0) {
-                     return loadFromFile(locateSpecFile(AM_HDP_2_0_HBASE_TEMPLATE_SPEC));
+                     return loadFromFile(locateSpecFile(AM_HDP_2_0_HBASE_TEMPLATE_SPEC, appManagerType));
+                  } else if (hdpVersion == HDP_VERSION.V2_1) {
+                     return loadFromFile(locateSpecFile(AM_HDP_2_1_HBASE_TEMPLATE_SPEC, appManagerType));
+                  } else if (hdpVersion == HDP_VERSION.V2_2){
+                     return loadFromFile(locateSpecFile(AM_HDP_2_2_HBASE_TEMPLATE_SPEC, appManagerType));
                   } else {
-                     return loadFromFile(locateSpecFile(AM_HDP_2_1_HBASE_TEMPLATE_SPEC));
+                     return loadFromFile(locateSpecFile(AM_HDP_CUSTOMIZED_HBASE_TEMPLATE_SPEC, appManagerType));
                   }
                }
             } else {
-               return loadFromFile(locateSpecFile(AM_HDFS_PURE_HBASE_TEMPLATE_SPEC));
+               return loadFromFile(locateSpecFile(AM_HDFS_PURE_HBASE_TEMPLATE_SPEC, appManagerType));
             }
          default:
             throw BddException.INVALID_PARAMETER("cluster type", type);
@@ -227,25 +247,25 @@ public class ClusterSpecFactory {
                getDefaultMapReduceVersion(vendor, distroVersion);
          if (Constants.CLOUDERA_MANAGER_PLUGIN_TYPE.equals(appManagerType)) {
             if (type.equals(ClusterType.HDFS_HBASE)) {
-               return loadFromFile(locateSpecFile(CM_HBASE_TEMPLATE_SPEC));
+               return loadFromFile(locateSpecFile(CM_HBASE_TEMPLATE_SPEC, appManagerType));
             }
             if (mr == MAPREDUCE_VERSION.V1) {
-               return loadFromFile(locateSpecFile(CM_HDFS_MAPRED_TEMPLATE_SPEC));
+               return loadFromFile(locateSpecFile(CM_HDFS_MAPRED_TEMPLATE_SPEC, appManagerType));
             } else {
-               return loadFromFile(locateSpecFile(CM_HDFS_YARN_TEMPLATE_SPEC));
+               return loadFromFile(locateSpecFile(CM_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
             }
          }
          switch (type) {
          case HDFS:
-            return loadFromFile(locateSpecFile(HDFS_TEMPLATE_SPEC));
+            return loadFromFile(locateSpecFile(HDFS_TEMPLATE_SPEC, appManagerType));
          case HDFS_MAPRED:
             if (mr == MAPREDUCE_VERSION.V1) {
-               return loadFromFile(locateSpecFile(HDFS_MAPRED_TEMPLATE_SPEC));
+               return loadFromFile(locateSpecFile(HDFS_MAPRED_TEMPLATE_SPEC, appManagerType));
             } else {
-               return loadFromFile(locateSpecFile(HDFS_YARN_TEMPLATE_SPEC));
+               return loadFromFile(locateSpecFile(HDFS_YARN_TEMPLATE_SPEC, appManagerType));
             }
          case HDFS_HBASE:
-            return loadFromFile(locateSpecFile(HDFS_HBASE_TEMPLATE_SPEC));
+            return loadFromFile(locateSpecFile(HDFS_HBASE_TEMPLATE_SPEC, appManagerType));
          default:
             throw BddException.INVALID_PARAMETER("cluster type", type);
          }
@@ -310,17 +330,21 @@ public class ClusterSpecFactory {
          String distroVersion) {
 
       if (vendor.trim().equalsIgnoreCase(Constants.HDP_VENDOR)) {
-         if (distroVersion.startsWith("2.1")) {
-            return HDP_VERSION.V2_1;
+         if (distroVersion.startsWith("1.")) {
+            return HDP_VERSION.V1;
          } else if (distroVersion.startsWith("2.0")) {
             return HDP_VERSION.V2_0;
+         } else if (distroVersion.startsWith("2.1")) {
+            return HDP_VERSION.V2_1;
+         } else if (distroVersion.startsWith("2.2")) {
+            return HDP_VERSION.V2_2;
          } else {
-            return HDP_VERSION.V1;
+            return HDP_VERSION.UNKNOWN;
          }
       }
 
-      logger.error("Unknown distro HDP version, return default HDP version 2.1");
-      return HDP_VERSION.V2_1;
+      logger.error("Unknown distro HDP version");
+      return HDP_VERSION.UNKNOWN;
    }
 
    /**

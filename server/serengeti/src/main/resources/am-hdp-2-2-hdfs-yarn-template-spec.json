@@ -1,51 +1,49 @@
 {
-  "groups":[
+  "groups": [
     {
-      "name":"zookeeper",
-      "roles":[
+      "name" : "zookeeper",
+      "roles" : [
         "ZOOKEEPER_SERVER"
       ],
       "instance_type":SMALL,
       "instance_num":3,
-      "ha":"on"
+      "ha" : "on"
     },
     {
-      "name":"master",
-      "roles":[
+      "name": "master",
+      "roles": [
         "NAMENODE",
         "RESOURCEMANAGER",
         "SECONDARY_NAMENODE",
-        "HBASE_MASTER",
         "HISTORYSERVER",
         "APP_TIMELINE_SERVER"
       ],
       "instance_type":MEDIUM,
       "instance_num":1,
-      "ha":"on"
+      "ha" : "on"
     },
     {
-      "name":"worker",
-      "roles":[
+      "name": "worker",
+      "roles": [
         "DATANODE",
-        "NODEMANAGER",
-        "HBASE_REGIONSERVER"
+        "NODEMANAGER"
       ],
       "instance_type":SMALL,
       "instance_num":3,
-      "ha":"off"
+      "ha": "off"
     },
     {
-      "name":"client",
-      "roles":[
+      "name": "client",
+      "roles": [
         "HDFS_CLIENT",
-        "HBASE_CLIENT",
+        "YARN_CLIENT",
         "MAPREDUCE2_CLIENT",
         "ZOOKEEPER_CLIENT",
-        "YARN_CLIENT"
+        "TEZ_CLIENT"
       ],
       "instance_type":SMALL,
       "instance_num":1,
-      "ha":"off"
+      "ha": "off"
     }
   ]
 }
