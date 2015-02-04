@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.exception.AuroraException;
@@ -31,7 +32,9 @@ import com.vmware.aurora.vc.vcevent.VcEventListener;
 import com.vmware.aurora.vc.vcservice.VcConnectionStatusChangeEvent.VcConnectionStatusChangeCallback;
 import com.vmware.vim.binding.vim.AboutInfo;
 import com.vmware.vim.binding.vim.fault.NotAuthenticated;
+import com.vmware.vim.binding.vmodl.LocalizableMessage;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
+import com.vmware.vim.binding.vmodl.RuntimeFault;
 import com.vmware.vim.vmomi.core.exception.InternalException;
 import com.vmware.vim.vmomi.core.exception.UnmarshallException;
 import com.vmware.vim.vmomi.core.types.VmodlContext;
@@ -552,6 +555,17 @@ public class VcContext {
             Long curGenCount = svc.getServiceGenCount();
             endSession();
             logger.debug(e);
+
+            if(e instanceof RuntimeFault) {
+               RuntimeFault rtFault = (RuntimeFault)e;
+               if(!ArrayUtils.isEmpty(rtFault.getFaultMessage())) {
+                  logger.error("vCenter Fault Message(s)>>>>");
+                  for(LocalizableMessage message : rtFault.getFaultMessage()) {
+                     logger.error(message.getMessage());
+                  }
+                  logger.error("<<<< End of Fault Message(s)");
+               }
+            }
 
             if (e instanceof RejectedExecutionException ||
                 e instanceof IllegalStateException) {

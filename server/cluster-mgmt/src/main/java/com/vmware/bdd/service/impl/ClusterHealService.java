@@ -366,7 +366,7 @@ public class ClusterHealService implements IClusterHealService {
       return new CreateVmSP(node.getVmName() + RECOVERY_VM_NAME_POSTFIX,
             createSchema, VcVmUtil.getTargetRp(clusterSpec.getName(),
                   groupName, node), getTargetDatastore(fullDiskSet),
-            prePowerOn, null, guestVariable, VcVmCloneType.FULL, getTargetFolder(node),
+            prePowerOn, null, guestVariable, VcVmCloneType.FULL, true, getTargetFolder(node),
             getTargetHost(node));
    }
 

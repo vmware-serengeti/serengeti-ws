@@ -15,50 +15,54 @@
 
 package com.vmware.aurora.composition;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
-import com.vmware.aurora.global.DiskSize;
-import com.vmware.aurora.composition.ImportVmSP;
+
 import com.vmware.aurora.composition.TestSP.CloneVmSP;
 import com.vmware.aurora.composition.TestSP.TakeSnapshotSP;
+import com.vmware.aurora.global.DiskSize;
 import com.vmware.aurora.vc.DeviceId;
-import com.vmware.aurora.vc.VcCluster;
+import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.VcVirtualMachine.DiskCreateSpec;
+import com.vmware.aurora.vc.VcVmCloneType;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
+import com.vmware.bdd.clone.spec.VmCreateSpec;
+import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 /**
  * @author shuang
- *
  */
 public class CloneTest extends AbstractTmTest {
    static final Logger logger = Logger.getLogger(CloneTest.class);
 
    /**
     * Test case :
-    *
+    * <p/>
     * 1.Import the test vm.
-    *
+    * <p/>
     * 2.Take a snapshot for the imported vm -- snap0.
-    *
+    * <p/>
     * 3.Do two linked clones of snap0. One is "ClonedVM1",the other one is
     * "ClonedVM2".
-    *
+    * <p/>
     * 4.The imported vm has two hard disks -- SCSI(0:0)Hard disk1 and
     * SCSI(0:1)Hard disk2.
-    *
+    * <p/>
     * During the clone procedure of "ClonedVM1",I removed the SCSI(0:1)Hard
     * disk2 and added a new disk -- SCSI(0:2)Hard disk2.
-    *
+    * <p/>
     * During the clone procedure of "ClonedVM2",I removed the SCSI(0:1)Hard
     * disk2 and added a new disk -- SCSI(0:3)Hard disk2.
-    *
+    * <p/>
     * 5.Take a snapshot of "ClonedVM1" -- snap1.
-    *
+    * <p/>
     * 6.Do a linked clone of snap1 and call the cloned vm "ClonedVM3".
     * "ClonedVM3" should have the same disk layout as "ClonedVM1".
-    *
     */
    @Test
    public void testTransaction() throws Exception {
@@ -66,15 +70,15 @@ public class CloneTest extends AbstractTmTest {
       DeviceId slot2 = new DeviceId("VirtualLsiLogicController", 0, 2);
       DeviceId slot3 = new DeviceId("VirtualLsiLogicController", 0, 3);
 
-      DeviceId[] removeDisks = { slot1 };
+      DeviceId[] removeDisks = {slot1};
 
       DiskCreateSpec[] addDisks =
-            { new DiskCreateSpec(slot2, ds, "data",
-                  DiskMode.persistent, DiskSize.sizeFromGB(10)) };
+            {new DiskCreateSpec(slot2, ds, "data",
+                  DiskMode.persistent, DiskSize.sizeFromGB(10))};
 
       DiskCreateSpec[] addDisks1 =
-            { new DiskCreateSpec(slot3, ds, "data",
-                  DiskMode.persistent, DiskSize.sizeFromGB(20)) };
+            {new DiskCreateSpec(slot3, ds, "data",
+                  DiskMode.persistent, DiskSize.sizeFromGB(20))};
 
 
       //Import vm -- "PlatformTestVM" as the target test vm.
@@ -123,49 +127,116 @@ public class CloneTest extends AbstractTmTest {
    }
 
 
+   VcVirtualMachine forkParentVm = null;
+   VcVirtualMachine forkChildVm = null;
    @Test
    public void testVMFork() throws Exception {
-      DeviceId slot1 = new DeviceId("VirtualLsiLogicController", 0, 1);
-      DeviceId slot2 = new DeviceId("VirtualLsiLogicController", 0, 2);
-      DeviceId slot3 = new DeviceId("VirtualLsiLogicController", 0, 3);
-
-      DeviceId[] removeDisks = { slot1 };
-
-      DiskCreateSpec[] addDisks =
-            { new DiskCreateSpec(slot2, ds, "data",
-                  DiskMode.persistent, DiskSize.sizeFromGB(10)) };
-
-      DiskCreateSpec[] addDisks1 =
-            { new DiskCreateSpec(slot3, ds, "data",
-                  DiskMode.persistent, DiskSize.sizeFromGB(20)) };
-
 
       //Import vm -- "PlatformTestVM" as the target test vm.
-      ImportVmSP sp0 = new TestUtil().testImportVM(vmName, rp);
+      final ImportVmSP sp0 = new TestUtil().testImportVM(vmName, rp);
 
       //Take a snapshot for test vm -- snap0
       final String snapshotName = "snap";
       TakeSnapshotSP sp1 =
             new TestUtil().testTakeSnapshot(sp0.getResult().getId(), snapshotName, "snapshot of PlatformTestVM");
 
-      //Clone from imported vm's snapshot -- "snap0".
-      String newVmName1 = "clonedVM1";
-      final CloneVmSP sp2 =
-            new TestUtil().testCloneVm(newVmName1, sp0.getResult().getId(),
-                  snapshotName, rp, ds, removeDisks, addDisks);
-      logger.info("Cloned VM: " + sp2.getResult());
 
-      VcContext.inVcSessionDo(new VcSession<Void>() {
-         @Override
-         protected Void body() throws Exception {
-            sp2.getVM().enableForkParent(120);
-
-            return null;
-         }
-      });
+      VmCreateSpec vmCreateSpec = new VmCreateSpec();
+      vmCreateSpec.setTargetRp(rp);
+      vmCreateSpec.setTargetDs(ds);
+      vmCreateSpec.setCloneType(VcVmCloneType.FULL);
+      vmCreateSpec.setPersisted(true);
+      vmCreateSpec.setVmName("forkParentVm");
 
 
-      new TestUtil().testCleanupVm(sp2.getResult());
-      logger.info("Deleted VM: " + sp2.getResult());
+      final VcVirtualMachine.CreateSpec vcVmCreateSpec =
+            vmCreateSpec.toCreateSpec(sp0.getResult().getSnapshotByName("snap"),
+                  new ConfigSpecImpl());
+
+      try {
+         forkParentVm = VcContext.inVcSessionDo(new VcSession<VcVirtualMachine>() {
+            @Override
+            protected boolean isTaskSession() {
+               return true;
+            }
+
+            @Override
+            protected VcVirtualMachine body() throws Exception {
+               forkParentVm = sp0.getResult().cloneVm(vcVmCreateSpec, null);
+               forkParentVm.enableForkParent();
+
+               Map<String, String> bootupConfigs = new HashMap<String, String>();
+               bootupConfigs.put("vmfork", "yes");
+               forkParentVm.setGuestConfigs(bootupConfigs);
+
+               forkParentVm.powerOn();
+
+               int i = 0;
+               while(i < 120){
+                  boolean flag = forkParentVm.isQuiescedForkParent();
+                  System.out.println("Vm Quiesced: " + flag);
+                  if(flag) {
+                     break;
+                  }
+
+                  Thread.sleep(2000);
+               }
+               return forkParentVm;
+            }
+         });
+
+
+         VmCreateSpec forkCreateSpec = new VmCreateSpec();
+         forkCreateSpec.setTargetRp(rp);
+         forkCreateSpec.setTargetDs(ds);
+         forkCreateSpec.setCloneType(VcVmCloneType.VMFORK);
+         forkCreateSpec.setPersisted(false);
+         forkCreateSpec.setVmName("fork01");
+
+         final VcVirtualMachine.CreateSpec vcForkCreateSpec =
+               forkCreateSpec.toCreateSpec(null, new ConfigSpecImpl());
+
+
+          forkChildVm = VcContext.inVcSessionDo(new VcSession<VcVirtualMachine>() {
+            @Override
+            protected boolean isTaskSession() {
+               return true;
+            }
+
+            @Override
+            protected VcVirtualMachine body() throws Exception {
+               forkChildVm = forkParentVm.cloneVm(vcForkCreateSpec, null);
+               forkChildVm.powerOn();
+               return forkChildVm;
+            }
+         });
+
+      } finally {
+
+         VcContext.inVcSessionDo(new VcSession<Void>() {
+            @Override
+            protected boolean isTaskSession() {
+               return true;
+            }
+
+            @Override
+            protected Void body() throws Exception {
+               if(forkChildVm != null) {
+                  forkChildVm.powerOff();
+                  forkChildVm.destroy(false);
+               }
+
+               if (forkParentVm != null) {
+                  forkParentVm.powerOff();
+                  forkParentVm.destroy();
+               }
+               sp0.getResult().removeAllSnapshots();
+               return null;
+            }
+         });
+      }
+
+
+
    }
 }

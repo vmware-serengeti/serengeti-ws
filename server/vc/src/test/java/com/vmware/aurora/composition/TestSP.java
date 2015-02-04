@@ -101,7 +101,9 @@ public class TestSP {
                VcSnapshot snap = template.getSnapshotByName(snapName);
 
                CreateSpec vmSpec =
-                     new CreateSpec(newVmName, snap, targetRp, targetDs, VcVmCloneType.LINKED, null);
+                     new CreateSpec(newVmName, snap, targetRp, targetDs, VcVmCloneType.LINKED,
+                           true,
+                           null);
 
                DeviceId[] removeSet = removeDisks;
                VcVirtualMachine newVm = template.cloneVm(vmSpec, removeSet);

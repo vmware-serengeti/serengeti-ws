@@ -89,7 +89,7 @@ public class CompositionLayerTest extends AbstractTmTest {
 
       CreateVmSP vm1SP =
             new CreateVmSP("testCompLayer", vmSchema, rp, ds, null, new QueryGuestInfo(3 * 60),
-                  null, VcVmCloneType.LINKED, vmFolder);
+                  null, VcVmCloneType.LINKED, true, vmFolder);
       vm1SP.call();
       logger.info("Created VM: " + vm1SP.getVM().getName());
 
@@ -104,7 +104,7 @@ public class CompositionLayerTest extends AbstractTmTest {
 
       CreateVmSP vm2SP =
             new CreateVmSP("testCloneCompLayer", vmCloneSchema, rp, ds, null,
-                  null, null, VcVmCloneType.FULL, vmFolder);
+                  null, null, VcVmCloneType.FULL, true, vmFolder);
       vm2SP.call();
 
       VmSchema vmFullCloneSchema =
@@ -117,7 +117,7 @@ public class CompositionLayerTest extends AbstractTmTest {
 
       CreateVmSP fullCloneVmSP =
             new CreateVmSP("testFullCloneCompLayer", vmFullCloneSchema, rp, ds,
-                  null, null, null, VcVmCloneType.LINKED, vmFolder);
+                  null, null, null, VcVmCloneType.LINKED, true, vmFolder);
       fullCloneVmSP.call();
 
       util.testRemoveSnapshot(templateId, snapshotName);

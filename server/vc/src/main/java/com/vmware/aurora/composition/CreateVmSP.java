@@ -58,6 +58,7 @@ public class CreateVmSP implements Callable<Void> {
    final IPrePostPowerOn postPowerOn;
    final Map<String, String> bootupConfigs;
    final VcVmCloneType cloneType;
+   final boolean persisted;
    final Folder vmFolder; /* optional */
    final VcHost host; /* optinal */
 
@@ -66,15 +67,17 @@ public class CreateVmSP implements Callable<Void> {
    public CreateVmSP(String newVmName, VmSchema vmSchema,
          VcResourcePool targetRp, VcDatastore targetDs,
          IPrePostPowerOn prePowerOn, IPrePostPowerOn postPowerOn,
-         Map<String, String> bootupConfigs, VcVmCloneType cloneType, Folder vmFolder) {
+         Map<String, String> bootupConfigs, VcVmCloneType cloneType, boolean persisted,
+         Folder vmFolder) {
       this(newVmName, vmSchema, targetRp, targetDs, prePowerOn, postPowerOn,
-            bootupConfigs, cloneType, vmFolder, null);
+            bootupConfigs, cloneType, persisted, vmFolder, null);
    }
 
    public CreateVmSP(String newVmName, VmSchema vmSchema,
          VcResourcePool targetRp, VcDatastore targetDs,
          IPrePostPowerOn prePowerOn, IPrePostPowerOn postPowerOn,
          Map<String, String> bootupConfigs, VcVmCloneType cloneType,
+         boolean persisted,
          Folder vmFolder, VcHost host) {
       this.newVmName = newVmName;
       this.vmSchema = vmSchema;
@@ -84,6 +87,7 @@ public class CreateVmSP implements Callable<Void> {
       this.postPowerOn = postPowerOn;
       this.bootupConfigs = bootupConfigs;
       this.cloneType = cloneType;
+      this.persisted = persisted;
       this.vmFolder = vmFolder;
       this.host = host;
    }
@@ -92,6 +96,7 @@ public class CreateVmSP implements Callable<Void> {
          VcResourcePool targetRp, VcDatastore targetDs,
          IPrePostPowerOn prePowerOn, IPrePostPowerOn postPowerOn,
          Map<String, String> bootupConfigs, VcVmCloneType cloneType,
+         boolean persisted,
          Folder vmFolder, VcHost host) {
       this.vcVm = vcVm;
       this.newVmName = vcVm.getName();
@@ -102,6 +107,7 @@ public class CreateVmSP implements Callable<Void> {
       this.postPowerOn = postPowerOn;
       this.bootupConfigs = bootupConfigs;
       this.cloneType = cloneType;
+      this.persisted = persisted;
       this.vmFolder = vmFolder;
       this.host = host;
    }
@@ -296,7 +302,7 @@ public class CreateVmSP implements Callable<Void> {
       if (requireClone()) {
          VcVirtualMachine.CreateSpec vmSpec =
                new VcVirtualMachine.CreateSpec(newVmName, snap, targetRp,
-                     targetDs, vmFolder, host, cloneType, configSpec);
+                     targetDs, vmFolder, host, cloneType, persisted, configSpec);
          // Clone from the template
          vcVm = template.cloneVm(vmSpec, null);
       } else {

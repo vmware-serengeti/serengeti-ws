@@ -29,6 +29,8 @@ import java.util.concurrent.TimeUnit;
 import com.google.gson.Gson;
 import com.google.gson.internal.Pair;
 import com.google.gson.reflect.TypeToken;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.vmware.aurora.exception.AuroraException;
 import com.vmware.aurora.exception.GuestVariableException;
@@ -221,6 +223,9 @@ public interface VcVirtualMachine extends VcVmBase {
 //      final boolean linkClone;
 
       final VcVmCloneType cloneType;
+
+      final boolean persisted;
+
       /**
        * More VM configuration changes.
        */
@@ -239,23 +244,33 @@ public interface VcVirtualMachine extends VcVmBase {
        * Create a clone from a VM snapshot.
        */
       public CreateSpec(String name, VcSnapshot parent, VcResourcePool rp, VcDatastore ds,
-                        VcVmCloneType cloneType, ConfigSpec spec) {
-         this(name, parent, rp, ds, null, null, cloneType, spec);
+                        VcVmCloneType cloneType, boolean persisted, ConfigSpec spec) {
+         this(name, parent, rp, ds, null, null, cloneType, persisted, spec);
       }
 
       /**
        * Create a clone from a VM snapshot.
        */
       public CreateSpec(String name, VcSnapshot parent, VcResourcePool rp, VcDatastore ds, Folder folder,
-            VcHost host, VcVmCloneType cloneType, ConfigSpec spec) {
+            VcHost host, VcVmCloneType cloneType, boolean persisted, ConfigSpec spec) {
+         AuAssert.check(cloneType != null, "please specify the clone type!");
+
+         if(cloneType != VcVmCloneType.VMFORK
+               || (cloneType == VcVmCloneType.VMFORK && persisted)) {
+            AuAssert.check(parent != null);
+         }
+
          parentSnap = parent;
-         AuAssert.check(parentSnap != null);
          this.name = name;
          this.rp = rp;
          this.ds = ds;
          this.folder = folder;
          this.host = host;
+
          this.cloneType = cloneType;
+         this.persisted = persisted;
+
+
          this.spec = spec;
       }
 
@@ -315,6 +330,15 @@ public interface VcVirtualMachine extends VcVmBase {
          }
          BackingInfo backing = VmConfigUtil.createVmdkBackingInfo(vm, ds, diskName, diskMode, thinDisk, eagerlyScrub);
          return vm.attachVirtualDiskSpec(deviceId, backing, true, size);
+      }
+
+      public String toString() {
+         return new ToStringBuilder("DiskCreateSpec")
+               .append("name",diskName)
+               .append("id",deviceId)
+               .append("size",size)
+               .append("ds",ds.getName())
+               .toString();
       }
    }
 
@@ -1204,7 +1228,7 @@ public interface VcVirtualMachine extends VcVmBase {
 
    public Folder getParentFolder();
 
-   public void enableForkParent(int maxWaitSeconds);
+   void enableForkParent();
 }
 
 @SuppressWarnings("serial")
@@ -3550,16 +3574,19 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
          }
       }
       if (!devChanges.isEmpty()) {
-         AuAssert.check(vmSpec.cloneType == VcVmCloneType.VMFORK, "Vmfork doesn't allow change disks.");
          configSpec.setDeviceChange(devChanges.toArray(new VirtualDeviceSpec[devChanges.size()]));
       }
 
       switch (vmSpec.cloneType) {
          case VMFORK:
-            //if vm is not quiesced, abort.
+            AuAssert.check(ArrayUtils.isEmpty(configSpec.getDeviceChange()), "Vmfork doesn't allow change disks.");
+            if(vmSpec.persisted) {
+               AuAssert.check(vmSpec.parentSnap != null, "Cannot create persistent fork child from a virtual machine which does not have a disk snapshot.");
+            }
             AuAssert.check(isQuiescedForkParent(), "VM is not quiesced.");
+
             return createForkChild(vmSpec.name, vmSpec.rp, vmSpec.ds,
-                  vmSpec.folder, true, VcCache.getRefreshVcTaskCB(vmSpec.rp));
+                  vmSpec.folder, vmSpec.persisted, VcCache.getRefreshVcTaskCB(vmSpec.rp));
          case FULL:
             return vmSpec.getParentVm().cloneSnapshot(vmSpec.name, vmSpec.rp, vmSpec.ds,
                   parentVcSnap, vmSpec.folder, vmSpec.host, false/*not linked*/, configSpec, VcCache.getRefreshVcTaskCB(vmSpec.rp));
@@ -3599,11 +3626,9 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
 
 
    @Override
-   public void enableForkParent(int maxWaitSeconds) {
+   public void enableForkParent() {
       VirtualMachine vm = this.getManagedObject();
       vm.enableForkParent();
-
-      waitReady(maxWaitSeconds);
    }
 
    private void waitReady(int maxWaitSeconds) {

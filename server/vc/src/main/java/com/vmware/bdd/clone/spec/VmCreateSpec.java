@@ -21,8 +21,12 @@ import com.vmware.aurora.composition.VmSchema;
 import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcResourcePool;
+import com.vmware.aurora.vc.VcSnapshot;
+import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.VcVmCloneType;
+import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
 import com.vmware.vim.binding.vim.Folder;
+import com.vmware.vim.binding.vim.vm.ConfigSpec;
 
 /**
  * vm spec
@@ -48,6 +52,8 @@ public class VmCreateSpec implements Location {
    private Map<String, String> bootupConfigs;
 
    private VcVmCloneType cloneType;
+
+   private boolean persisted = true;
 
    private IPrePostPowerOn prePowerOn;
 
@@ -154,5 +160,22 @@ public class VmCreateSpec implements Location {
 
    public void setCloneType(VcVmCloneType cloneType) {
       this.cloneType = cloneType;
+   }
+
+   public boolean isPersisted() {
+      return persisted;
+   }
+
+   public void setPersisted(boolean persisted) {
+      this.persisted = persisted;
+   }
+
+   public VcVirtualMachine.CreateSpec toCreateSpec(VcSnapshot snapshot, ConfigSpec configSpec) {
+      return new VcVirtualMachine.CreateSpec(
+            getVmName(), snapshot,
+            getTargetRp(), getTargetDs(),
+            getTargetFolder(), getTargetHost(),
+            getCloneType(), isPersisted(), configSpec
+      );
    }
 }
