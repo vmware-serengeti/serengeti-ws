@@ -47,12 +47,12 @@ import com.vmware.vim.binding.vim.fault.VmFaultToleranceOpIssuesList;
  */
 @Service
 @Qualifier("simpleClusterCloneService")
-public class SimpleClusterCloningService implements IClusterCloneService {
+public class SimpleClusterCloningService implements IClusterCloneService<VmCreateSpec> {
    private static final Logger logger = Logger
          .getLogger(SimpleClusterCloningService.class);
 
    @Override
-   public List<VmCreateResult<?>> createCopies(VmCreateSpec resource,
+   public List<VmCreateResult<VmCreateSpec>> createCopies(VmCreateSpec resource,
                                                int maxConcurrentCopy, List<VmCreateSpec> consumers,
                                                ProgressCallback callback) {
       Pair<Callable<Void>, Callable<Void>>[] storeProcedures =
@@ -85,7 +85,7 @@ public class SimpleClusterCloningService implements IClusterCloneService {
          }
 
          int total = 0;
-         List<VmCreateResult<?>> cloned = new ArrayList<VmCreateResult<?>>();
+         List<VmCreateResult<VmCreateSpec>> cloned = new ArrayList<>();
          for (int i = 0; i < storeProcedures.length; i++) {
             Pair<ExecutionResult, ExecutionResult> pair = result[i];
             VmCreateResult<VmCreateSpec> createResult = new VmCreateResult<VmCreateSpec>();

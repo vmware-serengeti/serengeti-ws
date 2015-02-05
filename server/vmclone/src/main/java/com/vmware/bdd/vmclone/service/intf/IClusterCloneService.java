@@ -18,6 +18,7 @@ import java.util.List;
 
 import com.vmware.aurora.composition.concurrent.Scheduler.ProgressCallback;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.clone.spec.Location;
 import com.vmware.bdd.clone.spec.VmCreateResult;
 import com.vmware.bdd.clone.spec.VmCreateSpec;
 import com.vmware.bdd.placement.entity.BaseNode;
@@ -29,7 +30,7 @@ import com.vmware.bdd.placement.interfaces.IContainer;
  * @author tli
  * 
  */
-public interface IClusterCloneService {
+public interface IClusterCloneService<T extends Location> {
 
    /**
     * given the initial source "resource", create copies in "consumers". The max
@@ -44,7 +45,7 @@ public interface IClusterCloneService {
     * @param callback
     * @return
     */
-   public List<VmCreateResult<?>> createCopies(VmCreateSpec resource, int maxConcurrentCopy,
+   public List<VmCreateResult<T>> createCopies(VmCreateSpec resource, int maxConcurrentCopy,
          List<VmCreateSpec> consumer, ProgressCallback callback);
 
    /**
