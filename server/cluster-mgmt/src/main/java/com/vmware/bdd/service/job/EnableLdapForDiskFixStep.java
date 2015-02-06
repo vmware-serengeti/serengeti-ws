@@ -42,7 +42,7 @@ public class EnableLdapForDiskFixStep extends TrackableTasklet {
 
       clusterLdapUserMgmtCfgService.configureUserMgmt(clusterName, nodeEntity);
 
-      putIntoJobExecutionContext(chunkContext, "Enable LDAP successfully", false);
+      putIntoJobExecutionContext(chunkContext, "Enable LDAP successfully", true);
 
       return RepeatStatus.FINISHED;
    }

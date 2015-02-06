@@ -103,12 +103,6 @@ public class ClusterLdapUserMgmtCfgService {
          return;
       }
 
-      ArrayList<String> nodeMgmtIpList = new ArrayList<>();
-      for (NodeEntity nodeEntity : nodeEntityList) {
-         nodeMgmtIpList.add(nodeEntity.getPrimaryMgtIpV4());
-      }
-      String[] nodeMgmtIps = new String[nodeEntityList.size()];
-      nodeMgmtIpList.toArray(nodeMgmtIps);
 
       Set<String> groupNameSet = new HashSet<>();
 
@@ -146,7 +140,7 @@ public class ClusterLdapUserMgmtCfgService {
          // scp to one node's tmp folder
          // cp to /etc/sssd
          // sudo authconfig --enablesssd --enablesssdauth --enablemkhomedir --updateall
-         nodeLdapUserMgmtConfService.configureSssd(nodeMgmtIps, localSssdConfFile.getAbsolutePath());
+         nodeLdapUserMgmtConfService.configureSssd(nodeEntityList, localSssdConfFile.getAbsolutePath());
       } finally {
          try {
             localSssdConfFile.delete();
@@ -160,7 +154,7 @@ public class ClusterLdapUserMgmtCfgService {
       if (disableLocalUserFlag != null) {
          boolean disableLocalUser = Boolean.parseBoolean(disableLocalUserFlag);
          if (disableLocalUser) {
-            nodeLdapUserMgmtConfService.disableLocalUsers(nodeMgmtIps);
+            nodeLdapUserMgmtConfService.disableLocalUsers(nodeEntityList);
          }
       }
    }

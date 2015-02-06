@@ -44,7 +44,7 @@ public class EnableLdapForNewNodesStep extends TrackableTasklet {
 
       clusterLdapUserMgmtCfgService.configureUserMgmt(clusterName, nodes);
 
-      putIntoJobExecutionContext(chunkContext, "Enable LDAP successfully", false);
+      putIntoJobExecutionContext(chunkContext, "Enable LDAP successfully", true);
 
       return RepeatStatus.FINISHED;
    }

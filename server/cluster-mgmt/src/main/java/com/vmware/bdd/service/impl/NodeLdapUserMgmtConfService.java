@@ -15,15 +15,20 @@
 package com.vmware.bdd.service.impl;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.vmware.aurora.global.Configuration;
+import com.vmware.bdd.entity.NodeEntity;
+import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.ssh.SshExecService;
 import com.vmware.bdd.usermgmt.job.ExecOutputLogger;
 import com.vmware.bdd.utils.Constants;
@@ -40,6 +45,9 @@ public class NodeLdapUserMgmtConfService {
 
    private SshExecService sshExecService = new SshExecService();
 
+   @Autowired
+   private IClusterEntityManager clusterEntityManager;
+
    private int TIMEOUT = Configuration.getInt("usermgmt.command.exec.timeout", 60);
 
 
@@ -49,22 +57,28 @@ public class NodeLdapUserMgmtConfService {
       this.sshPort = Configuration.getInt(Constants.SSH_PORT_CONFIG_NAME, Constants.DEFAULT_SSH_PORT);
    }
 
-   public void disableLocalUsers(String[] ips) {
+   public void disableLocalUsers(List<NodeEntity> nodeEntityList) {
       String[] remoteCmds = new String[]{
             "sudo usermod -L serengeti",
             "sudo usermod -L root"
       };
 
-      for(String ip : ips) {
+      for(NodeEntity nodeEntity : nodeEntityList) {
+         clusterEntityManager.updateNodeAction(nodeEntity, "Disabling Local Users");
          try {
-            sshExecService.exec(ip, sshPort, sshUser, remoteCmds, TIMEOUT);
+            sshExecService.exec(nodeEntity.getPrimaryMgtIpV4(), sshPort, sshUser, remoteCmds, TIMEOUT);
+            nodeEntity.setAction("Disable Local Users successfully!");
          } catch (Exception e) {
-            LOGGER.error("failed to disable local users for node: " + ip, e);
+            LOGGER.error("failed to disable local users for node: " + nodeEntity, e);
+            nodeEntity.setAction("Disable Local Users failed!");
+            nodeEntity.setActionFailed(true);
+         } finally {
+            clusterEntityManager.update(nodeEntity);
          }
       }
    }
 
-   public void configureSssd(String[] ips, String localSssdConfFile) {
+   public void configureSssd(List<NodeEntity> nodeEntityList, String localSssdConfFile) {
       String uploadedSssdConfFilePath = "/tmp/sssd.conf." + System.currentTimeMillis();
       String[] remoteCmds = new String[]{
             String.format("sudo mv -f %1s /etc/sssd/sssd.conf", uploadedSssdConfFilePath),
@@ -74,13 +88,20 @@ public class NodeLdapUserMgmtConfService {
             "sudo service sssd restart"
       };
 
-      for(String ip : ips) {
+      for(NodeEntity nodeEntity : nodeEntityList) {
+         clusterEntityManager.updateNodeAction(nodeEntity, "Enabling LDAP");
          try {
-            transferSssdConf(localSssdConfFile, ip, uploadedSssdConfFilePath);
+            transferSssdConf(localSssdConfFile, nodeEntity.getPrimaryMgtIpV4(), uploadedSssdConfFilePath);
 
-            sshExecService.exec(ip, sshPort, sshUser, remoteCmds, TIMEOUT);
+            sshExecService.exec(nodeEntity.getPrimaryMgtIpV4(), sshPort, sshUser, remoteCmds, TIMEOUT);
+
+            nodeEntity.setAction("Enable LDAP successfully!");
          } catch (Exception e) {
-            LOGGER.error("failed to configure sssd for node: " + ip, e);
+            LOGGER.error("failed to configure sssd for node: " + nodeEntity, e);
+            nodeEntity.setAction("Enable LDAP failed!");
+            nodeEntity.setActionFailed(true);
+         } finally {
+            clusterEntityManager.update(nodeEntity);
          }
       }
    }
@@ -107,5 +128,13 @@ public class NodeLdapUserMgmtConfService {
       } catch (IOException e) {
          throw new RuntimeException("CFG_LDAP_FAIL", e);
       }
+   }
+
+   public IClusterEntityManager getClusterEntityManager() {
+      return clusterEntityManager;
+   }
+
+   public void setClusterEntityManager(IClusterEntityManager clusterEntityManager) {
+      this.clusterEntityManager = clusterEntityManager;
    }
 }
