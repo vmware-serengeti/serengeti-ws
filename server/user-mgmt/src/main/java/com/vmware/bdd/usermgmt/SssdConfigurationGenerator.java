@@ -56,10 +56,10 @@ public class SssdConfigurationGenerator {
       if (isTemplateContentEmpty()) {
          Map<UserMgmtServer.Type, StringBuilder> templateMap = new HashMap<>();
          synchronized (templateContent) {
-            File usermgmrConfDir = new File(System.getProperty("serengeti.home.dir") + File.separator + "conf"
+            File usermgmtConfDir = new File(System.getProperty("serengeti.home.dir") + File.separator + "conf"
             + File.separator + "usermgmt");
             for (UserMgmtServer.Type type : UserMgmtServer.Type.values()) {
-               File templateFile = new File(usermgmrConfDir, "sssd.conf.template." + type);
+               File templateFile = new File(usermgmtConfDir, "sssd.conf.template." + type);
 
                StringBuilder stringBuilder = new StringBuilder();
                try (BufferedReader templateBufReader = new BufferedReader(new FileReader(templateFile))) {
@@ -69,9 +69,9 @@ public class SssdConfigurationGenerator {
                      line = templateBufReader.readLine();
                   }
                } catch (FileNotFoundException fnf) {
-                  throw new UserMgmtException("SSSD_CONF_TEMPLATE_NOT_FOUND", null);
+                  throw new UserMgmtException("SSSD_CONF_TEMPLATE_NOT_FOUND", fnf, templateFile.getAbsolutePath());
                } catch (IOException ioe) {
-                  throw new UserMgmtException("SSSD_CONF_TEMPLATE_READ_ERR", ioe);
+                  throw new UserMgmtException("SSSD_CONF_TEMPLATE_READ_ERR", ioe, templateFile.getAbsolutePath());
                }
                templateMap.put(type, stringBuilder);
             }

@@ -45,7 +45,7 @@ public class CfgUserMgmtOnMgmtVMExecutor {
 
    public void execute(UserMgmtServer userMgmtServer, SssdLdapConstantMappings sssdLdapConstantMappings) {
 
-      String taskDir = System.getProperty("serengeti.home.dir") + File.separator + "log" + File.separator + "task";
+      String taskDir = System.getProperty("serengeti.home.dir") + File.separator + "logs" + File.separator + "task";
 
       File workDir = new File(taskDir + File.separator + System.currentTimeMillis());
       workDir.mkdirs();
