@@ -35,7 +35,6 @@ ldap_uri = LDAP_URI_VALUE
 ldap_default_bind_dn = LDAP_DEFAULT_BIND_DN_VALUE
 ldap_default_authtok = LDAP_DEFAULT_AUTHTOK_VALUE
 
-
 ldap_access_filter = LDAP_ACCESS_FILTER_VALUE
 
 min_id = 1

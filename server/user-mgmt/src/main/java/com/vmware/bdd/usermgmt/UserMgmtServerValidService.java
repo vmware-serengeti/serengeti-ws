@@ -13,6 +13,11 @@ package com.vmware.bdd.usermgmt; /**********************************************
  *   limitations under the License.
  *****************************************************************************/
 
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.naming.AuthenticationException;
 import javax.naming.CommunicationException;
 import javax.naming.Context;
@@ -23,10 +28,10 @@ import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchResult;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.vmware.bdd.apitypes.UserMgmtServer;
 import com.vmware.bdd.exception.ValidationException;
@@ -36,9 +41,6 @@ import com.vmware.bdd.security.tls.TlsConnectionException;
 import com.vmware.bdd.security.tls.TlsTcpClient;
 import com.vmware.bdd.validation.ValidationError;
 import com.vmware.bdd.validation.ValidationErrors;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Created By xiaoliangl on 11/27/14.
@@ -46,12 +48,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMgmtServerValidService {
    private final static Logger LOGGER = Logger.getLogger(UserMgmtServerValidService.class);
+   private static final String LDAP_GROUP_OBJECT_CLASS = "ldap_group_object_class";
 
    @Autowired
    private LdapsTrustStoreConfig ldapsTrustStoreConfig;
 
    @Autowired
-   private SssdLdapConstantMappings sssdLdapConstantMappings;
+   private SssdConfigurationGenerator sssdConfigurationGenerator;
 
 
    public void validateServerInfo(UserMgmtServer userMgmtServer, boolean forceTrustCert) {
@@ -139,6 +142,7 @@ public class UserMgmtServerValidService {
 
       DirContext ctx = null;
       ValidationErrors validationErrors = new ValidationErrors();
+      String groupObjectClass = sssdConfigurationGenerator.get(userMgmtServer.getType()).get(LDAP_GROUP_OBJECT_CLASS);
       try {
          // Create the initial context
          ctx = new InitialDirContext(env);
@@ -149,8 +153,7 @@ public class UserMgmtServerValidService {
                   answer = ctx.search(
                         userMgmtServer.getBaseGroupDn(),
                         "(&(objectClass={0}) (cn={1}))",
-                        new Object[]{sssdLdapConstantMappings.get(userMgmtServer.getType(),
-                              SssdLdapConstantMappings.LDAP_GROUP_OBJECT_CLASS), groupName}, null);
+                        new Object[]{groupObjectClass, groupName}, null);
                   if (!answer.hasMoreElements()) {
                      validationErrors.addError(groupName, new ValidationError("GROUP.NOT_FOUND", String.format("Group (%1s) not found.", groupName)));
                   }
@@ -206,6 +209,7 @@ public class UserMgmtServerValidService {
       }
 
       //  env.put(Context.SECURITY_PROTOCOL, "ssl");
+      String groupObjectClass = sssdConfigurationGenerator.get(userMgmtServer.getType()).get(LDAP_GROUP_OBJECT_CLASS);
 
       DirContext ctx = null;
       ValidationErrors validationErrors = new ValidationErrors();
@@ -228,7 +232,7 @@ public class UserMgmtServerValidService {
                answer = ctx.search(
                      userMgmtServer.getBaseGroupDn(),
                      "(&(objectClass={0}) (cn={1}))",
-                     new Object[]{sssdLdapConstantMappings.get(userMgmtServer.getType(), SssdLdapConstantMappings.LDAP_GROUP_OBJECT_CLASS), groupCn}, null);
+                     new Object[]{groupObjectClass, groupCn}, null);
                if (!answer.hasMoreElements()) {
                   validationErrors.addError("AdminGroup", new ValidationError("ADMIN_GROUP.NOT_FOUND", "Admin Group not found."));
                }

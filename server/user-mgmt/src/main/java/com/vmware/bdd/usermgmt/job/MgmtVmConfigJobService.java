@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.vmware.bdd.apitypes.UserMgmtServer;
-import com.vmware.bdd.usermgmt.SssdLdapConstantMappings;
+import com.vmware.bdd.usermgmt.SssdConfigurationGenerator;
 
 /**
  * Created By xiaoliangl on 11/28/14.
@@ -29,11 +29,11 @@ public class MgmtVmConfigJobService {
    private final static Logger LOGGER = Logger.getLogger(MgmtVmConfigJobService.class);
 
    @Autowired
-   private SssdLdapConstantMappings sssdLdapConstantMappings;
+   private SssdConfigurationGenerator sssdConfigurationGenerator;
 
    public void enableLdap(UserMgmtServer usrMgmtServer) {
       CfgUserMgmtOnMgmtVMExecutor cfgExecutor = new CfgUserMgmtOnMgmtVMExecutor();
-      cfgExecutor.execute(usrMgmtServer, sssdLdapConstantMappings);
+      cfgExecutor.execute(usrMgmtServer, sssdConfigurationGenerator);
    }
 
    public void changeLocalAccountState(boolean enabled) {

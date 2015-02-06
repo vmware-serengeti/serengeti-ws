@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.FileSystemUtils;
 import org.testng.Assert;
@@ -41,7 +43,9 @@ public class TestSssdConfigurationGenerator {
    public void setup() throws IOException {
       String tmpDirPath = System.getProperty("java.io.tmpdir");
 
-      System.setProperty("serengeti.home.dir.bak", System.getProperty("serengeti.home.dir"));
+      if(StringUtils.isNotBlank(System.getProperty("serengeti.home.dir"))) {
+         System.setProperty("serengeti.home.dir.bak", System.getProperty("serengeti.home.dir"));
+      }
       System.setProperty("serengeti.home.dir", tmpDirPath);
 
       File usermgmrConfDir = new File(System.getProperty("serengeti.home.dir") + File.separator + "conf"
@@ -64,7 +68,9 @@ public class TestSssdConfigurationGenerator {
 
    @AfterClass
    public void teardown() {
-      System.setProperty("serengeti.home.dir", System.getProperty("serengeti.home.dir.bak"));
+      if(StringUtils.isNotBlank(System.getProperty("serengeti.home.dir.bak"))) {
+         System.setProperty("serengeti.home.dir", System.getProperty("serengeti.home.dir.bak"));
+      }
       System.out.println(System.getProperty("serengeti.home.dir"));
    }
 
@@ -100,6 +106,9 @@ public class TestSssdConfigurationGenerator {
       System.out.println(actual);
 
       Assert.assertEquals(actual, readResource("sssd.conf.ldap137"));
+
+      Assert.assertTrue(MapUtils.isNotEmpty(sssdConfigurationGenerator.get(UserMgmtServer.Type.LDAP)));
+      Assert.assertTrue(MapUtils.isNotEmpty(sssdConfigurationGenerator.get(UserMgmtServer.Type.AD_AS_LDAP)));
    }
 
    @Test

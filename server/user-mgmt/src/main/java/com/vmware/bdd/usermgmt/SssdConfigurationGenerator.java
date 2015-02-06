@@ -36,13 +36,9 @@ import com.vmware.bdd.apitypes.UserMgmtServer;
 @Component
 @Scope("singleton")
 public class SssdConfigurationGenerator {
+   private Map<UserMgmtServer.Type, StringBuilder> templateContent = new HashMap<>();
 
-   private final static String TEMPLATE_RESOURCE = "/com/vmware/bdd/usermgmt/sssd.conf.template";
-
-   @Autowired
-   private SssdLdapConstantMappings sssdLdapConstantMappings;
-
-   private volatile Map<UserMgmtServer.Type, StringBuilder> templateContent = new HashMap<>();
+   private Map<UserMgmtServer.Type, Map<String, String>> mapping = new HashMap<>();
 
    protected StringBuilder getTemplateContent(UserMgmtServer.Type type) {
       return templateContent.get(type);
@@ -60,11 +56,28 @@ public class SssdConfigurationGenerator {
             + File.separator + "usermgmt");
             for (UserMgmtServer.Type type : UserMgmtServer.Type.values()) {
                File templateFile = new File(usermgmtConfDir, "sssd.conf.template." + type);
+               HashMap<String, String> typeMap = new HashMap<>();
 
                StringBuilder stringBuilder = new StringBuilder();
                try (BufferedReader templateBufReader = new BufferedReader(new FileReader(templateFile))) {
                   String line = templateBufReader.readLine();
+
+                  boolean flag = false;
                   while (line != null) {
+                     if(StringUtils.isNotBlank(line)) {
+                        if(!flag) {
+                           flag = StringUtils.equals(line, "[domain/LDAP]");
+                        }
+
+                        if(flag) {
+                           int keyValueSepIndex = line.indexOf('=');
+                           if (keyValueSepIndex != -1) {
+                              typeMap.put(line.substring(0, keyValueSepIndex).trim(),
+                                    StringUtils.substring(line, keyValueSepIndex + 1).trim()
+                              );
+                           }
+                        }
+                     }
                      stringBuilder.append(line).append('\n');
                      line = templateBufReader.readLine();
                   }
@@ -74,9 +87,12 @@ public class SssdConfigurationGenerator {
                   throw new UserMgmtException("SSSD_CONF_TEMPLATE_READ_ERR", ioe, templateFile.getAbsolutePath());
                }
                templateMap.put(type, stringBuilder);
+
+               mapping.put(type, typeMap);
             }
 
             templateContent.putAll(templateMap);
+
          }
       }
    }
@@ -113,5 +129,8 @@ public class SssdConfigurationGenerator {
 
       return configContent;
    }
-
+   public Map<String, String> get(UserMgmtServer.Type type) {
+      load();
+      return mapping.get(type);
+   }
 }

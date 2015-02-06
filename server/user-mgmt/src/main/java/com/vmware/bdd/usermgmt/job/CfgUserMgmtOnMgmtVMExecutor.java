@@ -30,10 +30,11 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.UserMgmtServer;
-import com.vmware.bdd.usermgmt.SssdLdapConstantMappings;
+import com.vmware.bdd.usermgmt.SssdConfigurationGenerator;
 
 /**
  * Created By xiaoliangl on 12/12/14.
@@ -43,7 +44,7 @@ public class CfgUserMgmtOnMgmtVMExecutor {
 
    private final static int TIMEOUT = Configuration.getInt("usermgmt.command.exec.timeout", 120);
 
-   public void execute(UserMgmtServer userMgmtServer, SssdLdapConstantMappings sssdLdapConstantMappings) {
+   public void execute(UserMgmtServer userMgmtServer, SssdConfigurationGenerator sssdLdapConstantMappings) {
 
       String taskDir = System.getProperty("serengeti.home.dir") + File.separator + "logs" + File.separator + "task";
 
@@ -92,52 +93,34 @@ public class CfgUserMgmtOnMgmtVMExecutor {
 
 
    class SssdLdapParam {
-      private Map<String, String> sssd_ldap = new HashMap<>();
+      private Map<Object, Object> sssd_ldap = new HashMap<>();
       private List<String> run_list = new ArrayList<>();
 
-      public Map<String, String> getSssd_ldap() {
+      public Map<Object, Object> getSssd_ldap() {
          return sssd_ldap;
       }
-
-      public void setSssd_ldap(Map<String, String> sssd_ldap) {
-         this.sssd_ldap = sssd_ldap;
-      }
-
       public List<String> getRun_list() {
          return run_list;
       }
-
-      public void setRun_list(List<String> run_list) {
-         this.run_list = run_list;
-      }
    }
 
-   private void writeJsonFile(UserMgmtServer userMgmtServer, File file, SssdLdapConstantMappings sssdLdapConstantMappings) {
+   private void writeJsonFile(UserMgmtServer userMgmtServer, File file, SssdConfigurationGenerator sssdLdapConstantMappings) {
       SssdLdapParam sssdLdapParam = new SssdLdapParam();
 
-      SssdLdapConstantMappings.Getter constantGetter = sssdLdapConstantMappings.getterFirst(userMgmtServer.getType());
+      //initialize by template
+      sssdLdapParam.sssd_ldap.putAll(sssdLdapConstantMappings.get(userMgmtServer.getType()));
 
-      sssdLdapParam.sssd_ldap.put(SssdLdapConstantMappings.LDAP_SCHEMA, constantGetter.get(SssdLdapConstantMappings.LDAP_SCHEMA));
-
-      sssdLdapParam.sssd_ldap.put(SssdLdapConstantMappings.LDAP_USER_OBJECT_CLASS, constantGetter.get(SssdLdapConstantMappings.LDAP_USER_OBJECT_CLASS));
-      sssdLdapParam.sssd_ldap.put(SssdLdapConstantMappings.LDAP_USER_NAME, constantGetter.get(SssdLdapConstantMappings.LDAP_USER_NAME));
-      sssdLdapParam.sssd_ldap.put(SssdLdapConstantMappings.LDAP_GROUP_OBJECT_CLASS, constantGetter.get(SssdLdapConstantMappings.LDAP_GROUP_OBJECT_CLASS));
-
-      sssdLdapParam.sssd_ldap.put("ldap_tls_reqcert", "never");
-
+      //override values.
       sssdLdapParam.sssd_ldap.put("ldap_group_search_base", userMgmtServer.getBaseGroupDn());
       sssdLdapParam.sssd_ldap.put("ldap_user_search_base", userMgmtServer.getBaseUserDn());
       sssdLdapParam.sssd_ldap.put("ldap_uri", userMgmtServer.getPrimaryUrl());
       sssdLdapParam.sssd_ldap.put("ldap_default_bind_dn", userMgmtServer.getUserName());
       sssdLdapParam.sssd_ldap.put("ldap_default_authtok", userMgmtServer.getPassword());
-
-      //enable auth by groupdn
-      sssdLdapParam.sssd_ldap.put("access_provider", "ldap");
       sssdLdapParam.sssd_ldap.put("ldap_access_filter", "memberOf=" + userMgmtServer.getMgmtVMUserGroupDn());
 
       sssdLdapParam.run_list.add("recipe[sssd_ldap]");
 
-      BufferedWriter out = null;
+
       try {
          ObjectMapper objectMapper = new ObjectMapper();
          String json = objectMapper.writeValueAsString(sssdLdapParam);
@@ -146,19 +129,12 @@ public class CfgUserMgmtOnMgmtVMExecutor {
             LOGGER.debug("writing Configuration manifest in json " + json + " to file " + file);
          }
 
-         out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
-         out.write(json);
+         try(BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));) {
+            out.write(json);
+         }
       } catch (IOException ex) {
          LOGGER.error(ex.getMessage() + "\n failed to write enable_LDAP spec file " + file);
          throw new UserMgmtExecException("WRITE_CFG_LDAP_JSON_FAIL", ex);
-      } finally {
-         if (out != null) {
-            try {
-               out.close();
-            } catch (IOException e) {
-               //do nothing
-            }
-         }
       }
    }
 }
