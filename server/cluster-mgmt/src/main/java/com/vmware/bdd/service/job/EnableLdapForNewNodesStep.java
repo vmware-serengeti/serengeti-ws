@@ -44,7 +44,7 @@ public class EnableLdapForNewNodesStep extends TrackableTasklet {
 
       clusterLdapUserMgmtCfgService.configureUserMgmt(clusterName, nodes);
 
-      putIntoJobExecutionContext(chunkContext, JobConstants.SET_PASSWORD_SUCCEED_JOB_PARAM, false);
+      putIntoJobExecutionContext(chunkContext, "Enable LDAP successfully", false);
 
       return RepeatStatus.FINISHED;
    }
@@ -68,7 +68,7 @@ public class EnableLdapForNewNodesStep extends TrackableTasklet {
             }
             if (node.getStatus().ordinal() >= NodeStatus.VM_READY.ordinal()) {
                if (foundNodeList == null) {
-                  foundNodeList = new ArrayList<NodeEntity>();
+                  foundNodeList = new ArrayList<>();
                }
                foundNodeList.add(node);
             }
@@ -85,11 +85,6 @@ public class EnableLdapForNewNodesStep extends TrackableTasklet {
 
    public void setManagementOperation(ManagementOperation managementOperation) {
       this.managementOperation = managementOperation;
-   }
-
-
-   public ClusterLdapUserMgmtCfgService getClusterLdapUserMgmtCfgService() {
-      return clusterLdapUserMgmtCfgService;
    }
 
    public void setClusterLdapUserMgmtCfgService(ClusterLdapUserMgmtCfgService clusterLdapUserMgmtCfgService) {

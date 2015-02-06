@@ -122,7 +122,7 @@ public class ClusterSpecFactory {
          specFile = ConfigurationUtils.fileFromURL(filePath);
       }
 
-      AuAssert.check(specFile.exists());
+      AuAssert.check(specFile.exists(), "spec file not found: " + specFile.getAbsolutePath());
 
       return specFile;
    }

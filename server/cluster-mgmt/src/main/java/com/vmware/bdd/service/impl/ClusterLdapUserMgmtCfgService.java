@@ -24,12 +24,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
 import com.vmware.bdd.command.CommandUtil;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
@@ -60,6 +61,9 @@ public class ClusterLdapUserMgmtCfgService {
    @Autowired
    private NodeLdapUserMgmtConfService nodeLdapUserMgmtConfService;
 
+   @Autowired
+   private ServiceUserConfigService serviceUserConfigService;
+
    public Map<String, String> getUserMgmtCfg(String clusterName) {
       Map<String, String> userMgmtCfg = clusterEntityManager.findUserMgmtCfg(clusterName);
 
@@ -75,7 +79,7 @@ public class ClusterLdapUserMgmtCfgService {
       List<NodeEntity> nodeEntityList = clusterEntityManager.findAllNodes(clusterName);
 
       ArrayList<String> nodeMgmtIpList = new ArrayList<>();
-      for(NodeEntity nodeEntity : nodeEntityList) {
+      for (NodeEntity nodeEntity : nodeEntityList) {
          nodeMgmtIpList.add(nodeEntity.getPrimaryMgtIpV4());
       }
 
@@ -87,27 +91,43 @@ public class ClusterLdapUserMgmtCfgService {
 
    public void configureUserMgmt(String clusterName, List<NodeEntity> nodeEntityList) {
       Map<String, String> userMgmtCfg = getUserMgmtCfg(clusterName);
+      Map<String, Map<String, String>> serviceUserCfg = serviceUserConfigService.getServiceUserConfigs(clusterName);
 
-      if(userMgmtCfg == null) {
-         LOGGER.info("The cluster has no usermgmt conf in database, skip usermgmt configuration.");
+      if (userMgmtCfg == null && serviceUserCfg == null) {
+         LOGGER.info("no need to do usermgmt configuration.");
          return;
       }
 
-      if(nodeEntityList.isEmpty()) {
+      if (CollectionUtils.isEmpty(nodeEntityList)) {
          LOGGER.info("the target node list is empty, skip usermgmt configuration.");
          return;
       }
 
       ArrayList<String> nodeMgmtIpList = new ArrayList<>();
-      for(NodeEntity nodeEntity : nodeEntityList) {
+      for (NodeEntity nodeEntity : nodeEntityList) {
          nodeMgmtIpList.add(nodeEntity.getPrimaryMgtIpV4());
       }
       String[] nodeMgmtIps = new String[nodeEntityList.size()];
       nodeMgmtIpList.toArray(nodeMgmtIps);
 
+      Set<String> groupNameSet = new HashSet<>();
+
+      String[] userMgmtGroups = clusterUserMgmtValidService.getGroupNames(userMgmtCfg);
+      if (!ArrayUtils.isEmpty(userMgmtGroups)) {
+         groupNameSet.addAll(Arrays.asList(userMgmtGroups));
+      }
+
+      Set<String> serviceUserGroupSet = serviceUserConfigService.getServiceUserGroups(serviceUserCfg);
+      if (!CollectionUtils.isEmpty(serviceUserGroupSet)) {
+         groupNameSet.addAll(serviceUserGroupSet);
+      }
+
+      String[] groupNames = new String[groupNameSet.size()];
+      groupNameSet.toArray(groupNames);
+
       String sssdConfContent = sssdConfigurationGenerator.getConfigurationContent(
             userMgmtServerService.getByName(UserMgmtConstants.DEFAULT_USERMGMT_SERVER_NAME, false),
-            getGroupNames(clusterName)
+            groupNames
       );
 
       File taskDir = CommandUtil.createWorkDir(System.currentTimeMillis());
@@ -122,12 +142,12 @@ public class ClusterLdapUserMgmtCfgService {
          throw new RuntimeException("failed to write sssd.conf for usermgmt configuration.", ioe);
       }
 
-      try{
+      try {
          // scp to one node's tmp folder
          // cp to /etc/sssd
          // sudo authconfig --enablesssd --enablesssdauth --enablemkhomedir --updateall
          nodeLdapUserMgmtConfService.configureSssd(nodeMgmtIps, localSssdConfFile.getAbsolutePath());
-      }finally {
+      } finally {
          try {
             localSssdConfFile.delete();
          } catch (Exception ex) {
@@ -137,41 +157,15 @@ public class ClusterLdapUserMgmtCfgService {
 
       String disableLocalUserFlag = userMgmtCfg.get(UserMgmtConstants.DISABLE_LOCAL_USER_FLAG);
 
-      if(disableLocalUserFlag != null) {
+      if (disableLocalUserFlag != null) {
          boolean disableLocalUser = Boolean.parseBoolean(disableLocalUserFlag);
-         if(disableLocalUser) {
+         if (disableLocalUser) {
             nodeLdapUserMgmtConfService.disableLocalUsers(nodeMgmtIps);
          }
       }
    }
 
-   protected String[] getGroupNames(String clusterName) {
-      Map<String, String> userMgmtCfg = getUserMgmtCfg(clusterName);
-      Set<String> groupNames = new HashSet<>();
-      groupNames.addAll(Arrays.asList(clusterUserMgmtValidService.getGroupNames(userMgmtCfg)));
-      groupNames.addAll(getServiceUserGroups(clusterName));
-      String[] groups = new String[groupNames.size()];//TODO(qjin): confirm whether this is necessary
-      groupNames.toArray(groups);
-      return groups;
-   }
-
-   protected Set<String> getServiceUserGroups(String clusterName) {
-      Set<String> serviceUserGroups = null;
-      Map<String, Object> hadoopConfig =
-            (new Gson()).fromJson(clusterEntityManager.findByName(clusterName).getHadoopConfig(), Map.class);
-      Map<String, Map<String, String>> serviceUserConfigs = (Map<String, Map<String, String>>)
-            hadoopConfig.get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
-      for (Map<String, String> serviceUserConfig: serviceUserConfigs.values()) {
-         if (serviceUserGroups == null) {
-            serviceUserGroups = new HashSet<>();
-         }
-         serviceUserGroups.add(serviceUserConfig.get(UserMgmtConstants.USER_GROUP_NAME));
-      }
-      LOGGER.info("Service user groups are" + serviceUserGroups.toString());
-      return serviceUserGroups;
-   }
-
    public void configureUserMgmt(String clusterName, NodeEntity node) {
-
+      configureUserMgmt(clusterName, Arrays.asList(node));
    }
 }
