@@ -337,9 +337,8 @@ public class ClusterCommands implements CommandMarker {
                   clusterCreate.setInfrastructure_config(specInfraConfigs);
                }
             }
-            Map<String, Map<String, String>> serviceUserConfigs = (Map<String, Map<String, String>>)
-                  clusterSpec.getConfiguration().get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
-            validateServiceUserConfigs(appManager, serviceUserConfigs, failedMsgList);
+
+            validateServiceUserConfigs(appManager, clusterSpec, failedMsgList);
          }
          allNetworkNames = getAllNetworkNames();
       } catch (Exception e) {
@@ -441,7 +440,12 @@ public class ClusterCommands implements CommandMarker {
       }
    }
 
-   protected void validateServiceUserConfigs(String appMangerName, Map<String, Map<String, String>> serviceUserConfigs, List<String> failedMsgList) {
+   protected void validateServiceUserConfigs(String appMangerName, ClusterCreate clusterSpec, List<String> failedMsgList) {
+      if (clusterSpec.getConfiguration() == null) {
+         return;
+      }
+      Map<String, Map<String, String>> serviceUserConfigs = (Map<String, Map<String, String>>)
+            clusterSpec.getConfiguration().get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
       if (MapUtils.isEmpty(serviceUserConfigs)) {
          return;
       }
