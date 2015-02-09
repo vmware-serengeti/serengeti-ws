@@ -38,11 +38,11 @@ public class TimelyCollectionService implements ITimelyCollectionService {
     @Autowired
     protected ClusterManager clusterMgr;
     @Autowired
-    private IClusterEntityManager clusterEntityMgr;
+    protected IClusterEntityManager clusterEntityMgr;
     @Autowired
     protected SoftwareManagerCollector softwareManagerCollector;
     @Autowired
-    private INetworkService networkService;
+    protected INetworkService networkService;
 
     private static Map<String, List<String>> productRolesMap = new HashMap<>();
 
