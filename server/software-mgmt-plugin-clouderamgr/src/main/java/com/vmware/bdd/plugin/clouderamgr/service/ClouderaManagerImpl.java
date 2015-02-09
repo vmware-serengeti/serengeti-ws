@@ -15,6 +15,7 @@
 package com.vmware.bdd.plugin.clouderamgr.service;
 
 import javax.ws.rs.NotFoundException;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -66,7 +67,6 @@ import com.cloudera.api.v6.ServicesResourceV6;
 import com.cloudera.api.v7.RootResourceV7;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.GsonBuilder;
-
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
 import com.vmware.bdd.plugin.clouderamgr.exception.CommandExecFailException;
@@ -98,6 +98,7 @@ import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 import com.vmware.bdd.software.mgmt.plugin.utils.SSHUtil;
 import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.Version;
 
 /**
  * Author: Xiaoding Bian
@@ -258,7 +259,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
                stack.setFullVersion(apiParcel.getVersion());
                stack.setVendor(Constants.CDH_DISTRO_VENDOR);
                List<String> roles = new ArrayList<String>();
-               for (String role : AvailableServiceRoleContainer.allRoles(parcelVersion.getMajorVersion())) {
+               for (String role : AvailableServiceRoleContainer.allRoles(apiParcel.getVersion())) {
                   roles.add(role);
                }
                stack.setRoles(roles);
@@ -276,7 +277,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
    public String getSupportedConfigs(HadoopStack hadoopStack)
          throws SoftwareManagementPluginException {
       try {
-         return AvailableServiceRoleContainer.getSupportedConfigs(CmUtils.majorVersionOfHadoopStack(hadoopStack));
+         return AvailableServiceRoleContainer.getSupportedConfigs(CmUtils.distroVersionOfHadoopStack(hadoopStack));
       } catch (IOException e) {
          throw ClouderaManagerException.GET_SUPPORT_CONFIGS_EXCEPTION(e);
       }
@@ -1909,7 +1910,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
                            apiResourceRootV7.getClustersResource().getServicesResource(serviceDef.getName())
                            .firstRun(serviceDef.getName()), INVALID_PROGRESS, cluster.getCurrentReport(), reportQueue, true);
                   } else {
-                     if (serviceDef.getType().getVersionApiMin() > 6) {
+                     if (Version.compare(serviceDef.getType().getVersionApiMin() , "6") > 0) {
                         // just log, do not throw exception
                         logger.error(serviceDef.getType().getDisplayName() + " service cannot be deployed by API version 6, "
                               + "please upgrade CloudeManager to version " + Constants.API_VERSION_SINCE_OF_CM_VERSION.get(6) + " or higher");

@@ -1,0 +1,147 @@
+{
+  "name": "SOLR",
+  "displayName": "SOLR",
+  "parent": "CLUSTER",
+  "repository": "CDH",
+  "versionApiMin": "4",
+  "versionApiMax": "-1",
+  "versionCdhMin": "4",
+  "versionCdhMax": "-1",
+  "availableConfigurations" : [
+  {
+    "name" : "hdfs_service",
+    "required" : true,
+    "displayName" : "HDFS Service",
+    "description" : "Name of the HDFS service that this Search service instance depends on",
+    "relatedName" : ""
+  }, {
+    "name" : "zookeeper_service",
+    "required" : true,
+    "displayName" : "ZooKeeper Service",
+    "description" : "Name of the ZooKeeper service that this Search service instance depends on",
+    "relatedName" : ""
+  }, {
+    "name" : "service_triggers",
+    "required" : false,
+    "default" : "[]",
+    "displayName" : "Service Triggers",
+    "description" : "<p>The configured triggers for this service. This is a JSON formatted list of triggers. These triggers are evaluated as part as the health system. Every trigger expression is parsed, and if the trigger condition is met, the list of actions provided in the trigger expression is executed.</p><p>Each trigger has all of the following fields:</p><ul><li><code>triggerName</code> <strong>(mandatory)</strong> - the name of the trigger. This value must be unique for the specific service. </li><li><code>triggerExpression</code> <strong>(mandatory)</strong> - a tsquery expression representing the trigger. </li><li><code>streamThreshold</code> <strong>(optional)</strong> - the maximum number of streams that can satisfy a condition of a trigger before the condition fires. By default set to 0, and any stream returned will cause the condition to fire. </li><li><code>enabled</code> <strong> (optional)</strong> - by default set to 'true'. If set to 'false' the trigger will not be evaluated.</li></ul></p><p>For example, here is a JSON formatted trigger that fires if there are more than 10 DataNodes with more than 500 file-descriptors opened:</p><p><pre>[{\"triggerName\": \"sample-trigger\",\n  \"triggerExpression\": \"IF (SELECT fd_open WHERE roleType = DataNode and last(fd_open) > 500) DO health:bad\",\n  \"streamThreshold\": 10, \"enabled\": \"true\"}]</pre></p><p>Consult the trigger rules documentation for more details on how to write triggers using tsquery.</p><p>The JSON format is evolving and may change in the future and as a result backward compatibility is not guaranteed between releases at this time.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "solr_sentry_safety_valve",
+    "required" : false,
+    "displayName" : "Solr Service Advanced Configuration Snippet (Safety Valve) for sentry-site.xml",
+    "description" : "For advanced use only, a string to be inserted into <strong>sentry-site.xml</strong>. Applies to configurations of all roles in this service except client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "sentry_solr_provider_resource",
+    "required" : false,
+    "default" : "/user/solr/sentry/sentry-provider.ini",
+    "displayName" : "Sentry Global Policy File",
+    "description" : "HDFS path to the global policy file for Sentry authorization. This should be a relative path (and not a full HDFS URL). The global policy file must be in Sentry policy file format.",
+    "relatedName" : "sentry.solr.provider.resource"
+  }, {
+    "name" : "smon_derived_configs_safety_valve",
+    "required" : false,
+    "displayName" : "Service Monitor Derived Configs Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, a list of derived configuration properties that will be used by the Service Monitor instead of the default ones.",
+    "relatedName" : ""
+  }, {
+    "name" : "solr_env_safety_valve",
+    "required" : false,
+    "displayName" : "Solr Service Environment Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, key-value pairs (one on each line) to be inserted into a role's environment. Applies to configurations of all roles in this service except client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "process_username",
+    "required" : false,
+    "default" : "solr",
+    "displayName" : "System User",
+    "description" : "The user that this service's processes should run as.",
+    "relatedName" : ""
+  }, {
+    "name" : "hue_proxy_user_groups_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Hue Proxy User Groups",
+    "description" : "Comma-delimited list of groups that you want to allow the Hue user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "relatedName" : "solr.security.proxyuser.hue.groups"
+  }, {
+    "name" : "solr_sentry_enabled",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Sentry Authorization",
+    "description" : "Use Sentry to enable role-based, fine-grained authorization. Sentry is supported only on Search 1.1 or later and CDH 5 or later deployments and requires authentication to be turned on for Solr.</a>.",
+    "relatedName" : ""
+  }, {
+    "name" : "enable_config_alerts",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Configuration Change Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when this entity's configuration changes.",
+    "relatedName" : ""
+  }, {
+    "name" : "solr_solr_servers_healthy_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"90.0\",\"warning\":\"95.0\"}",
+    "displayName" : "Healthy Solr Server Monitoring Thresholds",
+    "description" : "The health test thresholds of the overall Solr Server health. The check returns \"Concerning\" health if the percentage of \"Healthy\" Solr Servers falls below the warning threshold. The check is unhealthy if the total percentage of \"Healthy\" and \"Concerning\" Solr Servers falls below the critical threshold.",
+    "relatedName" : ""
+  }, {
+    "name" : "hdfs_data_dir",
+    "required" : false,
+    "default" : "/solr",
+    "displayName" : "HDFS Data Directory",
+    "description" : "HDFS directory used for storage by this Solr service.",
+    "relatedName" : ""
+  }, {
+    "name" : "solr_security_authentication",
+    "required" : false,
+    "default" : "simple",
+    "displayName" : "Solr Secure Authentication",
+    "description" : "Choose the authentication mechanism used by Solr.",
+    "relatedName" : ""
+  }, {
+    "name" : "enable_alerts",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Service Level Health Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when the health of this service reaches the threshold specified by the EventServer setting eventserver_health_events_alert_threshold",
+    "relatedName" : ""
+  }, {
+    "name" : "solrd_watchdog_timeout",
+    "required" : false,
+    "default" : "30",
+    "displayName" : "Solrd Watchdog Timeout",
+    "description" : "If Solr does not respond on its web URL within this time interval, the Catalina process is killed.",
+    "relatedName" : ""
+  }, {
+    "name" : "zookeeper_znode",
+    "required" : false,
+    "default" : "/solr",
+    "displayName" : "ZooKeeper Znode",
+    "description" : "ZooKeeper znode used to store information about this Solr service.",
+    "relatedName" : ""
+  }, {
+    "name" : "hue_proxy_user_hosts_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Hue Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the Hue user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "relatedName" : "solr.security.proxyuser.hue.hosts"
+  }, {
+    "name" : "process_groupname",
+    "required" : false,
+    "default" : "solr",
+    "displayName" : "System Group",
+    "description" : "The group that this service's processes should run as.",
+    "relatedName" : ""
+  }, {
+    "name" : "solr_sentry_provider",
+    "required" : false,
+    "default" : "org.apache.sentry.provider.file.HadoopGroupResourceAuthorizationProvider",
+    "displayName" : "Sentry User to Group Mapping Class",
+    "description" : "The class to use in Sentry authorization for user to group mapping. Sentry authorization may be configured to use either Hadoop groups or local groups defined in the policy file. When configured with Hadoop groups, Sentry will ask the HDFS Namenode for group mapping for a given user to determine authorization access.",
+   "relatedName" : "sentry.provider"
+  } ]
+}

@@ -1,0 +1,527 @@
+{
+  "name": "NAMENODE",
+  "displayName": "HDFS_NAMENODE",
+  "parent": "HDFS",
+  "repository": "CDH",
+  "versionApiMin": "3",
+  "versionApiMax": "-1",
+  "versionCdhMin": "4",
+  "versionCdhMax": "-1",
+  "availableConfigurations" : [ {
+    "name" : "dfs_name_dir_list",
+    "required" : true,
+    "displayName" : "NameNode Data Directories",
+    "description" : "Determines where on the local file system the NameNode should store the name table (fsimage). For redundancy, enter a comma-delimited list of directories to replicate the name table in all of the directories. Typical values are /data/N/dfs/nn where N=1..3.",
+    "relatedName" : "dfs.namenode.name.dir"
+  }, {
+    "name" : "dfs_namenode_servicerpc_address",
+    "required" : false,
+    "displayName" : "NameNode Service RPC Port",
+    "description" : "Optional port for the service-rpc address which can be used by HDFS daemons instead of sharing the RPC address used by the clients.",
+    "relatedName" : "dfs.namenode.servicerpc-address"
+  }, {
+    "name" : "namenode_java_heapsize",
+    "required" : false,
+    "default" : "1073741824",
+    "displayName" : "Java Heap Size of Namenode in Bytes",
+    "description" : "Maximum size for the Java Process heap memory.  Passed to Java -Xmx.  Measured in bytes.",
+    "relatedName" : "",
+    "validationMessage" : "Java Heap Size of Namenode in Bytes is recommended to be at least 1GB for every million HDFS blocks. Suggested minimum value: 1073741824"
+  }, {
+    "name" : "namenode_rpc_latency_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"5000.0\",\"warning\":\"1000.0\"}",
+    "displayName" : "NameNode RPC Latency Thresholds",
+    "description" : "The health check thresholds of the NameNode's RPC latency.",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_rpc_latency_window",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "NameNode RPC Latency Monitoring Window",
+    "description" : "The period to review when computing the moving average of the NameNode's RPC latency.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_thrift_threads_max",
+    "required" : false,
+    "default" : "20",
+    "displayName" : "Hue Thrift Server Max Threadcount",
+    "description" : "Maximum number of running threads for the Hue Thrift server running on the NameNode",
+    "relatedName" : "dfs.thrift.threads.max"
+  }, {
+    "name" : "namenode_bind_wildcard",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Bind NameNode to Wildcard Address",
+    "description" : "If enabled, the NameNode binds to the wildcard address (\"0.0.0.0\") on all of its ports.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_http_port",
+    "required" : false,
+    "default" : "50070",
+    "displayName" : "NameNode Web UI Port",
+    "description" : "The base port where the DFS NameNode web UI listens. If the port number is 0, then the server starts on a free port. Combined with the NameNode's hostname to build its HTTP address.",
+    "relatedName" : "dfs.namenode.http-address"
+  }, {
+    "name" : "log_threshold",
+    "required" : false,
+    "default" : "INFO",
+    "displayName" : "NameNode Logging Threshold",
+    "description" : "The minimum log level for NameNode logs",
+    "relatedName" : ""
+  }, {
+    "name" : "topology_script_file_name",
+    "required" : false,
+    "displayName" : "Topology Script File Name",
+    "description" : "Full path to a custom topology script on the host file system. The topology script is used to determine the rack location of nodes. If left blank, a topology script will be provided that uses your hosts' rack information, visible in the \"Hosts\" page.",
+    "relatedName" : "net.topology.script.file.name"
+  }, {
+    "name" : "dfs_name_dir_restore",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Restore NameNode Directories at Checkpoint Time",
+    "description" : "If set to false and if one of the replicas of the NameNode storage fails, such as temporarily failure of NFS, this directory is not used until the NameNode restarts.  If enabled, failed storage is re-checked on every checkpoint and, if it becomes valid, the NameNode will try to restore the edits and fsimage.",
+    "relatedName" : "dfs.namenode.name.dir.restore"
+  }, {
+    "name" : "fs_trash_interval",
+    "required" : false,
+    "default" : "1440",
+    "displayName" : "Filesystem Trash Interval",
+    "description" : "Number of minutes between trash checkpoints. Also controls the number of minutes after which a trash checkpoint directory is deleted. To disable the trash feature, enter 0.",
+    "relatedName" : "fs.trash.interval",
+    "validationMessage" : "Trash checkpointing is on"
+  }, {
+    "name" : "namenode_host_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "NameNode Host Health Test",
+    "description" : "When computing the overall NameNode health, consider the host's health.",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_upgrade_status_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "HDFS Upgrade Status Health Test",
+    "description" : "Enables the health test of the upgrade status of the NameNode.",
+    "relatedName" : ""
+  }, {
+    "name" : "enable_alerts",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Health Alerts for this Role",
+    "description" : "When set, Cloudera Manager will send alerts when the health of this role reaches the threshold specified by the EventServer setting eventserver_health_events_alert_threshold",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_fd_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"70.0\",\"warning\":\"50.0\"}",
+    "displayName" : "File Descriptor Monitoring Thresholds",
+    "description" : "The health test thresholds of the number of file descriptors used. Specified as a percentage of file descriptor limit.",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_directory_failures_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"any\",\"warning\":\"never\"}",
+    "displayName" : "NameNode Directory Failures Thresholds",
+    "description" : "The health test thresholds of failed status directories in a NameNode.",
+    "relatedName" : ""
+  }, {
+    "name" : "rm_memory_soft_limit",
+    "required" : false,
+    "default" : "-1",
+    "displayName" : "Cgroup Memory Soft Limit",
+    "description" : "Soft memory limit to assign to this role, enforced by the Linux kernel. When the limit is reached, the kernel will reclaim pages charged to the process if and only if the host is facing memory pressure. If reclaiming fails, the kernel may kill the process. Both anonymous as well as page cache pages contribute to the limit. Use a value of -1 B to specify no limit. By default processes not managed by Cloudera Manager will have no limit.",
+    "relatedName" : "memory.soft_limit_in_bytes"
+  }, {
+    "name" : "dfs_namenode_quorum_journal_name",
+    "required" : false,
+    "displayName" : "Quorum-based Storage Journal name",
+    "description" : "Name of the journal located on each JournalNodes' filesystem.",
+    "relatedName" : ""
+  }, {
+    "name" : "process_auto_restart",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Automatically Restart Process",
+    "description" : "When set, this role's process is automatically (and transparently) restarted in the event of an unexpected failure.",
+    "relatedName" : ""
+  }, {
+    "name" : "oom_heap_dump_dir",
+    "required" : false,
+    "default" : "/tmp",
+    "displayName" : "Heap Dump Directory",
+    "description" : "Path to directory where heap dumps are generated when java.lang.OutOfMemoryError error is thrown. This directory is automatically created if it doesn't exist. However, if this directory already exists, role user must have write access to this directory. If this directory is shared amongst multiple roles, it should have 1777 permissions. Note that the heap dump files are created with 600 permissions and are owned by the role user. The amount of free space in this directory should be greater than the maximum Java Process heap size configured for this role.",
+    "relatedName" : ""
+  }, {
+    "name" : "log_event_whitelist",
+    "required" : false,
+    "default" : "{\n  \"version\": \"0\",\n  \"rules\": [\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 1, \"threshold\":\"FATAL\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\": \".* is deprecated. Instead, use .*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\": \".* is deprecated. Use .* instead\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.io.IOException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.net.SocketException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.net.SocketClosedException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.io.EOFException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.nio.channels.CancelledKeyException\"},\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 2, \"exceptiontype\": \".*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"Unknown job [^ ]+ being deleted.*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"Error executing shell command .+ No such process.+\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\".*attempt to override final parameter.+\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"[^ ]+ is a deprecated filesystem name. Use.*\"},\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 1, \"threshold\":\"WARN\"},\n    {\"alert\": false, \"rate\": 1, \"threshold\":\"INFO\", \"content\":\"Triggering checkpoint.*\"}\n  ]\n}\n",
+    "displayName" : "Rules to Extract Events from Log Files",
+    "description" : "<p>This file contains the rules which govern how log messages are turned into events by the custom log4j appender that this role loads. It is in JSON format, and is composed of a list of rules. Every log message is evaluated against each of these rules in turn to decide whether or not to send an event for that message.</p><p>Each rule has some or all of the following fields:</p><ul><li><span class='code'>alert</span> - whether or not events generated from this rule should be promoted to alerts. A value of \"true\" will cause alerts to be generated. If not specified, the default is \"false\".</li><li><span class='code'>rate</span> <strong>(mandatory)</strong> - the maximum number of log messages matching this rule that may be sent as events every minute. If more than <tt>rate</tt> matching log messages are received in a single minute, the extra messages are ignored. If rate is less than 0, the number of messages per minute is unlimited.</li><li><span class='code'>periodminutes</span>  - the number of minutes during which the publisher will only publish <tt>rate</tt> events or fewer. If not specified, the default is <strong>one minute</strong></li><li><span class='code'>threshold</span> - apply this rule only to messages with this log4j severity level or above. An example is \"WARN\" for warning level messages or higher.</li><li><span class='code'>content</span> - match only those messages whose contents match this regular expression.</li><li><span class='code'>exceptiontype</span> - match only those messages which are part of an exception message. The exception type must match this regular expression.</li></ul><br/><p>Example:<span class='code'>{\"alert\": false, \"rate\": 10, \"exceptiontype\": \"java.lang.StringIndexOutOfBoundsException\"}</span></p><p>This rule will send events to Cloudera Manager for every <span class='code'>StringIndexOutOfBoundsException</span>, up to a maximum of 10 every minute.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_namenode_shared_edits_dir",
+    "required" : false,
+    "displayName" : "Shared Edits Directory",
+    "description" : "Directory on a shared storage device, such as a Quorum-based Storage URI or a local directory that is an NFS mount from a NAS, to store the NameNode edits. The value of this configuration is automatically generated to be the Quourm Journal URI if there are JournalNodes and this NameNode is Highly Available.",
+    "relatedName" : "dfs.namenode.shared.edits.dir"
+  }, {
+    "name" : "dfs_thrift_threads_min",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "Hue Thrift Server Min Threadcount",
+    "description" : "Minimum number of running threads for the Hue Thrift server running on the NameNode",
+    "relatedName" : "dfs.thrift.threads.min"
+  }, {
+    "name" : "nameservice_mountpoints",
+    "required" : false,
+    "default" : "/",
+    "displayName" : "Mountpoints",
+    "description" : "Mountpoints that are mapped to this NameNode's Nameservice.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_namenode_edits_dir",
+    "required" : false,
+    "displayName" : "NameNode Edits Directories",
+    "description" : "Directories on the local file system to store the NameNode edits. If not set, the edits are stored in the NameNode's Data Directories. The value of this configuration is automatically generated to be the Quorum-based Storage URI if there are JournalNodes and this NameNode is not Highly Available.",
+    "relatedName" : "dfs.namenode.edits.dir"
+  }, {
+    "name" : "namenode_hosts_allow_safety_valve",
+    "required" : false,
+    "displayName" : "NameNode Advanced Configuration Snippet (Safety Valve) for dfs_hosts_allow.txt",
+    "description" : "For advanced use only, a string to be inserted into <strong>dfs_hosts_allow.txt</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_data_directories_free_space_percentage_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"never\",\"warning\":\"never\"}",
+    "displayName" : "Data Directories Free Space Monitoring Percentage Thresholds",
+    "description" : "The health test thresholds for monitoring of free space on the filesystems that contain this role's data directories. Specified as a percentage of the capacity on the filesystem. This setting is not used if a Data Directories Free Space Monitoring Absolute Thresholds setting is configured.",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_config_safety_valve",
+    "required" : false,
+    "displayName" : "NameNode Advanced Configuration Snippet (Safety Valve) for hdfs-site.xml",
+    "description" : "For advanced use only, a string to be inserted into <strong>hdfs-site.xml</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "rlimit_fds",
+    "required" : false,
+    "displayName" : "Maximum Process File Descriptors",
+    "description" : "If configured, overrides the process soft and hard rlimits (also called ulimits) for file descriptors to the configured value.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_namenode_replication_work_multiplier_per_iteration",
+    "required" : false,
+    "default" : "2",
+    "displayName" : "Replication Work Multiplier Per Iteration",
+    "description" : "This determines the total amount of block transfers to begin in parallel at a DataNode for replication, when such a command list is being sent over a DataNode heartbeat by the NameNode. The actual number is obtained by multiplying this value by the total number of live nodes in the cluster. The result number is the number of blocks to transfer immediately, per DataNode heartbeat.",
+    "relatedName" : "dfs.namenode.replication.work.multiplier.per.iteration"
+  }, {
+    "name" : "log4j_safety_valve",
+    "required" : false,
+    "displayName" : "NameNode Logging Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, a string to be inserted into <strong>log4j.properties</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "max_log_size",
+    "required" : false,
+    "default" : "200",
+    "displayName" : "NameNode Max Log Size",
+    "description" : "The maximum size, in megabytes, per log file for NameNode logs.  Typically used by log4j.",
+    "relatedName" : ""
+  }, {
+    "name" : "unexpected_exits_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"any\",\"warning\":\"never\"}",
+    "displayName" : "Unexpected Exits Thresholds",
+    "description" : "The health test thresholds for unexpected exits encountered within a recent period specified by the unexpected_exits_window configuration for the role.",
+    "relatedName" : ""
+  }, {
+    "name" : "log_directory_free_space_percentage_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"never\",\"warning\":\"never\"}",
+    "displayName" : "Log Directory Free Space Monitoring Percentage Thresholds",
+    "description" : "The health test thresholds for monitoring of free space on the filesystem that contains this role's log directory. Specified as a percentage of the capacity on that filesystem. This setting is not used if a Log Directory Free Space Monitoring Absolute Thresholds setting is configured.",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_out_of_sync_journal_nodes_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"any\",\"warning\":\"never\"}",
+    "displayName" : "NameNode Out-Of-Sync JournalNodes Thresholds",
+    "description" : "The health check thresholds for the number of out-of-sync JournalNodes for this NameNode.",
+    "relatedName" : ""
+  }, {
+    "name" : "log_directory_free_space_absolute_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"5.36870912E9\",\"warning\":\"1.073741824E10\"}",
+    "displayName" : "Log Directory Free Space Monitoring Absolute Thresholds",
+    "description" : "The health test thresholds for monitoring of free space on the filesystem that contains this role's log directory.",
+    "relatedName" : ""
+  }, {
+    "name" : "oom_heap_dump_enabled",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Dump Heap When Out of Memory",
+    "description" : "When set, generates heap dump file when java.lang.OutOfMemoryError is thrown.",
+    "relatedName" : ""
+  }, {
+    "name" : "max_log_backup_index",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "NameNode Maximum Log File Backups",
+    "description" : "The maximum number of rolled log files to keep for NameNode logs.  Typically used by log4j.",
+    "relatedName" : ""
+  }, {
+    "name" : "fs_checkpoint_period",
+    "required" : false,
+    "default" : "3600",
+    "displayName" : "Filesystem Checkpoint Period",
+    "description" : "The time between two periodic file system checkpoints.",
+    "relatedName" : "dfs.namenode.checkpoint.period"
+  }, {
+    "name" : "unexpected_exits_window",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Unexpected Exits Monitoring Period",
+    "description" : "The period to review when computing unexpected exits.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_https_port",
+    "required" : false,
+    "default" : "50470",
+    "displayName" : "Secure NameNode Web UI Port (SSL)",
+    "description" : "The base port where the secure NameNode web UI listens.",
+    "relatedName" : "dfs.https.port"
+  }, {
+    "name" : "namenode_gc_duration_window",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Garbage Collection Duration Monitoring Period",
+    "description" : "The period to review when computing the moving average of garbage collection time.",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_checkpoint_age_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"400.0\",\"warning\":\"200.0\"}",
+    "displayName" : "Filesystem Checkpoint Age Monitoring Thresholds",
+    "description" : "The health test thresholds of the age of the HDFS namespace checkpoint. Specified as a percentage of the configured checkpoint interval.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_namenode_handler_count",
+    "required" : false,
+    "default" : "30",
+    "displayName" : "NameNode Handler Count",
+    "description" : "The number of server threads for the NameNode.",
+    "relatedName" : "dfs.namenode.handler.count",
+    "validationMessage" : "NameNode Handler Count is at least ln(number of datanodes) * 20. Suggested minimum value: 0"
+  }, {
+    "name" : "dfs_access_time_precision",
+    "required" : false,
+    "default" : "3600000",
+    "displayName" : "Access Time Precision",
+    "description" : "The access time for HDFS file is precise upto this value. Setting the value of 0 disables access times for HDFS. When using the NFS Gateway role, make sure this property is enabled.",
+    "relatedName" : "dfs.access.time.precision"
+  }, {
+    "name" : "namenode_checkpoint_transactions_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"400.0\",\"warning\":\"200.0\"}",
+    "displayName" : "Filesystem Checkpoint Transactions Monitoring Thresholds",
+    "description" : "The health test thresholds of the number of transactions since the last HDFS namespace checkpoint. Specified as a percentage of the configured checkpointing transaction limit.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_safemode_threshold_pct",
+    "required" : false,
+    "default" : "0.999",
+    "displayName" : "Safemode Threshold Percentage",
+    "description" : "Specifies the percentage of blocks that should satisfy the minimal replication requirement defined by dfs.replication.min. Enter a value less than or equal to 0 to wait for any particular percentage of blocks before exiting safemode. Values greater than 1 will make safemode permanent.",
+    "relatedName" : "dfs.namenode.safemode.threshold-pct"
+  }, {
+    "name" : "dfs_namenode_service_handler_count",
+    "required" : false,
+    "default" : "30",
+    "displayName" : "NameNode Service Handler Count",
+    "description" : "The number of server threads for the NameNode used for service calls. Only used when NameNode Service RPC Port is configured.",
+    "relatedName" : "dfs.namenode.service.handler.count",
+    "validationMessage" : "NameNode Service Handler Count is at least ln(number of datanodes) * 20. Suggested minimum value: 0"
+  }, {
+    "name" : "fs_checkpoint_txns",
+    "required" : false,
+    "default" : "1000000",
+    "displayName" : "Filesystem Checkpoint Transaction Threshold",
+    "description" : "The number of transactions after which the NameNode or SecondaryNameNode will create a checkpoint of the namespace, regardless of whether the checkpoint period has expired.",
+    "relatedName" : "dfs.namenode.checkpoint.txns"
+  }, {
+    "name" : "dfs_thrift_timeout",
+    "required" : false,
+    "default" : "60",
+    "displayName" : "Hue Thrift Server Timeout",
+    "description" : "Timeout in seconds for the Hue Thrift server running on the NameNode",
+    "relatedName" : "dfs.thrift.timeout"
+  }, {
+    "name" : "namenode_safe_mode_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "NameNode Safemode Health Test",
+    "description" : "Enables the health test that the NameNode is not in safemode",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_data_directories_free_space_absolute_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"5.36870912E9\",\"warning\":\"1.073741824E10\"}",
+    "displayName" : "Data Directories Free Space Monitoring Absolute Thresholds",
+    "description" : "The health test thresholds for monitoring of free space on the filesystems that contain this role's data directories.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_federation_namenode_nameservice",
+    "required" : false,
+    "displayName" : "NameNode Nameservice",
+    "description" : "Nameservice of this NameNode. The Nameservice represents the interface to this NameNode and its High Availability partner. The Nameservice also represents the namespace associated with a federated NameNode.",
+    "relatedName" : ""
+  }, {
+    "name" : "oom_sigkill_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Kill When Out of Memory",
+    "description" : "When set, a SIGKILL signal is sent to the role process when java.lang.OutOfMemoryError is thrown.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_safemode_min_datanodes",
+    "required" : false,
+    "default" : "0",
+    "displayName" : "Safemode Minimum DataNodes",
+    "description" : "Specifies the number of DataNodes that must be  live before the name node exits safemode. Enter a value less than or equal to 0 to take the number of live DataNodes into account when deciding whether to remain in safemode during startup. Values greater than the number of DataNodes in the cluster will make safemode permanent.",
+    "relatedName" : "dfs.safemode.min.datanodes"
+  }, {
+    "name" : "namenode_hosts_exclude_safety_valve",
+    "required" : false,
+    "displayName" : "NameNode Advanced Configuration Snippet (Safety Valve) for dfs_hosts_exclude.txt",
+    "description" : "For advanced use only, a string to be inserted into <strong>dfs_hosts_exclude.txt</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_gc_duration_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"60.0\",\"warning\":\"30.0\"}",
+    "displayName" : "Garbage Collection Duration Thresholds",
+    "description" : "The health test thresholds for the weighted average time spent in Java garbage collection. Specified as a percentage of elapsed wall clock time.",
+    "relatedName" : ""
+  }, {
+    "name" : "rm_memory_hard_limit",
+    "required" : false,
+    "default" : "-1",
+    "displayName" : "Cgroup Memory Hard Limit",
+    "description" : "Hard memory limit to assign to this role, enforced by the Linux kernel. When the limit is reached, the kernel will reclaim pages charged to the process. If reclaiming fails, the kernel may kill the process. Both anonymous as well as page cache pages contribute to the limit. Use a value of -1 B to specify no limit. By default processes not managed by Cloudera Manager will have no limit.",
+    "relatedName" : "memory.limit_in_bytes"
+  }, {
+    "name" : "rm_cpu_shares",
+    "required" : false,
+    "default" : "1024",
+    "displayName" : "Cgroup CPU Shares",
+    "description" : "Number of CPU shares to assign to this role. The greater the number of shares, the larger the share of the host's CPUs that will be given to this role when the host experiences CPU contention. Must be between 2 and 262144. Defaults to 1024 for processes not managed by Cloudera Manager.",
+    "relatedName" : "cpu.shares"
+  }, {
+    "name" : "namenode_web_metric_collection_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Web Metric Collection",
+    "description" : "Enables the health test that the Cloudera Manager Agent can successfully contact and gather metrics from the web server.",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_web_metric_collection_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"never\",\"warning\":\"10000.0\"}",
+    "displayName" : "Web Metric Collection Duration",
+    "description" : "The health test thresholds on the duration of the metrics request to the web server.",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_startup_tolerance",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Health Check Startup Tolerance",
+    "description" : "The amount of time allowed after this role is started that failures of health checks that rely on communication with this role will be tolerated.",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_log_dir",
+    "required" : false,
+    "default" : "/var/log/hadoop-hdfs",
+    "displayName" : "NameNode Log Directory",
+    "description" : "Directory where NameNode will place its log files.",
+    "relatedName" : "hadoop.log.dir"
+  }, {
+    "name" : "rm_io_weight",
+    "required" : false,
+    "default" : "500",
+    "displayName" : "Cgroup I/O Weight",
+    "description" : "Weight for the read I/O requests issued by this role. The greater the weight, the higher the priority of the requests when the host experiences I/O contention. Must be between 100 and 1000. Defaults to 1000 for processes not managed by Cloudera Manager.",
+    "relatedName" : "blkio.weight"
+  }, {
+    "name" : "hadoop_metrics2_safety_valve",
+    "required" : false,
+    "displayName" : "Hadoop Metrics2 Advanced Configuration Snippet (Safety Valve)",
+    "description" : "Advanced Configuration Snippet (Safety Valve) for Hadoop Metrics2. Properties will be inserted into <strong>hadoop-metrics2.properties</strong>.",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_java_opts",
+    "required" : false,
+    "default" : "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:-CMSConcurrentMTEnabled -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled",
+    "displayName" : "Java Configuration Options for NameNode",
+    "description" : "These arguments will be passed as part of the Java command line. Commonly, garbage collection flags or extra debugging flags would be passed here.",
+    "relatedName" : ""
+  }, {
+    "name" : "autofailover_enabled",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Automatic Failover",
+    "description" : "Enable Automatic Failover to maintain High Availability. Requires a ZooKeeper service and a High Availability NameNode partner.",
+    "relatedName" : "dfs.ha.automatic-failover.enabled"
+  }, {
+    "name" : "enable_config_alerts",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Configuration Change Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when this entity's configuration changes.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_namenode_invalidate_work_pct_per_iteration",
+    "required" : false,
+    "default" : "0.32",
+    "displayName" : "Invalidate Work Percentage Per Iteration",
+    "description" : "This determines the percentage amount of block invalidations (deletes) to do over a single DataNode heartbeat deletion command. The final deletion count is determined by applying this percentage to the number of live nodes in the system. The resultant number is the number of blocks from the deletion list chosen for proper invalidation over a single heartbeat of a single DataNode.",
+    "relatedName" : "dfs.namenode.invalidate.work.pct.per.iteration"
+  }, {
+    "name" : "role_triggers",
+    "required" : false,
+    "default" : "[]",
+    "displayName" : "Role Triggers",
+    "description" : "<p>The configured triggers for this role. This is a JSON formatted list of triggers. These triggers are evaluated as part as the health system. Every trigger expression is parsed, and if the trigger condition is met, the list of actions provided in the trigger expression is executed.</p><p>Each trigger has all of the following fields:</p><ul><li><span class='code'>triggerName</span> <strong>(mandatory)</strong> - the name of the trigger. This value must be unique for the specific role. </li><li><span class='code'>triggerExpression</span> <strong>(mandatory)</strong> - a tsquery expression representing the trigger. <li><span class='code'>streamThreshold</span> <strong>(optional)</strong> - the maximum number of streams that can satisfy a condition of a trigger before the condition fires. By default set to 0, and any stream returned will cause the condition to fire. <li><span class='code'>enabled</span> <strong> (optional)</strong> - by default set to 'true'. If set to 'false' the trigger will not be evaluated.</p><p>For example, here is a JSON formatted trigger configured for a DataNode that fires if the DataNode has more than 1500 file-descriptors opened:</p><p><pre>[{\"triggerName\": \"sample-trigger\",\n  \"triggerExpression\": \"IF (SELECT fd_open WHERE roleName=$ROLENAME and last(fd_open) > 1500) DO health:red\",\n  \"streamThreshold\": 0}, \"enabled\": \"true\"]</pre></p><p>Consult the trigger rules documentation for more details on how to write triggers using tsquery.</p><p>The JSON format is evolving and may change in the future and as a result backward compatibility is not guaranteed between releases at this time.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_scm_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "NameNode Process Health Test",
+    "description" : "Enables the health test that the NameNode's process state is consistent with the role configuration",
+    "relatedName" : ""
+  }, {
+    "name" : "namenode_port",
+    "required" : false,
+    "default" : "8020",
+    "displayName" : "NameNode Port",
+    "description" : "The port where the NameNode runs the HDFS protocol. Combined with the NameNode's hostname to build its address.",
+    "relatedName" : "fs.defaultFS"
+  }, {
+    "name" : "dfs_safemode_extension",
+    "required" : false,
+    "default" : "30000",
+    "displayName" : "Safemode Extension",
+    "description" : "Determines extension of safemode in milliseconds after the threshold level is reached.",
+    "relatedName" : "dfs.namenode.safemode.extension"
+  }, {
+    "name" : "dfs_namenode_plugins_list",
+    "required" : false,
+    "default" : "",
+    "displayName" : "NameNode Plugins",
+    "description" : "Comma-separated list of NameNode plug-ins to be activated. If one plug-in cannot be loaded, all the plug-ins are ignored.",
+    "relatedName" : "dfs.namenode.plugins"
+  } ]
+}

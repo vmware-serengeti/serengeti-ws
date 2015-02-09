@@ -25,7 +25,6 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,26 +68,77 @@ public class TestAvailableServiceRoleContainer {
 
    @Test(groups = {"TestAvailableServiceRoleContainer"})
    public void testAllServicesRoles() throws IOException {
-      Set<String> allServicesV4 = AvailableServiceRoleContainer.allServices(4);
+      Set<String> allServicesV4 = AvailableServiceRoleContainer.allServices("4");
       Assert.assertTrue(allServicesV4.contains("HDFS"));
       Assert.assertFalse(allServicesV4.contains("YARN")); // CDH4 does not has YARN
       Assert.assertTrue(allServicesV4.contains("ZOOKEEPER"));
       Assert.assertTrue(allServicesV4.contains("HIVE"));
-      Set<String> allServicesV5 = AvailableServiceRoleContainer.allServices(5);
+      Set<String> allServicesV5 = AvailableServiceRoleContainer.allServices("5");
       Assert.assertTrue(allServicesV5.contains("YARN")); // CDH5 has YARN
-      Set<String> allRoles = AvailableServiceRoleContainer.allRoles(-1);
+      Set<String> allRoles = AvailableServiceRoleContainer.allRoles("-1");
       Assert.assertTrue(allRoles.contains("HDFS_DATANODE"));
       Assert.assertTrue(allRoles.contains("YARN_NODE_MANAGER"));
    }
 
    @Test(groups = {"TestAvailableServiceRoleContainer"})
    public void testConfigs() throws IOException {
-      String configs = AvailableServiceRoleContainer.getSupportedConfigs(5);
+      String configs = AvailableServiceRoleContainer.getSupportedConfigs("5");
       Map<String, Object> configMap = (new Gson()).fromJson(configs, Map.class);
       Assert.assertTrue(configMap.containsKey("HDFS"));
       Assert.assertTrue(configMap.containsKey("HDFS_DATANODE"));
       List<String> hdfsConfig = (List<String>) configMap.get("HDFS");
       Assert.assertTrue(hdfsConfig.contains("hdfs_missing_blocks_thresholds"));
       System.out.println(configs);
+   }
+
+   @Test(groups = {"TestAvailableServiceRoleContainer"})
+   public void testServiceIsilon() throws IOException {
+      Set<String> allServicesV51 = AvailableServiceRoleContainer.allServices("5.1.0");
+      Assert.assertTrue(allServicesV51.contains("ISILON"));
+
+      Set<String> allRolesV51 = AvailableServiceRoleContainer.allRoles("5.1.0");
+      Assert.assertTrue(allRolesV51.contains("GATEWAY"));
+
+      Set<String> allServicesV511 = AvailableServiceRoleContainer.allServices("5.1.1");
+      Assert.assertTrue(allServicesV511.contains("ISILON"));
+
+      Set<String> allRolesV511 = AvailableServiceRoleContainer.allRoles("5.1.1");
+      Assert.assertTrue(allRolesV511.contains("GATEWAY"));
+
+      Set<String> allServicesV52 = AvailableServiceRoleContainer.allServices("5.2");
+      Assert.assertTrue(allServicesV52.contains("ISILON"));
+
+      Set<String> allRolesV52 = AvailableServiceRoleContainer.allRoles("5.2");
+      Assert.assertTrue(allRolesV52.contains("GATEWAY"));
+
+      Set<String> allServicesV6 = AvailableServiceRoleContainer.allServices("6.0.0");
+      Assert.assertTrue(allServicesV6.contains("ISILON"));
+
+      Set<String> allRolesV6 = AvailableServiceRoleContainer.allRoles("6.0.0");
+      Assert.assertTrue(allRolesV6.contains("GATEWAY"));
+
+      Set<String> allServicesV1 = AvailableServiceRoleContainer.allServices("-1");
+      Assert.assertTrue(allServicesV1.contains("ISILON"));
+
+      Set<String> allRolesV1 = AvailableServiceRoleContainer.allRoles("-1");
+      Assert.assertTrue(allRolesV1.contains("GATEWAY"));
+
+      Set<String> allServicesV509 = AvailableServiceRoleContainer.allServices("5.0.9");
+      Assert.assertFalse(allServicesV509.contains("ISILON"));
+
+      Set<String> allRolesV510 = AvailableServiceRoleContainer.allRoles("5.0.9");
+      Assert.assertFalse(allRolesV510.contains("GATEWAY"));
+
+      Set<String> allServicesV49 = AvailableServiceRoleContainer.allServices("4.9");
+      Assert.assertFalse(allServicesV49.contains("ISILON"));
+
+      Set<String> allRolesV49 = AvailableServiceRoleContainer.allRoles("4.9");
+      Assert.assertFalse(allRolesV49.contains("GATEWAY"));
+
+      Set<String> allServicesV4 = AvailableServiceRoleContainer.allServices("4");
+      Assert.assertFalse(allServicesV4.contains("ISILON"));
+
+      Set<String> allRolesV4 = AvailableServiceRoleContainer.allRoles("4");
+      Assert.assertFalse(allRolesV4.contains("GATEWAY"));
    }
 }

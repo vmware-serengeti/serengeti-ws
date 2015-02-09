@@ -54,14 +54,14 @@ public class CmClusterValidator {
       logger.info("Start to validate blueprint for cluster " + blueprint.getName());
 
       String distro = blueprint.getHadoopStack().getDistro();
-      int majorVersion = CmUtils.majorVersionOfHadoopStack(blueprint.getHadoopStack());
+      String distroVersion = CmUtils.distroVersionOfHadoopStack(blueprint.getHadoopStack());
 
       try {
          List<String> unRecogConfigTypes = new ArrayList<String>();
          List<String> unRecogConfigKeys = new ArrayList<>();
-         validateConfigs(blueprint.getConfiguration(), unRecogConfigTypes, unRecogConfigKeys, majorVersion);
+         validateConfigs(blueprint.getConfiguration(), unRecogConfigTypes, unRecogConfigKeys, distroVersion);
 
-         Set<String> availableRoles = AvailableServiceRoleContainer.allRoles(majorVersion);
+         Set<String> availableRoles = AvailableServiceRoleContainer.allRoles(distroVersion);
 
          Set<String> definedServices = new HashSet<String>();
          Map<String, Integer> definedRoles = new HashMap<String, Integer>();
@@ -75,7 +75,7 @@ public class CmClusterValidator {
 
          int nnGroupsNum = 0;
          for (NodeGroupInfo group : blueprint.getNodeGroups()) {
-            validateConfigs(group.getConfiguration(), unRecogConfigTypes, unRecogConfigKeys, majorVersion);
+            validateConfigs(group.getConfiguration(), unRecogConfigTypes, unRecogConfigKeys, distroVersion);
             if (group.getRoles().contains("HDFS_NAMENODE")) {
                nnGroupsNum++;
             }
@@ -284,7 +284,7 @@ public class CmClusterValidator {
    }
 
    private void validateConfigs(Map<String, Object> config, List<String> unRecogConfigTypes,
-         List<String> unRecogConfigKeys, int majorVersion) {
+         List<String> unRecogConfigKeys, String distroVersion) {
       if (config == null || config.isEmpty()) {
          return;
       }
@@ -295,7 +295,7 @@ public class CmClusterValidator {
                continue;
             }
             AvailableServiceRole def = AvailableServiceRoleContainer.load(key);
-            if (!AvailableServiceRoleContainer.isSupported(majorVersion, def)) {
+            if (!AvailableServiceRoleContainer.isSupported(distroVersion, def)) {
                unRecogConfigTypes.add(key);
                continue;
             }

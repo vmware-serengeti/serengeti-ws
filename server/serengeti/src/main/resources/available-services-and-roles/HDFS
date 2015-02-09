@@ -1,0 +1,708 @@
+{
+  "name": "HDFS",
+  "displayName": "HDFS",
+  "parent": "CLUSTER",
+  "repository": "CDH",
+  "versionApiMin": "3",
+  "versionApiMax": "-1",
+  "versionCdhMin": "4",
+  "versionCdhMax": "-1",
+  "availableConfigurations" : [
+  {
+    "name" : "zookeeper_service",
+    "required" : false,
+    "displayName" : "ZooKeeper Service",
+    "description" : "Name of the ZooKeeper service that this HDFS service instance depends on",
+    "relatedName" : ""
+  }, {
+    "name" : "httpfs_proxy_user_groups_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "HttpFS Proxy User Groups",
+    "description" : "Comma-delimited list of groups that you want to allow the HttpFS user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "relatedName" : "hadoop.proxyuser.httpfs.groups"
+  }, {
+    "name" : "hdfs_namenode_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Active NameNode Role Health Check",
+    "description" : "When computing the overall HDFS cluster health, consider the active NameNode's health",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_client_use_datanode_hostname",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Use DataNode Hostname",
+    "description" : "Typically, HDFS clients and servers communicate by opening sockets via an IP address. In certain networking configurations, it is preferable to open sockets after doing a DNS lookup on the hostname. Enable this property to open sockets after doing a DNS lookup on the hostname. This property is supported in CDH3u4 or later deployments.",
+    "relatedName" : "dfs.client.use.datanode.hostname"
+  }, {
+    "name" : "hdfs_active_namenode_detecton_window",
+    "required" : false,
+    "default" : "3",
+    "displayName" : "Active NameNode Detection Window",
+    "description" : "The tolerance window that will be used in HDFS service tests that depend on detection of the active NameNode.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_encrypt_data_transfer_algorithm",
+    "required" : false,
+    "default" : "rc4",
+    "displayName" : "Data Transfer Encryption Algorithm",
+    "description" : "Algorithm to encrypt data transfer between DataNodes and clients, and among DataNodes. 3des is more cryptographically secure, but rc4 is substantially faster.",
+    "relatedName" : "dfs.encrypt.data.transfer.algorithm"
+  }, {
+    "name" : "audit_event_log_dir",
+    "required" : false,
+    "default" : "/var/log/hadoop-hdfs/audit",
+    "displayName" : "Audit Log Directory",
+    "description" : "Path to the directory where audit logs will be written. The directory will be created if it doesn't exist.",
+    "relatedName" : "audit_event_log_dir"
+  }, {
+    "name" : "smon_derived_configs_safety_valve",
+    "required" : false,
+    "displayName" : "Service Monitor Derived Configs Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, a list of derived configuration properties that will be used by the Service Monitor instead of the default ones.",
+    "relatedName" : ""
+  }, {
+    "name" : "catch_events",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Log Event Capture",
+    "description" : "When set, each role will identify important log events and forward them to Cloudera Manager.",
+    "relatedName" : ""
+  }, {
+    "name" : "hdfs_user_to_impersonate",
+    "required" : false,
+    "default" : "hdfs",
+    "displayName" : "HDFS User to Impersonate",
+    "description" : "The user the management services will impersonate as when connecting to HDFS. Defaults to 'hdfs', a superuser.",
+    "relatedName" : "hdfs.user.to.impersonate"
+  }, {
+    "name" : "mapred_proxy_user_hosts_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Mapred Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the mapred user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "relatedName" : "hadoop.proxyuser.mapred.hosts"
+  }, {
+    "name" : "oozie_proxy_user_hosts_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Oozie Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the oozie user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "relatedName" : "hadoop.proxyuser.oozie.hosts"
+  }, {
+    "name" : "hadoop_group_mapping_ldap_group_name_attr",
+    "required" : false,
+    "default" : "cn",
+    "displayName" : "Hadoop User Group Mapping LDAP Group Name Attribute",
+    "description" : "The attribute of the group object that identifies the group name. The default will usually be appropriate for all LDAP systems.",
+    "relatedName" : "hadoop.security.group.mapping.ldap.search.attr.group.name"
+  }, {
+    "name" : "firehose_hdfs_canary_directory",
+    "required" : false,
+    "default" : "/tmp/.cloudera_health_monitoring_canary_files",
+    "displayName" : "HDFS Health Canary Directory",
+    "description" : "The service monitor will use this directory to create files to test if the hdfs service is healthy. The directory and files are created with permissions specified by 'HDFS Health Canary Directory Permissions'",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_ha_fencing_methods",
+    "required" : false,
+    "default" : "shell(./cloudera_manager_agent_fencer.py)",
+    "displayName" : "HDFS High Availability Fencing Methods",
+    "description" : "List of fencing methods to use for service fencing. <tt>shell(./cloudera_manager_agent_fencer.py)</tt> is a fencing mechanism designed to take advantage of the CM agent.  The <tt>sshfence</tt> method uses SSH.  If using custom fencers (that may talk to shared store, power units, or network switches), use the shell mechanism to invoke them.",
+    "relatedName" : "dfs.ha.fencing.methods"
+  }, {
+    "name" : "HTTP_proxy_user_groups_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "HTTP Proxy User Groups",
+    "description" : "Comma-delimited list of groups that you want to allow the HTTP user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'. This is used by WebHCat.",
+    "relatedName" : "hadoop.proxyuser.HTTP.groups"
+  }, {
+    "name" : "hadoop_group_mapping_ldap_group_filter",
+    "required" : false,
+    "default" : "(objectClass=group)",
+    "displayName" : "Hadoop User Group Mapping LDAP Group Search Filter",
+    "description" : "An additional filter to use when searching for groups.",
+    "relatedName" : "hadoop.security.group.mapping.ldap.search.filter.group"
+  }, {
+    "name" : "enable_alerts",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Service Level Health Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when the health of this service reaches the threshold specified by the EventServer setting eventserver_health_events_alert_threshold",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_permissions",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Check HDFS Permissions",
+    "description" : "If false, permission checking is turned off for files in HDFS.",
+    "relatedName" : "dfs.permissions"
+  }, {
+    "name" : "dfs_replication_max",
+    "required" : false,
+    "default" : "512",
+    "displayName" : "Maximal Block Replication",
+    "description" : "The maximal block replication.",
+    "relatedName" : "dfs.replication.max"
+  }, {
+    "name" : "dfs_ha_fencing_ssh_private_key_files",
+    "required" : false,
+    "displayName" : "Private Keys for SSH Fencing Strategy",
+    "description" : "The SSH private key files to use with the built-in sshfence fencer. These are to be accessible to the <tt>hdfs</tt> user on the machines running the NameNodes.",
+    "relatedName" : "dfs.ha.fencing.ssh.private-key-files"
+  }, {
+    "name" : "navigator_audit_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Collection",
+    "description" : "Enable collection of audit events from the service's roles.",
+    "relatedName" : ""
+  }, {
+    "name" : "service_triggers",
+    "required" : false,
+    "default" : "[]",
+    "displayName" : "Service Triggers",
+    "description" : "<p>The configured triggers for this service. This is a JSON formatted list of triggers. These triggers are evaluated as part as the health system. Every trigger expression is parsed, and if the trigger condition is met, the list of actions provided in the trigger expression is executed.</p><p>Each trigger has all of the following fields:</p><ul><li><span class='code'>triggerName</span> <strong>(mandatory)</strong> - the name of the trigger. This value must be unique for the specific service. </li><li><span class='code'>triggerExpression</span> <strong>(mandatory)</strong> - a tsquery expression representing the trigger. <li><span class='code'>streamThreshold</span> <strong>(optional)</strong> - the maximum number of streams that can satisfy a condition of a trigger before the condition fires. By default set to 0, and any stream returned will cause the condition to fire. <li><span class='code'>enabled</span> <strong> (optional)</strong> - by default set to 'true'. If set to 'false' the trigger will not be evaluated.</p><p>For example, here is a JSON formatted trigger that fires if there are more than 10 DataNodes with more than 500 file-descriptors opened:</p><p><pre>[{\"triggerName\": \"sample-trigger\",\n  \"triggerExpression\": \"IF (SELECT fd_open WHERE roleType = DataNode and last(fd_open) > 500) DO health:red\",\n  \"streamThreshold\": 10, \"enabled\": \"true\"}]</pre></p><p>Consult the trigger rules documentation for more details on how to write triggers using tsquery.</p><p>The JSON format is evolving and may change in the future and as a result backward compatibility is not guaranteed between releases at this time.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_ha_fencing_ssh_connect_timeout",
+    "required" : false,
+    "default" : "30000",
+    "displayName" : "Timeout for SSH Fencing Strategy",
+    "description" : "SSH connection timeout, in milliseconds, to use with the built-in sshfence fencer.",
+    "relatedName" : "dfs.ha.fencing.ssh.connect-timeout"
+  }, {
+    "name" : "hadoop_group_mapping_ldap_use_ssl",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Hadoop User Group Mapping LDAP SSL Enabled",
+    "description" : "Whether or not to use SSL when connecting to the LDAP server.",
+    "relatedName" : "hadoop.security.group.mapping.ldap.use.ssl"
+  }, {
+    "name" : "hadoop_security_authorization",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Hadoop Secure Authorization",
+    "description" : "Enable authorization",
+    "relatedName" : "hadoop.security.authorization"
+  }, {
+    "name" : "firehose_hdfs_canary_directory_permissions",
+    "required" : false,
+    "default" : "-rwxrwxrwx",
+    "displayName" : "HDFS Health Canary Directory Permissions",
+    "description" : "The service monitor will use these permissions to create the directory and files to test if the hdfs service is healthy. Permissions are specified using the 10-character unix-symbolic format e.g. '-rwxr-xr-x'.",
+    "relatedName" : ""
+  }, {
+    "name" : "hdfs_missing_blocks_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"any\",\"warning\":\"never\"}",
+    "displayName" : "Missing Block Monitoring Thresholds",
+    "description" : "The health check thresholds of the number of missing blocks. Specified as a percentage of the total number of blocks.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapred_proxy_user_groups_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Mapred Proxy User Groups",
+    "description" : "Comma-delimited list of groups that you want to allow the mapred user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "relatedName" : "hadoop.proxyuser.mapred.groups"
+  }, {
+    "name" : "dfs_replication",
+    "required" : false,
+    "default" : "3",
+    "displayName" : "Replication Factor",
+    "description" : "Default block replication. The number of replications to make when the file is created. The default value is used if a replication number is not specified.",
+    "relatedName" : "dfs.replication"
+  }, {
+    "name" : "trusted_realms",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Trusted Kerberos Realms",
+    "description" : "Comma-separated list of Kerberos realms that Hadoop services should trust. If empty, defaults to the configured default_realm in the krb5.conf file. After changing this value and restarting the service, any services depending on this one must be restarted as well. The hadoop.security.auth_to_local property is configured using this information.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_datanode_hdfs_blocks_metadata_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable HDFS Block Metadata API",
+    "description" : "Enables DataNode support for the experimental DistributedFileSystem.getFileVBlockStorageLocations API. Applicable to CDH 4.1 and onwards.",
+    "relatedName" : "dfs.datanode.hdfs-blocks-metadata.enabled"
+  }, {
+    "name" : "dfs_replication_min",
+    "required" : false,
+    "default" : "1",
+    "displayName" : "Minimal Block Replication",
+    "description" : "The minimal block replication.",
+    "relatedName" : "dfs.namenode.replication.min"
+  }, {
+    "name" : "dfs_domain_socket_path",
+    "required" : false,
+    "default" : "/var/run/hdfs-sockets/dn",
+    "displayName" : "UNIX Domain Socket path",
+    "description" : "Path on the DataNode's local file system to a UNIX domain socket used for communication between the DataNode and local HDFS clients. This socket is used for Short Circuit Reads. Only the HDFS System User and \"root\" should have write access to the parent directory and all of its ancestors. This property is supported in CDH 4.2 or later deployments.",
+    "relatedName" : "dfs.domain.socket.path"
+  }, {
+    "name" : "process_groupname",
+    "required" : false,
+    "default" : "hdfs",
+    "displayName" : "System Group",
+    "description" : "The group that this service's processes should run as (except the HttpFS server, which has its own group)",
+    "relatedName" : ""
+  }, {
+    "name" : "navigator_client_config_safety_valve",
+    "required" : false,
+    "displayName" : "HDFS Client Advanced Configuration Snippet (Safety Valve) for navigator.client.properties",
+    "description" : "For advanced use only, a string to be inserted into the client configuration for <strong>navigator.client.properties</strong>.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_block_size",
+    "required" : false,
+    "default" : "134217728",
+    "displayName" : "HDFS Block Size",
+    "description" : "The default block size in bytes for new HDFS files. Note that this value is also used as the HBase Region Server HLog block size.",
+    "relatedName" : "dfs.blocksize"
+  }, {
+    "name" : "smon_client_config_overrides",
+    "required" : false,
+    "default" : "<property><name>dfs.socket.timeout</name><value>3000</value></property><property><name>dfs.datanode.socket.write.timeout</name><value>3000</value></property><property><name>ipc.client.connect.max.retries</name><value>1</value></property><property><name>fs.permissions.umask-mode</name><value>000</value></property>",
+    "displayName" : "Service Monitor Client Config Overrides",
+    "description" : "For advanced use only, a list of configuration properties that will be used by the Service Monitor instead of the current client configuration for the service.",
+    "relatedName" : ""
+  }, {
+    "name" : "navigator_audit_queue_policy",
+    "required" : false,
+    "default" : "DROP",
+    "displayName" : "Queue Policy",
+    "description" : "Action to take when the audit event queue is full. Drop the event or shutdown the affected process.",
+    "relatedName" : "navigator.batch.queue_policy"
+  }, {
+    "name" : "dfs_umaskmode",
+    "required" : false,
+    "default" : "022",
+    "displayName" : "Default Umask",
+    "description" : "Default umask for file and directory creation, specified in an octal value (with a leading 0)",
+    "relatedName" : "fs.permissions.umask-mode"
+  }, {
+    "name" : "hadoop_rpc_protection",
+    "required" : false,
+    "default" : "authentication",
+    "displayName" : "Hadoop RPC Protection",
+    "description" : "Quality of protection for secured RPC connections between NameNode and HDFS clients. For effective RPC protection, enable Kerberos authentication.",
+    "relatedName" : "hadoop.rpc.protection"
+  }, {
+    "name" : "dfs_block_local_path_access_user",
+    "required" : false,
+    "displayName" : "DataNode Local Path Access Users",
+    "description" : "Comma separated list of users allowed to do short circuit read. A short circuit read allows a client co-located with the data to read HDFS file blocks directly from HDFS. If empty, will default to the DataNode process' user.",
+    "relatedName" : "dfs.block.local-path-access.user"
+  }, {
+    "name" : "hdfs_standby_namenodes_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Standby NameNode Health Check",
+    "description" : "When computing the overall HDFS cluster health, consider the health of the standby NameNode.",
+    "relatedName" : ""
+  }, {
+    "name" : "flume_proxy_user_hosts_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Flume Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the flume user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "relatedName" : "hadoop.proxyuser.flume.hosts"
+  }, {
+    "name" : "hdfs_hadoop_group_name",
+    "required" : false,
+    "default" : "hadoop",
+    "displayName" : "Shared Hadoop Group Name",
+    "description" : "The name of the system group shared by all the core Hadoop services.",
+    "relatedName" : ""
+  }, {
+    "name" : "hadoop_security_authentication",
+    "required" : false,
+    "default" : "simple",
+    "displayName" : "Hadoop Secure Authentication",
+    "description" : "Choose the authentication mechanism used by Hadoop",
+    "relatedName" : "hadoop.security.authentication"
+  }, {
+    "name" : "hdfs_namenode_activation_startup_tolerance",
+    "required" : false,
+    "default" : "180",
+    "displayName" : "NameNode Activation Startup Tolerance",
+    "description" : "The amount of time after NameNode(s) start that the lack of an active NameNode will be tolerated. This is intended to allow either the auto-failover daemon to make a NameNode active, or a specifically issued failover command to take effect. This is an advanced option that does not often need to be changed.",
+    "relatedName" : ""
+  }, {
+    "name" : "hadoop_group_mapping_ldap_url",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Hadoop User Group Mapping LDAP URL",
+    "description" : "The URL for the LDAP server to use for resolving user groups when using LdapGroupsMapping.",
+    "relatedName" : "hadoop.security.group.mapping.ldap.url"
+  }, {
+    "name" : "hdfs_datanodes_healthy_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"90.0\",\"warning\":\"95.0\"}",
+    "displayName" : "Healthy DataNode Monitoring Thresholds",
+    "description" : "The health test thresholds of the overall DataNode health. The check returns \"Concerning\" health if the percentage of \"Healthy\" DataNodes falls below the warning threshold. The check is unhealthy if the total percentage of \"Healthy\" and \"Concerning\" DataNodes falls below the critical threshold.",
+    "relatedName" : ""
+  }, {
+    "name" : "hdfs_service_config_safety_valve",
+    "required" : false,
+    "displayName" : "HDFS Service Advanced Configuration Snippet (Safety Valve) for hdfs-site.xml",
+    "description" : "For advanced use only, a string to be inserted into <strong>hdfs-site.xml</strong>. Applies to configurations of all roles in this service except client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "hadoop_group_mapping_ldap_base",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Hadoop User Group Mapping Search Base",
+    "description" : "The search base for the LDAP connection. This is a distinguished name, and will typically be the root of the LDAP directory.",
+    "relatedName" : "hadoop.security.group.mapping.ldap.base"
+  }, {
+    "name" : "dfs_image_transfer_bandwidthPerSec",
+    "required" : false,
+    "default" : "0",
+    "displayName" : "FsImage Transfer Bandwidth",
+    "description" : "Maximum bandwidth used for image transfer in bytes per second. This can help keep normal namenode operations responsive during checkpointing. A default value of 0 indicates that throttling is disabled.",
+    "relatedName" : "dfs.image.transfer.bandwidthPerSec"
+  }, {
+    "name" : "hdfs_replication_env_safety_valve",
+    "required" : false,
+    "displayName" : "HDFS Replication Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, key-value pairs (one on each line) to be inserted into the environment of HDFS replication jobs.",
+    "relatedName" : ""
+  }, {
+    "name" : "hdfs_user_home_dir",
+    "required" : false,
+    "default" : "/var/lib/hadoop-hdfs",
+    "displayName" : "System User's Home Directory",
+    "description" : "The home directory of the system user on the local filesystem. This setting must reflect the system's configured value - only changing it here will not change the actual home directory.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_client_file_block_storage_locations_timeout",
+    "required" : false,
+    "default" : "10000",
+    "displayName" : "HDFS File Block Storage Location Timeout",
+    "description" : "Timeout in milliseconds for the parallel RPCs made in DistributedFileSystem#getFileBlockStorageLocations(). This value is only emitted for Impala.",
+    "relatedName" : "dfs.client.file-block-storage-locations.timeout.millis"
+  }, {
+    "name" : "hadoop_policy_config_safety_valve",
+    "required" : false,
+    "displayName" : "HDFS Service Advanced Configuration Snippet (Safety Valve) for hadoop-policy.xml",
+    "description" : "For advanced use only, a string to be inserted into <strong>hadoop-policy.xml</strong>. Applies to configurations of all roles in this service except client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "hadoop_group_mapping_ldap_keystore",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Hadoop User Group Mapping LDAP SSL Keystore",
+    "description" : "File path to the SSL keystore containing the SSL certificate required by the LDAP server.",
+    "relatedName" : "hadoop.security.group.mapping.ldap.ssl.keystore"
+  }, {
+    "name" : "dfs_ha_fencing_cloudera_manager_timeout_millis",
+    "required" : false,
+    "default" : "10000",
+    "displayName" : "Timeout for Cloudera Manager Fencing Strategy",
+    "description" : "The timeout, in milliseconds, to use with the Cloudera Manager agent-based fencer.",
+    "relatedName" : "dfs.ha.fencing.cloudera_manager.timeout_millis"
+  }, {
+    "name" : "navigator_event_tracker",
+    "required" : false,
+    "default" : "{\n  \"comment\" : [\n    \"Default event tracker for HDFS services.\",\n    \"Defines equality by comparing username, operation and source path \",\n    \"of the events.\"\n  ],\n  \"timeToLive\" : 60000,\n  \"fields\" : [\n    { \"type\": \"value\", \"name\" : \"src\" },\n    { \"type\": \"value\", \"name\" : \"operation\" },\n    { \"type\": \"username\", \"name\" : \"username\" }\n  ]\n}\n",
+    "displayName" : "Event Tracker",
+    "description" : "<p>\nConfigures the rules for event tracking and coalescing. This feature is\nused to define equivalency between different audit events. When\nevents match, according to a set of configurable parameters, only one\nentry in the audit list is generated for all the matching events.\n</p>\n\n<p>\nTracking works by keeping a reference to events when they first appear,\nand comparing other incoming events against the \"tracked\" events according\nto the rules defined here.\n</p>\n\n<p>Event trackers are defined in a JSON object like the following:</p>\n\n<pre>\n{\n  \"timeToLive\" : [integer],\n  \"fields\" : [\n    {\n      \"type\" : [string],\n      \"name\" : [string]\n    }\n  ]\n}\n</pre>\n\n<p>\nWhere:\n</p>\n\n<ul>\n  <li>timeToLive: maximum amount of time an event will be tracked, in\n  milliseconds. Must be provided. This defines how long, since it's\n  first seen, an event will be tracked. A value of 0 disables tracking.</li>\n\n  <li>fields: list of fields to compare when matching events against\n  tracked events.</li>\n</ul>\n\n<p>\nEach field has an evaluator type associated with it. The evaluator defines\nhow the field data is to be compared. The following evaluators are\navailable:\n</p>\n\n<ul>\n  <li>value: uses the field value for comparison.</li>\n\n  <li>username: treats the field value as a user name, and ignores any\n  host-specific data. This is useful for environment using Kerberos,\n  so that only the principal name and realm are compared.</li>\n</ul>\n\n<p>\nThe following is the list of fields that can be used to compare HDFS events:\n</p>\n\n<ul>\n  <li>username: the user performing the action.</li>\n  <li>ipAddress: the IP from where the request originated.</li>\n  <li>command: the HDFS operation being performed.</li>\n  <li>src: the source path for the operation.</li>\n  <li>dest: the destination path for the operation.</li>\n  <li>permissions: the permissions associated with the operation.</li>\n</ul>\n",
+    "relatedName" : "navigator_event_tracker"
+  }, {
+    "name" : "failover_controllers_healthy_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Failover Controllers Healthy",
+    "description" : "Enables the health check that verifies that the failover controllers associated with this service are healthy and running.",
+    "relatedName" : ""
+  }, {
+    "name" : "hadoop_authorized_admin_users",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Authorized Admin Users",
+    "description" : "Comma-separated list of users authorized to perform admin operations on Hadoop. This is emitted only if authorization is enabled.",
+    "relatedName" : ""
+  }, {
+    "name" : "httpfs_proxy_user_hosts_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "HttpFS Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the HttpFS user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "relatedName" : "hadoop.proxyuser.httpfs.hosts"
+  }, {
+    "name" : "hadoop_secure_web_ui",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Authentication for HTTP Web-Consoles",
+    "description" : "Enables authentication for hadoop HTTP web-consoles for all roles of this service. <b>Note:</b> This is effective only if security is enabled for the HDFS service.",
+    "relatedName" : ""
+  }, {
+    "name" : "hadoop_authorized_users",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Authorized Users",
+    "description" : "Comma-separated list of users authorized to used Hadoop. This is emitted only if authorization is enabled.",
+    "relatedName" : ""
+  }, {
+    "name" : "navigator_audit_log_max_backup_index",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "Number of Audit Logs to Retain",
+    "description" : "Maximum number of rolled over audit logs to retain. The logs will not be deleted if they contain audit events that have not yet been propagated to Audit Server.",
+    "relatedName" : "navigator.audit_log_max_backup_index"
+  }, {
+    "name" : "hive_proxy_user_groups_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Hive Proxy User Groups",
+    "description" : "Comma-delimited list of groups that you want to allow the Hive user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "relatedName" : "hadoop.proxyuser.hive.groups"
+  }, {
+    "name" : "core_site_safety_valve",
+    "required" : false,
+    "displayName" : "Cluster-wide Advanced Configuration Snippet (Safety Valve) for core-site.xml",
+    "description" : "For advanced use only, a string to be inserted into <strong>core-site.xml</strong>. Applies to all roles and client configurations in this HDFS service as well as all its dependent services. Any configs added here will be overridden by their default values in HDFS (which can be found in hdfs-default.xml).",
+    "relatedName" : ""
+  }, {
+    "name" : "hdfs_service_env_safety_valve",
+    "required" : false,
+    "displayName" : "HDFS Service Environment Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, key-value pairs (one on each line) to be inserted into a role's environment. Applies to configurations of all roles in this service except client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "hue_kerberos_principal_shortname",
+    "required" : false,
+    "default" : "hue",
+    "displayName" : "Hue's Kerberos Principal Short Name",
+    "description" : "The short name of Hue's Kerberos principal",
+    "relatedName" : "hue.kerberos.principal.shortname"
+  }, {
+    "name" : "dfs_permissions_supergroup",
+    "required" : false,
+    "default" : "supergroup",
+    "displayName" : "Superuser Group",
+    "description" : "The name of the group of superusers.",
+    "relatedName" : "dfs.permissions.superusergroup"
+  }, {
+    "name" : "hadoop_group_mapping_ldap_keystore_passwd",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Hadoop User Group Mapping LDAP SSL Keystore Password",
+    "description" : "The password for the SSL keystore.",
+    "relatedName" : "hadoop.security.group.mapping.ldap.ssl.keystore.password"
+  }, {
+    "name" : "dfs_encrypt_data_transfer",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Data Transfer Encryption",
+    "description" : "Enable encryption of data transfer between DataNodes and clients, and among DataNodes. For effective data transfer protection, enable Kerberos authentication and choose Privacy Quality of RPC Protection.",
+    "relatedName" : "dfs.encrypt.data.transfer"
+  }, {
+    "name" : "hdfs_free_space_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}",
+    "displayName" : "HDFS Free Space Monitoring Thresholds",
+    "description" : "The health check thresholds of free space in HDFS. Specified as a percentage of total HDFS capacity.",
+    "relatedName" : ""
+  }, {
+    "name" : "navigator_audit_event_filter",
+    "required" : false,
+    "default" : "{\n  \"comment\" : [\n    \"Default filter for HDFS services.\",\n    \"Discards events generated by the internal Cloudera and/or HDFS users\",\n    \"(hdfs, hbase, mapred and dr.who), and events that affect files in \",\n    \"/tmp directory.\"\n  ],\n  \"defaultAction\" : \"accept\",\n  \"rules\" : [\n    {\n      \"action\" : \"discard\",\n      \"fields\" : [\n        { \"name\" : \"username\", \"match\" : \"(?:cloudera-scm|hbase|hdfs|mapred|hive|dr.who)(?:/.+)?\" }\n      ]\n    },\n    {\n      \"action\" : \"discard\",\n      \"fields\" : [\n        { \"name\" : \"src\", \"match\" : \"/tmp(?:/.*)?\" }\n      ]\n    }\n  ]\n}\n",
+    "displayName" : "Event Filter",
+    "description" : "<p>Event filters are defined in a JSON object like the following:</p>\n\n<pre>\n{\n  \"defaultAction\" : (\"accept\", \"discard\"),\n  \"rules\" : [\n    {\n      \"action\" : (\"accept\", \"discard\"),\n      \"fields\" : [\n        {\n          \"name\" : \"fieldName\",\n          \"match\" : \"regex\"\n        }\n      ]\n    }\n  ]\n}\n</pre>\n\n<p>\nA filter has a default action and a list of rules, in order of precedence.\nEach rule defines an action, and a list of fields to match against the\naudit event.\n</p>\n\n<p>\nA rule is \"accepted\" if all the listed field entries match the audit\nevent. At that point, the action declared by the rule is taken.\n</p>\n\n<p>\nIf no rules match the event, the default action is taken. Actions\ndefault to \"accept\" if not defined in the JSON object.\n</p>\n\n<p>\nThe following is the list of fields that can be filtered for HDFS events:\n</p>\n\n<ul>\n  <li>username: the user performing the action.</li>\n  <li>ipAddress: the IP from where the request originated.</li>\n  <li>command: the HDFS operation being performed.</li>\n  <li>src: the source path for the operation.</li>\n  <li>dest: the destination path for the operation.</li>\n  <li>permissions: the permissions associated with the operation.</li>\n</ul>\n",
+    "relatedName" : "navigator.event.filter"
+  }, {
+    "name" : "dfs_ha_proxy_provider",
+    "required" : false,
+    "default" : "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider",
+    "displayName" : "FailoverProxyProvider Class",
+    "description" : "Enter a FailoverProxyProvider implementation to configure two URIs to connect to during fail-over. The first configured address is tried first, and on a fail-over event the other address is tried.",
+    "relatedName" : "dfs.client.failover.proxy.provider"
+  }, {
+    "name" : "hadoop_http_auth_cookie_domain",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Hadoop HTTP Authentication Cookie Domain",
+    "description" : "The domain to use for the HTTP cookie that stores the authentication token. In order for authentiation to work correctly across all Hadoop nodes' web-consoles the domain must be correctly set. <b>Important:</b> when using IP addresses, browsers ignore cookies with domain settings. For this setting to work properly all nodes in the cluster must be configured to generate URLs with hostname.domain names on it.",
+    "relatedName" : "hadoop.http.authentication.cookie.domain"
+  }, {
+    "name" : "dfs_datanode_read_shortcircuit",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable HDFS Short Circuit Read",
+    "description" : "Enable HDFS short circuit read. This allows a client co-located with the DataNode to read HDFS file blocks directly. This gives a performance boost to distributed clients that are aware of locality.",
+    "relatedName" : "dfs.client.read.shortcircuit"
+  }, {
+    "name" : "extra_auth_to_local_rules",
+    "required" : false,
+    "displayName" : "Additional Rules to Map Kerberos Principals to Short Names",
+    "description" : "Additional mapping rules that will be inserted before rules generated from the list of trusted realms and before the default rule. After changing this value and restarting the service, any services depending on this one must be restarted as well. The hadoop.security.auth_to_local property is configured using this information.",
+    "relatedName" : ""
+  }, {
+    "name" : "hdfs_canary_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "HDFS Canary Health Check",
+    "description" : "Enables the health check that a client can create, read, write, and delete files",
+    "relatedName" : ""
+  }, {
+    "name" : "navigator_audit_log_max_file_size",
+    "required" : false,
+    "default" : "100",
+    "displayName" : "Maximum Audit Log File Size",
+    "description" : "Maximum size of audit log file in MB before it is rolled over.",
+    "relatedName" : "navigator.audit_log_max_file_size"
+  }, {
+    "name" : "hue_proxy_user_hosts_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Hue Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the Hue user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "relatedName" : "hadoop.proxyuser.hue.hosts"
+  }, {
+    "name" : "HTTP_proxy_user_hosts_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "HTTP Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the HTTP user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'. This is used by WebHCat.",
+    "relatedName" : "hadoop.proxyuser.HTTP.hosts"
+  }, {
+    "name" : "hdfs_under_replicated_blocks_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"40.0\",\"warning\":\"10.0\"}",
+    "displayName" : "Under-replicated Block Monitoring Thresholds",
+    "description" : "The health check thresholds of the number of under-replicated blocks. Specified as a percentage of the total number of blocks.",
+    "relatedName" : ""
+  }, {
+    "name" : "hive_proxy_user_hosts_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Hive Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the Hive user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "relatedName" : "hadoop.proxyuser.hive.hosts"
+  }, {
+    "name" : "flume_proxy_user_groups_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Flume Proxy User Groups",
+    "description" : "Allows the flume user to impersonate any members of a comma-delimited list of groups. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "relatedName" : "hadoop.proxyuser.flume.groups"
+  }, {
+    "name" : "hdfs_blocks_with_corrupt_replicas_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"1.0\",\"warning\":\"0.5\"}",
+    "displayName" : "Blocks With Corrupt Replicas Monitoring Thresholds",
+    "description" : "The health check thresholds of the number of blocks that have at least one corrupt replica. Specified as a percentage of the total number of blocks.",
+    "relatedName" : ""
+  }, {
+    "name" : "hadoop_security_group_mapping",
+    "required" : false,
+    "default" : "org.apache.hadoop.security.ShellBasedUnixGroupsMapping",
+    "displayName" : "Hadoop User Group Mapping Implementation",
+    "description" : "Class for user to group mapping (get groups for a given user).",
+    "relatedName" : "hadoop.security.group.mapping"
+  }, {
+    "name" : "oozie_proxy_user_groups_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Oozie Proxy User Groups",
+    "description" : "Allows the oozie superuser to impersonate any members of a comma-delimited list of groups. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "relatedName" : "hadoop.proxyuser.oozie.groups"
+  }, {
+    "name" : "hadoop_group_mapping_ldap_member_attr",
+    "required" : false,
+    "default" : "member",
+    "displayName" : "Hadoop User Group Mapping LDAP Group Membership Attribute",
+    "description" : "The attribute of the group object that identifies the users that are members of the group. The default will usually be appropriate for any LDAP installation.",
+    "relatedName" : "hadoop.security.group.mapping.ldap.search.attr.member"
+  }, {
+    "name" : "hadoop_authorized_groups",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Authorized Groups",
+    "description" : "Comma-separated list of groups authorized to used Hadoop. This is emitted only if authorization is enabled.",
+    "relatedName" : ""
+  }, {
+    "name" : "hadoop_group_mapping_ldap_bind_user",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Hadoop User Group Mapping LDAP Bind User",
+    "description" : "The distinguished name of the user to bind as when connecting to the LDAP server. This may be left blank if the LDAP server supports anonymous binds.",
+    "relatedName" : "hadoop.security.group.mapping.ldap.bind.user"
+  }, {
+    "name" : "hadoop_group_mapping_ldap_user_filter",
+    "required" : false,
+    "default" : "(&(objectClass=user)(sAMAccountName={0}))",
+    "displayName" : "Hadoop User Group Mapping LDAP User Search Filter",
+    "description" : "An additional filter to use when searching for LDAP users. The default will usually be appropriate for Active Directory installations. If connecting to a generic LDAP server, ''sAMAccountName'' will likely be replaced with ''uid''. {0} is a special string used to denote where the username fits into the filter.",
+    "relatedName" : "hadoop.security.group.mapping.ldap.search.filter.user"
+  }, {
+    "name" : "process_username",
+    "required" : false,
+    "default" : "hdfs",
+    "displayName" : "System User",
+    "description" : "The user that this service's processes should run as (except the HttpFS server, which has its own user)",
+    "relatedName" : ""
+  }, {
+    "name" : "hue_proxy_user_groups_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Hue Proxy User Groups",
+    "description" : "Comma-delimited list of groups that you want to allow the Hue user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "relatedName" : "hadoop.proxyuser.hue.groups"
+  }, {
+    "name" : "io_compression_codecs",
+    "required" : false,
+    "default" : "org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.BZip2Codec,org.apache.hadoop.io.compress.DeflateCodec,org.apache.hadoop.io.compress.SnappyCodec,org.apache.hadoop.io.compress.Lz4Codec",
+    "displayName" : "Compression Codecs",
+    "description" : "Comma-separated list of compression codecs that can be used in job or map compression.",
+    "relatedName" : "io.compression.codecs"
+  }, {
+    "name" : "enable_config_alerts",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Configuration Change Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when this entity's configuration changes.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_webhdfs_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable WebHDFS",
+    "description" : "Enable WebHDFS interface",
+    "relatedName" : "dfs.webhdfs.enabled"
+  }, {
+    "name" : "dfs_image_transfer_timeout",
+    "required" : false,
+    "default" : "60000",
+    "displayName" : "FsImage Transfer Timeout",
+    "description" : "The amount of time to wait for HDFS filesystem image transfer from NameNode to complete.",
+    "relatedName" : "dfs.image.transfer.timeout"
+  }, {
+    "name" : "log_event_retry_frequency",
+    "required" : false,
+    "default" : "30",
+    "displayName" : "Log Event Retry Frequency",
+    "description" : "The frequency in which the log4j event publication appender will retry sending undelivered log events to the Event server, in seconds",
+    "relatedName" : ""
+  }, {
+    "name" : "hadoop_authorized_admin_groups",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Authorized Admin Groups",
+    "description" : "Comma-separated list of groups authorized to perform admin operations on Hadoop. This is emitted only if authorization is enabled.",
+    "relatedName" : ""
+  }, {
+    "name" : "hadoop_group_mapping_ldap_bind_passwd",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Hadoop User Group Mapping LDAP Bind User Password",
+    "description" : "The password of the bind user.",
+    "relatedName" : "hadoop.security.group.mapping.ldap.bind.password"
+  } ]
+}

@@ -1,0 +1,410 @@
+{
+  "name": "ISILON",
+  "displayName": "ISILON",
+  "parent": "CLUSTER",
+  "repository": "CDH",
+  "versionApiMin": "6",
+  "versionApiMax": "-1",
+  "versionCdhMin": "5.1.0",
+  "versionCdhMax": "-1",
+  "availableConfigurations" : [
+  {
+    "name" : "default_fs_name",
+    "required" : true,
+    "displayName" : "Default File System URI",
+    "description" : "The full file system URI, to be emitted as 'fs.default.name'",
+    "relatedName" : "default_fs_name"
+  },
+  {
+    "name" : "webhdfs_url",
+    "required" : false,
+    "displayName" : "WebHDFS URL",
+    "description" : "Full URL for the Web Interface of Isilon service.",
+    "relatedName" : "webhdfs_url"
+  },
+  {
+    "name" : "enable_config_alerts",
+    "required" : false,
+    "displayName" : "Enable Configuration Change Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when this entity's configuration changes.",
+    "default" : "false",
+    "relatedName" : ""
+  },
+  {
+    "name" : "client_config_priority",
+    "required" : true,
+    "displayName" : "Alternatives Priority",
+    "description" : "The priority level that the client configuration will have in the Alternatives system on the hosts. Higher priority levels will cause Alternatives to prefer this configuration over any others.",
+    "default" : "90",
+    "relatedName" : ""
+  },
+  {
+    "name" : "dfs_client_use_trash",
+    "required" : false,
+    "displayName" : "Use Trash",
+    "description" : "Move deleted files to the trash so that they can be recovered if necessary. This client side configuration takes effect only if the HDFS service-wide trash is disabled (NameNode Filesystem Trash Interval set to 0) and is ignored otherwise. The trash is not automatically emptied when enabled with this configuration.",
+    "default" : "false",
+    "relatedName" : ""
+  },
+  {
+    "name" : "dfs_client_read_shortcircuit",
+    "required" : false,
+    "displayName" : "Enable HDFS Short Circuit Read",
+    "description" : "Enable HDFS short circuit read. This allows a client co-located with the DataNode to read HDFS file blocks directly. This gives a performance boost to distributed clients that are aware of locality.",
+    "default" : "false",
+    "relatedName" : "dfs.client.read.shortcircuit"
+  },
+  {
+    "name" : "hdfs_client_java_heapsize",
+    "required" : false,
+    "displayName" : "Client Java Heap Size in Bytes",
+    "description" : "Maximum size in bytes for the Java process heap memory. Passed to Java -Xmx.",
+    "default" : "256 MiB",
+    "relatedName" : ""
+  },
+  {
+    "name" : "ISILON_service_env_safety_valve",
+    "required" : false,
+    "displayName" : "Isilon Service Environment Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, key-value pairs (one on each line) to be inserted into a role's environment. Applies to configurations of all roles in this service except client configuration.",
+    "default" : "",
+    "relatedName" : ""
+  },
+  {
+    "name" : "core_site_safety_valve",
+    "required" : false,
+    "displayName" : "Cluster-wide Advanced Configuration Snippet (Safety Valve) for core-site.xml",
+    "description" : "For advanced use only, a string to be inserted into core-site.xml. Applies to all roles and client configurations in this HDFS service as well as all its dependent services. Any configs added here will be overridden by their default values in HDFS (which can be found in hdfs-default.xml).",
+    "default" : "",
+    "relatedName" : ""
+  },
+  {
+    "name" : "dfs_datanode_hdfs_blocks_metadata_enabled",
+    "required" : false,
+    "displayName" : "Enable HDFS Block Metadata API",
+    "description" : "Enables DataNode support for the experimental DistributedFileSystem.getFileVBlockStorageLocations API. Applicable to CDH 4.1 and onwards.",
+    "default" : true,
+    "relatedName" : "dfs.datanode.hdfs-blocks-metadata.enabled"
+  },
+  {
+    "name" : "hdfs_client_config_safety_valve",
+    "required" : false,
+    "displayName" : "HDFS Client Advanced Configuration Snippet (Safety Valve) for hdfs-site.xml",
+    "description" : "For advanced use only, a string to be inserted into the client configuration for hdfs-site.xml.",
+    "default" : "",
+    "relatedName" : ""
+  },
+  {
+    "name" : "process_groupname",
+    "required" : true,
+    "displayName" : "System Group",
+    "description" : "The group that this service's processes should run as.",
+    "default" : "isilon",
+    "relatedName" : ""
+  },
+  {
+    "name" : "process_username",
+    "required" : true,
+    "displayName" : "System User",
+    "description" : "The user that this service's processes should run as.",
+    "default" : "isilon",
+    "relatedName" : ""
+  },
+  {
+    "name" : "enable_alerts",
+    "required" : false,
+    "displayName" : "Enable Service Level Health Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when the health of this service reaches the threshold specified by the EventServer setting eventserver_health_events_alert_threshold",
+    "default" : true,
+    "relatedName" : ""
+  },
+  {
+    "name" : "enable_config_alerts",
+    "required" : false,
+    "displayName" : "Enable Configuration Change Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when this entity's configuration changes.",
+    "default" : "false",
+    "relatedName" : ""
+  },
+  {
+    "name" : "service_triggers",
+    "required" : true,
+    "displayName" : "Service Triggers",
+    "description" : "The configured triggers for this service. This is a JSON formatted list of triggers. These triggers are evaluated as part as the health system. Every trigger expression is parsed, and if the trigger condition is met, the list of actions provided in the trigger expression is executed.",
+    "default" : "[]",
+    "relatedName" : ""
+  },
+  {
+    "name" : "smon_derived_configs_safety_valve",
+    "required" : false,
+    "displayName" : "Service Monitor Derived Configs Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, a list of derived configuration properties that will be used by the Service Monitor instead of the default ones.",
+    "default" : "",
+    "relatedName" : ""
+  },
+  {
+    "name" : "dfs_block_size",
+    "required" : false,
+    "displayName" : "HDFS Block Size",
+    "description" : "The default block size in bytes for new HDFS files. Note that this value is also used as the HBase Region Server HLog block size.",
+    "default" : "128 MiB",
+    "relatedName" : "dfs.blocksize"
+  },
+  {
+    "name" : "dfs_umaskmode",
+    "required" : false,
+    "displayName" : "Default Umask",
+    "description" : "Default umask for file and directory creation, specified in an octal value (with a leading 0)",
+    "default" : "022",
+    "relatedName" : "fs.permissions.umask-mode"
+  },
+  {
+    "name" : "io_compression_codecs",
+    "required" : false,
+    "displayName" : "Compression Codecs",
+    "description" : "Comma-separated list of compression codecs that can be used in job or map compression.",
+    "default" : "org.apache.hadoop.io.compress.DefaultCodec, org.apache.hadoop.io.compress.GzipCodec, org.apache.hadoop.io.compress.BZip2Codec, org.apache.hadoop.io.compress.DeflateCodec, org.apache.hadoop.io.compress.SnappyCodec, org.apache.hadoop.io.compress.Lz4Codec",
+    "relatedName" : "io.compression.codecs"
+  },
+  {
+    "name" : "kerberos_authentication",
+    "required" : true,
+    "displayName" : "Kerberos Authentication",
+    "description" : "Whether Kerberos is enabled for authentication",
+    "default" : "false",
+    "relatedName" : "kerberos_authentication"
+  },
+  {
+    "name" : "dfs_domain_socket_path",
+    "required" : false,
+    "displayName" : "UNIX Domain Socket path",
+    "description" : "Path on the DataNode's local file system to a UNIX domain socket used for communication between the DataNode and local HDFS clients. This socket is used for Short Circuit Reads. Only the HDFS System User and \"root\" should have write access to the parent directory and all of its ancestors. This property is supported in CDH 4.2 or later deployments.",
+    "default" : "/var/run/hdfs-sockets/dn",
+    "relatedName" : "dfs.domain.socket.path"
+  },
+  {
+    "name" : "HTTP_proxy_user_groups_list",
+    "required" : false,
+    "displayName" : "HTTP Proxy User Groups",
+    "description" : "Comma-delimited list of groups that you want to allow the HTTP user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'. This is used by WebHCat.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.HTTP.groups"
+  },
+  {
+    "name" : "HTTP_proxy_user_hosts_list",
+    "required" : false,
+    "displayName" : "HTTP Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the HTTP user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'. This is used by WebHCat.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.HTTP.hosts"
+  },
+  {
+    "name" : "flume_proxy_user_groups_list",
+    "required" : false,
+    "displayName" : "Flume Proxy User Groups",
+    "description" : "Allows the flume user to impersonate any members of a comma-delimited list of groups. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.flume.groups"
+  },
+  {
+    "name" : "flume_proxy_user_hosts_list",
+    "required" : false,
+    "displayName" : "Flume Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the flume user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.flume.hosts"
+  },
+  {
+    "name" : "hdfs_proxy_user_groups_list",
+    "required" : false,
+    "displayName" : "HDFS Proxy User Groups",
+    "description" : "Comma-delimited list of groups to allow the HDFS user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.hdfs.groups"
+  },
+  {
+    "name" : "hdfs_proxy_user_hosts_list",
+    "required" : false,
+    "displayName" : "HDFS Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the HDFS user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.hdfs.hosts"
+  },
+  {
+    "name" : "hive_proxy_user_groups_list",
+    "required" : false,
+    "displayName" : "Hive Proxy User Groups",
+    "description" : "Comma-delimited list of groups that you want to allow the Hive user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.hive.groups"
+  },
+  {
+    "name" : "hive_proxy_user_hosts_list",
+    "required" : false,
+    "displayName" : "Hive Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the Hive user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.hive.hosts"
+  },
+  {
+    "name" : "httpfs_proxy_user_groups_list",
+    "required" : false,
+    "displayName" : "HttpFS Proxy User Groups",
+    "description" : "Comma-delimited list of groups to allow the HttpFS user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.httpfs.groups"
+  },
+  {
+    "name" : "httpfs_proxy_user_hosts_list",
+    "required" : false,
+    "displayName" : "HttpFS Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the HttpFS user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.httpfs.hosts"
+  },
+  {
+    "name" : "hue_proxy_user_groups_list",
+    "required" : false,
+    "displayName" : "Hue Proxy User Groups",
+    "description" : "Comma-delimited list of groups that you want to allow the Hue user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.hue.groups"
+  },
+  {
+    "name" : "hue_proxy_user_hosts_list",
+    "required" : false,
+    "displayName" : "Hue Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the Hue user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.hue.hosts"
+  },
+  {
+    "name" : "mapred_proxy_user_groups_list",
+    "required" : false,
+    "displayName" : "Mapred Proxy User Groups",
+    "description" : "Comma-delimited list of groups that you want to allow the mapred user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.mapred.groups"
+  },
+  {
+    "name" : "mapred_proxy_user_hosts_list",
+    "required" : false,
+    "displayName" : "Mapred Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the mapred user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.mapred.hosts"
+  },
+  {
+    "name" : "oozie_proxy_user_groups_list",
+    "required" : false,
+    "displayName" : "Oozie Proxy User Groups",
+    "description" : "Allows the oozie superuser to impersonate any members of a comma-delimited list of groups. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.oozie.groups"
+  },
+  {
+    "name" : "oozie_proxy_user_hosts_list",
+    "required" : false,
+    "displayName" : "Oozie Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the oozie user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "default" : "*",
+    "relatedName" : "hadoop.proxyuser.oozie.hosts"
+  },
+  {
+    "name" : "dfs_replication",
+    "required" : false,
+    "displayName" : "Replication Factor",
+    "description" : "Default block replication. The number of replications to make when the file is created. The default value is used if a replication number is not specified.",
+    "default" : "3",
+    "relatedName" : "dfs.replication"
+  },
+  {
+    "name" : "dfs_namenode_acls_enabled",
+    "required" : false,
+    "displayName" : "Enable Access Control Lists",
+    "description" : "ACLs (Access Control Lists) enhance the existing HDFS permission model to support controlling file access for arbitrary combinations of users and groups instead of a single owner, single group, and all other users. When ACLs are disabled, the NameNode rejects all attempts to set an ACL.",
+    "default" : "false",
+    "relatedName" : "dfs.namenode.acls.enabled"
+  },
+  {
+    "name" : "extra_auth_to_local_rules",
+    "required" : false,
+    "displayName" : "Additional Rules to Map Kerberos Principals to Short Names",
+    "description" : "Additional mapping rules that will be inserted before rules generated from the list of trusted realms and before the default rule. After changing this value and restarting the service, any services depending on this one must be restarted as well. The hadoop.security.auth_to_local property is configured using this information.",
+    "default" : "",
+    "relatedName" : ""
+  },
+  {
+    "name" : "hadoop_authorized_admin_groups",
+    "required" : false,
+    "displayName" : "Authorized Admin Groups",
+    "description" : "Comma-separated list of groups authorized to perform admin operations on Hadoop. This is emitted only if authorization is enabled.",
+    "default" : "",
+    "relatedName" : ""
+  },
+  {
+    "name" : "hadoop_authorized_admin_users",
+    "required" : false,
+    "displayName" : "Authorized Admin Users",
+    "description" : "Comma-separated list of users authorized to perform admin operations on Hadoop. This is emitted only if authorization is enabled.",
+    "default" : "*",
+    "relatedName" : ""
+  },
+  {
+    "name" : "hadoop_authorized_groups",
+    "required" : false,
+    "displayName" : "Authorized Groups",
+    "description" : "Comma-separated list of groups authorized to used Hadoop. This is emitted only if authorization is enabled.",
+    "default" : "",
+    "relatedName" : ""
+  },
+  {
+    "name" : "hadoop_authorized_users",
+    "required" : false,
+    "displayName" : "Authorized Users",
+    "description" : "Comma-separated list of users authorized to used Hadoop. This is emitted only if authorization is enabled.",
+    "default" : "*",
+    "relatedName" : ""
+  },
+  {
+    "name" : "hadoop_rpc_protection",
+    "required" : false,
+    "displayName" : "Hadoop RPC Protection",
+    "description" : "Quality of protection for secured RPC connections between NameNode and HDFS clients. For effective RPC protection, enable Kerberos authentication.",
+    "default" : "authentication",
+    "relatedName" : "hadoop.rpc.protection"
+  },
+  {
+    "name" : "hadoop_security_authorization",
+    "required" : false,
+    "displayName" : "Hadoop Secure Authorization",
+    "description" : "Enable authorization",
+    "default" : "false",
+    "relatedName" : "hadoop.security.authorization"
+  },
+  {
+    "name" : "ssl_client_truststore_location",
+    "required" : false,
+    "displayName" : "Cluster-Wide Default SSL Client Truststore Location",
+    "description" : "Path to the SSL client truststore file. Defines a cluster-wide default that can be overridden by individual services. This truststore must be in JKS format. The truststore contains certificates of trusted servers, or of Certificate Authorities trusted to identify servers. The contents of the truststore can be modified without restarting any roles. By default, changes to its contents are picked up within ten seconds. If not set, the default Java truststore is used to verify certificates.",
+    "default" : "",
+    "relatedName" : "ssl.client.truststore.location"
+  },
+  {
+    "name" : "ssl_client_truststore_password",
+    "required" : false,
+    "displayName" : "Cluster-Wide Default SSL Client Truststore Password",
+    "description" : "Password for the SSL client truststore. Defines a cluster-wide default that can be overridden by individual services.",
+    "default" : "",
+    "relatedName" : "ssl.client.truststore.password"
+  },
+  {
+    "name" : "trusted_realms",
+    "required" : false,
+    "displayName" : "Trusted Kerberos Realms",
+    "description" : "List of Kerberos realms that Hadoop services should trust. If empty, defaults to the default_realm property configured in the krb5.conf file. After changing this value and restarting the service, all services depending on this service must also be restarted. Adds mapping rules for each domain to the hadoop.security.auth_to_local property in core-site.xml.",
+    "default" : "",
+    "relatedName" : ""
+  }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "name": "GATEWAY",
+  "displayName": "GATEWAY",
+  "parent": "ISILON",
+  "repository": "CDH",
+  "versionApiMin": 6,
+  "versionApiMax": -1,
+  "versionCdhMin": "5.1.0",
+  "versionCdhMax": "-1",
+  "availableConfigurations" : [
+  {
+    "name" : "client_config_root_dir",
+    "required" : true,
+    "default" : "/etc/hadoop",
+    "displayName" : "Deploy Directory",
+    "description" : "The directory where the client configs will be deployed",
+    "relatedName" : ""
+  },
+  {
+    "name" : "hbase_client_java_opts",
+    "required" : false,
+    "default" : "-Djava.net.preferIPv4Stack=true",
+    "displayName" : "Client Java Configuration Options",
+    "description" : "These are Java command line arguments. Commonly, garbage collection flags or extra debugging flags would be passed here.",
+    "relatedName" : ""
+  },
+  {
+    "name" : "hdfs_client_config_safety_valve",
+    "required" : false,
+    "default" : "",
+    "displayName" : "HDFS Client Advanced Configuration Snippet (Safety Valve) for hdfs-site.xml",
+    "description" : "For advanced use only, a string to be inserted into the client configuration for hdfs-site.xml.",
+    "relatedName" : ""
+  },
+  {
+    "name" : "hdfs_client_env_safety_valve",
+    "required" : false,
+    "default" : "",
+    "displayName" : "HDFS Client Environment Advanced Configuration Snippet for hadoop-env.sh (Safety Valve)",
+    "description" : "For advanced use only, key-value pairs (one on each line) to be inserted into the client configuration for hadoop-env.sh",
+    "relatedName" : ""
+  }
+  ]
+}

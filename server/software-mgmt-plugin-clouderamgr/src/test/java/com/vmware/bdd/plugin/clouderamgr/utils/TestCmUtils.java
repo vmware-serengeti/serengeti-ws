@@ -29,11 +29,11 @@ public class TestCmUtils {
    public void testMajorVersionOfStack() {
       HadoopStack stack = new HadoopStack();
       stack.setDistro("CDH-5.0.1");
-      Assert.assertEquals(CmUtils.majorVersionOfHadoopStack(stack), 5);
+      Assert.assertEquals(CmUtils.distroVersionOfHadoopStack(stack), "5.0.1");
       stack.setDistro("CDH");
-      Assert.assertEquals(CmUtils.majorVersionOfHadoopStack(stack), -1);
+      Assert.assertEquals(CmUtils.distroVersionOfHadoopStack(stack), "-1");
       stack.setDistro(null);
-      Assert.assertEquals(CmUtils.majorVersionOfHadoopStack(stack), -1);
+      Assert.assertEquals(CmUtils.distroVersionOfHadoopStack(stack), "-1");
    }
 
    @Test

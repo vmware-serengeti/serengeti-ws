@@ -1,0 +1,449 @@
+{
+  "name": "DATANODE",
+  "displayName": "HDFS_DATANODE",
+  "parent": "HDFS",
+  "repository": "CDH",
+  "versionApiMin": "3",
+  "versionApiMax": "-1",
+  "versionCdhMin": "4",
+  "versionCdhMax": "-1",
+  "availableConfigurations" : [ {
+    "name" : "datanode_java_heapsize",
+    "required" : false,
+    "default" : "1073741824",
+    "displayName" : "Java Heap Size of DataNode in Bytes",
+    "description" : "Maximum size for the Java Process heap memory.  Passed to Java -Xmx.  Measured in bytes.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_data_dir_list",
+    "required" : true,
+    "displayName" : "DataNode Data Directory",
+    "description" : "Comma-delimited list of directories on the local file system where the DataNode stores HDFS block data. Typical values are /data/N/dfs/dn for N = 1, 2, 3... These directories should be mounted using the noatime option and the disks should be configured using JBOD. RAID is not recommended.",
+    "relatedName" : "dfs.datanode.data.dir"
+  }, {
+    "name" : "dfs_datanode_du_reserved",
+    "required" : false,
+    "default" : "10737418240",
+    "displayName" : "Reserved Space for Non DFS Use",
+    "description" : "Reserved space in bytes per volume for non Distributed File System (DFS) use.",
+    "relatedName" : "dfs.datanode.du.reserved",
+    "validationMessage" : "DataNode Reserved Space for Non-DFS Use (2087257292B) is not zero."
+  }, {
+    "name" : "dfs_datanode_failed_volumes_tolerated",
+    "required" : false,
+    "default" : "0",
+    "displayName" : "DataNode Failed Volumes Tolerated",
+    "description" : "The number of volumes that are allowed to fail before a DataNode stops offering service. By default, any volume failure will cause a DataNode to shutdown.",
+    "relatedName" : "dfs.datanode.failed.volumes.tolerated",
+    "validationMessage" : "DataNode tolerance for failed volumes (2) is less than or equal to half of the number of data directories (5)."
+  }, {
+    "name" : "dfs_datanode_max_locked_memory",
+    "required" : false,
+    "default" : "4294967296",
+    "displayName" : "Maximum Memory Used for Caching",
+    "description" : "The maximum amount of memory a DataNode may use to cache data blocks in memory.  Setting it to zero will disable caching.",
+    "relatedName" : "dfs.datanode.max.locked.memory"
+  }, {
+    "name" : "dfs_thrift_threads_max",
+    "required" : false,
+    "default" : "20",
+    "displayName" : "Hue Thrift Server Max Threadcount",
+    "description" : "Maximum number of running threads for the Hue Thrift server running on each DataNode",
+    "relatedName" : "dfs.thrift.threads.max"
+  }, {
+    "name" : "dfs_datanode_http_port",
+    "required" : false,
+    "default" : "50075",
+    "displayName" : "DataNode HTTP Web UI Port",
+    "description" : "Port for the DataNode HTTP web UI. Combined with the DataNode's hostname to build its HTTP address.",
+    "relatedName" : "dfs.datanode.http.address"
+  }, {
+    "name" : "dfs_datanode_use_datanode_hostname",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Use DataNode Hostname",
+    "description" : "Whether DataNodes should use DataNode hostnames when connecting to DataNodes for data transfer. This property is supported in CDH3u4 or later deployments.",
+    "relatedName" : "dfs.datanode.use.datanode.hostname"
+  }, {
+    "name" : "log_threshold",
+    "required" : false,
+    "default" : "INFO",
+    "displayName" : "DataNode Logging Threshold",
+    "description" : "The minimum log level for DataNode logs",
+    "relatedName" : ""
+  }, {
+    "name" : "datanode_gc_duration_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"60.0\",\"warning\":\"30.0\"}",
+    "displayName" : "Garbage Collection Duration Thresholds",
+    "description" : "The health test thresholds for the weighted average time spent in Java garbage collection. Specified as a percentage of elapsed wall clock time.",
+    "relatedName" : ""
+  }, {
+    "name" : "datanode_fd_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"70.0\",\"warning\":\"50.0\"}",
+    "displayName" : "File Descriptor Monitoring Thresholds",
+    "description" : "The health test thresholds of the number of file descriptors used. Specified as a percentage of file descriptor limit.",
+    "relatedName" : ""
+  }, {
+    "name" : "datanode_connectivity_tolerance",
+    "required" : false,
+    "default" : "180",
+    "displayName" : "DataNode Connectivity Tolerance at Startup",
+    "description" : "The amount of time to wait for the DataNode to fully start up and connect to the NameNode before enforcing the connectivity check.",
+    "relatedName" : ""
+  }, {
+    "name" : "datanode_config_safety_valve",
+    "required" : false,
+    "displayName" : "DataNode Advanced Configuration Snippet (Safety Valve) for hdfs-site.xml",
+    "description" : "For advanced use only, a string to be inserted into <strong>hdfs-site.xml</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_datanode_handler_count",
+    "required" : false,
+    "default" : "3",
+    "displayName" : "Handler Count",
+    "description" : "The number of server threads for the DataNode.",
+    "relatedName" : "dfs.datanode.handler.count"
+  }, {
+    "name" : "enable_alerts",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Health Alerts for this Role",
+    "description" : "When set, Cloudera Manager will send alerts when the health of this role reaches the threshold specified by the EventServer setting eventserver_health_events_alert_threshold",
+    "relatedName" : ""
+  }, {
+    "name" : "datanode_web_metric_collection_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"never\",\"warning\":\"10000.0\"}",
+    "displayName" : "Web Metric Collection Duration",
+    "description" : "The health test thresholds on the duration of the metrics request to the web server.",
+    "relatedName" : ""
+  }, {
+    "name" : "rm_memory_soft_limit",
+    "required" : false,
+    "default" : "-1",
+    "displayName" : "Cgroup Memory Soft Limit",
+    "description" : "Soft memory limit to assign to this role, enforced by the Linux kernel. When the limit is reached, the kernel will reclaim pages charged to the process if and only if the host is facing memory pressure. If reclaiming fails, the kernel may kill the process. Both anonymous as well as page cache pages contribute to the limit. Use a value of -1 B to specify no limit. By default processes not managed by Cloudera Manager will have no limit.",
+    "relatedName" : "memory.soft_limit_in_bytes"
+  }, {
+    "name" : "process_auto_restart",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Automatically Restart Process",
+    "description" : "When set, this role's process is automatically (and transparently) restarted in the event of an unexpected failure.",
+    "relatedName" : ""
+  }, {
+    "name" : "log_event_whitelist",
+    "required" : false,
+    "default" : "{\n  \"version\": \"0\",\n  \"rules\": [\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 1, \"threshold\":\"FATAL\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\": \".* is deprecated. Instead, use .*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\": \".* is deprecated. Use .* instead\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.io.IOException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.net.SocketException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.net.SocketClosedException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.io.EOFException\"},\n    {\"alert\": false, \"rate\": 0, \"exceptiontype\": \"java.nio.channels.CancelledKeyException\"},\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 5, \"content\":\"Datanode registration failed\"},\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 2, \"exceptiontype\": \".*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"Got a command from standby NN - ignoring command:.*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"Unknown job [^ ]+ being deleted.*\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"Error executing shell command .+ No such process.+\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\".*attempt to override final parameter.+\"},\n    {\"alert\": false, \"rate\": 0, \"threshold\":\"WARN\", \"content\":\"[^ ]+ is a deprecated filesystem name. Use.*\"},\n    {\"alert\": false, \"rate\": 1, \"periodminutes\": 1, \"threshold\":\"WARN\"}\n  ]\n}\n",
+    "displayName" : "Rules to Extract Events from Log Files",
+    "description" : "<p>This file contains the rules which govern how log messages are turned into events by the custom log4j appender that this role loads. It is in JSON format, and is composed of a list of rules. Every log message is evaluated against each of these rules in turn to decide whether or not to send an event for that message.</p><p>Each rule has some or all of the following fields:</p><ul><li><span class='code'>alert</span> - whether or not events generated from this rule should be promoted to alerts. A value of \"true\" will cause alerts to be generated. If not specified, the default is \"false\".</li><li><span class='code'>rate</span> <strong>(mandatory)</strong> - the maximum number of log messages matching this rule that may be sent as events every minute. If more than <tt>rate</tt> matching log messages are received in a single minute, the extra messages are ignored. If rate is less than 0, the number of messages per minute is unlimited.</li><li><span class='code'>periodminutes</span>  - the number of minutes during which the publisher will only publish <tt>rate</tt> events or fewer. If not specified, the default is <strong>one minute</strong></li><li><span class='code'>threshold</span> - apply this rule only to messages with this log4j severity level or above. An example is \"WARN\" for warning level messages or higher.</li><li><span class='code'>content</span> - match only those messages whose contents match this regular expression.</li><li><span class='code'>exceptiontype</span> - match only those messages which are part of an exception message. The exception type must match this regular expression.</li></ul><br/><p>Example:<span class='code'>{\"alert\": false, \"rate\": 10, \"exceptiontype\": \"java.lang.StringIndexOutOfBoundsException\"}</span></p><p>This rule will send events to Cloudera Manager for every <span class='code'>StringIndexOutOfBoundsException</span>, up to a maximum of 10 every minute.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "oom_heap_dump_dir",
+    "required" : false,
+    "default" : "/tmp",
+    "displayName" : "Heap Dump Directory",
+    "description" : "Path to directory where heap dumps are generated when java.lang.OutOfMemoryError error is thrown. This directory is automatically created if it doesn't exist. However, if this directory already exists, role user must have write access to this directory. If this directory is shared amongst multiple roles, it should have 1777 permissions. Note that the heap dump files are created with 600 permissions and are owned by the role user. The amount of free space in this directory should be greater than the maximum Java Process heap size configured for this role.",
+    "relatedName" : ""
+  }, {
+    "name" : "datanode_gc_duration_window",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Garbage Collection Duration Monitoring Period",
+    "description" : "The period to review when computing the moving average of garbage collection time.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_thrift_threads_min",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "Hue Thrift Server Min Threadcount",
+    "description" : "Minimum number of running threads for the Hue Thrift server running on each DataNode",
+    "relatedName" : "dfs.thrift.threads.min"
+  }, {
+    "name" : "dfs_balance_bandwidthPerSec",
+    "required" : false,
+    "default" : "10485760",
+    "displayName" : "DataNode Balancing Bandwidth",
+    "description" : "Maximum amount of bandwidth that each DataNode can use for balancing. Specified in bytes per second.",
+    "relatedName" : "dfs.datanode.balance.bandwidthPerSec"
+  }, {
+    "name" : "rlimit_fds",
+    "required" : false,
+    "displayName" : "Maximum Process File Descriptors",
+    "description" : "If configured, overrides the process soft and hard rlimits (also called ulimits) for file descriptors to the configured value.",
+    "relatedName" : ""
+  }, {
+    "name" : "log4j_safety_valve",
+    "required" : false,
+    "displayName" : "DataNode Logging Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, a string to be inserted into <strong>log4j.properties</strong> for this role only.",
+    "relatedName" : ""
+  }, {
+    "name" : "max_log_size",
+    "required" : false,
+    "default" : "200",
+    "displayName" : "DataNode Max Log Size",
+    "description" : "The maximum size, in megabytes, per log file for DataNode logs.  Typically used by log4j.",
+    "relatedName" : ""
+  }, {
+    "name" : "unexpected_exits_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"any\",\"warning\":\"never\"}",
+    "displayName" : "Unexpected Exits Thresholds",
+    "description" : "The health test thresholds for unexpected exits encountered within a recent period specified by the unexpected_exits_window configuration for the role.",
+    "relatedName" : ""
+  }, {
+    "name" : "datanode_scm_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "DataNode Process Health Test",
+    "description" : "Enables the health test that the DataNode's process state is consistent with the role configuration",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_datanode_available_space_balanced_threshold",
+    "required" : false,
+    "default" : "10737418240",
+    "displayName" : "Available Space Policy Balanced Threshold",
+    "description" : "Only used when the DataNode Volume Choosing Policy is set to Available Space. Controls how much DataNode volumes are allowed to differ in terms of bytes of free disk space before they are considered imbalanced. If the free space of all the volumes are within this range of each other, the volumes will be considered balanced and block assignments will be done on a pure round robin basis.",
+    "relatedName" : "dfs.datanode.available-space-volume-choosing-policy.balanced-space-threshold"
+  }, {
+    "name" : "log_directory_free_space_percentage_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"never\",\"warning\":\"never\"}",
+    "displayName" : "Log Directory Free Space Monitoring Percentage Thresholds",
+    "description" : "The health test thresholds for monitoring of free space on the filesystem that contains this role's log directory. Specified as a percentage of the capacity on that filesystem. This setting is not used if a Log Directory Free Space Monitoring Absolute Thresholds setting is configured.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_datanode_max_xcievers",
+    "required" : false,
+    "default" : "4096",
+    "displayName" : "Maximum Number of Transfer Threads",
+    "description" : "Specifies the maximum number of threads to use for transferring data in and out of the DataNode.",
+    "relatedName" : "dfs.datanode.max.transfer.threads"
+  }, {
+    "name" : "log_directory_free_space_absolute_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"5.36870912E9\",\"warning\":\"1.073741824E10\"}",
+    "displayName" : "Log Directory Free Space Monitoring Absolute Thresholds",
+    "description" : "The health test thresholds for monitoring of free space on the filesystem that contains this role's log directory.",
+    "relatedName" : ""
+  }, {
+    "name" : "oom_heap_dump_enabled",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Dump Heap When Out of Memory",
+    "description" : "When set, generates heap dump file when java.lang.OutOfMemoryError is thrown.",
+    "relatedName" : ""
+  }, {
+    "name" : "max_log_backup_index",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "DataNode Maximum Log File Backups",
+    "description" : "The maximum number of rolled log files to keep for DataNode logs.  Typically used by log4j.",
+    "relatedName" : ""
+  }, {
+    "name" : "unexpected_exits_window",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Unexpected Exits Monitoring Period",
+    "description" : "The period to review when computing unexpected exits.",
+    "relatedName" : ""
+  }, {
+    "name" : "datanode_java_opts",
+    "required" : false,
+    "default" : "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:-CMSConcurrentMTEnabled -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled",
+    "displayName" : "Java Configuration Options for DataNode",
+    "description" : "These arguments will be passed as part of the Java command line. Commonly, garbage collection flags or extra debugging flags would be passed here.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_datanode_plugins_list",
+    "required" : false,
+    "default" : "",
+    "displayName" : "DateNode Plugins",
+    "description" : "Comma-separated list of DataNode plug-ins to be activated. If one plug-in cannot be loaded, all the plug-ins are ignored.",
+    "relatedName" : "dfs.datanode.plugins"
+  }, {
+    "name" : "dfs_datanode_ipc_port",
+    "required" : false,
+    "default" : "50020",
+    "displayName" : "DataNode Protocol Port",
+    "description" : "Port for the various DataNode Protocols. Combined with the DataNode's hostname to build its IPC port address.",
+    "relatedName" : "dfs.datanode.ipc.address"
+  }, {
+    "name" : "datanode_host_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "DataNode Host Health Test",
+    "description" : "When computing the overall DataNode health, consider the host's health.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_datanode_bind_wildcard",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Bind DataNode to Wildcard Address",
+    "description" : "If enabled, the DataNode binds to the wildcard address (\"0.0.0.0\") on all of its ports.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_datanode_drop_cache_behind_reads",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable purging cache after reads",
+    "description" : "In some workloads, the data read from HDFS is known to be significantly large enough that it is unlikely to be useful to cache it in the operating system buffer cache. In this case, the DataNode may be configured to automatically purge all data from the buffer cache after it is delivered to the client. This may improve performance for some workloads by freeing buffer cache spare usage for more cacheable data. This behavior will always be disabled for workloads that read only short sections of a block (e.g HBase random-IO workloads). This property is supported in CDH3u3 or later deployments.",
+    "relatedName" : "dfs.datanode.drop.cache.behind.reads"
+  }, {
+    "name" : "dfs_thrift_timeout",
+    "required" : false,
+    "default" : "60",
+    "displayName" : "Hue Thrift Server Timeout",
+    "description" : "Timeout in seconds for the Hue Thrift server running on each DataNode",
+    "relatedName" : "dfs.thrift.timeout"
+  }, {
+    "name" : "dfs_datanode_available_space_balanced_preference",
+    "required" : false,
+    "default" : "0.75",
+    "displayName" : "Available Space Policy Balanced Preference",
+    "description" : "Only used when the DataNode Volume Choosing Policy is set to Available Space. Controls what percentage of new block allocations will be sent to volumes with more available disk space than others. This setting should be in the range 0.0 - 1.0, though in practice 0.5 - 1.0, since there should be no reason to prefer that volumes with less available disk space receive more block allocations.",
+    "relatedName" : "dfs.datanode.available-space-volume-choosing-policy.balanced-space-preference-fraction"
+  }, {
+    "name" : "dfs_datanode_readahead_bytes",
+    "required" : false,
+    "default" : "4194304",
+    "displayName" : "Number of read ahead bytes",
+    "description" : "While reading block files, the DataNode can use the posix_fadvise system call to explicitly page data into the operating system buffer cache ahead of the current reader's position. This can improve performance especially when disks are highly contended. This configuration specifies the number of bytes ahead of the current read position which the DataNode will attempt to read ahead. A value of 0 disables this feature. This property is supported in CDH3u3 or later deployments.",
+    "relatedName" : "dfs.datanode.readahead.bytes"
+  }, {
+    "name" : "dfs_datanode_data_dir_perm",
+    "required" : false,
+    "default" : "700",
+    "displayName" : "DataNode Data Directory Permissions",
+    "description" : "Permissions for the directories on the local file system where the DataNode stores its blocks. The permissions must be octal. 755 and 700 are typical values.",
+    "relatedName" : "dfs.datanode.data.dir.perm"
+  }, {
+    "name" : "oom_sigkill_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Kill When Out of Memory",
+    "description" : "When set, a SIGKILL signal is sent to the role process when java.lang.OutOfMemoryError is thrown.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_datanode_sync_behind_writes",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable immediate enqueuing of data to disk after writes",
+    "description" : "If this configuration is enabled, the DataNode will instruct the operating system to enqueue all written data to the disk immediately after it is written. This differs from the usual OS policy which may wait for up to 30 seconds before triggering writeback. This may improve performance for some workloads by smoothing the IO profile for data written to disk. This property is supported in CDH3u3 or later deployments.",
+    "relatedName" : "dfs.datanode.sync.behind.writes"
+  }, {
+    "name" : "dfs_datanode_https_port",
+    "required" : false,
+    "default" : "50475",
+    "displayName" : "Secure DataNode Web UI Port (SSL)",
+    "description" : "The base port where the secure DataNode web UI listens.  Combined with the DataNode's hostname to build its secure web UI address.",
+    "relatedName" : "dfs.datanode.https.address"
+  }, {
+    "name" : "datanode_log_dir",
+    "required" : false,
+    "default" : "/var/log/hadoop-hdfs",
+    "displayName" : "DataNode Log Directory",
+    "description" : "Directory where DataNode will place its log files.",
+    "relatedName" : "hadoop.log.dir"
+  }, {
+    "name" : "dfs_datanode_volume_choosing_policy",
+    "required" : false,
+    "default" : "org.apache.hadoop.hdfs.server.datanode.fsdataset.RoundRobinVolumeChoosingPolicy",
+    "displayName" : "DataNode Volume Choosing Policy",
+    "description" : "DataNode Policy for picking which volume should get a new block. The Available Space policy is only available starting with CDH 4.3.",
+    "relatedName" : "dfs.datanode.fsdataset.volume.choosing.policy"
+  }, {
+    "name" : "datanode_free_space_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"10.0\",\"warning\":\"20.0\"}",
+    "displayName" : "DataNode Free Space Monitoring Thresholds",
+    "description" : "The health test thresholds of free space in a DataNode. Specified as a percentage of the capacity on the DataNode.",
+    "relatedName" : ""
+  }, {
+    "name" : "rm_memory_hard_limit",
+    "required" : false,
+    "default" : "-1",
+    "displayName" : "Cgroup Memory Hard Limit",
+    "description" : "Hard memory limit to assign to this role, enforced by the Linux kernel. When the limit is reached, the kernel will reclaim pages charged to the process. If reclaiming fails, the kernel may kill the process. Both anonymous as well as page cache pages contribute to the limit. Use a value of -1 B to specify no limit. By default processes not managed by Cloudera Manager will have no limit.",
+    "relatedName" : "memory.limit_in_bytes"
+  }, {
+    "name" : "dfs_datanode_drop_cache_behind_writes",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable purging cache after writes",
+    "description" : "In some workloads, the data written to HDFS is known to be significantly large enough that it is unlikely to be useful to cache it in the operating system buffer cache. In this case, the DataNode may be configured to automatically purge all data from the buffer cache after it is written to disk. This may improve performance for some workloads by freeing buffer cache spare usage for more cacheable data. This property is supported in CDH3u3 or later deployments.",
+    "relatedName" : "dfs.datanode.drop.cache.behind.writes"
+  }, {
+    "name" : "rm_cpu_shares",
+    "required" : false,
+    "default" : "1024",
+    "displayName" : "Cgroup CPU Shares",
+    "description" : "Number of CPU shares to assign to this role. The greater the number of shares, the larger the share of the host's CPUs that will be given to this role when the host experiences CPU contention. Must be between 2 and 262144. Defaults to 1024 for processes not managed by Cloudera Manager.",
+    "relatedName" : "cpu.shares"
+  }, {
+    "name" : "rm_io_weight",
+    "required" : false,
+    "default" : "500",
+    "displayName" : "Cgroup I/O Weight",
+    "description" : "Weight for the read I/O requests issued by this role. The greater the weight, the higher the priority of the requests when the host experiences I/O contention. Must be between 100 and 1000. Defaults to 1000 for processes not managed by Cloudera Manager.",
+    "relatedName" : "blkio.weight"
+  }, {
+    "name" : "hadoop_metrics2_safety_valve",
+    "required" : false,
+    "displayName" : "Hadoop Metrics2 Advanced Configuration Snippet (Safety Valve)",
+    "description" : "Advanced Configuration Snippet (Safety Valve) for Hadoop Metrics2. Properties will be inserted into <strong>hadoop-metrics2.properties</strong>.",
+    "relatedName" : ""
+  }, {
+    "name" : "datanode_volume_failures_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"any\",\"warning\":\"never\"}",
+    "displayName" : "DataNode Volume Failures Thresholds",
+    "description" : "The health test thresholds of failed volumes in a DataNode.",
+    "relatedName" : ""
+  }, {
+    "name" : "datanode_connectivity_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "DataNode Connectivity Health Test",
+    "description" : "Enables the health test that verifies the DataNode is connected to the NameNode",
+    "relatedName" : ""
+  }, {
+    "name" : "enable_config_alerts",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Configuration Change Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when this entity's configuration changes.",
+    "relatedName" : ""
+  }, {
+    "name" : "datanode_web_metric_collection_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Web Metric Collection",
+    "description" : "Enables the health test that the Cloudera Manager Agent can successfully contact and gather metrics from the web server.",
+    "relatedName" : ""
+  }, {
+    "name" : "role_triggers",
+    "required" : false,
+    "default" : "[]",
+    "displayName" : "Role Triggers",
+    "description" : "<p>The configured triggers for this role. This is a JSON formatted list of triggers. These triggers are evaluated as part as the health system. Every trigger expression is parsed, and if the trigger condition is met, the list of actions provided in the trigger expression is executed.</p><p>Each trigger has all of the following fields:</p><ul><li><span class='code'>triggerName</span> <strong>(mandatory)</strong> - the name of the trigger. This value must be unique for the specific role. </li><li><span class='code'>triggerExpression</span> <strong>(mandatory)</strong> - a tsquery expression representing the trigger. <li><span class='code'>streamThreshold</span> <strong>(optional)</strong> - the maximum number of streams that can satisfy a condition of a trigger before the condition fires. By default set to 0, and any stream returned will cause the condition to fire. <li><span class='code'>enabled</span> <strong> (optional)</strong> - by default set to 'true'. If set to 'false' the trigger will not be evaluated.</p><p>For example, here is a JSON formatted trigger configured for a DataNode that fires if the DataNode has more than 1500 file-descriptors opened:</p><p><pre>[{\"triggerName\": \"sample-trigger\",\n  \"triggerExpression\": \"IF (SELECT fd_open WHERE roleName=$ROLENAME and last(fd_open) > 1500) DO health:red\",\n  \"streamThreshold\": 0}, \"enabled\": \"true\"]</pre></p><p>Consult the trigger rules documentation for more details on how to write triggers using tsquery.</p><p>The JSON format is evolving and may change in the future and as a result backward compatibility is not guaranteed between releases at this time.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "datanode_block_count_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"never\",\"warning\":\"200000.0\"}",
+    "displayName" : "DataNode Block Count Thresholds",
+    "description" : "The health test thresholds of the number of blocks on a DataNode",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_datanode_port",
+    "required" : false,
+    "default" : "50010",
+    "displayName" : "DataNode Transceiver Port",
+    "description" : "Port for DataNode's XCeiver Protocol. Combined with the DataNode's hostname to build its address.",
+    "relatedName" : "dfs.datanode.address"
+  } ]
+}

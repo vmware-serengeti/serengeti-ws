@@ -15,7 +15,6 @@
 package com.vmware.bdd.plugin.clouderamgr.utils;
 
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import java.util.regex.Pattern;
 
@@ -26,10 +25,10 @@ import java.util.regex.Pattern;
  */
 public class CmUtils {
 
-   public static int majorVersionOfHadoopStack(HadoopStack stack) {
+   public static String distroVersionOfHadoopStack(HadoopStack stack) {
       try {
          String[] versionInfo = stack.getDistro().split("-");
-         return (new DefaultArtifactVersion(versionInfo[1])).getMajorVersion();
+         return (versionInfo[1]);
       } catch (Exception e) {
          return Constants.VERSION_UNBOUNDED;
       }

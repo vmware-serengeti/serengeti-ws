@@ -1,0 +1,272 @@
+{
+  "name": "MAPREDUCE",
+  "displayName": "MAPREDUCE",
+  "parent": "CLUSTER",
+  "repository": "CDH",
+  "versionApiMin": "3",
+  "versionApiMax": "-1",
+  "versionCdhMin": "4",
+  "versionCdhMax": "-1",
+  "availableConfigurations" : [
+  {
+    "name" : "hdfs_service",
+    "required" : true,
+    "displayName" : "HDFS Service",
+    "description" : "Name of the HDFS service that this MapReduce service instance depends on",
+    "relatedName" : ""
+  }, {
+    "name" : "zookeeper_service",
+    "required" : false,
+    "displayName" : "ZooKeeper Service",
+    "description" : "Name of the ZooKeeper service that this MapReduce service instance depends on",
+    "relatedName" : ""
+  }, {
+    "name" : "smon_client_config_overrides",
+    "required" : false,
+    "default" : "<property><name>mapreduce.jobclient.rpc.timeout</name><value>10000</value></property><property><name>ipc.ping.interval</name><value>10000</value></property><property><name>ipc.client.connect.timeout</name><value>10000</value></property><property><name>ipc.client.connect.max.retries</name><value>0</value></property><property><name>ipc.client.connect.max.retries.on.timeouts</name><value>0</value></property><property><name>mapreduce.job.counters.limit</name><value>12000</value></property><property><name>mapreduce.job.counters.max</name><value>12000</value></property><property><name>mapreduce.job.counters.group.name.max</name><value>12800</value></property><property><name>mapreduce.job.counters.counter.name.max</name><value>12800</value></property><property><name>mapreduce.job.counters.groups.max</name><value>5000</value></property>",
+    "displayName" : "Service Monitor Client Config Overrides",
+    "description" : "For advanced use only, a list of configuration properties that will be used by the Service Monitor instead of the current client configuration for the service.",
+    "relatedName" : ""
+  }, {
+    "name" : "hive_proxy_user_hosts_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Hive Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the Hive user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "relatedName" : "hadoop.proxyuser.hive.hosts"
+  }, {
+    "name" : "mapreduce_standby_jobtrackers_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Standby JobTracker Health Test",
+    "description" : "When computing the overall cluster health, consider the health of the standby JobTracker.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapreduce_service_env_safety_valve",
+    "required" : false,
+    "displayName" : "MapReduce Service Environment Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, key-value pairs (one on each line) to be inserted into a role's environment. Applies to configurations of all roles in this service except client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "hdfs_proxy_user_hosts_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "HDFS Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the HDFS user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "relatedName" : "hadoop.proxyuser.hdfs.hosts"
+  }, {
+    "name" : "mapreduce_active_jobtracker_detecton_window",
+    "required" : false,
+    "default" : "3",
+    "displayName" : "Active JobTracker Detection Window",
+    "description" : "The tolerance window that will be used in Mapreduce service tests that depend on detection of the active JobTracker.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapreduce_hadoop_policy_config_safety_valve",
+    "required" : false,
+    "displayName" : "MapReduce Service Advanced Configuration Snippet (Safety Valve) for hadoop-policy.xml",
+    "description" : "For advanced use only, a string to be inserted into <strong>hadoop-policy.xml</strong>. Applies to configurations of all roles in this service except client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "dfs_client_read_shortcircuit",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable HDFS Short Circuit Read",
+    "description" : "Enable HDFS short circuit read. This allows a client co-located with the DataNode to read HDFS file blocks directly. This gives a performance boost to distributed clients that are aware of locality.",
+    "relatedName" : "dfs.client.read.shortcircuit"
+  }, {
+    "name" : "smon_derived_configs_safety_valve",
+    "required" : false,
+    "displayName" : "Service Monitor Derived Configs Advanced Configuration Snippet (Safety Valve)",
+    "description" : "For advanced use only, a list of derived configuration properties that will be used by the Service Monitor instead of the default ones.",
+    "relatedName" : ""
+  }, {
+    "name" : "catch_events",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Log Event Capture",
+    "description" : "When set, each role will identify important log events and forward them to Cloudera Manager.",
+    "relatedName" : ""
+  }, {
+    "name" : "firehose_activity_slow_alert",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Alert on Slow Activities",
+    "description" : "If enabled, an alert will be generated when an activity has been running longer than the duration specified in the 'Activity Duration Rules' setting.",
+    "relatedName" : ""
+  }, {
+    "name" : "oozie_proxy_user_hosts_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Oozie Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the oozie user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "relatedName" : "hadoop.proxyuser.oozie.hosts"
+  }, {
+    "name" : "failover_controllers_healthy_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Failover Controllers Healthy",
+    "description" : "Enables the health check that verifies that the failover controllers associated with this service are healthy and running.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapred_system_dir",
+    "required" : false,
+    "default" : "/tmp/mapred/system",
+    "displayName" : "MapReduce System Directory",
+    "description" : "The HDFS directory where the MapReduce service stores system files. This directory must be accessible from both the server and client machines. For example: /hadoop/mapred/system/",
+    "relatedName" : "mapred.system.dir"
+  }, {
+    "name" : "hadoop_secure_web_ui",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Authentication for HTTP Web-Consoles",
+    "description" : "Enables authentication for hadoop HTTP web-consoles for all roles of this service. <b>Note:</b> This is effective only if security is enabled for the HDFS service.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapreduce_job_counters_limit",
+    "required" : false,
+    "default" : "120",
+    "displayName" : "Job Counters Limit",
+    "description" : "Limit on the number of counters allowed per job.",
+    "relatedName" : "mapreduce.job.counters.max"
+  }, {
+    "name" : "hdfs_proxy_user_groups_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "HDFS Proxy User Groups",
+    "description" : "Comma-delimited list of groups that you want to allow the HDFS user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "relatedName" : "hadoop.proxyuser.hdfs.groups"
+  }, {
+    "name" : "hive_proxy_user_groups_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Hive Proxy User Groups",
+    "description" : "Comma-delimited list of groups that you want to allow the Hive user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "relatedName" : "hadoop.proxyuser.hive.groups"
+  }, {
+    "name" : "mapreduce_service_config_safety_valve",
+    "required" : false,
+    "displayName" : "MapReduce Service Advanced Configuration Snippet (Safety Valve) for mapred-site.xml",
+    "description" : "For advanced use only, a string to be inserted into <strong>mapred-site.xml</strong>. Applies to configurations of all roles in this service except client configuration.",
+    "relatedName" : ""
+  }, {
+    "name" : "oozie_proxy_user_groups_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Oozie Proxy User Groups",
+    "description" : "Allows the oozie superuser to impersonate any members of a comma-delimited list of groups. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "relatedName" : "hadoop.proxyuser.oozie.groups"
+  }, {
+    "name" : "enable_alerts",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Service Level Health Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when the health of this service reaches the threshold specified by the EventServer setting eventserver_health_events_alert_threshold",
+    "relatedName" : ""
+  }, {
+    "name" : "io_file_buffer_size",
+    "required" : false,
+    "default" : "65536",
+    "displayName" : "SequenceFile I/O Buffer Size",
+    "description" : "Size of buffer for read and write operations of SequenceFiles.",
+    "relatedName" : "io.file.buffer.size"
+  }, {
+    "name" : "hue_kerberos_principal_shortname",
+    "required" : false,
+    "default" : "hue",
+    "displayName" : "Hue's Kerberos Principal Short Name",
+    "description" : "The short name of Hue's Kerberos principal",
+    "relatedName" : "hue.kerberos.principal.shortname"
+  }, {
+    "name" : "service_triggers",
+    "required" : false,
+    "default" : "[]",
+    "displayName" : "Service Triggers",
+    "description" : "<p>The configured triggers for this service. This is a JSON formatted list of triggers. These triggers are evaluated as part as the health system. Every trigger expression is parsed, and if the trigger condition is met, the list of actions provided in the trigger expression is executed.</p><p>Each trigger has all of the following fields:</p><ul><li><span class='code'>triggerName</span> <strong>(mandatory)</strong> - the name of the trigger. This value must be unique for the specific service. </li><li><span class='code'>triggerExpression</span> <strong>(mandatory)</strong> - a tsquery expression representing the trigger. </li><li><span class='code'>streamThreshold</span> <strong>(optional)</strong> - the maximum number of streams that can satisfy a condition of a trigger before the condition fires. By default set to 0, and any stream returned will cause the condition to fire. </li><li><span class='code'>enabled</span> <strong> (optional)</strong> - by default set to 'true'. If set to 'false' the trigger will not be evaluated.</li></ul></p><p>For example, here is a JSON formatted trigger that fires if there are more than 10 DataNodes with more than 500 file-descriptors opened:</p><p><pre>[{\"triggerName\": \"sample-trigger\",\n  \"triggerExpression\": \"IF (SELECT fd_open WHERE roleType = DataNode and last(fd_open) > 500) DO health:bad\",\n  \"streamThreshold\": 10, \"enabled\": \"true\"}]</pre></p><p>Consult the trigger rules documentation for more details on how to write triggers using tsquery.</p><p>The JSON format is evolving and may change in the future and as a result backward compatibility is not guaranteed between releases at this time.</p>",
+    "relatedName" : ""
+  }, {
+    "name" : "mapreduce_jobtracker_activation_startup_tolerance",
+    "required" : false,
+    "default" : "180",
+    "displayName" : "JobTracker Activation Startup Tolerance",
+    "description" : "The amount of time after JobTracker(s) start that the lack of an active JobTracker will be tolerated. This is intended to allow either the auto-failover daemon to make a JobTracker active, or a specifically issued failover command to take effect. This is an advanced option that does not often need to be changed.",
+    "relatedName" : ""
+  }, {
+    "name" : "firehose_activity_duration_rules",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Activity Duration Rules",
+    "description" : "To generate an event when certain activities are running slowly, enter rules for the activities in this setting. The syntax for a rule is '&lt;regex&gt;=&lt;number&gt;' where &lt;number&gt; is in minutes.  Enter one rule per line in this text box. When a new activity starts, each &lt;regex&gt; expression is tested against the name of the activity for a match. The first rule that matches is used.  If an activity matches a rule and runs longer than the &lt;number&gt; of minutes, an event will be sent.",
+    "relatedName" : ""
+  }, {
+    "name" : "process_username",
+    "required" : false,
+    "default" : "mapred",
+    "displayName" : "System User",
+    "description" : "The user that this service's processes should run as.",
+    "relatedName" : ""
+  }, {
+    "name" : "hue_proxy_user_groups_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Hue Proxy User Groups",
+    "description" : "Comma-delimited list of groups that you want to allow the Hue user to impersonate. The default '*' allows all groups. To disable entirely, use a string that doesn't correspond to a group name, such as '_no_group_'.",
+    "relatedName" : "hadoop.proxyuser.hue.groups"
+  }, {
+    "name" : "enable_config_alerts",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Configuration Change Alerts",
+    "description" : "When set, Cloudera Manager will send alerts when this entity's configuration changes.",
+    "relatedName" : ""
+  }, {
+    "name" : "firehose_activity_failure_alert",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Alert on Activity Failure",
+    "description" : "If enabled, an alert will be generated when any activity fails.",
+    "relatedName" : ""
+  }, {
+    "name" : "mapreduce_jobtracker_health_enabled",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "JobTracker Role Health Test",
+    "description" : "When computing the overall MapReduce cluster health, consider the JobTracker's health",
+    "relatedName" : ""
+  }, {
+    "name" : "hue_proxy_user_hosts_list",
+    "required" : false,
+    "default" : "*",
+    "displayName" : "Hue Proxy User Hosts",
+    "description" : "Comma-delimited list of hosts where you want to allow the Hue user to impersonate other users. The default '*' allows all hosts. To disable entirely, use a string that doesn't correspond to a host name, such as '_no_host'.",
+    "relatedName" : "hadoop.proxyuser.hue.hosts"
+  }, {
+    "name" : "log_event_retry_frequency",
+    "required" : false,
+    "default" : "30",
+    "displayName" : "Log Event Retry Frequency",
+    "description" : "The frequency in which the log4j event publication appender will retry sending undelivered log events to the Event server, in seconds",
+    "relatedName" : ""
+  }, {
+    "name" : "mapreduce_tasktrackers_healthy_thresholds",
+    "required" : false,
+    "default" : "{\"critical\":\"90.0\",\"warning\":\"95.0\"}",
+    "displayName" : "Healthy TaskTracker Monitoring Thresholds",
+    "description" : "The health test thresholds of the overall TaskTracker health. The check returns \"Concerning\" health if the percentage of \"Healthy\" TaskTrackers falls below the warning threshold. The check is unhealthy if the total percentage of \"Healthy\" and \"Concerning\" TaskTrackers falls below the critical threshold.",
+    "relatedName" : ""
+  }, {
+    "name" : "process_groupname",
+    "required" : false,
+    "default" : "hadoop",
+    "displayName" : "System Group",
+    "description" : "The group that this service's processes should run as.",
+    "relatedName" : ""
+  }, {
+    "name" : "hdfs_user_home_dir",
+    "required" : false,
+    "default" : "/var/lib/hadoop-mapreduce",
+    "displayName" : "System User's Home Directory",
+    "description" : "The home directory of the system user on the local filesystem. This setting must reflect the system's configured value - only changing it here will not change the actual home directory.",
+    "relatedName" : ""
+  } ]
+}

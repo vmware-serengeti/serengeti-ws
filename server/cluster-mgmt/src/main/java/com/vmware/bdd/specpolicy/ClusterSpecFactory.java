@@ -32,6 +32,7 @@ import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.Version;
 
 public class ClusterSpecFactory {
    private enum MAPREDUCE_VERSION {
@@ -330,13 +331,13 @@ public class ClusterSpecFactory {
          String distroVersion) {
 
       if (vendor.trim().equalsIgnoreCase(Constants.HDP_VENDOR)) {
-         if (distroVersion.startsWith("1.")) {
+         if (Version.compare(distroVersion, "1.0") >= 0 && Version.compare(distroVersion, "2.0") < 0) {
             return HDP_VERSION.V1;
-         } else if (distroVersion.startsWith("2.0")) {
+         } else if (Version.compare(distroVersion, "2.0") >= 0 && Version.compare(distroVersion, "2.1") < 0) {
             return HDP_VERSION.V2_0;
-         } else if (distroVersion.startsWith("2.1")) {
+         } else if (Version.compare(distroVersion, "2.1") >= 0 && Version.compare(distroVersion, "2.2") < 0) {
             return HDP_VERSION.V2_1;
-         } else if (distroVersion.startsWith("2.2")) {
+         } else if (Version.compare(distroVersion, "2.2") >= 0 && Version.compare(distroVersion, "2.3") < 0) {
             return HDP_VERSION.V2_2;
          } else {
             return HDP_VERSION.UNKNOWN;

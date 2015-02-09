@@ -42,6 +42,7 @@ import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.Version;
 
 /**
  * Cluster creation spec
@@ -722,41 +723,10 @@ public class ClusterCreate implements Serializable {
          String version =
                this.getDistroVersion()
                      .substring(matcher.start(), matcher.end());
-         if (compare(version, "4.2.1") > 0) {
+         if (Version.compare(version, "4.2.1") > 0) {
             warningMsgList.add(Constants.MUST_CONFIGURE_FQDN);
          }
       }
-   }
-
-   private int compare(String srcVersion, String destVersion) {
-      String[] srcVersionArray = srcVersion.split("\\.");
-      String[] destVersionArray = destVersion.split("\\.");
-      for (int i = 0; i < srcVersionArray.length; i++) {
-         if (i >= destVersionArray.length) {
-            return compare(destVersionArray, srcVersionArray, 1);
-         }
-         if (Integer.parseInt(srcVersionArray[i]) > Integer
-               .parseInt(destVersionArray[i])) {
-            return 1;
-         } else if (Integer.parseInt(srcVersionArray[i]) < Integer
-               .parseInt(destVersionArray[i])) {
-            return -1;
-         }
-      }
-      if (destVersionArray.length > srcVersionArray.length) {
-         return compare(srcVersionArray, destVersionArray, -1);
-      }
-      return 0;
-   }
-
-   private int compare(String[] srcVersionArray, String[] destVersionArray,
-         int type) {
-      for (int j = srcVersionArray.length; j < destVersionArray.length; j++) {
-         if (Integer.parseInt(destVersionArray[j]) > 0) {
-            return type;
-         }
-      }
-      return 0;
    }
 
    public void validateNodeGroupNames() {

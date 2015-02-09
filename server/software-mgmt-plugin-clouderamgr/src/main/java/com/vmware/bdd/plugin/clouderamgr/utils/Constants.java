@@ -27,7 +27,7 @@ public interface Constants {
    public static final String CDH_DISTRO_VENDOR = "CDH";
    public static final String CDH_PLUGIN_NAME = "ClouderaManager";
    public static final String CMS_NAME_TOKEN_DELIM = "_";
-   public static final int VERSION_UNBOUNDED = -1;
+   public static final String VERSION_UNBOUNDED = "-1";
 
    public static final String CONFIG_DFS_NAME_DIR_LIST = "dfs_name_dir_list";
    public static final String CONFIG_DFS_DATA_DIR_LIST = "dfs_data_dir_list";

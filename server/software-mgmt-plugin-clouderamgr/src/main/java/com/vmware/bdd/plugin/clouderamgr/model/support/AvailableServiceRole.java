@@ -19,12 +19,10 @@ import com.google.gson.annotations.Expose;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -49,16 +47,16 @@ public class AvailableServiceRole implements Comparable<AvailableServiceRole> {
    private AvailableParcelRepo repository;
 
    @Expose
-   private int versionApiMin;
+   private String versionApiMin;
 
    @Expose
-   private int versionApiMax;
+   private String versionApiMax;
 
    @Expose
-   private int versionCdhMin;
+   private String versionCdhMin;
 
    @Expose
-   private int versionCdhMax;
+   private String versionCdhMax;
 
    @Expose(serialize = false)
    private Map<String, AvailableConfiguration> availableConfigurations;
@@ -100,35 +98,35 @@ public class AvailableServiceRole implements Comparable<AvailableServiceRole> {
       this.repository = AvailableParcelRepo.valueOf(repository);
    }
 
-   public int getVersionApiMin() {
+   public String getVersionApiMin() {
       return versionApiMin;
    }
 
-   public void setVersionApiMin(int versionApiMin) {
+   public void setVersionApiMin(String versionApiMin) {
       this.versionApiMin = versionApiMin;
    }
 
-   public int getVersionApiMax() {
+   public String getVersionApiMax() {
       return versionApiMax;
    }
 
-   public void setVersionApiMax(int versionApiMax) {
+   public void setVersionApiMax(String versionApiMax) {
       this.versionApiMax = versionApiMax;
    }
 
-   public int getVersionCdhMin() {
+   public String getVersionCdhMin() {
       return versionCdhMin;
    }
 
-   public void setVersionCdhMin(int versionCdhMin) {
+   public void setVersionCdhMin(String versionCdhMin) {
       this.versionCdhMin = versionCdhMin;
    }
 
-   public int getVersionCdhMax() {
+   public String getVersionCdhMax() {
       return versionCdhMax;
    }
 
-   public void setVersionCdhMax(int versionCdhMax) {
+   public void setVersionCdhMax(String versionCdhMax) {
       this.versionCdhMax = versionCdhMax;
    }
 

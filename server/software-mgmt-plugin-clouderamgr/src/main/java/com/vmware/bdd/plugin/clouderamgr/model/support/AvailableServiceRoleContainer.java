@@ -19,7 +19,6 @@ import com.google.gson.GsonBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,6 +26,8 @@ import java.util.Set;
 
 import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
 import com.vmware.bdd.plugin.clouderamgr.utils.SerialUtils;
+import com.vmware.bdd.utils.Version;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -45,11 +46,11 @@ public class AvailableServiceRoleContainer {
       if (homeDir != null && homeDir.length() > 0) {
          StringBuilder builder = new StringBuilder();
          builder.append(homeDir).append(File.separator).append("conf")
-               .append(File.separator).append("cloudera-manager");
+               .append(File.separator).append("ClouderaManager").append(File.separator).append("available-services-and-roles");
          clouderaConfDir = builder.toString();
       } else {
          // for test only
-         clouderaConfDir = AvailableServiceRoleContainer.class.getClassLoader().getResource("cloudera-manager").getPath();
+         clouderaConfDir = AvailableServiceRoleContainer.class.getClassLoader().getResource("available-services-and-roles").getPath();
       }
    }
 
@@ -94,35 +95,47 @@ public class AvailableServiceRoleContainer {
     * @return
     * @throws IOException
     */
-   public static Set<String> allServices(int majorVersion) throws IOException {
+   public static Set<String> allServices(String distroVersion) throws IOException {
       loadAll();
       Set<String> services = new HashSet<String>();
       for (AvailableServiceRole element : elements.values()) {
-         if (element.isService() && isSupported(majorVersion, element)) {
+         if (element.isService() && isSupported(distroVersion, element)) {
             services.add(element.getDisplayName());
          }
       }
       return services;
    }
 
-   public static boolean isSupported(int majorVersion, AvailableServiceRole element) {
-      if (majorVersion == Constants.VERSION_UNBOUNDED) {
+   public static boolean isSupported(String distroVersion, AvailableServiceRole element) {
+      if (Constants.VERSION_UNBOUNDED.equals(distroVersion)) {
          return true;
       }
-      if (majorVersion < element.getVersionCdhMin()) {
+
+      boolean isGreaterThanMinVersion = false;
+      boolean isLessThanMaxVersion = false;
+
+      String cdhMinVersion = element.getVersionCdhMin();
+      if (Version.compare(distroVersion, cdhMinVersion) >= 0) {
+         isGreaterThanMinVersion = true;
+      }
+
+      String cdhMaxVersion = element.getVersionCdhMax();
+      if (Constants.VERSION_UNBOUNDED.equals(cdhMaxVersion) || Version.compare(distroVersion, cdhMaxVersion) <= 0) {
+         isLessThanMaxVersion = true;
+      }
+
+      if (isGreaterThanMinVersion && isLessThanMaxVersion) {
+         return true;
+      } else {
          return false;
       }
-      if (element.getVersionCdhMax() != Constants.VERSION_UNBOUNDED  && majorVersion > element.getVersionCdhMax()) {
-         return false;
-      }
-      return true;
    }
 
-   public static String getSupportedConfigs(int majorVersion) throws IOException {
+   public static String getSupportedConfigs(String distroVersion) throws IOException {
       loadAll();
       Map<String, Object> configs = new HashMap<String, Object>();
       for (AvailableServiceRole element : elements.values()) {
-         if ((element.isService() || element.isRole()) && isSupported(majorVersion, element)) {
+         if ((element.isService() || element.isRole()) && isSupported(distroVersion, element)) {
             configs.put(element.getDisplayName(), element.getAvailableConfigurations().keySet());
          }
       }
@@ -139,11 +152,11 @@ public class AvailableServiceRoleContainer {
     * @return
     * @throws IOException
     */
-   public static Set<String> allRoles(int majorVersion) throws IOException {
+   public static Set<String> allRoles(String distroVersion) throws IOException {
       loadAll();
       Set<String> roles = new HashSet<String>();
       for (AvailableServiceRole element : elements.values()) {
-         if (element.isRole() && isSupported(majorVersion, element)) {
+         if (element.isRole() && isSupported(distroVersion, element)) {
             roles.add(element.getDisplayName());
          }
       }
