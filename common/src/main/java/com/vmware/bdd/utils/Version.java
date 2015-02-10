@@ -14,20 +14,32 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
+import org.apache.log4j.Logger;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+
 public class Version {
+   private static final Logger logger = Logger.getLogger(Version.class);
 
    public static int compare(String srcVersion, String destVersion) {
-      String[] srcVersionArray = srcVersion.split("\\.");
-      String[] destVersionArray = destVersion.split("\\.");
+      logger.info("srcVersion before change to artifact version: " + srcVersion);
+      logger.info("destVersion before change to artifact version: " + destVersion);
+
+      DefaultArtifactVersion srcArtifactVersion = new DefaultArtifactVersion(srcVersion);
+      DefaultArtifactVersion destArtifactVersion = new DefaultArtifactVersion(destVersion);
+
+      int[] srcVersionArray = {srcArtifactVersion.getMajorVersion(), srcArtifactVersion.getMinorVersion(), srcArtifactVersion.getIncrementalVersion()};
+      int[] destVersionArray = {destArtifactVersion.getMajorVersion(), destArtifactVersion.getMinorVersion(), destArtifactVersion.getIncrementalVersion()};
+
+      logger.info("srcVersion after change to artifact version: " + srcArtifactVersion.getMajorVersion() + "." + srcArtifactVersion.getMinorVersion() + "." + srcArtifactVersion.getIncrementalVersion());
+      logger.info("destVersion after change to artifact version: " + destArtifactVersion.getMajorVersion() + "." + destArtifactVersion.getMinorVersion() + "." + destArtifactVersion.getIncrementalVersion());
+
       for (int i = 0; i < srcVersionArray.length; i++) {
          if (i >= destVersionArray.length) {
             return compare(destVersionArray, srcVersionArray, 1);
          }
-         if (Integer.parseInt(srcVersionArray[i]) > Integer
-               .parseInt(destVersionArray[i])) {
+         if (srcVersionArray[i] > destVersionArray[i]) {
             return 1;
-         } else if (Integer.parseInt(srcVersionArray[i]) < Integer
-               .parseInt(destVersionArray[i])) {
+         } else if (srcVersionArray[i] < destVersionArray[i]) {
             return -1;
          }
       }
@@ -37,10 +49,10 @@ public class Version {
       return 0;
    }
 
-   public static int compare(String[] srcVersionArray, String[] destVersionArray,
+   public static int compare(int[] srcVersionArray, int[] destVersionArray,
          int type) {
       for (int j = srcVersionArray.length; j < destVersionArray.length; j++) {
-         if (Integer.parseInt(destVersionArray[j]) > 0) {
+         if (destVersionArray[j] > 0) {
             return type;
          }
       }

@@ -21,7 +21,8 @@ public class TestVersion {
 
    @Test
    public void testCompare() {
-      
+
+      Assert.assertTrue(Version.compare("5.0.2-1.cdh5.0.2.p0.13", "5.0.1") > 0);
       Assert.assertTrue(Version.compare("6", "5") > 0);
       Assert.assertTrue(Version.compare("6", "5.9") > 0);
       Assert.assertTrue(Version.compare("5.1", "5") > 0);
