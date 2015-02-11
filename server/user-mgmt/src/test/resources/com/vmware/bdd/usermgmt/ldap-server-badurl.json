@@ -1,7 +1,7 @@
 {
     "name": "default ad server",
     "type": "LDAP",
-    "primaryUrl": "ldap://unknown.eng.vmware.com",
+    "primaryUrl": "ldap://unknown.company.com",
     "baseUserDn": "ou=users,dc=bde,dc=vmware,dc=com",
     "baseGroupDn": "ou=groups,dc=bde,dc=vmware,dc=com",
     "userName": "cn=Manager,dc=bde,dc=vmware,dc=com",

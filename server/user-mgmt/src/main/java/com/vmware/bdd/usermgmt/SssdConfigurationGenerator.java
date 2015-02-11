@@ -54,11 +54,8 @@ public class SssdConfigurationGenerator {
       if (isTemplateContentEmpty()) {
          Map<UserMgmtServer.Type, StringBuilder> templateMap = new HashMap<>();
          synchronized (templateContent) {
-
-            File usermgmtConfDir = new File(System.getProperty("serengeti.home.dir") + File.separator + "conf"
-            + File.separator + "usermgmt");
             for (UserMgmtServer.Type type : UserMgmtServer.Type.values()) {
-               File templateFile = CommonUtil.getConfigurationFile(SSSD_CONF_TEMPLATES + type, "sssd.conf");
+               File templateFile = CommonUtil.getConfigurationFile("usermgmt" + File.separator + SSSD_CONF_TEMPLATES + type, "sssd.conf");
                HashMap<String, String> typeMap = new HashMap<>();
 
                StringBuilder stringBuilder = new StringBuilder();
