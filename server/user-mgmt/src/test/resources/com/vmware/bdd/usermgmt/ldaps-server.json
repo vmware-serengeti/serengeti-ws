@@ -1,7 +1,7 @@
 {
     "name": "default ad server",
     "type": "LDAP",
-    "primaryUrl": "ldaps://pek2-aurora-dev-01-113-dhcp137.eng.vmware.com",
+    "primaryUrl": "ldaps://10.112.113.137",
     "baseUserDn": "ou=users,dc=bde,dc=vmware,dc=com",
     "baseGroupDn": "ou=groups,dc=bde,dc=vmware,dc=com",
     "userName": "cn=Manager,dc=bde,dc=vmware,dc=com",

@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.vmware.bdd.apitypes.UserMgmtServer;
+import com.vmware.bdd.utils.CommonUtil;
 
 /**
  * Created By xiaoliangl on 12/31/14.
@@ -53,10 +54,11 @@ public class SssdConfigurationGenerator {
       if (isTemplateContentEmpty()) {
          Map<UserMgmtServer.Type, StringBuilder> templateMap = new HashMap<>();
          synchronized (templateContent) {
+
             File usermgmtConfDir = new File(System.getProperty("serengeti.home.dir") + File.separator + "conf"
             + File.separator + "usermgmt");
             for (UserMgmtServer.Type type : UserMgmtServer.Type.values()) {
-               File templateFile = new File(usermgmtConfDir, SSSD_CONF_TEMPLATES + type);
+               File templateFile = CommonUtil.getConfigurationFile(SSSD_CONF_TEMPLATES + type, "sssd.conf");
                HashMap<String, String> typeMap = new HashMap<>();
 
                StringBuilder stringBuilder = new StringBuilder();

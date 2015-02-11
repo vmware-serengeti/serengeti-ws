@@ -31,7 +31,7 @@ ldap_group_object_class = posixGroup
 ldap_user_search_base = ou=users,dc=bde,dc=vmware,dc=com
 ldap_group_search_base = ou=groups,dc=bde,dc=vmware,dc=com
 
-ldap_uri = ldap://pek2-aurora-dev-01-113-dhcp137.eng.vmware.com
+ldap_uri = ldap://10.112.113.137
 ldap_default_bind_dn = cn=Manager,dc=bde,dc=vmware,dc=com
 ldap_default_authtok = openldap
 
