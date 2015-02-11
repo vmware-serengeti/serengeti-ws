@@ -28,7 +28,10 @@ public class MessageBundleCache {
       if(bundle != null) {
          return bundle;
       }
+      Messages messages = new Messages(ResourceBundle.getBundle(bundleName));
 
-      return CACHE.putIfAbsent(bundleName, new Messages(ResourceBundle.getBundle(bundleName)));
+      CACHE.putIfAbsent(bundleName, messages);
+
+      return messages;
    }
 }

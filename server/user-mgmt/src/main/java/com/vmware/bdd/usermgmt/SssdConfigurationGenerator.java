@@ -36,6 +36,7 @@ import com.vmware.bdd.apitypes.UserMgmtServer;
 @Component
 @Scope("singleton")
 public class SssdConfigurationGenerator {
+   public static final String SSSD_CONF_TEMPLATES = "sssd.conf.templates.";
    private Map<UserMgmtServer.Type, StringBuilder> templateContent = new HashMap<>();
 
    private Map<UserMgmtServer.Type, Map<String, String>> mapping = new HashMap<>();
@@ -55,7 +56,7 @@ public class SssdConfigurationGenerator {
             File usermgmtConfDir = new File(System.getProperty("serengeti.home.dir") + File.separator + "conf"
             + File.separator + "usermgmt");
             for (UserMgmtServer.Type type : UserMgmtServer.Type.values()) {
-               File templateFile = new File(usermgmtConfDir, "sssd.conf.template." + type);
+               File templateFile = new File(usermgmtConfDir, SSSD_CONF_TEMPLATES + type);
                HashMap<String, String> typeMap = new HashMap<>();
 
                StringBuilder stringBuilder = new StringBuilder();

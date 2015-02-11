@@ -12,38 +12,19 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *****************************************************************************/
-package com.vmware.bdd.exception;
+package com.vmware.bdd.usermgmt;
 
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import org.testng.annotations.Test;
+
+import com.vmware.bdd.usermgmt.job.UserMgmtExecException;
 
 /**
- * Created By xiaoliangl on 1/22/15.
+ * Created By xiaoliangl on 2/11/15.
  */
-public class Messages {
-   private ResourceBundle resourceBundle = null;
+public class TestUserMgmtException {
 
-
-
-   public Messages(ResourceBundle resourceBundle1) {
-      this.resourceBundle = resourceBundle1;
-   }
-
-   public String getString(String key, Object... details) {
-      String msg = null;
-      try {
-         if(resourceBundle != null) {
-            msg = resourceBundle.getString(key);
-            if (details != null) {
-               msg = String.format(msg, details);
-            }
-         } else {
-            msg = '!' + key + '!';
-         }
-      } catch (MissingResourceException e) {
-         msg = '!' + key + '!';
-      }
-
-      return msg;
+   @Test(expectedExceptions = UserMgmtException.class, expectedExceptionsMessageRegExp = "Current usermgmt mode is null\\.")
+   public void test() {
+      throw new UserMgmtExecException("CURRENT_USER_MGMT_MODE_IS_NULL", null);
    }
 }

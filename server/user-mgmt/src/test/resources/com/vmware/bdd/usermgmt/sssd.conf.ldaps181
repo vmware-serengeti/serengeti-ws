@@ -35,7 +35,6 @@ ldap_uri = ldap://10.112.113.181
 ldap_default_bind_dn = xiaoliangl@bde.vmware.com
 ldap_default_authtok = VMware123
 
-
 ldap_access_filter = (|(memberOf=cn=Administrators,cn=Builtin,dc=bde,dc=vmware,dc=com)(memberOf=cn=Users,cn=Builtin,dc=bde,dc=vmware,dc=com))
 
 min_id = 1

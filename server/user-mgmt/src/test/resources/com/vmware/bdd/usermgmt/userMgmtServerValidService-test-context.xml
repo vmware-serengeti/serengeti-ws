@@ -9,7 +9,7 @@
 
    <bean name="userMgmtServerValidService" class="com.vmware.bdd.usermgmt.UserMgmtServerValidService" />
 
-   <bean name="sssdLdapConstantMappings" class="com.vmware.bdd.usermgmt.SssdLdapConstantMappings"/>
-
    <bean class="com.vmware.bdd.usermgmt.mocks.LdapsTrustStoreConfigMock" />
+
+   <bean class="com.vmware.bdd.usermgmt.SssdConfigurationGenerator"/>
 </beans>

@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.UserMgmtServer;
@@ -44,6 +46,17 @@ public class TestUserMgmtServerValidService_Ldap extends AbstractTestNGSpringCon
       ObjectMapper objectMapper = new ObjectMapper();
       InputStream ris = TestUserMgmtServerValidService_Ldap.class.getResourceAsStream("/com/vmware/bdd/usermgmt/" + fileName);
       return objectMapper.readValue(new InputStreamReader(ris), UserMgmtServer.class);
+   }
+
+
+   @BeforeClass
+   public void setup() throws IOException {
+      TestSssdConfigurationGenerator.setupSssdTemplates();
+   }
+
+   @AfterClass
+   public void teardown() {
+      TestSssdConfigurationGenerator.teardownSssdTemplates();
    }
 
    @Test

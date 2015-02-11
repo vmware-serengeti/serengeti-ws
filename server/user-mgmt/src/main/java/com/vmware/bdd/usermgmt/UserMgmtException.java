@@ -14,20 +14,15 @@
  *****************************************************************************/
 package com.vmware.bdd.usermgmt;
 
-import com.vmware.bdd.usermgmt.i18n.Messages;
+import com.vmware.bdd.exception.ExceptionBase;
 
 /**
  * Created By xiaoliangl on 12/19/14.
  */
-public class UserMgmtException extends RuntimeException {
-   private String errorId = null;
+public class UserMgmtException extends ExceptionBase {
+   private static final String BUNDLE_NAME = "com.vmware.bdd.usermgmt.i18n.messages"; //$NON-NLS-1$
 
    public UserMgmtException(String errId, Throwable throwable, Object... details) {
-      super(Messages.getString(errId, details), throwable);
-      errorId = errId;
-   }
-
-   public String getErrorId() {
-      return errorId;
+      super(throwable, BUNDLE_NAME, errId, details);
    }
 }

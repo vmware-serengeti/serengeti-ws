@@ -16,15 +16,20 @@ package com.vmware.bdd.usermgmt;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.util.FileCopyUtils;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -39,9 +44,18 @@ import com.vmware.bdd.validation.ValidationError;
  */
 @ContextConfiguration(locations = "classpath:/com/vmware/bdd/usermgmt/userMgmtServerValidService-test-context.xml")
 public class TestUserMgmtServerValidService_Ldaps extends AbstractTestNGSpringContextTests {
-
    @Autowired
    private UserMgmtServerValidService validService;
+
+   @BeforeClass
+   public void setup() throws IOException {
+      TestSssdConfigurationGenerator.setupSssdTemplates();
+   }
+
+   @AfterClass
+   public void teardown() {
+      TestSssdConfigurationGenerator.teardownSssdTemplates();
+   }
 
    @BeforeMethod
    public void beforeMethod() throws IOException {

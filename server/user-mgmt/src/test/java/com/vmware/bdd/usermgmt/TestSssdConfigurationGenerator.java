@@ -24,7 +24,6 @@ import java.io.InputStreamReader;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.FileSystemUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -41,6 +40,11 @@ public class TestSssdConfigurationGenerator {
 
    @BeforeClass
    public void setup() throws IOException {
+      setupSssdTemplates();
+      sssdConfigurationGenerator = new SssdConfigurationGenerator();
+   }
+
+   public static void setupSssdTemplates() throws IOException {
       String tmpDirPath = System.getProperty("java.io.tmpdir");
 
       if(StringUtils.isNotBlank(System.getProperty("serengeti.home.dir"))) {
@@ -53,28 +57,30 @@ public class TestSssdConfigurationGenerator {
       usermgmrConfDir.mkdirs();
       usermgmrConfDir.deleteOnExit();
 
-      File tmpFile = new File(usermgmrConfDir, "sssd.conf.template.LDAP");
+      File tmpFile = new File(usermgmrConfDir, SssdConfigurationGenerator.SSSD_CONF_TEMPLATES + "LDAP");
       tmpFile.createNewFile();
       tmpFile.deleteOnExit();
-      FileCopyUtils.copy(readResource("sssd.conf.template.LDAP"), new FileWriter(tmpFile));
+      FileCopyUtils.copy(readResource(SssdConfigurationGenerator.SSSD_CONF_TEMPLATES + "LDAP"), new FileWriter(tmpFile));
 
-      tmpFile = new File(usermgmrConfDir, "sssd.conf.template.AD_AS_LDAP");
+      tmpFile = new File(usermgmrConfDir, SssdConfigurationGenerator.SSSD_CONF_TEMPLATES + "AD_AS_LDAP");
       tmpFile.createNewFile();
       tmpFile.deleteOnExit();
-      FileCopyUtils.copy(readResource("sssd.conf.template.AD_AS_LDAP"), new FileWriter(tmpFile));
-
-      sssdConfigurationGenerator = new SssdConfigurationGenerator();
+      FileCopyUtils.copy(readResource(SssdConfigurationGenerator.SSSD_CONF_TEMPLATES + "AD_AS_LDAP"), new FileWriter(tmpFile));
    }
 
    @AfterClass
    public void teardown() {
+      teardownSssdTemplates();
+   }
+
+   public static void teardownSssdTemplates() {
       if(StringUtils.isNotBlank(System.getProperty("serengeti.home.dir.bak"))) {
          System.setProperty("serengeti.home.dir", System.getProperty("serengeti.home.dir.bak"));
       }
       System.out.println(System.getProperty("serengeti.home.dir"));
    }
 
-   public String readResource(String fileName) throws IOException {
+   public static String readResource(String fileName) throws IOException {
       InputStream templateResStream = TestSssdConfigurationGenerator.class.getResourceAsStream("/com/vmware/bdd/usermgmt/" + fileName);
 
 
