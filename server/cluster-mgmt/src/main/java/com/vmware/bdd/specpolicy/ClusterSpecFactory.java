@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.configuration.ConfigurationUtils;
 import org.apache.log4j.Logger;
 
@@ -421,7 +422,7 @@ public class ClusterSpecFactory {
          newSpec.setTopologyPolicy(spec.getTopologyPolicy());
       }
 
-      if(spec.getInfrastructure_config() != null && !spec.getInfrastructure_config().isEmpty()) {
+      if(MapUtils.isNotEmpty(spec.getInfrastructure_config())) {
          newSpec.setInfrastructure_config(spec.getInfrastructure_config());
       }
 

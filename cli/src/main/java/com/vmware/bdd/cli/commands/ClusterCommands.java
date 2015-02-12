@@ -69,6 +69,7 @@ import com.vmware.bdd.utils.ValidateResult;
 
 @Component
 public class ClusterCommands implements CommandMarker {
+   private static LinkedHashMap<String, List<String>> USER_MGMT_COLUMN_FORMAT = null;
 
    @Autowired
    private NetworkRestClient networkRestClient;
@@ -331,7 +332,7 @@ public class ClusterCommands implements CommandMarker {
             Map<String, Map<String, String>> specInfraConfigs = clusterSpec.getInfrastructure_config();
             if(!MapUtils.isEmpty(specInfraConfigs)) //spec infra config is not empty
             {
-               if(infraConfigs != null && !infraConfigs.isEmpty()) {
+               if(MapUtils.isNotEmpty(infraConfigs)) {
                   System.out.println("adminGroup and userGroup has been specified as commandline parameters, so the values inside spec file will be ignored.");
                } else {
                   clusterCreate.setInfrastructure_config(specInfraConfigs);
@@ -1433,47 +1434,14 @@ public class ClusterCommands implements CommandMarker {
       return false;
    }
 
-   private void prettyOutputDynamicResourceInfo(ClusterRead cluster) {
-      TopologyType topology = cluster.getTopologyPolicy();
-      if (topology == null || topology == TopologyType.NONE) {
-         System.out.printf("cluster name: %s, distro: %s, status: %s",
-               cluster.getName(), cluster.getDistro(), cluster.getStatus());
-      } else {
-         System.out.printf(
-               "cluster name: %s, distro: %s, topology: %s, status: %s",
-               cluster.getName(), cluster.getDistro(), topology,
-               cluster.getStatus());
-      }
-      System.out.println();
-      if (cluster.getExternalHDFS() != null
-            && !cluster.getExternalHDFS().isEmpty()) {
-         System.out.printf("external HDFS: %s\n", cluster.getExternalHDFS());
-      }
-      LinkedHashMap<String, List<String>> ngColumnNamesWithGetMethodNames =
-            new LinkedHashMap<String, List<String>>();
-      List<NodeGroupRead> nodegroups = cluster.getNodeGroups();
-      if (nodegroups != null) {
-         ngColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_GROUP_NAME,
-               Arrays.asList("getName"));
-         ngColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_RUNNING_NODES,
-               Arrays.asList("getRunningNodesNum"));
-         ngColumnNamesWithGetMethodNames.put(
-               Constants.FORMAT_TABLE_COLUMN_IOSHARES,
-               Arrays.asList("getStorage", "getShares"));
-         try {
-            CommandsUtils.printInTableFormat(ngColumnNamesWithGetMethodNames,
-                  nodegroups.toArray(), Constants.OUTPUT_INDENT);
-         } catch (Exception e) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  cluster.getName(), Constants.OUTPUT_OP_LIST,
-                  Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
-         }
-      }
-   }
-
    private void prettyOutputClusterInfo(ClusterRead cluster, boolean detail) {
+      Map<String, Map<String, String>> infraCfg = cluster.getInfrastructure_config();
+      Map<String, String> userMgmtCfg = null;
+      if (MapUtils.isNotEmpty(infraCfg)) {
+         userMgmtCfg = infraCfg.get(UserMgmtConstants.LDAP_USER_MANAGEMENT);
+      }
+
+
       TopologyType topology = cluster.getTopologyPolicy();
       String autoElasticityStatus;
       String minComputeNodeNum = cluster.retrieveVhmMinNum();
@@ -1516,6 +1484,9 @@ public class ClusterCommands implements CommandMarker {
          clusterParams
                .put("EXTERNAL MAPREDUCE", cluster.getExternalMapReduce());
       }
+
+      clusterParams.put("AD/LDAP ENABLED", Boolean.toString(MapUtils.isNotEmpty(userMgmtCfg)));
+
       for (String key : clusterParams.keySet()) {
          System.out.printf(Constants.OUTPUT_INDENT + "%-26s:"
                + Constants.OUTPUT_INDENT + "%s\n", key, clusterParams.get(key));
@@ -1559,6 +1530,28 @@ public class ClusterCommands implements CommandMarker {
                   cluster.getName(), Constants.OUTPUT_OP_LIST,
                   Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          }
+
+         if(detail) {
+            prettyOutputDetailedUserMgmt(cluster.getName(), userMgmtCfg);
+         }
+      }
+   }
+
+   protected static void prettyOutputDetailedUserMgmt(String clusterName, Map<String, String> userMgmtCfg) {
+      try {
+         if (MapUtils.isNotEmpty(userMgmtCfg)) {
+            if (MapUtils.isEmpty(USER_MGMT_COLUMN_FORMAT)) {
+               USER_MGMT_COLUMN_FORMAT = new LinkedHashMap<>();
+               USER_MGMT_COLUMN_FORMAT.put("ADMINISTRATORS GROUP", Arrays.asList(UserMgmtConstants.ADMIN_GROUP_NAME));
+               USER_MGMT_COLUMN_FORMAT.put("USERS GROUP", Arrays.asList(UserMgmtConstants.USER_GROUP_NAME));
+               USER_MGMT_COLUMN_FORMAT.put("LOCAL USERS DISABLED", Arrays.asList(UserMgmtConstants.DISABLE_LOCAL_USER_FLAG));
+            }
+            CommandsUtils.printInTableFormat(USER_MGMT_COLUMN_FORMAT, Arrays.asList(((Map) userMgmtCfg)), Constants.OUTPUT_INDENT);
+         }
+      } catch (Exception e) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+               clusterName, Constants.OUTPUT_OP_LIST,
+               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 

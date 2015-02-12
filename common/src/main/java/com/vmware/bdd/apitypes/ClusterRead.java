@@ -15,6 +15,7 @@
 package com.vmware.bdd.apitypes;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.annotations.Expose;
@@ -84,6 +85,8 @@ public class ClusterRead implements Comparable<ClusterRead> {
    //   private boolean nodeGroupSorted;
 
    private boolean dcSeperation;
+
+   private Map<String, Map<String, String>> infrastructure_config;
 
    public ClusterRead() {
 
@@ -543,4 +546,11 @@ public class ClusterRead implements Comparable<ClusterRead> {
       this.externalDatanodes = externalDatanodes;
    }
 
+   public Map<String, Map<String, String>> getInfrastructure_config() {
+      return infrastructure_config;
+   }
+
+   public void setInfrastructure_config(Map<String, Map<String, String>> infrastructure_config) {
+      this.infrastructure_config = infrastructure_config;
+   }
 }

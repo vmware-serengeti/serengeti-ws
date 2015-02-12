@@ -15,23 +15,14 @@
 package com.vmware.bdd.manager;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.apache.commons.collections.MapUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpGet;
@@ -41,21 +32,11 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.DiskSpec.AllocationType;
 import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
-import com.vmware.bdd.apitypes.DiskSplitPolicy;
-import com.vmware.bdd.apitypes.IpBlock;
-import com.vmware.bdd.apitypes.IpConfigInfo;
-import com.vmware.bdd.apitypes.ClusterNetConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
-import com.vmware.bdd.apitypes.NetworkAdd;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.apitypes.NodeRead;
-import com.vmware.bdd.apitypes.PlacementPolicy;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks.GroupRacksType;
@@ -83,6 +64,7 @@ import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.InfrastructureConfigUtils;
 import com.vmware.bdd.utils.VcVmUtil;
 
 public class ClusterConfigManager {
@@ -362,16 +344,8 @@ public class ClusterConfigManager {
    private void setInfraConfig(ClusterCreate cluster, ClusterEntity clusterEntity) {
       Map<String, Map<String, String>> infraConfigs = cluster.getInfrastructure_config();
 
-      if(infraConfigs != null && !infraConfigs.isEmpty()) {
-         ObjectMapper objectMapper = new ObjectMapper();
-
-         String json = null;
-         try {
-            json = objectMapper.writeValueAsString(infraConfigs);
-         } catch (JsonProcessingException e) {
-            throw new SWMgrCollectorInternalException("Failed to serialized Infra Configuration");
-         }
-         clusterEntity.setInfraConfig(json);
+      if(MapUtils.isNotEmpty(infraConfigs)) {
+         clusterEntity.setInfraConfig(InfrastructureConfigUtils.write(infraConfigs));
       }
    }
 
@@ -907,16 +881,7 @@ public class ClusterConfigManager {
       }
 
       if(!CommonUtil.isBlank(clusterEntity.getInfraConfig())) {
-         ObjectMapper objectMapper = new ObjectMapper();
-
-         Map<String, Map<String, String>> infraConfigList = null;
-         try {
-            infraConfigList = objectMapper.readValue(clusterEntity.getInfraConfig(), Map.class);
-         } catch (IOException e) {
-            throw new SWMgrCollectorInternalException("failed to deserialize Infrastructure Configuration");
-         }
-
-         clusterConfig.setInfrastructure_config(infraConfigList);
+         clusterConfig.setInfrastructure_config(InfrastructureConfigUtils.read(clusterEntity.getInfraConfig()));
       }
    }
 

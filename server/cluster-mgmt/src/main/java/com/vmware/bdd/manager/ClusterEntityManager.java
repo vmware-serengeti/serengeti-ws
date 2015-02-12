@@ -68,6 +68,7 @@ import com.vmware.bdd.usermgmt.UserMgmtConstants;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.InfrastructureConfigUtils;
 import com.vmware.bdd.utils.VcVmUtil;
 
 @Transactional(readOnly = true)
@@ -779,6 +780,10 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       if (clusterStatus.isActiveServiceStatus()
             || clusterStatus == ClusterStatus.STOPPED) {
          clusterRead.setDcSeperation(clusterRead.validateSetManualElasticity());
+      }
+
+      if(StringUtils.isNotBlank(cluster.getInfraConfig())) {
+         clusterRead.setInfrastructure_config(InfrastructureConfigUtils.read(cluster.getInfraConfig()));
       }
 
       return clusterRead;

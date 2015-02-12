@@ -155,5 +155,9 @@ public class ClusterConfigException extends BddException {
    public static ClusterConfigException INVALID_LOCAL_REPO_URL(List<String> errors) {
 	  return new ClusterConfigException(null, "INVALID_LOCAL_REPO_URL", errors);
    }
+
+   public static ClusterConfigException INVALID_INFRA_CONFIG(Throwable ex) {
+      return new ClusterConfigException(ex, "INVALID_INFRA_CONFIG");
+   }
    
 }

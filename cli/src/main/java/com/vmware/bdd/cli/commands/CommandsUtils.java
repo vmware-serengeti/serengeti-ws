@@ -18,7 +18,6 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +35,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jline.console.ConsoleReader;
 import jline.internal.Configuration;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.fusesource.jansi.internal.Kernel32;
 import org.springframework.shell.core.JLineShell;
@@ -244,6 +246,59 @@ public class CommandsUtils {
          }
 
          printTable(table, spacesBeforeStart);
+      }
+   }
+
+   public static void printInTableFormat(LinkedHashMap<String, List<String>> columnNamesWithKeys,
+         List<Map> entities, String spacesBeforeStart) throws Exception {
+      if(MapUtils.isNotEmpty(columnNamesWithKeys)) {
+         int columnNum = columnNamesWithKeys.size();
+
+         if(CollectionUtils.isNotEmpty(entities)) {
+            String[][] table = new String[entities.size() + 1][columnNum];
+
+            //build table header: column names
+            String[] tableHeader = table[0];
+
+            int rowIndex = 1;
+            int columnIndex = 0;
+            for (Map<String, String> entity : entities) {
+               for( Entry<String, List<String>> columnNameEntry : columnNamesWithKeys.entrySet()) {
+                  if(tableHeader[columnIndex] == null) {
+                     tableHeader[columnIndex] = columnNameEntry.getKey();
+                  }
+
+                  StringBuilder value = new StringBuilder();
+                  for (String key : columnNameEntry.getValue()) {
+                     if(value.length() > 0) {
+                        value.append(',');
+                     }
+
+                     Object valueObj = entity.get(key);
+
+                     if(valueObj == null) {
+                        value.append(' ');
+                     } else {
+                        if(valueObj instanceof Double) {
+                           value.append(String.valueOf(round(((Double) valueObj).doubleValue(), 2, BigDecimal.ROUND_FLOOR)));
+                        } else {
+                           value.append(valueObj);
+                        }
+                     }
+                  }
+
+                  if (isJansiAvailable()) {
+                     table[rowIndex][columnIndex] = transferEncoding(value.toString());
+                  } else {
+                     table[rowIndex][columnIndex] = value.toString();
+                  }
+                  columnIndex ++;
+               }
+               rowIndex ++;
+            }
+
+            printTable(table, spacesBeforeStart);
+         }
       }
    }
 
