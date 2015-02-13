@@ -283,7 +283,7 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          nodeEntity.setMemorySize((long) vNode.getMem());
 
          // set disk entities, include system/swap/data disk
-         Set<DiskEntity> diskEntities = nodeEntity.getDisks();
+         List<DiskEntity> diskEntities = nodeEntity.getDisks();
 
          // system disk
          DiskEntity systemDisk = nodeEntity.findSystemDisk();

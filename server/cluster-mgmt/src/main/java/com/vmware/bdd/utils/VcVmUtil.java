@@ -14,13 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import com.google.gson.Gson;
@@ -683,6 +677,8 @@ public class VcVmUtil {
       schema.resourceSchema = resourceSchema;
 
       // prepare disk schema
+      VcVmUtil.sortDiskOrder(diskSet);
+
       DiskSchema diskSchema = new DiskSchema();
       ArrayList<Disk> disks = new ArrayList<Disk>(diskSet.size());
       for (DiskSpec disk : diskSet) {
@@ -749,9 +745,31 @@ public class VcVmUtil {
       return (new Gson()).toJson(volumes);
    }
 
-   public static String getVolumes(String moid, Set<DiskEntity> diskEntities) {
+   public static List<DiskSpec> toDiskSpecList(Collection<DiskEntity> diskEntityCollection) {
+      ArrayList<DiskSpec> diskSpecArrayList = new ArrayList<>();
+
+      for(DiskEntity entity : diskEntityCollection) {
+         diskSpecArrayList.add(entity.toDiskSpec());
+      }
+
+      return diskSpecArrayList;
+   }
+
+   public static void sortDiskOrder(List<DiskSpec> diskSpecs) {
+      //ensure the order by entity Id
+      Collections.sort(diskSpecs, new Comparator<DiskSpec>() {
+         @Override
+         public int compare(DiskSpec o1, DiskSpec o2) {
+            return Long.compare(o1.getId(), o2.getId());
+         }
+      });
+   }
+
+   public static String getVolumesFromSpecs(String moid, List<DiskSpec> diskEntities) {
+      VcVmUtil.sortDiskOrder(diskEntities);
+
       final List<String> volumes = new ArrayList<String>();
-      for (DiskEntity diskEntity : diskEntities) {
+      for (DiskSpec diskEntity : diskEntities) {
          if (StorageRead.DiskType.DATA_DISK.getType().equals(diskEntity.getDiskType())
                || StorageRead.DiskType.SWAP_DISK.getType().equals(diskEntity.getDiskType()))
             volumes.add(diskEntity.getDiskType() + ":" + VcVmUtil.fetchDiskUUID(moid, diskEntity.getExternalAddress()));

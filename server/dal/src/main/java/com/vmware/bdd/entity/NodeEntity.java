@@ -15,30 +15,23 @@
 package com.vmware.bdd.entity;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.apitypes.IpConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.NodeStatus;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.spectypes.NicSpec;
@@ -108,13 +101,14 @@ public class NodeEntity extends EntityBase {
    private VcResourcePoolEntity vcRp;
 
    @OneToMany(mappedBy = "nodeEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-   private Set<DiskEntity> disks;
+   @OrderBy("id")
+   private List<DiskEntity> disks;
 
    @OneToMany(mappedBy = "nodeEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
    private Set<NicEntity> nics;
 
    public NodeEntity() {
-      this.disks = new HashSet<DiskEntity>();
+      this.disks = new ArrayList<>();
       this.nics = new HashSet<NicEntity>();
    }
 
@@ -125,12 +119,35 @@ public class NodeEntity extends EntityBase {
       this.rack = rack;
       this.hostName = hostName;
       this.status = status;
-      this.disks = new HashSet<DiskEntity>();
+      this.disks = new ArrayList<>();
       this.nics = new HashSet<NicEntity>();
+   }
+
+   public static List<DiskEntity> toDiskEntityList(Collection<DiskEntity> diskEntityCollection) {
+      ArrayList<DiskEntity> diskSpecArrayList = new ArrayList<>();
+
+      for(DiskEntity entity : diskEntityCollection) {
+         diskSpecArrayList.add(entity);
+      }
+
+      return diskSpecArrayList;
+   }
+
+   public static void sortDiskOrder(List<DiskEntity> diskSpecs) {
+      //ensure the order by entity Id
+      Collections.sort(diskSpecs, new Comparator<DiskEntity>() {
+         @Override
+         public int compare(DiskEntity o1, DiskEntity o2) {
+            return Long.compare(o1.getId(), o2.getId());
+         }
+      });
    }
 
    public List<String> getVolumns() {
       List<String> volumns = new ArrayList<String>();
+
+      sortDiskOrder(disks);
+
       for (DiskEntity disk : disks) {
          if (DiskType.DATA_DISK.getType().equals(disk.getDiskType())
                || DiskType.SWAP_DISK.getType().equals(disk.getDiskType()))
@@ -140,13 +157,18 @@ public class NodeEntity extends EntityBase {
    }
 
    public List<String> getDataVolumnsMountPoint() {
+      sortDiskOrder(disks);
+
+      //Todo(qjin): need to check
       List<String> mountPoints = new ArrayList<String>();
+      int i = 0;
       for (DiskEntity disk : disks) {
          if (DiskType.DATA_DISK.getType().equals(disk.getDiskType())) {
+            //Todo(qjin): when will the uuid be null?
             if (disk.getHardwareUUID() == null) {
                continue;
             }
-            mountPoints.add("/mnt/scsi-3" + disk.getHardwareUUID().toLowerCase().replace("-", "") + "-part1");
+            mountPoints.add("/mnt/data" + i++);
          }
       }
       return mountPoints;
@@ -343,11 +365,11 @@ public class NodeEntity extends EntityBase {
       return new ArrayList<String>(datastores);
    }
 
-   public Set<DiskEntity> getDisks() {
+   public List<DiskEntity> getDisks() {
       return disks;
    }
 
-   public void setDisks(Set<DiskEntity> disks) {
+   public void setDisks(List<DiskEntity> disks) {
       this.disks = disks;
    }
 
@@ -372,7 +394,7 @@ public class NodeEntity extends EntityBase {
 
       if (newNode.getDisks() != null && !newNode.getDisks().isEmpty()) {
          if (this.disks == null)
-            this.disks = new HashSet<DiskEntity>(newNode.disks.size());
+            this.disks = new ArrayList<>(newNode.disks.size());
 
          for (DiskEntity disk : newNode.getDisks()) {
             DiskEntity clone = disk.copy(disk);

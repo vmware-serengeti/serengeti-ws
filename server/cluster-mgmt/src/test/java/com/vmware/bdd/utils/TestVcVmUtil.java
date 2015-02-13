@@ -262,7 +262,7 @@ public class TestVcVmUtil {
       disks.add(dataDisk0);
       disks.add(dataDisk1);
       Mockit.setUpMock(MockVcVmUtil.class);
-      String volumes = VcVmUtil.getVolumes("vm-01", disks);
+      String volumes = VcVmUtil.getVolumesFromSpecs("vm-01", VcVmUtil.toDiskSpecList(disks));
       System.out.println(volumes);
    }
 }
