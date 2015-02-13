@@ -139,7 +139,7 @@ public class TestScaleService {
       scaleService = new ScaleService();
       
       // mock getDisks
-      Set<DiskEntity> disks = new HashSet<DiskEntity>();
+      List<DiskEntity> disks = new ArrayList<>();
       DiskEntity swapDisk =  new DiskEntity(SWAP_DISK_NAME);
       swapDisk.setVmdkPath(DS1_NAME + "/" + NODE_NAME + "/" + SWAP_DISK_NAME);
       swapDisk.setDatastoreName(DS1_NAME);

@@ -21,11 +21,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import com.google.gson.internal.Pair;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.gson.internal.Pair;
 import com.vmware.aurora.composition.CreateVmSP;
 import com.vmware.aurora.composition.VmSchema;
 import com.vmware.aurora.composition.compensation.CompensateCreateVmSP;
@@ -122,17 +124,13 @@ public class ClusterHealService implements IClusterHealService {
 
    @Override
    public boolean hasBadDisks(String nodeName) {
-      List<DiskSpec> badDisks = getBadDisks(nodeName);
-      if (badDisks != null && !badDisks.isEmpty())
-         return true;
-      else
-         return false;
+      return CollectionUtils.isNotEmpty(getBadDisks(nodeName));
    }
 
    @Override
    public List<DiskSpec> getBadDisks(String nodeName) {
       List<DiskEntity> disks = clusterEntityMgr.getDisks(nodeName);
-      List<DiskSpec> bads = new ArrayList<DiskSpec>();
+      List<DiskSpec> bads = new ArrayList<>();
 
       // scan all disks and filter out those don't have backing vmdk files or
       // whoes vmdk file attaches to unaccessible datastores
@@ -188,13 +186,11 @@ public class ClusterHealService implements IClusterHealService {
       return result;
    }
 
-   private List<DiskSpec> findReplacementDisks(String nodeName,
+   private void findReplacementDisks(String nodeName,
          List<DiskSpec> badDisks, Map<AbstractDatastore, Integer> usage) {
       // reverse sort, in descending order
       // bin pack problem, place large disk first. 
       Collections.sort(badDisks);
-
-      List<DiskSpec> replacements = new ArrayList<DiskSpec>(badDisks.size());
 
       for (DiskSpec disk : badDisks) {
          int requiredSize = disk.getSize();
@@ -206,18 +202,14 @@ public class ClusterHealService implements IClusterHealService {
                         + " GB");
          }
 
-         DiskSpec replacement = new DiskSpec(disk);
-         replacement.setTargetDs(ads.getName());
-         replacement.setVmdkPath(null);
-         replacements.add(replacement);
+         disk.setTargetDs(ads.getName());
+         disk.setVmdkPath(null);
 
          // deduct space
          ads.allocate(requiredSize);
          // increase reference by 1
          usage.put(ads, usage.get(ads) + 1);
       }
-
-      return replacements;
    }
 
    @Override
@@ -266,7 +258,7 @@ public class ClusterHealService implements IClusterHealService {
       for (DiskEntity disk : goodDisks) {
          boolean bad = false;
          for (DiskSpec diskSpec : badDisks) {
-            if (disk.getName().equals(diskSpec.getName())) {
+            if (StringUtils.equals(disk.getName(), diskSpec.getName())) {
                bad = true;
                break;
             }
@@ -294,7 +286,9 @@ public class ClusterHealService implements IClusterHealService {
          }
       }
 
-      return findReplacementDisks(nodeName, badDisks, usage);
+      findReplacementDisks(nodeName, badDisks, usage);
+
+      return badDisks;
    }
 
    private VcDatastore getTargetDatastore(List<DiskSpec> disks) {
@@ -375,19 +369,24 @@ public class ClusterHealService implements IClusterHealService {
    public VcVirtualMachine createReplacementVm(String clusterName,
          String groupName, String nodeName, List<DiskSpec> replacementDisks) {
       ClusterCreate spec = configMgr.getClusterConfig(clusterName);
-      NodeEntity node =
-            clusterEntityMgr.findByName(spec.getName(), groupName, nodeName);
+      NodeEntity node = clusterEntityMgr.findByName(spec.getName(), groupName, nodeName);
 
       // replace bad disks with fixing disk, combining as a new disk set
-      List<DiskSpec> fullDiskSet = new ArrayList<DiskSpec>();
-      for (DiskEntity disk : clusterEntityMgr.getDisks(nodeName)) {
-         fullDiskSet.add(disk.toDiskSpec());
+      List<DiskSpec> fullDiskList = VcVmUtil.toDiskSpecList(clusterEntityMgr.getDisks(nodeName));
+
+      for(DiskSpec diskSpec : fullDiskList) {
+         //find the disk with same id, replace the target Ds
+         for(DiskSpec replaceDiskEntity : replacementDisks) {
+            if(diskSpec.getId() == replaceDiskEntity.getId()) {
+               diskSpec.setTargetDs(replaceDiskEntity.getTargetDs());
+               diskSpec.setVmdkPath(replaceDiskEntity.getVmdkPath());
+               break;
+            }
+         }
       }
-      fullDiskSet.removeAll(replacementDisks);
-      fullDiskSet.addAll(replacementDisks);
 
       CreateVmSP cloneVmSp =
-            getReplacementVmSp(spec, groupName, node, fullDiskSet);
+            getReplacementVmSp(spec, groupName, node, fullDiskList);
 
       CompensateCreateVmSP deleteVmSp = new CompensateCreateVmSP(cloneVmSp);
 

@@ -14,7 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.service.impl;
 
-import java.util.Set;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -99,7 +99,7 @@ public class ScaleService implements IScaleService {
 
    public DiskEntity findSwapDisk(NodeEntity node) {
       DiskEntity swapDisk = null;
-      Set<DiskEntity> diskEntities = node.getDisks();
+      List<DiskEntity> diskEntities = node.getDisks();
       for (DiskEntity diskEntity : diskEntities) {
          if (diskEntity.getDiskType().equals(DiskType.SWAP_DISK.getType())) {
             swapDisk = diskEntity;

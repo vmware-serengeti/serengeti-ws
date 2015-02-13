@@ -198,6 +198,7 @@ public class DiskEntity extends EntityBase {
       spec.setTargetDs(this.getDatastoreName());
       spec.setVmdkPath(this.vmdkPath);
 
+      spec.setId(getId());
       return spec;
    }
 

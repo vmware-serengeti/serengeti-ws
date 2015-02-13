@@ -51,6 +51,8 @@ public class DiskSpec implements Comparable<DiskSpec> {
    
    private String vmdkPath;
 
+   private long id;
+
    public DiskSpec() {
       super();
    }
@@ -251,5 +253,13 @@ public class DiskSpec implements Comparable<DiskSpec> {
       } else if (!name.equals(other.name))
          return false;
       return true;
+   }
+
+   public long getId() {
+      return id;
+   }
+
+   public void setId(long id1) {
+      id = id1;
    }
 }

@@ -16,6 +16,7 @@ package com.vmware.bdd.service.job.heal;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -65,7 +66,7 @@ public class NodeRecoverDiskFailureStep extends TrackableTasklet {
       if (vm == null) {
          // find bad disks
          List<DiskSpec> badDisks = healService.getBadDisks(targetNode);
-         AuAssert.check(!badDisks.isEmpty());
+         AuAssert.check(CollectionUtils.isNotEmpty(badDisks));
 
          // find replacements for bad disks
          logger.debug("get replacements for bad disks");
