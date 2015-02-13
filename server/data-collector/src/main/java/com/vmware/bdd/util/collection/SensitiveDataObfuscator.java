@@ -24,6 +24,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class SensitiveDataObfuscator {
 
@@ -40,6 +41,34 @@ public class SensitiveDataObfuscator {
         String sensitiveData = CommonUtil.readJsonFile(url);
         Gson gson = new Gson();
         return gson.fromJson(sensitiveData, List.class);
+    }
+
+    public static String hashSensitiveDataHierarchically(String key, String value, List<String> expandedSensitiveData) {
+        String newKey = key;
+        if (!CommonUtil.isBlank(key) && (key.indexOf(".") != -1)) {
+            String hashValue = CommonUtil.notNull(hashSensitiveData(newKey, value, expandedSensitiveData), "");
+            if (!CommonUtil.isBlank(hashValue) && !hashValue.equals(value)) {
+                return hashValue;
+            }
+            String[] words = key.split("\\.");
+            if (words.length > 0) {
+                int j = 1;
+                int index = 0;
+                hashValue = "";
+                while ((index = words.length - j) >= 0) {
+                    newKey = words[index];
+                    hashValue = hashSensitiveData(newKey, value, expandedSensitiveData);
+                    if (hashValue.equals(value)) {
+                        j++;
+                    } else  {
+                        return hashValue;
+                    }
+                }
+            }
+            return value;
+        } else {
+            return hashSensitiveData(newKey, value, expandedSensitiveData);
+        }
     }
 
     public static String hashSensitiveData(String key, String value, List<String> expandedSensitiveData) {
