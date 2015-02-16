@@ -63,6 +63,10 @@ public class HostnameManager{
       return mapredSuffix;
    }
 
+   public static Boolean isGenerateHostname() {
+      return Configuration.getBoolean("serengeti.generate_hostname");
+   }
+
    // TODO To consider multiple traffic definitions in feature
    public static String generateHostname(NodeEntity node, NicEntity nic) throws BddException {
       String vNodeName = node.getVmName();
@@ -78,10 +82,12 @@ public class HostnameManager{
       String vNodeName = vNode.getVmName();
       Map<NetTrafficType, List<String>> networkConfig = vNode.getCluster().getNetworkConfig();
       String hostname = "";
-      for (Map.Entry<NetTrafficType, List<String>> networkConfigEntry : networkConfig.entrySet()) {
-         if (networkConfigEntry.getValue().contains(networkEntity.getName())) {
-            hostname = generateHostnameWithTrafficType(networkConfigEntry.getKey(), vNodeName, null);
-            break;
+      if (isGenerateHostname() != null && isGenerateHostname()) {
+         for (Map.Entry<NetTrafficType, List<String>> networkConfigEntry : networkConfig.entrySet()) {
+            if (networkConfigEntry.getValue().contains(networkEntity.getName())) {
+               hostname = generateHostnameWithTrafficType(networkConfigEntry.getKey(), vNodeName, null);
+               break;
+            }
          }
       }
       return hostname;
