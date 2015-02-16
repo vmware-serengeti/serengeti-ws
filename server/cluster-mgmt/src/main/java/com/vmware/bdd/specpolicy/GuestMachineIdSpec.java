@@ -18,6 +18,11 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.NetworkAdd;
+import com.vmware.bdd.apitypes.NetworkDnsType;
+import com.vmware.bdd.entity.NetworkEntity;
+import com.vmware.bdd.manager.HostnameManager;
+import com.vmware.bdd.placement.entity.BaseNode;
+import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.IpAddressUtil;
@@ -54,6 +59,19 @@ public class GuestMachineIdSpec {
       this.nics = new NicDeviceConfigSpec[nicNumber];
       for (int i = 0; i < nicNumber; i++) {
          this.nics[i] = new NicDeviceConfigSpec(networkAdds.get(i), ipInfo);
+      }
+
+      this.defaultPg = defaultPg;
+      this.bootupUuid = null;
+      this.managementServerIP = IpAddressUtil.getHostManagementIp();
+   }
+
+   public GuestMachineIdSpec(List<NetworkAdd> networkAdds,
+         Map<String, String> ipInfo, String defaultPg, BaseNode vNode, INetworkService networkMgr) {
+      int nicNumber = networkAdds.size();
+      this.nics = new NicDeviceConfigSpec[nicNumber];
+      for (int i = 0; i < nicNumber; i++) {
+         this.nics[i] = new NicDeviceConfigSpec(networkAdds.get(i), ipInfo, vNode, networkMgr);
       }
 
       this.defaultPg = defaultPg;
@@ -117,11 +135,11 @@ public class GuestMachineIdSpec {
 
    public static class NicDeviceConfigSpec {
       /*
-      * It is not robust to assume OS assign NIC names(eth0, eth1...)
-      * according to the order of nic devices in Node#NetworkSchema we
-      * configured(it is not actually), so we need to transfer the
-      * <portgroup, ipconfig> pairs to control Ips configuration accurately
-      */
+       * It is not robust to assume OS assign NIC names(eth0, eth1...)
+       * according to the order of nic devices in Node#NetworkSchema we
+       * configured(it is not actually), so we need to transfer the
+       * <portgroup, ipconfig> pairs to control Ips configuration accurately
+       */
       @Expose
       @SerializedName(Constants.GUEST_VARIABLE_PORT_GROUP)
       private String portGroupName;
@@ -150,6 +168,14 @@ public class GuestMachineIdSpec {
       @SerializedName(Constants.GUEST_VARIABLE_DNS_KEY_1)
       private String dnsServer1;
 
+      @Expose
+      @SerializedName(Constants.GUEST_VARIABLE_DNS_TYPE)
+      private NetworkDnsType dnsType;
+
+      @Expose
+      @SerializedName(Constants.GUEST_VARIABLE_DHCP_HOSTNAME)
+      private String dhcpHostname;
+
       public NicDeviceConfigSpec() {}
 
       public NicDeviceConfigSpec(NetworkAdd networkAdd, Map<String, String> ipInfo) {
@@ -160,6 +186,13 @@ public class GuestMachineIdSpec {
          this.netmask = networkAdd.getNetmask();
          this.dnsServer0 = networkAdd.getDns1();
          this.dnsServer1 = networkAdd.getDns2();
+      }
+
+      public NicDeviceConfigSpec(NetworkAdd networkAdd, Map<String, String> ipInfo, BaseNode vNode, INetworkService networkMgr) {
+         this(networkAdd, ipInfo);
+         NetworkEntity networkEntity = networkMgr.getNetworkEntityByName(networkAdd.getName());
+         this.dhcpHostname = HostnameManager.generateHostname(networkEntity, vNode);
+         this.dnsType = NetworkDnsType.DYNAMIC;
       }
 
       public String getPortGroupName() {
@@ -217,5 +250,22 @@ public class GuestMachineIdSpec {
       public void setDnsServer1(String dnsServer1) {
          this.dnsServer1 = dnsServer1;
       }
+
+      public NetworkDnsType getDnsType() {
+         return dnsType;
+      }
+
+      public void setDnsType(NetworkDnsType dnsType) {
+         this.dnsType = dnsType;
+      }
+
+      public String getDhcpHostname() {
+         return dhcpHostname;
+      }
+
+      public void setDhcpHostname(String dhcpHostname) {
+         this.dhcpHostname = dhcpHostname;
+      }
+
    }
 }

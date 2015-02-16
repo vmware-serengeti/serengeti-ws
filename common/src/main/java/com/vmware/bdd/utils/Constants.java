@@ -64,6 +64,8 @@ public class Constants {
    public static final String GUEST_VARIABLE_NIC_DEVICES = "nics";
    public static final String GUEST_VARIABLE_RESERVE_RAW_DISKS = "reserveRawDisks";
    public static final String GUEST_VARIABLE_VOLUMES = "volumes";
+   public static final String GUEST_VARIABLE_DNS_TYPE = "dnsType";
+   public static final String GUEST_VARIABLE_DHCP_HOSTNAME = "dhcpHostname";
 
    public static final String MANAGEMENT_SERVER_IP = "managementServerIP";
    public static final String NULL_IPV4_ADDRESS = "0.0.0.0";

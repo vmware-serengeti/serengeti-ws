@@ -1175,7 +1175,7 @@ public class ClusteringService implements IClusteringService {
          GuestMachineIdSpec machineIdSpec =
                new GuestMachineIdSpec(networkAdds,
                      vNode.fetchPortGroupToIpV4Map(),
-                     vNode.getPrimaryMgtPgName());
+                     vNode.getPrimaryMgtPgName(), vNode, networkMgr);
          logger.info("machine id of vm " + vNode.getVmName() + ":\n"
                + machineIdSpec.toString());
          spec.setBootupConfigs(machineIdSpec.toGuestVariable());
