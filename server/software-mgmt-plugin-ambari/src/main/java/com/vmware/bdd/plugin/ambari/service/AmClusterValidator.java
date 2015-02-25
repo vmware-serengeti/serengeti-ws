@@ -356,11 +356,24 @@ public class AmClusterValidator {
          }
       }
       // FIXME
-      List<String> propertyNames = (List<String>) supportedConfigs.get("core-site.xml");
-      if (propertyNames != null) {
-         propertyNames.add("topology.script.file.name");
-         propertyNames.add("net.topology.script.file.name");
-         supportedConfigs.put("core-site.xml", propertyNames);
+      List<String> propertyNamesOfCoreSite = (List<String>) supportedConfigs.get("core-site.xml");
+      if (propertyNamesOfCoreSite != null) {
+         propertyNamesOfCoreSite.add("topology.script.file.name");
+         propertyNamesOfCoreSite.add("net.topology.script.file.name");
+         
+         // Configurations of HVE topology
+         propertyNamesOfCoreSite.add("net.topology.nodegroup.aware");
+         propertyNamesOfCoreSite.add("net.topology.impl");
+
+         supportedConfigs.put("core-site.xml", propertyNamesOfCoreSite);
+      }
+
+      // Configurations of HVE topology
+      List<String> propertyNamesOfHdfsSite = (List<String>) supportedConfigs.get("hdfs-site.xml");
+      if (propertyNamesOfHdfsSite != null) {
+         propertyNamesOfHdfsSite.add("dfs.block.replicator.classname");
+
+         supportedConfigs.put("hdfs-site.xml", propertyNamesOfHdfsSite);
       }
 
       Map<String, Object> notAvailableConfig = new HashMap<String, Object>();
