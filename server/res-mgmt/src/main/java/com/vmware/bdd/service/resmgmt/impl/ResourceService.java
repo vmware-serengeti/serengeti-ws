@@ -45,6 +45,7 @@ import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.VcDatastoreEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.entity.resmgmt.ResourceReservation;
+import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.service.utils.VcResourceUtils;
@@ -358,6 +359,12 @@ public class ResourceService implements IResourceService {
       return VcResourceUtils.findAllHostInVcResourcePool(vcClusterName, vcRpName);
    }
 
+   private UUID addReservation(ResourceReservation resReservation) {
+      UUID result = UUID.randomUUID();
+      reservedResource.put(result, resReservation);
+      return result;
+   }
+
 
    /* (non-Javadoc)
     * @see com.vmware.bdd.service.resmgmt.ResourceManager#reserveResoruce(com.vmware.bdd.bo.ResourceReservation)
@@ -365,23 +372,41 @@ public class ResourceService implements IResourceService {
    @Override
    public synchronized UUID reserveResoruce(ResourceReservation resReservation)
          throws VcProviderException {
-
       boolean concurrentJobEnabled = Configuration.getBoolean(Constants.SERENGETI_CONCURRENT_JOB_ENABLED, false);
-      if (reservedResource.keySet().size() == 0 || concurrentJobEnabled) {
-         if (concurrentJobEnabled) {
-            logger.info("concurrent cluster create is performed.");
+      if(concurrentJobEnabled) {//if concurrent creation switch is on, don't check concurrent creations.
+         logger.info("concurrent cluster create is performed.");
+         return addReservation(resReservation);
+      } else { // Only a simple creation can be running, others will wait for its finishing.
+         boolean noConcurrentCreation = reservedResource.isEmpty() ;
+
+         long maxWait = Configuration.getLong("serengeti.concurrent.job.maxWaitMins", 120l) * 60;
+         while (!noConcurrentCreation) {
+            if(maxWait <= 0) {
+               logger.warn("Max Concurrent Wait time elapsed, before the current cluster creation is done.");
+               break;
+            }
+
+            int timeSlice = 30;//check per default 30 seconds
+            try {
+               wait(timeSlice * 1000);
+            } catch (InterruptedException e) {
+               BddException.INTERNAL(e, "wait for concurrent cluster creation but be interrupted");
+            } finally {
+               maxWait -= timeSlice;
+            }
+            noConcurrentCreation = reservedResource.isEmpty();
+            logger.info("check if current reservation state: " + noConcurrentCreation);
+
          }
-         UUID result = UUID.randomUUID();
-         reservedResource.put(result, resReservation);
-         return result;
-      } else {
-         ResourceReservation[] reservations =
-               reservedResource.values().toArray(new ResourceReservation[0]);
-         String clusterName = reservations[0].getClusterName();
-         logger.error("concurrent cluster create is not allowed.");
-         throw VcProviderException
-               .CONCURRENT_CLUSTER_CREATING(clusterName != null ? clusterName
-                     : "unkown cluster");
+
+         if(!noConcurrentCreation) {
+            ResourceReservation[] reservations = reservedResource.values().toArray(new ResourceReservation[0]);
+            String clusterName = reservations[0].getClusterName();
+            logger.error("concurrent cluster create is not allowed.");
+            throw VcProviderException.CONCURRENT_CLUSTER_CREATING(clusterName != null ? clusterName : "unknown cluster");
+         } else {
+            return addReservation(resReservation);
+         }
       }
    }
 
@@ -392,6 +417,8 @@ public class ResourceService implements IResourceService {
    public synchronized void cancleReservation(UUID reservationId)
          throws VcProviderException {
       reservedResource.remove(reservationId);
+      notifyAll();
+      logger.info("current VMs Cloning is canceled, remove Reservation.");
    }
 
    /* (non-Javadoc)
@@ -401,6 +428,8 @@ public class ResourceService implements IResourceService {
    public synchronized void commitReservation(UUID reservationId)
          throws VcProviderException {
       reservedResource.remove(reservationId);
+      notifyAll();
+      logger.info("current VMs Cloning is done, commit Reservation.");
    }
 
 
