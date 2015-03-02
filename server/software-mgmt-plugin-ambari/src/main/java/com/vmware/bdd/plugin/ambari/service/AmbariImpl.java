@@ -224,6 +224,7 @@ public class AmbariImpl implements SoftwareManager {
                            .getComponentName());
                   }
                }
+               hadoopStack.setHveSupported(true);
                hadoopStack.setRoles(roles);
 
                hadoopStacks.add(hadoopStack);

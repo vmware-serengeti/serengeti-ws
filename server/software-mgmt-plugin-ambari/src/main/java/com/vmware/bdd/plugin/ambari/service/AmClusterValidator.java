@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,12 +35,14 @@ import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ComponentCategory;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ComponentName;
+import com.vmware.bdd.plugin.ambari.api.model.support.AvailableConfigurationContainer;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -358,24 +361,33 @@ public class AmClusterValidator {
                   apiConfiguration.getApiConfigurationInfo();
             String configType = apiConfigurationInfo.getType();
             String propertyName = apiConfigurationInfo.getPropertyName();
-            List<String> propertyNames;
+            Set<String> propertyNames;
 
             if (supportedConfigs.containsKey(configType)) {
-               propertyNames = (List<String>) supportedConfigs.get(configType);
+               propertyNames = (Set<String>) supportedConfigs.get(configType);
             } else {
-               propertyNames = new ArrayList<String>();
+               propertyNames = new HashSet<String>();
             }
             propertyNames.add(propertyName);
             supportedConfigs.put(configType, propertyNames);
          }
       }
-      // FIXME
-      List<String> propertyNames = (List<String>) supportedConfigs.get("core-site.xml");
-      if (propertyNames != null) {
-         propertyNames.add("topology.script.file.name");
-         propertyNames.add("net.topology.script.file.name");
-         supportedConfigs.put("core-site.xml", propertyNames);
+
+      // customized configurations
+      try {
+         Map<String, Object> customizedConfigs = AvailableConfigurationContainer.getSupportedConfigs(stackVersion);
+         for (String configType : customizedConfigs.keySet()) {
+            if (supportedConfigs.keySet().contains(configType)) {
+               Set<String> propertyNames = (Set<String>) supportedConfigs.get(configType);
+               propertyNames.addAll((Set<String>) customizedConfigs.get(configType));
+            } else {
+               supportedConfigs.put(configType, customizedConfigs.get(configType));
+            }
+         }
+      } catch (IOException erorr) {
+         errorMsgList.add("Read customized configurations failed. Please check it on conf directory of ambari. ERROR: " + erorr.getMessage());
       }
+
       //Todo(qjin:) need to bypass the service_user and other four golobal in configs that ambari cannot recognize
       Map<String, Object> notAvailableConfig = new HashMap<String, Object>();
       for (String key : config.keySet()) {
@@ -396,7 +408,7 @@ public class AmClusterValidator {
             Map<String, String> items = (Map<String, String>) config.get(key);
             for (String subKey : items.keySet()) {
                boolean isSupportedPropety = false;
-               for (String propertyName : (List<String>) supportedConfigs
+               for (String propertyName : (Set<String>) supportedConfigs
                      .get(key + ".xml")) {
                   if (propertyName.equals(subKey)) {
                      isSupportedPropety = true;

@@ -262,6 +262,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
                for (String role : AvailableServiceRoleContainer.allRoles(apiParcel.getVersion())) {
                   roles.add(role);
                }
+               stack.setHveSupported(true);
                stack.setRoles(roles);
                hadoopStacks.add(stack);
             }

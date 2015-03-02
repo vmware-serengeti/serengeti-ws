@@ -16,9 +16,11 @@ package com.vmware.bdd.plugin.clouderamgr.model;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.utils.SerialUtils;
 import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.plugin.clouderamgr.utils.SerialUtils;
+
 import junit.framework.Assert;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

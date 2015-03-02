@@ -20,6 +20,7 @@ public interface Constants {
    public static final String HEALTH_STATUS = "RUNNING";
    public static final String AMBARI_SSH_USER = "serengeti";
    public static final String AMBARI_SERVER_VERSION_1_6_0 = "1.6.0";
+   public static final String VERSION_UNBOUNDED = "-1";
 
    public static final String CONFIG_HDFS_SITE = "hdfs-site";
    public static final String CONFIG_YARN_SITE = "yarn-site";

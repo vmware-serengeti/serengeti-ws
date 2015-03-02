@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
-import com.vmware.bdd.plugin.clouderamgr.utils.SerialUtils;
+import com.vmware.bdd.software.mgmt.plugin.utils.SerialUtils;
 import com.vmware.bdd.utils.Version;
 
 import org.apache.log4j.Logger;

@@ -1,0 +1,26 @@
+{
+  "versionHdpMin": "2",
+  "versionHdpMax": "-1",
+  "configurations" : [
+    {
+      "type": "core-site.xml",
+      "name": "topology.script.file.name"
+    },
+    {
+      "type": "core-site.xml",
+      "name": "net.topology.script.file.name"
+    },
+    {
+      "type": "core-site.xml",
+      "name": "net.topology.nodegroup.aware"
+    },
+    {
+      "type": "core-site.xml",
+      "name": "net.topology.impl"
+    },
+    {
+      "type": "hdfs-site.xml",
+      "name": "dfs.block.replicator.classname"
+    }
+  ]
+}

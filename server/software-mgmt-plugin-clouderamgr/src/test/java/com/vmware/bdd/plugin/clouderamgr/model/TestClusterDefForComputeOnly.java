@@ -7,8 +7,8 @@ import junit.framework.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.vmware.bdd.plugin.clouderamgr.utils.SerialUtils;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.utils.SerialUtils;
 import com.vmware.bdd.utils.CommonUtil;
 
 public class TestClusterDefForComputeOnly {

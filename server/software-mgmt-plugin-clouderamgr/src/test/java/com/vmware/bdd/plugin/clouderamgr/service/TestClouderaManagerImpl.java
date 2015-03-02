@@ -37,6 +37,7 @@ import com.vmware.bdd.plugin.clouderamgr.service.cm.FakeClustersResource;
 import com.vmware.bdd.plugin.clouderamgr.service.cm.FakeHostsResource;
 import com.vmware.bdd.plugin.clouderamgr.service.cm.FakeRolesResource;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
+
 import mockit.Mock;
 import mockit.MockClass;
 import mockit.Mockit;
@@ -63,7 +64,6 @@ import com.cloudera.api.v7.RootResourceV7;
 import com.vmware.bdd.plugin.clouderamgr.poller.host.HostInstallPoller;
 import com.vmware.bdd.plugin.clouderamgr.service.cm.FakeRootResource;
 import com.vmware.bdd.plugin.clouderamgr.service.cm.FakeRootResourceV7;
-import com.vmware.bdd.plugin.clouderamgr.utils.SerialUtils;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
@@ -73,6 +73,7 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
+import com.vmware.bdd.software.mgmt.plugin.utils.SerialUtils;
 import com.vmware.bdd.utils.CommonUtil;
 
 import static org.mockito.Matchers.anyObject;
