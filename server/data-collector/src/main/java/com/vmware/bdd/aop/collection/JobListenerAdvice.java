@@ -48,7 +48,6 @@ public class JobListenerAdvice {
             if (args != null) {
                JobExecution jobExecution = (JobExecution) args[0];
                if (jobExecution != null) {
-                  //
                   String id = CollectionConstants.ASYNCHRONIZATION_PREFIX + jobExecution.getId();
                   dataContainer.push(id, CollectionConstants.OPERATION_END_TIME, System.currentTimeMillis(),
                         true);
