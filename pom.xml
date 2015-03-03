@@ -10,7 +10,6 @@
 
    <modules>
       <module>server/software-mgmt-plugin-common</module>
-      <module>impala</module>
       <module>lib/vlsi</module>
       <module>server/common</module>
       <module>server/vc</module>
@@ -546,40 +545,6 @@
             <groupId>com.vmware.bdd</groupId>
             <artifactId>commons-serengeti</artifactId>
             <version>2.2.0</version>
-         </dependency>
-         <dependency>
-            <groupId>com.vmware.bdd.impala.plugin.hdfs</groupId>
-            <artifactId>serengeti-impala-plugin-hdfs</artifactId>
-            <version>2.2.0</version>
-         </dependency>
-         <dependency>
-            <groupId>com.vmware.bdd.impala.plugin.mapreduce</groupId>
-            <artifactId>serengeti-impala-plugin-mapreduce</artifactId>
-            <version>2.2.0</version>
-         </dependency>
-         <dependency>
-            <groupId>com.vmware.bdd.impala.plugin.pig</groupId>
-            <artifactId>serengeti-impala-plugin-pig</artifactId>
-            <version>2.2.0</version>
-         </dependency>
-         <dependency>
-            <groupId>com.vmware.bdd.impala.plugin.hive</groupId>
-            <artifactId>serengeti-impala-plugin-hive</artifactId>
-            <version>2.2.0</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>org.antlr</groupId>
-                  <artifactId>antlr-runtime</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>org.antlr</groupId>
-                  <artifactId>antlr</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>jline</groupId>
-                  <artifactId>jline</artifactId>
-               </exclusion>
-            </exclusions>
          </dependency>
       </dependencies>
    </dependencyManagement>

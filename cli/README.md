@@ -1112,5 +1112,5 @@ Compute nodes are re-commissioned and powered-on or decommissioned and powered-o
  </tr>
 </table>
 ## 6. Hadoop Commands
-From CLI 0.6.0, we integrated impala(https://github.com/SpringSource/impala) hadoop hdfs, map/reduce, pig, and hive commands into CLI. You need to use "cluster target" command to set hdfs or jobtracker url before launching hdfs or map/reduce commands. More details can be found from CLI help.
+From CLI 2.2.0, we retired impala(https://github.com/SpringSource/impala).
 
