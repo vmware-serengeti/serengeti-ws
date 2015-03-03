@@ -292,6 +292,9 @@ public class CmClusterValidator {
       for (String key : config.keySet()) {
          try {
             if (key.equals(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE)) {
+               Map<String, Map<String, String>> configs = (Map<String, Map<String, String>>)config.get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
+               List<Map<String, String>> configList = new ArrayList<>(configs.values());
+               validateServiceUserConfigs(configList, errorMsgList);
                continue;
             }
             AvailableServiceRole def = AvailableServiceRoleContainer.load(key);
@@ -308,6 +311,22 @@ public class CmClusterValidator {
             }
          } catch (IOException e) {
             unRecogConfigTypes.add(key);
+         }
+      }
+   }
+
+   private void validateServiceUserConfigs(List<Map<String, String>>configs, List<String> errorMsgList) {
+      for (Map<String, String> config: configs) {
+         for (String key: config.keySet()) {
+            if (!key.equalsIgnoreCase(UserMgmtConstants.SERVICE_USER_GROUP) &&
+                  !key.equalsIgnoreCase(UserMgmtConstants.SERVICE_USER_NAME) &&
+                  !key.equalsIgnoreCase(UserMgmtConstants.SERVICE_USER_TYPE)) {
+               errorMsgList.add("Service user config doesn't support key: " + key);
+            }
+            if (key.equalsIgnoreCase(UserMgmtConstants.SERVICE_USER_TYPE) &&
+                  !config.get(key).equalsIgnoreCase("LDAP")) {
+               errorMsgList.add("You must use LDAP user to customize service user in Cloudera manager deployed cluster");
+            }
          }
       }
    }

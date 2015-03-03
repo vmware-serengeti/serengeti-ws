@@ -43,6 +43,7 @@ import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 
+import com.vmware.bdd.usermgmt.UserMgmtConstants;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -388,9 +389,16 @@ public class AmClusterValidator {
          errorMsgList.add("Read customized configurations failed. Please check it on conf directory of ambari. ERROR: " + erorr.getMessage());
       }
 
-      //Todo(qjin:) need to bypass the service_user and other four golobal in configs that ambari cannot recognize
       Map<String, Object> notAvailableConfig = new HashMap<String, Object>();
       for (String key : config.keySet()) {
+         //bypass the service_user config as we already validated it
+         if (key.equals(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE)) {
+            Map<String, Map<String, String>> configs = (Map<String, Map<String, String>>)config.get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
+            List<Map<String, String>> configList = new ArrayList<>(configs.values());
+            validateServiceUserConfigs(configList, errorMsgList);
+            continue;
+         }
+
          boolean isSupportedType = false;
          for (String configType : supportedConfigs.keySet()) {
             if (configType.equals(key + ".xml")) {
@@ -423,6 +431,21 @@ public class AmClusterValidator {
             }
          } catch (Exception e) {
             notAvailableConfig.put(key, config.get(key));
+         }
+      }
+   }
+
+   private void validateServiceUserConfigs(List<Map<String, String>>configs, List<String> errorMsgList) {
+      for (Map<String, String> config: configs) {
+         for (String key: config.keySet()) {
+            if (!key.equalsIgnoreCase(UserMgmtConstants.SERVICE_USER_NAME) &&
+                  !key.equalsIgnoreCase(UserMgmtConstants.SERVICE_USER_TYPE)) {
+               errorMsgList.add("Service user config doesn't support key: " + key);
+            }
+            if (key.equalsIgnoreCase(UserMgmtConstants.SERVICE_USER_TYPE) &&
+                  !config.get(key).equalsIgnoreCase("LOCAL")) {
+               errorMsgList.add("You must use local user to customize service user in Ambari deployed cluster");
+            }
          }
       }
    }

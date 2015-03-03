@@ -409,8 +409,9 @@ public class ClusterManager {
       String name = clusterSpec.getName();
 
       validateInfraConfig(clusterSpec);
-      validateServiceUserAndGroups(clusterSpec);
-
+      if (softMgr.getType().equalsIgnoreCase(Constants.CLOUDERA_MANAGER_PLUGIN_TYPE)) {
+         validateServiceUserAndGroupsInLdap(clusterSpec);
+      }
       logger.info("ClusteringService, creating cluster " + name);
 
       List<String> dsNames = getUsedDS(clusterSpec.getDsNames());
@@ -426,6 +427,7 @@ public class ClusterManager {
       validateNetworkAccessibility(createSpec.getName(), createSpec.getNetworkNames(), vcClusters);
       //save configuration into meta-db, and extend configuration using default spec
       clusterConfigMgr.createClusterConfig(clusterSpec);
+
       clusterEntityMgr.updateClusterStatus(name, ClusterStatus.PROVISIONING);
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
@@ -442,10 +444,29 @@ public class ClusterManager {
             jobParameters);
    }
 
-   private void validateServiceUserAndGroups(ClusterCreate clusterSpec) {
-      //Todo(qjin): implement
-//      clusterUserMgmtValidService.validateGroups();
-//      clusterUserMgmtValidService.validateGroupUsers(UserMgmtConstants.DEFAULT_USERMGMT_SERVER_NAME, );
+   private Map<String, Set<String>> getServiceGroupUsers(ClusterCreate clusterSpec) {
+      Map<String, Set<String>> groupUsers = new HashMap<>();
+      Map<String, Map<String, String>> serviceUsersConfigs = (Map<String, Map<String, String>>)
+            clusterSpec.getConfiguration().get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
+      for (Map<String, String> serviceUserConfig: serviceUsersConfigs.values()) {
+         String groupName = serviceUserConfig.get(UserMgmtConstants.SERVICE_USER_GROUP);
+         String userName = serviceUserConfig.get(UserMgmtConstants.SERVICE_USER_NAME);
+         if (groupName != null && !groupName.isEmpty() && userName!= null && !userName.isEmpty()) {
+            if (groupUsers.get(groupName) == null) {
+               Set<String> users = new HashSet<>();
+               groupUsers.put(groupName, users);
+            }
+            groupUsers.get(groupName).add(userName);
+         }
+      }
+      return groupUsers;
+   }
+
+   private void validateServiceUserAndGroupsInLdap(ClusterCreate clusterSpec) {
+      Map<String, Set<String>> groupUsers = getServiceGroupUsers(clusterSpec);
+      logger.info("going to validate Ldap user and groups for: " + new Gson().toJson(groupUsers));
+      clusterUserMgmtValidService.validateGroupUsers(UserMgmtConstants.DEFAULT_USERMGMT_SERVER_NAME, groupUsers);
+      logger.info("validate service user in Ldap succeed");
    }
 
    private void validateInfraConfig(ClusterCreate clusterSpec) {

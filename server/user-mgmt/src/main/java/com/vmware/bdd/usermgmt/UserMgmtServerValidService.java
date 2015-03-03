@@ -13,8 +13,10 @@ package com.vmware.bdd.usermgmt; /**********************************************
  *   limitations under the License.
  *****************************************************************************/
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,6 +51,7 @@ import com.vmware.bdd.validation.ValidationErrors;
 public class UserMgmtServerValidService {
    private final static Logger LOGGER = Logger.getLogger(UserMgmtServerValidService.class);
    private static final String LDAP_GROUP_OBJECT_CLASS = "ldap_group_object_class";
+   private static final String LDAP_USER_OBJECT_CLASS = "ldap_user_object_class";
 
    @Autowired
    private LdapsTrustStoreConfig ldapsTrustStoreConfig;
@@ -82,12 +85,8 @@ public class UserMgmtServerValidService {
    }
 
 
-   public void validateGroupUsers(UserMgmtServer userMgmtServer, Map<String, String[]> groupUsers) {
-      for (String group: groupUsers.keySet()) {
-         String[] groupNames = {group};
-         searchGroup(userMgmtServer, groupNames);
-         //Todo(qjin): validate user existense in group
-      }
+   public void validateGroupUsers(UserMgmtServer userMgmtServer, Map<String, Set<String>> groupUsers) {
+      searchGroupAndUser(userMgmtServer, groupUsers);
    }
 
    public void validateCertificate(String[] ldapUrlElements, boolean forceTrustCert) {
@@ -112,14 +111,20 @@ public class UserMgmtServerValidService {
    }
 
    public void searchGroup(UserMgmtServer userMgmtServer, String[] groupNames) {
+      Map<String, Set<String>> groupUsers = new HashMap<>();
+      for (String groupName: groupNames) {
+         groupUsers.put(groupName, null);
+      }
+      searchGroupAndUser(userMgmtServer, groupUsers);
+   }
+
+   //groupUsers is a groupName to group users map. For group without user, the String[] can be null or empty
+   public void searchGroupAndUser(UserMgmtServer userMgmtServer, Map<String, Set<String>> groupUsers) {
+      String[] groupNames = new String[groupUsers.keySet().size()];
+      groupUsers.keySet().toArray(groupNames);
       String[] ldapUrlElements = getLdapProtocol(userMgmtServer.getPrimaryUrl());
 
       boolean isLdaps = "LDAPS".equalsIgnoreCase(ldapUrlElements[0]);
-
-//      String[] groupDns = new String[groupNames.length];
-//      for(int i = 0; i < groupNames.length; i ++) {
-//         groupDns[i] = "cn=" + groupNames[i] + "," + userMgmtServer.getBaseGroupDn();
-//      }
 
       Hashtable<String, Object> env = new Hashtable<>();
       env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -143,6 +148,7 @@ public class UserMgmtServerValidService {
       DirContext ctx = null;
       ValidationErrors validationErrors = new ValidationErrors();
       String groupObjectClass = sssdConfigurationGenerator.get(userMgmtServer.getType()).get(LDAP_GROUP_OBJECT_CLASS);
+      String userObjectClass = sssdConfigurationGenerator.get(userMgmtServer.getType()).get(LDAP_USER_OBJECT_CLASS);
       try {
          // Create the initial context
          ctx = new InitialDirContext(env);
@@ -150,14 +156,26 @@ public class UserMgmtServerValidService {
          //validateServerInfo mgmt server default admin group
          for(String groupName : groupNames) {
             try {
-                  answer = ctx.search(
-                        userMgmtServer.getBaseGroupDn(),
-                        "(&(objectClass={0}) (cn={1}))",
-                        new Object[]{groupObjectClass, groupName}, null);
-                  if (!answer.hasMoreElements()) {
-                     validationErrors.addError(groupName, new ValidationError("GROUP.NOT_FOUND", String.format("Group (%1s) not found.", groupName)));
+               answer = ctx.search(
+                     userMgmtServer.getBaseGroupDn(),
+                     "(&(objectClass={0}) (cn={1}))",
+                     new Object[]{groupObjectClass, groupName}, null);
+               if (!answer.hasMoreElements()) {
+                  validationErrors.addError(groupName, new ValidationError("GROUP.NOT_FOUND", String.format("Group (%1s) not found.", groupName)));
+               }
+               Set<String> users = groupUsers.get(groupName);
+               if (users != null && !users.isEmpty()) {
+                  for (String user: users) {
+                     String memberOf = "cn=" + groupName + "," + userMgmtServer.getBaseGroupDn();
+                     answer = ctx.search(
+                           userMgmtServer.getBaseUserDn(),
+                           "(&(objectClass={0}) (cn={1}) (memberOf={2}))",
+                           new Object[]{userObjectClass, user, memberOf}, null);
+                     if (!answer.hasMoreElements()) {
+                        validationErrors.addError(user, new ValidationError("USER.NOT_FOUND", String.format("User (%1s) not found in group (%2s).", user, groupName)));
+                     }
                   }
-//            }
+               }
             } catch (NameNotFoundException nnf) {
                validationErrors.addError("BaseGroupDn", new ValidationError("BASE_GROUP_DN.NOT_FOUND", "BaseGroupDn not found."));
             } catch (InvalidNameException ine) {
@@ -185,6 +203,7 @@ public class UserMgmtServerValidService {
          }
 
          if (!validationErrors.getErrors().isEmpty()) {
+            LOGGER.error(validationErrors.getErrors());
             throw new ValidationException(validationErrors.getErrors());
          }
       }

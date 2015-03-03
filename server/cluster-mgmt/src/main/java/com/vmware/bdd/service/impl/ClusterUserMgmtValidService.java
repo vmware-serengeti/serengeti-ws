@@ -15,6 +15,7 @@
 package com.vmware.bdd.service.impl;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -23,7 +24,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.UserMgmtServer;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ValidationException;
@@ -61,11 +61,10 @@ public class ClusterUserMgmtValidService {
       if(userMgmtServer == null) {
          throw new BddException(null, "CLUSTER_LDAP_USER_MGMT", "LDAP_NOT_ENABLED");
       }
-
       userMgmtServerValidService.searchGroup(userMgmtServer, groupNames);
    }
 
-   public void validateGroupUsers(String userMgmtServerName, Map<String, String[]> groupUsers) {
+   public void validateGroupUsers(String userMgmtServerName, Map<String, Set<String>> groupUsers) {
       UserMgmtServer userMgmtServer = userMgmtServerService.getByName(userMgmtServerName, false);
       if(userMgmtServer == null) {
          throw new BddException(null, "CLUSTER_LDAP_USER_MGMT", "LDAP_NOT_ENABLED");
@@ -86,40 +85,18 @@ public class ClusterUserMgmtValidService {
          validGroupNameSet.add(userGroupName);
       }
 
-      if (validGroupNameSet.isEmpty()) {
-         ValidationError validationError = new ValidationError("BOTH_GROUPS_EMPTY", "Both admin and user groups are empty!");
-         ValidationErrors errors = new ValidationErrors();
-         errors.addError("groupNames", validationError);
-         throw new ValidationException(errors.getErrors());
-      }
-
       String[] groupNames = new String[validGroupNameSet.size()];
       validGroupNameSet.toArray(groupNames);
       return groupNames;
    }
 
-   protected HashSet<String> getServiceUserGroups(ClusterCreate clusterSpec) {
-      Map<String, Map<String, String>> serviceUserGroup = (Map<String, Map<String, String>>) clusterSpec.getConfiguration().get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
-      HashSet<String> serviceUserGroups = null;
-      for (Map<String, String> serviceUserConfig: serviceUserGroup.values()) {
-         //ambari doesn't have serivce group config
-         String userGroup = serviceUserConfig.get(UserMgmtConstants.SERVICE_USER_GROUP);
-         if (!CommonUtil.isBlank(userGroup)) {
-            if (serviceUserGroups == null) {
-               serviceUserGroups = new HashSet<>();
-            }
-            serviceUserGroups.add(userGroup);
-         }
-      }
-      return serviceUserGroups;
-   }
-
    public void validateUserMgmtConfig(Map<String, String> userMgmtCfg) {
       String[] groupNames = getGroupNames(userMgmtCfg);
-
-      LOGGER.info("validate groups: " + Arrays.toString(groupNames));
-      validateGroups(groupNames);
-      LOGGER.info("groups are validated successfully!");
+      if ((groupNames != null) && (groupNames.length > 0)) {
+         LOGGER.info("validate groups: " + Arrays.toString(groupNames));
+         validateGroups(groupNames);
+         LOGGER.info("groups are validated successfully!");
+      }
    }
 
 }

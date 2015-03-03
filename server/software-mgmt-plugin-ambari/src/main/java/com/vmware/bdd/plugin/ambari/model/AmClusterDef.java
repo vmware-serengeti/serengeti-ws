@@ -99,9 +99,6 @@ public class AmClusterDef implements Serializable {
       if (blueprint.hasTopologyPolicy()) {
          setRackTopologyFileName(blueprint);
       }
-      //set service user to configuration
-      //Todo(qjin): better to not change the blueprint and move this to the toAmConfigurations
-      updateServiceUserConfigInBlueprint(blueprint);
       this.configurations =
             AmUtils.toAmConfigurations(blueprint.getConfiguration());
       for (NodeGroupInfo group : blueprint.getNodeGroups()) {
@@ -348,34 +345,6 @@ public class AmClusterDef implements Serializable {
       if (confCoreSite.get("topology.script.file.name") == null) {
          confCoreSite.put("topology.script.file.name", rackTopologyFileName);
       }
-   }
-
-   private void updateServiceUserConfigInBlueprint(ClusterBlueprint blueprint) {
-      Map<String, Object> conf = blueprint.getConfiguration();
-      if (conf == null) {
-         return;
-      }
-      Map<String, Map<String, String>> serviceUserConfigs = (Map<String, Map<String, String>>)
-            conf.get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
-      if (MapUtils.isEmpty(serviceUserConfigs)) {
-         return;
-      }
-      //Todo(qjin:) For hdfs and other services, if need to modify other configs related with servcie user, also need to
-      //handle seperately, that config changes should be reflected in the blueprint
-      for (Map.Entry<String, Map<String, String>> serviceUserConfig: serviceUserConfigs.entrySet()) {
-         String serviceUser = serviceUserConfig.getValue().get(UserMgmtConstants.SERVICE_USER_NAME);
-         if (!StringUtils.isBlank(serviceUser)) {
-            String serviceUserParentConfigName = serviceUserConfig.getKey().toLowerCase() + "-env";
-            String serviceUserConfigName = serviceUserConfig.getKey().toLowerCase() + "_user";
-            Map<String, String> serviceConfig = (Map<String, String>)conf.get(serviceUserParentConfigName);
-            if (serviceConfig == null) {
-               serviceConfig = new HashMap<>();
-            }
-            serviceConfig.put(serviceUserConfigName, serviceUser);
-            conf.put(serviceUserParentConfigName, serviceConfig);
-         }
-      }
-      conf.remove(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
    }
 
 }

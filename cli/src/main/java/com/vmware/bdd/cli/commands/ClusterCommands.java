@@ -248,20 +248,15 @@ public class ClusterCommands implements CommandMarker {
 
       Map<String, Map<String, String>> infraConfigs = new HashMap<String, Map<String, String>>();
 
-
       if(StringUtils.isBlank(adminGroupName) && StringUtils.isBlank(userGroupName)) {
          //both adminGroupName and userGroupName are null, supposes no need to enable ldap.
       } else if(!StringUtils.isBlank(adminGroupName) && !StringUtils.isBlank(userGroupName)) {
-         Map<String, String> userMgmtConfig = new HashMap<String, String>();
+         if (MapUtils.isEmpty(infraConfigs.get(UserMgmtConstants.LDAP_USER_MANAGEMENT))) {
+            initInfraConfigs(infraConfigs, disableLocalUsersFlag);
+         }
+         Map<String, String> userMgmtConfig = infraConfigs.get(UserMgmtConstants.LDAP_USER_MANAGEMENT);
          userMgmtConfig.put(UserMgmtConstants.ADMIN_GROUP_NAME, adminGroupName);
          userMgmtConfig.put(UserMgmtConstants.USER_GROUP_NAME, userGroupName);
-         //TODO(qjin:) can also add a command line option here together with specfile to specify user management server
-
-         //disable local account by default.
-         userMgmtConfig.put(UserMgmtConstants.DISABLE_LOCAL_USER_FLAG,
-               disableLocalUsersFlag == null ? Boolean.TRUE.toString() : disableLocalUsersFlag.toString());
-
-         infraConfigs.put(UserMgmtConstants.LDAP_USER_MANAGEMENT, userMgmtConfig);
          clusterCreate.setInfrastructure_config(infraConfigs);
       } else {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
@@ -339,6 +334,13 @@ public class ClusterCommands implements CommandMarker {
                }
             }
 
+            Map<String, Map<String, String>> serviceUserConfig = (Map<String, Map<String, String>>)clusterSpec.getConfiguration().get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
+            //user didn't specify ldap in command line and specfile, but specfiy ldap user in service user
+            if (hasLdapServiceUser(serviceUserConfig) && (clusterCreate.getInfrastructure_config() == null)) {
+               Map<String, Map<String, String>> infraConfig = new HashMap<>();
+               initInfraConfigs(infraConfig, disableLocalUsersFlag);
+               clusterCreate.setInfrastructure_config(infraConfig);
+            }
             validateServiceUserConfigs(appManager, clusterSpec, failedMsgList);
          }
          allNetworkNames = getAllNetworkNames();
@@ -439,6 +441,23 @@ public class ClusterCommands implements CommandMarker {
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                CommandsUtils.getExceptionMessage(e));
       }
+   }
+
+   private boolean hasLdapServiceUser(Map<String, Map<String, String>> serviceUserConfigs) {
+      for (Map<String, String> serviceUserConfig: serviceUserConfigs.values()) {
+         if (serviceUserConfig.get(UserMgmtConstants.SERVICE_USER_TYPE).equalsIgnoreCase("LDAP")) {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   private void initInfraConfigs(Map<String, Map<String, String>> infraConfigs, Boolean disableLocalUsersFlag) {
+      Map<String, String> userMgmtConfigs = new HashMap<>();
+      //disable local account by default.
+      userMgmtConfigs.put(UserMgmtConstants.DISABLE_LOCAL_USER_FLAG,
+            disableLocalUsersFlag == null ? Boolean.TRUE.toString() : disableLocalUsersFlag.toString());
+      infraConfigs.put(UserMgmtConstants.LDAP_USER_MANAGEMENT, userMgmtConfigs);
    }
 
    protected void validateServiceUserConfigs(String appMangerName, ClusterCreate clusterSpec, List<String> failedMsgList) {
