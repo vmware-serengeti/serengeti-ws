@@ -27,4 +27,7 @@
         <aop:include name="dataCollectorAdvice"/>
     </aop:aspectj-autoproxy>
 
+    <mvc:interceptors>
+        <bean class="com.vmware.bdd.rest.interceptor.RestLogInterceptor" />
+    </mvc:interceptors>
 </beans>

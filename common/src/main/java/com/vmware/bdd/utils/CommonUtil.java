@@ -596,10 +596,14 @@ public class CommonUtil {
   }
 
    public static void writeFile(File file, String content) {
+      writeFile(file, content, false);
+   }
+
+   public static void writeFile(File file, String content, boolean append) {
       OutputStream out = null;
       BufferedWriter bw = null;
       try {
-         out = new FileOutputStream(file);
+         out = new FileOutputStream(file, append);
          bw = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
          bw.write(content);
          bw.flush();
