@@ -446,17 +446,22 @@ public class ClusterManager {
 
    private Map<String, Set<String>> getServiceGroupUsers(ClusterCreate clusterSpec) {
       Map<String, Set<String>> groupUsers = new HashMap<>();
-      Map<String, Map<String, String>> serviceUsersConfigs = (Map<String, Map<String, String>>)
-            clusterSpec.getConfiguration().get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
-      for (Map<String, String> serviceUserConfig: serviceUsersConfigs.values()) {
-         String groupName = serviceUserConfig.get(UserMgmtConstants.SERVICE_USER_GROUP);
-         String userName = serviceUserConfig.get(UserMgmtConstants.SERVICE_USER_NAME);
-         if (groupName != null && !groupName.isEmpty() && userName!= null && !userName.isEmpty()) {
-            if (groupUsers.get(groupName) == null) {
-               Set<String> users = new HashSet<>();
-               groupUsers.put(groupName, users);
+      Map<String, Object> configuration = clusterSpec.getConfiguration();
+      if (MapUtils.isNotEmpty(configuration)) {
+         Map<String, Map<String, String>> serviceUsersConfigs = (Map<String, Map<String, String>>)
+               configuration.get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
+         if (MapUtils.isNotEmpty(serviceUsersConfigs)) {
+            for (Map<String, String> serviceUserConfig : serviceUsersConfigs.values()) {
+               String groupName = serviceUserConfig.get(UserMgmtConstants.SERVICE_USER_GROUP);
+               String userName = serviceUserConfig.get(UserMgmtConstants.SERVICE_USER_NAME);
+               if (groupName != null && !groupName.isEmpty() && userName != null && !userName.isEmpty()) {
+                  if (groupUsers.get(groupName) == null) {
+                     Set<String> users = new HashSet<>();
+                     groupUsers.put(groupName, users);
+                  }
+                  groupUsers.get(groupName).add(userName);
+               }
             }
-            groupUsers.get(groupName).add(userName);
          }
       }
       return groupUsers;

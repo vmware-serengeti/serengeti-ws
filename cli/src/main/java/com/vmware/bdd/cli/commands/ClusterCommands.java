@@ -199,7 +199,6 @@ public class ClusterCommands implements CommandMarker {
       }
       clusterCreate.setTopologyPolicy(policy);
 
-
       DistroRead distroRead4Create;
       try {
          if (distro != null) {
@@ -323,15 +322,20 @@ public class ClusterCommands implements CommandMarker {
                   clusterCreate.setInfrastructure_config(specInfraConfigs);
                }
             }
-
-            Map<String, Map<String, String>> serviceUserConfig = (Map<String, Map<String, String>>)clusterSpec.getConfiguration().get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
-            //user didn't specify ldap in command line and specfile, but specfiy ldap user in service user
-            if (hasLdapServiceUser(serviceUserConfig) && (clusterCreate.getInfrastructure_config() == null)) {
-               Map<String, Map<String, String>> infraConfig = new HashMap<>();
-               initInfraConfigs(infraConfig, disableLocalUsersFlag);
-               clusterCreate.setInfrastructure_config(infraConfig);
+            Map<String, Object> configuration = clusterSpec.getConfiguration();
+            if (MapUtils.isNotEmpty(configuration)) {
+               Map<String, Map<String, String>> serviceUserConfig = (Map<String, Map<String, String>>)configuration.get(UserMgmtConstants.SERVICE_USER_CONFIG_IN_SPEC_FILE);
+               if (MapUtils.isNotEmpty(serviceUserConfig)) {
+                  //user didn't specify ldap in command line and specfile, but specfiy ldap user in service user
+                  if (hasLdapServiceUser(serviceUserConfig) && (clusterCreate.getInfrastructure_config() == null)) {
+                     Map<String, Map<String, String>> infraConfig = new HashMap<>();
+                     initInfraConfigs(infraConfig, disableLocalUsersFlag);
+                     clusterCreate.setInfrastructure_config(infraConfig);
+                  }
+                  validateServiceUserConfigs(appManager, clusterSpec, failedMsgList);
+               }
             }
-            validateServiceUserConfigs(appManager, clusterSpec, failedMsgList);
+
          }
          allNetworkNames = getAllNetworkNames();
       } catch (Exception e) {
