@@ -469,9 +469,11 @@ public class ClusterManager {
 
    private void validateServiceUserAndGroupsInLdap(ClusterCreate clusterSpec) {
       Map<String, Set<String>> groupUsers = getServiceGroupUsers(clusterSpec);
-      logger.info("going to validate Ldap user and groups for: " + new Gson().toJson(groupUsers));
-      clusterUserMgmtValidService.validateGroupUsers(UserMgmtConstants.DEFAULT_USERMGMT_SERVER_NAME, groupUsers);
-      logger.info("validate service user in Ldap succeed");
+      if (!groupUsers.isEmpty()) {
+         logger.info("going to validate Ldap user and groups for: " + new Gson().toJson(groupUsers));
+         clusterUserMgmtValidService.validateGroupUsers(UserMgmtConstants.DEFAULT_USERMGMT_SERVER_NAME, groupUsers);
+         logger.info("validate service user in Ldap succeed");
+      }
    }
 
    private void validateInfraConfig(ClusterCreate clusterSpec) {
