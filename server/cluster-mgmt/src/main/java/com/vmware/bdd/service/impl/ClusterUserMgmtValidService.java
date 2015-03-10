@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -73,7 +74,7 @@ public class ClusterUserMgmtValidService {
    }
 
    protected String[] getGroupNames(Map<String, String> userMgmtCfg) {
-      if (userMgmtCfg.isEmpty()) {
+      if (MapUtils.isEmpty(userMgmtCfg)) {
          return null;
       }
       Set<String> validGroupNameSet = new HashSet<>();
