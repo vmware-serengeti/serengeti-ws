@@ -87,7 +87,7 @@ public class RestLogInterceptor implements HandlerInterceptor {
         String status = isSuceed ? "Success" : "Fail";
         String info = status + ", " + millisecond + ", " + location;
         logger.info(info);
-        String  currentTime = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH).format(System.currentTimeMillis());
+        String currentTime = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH).format(System.currentTimeMillis());
         CommonUtil.writeFile(auditFile, currentTime + " AUDIT " + info + "\n", true);
     }
 }
