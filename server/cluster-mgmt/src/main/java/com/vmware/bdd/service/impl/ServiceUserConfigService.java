@@ -59,7 +59,7 @@ public class ServiceUserConfigService {
          for (Map<String, String> serviceUserConfig : serviceUserConfigs.values()) {
             serviceUserGroups.add(serviceUserConfig.get(UserMgmtConstants.USER_GROUP_NAME));
          }
-         LOGGER.info("Service user groups are" + serviceUserGroups.toString());
+         LOGGER.info("Service user groups are " + new Gson().toJson(serviceUserGroups));
       }
       return serviceUserGroups;
    }

@@ -93,7 +93,9 @@ public class ClusterLdapUserMgmtCfgService {
       Map<String, String> userMgmtCfg = getUserMgmtCfg(clusterName);
       Map<String, Map<String, String>> serviceUserCfg = serviceUserConfigService.getServiceUserConfigs(clusterName);
 
-      if (userMgmtCfg == null && serviceUserCfg == null) {
+      //only when user didn't config ldap group in command line and service user in spec file, will the userMgmtCfg be null
+      //it means if userMgmt is null, no ldap user or group is configured
+      if (userMgmtCfg == null) {
          LOGGER.info("no need to do usermgmt configuration.");
          return;
       }
@@ -102,7 +104,6 @@ public class ClusterLdapUserMgmtCfgService {
          LOGGER.info("the target node list is empty, skip usermgmt configuration.");
          return;
       }
-
 
       Set<String> groupNameSet = new HashSet<>();
 
