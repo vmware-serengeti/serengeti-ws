@@ -73,6 +73,9 @@ public class ClusterUserMgmtValidService {
    }
 
    protected String[] getGroupNames(Map<String, String> userMgmtCfg) {
+      if (userMgmtCfg.isEmpty()) {
+         return null;
+      }
       Set<String> validGroupNameSet = new HashSet<>();
 
       String adminGroupName = userMgmtCfg.get(UserMgmtConstants.ADMIN_GROUP_NAME);
