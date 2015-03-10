@@ -56,8 +56,14 @@ public class ThriftSoftwareManagementTask implements ISoftwareManagementTask {
       final SoftwareManagementClient client = new SoftwareManagementClient();
       client.init();
 
-      if (clusterOperation.getAction().ordinal() != ClusterAction.QUERY.ordinal()) {
-         //Reset node's provision attribute
+      // Reset node's provision attribute when it's not a QUERY or CREATE action.
+      // No need to reset when creating a cluster because the attributes are not initialized, so as to save time.
+      switch (clusterOperation.getAction()) {
+      case QUERY:
+         break;
+      case CREATE:
+         break;
+      default:
          client.resetNodeProvisionAttribute(clusterOperation.getTargetName());
       }
 

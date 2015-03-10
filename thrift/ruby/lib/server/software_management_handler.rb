@@ -113,8 +113,11 @@ module Software
             nodes = nodes.sort_by! { |n| n.name }
             nodes.each do |node|
               attrs = get_provision_attrs(node)
+              attrs[:finished] = false
+              attrs[:succeed] = nil
               attrs[:progress] = 0
               attrs[:action] = ''
+              attrs[:error_msg] = ''
               set_provision_attrs(node, attrs)
               node.save
             end
