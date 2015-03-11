@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.bdd.plugin.ambari.utils.AmUtils;
+import com.vmware.bdd.utils.CommonUtil;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.plugin.ambari.utils.Constants;
@@ -33,19 +35,11 @@ public class AvailableConfigurationContainer {
 
    private static final Logger logger = Logger.getLogger(AvailableConfigurationContainer.class);
    private static List<AvailableConfiguration> availableConfigurations = new ArrayList<AvailableConfiguration>();
-   private static String ambariConfDir = null;
+   private static String ambariAvailiableConfigurationsDir = null;
 
    static {
-      String homeDir = System.getProperties().getProperty("serengeti.home.dir");
-      if (homeDir != null && homeDir.length() > 0) {
          StringBuilder builder = new StringBuilder();
-         builder.append(homeDir).append(File.separator).append("conf")
-         .append(File.separator).append("Ambari").append(File.separator).append("available-configurations");
-         ambariConfDir = builder.toString();
-      } else {
-         // for test only
-         ambariConfDir = AvailableConfigurationContainer.class.getClassLoader().getResource("available-configurations").getPath();
-      }
+         ambariAvailiableConfigurationsDir = builder.append(AmUtils.getConfDir()).append(File.separator).append("available-configurations").toString();
    }
 
    public static List<AvailableConfiguration> load(String fileName) throws IOException {
@@ -53,10 +47,9 @@ public class AvailableConfigurationContainer {
       logger.info("loading " + fileName + "...");
       String content = null;
       try {
-         content = SerialUtils.dataFromFile(ambariConfDir + File.separator + fileName);
+         content = SerialUtils.dataFromFile(ambariAvailiableConfigurationsDir + File.separator + fileName);
          AvailableConfiguration availableConfiguration = SerialUtils.getObjectByJsonString(AvailableConfiguration.class, content);
          availableConfigurations.add(availableConfiguration);
-
       } catch (IOException e) {
          logger.error(e.getMessage());
          throw new IOException("Failed to load " + fileName);
@@ -66,7 +59,7 @@ public class AvailableConfigurationContainer {
 
    public static void loadAll() throws IOException {
       availableConfigurations.clear();
-      File dir = new File(ambariConfDir);
+      File dir = new File(ambariAvailiableConfigurationsDir);
       for (File file : dir.listFiles()) {
          load(file.getName());
       }
@@ -119,4 +112,5 @@ public class AvailableConfigurationContainer {
       }
       return supportedConfigs;
    }
+
 }

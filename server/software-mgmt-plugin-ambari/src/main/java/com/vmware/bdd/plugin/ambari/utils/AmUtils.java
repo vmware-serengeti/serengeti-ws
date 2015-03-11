@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.utils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -151,5 +152,9 @@ public class AmUtils {
       requestInfo.setContext("Installing components");
       requestInfo.setQueryString("HostRoles/state=INIT");
       return hostsRequest;
+   }
+
+   public static String getConfDir() {
+      return com.vmware.bdd.utils.CommonUtil.getConfDir() + File.separator + Constants.AMBARI_PLUGIN_NAME;
    }
 }

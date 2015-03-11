@@ -17,6 +17,7 @@ package com.vmware.bdd.software.mgmt.plugin.exception;
 
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -189,5 +190,9 @@ public class SoftwareManagementPluginException extends RuntimeException {
 
    public static SoftwareManagementPluginException CLUSTER_IS_NOT_COMPUTE_ONLY_CLUSTER(String clusterName) {
       return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.CLUSTER_IS_NOT_COMPUTE_ONLY_CLUSTER", null, clusterName);
+   }
+
+   public static SoftwareManagementPluginException READ_BLACKLIST_FOR_SCALE_IN_FAILED(String errMsg) {
+      return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.READ_BLACKLIST_FOR_SCALE_IN_FAILED", null, errMsg);
    }
 }

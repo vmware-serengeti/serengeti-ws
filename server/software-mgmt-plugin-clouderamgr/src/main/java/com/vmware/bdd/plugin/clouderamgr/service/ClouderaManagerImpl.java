@@ -16,6 +16,7 @@ package com.vmware.bdd.plugin.clouderamgr.service;
 
 import javax.ws.rs.NotFoundException;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.vmware.bdd.software.mgmt.plugin.utils.SerialUtils;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -115,7 +117,6 @@ public class ClouderaManagerImpl implements SoftwareManager {
    private final int sshPort = 22;
    private final String stopAgentCmd = "sudo service cloudera-scm-agent stop";
    private final String privateKeyFile = "/home/serengeti/.ssh/id_rsa";
-   private final String rolesBlacklistForShrink = "shrink_cloudera_manager_roles_blacklist.json";
    private String privateKey;
    private RootResourceV6 apiResourceRootV6;
    private RootResourceV7 apiResourceRootV7;
@@ -2277,9 +2278,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    public void validateRolesForShrink(NodeGroupInfo groupInfo)
          throws SoftwareManagementPluginException {
-      String blacklistStr = CommonUtil.readJsonFile(rolesBlacklistForShrink);
-      ValidateRolesUtil.validateRolesForShrink(blacklistStr, groupInfo);
-   };
+      ValidateRolesUtil.validateRolesForShrink(CmUtils.getConfDir(), groupInfo);
+   }
 
    @Override
    public void updateInfrastructure(ClusterBlueprint blueprint)

@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ironfan.impl;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -23,6 +25,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.Gson;
+import com.vmware.bdd.plugin.ironfan.utils.DefaultUtils;
+import com.vmware.bdd.software.mgmt.plugin.utils.SerialUtils;
 import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
 import org.apache.log4j.Logger;
 
@@ -50,6 +54,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
 
    private static final String mapredConfigsFile = "mapred.json";
    private static final String yarnConfigsFile = "yarn.json";
+
    private String mapredConfigs = "";
    private String yarnConfigs = "";
 
@@ -280,8 +285,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
 
    @Override
    public void validateRolesForShrink(NodeGroupInfo groupInfo) throws SoftwareManagementPluginException {
-      String jsonStr = CommonUtil.readJsonFile("shrink_cluster_roles_blacklist.json");
-      ValidateRolesUtil.validateRolesForShrink(jsonStr, groupInfo);
+      ValidateRolesUtil.validateRolesForShrink(DefaultUtils.getConfDir(), groupInfo);
    }
 
    @Override

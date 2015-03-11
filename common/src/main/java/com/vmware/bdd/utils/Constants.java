@@ -220,6 +220,7 @@ public class Constants {
    public static final String DEFAULT_SERENGETI_SBIN_DIR = "/opt/serengeti/sbin";
    public static final String SERENGETI_HOME = "serengeti.home";
    public static final String DEFAULT_SERENGETI_HOME = "/home/serengeti";
+   public static final String DEFAULT_SERENGETI_ROOT_DIR = "/opt/serengeti";
    public static final String EXEC_COMMAND_TIMEOUT = " timeout.";
    public static final String EXEC_COMMAND_FAILED = " failed.";
    public static final String NO_RESOURCE_POOL_IS_CREATED = "no resource pool is created.";

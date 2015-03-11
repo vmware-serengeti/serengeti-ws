@@ -41,6 +41,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
+import com.vmware.aurora.util.StringUtil;
 import org.apache.commons.configuration.ConfigurationUtils;
 import org.apache.log4j.Logger;
 
@@ -50,6 +51,16 @@ import com.vmware.bdd.exception.BddException;
 public class CommonUtil {
 
    static final Logger logger = Logger.getLogger(CommonUtil.class);
+
+   public static String getConfDir() {
+      String homeDir = System.getProperties().getProperty("serengeti.home.dir");
+      if (StringUtil.isNullOrWhitespace(homeDir)) {
+         homeDir = Constants.DEFAULT_SERENGETI_ROOT_DIR;
+      }
+      StringBuilder builder = new StringBuilder();
+      builder.append(homeDir).append(File.separator).append("conf");
+      return builder.toString();
+   }
 
    public static File getConfigurationFile(final String filename, final String typeName) {
       // try to locate file directly
@@ -62,8 +73,7 @@ public class CommonUtil {
       String homeDir = System.getProperties().getProperty("serengeti.home.dir");
       if (homeDir != null && !homeDir.trim().isEmpty()) {
          StringBuilder builder = new StringBuilder();
-         builder.append(homeDir).append(File.separator).append("conf")
-               .append(File.separator).append(filename);
+         builder.append(getConfDir()).append(File.separator).append(filename);
          specFile = new File(builder.toString());
 
          if (!specFile.exists()) {

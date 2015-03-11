@@ -15,6 +15,8 @@
 package com.vmware.bdd.plugin.ambari.service;
 
 import javax.ws.rs.NotFoundException;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,6 +61,7 @@ import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionInfo;
+import com.vmware.bdd.plugin.ambari.api.model.support.AvailableConfigurationContainer;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.exception.AmException;
 import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
@@ -66,6 +69,7 @@ import com.vmware.bdd.plugin.ambari.model.AmNodeDef;
 import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
 import com.vmware.bdd.plugin.ambari.poller.HostBootstrapPoller;
 import com.vmware.bdd.plugin.ambari.spectypes.HadoopRole;
+import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
@@ -79,8 +83,9 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
+import com.vmware.bdd.software.mgmt.plugin.utils.SerialUtils;
 import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
-import com.vmware.bdd.utils.CommonUtil;
+
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -91,7 +96,6 @@ public class AmbariImpl implements SoftwareManager {
    private final int REQUEST_MAX_RETRY_TIMES = 10;
    public static final String MIN_SUPPORTED_VERSION = "1.6.0";
    private static final String UNKNOWN_VERSION = "UNKNOWN";
-   private static final String rolesBlacklistForShrink = "shrink_ambari_roles_blacklist.json";
 
    private String privateKey;
 
@@ -646,9 +650,8 @@ public class AmbariImpl implements SoftwareManager {
 
    public void validateRolesForShrink(NodeGroupInfo groupInfo)
          throws SoftwareManagementPluginException {
-      String blacklistStr = CommonUtil.readJsonFile(rolesBlacklistForShrink);
-      ValidateRolesUtil.validateRolesForShrink(blacklistStr, groupInfo);
-   };
+      ValidateRolesUtil.validateRolesForShrink(AmUtils.getConfDir(), groupInfo);
+   }
 
    @Override
    public void updateInfrastructure(ClusterBlueprint blueprint) {

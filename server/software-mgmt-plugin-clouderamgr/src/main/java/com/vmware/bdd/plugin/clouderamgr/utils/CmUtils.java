@@ -14,8 +14,10 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.clouderamgr.utils;
 
+import com.vmware.aurora.util.StringUtil;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 
+import java.io.File;
 import java.util.regex.Pattern;
 
 /**
@@ -37,5 +39,12 @@ public class CmUtils {
    public static boolean isValidRack(String rack) {
       Pattern rackPattern = Pattern.compile("(/[a-zA-Z0-9\\.\\-\\_]+)+");
       return rackPattern.matcher(rack).matches();
+   }
+
+   public static String getConfDir() {
+      StringBuilder builder = new StringBuilder();
+      builder.append(com.vmware.bdd.utils.CommonUtil.getConfDir())
+            .append(File.separator).append(Constants.CDH_PLUGIN_NAME);
+      return builder.toString();
    }
 }

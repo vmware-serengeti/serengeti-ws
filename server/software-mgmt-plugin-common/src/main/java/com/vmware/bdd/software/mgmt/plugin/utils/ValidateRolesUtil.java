@@ -19,6 +19,8 @@ import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginExc
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import org.apache.log4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,14 +32,22 @@ import java.util.Set;
 public final class ValidateRolesUtil {
    private static Logger logger = Logger.getLogger(ValidateRolesUtil.class);
 
-   public static void validateRolesForShrink(String blacklistJson, NodeGroupInfo groupInfo) {
+   public static void validateRolesForShrink(String appManagerConfPath, NodeGroupInfo groupInfo) {
+      String blacklistJson;
+      String filePath = appManagerConfPath + File.separator + Constants.rolesBlacklistForShrink;
+      try {
+         blacklistJson = SerialUtils.dataFromFile(filePath);
+      } catch (IOException e) {
+         String errMsg = appManagerConfPath + ": "  + e.getMessage();
+         throw SoftwareManagementPluginException.READ_BLACKLIST_FOR_SCALE_IN_FAILED(errMsg);
+      }
       Gson gson = new Gson();
       Set<String> blacklist = new HashSet(gson.fromJson(blacklistJson, List.class));
       logger.info("roles in blackList are: " + blacklist.toString());
 
       List<String> roles = groupInfo.getRoles();
       List<String> invalidRoles = null;
-      for (String role: roles) {
+      for (String role : roles) {
          if (blacklist.contains(role)) {
             if (invalidRoles == null) {
                invalidRoles = new ArrayList<String>();
