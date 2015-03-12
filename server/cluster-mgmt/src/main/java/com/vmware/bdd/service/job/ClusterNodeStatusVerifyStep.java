@@ -60,10 +60,7 @@ public class ClusterNodeStatusVerifyStep extends TrackableTasklet {
          if ((success != null && !success)
                || (verifyStatus == null || !verifyStatus)) {
             // throw creation exception here, and query detail node error message from node entity
-            if (!managementOperation.equals(ManagementOperation.START)) {
-               //if is start cluster, force to start the cluster even met failures
-               throw ClusteringServiceException.CLUSTER_OPERATION_FAILED(clusterName);
-            }
+            throw ClusteringServiceException.CLUSTER_OPERATION_FAILED(clusterName);
          }
       }
       return RepeatStatus.FINISHED;

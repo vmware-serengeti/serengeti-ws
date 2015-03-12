@@ -620,8 +620,7 @@ public class ClusterCommands implements CommandMarker {
 
    @CliCommand(value = "cluster start", help = "Start a cluster")
    public void startCluster(
-         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
-         @CliOption(key = { "force" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Force start cluster") final boolean forceStart) {
+         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName) {
 
       Map<String, String> queryStrings = new HashMap<String, String>();
       queryStrings
