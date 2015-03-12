@@ -121,7 +121,8 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
             }
          }
          if (!errorMsgList.isEmpty()) {
-            throw InfrastructureException.FORMAT_DISK_FAIL(clusterName, errorMsgList);
+            logger.error(errorMsgList);
+            //throw InfrastructureException.FORMAT_DISK_FAIL(clusterName, errorMsgList);
          }
       }  catch (InterruptedException e) {
          logger.error("error in waiting disk format", e);
