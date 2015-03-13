@@ -452,7 +452,7 @@
          <dependency>
            <groupId>org.eclipse.jetty</groupId>
            <artifactId>jetty-http</artifactId>
-           <version>9.2.2.v20140723</version>
+           <version>9.2.9.v20150224</version>
          </dependency>
          <dependency>
             <groupId>com.sun.net.httpserver</groupId>
