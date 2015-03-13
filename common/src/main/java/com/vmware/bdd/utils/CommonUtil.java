@@ -55,6 +55,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.exception.BddException;
@@ -522,6 +523,14 @@ public class CommonUtil {
 
      // time out now
      return null;
+  }
+
+  public static boolean getBooleanFromString(String booleanString, boolean defaultValue) {
+     boolean ret = defaultValue;
+     if (!StringUtils.isBlank(booleanString)) {
+        ret = Boolean.valueOf(booleanString);
+     }
+     return ret;
   }
 
 }

@@ -23,6 +23,7 @@ import java.util.Set;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import org.apache.log4j.Logger;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -214,7 +215,6 @@ public class SoftwareManagementStep extends TrackableTasklet {
       ISoftwareManagementTask task;
       SoftwareManager softwareMgr =
             softwareMgrs.getSoftwareManagerByClusterName(clusterName);
-
       ClusterBlueprint clusterBlueprint =
             getFromJobExecutionContext(chunkContext,
                   JobConstants.CLUSTER_BLUEPRINT_JOB_PARAM,

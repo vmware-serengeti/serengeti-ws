@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
 import org.apache.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -88,7 +89,12 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
    }
 
    @Override
-   public void preStartServices(String clusterName, int maxWaitingSeconds) throws InfrastructureException {
+   public void preStartServices(String clusterName, int maxWaitingSeconds) throws SoftwareManagementPluginException {
+      preStartServices(clusterName, maxWaitingSeconds, false);
+   }
+
+   @Override
+   public void preStartServices(String clusterName, int maxWaitingSeconds, boolean forceStart) throws InfrastructureException {
       logger.info("Pre configuration for cluster " + clusterName);
       synchronized(this) {
          if (clusterEntityMgr == null) {
@@ -121,7 +127,10 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
             }
          }
          if (!errorMsgList.isEmpty()) {
-            throw InfrastructureException.FORMAT_DISK_FAIL(clusterName, errorMsgList);
+            logger.error(errorMsgList);
+            if (!forceStart) {
+               throw InfrastructureException.FORMAT_DISK_FAIL(clusterName, errorMsgList);
+            }
          }
       }  catch (InterruptedException e) {
          logger.error("error in waiting disk format", e);

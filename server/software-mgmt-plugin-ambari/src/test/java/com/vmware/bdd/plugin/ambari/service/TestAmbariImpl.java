@@ -62,6 +62,10 @@ public class TestAmbariImpl {
          return new PreStartServices() {
             @Override
             public void preStartServices(String clusterName,
+                                         int maxWaitingSeconds, boolean forceStart) throws SoftwareManagementPluginException {
+            }
+            @Override
+            public void preStartServices(String clusterName,
                                          int maxWaitingSeconds) throws SoftwareManagementPluginException {
             }
          };
@@ -293,7 +297,7 @@ public class TestAmbariImpl {
    public void testStartClusterNotProvisionedByBDE() {
       AmbariImpl ambari = Mockito.mock(AmbariImpl.class);
       Mockito.when(ambari.isProvisioned(blueprint.getName())).thenReturn(true);
-      Mockito.when(ambari.startCluster(blueprint, reportQueue)).thenCallRealMethod();
+      Mockito.when(ambari.startCluster(blueprint, reportQueue, false)).thenCallRealMethod();
       try {
          ambari.startCluster(blueprint, reportQueue);
       } catch (SoftwareManagementPluginException e) {

@@ -169,7 +169,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
 
    @Override
    public boolean startCluster(ClusterBlueprint clusterBlueprint,
-         ClusterReportQueue reports) throws SoftwareManagementPluginException {
+         ClusterReportQueue reports, boolean forceStart) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }

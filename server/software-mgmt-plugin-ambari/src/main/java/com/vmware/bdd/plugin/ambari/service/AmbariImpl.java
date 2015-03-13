@@ -981,8 +981,13 @@ public class AmbariImpl implements SoftwareManager {
       return serviceNames;
    }
 
+   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reportQueue)
+         throws SoftwareManagementPluginException {
+      return startCluster(clusterBlueprint, reportQueue, false);
+   }
+
    @Override
-   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
+   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports, boolean forceStart)
          throws SoftwareManagementPluginException {
       AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, null);
       String clusterName = clusterDef.getName();
@@ -1005,7 +1010,8 @@ public class AmbariImpl implements SoftwareManager {
       //TODO(qjin): find out the root cause of failure in startting services
       Exception resultException = null;
       try {
-         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, 120);
+         logger.info("forceStart is: " + forceStart);
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, 120, forceStart);
          for (int i = 0; i < getRequestMaxRetryTimes(); i++) {
             ApiRequest apiRequestSummary;
             try {
