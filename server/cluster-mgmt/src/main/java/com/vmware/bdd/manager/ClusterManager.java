@@ -830,8 +830,7 @@ public class ClusterManager {
       }
    }
 
-   @ClusterManagerPointcut
-   public Long startCluster(String clusterName) throws Exception {
+   public Long startCluster(String clusterName, boolean force) throws Exception {
       logger.info("ClusterManager, starting cluster " + clusterName);
 
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
@@ -862,6 +861,7 @@ public class ClusterManager {
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
             clusterName));
+      param.put(JobConstants.FORCE_CLUSTER_OPERATION_JOB_PARAM, new JobParameter(String.valueOf(force)));
       param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
       param.put(JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM,
             new JobParameter(ClusterStatus.RUNNING.name()));

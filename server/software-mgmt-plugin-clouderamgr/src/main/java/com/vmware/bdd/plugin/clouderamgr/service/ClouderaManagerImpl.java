@@ -1003,8 +1003,12 @@ public class ClouderaManagerImpl implements SoftwareManager {
       }
    }
 
-   @Override
    public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
+      return startCluster(clusterBlueprint, reportQueue, false);
+   }
+
+   @Override
+   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reportQueue, boolean forceStart) throws SoftwareManagementPluginException {
       assert(clusterBlueprint != null && clusterBlueprint.getName() != null && !clusterBlueprint.getName().isEmpty());
       String clusterName = clusterBlueprint.getName();
       CmClusterDef clusterDef = null;

@@ -41,8 +41,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
-import com.vmware.aurora.util.StringUtil;
 import org.apache.commons.configuration.ConfigurationUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.vmware.bdd.apitypes.NetworkDnsType;
@@ -630,4 +630,12 @@ public class CommonUtil {
          }
       }
    }
+  public static boolean getBooleanFromString(String booleanString, boolean defaultValue) {
+     boolean ret = defaultValue;
+     if (!StringUtils.isBlank(booleanString)) {
+        ret = Boolean.valueOf(booleanString);
+     }
+     return ret;
+  }
+
 }

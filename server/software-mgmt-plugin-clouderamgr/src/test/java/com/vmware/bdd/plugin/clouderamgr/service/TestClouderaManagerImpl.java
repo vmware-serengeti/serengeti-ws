@@ -141,7 +141,11 @@ public class TestClouderaManagerImpl {
          return new PreStartServices() {
             @Override
             public void preStartServices(String clusterName,
-                  int maxWaitingSeconds) throws SoftwareManagementPluginException {
+                                         int maxWaitingSeconds, boolean forceStart) throws SoftwareManagementPluginException {
+            }
+            @Override
+            public void preStartServices(String clusterName,
+                                         int maxWaitingSeconds) throws SoftwareManagementPluginException {
             }
          };
       }

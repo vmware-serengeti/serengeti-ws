@@ -275,6 +275,7 @@ public class RestResource {
    public void startStopResumeCluster(
          @PathVariable("clusterName") String clusterName,
          @RequestParam(value = "state", required = true) String state,
+         @RequestParam(value = "force", required = false, defaultValue = "false") String force,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
 
@@ -290,7 +291,7 @@ public class RestResource {
          taskId = clusterMgr.stopCluster(clusterName);
          redirectRequest(taskId, request, response);
       } else if (state.equals("start")) {
-         taskId = clusterMgr.startCluster(clusterName);
+         taskId = clusterMgr.startCluster(clusterName, Boolean.valueOf(force));
          redirectRequest(taskId, request, response);
       } else if (state.equals("resume")) {
          taskId = clusterMgr.resumeClusterCreation(clusterName);

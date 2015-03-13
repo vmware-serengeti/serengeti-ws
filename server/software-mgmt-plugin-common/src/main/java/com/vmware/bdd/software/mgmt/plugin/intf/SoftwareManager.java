@@ -149,7 +149,7 @@ public interface SoftwareManager {
     * notify operation status change for this cluster, otherwise, client cannot
     * get information in this long operation time
     */
-   boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
+   boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports, boolean forceStart)
          throws SoftwareManagementPluginException;
 
    /**

@@ -990,8 +990,13 @@ public class AmbariImpl implements SoftwareManager {
       return serviceNames;
    }
 
+   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reportQueue)
+         throws SoftwareManagementPluginException {
+      return startCluster(clusterBlueprint, reportQueue, false);
+   }
+
    @Override
-   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
+   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports, boolean forceStart)
          throws SoftwareManagementPluginException {
       AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, null);
       String clusterName = clusterDef.getName();

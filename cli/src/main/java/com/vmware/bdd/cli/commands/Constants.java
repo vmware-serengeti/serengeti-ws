@@ -286,4 +286,5 @@ public class Constants {
    enum YES_NO {
       yes, no
    }
+   public static final String FORCE_CLUSTER_OPERATION_KEY = "force";
 }

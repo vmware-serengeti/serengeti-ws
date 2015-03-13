@@ -231,7 +231,7 @@ public class ClusterCommandsTest extends MockRestServer {
         CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         this.buildReqRespWithoutRespBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1?state=start",
                 HttpMethod.PUT, HttpStatus.NO_CONTENT, "");
-        clusterCommands.startCluster("cluster1");
+        clusterCommands.startCluster("cluster1", "false");
         CookieCache.clear();
     }
 
@@ -245,7 +245,7 @@ public class ClusterCommandsTest extends MockRestServer {
         this.buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1?state=start",
                 HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
-        clusterCommands.startCluster("cluster1");
+        clusterCommands.startCluster("cluster1", "false");
         CookieCache.clear();
     }
 
