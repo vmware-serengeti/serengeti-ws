@@ -21,17 +21,11 @@ public class Version {
    private static final Logger logger = Logger.getLogger(Version.class);
 
    public static int compare(String srcVersion, String destVersion) {
-      logger.info("srcVersion before change to artifact version: " + srcVersion);
-      logger.info("destVersion before change to artifact version: " + destVersion);
-
       DefaultArtifactVersion srcArtifactVersion = new DefaultArtifactVersion(srcVersion);
       DefaultArtifactVersion destArtifactVersion = new DefaultArtifactVersion(destVersion);
 
       int[] srcVersionArray = {srcArtifactVersion.getMajorVersion(), srcArtifactVersion.getMinorVersion(), srcArtifactVersion.getIncrementalVersion()};
       int[] destVersionArray = {destArtifactVersion.getMajorVersion(), destArtifactVersion.getMinorVersion(), destArtifactVersion.getIncrementalVersion()};
-
-      logger.info("srcVersion after change to artifact version: " + srcArtifactVersion.getMajorVersion() + "." + srcArtifactVersion.getMinorVersion() + "." + srcArtifactVersion.getIncrementalVersion());
-      logger.info("destVersion after change to artifact version: " + destArtifactVersion.getMajorVersion() + "." + destArtifactVersion.getMinorVersion() + "." + destArtifactVersion.getIncrementalVersion());
 
       for (int i = 0; i < srcVersionArray.length; i++) {
          if (i >= destVersionArray.length) {
