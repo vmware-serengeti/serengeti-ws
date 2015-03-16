@@ -51,14 +51,14 @@ e.g. send POST to https://localhost:8443/serengeti/j_spring_security_check?j_use
 
 Navigate to URL /serengeti/j_spring_security_logout means logout, and the session will be removed from server side.
 #### Session timeout
-If the user session is idle more than 30 mintues, server will invalidate the session. The timeout can be set in /opt/serengeti/tomcat6/webapps/serengeti/WEB-INF/web.xml in following format:
+If the user session is idle more than 30 mintues, server will invalidate the session. The timeout can be set in /opt/serengeti/tomcat/webapps/serengeti/WEB-INF/web.xml in following format:
 
     <session-config>
       <session-timeout>30</session-timeout>    <!-- 30 minutes -->
     </session-config>
 
 #### Add/Delete a User in Serengeti
-Add or delete user at /opt/serengeti/tomcat6/webapps/serengeti/WEB-INF/spring-security-context.xml file, user-service element.
+Add or delete user at /opt/serengeti/tomcat/webapps/serengeti/WEB-INF/spring-security-context.xml file, user-service element.
 Following is a sample to add one user into user-service.
 
     <authentication-manager alias="authenticationManager">
@@ -72,7 +72,7 @@ Following is a sample to add one user into user-service.
     
 The authorities value should define user role in Serengeti, but in M2, it’s not used.
 #### Modify User Password
-Change password is in the same element at /opt/serengeti/tomcat6/webapps/serengeti/WEB-INF/spring-security-context.xml file.
+Change password is in the same element at /opt/serengeti/tomcat/webapps/serengeti/WEB-INF/spring-security-context.xml file.
 
     <authentication-manager alias="authenticationManager">
       <authentication-provider>

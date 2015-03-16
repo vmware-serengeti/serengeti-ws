@@ -1,6 +1,6 @@
 two ways to run serengeti in tomcat:
 
-1. in Maven cli, execute "mvn tomcat6:run -s maven-settings.xml" after running "mvn clean -s maven-settings.xml" and "mvn package -s maven-settings.xml"
+1. in Maven cli: execute "mvn tomcat:run -s maven-settings.xml" after running "mvn clean -s maven-settings.xml" and "mvn package -s maven-settings.xml"
 
 2. in Eclipse (configure your Tomcat server properly first)
    a). edit Properties->Project Facets and add the Dynamic Web Module 2.5 to the serengeti project.
