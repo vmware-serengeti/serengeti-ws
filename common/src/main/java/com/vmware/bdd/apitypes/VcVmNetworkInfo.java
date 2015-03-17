@@ -12,19 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.software.mgmt.plugin.intf;
+package com.vmware.bdd.apitypes;
 
-import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
+import java.util.List;
 
-/**
- * Author: Xiaoding Bian
- * Date: 7/29/14
- * Time: 10:35 AM
- */
-public interface PreStartServices {
+import com.google.gson.annotations.Expose;
 
-   void preStartServices(String clusterName, boolean forceStart) throws SoftwareManagementPluginException;
+public class VcVmNetworkInfo {
 
-   void preStartServices(String clusterName) throws SoftwareManagementPluginException;
+   @Expose
+   private List<VcVmNicInfo> nics;
+
+   public List<VcVmNicInfo> getNics() {
+      return nics;
+   }
+
+   public void setNics(List<VcVmNicInfo> nics) {
+      this.nics = nics;
+   }
 
 }

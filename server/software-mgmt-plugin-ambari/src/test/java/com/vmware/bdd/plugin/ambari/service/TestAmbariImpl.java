@@ -61,12 +61,10 @@ public class TestAmbariImpl {
       public static PreStartServices getPreStartServicesHook() {
          return new PreStartServices() {
             @Override
-            public void preStartServices(String clusterName,
-                                         int maxWaitingSeconds, boolean forceStart) throws SoftwareManagementPluginException {
+            public void preStartServices(String clusterName, boolean forceStart) throws SoftwareManagementPluginException {
             }
             @Override
-            public void preStartServices(String clusterName,
-                                         int maxWaitingSeconds) throws SoftwareManagementPluginException {
+            public void preStartServices(String clusterName) throws SoftwareManagementPluginException {
             }
          };
       }
@@ -187,7 +185,7 @@ public class TestAmbariImpl {
       } catch (SoftwareManagementPluginException e) {
          Assert.assertNotNull(e.getCause());
          String expectedErrMsg = "App_Manager (" + Constants.AMBARI_PLUGIN_NAME + ") fails to stop the cluster " +
-            blueprint.getName() + ": Cannot stop a cluster that is not provisioned by Big Data Extension.";
+               blueprint.getName() + ": Cannot stop a cluster that is not provisioned by Big Data Extension.";
          Assert.assertEquals(e.getCause().getMessage(), expectedErrMsg);
       }
    }

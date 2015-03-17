@@ -938,7 +938,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
             succeed = true;
             return true;
          }
-         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName(), 120);
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName());
          executeAndReport("Starting Services",
                            apiResourceRootV6.getClustersResource().startCommand(clusterName),
                            ProgressSplit.START_SERVICES.getProgress(),
@@ -1780,7 +1780,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       boolean executed = true;
       int endProgress = ProgressSplit.START_SERVICES.getProgress();
       try {
-         ReflectionUtils.getPreStartServicesHook().preStartServices(cluster.getName(), 120);
+         ReflectionUtils.getPreStartServicesHook().preStartServices(cluster.getName());
          if (!cluster.isEmpty()) {
             if (!isConfigured(cluster)) {
                configureServices(cluster, reportQueue, true);
