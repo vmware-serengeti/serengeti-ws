@@ -16,6 +16,7 @@ package com.vmware.bdd.service.job;
 
 import java.util.Map;
 
+import com.vmware.bdd.utils.JobUtils;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +65,10 @@ public class ClusterOperationCallbackStep extends TrackableTasklet {
                CommonUtil.gracefulRackTopologyOutput(rackTopology, filename, "\n");
             } catch (Exception e) {
                String errorMessage = msg + " failed. " + e.getLocalizedMessage();
-               throw TaskException.EXECUTION_FAILED(errorMessage);
+               boolean forceStart = JobUtils.getJobParameterForceClusterOperation(chunkContext);
+               if (!forceStart) {
+                  throw TaskException.EXECUTION_FAILED(errorMessage);
+               }
             }
          }
       }

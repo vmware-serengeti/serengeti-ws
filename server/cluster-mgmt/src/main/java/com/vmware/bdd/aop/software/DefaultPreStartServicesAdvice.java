@@ -21,6 +21,8 @@ import java.util.concurrent.Callable;
 
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
+import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.JobUtils;
 import org.apache.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -128,13 +130,17 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
          }
          if (!errorMsgList.isEmpty()) {
             logger.error(errorMsgList);
+            JobUtils.forceClusterOperationRecordError(forceStart, logger);
             if (!forceStart) {
                throw InfrastructureException.FORMAT_DISK_FAIL(clusterName, errorMsgList);
             }
          }
       }  catch (InterruptedException e) {
          logger.error("error in waiting disk format", e);
-         throw BddException.INTERNAL(e, e.getMessage());
+         JobUtils.forceClusterOperationRecordError(forceStart, logger);
+         if (!forceStart) {
+            throw BddException.INTERNAL(e, e.getMessage());
+         }
       }
    }
 }
