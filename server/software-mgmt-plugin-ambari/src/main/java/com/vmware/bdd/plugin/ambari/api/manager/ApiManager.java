@@ -22,6 +22,8 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiOperationLevel;
+import com.vmware.bdd.plugin.ambari.utils.Constants;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.http.HttpStatus;
 
@@ -372,6 +374,11 @@ public class ApiManager implements IApiManager {
       return ApiUtils.jsonToObject(ApiRequest.class, stopServicesJson);
    }
 
+   private boolean isAmbari_1_6_0() {
+      String ambariServerVersion = getVersion();
+      return ambariServerVersion.equalsIgnoreCase(Constants.AMBARI_SERVER_VERSION_1_6_0);
+   }
+
    @Override
    public ApiRequest startAllServicesInCluster(String clusterName) throws AmbariApiException {
       ApiServiceInfo serviceInfo = new ApiServiceInfo();
@@ -380,15 +387,19 @@ public class ApiManager implements IApiManager {
       body.setServiceInfo(serviceInfo);
       ApiRequestInfo requestInfo = new ApiRequestInfo();
       requestInfo.setContext("Start All Services");
-      ApiPutRequest stopRequest = new ApiPutRequest(requestInfo, body);
-      String request = ApiUtils.objectToJson(stopRequest);
+      if (!isAmbari_1_6_0()) {
+         ApiOperationLevel operationLevel = new ApiOperationLevel(Constants.OPERATION_LEVEL, clusterName);
+         requestInfo.setOperationLevel(operationLevel);
+      }
+      ApiPutRequest startRequest = new ApiPutRequest(requestInfo, body);
+      String request = ApiUtils.objectToJson(startRequest);
       logger.debug("The request in start cluster is :" + request);
 
       Response response = null;
       try {
          response = apiResourceRootV1.getClustersResource()
                      .getServicesResource(clusterName)
-                     .startAllServices(clusterName, "true", request);
+                     .startAllServices(clusterName, "false", request);
       } catch (Exception e) {
          throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
       }

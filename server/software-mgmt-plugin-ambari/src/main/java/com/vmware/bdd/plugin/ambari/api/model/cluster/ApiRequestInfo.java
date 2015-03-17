@@ -108,6 +108,8 @@ public class ApiRequestInfo {
    @Expose
    @SerializedName("parameters")
    private HashMap<String, String> parameters;
+   @SerializedName("operation_level")
+   private ApiOperationLevel operationLevel;
 
    public Long getRequestId() {
       return requestId;
@@ -283,5 +285,11 @@ public class ApiRequestInfo {
 
    public void setParameters(HashMap<String, String> parameters) {
       this.parameters = parameters;
+   public ApiOperationLevel getOperationLevel() {
+      return operationLevel;
+   }
+
+   public void setOperationLevel(ApiOperationLevel operationLevel) {
+      this.operationLevel = operationLevel;
    }
 }

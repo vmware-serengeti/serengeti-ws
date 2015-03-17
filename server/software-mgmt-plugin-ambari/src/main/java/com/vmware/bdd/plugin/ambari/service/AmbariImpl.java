@@ -1014,8 +1014,9 @@ public class AmbariImpl implements SoftwareManager {
       //TODO(qjin): find out the root cause of failure in startting services
       Exception resultException = null;
       try {
-         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, 120);
-         for (int i = 0; i < getRequestMaxRetryTimes(); i++) {
+         logger.info("forceStart is: " + forceStart);
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, 120, forceStart);
+         for (int i = 0; i < getRequestMaxRetryTimes() && !success; i++) {
             ApiRequest apiRequestSummary;
             try {
                apiRequestSummary = apiManager.startAllServicesInCluster(clusterName);
