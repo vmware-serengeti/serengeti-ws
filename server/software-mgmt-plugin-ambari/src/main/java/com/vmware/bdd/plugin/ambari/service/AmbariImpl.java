@@ -1012,7 +1012,7 @@ public class AmbariImpl implements SoftwareManager {
       try {
          logger.info("forceStart is: " + forceStart);
          ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, 120, forceStart);
-         for (int i = 0; i < getRequestMaxRetryTimes(); i++) {
+         for (int i = 0; i < getRequestMaxRetryTimes() && !success; i++) {
             ApiRequest apiRequestSummary;
             try {
                apiRequestSummary = apiManager.startAllServicesInCluster(clusterName);
