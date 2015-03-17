@@ -371,4 +371,11 @@ public class JobUtils {
       String forceStartString = JobUtils.getJobParameter(chunkContext, JobConstants.FORCE_CLUSTER_OPERATION_JOB_PARAM);
       return CommonUtil.getBooleanFromString(forceStartString, false);
    }
+
+   public static void forceClusterOperationRecordError(boolean force, Logger logger) {
+      if(force) {
+         logger.warn(Constants.FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION);
+      }
+   }
+
 }

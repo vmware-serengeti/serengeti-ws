@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gson.Gson;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
@@ -356,7 +357,8 @@ public class AmbariImpl implements SoftwareManager {
    protected boolean isClusterProvisionedByBDE(final AmClusterDef clusterDef) {
       /*
       For cluster resume/resize, the cluster is already exist, we need to check if this cluster is created by BDE.
-      So far, just check if all hostnames exist in Ambari Cluster are included in given blueprint
+      So far, just check if all hostnames exist in Ambari Cluster are included in given blueprint. To avoid potential
+      user limitation, will not throw out any exception, just give out an warning
        */
       String clusterName = clusterDef.getName();
       Set<String> hostnames = new HashSet<String>();
@@ -365,7 +367,7 @@ public class AmbariImpl implements SoftwareManager {
       }
       for (ApiHost apiHost : apiManager.getCluster(clusterName).getApiHosts()) {
          if (!hostnames.contains(apiHost.getApiHostInfo().getHostName())) {
-            throw SoftwareManagementPluginException.CLUSTER_ALREADY_EXIST(clusterName);
+            logger.warn("Host " + apiHost.getApiHostInfo().getHostName() + " managed by Ambari doesn't exists in BDE");
          }
       }
       return true;
@@ -1000,6 +1002,7 @@ public class AmbariImpl implements SoftwareManager {
          throws SoftwareManagementPluginException {
       AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, null);
       String clusterName = clusterDef.getName();
+      ClusterReport clusterReport = clusterDef.getCurrentReport();
       if (!isProvisioned(clusterName)) {
          throw AmException.CLUSTER_NOT_PROVISIONED(clusterName);
       }
@@ -1007,19 +1010,18 @@ public class AmbariImpl implements SoftwareManager {
          throw SoftwareManagementPluginException.START_CLUSTER_FAILED_NOT_PROV_BY_BDE(clusterName);
       }
 
-      ClusterReport clusterReport = clusterDef.getCurrentReport();
       clusterReport.setAction("Ambari is starting services");
       clusterReport.setProgress(ProgressSplit.OPERATION_BEGIN.getProgress());
       reportStatus(clusterReport, reports);
+
       boolean success = false;
-      //when start services, some tasks will fail with error msg "Host Role in invalid state".
+      //In ambari1.6.0, when start services, some tasks will fail with error msg "Host Role in invalid state".
       // The failed task are random(I had saw NodeManager, ResourceManager, NAGOIS failed), and the
       // root cause is not clear by now. Each time, when I retry, it succeed. So just add retry logic to make a
       // a temp fix for it.
       //TODO(qjin): find out the root cause of failure in startting services
       Exception resultException = null;
       try {
-         logger.info("forceStart is: " + forceStart);
          ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, 120, forceStart);
          for (int i = 0; i < getRequestMaxRetryTimes() && !success; i++) {
             ApiRequest apiRequestSummary;

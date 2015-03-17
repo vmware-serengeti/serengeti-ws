@@ -281,4 +281,5 @@ public class Constants {
 
    public static final String CLUSTER_CLONE_TYPE_FAST_CLONE = "fast";
    public static final String CLUSTER_CLONE_TYPE_INSTANT_CLONE = "instant";
+   public static final String FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION = "The above error is ignored because the force flag is set.";
 }

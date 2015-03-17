@@ -14,8 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job;
 
-import com.vmware.aurora.util.StringUtil;
-import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.JobUtils;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -65,6 +63,7 @@ public class ClusterNodeStatusVerifyStep extends TrackableTasklet {
                || (verifyStatus == null || !verifyStatus)) {
             logger.error("operation is " + managementOperation + " forceStart is: " + forceStart);
             // throw creation exception here, and query detail node error message from node entity
+            JobUtils.forceClusterOperationRecordError(forceStart, logger);
             if (!forceStart || !managementOperation.equals(ManagementOperation.START)) {
                //if is start custer, force to start the cluster even met failures
                throw ClusteringServiceException.CLUSTER_OPERATION_FAILED(clusterName);
