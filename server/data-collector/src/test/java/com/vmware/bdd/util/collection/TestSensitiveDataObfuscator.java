@@ -31,7 +31,7 @@ public class TestSensitiveDataObfuscator {
         value = SensitiveDataObfuscator.hashSensitiveData(
                 "password","1234567abc", null);
         assertEquals(SensitiveDataObfuscator.getSensitiveDataFromFile().size(), 54);
-        assertEquals(value, "784EBC7877711442A5271F5CF3E39005");
+        assertEquals(value, "4D74CDB3F355C750B8FE2E4C86CC062F41CA1C7373A8CD19D2C7C2D6974C3002");
     }
 
     @Test(groups = { "SensitiveDataObfuscatorTest" })
@@ -48,10 +48,10 @@ public class TestSensitiveDataObfuscator {
     }
 
     @Test(groups = { "SensitiveDataObfuscatorTest" })
-    public void testParseStrToMd5U32() {
-        String mask = SensitiveDataObfuscator.parseStrToMd5U32("255.255.255.0");
-        assertEquals(mask, "454A105061438B142842C0EF875CFBFE");
-        String ip = SensitiveDataObfuscator.parseStrToMd5U32("192.168.0.1");
-        assertEquals(ip, "F0FDB4C3F58E3E3F8E77162D893D3055");
+    public void testParseStrToSHA256() {
+        String mask = SensitiveDataObfuscator.parseStrToSHA256("255.255.255.0");
+        assertEquals(mask, "F9E2C70401F315FEEBFC5B2A2B7493C10578E8E5CC3D7C7354FCF5F34FEC0DB5");
+        String ip = SensitiveDataObfuscator.parseStrToSHA256("192.168.0.1");
+        assertEquals(ip, "37D7A80604871E579850A658C7ADD2AE7557D0C6ABCC9B31ECDDC4424207EBA3");
     }
 }

@@ -75,17 +75,17 @@ public class SensitiveDataObfuscator {
         if ((sensitiveData != null && sensitiveData.contains(key)) ||
                 (expandedSensitiveData != null &&
                         expandedSensitiveData.contains(key)) && !CommonUtil.isBlank(value)) {
-             return parseStrToMd5U32(value);
+             return parseStrToSHA256(value);
         } else {
             return value;
         }
     }
 
-    public static String parseStrToMd5U32(String str){
+    public static String parseStrToSHA256(String str){
         String reStr = "";
         try {
-            MessageDigest md5 = MessageDigest.getInstance("MD5");
-            byte[] bytes = md5.digest(str.getBytes());
+            MessageDigest sha = MessageDigest.getInstance("SHA-256");
+            byte[] bytes = sha.digest(str.getBytes());
             reStr = ByteArrayUtils.byteArrayToHexString(bytes);
             } catch (NoSuchAlgorithmException e) {
                 logger.warn("Hash sensitive data failed: " + e.getMessage());
