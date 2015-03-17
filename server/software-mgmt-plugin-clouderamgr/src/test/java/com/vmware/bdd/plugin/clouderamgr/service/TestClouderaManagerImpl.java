@@ -140,12 +140,10 @@ public class TestClouderaManagerImpl {
       public static PreStartServices getPreStartServicesHook() {
          return new PreStartServices() {
             @Override
-            public void preStartServices(String clusterName,
-                                         int maxWaitingSeconds, boolean forceStart) throws SoftwareManagementPluginException {
+            public void preStartServices(String clusterName, boolean forceStart) throws SoftwareManagementPluginException {
             }
             @Override
-            public void preStartServices(String clusterName,
-                                         int maxWaitingSeconds) throws SoftwareManagementPluginException {
+            public void preStartServices(String clusterName) throws SoftwareManagementPluginException {
             }
          };
       }
@@ -237,8 +235,8 @@ public class TestClouderaManagerImpl {
       String yarnServiceName = blueprint.getName() + "_YARN";
       ApiRoleList roleList =
             rootResourceV6.getClustersResource()
-                  .getServicesResource(blueprint.getName())
-                  .getRolesResource(hdfsServiceName).readRoles();
+            .getServicesResource(blueprint.getName())
+            .getRolesResource(hdfsServiceName).readRoles();
       for (ApiRole role : roleList.getRoles()) {
          if (role.getHostRef().getHostId().equals(hosts.get(2).getHostId())) {
             ApiRoleRef roleRef = new ApiRoleRef();
@@ -250,8 +248,8 @@ public class TestClouderaManagerImpl {
       }
       roleList =
             rootResourceV6.getClustersResource()
-                  .getServicesResource(blueprint.getName())
-                  .getRolesResource(yarnServiceName).readRoles();
+            .getServicesResource(blueprint.getName())
+            .getRolesResource(yarnServiceName).readRoles();
       for (ApiRole role : roleList.getRoles()) {
          if (role.getHostRef().getHostId().equals(hosts.get(2).getHostId())) {
             ApiRoleRef roleRef = new ApiRoleRef();

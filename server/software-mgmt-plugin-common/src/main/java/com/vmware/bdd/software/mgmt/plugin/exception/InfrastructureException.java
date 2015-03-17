@@ -41,12 +41,12 @@ public class InfrastructureException extends SoftwareManagementPluginException {
       return failedMsgList;
    }
 
-   public static InfrastructureException FORMAT_DISK_FAIL(
+   public static InfrastructureException WAIT_VM_STATUS_FAIL(
          String clusterName, List<String> failedMsgList) {
       String details = failedMsgList != null && failedMsgList.size() > 0 ? Arrays.toString(failedMsgList.toArray()) : "";
 
       InfrastructureException e =
-            new InfrastructureException("APP_MANAGER.FORMAT_DISK_FAIL",
+            new InfrastructureException("APP_MANAGER.WAIT_VM_STATUS_FAIL",
                   null, clusterName, details);
       e.failedMsgList = failedMsgList;
 

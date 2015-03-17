@@ -1079,5 +1079,34 @@ public class VcVmUtil {
       });
    }
 
+   public static String getHostNameFromIpV4(VcVirtualMachine vcVm, String ipV4) {
+
+      VcVmNetworkInfo vcVmNetworkInfo = null;
+
+      String guestNetworkInfo = vcVm.getGuestVariables().get("guestinfo.network_info");
+      if (guestNetworkInfo != null && !guestNetworkInfo.isEmpty()) {
+         Gson gson = new Gson();
+         vcVmNetworkInfo = gson.fromJson(guestNetworkInfo, VcVmNetworkInfo.class);
+      }
+
+      if (vcVmNetworkInfo == null || ipV4 == null) {
+         return null;
+      }
+
+      String hostName = null;
+      for (VcVmNicInfo vcVmNicInfo : vcVmNetworkInfo.getNics()) {
+         if (ipV4.equals(vcVmNicInfo.getIpAddress())) {
+            hostName = vcVmNicInfo.getFqdn();
+            break;
+         }
+      }
+
+      return hostName;
+   }
+
+   public static String getMgtHostName(VcVirtualMachine vcVm, String primaryMgtIpV4) {
+      return getHostNameFromIpV4(vcVm, primaryMgtIpV4);
+   }
+
 }
 

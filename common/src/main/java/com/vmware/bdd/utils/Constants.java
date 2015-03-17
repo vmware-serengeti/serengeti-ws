@@ -229,6 +229,8 @@ public class Constants {
    public static final String SERENGETI_PRIVATE_KEY_FILE = "/home/serengeti/.ssh/id_rsa";
    public static final String VM_DISK_FORMAT_STATUS_KEY = "guestinfo.DiskFormatCode";
    public static final String VM_DISK_FORMAT_ERROR_KEY = "guestinfo.disk.format.status";
+   public static final String VM_FQDN_REGISTER_STATUS_KEY = "guestinfo.FqdnRegisterCode";
+   public static final String VM_FQDN_REGISTER_ERROR_KEY = "guestinfo.fqdn.register.status";
    public static final String APPMANAGER_KEYSTORE_PATH = "/opt/serengeti/.certs/";
    public static final String APPMANAGER_KEYSTORE_FILE = "appmanagers.jks";
    public static final char[] APPMANAGER_KEYSTORE_PASSWORD = "changeit".toCharArray();

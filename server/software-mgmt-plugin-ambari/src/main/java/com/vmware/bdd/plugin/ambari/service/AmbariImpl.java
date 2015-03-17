@@ -276,6 +276,9 @@ public class AmbariImpl implements SoftwareManager {
          String ambariServerVersion = getVersion();
          clusterDef = new AmClusterDef(blueprint, privateKey, ambariServerVersion);
          logger.info("Cluster def after modification: " + ApiUtils.objectToJson(clusterDef));
+
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName());
+
          provisionCluster(clusterDef, reportQueue);
          success = true;
 
@@ -568,8 +571,6 @@ public class AmbariImpl implements SoftwareManager {
 
          String clusterName = clusterDef.getName();
 
-         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, 120);
-
          // For cluster resume/resize, the blueprint is already exist, we need to delete this cluster first.
          if (isProvisioned(clusterName) && isClusterProvisionedByBDE(clusterDef)) {
             try {
@@ -680,6 +681,9 @@ public class AmbariImpl implements SoftwareManager {
          logger.info(ApiUtils.objectToJson(blueprint));
          logger.info("Start cluster " + blueprint.getName() + " scale out.");
          clusterDef = new AmClusterDef(blueprint, privateKey);
+
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName());
+
          bootstrap(clusterDef, addedNodeNames, reports);
          provisionComponents(clusterDef, addedNodeNames, reports);
          success = true;
@@ -1022,8 +1026,8 @@ public class AmbariImpl implements SoftwareManager {
       //TODO(qjin): find out the root cause of failure in startting services
       Exception resultException = null;
       try {
-         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, 120, forceStart);
-         for (int i = 0; i < getRequestMaxRetryTimes() && !success; i++) {
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, forceStart);
+            for (int i = 0; i < getRequestMaxRetryTimes() && !success; i++) {
             ApiRequest apiRequestSummary;
             try {
                apiRequestSummary = apiManager.startAllServicesInCluster(clusterName);
