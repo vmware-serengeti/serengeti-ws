@@ -20,8 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
+import com.vmware.bdd.utils.JobUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -140,6 +142,12 @@ public class SoftwareManagementStep extends TrackableTasklet {
                      clusterName);
          Set<String> hostnames = new HashSet<String>();
          for (NodeEntity node : nodes) {
+            //for software operation, we can only handle VMs who are already VM_READY
+            //Add this filter to tolerate some vm failures in cluster start
+            boolean force = JobUtils.getJobParameterForceClusterOperation(chunkContext);
+            if (force && ManagementOperation.START.equals(managementOperation) && !node.getStatus().equals(NodeStatus.VM_READY)) {
+               continue;
+            }
             hostnames.add(node.getHostName());
          }
          ClusterCreate clusterSpec = clusterManager.getClusterSpec(clusterName);

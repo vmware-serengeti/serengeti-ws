@@ -285,6 +285,7 @@ public class ApiRequestInfo {
 
    public void setParameters(HashMap<String, String> parameters) {
       this.parameters = parameters;
+   }
    public ApiOperationLevel getOperationLevel() {
       return operationLevel;
    }
