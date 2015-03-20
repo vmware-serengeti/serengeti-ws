@@ -25,13 +25,15 @@
 			<value>execute</value>
 		</property>
 	</bean>
-	<bean id="dataCollectionCronTriggerFactory" class="com.vmware.bdd.manager.collection.quartz.InitializingCronTriggerFactoryBean">
-		<constructor-arg ref = "collectionDriverManager" index="0"/>
-		<!-- execute job in 2025, that is it will be executing barely  -->
-		<constructor-arg value = "0 15 10 * * ? 2025" index="1"/>
+	<bean id="dataCollectionCronTriggerFactory" class="com.vmware.bdd.manager.collection.quartz.InitializingCronTriggerFactoryBean" init-method="init">
+		<property name="collectionDriverManager">
+			<ref bean="collectionDriverManager" />
+		</property>
 		<property name="jobDetail">
 			<ref bean="dataCollectionJobDetail" />
 		</property>
+		<!-- execute job in 2025, that is it will be executing barely  -->
+		<property name="cronExpression" value="0 15 10 * * ? 2025" />
 	</bean>
 	<bean name="schedulerFactory"
 		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">

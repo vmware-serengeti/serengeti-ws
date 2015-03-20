@@ -29,15 +29,7 @@ public class InitializingCronTriggerFactoryBean extends CronTriggerFactoryBean {
          .getLogger(InitializingCronTriggerFactoryBean.class);
    private CollectionDriverManager collectionDriverManager;
 
-   public InitializingCronTriggerFactoryBean(
-         CollectionDriverManager collectionDriverManager,
-         String defaultCronExpression) {
-      this.collectionDriverManager = collectionDriverManager;
-      if (this.collectionDriverManager == null
-            || this.collectionDriverManager.getDriver() == null) {
-         setCronExpression(defaultCronExpression);
-         return;
-      }
+   public void init() {
       String cronExpression = getCronExpressionFromConfiguration();
       if (!CommonUtil.isBlank(cronExpression)
             && CronExpression.isValidExpression(cronExpression)) {
@@ -47,7 +39,7 @@ public class InitializingCronTriggerFactoryBean extends CronTriggerFactoryBean {
          if (driver != null) {
             setCronExpression(driver.getDefaultCronExpression());
          } else {
-            logger.warn("In the constructor of class InitializingCronTriggerFactoryBean, driver is null.");
+            logger.warn("com.vmware.bdd.manager.collection.CollectionDriver is not configured.");
          }
       }
    }
@@ -62,6 +54,10 @@ public class InitializingCronTriggerFactoryBean extends CronTriggerFactoryBean {
                      .getProperty(driver.getCronExpressionName());
       }
       return cronExpression;
+   }
+
+   public void setCollectionDriverManager(CollectionDriverManager collectionDriverManager) {
+      this.collectionDriverManager = collectionDriverManager;
    }
 
 }

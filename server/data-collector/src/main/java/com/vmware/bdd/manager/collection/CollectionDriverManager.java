@@ -31,17 +31,12 @@ public class CollectionDriverManager {
    static final Logger logger = Logger.getLogger(CollectionDriverManager.class);
    protected CollectionDriver driver;
    protected static File file;
+   private ICollectionInitializerService collectionInitializerService;
    private CollectOperationManager collectOperationManager;
    private DataContainer dataContainer;
+   private String driverClass;
 
-   public CollectionDriverManager() {}
-   public CollectionDriverManager(String driverClass, ICollectionInitializerService collectionInitializerService
-         , CollectOperationManager collectOperationMgr, DataContainer container) {
-      init(driverClass, collectionInitializerService);
-      startCollection(collectOperationMgr, container);
-   }
-
-   private void init(String driverClass, ICollectionInitializerService collectionInitializerService) {
+   public void init() {
       try {
          Class<?> newClass = Class.forName(driverClass);
          if (newClass != null) {
@@ -57,6 +52,8 @@ public class CollectionDriverManager {
          logger.error("Failed to instance class " + driverClass + ": "
                + e.getLocalizedMessage());
       }
+
+      startCollection(collectOperationManager, dataContainer);
    }
 
    private void startCollection(CollectOperationManager collectOperationMgr, DataContainer container) {
@@ -128,6 +125,30 @@ public class CollectionDriverManager {
 
    public static File getConfigurationFile() {
       return file;
+   }
+
+   public void setDriver(CollectionDriver driver) {
+      this.driver = driver;
+   }
+
+   public static void setFile(File file) {
+      CollectionDriverManager.file = file;
+   }
+
+   public void setCollectionInitializerService(ICollectionInitializerService collectionInitializerService) {
+      this.collectionInitializerService = collectionInitializerService;
+   }
+
+   public void setCollectOperationManager(CollectOperationManager collectOperationManager) {
+      this.collectOperationManager = collectOperationManager;
+   }
+
+   public void setDataContainer(DataContainer dataContainer) {
+      this.dataContainer = dataContainer;
+   }
+
+   public void setDriverClass(String driverClass) {
+      this.driverClass = driverClass;
    }
 
 }
