@@ -162,6 +162,9 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
 
             List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(clusterName);
             for (NodeEntity node : nodes) {
+               if (node.getMoId() == null || node.getMoId().isEmpty()) {
+                  continue;
+               }
                node = clusterEntityMgr.getNodeWithNicsByMobId(node.getMoId());
                VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
                String hostname = VcVmUtil.getMgtHostName(vm, node.getPrimaryMgtIpV4());
