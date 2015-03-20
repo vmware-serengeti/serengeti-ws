@@ -1068,13 +1068,17 @@ public class VcVmUtil {
 
       VcVmNetworkInfo vcVmNetworkInfo = null;
 
+      if (vcVm == null) {
+         return null;
+      }
+
       String guestNetworkInfo = vcVm.getGuestVariables().get("guestinfo.network_info");
       if (guestNetworkInfo != null && !guestNetworkInfo.isEmpty()) {
          Gson gson = new Gson();
          vcVmNetworkInfo = gson.fromJson(guestNetworkInfo, VcVmNetworkInfo.class);
       }
 
-      if (vcVmNetworkInfo == null || ipV4 == null) {
+      if (vcVmNetworkInfo == null || ipV4 == null || Constants.NULL_IPV4_ADDRESS.equals(ipV4)) {
          return null;
       }
 

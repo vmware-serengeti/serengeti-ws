@@ -92,21 +92,21 @@ public class WaitVMStatusTask implements Callable<Void> {
 
    private void waitForDiskFormat(VcVirtualMachine vm) {
 
-      String status = getStatus(vm, Constants.VM_DISK_FORMAT_STATUS_KEY, DISK_FORMAT_INPROGRESS, "disk format");
+      String status = getStatus(vm, Constants.VM_DISK_FORMAT_STATUS_KEY, DISK_FORMAT_INPROGRESS, "Disk preparing");
 
       if (isInprogress(status, DISK_FORMAT_INPROGRESS)) {
-         logger.error("Didn't get disk format finished signal for vm " + vm.getName() + ".");
+         logger.error("Didn't get disk preparing finished signal for vm " + vm.getName() + ".");
          throw SoftwareManagementException.GET_DISK_FORMAT_STATUS_ERROR(vm.getName());
       }
 
       if (isFailed(status, DISK_FORMAT_SUCCESS)) {
          Map<String, String> variables = vm.getGuestVariables();
          String error = variables.get(Constants.VM_DISK_FORMAT_ERROR_KEY);
-         logger.error("Failed to format disk for vm " + vm.getName() + ", for " + error);
+         logger.error("Failed to prepare disk for vm " + vm.getName() + ", for " + error);
          throw SoftwareManagementException.FAILED_TO_FORMAT_DISK(vm.getName(), error);
       }
 
-      logger.info("Disk format finished for vm " + vm.getName());
+      logger.info("Disk preparing finished for vm " + vm.getName());
    }
 
    private String getStatus(VcVirtualMachine vm, String statusKey, String inprogress, String action) {
@@ -120,7 +120,7 @@ public class WaitVMStatusTask implements Callable<Void> {
             status = variables.get(statusKey);
          }
       } catch (InterruptedException e) {
-         logger.info("Waiting " + action + " thread is interrupted.", e);
+         logger.info("Waiting for " + action + " thread is interrupted.", e);
       }
 
       return status;
