@@ -91,11 +91,13 @@ public class TestJobListenerAdvice {
         collectionInitializerService = mock(FakeCollectionInitializerService.class);
         collectOperationManager = mock(CollectOperationManager.class);
         dataContainer = new DataContainer();
-        collectionDriverManager =
-                new FakeCollectionDriverManager(
-                        "com.vmware.bdd.manager.ph.PhoneHomeCollectionDriver",
-                        collectionInitializerService, collectionDriver,
-                        collectOperationManager, dataContainer, file);
+        collectionDriverManager = new FakeCollectionDriverManager();
+        collectionDriverManager.setDriverClass("com.vmware.bdd.manager.ph.PhoneHomeCollectionDriver");
+        collectionDriverManager.setCollectionInitializerService(collectionInitializerService);
+        collectionDriverManager.setDriver(collectionDriver);
+        collectionDriverManager.setCollectOperationManager(collectOperationManager);
+        collectionDriverManager.setDataContainer(dataContainer);
+        collectionDriverManager.setFile(file);
         when(collectionDriver.getCollectionSwitchName()).thenReturn("serengeti.ph.enable");
         jobListenerAdvice = new JobListenerAdvice();
         jobListenerAdvice.setCollectionDriverManager(collectionDriverManager);

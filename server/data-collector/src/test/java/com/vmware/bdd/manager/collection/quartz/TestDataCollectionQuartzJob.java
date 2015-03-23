@@ -104,13 +104,14 @@ public class TestDataCollectionQuartzJob {
             Mockito.mock(FakeCollectionInitializerService.class);
       CollectOperationManager collectOperationManager = mock(CollectOperationManager.class);
       DataContainer dataContainer = mock(DataContainer.class);
-      CollectionDriverManager collectionDriverManager =
-            new FakeCollectionDriverManager(
-                  "com.vmware.bdd.manager.ph.PhoneHomeCollectionDriver",
-                  collectionInitializerService, collectionDriver,
-                  collectOperationManager, dataContainer, file);
-      DataCollectionQuartzJob dataCollectionQuartzJob =
-            new DataCollectionQuartzJob();
+      CollectionDriverManager collectionDriverManager = new FakeCollectionDriverManager();
+      DataCollectionQuartzJob dataCollectionQuartzJob = new DataCollectionQuartzJob();
+      collectionDriverManager.setDriverClass("com.vmware.bdd.manager.ph.PhoneHomeCollectionDriver");
+      collectionDriverManager.setCollectionInitializerService(collectionInitializerService);
+      collectionDriverManager.setDriver(collectionDriver);
+      collectionDriverManager.setCollectOperationManager(collectOperationManager);
+      collectionDriverManager.setDataContainer(dataContainer);
+      collectionDriverManager.setFile(file);
       dataCollectionQuartzJob
             .setCollectionDriverManager(collectionDriverManager);
       dataCollectionQuartzJob.setJobManager(jobManager);

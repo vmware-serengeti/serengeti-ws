@@ -20,24 +20,6 @@ import com.vmware.bdd.service.collection.ICollectionInitializerService;
 
 public class FakeCollectionDriverManager extends CollectionDriverManager {
 
-   public FakeCollectionDriverManager(String driverClass,
-         ICollectionInitializerService collectionInitializerService,
-         CollectionDriver collectionDirver,
-         CollectOperationManager collectOperationManager,
-         DataContainer container, File configurationFile) {
-      super(driverClass, collectionInitializerService, collectOperationManager, container);
-      setDriver(collectionDirver);
-      setFile(configurationFile);
-   }
-
-   private void setDriver(CollectionDriver driver) {
-      super.driver = driver;
-   }
-
-   private void setFile(File configurationFile) {
-      super.file = configurationFile;
-   }
-
    @Override
    public CollectionDriver getDriver() {
       return super.getDriver();
