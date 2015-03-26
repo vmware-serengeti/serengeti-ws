@@ -65,7 +65,7 @@ public class UnsupportedOpsBlocker {
          throw BddException.APP_MGR_TYPE_IS_BLANK(appMgrEntity.getName());
       }
 
-      blockUnsupportedOpsByAppMgr(ops, appMgrEntity.getType());
+      //blockUnsupportedOpsByAppMgr(ops, appMgrEntity.getType());
    }
 
    public void blockUnsupportedOpsByAppMgr(String ops, String appMgr) {
