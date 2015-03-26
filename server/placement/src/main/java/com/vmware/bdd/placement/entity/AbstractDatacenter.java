@@ -496,7 +496,10 @@ public class AbstractDatacenter extends AbstractObject {
       List<AbstractHost> hosts = new ArrayList<AbstractHost>();
 
       for (AbstractCluster cluster : this.clusters) {
-         hosts.addAll(cluster.getHosts());
+         List<AbstractHost> clusterHosts = cluster.getHosts();
+         if ((clusterHosts != null) && (!clusterHosts.isEmpty())) {
+            hosts.addAll(clusterHosts);
+         }
       }
 
       return hosts;
