@@ -279,4 +279,6 @@ public class Constants {
 
    public static final String DEPLOY_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
+   public static final String CLUSTER_CLONE_TYPE_FAST_CLONE = "fast";
+   public static final String CLUSTER_CLONE_TYPE_INSTANT_CLONE = "instant";
 }

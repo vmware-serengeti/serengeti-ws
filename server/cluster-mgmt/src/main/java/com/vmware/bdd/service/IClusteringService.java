@@ -131,7 +131,8 @@ public interface IClusteringService {
     */
    public boolean createVcVms(List<NetworkAdd> networkAdds,
          List<BaseNode> vNodes, Map<String, Set<String>> occupiedMgrIps,
-         boolean reserveRawDisks, StatusUpdater statusUpdater);
+         boolean reserveRawDisks, StatusUpdater statusUpdater,
+         String clusterCloneType);
 
    /**
     * Initialize clustering service

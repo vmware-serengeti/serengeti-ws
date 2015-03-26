@@ -26,6 +26,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
@@ -736,11 +737,18 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
          clusterRead.setExternalMapReduce(advancedProperties
                .get("ExternalMapReduce"));
          clusterRead.setLocalRepoURL(advancedProperties.get("LocalRepoURL"));
+         clusterRead.setClusterCloneType(advancedProperties.get("ClusterCloneType"));
          clusterRead.setExternalNamenode(advancedProperties.get("ExternalNamenode"));
          clusterRead.setExternalSecondaryNamenode(advancedProperties.get("ExternalSecondaryNamenode"));
          if (advancedProperties.get("ExternalDatanodes") != null) {
             clusterRead.setExternalDatanodes(gson.fromJson(gson.toJson(advancedProperties.get("ExternalDatanodes")), HashSet.class));
          }
+      }
+
+      String cloneType = clusterRead.getClusterCloneType();
+      if (CommonUtil.isBlank(cloneType)) {
+         // for clusters from previous releases, it should be fast clone
+         clusterRead.setClusterCloneType(Constants.CLUSTER_CLONE_TYPE_FAST_CLONE);
       }
 
       SoftwareManager softMgr = null;

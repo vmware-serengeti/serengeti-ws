@@ -88,6 +88,8 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
    private Map<String, Map<String, String>> infrastructure_config;
 
+   private String clusterCloneType;
+
    public ClusterRead() {
 
    }
@@ -552,5 +554,13 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
    public void setInfrastructure_config(Map<String, Map<String, String>> infrastructure_config) {
       this.infrastructure_config = infrastructure_config;
+   }
+
+   public String getClusterCloneType() {
+      return clusterCloneType;
+   }
+
+   public void setClusterCloneType(String clusterCloneType) {
+      this.clusterCloneType = clusterCloneType;
    }
 }

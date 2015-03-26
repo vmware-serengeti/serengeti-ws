@@ -1349,6 +1349,11 @@ public class ClusterCommands implements CommandMarker {
                .put("EXTERNAL MAPREDUCE", cluster.getExternalMapReduce());
       }
 
+      String cloneType = cluster.getClusterCloneType();
+      if (!CommandsUtils.isBlank(cloneType)) {
+         clusterParams.put("CLUSTER CLONE TYPE", cloneType.toUpperCase());
+      }
+
       clusterParams.put("AD/LDAP ENABLED", Boolean.toString(MapUtils.isNotEmpty(userMgmtCfg)));
 
       for (String key : clusterParams.keySet()) {

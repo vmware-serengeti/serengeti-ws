@@ -132,7 +132,7 @@ public class TestClusteringService {
       vNodes.add(node);
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, false);
       try {
-         service.createVcVms(networkAdds, vNodes, null, false, null);
+         service.createVcVms(networkAdds, vNodes, null, false, null, "fast");
          Assert.assertTrue(false, "should throw exception but not.");
       } catch (Exception e) {
          logger.info(e.getMessage(), e);
@@ -153,7 +153,7 @@ public class TestClusteringService {
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, true);
       MockTmScheduler.setResultIsNull(true);
       try {
-         service.createVcVms(networkAdds, vNodes, null, false, null);
+         service.createVcVms(networkAdds, vNodes, null, false, null, "fast");
          Assert.assertTrue(false, "should throw exception but not.");
       } catch (Exception e) {
          logger.info(e.getMessage(), e);
@@ -218,10 +218,10 @@ public class TestClusteringService {
       cloneServiceMap.put("mockClusterCloneService", cloneService);
       service.setCloneService(cloneServiceMap);
 
-      boolean success = service.createVcVms(networkAdds, vNodes, null, false, null);
+      boolean success = service.createVcVms(networkAdds, vNodes, null, false, null, "fast");
       Assert.assertTrue(!success, "should get create vm failed.");
       MockVcCache.setGetFlag(true);
-      success = service.createVcVms(networkAdds, vNodes, null, false, null);
+      success = service.createVcVms(networkAdds, vNodes, null, false, null, "fast");
       Assert.assertTrue(!success, "should get create vm failed.");
    }
 
@@ -319,7 +319,7 @@ public class TestClusteringService {
       cloneServiceMap.put("mockClusterCloneService", cloneService);
       service.setCloneService(cloneServiceMap);
 
-      boolean success = service.createVcVms(networkAdds, vNodes, null, false, null);
+      boolean success = service.createVcVms(networkAdds, vNodes, null, false, null, "fast");
       Assert.assertTrue(success, "should get create vm success.");
    }
 

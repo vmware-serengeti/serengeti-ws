@@ -38,6 +38,7 @@ import com.vmware.bdd.aop.annotation.ClusterManagerPointcut;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -449,6 +450,12 @@ public class ClusterManager {
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
       validateNetworkAccessibility(createSpec.getName(), createSpec.getNetworkNames(), vcClusters);
+
+      // get the current cluster clone type from the configuration file
+      String type = Configuration.getString("cluster.clone.service");
+      AuAssert.check(StringUtils.isNotBlank(type), "cluster.clone.service in serengeti.properties can not be null.");
+      clusterSpec.setClusterCloneType(type);
+
       //save configuration into meta-db, and extend configuration using default spec
       clusterConfigMgr.createClusterConfig(clusterSpec);
 

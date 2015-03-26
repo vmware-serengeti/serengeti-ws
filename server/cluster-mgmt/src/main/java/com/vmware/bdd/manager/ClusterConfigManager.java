@@ -294,7 +294,9 @@ public class ClusterConfigManager {
                cluster.getExternalMapReduce(), localRepoURL,
                cluster.getExternalNamenode(),
                cluster.getExternalSecondaryNamenode(),
-               cluster.getExternalDatanodes(), clusterEntity);
+               cluster.getExternalDatanodes(),
+               cluster.getClusterCloneType(),
+               clusterEntity);
          NodeGroupCreate[] groups = cluster.getNodeGroups();
          if (groups != null && groups.length > 0) {
             clusterEntity.setNodeGroups(convertNodeGroupsToEntities(gson,
@@ -352,12 +354,13 @@ public class ClusterConfigManager {
    private void setAdvancedProperties(String externalHDFS,
          String externalMapReduce, String localRepoURL,
          String externalNamenode, String externalSecondaryNamenode,
-         Set<String> externalDatanodes, ClusterEntity clusterEntity) {
+         Set<String> externalDatanodes, String clusterCloneType,ClusterEntity clusterEntity) {
       if (!CommonUtil.isBlank(externalHDFS)
             || !CommonUtil.isBlank(externalMapReduce)
             || !CommonUtil.isBlank(localRepoURL)
             || !CommonUtil.isBlank(externalNamenode)
             || !CommonUtil.isBlank(externalSecondaryNamenode)
+            || !CommonUtil.isBlank(clusterCloneType)
             || (externalDatanodes != null && !externalDatanodes.isEmpty())) {
          Map<String, Object> advancedProperties = new HashMap<String, Object>();
          advancedProperties.put("ExternalHDFS", externalHDFS);
@@ -366,6 +369,7 @@ public class ClusterConfigManager {
          advancedProperties.put("ExternalNamenode", externalNamenode);
          advancedProperties.put("ExternalSecondaryNamenode", externalSecondaryNamenode);
          advancedProperties.put("ExternalDatanodes", externalDatanodes);
+         advancedProperties.put("ClusterCloneType", clusterCloneType);
          Gson g = new Gson();
          clusterEntity.setAdvancedProperties(g.toJson(advancedProperties));
       }
@@ -873,12 +877,16 @@ public class ClusterConfigManager {
          clusterConfig.setExternalMapReduce(advancedProperties
                .get("ExternalMapReduce"));
          clusterConfig.setLocalRepoURL(advancedProperties.get("LocalRepoURL"));
+         clusterConfig.setClusterCloneType(advancedProperties.get("ClusterCloneType"));
          clusterConfig.setExternalNamenode(advancedProperties.get("ExternalNamenode"));
          clusterConfig.setExternalSecondaryNamenode(advancedProperties.get("ExternalSecondaryNamenode"));
          if (advancedProperties.get("ExternalDatanodes") != null) {
             clusterConfig.setExternalDatanodes(gson.fromJson(gson.toJson(advancedProperties.get("ExternalDatanodes")), HashSet.class));
          }
       }
+
+      // for clusters from previous releases, the clone type is fast clone
+      setDefaultClusterCloneType(clusterConfig);
 
       if(!CommonUtil.isBlank(clusterEntity.getInfraConfig())) {
          clusterConfig.setInfrastructure_config(InfrastructureConfigUtils.read(clusterEntity.getInfraConfig()));
@@ -1158,7 +1166,12 @@ public class ClusterConfigManager {
          clusterCreate.setExternalMapReduce(advancedProperties
                .get("ExternalMapReduce"));
          clusterCreate.setLocalRepoURL(advancedProperties.get("LocalRepoURL"));
+         clusterCreate.setClusterCloneType(advancedProperties.get("ClusterCloneType"));
       }
+
+      // for clusters from previous releases, the clone type is fast clone
+      setDefaultClusterCloneType(clusterCreate);
+
       // only check roles validity in server side, but not in CLI and GUI, because roles info exist in server side.
       ClusterBlueprint blueprint = clusterCreate.toBlueprint();
       try {
@@ -1183,7 +1196,9 @@ public class ClusterConfigManager {
             clusterCreate.getLocalRepoURL(),
             clusterCreate.getExternalNamenode(),
             clusterCreate.getExternalSecondaryNamenode(),
-            clusterCreate.getExternalDatanodes(), cluster);
+            clusterCreate.getExternalDatanodes(),
+            clusterCreate.getClusterCloneType(),
+            cluster);
       updateNodegroupAppConfig(clusterCreate, cluster,
             clusterCreate.isValidateConfig());
    }
@@ -1331,4 +1346,10 @@ public class ClusterConfigManager {
       return succ;
    }
 
+   private void setDefaultClusterCloneType(ClusterCreate clusterCreate) {
+      String cloneType = clusterCreate.getClusterCloneType();
+      if (CommonUtil.isBlank(cloneType)) {
+         clusterCreate.setClusterCloneType(Constants.CLUSTER_CLONE_TYPE_FAST_CLONE);
+      }
+   }
 }

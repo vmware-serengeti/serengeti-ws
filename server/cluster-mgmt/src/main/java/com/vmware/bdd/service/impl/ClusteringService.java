@@ -235,7 +235,7 @@ public class ClusteringService implements IClusteringService {
    /**
     *
     * @param cloneServiceMap clone service qualifier to clone service map.
-    * 3 clone services so far: simpleClusterCloneService, fastClusterCloneService, forkClusterCloneService
+    * 3 clone services so far: simpleClusterCloneService, fastClusterCloneService, instantClusterCloneService
     */
    @Autowired
    public void setCloneService(Map<String, IClusterCloneService> cloneServiceMap) {
@@ -1137,7 +1137,8 @@ public class ClusteringService implements IClusteringService {
    @Override
    public boolean createVcVms(List<NetworkAdd> networkAdds,
          List<BaseNode> vNodes, Map<String, Set<String>> occupiedIpSets,
-         boolean reserveRawDisks, StatusUpdater statusUpdator) {
+         boolean reserveRawDisks, StatusUpdater statusUpdator,
+         String clusterCloneType) {
       if (vNodes.isEmpty()) {
          logger.info("No vm to be created.");
          return true;
@@ -1198,7 +1199,7 @@ public class ClusteringService implements IClusteringService {
 
       // call clone service to copy templates
       List<VmCreateResult<?>> results =
-            chooseClusterCloneService().createCopies(sourceSpec, cloneConcurrency, specs,
+            chooseClusterCloneService(clusterCloneType).createCopies(sourceSpec, cloneConcurrency, specs,
                   callback);
       if (results == null || results.isEmpty()) {
          for (VmCreateSpec spec : specs) {
@@ -1445,7 +1446,8 @@ public class ClusteringService implements IClusteringService {
       }
 
       //pre-placement task
-      chooseClusterCloneService().preCalculatePlacements(container, clusterSpec, existedNodes);
+      String clusterCloneType = clusterSpec.getClusterCloneType();
+      chooseClusterCloneService(clusterCloneType).preCalculatePlacements(container, clusterSpec, existedNodes);
 
       List<BaseNode> baseNodes =
             placementService.getPlacementPlan(container, clusterSpec,

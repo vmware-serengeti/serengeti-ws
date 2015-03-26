@@ -139,6 +139,9 @@ public class ClusterCreate implements Serializable {
    @Expose
    private String localRepoURL;
 
+   @Expose
+   private String clusterCloneType;
+
    private String hostnamePrefix;
 
    public ClusterCreate() {
@@ -850,4 +853,11 @@ public class ClusterCreate implements Serializable {
       this.hostnamePrefix = hostnamePrefix;
    }
 
+   public String getClusterCloneType() {
+      return clusterCloneType;
+   }
+
+   public void setClusterCloneType(String clusterCloneType) {
+      this.clusterCloneType = clusterCloneType;
+   }
 }
