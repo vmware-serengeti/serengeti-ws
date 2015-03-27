@@ -12,6 +12,7 @@
       },
       "cpuNum" : 1,
       "memCapacityMB" : 2048,
+      "swapRatio" : 2,
       "haFlag" : "off"
     },
     {
@@ -20,12 +21,16 @@
         "mapr_zookeeper"
       ],
       "instanceNum" : 3,
+      "placementPolicies": {
+        "instancePerHost": 1
+      },
       "storage" : {
         "type" : "SHARED",
         "sizeGB" : 20
       },
       "cpuNum" : 1,
       "memCapacityMB" : 5120,
+      "swapRatio" : 2,
       "haFlag" : "on"
     },
     {
@@ -34,19 +39,21 @@
         "mapr_cldb",
         "mapr_nfs",
         "mapr_fileserver",
-        "mapr_resourcemanager",
-        "mapr_historyserver",
-        "mapr_hbase_master",
+        "mapr_jobtracker",
         "mapr_webserver",
         "mapr_metrics"
       ],
       "instanceNum" : 3,
+      "placementPolicies": {
+        "instancePerHost": 1
+      },
       "storage" : {
         "type" : "LOCAL",
         "sizeGB" : 50
       },
       "cpuNum" : 2,
       "memCapacityMB" : 7680,
+      "swapRatio" : 2,
       "haFlag" : "on"
     },
     {
@@ -54,8 +61,7 @@
       "roles" : [
         "mapr_nfs",
         "mapr_fileserver",
-        "mapr_nodemanager",
-        "mapr_hbase_regionserver"
+        "mapr_tasktracker"
       ],
       "instanceNum" : 3,
       "storage" : {
@@ -64,13 +70,13 @@
       },
       "cpuNum" : 2,
       "memCapacityMB" : 5120,
+      "swapRatio" : 2,
       "haFlag" : "off"
     },
     {
       "name" : "client",
       "roles" : [
         "mapr_client",
-        "mapr_hbase_client",
         "mapr_pig",
         "mapr_hive"
       ],
@@ -81,7 +87,9 @@
       },
       "cpuNum" : 2,
       "memCapacityMB" : 5120,
+      "swapRatio" : 2,
       "haFlag" : "off"
     }
   ]
 }
+

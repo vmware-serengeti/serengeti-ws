@@ -32,11 +32,10 @@
     {
       "name":"master",
       "roles":[
-        "mapr_cldb", 
+        "mapr_cldb",
         "mapr_nfs",
         "mapr_fileserver",
-        "mapr_resourcemanager",
-        "mapr_historyserver",
+        "mapr_jobtracker",
         "mapr_webserver",
         "mapr_metrics"
       ],
@@ -54,7 +53,7 @@
       "roles":[
         "mapr_nfs",
         "mapr_fileserver",
-        "mapr_nodemanager"
+        "mapr_tasktracker"
       ],
       "instance_num":3,
       "storage" : {

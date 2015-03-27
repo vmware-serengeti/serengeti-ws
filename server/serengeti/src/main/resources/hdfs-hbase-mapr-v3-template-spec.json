@@ -1,32 +1,33 @@
 {
-  "nodeGroups" : [
+  "distro":"mapr",
+  "groups" : [
     {
       "name" : "mysql",
       "roles" : [
         "mapr_mysql_server"
       ],
-      "instanceNum" : 1,
+      "instance_num":1,
       "storage" : {
         "type" : "SHARED",
         "sizeGB" : 20
       },
-      "cpuNum" : 1,
-      "memCapacityMB" : 2048,
-      "haFlag" : "off"
+      "cpu" : 1,
+      "memory" : 2048,
+      "ha":"off"
     },
     {
       "name" : "zookeeper",
       "roles" : [
         "mapr_zookeeper"
       ],
-      "instanceNum" : 3,
+      "instance_num" : 3,
       "storage" : {
         "type" : "SHARED",
         "sizeGB" : 20
       },
-      "cpuNum" : 1,
-      "memCapacityMB" : 5120,
-      "haFlag" : "on"
+      "cpu" : 1,
+      "memory" : 5120,
+      "ha" : "on"
     },
     {
       "name" : "master",
@@ -34,37 +35,36 @@
         "mapr_cldb",
         "mapr_nfs",
         "mapr_fileserver",
-        "mapr_resourcemanager",
-        "mapr_historyserver",
+        "mapr_jobtracker",
         "mapr_hbase_master",
         "mapr_webserver",
         "mapr_metrics"
       ],
-      "instanceNum" : 3,
+      "instance_num" : 3,
       "storage" : {
         "type" : "LOCAL",
         "sizeGB" : 50
       },
-      "cpuNum" : 2,
-      "memCapacityMB" : 7680,
-      "haFlag" : "on"
+      "cpu" : 2,
+      "memory" : 7680,
+      "ha" : "on"
     },
     {
       "name" : "worker",
       "roles" : [
         "mapr_nfs",
         "mapr_fileserver",
-        "mapr_nodemanager",
+        "mapr_tasktracker",
         "mapr_hbase_regionserver"
       ],
-      "instanceNum" : 3,
+      "instance_num" : 3,
       "storage" : {
         "type" : "LOCAL",
         "sizeGB" : 50
       },
-      "cpuNum" : 2,
-      "memCapacityMB" : 5120,
-      "haFlag" : "off"
+      "cpu" : 2,
+      "memory" : 5120,
+      "ha" : "off"
     },
     {
       "name" : "client",
@@ -74,14 +74,14 @@
         "mapr_pig",
         "mapr_hive"
       ],
-      "instanceNum" : 1,
+      "instance_num" : 1,
       "storage" : {
         "type" : "SHARED",
         "sizeGB" : 50
       },
-      "cpuNum" : 2,
-      "memCapacityMB" : 5120,
-      "haFlag" : "off"
+      "cpu" : 2,
+      "memory" : 5120,
+      "ha" : "off"
     }
   ]
 }
