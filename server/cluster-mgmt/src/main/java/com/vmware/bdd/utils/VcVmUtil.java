@@ -494,6 +494,9 @@ public class VcVmUtil {
 
    public static boolean isDatastoreAccessible(String dsMobId) {
       final VcDatastore ds = VcCache.getIgnoreMissing(dsMobId);
+      if (ds == null) {
+         return false;
+      }
       try {
          VcContext.inVcSessionDo(new VcSession<Void>() {
             @Override

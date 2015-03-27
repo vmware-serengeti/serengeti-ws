@@ -1203,7 +1203,8 @@ public class ClusterManager {
          List<String> roles = nodeGroup.getRoleNameList();
 
          // TODO: more fine control on node roles
-         if (softMgr.hasMgmtRole(roles)) {
+         // Allow disk fix except ironfan
+         if (Constants.IRONFAN.equals(softMgr.getType()) && softMgr.hasMgmtRole(roles)) {
             logger.info("node group " + nodeGroup.getName()
                   + " contains management roles, pass it");
             continue;
