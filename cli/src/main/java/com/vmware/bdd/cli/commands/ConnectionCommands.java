@@ -18,8 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import jline.console.ConsoleReader;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.shell.core.CommandMarker;
@@ -65,35 +63,6 @@ public class ConnectionCommands implements CommandMarker {
          }
          connect(hostName, loginInfo, 3);
          getServerVersion(hostName);
-      } catch (Exception e) {
-         System.out.println();
-         printConnectionFailure(e.getMessage());
-      }
-   }
-
-   @CliCommand(value = "loggedConnect", help = "Connect a serengeti server with username/password as options and get logged into cli history")
-   public void loggedConn(
-         @CliOption(key = { "host" }, mandatory = true, help = "The serengeti host with optional port number, e.g. hostname:port") final String hostName,
-         @CliOption(key = { "username" }, mandatory = false, help = "The serengeti user name") final String username,
-         @CliOption(key = { "password" }, mandatory = false, help = "The serengeti password") final String password) {
-      if (!validateHostPort(hostName)) {
-         return;
-      }
-      Map<String,String> loginInfo = new HashMap<String,String>();
-      loginInfo.put(Constants.LOGIN_USERNAME, username);
-      loginInfo.put(Constants.LOGIN_PASSWORD, password);
-      try {
-         if (CommandsUtils.isBlank(username)) {
-            if(!CommandsUtils.prompt(Constants.CONNECT_ENTER_USER_NAME, CommandsUtils.PromptType.USER_NAME, loginInfo)){
-               return ;
-            }
-         }
-         if (CommandsUtils.isBlank(password)) {
-            if(!CommandsUtils.prompt(Constants.CONNECT_ENTER_PASSWORD, CommandsUtils.PromptType.PASSWORD, loginInfo)){
-               return ;
-            }
-         }
-         connect(hostName, loginInfo, 3);
       } catch (Exception e) {
          System.out.println();
          printConnectionFailure(e.getMessage());
