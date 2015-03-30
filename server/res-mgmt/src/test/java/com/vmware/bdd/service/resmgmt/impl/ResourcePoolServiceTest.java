@@ -203,10 +203,22 @@ public class ResourcePoolServiceTest extends BaseResourceTest {
 
    @Test(groups = { "res-mgmt", "dependsOnVC", "dependsOnDB"})
    public void testgetAllResourcePoolForRest() {
-      super.init();
-      IResourcePoolService rpSvc = ctx.getBean(IResourcePoolService.class);
+      new Expectations() {
+         {
+            List<VcResourcePoolEntity> rpEntities = new ArrayList<VcResourcePoolEntity>();
+            VcResourcePoolEntity rpEntity = new VcResourcePoolEntity();
+            rpEntity.setName("defaultRP");
+            rpEntity.setVcCluster("cluster-ws");
+            rpEntity.setVcResourcePool("jarred");
+            rpEntities.add(rpEntity);
+            rpDao.findAllOrderByClusterName();
+            result = rpEntities;
+         }
+      };
+      rpSvc.setRpDao(rpDao);
       List<ResourcePoolRead> rps = rpSvc.getAllResourcePoolForRest();
       Assert.assertNotNull(rps);
+      Assert.assertEquals(rps.size(), 1);
    }
 
    @Test(groups = { "res-mgmt" })

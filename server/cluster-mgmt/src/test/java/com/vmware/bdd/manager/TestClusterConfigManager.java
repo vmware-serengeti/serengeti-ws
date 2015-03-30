@@ -149,7 +149,7 @@ public class TestClusterConfigManager {
                   "../serengeti/WebContent/WEB-INF/spring/datasource-context.xml",
                   "../serengeti/WebContent/WEB-INF/spring/spring-batch-context.xml",
                   "../serengeti/WebContent/WEB-INF/spring/tx-context.xml",
-                  "../serengeti/WebContent/WEB-INF/spring/serengeti-jobs-context.xml",
+                  "src/test/resources/spring/serengeti-jobs-context.xml",
                   "../serengeti/WebContent/WEB-INF/spring/manager-context.xml");
       context.getBean(SoftwareManagerCollector.class).loadSoftwareManagers();
       clusterConfigMgr = context.getBean(ClusterConfigManager.class);

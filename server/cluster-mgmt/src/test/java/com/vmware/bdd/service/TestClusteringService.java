@@ -215,7 +215,7 @@ public class TestClusteringService {
             new ArrayList<VmCreateResult<?>>());
 
       HashMap<String, IClusterCloneService> cloneServiceMap = new HashMap<>();
-      cloneServiceMap.put("mockClusterCloneService", cloneService);
+      cloneServiceMap.put("fastClusterCloneService", cloneService);
       service.setCloneService(cloneServiceMap);
 
       boolean success = service.createVcVms(networkAdds, vNodes, null, false, null, "fast");
@@ -311,12 +311,10 @@ public class TestClusteringService {
          nodes.add(s);
       }
       IClusterCloneService cloneService = Mockito.mock(IClusterCloneService.class);
-      Mockito.when(
-            cloneService.createCopies(Mockito.<VmCreateSpec> any(),
-                  Mockito.anyInt(), Mockito.anyList(),
-                  Mockito.<ProgressCallback> any())).thenReturn(nodes);
+      Mockito.when(cloneService.createCopies(Mockito.<VmCreateSpec> any(), Mockito.anyInt(), Mockito.anyList(),
+              Mockito.<ProgressCallback> any())).thenReturn(nodes);
       HashMap<String, IClusterCloneService> cloneServiceMap = new HashMap<>();
-      cloneServiceMap.put("mockClusterCloneService", cloneService);
+      cloneServiceMap.put("fastClusterCloneService", cloneService);
       service.setCloneService(cloneServiceMap);
 
       boolean success = service.createVcVms(networkAdds, vNodes, null, false, null, "fast");

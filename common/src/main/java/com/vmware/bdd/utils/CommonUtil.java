@@ -100,8 +100,8 @@ public class CommonUtil {
 
    public static String readJsonFile(URL fileURL) {
       StringBuilder jsonBuff = new StringBuilder();
-      String fileName = fileURL.getFile();
       if (fileURL != null) {
+         String fileName = fileURL.getFile();
          InputStream in = null;
          try {
             in = new BufferedInputStream(fileURL.openStream());

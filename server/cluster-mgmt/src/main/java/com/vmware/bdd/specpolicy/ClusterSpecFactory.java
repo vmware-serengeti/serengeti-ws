@@ -56,8 +56,12 @@ public class ClusterSpecFactory {
          "hdfs-hbase-template-spec.json";
    private static final String HDFS_MAPRED_MAPR_TEMPLATE_SPEC =
          "hdfs-mapred-mapr-template-spec.json";
+   private static final String HDFS_MAPRED_MAPR_V3_TEMPLATE_SPEC =
+         "hdfs-mapred-mapr-v3-template-spec.json";
    private static final String HDFS_HBASE_MAPR_TEMPLATE_SPEC =
          "hdfs-hbase-mapr-template-spec.json";
+   private static final String HDFS_HBASE_MAPR_V3_TEMPLATE_SPEC =
+         "hdfs-hbase-mapr-v3-template-spec.json";
    private static final String HDFS_GPHD_TEMPLATE_SPEC =
          "hdfs-gphd-template-spec.json";
    private static final String HDFS_MAPRED_GPHD_TEMPLATE_SPEC =
@@ -165,11 +169,12 @@ public class ClusterSpecFactory {
          String vendor, String distroVersion, String appManagerType) throws FileNotFoundException {
       // loading from file each time is slow but fine
       if (vendor.trim().equalsIgnoreCase(Constants.MAPR_VENDOR)) {
+         boolean isMapr3 = Version.compare(distroVersion, "4") < 0;
          switch (type) {
          case HDFS_MAPRED:
-            return loadFromFile(locateSpecFile(HDFS_MAPRED_MAPR_TEMPLATE_SPEC, appManagerType));
+            return loadFromFile(locateSpecFile(isMapr3 ? HDFS_MAPRED_MAPR_V3_TEMPLATE_SPEC : HDFS_MAPRED_MAPR_TEMPLATE_SPEC, appManagerType));
          case HDFS_HBASE:
-            return loadFromFile(locateSpecFile(HDFS_HBASE_MAPR_TEMPLATE_SPEC, appManagerType));
+            return loadFromFile(locateSpecFile(isMapr3 ? HDFS_HBASE_MAPR_V3_TEMPLATE_SPEC : HDFS_HBASE_MAPR_TEMPLATE_SPEC, appManagerType));
          default:
             throw BddException.INVALID_PARAMETER("cluster type", type);
          }

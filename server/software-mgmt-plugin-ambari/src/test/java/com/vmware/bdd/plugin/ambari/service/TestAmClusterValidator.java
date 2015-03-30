@@ -18,8 +18,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.vmware.bdd.plugin.ambari.utils.MockAmUtils;
 import junit.framework.Assert;
 
+import mockit.Mockit;
 import org.mockito.Mockito;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -41,6 +43,7 @@ public class TestAmClusterValidator {
 
    @BeforeClass(groups = { "TestClusterDef" })
    public static void setup() throws IOException {
+      Mockit.setUpMock(MockAmUtils.class);
 
       ApiRootResource apiRootResource = Mockito.mock(ApiRootResource.class);
       RootResourceV1 rootResourceV1 = new FakeRootResourceV1();
@@ -57,17 +60,18 @@ public class TestAmClusterValidator {
       validator.setApiManager(new ApiManager(clientbuilder));
    }
 
-   @Test(groups = { "TestAmClusterValidator" })
+   @Test(groups = { "TestAmClusterValidator" },expectedExceptions = ValidationException.class)
    public void testSuccess() {
       try {
          Assert.assertTrue(validator.validateBlueprint(blueprint));
       } catch (ValidationException e) {
          System.out.println("warning_msg_list: " + e.getWarningMsgList());
          System.out.println("error_msg_list: " + e.getFailedMsgList());
+         throw e;
       }
    }
 
-   @Test(groups = { "TestAmClusterValidator" })
+   @Test(groups = { "TestAmClusterValidator" },expectedExceptions = ValidationException.class)
    public void testUnrecogConfigTypes() {
       try {
          blueprint.getConfiguration().put("hdfs-site.xml",
@@ -76,10 +80,11 @@ public class TestAmClusterValidator {
       } catch (ValidationException e) {
          System.out.println("warning_msg_list: " + e.getWarningMsgList());
          System.out.println("error_msg_list: " + e.getFailedMsgList());
+         throw e;
       }
    }
 
-   @Test(groups = { "TestAmClusterValidator" })
+   @Test(groups = { "TestAmClusterValidator" },expectedExceptions = ValidationException.class)
    public void testRecogConfigTypes() {
       try {
          Map<String, String> configItem = new HashMap<String, String>();
@@ -90,10 +95,11 @@ public class TestAmClusterValidator {
       } catch (ValidationException e) {
          System.out.println("warning_msg_list: " + e.getWarningMsgList());
          System.out.println("error_msg_list: " + e.getFailedMsgList());
+         throw e;
       }
    }
 
-   @Test(groups = { "TestAmClusterValidator" })
+   @Test(groups = { "TestAmClusterValidator" },expectedExceptions = ValidationException.class)
    public void testBadConfigItems() {
       try {
          Map<String, String> configItem = new HashMap<String, String>();
@@ -104,10 +110,11 @@ public class TestAmClusterValidator {
       } catch (ValidationException e) {
          System.out.println("warning_msg_list: " + e.getWarningMsgList());
          System.out.println("error_msg_list: " + e.getFailedMsgList());
+         throw e;
       }
    }
 
-   @Test(groups = { "TestAmClusterValidator" })
+   @Test(groups = { "TestAmClusterValidator" },expectedExceptions = ValidationException.class)
    public void testMissedRoles() {
       try {
          blueprint.getNodeGroups().get(1).getRoles().remove("HDFS_DATANODE");
@@ -117,6 +124,7 @@ public class TestAmClusterValidator {
       } catch (ValidationException e) {
          System.out.println("warning_msg_list: " + e.getWarningMsgList());
          System.out.println("error_msg_list: " + e.getFailedMsgList());
+         throw e;
       }
    }
 

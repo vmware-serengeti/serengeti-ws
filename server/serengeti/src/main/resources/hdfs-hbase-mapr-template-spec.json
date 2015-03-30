@@ -35,8 +35,8 @@
         "mapr_cldb",
         "mapr_nfs",
         "mapr_fileserver",
-        "mapr_jobtracker",
-        "mapr_tasktracker",
+        "mapr_resourcemanager",
+        "mapr_historyserver",
         "mapr_hbase_master",
         "mapr_webserver",
         "mapr_metrics"
@@ -55,7 +55,7 @@
       "roles" : [
         "mapr_nfs",
         "mapr_fileserver",
-        "mapr_tasktracker",
+        "mapr_nodemanager",
         "mapr_hbase_regionserver"
       ],
       "instance_num" : 3,
