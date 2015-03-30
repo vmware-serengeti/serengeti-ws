@@ -30,6 +30,7 @@ public class TestConfiguration {
       assertEquals(proxy,"192.168.0.1,192.168.0.2");
 //      proxy = Configuration.getStrings("serengeti.no_proxy_no_comma", "127.0.0.1");
 //      assertEquals(proxy,"192.168.0.1 192.168.0.2");
+      Configuration.setString("serengeti.http_proxy", "proxy.domain.com:3128");
       proxy = Configuration.getStrings("serengeti.http_proxy", "127.0.0.1");
       assertEquals(proxy,"proxy.domain.com:3128");
 //      proxy = Configuration.getStrings("serengeti.svn_proxy", "127.0.0.1");

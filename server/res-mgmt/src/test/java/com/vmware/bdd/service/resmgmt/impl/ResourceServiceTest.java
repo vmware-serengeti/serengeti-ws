@@ -19,10 +19,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import mockit.Expectations;
-import mockit.Mock;
-import mockit.MockUp;
-import mockit.Mocked;
+import com.vmware.bdd.service.utils.MockVcContext;
+import com.vmware.bdd.service.utils.MockVcInventory;
+import mockit.*;
 
 import org.apache.log4j.Logger;
 import org.testng.Assert;
@@ -70,6 +69,8 @@ public class ResourceServiceTest extends BaseResourceTest {
    @BeforeClass
    public void init() {
       resSvc = new ResourceService();
+      Mockit.setUpMock(MockVcContext.class);
+      Mockit.setUpMock(MockVcInventory.class);
    }
 
    private void initVirtualCenter() {

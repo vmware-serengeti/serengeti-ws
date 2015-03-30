@@ -6,10 +6,16 @@
           "name": "yarn.application.classpath"
         }
       ],
+      "hdfs-site.xml": [
+
+      ],
       "mapred-site.xml": [
         {
           "name": "mapred\\.queue\\.[0-9a-zA-Z-_]+\\.acl-administer-jobs",
           "nameIsPattern": "true"
+        },
+        {
+          "name": "mapred.cluster.map.memory.mb"
         }
       ],
       "topology.data": [
@@ -20,6 +26,20 @@
       "fair-scheduler.xml": [
         {
           "name": "text"
+        }
+      ]
+    }
+  },
+  {
+    "zookeeper": {
+      "java.env": [
+        {
+          "name": "JVMFLAGS"
+        }
+      ],
+      "log4j.properties": [
+        {
+          "name": "zookeeper.root.logger"
         }
       ]
     }

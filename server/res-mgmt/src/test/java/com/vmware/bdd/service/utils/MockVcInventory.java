@@ -72,4 +72,7 @@ public class MockVcInventory {
       }
       return clusters;
    }
+
+   @Mock
+   public static void loadInventory() {}
 }

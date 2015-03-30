@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.bdd.apitypes.NetworkDnsType;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.Tested;
@@ -209,8 +210,9 @@ public class ResourceInitializerServiceTest extends BaseResourceTest{
       networkSvc = new MockUp<INetworkService>() {
          @Mock
          NetworkEntity addDhcpNetwork(final String name,
-               final String portGroup, final String dnsType,
+               final String portGroup, NetworkDnsType dnsType,
                final boolean isGenerateHostname) {
+            Assert.assertEquals(dnsType, NetworkDnsType.NORMAL);
             Assert.assertEquals(name, "defaultNetwork");
             Assert.assertEquals(portGroup, "serengetiNet");
             return new NetworkEntity();

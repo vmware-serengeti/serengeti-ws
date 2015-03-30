@@ -193,6 +193,7 @@ public class NetworkServiceTest {
          }
          {
             networkDao.addIpBlocks(network, network.getIpBlocks());
+            networkDao.setIsGenerateHostname(network, anyBoolean);
          }
       };
       NetworkAdd networkAdd = new NetworkAdd();
