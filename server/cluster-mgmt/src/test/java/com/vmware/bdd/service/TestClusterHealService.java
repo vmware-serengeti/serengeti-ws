@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.vmware.bdd.entity.EntityBase;
 import junit.framework.Assert;
 import mockit.Mock;
 import mockit.MockClass;
@@ -101,6 +102,7 @@ public class TestClusterHealService {
 
    @BeforeClass(groups = { "TestClusterHealService" })
    public static void setUp() throws Exception {
+
       service = new ClusterHealService();
 
       // mock cluster entity manager
@@ -115,7 +117,9 @@ public class TestClusterHealService {
          disk.setDatastoreMoId(LOCAL_DS_MOID_PREFIX + i);
          disk.setSizeInMB(20 * 1024);
          disk.setDiskType(DiskType.SYSTEM_DISK.type);
-         disks.add(disk);
+         DiskEntity spy = Mockito.spy(disk);
+         Mockito.when(spy.getId()).thenReturn(new Long(1));
+         disks.add(spy);
       }
       Mockito.when(entityMgr.getDisks("bj-worker-1")).thenReturn(disks);
 

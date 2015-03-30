@@ -23,6 +23,8 @@ import java.util.concurrent.Callable;
 import com.vmware.aurora.composition.DiskSchema;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.service.MockVcVmUtil;
+import mockit.Mock;
+import mockit.MockClass;
 import mockit.Mockit;
 
 import org.mockito.Mockito;
@@ -54,11 +56,21 @@ import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 public class TestVcVmUtil {
+   @MockClass(realClass = DiskEntity.class)
+   public static class MockDiskEntity {
+      @Mock
+      public Long getId() {
+         return new Long(1);
+      }
+   }
+
    @BeforeMethod(groups = { "TestVcVmUtil" }, dependsOnGroups = { "TestClusterManager" })
    public void setMockup() {
+      Mockit.setUpMock(MockDiskEntity.class);
       Mockit.setUpMock(MockVcResourceUtils.class);
       Mockit.setUpMock(MockTmScheduler.class);
       Mockit.setUpMock(MockVcCache.class);
+
    }
 
    @AfterMethod
