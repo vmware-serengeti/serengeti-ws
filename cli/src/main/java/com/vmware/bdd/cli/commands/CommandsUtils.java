@@ -659,7 +659,7 @@ public class CommandsUtils {
 
    private static String readEnter(String msg, PromptType promptType) throws Exception {
       String enter = "";
-      ConsoleReader reader = new ConsoleReader();
+      ConsoleReader reader = getConsoleReader();
       reader.setPrompt(msg);
       if (promptType == PromptType.USER_NAME) {
          enter = reader.readLine();
@@ -667,5 +667,11 @@ public class CommandsUtils {
          enter = reader.readLine(Character.valueOf('*'));
       }
       return enter;
+   }
+
+   public static ConsoleReader getConsoleReader() throws IOException{
+      ConsoleReader reader = new ConsoleReader();
+      reader.setExpandEvents(false);
+      return reader;
    }
 }
