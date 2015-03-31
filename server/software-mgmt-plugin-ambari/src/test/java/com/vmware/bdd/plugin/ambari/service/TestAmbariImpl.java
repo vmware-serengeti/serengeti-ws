@@ -411,11 +411,7 @@ public class TestAmbariImpl {
    }
 
    private final static String[][] invalidServerVersion = new String[][] {
-         {"0.0.0"},
-         {"1.1.0"},
-         {"1.5.0"},
-         {"1.8.0"},
-         {"4.9.0"}
+         {"UNKNOWN"}
    };
 
    @DataProvider(name = "TestAmbariImpl.InvalidServerVersion")
