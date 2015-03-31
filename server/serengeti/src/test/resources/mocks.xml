@@ -50,4 +50,17 @@
    <bean name="clusterMgr" class="org.mockito.Mockito" factory-method="mock">
       <constructor-arg value="com.vmware.bdd.manager.ClusterManager" />
    </bean>
+   <bean name="clusterEntityManager" class="org.mockito.Mockito" factory-method="mock">
+      <constructor-arg value="com.vmware.bdd.manager.intf.IClusterEntityManager" />
+   </bean>
+   <bean name="clusterUserMgmtValidService" class="org.mockito.Mockito" factory-method="mock">
+      <constructor-arg value="com.vmware.bdd.service.impl.ClusterUserMgmtValidService" />
+   </bean>
+   <bean name="opsBlocker" class="org.mockito.Mockito" factory-method="mock">
+      <constructor-arg value="com.vmware.bdd.manager.UnsupportedOpsBlocker" />
+   </bean>
+   <bean name="appManager" class="org.mockito.Mockito" factory-method="mock">
+      <constructor-arg value="com.vmware.bdd.dal.IAppManagerDAO" />
+   </bean>
+
 </beans>
