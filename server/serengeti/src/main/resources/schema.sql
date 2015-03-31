@@ -118,7 +118,7 @@ create sequence node_group_seq;
 create table node_group (
    id                     bigint       not null unique DEFAULT nextval('node_group_seq'::regclass),
    name                   varchar(255) not null,
-   roles                  varchar(255),
+   roles                  text,
    node_type              integer,
    cpu                    integer,
    memory                 integer,
