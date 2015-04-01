@@ -15,9 +15,9 @@
 package com.vmware.bdd.dal;
 
 import com.vmware.bdd.entity.VcResourcePoolEntity;
-import junit.framework.Assert;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

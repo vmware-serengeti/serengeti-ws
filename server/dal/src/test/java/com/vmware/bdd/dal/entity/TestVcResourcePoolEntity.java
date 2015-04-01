@@ -20,9 +20,9 @@ import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
-import junit.framework.Assert;
 import org.springframework.test.context.ContextConfiguration;
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.HashSet;

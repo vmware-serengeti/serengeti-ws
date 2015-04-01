@@ -2,8 +2,7 @@ package com.vmware.bdd.plugin.clouderamgr.model;
 
 import java.io.IOException;
 
-import junit.framework.Assert;
-
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

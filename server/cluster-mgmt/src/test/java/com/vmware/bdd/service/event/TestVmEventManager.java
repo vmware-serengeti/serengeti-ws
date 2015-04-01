@@ -18,7 +18,6 @@ import com.vmware.bdd.service.event.VmEventManager;
 import com.vmware.bdd.service.sp.MockConcurrentClusterEntityManager;
 import com.vmware.bdd.service.sp.MockVcContext;
 import com.vmware.bdd.service.sp.MockVcEventListener;
-import junit.framework.Assert;
 import mockit.Mockit;
 
 import org.mockito.Mockito;

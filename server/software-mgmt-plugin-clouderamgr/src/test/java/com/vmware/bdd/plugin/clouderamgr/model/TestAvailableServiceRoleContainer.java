@@ -17,8 +17,8 @@ package com.vmware.bdd.plugin.clouderamgr.model;
 import com.google.gson.Gson;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
-import junit.framework.Assert;
 
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

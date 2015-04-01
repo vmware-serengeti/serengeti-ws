@@ -19,10 +19,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.vmware.bdd.plugin.ambari.utils.MockAmUtils;
-import junit.framework.Assert;
 
 import mockit.Mockit;
 import org.mockito.Mockito;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

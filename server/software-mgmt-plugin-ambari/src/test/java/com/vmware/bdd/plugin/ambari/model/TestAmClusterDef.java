@@ -16,8 +16,7 @@ package com.vmware.bdd.plugin.ambari.model;
 
 import java.io.IOException;
 
-import junit.framework.Assert;
-
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

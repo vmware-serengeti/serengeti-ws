@@ -16,9 +16,8 @@ package com.vmware.bdd.plugin.ambari.service;
 
 import java.net.URL;
 
-import junit.framework.Assert;
-
 import org.mockito.Mockito;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;

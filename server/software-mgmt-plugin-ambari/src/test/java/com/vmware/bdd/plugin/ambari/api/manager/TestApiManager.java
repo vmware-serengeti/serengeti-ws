@@ -25,10 +25,10 @@ import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
 import com.vmware.bdd.plugin.ambari.service.am.FakeRootResourceV1;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 
-import junit.framework.Assert;
 import mockit.Mockit;
 
 import org.mockito.Mockito;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

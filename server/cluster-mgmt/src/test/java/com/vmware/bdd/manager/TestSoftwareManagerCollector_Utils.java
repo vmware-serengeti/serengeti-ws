@@ -16,7 +16,7 @@ package com.vmware.bdd.manager;
 
 import java.util.ArrayList;
 
-import junit.framework.Assert;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 

@@ -16,8 +16,8 @@ package com.vmware.bdd.service.job.software;
 
 import java.util.Map;
 
-import junit.framework.Assert;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.service.job.software.external.ExternalManagementTask;
@@ -36,6 +36,6 @@ public class TestExternalManagementTask {
                   new MockSoftwareManager(), null);
 
       Map<String, Object> result = task.call();
-      Assert.assertTrue("should get success result", (Boolean)result.get("succeed"));
+      Assert.assertTrue((Boolean)result.get("succeed"), "should get success result");
    }
 }

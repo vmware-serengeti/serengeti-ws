@@ -20,13 +20,13 @@ import java.util.List;
 import java.util.Set;
 
 import com.vmware.bdd.entity.EntityBase;
-import junit.framework.Assert;
 import mockit.Mock;
 import mockit.MockClass;
 import mockit.Mockit;
 
 import org.apache.log4j.Logger;
 import org.mockito.Mockito;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -156,8 +156,7 @@ public class TestClusterHealService {
    public void testGetBadDisks() {
       logger.info("test getBadDisks");
       List<DiskSpec> badDisks = service.getBadDisks(NODE_1_NAME);
-      Assert.assertTrue("disk 0 on local-datastore-0 should be bad",
-            badDisks.size() == 1);
+      Assert.assertTrue(badDisks.size() == 1, "disk 0 on local-datastore-0 should be bad");
    }
 
    @Test(groups = { "TestClusterHealService" }, dependsOnMethods = { "testGetBadDisks" })
@@ -169,7 +168,6 @@ public class TestClusterHealService {
 
       Assert.assertTrue(!replacements.isEmpty());
       String newDs = LOCAL_DS_NAME_PREFIX + 3;
-      Assert.assertTrue("the replacement disk should be placed to " + newDs,
-            newDs.equals(replacements.get(0).getTargetDs()));
+      Assert.assertTrue(newDs.equals(replacements.get(0).getTargetDs()), "the replacement disk should be placed to " + newDs);
    }
 }
