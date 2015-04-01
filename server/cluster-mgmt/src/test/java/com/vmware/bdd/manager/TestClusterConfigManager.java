@@ -325,7 +325,7 @@ public class TestClusterConfigManager {
    @Test(groups = { "TestClusterConfigManager" })
    public void testCreateClusterConfigWithInfraConfig() throws Exception {
       ClusterCreate spec = new ClusterCreate();
-      spec.setName("my-cluster");
+      spec.setName("my-cluster10");
       List<String> rps = new ArrayList<String>();
       rps.add("myRp1");
       spec.setRpNames(rps);
@@ -351,9 +351,9 @@ public class TestClusterConfigManager {
       for (ClusterEntity c : cs) {
          System.out.println(c.getId());
       }
-      cluster = clusterEntityMgr.findByName("my-cluster");
+      cluster = clusterEntityMgr.findByName("my-cluster10");
       Assert.assertTrue(cluster != null);
-      ClusterCreate attrs = clusterConfigMgr.getClusterConfig("my-cluster");
+      ClusterCreate attrs = clusterConfigMgr.getClusterConfig("my-cluster10");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
       Assert.assertTrue(manifest.indexOf("master") != -1,
