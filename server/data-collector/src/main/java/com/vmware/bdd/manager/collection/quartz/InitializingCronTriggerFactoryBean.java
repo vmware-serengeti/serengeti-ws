@@ -29,13 +29,13 @@ public class InitializingCronTriggerFactoryBean extends CronTriggerFactoryBean {
          .getLogger(InitializingCronTriggerFactoryBean.class);
    private CollectionDriverManager collectionDriverManager;
 
-   public void init() {
+   private void initCronExpression() {
       String cronExpression = getCronExpressionFromConfiguration();
       if (!CommonUtil.isBlank(cronExpression)
             && CronExpression.isValidExpression(cronExpression)) {
          setCronExpression(cronExpression);
       } else {
-         CollectionDriver driver = this.collectionDriverManager.getDriver();
+         CollectionDriver driver = collectionDriverManager.getDriver();
          if (driver != null) {
             setCronExpression(driver.getDefaultCronExpression());
          } else {
@@ -58,6 +58,7 @@ public class InitializingCronTriggerFactoryBean extends CronTriggerFactoryBean {
 
    public void setCollectionDriverManager(CollectionDriverManager collectionDriverManager) {
       this.collectionDriverManager = collectionDriverManager;
+      initCronExpression();
    }
 
 }
