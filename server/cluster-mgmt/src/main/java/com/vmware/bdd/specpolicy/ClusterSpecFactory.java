@@ -20,9 +20,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
+import java.util.Collections;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.configuration.ConfigurationUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
@@ -116,14 +118,14 @@ public class ClusterSpecFactory {
                .append(File.separator).append(appManagerType).append(File.separator)
                .append("spec-templates").append(File.separator).append(filename);
          specFile = new File(builder.toString());
+      }
 
-         if (!specFile.exists()) {
-            logger.warn("template cluster file does not exist: " + builder);
-            // search in class paths
-            URL filePath = ConfigurationUtils.locate(filename);
-            if (filePath != null) {
-               specFile = ConfigurationUtils.fileFromURL(filePath);
-            }
+      if (!specFile.exists()) {
+         logger.warn("template cluster file does not exist: " + specFile.getAbsolutePath());
+         // search in class paths
+         URL filePath = ConfigurationUtils.locate(filename);
+         if (filePath != null) {
+            specFile = ConfigurationUtils.fileFromURL(filePath);
          }
       }
 
@@ -368,6 +370,10 @@ public class ClusterSpecFactory {
     */
    public static ClusterCreate getCustomizedSpec(ClusterCreate spec, String appManagerType)
          throws FileNotFoundException {
+
+      if (!ArrayUtils.isEmpty(spec.getNodeGroups())) {
+         spec.setSpecFile(true);
+      }
       if (spec.isSpecFile()) {
          return spec;
       }

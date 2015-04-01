@@ -132,6 +132,8 @@ public class ClusterCreate implements Serializable {
 
    private Boolean validateConfig = true;
 
+   // This means whether this object already contains the cluster definition.
+   // If not, will load the default spec file.
    private Boolean specFile = false;
 
    private String password;
