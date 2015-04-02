@@ -53,6 +53,7 @@ import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.apitypes.NetworkDnsType;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
@@ -243,7 +244,7 @@ public class TestClusteringJobs extends
          logger.error("ignore create datastore exception. ", e);
       }
       try {
-         netSvc.addDhcpNetwork(TEST_DHCP_NETWORK_NAME, dhcpPortgroup, null, false);
+         netSvc.addDhcpNetwork(TEST_DHCP_NETWORK_NAME, dhcpPortgroup, NetworkDnsType.NORMAL, false);
       } catch (Exception e) {
          logger.error("ignore create network exception. ", e);
       }
@@ -254,7 +255,7 @@ public class TestClusteringJobs extends
       ipBlocks.add(ipBlock);
       try {
          netSvc.addIpPoolNetwork(TEST_STATIC_NETWORK_NAME, staticPortgroup,
-               staticNetMask, staticGateway, staticDns1, staticDns2, ipBlocks, null, false);
+               staticNetMask, staticGateway, staticDns1, staticDns2, ipBlocks, NetworkDnsType.NORMAL, false);
       } catch (Exception e) {
          logger.error("ignore create ip pool exception. ", e);
       }
@@ -387,6 +388,7 @@ public class TestClusteringJobs extends
    public void testCreateCluster() throws Exception {
       ClusterCreate createSpec = new ClusterCreate();
       createSpec.setName(TEST_STATIC_IP_CLUSTER_NAME);
+      createSpec.setAppManager("Default");
       createSpec.setType(ClusterType.HDFS_MAPRED);
       createSpec.setNetworkConfig(createNetConfig(TEST_STATIC_NETWORK_NAME, staticPortgroup));
       createSpec.setDistro("bigtop");
@@ -567,6 +569,7 @@ public class TestClusteringJobs extends
       ClusterCreate createSpec =
             ClusterSpecFactory.createDefaultSpec(ClusterType.HDFS_MAPRED,
                   Constants.DEFAULT_VENDOR, null, null);
+      createSpec.setAppManager("Default");
       createSpec.setName(TEST_DHCP_CLUSTER_NAME);
       createSpec.setNetworkConfig(createNetConfig(TEST_DHCP_NETWORK_NAME, dhcpPortgroup));
       createSpec.setDistro("bigtop");

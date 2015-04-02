@@ -125,13 +125,15 @@ public class ClusterManager {
    private static final String commRegex = "-[0-9]+\\.[0-9]+.*\\.rpm";
 
    private static HashSet<String> getExtraRequiredPackages() {
+      HashSet<String> hs = new HashSet<String>();
       String extraPackStr =
             Configuration.getString(
                   Constants.SERENGETI_YUM_EXTRA_PACKAGES_CONFIG,
-                  Constants.SERENGETI_YUM_EXTRA_PACKAGES);
-      String[] packs = extraPackStr.split(",");
-      HashSet<String> hs = new HashSet<String>();
-      hs.addAll(Arrays.asList(packs));
+                  Constants.SERENGETI_YUM_EXTRA_PACKAGES).trim();
+      if (!extraPackStr.isEmpty()) {
+         String[] packs = extraPackStr.split(",");
+         hs.addAll(Arrays.asList(packs));
+      }
       return hs;
    }
 
