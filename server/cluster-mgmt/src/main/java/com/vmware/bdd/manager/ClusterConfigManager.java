@@ -1053,20 +1053,23 @@ public class ClusterConfigManager {
          storage.setType(storageType.toString().toLowerCase());
       }
 
-      if (systemDiskStoreNames != null && !systemDiskStoreNames.isEmpty())
-         storage.setImagestoreNamePattern(getDatastoreNamePattern(storageType,
-               systemDiskStoreNames));
-      else
-         storage.setImagestoreNamePattern(getDatastoreNamePattern(storageType,
-               storeNames));
+      if (systemDiskStoreNames != null && !systemDiskStoreNames.isEmpty()) {
+         // when getDatastoreNamePattern return null, the ImagestoreNamePattern will be set to proper
+         // values in NodeGroupCreate.getImagestoreNamePattern()
+         storage.setImagestoreNamePattern(getDatastoreNamePattern(systemDiskStoreNames));
+         storage.setDsNames4System(systemDiskStoreNames);
+      } else {
+         storage.setImagestoreNamePattern(getDatastoreNamePattern(storeNames));
+      }
 
-      if (dataDiskStoreNames != null && !dataDiskStoreNames.isEmpty())
-         storage.setDiskstoreNamePattern(getDatastoreNamePattern(storageType,
-               dataDiskStoreNames));
-      else
-         storage.setDiskstoreNamePattern(getDatastoreNamePattern(storageType,
-               storeNames));
-
+      if (dataDiskStoreNames != null && !dataDiskStoreNames.isEmpty()) {
+         // when getDatastoreNamePattern return null, the DiskstoreNamePattern will be set to proper
+         // values in NodeGroupCreate.getDiskstoreNamePattern()
+         storage.setDiskstoreNamePattern(getDatastoreNamePattern(dataDiskStoreNames));
+         storage.setDsNames4Data(dataDiskStoreNames);
+      } else {
+         storage.setDiskstoreNamePattern(getDatastoreNamePattern(storeNames));
+      }
       storage.setShares(ngEntity.getCluster().getIoShares());
 
       // set storage split policy based on group roles
@@ -1117,30 +1120,18 @@ public class ClusterConfigManager {
       }
    }
 
-   private List<String> getDatastoreNamePattern(DatastoreType storageType,
-         List<String> storeNames) {
-      if (storageType == null && (storeNames == null || storeNames.isEmpty())) {
+   private List<String> getDatastoreNamePattern(List<String> storeNames) {
+      if (storeNames == null || storeNames.isEmpty()) {
          return null;
       }
       Set<String> storePattern = null;
-      if (storageType == null) {
-         logger.debug("storage type is not specified.");
-         storePattern = datastoreMgr.getDatastoresByNames(storeNames);
-      }
-      if (storageType == DatastoreType.LOCAL) {
-         storePattern = datastoreMgr.getLocalDatastoresByNames(storeNames);
-      } else {
-         storePattern = datastoreMgr.getSharedDatastoresByNames(storeNames);
-      }
-
+      storePattern = datastoreMgr.getDatastoresByNames(storeNames);
       if (storePattern == null || storePattern.isEmpty()) {
-         logger.warn("No any datastore found for datastore name: " + storeNames
-               + ", type: " + storageType
-               + ". Will use cluster level storage definition.");
-         return null;
+         String datastoreNames = new Gson().toJson(storeNames);
+         logger.error("datastore " + datastoreNames + " not found in BDE");
+         throw BddException.NOT_FOUND("datastore", datastoreNames);
       }
-
-      return new ArrayList<String>(storePattern);
+      return new ArrayList<>(storePattern);
    }
 
    @Transactional

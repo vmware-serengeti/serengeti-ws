@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 
 import com.google.gson.internal.Pair;
@@ -762,6 +763,7 @@ public class PlacementPlanner implements IPlacementPlanner {
 
          // place system disks first
          disks = placeUnSeparableDisks(systemDisks, imagestores);
+         logger.info("Placing system disks to imagestores: " + new Gson().toJson(imagestores));
          if (disks == null) {
             logger.info("Can not place " + getDiskSize(systemDisks)
                   + " GB system disk on datastore with " + getDsFree(imagestores) + " GB free space.");

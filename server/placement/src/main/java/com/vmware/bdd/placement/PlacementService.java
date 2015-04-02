@@ -67,7 +67,6 @@ public class PlacementService implements IPlacementService {
          filteredHosts.remove(PlacementUtil.NO_DATASTORE_HOSTS);
          filteredHosts.remove(PlacementUtil.NO_DATASTORE_HOSTS_NODE_GROUP);
       }
-      List<String> dsFilteredOutHosts = new ArrayList<String>();
       if (vGroup.getvNodes().size() != 0) {
          List<String> noDatastoreHosts = container.getDsFilteredOutHosts(vGroup);
          if (null != noDatastoreHosts && !noDatastoreHosts.isEmpty()) {
