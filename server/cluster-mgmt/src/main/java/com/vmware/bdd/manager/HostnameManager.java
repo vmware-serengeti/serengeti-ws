@@ -112,7 +112,7 @@ public class HostnameManager{
       }
       hostname = (prefix + suffix).replaceAll("[^a-zA-Z0-9\\-]", "-").replaceAll("([\\-]*[\\-])", "-");
 
-      return hostname;
+      return hostname.toLowerCase();
    }
 
 }

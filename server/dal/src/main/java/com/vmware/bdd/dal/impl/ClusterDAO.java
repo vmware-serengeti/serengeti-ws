@@ -50,7 +50,7 @@ public class ClusterDAO extends BaseDAO<ClusterEntity> implements IClusterDAO {
 
    @Override
    public ClusterEntity findByName(String name) {
-      return findUniqueByCriteria(Restrictions.eq("name", name));
+      return findUniqueByCriteria(Restrictions.eq("name", name).ignoreCase());
    }
 
    @Override
