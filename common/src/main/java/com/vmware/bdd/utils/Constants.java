@@ -264,4 +264,5 @@ public class Constants {
    public static final String CLUSTER_RACK_TOPOLOGY_FILE_SUFFIX = ".topology.data";
 
    public static final String FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION = "The above error is ignored because the force flag is set.";
+   public static final String SERENGETI_DISABLE_SWAPDISK = "serengeti.disable.swapdisk";
 }
