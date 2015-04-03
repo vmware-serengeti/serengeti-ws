@@ -12,8 +12,9 @@
 
 	<beans:import resource="classpath*:/META-INF/spring/jobs/common-job-context.xml" />
 
-	<beans:bean name="scaleService" class="com.vmware.bdd.service.impl.ScaleService">
+    <beans:bean name="scaleService" class="com.vmware.bdd.service.impl.ScaleService">
 		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
+        <beans:property name="clusterConfigMgr" ref="clusterConfigMgr" />
 	</beans:bean>
 	<beans:bean name="singleNodeSyncupTasklet"
 		class="com.vmware.bdd.service.job.vm.SingleNodeSyncupStep">
