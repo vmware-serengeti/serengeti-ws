@@ -68,7 +68,7 @@ public class VcResourceUtils {
    private static final int HARDWARE_VERSION_9_AND_10_MAX_CPU = 64;
    private static final int HARDWARE_VERSION_9_AND_10_MAX_MEMORY = 1011 * 1024; //1011 GB
 
-   private static VcDatacenter dataCenter;
+   private static String datacenterName;
 
    public static Collection<VcDatastore> findDSInVCByPattern(
          final String vcDSNamePattern) {
@@ -676,14 +676,6 @@ public class VcResourceUtils {
          return "";
    }
 
-   public static VcDatacenter getDataCenter() {
-      return dataCenter;
-   }
-
-   public static void setDataCenter(VcDatacenter dataCenter) {
-      VcResourceUtils.dataCenter = dataCenter;
-   }
-
    /**
     * @param serverMobId
     * @return
@@ -790,26 +782,15 @@ public class VcResourceUtils {
     * Get VC clusters in the same DataCenter of BDE Server
     */
    public static List<VcCluster> getClusters() {
-      if (dataCenter == null) {
+      if (datacenterName == null) {
          final String serverMobId =
                Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
          logger.info("server mob id:" + serverMobId);
          final VcVirtualMachine serverVm = findVM(serverMobId);
          VcResourcePool vcRP = getVmRp(serverVm);
          // only use the resources in the same DataCenter of BDE Server
-         VcDatacenter dc = vcRP.getVcCluster().getDatacenter();
-         VcResourceUtils.setDataCenter(dc);
+         datacenterName = vcRP.getVcCluster().getDatacenter().getName();
       }
-      List<VcCluster> clusters = new ArrayList<VcCluster>();
-      List<VcCluster> allClusters = VcInventory.getClusters();
-      if (dataCenter != null) {
-         for (VcCluster cluster : allClusters) {
-            if (dataCenter.getName().equalsIgnoreCase(cluster.getDatacenter().getName())) {
-               logger.debug("Found cluster " + cluster.getName() + " in datacenter " + dataCenter.getName());
-               clusters.add(cluster);
-            }
-         }
-      }
-      return clusters;
+      return VcInventory.getClustersInDatacenter(datacenterName);
    }
 }

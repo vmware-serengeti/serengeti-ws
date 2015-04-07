@@ -186,7 +186,7 @@ public class ResourceService implements IResourceService {
 
    @Override
    public void refreshResourcePool() {
-      List<VcCluster> vcClusters = VcInventory.getClusters();
+      List<VcCluster> vcClusters = VcResourceUtils.getClusters();
       AuAssert.check(vcClusters != null && vcClusters.size() != 0);
       for (VcCluster vcCluster : vcClusters) {
          VcResourceUtils.refreshResourcePool(vcCluster);
@@ -206,7 +206,7 @@ public class ResourceService implements IResourceService {
 
    @Override
    public void refreshDatastore() {
-      List<VcCluster> vcClusters = VcInventory.getClusters();
+      List<VcCluster> vcClusters = VcResourceUtils.getClusters();
       AuAssert.check(vcClusters != null && vcClusters.size() != 0);
       for (VcCluster vcCluster : vcClusters) {
          VcResourceUtils.refreshDatastore(vcCluster);
@@ -277,7 +277,7 @@ public class ResourceService implements IResourceService {
 
    @Override
    public void refreshNetwork() {
-      List<VcCluster> vcClusters = VcInventory.getClusters();
+      List<VcCluster> vcClusters = VcResourceUtils.getClusters();
       AuAssert.check(vcClusters != null && vcClusters.size() != 0);
       for (VcCluster vcCluster : vcClusters) {
          VcResourceUtils.refreshNetwork(vcCluster);
@@ -456,7 +456,7 @@ public class ResourceService implements IResourceService {
 
                @Override
                protected List<VcCluster> body() throws Exception {
-                  List<VcCluster> vcClusters = VcInventory.getClusters();
+                  List<VcCluster> vcClusters = VcResourceUtils.getClusters();
                   for (VcResourcePoolEntity rpEntity : allRPEntities) {
                      boolean added = false;
                      for (VcCluster vcCluster : result) {

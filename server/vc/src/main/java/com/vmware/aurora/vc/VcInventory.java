@@ -171,4 +171,18 @@ public class VcInventory {
       }
       return results;
    }
+
+   /**
+    * @return all clusters under the specified DataCenter in the Virtual Center.
+    */
+   static public List<VcCluster> getClustersInDatacenter(String datacenterName) {
+      ArrayList<VcCluster> results = new ArrayList<VcCluster>();
+      List<VcDatacenter> dcList = getDatacenters();
+      for (VcDatacenter dc : dcList) {
+         if (datacenterName == null || datacenterName.equalsIgnoreCase(dc.getName())) {
+            results.addAll(dc.getVcClusters());
+         }
+      }
+      return results;
+   }
 }
