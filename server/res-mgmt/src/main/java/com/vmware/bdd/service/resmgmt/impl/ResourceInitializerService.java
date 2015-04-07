@@ -14,40 +14,29 @@
  ***************************************************************************/
 package com.vmware.bdd.service.resmgmt.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vmware.vim.binding.vim.net.IpConfigInfo;
-import com.vmware.vim.binding.vim.vm.GuestInfo;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vmware.aurora.global.Configuration;
-import com.vmware.aurora.vc.VcCache;
-import com.vmware.aurora.vc.VcDatastore;
-import com.vmware.aurora.vc.VcNetwork;
+import com.vmware.aurora.vc.VcDatacenter;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
-import com.vmware.aurora.vc.vcservice.VcContext;
-import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.aop.annotation.RetryTransaction;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NetworkDnsType;
 import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ServerInfoEntity;
-import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceInitializerService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
-import com.vmware.bdd.utils.ConfigInfo;
+import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.utils.Constants;
-import com.vmware.vim.binding.vim.VirtualMachine;
-import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 
 /**
  * @author Jarred Li
@@ -151,17 +140,19 @@ public class ResourceInitializerService implements IResourceInitializerService {
       final String serverMobId =
             Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
       logger.info("server mob id:" + serverMobId);
-      final VcVirtualMachine serverVm = findVM(serverMobId);
-      VcResourcePool vcRP = getVmRp(serverVm);
+      final VcVirtualMachine serverVm = VcResourceUtils.findVM(serverMobId);
+      VcResourcePool vcRP = VcResourceUtils.getVmRp(serverVm);
+      String dcName = vcRP.getVcCluster().getDatacenter().getName();
       String clusterName = vcRP.getVcCluster().getName();
       String vcRPName = vcRP.getName();
-      logger.info("vc rp: " + vcRPName + ", cluster: " + clusterName);
-      String networkName = getVMNetwork(serverVm);
-      Map<DatastoreType, List<String>> dsNames = getVmDatastore(serverVm);
+      logger.info("vc rp: " + vcRPName + ", cluster: " + clusterName + ", datacenter: " + dcName);
+      String networkName = VcResourceUtils.getVMNetwork(serverVm);
+      Map<DatastoreType, List<String>> dsNames = VcResourceUtils.getVmDatastore(serverVm);
       if (rpSvc.isDeployedUnderCluster(clusterName, vcRPName)) {
          vcRPName = "";
       }
       addResourceIntoDB(clusterName, vcRPName, networkName, dsNames);
+
    }
 
 
@@ -195,72 +186,6 @@ public class ResourceInitializerService implements IResourceInitializerService {
    }
 
 
-   /**
-    * @param serverVm
-    * @return
-    */
-   private Map<DatastoreType, List<String>> getVmDatastore(
-         final VcVirtualMachine serverVm) {
-      Map<DatastoreType, List<String>> dsNames =
-            new HashMap<DatastoreType, List<String>>();
-      dsNames.put(DatastoreType.LOCAL, new ArrayList<String>());
-      dsNames.put(DatastoreType.SHARED, new ArrayList<String>());
-      for (VcDatastore ds : serverVm.getDatastores()) {
-         if (ds.isLocal()) {
-            dsNames.get(DatastoreType.LOCAL).add(ds.getName());
-         } else {
-            dsNames.get(DatastoreType.SHARED).add(ds.getName());
-         }
-         break;
-      }
-      return dsNames;
-   }
-
-
-   /**
-    * @param serverVm
-    * @return
-    */
-   private String getVMNetwork(final VcVirtualMachine serverVm) {
-      String networkName = VcContext.inVcSessionDo(new VcSession<String>() {
-         @Override
-         protected String body() throws Exception {
-            GuestInfo.NicInfo[] nicInfos = serverVm.queryGuest().getNet();
-
-            if (nicInfos == null || nicInfos.length == 0) {
-               return null;
-            }
-
-            String defaultNetwork = null;
-            for (GuestInfo.NicInfo nicInfo : nicInfos) {
-               if (nicInfo.getNetwork() == null) {
-                  continue;
-               }
-
-               if (defaultNetwork == null) {
-                  defaultNetwork = nicInfo.getNetwork();
-               }
-
-               if (nicInfo.getIpConfig() == null || nicInfo.getIpConfig().getIpAddress() == null
-                     || nicInfo.getIpConfig().getIpAddress().length == 0) {
-                  continue;
-               }
-
-               for (IpConfigInfo.IpAddress info : nicInfo.getIpConfig().getIpAddress()) {
-                  if (info.getIpAddress() != null
-                        && sun.net.util.IPAddressUtil.isIPv4LiteralAddress(info.getIpAddress())) {
-                     return nicInfo.getNetwork();
-                  }
-               }
-            }
-
-            return defaultNetwork;
-         }
-      });
-      logger.info("network name:" + networkName);
-      return networkName;
-   }
-
    @Override
    @Transactional(readOnly = true)
    public boolean isResourceInitialized() {
@@ -274,43 +199,6 @@ public class ResourceInitializerService implements IResourceInitializerService {
       }
       logger.info("resource initialized? " + result);
       return result;
-   }
-
-   private VcResourcePool getVmRp(final VcVirtualMachine serverVm) {
-      VcResourcePool vcRP =
-            VcContext.inVcSessionDo(new VcSession<VcResourcePool>() {
-               @Override
-               protected VcResourcePool body() throws Exception {
-                  if (ConfigInfo.isDeployAsVApp()) {
-                     VcResourcePool vApp = serverVm.getParentVApp();
-                     logger.info("vApp name: " + vApp.getName());
-                     VcResourcePool vcRP = vApp.getParent();
-                     return vcRP;
-                  } else {
-                     return serverVm.getResourcePool();
-                  }
-               }
-            });
-      return vcRP;
-   }
-
-   /**
-    * @param serverMobId
-    * @return
-    */
-   private VcVirtualMachine findVM(final String serverMobId) {
-      final VcVirtualMachine serverVm =
-            VcContext.inVcSessionDo(new VcSession<VcVirtualMachine>() {
-               @Override
-               protected VcVirtualMachine body() throws Exception {
-                  VcVirtualMachine vm = VcCache.get(serverMobId);
-                  if (vm == null) {
-                     VcProviderException.SERVER_NOT_FOUND(serverMobId);
-                  }
-                  return vm;
-               }
-            });
-      return serverVm;
    }
 
    @Override

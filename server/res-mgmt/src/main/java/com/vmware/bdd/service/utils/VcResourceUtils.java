@@ -38,14 +38,18 @@ import com.vmware.aurora.vc.VcUtil;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
+import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.vim.binding.vim.EnvironmentBrowser;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.VirtualMachine;
 import com.vmware.vim.binding.vim.VirtualMachine.FaultToleranceState;
+import com.vmware.vim.binding.vim.net.IpConfigInfo;
 import com.vmware.vim.binding.vim.vm.ConfigOption;
+import com.vmware.vim.binding.vim.vm.GuestInfo;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import com.vmware.vim.vmomi.core.types.VmodlTypeMap;
 
@@ -64,6 +68,8 @@ public class VcResourceUtils {
    private static final int HARDWARE_VERSION_9_AND_10_MAX_CPU = 64;
    private static final int HARDWARE_VERSION_9_AND_10_MAX_MEMORY = 1011 * 1024; //1011 GB
 
+   private static VcDatacenter dataCenter;
+
    public static Collection<VcDatastore> findDSInVCByPattern(
          final String vcDSNamePattern) {
       Collection<VcDatastore> result =
@@ -73,7 +79,7 @@ public class VcResourceUtils {
                   Map<String, VcDatastore> dsMap =
                         new HashMap<String, VcDatastore>();
 
-                  List<VcCluster> vcClusters = VcInventory.getClusters();
+                  List<VcCluster> vcClusters = getClusters();
                   for (VcCluster vcCluster : vcClusters) {
                      for (VcDatastore vcDS : vcCluster.getAllDatastores()) {
                         String pattern = vcDSNamePattern;
@@ -90,7 +96,7 @@ public class VcResourceUtils {
 
    public static VcDatastore findDSInVcByName(String dsName) {
       VcDatastore ds = null;
-      for (VcCluster cluster : VcInventory.getClusters()) {
+      for (VcCluster cluster : getClusters()) {
          ds = cluster.getDatastore(dsName);
          if (ds != null) {
             return ds;
@@ -104,7 +110,7 @@ public class VcResourceUtils {
 
          @Override
          protected VcNetwork body() throws Exception {
-            List<VcCluster> vcClusters = VcInventory.getClusters();
+            List<VcCluster> vcClusters = getClusters();
             for (VcCluster vcCluster : vcClusters) {
                for (VcNetwork vcNetwork : vcCluster.getAllNetworks()) {
                   if (vcNetwork.getName().equals(portGroupName)) {
@@ -152,7 +158,7 @@ public class VcResourceUtils {
          @Override
          protected List<VcHost> body() throws Exception {
             List<VcHost> result = new ArrayList<VcHost>();
-            List<VcCluster> vcClusters = VcInventory.getClusters();
+            List<VcCluster> vcClusters = getClusters();
             for (VcCluster vcCluster : vcClusters) {
                if (!clusterName.equals(vcCluster.getName())) {
                   continue;
@@ -168,7 +174,7 @@ public class VcResourceUtils {
       return VcContext.inVcSessionDo(new VcSession<VcHost>() {
          @Override
          protected VcHost body() throws Exception {
-            List<VcCluster> vcClusters = VcInventory.getClusters();
+            List<VcCluster> vcClusters = getClusters();
             for (VcCluster vcCluster : vcClusters) {
                List<VcHost> hosts = vcCluster.getHosts();
                for (VcHost host : hosts) {
@@ -187,7 +193,7 @@ public class VcResourceUtils {
       VcCluster vcCluster = VcContext.inVcSessionDo(new VcSession<VcCluster>() {
          @Override
          protected VcCluster body() throws Exception {
-            List<VcCluster> vcClusters = VcInventory.getClusters();
+            List<VcCluster> vcClusters = getClusters();
             for (VcCluster vcCluster : vcClusters) {
                if (clusterName.equals(vcCluster.getName())) {
                   return vcCluster;
@@ -211,7 +217,7 @@ public class VcResourceUtils {
             VcContext.inVcSessionDo(new VcSession<VcResourcePool>() {
                @Override
                protected VcResourcePool body() throws Exception {
-                  List<VcCluster> vcClusters = VcInventory.getClusters();
+                  List<VcCluster> vcClusters = getClusters();
                   String targetRP = "";
                   for (VcCluster vcCluster : vcClusters) {
                      if (!clusterName.equals(vcCluster.getName())) {
@@ -641,7 +647,7 @@ public class VcResourceUtils {
          @Override
          protected Integer body() throws Exception {
             VcHost vcHost = null;
-            List<VcCluster> vcClusters = VcInventory.getClusters();
+            List<VcCluster> vcClusters = getClusters();
             for (VcCluster vcCluster : vcClusters) {
                List<VcHost> hosts = vcCluster.getHosts();
                for (VcHost host : hosts) {
@@ -668,5 +674,142 @@ public class VcResourceUtils {
          return serverVm.getHost().getName();
       else
          return "";
+   }
+
+   public static VcDatacenter getDataCenter() {
+      return dataCenter;
+   }
+
+   public static void setDataCenter(VcDatacenter dataCenter) {
+      VcResourceUtils.dataCenter = dataCenter;
+   }
+
+   /**
+    * @param serverMobId
+    * @return
+    */
+   public static VcVirtualMachine findVM(final String serverMobId) {
+      final VcVirtualMachine serverVm =
+            VcContext.inVcSessionDo(new VcSession<VcVirtualMachine>() {
+               @Override
+               protected VcVirtualMachine body() throws Exception {
+                  VcVirtualMachine vm = VcCache.get(serverMobId);
+                  if (vm == null) {
+                     VcProviderException.SERVER_NOT_FOUND(serverMobId);
+                  }
+                  return vm;
+               }
+            });
+      return serverVm;
+   }
+
+   public static VcResourcePool getVmRp(final VcVirtualMachine serverVm) {
+      VcResourcePool vcRP =
+            VcContext.inVcSessionDo(new VcSession<VcResourcePool>() {
+               @Override
+               protected VcResourcePool body() throws Exception {
+                  if (ConfigInfo.isDeployAsVApp()) {
+                     VcResourcePool vApp = serverVm.getParentVApp();
+                     logger.info("vApp name: " + vApp.getName());
+                     VcResourcePool vcRP = vApp.getParent();
+                     return vcRP;
+                  } else {
+                     return serverVm.getResourcePool();
+                  }
+               }
+            });
+      return vcRP;
+   }
+
+   /**
+    * @param serverVm
+    * @return
+    */
+   public static Map<DatastoreType, List<String>> getVmDatastore(
+         final VcVirtualMachine serverVm) {
+      Map<DatastoreType, List<String>> dsNames =
+            new HashMap<DatastoreType, List<String>>();
+      dsNames.put(DatastoreType.LOCAL, new ArrayList<String>());
+      dsNames.put(DatastoreType.SHARED, new ArrayList<String>());
+      for (VcDatastore ds : serverVm.getDatastores()) {
+         if (ds.isLocal()) {
+            dsNames.get(DatastoreType.LOCAL).add(ds.getName());
+         } else {
+            dsNames.get(DatastoreType.SHARED).add(ds.getName());
+         }
+         break;
+      }
+      return dsNames;
+   }
+
+   /**
+    * @param serverVm
+    * @return
+    */
+   public static String getVMNetwork(final VcVirtualMachine serverVm) {
+      String networkName = VcContext.inVcSessionDo(new VcSession<String>() {
+         @Override
+         protected String body() throws Exception {
+            GuestInfo.NicInfo[] nicInfos = serverVm.queryGuest().getNet();
+
+            if (nicInfos == null || nicInfos.length == 0) {
+               return null;
+            }
+
+            String defaultNetwork = null;
+            for (GuestInfo.NicInfo nicInfo : nicInfos) {
+               if (nicInfo.getNetwork() == null) {
+                  continue;
+               }
+
+               if (defaultNetwork == null) {
+                  defaultNetwork = nicInfo.getNetwork();
+               }
+
+               if (nicInfo.getIpConfig() == null || nicInfo.getIpConfig().getIpAddress() == null
+                     || nicInfo.getIpConfig().getIpAddress().length == 0) {
+                  continue;
+               }
+
+               for (IpConfigInfo.IpAddress info : nicInfo.getIpConfig().getIpAddress()) {
+                  if (info.getIpAddress() != null
+                        && sun.net.util.IPAddressUtil.isIPv4LiteralAddress(info.getIpAddress())) {
+                     return nicInfo.getNetwork();
+                  }
+               }
+            }
+
+            return defaultNetwork;
+         }
+      });
+      logger.info("network name:" + networkName);
+      return networkName;
+   }
+
+   /*
+    * Get VC clusters in the same DataCenter of BDE Server
+    */
+   public static List<VcCluster> getClusters() {
+      if (dataCenter == null) {
+         final String serverMobId =
+               Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
+         logger.info("server mob id:" + serverMobId);
+         final VcVirtualMachine serverVm = findVM(serverMobId);
+         VcResourcePool vcRP = getVmRp(serverVm);
+         // only use the resources in the same DataCenter of BDE Server
+         VcDatacenter dc = vcRP.getVcCluster().getDatacenter();
+         VcResourceUtils.setDataCenter(dc);
+      }
+      List<VcCluster> clusters = new ArrayList<VcCluster>();
+      List<VcCluster> allClusters = VcInventory.getClusters();
+      if (dataCenter != null) {
+         for (VcCluster cluster : allClusters) {
+            if (dataCenter.getName().equalsIgnoreCase(cluster.getDatacenter().getName())) {
+               logger.debug("Found cluster " + cluster.getName() + " in datacenter " + dataCenter.getName());
+               clusters.add(cluster);
+            }
+         }
+      }
+      return clusters;
    }
 }
