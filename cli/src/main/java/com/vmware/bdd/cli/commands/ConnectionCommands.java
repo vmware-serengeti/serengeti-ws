@@ -97,7 +97,9 @@ public class ConnectionCommands implements CommandMarker {
       final String path = Constants.REST_PATH_HELLO;
       final HttpMethod httpverb = HttpMethod.GET;
 
-      String serverVersion = conn.getObjectByPath(String.class, path, httpverb, false);
+      @SuppressWarnings("unchecked")
+      HashMap<String, String> serverInfo = conn.getObjectByPath(HashMap.class, path, httpverb, false);
+      String serverVersion = serverInfo.get("version");
       String cliVersion = com.vmware.bdd.utils.Constants.VERSION;
       if (!cliVersion.equals(serverVersion)) {
          System.out.println("Warning: CLI version "+ cliVersion + " does not match with management server version " + serverVersion + ".");

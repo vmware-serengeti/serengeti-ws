@@ -15,6 +15,7 @@
 package com.vmware.bdd.rest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -138,11 +139,13 @@ public class RestResource {
     * Get REST api version
     * @return REST api version
     */
-   @RequestMapping(value = "/hello", method = RequestMethod.GET)
+   @RequestMapping(value = "/hello", method = RequestMethod.GET, produces = "application/json")
    @ResponseStatus(HttpStatus.OK)
    @ResponseBody
-   public String getHello() {
-      return Constants.VERSION;
+   public Map<String, String> getHello() {
+      Map<String, String> serverInfo = new HashMap<String, String>();
+      serverInfo.put("version", Constants.VERSION);
+      return serverInfo;
    }
 
    // task API
