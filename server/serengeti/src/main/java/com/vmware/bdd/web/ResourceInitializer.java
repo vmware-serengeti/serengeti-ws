@@ -96,10 +96,14 @@ public class ResourceInitializer implements ServletContextListener {
       clusterSvc.init();
       boolean regWebPlugin = Configuration.getBoolean("reg_web_plugin");
       if(regWebPlugin) {
-         NgcBDERegistrar ngc = new NgcBDERegistrar();
-         ngc.initNgcRegistration();
+         try {
+            NgcBDERegistrar ngc = new NgcBDERegistrar();
+            ngc.initNgcRegistration();
+         } catch (Exception e) {
+            logger.error("NGC BDE plugin auto-installation failed! You need to manually register the BDE plugin for vCenter.");
+            logger.error(e.getMessage());
+         }
       }
-
    }
 
    private void initDataCollection(WebApplicationContext wac)
