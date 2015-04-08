@@ -42,7 +42,7 @@ public class WaitVMStatusTask implements Callable<Void> {
    private int maxWaitingSeconds;
    public WaitVMStatusTask(String vmId) {
       this.vmId = vmId;
-      this.maxWaitingSeconds = Configuration.getInt("serengeti.wait_vm_status.timeout.seconds");
+      this.maxWaitingSeconds = Configuration.getInt("serengeti.vm_bootup.timeout.seconds");
    }
 
    @Override
