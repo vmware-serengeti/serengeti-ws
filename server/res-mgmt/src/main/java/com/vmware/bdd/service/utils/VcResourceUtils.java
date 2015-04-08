@@ -779,18 +779,31 @@ public class VcResourceUtils {
    }
 
    /*
-    * Get VC clusters in the same DataCenter of BDE Server
+    * Get the name of the DataCenter which BDE Server belongs to.
     */
-   public static List<VcCluster> getClusters() {
+   public static synchronized String getCurrentDatacenterName() {
       if (datacenterName == null) {
          final String serverMobId =
                Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
          logger.info("server mob id:" + serverMobId);
          final VcVirtualMachine serverVm = findVM(serverMobId);
-         VcResourcePool vcRP = getVmRp(serverVm);
+         final VcResourcePool vcRP = getVmRp(serverVm);
          // only use the resources in the same DataCenter of BDE Server
-         datacenterName = vcRP.getVcCluster().getDatacenter().getName();
+         datacenterName =
+               VcContext.inVcSessionDo(new VcSession<String>() {
+                  @Override
+                  protected String body() throws Exception {
+                     return vcRP.getVcCluster().getDatacenter().getName();
+                  }
+               });
       }
-      return VcInventory.getClustersInDatacenter(datacenterName);
+      return datacenterName;
+   }
+
+   /*
+    * Get VC clusters in the same DataCenter of BDE Server
+    */
+   public static List<VcCluster> getClusters() {
+      return VcInventory.getClustersInDatacenter(getCurrentDatacenterName());
    }
 }
