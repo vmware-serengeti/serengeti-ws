@@ -47,22 +47,18 @@ public class UserService implements UserDetailsService {
                (Users) jaxbUnmarshaller.unmarshal(FileUtils.getConfigurationFile(
                      UserService.UsersFile, "Users"));
          User userDTO = null;
-         boolean exsiting = false;
-         boolean anonymous = false;
          if (users != null) {
             for (User user : users.getUsers()) {
                if (user.getName().equals(username)) {
-                  exsiting = true;
                   userDTO = user;
                   break;
                } else if (user.getName().trim().equals("*")) {
-                  anonymous = true;
                   userDTO = user;
                   userDTO.setName("Guest");
                }
             }
          }
-         if (!exsiting && !anonymous) {
+         if (null == userDTO) {
             throw new UsernameNotFoundException("unauthorized user");
          }
 
