@@ -665,6 +665,7 @@ public class AmbariImpl implements SoftwareManager {
    @Override
    public boolean reconfigCluster(ClusterBlueprint blueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
+      ReflectionUtils.getPreStartServicesHook().preStartServices(blueprint.getName());
       // TODO Auto-generated method stub
       return true;
    }

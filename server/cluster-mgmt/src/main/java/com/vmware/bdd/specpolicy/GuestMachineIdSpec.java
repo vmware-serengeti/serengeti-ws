@@ -20,6 +20,7 @@ import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NetworkDnsType;
 import com.vmware.bdd.entity.NetworkEntity;
+import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.manager.HostnameManager;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.resmgmt.INetworkService;
@@ -72,6 +73,19 @@ public class GuestMachineIdSpec {
       this.nics = new NicDeviceConfigSpec[nicNumber];
       for (int i = 0; i < nicNumber; i++) {
          this.nics[i] = new NicDeviceConfigSpec(networkAdds.get(i), ipInfo, vNode, networkMgr);
+      }
+
+      this.defaultPg = defaultPg;
+      this.bootupUuid = null;
+      this.managementServerIP = IpAddressUtil.getHostManagementIp();
+   }
+
+   public GuestMachineIdSpec(List<NetworkAdd> networkAdds,
+         Map<String, String> ipInfo, String defaultPg, NodeEntity node, INetworkService networkMgr) {
+      int nicNumber = networkAdds.size();
+      this.nics = new NicDeviceConfigSpec[nicNumber];
+      for (int i = 0; i < nicNumber; i++) {
+         this.nics[i] = new NicDeviceConfigSpec(networkAdds.get(i), ipInfo, node, networkMgr);
       }
 
       this.defaultPg = defaultPg;
@@ -193,6 +207,13 @@ public class GuestMachineIdSpec {
          NetworkEntity networkEntity = networkMgr.getNetworkEntityByName(networkAdd.getName());
          this.dhcpHostname = HostnameManager.generateHostname(networkEntity, vNode);
          this.dnsType = networkEntity.getDnsType();
+      }
+
+      public NicDeviceConfigSpec(NetworkAdd networkAdd, Map<String, String> ipInfo, NodeEntity node, INetworkService networkMgr) {
+         this(networkAdd, ipInfo);
+         NetworkEntity networkEntity = networkMgr.getNetworkEntityByName(networkAdd.getName());
+         this.dhcpHostname = HostnameManager.generateHostname(networkEntity, node);
+         this.dnsType = NetworkDnsType.DYNAMIC;
       }
 
       public String getPortGroupName() {

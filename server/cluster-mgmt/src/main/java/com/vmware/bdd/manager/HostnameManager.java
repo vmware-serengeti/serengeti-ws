@@ -20,6 +20,8 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
+import com.vmware.bdd.apitypes.ClusterNetConfigInfo;
+import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NicEntity;
@@ -82,6 +84,22 @@ public class HostnameManager{
          if (networkConfigEntry.getValue().contains(networkEntity.getName()) && networkEntity.getIsGenerateHostname()) {
             hostname = generateHostnameWithTrafficType(networkConfigEntry.getKey(), vNodeName, vNode.getCluster().getHostnamePrefix());
             break;
+         }
+      }
+      return hostname;
+   }
+
+   // TODO To consider multiple traffic definitions in feature
+   public static String generateHostname(NetworkEntity networkEntity, NodeEntity node) throws BddException {
+      String vNodeName = node.getVmName();
+      Map<NetTrafficType, List<ClusterNetConfigInfo>> networkConfig = node.getNodeGroup().getCluster().getNetworkConfigInfo();
+      String hostname = "";
+      for (Map.Entry<NetTrafficType, List<ClusterNetConfigInfo>> networkConfigEntry : networkConfig.entrySet()) {
+         for (ClusterNetConfigInfo netConfigInfo : networkConfigEntry.getValue()) {
+            if (netConfigInfo.getIsGenerateHostname() && netConfigInfo.getNetworkName().equals(networkEntity.getName())) {
+               hostname = generateHostnameWithTrafficType(networkConfigEntry.getKey(), vNodeName, null);
+               break;
+            }
          }
       }
       return hostname;

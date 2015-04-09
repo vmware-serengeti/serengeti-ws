@@ -166,6 +166,14 @@ public class DiskSpec implements Comparable<DiskSpec> {
       return DiskType.SYSTEM_DISK.equals(this.diskType);
    }
 
+   public boolean isDataDisk() {
+      return DiskType.DATA_DISK.equals(this.diskType);
+   }
+
+   public boolean isSwapDisk() {
+      return DiskType.SWAP_DISK.equals(this.diskType);
+   }
+
    public String getExternalAddress() {
       return externalAddress;
    }

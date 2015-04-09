@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.software.mgmt.exception.SoftwareManagementException;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
 import com.vmware.bdd.utils.JobUtils;
@@ -108,7 +109,7 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
 
       waitVmBootup(clusterName, forceStart);
 
-      updateNodes(clusterName);
+      updateNodes(clusterName, forceStart);
    }
 
    private void waitVmBootup(String clusterName, boolean forceStart) {
@@ -154,7 +155,7 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
    }
 
    @Transactional
-   private Void updateNodes(final String clusterName) {
+   private Void updateNodes(final String clusterName, final boolean forceStart) {
 
       return VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
@@ -168,7 +169,14 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
                node = clusterEntityMgr.getNodeWithNicsByMobId(node.getMoId());
                VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
                String hostname = VcVmUtil.getMgtHostName(vm, node.getPrimaryMgtIpV4());
-               if (hostname != null && !hostname.isEmpty() && !hostname.equals(node.getGuestHostName())) {
+               if (hostname == null || hostname.isEmpty()) {
+                  logger.error("Failed to get FQDN from vm " + vm.getName());
+                  JobUtils.forceClusterOperationRecordError(forceStart, logger);
+                  if (!forceStart) {
+                     throw SoftwareManagementException.FAILED_TO_GET_FQDN(vm.getName());
+                  }
+               }
+               if (!hostname.equals(node.getGuestHostName())) {
                   node.setGuestHostName(hostname);
                   clusterEntityMgr.update(node);
                   logger.info("Update management NIC FQDN of node " + node.getVmName() + " to " + node.getGuestHostName());

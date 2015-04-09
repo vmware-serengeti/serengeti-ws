@@ -55,71 +55,61 @@ public class NodeRecoverDiskFailureStep extends TrackableTasklet {
 
       VcVirtualMachine vm = null;
       try {
-         vm = healService.checkNodeStatus(clusterName, groupName, targetNode);
+         vm = healService.getFixingVm(clusterName, groupName, targetNode);
       } catch (Exception e) {
          putIntoJobExecutionContext(chunkContext,
                JobConstants.CURRENT_ERROR_MESSAGE, e.getMessage());
          throw e;
       }
 
+      // find bad disks
+      List<DiskSpec> badDisks = healService.getBadDisks(targetNode);
+      AuAssert.check(CollectionUtils.isNotEmpty(badDisks));
+
+      // find replacements for bad disks
+      logger.debug("get replacements for bad disks");
+      List<DiskSpec> replacements;
+      try {
+         replacements = healService.getReplacementDisks(clusterName, groupName, targetNode, badDisks);
+         AuAssert.check(badDisks.size() == replacements.size());
+      } catch (Exception e) {
+         putIntoJobExecutionContext(chunkContext, JobConstants.CURRENT_ERROR_MESSAGE, e.getMessage());
+         throw e;
+      }
+
+      logger.debug("get replacement disk set for recovery " + replacements.toString());
+      jobExecutionStatusHolder.setCurrentStepProgress(getJobExecutionId(chunkContext), 0.3);
+
       // need to create replace vm to recover disk fix
       if (vm == null) {
-         // find bad disks
-         List<DiskSpec> badDisks = healService.getBadDisks(targetNode);
-         AuAssert.check(CollectionUtils.isNotEmpty(badDisks));
-
-         // find replacements for bad disks
-         logger.debug("get replacements for bad disks");
-         List<DiskSpec> replacements;
-         try {
-            replacements =
-                  healService.getReplacementDisks(clusterName, groupName,
-                        targetNode, badDisks);
-            AuAssert.check(badDisks.size() == replacements.size());
-         } catch (Exception e) {
-            putIntoJobExecutionContext(chunkContext,
-                  JobConstants.CURRENT_ERROR_MESSAGE, e.getMessage());
-            throw e;
-         }
-
-         logger.debug("get replacement disk set for recovery "
-               + replacements.toString());
-         jobExecutionStatusHolder.setCurrentStepProgress(
-               getJobExecutionId(chunkContext), 0.3);
 
          // clone and recover
          logger.debug("start recovering bad vm " + targetNode);
          try {
-            VcVirtualMachine newVm =
-                  healService.createReplacementVm(clusterName, groupName,
-                        targetNode, replacements);
+            VcVirtualMachine newVm = healService.createReplacementVm(clusterName, groupName, targetNode, replacements);
 
             // assert, if creation failed, exception should be thrown from previous method
             if (newVm != null) {
-               logger.info("created replacement vm " + newVm.getId()
-                     + " for node " + targetNode);
+               logger.info("created replacement vm " + newVm.getId() + " for node " + targetNode);
 
-               putIntoJobExecutionContext(chunkContext,
-                     JobConstants.REPLACE_VM_ID, newVm.getId());
+               putIntoJobExecutionContext(chunkContext, JobConstants.REPLACE_VM_ID, newVm.getId());
             } else {
-               logger.error("failed creating replacement vm for node "
-                     + targetNode);
-               throw ClusterHealServiceException
-                     .FAILED_CREATE_REPLACEMENT_VM(targetNode);
+               logger.error("failed creating replacement vm for node " + targetNode);
+               throw ClusterHealServiceException.FAILED_CREATE_REPLACEMENT_VM(targetNode);
             }
          } catch (Exception e) {
-            putIntoJobExecutionContext(chunkContext,
-                  JobConstants.CURRENT_ERROR_MESSAGE, e.getMessage());
+            putIntoJobExecutionContext(chunkContext, JobConstants.CURRENT_ERROR_MESSAGE, e.getMessage());
 
             throw e;
          }
       } else {
-         putIntoJobExecutionContext(chunkContext, JobConstants.REPLACE_VM_ID,
-               vm.getId());
+         if (healService.hasBadDisksExceptSystem(targetNode)) {
+            vm = healService.replaceBadDisksExceptSystem(clusterName, groupName, targetNode, replacements);
+         }
+         putIntoJobExecutionContext(chunkContext, JobConstants.REPLACE_VM_ID, vm.getId());
       }
 
-      jobExecutionStatusHolder.setCurrentStepProgress(
-            getJobExecutionId(chunkContext), 1.0);
+      jobExecutionStatusHolder.setCurrentStepProgress(getJobExecutionId(chunkContext), 1.0);
       return RepeatStatus.FINISHED;
    }
 }

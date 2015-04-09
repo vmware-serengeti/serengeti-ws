@@ -502,7 +502,6 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
             + " does not exist. Update node status to NOT_EXIST.");
       node.setStatus(NodeStatus.NOT_EXIST);
       node.resetNicsInfo();
-      node.setHostName(null);
       node.setMoId(null);
       if (node.getAction() != null
             && !(node.getAction().equals(Constants.NODE_ACTION_CLONING_VM))
