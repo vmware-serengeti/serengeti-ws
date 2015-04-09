@@ -713,6 +713,17 @@ public class VcResourceUtils {
       return vcRP;
    }
 
+   public static VcCluster getRpCluster(final VcResourcePool vcRp) {
+      VcCluster vcCluster =
+            VcContext.inVcSessionDo(new VcSession<VcCluster>() {
+               @Override
+               protected VcCluster body() throws Exception {
+                  return vcRp.getVcCluster();
+               }
+            });
+      return vcCluster;
+   }
+
    /**
     * @param serverVm
     * @return

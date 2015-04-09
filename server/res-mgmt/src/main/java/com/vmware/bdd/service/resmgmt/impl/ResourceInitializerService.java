@@ -141,20 +141,17 @@ public class ResourceInitializerService implements IResourceInitializerService {
             Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
       logger.info("server mob id:" + serverMobId);
       final VcVirtualMachine serverVm = VcResourceUtils.findVM(serverMobId);
-      VcResourcePool vcRP = VcResourceUtils.getVmRp(serverVm);
-      String dcName = vcRP.getVcCluster().getDatacenter().getName();
-      String clusterName = vcRP.getVcCluster().getName();
+      final VcResourcePool vcRP = VcResourceUtils.getVmRp(serverVm);
+      String clusterName = VcResourceUtils.getRpCluster(vcRP).getName();
       String vcRPName = vcRP.getName();
-      logger.info("vc rp: " + vcRPName + ", cluster: " + clusterName + ", datacenter: " + dcName);
+      logger.info("vc rp: " + vcRPName + ", cluster: " + clusterName);
       String networkName = VcResourceUtils.getVMNetwork(serverVm);
       Map<DatastoreType, List<String>> dsNames = VcResourceUtils.getVmDatastore(serverVm);
       if (rpSvc.isDeployedUnderCluster(clusterName, vcRPName)) {
          vcRPName = "";
       }
       addResourceIntoDB(clusterName, vcRPName, networkName, dsNames);
-
    }
-
 
    /**
     * @param clusterName
