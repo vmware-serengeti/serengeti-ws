@@ -21,6 +21,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.vmware.aurora.vc.DeviceId;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.spectypes.DiskSpec;
 
@@ -240,5 +241,13 @@ public class DiskEntity extends EntityBase {
             + ", datastoreName=" + datastoreName + ", datastoreMoId="
             + datastoreMoId + ", hardwareUUID=" + hardwareUUID + ", vmkdPath="
             + vmdkPath + ", nodeEntity=" + nodeEntity + "]";
+   }
+
+   public DeviceId getDiskDeviceId() {
+      if (this.externalAddress == null) {
+         return null;
+      }
+
+      return new DeviceId(this.externalAddress);
    }
 }

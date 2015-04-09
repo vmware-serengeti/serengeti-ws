@@ -20,6 +20,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
+import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NicEntity;
@@ -87,6 +88,24 @@ public class HostnameManager{
             if (networkConfigEntry.getValue().contains(networkEntity.getName())) {
                hostname = generateHostnameWithTrafficType(networkConfigEntry.getKey(), vNodeName, null);
                break;
+            }
+         }
+      }
+      return hostname;
+   }
+
+   // TODO To consider multiple traffic definitions in feature
+   public static String generateHostname(NetworkEntity networkEntity, NodeEntity node) throws BddException {
+      String vNodeName = node.getVmName();
+      Map<NetTrafficType, List<NetConfigInfo>> networkConfig = node.getNodeGroup().getCluster().getNetworkConfigInfo();
+      String hostname = "";
+      if (isGenerateHostname() != null && isGenerateHostname()) {
+         for (Map.Entry<NetTrafficType, List<NetConfigInfo>> networkConfigEntry : networkConfig.entrySet()) {
+            for (NetConfigInfo netConfigInfo : networkConfigEntry.getValue()) {
+               if (netConfigInfo.getNetworkName().equals(networkEntity.getName())) {
+                  hostname = generateHostnameWithTrafficType(networkConfigEntry.getKey(), vNodeName, null);
+                  break;
+               }
             }
          }
       }

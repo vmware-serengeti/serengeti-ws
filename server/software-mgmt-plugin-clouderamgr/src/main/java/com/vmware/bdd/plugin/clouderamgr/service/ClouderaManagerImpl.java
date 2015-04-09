@@ -324,6 +324,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       CmClusterDef clusterDef = null;
       try {
          clusterDef = new CmClusterDef(blueprint);
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName());
          syncHostsId(clusterDef);
          configureServices(clusterDef, reportQueue, false);
          success = true;

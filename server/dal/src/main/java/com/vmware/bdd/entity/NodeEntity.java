@@ -633,4 +633,8 @@ public class NodeEntity extends EntityBase {
    public String getVmNameWithIP() {
       return this.getVmName() + "(" + this.getPrimaryMgtIpV4() + ")";
    }
+
+   public boolean isNotExist() {
+      return NodeStatus.NOT_EXIST.equals(this.status);
+   }
 }
