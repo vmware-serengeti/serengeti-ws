@@ -281,6 +281,7 @@ public class Constants {
 
    public static final String DEPLOY_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
+   public static final String VCENTER_VERSION_6 = "6";
    public static final String CLUSTER_CLONE_TYPE_FAST_CLONE = "fast";
    public static final String CLUSTER_CLONE_TYPE_INSTANT_CLONE = "instant";
    public static final String FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION = "The above error is ignored because the force flag is set.";

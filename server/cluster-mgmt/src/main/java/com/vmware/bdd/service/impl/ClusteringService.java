@@ -50,7 +50,18 @@ import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.util.CmsWorker;
-import com.vmware.aurora.vc.*;
+import com.vmware.aurora.vc.DeviceId;
+import com.vmware.aurora.vc.VcCache;
+import com.vmware.aurora.vc.VcCluster;
+import com.vmware.aurora.vc.VcDatacenter;
+import com.vmware.aurora.vc.VcDatastore;
+import com.vmware.aurora.vc.VcHost;
+import com.vmware.aurora.vc.VcInventory;
+import com.vmware.aurora.vc.VcResourcePool;
+import com.vmware.aurora.vc.VcSnapshot;
+import com.vmware.aurora.vc.VcUtil;
+import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.aurora.vc.VcVmCloneType;
 import com.vmware.aurora.vc.vcevent.VcEventRouter;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
@@ -113,6 +124,7 @@ import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.VcVmUtil;
+import com.vmware.bdd.utils.Version;
 import com.vmware.bdd.vmclone.service.intf.IClusterCloneService;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
@@ -1236,14 +1248,6 @@ public class ClusteringService implements IClusteringService {
       return success;
    }
 
-   private IClusterCloneService chooseClusterCloneService() {
-      String type = Configuration.getString("cluster.clone.service");
-
-      AuAssert.check(StringUtils.isNotBlank(type), "cluster.clone.service in serengeti.properties can not be null.");
-
-      return chooseClusterCloneService(type);
-   }
-
    private IClusterCloneService chooseClusterCloneService(String type) {
       String qualifier = type+"ClusterCloneService";
       IClusterCloneService clusterCloneService = this.cloneServiceMap.get(qualifier);
@@ -1443,6 +1447,14 @@ public class ClusteringService implements IClusteringService {
             throw PlacementException.INVALID_RACK_INFO(clusterSpec.getName(),
                   nodeGroup.getName());
          }
+      }
+
+      // for instant clone, we need check if the target hosts are with version 6 or higher
+      // if user does not set the clone type in serengeti.properties, the default type
+      // should still be FAST clone for hosts with 5.x version
+      // for cluster resize, the original cloneType should be used
+      if ( null == existedNodes ) {
+         checkAndUpdateClusterCloneType(clusterSpec, container);
       }
 
       //pre-placement task
@@ -2064,4 +2076,44 @@ public class ClusteringService implements IClusteringService {
       return true;
    }
 
+   private void checkAndUpdateClusterCloneType(ClusterCreate clusterSpec, Container container) {
+      String clusterName = clusterSpec.getName();
+      String type = Configuration.getString("cluster.clone.service");
+      if ( StringUtils.isBlank(type) ) {
+         // check if there are any ESXi hosts with version lower than 6.0
+         boolean isLowVersion = false;
+         for ( AbstractHost host : container.getAllHosts() ) {
+            String hostName = host.getName();
+            final VcHost vchost = VcResourceUtils.findHost(hostName);
+            AuAssert.check(vchost != null, String.format("can' find host: %1s in VC.", hostName));
+            String version = vchost.getVersion();
+            if ( Version.compare(version, Constants.VCENTER_VERSION_6 ) < 0 ) {
+               logger.info("Some ESXi host version is lower than 6.0.");
+               isLowVersion = true;
+               break;
+            }
+         }
+
+         // if some ESXi host version is lower than 6.0, update the cluster clone type to FAST
+         if ( isLowVersion ) {
+            ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
+            String advProps = cluster.getAdvancedProperties();
+            if (!CommonUtil.isBlank(advProps)) {
+               Gson gson = new Gson();
+               Map<String, String> advancedProperties =
+                     gson.fromJson(advProps, Map.class);
+               String cloneType = advancedProperties.get("ClusterCloneType");
+               if ( !StringUtils.isBlank(cloneType)
+                     && cloneType.equals(Constants.CLUSTER_CLONE_TYPE_INSTANT_CLONE) ) {
+                  cloneType = Constants.CLUSTER_CLONE_TYPE_FAST_CLONE;
+                  advancedProperties.put("ClusterCloneType", cloneType);
+                  cluster.setAdvancedProperties(gson.toJson(advancedProperties));
+                  logger.info("Change cluster clone type to fast clone because of ESXi version lower than 6.0.");
+                  clusterEntityMgr.update(cluster);
+                  clusterSpec.setClusterCloneType(cloneType);
+               }
+            }
+         }
+      }
+   }
 }

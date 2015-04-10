@@ -33,10 +33,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
-import com.vmware.bdd.service.impl.ClusterUserMgmtValidService;
-import com.vmware.bdd.aop.annotation.ClusterManagerPointcut;
-import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
-
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -48,6 +44,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vmware.aurora.global.Configuration;
+import com.vmware.aurora.vc.vcservice.VcContext;
+import com.vmware.bdd.aop.annotation.ClusterManagerPointcut;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterStatus;
@@ -73,12 +71,14 @@ import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.IExecutionService;
+import com.vmware.bdd.service.impl.ClusterUserMgmtValidService;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.specpolicy.ClusterSpecFactory;
 import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
 import com.vmware.bdd.spectypes.IronfanStack;
@@ -89,6 +89,7 @@ import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.ValidationUtils;
+import com.vmware.bdd.utils.Version;
 
 public class ClusterManager {
    static final Logger logger = Logger.getLogger(ClusterManager.class);
@@ -454,8 +455,8 @@ public class ClusterManager {
       validateNetworkAccessibility(createSpec.getName(), createSpec.getNetworkNames(), vcClusters);
 
       // get the current cluster clone type from the configuration file
-      String type = Configuration.getString("cluster.clone.service");
-      AuAssert.check(StringUtils.isNotBlank(type), "cluster.clone.service in serengeti.properties can not be null.");
+      // if it is not set in configuration file, then use INSTANT clone for VC6/ESXi6
+      String type = getClusterCloneType();
       clusterSpec.setClusterCloneType(type);
 
       //save configuration into meta-db, and extend configuration using default spec
@@ -1516,5 +1517,23 @@ public class ClusterManager {
          logger.info("the check is successful: all needed packages are there.");
          extraPackagesExisted = true;
       }
+   }
+
+   private String getClusterCloneType() {
+      String type = Configuration.getString("cluster.clone.service");
+      if ( StringUtils.isBlank(type) ) {
+         String version = "";
+         VcContext.initVcContext();
+         version = VcContext.getVcVersion();
+         if ( !CommonUtil.isBlank(version) ) {
+            if ( Version.compare(version, Constants.VCENTER_VERSION_6 ) < 0 ) {
+               type = Constants.CLUSTER_CLONE_TYPE_FAST_CLONE;
+            } else {
+               logger.info("The VCenter version is equal or higher than 6.0. Set cluster clone type to instant.");
+               type = Constants.CLUSTER_CLONE_TYPE_INSTANT_CLONE;
+            }
+         }
+      }
+      return type;
    }
 }
