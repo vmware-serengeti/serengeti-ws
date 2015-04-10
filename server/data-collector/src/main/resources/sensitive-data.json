@@ -52,5 +52,6 @@
   "bindAddress",
   "peerport",
   "leaderport",
-  "clientPort"
+  "clientPort",
+  "localRepoURL"
 ]

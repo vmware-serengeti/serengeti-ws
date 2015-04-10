@@ -30,7 +30,7 @@ public class TestSensitiveDataObfuscator {
         assertEquals(value, CollectionConstants.METHOD_CONFIG_CLUSTER);
         value = SensitiveDataObfuscator.hashSensitiveData(
                 "password","1234567abc", null);
-        assertEquals(SensitiveDataObfuscator.getSensitiveDataFromFile().size(), 54);
+        assertEquals(SensitiveDataObfuscator.getSensitiveDataFromFile().size(), 55);
         assertEquals(value, "4D74CDB3F355C750B8FE2E4C86CC062F41CA1C7373A8CD19D2C7C2D6974C3002");
     }
 
