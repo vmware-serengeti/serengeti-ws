@@ -62,7 +62,7 @@ public class ClusterOperationCallbackStep extends TrackableTasklet {
             String msg = "Generating rack topology data file " + filename + " for cluster " + clusterName;
             logger.info(msg);
             try {
-               CommonUtil.gracefulRackTopologyOutput(rackTopology, filename, "\n");
+               CommonUtil.gracefulRackTopologyOutput(rackTopology, filename, System.lineSeparator());
             } catch (Exception e) {
                String errorMessage = msg + " failed. " + e.getLocalizedMessage();
                boolean forceStart = JobUtils.getJobParameterForceClusterOperation(chunkContext);

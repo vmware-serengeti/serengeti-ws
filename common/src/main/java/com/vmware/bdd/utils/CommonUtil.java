@@ -191,7 +191,7 @@ public class CommonUtil {
    public static void prettyOutputStrings(List<Object> objs, String fileName, String delimeter) throws Exception {
       StringBuffer buff = new StringBuffer();
       if (isBlank(delimeter)) {
-         delimeter = "\n";
+         delimeter = System.lineSeparator();
       }
 
       for (Object obj : objs) {
@@ -216,6 +216,10 @@ public class CommonUtil {
          }
          bw = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
          bw.write(buff.toString());
+         if (!isBlank(fileName)) {
+            // [Bug 1406542] always append a newline at the end of the file
+            bw.newLine();
+         }
          bw.flush();
       } finally {
          if (bw != null && out != null && !(out instanceof PrintStream)) {
