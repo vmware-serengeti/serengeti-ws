@@ -1092,6 +1092,7 @@ public class RestResource {
          @PathVariable("appManagerName") String appManagerName,
          @PathVariable("distroName") String distroName) {
       appManagerName = CommonUtil.decode(appManagerName);
+      distroName = CommonUtil.decode(distroName);
       if (CommonUtil.isBlank(appManagerName)
             || !CommonUtil.validateResourceName(appManagerName)) {
          throw BddException.INVALID_PARAMETER("appmanager name", appManagerName);
@@ -1222,6 +1223,8 @@ public class RestResource {
             BddException.wrapIfNeeded(t, "REST API transport layer error.");
       logger.error("rest call error", ex);
       response.setStatus(getHttpErrorCode(ex.getFullErrorId()));
+      response.setContentType("application/json;charset=utf-8");
+      response.setCharacterEncoding("utf-8");
       return new BddErrorMessage(ex.getFullErrorId(), extractErrorMessage(ex));
    }
 

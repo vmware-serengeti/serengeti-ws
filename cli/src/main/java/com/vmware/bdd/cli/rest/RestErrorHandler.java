@@ -101,7 +101,7 @@ public class RestErrorHandler implements ResponseErrorHandler {
       InputStreamReader inputStreamReader = null;
       BufferedReader bufferedReader = null;
       try {
-         inputStreamReader = new InputStreamReader(is);
+         inputStreamReader = new InputStreamReader(is, "UTF-8");
          bufferedReader = new BufferedReader(inputStreamReader);
          String line = "";
          while ((line = bufferedReader.readLine()) != null) {

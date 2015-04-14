@@ -33,105 +33,104 @@ import org.springframework.stereotype.Component;
 @Component
 public class AppManagerRestClient {
 
-   @Autowired
-   private RestClient restClient;
+    @Autowired
+    private RestClient restClient;
 
-   public void add(AppManagerAdd appManagerAdd) {
-      final String path = Constants.REST_PATH_APPMANAGERS;
-      final HttpMethod httpverb = HttpMethod.POST;
-      restClient.createObject(appManagerAdd, path, httpverb);
-   }
+    public void add(AppManagerAdd appManagerAdd) {
+        final String path = Constants.REST_PATH_APPMANAGERS;
+        final HttpMethod httpverb = HttpMethod.POST;
+        restClient.createObject(appManagerAdd, path, httpverb);
+    }
 
-   public AppManagerRead get(String name) {
-      name = CommonUtil.encode(name);
-      final String path = Constants.REST_PATH_APPMANAGER;
-      final HttpMethod httpverb = HttpMethod.GET;
+    public AppManagerRead get(String name) {
+        name = CommonUtil.encode(name);
+        final String path = Constants.REST_PATH_APPMANAGER;
+        final HttpMethod httpverb = HttpMethod.GET;
 
-      return restClient.getObject(name, AppManagerRead.class, path, httpverb,
-            false);
-   }
+        return restClient.getObject(name, AppManagerRead.class, path, httpverb,
+                false);
+    }
 
-   public AppManagerRead[] getAll() {
-      final String path = Constants.REST_PATH_APPMANAGERS;
-      final HttpMethod httpverb = HttpMethod.GET;
+    public AppManagerRead[] getAll() {
+        final String path = Constants.REST_PATH_APPMANAGERS;
+        final HttpMethod httpverb = HttpMethod.GET;
 
-      return restClient.getAllObjects(AppManagerRead[].class, path, httpverb,
-            false);
-   }
+        return restClient.getAllObjects(AppManagerRead[].class, path, httpverb,
+                false);
+    }
 
-   public DistroRead[] getDistros(String name) {
-      final String path =
-            Constants.REST_PATH_APPMANAGER + "/" + name + "/"
-                  + Constants.REST_PATH_DISTROS;
-      final HttpMethod httpverb = HttpMethod.GET;
+    public DistroRead[] getDistros(String name) {
+        name = CommonUtil.encode(name);
+        final String path = Constants.REST_PATH_APPMANAGER + "/" + name
+                + "/" + Constants.REST_PATH_DISTROS;
+        final HttpMethod httpverb = HttpMethod.GET;
+        return restClient.getAllObjects(DistroRead[].class, path, httpverb, false);
+    }
 
-      return restClient.getAllObjects(DistroRead[].class, path, httpverb,
-            false);
-   }
+    public String[] getTypes() {
+        final String path = Constants.REST_PATH_APPMANAGERS + "/types";
+        final HttpMethod httpverb = HttpMethod.GET;
 
-   public String[] getTypes() {
-      final String path = Constants.REST_PATH_APPMANAGERS + "/types";
-      final HttpMethod httpverb = HttpMethod.GET;
+        return restClient.getAllObjects(String[].class, path, httpverb,
+                false);
+    }
 
-      return restClient.getAllObjects(String[].class, path, httpverb,
-            false);
-   }
+    public String[] getRoles(String appMgrName, String distroName) {
+        final String path =
+                Constants.REST_PATH_APPMANAGER + "/" + appMgrName + "/"
+                        + Constants.REST_PATH_DISTRO + "/" + distroName + "/"
+                        + Constants.REST_PATH_ROLES;
+        final HttpMethod httpverb = HttpMethod.GET;
 
-   public String[] getRoles(String appMgrName, String distroName) {
-      final String path =
-            Constants.REST_PATH_APPMANAGER + "/" + appMgrName + "/"
-                  + Constants.REST_PATH_DISTRO + "/" + distroName + "/"
-                  + Constants.REST_PATH_ROLES;
-      final HttpMethod httpverb = HttpMethod.GET;
+        return restClient.getAllObjects(String[].class, path, httpverb,
+                false);
+    }
 
-      return restClient.getAllObjects(String[].class, path, httpverb,
-            false);
-   }
+    public String getConfigurations(String appMgrName, String distroName) {
+        final String path =
+                Constants.REST_PATH_APPMANAGER + "/" + appMgrName + "/"
+                        + Constants.REST_PATH_DISTRO + "/" + distroName + "/"
+                        + Constants.REST_PATH_CONFIGURATIONS;
+        final HttpMethod httpverb = HttpMethod.GET;
 
-   public String getConfigurations(String appMgrName, String distroName) {
-      final String path =
-            Constants.REST_PATH_APPMANAGER + "/" + appMgrName + "/"
-                  + Constants.REST_PATH_DISTRO + "/" + distroName + "/"
-                  + Constants.REST_PATH_CONFIGURATIONS;
-      final HttpMethod httpverb = HttpMethod.GET;
+        return restClient.getAllObjects(String.class, path, httpverb,
+                false);
+    }
 
-      return restClient.getAllObjects(String.class, path, httpverb,
-            false);
-   }
+    public DistroRead getDefaultDistro(String name) {
+        name = CommonUtil.encode(name);
+        final String path =
+                Constants.REST_PATH_APPMANAGER + "/" + name + "/"
+                        + Constants.REST_PATH_DEFAULT_DISTRO;
+        final HttpMethod httpverb = HttpMethod.GET;
 
-   public DistroRead getDefaultDistro(String name) {
-      name = CommonUtil.encode(name);
-      final String path =
-            Constants.REST_PATH_APPMANAGER + "/" + name + "/"
-                  + Constants.REST_PATH_DEFAULT_DISTRO;
-      final HttpMethod httpverb = HttpMethod.GET;
+        return restClient.getAllObjects(DistroRead.class, path, httpverb,
+                false);
+    }
 
-      return restClient.getAllObjects(DistroRead.class, path, httpverb,
-            false);
-   }
+    public DistroRead getDistroByName(String appMangerName, String distroName) {
+        appMangerName = CommonUtil.encode(appMangerName);
+        distroName = CommonUtil.encode(distroName);
+        final String path =
+                Constants.REST_PATH_APPMANAGER + "/" + appMangerName + "/"
+                        + Constants.REST_PATH_DISTRO;
+        final HttpMethod httpverb = HttpMethod.GET;
 
-   public DistroRead getDistroByName(String appMangerName, String distroName) {
-      appMangerName = CommonUtil.encode(appMangerName);
-      final String path =
-            Constants.REST_PATH_APPMANAGER + "/" + appMangerName + "/"
-                  + Constants.REST_PATH_DISTRO;
-      final HttpMethod httpverb = HttpMethod.GET;
+        return restClient.getObject(distroName, DistroRead.class, path, httpverb,
+                false);
+    }
 
-      return restClient.getObject(distroName, DistroRead.class, path, httpverb,
-            false);
-   }
+    public void modify(AppManagerAdd appManagerAdd) {
+        final String path = Constants.REST_PATH_APPMANAGERS;
+        final HttpMethod httpverb = HttpMethod.PUT;
+        restClient.update(appManagerAdd, path, httpverb);
+    }
 
-   public void modify(AppManagerAdd appManagerAdd) {
-      final String path = Constants.REST_PATH_APPMANAGERS;
-      final HttpMethod httpverb = HttpMethod.PUT;
-      restClient.update(appManagerAdd, path, httpverb);
-   }
+    public void delete(String id) {
+        id = CommonUtil.encode(id);
+        final String path = Constants.REST_PATH_APPMANAGER;
+        final HttpMethod httpverb = HttpMethod.DELETE;
 
-   public void delete(String id) {
-      id = CommonUtil.encode(id);
-      final String path = Constants.REST_PATH_APPMANAGER;
-      final HttpMethod httpverb = HttpMethod.DELETE;
-
-      restClient.deleteObject(id, path, httpverb);
-   }
+        restClient.deleteObject(id, path, httpverb);
+    }
 }
