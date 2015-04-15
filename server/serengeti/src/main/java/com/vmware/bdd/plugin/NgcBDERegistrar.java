@@ -36,6 +36,13 @@ public class NgcBDERegistrar extends NgcRegistrar {
    private static final Logger LOGGER = Logger.getLogger(NgcBDERegistrar.class);
 
    public void initNgcRegistration() {
+	  LOGGER.info("Packaging NGC BDE plugin tarball...");
+	  try{
+		  packageNgcTarball();
+	  } catch (IOException ex) {
+		  LOGGER.error("Packaging NGC BDE plugin tarball fails due to "+ ex.getMessage());
+	  }
+
       LOGGER.info("Starting to register NGC BDE plugin...");
       VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
@@ -46,7 +53,7 @@ public class NgcBDERegistrar extends NgcRegistrar {
             Extension extension =
                   extensionManager.findExtension(NgcConstants.NGC_KEY);
             LOGGER.info("get extension..." + NgcConstants.NGC_KEY);
-            packageNgcTarball();
+
             if (extension == null) {
                LOGGER.info("register extension...");
                registerExtension();
