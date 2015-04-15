@@ -213,7 +213,7 @@ public class GuestMachineIdSpec {
          this(networkAdd, ipInfo);
          NetworkEntity networkEntity = networkMgr.getNetworkEntityByName(networkAdd.getName());
          this.dhcpHostname = HostnameManager.generateHostname(networkEntity, node);
-         this.dnsType = NetworkDnsType.DYNAMIC;
+         this.dnsType = networkEntity.getDnsType();
       }
 
       public String getPortGroupName() {
