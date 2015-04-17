@@ -17,6 +17,7 @@ package com.vmware.bdd.service.impl;
 import java.io.IOException;
 import java.util.List;
 
+import com.vmware.bdd.usermgmt.UserMgmtConstants;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
@@ -27,7 +28,6 @@ import org.springframework.stereotype.Component;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.entity.NodeEntity;
-import com.vmware.bdd.manager.ClusterEntityManager;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.ssh.SshExecService;
 import com.vmware.bdd.usermgmt.job.ExecOutputLogger;
@@ -78,37 +78,40 @@ public class NodeLdapUserMgmtConfService {
       }
    }
 
-   public void configureSssd(List<NodeEntity> nodeEntityList, String localSssdConfFile) {
+   public void configureLdap(List<NodeEntity> nodeEntityList, String localSssdConfFile, String adminGroupName) {
       String uploadedSssdConfFilePath = "/tmp/sssd.conf." + System.currentTimeMillis();
       String[] remoteCmds = new String[]{
-            String.format("sudo mv -f %1s /etc/sssd/sssd.conf", uploadedSssdConfFilePath),
-            "sudo chown root:root /etc/sssd/sssd.conf",
-            "sudo chmod 600 /etc/sssd/sssd.conf",
-            "sudo authconfig --enablesssd --enablesssdauth --enablemkhomedir --updateall",
-            "sudo service sssd restart"
+            "sudo " + UserMgmtConstants.CONFIG_LDAP_SCRIPT + " " + uploadedSssdConfFilePath
       };
+      String enableSudoCmd = "echo 'Do not need to enable sudo'";
+      if (adminGroupName != null) {
+         enableSudoCmd = "sudo " + UserMgmtConstants.ENABLE_SUDO_SCRIPT  + " " + adminGroupName;
+      }
+      String[] enableSudoCmds = new String[] {enableSudoCmd};
 
       for(NodeEntity nodeEntity : nodeEntityList) {
          clusterEntityManager.updateNodeAction(nodeEntity, "Enabling LDAP");
          try {
-            transferSssdConf(localSssdConfFile, nodeEntity.getPrimaryMgtIpV4(), uploadedSssdConfFilePath);
-
+            transferFile(localSssdConfFile, nodeEntity.getPrimaryMgtIpV4(), uploadedSssdConfFilePath);
             sshExecService.exec(nodeEntity.getPrimaryMgtIpV4(), sshPort, sshUser, remoteCmds, TIMEOUT);
+            sshExecService.exec(nodeEntity.getPrimaryMgtIpV4(), sshPort, sshUser, enableSudoCmds, TIMEOUT);
 
-            nodeEntity.setAction("Enable LDAP successfully!");
+            nodeEntity.setAction("Enable LDAP succeeded");
          } catch (Exception e) {
-            LOGGER.error("failed to configure sssd for node: " + nodeEntity, e);
-            nodeEntity.setAction("Enable LDAP failed!");
+            //Todo(qjin: error handling need to be enhanced here.)
+            LOGGER.error("failed to configure LDAP for node: " + nodeEntity, e);
+            nodeEntity.setAction("Enable LDAP failed");
             nodeEntity.setActionFailed(true);
+            nodeEntity.setErrMessage(e.getMessage());
          } finally {
             clusterEntityManager.update(nodeEntity);
          }
       }
    }
 
-   private void transferSssdConf(String specFilePath, String ip, String targetFilePath) {
+   private void transferFile(String srcFilePath, String ip, String targetFilePath) {
       CommandLine cmdLine = new CommandLine("scp")
-            .addArgument(specFilePath)
+            .addArgument(srcFilePath)
             .addArgument(ip + ":" + targetFilePath);
 
       DefaultExecutor executor = new DefaultExecutor();

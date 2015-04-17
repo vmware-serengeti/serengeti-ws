@@ -25,11 +25,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vmware.aurora.util.AuAssert;
+import com.vmware.bdd.usermgmt.UserMgmtConstants;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.log4j.Logger;
+import org.codehaus.plexus.util.cli.Commandline;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.aurora.global.Configuration;
@@ -58,6 +61,7 @@ public class CfgUserMgmtOnMgmtVMExecutor {
 
       try {
          execChefClient(specFilePath);
+         enableSudo(userMgmtServer.getAdminGroupName());
          LOGGER.info("execute ChefClient for enable_LDAP is finished.");
       } finally {
          workDir.delete();
@@ -65,18 +69,12 @@ public class CfgUserMgmtOnMgmtVMExecutor {
       }
    }
 
-   private void execChefClient(String specFilePath) {
-      CommandLine cmdLine = new CommandLine("sudo")
-            .addArgument("chef-client")
-            .addArgument("-z")
-            .addArgument("-j")
-            .addArgument("\"" + specFilePath + "\"");
-
+   private void execCommand(CommandLine cmdLine) {
       DefaultExecutor executor = new DefaultExecutor();
 
       executor.setStreamHandler(new PumpStreamHandler(
-                  new ExecOutputLogger(LOGGER, false), //output logger
-                  new ExecOutputLogger(LOGGER, true)) //error logger
+            new ExecOutputLogger(LOGGER, false), //output logger
+            new ExecOutputLogger(LOGGER, true)) //error logger
       );
 
       executor.setWatchdog(new ExecuteWatchdog(1000l * TIMEOUT));
@@ -89,6 +87,23 @@ public class CfgUserMgmtOnMgmtVMExecutor {
       } catch (IOException e) {
          throw new UserMgmtExecException("CFG_LDAP_FAIL", e);
       }
+   }
+
+   private void enableSudo(String adminGroupName) {
+      CommandLine cmdLine = new CommandLine("sudo")
+            .addArgument(UserMgmtConstants.ENABLE_SUDO_SCRIPT)
+            .addArgument(adminGroupName);
+      execCommand(cmdLine);
+   }
+
+   private void execChefClient(String specFilePath) {
+      CommandLine cmdLine = new CommandLine("sudo")
+            .addArgument("chef-client")
+            .addArgument("-z")
+            .addArgument("-j")
+            .addArgument("\"" + specFilePath + "\"");
+
+      execCommand(cmdLine);
    }
 
 

@@ -20,7 +20,6 @@ package com.vmware.bdd.ssh;
 public class TestSshExecService {
    /*public static void main(String[] args) {
       SshExecService sshExecService = new SshExecService();
-      sshExecService.exec(args[0], Integer.parseInt(args[1]), args[2],
             new String[]{
                   "touch /tmp/hello",
                   "sudo mv /tmp/hello /opt/serengeti/hello"}, 60);

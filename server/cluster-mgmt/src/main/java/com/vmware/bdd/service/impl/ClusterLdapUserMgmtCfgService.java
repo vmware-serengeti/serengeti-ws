@@ -105,6 +105,8 @@ public class ClusterLdapUserMgmtCfgService {
          return;
       }
 
+      String adminGroupName = userMgmtCfg.get(UserMgmtConstants.ADMIN_GROUP_NAME);
+
       Set<String> groupNameSet = new HashSet<>();
 
       String[] userMgmtGroups = clusterUserMgmtValidService.getGroupNames(userMgmtCfg);
@@ -141,7 +143,7 @@ public class ClusterLdapUserMgmtCfgService {
          // scp to one node's tmp folder
          // cp to /etc/sssd
          // sudo authconfig --enablesssd --enablesssdauth --enablemkhomedir --updateall
-         nodeLdapUserMgmtConfService.configureSssd(nodeEntityList, localSssdConfFile.getAbsolutePath());
+         nodeLdapUserMgmtConfService.configureLdap(nodeEntityList, localSssdConfFile.getAbsolutePath(), adminGroupName);
       } finally {
          try {
             localSssdConfFile.delete();

@@ -84,12 +84,9 @@ public class Constants {
    public static final String NODE_ACTION_UPGRADE_SUCCEED = "Upgrade Succeeded";
    public static final String NODE_ACTION_WRONG_FT_STATUS = "Wrong FT status";
    public static final String NODE_ACTION_SETTING_PASSWORD = "Setting Password";
-   public static final String NODE_ACTION_SET_PASSWORD_SUCCEED = "Set password succeed";
+   public static final String NODE_ACTION_SET_PASSWORD_SUCCEED = "Set password succeeded";
    public static final String NODE_ACTION_SET_PASSWORD_FAILED = "Set password failed";
    public static final String NODE_ACTION_CHANGE_REPO_DIR_PERMISSION = "Remote add the write permission to repo dir";
-   public static final String NODE_ACTION_SCP_LOCALREPO_FILE = "Remote copy the local repo file";
-   public static final String NODE_ACTION_MAKE_BACKUP_DIR = "Make a backup dir /etc/yum.repos.d/backup";
-   public static final String NODE_ACTION_MOVE_CENTOS_REPO = "move all the CentOS*.repo to /etc/yum.repos.d/backup";
    public static final String NODE_ACTION_GENERATE_HOSTNAME_SUCCEED = "Generating Hostname Succeeded";
    public static final String NODE_ACTION_GENERATE_HOSTNAME_FAILED = "Generating Hostname Failed";
    public static final String NODE_ACTION_GENERATE_HOSTNAME = "Generating Hostname";

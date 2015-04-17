@@ -14,7 +14,11 @@
  *****************************************************************************/
 package com.vmware.bdd.ssh;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.PublicKey;
 import java.util.concurrent.TimeUnit;
 
@@ -34,7 +38,6 @@ public class SshExecService {
    private static final Logger LOGGER = Logger.getLogger(SshExecService.class);
 
    private SSHClient sshClient;
-
 
    public void exec(String host, int port, String userName, String[] cmds, int timeoutInSecond) {
       sshClient = new SSHClient();
@@ -65,6 +68,16 @@ public class SshExecService {
 
    }
 
+   private String readFromStream(InputStream in) throws IOException {
+      StringBuffer result = new StringBuffer();
+      BufferedInputStream inputStream = new BufferedInputStream(in);
+      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+      while(bufferedReader.ready()) {
+         result.append(bufferedReader.readLine());
+      }
+      return result.toString();
+   }
+
    protected void exec(SSHClient client, String cmd, int timeoutInSecond) throws IOException {
       LOGGER.debug("exec remote cmd via ssh: " + cmd);
 
@@ -81,8 +94,11 @@ public class SshExecService {
          int exitStatus = command.getExitStatus();
          LOGGER.debug("cmd exit status: " + exitStatus);
          if(exitStatus != 0) {
+            StringBuilder output = new StringBuilder();
+            output.append(readFromStream(command.getErrorStream()));
+            output.append(readFromStream(command.getInputStream()));
             //@TODO improve error handling
-            throw new SshExecException("exec failed with exit code != 0", null);
+            throw new SshExecException("exec failed with exit code: " + exitStatus + output.toString(), null);
          }
          LOGGER.info("cmd exec successfully!");
       } catch (IOException e) {

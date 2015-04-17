@@ -33,4 +33,7 @@ public interface UserMgmtConstants {
    String SERVICE_USER_CONFIG_IN_SPEC_FILE = "service_user";
    String SERVICE_USER_NAME = "user_name";
    String SERVICE_USER_GROUP = "user_group";
+
+   String ENABLE_SUDO_SCRIPT = "/opt/serengeti/sbin/enable-sudo.sh";
+   String CONFIG_LDAP_SCRIPT = "/opt/serengeti/sbin/config-ldap.sh";
 }

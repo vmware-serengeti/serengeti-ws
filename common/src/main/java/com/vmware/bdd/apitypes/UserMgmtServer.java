@@ -206,4 +206,10 @@ public class UserMgmtServer {
 
       return equalsBuilder.isEquals();
    }
+
+   //We regard the first cn of mgmtVMUserGroupDn as its admin group name
+   public String getAdminGroupName() {
+      String[] configs = mgmtVMUserGroupDn.split(",");
+      return configs[0].split("=")[1];
+   }
 }
