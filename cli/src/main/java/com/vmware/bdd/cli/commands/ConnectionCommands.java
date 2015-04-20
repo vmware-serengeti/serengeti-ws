@@ -41,7 +41,7 @@ public class ConnectionCommands implements CommandMarker {
 
    @CliCommand(value = "connect", help = "Connect a serengeti server")
    public void conn(
-         @CliOption(key = { "host" }, mandatory = true, help = "The serengeti host with optional port number, e.g. hostname:port") final String hostName) {
+         @CliOption(key = { "host" }, mandatory = false, unspecifiedDefaultValue = "localhost:8443", help = "The serengeti server hostname and port number, e.g. hostname:port") final String hostName) {
       if (!validateHostPort(hostName)) {
          return;
       }
