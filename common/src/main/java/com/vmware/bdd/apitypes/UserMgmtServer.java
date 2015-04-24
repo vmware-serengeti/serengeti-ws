@@ -17,6 +17,7 @@ package com.vmware.bdd.apitypes;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -26,6 +27,8 @@ import com.vmware.bdd.validation.LdapUrlFormat;
 /**
  * Created By xiaoliangl on 11/24/14.
  */
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserMgmtServer {
    public enum Type {
       LDAP, AD_AS_LDAP

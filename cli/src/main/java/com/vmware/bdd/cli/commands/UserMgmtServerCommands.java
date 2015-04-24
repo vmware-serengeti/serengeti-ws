@@ -220,11 +220,11 @@ public class UserMgmtServerCommands implements CommandMarker {
          fr = new FileReader(cfgFilePath);
          return objectMapper.readValue(new BufferedReader(fr), UserMgmtServer.class);
       } catch (FileNotFoundException e) {
-         MODIFY_LDAP_OUTPUT.printFailure(null, "JSON file not found.");
+         MODIFY_LDAP_OUTPUT.printFailure(null, "File " +  cfgFilePath + " not found.");
       } catch (JsonMappingException | JsonParseException e) {
-         MODIFY_LDAP_OUTPUT.printFailure(null, "Failed to parse JSON file not found.");
+         MODIFY_LDAP_OUTPUT.printFailure(null, "Failed to parse file " + cfgFilePath);
       } catch (IOException e) {
-         MODIFY_LDAP_OUTPUT.printFailure(null, "IO error on reading the JSON file.");
+         MODIFY_LDAP_OUTPUT.printFailure(null, "IO error on reading file " + cfgFilePath);
       } finally {
          if (fr != null) {
             try {
