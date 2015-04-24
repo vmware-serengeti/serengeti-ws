@@ -16,7 +16,10 @@ package com.vmware.bdd.service.resmgmt.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -169,6 +172,7 @@ public class NetworkService implements Serializable, INetworkService {
             blocks.add(blk);
          }
 
+         checkIpBlockOverlap(name, blocks, portGroup);
          networkDao.addIpBlocks(network, blocks);
          network.validate();
          return network;
@@ -315,6 +319,7 @@ public class NetworkService implements Serializable, INetworkService {
                                     .getEndIp()));
             blocks.add(blk);
          }
+         checkIpBlockOverlap(networkName, blocks, network.getPortGroup());
          networkDao.addIpBlocks(network, blocks);
       }
 
@@ -564,4 +569,54 @@ public class NetworkService implements Serializable, INetworkService {
       }
    }
 
+   private void checkIpBlockOverlap(String networkName, List<IpBlockEntity> ipBlockList, String portGroup) {
+      // check if the new added ip ranges overlap with existed ip ranges
+      Map<String, List<IpBlockEntity>> net2IpBlocks = getExistedIpBlocks4PortGroup(portGroup);
+      List<String> overlapNets = new ArrayList<String>();
+      Iterator<String> netItr = net2IpBlocks.keySet().iterator();
+      for ( IpBlockEntity blk : ipBlockList ) {
+         while ( netItr.hasNext() ) {
+            String net = netItr.next();
+            if ( net.equals(networkName) ) {
+               // do not check the ip overlap for the same network
+               continue;
+            }
+            for ( IpBlockEntity exblk : net2IpBlocks.get(net) ) {
+               if ( blk.isOverlapedWith(exblk) ) {
+                  overlapNets.add(net);
+                  break;
+               }
+            }
+         }
+      }
+      if ( overlapNets.size() > 0 ) {
+         // there are overlapped ip ranges, will throw exception
+         String overlapNetsStr = "[ ";
+         for ( int i=0; i<overlapNets.size(); i++ ) {
+            overlapNetsStr += overlapNets.get(i);
+            if ( i < overlapNets.size() - 1 ) {
+               overlapNetsStr += ", ";
+            }
+         }
+         overlapNetsStr += " ]";
+         throw NetworkException.IP_BLOCK_OVERLAP_WITH_NETWORKS(overlapNetsStr);
+      }
+   }
+
+   private Map<String, List<IpBlockEntity>> getExistedIpBlocks4PortGroup(String portGroup) {
+      Map<String, List<IpBlockEntity>> net2IpBlocks = new HashMap<String, List<IpBlockEntity>>();
+      List<NetworkEntity> allNetworks = getAllNetworkEntities();
+      if ( null != allNetworks ) {
+         for ( NetworkEntity network : allNetworks ) {
+            List<IpBlockEntity> ipBlockList = network.getIpBlocks();
+            AllocType allocType = network.getAllocType();
+            String pg = network.getPortGroup();
+            // we only check networks with static ips for the given port group
+            if ( allocType == AllocType.IP_POOL && pg.equals(portGroup) ) {
+               net2IpBlocks.put(network.getName(), ipBlockList);
+            }
+         }
+      }
+      return net2IpBlocks;
+   }
 }

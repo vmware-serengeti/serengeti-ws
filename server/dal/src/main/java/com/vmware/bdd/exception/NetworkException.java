@@ -59,4 +59,8 @@ public class NetworkException extends BddException {
       return new NetworkException(null, "IP_CONFIG_NOT_USED_FOR_DHCP");
    }
 
+   public static NetworkException IP_BLOCK_OVERLAP_WITH_NETWORKS(String nets) {
+      return new NetworkException(null, "IP_BLOCK_OVERLAP_WITH_NETWORKS", nets);
+   }
+
 }
