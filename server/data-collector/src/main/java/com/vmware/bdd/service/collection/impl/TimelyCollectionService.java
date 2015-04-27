@@ -275,6 +275,7 @@ public class TimelyCollectionService implements ITimelyCollectionService {
            int index = 0;
            for (Object parameter : operationParameters) {
                if (parameter != null) {
+                   filterSensitiveData(parameter);
                    methodParameter.setParameter("arg" + index, parameter);
                    index ++;
                }
@@ -287,7 +288,37 @@ public class TimelyCollectionService implements ITimelyCollectionService {
        return data;
    }
 
-   @Override
+    private void filterSensitiveData(Object parameter) {
+        String className = parameter.getClass().getName();
+        switch (className) {
+            case "com.vmware.bdd.apitypes.NetworkAdd":
+                NetworkAdd network = (NetworkAdd) parameter;
+                network.setPortGroup(null);
+                network.setDns1(null);
+                network.setDns2(null);
+                network.setGateway(null);
+                network.setNetmask(null);
+                break;
+            case "com.vmware.bdd.apitypes.AppManagerAdd":
+                AppManagerAdd appManager = (AppManagerAdd) parameter;
+                appManager.setUsername(null);
+                appManager.setPassword(null);
+                appManager.setSslCertificate(null);
+                break;
+            case "com.vmware.bdd.apitypes.UserMgmtServer":
+                UserMgmtServer userMgmtServer = (UserMgmtServer) parameter;
+                userMgmtServer.setUserName(null);
+                userMgmtServer.setPassword(null);
+                break;
+            case "com.vmware.bdd.apitypes.ClusterCreate":
+                ClusterCreate cluster = (ClusterCreate) parameter;
+                cluster.setHostnamePrefix(null);
+                break;
+            default:
+        }
+    }
+
+    @Override
    public Map<String, Map<String, ?>> mergeData(
          Map<String, Map<String, Object>> operationData,
          Map<String, Map<String, Object>> clusterSnapshotData) {

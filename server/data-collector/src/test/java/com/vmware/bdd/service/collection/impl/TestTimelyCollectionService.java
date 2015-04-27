@@ -128,6 +128,8 @@ public class TestTimelyCollectionService {
         assertEquals(cluster.getName(), "test");
         assertEquals(cluster.getAppManager(), "Default");
         assertEquals(cluster.getNodeGroups().length, 3);
+        assertEquals(cluster.getHostnamePrefix(), null);
+
         for (NodeGroupCreate nodeGroupCreate : cluster.getNodeGroups()) {
             switch (nodeGroupCreate.getName()) {
                 case "master":
@@ -263,6 +265,7 @@ public class TestTimelyCollectionService {
                 + "hdfs://168.192.0.71:8020" + "\"}}}}";
         Map config = (new Gson()).fromJson(configJson, Map.class);
         clusterSpec.setConfiguration((Map<String, Object>)(config.get("configuration")));
+        clusterSpec.setHostnamePrefix("bde-hostName");
         return clusterSpec;
     }
 }
