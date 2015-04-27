@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
 
 import com.vmware.aurora.util.StringUtil;
 import org.apache.commons.configuration.ConfigurationUtils;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -370,6 +371,11 @@ public class CommonUtil {
          return true;
       }
       return false;
+   }
+
+   public static char[] allChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*_=+-/".toCharArray();
+   public static String randomString(int count) {
+      return RandomStringUtils.random(count, allChars);
    }
 
    public static String getClusterName(String vmName) throws BddException {

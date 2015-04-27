@@ -23,6 +23,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -32,12 +35,8 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -52,6 +51,8 @@ import com.vmware.bdd.cli.auth.LoginClientImpl;
 import com.vmware.bdd.cli.auth.LoginResponse;
 import jline.console.ConsoleReader;
 
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
 import org.fusesource.jansi.AnsiConsole;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,40 +102,6 @@ public class RestClient {
    }
 
    private RestClient() {
-      hostUri = getHostUriProperty();
-   }
-
-   /*
-    *  Get Serengeti host from cli property file
-    */
-   private String getHostUriProperty() {
-      String hostUri = null;
-      FileReader hostFileReader = null;
-
-      try {
-         hostFileReader = new FileReader(Constants.PROPERTY_FILE);
-         Properties hostProperties = new Properties();
-         hostProperties.load(hostFileReader);
-
-         if (hostProperties != null
-               && hostProperties.get(Constants.PROPERTY_HOST) != null) {
-            hostUri =
-                  Constants.HTTPS_CONNECTION_PREFIX
-                        + (String) hostProperties.get(Constants.PROPERTY_HOST)
-                        + Constants.HTTPS_CONNECTION_LOGIN_SUFFIX;
-         }
-      } catch (Exception e) {//not set yet; or read io error
-      } finally {
-         if (hostFileReader != null) {
-            try {
-               hostFileReader.close();
-            } catch (IOException e) {
-               //nothing to do
-            }
-         }
-      }
-
-      return hostUri;
    }
 
    /**
@@ -158,7 +125,6 @@ public class RestClient {
       Connect.ConnectType connectType = null;
       try {
          LoginResponse response = loginClient.login(hostUri, username, password);
-
          //200
          if (response.getResponseCode() == HttpStatus.OK.value()) {
             if(CommonUtil.isBlank(response.getSessionId())) {
@@ -171,8 +137,6 @@ public class RestClient {
                }
             } else {
                //normal response
-               updateHostProperty(host);
-
                writeCookieInfo(response.getSessionId());
                System.out.println(Constants.CONNECT_SUCCESS);
                connectType = Connect.ConnectType.SUCCESS;
@@ -230,23 +194,11 @@ public class RestClient {
 
    private void writeCookieInfo(String cookie) {
       CookieCache.put(CookieCache.COOKIE, cookie);
-      Properties properties = new Properties();
-      properties.put(CookieCache.COOKIE, cookie);
-      CommandsUtils.writeProperties(properties, Constants.PROPERTY_FILE);
    }
 
    private String readCookieInfo() {
       String cookieValue = "";
       cookieValue = CookieCache.get(CookieCache.COOKIE);
-      if (CommandsUtils.isBlank(cookieValue)) {
-         Properties properties = null;
-         properties = CommandsUtils.readProperties(Constants.PROPERTY_FILE);
-         if (properties != null) {
-            return properties.getProperty(CookieCache.COOKIE);
-         } else {
-            return null;
-         }
-      }
       return cookieValue;
    }
 
@@ -302,34 +254,6 @@ public class RestClient {
 
    private HttpHeaders buildHeaders() {
       return buildHeaders(true);
-   }
-
-   /*
-    * Update host property file
-    */
-   private void updateHostProperty(final String host) throws IOException {
-      FileOutputStream hostFile = null;
-      try {
-         Properties hostProperty = new Properties();
-         hostProperty.setProperty(Constants.PROPERTY_HOST, host);
-         hostFile = new FileOutputStream(Constants.PROPERTY_FILE);
-         hostProperty.store(hostFile, Constants.PROPERTY_FILE_HOST_COMMENT);
-      } catch (IOException e) {
-         StringBuilder exceptionMsg = new StringBuilder();
-         exceptionMsg.append(Constants.PROPERTY_FILE_HOST_FAILURE);
-         if (!CommonUtil.isBlank(e.getMessage())) {
-            exceptionMsg.append(",").append(e.getMessage());
-         }
-         throw new IOException(exceptionMsg.toString());
-      } finally {
-         if (hostFile != null) {
-            try {
-               hostFile.close();
-            } catch (IOException e) {
-               //nothing to do
-            }
-         }
-      }
    }
 
    /**
@@ -875,6 +799,10 @@ public class RestClient {
    private static class DefaultTrustManager implements X509TrustManager {
 
       private KeyStore keyStore;
+      private static final char[] DEFAULT_PASSWORD = "changeit".toCharArray();
+      private static final String KEY_STORE_FILE = "serengeti.keystore";
+      private static final String KEY_STORE_PASSWORD_KEY = "keystore_pswd";
+      private static final int KEY_STORE_PASSWORD_LENGTH = 8;
 
       public DefaultTrustManager (KeyStore keyStore) {
          this.keyStore = keyStore;
@@ -889,29 +817,27 @@ public class RestClient {
       public void checkServerTrusted(X509Certificate[] chain, String authType)
             throws CertificateException {
          String errorMsg = "";
-         /*
-          * load key store file 
-          */
-         char[] pwd = "changeit".toCharArray();
          InputStream in = null;
          OutputStream out = null;
+
+         // load key store file
          try {
-            File file = new File("serengeti.keystore");
-            if (file.isFile() == false) {
+            char[] pwd = readKeyStorePwd();
+            File file = new File(KEY_STORE_FILE);
+
+            if (!file.isFile()) {
                char SEP = File.separatorChar;
-               File dir =
-                     new File(System.getProperty("java.home") + SEP + "lib"
-                           + SEP + "security");
-               file = new File(dir, "serengeti.keystore");
-               if (file.isFile() == false) {
-                  file = new File(dir, "cacerts");
+               file = new File(System.getProperty("java.home") + SEP + "lib"
+                           + SEP + "security" + SEP + "cacerts");
+               if (file.isFile()) {
+                  // keystore password of cacerts file is DEFAULT_PASSWORD
+                  keyStore.load(new FileInputStream(file), DEFAULT_PASSWORD);
                }
+            } else {
+               keyStore.load(new FileInputStream(file), pwd);
             }
-            in = new FileInputStream(file);
-            keyStore.load(in, pwd);
-            /*
-             * show certificate informations
-             */
+
+            // show certificate informations
             MessageDigest sha1 = MessageDigest.getInstance("SHA1");
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             String md5Fingerprint = "";
@@ -930,7 +856,8 @@ public class RestClient {
                      continue;
                   }
                }
-               System.out.println("Certificate");
+               System.out.println();
+               System.out.println("Server Certificate");
                System.out
                      .println("================================================================");
                System.out.println("Subject:  " + cert.getSubjectDN());
@@ -950,35 +877,39 @@ public class RestClient {
                // Read user input
                String readMsg = "";
                if (RunWayConfig.getRunType().equals(RunType.MANUAL)) {
-                  readMsg = reader.readLine();
+                  readMsg = reader.readLine().trim();
                } else {
                   readMsg = "yes";
                }
-               if (!"yes".equalsIgnoreCase(readMsg.trim())
-                     && !"y".equalsIgnoreCase(readMsg.trim())) {
+               if ("yes".equalsIgnoreCase(readMsg) || "y".equalsIgnoreCase(readMsg)) {
+                  {
+                     // add new certificate into key store file.
+                     keyStore.setCertificateEntry(md5Fingerprint, cert);
+                     out = new FileOutputStream(KEY_STORE_FILE);
+                     keyStore.store(out, pwd);
+                     // save keystore password
+                     saveKeyStorePwd(pwd);
+                  }
+               } else {
                   if (i == chain.length - 1) {
                      throw new CertificateException(
-                           "Not find a valid certificate.");
+                           "Could not find a valid certificate in the keystore.");
                   } else {
                      continue;
                   }
                }
-               /*
-                *  add new certificate into key store file.
-                */
-               keyStore.setCertificateEntry(md5Fingerprint, cert);
-               out = new FileOutputStream("serengeti.keystore");
-               keyStore.store(out, pwd);
             }
-
          } catch (FileNotFoundException e) {
-            errorMsg = "Cannot find file warning: " + e.getMessage();
+            errorMsg = "Cannot find the keystore file: " + e.getMessage();
          } catch (NoSuchAlgorithmException e) {
-            errorMsg = "SSL Algorithm error: " + e.getMessage();
+            errorMsg = "SSL Algorithm not supported: " + e.getMessage();
          } catch (IOException e) {
-            errorMsg = "SSL Algorithm error: " + e.getMessage();
+            e.printStackTrace();
+            errorMsg = "IO error: " + e.getMessage();
          } catch (KeyStoreException e) {
-            errorMsg = "Key store error: " + e.getMessage();
+            errorMsg = "Keystore error: " + e.getMessage();
+         } catch (ConfigurationException e) {
+            errorMsg = "cli.properties access error: " + e.getMessage();
          } finally {
             if (!CommandsUtils.isBlank(errorMsg)) {
                System.out.println(errorMsg);
@@ -1001,9 +932,49 @@ public class RestClient {
          }
       }
 
+      private PropertiesConfiguration loadCLIProperty() throws ConfigurationException {
+         PropertiesConfiguration properties = new PropertiesConfiguration();
+         File file = new File(Constants.PROPERTY_FILE);
+         properties.setFile(file);
+         if (file.isFile()) {
+            properties.load();
+         }
+         return properties;
+      }
+      private char[] readKeyStorePwd() throws IOException, ConfigurationException {
+         PropertiesConfiguration properties = loadCLIProperty();
+         String password = properties.getString(KEY_STORE_PASSWORD_KEY);
+         if (password == null) {
+            // generate a random keystore password
+            password = CommonUtil.randomString(KEY_STORE_PASSWORD_LENGTH);
+         }
+         return password.toCharArray();
+      }
+
+      private void saveKeyStorePwd(char[] password) throws IOException, ConfigurationException {
+         PropertiesConfiguration properties = loadCLIProperty();
+         properties.setProperty(KEY_STORE_PASSWORD_KEY, new String(password));
+         properties.save();
+
+         // set file permission to 600 to protect keystore password
+         setOwnerOnlyReadWrite(Constants.PROPERTY_FILE);
+         setOwnerOnlyReadWrite(Constants.CLI_HISTORY_FILE);
+         setOwnerOnlyReadWrite(KEY_STORE_FILE);
+      }
+
       @Override
       public X509Certificate[] getAcceptedIssuers() {
          return null;
+      }
+
+      /*
+       * Set file permission to 600
+       */
+      private void setOwnerOnlyReadWrite(String filename) throws IOException {
+         Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+         perms.add(PosixFilePermission.OWNER_READ);
+         perms.add(PosixFilePermission.OWNER_WRITE);
+         Files.setPosixFilePermissions(Paths.get(filename), perms);
       }
    }
 

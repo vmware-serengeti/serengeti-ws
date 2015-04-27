@@ -75,19 +75,19 @@ public class ConnectionCommands implements CommandMarker {
    }
 
    private boolean connect(final String hostName, final Map<String, String> loginInfo, int count) throws Exception {
-      if (count < 0) {
+      if (count <= 0) {
          return false;
       }
       ConnectType connectType = conn.connect(hostName, loginInfo.get(Constants.LOGIN_USERNAME), loginInfo.get(Constants.LOGIN_PASSWORD));
+      if (connectType == ConnectType.ERROR) {
+         return false;
+      }
       if (connectType == ConnectType.UNAUTHORIZATION) {
-         if (count == 0) {
-            return false;
-         }
          if (!CommandsUtils.prompt(Constants.CONNECT_ENTER_PASSWORD, CommandsUtils.PromptType.PASSWORD, loginInfo)) {
             return false;
          } else {
             count--;
-            connect(hostName, loginInfo, count);
+            return connect(hostName, loginInfo, count);
          }
       }
       return true;

@@ -134,9 +134,7 @@ public class Constants {
    public static final String HTTPS_CONNECTION_API = "api/";
    public static final String HTTPS_CONNECTION_LOGIN_SUFFIX = "/serengeti/";
    public static final String PROPERTY_FILE = "cli.properties";
-   public static final String PROPERTY_HOST = "host";
-   public static final String PROPERTY_FILE_HOST_COMMENT = "update host information";
-   public static final String PROPERTY_FILE_HOST_FAILURE = "cannot update the host information";
+   public static final String CLI_HISTORY_FILE = "cli.history";
 
    public static final String INPUT_SPEC_PARAM = "\"spec\"";
    public static final String INPUT_RPNAMES_PARAM = "\"rpNames\"";
