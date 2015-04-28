@@ -130,8 +130,6 @@ public class StartVmPostPowerOn implements IPrePostPowerOn {
    }
 
    private void upgradeNode(NodeEntity node) {
-      ClusterUpgradeService upgradeService = new ClusterUpgradeService();
-      upgradeService.setClusterEntityMgr(clusterEntityMgr);
       String serverVersion = clusterEntityMgr.getServerVersion();
       String vmName = node.getVmName();
       if (node.needUpgrade(serverVersion) && node.canBeUpgrade()) {

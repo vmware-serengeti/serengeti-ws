@@ -407,7 +407,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
          default:
             break;
          }
-         logger.info("Got status " + report.getStatus()
+         logger.info("Got status " + report.getStatus() + " for cluster " + clusterName
                + ", change cluster status from " + oldState + " to "
                + cluster.getStatus());
          break;

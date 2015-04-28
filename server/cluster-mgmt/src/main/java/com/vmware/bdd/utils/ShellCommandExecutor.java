@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ShellCommandExecutor {
 
    private final static Logger logger = Logger.getLogger(ShellCommandExecutor.class);
+   public final static long DEFAULT_TIMEOUT = 3600L; // 1 hour
 
    protected long timeoutInterval = 0L;
    private int exitCode;
@@ -44,6 +45,14 @@ public class ShellCommandExecutor {
    private String[] command;
    private StringBuffer output;
    private Process process;
+
+   public static void execCmd(String command) {
+      execCmd(command, command);
+   }
+
+   public static void execCmd(String command, String description) {
+      execCmd(command, null, null, DEFAULT_TIMEOUT, description);
+   }
 
    public static void execCmd(String command, File dir, Map<String, String> env, long timeoutInSec, String description) {
       ShellCommandExecutor executor = new ShellCommandExecutor(new String[]{"bash", "-c", command}, dir, env, timeoutInSec);

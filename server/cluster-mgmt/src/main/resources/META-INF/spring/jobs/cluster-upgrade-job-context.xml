@@ -26,7 +26,6 @@
 
 	<beans:bean id="clusterUpgradeService"
 		class="com.vmware.bdd.service.impl.ClusterUpgradeService">
-		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
 	</beans:bean>
 
 	<beans:bean id="upgradeClusterJobListener"

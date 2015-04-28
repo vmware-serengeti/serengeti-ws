@@ -614,6 +614,12 @@ public class CommandsUtils {
       USER_NAME, PASSWORD
    }
 
+   public static String prompt(String msg) throws IOException {
+      ConsoleReader reader = getConsoleReader();
+      reader.setPrompt(msg);
+      return reader.readLine();
+   }
+
    public static boolean prompt(String msg, PromptType promptType,
          Map<String, String> loginInfo) throws Exception {
       int k = 0;

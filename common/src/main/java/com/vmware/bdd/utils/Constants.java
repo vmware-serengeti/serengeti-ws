@@ -80,16 +80,16 @@ public class Constants {
    public static final String NODE_ACTION_UPGRADING = "Upgrading";
    public static final String NODE_ACTION_DOWNLOAD_PACKAGES = "Downloading upgrade packages";
    public static final String NODE_ACTION_INSTALL_PACKAGES = "Installing upgrade packages";
-   public static final String NODE_ACTION_UPGRADE_FAILED = "Upgrade Failed";
-   public static final String NODE_ACTION_UPGRADE_SUCCEED = "Upgrade Succeeded";
+   public static final String NODE_ACTION_UPGRADE_FAILED = "Upgrade failed";
+   public static final String NODE_ACTION_UPGRADE_SUCCEED = "Upgrade succeeded";
    public static final String NODE_ACTION_WRONG_FT_STATUS = "Wrong FT status";
-   public static final String NODE_ACTION_SETTING_PASSWORD = "Setting Password";
+   public static final String NODE_ACTION_SETTING_PASSWORD = "Setting password";
    public static final String NODE_ACTION_SET_PASSWORD_SUCCEED = "Set password succeeded";
    public static final String NODE_ACTION_SET_PASSWORD_FAILED = "Set password failed";
    public static final String NODE_ACTION_CHANGE_REPO_DIR_PERMISSION = "Remote add the write permission to repo dir";
-   public static final String NODE_ACTION_GENERATE_HOSTNAME_SUCCEED = "Generating Hostname Succeeded";
-   public static final String NODE_ACTION_GENERATE_HOSTNAME_FAILED = "Generating Hostname Failed";
-   public static final String NODE_ACTION_GENERATE_HOSTNAME = "Generating Hostname";
+   public static final String NODE_ACTION_GENERATE_HOSTNAME_SUCCEED = "Generating hostname succeeded";
+   public static final String NODE_ACTION_GENERATE_HOSTNAME_FAILED = "Generating hostname failed";
+   public static final String NODE_ACTION_GENERATE_HOSTNAME = "Generating hostname";
 
    public static final int VM_POWER_ON_WAITING_SEC = 600;
    public static final int VM_SHUTDOWN_WAITING_SEC = 600;
@@ -276,6 +276,8 @@ public class Constants {
 
    public static final String MAINTENANCE_MODE_FLAG_FILE = "/opt/serengeti/etc/maintenance";
 
+   public static final String CLUSTER_SERVICES_OPERATION = "/opt/serengeti/sbin/cluster-services.sh";
+
    public static final String DEPLOY_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
    public static final String VCENTER_VERSION_6 = "6";
@@ -283,4 +285,7 @@ public class Constants {
    public static final String CLUSTER_CLONE_TYPE_INSTANT_CLONE = "instant";
    public static final String FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION = "The above error is ignored because the force flag is set.";
    public static final String SERENGETI_DISABLE_SWAPDISK = "serengeti.disable.vm.swap.disk";
+
+   public static final String BDE_SERVER_VERSION_2_2 = "2.2.0";
+   public static final String BDE_SERVER_VERSION_2_1 = "2.1.0";
 }

@@ -24,6 +24,7 @@ import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterConfigurations;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponentsRequest;

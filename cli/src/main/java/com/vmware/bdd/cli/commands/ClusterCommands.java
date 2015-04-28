@@ -1152,7 +1152,9 @@ public class ClusterCommands implements CommandMarker {
 
    @CliCommand(value = "cluster upgrade", help = "Upgrade an old cluster")
    public void upgradeCluster(
-         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name) {
+         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
+         @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes)
+         throws IOException {
       // validate the name
       if (name.indexOf("-") != -1) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
@@ -1163,6 +1165,15 @@ public class ClusterCommands implements CommandMarker {
 
       // rest invocation
       try {
+         // add a confirm message
+         List<String> warningMsgList = new ArrayList<String>();
+         warningMsgList.add("Warning: " + Constants.PARAM_PROMPT_UPGRADE_CLUSTER_WARNING);
+         if (!CommandsUtils.showWarningMsg(name,
+               Constants.OUTPUT_OBJECT_CLUSTER, Constants.OUTPUT_OP_UPGRADE,
+               warningMsgList, alwaysAnswerYes, null)) {
+            return;
+         }
+
          restClient.upgradeCluster(name);
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_RESULT_UPGRADE);
@@ -1187,7 +1198,9 @@ public class ClusterCommands implements CommandMarker {
       columnNamesWithGetMethodNames.put("STATUS", Arrays.asList("getStatus"));
       CommandsUtils.printInTableFormat(columnNamesWithGetMethodNames,
             succeedNodes.toArray(), Constants.OUTPUT_INDENT);
-      System.out.println("The recovery-failed nodes: " + failedNodes.size());
+      if (failedNodes.size() > 0) {
+         System.out.println("The failed nodes: " + failedNodes.size());
+      }
       setNodeStatusInfo(failedNodes, nodeGroups);
       columnNamesWithGetMethodNames.put("Error Message",
             Arrays.asList("getErrorMessage"));

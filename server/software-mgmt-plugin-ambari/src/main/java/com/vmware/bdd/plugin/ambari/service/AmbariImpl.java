@@ -15,6 +15,7 @@
 package com.vmware.bdd.plugin.ambari.service;
 
 import javax.ws.rs.NotFoundException;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -42,6 +43,7 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroupConfiguration;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroupInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroupList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponent;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponentsRequest;
@@ -665,16 +667,49 @@ public class AmbariImpl implements SoftwareManager {
    @Override
    public boolean reconfigCluster(ClusterBlueprint blueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      ReflectionUtils.getPreStartServicesHook().preStartServices(blueprint.getName());
-      // TODO Auto-generated method stub
-      return true;
+      boolean success = false;
+      AmClusterDef clusterDef = null;
+      try {
+         clusterDef = new AmClusterDef(blueprint, privateKey);
+         
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName());
+         
+         ApiConfigGroupList apiConfigGroupList = apiManager.getConfigGroupsList(clusterDef.getName());
+         
+         updateConfigGroups(apiConfigGroupList, clusterDef, reports);
+         success = true;
+         
+         clusterDef.getCurrentReport().setAction("Successfully Reconfigure Cluster");
+         clusterDef.getCurrentReport().setProgress(100);
+         clusterDef.getCurrentReport().setSuccess(true);
+      } catch (Exception e) {
+
+      }
+      return success;
+   }
+   
+   private void updateConfigGroups(ApiConfigGroupList apiConfigGroupList, AmClusterDef clusterDef, ClusterReportQueue reports) {
+      String action = "Configuring cluster services";
+      clusterDef.getCurrentReport().setAction(action);
+      reports.addClusterReport(clusterDef.getCurrentReport().clone());
+
+      for (ApiConfigGroup group: apiConfigGroupList.getConfigGroups()) {
+         if (group.getApiConfigGroupInfo() != null && group.getApiConfigGroupInfo().getDesiredConfigs() != null) {
+               for(ApiConfigGroupConfiguration config: group.getApiConfigGroupInfo().getDesiredConfigs()) {
+                  if (config.getType().equalsIgnoreCase(Constants.CONFIG_HDFS_SITE)) {
+
+                  }
+               }
+
+         }
+
+      }
    }
 
    @Override
    public boolean scaleOutCluster(ClusterBlueprint blueprint, List<String> addedNodeNames,
          ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
-      // TODO Auto-generated method stub
       boolean success = false;
       AmClusterDef clusterDef = null;
       try {
@@ -1454,7 +1489,9 @@ public class AmbariImpl implements SoftwareManager {
 
    private void reportStatus(final ClusterReport clusterReport,
          final ClusterReportQueue reportQueue) {
-      reportQueue.addClusterReport(clusterReport.clone());
+      if (reportQueue != null) {
+         reportQueue.addClusterReport(clusterReport.clone());
+      }
    }
 
    @Override
@@ -1495,5 +1532,18 @@ public class AmbariImpl implements SoftwareManager {
 
    public int getRequestMaxRetryTimes() {
       return REQUEST_MAX_RETRY_TIMES;
+   }
+
+   @Override
+   public boolean hasMountPointStartwithDatax(String clusterName) {
+      boolean hasMountPointStartwithDatax = false;
+
+      ApiBlueprint apiBlueprint = apiManager.getBlueprint(clusterName);
+      String apiBlueprintJson = ApiUtils.objectToJson(apiBlueprint);
+      if (apiBlueprintJson.contains("/mnt/data0")) {
+         hasMountPointStartwithDatax = true;
+      }
+
+      return hasMountPointStartwithDatax;
    }
 }

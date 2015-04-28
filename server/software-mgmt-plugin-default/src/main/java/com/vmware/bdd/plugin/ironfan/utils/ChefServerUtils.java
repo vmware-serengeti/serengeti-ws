@@ -69,7 +69,7 @@ public class ChefServerUtils {
         synchronized(ChefServerUtils.class) {
             if (allRoles == null) {
                 HashSet<String> roles = new HashSet<String>();
-                Process p = ChefServerUtils.execCommand(GET_ROLES_CMD);
+                Process p = DefaultUtils.launchProcess(GET_ROLES_CMD);
                 if (p == null) {
                    throw IronFanPluginException.GET_ROLES_EXCEPTION(null);
                 }
@@ -94,22 +94,5 @@ public class ChefServerUtils {
             }
             return allRoles;
         }
-    }
-
-    public static Process execCommand(String cmd) {
-        if (cmd == null || cmd.isEmpty()) {
-            return null;
-        }
-
-        Process p = null;
-        try {
-            p = new ProcessBuilder(Arrays.asList(cmd.split(" "))).start();
-            p.waitFor();
-        } catch (Exception e) {
-            p = null;
-            logger.error("Failed to execute command " + cmd + " : " + e.getMessage());
-        }
-
-        return p;
     }
 }

@@ -17,6 +17,7 @@ package com.vmware.bdd.service.sp;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.ssh.SshExecService;
 import com.vmware.bdd.utils.ShellCommandExecutor;
 import org.apache.log4j.Logger;
 import com.vmware.aurora.global.Configuration;
@@ -38,10 +39,12 @@ public class NodeUpgradeSP implements Callable<Void> {
    private static final Logger logger = Logger.getLogger(NodeUpgradeSP.class);
 
    private NodeEntity node;
+   private String serverVersion;
    private static final int connTimeoutInSec = 600;
 
    public NodeUpgradeSP(NodeEntity node, String serverVersion) {
       this.node = node;
+      this.serverVersion = serverVersion;
    }
 
    @Override
@@ -50,15 +53,14 @@ public class NodeUpgradeSP implements Callable<Void> {
       return null;
    }
 
+   //For node upgrade, we only support N ~ N+1 upgrade
    private void upgrade() throws Exception {
-      String nodeVmName = node.getVmName();
-      String nodeIp = node.getPrimaryMgtIpV4();
 
       logger.info("Upgrading cluster node " + node.getVmName());
 
       if (node.getMoId() != null) {
          if (node.canBeUpgrade()) {
-            upgradeNodeSteps(nodeVmName, nodeIp);
+            upgradeNode();
          } else {
             setBootupUUID();
          }
@@ -66,11 +68,24 @@ public class NodeUpgradeSP implements Callable<Void> {
 
    }
 
+   private boolean needUpgradedToM10() {
+      //TODO(qjin): check mount point format on node to decide whether need to upgrade
+      return true;
+   }
+
    public NodeEntity getNode() {
       return node;
    }
 
-   private void upgradeNodeSteps(String nodeVmName, String nodeIp){
+   private void upgradeNode(){
+      if (serverVersion.equalsIgnoreCase(Constants.BDE_SERVER_VERSION_2_2)) {
+         if (!needUpgradedToM10()) {
+            return;
+         }
+      }
+
+      String nodeVmName = node.getVmName();
+      String nodeIp = node.getPrimaryMgtIpV4();
 
       String sshUser = Configuration.getString(Constants.SSH_USER_CONFIG_NAME, Constants.DEFAULT_SSH_USER_NAME);
 

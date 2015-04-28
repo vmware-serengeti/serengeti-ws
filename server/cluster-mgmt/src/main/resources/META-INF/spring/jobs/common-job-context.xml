@@ -159,5 +159,7 @@
 	<beans:bean name="clusterOperationCallbackService"
 		class="com.vmware.bdd.service.impl.ClusterOperationCallbackService">
 	</beans:bean>
-
+	<beans:bean name="softwareManagementService"
+		class="com.vmware.bdd.service.impl.SoftwareManagementService">
+	</beans:bean>
 </beans:beans>

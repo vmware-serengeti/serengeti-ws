@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.google.gson.Gson;
 import com.vmware.bdd.software.mgmt.plugin.utils.SerialUtils;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -338,8 +339,11 @@ public class ClouderaManagerImpl implements SoftwareManager {
       CmClusterDef clusterDef = null;
       try {
          clusterDef = new CmClusterDef(blueprint);
+         logger.info("Reconfig cluster, blueprint is: " + new Gson().toJson(blueprint, ClusterBlueprint.class));
          ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName());
+         logger.info("Pre start service succeeded");
          syncHostsId(clusterDef);
+         logger.info("Sync hosts Id succeed");
          configureServices(clusterDef, reportQueue, false);
          success = true;
          clusterDef.getCurrentReport().setAction("Successfully Reconfigure Cluster");
@@ -501,7 +505,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
             retry(5, new Retriable() {
                @Override
                public void doWork() throws Exception {
-                  executeAndReport("Deploy client config", addedNodeNames,
+                  executeAndReport("Deploying client config", addedNodeNames,
                         apiResourceRootV6.getClustersResource()
                               .getServicesResource(cluster.getName())
                               .deployClientConfigCommand(sName, roleNameList),
@@ -1557,7 +1561,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
          preDeployConfig(cluster);
 
-         executeAndReport("Deploy client config", apiResourceRootV6.getClustersResource().deployClientConfig(cluster.getName()),
+         executeAndReport("Deploying client config", apiResourceRootV6.getClustersResource().deployClientConfig(cluster.getName()),
                ProgressSplit.CONFIGURE_SERVICES.getProgress(), cluster.getCurrentReport(), reportQueue);
 
       } catch (Exception e) {
@@ -2352,5 +2356,10 @@ public class ClouderaManagerImpl implements SoftwareManager {
       List<HadoopStack> hadoopStacks = getSupportedStacks();
       Collections.<HadoopStack> sort(hadoopStacks);
       return hadoopStacks.get(0);
+   }
+
+   @Override
+   public boolean hasMountPointStartwithDatax(String clusterName) {
+      return false;
    }
 }

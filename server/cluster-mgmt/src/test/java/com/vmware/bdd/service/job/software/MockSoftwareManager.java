@@ -263,6 +263,11 @@ public class MockSoftwareManager implements SoftwareManager {
    }
 
    @Override
+   public boolean hasMountPointStartwithDatax(String clusterName) {
+      return false;
+   }
+
+   @Override
    public boolean hasComputeMasterGroup(ClusterBlueprint blueprint) {
       // TODO Auto-generated method stub
       return false;

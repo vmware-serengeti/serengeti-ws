@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response;
 
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiOperationLevel;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
+
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.http.HttpStatus;
 
@@ -102,7 +103,6 @@ public class ApiManager implements IApiManager {
       apiResourceRootV1 = amApiRootResource.getRootV1();
       healthCheck();
    }
-
 
    @Override
    public ApiStackList getStackList() throws AmbariApiException {
@@ -1003,6 +1003,20 @@ public class ApiManager implements IApiManager {
       }
       return result;
    }
+   
+   public ApiConfigGroupList getConfigGroupsList(String clusterName) throws AmbariApiException {
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+                     .getConfigGroupsResource(clusterName)
+                     .readConfigGroupsWithFields("*");
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
+      String strConfGroups = handleAmbariResponse(response);
+      ApiConfigGroupList apiConfGroupList = ApiUtils.jsonToObject(ApiConfigGroupList.class, strConfGroups);
+      return apiConfGroupList;
+   }
 
    public void deleteConfigGroup(String clusterName, String groupId)
          throws AmbariApiException {
@@ -1016,6 +1030,7 @@ public class ApiManager implements IApiManager {
       }
       handleAmbariResponse(response);
    }
+
 
    public ApiRequest startComponents(String clusterName,
          List<String> hostNames, List<String> components)
@@ -1068,6 +1083,34 @@ public class ApiManager implements IApiManager {
          response = apiResourceRootV1.getClustersResource()
                      .getConfigGroupsResource(clusterName)
                      .createConfigGroups(confGroups);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
+      handleAmbariResponse(response);
+   }
+
+   public ApiConfigGroup readConfigGroup(String clusterName, String configGroupId) {
+      logger.debug("Updating config group: " + configGroupId);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+               .getConfigGroupsResource(clusterName)
+               .readConfigGroup(configGroupId);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
+      return ApiUtils.jsonToObject(ApiConfigGroup.class, handleAmbariResponse(response));
+   }
+
+   public void updateConfigGroup(String clusterName,
+                                  ApiConfigGroup configGroup) throws AmbariApiException {
+      String confGroup = ApiUtils.objectToJson(configGroup);
+      logger.debug("Updating config group: " + confGroup);
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource()
+               .getConfigGroupsResource(clusterName)
+               .updateConfigGroup(confGroup);
       } catch (Exception e) {
          throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
       }
@@ -1196,4 +1239,6 @@ public class ApiManager implements IApiManager {
       }
       return result;
    }
+
+
 }

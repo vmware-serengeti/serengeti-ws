@@ -14,24 +14,15 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ironfan.impl;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import com.google.gson.Gson;
-import com.vmware.bdd.plugin.ironfan.utils.DefaultUtils;
-import com.vmware.bdd.software.mgmt.plugin.utils.SerialUtils;
-import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
-import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.DistroRead;
+import com.vmware.bdd.plugin.ironfan.utils.DefaultUtils;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -41,13 +32,13 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
+import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.IronfanStack;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
 public class DefaultSoftwareManagerImpl implements SoftwareManager {
-   private static final Logger logger = Logger.getLogger(DefaultSoftwareManagerImpl.class);
    private ClusterValidator validator;
    private InfrastructureUpdator updator;
    private DistroManager distroManager;
@@ -194,7 +185,6 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
    @Override
    public boolean onStopCluster(ClusterBlueprint clusterBlueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
-      // We don't acctually stop any services for ironfan deployed cluster
       return true;
    }
 
@@ -382,6 +372,11 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
          }
       }
       return null;
+   }
+
+   @Override
+   public boolean hasMountPointStartwithDatax(String clusterName) {
+      return false;
    }
 
 }

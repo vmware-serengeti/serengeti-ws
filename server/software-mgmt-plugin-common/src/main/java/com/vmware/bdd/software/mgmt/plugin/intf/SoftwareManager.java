@@ -308,4 +308,7 @@ public interface SoftwareManager {
     * @return
     */
    boolean twoDataDisksRequired(NodeGroupInfo group);
+
+   boolean hasMountPointStartwithDatax(String clusterName);
+
 }

@@ -243,6 +243,8 @@ public class Constants {
          "not regular configuration properties. ";
    public static final String PARAM_CLUSTER_CONFIG_RUNNING_JOB_WARNING =
          "Applying new Hadoop configuration will restart Hadoop processes and may lead to termination of running jobs.";
+   public static final String PARAM_PROMPT_UPGRADE_CLUSTER_WARNING =
+         "cluster upgrade may need to restart the services running in the cluster nodes. You should stop all running jobs before running cluster upgrade.";
    public static final String PARAM_CLUSTER_SPEC_HA_ERROR = "the ha property must be 'off', 'on' or 'ft' in specification file ";
    public static final String CONNECT_UNAUTHORIZATION_CONNECT =
          "The connection is refused, may be invalid username or invalid password. Try to reconnect.";

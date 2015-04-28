@@ -18,6 +18,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.manager.SoftwareManagerCollector;
+import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
+import com.vmware.bdd.service.job.software.external.ExternalProgressMonitor;
+import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,8 +44,15 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
    private static final Logger logger = Logger
          .getLogger(ClusterUpgradeService.class);
 
-   private IClusterEntityManager clusterEntityMgr;
    private String serverVersion;
+   @Autowired
+   private IClusterEntityManager clusterEntityMgr;
+   @Autowired
+   private IExclusiveLockedClusterEntityManager lockClusterEntityMgr;
+   @Autowired
+   private SoftwareManagerCollector softwareManagerCollector;
+   @Autowired
+   private SoftwareManagementService softwareManagementService;
 
    @Override
    public boolean upgrade(final String clusterName, StatusUpdater statusUpdator) {
@@ -48,9 +61,11 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
       this.serverVersion = clusterEntityMgr.getServerVersion();
       List<NodeEntity> nodes = getNodes(clusterName);
 
+      // do upgrade
       List<Callable<Void>> storeNodeProcedures = new ArrayList<Callable<Void>>();
-
       try {
+         preUpgradeNode(clusterName);
+
          for (NodeEntity node : nodes) {
             if (node.needUpgrade(serverVersion)) {
                NodeUpgradeSP nodeUpgradeSP = new NodeUpgradeSP(node, serverVersion);
@@ -63,6 +78,7 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
             return true;
          }
 
+         @SuppressWarnings("unchecked")
          Callable<Void>[] storeNodeProceduresArray = storeNodeProcedures.toArray(new Callable[0]);
          NoProgressUpdateCallback callback = new NoProgressUpdateCallback();
          ExecutionResult[] result =
@@ -77,6 +93,20 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
          }
 
          boolean success = true;
+         for (int i = 0; i < storeNodeProceduresArray.length; i++) {
+            Throwable nodeUpgradeSPException = result[i].throwable;
+            if (nodeUpgradeSPException != null) {
+               success = false;
+               break;
+            }
+         }
+         if (success) {
+            // this call must be placed before the updateNodeData(node) below,
+            // otherwise a @Transactional deadlock will occur.
+            postUpgradeNode(clusterName);
+         }
+
+         success = true;
          int total = 0;
          for (int i = 0; i < storeNodeProceduresArray.length; i++) {
             Throwable nodeUpgradeSPException = result[i].throwable;
@@ -100,6 +130,26 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
       }
    }
 
+   private void postUpgradeNode(String clusterName) {
+      if (serverVersion.equalsIgnoreCase(Constants.BDE_SERVER_VERSION_2_2)) {
+         SoftwareManager softwareManager = softwareManagerCollector.getSoftwareManagerByClusterName(clusterName);
+         ClusterBlueprint blueprint = clusterEntityMgr.toClusterBluePrint(clusterName);
+         if (needToRestartCluster(softwareManager, blueprint)) {
+            this.softwareManagementService.configCluster(clusterName);
+         }
+      }
+   }
+
+   private void preUpgradeNode(String clusterName) {
+      if (serverVersion.equalsIgnoreCase(Constants.BDE_SERVER_VERSION_2_2)) {
+         SoftwareManager softwareManager = softwareManagerCollector.getSoftwareManagerByClusterName(clusterName);
+         ClusterBlueprint blueprint = clusterEntityMgr.toClusterBluePrint(clusterName);
+         if (needToRestartCluster(softwareManager, blueprint)) {
+            this.softwareManagementService.stopCluster(clusterName);
+         }
+      }
+   }
+
    @Override
    public boolean upgradeFailed(final String clusterName, StatusUpdater statusUpdator) {
       boolean upgradeFailed = false;
@@ -115,15 +165,6 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
 
    private List<NodeEntity> getNodes(String clusterName) {
       return clusterEntityMgr.findAllNodes(clusterName);
-   }
-
-   public IClusterEntityManager getClusterEntityMgr() {
-      return clusterEntityMgr;
-   }
-
-   @Autowired
-   public void setClusterEntityMgr(IClusterEntityManager clusterEntityMgr) {
-      this.clusterEntityMgr = clusterEntityMgr;
    }
 
    private void updateNodeData(NodeEntity node) {
@@ -157,4 +198,11 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
       }
    }
 
+   private boolean needToRestartCluster(SoftwareManager softwareManager, ClusterBlueprint blueprint) {
+      if (softwareManager.hasMountPointStartwithDatax(blueprint.getName())) {
+         return false;
+      } else {
+         return true;
+      }
+   }
 }

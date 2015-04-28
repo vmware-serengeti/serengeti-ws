@@ -21,7 +21,6 @@ import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.ClusterNetConfigInfo;
-import com.vmware.bdd.apitypes.NetConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NicEntity;

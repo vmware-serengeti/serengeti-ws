@@ -901,7 +901,7 @@ public class ClusterCommandsTest extends MockRestServer {
        cr1.setNodeGroups(nodeGroupRead1);
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/upgrade",
                HttpMethod.PUT, HttpStatus.NO_CONTENT, "");
-       clusterCommands.upgradeCluster("cluster1");
+       clusterCommands.upgradeCluster("cluster1", true);
        CookieCache.clear();
    }
 

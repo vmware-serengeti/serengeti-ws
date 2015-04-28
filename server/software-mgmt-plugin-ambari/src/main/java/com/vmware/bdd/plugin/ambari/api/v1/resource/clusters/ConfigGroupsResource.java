@@ -18,6 +18,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -43,7 +44,22 @@ public interface ConfigGroupsResource {
    @Path("/")
    public Response readConfigGroupsWithFields(@QueryParam("fields") String fields);
 
+   @GET
+   @Path("/")
+   public Response readConfigGroups();
+
+   @GET
+   @Path("/{ConfigGroupId}")
+   public Response readConfigGroup(@PathParam(Parameters.CONFIG_GROUP_ID) String groupId);
+
    @DELETE
    @Path("/{ConfigGroupId}")
    public Response deleteConfigGroup(@PathParam(Parameters.CONFIG_GROUP_ID) String groupId);
+   
+
+   @PUT
+   @Path("/{ConfigGroupId}")
+   @Consumes({ MediaType.APPLICATION_XML })
+   @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
+   public Response updateConfigGroup(String configGroup);
 }

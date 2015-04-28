@@ -110,7 +110,10 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
                success = softwareManager.deleteCluster(clusterBlueprint, queue);
                break;
             case START:
-               boolean forceStart = JobUtils.getJobParameterForceClusterOperation(chunkContext);
+               boolean forceStart = false;
+               if (chunkContext != null) {
+                  forceStart = JobUtils.getJobParameterForceClusterOperation(chunkContext);
+               }
                success = softwareManager.startCluster(clusterBlueprint, queue, forceStart);
                break;
             case STOP:
