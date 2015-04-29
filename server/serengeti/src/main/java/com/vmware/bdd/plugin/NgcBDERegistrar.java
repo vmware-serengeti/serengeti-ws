@@ -103,11 +103,7 @@ public class NgcBDERegistrar extends NgcRegistrar {
          serverInfo.setCompany(NgcConstants.NGC_COMPANY);
          serverInfo.setDescription(description);
 
-         //Certificate cert = CmsKeyStore.getCertificate(CmsKeyStore.getCmsKeyAlias());
-         //serverInfo.setServerThumbprint(CmsKeyStore.parseThumbPrint(cert));
-
-         String thumbPrint =
-               RetrieveSSLCert.retrieveSSLCert(LOCAL_HOST, PORT_NUM);
+         String thumbPrint = Configuration.getString("vim.thumbprint", null);
          serverInfo.setServerThumbprint(thumbPrint);
          serverInfo.setType(NgcConstants.NGC_SERVER_TYPE);
          serverInfo.setUrl(pluginUrl);
